@@ -1,5 +1,7 @@
 package main
 
-func TestMain() {
+import "testing"
+
+func TestDummy(t *testing.T) {
 	main()
 }
