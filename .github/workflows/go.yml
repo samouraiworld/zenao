@@ -24,7 +24,7 @@ jobs:
         run: go test ./backend/...
 
       - name: Build
-        run: go build ./backend/...
+        run: go build ./backend -o zenao-backend
 
       - name: Check diff
         run: git diff --exit-code
