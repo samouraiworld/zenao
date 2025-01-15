@@ -1,2 +1,2 @@
 # zenao
-Zenao
+Zenao.io
