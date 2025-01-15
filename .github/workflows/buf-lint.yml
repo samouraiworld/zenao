@@ -1,0 +1,22 @@
+name: Buf Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+
+jobs:
+  buf-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: bufbuild/buf-setup-action@v1.49.0
+        with:
+          version: 1.49.0
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Buf lint
+        run: buf lint
