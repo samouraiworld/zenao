@@ -26,6 +26,11 @@ lint-gno:
 test-gno:
 	./gnobuild/gno/gnovm/build/gno test ./gno/... -v
 
+.PHONY: gno-mod-tidy
+gno-mod-tidy:
+	export gno=$$(pwd)/gnobuild/gno/gnovm/build/gno; \
+	find gno -name gno.mod -type f | xargs -I'{}' sh -c 'cd $$(dirname {}); $$gno mod tidy' \;
+
 .PHONY: clean-gno
 clean-gno:
 	rm -rf gnobuild
