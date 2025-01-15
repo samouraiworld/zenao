@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"slices"
 
 	connectcors "connectrpc.com/cors"
 	"github.com/rs/cors"
@@ -20,7 +21,10 @@ func main() {
 	zenao := &ZenaoServer{}
 	mux := http.NewServeMux()
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
-	mux.Handle(path, withLogging(withCORS(handler), logger))
+	mux.Handle(path, middlewares(handler,
+		withRequestLogging(logger),
+		withConnectCORS("*"),
+	))
 
 	addr := "localhost:4242"
 	logger.Info("Starting server", zap.String("addr", addr))
@@ -31,23 +35,37 @@ func main() {
 	)
 }
 
-func withCORS(h http.Handler) http.Handler {
-	middleware := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: connectcors.AllowedMethods(),
-		AllowedHeaders: connectcors.AllowedHeaders(),
-		ExposedHeaders: connectcors.ExposedHeaders(),
-	})
-	return middleware.Handler(h)
+func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {
+	res := base
+	rms := ms[:]
+	slices.Reverse(rms)
+	for _, m := range rms {
+		res = m(res)
+	}
+	return res
 }
 
-func withLogging(next http.Handler, logger *zap.Logger) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger.Info("Request",
-			zap.String("method", r.Method),
-			zap.String("path", r.RequestURI),
-			zap.String("host", r.Host),
-		)
-		next.ServeHTTP(w, r)
-	})
+func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		middleware := cors.New(cors.Options{
+			AllowedOrigins: allowedOrigins,
+			AllowedMethods: connectcors.AllowedMethods(),
+			AllowedHeaders: connectcors.AllowedHeaders(),
+			ExposedHeaders: connectcors.ExposedHeaders(),
+		})
+		return middleware.Handler(next)
+	}
+}
+
+func withRequestLogging(logger *zap.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			logger.Info("Request",
+				zap.String("method", r.Method),
+				zap.String("path", r.RequestURI),
+				zap.String("host", r.Host),
+			)
+			next.ServeHTTP(w, r)
+		})
+	}
 }
