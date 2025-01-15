@@ -8,6 +8,8 @@ import {
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ToggleTheme } from "@/app/components/ToggleTheme";
+import { ThemeProvider } from "@/app/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,17 +33,25 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" style={{ colorScheme: "dark" }} className="dark">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <SignedOut>
-            <SignInButton />
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-          {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+            <ToggleTheme />
+            {children}
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
