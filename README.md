@@ -1,2 +1,2 @@
 # zenao
-Zenao.org
+Zenao
