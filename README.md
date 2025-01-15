@@ -4,13 +4,15 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, start the backend
+First, [install golang](https://go.dev/doc/install).
+
+Then, start the backend:
 
 ```bash
 go run ./backend
 ```
 
-Then, run the development server:
+In another terminal, run the development server:
 
 ```bash
 npm i && npm run dev
