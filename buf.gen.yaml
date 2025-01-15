@@ -1,0 +1,16 @@
+version: v2
+plugins:
+  - local: node_modules/.bin/protoc-gen-es
+    out: app/api
+    # Also generate any imported dependencies
+    include_imports: true
+    # Add more plugin options here
+    opt: target=ts
+
+  - local: protoc-gen-go
+    out: backend
+    opt: paths=source_relative
+    
+  - local: protoc-gen-connect-go
+    out: backend
+    opt: paths=source_relative

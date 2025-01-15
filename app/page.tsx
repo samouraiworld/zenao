@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { CreateEventButton } from "./create-event-button";
 
 export default function Home() {
   return (
@@ -22,6 +23,8 @@ export default function Home() {
           </li>
           <li>Save and see your changes instantly.</li>
         </ol>
+
+        <CreateEventButton />
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package zenao.v1;
+option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
+
+service ZenaoService {
+  rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+}
+
+message CreateEventRequest {
+
+}
+
+message CreateEventResponse {
+  
+}

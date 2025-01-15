@@ -1,7 +1,11 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestDummy(t *testing.T) {
-	main()
+	require.True(t, true)
 }

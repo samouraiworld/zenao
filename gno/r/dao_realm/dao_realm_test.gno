@@ -1,0 +1,28 @@
+package dao_realm
+
+import "testing"
+
+func TestInit(t *testing.T) {
+	membersCount := dao.MembersCount()
+	if membersCount != 4 {
+		t.Fatalf("Expected 4 members, got %d", membersCount)
+	}
+
+	roles := dao.MemberModule.GetRoles()
+	expectedRoles := []string{"admin", "public-relationships", "finance-officer"}
+	if len(roles) != len(expectedRoles) {
+		t.Fatalf("Expected %d roles, got %d", len(expectedRoles), len(roles))
+	}
+	for i, role := range roles {
+		err := true
+		for j, expectedRole := range expectedRoles {
+			if role == expectedRole {
+				err = false
+				break
+			}
+		}
+		if err {
+			t.Fatalf("Expected roles %v, got %v", expectedRoles, roles)
+		}
+	}
+}
