@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.3",
+    "@clerk/nextjs": "^6.9.10",
     "@connectrpc/connect": "^2.0.1",
     "@connectrpc/connect-web": "^2.0.1",
     "next": "15.1.4",
