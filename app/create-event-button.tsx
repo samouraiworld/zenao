@@ -21,7 +21,7 @@ export const CreateEventButton: FC = () => {
           {},
           {
             headers: {
-              "clerk-auth": token,
+              Authorization: "Bearer " + token,
             },
           },
         );

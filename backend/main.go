@@ -1,10 +1,17 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"slices"
+	"strings"
 
+	"connectrpc.com/authn"
 	connectcors "connectrpc.com/cors"
+	"github.com/clerk/clerk-sdk-go/v2"
+	"github.com/clerk/clerk-sdk-go/v2/jwt"
+	"github.com/clerk/clerk-sdk-go/v2/user"
 	"github.com/rs/cors"
 	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
 	"go.uber.org/zap"
@@ -18,12 +25,15 @@ func main() {
 		panic(err)
 	}
 
-	zenao := &ZenaoServer{}
+	clerk.SetKey("sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK")
+
+	zenao := &ZenaoServer{Logger: logger}
 	mux := http.NewServeMux()
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
 		withRequestLogging(logger),
 		withConnectCORS("*"),
+		authn.NewMiddleware(authenticate).Wrap,
 	))
 
 	addr := "localhost:4242"
@@ -50,7 +60,7 @@ func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
 		middleware := cors.New(cors.Options{
 			AllowedOrigins: allowedOrigins,
 			AllowedMethods: connectcors.AllowedMethods(),
-			AllowedHeaders: connectcors.AllowedHeaders(),
+			AllowedHeaders: append(connectcors.AllowedHeaders(), "Authorization"), // Authorization needed?
 			ExposedHeaders: connectcors.ExposedHeaders(),
 		})
 		return middleware.Handler(next)
@@ -68,4 +78,27 @@ func withRequestLogging(logger *zap.Logger) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func authenticate(_ context.Context, req *http.Request) (any, error) {
+	// Get the session JWT from the Authorization header
+	sessionToken := strings.TrimPrefix(req.Header.Get("Authorization"), "Bearer ")
+
+	// Verify the session
+	claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
+		Token: sessionToken,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	usr, err := user.Get(req.Context(), claims.Subject)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf(`{"user_id": "%s", "user_banned": "%t"}`+"\n", usr.ID, usr.Banned)
+	// The request is authenticated! We can propagate the authenticated user to
+	// Connect interceptors and services by returning it: the middleware we're
+	// about to construct will attach it to the context automatically.
+	return usr, nil
 }
