@@ -29,6 +29,7 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	if err := s.Chain.CreateEvent(evtID, user.ID, req.Msg); err != nil {
+		s.Logger.Error("create-event", zap.Error(err))
 		// TODO: db rollback
 		return nil, err
 	}

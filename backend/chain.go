@@ -6,7 +6,6 @@ import (
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/tm2/pkg/amino"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
@@ -22,7 +21,7 @@ type gnoZenaoChain struct {
 
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
-	signer, err := gnoclient.SignerFromBip39(g.adminMnemonic, g.chainID, "", 1, 1)
+	signer, err := gnoclient.SignerFromBip39(g.adminMnemonic, g.chainID, "", 0, 0)
 	if err != nil {
 		return err
 	}
@@ -30,6 +29,14 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	if err != nil {
 		return err
 	}
+
+	tmClient, err := tm2client.NewHTTPClient(g.chainEndpoint)
+	if err != nil {
+		return err
+	}
+	defer tmClient.Close()
+
+	client := gnoclient.Client{Signer: signer, RPCClient: tmClient}
 
 	/*
 		userRealmPkgPath, err := getOrCreateUserRealm(user.ID)
@@ -45,7 +52,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 		_ = eventRealmPkgPath
 	*/
 
-	addEventTx, err := gnoclient.NewCallTx(gnoclient.BaseTxCfg{
+	broadcastRes, err := client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "10000ugnot",
 		GasWanted: 10000000,
 	}, vm.MsgCall{
@@ -61,21 +68,11 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	if err != nil {
 		return err
 	}
-
-	signedTx, err := signer.Sign(gnoclient.SignCfg{UnsignedTX: *addEventTx})
-	if err != nil {
-		return err
+	if broadcastRes.CheckTx.Error != nil {
+		return fmt.Errorf("%w\n%s", broadcastRes.CheckTx.Error, broadcastRes.CheckTx.Log)
 	}
-
-	client, err := tm2client.NewHTTPClient(g.chainEndpoint)
-	if err != nil {
-		return err
-	}
-
-	// XXX: this does not return an error but also does not really broadcast the tx
-	broadcastRes, err := client.BroadcastTxCommit(amino.MustMarshal(signedTx))
-	if err != nil {
-		return err
+	if broadcastRes.DeliverTx.Error != nil {
+		return fmt.Errorf("%w\n%s", broadcastRes.DeliverTx.Error, broadcastRes.DeliverTx.Log)
 	}
 
 	g.logger.Info("broadcasted tx", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))

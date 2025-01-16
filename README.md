@@ -15,10 +15,10 @@ make install
 cd ..
 ```
 
-Now, start gnodev:
+Now, start gnodev with the admin account:
 
 ```bash
-gnodev
+gnodev --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot
 ```
 
 In another terminal, start the backend:
