@@ -72,7 +72,8 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 		return err
 	}
 
-	broadcastRes, err := client.BroadcastTxSync(amino.MustMarshal(signedTx))
+	// XXX: this does not return an error but also does not really broadcast the tx
+	broadcastRes, err := client.BroadcastTxCommit(amino.MustMarshal(signedTx))
 	if err != nil {
 		return err
 	}
