@@ -23,7 +23,11 @@ func TestEvents(t *testing.T) {
 	}
 
 	// inject events
-	events := []testEvent{
+	events := []struct {
+		id      string
+		creator string
+		endDate time.Time
+	}{
 		{"1-future-event-month", "alice", time.Now().Add(30 * 24 * time.Hour)},
 		{"2-future-event-day", "bob", time.Now().Add(24 * time.Hour)},
 		{"3-past-event-hour", "alice", time.Now().Add(-time.Hour)},
@@ -63,7 +67,10 @@ func TestEvents(t *testing.T) {
 	}
 
 	// inject participants
-	participants := []testParticipant{
+	participants := []struct {
+		id        string
+		eventIdxs []int
+	}{
 		{"eve", []int{0, 2, 4}},
 		{"carol", []int{1, 3}},
 	}
@@ -90,15 +97,4 @@ func TestEvents(t *testing.T) {
 		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10)
 		urequire.Equal(t, "", strings.Join(events, ", "))
 	}
-}
-
-type testEvent struct {
-	id      string
-	creator string
-	endDate time.Time
-}
-
-type testParticipant struct {
-	id        string
-	eventIdxs []int
 }
