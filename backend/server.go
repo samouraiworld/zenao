@@ -3,16 +3,15 @@ package main
 import (
 	"context"
 
-	"connectrpc.com/connect"
-	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"go.uber.org/zap"
 )
 
-type ZenaoServer struct{}
+type ZenaoServer struct {
+	Logger  *zap.Logger
+	GetUser func(ctx context.Context) ZenaoUser
+}
 
-func (s *ZenaoServer) CreateEvent(
-	ctx context.Context,
-	req *connect.Request[zenaov1.CreateEventRequest],
-) (*connect.Response[zenaov1.CreateEventResponse], error) {
-	res := connect.NewResponse(&zenaov1.CreateEventResponse{})
-	return res, nil
+type ZenaoUser struct {
+	ID     string
+	Banned bool
 }
