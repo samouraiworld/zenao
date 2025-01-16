@@ -33,13 +33,13 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" style={{ colorScheme: "dark" }} className="dark">
+      <html lang="en" style={{ colorScheme: "dark" }} className="dark-theme">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ThemeProvider
             attribute="class"
-            defaultTheme="dark"
+            defaultTheme="dark-theme"
             enableSystem
             disableTransitionOnChange
           >
