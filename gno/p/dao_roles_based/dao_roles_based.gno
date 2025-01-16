@@ -155,11 +155,11 @@ func (d *DaoRolesBased) propose(title, description, resource string, message Exe
 		panic("resource not found")
 	}
 
-	if len(title) < 9 {
+	if len(title) < 3 {
 		panic("title should be at least 9 characters long")
 	}
 
-	if len(description) < 15 {
+	if len(description) < 3 {
 		panic("description should be at least 15 characters long")
 	}
 

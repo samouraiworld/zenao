@@ -32,6 +32,15 @@ func (m *MemberModule) MembersCount() uint64 {
 	return uint64(m.members.Size())
 }
 
+func (m *MemberModule) GetMembers() []string {
+	members := make([]string, 0, m.members.Size())
+	m.members.Iterate("", "", func(key string, value interface{}) bool {
+		members = append(members, key)
+		return false
+	})
+	return members
+}
+
 func (m *MemberModule) GetRoles() []string {
 	return m.roleManager.GetRoles()
 }

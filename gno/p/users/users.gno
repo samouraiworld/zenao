@@ -52,15 +52,14 @@ func NewUser(id, username string) *User {
 
 func (u *User) TransferOwnership(newOwner string) {
 	caller := std.PrevRealm().Addr().String()
-	if !u.user.MemberModule.HasRole(caller, "admin") {
-		panic("only the owner can transfer the ownership")
-	}
+
 	typeAddMember := dao_roles_based.NewAddNewMemberMessageHandler(nil).Type()
 	typeRemoveMember := dao_roles_based.NewRemoveMemberMessageHandler(nil).Type()
 	// example of proposal: {"title":"add member with admin role,"description":"","message":{"type":"gno.land/r/teritori/social_feeds.CreatePost","payload":{"feedId":"1","parentId":"0","category":"2","metadata":""}}}
-	proposalAddMemberJSON := `{"title":"add member with admin role","description":"","message":{"type":"` + typeAddMember + `","payload":{"address":"` + newOwner + `","role":["admin"]}}}`
-	proposalRemoveMemberJSON := `{"title":"remove member","description":"","message":{"type":"` + typeRemoveMember + `","payload":{"address":"` + caller + `"}}}`
+	proposalAddMemberJSON := `{"title":"add member with admin role","description":"no description","message":{"type":"` + typeAddMember + `","payload":{"address":"` + newOwner + `","roles":["admin"]}}}`
+	proposalRemoveMemberJSON := `{"title":"remove member","description":"no description","message":{"type":"` + typeRemoveMember + `","payload":{"address":"` + caller + `"}}}`
 
 	u.user.InstantExecute(proposalAddMemberJSON)
+	panic(proposalAddMemberJSON)
 	u.user.InstantExecute(proposalRemoveMemberJSON)
 }
