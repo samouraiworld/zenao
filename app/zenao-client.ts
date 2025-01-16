@@ -2,7 +2,7 @@ import { createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
 
 // Import service definition that you want to connect to.
-import { ZenaoService } from "./api/zenao/v1/zenao_pb";
+import { ZenaoService } from "@/app/api/zenao/v1/zenao_pb";
 
 // The transport defines what type of endpoint we're hitting.
 // In our example we'll be communicating with a Connect endpoint.

@@ -1,6 +1,6 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import React from "react";
-import { ToggleThemeButton } from "./buttons/ToggleThemeButton";
+import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 
 export const Header: React.FC = () => {
   return (
