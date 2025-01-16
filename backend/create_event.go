@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"connectrpc.com/authn"
 	"connectrpc.com/connect"
-	"github.com/clerk/clerk-sdk-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
@@ -15,7 +13,7 @@ func (s *ZenaoServer) CreateEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.CreateEventRequest],
 ) (*connect.Response[zenaov1.CreateEventResponse], error) {
-	user := authn.GetInfo(ctx).(*clerk.User)
+	user := s.GetUser(ctx)
 	s.Logger.Info("user", zap.String("id", user.ID), zap.Bool("banned", user.Banned))
 	if user.Banned {
 		return nil, errors.New("user is banned")

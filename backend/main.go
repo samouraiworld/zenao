@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"slices"
 	"strings"
@@ -19,27 +18,37 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
+const (
+	allowedOrigin  = "*"
+	clerkSecretKey = "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK"
+	bindAddr       = "localhost:4242"
+)
+
 func main() {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		panic(err)
 	}
 
-	clerk.SetKey("sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK")
-
-	zenao := &ZenaoServer{Logger: logger}
 	mux := http.NewServeMux()
+
+	zenao := &ZenaoServer{
+		Logger: logger,
+		GetUser: func(ctx context.Context) ZenaoUser {
+			clerkUser := authn.GetInfo(ctx).(*clerk.User)
+			return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
+		},
+	}
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
 		withRequestLogging(logger),
-		withConnectCORS("*"),
-		authn.NewMiddleware(authenticate).Wrap,
+		withConnectCORS(allowedOrigin),
+		withClerkAuth(clerkSecretKey),
 	))
 
-	addr := "localhost:4242"
-	logger.Info("Starting server", zap.String("addr", addr))
+	logger.Info("Starting server", zap.String("addr", bindAddr))
 	http.ListenAndServe(
-		addr,
+		bindAddr,
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
@@ -60,7 +69,7 @@ func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
 		middleware := cors.New(cors.Options{
 			AllowedOrigins: allowedOrigins,
 			AllowedMethods: connectcors.AllowedMethods(),
-			AllowedHeaders: append(connectcors.AllowedHeaders(), "Authorization"), // Authorization needed?
+			AllowedHeaders: append(connectcors.AllowedHeaders(), "Authorization"),
 			ExposedHeaders: connectcors.ExposedHeaders(),
 		})
 		return middleware.Handler(next)
@@ -80,25 +89,22 @@ func withRequestLogging(logger *zap.Logger) func(http.Handler) http.Handler {
 	}
 }
 
-func authenticate(_ context.Context, req *http.Request) (any, error) {
-	// Get the session JWT from the Authorization header
-	sessionToken := strings.TrimPrefix(req.Header.Get("Authorization"), "Bearer ")
+func withClerkAuth(secretKey string) func(http.Handler) http.Handler {
+	clerk.SetKey(secretKey)
+	return authn.NewMiddleware(func(_ context.Context, req *http.Request) (any, error) {
+		sessionToken := strings.TrimPrefix(req.Header.Get("Authorization"), "Bearer ")
 
-	// Verify the session
-	claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
-		Token: sessionToken,
-	})
-	if err != nil {
-		return nil, err
-	}
+		claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
+			Token: sessionToken,
+		})
+		if err != nil {
+			return nil, err
+		}
 
-	usr, err := user.Get(req.Context(), claims.Subject)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf(`{"user_id": "%s", "user_banned": "%t"}`+"\n", usr.ID, usr.Banned)
-	// The request is authenticated! We can propagate the authenticated user to
-	// Connect interceptors and services by returning it: the middleware we're
-	// about to construct will attach it to the context automatically.
-	return usr, nil
+		usr, err := user.Get(req.Context(), claims.Subject)
+		if err != nil {
+			return nil, err
+		}
+		return usr, nil
+	}).Wrap
 }
