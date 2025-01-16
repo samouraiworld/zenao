@@ -10,12 +10,52 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiFAoSQ3JlYXRlRXZlbnRSZXF1ZXN0IhUKE0NyZWF0ZUV2ZW50UmVzcG9uc2UyWgoMWmVuYW9TZXJ2aWNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZUI5WjdnaXRodWIuY29tL3NhbW91cmFpd29ybGQvemVuYW8vYmFja2VuZC96ZW5hby92MTt6ZW5hb3YxYgZwcm90bzM");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCTJaCgxaZW5hb1NlcnZpY2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
  */
 export type CreateEventRequest = Message<"zenao.v1.CreateEventRequest"> & {
+  /**
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string image_uri = 3;
+   */
+  imageUri: string;
+
+  /**
+   * unix seconds
+   *
+   * @generated from field: uint64 start_date = 4;
+   */
+  startDate: bigint;
+
+  /**
+   * unix seconds
+   *
+   * @generated from field: uint64 end_date = 5;
+   */
+  endDate: bigint;
+
+  /**
+   * XXX: use fixed point?
+   *
+   * @generated from field: double ticket_price = 6;
+   */
+  ticketPrice: number;
+
+  /**
+   * @generated from field: uint32 capacity = 7;
+   */
+  capacity: number;
 };
 
 /**
@@ -29,6 +69,10 @@ export const CreateEventRequestSchema: GenMessage<CreateEventRequest> = /*@__PUR
  * @generated from message zenao.v1.CreateEventResponse
  */
 export type CreateEventResponse = Message<"zenao.v1.CreateEventResponse"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
 };
 
 /**
