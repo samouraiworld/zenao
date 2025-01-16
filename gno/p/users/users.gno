@@ -55,7 +55,7 @@ func (u *User) TransferOwnership(newOwner string) {
 
 	typeAddMember := dao_roles_based.NewAddNewMemberMessageHandler(nil).Type()
 	typeRemoveMember := dao_roles_based.NewRemoveMemberMessageHandler(nil).Type()
-	// example of proposal: {"title":"add member with admin role,"description":"","message":{"type":"gno.land/r/teritori/social_feeds.CreatePost","payload":{"feedId":"1","parentId":"0","category":"2","metadata":""}}}
+
 	proposalAddMemberJSON := `{"title":"add member with admin role","description":"no description","message":{"type":"` + typeAddMember + `","payload":{"address":"` + newOwner + `","roles":["admin"]}}}`
 	proposalRemoveMemberJSON := `{"title":"remove member","description":"no description","message":{"type":"` + typeRemoveMember + `","payload":{"address":"` + caller + `"}}}`
 
