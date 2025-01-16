@@ -1,3 +1,5 @@
+CAT := $(if $(filter $(OS),Windows_NT),type,cat)
+
 .PHONY: generate
 generate:
 	npm i
