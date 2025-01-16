@@ -8,6 +8,8 @@ import (
 	"gno.land/p/demo/seqid"
 )
 
+// all dates are in unix seconds for easier interfacing with maketx call and vm/qeval
+
 var (
 	Ownable             *ownable.Ownable
 	eventsByEndDate     avl.Tree // <date>/<event-pkg-path> -> event-pkg-path
