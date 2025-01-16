@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export const ToggleTheme: React.FC = () => {
+export const ToggleThemeButton: React.FC = () => {
   const { setTheme } = useTheme();
 
   return (

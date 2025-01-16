@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
-import { zenaoClient } from "./zenao-client";
+import { zenaoClient } from "../zenao-client";
 
 export const CreateEventButton: FC = () => {
   const user = useUser();
