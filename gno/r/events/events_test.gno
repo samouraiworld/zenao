@@ -70,7 +70,7 @@ func TestEvents(t *testing.T) {
 	for _, p := range participants {
 		for _, eventIdx := range p.eventIdxs {
 			evt := events[eventIdx]
-			AddParticipant(p.id, evt.id, evt.endDate.Unix())
+			AddParticipant(evt.id, p.id, evt.endDate.Unix())
 		}
 	}
 

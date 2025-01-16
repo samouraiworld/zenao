@@ -12,9 +12,9 @@ import (
 
 var (
 	Ownable             *ownable.Ownable
-	eventsByEndDate     avl.Tree // <date>/<event-pkg-path> -> event-pkg-path
-	eventsByParticipant avl.Tree // <userID>/<date>/<event-pkg-path> -> event-pkg-path
-	eventsByCreator     avl.Tree // <creatorID>/<date>/<event-pkg-path> -> event-pkg-path
+	eventsByEndDate     avl.Tree // <endDateUnixSeconds>/<eventID> -> eventID
+	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventID> -> eventID
+	eventsByCreator     avl.Tree // <creatorID>/<endDateUnixSeconds>/<eventID> -> eventID
 )
 
 func init() {
@@ -22,25 +22,25 @@ func init() {
 	Ownable = ownable.NewWithAddress(initialOwner)
 }
 
-func AddEvent(pkgPath string, creatorID string, endDate int64) {
+func AddEvent(eventID string, creatorID string, eventEndDate int64) {
 	Ownable.AssertCallerIsOwner()
 
 	{
-		key := unixTimeKey(endDate) + "/" + pkgPath
-		eventsByEndDate.Set(key, pkgPath)
+		key := unixTimeKey(eventEndDate) + "/" + eventID
+		eventsByEndDate.Set(key, eventID)
 	}
 
 	{
-		key := creatorID + "/" + unixTimeKey(endDate) + "/" + pkgPath
-		eventsByCreator.Set(key, pkgPath)
+		key := creatorID + "/" + unixTimeKey(eventEndDate) + "/" + eventID
+		eventsByCreator.Set(key, eventID)
 	}
 }
 
-func AddParticipant(userID string, pkgPath string, endDate int64) {
+func AddParticipant(eventID string, userID string, eventEndDate int64) {
 	Ownable.AssertCallerIsOwner()
 
-	key := userID + "/" + unixTimeKey(endDate) + "/" + pkgPath
-	eventsByParticipant.Set(key, pkgPath)
+	key := userID + "/" + unixTimeKey(eventEndDate) + "/" + eventID
+	eventsByParticipant.Set(key, eventID)
 }
 
 func listEvents(from, to int64, limit uint32) []string {
@@ -57,9 +57,9 @@ func listEventsByCreator(creatorID string, from, to int64, limit uint32) []strin
 	return listEventsInternal(&eventsByCreator, fromKey, toKey, from > to, limit)
 }
 
-func listEventsByParticipant(userID string, from, to int64, limit uint32) []string {
-	fromKey := userID + "/" + unixTimeKey(from)
-	toKey := userID + "/" + unixTimeKey(to)
+func listEventsByParticipant(participantID string, from, to int64, limit uint32) []string {
+	fromKey := participantID + "/" + unixTimeKey(from)
+	toKey := participantID + "/" + unixTimeKey(to)
 
 	return listEventsInternal(&eventsByParticipant, fromKey, toKey, from > to, limit)
 }
