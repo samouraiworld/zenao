@@ -22,6 +22,7 @@ const (
 	allowedOrigin  = "*"
 	clerkSecretKey = "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK"
 	bindAddr       = "localhost:4242"
+	adminMnemonic  = "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique"
 )
 
 func main() {
@@ -30,17 +31,25 @@ func main() {
 		panic(err)
 	}
 
-	mux := http.NewServeMux()
-
 	db, err := setupDB()
 	if err != nil {
 		panic(err)
 	}
 
+	chain := &gnoZenaoChain{
+		adminMnemonic:      adminMnemonic,
+		eventsIndexPkgPath: "gno.land/r/zenao/events",
+		chainEndpoint:      "127.0.0.1:26657",
+		logger:             logger,
+	}
+
+	mux := http.NewServeMux()
+
 	zenao := &ZenaoServer{
 		Logger:  logger,
 		GetUser: getUserFromClerk,
 		DB:      db,
+		Chain:   chain,
 	}
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,

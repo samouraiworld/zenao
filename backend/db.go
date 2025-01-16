@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -46,18 +47,22 @@ type gormZenaoDB struct {
 }
 
 // CreateEvent implements ZenaoDB.
-func (g *gormZenaoDB) CreateEvent(creatorID string, event *zenaov1.CreateEventRequest) error {
+func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error) {
 	// XXX: validate?
-	return g.db.Create(&Event{
-		Title:       event.Title,
-		Description: event.Description,
-		ImageURI:    event.ImageUri,
-		StartDate:   time.Unix(int64(event.StartDate), 0), // XXX: overflow?
-		EndDate:     time.Unix(int64(event.EndDate), 0),   // XXX: overflow?
+	evt := &Event{
+		Title:       req.Title,
+		Description: req.Description,
+		ImageURI:    req.ImageUri,
+		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
 		CreatorID:   creatorID,
-		TicketPrice: event.TicketPrice,
-		Capacity:    event.Capacity,
-	}).Error
+		TicketPrice: req.TicketPrice,
+		Capacity:    req.Capacity,
+	}
+	if err := g.db.Create(evt).Error; err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%d", evt.ID), nil
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)

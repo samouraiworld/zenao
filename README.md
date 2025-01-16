@@ -6,13 +6,28 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](https://github.com/nvm-sh/nvm).
 
-Then, start the backend:
+Install gno tools if you don't have them:
+
+```bash
+git clone git@github.com:gnolang/gno.git
+cd gno
+make install
+cd ..
+```
+
+Now, start gnodev:
+
+```bash
+gnodev
+```
+
+In another terminal, start the backend:
 
 ```bash
 go run ./backend
 ```
 
-In another terminal, run the development server:
+In a third terminal, run the development server:
 
 ```bash
 nvm use

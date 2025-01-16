@@ -11,6 +11,7 @@ type ZenaoServer struct {
 	Logger  *zap.Logger
 	GetUser func(ctx context.Context) ZenaoUser
 	DB      ZenaoDB
+	Chain   ZenaoChain
 }
 
 type ZenaoUser struct {
@@ -19,5 +20,9 @@ type ZenaoUser struct {
 }
 
 type ZenaoDB interface {
-	CreateEvent(creatorID string, event *zenaov1.CreateEventRequest) error
+	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
+}
+
+type ZenaoChain interface {
+	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 }
