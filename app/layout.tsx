@@ -43,13 +43,6 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            <ToggleTheme />
             {children}
           </ThemeProvider>
         </body>
