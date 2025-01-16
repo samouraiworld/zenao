@@ -32,12 +32,15 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	db, err := setupDB()
+	if err != nil {
+		panic(err)
+	}
+
 	zenao := &ZenaoServer{
-		Logger: logger,
-		GetUser: func(ctx context.Context) ZenaoUser {
-			clerkUser := authn.GetInfo(ctx).(*clerk.User)
-			return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
-		},
+		Logger:  logger,
+		GetUser: getUserFromClerk,
+		DB:      db,
 	}
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
@@ -52,6 +55,11 @@ func main() {
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
+}
+
+func getUserFromClerk(ctx context.Context) ZenaoUser {
+	clerkUser := authn.GetInfo(ctx).(*clerk.User)
+	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {

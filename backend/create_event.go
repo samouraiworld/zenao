@@ -19,21 +19,29 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	userRealmPkgPath, err := getOrCreateUserRealm(user.ID)
-	if err != nil {
+	if err := s.DB.CreateEvent(user.ID, req.Msg); err != nil {
 		return nil, err
 	}
 
-	eventRealmPkgPath, err := createEventRealm(userRealmPkgPath)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		userRealmPkgPath, err := getOrCreateUserRealm(user.ID)
+		if err != nil {
+			return nil, err
+		}
 
-	_ = eventRealmPkgPath
+		eventRealmPkgPath, err := createEventRealm(userRealmPkgPath)
+		if err != nil {
+			return nil, err
+		}
+
+		_ = eventRealmPkgPath
+	*/
 
 	res := connect.NewResponse(&zenaov1.CreateEventResponse{})
 	return res, nil
 }
+
+/*
 
 func getOrCreateUserRealm(userID string) (string, error) {
 	return "", errors.New("not implemented")
@@ -42,3 +50,5 @@ func getOrCreateUserRealm(userID string) (string, error) {
 func createEventRealm(userRealmPkgPath string) (string, error) {
 	return "", errors.New("not implemented")
 }
+
+*/
