@@ -2,7 +2,6 @@ package events
 
 import (
 	"std"
-	"time"
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/ownable"
@@ -21,46 +20,46 @@ func init() {
 	Ownable = ownable.NewWithAddress(initialOwner)
 }
 
-func AddEvent(pkgPath string, creatorID string, endDate time.Time) {
+func AddEvent(pkgPath string, creatorID string, endDate int64) {
 	Ownable.AssertCallerIsOwner()
 
 	{
-		key := timeKey(endDate) + "/" + pkgPath
+		key := unixTimeKey(endDate) + "/" + pkgPath
 		eventsByEndDate.Set(key, pkgPath)
 	}
 
 	{
-		key := creatorID + "/" + timeKey(endDate) + "/" + pkgPath
+		key := creatorID + "/" + unixTimeKey(endDate) + "/" + pkgPath
 		eventsByCreator.Set(key, pkgPath)
 	}
 }
 
-func AddParticipant(userID string, pkgPath string, endDate time.Time) {
+func AddParticipant(userID string, pkgPath string, endDate int64) {
 	Ownable.AssertCallerIsOwner()
 
-	key := userID + "/" + timeKey(endDate) + "/" + pkgPath
+	key := userID + "/" + unixTimeKey(endDate) + "/" + pkgPath
 	eventsByParticipant.Set(key, pkgPath)
 }
 
-func listEvents(from, to time.Time, limit uint32) []string {
-	fromKey := timeKey(from)
-	toKey := timeKey(to)
+func listEvents(from, to int64, limit uint32) []string {
+	fromKey := unixTimeKey(from)
+	toKey := unixTimeKey(to)
 
-	return listEventsInternal(&eventsByEndDate, fromKey, toKey, from.After(to), limit)
+	return listEventsInternal(&eventsByEndDate, fromKey, toKey, from > to, limit)
 }
 
-func listEventsByCreator(creatorID string, from, to time.Time, limit uint32) []string {
-	fromKey := creatorID + "/" + timeKey(from)
-	toKey := creatorID + "/" + timeKey(to)
+func listEventsByCreator(creatorID string, from, to int64, limit uint32) []string {
+	fromKey := creatorID + "/" + unixTimeKey(from)
+	toKey := creatorID + "/" + unixTimeKey(to)
 
-	return listEventsInternal(&eventsByCreator, fromKey, toKey, from.After(to), limit)
+	return listEventsInternal(&eventsByCreator, fromKey, toKey, from > to, limit)
 }
 
-func listEventsByParticipant(userID string, from, to time.Time, limit uint32) []string {
-	fromKey := userID + "/" + timeKey(from)
-	toKey := userID + "/" + timeKey(to)
+func listEventsByParticipant(userID string, from, to int64, limit uint32) []string {
+	fromKey := userID + "/" + unixTimeKey(from)
+	toKey := userID + "/" + unixTimeKey(to)
 
-	return listEventsInternal(&eventsByParticipant, fromKey, toKey, from.After(to), limit)
+	return listEventsInternal(&eventsByParticipant, fromKey, toKey, from > to, limit)
 }
 
 func listEventsInternal(at *avl.Tree, fromKey string, toKey string, rev bool, limit uint32) []string {
@@ -78,6 +77,9 @@ func listEventsInternal(at *avl.Tree, fromKey string, toKey string, rev bool, li
 	return res
 }
 
-func timeKey(t time.Time) string {
-	return seqid.ID(t.Unix()).String()
+func unixTimeKey(t int64) string {
+	if t < 0 {
+		panic("negative unix time")
+	}
+	return seqid.ID(t).String()
 }
