@@ -41,6 +41,7 @@ func main() {
 		eventsIndexPkgPath: "gno.land/r/zenao/events",
 		chainEndpoint:      "127.0.0.1:26657",
 		logger:             logger,
+		chainID:            "dev",
 	}
 
 	mux := http.NewServeMux()
