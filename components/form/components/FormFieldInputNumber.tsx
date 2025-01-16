@@ -1,6 +1,6 @@
 "use client";
 
-import { FormFieldProps } from "./types";
+import { FormFieldProps } from "../types";
 import {
   FormControl,
   FormField,

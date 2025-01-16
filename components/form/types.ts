@@ -1,5 +1,5 @@
 import { Control, FieldValues } from "react-hook-form";
-import { FormSchemaType } from "@/app/create/page";
+import { FormSchemaType } from "./CreateEventForm";
 import { KeysOfValue } from "@/app/types";
 
 interface GenericFormFieldProps<T extends FieldValues, TCondition> {

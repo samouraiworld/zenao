@@ -2,7 +2,7 @@
 
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { FormFieldProps } from "./types";
+import { FormFieldProps } from "../types";
 import { Button } from "@/components/shadcn/button";
 import {
   FormControl,
@@ -55,10 +55,7 @@ export const FormFieldDatePicker: React.FC<FormFieldProps<Date>> = ({
                 mode="single"
                 selected={field.value}
                 onSelect={field.onChange}
-                disabled={(date) =>
-                  date > new Date() || date < new Date("1900-01-01")
-                }
-                initialFocus
+                disabled={(date) => date < new Date()}
               />
             </PopoverContent>
           </Popover>
