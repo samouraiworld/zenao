@@ -1,9 +1,12 @@
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 
-export default function HomePage() {
+export default function Home() {
+  const t = useTranslations("home");
+
   return (
     <div className="h-screen flex flex-col font-[family-name:var(--font-geist-sans)]">
       <Header />
@@ -19,7 +22,7 @@ export default function HomePage() {
           />
           <ol className="flex flex-col list-inside list-decimal gap-4 my-8 text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
             <li className="mb-2">
-              Get started by editing{" "}
+              {t("first-point")}
               <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
                 app/page.tsx
               </code>
