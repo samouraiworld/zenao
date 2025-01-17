@@ -497,3 +497,30 @@ func TestInstantExecute(t *testing.T) {
 		})
 	}
 }
+
+func TestGetMembers(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String()}, {carol.String()}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"10"}}]`
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	expectedMembers := []string{alice.String(), bob.String(), carol.String()}
+	m := dao.MemberModule.GetMembers()
+	if len(m) != len(expectedMembers) {
+		t.Errorf("Expected %d members, got %d", len(expectedMembers), len(m))
+	}
+
+	for _, eMember := range expectedMembers {
+		if !dao.IsMember(eMember) {
+			t.Errorf("Expected member %s to be a member", eMember)
+		}
+	}
+}
