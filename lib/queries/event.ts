@@ -8,7 +8,7 @@ export const eventOptions = (id: string) =>
       const client = new GnoJSONRPCProvider("http://127.0.0.1:26657");
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/events`,
-        `listEvents(${(Date.now() / 1000 - 60 * 60 * 24 * 30).toFixed(0)}, ${(Date.now() / 1000 + 60 * 60 * 24 * 30).toFixed(0)}, 50)`,
+        `Render("")`,
       );
       return res;
     },
