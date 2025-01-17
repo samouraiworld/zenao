@@ -49,7 +49,7 @@ func execFakegen() error {
 		return err
 	}
 
-	for range 50 {
+	for range 20 {
 		a := fakeEvent{}
 		err := faker.FakeData(&a)
 		if err != nil {
