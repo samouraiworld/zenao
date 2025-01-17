@@ -131,6 +131,7 @@ const realmSourceTemplate = `package event
 
 import (
 	"std"
+	"time"
 
 	"gno.land/p/demo/json"
 	"gno.land/p/demo/ufmt"
@@ -168,9 +169,16 @@ func getInfoJSON() string {
 }
 
 func Render(path string) string {
-	s := ""
-	s += md.H1("Event")
-	s += std.CurrentRealm().Addr().String() + "\n"
+	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
+	s += md.Image("Event presentation", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
+	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
+	s += md.BulletList([]string{
+		ufmt.Sprintf("Time: From %s to %s", time.Unix({{.req.StartDate}}, 0).Format(time.DateTime), time.Unix({{.req.EndDate}}, 0).Format(time.DateTime)),
+		ufmt.Sprintf("Price: {{.req.TicketPrice}} €"),
+		ufmt.Sprintf("Capacity: {{.req.Capacity}} persons"),
+	}) + "\n"
+	s += md.HorizontalRule()
+	s += md.Paragraph(std.CurrentRealm().Addr().String())
 	s += md.CodeBlock(getInfoJSON())
 	return s
 }
