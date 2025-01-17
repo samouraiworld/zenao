@@ -19,9 +19,14 @@ import (
 )
 
 const (
-	allowedOrigin  = "*"
-	clerkSecretKey = "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK"
-	bindAddr       = "localhost:4242"
+	allowedOrigin      = "*"
+	clerkSecretKey     = "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK"
+	bindAddr           = "localhost:4242"
+	adminMnemonic      = "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique"
+	eventsIndexPkgPath = "gno.land/r/zenao/events"
+	chainEndpoint      = "127.0.0.1:26657"
+	chainID            = "dev"
+	dbPath             = "dev.db"
 )
 
 func main() {
@@ -30,14 +35,23 @@ func main() {
 		panic(err)
 	}
 
+	chain, err := setupChain(adminMnemonic, eventsIndexPkgPath, chainID, chainEndpoint, logger)
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := setupLocalDB(dbPath)
+	if err != nil {
+		panic(err)
+	}
+
 	mux := http.NewServeMux()
 
 	zenao := &ZenaoServer{
-		Logger: logger,
-		GetUser: func(ctx context.Context) ZenaoUser {
-			clerkUser := authn.GetInfo(ctx).(*clerk.User)
-			return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
-		},
+		Logger:  logger,
+		GetUser: getUserFromClerk,
+		DBTx:    db.Tx,
+		Chain:   chain,
 	}
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
@@ -52,6 +66,11 @@ func main() {
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
+}
+
+func getUserFromClerk(ctx context.Context) ZenaoUser {
+	clerkUser := authn.GetInfo(ctx).(*clerk.User)
+	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {

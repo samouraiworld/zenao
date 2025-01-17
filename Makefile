@@ -44,3 +44,7 @@ gno-mod-tidy:
 .PHONY: clean-gno
 clean-gno:
 	rm -rf gnobuild
+
+.PHONY: lint-fix
+lint-fix:
+	npx next lint --fix
