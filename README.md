@@ -24,7 +24,12 @@ gnodev --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot 
 In another terminal, start the backend:
 
 ```bash
-go run ./backend
+go run ./backend start
+```
+
+Optionally, generate fake data:
+```bash
+go run ./backend fakegen
 ```
 
 In a third terminal, run the development server:

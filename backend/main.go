@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"net/http"
+	"os"
 	"slices"
 	"strings"
 
@@ -11,11 +12,13 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/clerk/clerk-sdk-go/v2/user"
+	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/rs/cors"
-	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
+
+	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
 )
 
 const (
@@ -30,19 +33,51 @@ const (
 )
 
 func main() {
+	cmd := commands.NewCommand(
+		commands.Metadata{
+			ShortUsage: "<subcommand> [flags] [<arg>...]",
+			LongHelp:   "zenao backend server and tools",
+		},
+		commands.NewEmptyConfig(),
+		commands.HelpExec,
+	)
+
+	cmd.AddSubCommands(
+		newStartCmd(),
+		newFakegenCmd(),
+	)
+
+	cmd.Execute(context.Background(), os.Args[1:])
+}
+
+func newStartCmd() *commands.Command {
+	return commands.NewCommand(
+		commands.Metadata{
+			Name:       "start",
+			ShortUsage: "start",
+			ShortHelp:  "start the server",
+		},
+		commands.NewEmptyConfig(),
+		func(ctx context.Context, args []string) error {
+			return execStart()
+		},
+	)
+}
+
+func execStart() error {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	chain, err := setupChain(adminMnemonic, eventsIndexPkgPath, chainID, chainEndpoint, logger)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	db, err := setupLocalDB(dbPath)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	mux := http.NewServeMux()
@@ -61,7 +96,8 @@ func main() {
 	))
 
 	logger.Info("Starting server", zap.String("addr", bindAddr))
-	http.ListenAndServe(
+
+	return http.ListenAndServe(
 		bindAddr,
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
