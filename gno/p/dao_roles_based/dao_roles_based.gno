@@ -122,7 +122,6 @@ func (d *DaoRolesBased) ProposeJSON(proposalJSON string) {
 	d.propose(req.title, req.description, msg.Type(), msg)
 }
 
-// TODO: add unit tests for this method
 func (d *DaoRolesBased) InstantExecute(proposalJSON string) {
 	var req ProposalRequest
 	req.fromJSON(json.Must(json.Unmarshal([]byte(proposalJSON))))

@@ -417,3 +417,83 @@ func TestExecuteProposal(t *testing.T) {
 		})
 	}
 }
+
+func TestInstantExecute(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String()}, {carol.String()}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"10"}}]`
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"MockExecutableMessage","payload":{}}}`
+	std.TestSetOrigCaller(alice)
+	dao.ProposeJSON(proposalJSON)
+
+	type testInstantExecuteInput struct {
+		proposalJSON string
+		executor     std.Address
+	}
+
+	type testInstantExecuteExpected struct {
+		panic bool
+	}
+
+	type testInstantExecute struct {
+		input    testInstantExecuteInput
+		expected testInstantExecuteExpected
+	}
+
+	type testInstantExecuteTable map[string]testInstantExecute
+
+	tests := testInstantExecuteTable{
+		"Success": {
+			input: testInstantExecuteInput{
+				proposalJSON: proposalJSON,
+				executor:     alice,
+			},
+			expected: testInstantExecuteExpected{
+				panic: false,
+			},
+		},
+		"Unknown message type": {
+			input: testInstantExecuteInput{
+				proposalJSON: `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"UnknownMessage","payload":{""}}}`,
+				executor:     alice,
+			},
+			expected: testInstantExecuteExpected{
+				panic: true,
+			},
+		},
+		"Non-member": {
+			input: testInstantExecuteInput{
+				proposalJSON: proposalJSON,
+				executor:     dave,
+			},
+			expected: testInstantExecuteExpected{
+				panic: true,
+			},
+		},
+	}
+
+	for testName, test := range tests {
+		t.Run(testName, func(t *testing.T) {
+			if test.expected.panic {
+				defer func() {
+					if r := recover(); r == nil {
+						t.Errorf("Expected panic, got none")
+					}
+				}()
+			}
+
+			std.TestSetOrigCaller(test.input.executor)
+			dao.InstantExecute(test.input.proposalJSON)
+		})
+	}
+}
