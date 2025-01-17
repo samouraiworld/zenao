@@ -24,12 +24,12 @@ type DaoRolesBased struct {
 }
 
 func NewDaoRolesBasedJSON(name, description string, roles []string, members [][]string, resourcesJSON string, handlers []MessageHandler) *DaoRolesBased {
-	if len(name) < 5 {
-		panic("dao name should be at least 5 characters long")
+	if len(name) < 3 {
+		panic("dao name should be at least 3 characters long")
 	}
 
-	if len(description) < 10 {
-		panic("dao description should be at least 10 characters long")
+	if len(description) < 3 {
+		panic("dao description should be at least 3 characters long")
 	}
 
 	dao := &DaoRolesBased{
@@ -42,12 +42,24 @@ func NewDaoRolesBasedJSON(name, description string, roles []string, members [][]
 		renderingRouter:  mux.NewRouter(),
 		realmName:        path.Base(std.CurrentRealm().PkgPath()),
 	}
+	dao.initMessagesRegistry()
 	dao.initRenderingRouter()
 
 	dao.MemberModule.setRoles(roles)
 	dao.MemberModule.setMembers(members)
 
 	resources := dao.parseResourcesJSON(resourcesJSON)
+	conditionRaw, ok := resources.Get("init")
+	if !ok {
+		panic("resources should have an 'init' condition")
+	}
+	condition := conditionRaw.(daocond.Condition)
+	dao.MessagesRegistry.handlers.Iterate("", "", func(key string, value interface{}) bool {
+		resources.Set(key, condition)
+		return false
+	})
+	resources.Remove("init")
+
 	dao.ResourcesModule.setResources(resources)
 
 	for _, handler := range handlers {
@@ -121,6 +133,15 @@ func (d *DaoRolesBased) ProposeJSON(proposalJSON string) {
 	d.propose(req.title, req.description, msg.Type(), msg)
 }
 
+func (d *DaoRolesBased) InstantExecute(proposalJSON string) {
+	var req ProposalRequest
+	req.fromJSON(json.Must(json.Unmarshal([]byte(proposalJSON))))
+	msg := d.MessagesRegistry.messageFromJSON(req.message)
+	proposal := d.propose(req.title, req.description, msg.Type(), msg)
+	d.Vote(uint64(proposal.id), "yes")
+	d.Execute(uint64(proposal.id))
+}
+
 func (d *DaoRolesBased) HasRole(memberId string, role string) bool {
 	return d.MemberModule.HasRole(memberId, role)
 }
@@ -133,7 +154,7 @@ func (d *DaoRolesBased) MembersCount() uint64 {
 	return d.MemberModule.MembersCount()
 }
 
-func (d *DaoRolesBased) propose(title, description, resource string, message ExecutableMessage) {
+func (d *DaoRolesBased) propose(title, description, resource string, message ExecutableMessage) *Proposal {
 	proposer := std.PrevRealm().Addr()
 	if !d.MemberModule.IsMember(proposer.String()) {
 		panic(proposer + " proposer is not a member" + proposer)
@@ -144,15 +165,15 @@ func (d *DaoRolesBased) propose(title, description, resource string, message Exe
 		panic("resource not found")
 	}
 
-	if len(title) < 9 {
+	if len(title) < 3 {
 		panic("title should be at least 9 characters long")
 	}
 
-	if len(description) < 15 {
+	if len(description) < 3 {
 		panic("description should be at least 15 characters long")
 	}
 
-	d.ProposalModule.newProposal(title, description, proposer, message, condition.NewState())
+	return d.ProposalModule.newProposal(title, description, proposer, message, condition.NewState())
 }
 
 func (d *DaoRolesBased) parseResourcesJSON(resourcesJSON string) *avl.Tree {

@@ -57,7 +57,7 @@ func TestNewDaoRolesBasedJSON(t *testing.T) {
 	description := "My DAO Description"
 	roles := []string{"admin"}
 	members := [][]string{{alice.String(), "admin"}, {bob.String()}, {carol.String()}}
-	resourcesJSON := `[]`
+	resourcesJSON := `[{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	handlers := []MessageHandler{}
 
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, handlers)
@@ -80,8 +80,8 @@ func TestNewDaoRolesBasedJSON(t *testing.T) {
 	}
 
 	resourcesLen := dao.ResourcesModule.resources.Size()
-	if resourcesLen != 0 {
-		t.Errorf("Expected 0 resources, got %d", resourcesLen)
+	if resourcesLen != 6 { // There is 6 default resources
+		t.Errorf("Expected 6 resources, got %d", resourcesLen)
 	}
 }
 
@@ -95,7 +95,7 @@ func TestProposeJSON(t *testing.T) {
 		&MockMessageHandler{},
 	}
 
-	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}}]`
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	std.TestSetOrigCaller(alice)
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
@@ -204,7 +204,7 @@ func TestVote(t *testing.T) {
 		&MockMessageHandler{},
 	}
 
-	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"10"}}]`
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"20"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	std.TestSetOrigCaller(alice)
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 	proposalJSON := `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"MockExecutableMessage","payload":{}}}`
@@ -319,7 +319,7 @@ func TestExecuteProposal(t *testing.T) {
 		&MockMessageHandler{},
 	}
 
-	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"10"}}]`
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"20"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	std.TestSetOrigCaller(alice)
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 	proposalJSON := `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"MockExecutableMessage","payload":{}}}`
@@ -416,4 +416,313 @@ func TestExecuteProposal(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInstantExecute(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String()}, {carol.String()}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"20"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"MockExecutableMessage","payload":{}}}`
+	std.TestSetOrigCaller(alice)
+	dao.ProposeJSON(proposalJSON)
+
+	type testInstantExecuteInput struct {
+		proposalJSON string
+		executor     std.Address
+	}
+
+	type testInstantExecuteExpected struct {
+		panic bool
+	}
+
+	type testInstantExecute struct {
+		input    testInstantExecuteInput
+		expected testInstantExecuteExpected
+	}
+
+	type testInstantExecuteTable map[string]testInstantExecute
+
+	tests := testInstantExecuteTable{
+		"Success": {
+			input: testInstantExecuteInput{
+				proposalJSON: proposalJSON,
+				executor:     alice,
+			},
+			expected: testInstantExecuteExpected{
+				panic: false,
+			},
+		},
+		"Unknown message type": {
+			input: testInstantExecuteInput{
+				proposalJSON: `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"UnknownMessage","payload":{""}}}`,
+				executor:     alice,
+			},
+			expected: testInstantExecuteExpected{
+				panic: true,
+			},
+		},
+		"Non-member": {
+			input: testInstantExecuteInput{
+				proposalJSON: proposalJSON,
+				executor:     dave,
+			},
+			expected: testInstantExecuteExpected{
+				panic: true,
+			},
+		},
+	}
+
+	for testName, test := range tests {
+		t.Run(testName, func(t *testing.T) {
+			if test.expected.panic {
+				defer func() {
+					if r := recover(); r == nil {
+						t.Errorf("Expected panic, got none")
+					}
+				}()
+			}
+
+			std.TestSetOrigCaller(test.input.executor)
+			dao.InstantExecute(test.input.proposalJSON)
+		})
+	}
+}
+
+func TestGetMembers(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String()}, {carol.String()}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	expectedMembers := []string{alice.String(), bob.String(), carol.String()}
+	m := dao.MemberModule.GetMembers()
+	if len(m) != len(expectedMembers) {
+		t.Errorf("Expected %d members, got %d", len(expectedMembers), len(m))
+	}
+
+	for _, eMember := range expectedMembers {
+		if !dao.IsMember(eMember) {
+			t.Errorf("Expected member %s to be a member", eMember)
+		}
+	}
+}
+
+func TestAddMemberProposal(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
+
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"Add Member Proposal","description":"Add Member Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddNewMember","payload":{"address":"` + bob.String() + `","roles":["admin"]}}}`
+
+	std.TestSetOrigCaller(alice)
+
+	if dao.IsMember(bob.String()) {
+		t.Errorf("Expected member %s to not be a member", bob.String())
+	}
+
+	dao.InstantExecute(proposalJSON)
+
+	if !dao.IsMember(bob.String()) {
+		t.Errorf("Expected member %s to be a member", bob.String())
+	}
+
+	if !dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to have role 'admin'", bob.String())
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithUnknowkRole := `{"title":"Add Member Proposal","description":"Add Member Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddNewMember","payload":{"address":"` + carol.String() + `","roles":["unknown"]}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithUnknowkRole)
+}
+
+func TestRemoveMemberProposal(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String(), "admin"}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
+
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"Remove Member Proposal","description":"Remove Member Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveMember","payload": "` + bob.String() + `"}}`
+
+	std.TestSetOrigCaller(alice)
+
+	if !dao.IsMember(bob.String()) {
+		t.Errorf("Expected member %s to be a member", bob.String())
+	}
+
+	if !dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to have role 'admin'", bob.String())
+	}
+
+	dao.InstantExecute(proposalJSON)
+
+	if dao.IsMember(bob.String()) {
+		t.Errorf("Expected user %s to not be a member", bob.String())
+	}
+
+	if dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected user %s to not have role 'admin'", bob.String())
+	}
+}
+
+func TestAddRoleToUserProposal(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String()}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
+
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
+
+	std.TestSetOrigCaller(alice)
+
+	if dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to not have role 'admin'", bob.String())
+	}
+
+	dao.InstantExecute(proposalJSON)
+
+	if !dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to have role 'admin'", bob.String())
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithUnknowkRole := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + alice.String() + `","role":"unknown"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithUnknowkRole)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithNonMember := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + carol.String() + `","role":"admin"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithNonMember)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithAlreadyRole := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithAlreadyRole)
+}
+
+func TestRemoveRoleFromUserProposal(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String(), "admin"}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
+
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
+
+	std.TestSetOrigCaller(alice)
+
+	if !dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to have role 'admin'", bob.String())
+	}
+
+	dao.InstantExecute(proposalJSON)
+
+	if dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to not have role 'admin'", bob.String())
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithUnknowkRole := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + alice.String() + `","role":"unknown"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithUnknowkRole)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithNonMember := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + carol.String() + `","role":"admin"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithNonMember)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithNonRole := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithNonRole)
 }

@@ -32,6 +32,15 @@ func (m *MemberModule) MembersCount() uint64 {
 	return uint64(m.members.Size())
 }
 
+func (m *MemberModule) GetMembers() []string {
+	members := make([]string, 0, m.members.Size())
+	m.members.Iterate("", "", func(key string, value interface{}) bool {
+		members = append(members, key)
+		return false
+	})
+	return members
+}
+
 func (m *MemberModule) GetRoles() []string {
 	return m.roleManager.GetRoles()
 }
@@ -55,4 +64,50 @@ func (m *MemberModule) setMembers(members [][]string) {
 			m.roleManager.AddRoleToUser(std.Address(member[0]), role, caller)
 		}
 	}
+}
+
+// TODO: add test for this kind of proposals
+func (m *MemberModule) addMember(member string, roles []string) {
+	if m.IsMember(member) {
+		panic("member already exists")
+	}
+	caller := std.CurrentRealm().Addr()
+	m.members.Set(member, struct{}{})
+	for _, role := range roles {
+		m.roleManager.AddRoleToUser(std.Address(member), role, caller)
+	}
+}
+
+func (m *MemberModule) removeMember(member string) {
+	if !m.IsMember(member) {
+		panic("member does not exist")
+	}
+	m.members.Remove(member)
+	m.roleManager.RemoveAllRolesFromUser(std.Address(member), std.CurrentRealm().Addr())
+}
+
+func (m *MemberModule) addRoleToMember(member string, role string) {
+	if !m.IsMember(member) {
+		panic("member does not exist")
+	}
+	if !m.roleManager.RoleExists(role) {
+		panic("role does not exist")
+	}
+	if m.HasRole(member, role) {
+		panic("member already has the role")
+	}
+	m.roleManager.AddRoleToUser(std.Address(member), role, std.CurrentRealm().Addr())
+}
+
+func (m *MemberModule) removeRoleFromMember(member string, role string) {
+	if !m.IsMember(member) {
+		panic("member does not exist")
+	}
+	if !m.roleManager.RoleExists(role) {
+		panic("role does not exist")
+	}
+	if !m.HasRole(member, role) {
+		panic("member does not have the role")
+	}
+	m.roleManager.RemoveRoleFromUser(std.Address(member), role, std.CurrentRealm().Addr())
 }

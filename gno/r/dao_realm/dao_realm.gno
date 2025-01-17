@@ -20,7 +20,7 @@ func init() {
 	}
 
 	messagesHandlers := []dao_roles_based.MessageHandler{}
-	resourcesJSON := `[]`
+	resourcesJSON := `[{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 
 	dao = dao_roles_based.NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
