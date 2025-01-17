@@ -41,4 +41,7 @@ func TestTransferOwnership(t *testing.T) {
 	if user.user.IsMember(alice.String()) {
 		t.Fatalf("expected alice to not be a member")
 	}
+	if !user.user.HasRole(bob.String(), "admin") {
+		t.Fatalf("expected bob to have admin role")
+	}
 }
