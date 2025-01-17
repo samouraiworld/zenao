@@ -54,7 +54,6 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Event realm source:\n%s", eventRealmSrc)
 
 	eventRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/events/e%s`, evtID)
 
