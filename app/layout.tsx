@@ -4,7 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeProvider } from "next-themes";
+import QueryProviders from "./query-providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,27 +34,30 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <ClerkProvider>
-      <html
-        lang={locale}
-        style={{ colorScheme: "dark" }}
-        className="dark-theme"
+    <html
+      suppressHydrationWarning
+      lang={locale}
+      style={{ colorScheme: "dark" }}
+      className="dark-theme"
+    >
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark-theme"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NextIntlClientProvider messages={messages}>
-              {children}
-            </NextIntlClientProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        <ClerkProvider>
+          <QueryProviders>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark-theme"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NextIntlClientProvider messages={messages}>
+                {children}
+              </NextIntlClientProvider>
+            </ThemeProvider>
+          </QueryProviders>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }
