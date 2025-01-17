@@ -74,7 +74,7 @@ type RegisterHandlerExecutableMessage struct {
 var _ ExecutableMessage = &RegisterHandlerExecutableMessage{}
 
 func (m RegisterHandlerExecutableMessage) Type() string {
-	return "gno.land/p/zenao/dao_interfaces.RegisterHandler"
+	return "gno.land/p/zenao/dao_roles_based.RegisterHandler"
 }
 
 func (m *RegisterHandlerExecutableMessage) FromJSON(ast *json.Node) {
@@ -118,7 +118,7 @@ type RemoveHandlerExecutableMessage struct {
 var _ ExecutableMessage = &RemoveHandlerExecutableMessage{}
 
 func (m RemoveHandlerExecutableMessage) Type() string {
-	return "gno.land/p/zenao/dao_interfaces.RemoveHandler"
+	return "gno.land/p/zenao/dao_roles_based.RemoveHandler"
 }
 
 func (m *RemoveHandlerExecutableMessage) FromJSON(ast *json.Node) {
@@ -163,7 +163,7 @@ type AddNewMemberMessage struct {
 var _ ExecutableMessage = &AddNewMemberMessage{}
 
 func (m AddNewMemberMessage) Type() string {
-	return "gno.land/p/zenao/dao_interfaces.AddNewMember"
+	return "gno.land/p/zenao/dao_roles_based.AddNewMember"
 }
 
 func (m *AddNewMemberMessage) FromJSON(ast *json.Node) {
@@ -219,7 +219,7 @@ type RemoveMemberMessage struct {
 var _ ExecutableMessage = &RemoveMemberMessage{}
 
 func (m RemoveMemberMessage) Type() string {
-	return "gno.land/p/zenao/dao_interfaces.RemoveMember"
+	return "gno.land/p/zenao/dao_roles_based.RemoveMember"
 }
 
 func (m *RemoveMemberMessage) FromJSON(ast *json.Node) {
@@ -263,7 +263,7 @@ type AddRoleToUserMessage struct {
 var _ ExecutableMessage = &AddRoleToUserMessage{}
 
 func (m AddRoleToUserMessage) Type() string {
-	return "gno.land/p/zenao/dao_interfaces.AddRoleToUser"
+	return "gno.land/p/zenao/dao_roles_based.AddRoleToUser"
 }
 
 func (m *AddRoleToUserMessage) FromJSON(ast *json.Node) {
@@ -312,7 +312,7 @@ type RemoveRoleFromUserMessage struct {
 var _ ExecutableMessage = &RemoveRoleFromUserMessage{}
 
 func (m RemoveRoleFromUserMessage) Type() string {
-	return "gno.land/p/zenao/dao_interfaces.RemoveRoleFromUser"
+	return "gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser"
 }
 
 func (m *RemoveRoleFromUserMessage) FromJSON(ast *json.Node) {

@@ -26,11 +26,13 @@ func NewUser(id, username string) *User {
 	handlerTypes := []string{
 		dao_roles_based.NewAddNewMemberMessageHandler(nil).Type(),
 		dao_roles_based.NewRemoveMemberMessageHandler(nil).Type(),
+		"init",
 	}
 
 	conditions := make(map[string]string)
 	conditions[handlerTypes[0]] = `"condition":{"type":"role-count","role":"admin","count":"1"}`
 	conditions[handlerTypes[1]] = `"condition":{"type":"role-count","role":"admin","count":"1"}`
+	conditions["init"] = `"condition":{"type":"role-count","role":"admin","count":"1"}`
 
 	var resourcesJSON = `[`
 	for i, hType := range handlerTypes {
@@ -60,6 +62,5 @@ func (u *User) TransferOwnership(newOwner string) {
 	proposalRemoveMemberJSON := `{"title":"remove member","description":"no description","message":{"type":"` + typeRemoveMember + `","payload":{"address":"` + caller + `"}}}`
 
 	u.user.InstantExecute(proposalAddMemberJSON)
-	panic(proposalAddMemberJSON)
 	u.user.InstantExecute(proposalRemoveMemberJSON)
 }

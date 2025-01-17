@@ -49,6 +49,17 @@ func NewDaoRolesBasedJSON(name, description string, roles []string, members [][]
 	dao.MemberModule.setMembers(members)
 
 	resources := dao.parseResourcesJSON(resourcesJSON)
+	conditionRaw, ok := resources.Get("init")
+	if !ok {
+		panic("resources should have an 'init' condition")
+	}
+	condition := conditionRaw.(daocond.Condition)
+	dao.MessagesRegistry.handlers.Iterate("", "", func(key string, value interface{}) bool {
+		resources.Set(key, condition)
+		return false
+	})
+	resources.Remove("init")
+
 	dao.ResourcesModule.setResources(resources)
 
 	for _, handler := range handlers {
