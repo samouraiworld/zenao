@@ -1,20 +1,12 @@
 import Image from "next/image";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { CreateEventButton } from "./create-event-button";
-import { ToggleTheme } from "./components/ToggleTheme";
+import Link from "next/link";
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="h-screen flex flex-col font-[family-name:var(--font-geist-sans)]">
-      <div className="flex flex-row justify-between p-2">
-        <SignedOut>
-          <SignInButton />
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
-        <ToggleTheme />
-      </div>
+      <Header />
       <div className="h-screen flex flex-col justify-center items-center">
         <main className="flex flex-col mb-10 justify-center items-center">
           <Image
@@ -36,7 +28,7 @@ export default function Home() {
             <li>Save and see your changes instantly.</li>
           </ol>
 
-          <CreateEventButton />
+          <Link href="/create">Create event</Link>
 
           <div className="flex gap-4 mt-8 items-center flex-col sm:flex-row">
             <a
@@ -112,7 +104,7 @@ export default function Home() {
           </a>
         </div>
       </div>
-      <footer className="flex items-center justify-center">Zenao</footer>
+      <Footer />
     </div>
   );
 }
