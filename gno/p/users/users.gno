@@ -6,12 +6,6 @@ import (
 	"gno.land/p/zenao/dao_roles_based"
 )
 
-// a user is "dao" contract with special properties
-// 1. the "user" dao have one member that is the user that deploy the contract
-// 2. the "user" dao have a "role" admin that is the role of the user
-// 3. the "user" dao have one message handler to replace the user and give ownership to another user
-// 4. the user realm extend the "dao" realm by adding a username, id, description & picture
-
 type User struct {
 	user *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
 }
