@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
@@ -31,6 +32,7 @@ type fakeEvent struct {
 	Capacity      float64 `faker:"amount"`
 	StartDate     int64   `faker:"unix_time"`
 	DurationHours int     `faker:"oneof: 1, 24, 72"`
+	ImageLock     float64 `faker:"amount"`
 }
 
 func execFakegen() error {
@@ -58,7 +60,7 @@ func execFakegen() error {
 		req := &zenaov1.CreateEventRequest{
 			Title:       a.Title,
 			Description: a.Description,
-			ImageUri:    "http://loremflickr.com/800/800",
+			ImageUri:    fmt.Sprintf("https://loremflickr.com/800/800?lock=%d", uint64(a.ImageLock)),
 			StartDate:   uint64(a.StartDate),
 			EndDate:     uint64(time.Unix(a.StartDate, 0).Add(time.Duration(a.DurationHours) * time.Hour).Unix()),
 			TicketPrice: a.TicketPrice,
