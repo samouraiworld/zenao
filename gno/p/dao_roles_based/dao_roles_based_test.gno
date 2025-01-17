@@ -568,3 +568,161 @@ func TestAddMemberProposal(t *testing.T) {
 	std.TestSetOrigCaller(alice)
 	dao.InstantExecute(proposalWithUnknowkRole)
 }
+
+func TestRemoveMemberProposal(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String(), "admin"}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
+
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"Remove Member Proposal","description":"Remove Member Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveMember","payload": "` + bob.String() + `"}}`
+
+	std.TestSetOrigCaller(alice)
+
+	if !dao.IsMember(bob.String()) {
+		t.Errorf("Expected member %s to be a member", bob.String())
+	}
+
+	if !dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to have role 'admin'", bob.String())
+	}
+
+	dao.InstantExecute(proposalJSON)
+
+	if dao.IsMember(bob.String()) {
+		t.Errorf("Expected user %s to not be a member", bob.String())
+	}
+
+	if dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected user %s to not have role 'admin'", bob.String())
+	}
+}
+
+func TestAddRoleToUserProposal(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String()}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
+
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
+
+	std.TestSetOrigCaller(alice)
+
+	if dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to not have role 'admin'", bob.String())
+	}
+
+	dao.InstantExecute(proposalJSON)
+
+	if !dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to have role 'admin'", bob.String())
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithUnknowkRole := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + alice.String() + `","role":"unknown"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithUnknowkRole)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithNonMember := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + carol.String() + `","role":"admin"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithNonMember)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithAlreadyRole := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithAlreadyRole)
+}
+
+func TestRemoveRoleFromUserProposal(t *testing.T) {
+	name := "My DAO"
+	description := "My DAO Description"
+	roles := []string{"admin"}
+	members := [][]string{{alice.String(), "admin"}, {bob.String(), "admin"}}
+
+	messagesHandlers := []MessageHandler{
+		&MockMessageHandler{},
+	}
+
+	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
+
+	std.TestSetOrigCaller(alice)
+	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
+
+	proposalJSON := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
+
+	std.TestSetOrigCaller(alice)
+
+	if !dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to have role 'admin'", bob.String())
+	}
+
+	dao.InstantExecute(proposalJSON)
+
+	if dao.HasRole(bob.String(), "admin") {
+		t.Errorf("Expected member %s to not have role 'admin'", bob.String())
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithUnknowkRole := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + alice.String() + `","role":"unknown"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithUnknowkRole)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithNonMember := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + carol.String() + `","role":"admin"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithNonMember)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Expected panic, got none")
+		}
+	}()
+
+	proposalWithNonRole := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
+	std.TestSetOrigCaller(alice)
+	dao.InstantExecute(proposalWithNonRole)
+}
