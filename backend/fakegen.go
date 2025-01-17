@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
@@ -32,7 +32,6 @@ type fakeEvent struct {
 	Capacity      float64 `faker:"amount"`
 	StartDate     int64   `faker:"unix_time"`
 	DurationHours int     `faker:"oneof: 1, 24, 72"`
-	ImageLock     float64 `faker:"amount"`
 }
 
 func execFakegen() error {
@@ -60,7 +59,7 @@ func execFakegen() error {
 		req := &zenaov1.CreateEventRequest{
 			Title:       a.Title,
 			Description: a.Description,
-			ImageUri:    fmt.Sprintf("https://loremflickr.com/800/800?lock=%d", uint64(a.ImageLock)),
+			ImageUri:    randomPick(eventImages),
 			StartDate:   uint64(a.StartDate),
 			EndDate:     uint64(time.Unix(a.StartDate, 0).Add(time.Duration(a.DurationHours) * time.Hour).Unix()),
 			TicketPrice: a.TicketPrice,
@@ -79,4 +78,26 @@ func execFakegen() error {
 	}
 
 	return nil
+}
+
+func randomPick[T any](s []T) T {
+	if len(s) == 0 {
+		panic(errors.New("can't pick from empty slice"))
+	}
+	idxs, err := faker.RandomInt(0, len(s)-1)
+	if err != nil {
+		panic(err)
+	}
+	return s[idxs[0]]
+}
+
+// loremflickr just got hit by flickr api restrictions so we use wikimedia images
+var eventImages = []string{
+	"https://upload.wikimedia.org/wikipedia/commons/2/2c/VIP_Party_%2810580932805%29.jpg?20140329180710",
+	"https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Brighton%2C_Party_in_the_Park_2002.jpg/1599px-Brighton%2C_Party_in_the_Park_2002.jpg?20210120152026",
+	"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/The_Yellow_Fellowship.jpg/640px-The_Yellow_Fellowship.jpg",
+	"https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/Hipp_hipp_hurra%21_Konstn%C3%A4rsfest_p%C3%A5_Skagen_-_Peder_Severin_Kr%C3%B8yer.jpg/640px-Hipp_hipp_hurra%21_Konstn%C3%A4rsfest_p%C3%A5_Skagen_-_Peder_Severin_Kr%C3%B8yer.jpg",
+	"https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Brussels_2005-04_-_art_%284887177097%29.jpg/640px-Brussels_2005-04_-_art_%284887177097%29.jpg",
+	"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/2019_Meeting.jpg/640px-2019_Meeting.jpg",
+	"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Sheffield_Steel_Rollergirls_vs_Nothing_Toulouse_-_2014-03-29_-_8781.jpg/640px-Sheffield_Steel_Rollergirls_vs_Nothing_Toulouse_-_2014-03-29_-_8781.jpg",
 }
