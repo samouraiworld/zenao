@@ -14,41 +14,34 @@ func (s *ZenaoServer) CreateEvent(
 	req *connect.Request[zenaov1.CreateEventRequest],
 ) (*connect.Response[zenaov1.CreateEventResponse], error) {
 	user := s.GetUser(ctx)
-	s.Logger.Info("user", zap.String("id", user.ID), zap.Bool("banned", user.Banned))
+
+	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", user.ID), zap.Bool("user-banned", user.Banned))
+
 	if user.Banned {
 		return nil, errors.New("user is banned")
 	}
 
-	if err := s.DB.CreateEvent(user.ID, req.Msg); err != nil {
+	// TODO: validate request
+
+	evtID := ""
+
+	if err := s.DBTx(func(db ZenaoDB) error {
+		var err error
+		if evtID, err = db.CreateEvent(user.ID, req.Msg); err != nil {
+			return err
+		}
+
+		if err := s.Chain.CreateEvent(evtID, user.ID, req.Msg); err != nil {
+			s.Logger.Error("create-event", zap.Error(err))
+			return err
+		}
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	/*
-		userRealmPkgPath, err := getOrCreateUserRealm(user.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		eventRealmPkgPath, err := createEventRealm(userRealmPkgPath)
-		if err != nil {
-			return nil, err
-		}
-
-		_ = eventRealmPkgPath
-	*/
-
-	res := connect.NewResponse(&zenaov1.CreateEventResponse{})
-	return res, nil
+	return connect.NewResponse(&zenaov1.CreateEventResponse{
+		Id: evtID,
+	}), nil
 }
-
-/*
-
-func getOrCreateUserRealm(userID string) (string, error) {
-	return "", errors.New("not implemented")
-}
-
-func createEventRealm(userRealmPkgPath string) (string, error) {
-	return "", errors.New("not implemented")
-}
-
-*/

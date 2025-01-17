@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -27,8 +28,8 @@ type SoldTicket struct {
 	Price   float64
 }
 
-func setupDB() (*gormZenaoDB, error) {
-	db, err := gorm.Open(sqlite.Open("dev.db"), &gorm.Config{})
+func setupLocalDB(path string) (*gormZenaoDB, error) {
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -45,19 +46,29 @@ type gormZenaoDB struct {
 	db *gorm.DB
 }
 
+func (g *gormZenaoDB) Tx(cb func(db ZenaoDB) error) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		return cb(&gormZenaoDB{db: tx})
+	})
+}
+
 // CreateEvent implements ZenaoDB.
-func (g *gormZenaoDB) CreateEvent(creatorID string, event *zenaov1.CreateEventRequest) error {
+func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error) {
 	// XXX: validate?
-	return g.db.Create(&Event{
-		Title:       event.Title,
-		Description: event.Description,
-		ImageURI:    event.ImageUri,
-		StartDate:   time.Unix(int64(event.StartDate), 0), // XXX: overflow?
-		EndDate:     time.Unix(int64(event.EndDate), 0),   // XXX: overflow?
+	evt := &Event{
+		Title:       req.Title,
+		Description: req.Description,
+		ImageURI:    req.ImageUri,
+		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
 		CreatorID:   creatorID,
-		TicketPrice: event.TicketPrice,
-		Capacity:    event.Capacity,
-	}).Error
+		TicketPrice: req.TicketPrice,
+		Capacity:    req.Capacity,
+	}
+	if err := g.db.Create(evt).Error; err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%d", evt.ID), nil
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)
