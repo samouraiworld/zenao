@@ -10,7 +10,7 @@ export function EventInfo({ id }: { id: string }) {
   return (
     <div>
       <figure>
-        <h2>{data}</h2>
+        <h2>{JSON.stringify(data)}</h2>
       </figure>
     </div>
   );

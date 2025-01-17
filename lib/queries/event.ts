@@ -7,9 +7,19 @@ export const eventOptions = (id: string) =>
     queryFn: async () => {
       const client = new GnoJSONRPCProvider("http://127.0.0.1:26657");
       const res = await client.evaluateExpression(
-        `gno.land/r/zenao/events`,
-        `Render("")`,
+        `gno.land/r/zenao/events/e${id}`,
+        `getInfoJSON()`,
       );
-      return res;
+      const event = extractGnoJSONResponse(res);
+      // TODO: validate/coerce type via zod
+      return event;
     },
   });
+
+function extractGnoJSONResponse(res: string): unknown {
+  const jsonString = res.substring("(".length, res.length - " string)".length);
+  // eslint-disable-next-line no-restricted-syntax
+  const jsonStringContent = JSON.parse(jsonString);
+  // eslint-disable-next-line no-restricted-syntax
+  return JSON.parse(jsonStringContent) as unknown;
+}
