@@ -192,7 +192,6 @@ func (rm *RoleManager) GetUserRoles(user std.Address) []string {
 	return res
 }
 
-// TODO: Add unit test for this
 func (rm *RoleManager) RemoveAllRolesFromUser(user std.Address, caller std.Address) {
 	if rm.owner.Owner() != caller && !rm.HasPermission(caller, PermissionWriteRole) {
 		panic("caller does not have permission")
