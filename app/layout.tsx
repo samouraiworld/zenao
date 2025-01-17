@@ -5,7 +5,7 @@ import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
-import Providers from "./providers";
+import QueryProviders from "./query-providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,7 +44,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClerkProvider>
-          <Providers>
+          <QueryProviders>
             <ThemeProvider
               attribute="class"
               defaultTheme="dark-theme"
@@ -55,7 +55,7 @@ export default async function RootLayout({
                 {children}
               </NextIntlClientProvider>
             </ThemeProvider>
-          </Providers>
+          </QueryProviders>
         </ClerkProvider>
       </body>
     </html>
