@@ -7,56 +7,50 @@ import (
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
+	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
 
 type gnoZenaoChain struct {
-	adminMnemonic      string
+	client             gnoclient.Client
 	eventsIndexPkgPath string
-	chainID            string
-	chainEndpoint      string
+	signerInfo         keys.Info
 	logger             *zap.Logger
+}
+
+func setupChain(adminMnemonic string, eventsIndexPkgPath string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
+	signer, err := gnoclient.SignerFromBip39(adminMnemonic, chainID, "", 0, 0)
+	if err != nil {
+		return nil, err
+	}
+	signerInfo, err := signer.Info()
+	if err != nil {
+		return nil, err
+	}
+
+	tmClient, err := tm2client.NewHTTPClient(chainEndpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	client := gnoclient.Client{Signer: signer, RPCClient: tmClient}
+
+	return &gnoZenaoChain{
+		client:             client,
+		eventsIndexPkgPath: eventsIndexPkgPath,
+		signerInfo:         signerInfo,
+		logger:             logger,
+	}, nil
 }
 
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
-	signer, err := gnoclient.SignerFromBip39(g.adminMnemonic, g.chainID, "", 0, 0)
-	if err != nil {
-		return err
-	}
-	signerInfo, err := signer.Info()
-	if err != nil {
-		return err
-	}
-
-	tmClient, err := tm2client.NewHTTPClient(g.chainEndpoint)
-	if err != nil {
-		return err
-	}
-	defer tmClient.Close()
-
-	client := gnoclient.Client{Signer: signer, RPCClient: tmClient}
-
-	/*
-		userRealmPkgPath, err := getOrCreateUserRealm(user.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		eventRealmPkgPath, err := createEventRealm(userRealmPkgPath)
-		if err != nil {
-			return nil, err
-		}
-
-		_ = eventRealmPkgPath
-	*/
-
-	broadcastRes, err := client.Call(gnoclient.BaseTxCfg{
+	broadcastRes, err := g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "10000ugnot",
 		GasWanted: 10000000,
 	}, vm.MsgCall{
-		Caller:  signerInfo.GetAddress(),
+		Caller:  g.signerInfo.GetAddress(),
 		PkgPath: g.eventsIndexPkgPath,
 		Func:    "AddEvent",
 		Args: []string{

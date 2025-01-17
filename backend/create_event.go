@@ -23,14 +23,21 @@ func (s *ZenaoServer) CreateEvent(
 
 	// TODO: validate request
 
-	evtID, err := s.DB.CreateEvent(user.ID, req.Msg)
-	if err != nil {
-		return nil, err
-	}
+	evtID := ""
 
-	if err := s.Chain.CreateEvent(evtID, user.ID, req.Msg); err != nil {
-		s.Logger.Error("create-event", zap.Error(err))
-		// TODO: db rollback
+	if err := s.DBTx(func(db ZenaoDB) error {
+		var err error
+		if evtID, err = db.CreateEvent(user.ID, req.Msg); err != nil {
+			return err
+		}
+
+		if err := s.Chain.CreateEvent(evtID, user.ID, req.Msg); err != nil {
+			s.Logger.Error("create-event", zap.Error(err))
+			return err
+		}
+
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 

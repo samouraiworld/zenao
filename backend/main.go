@@ -19,10 +19,14 @@ import (
 )
 
 const (
-	allowedOrigin  = "*"
-	clerkSecretKey = "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK"
-	bindAddr       = "localhost:4242"
-	adminMnemonic  = "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique"
+	allowedOrigin      = "*"
+	clerkSecretKey     = "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK"
+	bindAddr           = "localhost:4242"
+	adminMnemonic      = "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique"
+	eventsIndexPkgPath = "gno.land/r/zenao/events"
+	chainEndpoint      = "127.0.0.1:26657"
+	chainID            = "dev"
+	dbPath             = "dev.db"
 )
 
 func main() {
@@ -31,17 +35,14 @@ func main() {
 		panic(err)
 	}
 
-	db, err := setupDB()
+	chain, err := setupChain(adminMnemonic, eventsIndexPkgPath, chainID, chainEndpoint, logger)
 	if err != nil {
 		panic(err)
 	}
 
-	chain := &gnoZenaoChain{
-		adminMnemonic:      adminMnemonic,
-		eventsIndexPkgPath: "gno.land/r/zenao/events",
-		chainEndpoint:      "127.0.0.1:26657",
-		logger:             logger,
-		chainID:            "dev",
+	db, err := setupLocalDB(dbPath)
+	if err != nil {
+		panic(err)
 	}
 
 	mux := http.NewServeMux()
@@ -49,7 +50,7 @@ func main() {
 	zenao := &ZenaoServer{
 		Logger:  logger,
 		GetUser: getUserFromClerk,
-		DB:      db,
+		DBTx:    db.Tx,
 		Chain:   chain,
 	}
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)

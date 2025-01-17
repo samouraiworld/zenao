@@ -10,7 +10,7 @@ import (
 type ZenaoServer struct {
 	Logger  *zap.Logger
 	GetUser func(ctx context.Context) ZenaoUser
-	DB      ZenaoDB
+	DBTx    func(func(db ZenaoDB) error) error
 	Chain   ZenaoChain
 }
 

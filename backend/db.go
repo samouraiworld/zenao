@@ -28,8 +28,8 @@ type SoldTicket struct {
 	Price   float64
 }
 
-func setupDB() (*gormZenaoDB, error) {
-	db, err := gorm.Open(sqlite.Open("dev.db"), &gorm.Config{})
+func setupLocalDB(path string) (*gormZenaoDB, error) {
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -44,6 +44,12 @@ func setupDB() (*gormZenaoDB, error) {
 
 type gormZenaoDB struct {
 	db *gorm.DB
+}
+
+func (g *gormZenaoDB) Tx(cb func(db ZenaoDB) error) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		return cb(&gormZenaoDB{db: tx})
+	})
 }
 
 // CreateEvent implements ZenaoDB.
