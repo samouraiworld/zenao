@@ -60,7 +60,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	eventRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/events/e%s`, evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
-		GasFee:    "100000ugnot",
+		GasFee:    "10000000ugnot",
 		GasWanted: 100000000,
 	}, vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
@@ -77,7 +77,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	g.logger.Info("created event realm", zap.String("pkg-path", eventRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "10000ugnot",
+		GasFee:    "1000000ugnot",
 		GasWanted: 10000000,
 	}, vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),

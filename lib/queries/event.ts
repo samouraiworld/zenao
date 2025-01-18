@@ -1,18 +1,24 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
+import { eventFormSchema } from "@/components/form/types";
 
 export const eventOptions = (id: string) =>
   queryOptions({
     queryKey: ["event", id],
     queryFn: async () => {
-      const client = new GnoJSONRPCProvider("http://127.0.0.1:26657");
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/events/e${id}`,
-        `getInfoJSON()`,
-      );
-      const event = extractGnoJSONResponse(res);
-      // TODO: validate/coerce type via zod
-      return event;
+      try {
+        const client = new GnoJSONRPCProvider("http://127.0.0.1:26657");
+        const res = await client.evaluateExpression(
+          `gno.land/r/zenao/events/e${id}`,
+          `getInfoJSON()`,
+        );
+        const event = extractGnoJSONResponse(res);
+        return eventFormSchema.parse(event);
+      } catch (err) {
+        console.error(err);
+      }
+
+      return null;
     },
   });
 

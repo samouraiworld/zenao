@@ -1,7 +1,7 @@
 "use client";
 
 import { Calendar as CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, fromUnixTime, getUnixTime } from "date-fns";
 import { FormFieldProps } from "../types";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -20,7 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/shadcn/popover";
 
-export const FormFieldDatePicker: React.FC<FormFieldProps<Date>> = ({
+export const FormFieldDatePicker: React.FC<FormFieldProps<bigint>> = ({
   control,
   name,
 }) => {
@@ -42,7 +42,7 @@ export const FormFieldDatePicker: React.FC<FormFieldProps<Date>> = ({
                   )}
                 >
                   {field.value ? (
-                    format(field.value, "PPP")
+                    format(fromUnixTime(Number(field.value)), "PPP")
                   ) : (
                     <span>{name}</span>
                   )}
@@ -53,8 +53,8 @@ export const FormFieldDatePicker: React.FC<FormFieldProps<Date>> = ({
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={field.value}
-                onSelect={field.onChange}
+                selected={fromUnixTime(Number(field.value))}
+                onSelect={(selected) => field.onChange(getUnixTime(selected!))}
                 disabled={(date) => date < new Date()}
               />
             </PopoverContent>
