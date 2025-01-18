@@ -1,5 +1,5 @@
 import { Control, FieldValues } from "react-hook-form";
-import { FormSchemaType } from "./CreateEventForm";
+import { z } from "zod";
 import { KeysOfValue } from "@/app/types";
 
 interface GenericFormFieldProps<T extends FieldValues, TCondition> {
@@ -7,6 +7,17 @@ interface GenericFormFieldProps<T extends FieldValues, TCondition> {
   name: KeysOfValue<T, TCondition>;
 }
 export type FormFieldProps<TCondition> = GenericFormFieldProps<
-  FormSchemaType,
+  EventFormSchemaType,
   TCondition
 >;
+
+export const eventFormSchema = z.object({
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  imageUri: z.string().trim().min(1).url(),
+  startDate: z.coerce.bigint(),
+  endDate: z.coerce.bigint(),
+  ticketPrice: z.coerce.number(),
+  capacity: z.coerce.number(),
+});
+export type EventFormSchemaType = z.infer<typeof eventFormSchema>;

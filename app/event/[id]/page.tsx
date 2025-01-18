@@ -13,12 +13,13 @@ export default async function EventPage({
   const p = await params;
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(eventOptions(p.id));
+
   return (
     <div className="h-screen flex flex-col font-[family-name:var(--font-geist-sans)]">
       <Header />
       <div className="h-screen flex flex-col justify-center items-center">
-        <main className="flex flex-col mb-10 justify-center items-center">
-          <div className="flex gap-4 mt-8 items-center flex-col">
+        <main className="h-full flex flex-col mb-10 justify-center items-center">
+          <div className="h-full gap-4 mt-8 items-center flex-col">
             <HydrationBoundary state={dehydrate(queryClient)}>
               <EventInfo id={p.id} />
             </HydrationBoundary>

@@ -2,31 +2,19 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useClerk } from "@clerk/nextjs";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
+import { eventFormSchema, EventFormSchemaType } from "./types";
 import { zenaoClient } from "@/app/zenao-client";
 import { Button } from "@/components/shadcn/button";
 import { Form } from "@/components/shadcn/form";
 
-const createEventFormSchema = z.object({
-  title: z.string().trim().min(1),
-  description: z.string().trim().min(1),
-  imageUri: z.string().trim().min(1),
-  startDate: z.date(),
-  endDate: z.date(),
-  ticketPrice: z.coerce.number(),
-  capacity: z.coerce.number(),
-});
-
-export type FormSchemaType = z.infer<typeof createEventFormSchema>;
-
 export const CreateEventForm: React.FC = () => {
   const { client } = useClerk();
-  const form = useForm<FormSchemaType>({
-    resolver: zodResolver(createEventFormSchema),
+  const form = useForm<EventFormSchemaType>({
+    resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: "teset",
       description: "test",
@@ -36,7 +24,7 @@ export const CreateEventForm: React.FC = () => {
     },
   });
 
-  const onSubmit = async (values: FormSchemaType) => {
+  const onSubmit = async (values: EventFormSchemaType) => {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     const token = await client.activeSessions[0].getToken();
@@ -44,18 +32,9 @@ export const CreateEventForm: React.FC = () => {
       throw new Error("invalid clerk token");
     }
     try {
-      await zenaoClient.createEvent(
-        {
-          ...values,
-          startDate: BigInt(Math.floor(values.startDate.getTime() / 1000)),
-          endDate: BigInt(Math.floor(values.endDate.getTime() / 1000)),
-        },
-        {
-          headers: {
-            Authorization: "Bearer " + token,
-          },
-        },
-      );
+      await zenaoClient.createEvent(values, {
+        headers: { Authorization: "Bearer " + token },
+      });
       alert("Success");
     } catch (err) {
       console.error("error", err);
