@@ -1,5 +1,16 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
+import { z } from "zod";
+
+const createEventFormSchema = z.object({
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  imageUri: z.string().trim().min(1),
+  startDate: z.string(),
+  endDate: z.string(),
+  ticketPrice: z.coerce.number(),
+  capacity: z.coerce.number(),
+});
 
 export const eventOptions = (id: string) =>
   queryOptions({
@@ -11,8 +22,13 @@ export const eventOptions = (id: string) =>
         `getInfoJSON()`,
       );
       const event = extractGnoJSONResponse(res);
-      // TODO: validate/coerce type via zod
-      return event;
+      try {
+        return createEventFormSchema.parse(event);
+      } catch (err) {
+        console.error(err);
+      }
+
+      return null;
     },
   });
 

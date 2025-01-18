@@ -43,19 +43,23 @@ export const CreateEventForm: React.FC = () => {
     if (!token) {
       throw new Error("invalid clerk token");
     }
-    await zenaoClient.createEvent(
-      {
-        ...values,
-        startDate: BigInt(Math.floor(values.startDate.getTime() / 1000)),
-        endDate: BigInt(Math.floor(values.endDate.getTime() / 1000)),
-      },
-      {
-        headers: {
-          Authorization: "Bearer " + token,
+    try {
+      await zenaoClient.createEvent(
+        {
+          ...values,
+          startDate: BigInt(Math.floor(values.startDate.getTime() / 1000)),
+          endDate: BigInt(Math.floor(values.endDate.getTime() / 1000)),
         },
-      },
-    );
-    alert("Success");
+        {
+          headers: {
+            Authorization: "Bearer " + token,
+          },
+        },
+      );
+      alert("Success");
+    } catch (err) {
+      console.error("error", err);
+    }
   };
 
   return (

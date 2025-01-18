@@ -18,7 +18,7 @@ export default async function EventPage({
       <Header />
       <div className="h-screen flex flex-col justify-center items-center">
         <main className="flex flex-col mb-10 justify-center items-center">
-          <div className="flex gap-4 mt-8 items-center flex-col sm:flex-row">
+          <div className="flex gap-4 mt-8 items-center flex-col">
             <HydrationBoundary state={dehydrate(queryClient)}>
               <EventInfo id={p.id} />
             </HydrationBoundary>
