@@ -1,111 +1,50 @@
-import Image from "next/image";
+"use client";
+
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
+import { Input } from "@/components/shadcn/input";
+import { Button } from "@/components/shadcn/button";
 
 export default function Home() {
   const t = useTranslations("home");
 
   return (
-    <div className="h-screen flex flex-col font-[family-name:var(--font-geist-sans)]">
+    <div className="h-screen w-screen flex flex-col border-solid family-name:var(--font-geist-sans)]">
       <Header />
-      <div className="h-screen flex flex-col justify-center items-center">
-        <main className="flex flex-col mb-10 justify-center items-center">
+      <div className="h-screen flex flex-col justify-center items-center mb-10 sm:mb-0">
+        <main className="flex mw-1/4 flex-col justify-center items-center">
           <Image
-            className="dark:invert"
-            src="/next.svg"
-            alt="Next.js logo"
-            width={180}
-            height={38}
+            src="/zenao-logo.png"
+            alt="zeano logo"
+            width={200}
+            height={200}
             priority
+            className="mb-5 mt-5"
           />
-          <ol className="flex flex-col list-inside list-decimal gap-4 my-8 text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-            <li className="mb-2">
-              {t("first-point")}
-              <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-                app/page.tsx
-              </code>
-              .
-            </li>
-            <li>Save and see your changes instantly.</li>
-          </ol>
-
-          <Link href="/create">Create event</Link>
-
-          <div className="flex gap-4 mt-8 items-center flex-col sm:flex-row">
-            <a
-              className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-              href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                className="dark:invert"
-                src="/vercel.svg"
-                alt="Vercel logomark"
-                width={20}
-                height={20}
-              />
-              Deploy now
-            </a>
-            <a
-              className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-              href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Read our docs
-            </a>
-          </div>
+          <p className="text-3xl font-semibold">Organize</p>
+          <p className="text-3xl font-semibold">event(s)</p>
+          <p className="text-3xl font-semibold">in seconds</p>
+          <p className="mt-10 text-sm dark:text-[#808080]">{`"Anything that happens, arrives or appears,`}</p>
+          <p className="text-sm dark:text-[#808080]">
+            can give birth to an autonomous community,
+          </p>
+          <p className="mb-10 text-sm dark:text-[#808080]">
+            {" "}
+            {`or a new tribe."`}
+          </p>
+          <Input
+            placeholder="Event name..."
+            className="dark:bg-[#1B1B1B] dark:border-[#1B1B1B] mb-4 h-10 flex pb-1 rounded-lg focus-visible:ring-0"
+          />
+          <Button asChild className="w-full flex rounded-3xl py-5">
+            <Link href="/create" className="text-sm">
+              Create your event
+            </Link>
+          </Button>
         </main>
-        <div className="flex gap-6">
-          <a
-            className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              aria-hidden
-              src="/file.svg"
-              alt="File icon"
-              width={16}
-              height={16}
-            />
-            Learn
-          </a>
-          <a
-            className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              aria-hidden
-              src="/window.svg"
-              alt="Window icon"
-              width={16}
-              height={16}
-            />
-            Examples
-          </a>
-          <a
-            className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-            href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              aria-hidden
-              src="/globe.svg"
-              alt="Globe icon"
-              width={16}
-              height={16}
-            />
-            Go to nextjs.org →
-          </a>
-        </div>
       </div>
       <Footer />
     </div>
