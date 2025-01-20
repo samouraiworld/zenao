@@ -1,6 +1,34 @@
 {
+  "header": {
+    "zenao": "ZENAO",
+    "discover": "Discover",
+    "calendar": "Calendar",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "sign-in": "Sign in"
+  },
+  "footer": {
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "security": "Security"
+  },
   "home": {
-    "first-point": "Get started by editing ",
-    "second-point": "Save and see your changes instantly"
+    "main-text": "Organize event(s) in seconds",
+    "secondary-text": "\"Anything that happens, arrives or appears, can give birth to an autonomous community, or a new tribe.\"",
+    "placeholder": "Event name...",
+    "button": "Create your event"
+  },
+  "create": {
+    "create-event-button": "Create event"
+  },
+  "components": {
+    "modals": {
+      "signed-out-modal": {
+        "title": "Sign In/Sign Up",
+        "description": "You have to sign in or sign up to create an event.",
+        "sign-in": "Sign in",
+        "sign-up": "Sign up"
+      }
+    }
   }
 }

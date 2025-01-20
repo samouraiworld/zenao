@@ -1,6 +1,9 @@
+"use client";
+
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CreateEventForm } from "@/components/form/CreateEventForm";
+import { SignedOutModal } from "@/components/modals/SignedOutModal";
 
 export default function CreateEventPage() {
   return (
@@ -12,6 +15,7 @@ export default function CreateEventPage() {
           <div className="flex gap-4 mt-8 items-center flex-col sm:flex-row"></div>
         </main>
       </div>
+      <SignedOutModal />
       <Footer />
     </div>
   );

@@ -1,18 +1,28 @@
+"use client";
+
 import { FacebookIcon, LinkedinIcon, TwitterIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 export const Footer: React.FC = () => {
+  const t = useTranslations("footer");
   return (
-    <footer className="flex flex-row justify-between p-4">
-      <div className="flex flex-row gap-5">
-        <p>Terms</p>
-        <p>Privacy</p>
-        <p>Security</p>
+    <footer className="flex flex-row justify-between items-end p-4">
+      <div className="flex flex-row gap-3 sm:gap-5">
+        <p className="text-sm text-secondary-color underline underline-offset-1">
+          {t("terms")}
+        </p>
+        <p className="text-sm text-secondary-color underline underline-offset-1">
+          {t("privacy")}
+        </p>
+        <p className="text-sm text-secondary-color underline underline-offset-1">
+          {t("security")}
+        </p>
       </div>
-      <div className="flex flex-row gap-5">
-        <TwitterIcon className="h-6 w-6" />
-        <FacebookIcon className="h-6 w-6" />
-        <LinkedinIcon className="h-6 w-6" />
+      <div className="flex flex-row gap-3 sm:gap-5">
+        <TwitterIcon className="h-5 w-5" />
+        <FacebookIcon className="h-5 w-5" />
+        <LinkedinIcon className="h-5 w-5" />
       </div>
     </footer>
   );
