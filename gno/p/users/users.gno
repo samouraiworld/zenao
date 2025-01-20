@@ -17,25 +17,7 @@ func NewUser(id, username string) *User {
 		{caller, "admin"},
 	}
 
-	handlerTypes := []string{
-		dao_roles_based.NewAddNewMemberMessageHandler(nil).Type(),
-		dao_roles_based.NewRemoveMemberMessageHandler(nil).Type(),
-		"init",
-	}
-
-	conditions := make(map[string]string)
-	conditions[handlerTypes[0]] = `"condition":{"type":"role-count","role":"admin","count":"1"}`
-	conditions[handlerTypes[1]] = `"condition":{"type":"role-count","role":"admin","count":"1"}`
-	conditions["init"] = `"condition":{"type":"role-count","role":"admin","count":"1"}`
-
-	var resourcesJSON = `[`
-	for i, hType := range handlerTypes {
-		resourcesJSON += `{"resource":"` + hType + `",` + conditions[hType] + `}`
-		if i < len(handlerTypes)-1 {
-			resourcesJSON += `,`
-		}
-	}
-	resourcesJSON += `]`
+	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"admin","count":"1"}}]`
 
 	// Don't pass the message handlers, since they are by default in the user dao
 	dao := dao_roles_based.NewDaoRolesBasedJSON(id, username, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
