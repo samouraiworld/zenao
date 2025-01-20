@@ -1,8 +1,6 @@
 package events
 
 import (
-	"std"
-
 	"gno.land/p/zenao/dao_roles_based"
 )
 
@@ -10,11 +8,10 @@ type Event struct {
 	event *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
 }
 
-func NewEvent() *Event {
-	caller := std.PrevRealm().Addr().String()
+func NewEvent(organizer string) *Event {
 	roles := []string{"organizer", "gatekeeper", "participant"}
 	members := [][]string{
-		{caller, "organizer"},
+		{organizer, "organizer"},
 	}
 
 	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"organizer","count":"1"}}]`
@@ -35,9 +32,9 @@ func (e *Event) AddParticipant(participant string) {
 }
 
 func (e *Event) RemoveParticipant(participant string) {
-	typeRemoveMember := dao_roles_based.NewRemoveMemberMessageHandler(nil).Type()
-	proposalRemoveMemberJSON := `{"title":"remove member","description":"no description","message":{"type":"` + typeRemoveMember + `","payload":{"address":"` + participant + `"}}}`
-	e.event.InstantExecute(proposalRemoveMemberJSON)
+	typeRemoveRole := dao_roles_based.NewRemoveRoleFromUserMessageHandler(nil).Type()
+	proposalRemoveParticipantJSON := `{"title":"remove participant","description":"no description","message":{"type":"` + typeRemoveRole + `","payload":{"address":"` + participant + `", "role":"participant"}}}`
+	e.event.InstantExecute(proposalRemoveParticipantJSON)
 }
 
 func (e *Event) AddGatekeeper(gatekeeper string) {
@@ -47,7 +44,7 @@ func (e *Event) AddGatekeeper(gatekeeper string) {
 }
 
 func (e *Event) RemoveGatekeeper(gatekeeper string) {
-	typeRemoveMember := dao_roles_based.NewRemoveMemberMessageHandler(nil).Type()
-	proposalRemoveMemberJSON := `{"title":"remove member","description":"no description","message":{"type":"` + typeRemoveMember + `","payload":{"address":"` + gatekeeper + `"}}}`
-	e.event.InstantExecute(proposalRemoveMemberJSON)
+	typeRemoveRole := dao_roles_based.NewRemoveRoleFromUserMessageHandler(nil).Type()
+	proposalRemoveGatekeeperJSON := `{"title":"remove participant","description":"no description","message":{"type":"` + typeRemoveRole + `","payload":{"address":"` + gatekeeper + `", "role":"gatekeeper"}}}`
+	e.event.InstantExecute(proposalRemoveGatekeeperJSON)
 }

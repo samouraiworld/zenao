@@ -110,4 +110,7 @@ func (m *MemberModule) removeRoleFromMember(member string, role string) {
 		panic("member does not have the role")
 	}
 	m.roleManager.RemoveRoleFromUser(std.Address(member), role, std.CurrentRealm().Addr())
+	if len(m.GetUserRoles(member)) == 0 {
+		m.members.Remove(member)
+	}
 }
