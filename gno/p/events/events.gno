@@ -1,7 +1,8 @@
 package events
 
 import (
-	"github.com/gnolang/gno/gnovm/stdlibs/std"
+	"std"
+
 	"gno.land/p/zenao/dao_roles_based"
 )
 
