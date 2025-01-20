@@ -27,12 +27,12 @@ export default function Home() {
           <p className="text-3xl font-semibold w-[200px] text-center">
             {t("main-text")}
           </p>
-          <p className="my-10 w-[280px] text-sm dark:text-[#808080] text-center">
+          <p className="my-10 w-[280px] text-sm text-secondary-color text-center">
             {t("secondary-text")}
           </p>
           <Input
             placeholder={t("placeholder")}
-            className="dark:bg-[#1B1B1B] dark:border-[#1B1B1B] mb-4 h-10 flex pb-1 rounded-lg focus-visible:ring-0"
+            className="dark:bg-secondary dark:border-secondary mb-4 h-10 flex pb-1 rounded-lg focus-visible:ring-0"
           />
           <Button asChild className="w-full flex rounded-3xl py-5">
             <Link href="/create" className="text-sm">

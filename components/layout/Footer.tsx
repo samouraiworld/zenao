@@ -9,13 +9,13 @@ export const Footer: React.FC = () => {
   return (
     <footer className="flex flex-row justify-between items-end p-4">
       <div className="flex flex-row gap-3 sm:gap-5">
-        <p className="text-sm dark:text-[#808080] underline underline-offset-1">
+        <p className="text-sm text-secondary-color underline underline-offset-1">
           {t("terms")}
         </p>
-        <p className="text-sm dark:text-[#808080] underline underline-offset-1">
+        <p className="text-sm text-secondary-color underline underline-offset-1">
           {t("privacy")}
         </p>
-        <p className="text-sm dark:text-[#808080] underline underline-offset-1">
+        <p className="text-sm text-secondary-color underline underline-offset-1">
           {t("security")}
         </p>
       </div>

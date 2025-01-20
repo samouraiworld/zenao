@@ -15,7 +15,7 @@ export const Header: React.FC = () => {
 
   return (
     <div className="flex justify-center sm:p-2">
-      <div className="flex flex-row items-center p-2 gap-1 sm:gap-2 rounded-xl dark:bg-[#1B1B1B] bg-[#f2f2f2]">
+      <div className="flex flex-row items-center p-2 gap-1 sm:gap-2 rounded-xl bg-secondary">
         {!isMobile && (
           <Link href="/" className="flex flex-row gap-2">
             <Image
@@ -31,14 +31,14 @@ export const Header: React.FC = () => {
         )}
 
         <div className="flex flex-row gap-3 sm:gap-5 mr-3 sm:mx-4">
-          <a className="text-sm dark:text-[#808080]">{t("discover")}</a>
-          <a className="text-sm dark:text-[#808080]">{t("calendar")}</a>
-          <a className="text-sm dark:text-[#808080]">{t("pricing")}</a>
-          <a className="text-sm dark:text-[#808080]">{t("blog")}</a>
+          <a className="text-sm text-secondary-color">{t("discover")}</a>
+          <a className="text-sm text-secondary-color">{t("calendar")}</a>
+          <a className="text-sm text-secondary-color">{t("pricing")}</a>
+          <a className="text-sm text-secondary-color">{t("blog")}</a>
         </div>
         <SignedOut>
           <SignInButton>
-            <Button variant="secondary">
+            <Button variant="outline">
               <span>{t("sign-in")}</span>
             </Button>
           </SignInButton>
