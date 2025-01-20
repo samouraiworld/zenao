@@ -25,4 +25,5 @@ type ZenaoDB interface {
 
 type ZenaoChain interface {
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
+	CreateUser(id string, username string) error
 }

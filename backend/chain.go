@@ -76,24 +76,34 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 
 	g.logger.Info("created event realm", zap.String("pkg-path", eventRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
-	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: 10000000,
-	}, vm.MsgCall{
-		Caller:  g.signerInfo.GetAddress(),
-		PkgPath: g.eventsIndexPkgPath,
-		Func:    "AddEvent",
-		Args: []string{
-			evtID,
-			creatorID,
-			fmt.Sprintf("%d", req.EndDate),
+	return nil
+}
+
+// CreateUser implements ZenaoChain.
+func (g *gnoZenaoChain) CreateUser(id string, username string) error {
+	userRealmSrc, err := generateUserRealmSource(id, username)
+	if err != nil {
+		return err
+	}
+
+	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, id)
+
+	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgAddPackage{
+		Creator: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name:  "user",
+			Path:  userRealmPkgPath,
+			Files: []*gnovm.MemFile{{Name: "user.gno", Body: userRealmSrc}},
 		},
 	}))
 	if err != nil {
 		return err
 	}
 
-	g.logger.Info("indexed event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("created user realm", zap.String("pkg-path", userRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -119,7 +129,7 @@ func generateEventRealmSource(evtID string, creatorID string, req *zenaov1.Creat
 		"creatorID": creatorID,
 		"req":       req,
 	}
-	t := template.Must(template.New("").Parse(realmSourceTemplate))
+	t := template.Must(template.New("").Parse(eventRealmSourceTemplate))
 	buf := strings.Builder{}
 	if err := t.Execute(&buf, m); err != nil {
 		return "", err
@@ -127,7 +137,20 @@ func generateEventRealmSource(evtID string, creatorID string, req *zenaov1.Creat
 	return buf.String(), nil
 }
 
-const realmSourceTemplate = `package event
+func generateUserRealmSource(id string, username string) (string, error) {
+	m := map[string]string{
+		"id":       id,
+		"username": username,
+	}
+	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
+	buf := strings.Builder{}
+	if err := t.Execute(&buf, m); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+const eventRealmSourceTemplate = `package event
 
 import (
 	"std"
@@ -181,5 +204,27 @@ func Render(path string) string {
 	s += md.Paragraph(std.CurrentRealm().Addr().String())
 	s += md.CodeBlock(getInfoJSON())
 	return s
+}
+`
+
+const userRealmSourceTemplate = `package user
+
+import (
+	"gno.land/p/zenao/users"
+	"gno.land/r/demo/profile"
+)
+
+var user *users.User
+
+func init() {
+	user = users.NewUser("{{.id}}", "{{.username}}")
+
+	profile.SetStringField(profile.DisplayName, "{{.username}}")
+	profile.SetStringField(profile.Bio, "This is a user")
+	profile.SetStringField(profile.Avatar, "")
+}
+
+func TransferOwnership(newOwner string) {
+	user.TransferOwnership(newOwner)
 }
 `

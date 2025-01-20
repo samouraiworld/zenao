@@ -17,5 +17,18 @@ func init() {
 
 func AddParticipant(participant string) {
 	event.AddParticipant(participant)
-	events_reg.AddParticipant(event.GetID(), participant, eventEndDate)
+	events_reg.AddParticipant(event.GetID(), participant, event.GetEndDate())
+}
+
+func RemoveParticipant(participant string) {
+	event.RemoveParticipant(participant)
+	events_reg.RemoveParticipant(event.GetID(), participant, event.GetEndDate())
+}
+
+func AddGatekeeper(gatekeeper string) {
+	event.AddGatekeeper(gatekeeper)
+}
+
+func RemoveGatekeeper(gatekeeper string) {
+	event.RemoveGatekeeper(gatekeeper)
 }
