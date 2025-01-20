@@ -4,12 +4,14 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "../shadcn/button";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { useIsMobile } from "@/app/hooks/useIsMobile";
 
 export const Header: React.FC = () => {
   const isMobile = useIsMobile();
+  const t = useTranslations("header");
 
   return (
     <div className="flex justify-center sm:p-2">
@@ -24,20 +26,20 @@ export const Header: React.FC = () => {
               priority
               className="sm:overflow-auto"
             />
-            <span className="font-extrabold">ZENAO</span>
+            <span className="font-extrabold">{t("zenao")}</span>
           </Link>
         )}
 
         <div className="flex flex-row gap-3 sm:gap-5 mr-3 sm:mx-4">
-          <a className="text-sm dark:text-[#808080]">Discover</a>
-          <a className="text-sm dark:text-[#808080]">Calendar</a>
-          <a className="text-sm dark:text-[#808080]">Pricing</a>
-          <a className="text-sm dark:text-[#808080]">Blog</a>
+          <a className="text-sm dark:text-[#808080]">{t("discover")}</a>
+          <a className="text-sm dark:text-[#808080]">{t("calendar")}</a>
+          <a className="text-sm dark:text-[#808080]">{t("pricing")}</a>
+          <a className="text-sm dark:text-[#808080]">{t("blog")}</a>
         </div>
         <SignedOut>
           <SignInButton>
             <Button variant="secondary">
-              <span>Sign in</span>
+              <span>{t("sign-in")}</span>
             </Button>
           </SignInButton>
         </SignedOut>

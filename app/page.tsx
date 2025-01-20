@@ -24,24 +24,19 @@ export default function Home() {
             priority
             className="mb-5 mt-5"
           />
-          <p className="text-3xl font-semibold">Organize</p>
-          <p className="text-3xl font-semibold">event(s)</p>
-          <p className="text-3xl font-semibold">in seconds</p>
-          <p className="mt-10 text-sm dark:text-[#808080]">{`"Anything that happens, arrives or appears,`}</p>
-          <p className="text-sm dark:text-[#808080]">
-            can give birth to an autonomous community,
+          <p className="text-3xl font-semibold w-[200px] text-center">
+            {t("main-text")}
           </p>
-          <p className="mb-10 text-sm dark:text-[#808080]">
-            {" "}
-            {`or a new tribe."`}
+          <p className="my-10 w-[280px] text-sm dark:text-[#808080] text-center">
+            {t("secondary-text")}
           </p>
           <Input
-            placeholder="Event name..."
+            placeholder={t("placeholder")}
             className="dark:bg-[#1B1B1B] dark:border-[#1B1B1B] mb-4 h-10 flex pb-1 rounded-lg focus-visible:ring-0"
           />
           <Button asChild className="w-full flex rounded-3xl py-5">
             <Link href="/create" className="text-sm">
-              Create your event
+              {t("button")}
             </Link>
           </Button>
         </main>
