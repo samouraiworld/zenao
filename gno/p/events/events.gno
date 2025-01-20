@@ -5,13 +5,16 @@ import (
 )
 
 type Event struct {
-	event *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
+	id           string
+	creator      string
+	eventEndDate int64
+	event        *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
 }
 
-func NewEvent(organizer string) *Event {
+func NewEvent(id string, creator string, eventEndDate int64) *Event {
 	roles := []string{"organizer", "gatekeeper", "participant"}
 	members := [][]string{
-		{organizer, "organizer"},
+		{creator, "organizer"},
 	}
 
 	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"organizer","count":"1"}}]`
@@ -19,7 +22,10 @@ func NewEvent(organizer string) *Event {
 	// Don't pass the message handlers, since they are by default in the user dao
 	dao := dao_roles_based.NewDaoRolesBasedJSON("event", "event", roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	event := &Event{
-		event: dao,
+		id:           id,
+		creator:      creator,
+		eventEndDate: eventEndDate,
+		event:        dao,
 	}
 
 	return event
@@ -47,4 +53,16 @@ func (e *Event) RemoveGatekeeper(gatekeeper string) {
 	typeRemoveRole := dao_roles_based.NewRemoveRoleFromUserMessageHandler(nil).Type()
 	proposalRemoveGatekeeperJSON := `{"title":"remove participant","description":"no description","message":{"type":"` + typeRemoveRole + `","payload":{"address":"` + gatekeeper + `", "role":"gatekeeper"}}}`
 	e.event.InstantExecute(proposalRemoveGatekeeperJSON)
+}
+
+func (e *Event) GetID() string {
+	return e.id
+}
+
+func (e *Event) GetCreator() string {
+	return e.creator
+}
+
+func (e *Event) GetEndDate() int64 {
+	return e.eventEndDate
 }
