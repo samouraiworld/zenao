@@ -30,6 +30,7 @@ const (
 	chainEndpoint      = "127.0.0.1:26657"
 	chainID            = "dev"
 	dbPath             = "dev.db"
+	frontendDomain     = "http://localhost:3000"
 )
 
 func main() {

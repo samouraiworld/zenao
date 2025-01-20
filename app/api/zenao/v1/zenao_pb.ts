@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCTJaCgxaZW5hb1NlcnZpY2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSJFChxDcmVhdGVDaGVja291dFNlc3Npb25SZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEhMKC251bV90aWNrZXRzGAIgASgNIjUKHUNyZWF0ZUNoZWNrb3V0U2Vzc2lvblJlc3BvbnNlEhQKDGNoZWNrb3V0X3VyaRgBIAEoCTLEAQoMWmVuYW9TZXJ2aWNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJoChVDcmVhdGVDaGVja291dFNlc3Npb24SJi56ZW5hby52MS5DcmVhdGVDaGVja291dFNlc3Npb25SZXF1ZXN0GicuemVuYW8udjEuQ3JlYXRlQ2hlY2tvdXRTZXNzaW9uUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
@@ -83,6 +83,45 @@ export const CreateEventResponseSchema: GenMessage<CreateEventResponse> = /*@__P
   messageDesc(file_zenao_v1_zenao, 1);
 
 /**
+ * @generated from message zenao.v1.CreateCheckoutSessionRequest
+ */
+export type CreateCheckoutSessionRequest = Message<"zenao.v1.CreateCheckoutSessionRequest"> & {
+  /**
+   * @generated from field: string event_id = 1;
+   */
+  eventId: string;
+
+  /**
+   * @generated from field: uint32 num_tickets = 2;
+   */
+  numTickets: number;
+};
+
+/**
+ * Describes the message zenao.v1.CreateCheckoutSessionRequest.
+ * Use `create(CreateCheckoutSessionRequestSchema)` to create a new message.
+ */
+export const CreateCheckoutSessionRequestSchema: GenMessage<CreateCheckoutSessionRequest> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 2);
+
+/**
+ * @generated from message zenao.v1.CreateCheckoutSessionResponse
+ */
+export type CreateCheckoutSessionResponse = Message<"zenao.v1.CreateCheckoutSessionResponse"> & {
+  /**
+   * @generated from field: string checkout_uri = 1;
+   */
+  checkoutUri: string;
+};
+
+/**
+ * Describes the message zenao.v1.CreateCheckoutSessionResponse.
+ * Use `create(CreateCheckoutSessionResponseSchema)` to create a new message.
+ */
+export const CreateCheckoutSessionResponseSchema: GenMessage<CreateCheckoutSessionResponse> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 3);
+
+/**
  * @generated from service zenao.v1.ZenaoService
  */
 export const ZenaoService: GenService<{
@@ -93,6 +132,14 @@ export const ZenaoService: GenService<{
     methodKind: "unary";
     input: typeof CreateEventRequestSchema;
     output: typeof CreateEventResponseSchema;
+  },
+  /**
+   * @generated from rpc zenao.v1.ZenaoService.CreateCheckoutSession
+   */
+  createCheckoutSession: {
+    methodKind: "unary";
+    input: typeof CreateCheckoutSessionRequestSchema;
+    output: typeof CreateCheckoutSessionResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_zenao_v1_zenao, 0);

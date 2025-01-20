@@ -11,6 +11,7 @@ require (
 	github.com/go-faker/faker/v4 v4.5.0
 	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.9.0
+	github.com/stripe/stripe-go/v81 v81.2.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.28.0
 	google.golang.org/protobuf v1.36.3

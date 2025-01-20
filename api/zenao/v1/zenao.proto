@@ -5,6 +5,7 @@ option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
 
 service ZenaoService {
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+  rpc CreateCheckoutSession(CreateCheckoutSessionRequest) returns (CreateCheckoutSessionResponse);
 }
 
 message CreateEventRequest {
@@ -19,4 +20,13 @@ message CreateEventRequest {
 
 message CreateEventResponse {
   string id = 1;
+}
+
+message CreateCheckoutSessionRequest {
+  string event_id = 1;
+  uint32 num_tickets = 2;
+}
+
+message CreateCheckoutSessionResponse {
+  string checkout_uri = 1;
 }

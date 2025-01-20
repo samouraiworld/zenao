@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -69,6 +70,20 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		return "", err
 	}
 	return fmt.Sprintf("%d", evt.ID), nil
+}
+
+// GetEvent implements ZenaoDB.
+func (g *gormZenaoDB) GetEvent(id string) (*Event, error) {
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var evt Event
+	evt.ID = uint(idUint)
+	if err := g.db.First(&evt).Error; err != nil {
+		return nil, err
+	}
+	return &evt, err
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)
