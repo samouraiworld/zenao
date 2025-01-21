@@ -21,6 +21,7 @@ type ZenaoUser struct {
 
 type ZenaoDB interface {
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
+	CreateUser(id string, username string) error
 }
 
 type ZenaoChain interface {

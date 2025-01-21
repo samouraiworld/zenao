@@ -39,7 +39,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.49.0",
+    "@bufbuild/buf": "^1.50.0",
     "@bufbuild/protoc-gen-es": "^2.2.3",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",

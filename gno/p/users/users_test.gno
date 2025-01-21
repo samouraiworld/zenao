@@ -14,7 +14,7 @@ var (
 
 func TestNewUser(t *testing.T) {
 	std.TestSetOrigCaller(alice)
-	user := NewUser("userid01", "Alice")
+	user := NewUser("userid01")
 	if user.user.MemberModule.GetMembers()[0] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), user.user.MemberModule.GetMembers()[0])
 	}
@@ -25,7 +25,7 @@ func TestNewUser(t *testing.T) {
 
 func TestTransferOwnership(t *testing.T) {
 	std.TestSetOrigCaller(alice)
-	user := NewUser("userid01", "Alice")
+	user := NewUser("userid01")
 	std.TestSetOrigCaller(bob)
 	defer func() {
 		if r := recover(); r == nil {

@@ -204,7 +204,7 @@ import (
 var user *users.User
 
 func init() {
-	user = users.NewUser("{{.id}}", "{{.username}}")
+	user = users.NewUser("{{.id}}")
 
 	profile.SetStringField(profile.DisplayName, "{{.username}}")
 	profile.SetStringField(profile.Bio, {{.description}})

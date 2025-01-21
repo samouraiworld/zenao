@@ -8,7 +8,7 @@ import (
 var user *users.User
 
 func init() {
-	user = users.NewUser("123e4567-e89b-12d3-a456-426614174000", "user1")
+	user = users.NewUser("123e4567-e89b-12d3-a456-426614174000")
 
 	profile.SetStringField(profile.DisplayName, "User 1")
 	profile.SetStringField(profile.Bio, "This is a user")
