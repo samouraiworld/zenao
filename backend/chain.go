@@ -187,6 +187,9 @@ func AddGatekeeper(gatekeeper string) {
 func RemoveGatekeeper(gatekeeper string) {
 	event.RemoveGatekeeper(gatekeeper)
 }
+
+func Render(path string) string {
+	return "Coming soon"
 `
 
 const userRealmSourceTemplate = `package user
