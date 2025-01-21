@@ -22,6 +22,50 @@ export const eventOptions = (id: string) =>
     },
   });
 
+export const eventCreatorOptions = (id: string) =>
+  queryOptions({
+    queryKey: ["eventCreator", id],
+    queryFn: async () => {
+      try {
+        const client = new GnoJSONRPCProvider("http://127.0.0.1:26657");
+        const res = await client.getFileContent(
+          `gno.land/r/zenao/events/e${id}/event.gno`,
+        );
+        const array = res.split("\n");
+        const regex = new RegExp("creator", "i");
+        const creator = array
+          .filter((item) => regex.test(item))[0]
+          .trim()
+          .split('"')[1];
+
+        return creator || null;
+      } catch (err) {
+        console.error(err);
+      }
+
+      return null;
+    },
+  });
+
+export const eventsOptions = () =>
+  queryOptions({
+    queryKey: ["events"],
+    queryFn: async () => {
+      try {
+        const client = new GnoJSONRPCProvider("http://127.0.0.1:26657");
+        const res = await client.evaluateExpression(
+          `gno.land/r/zenao/events`,
+          `Render("")`,
+        );
+        return res;
+      } catch (err) {
+        console.error(err);
+      }
+
+      return null;
+    },
+  });
+
 function extractGnoJSONResponse(res: string): unknown {
   const jsonString = res.substring("(".length, res.length - " string)".length);
   // eslint-disable-next-line no-restricted-syntax

@@ -1,19 +1,13 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { EventInfo } from "./event-info";
-import { Header } from "@/components/layout/Header";
+import { EventList } from "./event-list";
 import { Footer } from "@/components/layout/Footer";
-import { eventCreatorOptions, eventOptions } from "@/lib/queries/event";
+import { Header } from "@/components/layout/Header";
 import { getQueryClient } from "@/lib/get-query-client";
+import { eventsOptions } from "@/lib/queries/event";
 
-export default async function EventPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const p = await params;
+export default function Events() {
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(eventOptions(p.id));
-  void queryClient.prefetchQuery(eventCreatorOptions(p.id));
+  void queryClient.prefetchQuery(eventsOptions());
 
   return (
     <div className="h-screen flex flex-col font-[family-name:var(--font-geist-sans)]">
@@ -22,7 +16,7 @@ export default async function EventPage({
         <main className="h-full flex flex-col mb-10 justify-center items-center">
           <div className="h-full gap-4 mt-8 items-center flex-col">
             <HydrationBoundary state={dehydrate(queryClient)}>
-              <EventInfo id={p.id} />
+              <EventList />
             </HydrationBoundary>
           </div>
         </main>

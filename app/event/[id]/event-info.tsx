@@ -5,10 +5,11 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
-import { eventOptions } from "@/lib/queries/event";
+import { eventCreatorOptions, eventOptions } from "@/lib/queries/event";
 
 export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
+  const { data: creator } = useSuspenseQuery(eventCreatorOptions(id));
 
   return (
     <div className="mx-28">
@@ -25,6 +26,7 @@ export function EventInfo({ id }: { id: string }) {
               <Link href={`http://127.0.0.1:8888/r/zenao/events/e${id}`}>
                 See on gnoweb
               </Link>
+              <p>{creator}</p>
               <p className="my-4">
                 Add link here if you are the host and can directly navigate to
                 the manage org event page
