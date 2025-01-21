@@ -13,6 +13,9 @@ import { zenaoClient } from "@/app/zenao-client";
 export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
 
+  if (!data) {
+    return <p>{`Event doesn't exist`}</p>;
+  }
   return (
     <div className="mx-28">
       {data ? (

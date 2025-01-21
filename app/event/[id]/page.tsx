@@ -1,9 +1,8 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { EventInfo } from "./event-info";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
+import { ScreenContainer } from "@/components/layout/ScreenContainer";
 
 export default async function EventPage({
   params,
@@ -15,18 +14,14 @@ export default async function EventPage({
   void queryClient.prefetchQuery(eventOptions(p.id));
 
   return (
-    <div className="h-screen flex flex-col font-[family-name:var(--font-geist-sans)]">
-      <Header />
-      <div className="h-screen flex flex-col justify-center items-center">
-        <main className="h-full flex flex-col mb-10 justify-center items-center">
-          <div className="h-full gap-4 mt-8 items-center flex-col">
-            <HydrationBoundary state={dehydrate(queryClient)}>
-              <EventInfo id={p.id} />
-            </HydrationBoundary>
-          </div>
-        </main>
-      </div>
-      <Footer />
-    </div>
+    <ScreenContainer>
+      <main className="flex flex-col max-w-[960px] mb-10">
+        <div className="mt-8 mx-5">
+          <HydrationBoundary state={dehydrate(queryClient)}>
+            <EventInfo id={p.id} />
+          </HydrationBoundary>
+        </div>
+      </main>
+    </ScreenContainer>
   );
 }
