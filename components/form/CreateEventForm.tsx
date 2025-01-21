@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useClerk } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
@@ -13,6 +14,7 @@ import { Form } from "@/components/shadcn/form";
 
 export const CreateEventForm: React.FC = () => {
   const { client } = useClerk();
+  const t = useTranslations("create");
   const form = useForm<EventFormSchemaType>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
@@ -51,7 +53,7 @@ export const CreateEventForm: React.FC = () => {
         <FormFieldInputNumber control={form.control} name="capacity" />
         <FormFieldDatePicker control={form.control} name="startDate" />
         <FormFieldDatePicker control={form.control} name="endDate" />
-        <Button type="submit">Create Event</Button>
+        <Button type="submit">{t("create-event-button")}</Button>
       </form>
     </Form>
   );
