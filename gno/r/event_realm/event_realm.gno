@@ -10,9 +10,9 @@ var event *events.Event
 
 func init() {
 	eventID := "1"
-	creator = "g16jv3rpz7mkt0gqulxas56se2js7v5vmc6n6e0r" // replace w/ address of the user realm
+	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
 	event = events.NewEvent(eventID, creator, 0, 0, 0, 0)
-	events_reg.AddEvent(eventID, creator, eventEndDate)
+	// events_reg.AddEvent(eventID, creator, event.GetEndDate()) // break the linting rule
 
 	profile.SetStringField(profile.DisplayName, "title")
 	profile.SetStringField(profile.Bio, "description")
