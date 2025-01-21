@@ -43,6 +43,13 @@ func AddParticipant(eventID string, userID string, eventEndDate int64) {
 	eventsByParticipant.Set(key, eventID)
 }
 
+func RemoveParticipant(eventID string, userID string, eventEndDate int64) {
+	Ownable.AssertCallerIsOwner()
+
+	key := userID + "/" + unixTimeKey(eventEndDate) + "/" + eventID
+	eventsByParticipant.Remove(key)
+}
+
 func listEvents(from, to int64, limit uint32) []string {
 	fromKey := unixTimeKey(from)
 	toKey := unixTimeKey(to)

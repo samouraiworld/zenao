@@ -54,6 +54,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	if err != nil {
 		return err
 	}
+	g.logger.Info("generated event realm source", zap.String("src", eventRealmSrc))
 
 	// TODO: single tx with all messages
 
@@ -163,7 +164,7 @@ var event *events.Event
 func init() {
 	eventID := "{{.id}}"
 	creator := "{{.creatorID}}"
-	event = events.NewEvent(eventID, creator, {{.req.StartDate}}), {{.req.EndDate}}), {{.req.TicketPrice}}), {{.req.Capacity}}) 
+	event = events.NewEvent(eventID, creator, {{.req.StartDate}}, {{.req.EndDate}}, {{.req.TicketPrice}}, {{.req.Capacity}}) 
 
 	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
 	profile.SetStringField(profile.Bio, "{{.req.Description}}")
@@ -190,6 +191,7 @@ func RemoveGatekeeper(gatekeeper string) {
 
 func Render(path string) string {
 	return "Coming soon"
+}
 `
 
 const userRealmSourceTemplate = `package user

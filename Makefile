@@ -10,7 +10,7 @@ generate:
 
 .PHONY: start.gnodev
 start.gnodev:
-	gnodev $$(find gno -name gno.mod -type f -exec dirname {} \;)
+	gnodev --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
 
 .PHONY: clone-gno
 clone-gno:
