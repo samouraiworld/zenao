@@ -81,8 +81,8 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 }
 
 // CreateUser implements ZenaoChain.
-func (g *gnoZenaoChain) CreateUser(id string, username string) error {
-	userRealmSrc, err := generateUserRealmSource(id, username)
+func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) error {
+	userRealmSrc, err := generateUserRealmSource(id, req)
 	if err != nil {
 		return err
 	}
@@ -138,10 +138,10 @@ func generateEventRealmSource(evtID string, creatorID string, req *zenaov1.Creat
 	return buf.String(), nil
 }
 
-func generateUserRealmSource(id string, username string) (string, error) {
+func generateUserRealmSource(id string, req *zenaov1.CreateUserRequest) (string, error) {
 	m := map[string]string{
 		"id":       id,
-		"username": username,
+		"username": req.Username,
 	}
 	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
 	buf := strings.Builder{}
@@ -207,8 +207,6 @@ func init() {
 	user = users.NewUser("{{.id}}")
 
 	profile.SetStringField(profile.DisplayName, "{{.username}}")
-	profile.SetStringField(profile.Bio, {{.description}})
-	profile.SetStringField(profile.Avatar, {{.imageUri}})
 }
 
 func TransferOwnership(newOwner string) {

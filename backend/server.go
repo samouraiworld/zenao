@@ -21,10 +21,10 @@ type ZenaoUser struct {
 
 type ZenaoDB interface {
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
-	CreateUser(id string, username string) error
+	CreateUser(id string, req *zenaov1.CreateUserRequest) (string, error)
 }
 
 type ZenaoChain interface {
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
-	CreateUser(id string, username string) error
+	CreateUser(userID string, req *zenaov1.CreateUserRequest) error
 }
