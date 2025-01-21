@@ -89,7 +89,7 @@ func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (str
 	if err := g.db.Create(user).Error; err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%d", user.ID), nil
+	return user.ID, nil
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)
