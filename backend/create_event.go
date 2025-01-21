@@ -14,18 +14,17 @@ func (s *ZenaoServer) CreateEvent(
 	req *connect.Request[zenaov1.CreateEventRequest],
 ) (*connect.Response[zenaov1.CreateEventResponse], error) {
 	user := s.GetUser(ctx)
+	if user == nil || user.Banned {
+		return nil, errors.New("unauthorized")
+	}
 
 	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", user.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
 
 	// TODO: validate request
 
 	evtID := ""
 
-	if err := s.DBTx(func(db ZenaoDB) error {
+	if err := s.DB.Tx(func(db ZenaoDB) error {
 		var err error
 		if evtID, err = db.CreateEvent(user.ID, req.Msg); err != nil {
 			return err
