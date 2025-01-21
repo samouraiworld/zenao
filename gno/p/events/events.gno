@@ -5,13 +5,16 @@ import (
 )
 
 type Event struct {
-	id           string
-	creator      string
-	eventEndDate int64
-	event        *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
+	id          string
+	creator     string
+	startDate   int64
+	endDate     int64
+	ticketPrice int64
+	capacity    int64
+	event       *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
 }
 
-func NewEvent(id string, creator string, eventEndDate int64) *Event {
+func NewEvent(id string, creator string, startDate int64, endDate int64, ticketPrice int64, capacity int64) *Event {
 	roles := []string{"organizer", "gatekeeper", "participant"}
 	members := [][]string{
 		{creator, "organizer"},
@@ -22,10 +25,13 @@ func NewEvent(id string, creator string, eventEndDate int64) *Event {
 	// Don't pass the message handlers, since they are by default in the user dao
 	dao := dao_roles_based.NewDaoRolesBasedJSON("event", "event", roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	event := &Event{
-		id:           id,
-		creator:      creator,
-		eventEndDate: eventEndDate,
-		event:        dao,
+		id:          id,
+		creator:     creator,
+		startDate:   startDate,
+		endDate:     endDate,
+		ticketPrice: ticketPrice,
+		capacity:    capacity,
+		event:       dao,
 	}
 
 	return event
@@ -64,5 +70,5 @@ func (e *Event) GetCreator() string {
 }
 
 func (e *Event) GetEndDate() int64 {
-	return e.eventEndDate
+	return e.endDate
 }

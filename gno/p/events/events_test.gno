@@ -16,7 +16,7 @@ var (
 
 func TestNewEvent(t *testing.T) {
 	std.TestSetOrigCaller(alice)
-	event := NewEvent("1", alice.String(), 0)
+	event := NewEvent("1", alice.String(), 0, 0, 0, 0)
 	if event.event.MemberModule.GetMembers()[0] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), event.event.MemberModule.GetMembers()[0])
 	}
@@ -27,7 +27,7 @@ func TestNewEvent(t *testing.T) {
 
 func TestAddParticipant(t *testing.T) {
 	std.TestSetOrigCaller(alice)
-	event := NewEvent("1", alice.String(), 0)
+	event := NewEvent("1", alice.String(), 0, 0, 0, 0)
 	if event.event.MemberModule.GetMembers()[0] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), event.event.MemberModule.GetMembers()[0])
 	}
@@ -55,7 +55,7 @@ func TestAddParticipant(t *testing.T) {
 
 func TestRemoveParticipant(t *testing.T) {
 	std.TestSetOrigCaller(alice)
-	event := NewEvent("1", alice.String(), 0)
+	event := NewEvent("1", alice.String(), 0, 0, 0, 0)
 	if event.event.MemberModule.GetMembers()[0] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), event.event.MemberModule.GetMembers()[0])
 	}

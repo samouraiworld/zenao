@@ -153,57 +153,39 @@ func generateUserRealmSource(id string, username string) (string, error) {
 const eventRealmSourceTemplate = `package event
 
 import (
-	"std"
-	"time"
-
-	"gno.land/p/demo/json"
-	"gno.land/p/demo/ufmt"
-	"gno.land/p/moul/md"
+	"gno.land/p/zenao/events"
 	"gno.land/r/demo/profile"
+	"gno.land/r/zenao/events_reg"
 )
 
-var (
-	id = "{{.id}}"
-	creator = "{{.creatorID}}"
-)
+var event *events.Event
 
 func init() {
+	eventID := "{{.id}}"
+	creator := "{{.creatorID}}"
+	event = events.NewEvent(eventID, creator, {{.req.StartDate}}), {{.req.EndDate}}), {{.req.TicketPrice}}), {{.req.Capacity}}) 
+
 	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
 	profile.SetStringField(profile.Bio, "{{.req.Description}}")
 	profile.SetStringField(profile.Avatar, "{{.req.ImageUri}}")
 }
 
-func getInfoJSON() string {
-	obj := json.ObjectNode("", map[string]*json.Node{
-		"title":       json.StringNode("", profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, "")),
-		"description": json.StringNode("", profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, "")),
-		"imageUri":    json.StringNode("", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, "")),
-		"startDate":   json.StringNode("", ufmt.Sprintf("%d", {{.req.StartDate}})),
-		"endDate":     json.StringNode("", ufmt.Sprintf("%d", {{.req.EndDate}})),
-		"ticketPrice": json.NumberNode("", {{.req.TicketPrice}}),
-		"capacity":    json.NumberNode("", {{.req.Capacity}}),
-	})
-
-	bz, err := json.Marshal(obj)
-	if err != nil {
-		panic(err)
-	}
-	return string(bz)
+func AddParticipant(participant string) {
+	event.AddParticipant(participant)
+	events_reg.AddParticipant(event.GetID(), participant, event.GetEndDate())
 }
 
-func Render(path string) string {
-	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
-	s += md.Image("Event presentation", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
-	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
-	s += md.BulletList([]string{
-		ufmt.Sprintf("Time: From %s to %s", time.Unix({{.req.StartDate}}, 0).Format(time.DateTime), time.Unix({{.req.EndDate}}, 0).Format(time.DateTime)),
-		ufmt.Sprintf("Price: {{.req.TicketPrice}} €"),
-		ufmt.Sprintf("Capacity: {{.req.Capacity}} persons"),
-	}) + "\n"
-	s += md.HorizontalRule()
-	s += md.Paragraph(std.CurrentRealm().Addr().String())
-	s += md.CodeBlock(getInfoJSON())
-	return s
+func RemoveParticipant(participant string) {
+	event.RemoveParticipant(participant)
+	events_reg.RemoveParticipant(event.GetID(), participant, event.GetEndDate())
+}
+
+func AddGatekeeper(gatekeeper string) {
+	event.AddGatekeeper(gatekeeper)
+}
+
+func RemoveGatekeeper(gatekeeper string) {
+	event.RemoveGatekeeper(gatekeeper)
 }
 `
 
@@ -220,11 +202,15 @@ func init() {
 	user = users.NewUser("{{.id}}", "{{.username}}")
 
 	profile.SetStringField(profile.DisplayName, "{{.username}}")
-	profile.SetStringField(profile.Bio, "This is a user")
-	profile.SetStringField(profile.Avatar, "")
+	profile.SetStringField(profile.Bio, {{.description}})
+	profile.SetStringField(profile.Avatar, {{.imageUri}})
 }
 
 func TransferOwnership(newOwner string) {
 	user.TransferOwnership(newOwner)
+}
+
+func Render(path string) string {
+	return "Coming soon"
 }
 `

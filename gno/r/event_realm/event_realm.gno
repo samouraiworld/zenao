@@ -2,6 +2,7 @@ package event_realm
 
 import (
 	"gno.land/p/zenao/events"
+	"gno.land/r/demo/profile"
 	"gno.land/r/zenao/events_reg"
 )
 
@@ -13,6 +14,10 @@ func init() {
 	eventEndDate = 0
 	event = events.NewEvent(eventID, creator, eventEndDate)
 	events_reg.AddEvent(eventID, creator, eventEndDate)
+
+	profile.SetStringField(profile.DisplayName, "title")
+	profile.SetStringField(profile.Bio, "description")
+	profile.SetStringField(profile.Avatar, "avatar")
 }
 
 func AddParticipant(participant string) {
