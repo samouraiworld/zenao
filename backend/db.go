@@ -22,6 +22,11 @@ type Event struct {
 	CreatorID   string
 }
 
+type BusinessAccount struct {
+	UserID          string `gorm:"primaryKey"`
+	StripeAccountID string `gorm:"primaryKey"`
+}
+
 type SoldTicket struct {
 	gorm.Model
 	EventID uint
@@ -36,7 +41,7 @@ func setupLocalDB(path string) (*gormZenaoDB, error) {
 	}
 
 	// Migrate the schema
-	if err := db.AutoMigrate(&Event{}, &SoldTicket{}); err != nil {
+	if err := db.AutoMigrate(&Event{}, &SoldTicket{}, &BusinessAccount{}); err != nil {
 		return nil, err
 	}
 
@@ -84,6 +89,25 @@ func (g *gormZenaoDB) GetEvent(id string) (*Event, error) {
 		return nil, err
 	}
 	return &evt, err
+}
+
+// CreateOrganizer implements ZenaoDB.
+func (g *gormZenaoDB) CreateOrganizer(userID string, stripeAccountID string) (*BusinessAccount, error) {
+	org := BusinessAccount{UserID: userID, StripeAccountID: stripeAccountID}
+	if err := g.db.Create(&org).Error; err != nil {
+		return nil, err
+	}
+	return &org, nil
+}
+
+// GetBusinessAccounts implements ZenaoDB.
+func (g *gormZenaoDB) GetBusinessAccounts(userID string) ([]*BusinessAccount, error) {
+	var accs []*BusinessAccount
+	result := g.db.Find(&accs).Where("user_id = ?", userID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return accs, nil
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)

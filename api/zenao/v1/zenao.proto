@@ -5,7 +5,10 @@ option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
 
 service ZenaoService {
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+  rpc CreateBusinessAccount(CreateBusinessAccountRequest) returns (CreateBusinessAccountResponse);
+  rpc ListBusinessAccounts(ListBusinessAccountsRequest) returns (ListBusinessAccountsResponse);
   rpc CreateCheckoutSession(CreateCheckoutSessionRequest) returns (CreateCheckoutSessionResponse);
+  rpc GetBusinessAccountLink(GetBusinessAccountLinkRequest) returns (GetBusinessAccountLinkResponse);
 }
 
 message CreateEventRequest {
@@ -25,8 +28,40 @@ message CreateEventResponse {
 message CreateCheckoutSessionRequest {
   string event_id = 1;
   uint32 num_tickets = 2;
+  string email = 3;
 }
 
 message CreateCheckoutSessionResponse {
   string checkout_uri = 1;
+}
+
+message CreateBusinessAccountRequest {
+
+}
+
+message CreateBusinessAccountResponse {
+  string account_link = 1;
+}
+
+message BusinessAccount {
+  string id = 1;
+  string company_name = 2;
+  string email = 3;
+  bool can_charge = 4;
+}
+
+message ListBusinessAccountsRequest {
+
+}
+
+message ListBusinessAccountsResponse {
+  repeated BusinessAccount accounts = 1;
+}
+
+message GetBusinessAccountLinkRequest {
+  string id = 1;
+}
+
+message GetBusinessAccountLinkResponse {
+  string account_link = 1;
 }

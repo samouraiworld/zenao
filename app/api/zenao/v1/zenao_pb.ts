@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSJFChxDcmVhdGVDaGVja291dFNlc3Npb25SZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEhMKC251bV90aWNrZXRzGAIgASgNIjUKHUNyZWF0ZUNoZWNrb3V0U2Vzc2lvblJlc3BvbnNlEhQKDGNoZWNrb3V0X3VyaRgBIAEoCTLEAQoMWmVuYW9TZXJ2aWNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJoChVDcmVhdGVDaGVja291dFNlc3Npb24SJi56ZW5hby52MS5DcmVhdGVDaGVja291dFNlc3Npb25SZXF1ZXN0GicuemVuYW8udjEuQ3JlYXRlQ2hlY2tvdXRTZXNzaW9uUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSJUChxDcmVhdGVDaGVja291dFNlc3Npb25SZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEhMKC251bV90aWNrZXRzGAIgASgNEg0KBWVtYWlsGAMgASgJIjUKHUNyZWF0ZUNoZWNrb3V0U2Vzc2lvblJlc3BvbnNlEhQKDGNoZWNrb3V0X3VyaRgBIAEoCSIeChxDcmVhdGVCdXNpbmVzc0FjY291bnRSZXF1ZXN0IjUKHUNyZWF0ZUJ1c2luZXNzQWNjb3VudFJlc3BvbnNlEhQKDGFjY291bnRfbGluaxgBIAEoCSJWCg9CdXNpbmVzc0FjY291bnQSCgoCaWQYASABKAkSFAoMY29tcGFueV9uYW1lGAIgASgJEg0KBWVtYWlsGAMgASgJEhIKCmNhbl9jaGFyZ2UYBCABKAgiHQobTGlzdEJ1c2luZXNzQWNjb3VudHNSZXF1ZXN0IksKHExpc3RCdXNpbmVzc0FjY291bnRzUmVzcG9uc2USKwoIYWNjb3VudHMYASADKAsyGS56ZW5hby52MS5CdXNpbmVzc0FjY291bnQiKwodR2V0QnVzaW5lc3NBY2NvdW50TGlua1JlcXVlc3QSCgoCaWQYASABKAkiNgoeR2V0QnVzaW5lc3NBY2NvdW50TGlua1Jlc3BvbnNlEhQKDGFjY291bnRfbGluaxgBIAEoCTKCBAoMWmVuYW9TZXJ2aWNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJoChVDcmVhdGVCdXNpbmVzc0FjY291bnQSJi56ZW5hby52MS5DcmVhdGVCdXNpbmVzc0FjY291bnRSZXF1ZXN0GicuemVuYW8udjEuQ3JlYXRlQnVzaW5lc3NBY2NvdW50UmVzcG9uc2USZQoUTGlzdEJ1c2luZXNzQWNjb3VudHMSJS56ZW5hby52MS5MaXN0QnVzaW5lc3NBY2NvdW50c1JlcXVlc3QaJi56ZW5hby52MS5MaXN0QnVzaW5lc3NBY2NvdW50c1Jlc3BvbnNlEmgKFUNyZWF0ZUNoZWNrb3V0U2Vzc2lvbhImLnplbmFvLnYxLkNyZWF0ZUNoZWNrb3V0U2Vzc2lvblJlcXVlc3QaJy56ZW5hby52MS5DcmVhdGVDaGVja291dFNlc3Npb25SZXNwb25zZRJrChZHZXRCdXNpbmVzc0FjY291bnRMaW5rEicuemVuYW8udjEuR2V0QnVzaW5lc3NBY2NvdW50TGlua1JlcXVlc3QaKC56ZW5hby52MS5HZXRCdXNpbmVzc0FjY291bnRMaW5rUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
@@ -95,6 +95,11 @@ export type CreateCheckoutSessionRequest = Message<"zenao.v1.CreateCheckoutSessi
    * @generated from field: uint32 num_tickets = 2;
    */
   numTickets: number;
+
+  /**
+   * @generated from field: string email = 3;
+   */
+  email: string;
 };
 
 /**
@@ -122,6 +127,132 @@ export const CreateCheckoutSessionResponseSchema: GenMessage<CreateCheckoutSessi
   messageDesc(file_zenao_v1_zenao, 3);
 
 /**
+ * @generated from message zenao.v1.CreateBusinessAccountRequest
+ */
+export type CreateBusinessAccountRequest = Message<"zenao.v1.CreateBusinessAccountRequest"> & {
+};
+
+/**
+ * Describes the message zenao.v1.CreateBusinessAccountRequest.
+ * Use `create(CreateBusinessAccountRequestSchema)` to create a new message.
+ */
+export const CreateBusinessAccountRequestSchema: GenMessage<CreateBusinessAccountRequest> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 4);
+
+/**
+ * @generated from message zenao.v1.CreateBusinessAccountResponse
+ */
+export type CreateBusinessAccountResponse = Message<"zenao.v1.CreateBusinessAccountResponse"> & {
+  /**
+   * @generated from field: string account_link = 1;
+   */
+  accountLink: string;
+};
+
+/**
+ * Describes the message zenao.v1.CreateBusinessAccountResponse.
+ * Use `create(CreateBusinessAccountResponseSchema)` to create a new message.
+ */
+export const CreateBusinessAccountResponseSchema: GenMessage<CreateBusinessAccountResponse> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 5);
+
+/**
+ * @generated from message zenao.v1.BusinessAccount
+ */
+export type BusinessAccount = Message<"zenao.v1.BusinessAccount"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string company_name = 2;
+   */
+  companyName: string;
+
+  /**
+   * @generated from field: string email = 3;
+   */
+  email: string;
+
+  /**
+   * @generated from field: bool can_charge = 4;
+   */
+  canCharge: boolean;
+};
+
+/**
+ * Describes the message zenao.v1.BusinessAccount.
+ * Use `create(BusinessAccountSchema)` to create a new message.
+ */
+export const BusinessAccountSchema: GenMessage<BusinessAccount> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 6);
+
+/**
+ * @generated from message zenao.v1.ListBusinessAccountsRequest
+ */
+export type ListBusinessAccountsRequest = Message<"zenao.v1.ListBusinessAccountsRequest"> & {
+};
+
+/**
+ * Describes the message zenao.v1.ListBusinessAccountsRequest.
+ * Use `create(ListBusinessAccountsRequestSchema)` to create a new message.
+ */
+export const ListBusinessAccountsRequestSchema: GenMessage<ListBusinessAccountsRequest> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 7);
+
+/**
+ * @generated from message zenao.v1.ListBusinessAccountsResponse
+ */
+export type ListBusinessAccountsResponse = Message<"zenao.v1.ListBusinessAccountsResponse"> & {
+  /**
+   * @generated from field: repeated zenao.v1.BusinessAccount accounts = 1;
+   */
+  accounts: BusinessAccount[];
+};
+
+/**
+ * Describes the message zenao.v1.ListBusinessAccountsResponse.
+ * Use `create(ListBusinessAccountsResponseSchema)` to create a new message.
+ */
+export const ListBusinessAccountsResponseSchema: GenMessage<ListBusinessAccountsResponse> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 8);
+
+/**
+ * @generated from message zenao.v1.GetBusinessAccountLinkRequest
+ */
+export type GetBusinessAccountLinkRequest = Message<"zenao.v1.GetBusinessAccountLinkRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message zenao.v1.GetBusinessAccountLinkRequest.
+ * Use `create(GetBusinessAccountLinkRequestSchema)` to create a new message.
+ */
+export const GetBusinessAccountLinkRequestSchema: GenMessage<GetBusinessAccountLinkRequest> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 9);
+
+/**
+ * @generated from message zenao.v1.GetBusinessAccountLinkResponse
+ */
+export type GetBusinessAccountLinkResponse = Message<"zenao.v1.GetBusinessAccountLinkResponse"> & {
+  /**
+   * @generated from field: string account_link = 1;
+   */
+  accountLink: string;
+};
+
+/**
+ * Describes the message zenao.v1.GetBusinessAccountLinkResponse.
+ * Use `create(GetBusinessAccountLinkResponseSchema)` to create a new message.
+ */
+export const GetBusinessAccountLinkResponseSchema: GenMessage<GetBusinessAccountLinkResponse> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 10);
+
+/**
  * @generated from service zenao.v1.ZenaoService
  */
 export const ZenaoService: GenService<{
@@ -134,12 +265,36 @@ export const ZenaoService: GenService<{
     output: typeof CreateEventResponseSchema;
   },
   /**
+   * @generated from rpc zenao.v1.ZenaoService.CreateBusinessAccount
+   */
+  createBusinessAccount: {
+    methodKind: "unary";
+    input: typeof CreateBusinessAccountRequestSchema;
+    output: typeof CreateBusinessAccountResponseSchema;
+  },
+  /**
+   * @generated from rpc zenao.v1.ZenaoService.ListBusinessAccounts
+   */
+  listBusinessAccounts: {
+    methodKind: "unary";
+    input: typeof ListBusinessAccountsRequestSchema;
+    output: typeof ListBusinessAccountsResponseSchema;
+  },
+  /**
    * @generated from rpc zenao.v1.ZenaoService.CreateCheckoutSession
    */
   createCheckoutSession: {
     methodKind: "unary";
     input: typeof CreateCheckoutSessionRequestSchema;
     output: typeof CreateCheckoutSessionResponseSchema;
+  },
+  /**
+   * @generated from rpc zenao.v1.ZenaoService.GetBusinessAccountLink
+   */
+  getBusinessAccountLink: {
+    methodKind: "unary";
+    input: typeof GetBusinessAccountLinkRequestSchema;
+    output: typeof GetBusinessAccountLinkResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_zenao_v1_zenao, 0);

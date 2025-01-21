@@ -1,14 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
+import { redirect } from "next/navigation";
 import { eventOptions } from "@/lib/queries/event";
+import { Button } from "@/components/shadcn/button";
+import { zenaoClient } from "@/app/zenao-client";
+import { Input } from "@/components/shadcn/input";
 
 export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
+  const [email, setEmail] = useState("");
 
   return (
     <div className="mx-28">
@@ -47,6 +52,22 @@ export function EventInfo({ id }: { id: string }) {
             <p>Price: {data.ticketPrice}</p>
             <p>Capacity: {data.capacity}</p>
           </div>
+          <Input
+            name="email"
+            onChange={(evt) => setEmail(evt.target.value)}
+          ></Input>
+          <Button
+            onClick={async () => {
+              const sess = await zenaoClient.createCheckoutSession({
+                eventId: id,
+                numTickets: 1,
+                email: email,
+              });
+              redirect(sess.checkoutUri);
+            }}
+          >
+            Buy ticket
+          </Button>
         </div>
       ) : (
         <p>{`Event doesn't exist`}</p>

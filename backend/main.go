@@ -14,6 +14,7 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2/user"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/rs/cors"
+	"github.com/stripe/stripe-go/v81"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -31,6 +32,7 @@ const (
 	chainID            = "dev"
 	dbPath             = "dev.db"
 	frontendDomain     = "http://localhost:3000"
+	stripeSecretKey    = "sk_test_51QhZ8fRwfVmWKPLRyJS3DoP0MTARWZJkc5Hxq0EPGtjpuG7teDVLmPr9NRPr7GNtOSm3R85IfS6ee9WffHvl8s4O00qIeU24yB"
 )
 
 func main() {
@@ -71,6 +73,8 @@ func execStart() error {
 		return err
 	}
 
+	stripe.Key = stripeSecretKey
+
 	chain, err := setupChain(adminMnemonic, eventsIndexPkgPath, chainID, chainEndpoint, logger)
 	if err != nil {
 		return err
@@ -83,17 +87,19 @@ func execStart() error {
 
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("/stripe-webhook", handleStripeWebhook)
+
 	zenao := &ZenaoServer{
 		Logger:  logger,
 		GetUser: getUserFromClerk,
-		DBTx:    db.Tx,
+		DB:      db,
 		Chain:   chain,
 	}
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
 		withRequestLogging(logger),
 		withConnectCORS(allowedOrigin),
-		withClerkAuth(clerkSecretKey),
+		withClerkAuth(clerkSecretKey, logger),
 	))
 
 	logger.Info("Starting server", zap.String("addr", bindAddr))
@@ -105,9 +111,13 @@ func execStart() error {
 	)
 }
 
-func getUserFromClerk(ctx context.Context) ZenaoUser {
-	clerkUser := authn.GetInfo(ctx).(*clerk.User)
-	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
+func getUserFromClerk(ctx context.Context) *ZenaoUser {
+	authnUser := authn.GetInfo(ctx)
+	if authnUser == nil {
+		return nil
+	}
+	clerkUser := authnUser.(*clerk.User)
+	return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {
@@ -145,21 +155,28 @@ func withRequestLogging(logger *zap.Logger) func(http.Handler) http.Handler {
 	}
 }
 
-func withClerkAuth(secretKey string) func(http.Handler) http.Handler {
+func withClerkAuth(secretKey string, logger *zap.Logger) func(http.Handler) http.Handler {
 	clerk.SetKey(secretKey)
 	return authn.NewMiddleware(func(_ context.Context, req *http.Request) (any, error) {
-		sessionToken := strings.TrimPrefix(req.Header.Get("Authorization"), "Bearer ")
+		authHeader := req.Header.Get("Authorization")
+		if authHeader == "" {
+			return nil, nil
+		}
+
+		sessionToken := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
 			Token: sessionToken,
 		})
 		if err != nil {
-			return nil, err
+			logger.Debug("auth failed", zap.Error(err))
+			return nil, nil
 		}
 
 		usr, err := user.Get(req.Context(), claims.Subject)
 		if err != nil {
-			return nil, err
+			logger.Debug("auth failed", zap.Error(err))
+			return nil, nil
 		}
 		return usr, nil
 	}).Wrap

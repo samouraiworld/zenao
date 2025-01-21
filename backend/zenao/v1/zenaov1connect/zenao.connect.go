@@ -36,15 +36,27 @@ const (
 	// ZenaoServiceCreateEventProcedure is the fully-qualified name of the ZenaoService's CreateEvent
 	// RPC.
 	ZenaoServiceCreateEventProcedure = "/zenao.v1.ZenaoService/CreateEvent"
+	// ZenaoServiceCreateBusinessAccountProcedure is the fully-qualified name of the ZenaoService's
+	// CreateBusinessAccount RPC.
+	ZenaoServiceCreateBusinessAccountProcedure = "/zenao.v1.ZenaoService/CreateBusinessAccount"
+	// ZenaoServiceListBusinessAccountsProcedure is the fully-qualified name of the ZenaoService's
+	// ListBusinessAccounts RPC.
+	ZenaoServiceListBusinessAccountsProcedure = "/zenao.v1.ZenaoService/ListBusinessAccounts"
 	// ZenaoServiceCreateCheckoutSessionProcedure is the fully-qualified name of the ZenaoService's
 	// CreateCheckoutSession RPC.
 	ZenaoServiceCreateCheckoutSessionProcedure = "/zenao.v1.ZenaoService/CreateCheckoutSession"
+	// ZenaoServiceGetBusinessAccountLinkProcedure is the fully-qualified name of the ZenaoService's
+	// GetBusinessAccountLink RPC.
+	ZenaoServiceGetBusinessAccountLinkProcedure = "/zenao.v1.ZenaoService/GetBusinessAccountLink"
 )
 
 // ZenaoServiceClient is a client for the zenao.v1.ZenaoService service.
 type ZenaoServiceClient interface {
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
+	CreateBusinessAccount(context.Context, *connect.Request[v1.CreateBusinessAccountRequest]) (*connect.Response[v1.CreateBusinessAccountResponse], error)
+	ListBusinessAccounts(context.Context, *connect.Request[v1.ListBusinessAccountsRequest]) (*connect.Response[v1.ListBusinessAccountsResponse], error)
 	CreateCheckoutSession(context.Context, *connect.Request[v1.CreateCheckoutSessionRequest]) (*connect.Response[v1.CreateCheckoutSessionResponse], error)
+	GetBusinessAccountLink(context.Context, *connect.Request[v1.GetBusinessAccountLinkRequest]) (*connect.Response[v1.GetBusinessAccountLinkResponse], error)
 }
 
 // NewZenaoServiceClient constructs a client for the zenao.v1.ZenaoService service. By default, it
@@ -64,10 +76,28 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("CreateEvent")),
 			connect.WithClientOptions(opts...),
 		),
+		createBusinessAccount: connect.NewClient[v1.CreateBusinessAccountRequest, v1.CreateBusinessAccountResponse](
+			httpClient,
+			baseURL+ZenaoServiceCreateBusinessAccountProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("CreateBusinessAccount")),
+			connect.WithClientOptions(opts...),
+		),
+		listBusinessAccounts: connect.NewClient[v1.ListBusinessAccountsRequest, v1.ListBusinessAccountsResponse](
+			httpClient,
+			baseURL+ZenaoServiceListBusinessAccountsProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("ListBusinessAccounts")),
+			connect.WithClientOptions(opts...),
+		),
 		createCheckoutSession: connect.NewClient[v1.CreateCheckoutSessionRequest, v1.CreateCheckoutSessionResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreateCheckoutSessionProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("CreateCheckoutSession")),
+			connect.WithClientOptions(opts...),
+		),
+		getBusinessAccountLink: connect.NewClient[v1.GetBusinessAccountLinkRequest, v1.GetBusinessAccountLinkResponse](
+			httpClient,
+			baseURL+ZenaoServiceGetBusinessAccountLinkProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetBusinessAccountLink")),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -75,8 +105,11 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 
 // zenaoServiceClient implements ZenaoServiceClient.
 type zenaoServiceClient struct {
-	createEvent           *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
-	createCheckoutSession *connect.Client[v1.CreateCheckoutSessionRequest, v1.CreateCheckoutSessionResponse]
+	createEvent            *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
+	createBusinessAccount  *connect.Client[v1.CreateBusinessAccountRequest, v1.CreateBusinessAccountResponse]
+	listBusinessAccounts   *connect.Client[v1.ListBusinessAccountsRequest, v1.ListBusinessAccountsResponse]
+	createCheckoutSession  *connect.Client[v1.CreateCheckoutSessionRequest, v1.CreateCheckoutSessionResponse]
+	getBusinessAccountLink *connect.Client[v1.GetBusinessAccountLinkRequest, v1.GetBusinessAccountLinkResponse]
 }
 
 // CreateEvent calls zenao.v1.ZenaoService.CreateEvent.
@@ -84,15 +117,33 @@ func (c *zenaoServiceClient) CreateEvent(ctx context.Context, req *connect.Reque
 	return c.createEvent.CallUnary(ctx, req)
 }
 
+// CreateBusinessAccount calls zenao.v1.ZenaoService.CreateBusinessAccount.
+func (c *zenaoServiceClient) CreateBusinessAccount(ctx context.Context, req *connect.Request[v1.CreateBusinessAccountRequest]) (*connect.Response[v1.CreateBusinessAccountResponse], error) {
+	return c.createBusinessAccount.CallUnary(ctx, req)
+}
+
+// ListBusinessAccounts calls zenao.v1.ZenaoService.ListBusinessAccounts.
+func (c *zenaoServiceClient) ListBusinessAccounts(ctx context.Context, req *connect.Request[v1.ListBusinessAccountsRequest]) (*connect.Response[v1.ListBusinessAccountsResponse], error) {
+	return c.listBusinessAccounts.CallUnary(ctx, req)
+}
+
 // CreateCheckoutSession calls zenao.v1.ZenaoService.CreateCheckoutSession.
 func (c *zenaoServiceClient) CreateCheckoutSession(ctx context.Context, req *connect.Request[v1.CreateCheckoutSessionRequest]) (*connect.Response[v1.CreateCheckoutSessionResponse], error) {
 	return c.createCheckoutSession.CallUnary(ctx, req)
 }
 
+// GetBusinessAccountLink calls zenao.v1.ZenaoService.GetBusinessAccountLink.
+func (c *zenaoServiceClient) GetBusinessAccountLink(ctx context.Context, req *connect.Request[v1.GetBusinessAccountLinkRequest]) (*connect.Response[v1.GetBusinessAccountLinkResponse], error) {
+	return c.getBusinessAccountLink.CallUnary(ctx, req)
+}
+
 // ZenaoServiceHandler is an implementation of the zenao.v1.ZenaoService service.
 type ZenaoServiceHandler interface {
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
+	CreateBusinessAccount(context.Context, *connect.Request[v1.CreateBusinessAccountRequest]) (*connect.Response[v1.CreateBusinessAccountResponse], error)
+	ListBusinessAccounts(context.Context, *connect.Request[v1.ListBusinessAccountsRequest]) (*connect.Response[v1.ListBusinessAccountsResponse], error)
 	CreateCheckoutSession(context.Context, *connect.Request[v1.CreateCheckoutSessionRequest]) (*connect.Response[v1.CreateCheckoutSessionResponse], error)
+	GetBusinessAccountLink(context.Context, *connect.Request[v1.GetBusinessAccountLinkRequest]) (*connect.Response[v1.GetBusinessAccountLinkResponse], error)
 }
 
 // NewZenaoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -108,18 +159,42 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("CreateEvent")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceCreateBusinessAccountHandler := connect.NewUnaryHandler(
+		ZenaoServiceCreateBusinessAccountProcedure,
+		svc.CreateBusinessAccount,
+		connect.WithSchema(zenaoServiceMethods.ByName("CreateBusinessAccount")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceListBusinessAccountsHandler := connect.NewUnaryHandler(
+		ZenaoServiceListBusinessAccountsProcedure,
+		svc.ListBusinessAccounts,
+		connect.WithSchema(zenaoServiceMethods.ByName("ListBusinessAccounts")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCreateCheckoutSessionHandler := connect.NewUnaryHandler(
 		ZenaoServiceCreateCheckoutSessionProcedure,
 		svc.CreateCheckoutSession,
 		connect.WithSchema(zenaoServiceMethods.ByName("CreateCheckoutSession")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceGetBusinessAccountLinkHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetBusinessAccountLinkProcedure,
+		svc.GetBusinessAccountLink,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetBusinessAccountLink")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/zenao.v1.ZenaoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ZenaoServiceCreateEventProcedure:
 			zenaoServiceCreateEventHandler.ServeHTTP(w, r)
+		case ZenaoServiceCreateBusinessAccountProcedure:
+			zenaoServiceCreateBusinessAccountHandler.ServeHTTP(w, r)
+		case ZenaoServiceListBusinessAccountsProcedure:
+			zenaoServiceListBusinessAccountsHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreateCheckoutSessionProcedure:
 			zenaoServiceCreateCheckoutSessionHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetBusinessAccountLinkProcedure:
+			zenaoServiceGetBusinessAccountLinkHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -133,6 +208,18 @@ func (UnimplementedZenaoServiceHandler) CreateEvent(context.Context, *connect.Re
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreateEvent is not implemented"))
 }
 
+func (UnimplementedZenaoServiceHandler) CreateBusinessAccount(context.Context, *connect.Request[v1.CreateBusinessAccountRequest]) (*connect.Response[v1.CreateBusinessAccountResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreateBusinessAccount is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) ListBusinessAccounts(context.Context, *connect.Request[v1.ListBusinessAccountsRequest]) (*connect.Response[v1.ListBusinessAccountsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListBusinessAccounts is not implemented"))
+}
+
 func (UnimplementedZenaoServiceHandler) CreateCheckoutSession(context.Context, *connect.Request[v1.CreateCheckoutSessionRequest]) (*connect.Response[v1.CreateCheckoutSessionResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreateCheckoutSession is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetBusinessAccountLink(context.Context, *connect.Request[v1.GetBusinessAccountLinkRequest]) (*connect.Response[v1.GetBusinessAccountLinkResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetBusinessAccountLink is not implemented"))
 }
