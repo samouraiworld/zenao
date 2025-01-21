@@ -26,7 +26,7 @@ const (
 	clerkSecretKey     = "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK"
 	bindAddr           = "localhost:4242"
 	adminMnemonic      = "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique"
-	eventsIndexPkgPath = "gno.land/r/zenao/events"
+	eventsIndexPkgPath = "gno.land/r/zenao/events_reg"
 	chainEndpoint      = "127.0.0.1:26657"
 	chainID            = "dev"
 	dbPath             = "dev.db"

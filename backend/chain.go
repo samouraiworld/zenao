@@ -54,7 +54,6 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	if err != nil {
 		return err
 	}
-	g.logger.Info("generated event realm source", zap.String("src", eventRealmSrc))
 
 	// TODO: single tx with all messages
 
@@ -172,7 +171,6 @@ const eventRealmSourceTemplate = `package event
 import (
 	"gno.land/p/zenao/events"
 	"gno.land/r/demo/profile"
-	"gno.land/r/zenao/events_reg"
 )
 
 var event *events.Event
