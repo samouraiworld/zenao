@@ -77,6 +77,22 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 
 	g.logger.Info("created event realm", zap.String("pkg-path", eventRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 10000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.eventsIndexPkgPath,
+		Func:    "AddEvent",
+		Args: []string{
+			evtID,
+			creatorID,
+			fmt.Sprintf("%d", req.EndDate),
+		},
+	}))
+
+	g.logger.Info("indexed event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
 	return nil
 }
 
@@ -164,7 +180,7 @@ var event *events.Event
 func init() {
 	eventID := "{{.id}}"
 	creator := "{{.creatorID}}"
-	event = events.NewEvent(eventID, creator, {{.req.StartDate}}, {{.req.EndDate}}, {{.req.TicketPrice}}, {{.req.Capacity}}) 
+	event = events.NewEvent(eventID, creator, "{{.req.Title}}", "{{.req.Description}}" ,{{.req.StartDate}}, {{.req.EndDate}}, {{.req.TicketPrice}}, {{.req.Capacity}}) 
 
 	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
 	profile.SetStringField(profile.Bio, "{{.req.Description}}")
@@ -173,12 +189,10 @@ func init() {
 
 func AddParticipant(participant string) {
 	event.AddParticipant(participant)
-	events_reg.AddParticipant(event.GetID(), participant, event.GetEndDate())
 }
 
 func RemoveParticipant(participant string) {
 	event.RemoveParticipant(participant)
-	events_reg.RemoveParticipant(event.GetID(), participant, event.GetEndDate())
 }
 
 func AddGatekeeper(gatekeeper string) {

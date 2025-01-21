@@ -45,8 +45,12 @@ func (m *MemberModule) GetRoles() []string {
 	return m.roleManager.GetRoles()
 }
 
-func (m *MemberModule) GetUserRoles(memberId string) []string {
+func (m *MemberModule) GetMemberRoles(memberId string) []string {
 	return m.roleManager.GetUserRoles(std.Address(memberId))
+}
+
+func (m *MemberModule) CountMemberRoles(memberId string) int {
+	return m.roleManager.CountUserRoles(std.Address(memberId))
 }
 
 func (m *MemberModule) setRoles(roles []string) {
@@ -110,7 +114,4 @@ func (m *MemberModule) removeRoleFromMember(member string, role string) {
 		panic("member does not have the role")
 	}
 	m.roleManager.RemoveRoleFromUser(std.Address(member), role, std.CurrentRealm().Addr())
-	if len(m.GetUserRoles(member)) == 0 {
-		m.members.Remove(member)
-	}
 }

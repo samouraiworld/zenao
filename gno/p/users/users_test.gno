@@ -15,10 +15,10 @@ var (
 func TestNewUser(t *testing.T) {
 	std.TestSetOrigCaller(alice)
 	user := NewUser("userid01")
-	if user.user.MemberModule.GetMembers()[0] != alice.String() {
-		t.Fatalf("expected %s, got %s", alice.String(), user.user.MemberModule.GetMembers()[0])
+	if user.org.MemberModule.GetMembers()[0] != alice.String() {
+		t.Fatalf("expected %s, got %s", alice.String(), user.org.MemberModule.GetMembers()[0])
 	}
-	if !user.user.HasRole(alice.String(), "admin") {
+	if !user.org.MemberModule.HasRole(alice.String(), "admin") {
 		t.Fatalf("expected user to have admin role")
 	}
 }
@@ -35,13 +35,13 @@ func TestTransferOwnership(t *testing.T) {
 	user.TransferOwnership(bob.String())
 	std.TestSetOrigCaller(alice)
 	user.TransferOwnership(bob.String())
-	if user.user.MemberModule.GetMembers()[0] != bob.String() {
-		t.Fatalf("expected %s, got %s", bob.String(), user.user.MemberModule.GetMembers()[0])
+	if user.org.MemberModule.GetMembers()[0] != bob.String() {
+		t.Fatalf("expected %s, got %s", bob.String(), user.org.MemberModule.GetMembers()[0])
 	}
-	if user.user.IsMember(alice.String()) {
+	if user.org.MemberModule.IsMember(alice.String()) {
 		t.Fatalf("expected alice to not be a member")
 	}
-	if !user.user.HasRole(bob.String(), "admin") {
+	if !user.org.MemberModule.HasRole(bob.String(), "admin") {
 		t.Fatalf("expected bob to have admin role")
 	}
 }

@@ -142,18 +142,6 @@ func (d *DaoRolesBased) InstantExecute(proposalJSON string) {
 	d.Execute(uint64(proposal.id))
 }
 
-func (d *DaoRolesBased) HasRole(memberId string, role string) bool {
-	return d.MemberModule.HasRole(memberId, role)
-}
-
-func (d *DaoRolesBased) IsMember(memberId string) bool {
-	return d.MemberModule.IsMember(memberId)
-}
-
-func (d *DaoRolesBased) MembersCount() uint64 {
-	return d.MemberModule.MembersCount()
-}
-
 func (d *DaoRolesBased) propose(title, description, resource string, message ExecutableMessage) *Proposal {
 	proposer := std.PrevRealm().Addr()
 	if !d.MemberModule.IsMember(proposer.String()) {
@@ -185,7 +173,7 @@ func (d *DaoRolesBased) parseResourcesJSON(resourcesJSON string) *avl.Tree {
 	resources := avl.NewTree()
 	for _, resourceNode := range resourcesNodesArray {
 		resourceObj := resourceNode.MustObject()
-		condition := daocond.ConditionFromJSON(resourceObj["condition"], d.HasRole, d.IsMember, d.MembersCount)
+		condition := daocond.ConditionFromJSON(resourceObj["condition"], d.MemberModule.HasRole, d.MemberModule.IsMember, d.MemberModule.MembersCount)
 		resources.Set(resourceObj["resource"].MustString(), condition)
 	}
 	return resources
