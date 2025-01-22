@@ -15,6 +15,10 @@ func (s *ZenaoServer) EditUser(
 ) (*connect.Response[zenaov1.EditUserResponse], error) {
 	user := s.GetUser(ctx)
 
+	if err := s.EnsureUserExists(ctx, user); err != nil {
+		return nil, err
+	}
+
 	s.Logger.Info("edit-user", zap.String("user-id", user.ID))
 
 	if user.Banned {

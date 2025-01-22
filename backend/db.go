@@ -45,7 +45,7 @@ func setupLocalDB(path string) (*gormZenaoDB, error) {
 	}
 
 	// Migrate the schema
-	if err := db.AutoMigrate(&Event{}, &SoldTicket{}); err != nil {
+	if err := db.AutoMigrate(&Event{}, &SoldTicket{}, &User{}); err != nil {
 		return nil, err
 	}
 
@@ -82,11 +82,9 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 }
 
 // CreateUser implements ZenaoDB.
-func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (string, error) {
-	// XXX: validate?
+func (g *gormZenaoDB) CreateUser(userID string) (string, error) {
 	user := &User{
-		ID:          id,
-		DisplayName: req.DisplayName,
+		ID: userID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
 		return "", err
@@ -95,15 +93,24 @@ func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (str
 }
 
 // EditUser implements ZenaoDB.
-func (g *gormZenaoDB) EditUser(id string, req *zenaov1.EditUserRequest) error {
+func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) error {
 	// XXX: validate?
 	user := &User{
-		ID:          id,
+		ID:          userID,
 		DisplayName: req.DisplayName,
 		Bio:         req.Bio,
 		AvatarURI:   req.AvatarUri,
 	}
 	return g.db.Save(user).Error
+}
+
+// UserExists implements ZenaoDB.
+func (g *gormZenaoDB) UserExists(userID string) (bool, error) {
+	var count int64
+	if err := g.db.Model(&User{}).Where("id = ?", userID).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)

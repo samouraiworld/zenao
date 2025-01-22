@@ -33,6 +33,7 @@ func EditUser(displayName, bio, avatar string) {
 
 func Render(path string) string {
 	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
-	s += md.HorizontalRule()
+	s += md.Image("User avatar", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
+	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
 	return s
 }

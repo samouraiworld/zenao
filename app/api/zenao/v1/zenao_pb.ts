@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSIpChFDcmVhdGVVc2VyUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkiIAoSQ3JlYXRlVXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIkgKD0VkaXRVc2VyUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSCwoDYmlvGAIgASgJEhIKCmF2YXRhcl91cmkYAyABKAkiHgoQRWRpdFVzZXJSZXNwb25zZRIKCgJpZBgBIAEoCTLmAQoMWmVuYW9TZXJ2aWNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJHCgpDcmVhdGVVc2VyEhsuemVuYW8udjEuQ3JlYXRlVXNlclJlcXVlc3QaHC56ZW5hby52MS5DcmVhdGVVc2VyUmVzcG9uc2USQQoIRWRpdFVzZXISGS56ZW5hby52MS5FZGl0VXNlclJlcXVlc3QaGi56ZW5hby52MS5FZGl0VXNlclJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSJICg9FZGl0VXNlclJlcXVlc3QSFAoMZGlzcGxheV9uYW1lGAEgASgJEgsKA2JpbxgCIAEoCRISCgphdmF0YXJfdXJpGAMgASgJIh4KEEVkaXRVc2VyUmVzcG9uc2USCgoCaWQYASABKAkynQEKDFplbmFvU2VydmljZRJKCgtDcmVhdGVFdmVudBIcLnplbmFvLnYxLkNyZWF0ZUV2ZW50UmVxdWVzdBodLnplbmFvLnYxLkNyZWF0ZUV2ZW50UmVzcG9uc2USQQoIRWRpdFVzZXISGS56ZW5hby52MS5FZGl0VXNlclJlcXVlc3QaGi56ZW5hby52MS5FZGl0VXNlclJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
@@ -83,40 +83,6 @@ export const CreateEventResponseSchema: GenMessage<CreateEventResponse> = /*@__P
   messageDesc(file_zenao_v1_zenao, 1);
 
 /**
- * @generated from message zenao.v1.CreateUserRequest
- */
-export type CreateUserRequest = Message<"zenao.v1.CreateUserRequest"> & {
-  /**
-   * @generated from field: string display_name = 1;
-   */
-  displayName: string;
-};
-
-/**
- * Describes the message zenao.v1.CreateUserRequest.
- * Use `create(CreateUserRequestSchema)` to create a new message.
- */
-export const CreateUserRequestSchema: GenMessage<CreateUserRequest> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 2);
-
-/**
- * @generated from message zenao.v1.CreateUserResponse
- */
-export type CreateUserResponse = Message<"zenao.v1.CreateUserResponse"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-};
-
-/**
- * Describes the message zenao.v1.CreateUserResponse.
- * Use `create(CreateUserResponseSchema)` to create a new message.
- */
-export const CreateUserResponseSchema: GenMessage<CreateUserResponse> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 3);
-
-/**
  * @generated from message zenao.v1.EditUserRequest
  */
 export type EditUserRequest = Message<"zenao.v1.EditUserRequest"> & {
@@ -141,7 +107,7 @@ export type EditUserRequest = Message<"zenao.v1.EditUserRequest"> & {
  * Use `create(EditUserRequestSchema)` to create a new message.
  */
 export const EditUserRequestSchema: GenMessage<EditUserRequest> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 4);
+  messageDesc(file_zenao_v1_zenao, 2);
 
 /**
  * @generated from message zenao.v1.EditUserResponse
@@ -158,7 +124,7 @@ export type EditUserResponse = Message<"zenao.v1.EditUserResponse"> & {
  * Use `create(EditUserResponseSchema)` to create a new message.
  */
 export const EditUserResponseSchema: GenMessage<EditUserResponse> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 5);
+  messageDesc(file_zenao_v1_zenao, 3);
 
 /**
  * @generated from service zenao.v1.ZenaoService
@@ -171,14 +137,6 @@ export const ZenaoService: GenService<{
     methodKind: "unary";
     input: typeof CreateEventRequestSchema;
     output: typeof CreateEventResponseSchema;
-  },
-  /**
-   * @generated from rpc zenao.v1.ZenaoService.CreateUser
-   */
-  createUser: {
-    methodKind: "unary";
-    input: typeof CreateUserRequestSchema;
-    output: typeof CreateUserResponseSchema;
   },
   /**
    * @generated from rpc zenao.v1.ZenaoService.EditUser
