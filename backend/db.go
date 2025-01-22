@@ -28,6 +28,14 @@ type SoldTicket struct {
 	Price   float64
 }
 
+type User struct {
+	ID        string `gorm:"primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Username  string
+}
+
 func setupLocalDB(path string) (*gormZenaoDB, error) {
 	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
 	if err != nil {
@@ -69,6 +77,19 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		return "", err
 	}
 	return fmt.Sprintf("%d", evt.ID), nil
+}
+
+// CreateUser implements ZenaoDB.
+func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (string, error) {
+	// XXX: validate?
+	user := &User{
+		ID:       id,
+		Username: req.Username,
+	}
+	if err := g.db.Create(user).Error; err != nil {
+		return "", err
+	}
+	return user.ID, nil
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)

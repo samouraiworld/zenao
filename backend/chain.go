@@ -89,11 +89,37 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 			fmt.Sprintf("%d", req.EndDate),
 		},
 	}))
+
+	g.logger.Info("indexed event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
+// CreateUser implements ZenaoChain.
+func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) error {
+	userRealmSrc, err := generateUserRealmSource(id, req)
 	if err != nil {
 		return err
 	}
 
-	g.logger.Info("indexed event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, id)
+
+	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgAddPackage{
+		Creator: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name:  "user",
+			Path:  userRealmPkgPath,
+			Files: []*gnovm.MemFile{{Name: "user.gno", Body: userRealmSrc}},
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("created user realm", zap.String("pkg-path", userRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -119,7 +145,7 @@ func generateEventRealmSource(evtID string, creatorID string, req *zenaov1.Creat
 		"creatorID": creatorID,
 		"req":       req,
 	}
-	t := template.Must(template.New("").Parse(realmSourceTemplate))
+	t := template.Must(template.New("").Parse(eventRealmSourceTemplate))
 	buf := strings.Builder{}
 	if err := t.Execute(&buf, m); err != nil {
 		return "", err
@@ -127,45 +153,57 @@ func generateEventRealmSource(evtID string, creatorID string, req *zenaov1.Creat
 	return buf.String(), nil
 }
 
-const realmSourceTemplate = `package event
+func generateUserRealmSource(id string, req *zenaov1.CreateUserRequest) (string, error) {
+	m := map[string]string{
+		"id":       id,
+		"username": req.Username,
+	}
+	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
+	buf := strings.Builder{}
+	if err := t.Execute(&buf, m); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+const eventRealmSourceTemplate = `package event
 
 import (
 	"std"
 	"time"
 
-	"gno.land/p/demo/json"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/zenao/events"
 	"gno.land/r/demo/profile"
 )
 
-var (
-	id = "{{.id}}"
-	creator = "{{.creatorID}}"
-)
+var event *events.Event
 
 func init() {
+	eventID := "{{.id}}"
+	creator := "{{.creatorID}}"
+	event = events.NewEvent(eventID, creator, "{{.req.Title}}", "{{.req.Description}}" ,{{.req.StartDate}}, {{.req.EndDate}}, {{.req.TicketPrice}}, {{.req.Capacity}}, profile.GetStringField) 
+
 	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
 	profile.SetStringField(profile.Bio, "{{.req.Description}}")
 	profile.SetStringField(profile.Avatar, "{{.req.ImageUri}}")
 }
 
-func getInfoJSON() string {
-	obj := json.ObjectNode("", map[string]*json.Node{
-		"title":       json.StringNode("", profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, "")),
-		"description": json.StringNode("", profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, "")),
-		"imageUri":    json.StringNode("", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, "")),
-		"startDate":   json.StringNode("", ufmt.Sprintf("%d", {{.req.StartDate}})),
-		"endDate":     json.StringNode("", ufmt.Sprintf("%d", {{.req.EndDate}})),
-		"ticketPrice": json.NumberNode("", {{.req.TicketPrice}}),
-		"capacity":    json.NumberNode("", {{.req.Capacity}}),
-	})
+func AddParticipant(participant string) {
+	event.AddParticipant(participant)
+}
 
-	bz, err := json.Marshal(obj)
-	if err != nil {
-		panic(err)
-	}
-	return string(bz)
+func RemoveParticipant(participant string) {
+	event.RemoveParticipant(participant)
+}
+
+func AddGatekeeper(gatekeeper string) {
+	event.AddGatekeeper(gatekeeper)
+}
+
+func RemoveGatekeeper(gatekeeper string) {
+	event.RemoveGatekeeper(gatekeeper)
 }
 
 func Render(path string) string {
@@ -173,13 +211,42 @@ func Render(path string) string {
 	s += md.Image("Event presentation", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
 	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
 	s += md.BulletList([]string{
-		ufmt.Sprintf("Time: From %s to %s", time.Unix({{.req.StartDate}}, 0).Format(time.DateTime), time.Unix({{.req.EndDate}}, 0).Format(time.DateTime)),
-		ufmt.Sprintf("Price: {{.req.TicketPrice}} €"),
-		ufmt.Sprintf("Capacity: {{.req.Capacity}} persons"),
+		ufmt.Sprintf("Time: From %s to %s", time.Unix(event.GetStartDate(), 0).Format(time.DateTime), time.Unix(event.GetEndDate(), 0).Format(time.DateTime)),
+		ufmt.Sprintf("Price: %g€", event.GetTicketPrice()),
+		ufmt.Sprintf("Capacity: %d/%d", event.CountParticipants(), event.GetCapacity()),
+		ufmt.Sprintf("Organizer: %s", profile.GetStringField(std.Address(event.GetCreator()), profile.DisplayName, "")),
 	}) + "\n"
 	s += md.HorizontalRule()
 	s += md.Paragraph(std.CurrentRealm().Addr().String())
-	s += md.CodeBlock(getInfoJSON())
+	return s
+}
+`
+
+const userRealmSourceTemplate = `package user
+
+import (
+	"std"
+
+	"gno.land/p/moul/md"
+	"gno.land/p/zenao/users"
+	"gno.land/r/demo/profile"
+)
+
+var user *users.User
+
+func init() {
+	user = users.NewUser("{{.id}}")
+
+	profile.SetStringField(profile.DisplayName, "{{.username}}")
+}
+
+func TransferOwnership(newOwner string) {
+	user.TransferOwnership(newOwner)
+}
+
+func Render(path string) string {
+	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
+	s += md.HorizontalRule()
 	return s
 }
 `

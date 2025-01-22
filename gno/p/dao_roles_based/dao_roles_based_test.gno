@@ -71,10 +71,10 @@ func TestNewDaoRolesBasedJSON(t *testing.T) {
 
 	for _, member := range members {
 		address := member[0]
-		if !dao.IsMember(address) {
+		if !dao.MemberModule.IsMember(address) {
 			t.Errorf("Expected member %s to be a member", address)
 		}
-		if len(member) == 2 && !dao.HasRole(address, member[1]) {
+		if len(member) == 2 && !dao.MemberModule.HasRole(address, member[1]) {
 			t.Errorf("Expected member %s to have role %s", address, member[1])
 		}
 	}
@@ -519,7 +519,7 @@ func TestGetMembers(t *testing.T) {
 	}
 
 	for _, eMember := range expectedMembers {
-		if !dao.IsMember(eMember) {
+		if !dao.MemberModule.IsMember(eMember) {
 			t.Errorf("Expected member %s to be a member", eMember)
 		}
 	}
@@ -544,17 +544,17 @@ func TestAddMemberProposal(t *testing.T) {
 
 	std.TestSetOrigCaller(alice)
 
-	if dao.IsMember(bob.String()) {
+	if dao.MemberModule.IsMember(bob.String()) {
 		t.Errorf("Expected member %s to not be a member", bob.String())
 	}
 
 	dao.InstantExecute(proposalJSON)
 
-	if !dao.IsMember(bob.String()) {
+	if !dao.MemberModule.IsMember(bob.String()) {
 		t.Errorf("Expected member %s to be a member", bob.String())
 	}
 
-	if !dao.HasRole(bob.String(), "admin") {
+	if !dao.MemberModule.HasRole(bob.String(), "admin") {
 		t.Errorf("Expected member %s to have role 'admin'", bob.String())
 	}
 
@@ -588,21 +588,21 @@ func TestRemoveMemberProposal(t *testing.T) {
 
 	std.TestSetOrigCaller(alice)
 
-	if !dao.IsMember(bob.String()) {
+	if !dao.MemberModule.IsMember(bob.String()) {
 		t.Errorf("Expected member %s to be a member", bob.String())
 	}
 
-	if !dao.HasRole(bob.String(), "admin") {
+	if !dao.MemberModule.HasRole(bob.String(), "admin") {
 		t.Errorf("Expected member %s to have role 'admin'", bob.String())
 	}
 
 	dao.InstantExecute(proposalJSON)
 
-	if dao.IsMember(bob.String()) {
+	if dao.MemberModule.IsMember(bob.String()) {
 		t.Errorf("Expected user %s to not be a member", bob.String())
 	}
 
-	if dao.HasRole(bob.String(), "admin") {
+	if dao.MemberModule.HasRole(bob.String(), "admin") {
 		t.Errorf("Expected user %s to not have role 'admin'", bob.String())
 	}
 }
@@ -626,13 +626,13 @@ func TestAddRoleToUserProposal(t *testing.T) {
 
 	std.TestSetOrigCaller(alice)
 
-	if dao.HasRole(bob.String(), "admin") {
+	if dao.MemberModule.HasRole(bob.String(), "admin") {
 		t.Errorf("Expected member %s to not have role 'admin'", bob.String())
 	}
 
 	dao.InstantExecute(proposalJSON)
 
-	if !dao.HasRole(bob.String(), "admin") {
+	if !dao.MemberModule.HasRole(bob.String(), "admin") {
 		t.Errorf("Expected member %s to have role 'admin'", bob.String())
 	}
 
@@ -686,13 +686,13 @@ func TestRemoveRoleFromUserProposal(t *testing.T) {
 
 	std.TestSetOrigCaller(alice)
 
-	if !dao.HasRole(bob.String(), "admin") {
+	if !dao.MemberModule.HasRole(bob.String(), "admin") {
 		t.Errorf("Expected member %s to have role 'admin'", bob.String())
 	}
 
 	dao.InstantExecute(proposalJSON)
 
-	if dao.HasRole(bob.String(), "admin") {
+	if dao.MemberModule.HasRole(bob.String(), "admin") {
 		t.Errorf("Expected member %s to not have role 'admin'", bob.String())
 	}
 

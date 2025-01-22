@@ -1,4 +1,4 @@
-package events
+package events_reg
 
 import "gno.land/p/moul/md"
 

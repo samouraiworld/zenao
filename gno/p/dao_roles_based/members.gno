@@ -45,8 +45,16 @@ func (m *MemberModule) GetRoles() []string {
 	return m.roleManager.GetRoles()
 }
 
-func (m *MemberModule) GetUserRoles(memberId string) []string {
+func (m *MemberModule) GetMemberRoles(memberId string) []string {
 	return m.roleManager.GetUserRoles(std.Address(memberId))
+}
+
+func (m *MemberModule) CountMemberRoles(memberId string) int {
+	return m.roleManager.CountUserRoles(std.Address(memberId))
+}
+
+func (m *MemberModule) GetMembersWithRole(role string) []string {
+	return m.roleManager.GetRoleUsers(role)
 }
 
 func (m *MemberModule) setRoles(roles []string) {

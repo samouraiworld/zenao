@@ -3,7 +3,7 @@ package dao_realm
 import "testing"
 
 func TestInit(t *testing.T) {
-	membersCount := dao.MembersCount()
+	membersCount := dao.MemberModule.MembersCount()
 	if membersCount != 4 {
 		t.Fatalf("Expected 4 members, got %d", membersCount)
 	}
