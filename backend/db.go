@@ -29,11 +29,13 @@ type SoldTicket struct {
 }
 
 type User struct {
-	ID        string `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Username  string
+	ID          string `gorm:"primaryKey"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	DisplayName string
+	Bio         string
+	AvatarURI   string
 }
 
 func setupLocalDB(path string) (*gormZenaoDB, error) {
@@ -83,13 +85,25 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (string, error) {
 	// XXX: validate?
 	user := &User{
-		ID:       id,
-		Username: req.Username,
+		ID:          id,
+		DisplayName: req.DisplayName,
 	}
 	if err := g.db.Create(user).Error; err != nil {
 		return "", err
 	}
 	return user.ID, nil
+}
+
+// EditUser implements ZenaoDB.
+func (g *gormZenaoDB) EditUser(id string, req *zenaov1.EditUserRequest) error {
+	// XXX: validate?
+	user := &User{
+		ID:          id,
+		DisplayName: req.DisplayName,
+		Bio:         req.Bio,
+		AvatarURI:   req.AvatarUri,
+	}
+	return g.db.Save(user).Error
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)

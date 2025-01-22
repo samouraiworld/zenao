@@ -124,6 +124,32 @@ func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) er
 	return nil
 }
 
+// EditUser implements ZenaoChain.
+func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
+	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, userID)
+
+	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 10000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: userRealmPkgPath,
+		Func:    "EditUser",
+		Args: []string{
+			req.DisplayName,
+			req.Bio,
+			req.AvatarUri,
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("edited user", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
 var _ ZenaoChain = (*gnoZenaoChain)(nil)
 
 func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr error) (*ctypes.ResultBroadcastTxCommit, error) {
@@ -156,7 +182,7 @@ func generateEventRealmSource(evtID string, creatorID string, req *zenaov1.Creat
 func generateUserRealmSource(id string, req *zenaov1.CreateUserRequest) (string, error) {
 	m := map[string]string{
 		"id":       id,
-		"username": req.Username,
+		"username": req.DisplayName,
 	}
 	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
 	buf := strings.Builder{}
@@ -242,6 +268,15 @@ func init() {
 
 func TransferOwnership(newOwner string) {
 	user.TransferOwnership(newOwner)
+}
+	
+func EditUser(displayName, bio, avatar string) {
+	if !user.IsOwner() {
+		panic("caller is not owner/admin of the user realm")
+	}
+	profile.SetStringField(profile.DisplayName, displayName)
+	profile.SetStringField(profile.Bio, bio)
+	profile.SetStringField(profile.Avatar, avatar)
 }
 
 func Render(path string) string {

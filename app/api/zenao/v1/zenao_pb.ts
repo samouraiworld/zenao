@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSIlChFDcmVhdGVVc2VyUmVxdWVzdBIQCgh1c2VybmFtZRgBIAEoCSIgChJDcmVhdGVVc2VyUmVzcG9uc2USCgoCaWQYASABKAkiTAoPRWRpdFVzZXJSZXF1ZXN0EhAKCHVzZXJuYW1lGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhIKCmF2YXRhcl91cmkYAyABKAkiHgoQRWRpdFVzZXJSZXNwb25zZRIKCgJpZBgBIAEoCTLmAQoMWmVuYW9TZXJ2aWNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJHCgpDcmVhdGVVc2VyEhsuemVuYW8udjEuQ3JlYXRlVXNlclJlcXVlc3QaHC56ZW5hby52MS5DcmVhdGVVc2VyUmVzcG9uc2USQQoIRWRpdFVzZXISGS56ZW5hby52MS5FZGl0VXNlclJlcXVlc3QaGi56ZW5hby52MS5FZGl0VXNlclJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSIpChFDcmVhdGVVc2VyUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkiIAoSQ3JlYXRlVXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIkgKD0VkaXRVc2VyUmVxdWVzdBIUCgxkaXNwbGF5X25hbWUYASABKAkSCwoDYmlvGAIgASgJEhIKCmF2YXRhcl91cmkYAyABKAkiHgoQRWRpdFVzZXJSZXNwb25zZRIKCgJpZBgBIAEoCTLmAQoMWmVuYW9TZXJ2aWNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJHCgpDcmVhdGVVc2VyEhsuemVuYW8udjEuQ3JlYXRlVXNlclJlcXVlc3QaHC56ZW5hby52MS5DcmVhdGVVc2VyUmVzcG9uc2USQQoIRWRpdFVzZXISGS56ZW5hby52MS5FZGl0VXNlclJlcXVlc3QaGi56ZW5hby52MS5FZGl0VXNlclJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
@@ -87,9 +87,9 @@ export const CreateEventResponseSchema: GenMessage<CreateEventResponse> = /*@__P
  */
 export type CreateUserRequest = Message<"zenao.v1.CreateUserRequest"> & {
   /**
-   * @generated from field: string username = 1;
+   * @generated from field: string display_name = 1;
    */
-  username: string;
+  displayName: string;
 };
 
 /**
@@ -121,14 +121,14 @@ export const CreateUserResponseSchema: GenMessage<CreateUserResponse> = /*@__PUR
  */
 export type EditUserRequest = Message<"zenao.v1.EditUserRequest"> & {
   /**
-   * @generated from field: string username = 1;
+   * @generated from field: string display_name = 1;
    */
-  username: string;
+  displayName: string;
 
   /**
-   * @generated from field: string description = 2;
+   * @generated from field: string bio = 2;
    */
-  description: string;
+  bio: string;
 
   /**
    * @generated from field: string avatar_uri = 3;

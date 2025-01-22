@@ -15,16 +15,18 @@ func (s *ZenaoServer) CreateUser(
 ) (*connect.Response[zenaov1.CreateUserResponse], error) {
 	user := s.GetUser(ctx)
 
-	s.Logger.Info("create-user", zap.String("username", req.Msg.Username), zap.String("user-id", user.ID))
+	s.Logger.Info("create-user", zap.String("username", req.Msg.DisplayName), zap.String("user-id", user.ID))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
 	}
 
-	// check if already exists
 	if err := s.DBTx(func(db ZenaoDB) error {
-		_, err := db.CreateUser(user.ID, req.Msg)
-		if err != nil {
+		if _, err := db.CreateUser(user.ID, req.Msg); err != nil {
+			return err
+		}
+
+		if err := s.Chain.CreateUser(user.ID, req.Msg); err != nil {
 			return err
 		}
 		return nil
