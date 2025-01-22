@@ -22,7 +22,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	if err := s.DBTx(func(db ZenaoDB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
 
-		if err := db.SellTicket(req.Msg.EventId, user.ID); err != nil {
+		if err := db.Participate(req.Msg.EventId, user.ID); err != nil {
 			return err
 		}
 		if err := s.Chain.Participate(req.Msg.EventId, user.ID); err != nil {

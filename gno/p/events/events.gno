@@ -25,6 +25,7 @@ func NewEvent(id string, creator string, title string, description string, start
 	roles := []string{"organizer", "gatekeeper", "participant"}
 	members := [][]string{
 		{creator, "organizer"},
+		{"g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94", "organizer"}, // zenao admin, XXX: inject from codegen
 	}
 
 	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"organizer","count":"1"}}]`

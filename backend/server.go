@@ -24,8 +24,7 @@ type ZenaoUser struct {
 type ZenaoDB interface {
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
 	CreateUser(id string, req *zenaov1.CreateUserRequest) (string, error)
-	GetRemainingCapacity(eventID string) (uint32, error)
-	SellTicket(eventID string, userID string) error
+	Participate(eventID string, userID string) error
 }
 
 type ZenaoChain interface {
