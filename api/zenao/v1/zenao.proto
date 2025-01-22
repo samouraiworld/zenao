@@ -6,6 +6,7 @@ option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
 service ZenaoService {
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditUser(EditUserRequest) returns (EditUserResponse);
+  rpc Participate(ParticipateRequest) returns (ParticipateResponse);
 }
 
 message CreateEventRequest {
@@ -27,3 +28,11 @@ message EditUserRequest {
 }
 
 message EditUserResponse { string id = 1; }
+
+message ParticipateRequest {
+  string event_id = 1;
+}
+
+message ParticipateResponse {
+  string ticket_secret = 1;
+}

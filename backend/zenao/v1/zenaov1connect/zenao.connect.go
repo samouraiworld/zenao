@@ -38,12 +38,16 @@ const (
 	ZenaoServiceCreateEventProcedure = "/zenao.v1.ZenaoService/CreateEvent"
 	// ZenaoServiceEditUserProcedure is the fully-qualified name of the ZenaoService's EditUser RPC.
 	ZenaoServiceEditUserProcedure = "/zenao.v1.ZenaoService/EditUser"
+	// ZenaoServiceParticipateProcedure is the fully-qualified name of the ZenaoService's Participate
+	// RPC.
+	ZenaoServiceParticipateProcedure = "/zenao.v1.ZenaoService/Participate"
 )
 
 // ZenaoServiceClient is a client for the zenao.v1.ZenaoService service.
 type ZenaoServiceClient interface {
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
 	EditUser(context.Context, *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error)
+	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
 }
 
 // NewZenaoServiceClient constructs a client for the zenao.v1.ZenaoService service. By default, it
@@ -69,6 +73,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("EditUser")),
 			connect.WithClientOptions(opts...),
 		),
+		participate: connect.NewClient[v1.ParticipateRequest, v1.ParticipateResponse](
+			httpClient,
+			baseURL+ZenaoServiceParticipateProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("Participate")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -76,6 +86,7 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 type zenaoServiceClient struct {
 	createEvent *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
 	editUser    *connect.Client[v1.EditUserRequest, v1.EditUserResponse]
+	participate *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
 }
 
 // CreateEvent calls zenao.v1.ZenaoService.CreateEvent.
@@ -88,10 +99,16 @@ func (c *zenaoServiceClient) EditUser(ctx context.Context, req *connect.Request[
 	return c.editUser.CallUnary(ctx, req)
 }
 
+// Participate calls zenao.v1.ZenaoService.Participate.
+func (c *zenaoServiceClient) Participate(ctx context.Context, req *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error) {
+	return c.participate.CallUnary(ctx, req)
+}
+
 // ZenaoServiceHandler is an implementation of the zenao.v1.ZenaoService service.
 type ZenaoServiceHandler interface {
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
 	EditUser(context.Context, *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error)
+	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
 }
 
 // NewZenaoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -113,12 +130,20 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("EditUser")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceParticipateHandler := connect.NewUnaryHandler(
+		ZenaoServiceParticipateProcedure,
+		svc.Participate,
+		connect.WithSchema(zenaoServiceMethods.ByName("Participate")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/zenao.v1.ZenaoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ZenaoServiceCreateEventProcedure:
 			zenaoServiceCreateEventHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditUserProcedure:
 			zenaoServiceEditUserHandler.ServeHTTP(w, r)
+		case ZenaoServiceParticipateProcedure:
+			zenaoServiceParticipateHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -134,4 +159,8 @@ func (UnimplementedZenaoServiceHandler) CreateEvent(context.Context, *connect.Re
 
 func (UnimplementedZenaoServiceHandler) EditUser(context.Context, *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EditUser is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.Participate is not implemented"))
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/clerk/clerk-sdk-go/v2/user"
 	"github.com/gnolang/gno/tm2/pkg/commands"
+	"github.com/resend/resend-go/v2"
 	"github.com/rs/cors"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
@@ -30,6 +31,7 @@ const (
 	chainEndpoint      = "127.0.0.1:26657"
 	chainID            = "dev"
 	dbPath             = "dev.db"
+	resendSecretKey    = "re_fj3PNvR6_Pu8PsJEHVZdV8o1xPj6qe1HE" // be very careful with this key, it allows to send mail from zenao.io
 )
 
 func main() {
@@ -83,10 +85,11 @@ func execStart() error {
 	mux := http.NewServeMux()
 
 	zenao := &ZenaoServer{
-		Logger:  logger,
-		GetUser: getUserFromClerk,
-		DBTx:    db.Tx,
-		Chain:   chain,
+		Logger:     logger,
+		GetUser:    getUserFromClerk,
+		DBTx:       db.Tx,
+		Chain:      chain,
+		MailClient: resend.NewClient(resendSecretKey),
 	}
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
@@ -106,7 +109,11 @@ func execStart() error {
 
 func getUserFromClerk(ctx context.Context) ZenaoUser {
 	clerkUser := authn.GetInfo(ctx).(*clerk.User)
-	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
+	email := ""
+	if len(clerkUser.EmailAddresses) != 0 {
+		email = clerkUser.EmailAddresses[0].EmailAddress
+	}
+	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {

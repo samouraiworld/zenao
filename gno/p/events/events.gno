@@ -21,10 +21,11 @@ type Event struct {
 	org              *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
 }
 
-func NewEvent(id string, creator string, title string, description string, startDate int64, endDate int64, ticketPrice float64, capacity int64, getProfileString GetProfileString) *Event {
+func NewEvent(id string, creatorAddr string, title string, description string, startDate int64, endDate int64, ticketPrice float64, capacity int64, getProfileString GetProfileString, zenaoAdminAddr string) *Event {
 	roles := []string{"organizer", "gatekeeper", "participant"}
 	members := [][]string{
-		{creator, "organizer"},
+		{creatorAddr, "organizer"},
+		{zenaoAdminAddr, "organizer"},
 	}
 
 	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"organizer","count":"1"}}]`
@@ -33,7 +34,7 @@ func NewEvent(id string, creator string, title string, description string, start
 	dao := dao_roles_based.NewDaoRolesBasedJSON(title, description, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	event := &Event{
 		id:               id,
-		creator:          creator,
+		creator:          creatorAddr,
 		startDate:        startDate,
 		endDate:          endDate,
 		ticketPrice:      ticketPrice,

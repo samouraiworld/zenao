@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -81,6 +83,20 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 	return fmt.Sprintf("%d", evt.ID), nil
 }
 
+// GetEvent implements ZenaoDB.
+func (g *gormZenaoDB) GetEvent(id string) (*Event, error) {
+	evtIDInt, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var evt Event
+	evt.ID = uint(evtIDInt)
+	if err := g.db.First(&evt).Error; err != nil {
+		return nil, err
+	}
+	return &evt, nil
+}
+
 // CreateUser implements ZenaoDB.
 func (g *gormZenaoDB) CreateUser(userID string) (string, error) {
 	user := &User{
@@ -90,6 +106,38 @@ func (g *gormZenaoDB) CreateUser(userID string) (string, error) {
 		return "", err
 	}
 	return user.ID, nil
+}
+
+// Participate implements ZenaoDB.
+func (g *gormZenaoDB) Participate(eventID string, userID string) error {
+	evt, err := g.GetEvent(eventID)
+	if err != nil {
+		return err
+	}
+
+	var participantsCount int64
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ?", evt.ID).Count(&participantsCount).Error; err != nil {
+		return err
+	}
+
+	remaining := int64(evt.Capacity) - participantsCount
+	if remaining <= 0 {
+		return errors.New("sold out")
+	}
+
+	var count int64
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userID).Count(&count).Error; err != nil {
+		return err
+	}
+	if count != 0 {
+		return errors.New("user is already participant for this event")
+	}
+
+	if err := g.db.Create(&SoldTicket{EventID: evt.ID, UserID: userID}).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // EditUser implements ZenaoDB.
