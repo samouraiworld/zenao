@@ -124,6 +124,37 @@ func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) er
 	return nil
 }
 
+// Participate implements ZenaoChain.
+func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
+	eventPkgPath := eventRealmPkgPath(eventID)
+	userPkgPath := userRealmPkgPath(userID)
+
+	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: eventPkgPath,
+		Func:    "AddParticipant",
+		Args:    []string{userPkgPath},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("added participant", zap.String("user", userPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
+func eventRealmPkgPath(eventID string) string {
+	return fmt.Sprintf("gno.land/r/zenao/events/e%s", eventID)
+}
+
+func userRealmPkgPath(userID string) string {
+	return fmt.Sprintf("gno.land/r/zenao/users/u%s", strings.TrimPrefix(userID, "user_"))
+}
+
 var _ ZenaoChain = (*gnoZenaoChain)(nil)
 
 func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr error) (*ctypes.ResultBroadcastTxCommit, error) {

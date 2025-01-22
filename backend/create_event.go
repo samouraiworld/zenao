@@ -21,6 +21,10 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, errors.New("user is banned")
 	}
 
+	if req.Msg.TicketPrice != 0 {
+		return nil, errors.New("event with price is not supported")
+	}
+
 	// TODO: validate request
 
 	evtID := ""

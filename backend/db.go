@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -90,6 +92,46 @@ func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (str
 		return "", err
 	}
 	return user.ID, nil
+}
+
+// GetRemainingCapacity implements ZenaoDB.
+func (g *gormZenaoDB) GetRemainingCapacity(eventID string) (uint32, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	var evt Event
+	evt.ID = uint(evtIDInt)
+	if err := g.db.First(&evt).Error; err != nil {
+		return 0, err
+	}
+	var count int64
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ?", evt.ID).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return evt.Capacity - uint32(count), nil
+}
+
+// SellTicket implements ZenaoDB.
+func (g *gormZenaoDB) SellTicket(eventID string, userID string) error {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	remaining, err := g.GetRemainingCapacity(eventID)
+	if err != nil {
+		return err
+	}
+	if remaining == 0 {
+		return errors.New("sold out")
+	}
+
+	if err := g.db.Create(&SoldTicket{EventID: uint(evtIDInt), UserID: userID}).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)

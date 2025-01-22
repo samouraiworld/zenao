@@ -82,15 +82,14 @@ func execStart() error {
 		return err
 	}
 
-	mailClient := resend.NewClient(resendSecretKey)
-
 	mux := http.NewServeMux()
 
 	zenao := &ZenaoServer{
-		Logger:  logger,
-		GetUser: getUserFromClerk,
-		DBTx:    db.Tx,
-		Chain:   chain,
+		Logger:     logger,
+		GetUser:    getUserFromClerk,
+		DBTx:       db.Tx,
+		Chain:      chain,
+		MailClient: resend.NewClient(resendSecretKey),
 	}
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
