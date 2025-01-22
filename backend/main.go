@@ -13,6 +13,7 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/clerk/clerk-sdk-go/v2/user"
 	"github.com/gnolang/gno/tm2/pkg/commands"
+	"github.com/resend/resend-go/v2"
 	"github.com/rs/cors"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
@@ -30,6 +31,7 @@ const (
 	chainEndpoint      = "127.0.0.1:26657"
 	chainID            = "dev"
 	dbPath             = "dev.db"
+	resendSecretKey    = "re_fj3PNvR6_Pu8PsJEHVZdV8o1xPj6qe1HE"
 )
 
 func main() {
@@ -79,6 +81,8 @@ func execStart() error {
 	if err != nil {
 		return err
 	}
+
+	mailClient := resend.NewClient(resendSecretKey)
 
 	mux := http.NewServeMux()
 
