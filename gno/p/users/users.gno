@@ -40,3 +40,8 @@ func (u *User) TransferOwnership(newOwner string) {
 	u.org.InstantExecute(proposalAddMemberJSON)
 	u.org.InstantExecute(proposalRemoveMemberJSON)
 }
+
+func (u *User) IsOwner() bool {
+	caller := std.PrevRealm().Addr().String()
+	return u.org.MemberModule.HasRole(caller, "admin")
+}
