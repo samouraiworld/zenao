@@ -11,6 +11,7 @@ import (
 	"github.com/gnolang/gno/gnovm"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
+	"github.com/gnolang/gno/tm2/pkg/crypto"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
@@ -50,7 +51,10 @@ func setupChain(adminMnemonic string, eventsIndexPkgPath string, chainID string,
 
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
-	eventRealmSrc, err := generateEventRealmSource(evtID, creatorID, req)
+	chainCreatorID := strings.ToLower(strings.TrimPrefix(creatorID, "user_"))
+	creatorRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, chainCreatorID)
+	creatorRealmAddr := derivePkgAddr(creatorRealmPkgPath)
+	eventRealmSrc, err := generateEventRealmSource(evtID, creatorRealmAddr, req)
 	if err != nil {
 		return err
 	}
@@ -95,14 +99,14 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	return nil
 }
 
-// CreateUser implements ZenaoChain.
-func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) error {
-	userRealmSrc, err := generateUserRealmSource(id, req)
+func (g *gnoZenaoChain) CreateUser(userID string) error {
+	userRealmSrc, err := generateUserRealmSource(userID)
 	if err != nil {
 		return err
 	}
 
-	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, id)
+	chainUserID := strings.ToLower(strings.TrimPrefix(userID, "user_"))
+	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, chainUserID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -120,6 +124,33 @@ func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) er
 	}
 
 	g.logger.Info("created user realm", zap.String("pkg-path", userRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
+// EditUser implements ZenaoChain.
+func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
+	chainUserID := strings.ToLower(strings.TrimPrefix(userID, "user_"))
+	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, chainUserID)
+
+	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 10000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: userRealmPkgPath,
+		Func:    "EditUser",
+		Args: []string{
+			req.DisplayName,
+			req.Bio,
+			req.AvatarUri,
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("edited user", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -153,17 +184,21 @@ func generateEventRealmSource(evtID string, creatorID string, req *zenaov1.Creat
 	return buf.String(), nil
 }
 
-func generateUserRealmSource(id string, req *zenaov1.CreateUserRequest) (string, error) {
+func generateUserRealmSource(id string) (string, error) {
 	m := map[string]string{
-		"id":       id,
-		"username": req.Username,
+		"id": id,
 	}
+
 	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
 	buf := strings.Builder{}
 	if err := t.Execute(&buf, m); err != nil {
 		return "", err
 	}
 	return buf.String(), nil
+}
+
+func derivePkgAddr(pkgPath string) string {
+	return string(crypto.AddressFromPreimage([]byte("pkgPath:" + pkgPath)).Bech32())
 }
 
 const eventRealmSourceTemplate = `package event
@@ -236,17 +271,25 @@ var user *users.User
 
 func init() {
 	user = users.NewUser("{{.id}}")
-
-	profile.SetStringField(profile.DisplayName, "{{.username}}")
 }
 
 func TransferOwnership(newOwner string) {
 	user.TransferOwnership(newOwner)
 }
+	
+func EditUser(displayName, bio, avatar string) {
+	if !user.IsOwner() {
+		panic("caller is not owner/admin of the user realm")
+	}
+	profile.SetStringField(profile.DisplayName, displayName)
+	profile.SetStringField(profile.Bio, bio)
+	profile.SetStringField(profile.Avatar, avatar)
+}
 
 func Render(path string) string {
 	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
-	s += md.HorizontalRule()
+	s += md.Image("User avatar", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
+	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
 	return s
 }
 `
