@@ -15,6 +15,10 @@ func (s *ZenaoServer) CreateEvent(
 ) (*connect.Response[zenaov1.CreateEventResponse], error) {
 	user := s.GetUser(ctx)
 
+	if err := s.EnsureUserExists(ctx, user); err != nil {
+		return nil, err
+	}
+
 	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", user.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
