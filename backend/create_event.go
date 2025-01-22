@@ -22,15 +22,6 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	//TODO delete just for test
-	s.EditUser(ctx, &connect.Request[zenaov1.EditUserRequest]{
-		Msg: &zenaov1.EditUserRequest{
-			DisplayName: "Killua",
-			Bio:         "I'm a pro hunter",
-			AvatarUri:   "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDh0bGdycmUyNG1jNXdtOHp5ejBlOXZ2Yml2bnYxOXRpN3oxZmlnMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HGQ4RWHYtw9Dmhj7mk/giphy.gif",
-		},
-	})
-
 	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {

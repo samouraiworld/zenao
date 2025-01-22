@@ -114,5 +114,3 @@ func (g *gormZenaoDB) UserExists(clerkID string) (uint, error) {
 	}
 	return user.ID, nil
 }
-
-var _ ZenaoDB = (*gormZenaoDB)(nil)
