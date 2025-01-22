@@ -42,6 +42,6 @@ func (s *ZenaoServer) EditUser(
 	}
 
 	return connect.NewResponse(&zenaov1.EditUserResponse{
-		Id: uint64(userID),
+		Id: userID,
 	}), nil
 }

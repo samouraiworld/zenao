@@ -9,6 +9,7 @@ require (
 	github.com/clerk/clerk-sdk-go/v2 v2.2.0
 	github.com/gnolang/gno v0.0.0-20250116081039-cb2255f61c0a
 	github.com/go-faker/faker/v4 v4.5.0
+	github.com/resend/resend-go/v2 v2.14.0
 	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0

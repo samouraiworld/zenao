@@ -3,30 +3,36 @@ package main
 import (
 	"context"
 
+	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
 
 type ZenaoServer struct {
-	Logger  *zap.Logger
-	GetUser func(ctx context.Context) ZenaoUser
-	DBTx    func(func(db ZenaoDB) error) error
-	Chain   ZenaoChain
+	Logger     *zap.Logger
+	GetUser    func(ctx context.Context) ZenaoUser
+	DBTx       func(func(db ZenaoDB) error) error
+	Chain      ZenaoChain
+	MailClient *resend.Client
 }
 
 type ZenaoUser struct {
 	ID     string
+	Email  string
 	Banned bool
 }
 
 // ClerkID is used to create & identify users
 // User ID is auto-incremented used for database & on-chain related logic
 type ZenaoDB interface {
-	CreateUser(clerkID string) (uint, error)
-	UserExists(clerkID string) (uint, error)
-	EditUser(userID uint, req *zenaov1.EditUserRequest) error
+	CreateUser(clerkID string) (string, error)
+	UserExists(clerkID string) (string, error)
+	EditUser(userID string, req *zenaov1.EditUserRequest) error
 
-	CreateEvent(creatorID uint, req *zenaov1.CreateEventRequest) (uint, error)
+	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
+
+	Participate(eventID string, userID string) error
+	GetEvent(eventID string) (*Event, error)
 }
 
 type ZenaoChain interface {
@@ -34,4 +40,5 @@ type ZenaoChain interface {
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
+	Participate(eventID string, userID string) error
 }

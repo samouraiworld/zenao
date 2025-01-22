@@ -9,9 +9,9 @@ import (
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/gnovm"
+	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
-	"github.com/gnolang/gno/tm2/pkg/crypto"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
@@ -51,16 +51,16 @@ func setupChain(adminMnemonic string, eventsIndexPkgPath string, chainID string,
 
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
-	creatorRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, creatorID)
-	creatorRealmAddr := derivePkgAddr(creatorRealmPkgPath)
-	eventRealmSrc, err := generateEventRealmSource(evtID, creatorRealmAddr, req)
+	creatorAddr := gnolang.DerivePkgAddr(userRealmPkgPath(creatorID)).String()
+
+	eventRealmSrc, err := generateEventRealmSource(evtID, creatorAddr, g.signerInfo.GetAddress().String(), req)
 	if err != nil {
 		return err
 	}
 
 	// TODO: single tx with all messages
 
-	eventRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/events/e%s`, evtID)
+	eventPkgPath := eventRealmPkgPath(evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -69,7 +69,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 		Creator: g.signerInfo.GetAddress(),
 		Package: &gnovm.MemPackage{
 			Name:  "event",
-			Path:  eventRealmPkgPath,
+			Path:  eventPkgPath,
 			Files: []*gnovm.MemFile{{Name: "event.gno", Body: eventRealmSrc}},
 		},
 	}))
@@ -77,7 +77,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 		return err
 	}
 
-	g.logger.Info("created event realm", zap.String("pkg-path", eventRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("created event realm", zap.String("pkg-path", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -92,6 +92,9 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 			fmt.Sprintf("%d", req.EndDate),
 		},
 	}))
+	if err != nil {
+		return err
+	}
 
 	g.logger.Info("indexed event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
@@ -104,7 +107,7 @@ func (g *gnoZenaoChain) CreateUser(userID string) error {
 		return err
 	}
 
-	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, userID)
+	userPkgPath := userRealmPkgPath(userID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -113,7 +116,7 @@ func (g *gnoZenaoChain) CreateUser(userID string) error {
 		Creator: g.signerInfo.GetAddress(),
 		Package: &gnovm.MemPackage{
 			Name:  "user",
-			Path:  userRealmPkgPath,
+			Path:  userPkgPath,
 			Files: []*gnovm.MemFile{{Name: "user.gno", Body: userRealmSrc}},
 		},
 	}))
@@ -121,7 +124,31 @@ func (g *gnoZenaoChain) CreateUser(userID string) error {
 		return err
 	}
 
-	g.logger.Info("created user realm", zap.String("pkg-path", userRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("created user realm", zap.String("pkg-path", userPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
+// Participate implements ZenaoChain.
+func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
+	eventPkgPath := eventRealmPkgPath(eventID)
+	userPkgPath := userRealmPkgPath(userID)
+
+	// XXX: this won't work because the admin of the event is the event
+	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: eventPkgPath,
+		Func:    "AddParticipant",
+		Args:    []string{gnolang.DerivePkgAddr(userPkgPath).String()},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("added participant", zap.String("user", userPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -148,8 +175,15 @@ func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) er
 	}
 
 	g.logger.Info("edited user", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
-
 	return nil
+}
+
+func eventRealmPkgPath(eventID string) string {
+	return fmt.Sprintf("gno.land/r/zenao/events/e%s", eventID)
+}
+
+func userRealmPkgPath(userID string) string {
+	return fmt.Sprintf("gno.land/r/zenao/users/u%s", userID)
 }
 
 var _ ZenaoChain = (*gnoZenaoChain)(nil)
@@ -167,11 +201,12 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func generateEventRealmSource(evtID string, creatorID string, req *zenaov1.CreateEventRequest) (string, error) {
+func generateEventRealmSource(evtID string, creatorAddr string, zenaoAdminAddr string, req *zenaov1.CreateEventRequest) (string, error) {
 	m := map[string]interface{}{
-		"id":        evtID,
-		"creatorID": creatorID,
-		"req":       req,
+		"id":             evtID,
+		"creatorAddr":    creatorAddr,
+		"req":            req,
+		"zenaoAdminAddr": zenaoAdminAddr,
 	}
 	t := template.Must(template.New("").Parse(eventRealmSourceTemplate))
 	buf := strings.Builder{}
@@ -194,10 +229,6 @@ func generateUserRealmSource(id string) (string, error) {
 	return buf.String(), nil
 }
 
-func derivePkgAddr(pkgPath string) string {
-	return string(crypto.AddressFromPreimage([]byte("pkgPath:" + pkgPath)).Bech32())
-}
-
 const eventRealmSourceTemplate = `package event
 
 import (
@@ -214,8 +245,19 @@ var event *events.Event
 
 func init() {
 	eventID := "{{.id}}"
-	creator := "{{.creatorID}}"
-	event = events.NewEvent(eventID, creator, "{{.req.Title}}", "{{.req.Description}}" ,{{.req.StartDate}}, {{.req.EndDate}}, {{.req.TicketPrice}}, {{.req.Capacity}}, profile.GetStringField) 
+	creator := "{{.creatorAddr}}"
+	event = events.NewEvent(
+		eventID,
+		creator,
+		"{{.req.Title}}",
+		"{{.req.Description}}",
+		{{.req.StartDate}},
+		{{.req.EndDate}},
+		{{.req.TicketPrice}},
+		{{.req.Capacity}},
+		profile.GetStringField,
+		"{{.zenaoAdminAddr}}",
+	) 
 
 	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
 	profile.SetStringField(profile.Bio, "{{.req.Description}}")

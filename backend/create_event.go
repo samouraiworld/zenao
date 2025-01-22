@@ -37,9 +37,13 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, errors.New("user is banned")
 	}
 
+	if req.Msg.TicketPrice != 0 {
+		return nil, errors.New("event with price is not supported")
+	}
+
 	// TODO: validate request
 
-	evtID := uint(0)
+	evtID := ""
 
 	if err := s.DBTx(func(db ZenaoDB) error {
 		var err error
@@ -58,6 +62,6 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{
-		Id: uint64(evtID),
+		Id: evtID,
 	}), nil
 }

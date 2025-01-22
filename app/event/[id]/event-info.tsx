@@ -5,7 +5,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
+import { useClerk } from "@clerk/nextjs";
 import { eventOptions } from "@/lib/queries/event";
+import { Button } from "@/components/shadcn/button";
+import { zenaoClient } from "@/app/zenao-client";
 
 export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
@@ -47,10 +50,32 @@ export function EventInfo({ id }: { id: string }) {
             <p>Price: {data.ticketPrice}</p>
             <p>Capacity: {data.capacity}</p>
           </div>
+          <ParticipateButton eventId={id} />
         </div>
       ) : (
         <p>{`Event doesn't exist`}</p>
       )}
     </div>
+  );
+}
+
+function ParticipateButton({ eventId }: { eventId: string }) {
+  const { session } = useClerk();
+  return (
+    <Button
+      onClick={async () => {
+        const token = await session?.getToken();
+        if (!token) {
+          throw new Error("invalid token");
+        }
+        await zenaoClient.participate(
+          { eventId },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        alert("Success");
+      }}
+    >
+      Participate
+    </Button>
   );
 }

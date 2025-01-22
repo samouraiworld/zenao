@@ -15,7 +15,7 @@ var event *events.Event
 func init() {
 	eventID := "1"
 	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
-	event = events.NewEvent(eventID, creator, "title", "description", 0, 0, 0, 0, profile.GetStringField)
+	event = events.NewEvent(eventID, creator, "title", "description", 0, 0, 0, 0, profile.GetStringField, "")
 
 	profile.SetStringField(profile.DisplayName, "title")
 	profile.SetStringField(profile.Bio, "description")
