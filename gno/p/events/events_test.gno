@@ -17,8 +17,8 @@ var (
 func TestNewEvent(t *testing.T) {
 	std.TestSetOrigCaller(alice)
 	event := NewEvent("1", alice.String(), "event", "this is an event", 0, 0, 0, 0, nil, "")
-	if event.org.MemberModule.GetMembers()[0] != alice.String() {
-		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[0])
+	if event.org.MemberModule.GetMembers()[1] != alice.String() {
+		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[1])
 	}
 	if !event.org.MemberModule.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
@@ -28,15 +28,15 @@ func TestNewEvent(t *testing.T) {
 func TestAddParticipant(t *testing.T) {
 	std.TestSetOrigCaller(alice)
 	event := NewEvent("1", alice.String(), "event", "this is an event", 0, 0, 0, 0, nil, "")
-	if event.org.MemberModule.GetMembers()[0] != alice.String() {
-		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[0])
+	if event.org.MemberModule.GetMembers()[1] != alice.String() {
+		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[1])
 	}
 	if !event.org.MemberModule.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
 	event.AddParticipant(bob.String())
-	if event.org.MemberModule.GetMembers()[1] != bob.String() {
-		t.Fatalf("expected %s, got %s", bob.String(), event.org.MemberModule.GetMembers()[1])
+	if event.org.MemberModule.GetMembers()[2] != bob.String() {
+		t.Fatalf("expected %s, got %s", bob.String(), event.org.MemberModule.GetMembers()[2])
 	}
 	if !event.org.MemberModule.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to have participant role")
@@ -44,8 +44,8 @@ func TestAddParticipant(t *testing.T) {
 
 	event.AddGatekeeper(dave.String())
 	event.AddParticipant(dave.String())
-	if len(event.org.MemberModule.GetMembers()) != 3 {
-		t.Fatalf("expected 3, got %d", dave.String(), len(event.org.MemberModule.GetMembers()))
+	if len(event.org.MemberModule.GetMembers()) != 4 {
+		t.Fatalf("expected 4, got %d", len(event.org.MemberModule.GetMembers()))
 	}
 	if !event.org.MemberModule.HasRole(dave.String(), "gatekeeper") {
 		t.Fatalf("expected dave to have gatekeeper role")
@@ -67,22 +67,22 @@ func TestAddParticipant(t *testing.T) {
 func TestRemoveParticipant(t *testing.T) {
 	std.TestSetOrigCaller(alice)
 	event := NewEvent("1", alice.String(), "event", "this is an event", 0, 0, 0, 0, nil, "")
-	if event.org.MemberModule.GetMembers()[0] != alice.String() {
-		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[0])
+	if event.org.MemberModule.GetMembers()[1] != alice.String() {
+		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[1])
 	}
 	if !event.org.MemberModule.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
 	event.AddParticipant(bob.String())
-	if event.org.MemberModule.GetMembers()[1] != bob.String() {
-		t.Fatalf("expected %s, got %s", bob.String(), event.org.MemberModule.GetMembers()[1])
+	if event.org.MemberModule.GetMembers()[2] != bob.String() {
+		t.Fatalf("expected %s, got %s", bob.String(), event.org.MemberModule.GetMembers()[2])
 	}
 	if !event.org.MemberModule.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to have participant role")
 	}
 	event.RemoveParticipant(bob.String())
-	if len(event.org.MemberModule.GetMembers()) != 1 {
-		t.Fatalf("expected 1 member, got %d", len(event.org.MemberModule.GetMembers()))
+	if len(event.org.MemberModule.GetMembers()) != 2 {
+		t.Fatalf("expected 2 member, got %d", len(event.org.MemberModule.GetMembers()))
 	}
 	if event.org.MemberModule.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to not have participant role")
@@ -90,8 +90,8 @@ func TestRemoveParticipant(t *testing.T) {
 	event.AddGatekeeper(dave.String())
 	event.AddParticipant(dave.String())
 	event.RemoveParticipant(dave.String())
-	if len(event.org.MemberModule.GetMembers()) != 2 {
-		t.Fatalf("expected 2 member, got %d", len(event.org.MemberModule.GetMembers()))
+	if len(event.org.MemberModule.GetMembers()) != 3 {
+		t.Fatalf("expected 3 member, got %d", len(event.org.MemberModule.GetMembers()))
 	}
 	if !event.org.MemberModule.HasRole(dave.String(), "gatekeeper") {
 		t.Fatalf("expected dave to have gatekeeper role")
@@ -100,8 +100,8 @@ func TestRemoveParticipant(t *testing.T) {
 		t.Fatalf("expected dave be a member")
 	}
 	event.RemoveGatekeeper(dave.String())
-	if len(event.org.MemberModule.GetMembers()) != 1 {
-		t.Fatalf("expected 1 members, got %d", len(event.org.MemberModule.GetMembers()))
+	if len(event.org.MemberModule.GetMembers()) != 2 {
+		t.Fatalf("expected 2 members, got %d", len(event.org.MemberModule.GetMembers()))
 	}
 	if event.org.MemberModule.HasRole(dave.String(), "gatekeeper") {
 		t.Fatalf("expected dave to not have gatekeeper role")
