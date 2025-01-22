@@ -94,24 +94,6 @@ func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (str
 	return user.ID, nil
 }
 
-// getRemainingCapacity implements ZenaoDB.
-func (g *gormZenaoDB) getRemainingCapacity(eventID string) (uint32, error) {
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
-	if err != nil {
-		return 0, err
-	}
-	var evt Event
-	evt.ID = uint(evtIDInt)
-	if err := g.db.First(&evt).Error; err != nil {
-		return 0, err
-	}
-	var count int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ?", evt.ID).Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return evt.Capacity - uint32(count), nil
-}
-
 // Participate implements ZenaoDB.
 func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
@@ -119,11 +101,19 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 		return err
 	}
 
-	remaining, err := g.getRemainingCapacity(eventID)
-	if err != nil {
+	var evt Event
+	evt.ID = uint(evtIDInt)
+	if err := g.db.First(&evt).Error; err != nil {
 		return err
 	}
-	if remaining == 0 {
+
+	var participantsCount int64
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ?", evtIDInt).Count(&participantsCount).Error; err != nil {
+		return err
+	}
+
+	remaining := int64(evt.Capacity) - participantsCount
+	if remaining <= 0 {
 		return errors.New("sold out")
 	}
 

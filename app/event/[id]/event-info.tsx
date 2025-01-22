@@ -72,6 +72,7 @@ function ParticipateButton({ eventId }: { eventId: string }) {
           { eventId },
           { headers: { Authorization: `Bearer ${token}` } },
         );
+        alert("Success");
       }}
     >
       Participate

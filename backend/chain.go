@@ -52,7 +52,8 @@ func setupChain(adminMnemonic string, eventsIndexPkgPath string, chainID string,
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
 	creatorAddr := gnolang.DerivePkgAddr(userRealmPkgPath(creatorID)).String()
-	eventRealmSrc, err := generateEventRealmSource(evtID, creatorAddr, req)
+
+	eventRealmSrc, err := generateEventRealmSource(evtID, creatorAddr, g.signerInfo.GetAddress().String(), req)
 	if err != nil {
 		return err
 	}
@@ -176,11 +177,12 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func generateEventRealmSource(evtID string, creatorAddr string, req *zenaov1.CreateEventRequest) (string, error) {
+func generateEventRealmSource(evtID string, creatorAddr string, zenaoAdminAddr string, req *zenaov1.CreateEventRequest) (string, error) {
 	m := map[string]interface{}{
-		"id":          evtID,
-		"creatorAddr": creatorAddr,
-		"req":         req,
+		"id":             evtID,
+		"creatorAddr":    creatorAddr,
+		"req":            req,
+		"zenaoAdminAddr": zenaoAdminAddr,
 	}
 	t := template.Must(template.New("").Parse(eventRealmSourceTemplate))
 	buf := strings.Builder{}
@@ -220,7 +222,18 @@ var event *events.Event
 func init() {
 	eventID := "{{.id}}"
 	creator := "{{.creatorAddr}}"
-	event = events.NewEvent(eventID, creator, "{{.req.Title}}", "{{.req.Description}}" ,{{.req.StartDate}}, {{.req.EndDate}}, {{.req.TicketPrice}}, {{.req.Capacity}}, profile.GetStringField) 
+	event = events.NewEvent(
+		eventID,
+		creator,
+		"{{.req.Title}}",
+		"{{.req.Description}}",
+		{{.req.StartDate}},
+		{{.req.EndDate}},
+		{{.req.TicketPrice}},
+		{{.req.Capacity}},
+		profile.GetStringField,
+		"{{.zenaoAdminAddr}}",
+	) 
 
 	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
 	profile.SetStringField(profile.Bio, "{{.req.Description}}")
