@@ -28,6 +28,7 @@ type ZenaoDB interface {
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserExists(userID string) (bool, error)
 	Participate(eventID string, userID string) error
+	GetEvent(eventID string) (*Event, error)
 }
 
 type ZenaoChain interface {
