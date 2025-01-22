@@ -183,7 +183,7 @@ var event *events.Event
 func init() {
 	eventID := "{{.id}}"
 	creator := "{{.creatorID}}"
-	event = events.NewEvent(eventID, creator, "{{.req.Title}}", "{{.req.Description}}" ,{{.req.StartDate}}, {{.req.EndDate}}, {{.req.TicketPrice}}, {{.req.Capacity}}) 
+	event = events.NewEvent(eventID, creator, "{{.req.Title}}", "{{.req.Description}}" ,{{.req.StartDate}}, {{.req.EndDate}}, {{.req.TicketPrice}}, {{.req.Capacity}}, profile.GetStringField) 
 
 	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
 	profile.SetStringField(profile.Bio, "{{.req.Description}}")
@@ -212,7 +212,7 @@ func Render(path string) string {
 	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
 	s += md.BulletList([]string{
 		ufmt.Sprintf("Time: From %s to %s", time.Unix(event.GetStartDate(), 0).Format(time.DateTime), time.Unix(event.GetEndDate(), 0).Format(time.DateTime)),
-		ufmt.Sprintf("Price: %d€", event.GetTicketPrice()),
+		ufmt.Sprintf("Price: %g€", event.GetTicketPrice()),
 		ufmt.Sprintf("Capacity: %d/%d", event.CountParticipants(), event.GetCapacity()),
 		ufmt.Sprintf("Organizer: %s", profile.GetStringField(std.Address(event.GetCreator()), profile.DisplayName, "")),
 	}) + "\n"

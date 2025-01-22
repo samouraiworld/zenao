@@ -1,20 +1,27 @@
 package events
 
 import (
+	"std"
+
+	"gno.land/p/demo/json"
+	"gno.land/p/demo/ufmt"
 	"gno.land/p/zenao/dao_roles_based"
 )
 
+type GetProfileString func(addr std.Address, field string, def string) string
+
 type Event struct {
-	id          string
-	creator     string
-	startDate   int64
-	endDate     int64
-	ticketPrice int64
-	capacity    int64
-	org         *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
+	id               string
+	creator          string
+	startDate        int64
+	endDate          int64
+	ticketPrice      float64
+	capacity         int64
+	getProfileString GetProfileString
+	org              *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
 }
 
-func NewEvent(id string, creator string, title string, description string, startDate int64, endDate int64, ticketPrice int64, capacity int64) *Event {
+func NewEvent(id string, creator string, title string, description string, startDate int64, endDate int64, ticketPrice float64, capacity int64, getProfileString GetProfileString) *Event {
 	roles := []string{"organizer", "gatekeeper", "participant"}
 	members := [][]string{
 		{creator, "organizer"},
@@ -25,13 +32,14 @@ func NewEvent(id string, creator string, title string, description string, start
 	// Don't pass the message handlers, since they are by default in the user dao
 	dao := dao_roles_based.NewDaoRolesBasedJSON(title, description, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	event := &Event{
-		id:          id,
-		creator:     creator,
-		startDate:   startDate,
-		endDate:     endDate,
-		ticketPrice: ticketPrice,
-		capacity:    capacity,
-		org:         dao,
+		id:               id,
+		creator:          creator,
+		startDate:        startDate,
+		endDate:          endDate,
+		ticketPrice:      ticketPrice,
+		capacity:         capacity,
+		org:              dao,
+		getProfileString: getProfileString,
 	}
 
 	return event
@@ -105,10 +113,27 @@ func (e *Event) GetStartDate() int64 {
 	return e.startDate
 }
 
-func (e *Event) GetTicketPrice() int64 {
+func (e *Event) GetTicketPrice() float64 {
 	return e.ticketPrice
 }
 
 func (e *Event) GetCapacity() int64 {
 	return e.capacity
+}
+
+func (e *Event) GetInfoJSON() string {
+	obj := json.ObjectNode("", map[string]*json.Node{
+		"title":       json.StringNode("", e.getProfileString(std.CurrentRealm().Addr(), "DisplayName", "")),
+		"description": json.StringNode("", e.getProfileString(std.CurrentRealm().Addr(), "Bio", "")),
+		"imageUri":    json.StringNode("", e.getProfileString(std.CurrentRealm().Addr(), "Avatar", "")),
+		"startDate":   json.StringNode("", ufmt.Sprintf("%d", e.startDate)),
+		"endDate":     json.StringNode("", ufmt.Sprintf("%d", e.endDate)),
+		"ticketPrice": json.NumberNode("", float64(e.ticketPrice)),
+		"capacity":    json.NumberNode("", float64(e.capacity)),
+	})
+	bz, err := json.Marshal(obj)
+	if err != nil {
+		panic(err)
+	}
+	return string(bz)
 }
