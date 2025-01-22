@@ -184,7 +184,7 @@ func eventRealmPkgPath(eventID string) string {
 }
 
 func userRealmPkgPath(userID string) string {
-	return fmt.Sprintf("gno.land/r/zenao/users/u%s", strings.TrimPrefix(userID, "user_"))
+	return fmt.Sprintf("gno.land/r/zenao/users/u%s", strings.ToLower(strings.TrimPrefix(userID, "user_")))
 }
 
 var _ ZenaoChain = (*gnoZenaoChain)(nil)
