@@ -109,7 +109,11 @@ func execStart() error {
 
 func getUserFromClerk(ctx context.Context) ZenaoUser {
 	clerkUser := authn.GetInfo(ctx).(*clerk.User)
-	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned}
+	email := ""
+	if len(clerkUser.EmailAddresses) != 0 {
+		email = clerkUser.EmailAddresses[0].EmailAddress
+	}
+	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {

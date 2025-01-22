@@ -18,6 +18,7 @@ type ZenaoServer struct {
 
 type ZenaoUser struct {
 	ID     string
+	Email  string
 	Banned bool
 }
 
@@ -25,6 +26,7 @@ type ZenaoDB interface {
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
 	CreateUser(id string, req *zenaov1.CreateUserRequest) (string, error)
 	Participate(eventID string, userID string) error
+	GetEvent(id string) (*Event, error)
 }
 
 type ZenaoChain interface {

@@ -60,7 +60,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 
 	// TODO: single tx with all messages
 
-	eventRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/events/e%s`, evtID)
+	eventPkgPath := eventRealmPkgPath(evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -69,7 +69,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 		Creator: g.signerInfo.GetAddress(),
 		Package: &gnovm.MemPackage{
 			Name:  "event",
-			Path:  eventRealmPkgPath,
+			Path:  eventPkgPath,
 			Files: []*gnovm.MemFile{{Name: "event.gno", Body: eventRealmSrc}},
 		},
 	}))
@@ -77,7 +77,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 		return err
 	}
 
-	g.logger.Info("created event realm", zap.String("pkg-path", eventRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("created event realm", zap.String("pkg-path", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -108,7 +108,7 @@ func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) er
 		return err
 	}
 
-	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, id)
+	userPkgPath := userRealmPkgPath(id)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -117,7 +117,7 @@ func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) er
 		Creator: g.signerInfo.GetAddress(),
 		Package: &gnovm.MemPackage{
 			Name:  "user",
-			Path:  userRealmPkgPath,
+			Path:  userPkgPath,
 			Files: []*gnovm.MemFile{{Name: "user.gno", Body: userRealmSrc}},
 		},
 	}))
@@ -125,7 +125,7 @@ func (g *gnoZenaoChain) CreateUser(id string, req *zenaov1.CreateUserRequest) er
 		return err
 	}
 
-	g.logger.Info("created user realm", zap.String("pkg-path", userRealmPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("created user realm", zap.String("pkg-path", userPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }

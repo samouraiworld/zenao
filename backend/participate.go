@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
+	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
@@ -25,10 +27,26 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		if err := db.Participate(req.Msg.EventId, user.ID); err != nil {
 			return err
 		}
+
+		evt, err := db.GetEvent(req.Msg.EventId)
+		if err != nil {
+			return err
+		}
+
 		if err := s.Chain.Participate(req.Msg.EventId, user.ID); err != nil {
 			// XXX: handle case where tx is broadcasted but we have an error afterwards, eg: chain has been updated but db rollbacked
 			return err
 		}
+
+		if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+			From:    "Zenao <onboarding@resend.dev>",
+			To:      []string{user.Email},
+			Subject: fmt.Sprintf("Your ticket for %s", evt.Title),
+			Text:    "TODO",
+		}); err != nil {
+			return err
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err

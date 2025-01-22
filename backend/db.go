@@ -81,6 +81,20 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 	return fmt.Sprintf("%d", evt.ID), nil
 }
 
+// GetEvent implements ZenaoDB.
+func (g *gormZenaoDB) GetEvent(id string) (*Event, error) {
+	evtIDInt, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var evt Event
+	evt.ID = uint(evtIDInt)
+	if err := g.db.First(&evt).Error; err != nil {
+		return nil, err
+	}
+	return &evt, nil
+}
+
 // CreateUser implements ZenaoDB.
 func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (string, error) {
 	// XXX: validate?
@@ -96,19 +110,13 @@ func (g *gormZenaoDB) CreateUser(id string, req *zenaov1.CreateUserRequest) (str
 
 // Participate implements ZenaoDB.
 func (g *gormZenaoDB) Participate(eventID string, userID string) error {
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	evt, err := g.GetEvent(eventID)
 	if err != nil {
 		return err
 	}
 
-	var evt Event
-	evt.ID = uint(evtIDInt)
-	if err := g.db.First(&evt).Error; err != nil {
-		return err
-	}
-
 	var participantsCount int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ?", evtIDInt).Count(&participantsCount).Error; err != nil {
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ?", evt.ID).Count(&participantsCount).Error; err != nil {
 		return err
 	}
 
@@ -118,14 +126,14 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 	}
 
 	var count int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evtIDInt, userID).Count(&count).Error; err != nil {
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userID).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
 		return errors.New("user is already participant for this event")
 	}
 
-	if err := g.db.Create(&SoldTicket{EventID: uint(evtIDInt), UserID: userID}).Error; err != nil {
+	if err := g.db.Create(&SoldTicket{EventID: evt.ID, UserID: userID}).Error; err != nil {
 		return err
 	}
 
