@@ -18,7 +18,7 @@ message CreateEventRequest {
   uint32 capacity = 7;
 }
 
-message CreateEventResponse { string id = 1; }
+message CreateEventResponse { uint64 id = 1; }
 
 message EditUserRequest {
   string display_name = 1;
@@ -26,4 +26,4 @@ message EditUserRequest {
   string avatar_uri = 3;
 }
 
-message EditUserResponse { string id = 1; }
+message EditUserResponse { uint64 id = 1; }

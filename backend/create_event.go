@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -15,11 +16,22 @@ func (s *ZenaoServer) CreateEvent(
 ) (*connect.Response[zenaov1.CreateEventResponse], error) {
 	user := s.GetUser(ctx)
 
-	if err := s.EnsureUserExists(ctx, user); err != nil {
+	// retrieve auto-incremented user ID from database, do not use clerk's user ID directly for realms
+	userID, err := s.EnsureUserExists(ctx, user)
+	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", user.ID), zap.Bool("user-banned", user.Banned))
+	//TODO delete just for test
+	s.EditUser(ctx, &connect.Request[zenaov1.EditUserRequest]{
+		Msg: &zenaov1.EditUserRequest{
+			DisplayName: "Killua",
+			Bio:         "I'm a pro hunter",
+			AvatarUri:   "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaDh0bGdycmUyNG1jNXdtOHp5ejBlOXZ2Yml2bnYxOXRpN3oxZmlnMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HGQ4RWHYtw9Dmhj7mk/giphy.gif",
+		},
+	})
+
+	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -27,15 +39,15 @@ func (s *ZenaoServer) CreateEvent(
 
 	// TODO: validate request
 
-	evtID := ""
+	evtID := uint(0)
 
 	if err := s.DBTx(func(db ZenaoDB) error {
 		var err error
-		if evtID, err = db.CreateEvent(user.ID, req.Msg); err != nil {
+		if evtID, err = db.CreateEvent(userID, req.Msg); err != nil {
 			return err
 		}
 
-		if err := s.Chain.CreateEvent(evtID, user.ID, req.Msg); err != nil {
+		if err := s.Chain.CreateEvent(fmt.Sprintf("%d", evtID), fmt.Sprintf("%d", userID), req.Msg); err != nil {
 			s.Logger.Error("create-event", zap.Error(err))
 			return err
 		}
@@ -46,6 +58,6 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{
-		Id: evtID,
+		Id: uint64(evtID),
 	}), nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
@@ -65,14 +66,14 @@ func execFakegen() error {
 			TicketPrice: a.TicketPrice,
 			Capacity:    uint32(a.Capacity),
 		}
-		creatorID := "user_alice"
+		creatorID := 1
 
-		evtId, err := db.CreateEvent(creatorID, req)
+		evtId, err := db.CreateEvent(uint(creatorID), req)
 		if err != nil {
 			return err
 		}
 
-		if err := chain.CreateEvent(evtId, creatorID, req); err != nil {
+		if err := chain.CreateEvent(fmt.Sprintf("%d", evtId), fmt.Sprintf("%d", creatorID), req); err != nil {
 			return err
 		}
 	}

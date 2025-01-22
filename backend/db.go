@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -18,7 +18,8 @@ type Event struct {
 	ImageURI    string
 	TicketPrice float64
 	Capacity    uint32
-	CreatorID   string
+	CreatorID   uint
+	Creator     User `gorm:"foreignKey:CreatorID"`
 }
 
 type SoldTicket struct {
@@ -29,10 +30,8 @@ type SoldTicket struct {
 }
 
 type User struct {
-	ID          string `gorm:"primaryKey"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	gorm.Model         // this ID should be used for any database related logic (like querying)
+	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -63,7 +62,7 @@ func (g *gormZenaoDB) Tx(cb func(db ZenaoDB) error) error {
 }
 
 // CreateEvent implements ZenaoDB.
-func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error) {
+func (g *gormZenaoDB) CreateEvent(creatorID uint, req *zenaov1.CreateEventRequest) (uint, error) {
 	// XXX: validate?
 	evt := &Event{
 		Title:       req.Title,
@@ -76,27 +75,27 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		Capacity:    req.Capacity,
 	}
 	if err := g.db.Create(evt).Error; err != nil {
-		return "", err
+		return 0, err
 	}
-	return fmt.Sprintf("%d", evt.ID), nil
+	return evt.ID, nil
 }
 
 // CreateUser implements ZenaoDB.
-func (g *gormZenaoDB) CreateUser(userID string) (string, error) {
+func (g *gormZenaoDB) CreateUser(clerkID string) (uint, error) {
 	user := &User{
-		ID: userID,
+		ClerkID: clerkID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
-		return "", err
+		return 0, err
 	}
 	return user.ID, nil
 }
 
 // EditUser implements ZenaoDB.
-func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) error {
+func (g *gormZenaoDB) EditUser(userID uint, req *zenaov1.EditUserRequest) error {
 	// XXX: validate?
 	user := &User{
-		ID:          userID,
+		Model:       gorm.Model{ID: userID},
 		DisplayName: req.DisplayName,
 		Bio:         req.Bio,
 		AvatarURI:   req.AvatarUri,
@@ -105,12 +104,15 @@ func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) erro
 }
 
 // UserExists implements ZenaoDB.
-func (g *gormZenaoDB) UserExists(userID string) (bool, error) {
-	var count int64
-	if err := g.db.Model(&User{}).Where("id = ?", userID).Count(&count).Error; err != nil {
-		return false, err
+func (g *gormZenaoDB) UserExists(clerkID string) (uint, error) {
+	var user User
+	if err := g.db.Where("clerk_id = ?", clerkID).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, nil
+		}
+		return 0, err
 	}
-	return count > 0, nil
+	return user.ID, nil
 }
 
 var _ ZenaoDB = (*gormZenaoDB)(nil)

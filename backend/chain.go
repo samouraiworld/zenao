@@ -51,8 +51,7 @@ func setupChain(adminMnemonic string, eventsIndexPkgPath string, chainID string,
 
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
-	chainCreatorID := strings.ToLower(strings.TrimPrefix(creatorID, "user_"))
-	creatorRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, chainCreatorID)
+	creatorRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, creatorID)
 	creatorRealmAddr := derivePkgAddr(creatorRealmPkgPath)
 	eventRealmSrc, err := generateEventRealmSource(evtID, creatorRealmAddr, req)
 	if err != nil {
@@ -105,8 +104,7 @@ func (g *gnoZenaoChain) CreateUser(userID string) error {
 		return err
 	}
 
-	chainUserID := strings.ToLower(strings.TrimPrefix(userID, "user_"))
-	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, chainUserID)
+	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, userID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -130,8 +128,7 @@ func (g *gnoZenaoChain) CreateUser(userID string) error {
 
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
-	chainUserID := strings.ToLower(strings.TrimPrefix(userID, "user_"))
-	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, chainUserID)
+	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, userID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
