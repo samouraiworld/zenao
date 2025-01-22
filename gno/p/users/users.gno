@@ -20,7 +20,7 @@ func NewUser(id string) *User {
 	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"admin","count":"1"}}]`
 
 	// Don't pass the message handlers, since they are by default in the user dao
-	dao := dao_roles_based.NewDaoRolesBasedJSON(id, "zenao dao user", roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
+	dao := dao_roles_based.NewDaoRolesBasedJSON("Zenao user #"+id, "Zenao managed user", roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	user := &User{
 		org: dao,
 	}

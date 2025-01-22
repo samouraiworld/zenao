@@ -22,18 +22,22 @@ type ZenaoUser struct {
 	Banned bool
 }
 
+// ClerkID is used to create & identify users
+// User ID is auto-incremented used for database & on-chain related logic
 type ZenaoDB interface {
-	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
-	CreateUser(userID string) (string, error)
+	CreateUser(clerkID string) (string, error)
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
-	UserExists(userID string) (bool, error)
-	Participate(eventID string, userID string) error
+	UserExists(clerkID string) (string, error)
+
+	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
 	GetEvent(eventID string) (*Event, error)
+	Participate(eventID string, userID string) error
 }
 
 type ZenaoChain interface {
-	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	CreateUser(userID string) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+
+	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	Participate(eventID string, userID string) error
 }

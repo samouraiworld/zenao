@@ -29,10 +29,6 @@ message EditUserRequest {
 
 message EditUserResponse { string id = 1; }
 
-message ParticipateRequest {
-  string event_id = 1;
-}
+message ParticipateRequest { string event_id = 1; }
 
-message ParticipateResponse {
-  string ticket_secret = 1;
-}
+message ParticipateResponse { string ticket_secret = 1; }

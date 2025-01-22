@@ -20,7 +20,8 @@ type Event struct {
 	ImageURI    string
 	TicketPrice float64
 	Capacity    uint32
-	CreatorID   string
+	CreatorID   uint
+	Creator     User `gorm:"foreignKey:CreatorID"`
 }
 
 type SoldTicket struct {
@@ -31,10 +32,8 @@ type SoldTicket struct {
 }
 
 type User struct {
-	ID          string `gorm:"primaryKey"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	gorm.Model         // this ID should be used for any database related logic (like querying)
+	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -67,13 +66,17 @@ func (g *gormZenaoDB) Tx(cb func(db ZenaoDB) error) error {
 // CreateEvent implements ZenaoDB.
 func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error) {
 	// XXX: validate?
+	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
+	if err != nil {
+		return "", err
+	}
 	evt := &Event{
 		Title:       req.Title,
 		Description: req.Description,
 		ImageURI:    req.ImageUri,
 		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
 		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
-		CreatorID:   creatorID,
+		CreatorID:   uint(creatorIDInt),
 		TicketPrice: req.TicketPrice,
 		Capacity:    req.Capacity,
 	}
@@ -98,14 +101,14 @@ func (g *gormZenaoDB) GetEvent(id string) (*Event, error) {
 }
 
 // CreateUser implements ZenaoDB.
-func (g *gormZenaoDB) CreateUser(userID string) (string, error) {
+func (g *gormZenaoDB) CreateUser(clerkID string) (string, error) {
 	user := &User{
-		ID: userID,
+		ClerkID: clerkID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
 		return "", err
 	}
-	return user.ID, nil
+	return fmt.Sprintf("%d", user.ID), nil
 }
 
 // Participate implements ZenaoDB.
@@ -143,22 +146,24 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 // EditUser implements ZenaoDB.
 func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) error {
 	// XXX: validate?
-	user := &User{
-		ID:          userID,
+	if err := g.db.Model(&User{}).Where("id = ?", userID).Updates(User{
 		DisplayName: req.DisplayName,
 		Bio:         req.Bio,
 		AvatarURI:   req.AvatarUri,
+	}).Error; err != nil {
+		return err
 	}
-	return g.db.Save(user).Error
+	return nil
 }
 
 // UserExists implements ZenaoDB.
-func (g *gormZenaoDB) UserExists(userID string) (bool, error) {
-	var count int64
-	if err := g.db.Model(&User{}).Where("id = ?", userID).Count(&count).Error; err != nil {
-		return false, err
+func (g *gormZenaoDB) UserExists(clerkID string) (string, error) {
+	var user User
+	if err := g.db.Where("clerk_id = ?", clerkID).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", nil
+		}
+		return "", err
 	}
-	return count > 0, nil
+	return fmt.Sprintf("%d", user.ID), nil
 }
-
-var _ ZenaoDB = (*gormZenaoDB)(nil)

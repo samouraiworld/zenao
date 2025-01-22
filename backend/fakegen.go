@@ -65,7 +65,7 @@ func execFakegen() error {
 			TicketPrice: a.TicketPrice,
 			Capacity:    uint32(a.Capacity),
 		}
-		creatorID := "user_alice"
+		creatorID := "1"
 
 		evtId, err := db.CreateEvent(creatorID, req)
 		if err != nil {

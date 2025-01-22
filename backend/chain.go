@@ -58,6 +58,8 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 		return err
 	}
 
+	g.logger.Info("creating event on chain", zap.String("pkg-path", eventRealmPkgPath(evtID)))
+
 	// TODO: single tx with all messages
 
 	eventPkgPath := eventRealmPkgPath(evtID)
@@ -155,15 +157,14 @@ func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
 
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
-	chainUserID := strings.ToLower(strings.TrimPrefix(userID, "user_"))
-	userRealmPkgPath := fmt.Sprintf(`gno.land/r/zenao/users/u%s`, chainUserID)
+	userPkgPath := userRealmPkgPath(userID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
 		GasWanted: 10000000,
 	}, vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
-		PkgPath: userRealmPkgPath,
+		PkgPath: userPkgPath,
 		Func:    "EditUser",
 		Args: []string{
 			req.DisplayName,
@@ -184,7 +185,7 @@ func eventRealmPkgPath(eventID string) string {
 }
 
 func userRealmPkgPath(userID string) string {
-	return fmt.Sprintf("gno.land/r/zenao/users/u%s", strings.ToLower(strings.TrimPrefix(userID, "user_")))
+	return fmt.Sprintf("gno.land/r/zenao/users/u%s", userID)
 }
 
 var _ ZenaoChain = (*gnoZenaoChain)(nil)
