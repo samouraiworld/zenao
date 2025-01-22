@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCTJaCgxaZW5hb1NlcnZpY2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEimQEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0iIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSIlChFDcmVhdGVVc2VyUmVxdWVzdBIQCgh1c2VybmFtZRgBIAEoCSIgChJDcmVhdGVVc2VyUmVzcG9uc2USCgoCaWQYASABKAkyowEKDFplbmFvU2VydmljZRJKCgtDcmVhdGVFdmVudBIcLnplbmFvLnYxLkNyZWF0ZUV2ZW50UmVxdWVzdBodLnplbmFvLnYxLkNyZWF0ZUV2ZW50UmVzcG9uc2USRwoKQ3JlYXRlVXNlchIbLnplbmFvLnYxLkNyZWF0ZVVzZXJSZXF1ZXN0GhwuemVuYW8udjEuQ3JlYXRlVXNlclJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
@@ -83,6 +83,40 @@ export const CreateEventResponseSchema: GenMessage<CreateEventResponse> = /*@__P
   messageDesc(file_zenao_v1_zenao, 1);
 
 /**
+ * @generated from message zenao.v1.CreateUserRequest
+ */
+export type CreateUserRequest = Message<"zenao.v1.CreateUserRequest"> & {
+  /**
+   * @generated from field: string username = 1;
+   */
+  username: string;
+};
+
+/**
+ * Describes the message zenao.v1.CreateUserRequest.
+ * Use `create(CreateUserRequestSchema)` to create a new message.
+ */
+export const CreateUserRequestSchema: GenMessage<CreateUserRequest> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 2);
+
+/**
+ * @generated from message zenao.v1.CreateUserResponse
+ */
+export type CreateUserResponse = Message<"zenao.v1.CreateUserResponse"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message zenao.v1.CreateUserResponse.
+ * Use `create(CreateUserResponseSchema)` to create a new message.
+ */
+export const CreateUserResponseSchema: GenMessage<CreateUserResponse> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 3);
+
+/**
  * @generated from service zenao.v1.ZenaoService
  */
 export const ZenaoService: GenService<{
@@ -93,6 +127,14 @@ export const ZenaoService: GenService<{
     methodKind: "unary";
     input: typeof CreateEventRequestSchema;
     output: typeof CreateEventResponseSchema;
+  },
+  /**
+   * @generated from rpc zenao.v1.ZenaoService.CreateUser
+   */
+  createUser: {
+    methodKind: "unary";
+    input: typeof CreateUserRequestSchema;
+    output: typeof CreateUserResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_zenao_v1_zenao, 0);

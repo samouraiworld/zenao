@@ -1,4 +1,4 @@
-package events
+package events_reg
 
 import (
 	"std"
@@ -41,6 +41,13 @@ func AddParticipant(eventID string, userID string, eventEndDate int64) {
 
 	key := userID + "/" + unixTimeKey(eventEndDate) + "/" + eventID
 	eventsByParticipant.Set(key, eventID)
+}
+
+func RemoveParticipant(eventID string, userID string, eventEndDate int64) {
+	Ownable.AssertCallerIsOwner()
+
+	key := userID + "/" + unixTimeKey(eventEndDate) + "/" + eventID
+	eventsByParticipant.Remove(key)
 }
 
 func listEvents(from, to int64, limit uint32) []string {

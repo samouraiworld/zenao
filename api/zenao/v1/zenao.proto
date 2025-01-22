@@ -5,18 +5,21 @@ option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
 
 service ZenaoService {
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
 }
 
 message CreateEventRequest {
   string title = 1;
   string description = 2;
   string image_uri = 3;
-  uint64 start_date = 4; // unix seconds
-  uint64 end_date = 5; // unix seconds
+  uint64 start_date = 4;   // unix seconds
+  uint64 end_date = 5;     // unix seconds
   double ticket_price = 6; // XXX: use fixed point?
   uint32 capacity = 7;
 }
 
-message CreateEventResponse {
-  string id = 1;
-}
+message CreateEventResponse { string id = 1; }
+
+message CreateUserRequest { string username = 1; }
+
+message CreateUserResponse { string id = 1; }

@@ -63,7 +63,6 @@ func (r *MessagesRegistry) execute(msg ExecutableMessage) {
 	if !ok {
 		panic("invalid ExecutableMessage: invalid message type")
 	}
-
 	h.(MessageHandler).Execute(msg)
 }
 

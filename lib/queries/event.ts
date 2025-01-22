@@ -10,7 +10,7 @@ export const eventOptions = (id: string) =>
         const client = new GnoJSONRPCProvider("http://127.0.0.1:26657");
         const res = await client.evaluateExpression(
           `gno.land/r/zenao/events/e${id}`,
-          `getInfoJSON()`,
+          `event.GetInfoJSON()`,
         );
         const event = extractGnoJSONResponse(res);
         return eventFormSchema.parse(event);
