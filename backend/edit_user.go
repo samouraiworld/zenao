@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -33,7 +32,7 @@ func (s *ZenaoServer) EditUser(
 			return err
 		}
 
-		if err := s.Chain.EditUser(fmt.Sprintf("%d", userID), req.Msg); err != nil {
+		if err := s.Chain.EditUser(userID, req.Msg); err != nil {
 			return err
 		}
 		return nil

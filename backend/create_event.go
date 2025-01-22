@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -51,7 +50,7 @@ func (s *ZenaoServer) CreateEvent(
 			return err
 		}
 
-		if err := s.Chain.CreateEvent(fmt.Sprintf("%d", evtID), fmt.Sprintf("%d", userID), req.Msg); err != nil {
+		if err := s.Chain.CreateEvent(evtID, userID, req.Msg); err != nil {
 			s.Logger.Error("create-event", zap.Error(err))
 			return err
 		}

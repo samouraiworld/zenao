@@ -58,6 +58,8 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 		return err
 	}
 
+	g.logger.Info("creating event", zap.String("pkg-path", eventRealmPkgPath(evtID)))
+
 	// TODO: single tx with all messages
 
 	eventPkgPath := eventRealmPkgPath(evtID)

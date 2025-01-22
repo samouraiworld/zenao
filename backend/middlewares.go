@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"go.uber.org/zap"
 )
@@ -30,7 +29,7 @@ func (s *ZenaoServer) EnsureUserExists(
 			return err
 		}
 
-		if err := s.Chain.CreateUser(fmt.Sprintf("%d", userID)); err != nil {
+		if err := s.Chain.CreateUser(userID); err != nil {
 			return err
 		}
 		return nil
