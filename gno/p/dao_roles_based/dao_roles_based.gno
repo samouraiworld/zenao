@@ -24,12 +24,12 @@ type DaoRolesBased struct {
 }
 
 func NewDaoRolesBasedJSON(name, description string, roles []string, members [][]string, resourcesJSON string, handlers []MessageHandler) *DaoRolesBased {
-	if len(name) < 3 {
-		panic("dao name should be at least 3 characters long")
+	if len(name) < 1 {
+		panic("dao name should be at least 1 characters long")
 	}
 
-	if len(description) < 3 {
-		panic("dao description should be at least 3 characters long")
+	if len(description) < 1 {
+		panic("dao description should be at least 1 characters long")
 	}
 
 	dao := &DaoRolesBased{
