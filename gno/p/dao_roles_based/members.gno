@@ -53,6 +53,10 @@ func (m *MemberModule) CountMemberRoles(memberId string) int {
 	return m.roleManager.CountUserRoles(std.Address(memberId))
 }
 
+func (m *MemberModule) GetMembersWithRole(role string) []string {
+	return m.roleManager.GetRoleUsers(role)
+}
+
 func (m *MemberModule) setRoles(roles []string) {
 	caller := std.CurrentRealm().Addr()
 	for _, role := range roles {

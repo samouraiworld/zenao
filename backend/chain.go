@@ -169,6 +169,11 @@ func generateUserRealmSource(id string, req *zenaov1.CreateUserRequest) (string,
 const eventRealmSourceTemplate = `package event
 
 import (
+	"std"
+	"time"
+
+	"gno.land/p/demo/ufmt"
+	"gno.land/p/moul/md"
 	"gno.land/p/zenao/events"
 	"gno.land/r/demo/profile"
 )
@@ -202,7 +207,18 @@ func RemoveGatekeeper(gatekeeper string) {
 }
 
 func Render(path string) string {
-	return "Coming soon"
+	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
+	s += md.Image("Event presentation", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
+	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
+	s += md.BulletList([]string{
+		ufmt.Sprintf("Time: From %s to %s", time.Unix(event.GetStartDate(), 0).Format(time.DateTime), time.Unix(event.GetEndDate(), 0).Format(time.DateTime)),
+		ufmt.Sprintf("Price: %d€", event.GetTicketPrice()),
+		ufmt.Sprintf("Capacity: %d/%d", event.CountParticipants(), event.GetCapacity()),
+		ufmt.Sprintf("Organizer: %s", profile.GetStringField(std.Address(event.GetCreator()), profile.DisplayName, "")),
+	}) + "\n"
+	s += md.HorizontalRule()
+	s += md.Paragraph(std.CurrentRealm().Addr().String())
+	return s
 }
 `
 

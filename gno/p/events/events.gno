@@ -85,6 +85,10 @@ func (e *Event) RemoveGatekeeper(gatekeeper string) {
 	}
 }
 
+func (e *Event) CountParticipants() int {
+	return len(e.org.MemberModule.GetMembersWithRole("participant"))
+}
+
 func (e *Event) GetID() string {
 	return e.id
 }
@@ -95,4 +99,16 @@ func (e *Event) GetCreator() string {
 
 func (e *Event) GetEndDate() int64 {
 	return e.endDate
+}
+
+func (e *Event) GetStartDate() int64 {
+	return e.startDate
+}
+
+func (e *Event) GetTicketPrice() int64 {
+	return e.ticketPrice
+}
+
+func (e *Event) GetCapacity() int64 {
+	return e.capacity
 }

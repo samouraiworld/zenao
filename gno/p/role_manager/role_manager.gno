@@ -184,6 +184,19 @@ func (rm *RoleManager) GetRoles() []string {
 	return res
 }
 
+func (rm *RoleManager) GetRoleUsers(roleName string) []string {
+	role := rm.mustGetRole(roleName)
+	i := 0
+	users := role.users
+	res := make([]string, users.Size())
+	users.Iterate("", "", func(key string, value interface{}) bool {
+		res[i] = key
+		i++
+		return false
+	})
+	return res
+}
+
 func (rm *RoleManager) GetUserRoles(user std.Address) []string {
 	userRoles, ok := rm.users.Get(user.String())
 	if !ok {
