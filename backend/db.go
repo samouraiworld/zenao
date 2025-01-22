@@ -94,13 +94,14 @@ func (g *gormZenaoDB) CreateUser(clerkID string) (uint, error) {
 // EditUser implements ZenaoDB.
 func (g *gormZenaoDB) EditUser(userID uint, req *zenaov1.EditUserRequest) error {
 	// XXX: validate?
-	user := &User{
-		Model:       gorm.Model{ID: userID},
+	if err := g.db.Model(&User{}).Where("id = ?", userID).Updates(User{
 		DisplayName: req.DisplayName,
 		Bio:         req.Bio,
 		AvatarURI:   req.AvatarUri,
+	}).Error; err != nil {
+		return err
 	}
-	return g.db.Save(user).Error
+	return nil
 }
 
 // UserExists implements ZenaoDB.
