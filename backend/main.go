@@ -31,7 +31,7 @@ const (
 	chainEndpoint      = "127.0.0.1:26657"
 	chainID            = "dev"
 	dbPath             = "dev.db"
-	resendSecretKey    = "re_fj3PNvR6_Pu8PsJEHVZdV8o1xPj6qe1HE"
+	resendSecretKey    = "re_fj3PNvR6_Pu8PsJEHVZdV8o1xPj6qe1HE" // be very careful with this key, it allows to send mail from zenao.io
 )
 
 func main() {
