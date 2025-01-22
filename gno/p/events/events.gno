@@ -31,7 +31,7 @@ func NewEvent(id string, creatorAddr string, title string, description string, s
 	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"organizer","count":"1"}}]`
 
 	// Don't pass the message handlers, since they are by default in the user dao
-	dao := dao_roles_based.NewDaoRolesBasedJSON("event: "+title, description, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
+	dao := dao_roles_based.NewDaoRolesBasedJSON(title, description, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	event := &Event{
 		id:               id,
 		creator:          creatorAddr,

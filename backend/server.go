@@ -26,13 +26,12 @@ type ZenaoUser struct {
 // User ID is auto-incremented used for database & on-chain related logic
 type ZenaoDB interface {
 	CreateUser(clerkID string) (string, error)
-	UserExists(clerkID string) (string, error)
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	UserExists(clerkID string) (string, error)
 
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
-
-	Participate(eventID string, userID string) error
 	GetEvent(eventID string) (*Event, error)
+	Participate(eventID string, userID string) error
 }
 
 type ZenaoChain interface {
