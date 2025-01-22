@@ -1,6 +1,9 @@
 package user_realm
 
 import (
+	"std"
+
+	"gno.land/p/moul/md"
 	"gno.land/p/zenao/users"
 	"gno.land/r/demo/profile"
 )
@@ -17,4 +20,10 @@ func init() {
 
 func TransferOwnership(newOwner string) {
 	user.TransferOwnership(newOwner)
+}
+
+func Render(path string) string {
+	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
+	s += md.HorizontalRule()
+	return s
 }

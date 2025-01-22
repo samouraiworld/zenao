@@ -225,6 +225,9 @@ func Render(path string) string {
 const userRealmSourceTemplate = `package user
 
 import (
+	"std"
+
+	"gno.land/p/moul/md"
 	"gno.land/p/zenao/users"
 	"gno.land/r/demo/profile"
 )
@@ -242,6 +245,8 @@ func TransferOwnership(newOwner string) {
 }
 
 func Render(path string) string {
-	return "Coming soon"
+	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
+	s += md.HorizontalRule()
+	return s
 }
 `
