@@ -47,7 +47,6 @@ export function EventInfo({ id }: { id: string }) {
             <p>
               End Date: {format(fromUnixTime(Number(data.endDate)), "PPPPpppp")}
             </p>
-            <p>Price: {data.ticketPrice}</p>
             <p>Capacity: {data.capacity}</p>
           </div>
           <ParticipateButton eventId={id} />

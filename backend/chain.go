@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"text/template"
@@ -53,7 +54,7 @@ func setupChain(adminMnemonic string, eventsIndexPkgPath string, chainID string,
 func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
 	creatorAddr := gnolang.DerivePkgAddr(userRealmPkgPath(creatorID)).String()
 
-	eventRealmSrc, err := generateEventRealmSource(evtID, creatorAddr, g.signerInfo.GetAddress().String(), req)
+	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), req)
 	if err != nil {
 		return err
 	}
@@ -203,12 +204,22 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func generateEventRealmSource(evtID string, creatorAddr string, zenaoAdminAddr string, req *zenaov1.CreateEventRequest) (string, error) {
+func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, req *zenaov1.CreateEventRequest) (string, error) {
+	titleBz, err := json.Marshal(req.Title)
+	if err != nil {
+		return "", err
+	}
+	descBz, err := json.Marshal(req.Description)
+	if err != nil {
+		return "", err
+	}
+
 	m := map[string]interface{}{
-		"id":             evtID,
 		"creatorAddr":    creatorAddr,
 		"req":            req,
 		"zenaoAdminAddr": zenaoAdminAddr,
+		"title":          string(titleBz),
+		"description":    string(descBz),
 	}
 	t := template.Must(template.New("").Parse(eventRealmSourceTemplate))
 	buf := strings.Builder{}
@@ -220,7 +231,9 @@ func generateEventRealmSource(evtID string, creatorAddr string, zenaoAdminAddr s
 
 func generateUserRealmSource(id string) (string, error) {
 	m := map[string]string{
-		"id": id,
+		"displayName": fmt.Sprintf("Zenao user #%s", id),
+		"bio":         "Zenao managed user",
+		"avatarURI":   "https://www.wikimedia.org/portal/wikimedia.org/assets/img/wikimedia_logo.png",
 	}
 
 	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
@@ -246,20 +259,17 @@ import (
 var event *events.Event
 
 func init() {
-	eventID := "{{.id}}"
-	creator := "{{.creatorAddr}}"
-	event = events.NewEvent(
-		eventID,
-		creator,
-		"{{.req.Title}}",
-		"{{.req.Description}}",
-		{{.req.StartDate}},
-		{{.req.EndDate}},
-		{{.req.TicketPrice}},
-		{{.req.Capacity}},
-		profile.GetStringField,
-		"{{.zenaoAdminAddr}}",
-	) 
+	conf := events.Config{
+		Creator: "{{.creatorAddr}}",
+		Title: {{.title}},
+		Description: {{.description}},
+		StartDate: {{.req.StartDate}},
+		EndDate: {{.req.EndDate}},
+		Capacity: {{.req.Capacity}},
+		GetProfileString: profile.GetStringField,
+		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
+	}
+	event = events.NewEvent(&conf) 
 
 	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
 	profile.SetStringField(profile.Bio, "{{.req.Description}}")
@@ -288,7 +298,6 @@ func Render(path string) string {
 	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
 	s += md.BulletList([]string{
 		ufmt.Sprintf("Time: From %s to %s", time.Unix(event.GetStartDate(), 0).Format(time.DateTime), time.Unix(event.GetEndDate(), 0).Format(time.DateTime)),
-		ufmt.Sprintf("Price: %g€", event.GetTicketPrice()),
 		ufmt.Sprintf("Capacity: %d/%d", event.CountParticipants(), event.GetCapacity()),
 		ufmt.Sprintf("Organizer: %s", profile.GetStringField(std.Address(event.GetCreator()), profile.DisplayName, "")),
 	}) + "\n"
@@ -311,7 +320,11 @@ import (
 var user *users.User
 
 func init() {
-	user = users.NewUser("{{.id}}")
+	user = users.NewUser()
+
+	profile.SetStringField(profile.DisplayName, "{{.displayName}}")
+	profile.SetStringField(profile.Bio, "{{.bio}}")
+	profile.SetStringField(profile.Avatar, "{{.avatarURI}}")
 }
 
 func TransferOwnership(newOwner string) {
