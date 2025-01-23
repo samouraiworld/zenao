@@ -1,24 +1,24 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useClerk } from "@clerk/nextjs";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import React from "react";
-import { Skeleton } from "../shadcn/skeleton";
-import { Card } from "../cards/Card";
-import { Separator } from "../common/Separator";
-import { SmallText } from "../texts/SmallText";
-import { FormFieldInputString } from "./components/FormFieldInputString";
-import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
-import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
-import { eventFormSchema, EventFormSchemaType, urlPattern } from "./types";
-import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { zenaoClient } from "@/app/zenao-client";
 import { Button } from "@/components/shadcn/button";
 import { Form } from "@/components/shadcn/form";
 import { isValidURL } from "@/lib/utils";
+import { useClerk } from "@clerk/nextjs";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Card } from "../cards/Card";
+import { Separator } from "../common/Separator";
+import { Skeleton } from "../shadcn/skeleton";
+import { SmallText } from "../texts/SmallText";
+import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
+import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
+import { FormFieldInputString } from "./components/FormFieldInputString";
+import { FormFieldTextArea } from "./components/FormFieldTextArea";
+import { eventFormSchema, EventFormSchemaType, urlPattern } from "./types";
 
 export const CreateEventForm: React.FC = () => {
   const { client } = useClerk();
@@ -45,6 +45,10 @@ export const CreateEventForm: React.FC = () => {
       await zenaoClient.createEvent(values, {
         headers: { Authorization: "Bearer " + token },
       });
+      const addr = await zenaoClient.getUserAddress({}, {
+        headers: { Authorization: "Bearer " + token },
+      })
+      console.log(addr);
       setIsLoaded(false);
       form.reset();
       alert("Success");
@@ -63,7 +67,7 @@ export const CreateEventForm: React.FC = () => {
           <div className="flex flex-col gap-4 w-full sm:w-2/5">
             {/* I'm obligate to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead)  */}
             {isValidURL(imageUri, urlPattern) &&
-            !form.formState.errors.imageUri?.message ? (
+              !form.formState.errors.imageUri?.message ? (
               <Image
                 src={imageUri}
                 width={330}

@@ -35,6 +35,9 @@ const (
 const (
 	// ZenaoServiceEditUserProcedure is the fully-qualified name of the ZenaoService's EditUser RPC.
 	ZenaoServiceEditUserProcedure = "/zenao.v1.ZenaoService/EditUser"
+	// ZenaoServiceGetUserAddressProcedure is the fully-qualified name of the ZenaoService's
+	// GetUserAddress RPC.
+	ZenaoServiceGetUserAddressProcedure = "/zenao.v1.ZenaoService/GetUserAddress"
 	// ZenaoServiceCreateEventProcedure is the fully-qualified name of the ZenaoService's CreateEvent
 	// RPC.
 	ZenaoServiceCreateEventProcedure = "/zenao.v1.ZenaoService/CreateEvent"
@@ -49,6 +52,7 @@ const (
 type ZenaoServiceClient interface {
 	// USER
 	EditUser(context.Context, *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error)
+	GetUserAddress(context.Context, *connect.Request[v1.GetUserAddressRequest]) (*connect.Response[v1.GetUserAddressResponse], error)
 	// EVENT
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
 	EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error)
@@ -70,6 +74,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceEditUserProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("EditUser")),
+			connect.WithClientOptions(opts...),
+		),
+		getUserAddress: connect.NewClient[v1.GetUserAddressRequest, v1.GetUserAddressResponse](
+			httpClient,
+			baseURL+ZenaoServiceGetUserAddressProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetUserAddress")),
 			connect.WithClientOptions(opts...),
 		),
 		createEvent: connect.NewClient[v1.CreateEventRequest, v1.CreateEventResponse](
@@ -95,15 +105,21 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 
 // zenaoServiceClient implements ZenaoServiceClient.
 type zenaoServiceClient struct {
-	editUser    *connect.Client[v1.EditUserRequest, v1.EditUserResponse]
-	createEvent *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
-	editEvent   *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
-	participate *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
+	editUser       *connect.Client[v1.EditUserRequest, v1.EditUserResponse]
+	getUserAddress *connect.Client[v1.GetUserAddressRequest, v1.GetUserAddressResponse]
+	createEvent    *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
+	editEvent      *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
+	participate    *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
 }
 
 // EditUser calls zenao.v1.ZenaoService.EditUser.
 func (c *zenaoServiceClient) EditUser(ctx context.Context, req *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error) {
 	return c.editUser.CallUnary(ctx, req)
+}
+
+// GetUserAddress calls zenao.v1.ZenaoService.GetUserAddress.
+func (c *zenaoServiceClient) GetUserAddress(ctx context.Context, req *connect.Request[v1.GetUserAddressRequest]) (*connect.Response[v1.GetUserAddressResponse], error) {
+	return c.getUserAddress.CallUnary(ctx, req)
 }
 
 // CreateEvent calls zenao.v1.ZenaoService.CreateEvent.
@@ -125,6 +141,7 @@ func (c *zenaoServiceClient) Participate(ctx context.Context, req *connect.Reque
 type ZenaoServiceHandler interface {
 	// USER
 	EditUser(context.Context, *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error)
+	GetUserAddress(context.Context, *connect.Request[v1.GetUserAddressRequest]) (*connect.Response[v1.GetUserAddressResponse], error)
 	// EVENT
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
 	EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error)
@@ -142,6 +159,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceEditUserProcedure,
 		svc.EditUser,
 		connect.WithSchema(zenaoServiceMethods.ByName("EditUser")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetUserAddressHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetUserAddressProcedure,
+		svc.GetUserAddress,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetUserAddress")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceCreateEventHandler := connect.NewUnaryHandler(
@@ -166,6 +189,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		switch r.URL.Path {
 		case ZenaoServiceEditUserProcedure:
 			zenaoServiceEditUserHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetUserAddressProcedure:
+			zenaoServiceGetUserAddressHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreateEventProcedure:
 			zenaoServiceCreateEventHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditEventProcedure:
@@ -183,6 +208,10 @@ type UnimplementedZenaoServiceHandler struct{}
 
 func (UnimplementedZenaoServiceHandler) EditUser(context.Context, *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EditUser is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetUserAddress(context.Context, *connect.Request[v1.GetUserAddressRequest]) (*connect.Response[v1.GetUserAddressResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetUserAddress is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error) {
