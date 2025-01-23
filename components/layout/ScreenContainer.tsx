@@ -30,15 +30,17 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
 
 export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
   children,
+  isSignedOutModal,
 }) => {
   return (
     <div className="sm:h-screen flex flex-col family-name:var(--font-geist-sans)]">
       <Header />
-      <div className="sm:h-screen flex flex-col justify-center items-center">
-        <main className="flex flex-col justify-center items-center mb-10 sm:mb-0">
-          <div className="mx-5 sm:mx-0">{children}</div>
+      <div className="sm:h-screen flex flex-col items-center justify-center">
+        <main className="flex flex-col w-full justify-center items-center mb-10 sm:mb-0">
+          <div className="mt-8 mx-5">{children}</div>
         </main>
       </div>
+      {isSignedOutModal && <SignedOutModal />}
       <Footer />
     </div>
   );

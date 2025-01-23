@@ -21,7 +21,7 @@ import { Input } from "@/components/shadcn/input";
 
 interface EventSectionProps {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
@@ -29,7 +29,7 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
     <div className="flex flex-col">
       <Text className="font-semibold">{title}</Text>
       <Separator className="mt-2 mb-3" />
-      {children}
+      {children && children}
     </div>
   );
 };
@@ -38,7 +38,7 @@ export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
   const t = useTranslations("event");
 
-  const isOrganisatorRole = true;
+  const isOrganisatorRole = false;
   const isRegistered = false;
   const participantsCount = 20;
   const iconSize = 22;
@@ -72,10 +72,9 @@ export function EventInfo({ id }: { id: string }) {
             count: participantsCount,
             capacity: data.capacity,
           })}
-        >
-          <SmallText>Avatars</SmallText>
-        </EventSection>
+        />
         <EventSection title={t("hosted-by")}>
+          {/* TODO: Plug host user */}
           <SmallText>User</SmallText>
         </EventSection>
         <EventSection title={""}>
@@ -107,9 +106,8 @@ export function EventInfo({ id }: { id: string }) {
         </div>
         <div className="flex flex-row gap-4 items-center">
           <MapPin width={iconSize} height={iconSize} />
-          <LargeText>
-            {isRegistered ? "Paris, Ground Control" : t("register-address")}
-          </LargeText>
+          {/* TODO: Add location */}
+          <LargeText>{data.location}</LargeText>
         </div>
 
         <Card className="mt-2">

@@ -24,6 +24,7 @@
     "image-uri-placeholder": "Image URL...",
     "title-placeholder": "Event name...",
     "description-placeholder": "Description...",
+    "location-placeholder": "Location...",
     "capacity-placeholder": "Capacity...",
     "start-date-placeholder": "Choose your start date/time...",
     "end-date-placeholder": "Choose your end date/time..."

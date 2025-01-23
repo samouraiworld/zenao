@@ -9,6 +9,7 @@ export const eventInfoSchema = z.object({
   startDate: z.coerce.bigint(),
   endDate: z.coerce.bigint(),
   capacity: z.coerce.number(),
+  // location: z.string().trim().min(1),
 });
 
 export const eventOptions = (id: string) =>

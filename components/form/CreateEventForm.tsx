@@ -30,6 +30,8 @@ export const CreateEventForm: React.FC = () => {
       imageUri: "",
       description: "",
       title: "",
+      capacity: 0,
+      location: "",
     },
   });
   const imageUri = form.watch("imageUri");
@@ -94,6 +96,13 @@ export const CreateEventForm: React.FC = () => {
                 control={form.control}
                 name="description"
                 placeholder={t("description-placeholder")}
+              />
+            </Card>
+            <Card>
+              <FormFieldInputString
+                control={form.control}
+                name="location"
+                placeholder={t("location-placeholder")}
               />
             </Card>
             <Card>
