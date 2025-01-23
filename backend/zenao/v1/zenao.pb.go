@@ -99,6 +99,13 @@ func (x *CreateEventRequest) GetEndDate() uint64 {
 	return 0
 }
 
+func (x *CreateEventRequest) GetTicketPrice() float64 {
+	if x != nil {
+		return x.TicketPrice
+	}
+	return 0
+}
+
 func (x *CreateEventRequest) GetCapacity() uint32 {
 	if x != nil {
 		return x.Capacity
