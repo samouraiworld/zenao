@@ -53,6 +53,9 @@ message EditEventRequest {
 
 message EditEventResponse { string id = 1; }
 
-message ParticipateRequest { string event_id = 1; }
+message ParticipateRequest {
+  string event_id = 1;
+  string email = 2;
+}
 
 message ParticipateResponse { string ticket_secret = 1; }

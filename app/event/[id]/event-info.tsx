@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
@@ -16,6 +16,7 @@ import { Text } from "@/components/texts/DefaultText";
 import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
+import { Input } from "@/components/shadcn/input";
 
 interface EventSectionProps {
   title: string;
@@ -130,23 +131,34 @@ export function EventInfo({ id }: { id: string }) {
 
 function ParticipateButton({ eventId }: { eventId: string }) {
   const { session } = useClerk();
+  const [email, setEmail] = useState("");
   const t = useTranslations("event");
   return (
-    <Button
-      className="w-full"
-      onClick={async () => {
-        const token = await session?.getToken();
-        if (!token) {
-          throw new Error("invalid token");
-        }
-        await zenaoClient.participate(
-          { eventId },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        alert("Success");
-      }}
-    >
-      <SmallText variant="invert">{t("participate-button")}</SmallText>
-    </Button>
+    <div>
+      {!session && (
+        <Input
+          placeholder="Email"
+          onChange={(evt) => setEmail(evt.target.value)}
+          style={{ marginBottom: 8 }}
+        />
+      )}
+      <Button
+        className="w-full"
+        onClick={async () => {
+          const token = await session?.getToken();
+          if (token) {
+            await zenaoClient.participate(
+              { eventId },
+              { headers: { Authorization: `Bearer ${token}` } },
+            );
+          } else {
+            await zenaoClient.participate({ eventId, email });
+          }
+          alert("Success");
+        }}
+      >
+        <SmallText variant="invert">{t("participate-button")}</SmallText>
+      </Button>
+    </div>
   );
 }
