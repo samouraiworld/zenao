@@ -15,6 +15,9 @@ func (s *ZenaoServer) GetUserAddress(
 	req *connect.Request[zenaov1.GetUserAddressRequest],
 ) (*connect.Response[zenaov1.GetUserAddressResponse], error) {
 	user := s.GetUser(ctx)
+	if user == nil {
+		return nil, errors.New("unauthorized")
+	}
 
 	userID, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
