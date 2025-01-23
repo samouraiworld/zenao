@@ -49,6 +49,7 @@ const (
 type ZenaoServiceClient interface {
 	// USER
 	EditUser(context.Context, *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error)
+	// EVENT
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
 	EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
@@ -124,6 +125,7 @@ func (c *zenaoServiceClient) Participate(ctx context.Context, req *connect.Reque
 type ZenaoServiceHandler interface {
 	// USER
 	EditUser(context.Context, *connect.Request[v1.EditUserRequest]) (*connect.Response[v1.EditUserResponse], error)
+	// EVENT
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
 	EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)

@@ -260,6 +260,8 @@ export const ZenaoService: GenService<{
     output: typeof EditUserResponseSchema;
   },
   /**
+   * EVENT
+   *
    * @generated from rpc zenao.v1.ZenaoService.CreateEvent
    */
   createEvent: {
