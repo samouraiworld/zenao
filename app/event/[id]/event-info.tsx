@@ -137,8 +137,9 @@ function ParticipateButton({ eventId }: { eventId: string }) {
     <div>
       {!session && (
         <Input
-          placeholder="email"
+          placeholder="Email"
           onChange={(evt) => setEmail(evt.target.value)}
+          style={{ marginBottom: 8 }}
         />
       )}
       <Button
