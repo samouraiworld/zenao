@@ -11,6 +11,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type User struct {
+	gorm.Model         // this ID should be used for any database related logic (like querying)
+	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
+	DisplayName string
+	Bio         string
+	AvatarURI   string
+}
+
 type Event struct {
 	gorm.Model
 	Title       string
@@ -25,19 +33,19 @@ type Event struct {
 	Creator     User `gorm:"foreignKey:CreatorID"`
 }
 
+type UserEvents struct {
+	UserID  uint   `gorm:"primaryKey"`
+	EventID uint   `gorm:"primaryKey"`
+	Role    string // organizer, gatekeeper, participant
+	Event   Event  `gorm:"foreignKey:EventID"`
+	User    User   `gorm:"foreignKey:UserID"`
+}
+
 type SoldTicket struct {
 	gorm.Model
 	EventID uint
 	UserID  string
 	Price   float64
-}
-
-type User struct {
-	gorm.Model         // this ID should be used for any database related logic (like querying)
-	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
-	DisplayName string
-	Bio         string
-	AvatarURI   string
 }
 
 func setupLocalDB(path string) (*gormZenaoDB, error) {
