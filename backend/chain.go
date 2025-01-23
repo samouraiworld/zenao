@@ -104,6 +104,36 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	return nil
 }
 
+// EditEvent implements ZenaoChain.
+func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) error {
+	eventPkgPath := eventRealmPkgPath(evtID)
+
+	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 10000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: eventPkgPath,
+		Func:    "EditEvent",
+		Args: []string{
+			req.Title,
+			req.Description,
+			req.ImageUri,
+			fmt.Sprintf("%d", req.StartDate),
+			fmt.Sprintf("%d", req.EndDate),
+			fmt.Sprintf("%d", req.Capacity),
+			req.Location,
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("edited event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	return nil
+}
+
+// CreateUser implements ZenaoChain.
 func (g *gnoZenaoChain) CreateUser(userID string) error {
 	userRealmSrc, err := generateUserRealmSource(userID)
 	if err != nil {
@@ -297,14 +327,27 @@ func RemoveGatekeeper(gatekeeper string) {
 	event.RemoveGatekeeper(gatekeeper)
 }
 
+func EditEvent(title, description, imageURI string, startDate, endDate int64, capacity uint64, location string) {
+	event.AssertCallerIsOrganizer()
+
+	profile.SetStringField(profile.DisplayName, title)
+	profile.SetStringField(profile.Bio, description)
+	profile.SetStringField(profile.Avatar, imageURI)
+
+	event.StartDate = startDate
+	event.EndDate = endDate
+	event.Capacity = capacity
+	event.Location = location
+}
+
 func Render(path string) string {
 	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
 	s += md.Image("Event presentation", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
 	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
 	s += md.BulletList([]string{
-		ufmt.Sprintf("Time: From %s to %s", time.Unix(event.GetStartDate(), 0).Format(time.DateTime), time.Unix(event.GetEndDate(), 0).Format(time.DateTime)),
-		ufmt.Sprintf("Capacity: %d/%d", event.CountParticipants(), event.GetCapacity()),
-		ufmt.Sprintf("Organizer: %s", profile.GetStringField(std.Address(event.GetCreator()), profile.DisplayName, "")),
+		ufmt.Sprintf("Time: From %s to %s", time.Unix(event.StartDate, 0).Format(time.DateTime), time.Unix(event.EndDate, 0).Format(time.DateTime)),
+		ufmt.Sprintf("Capacity: %d/%d", event.CountParticipants(), event.Capacity),
+		ufmt.Sprintf("Organizer: %s", profile.GetStringField(std.Address(event.Creator), profile.DisplayName, "")),
 	}) + "\n"
 	s += md.HorizontalRule()
 	s += md.Paragraph(std.CurrentRealm().Addr().String())

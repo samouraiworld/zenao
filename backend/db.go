@@ -20,8 +20,8 @@ type Event struct {
 	ImageURI    string
 	TicketPrice float64
 	Capacity    uint32
-	CreatorID   uint
 	Location    string
+	CreatorID   uint
 	Creator     User `gorm:"foreignKey:CreatorID"`
 }
 
@@ -86,6 +86,29 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		return "", err
 	}
 	return fmt.Sprintf("%d", evt.ID), nil
+}
+
+// EditEvent implements ZenaoDB.
+func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) error {
+	// XXX: validate?
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(Event{
+		Title:       req.Title,
+		Description: req.Description,
+		ImageURI:    req.ImageUri,
+		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
+		TicketPrice: req.TicketPrice,
+		Capacity:    req.Capacity,
+		Location:    req.Location,
+	}).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetEvent implements ZenaoDB.

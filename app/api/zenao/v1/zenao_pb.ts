@@ -10,7 +10,51 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiqwEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SEAoIbG9jYXRpb24YCCABKAkiIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSJICg9FZGl0VXNlclJlcXVlc3QSFAoMZGlzcGxheV9uYW1lGAEgASgJEgsKA2JpbxgCIAEoCRISCgphdmF0YXJfdXJpGAMgASgJIh4KEEVkaXRVc2VyUmVzcG9uc2USCgoCaWQYASABKAkiJgoSUGFydGljaXBhdGVSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJIiwKE1BhcnRpY2lwYXRlUmVzcG9uc2USFQoNdGlja2V0X3NlY3JldBgBIAEoCTLpAQoMWmVuYW9TZXJ2aWNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJBCghFZGl0VXNlchIZLnplbmFvLnYxLkVkaXRVc2VyUmVxdWVzdBoaLnplbmFvLnYxLkVkaXRVc2VyUmVzcG9uc2USSgoLUGFydGljaXBhdGUSHC56ZW5hby52MS5QYXJ0aWNpcGF0ZVJlcXVlc3QaHS56ZW5hby52MS5QYXJ0aWNpcGF0ZVJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIqsBChJDcmVhdGVFdmVudFJlcXVlc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJEhIKCnN0YXJ0X2RhdGUYBCABKAQSEAoIZW5kX2RhdGUYBSABKAQSFAoMdGlja2V0X3ByaWNlGAYgASgBEhAKCGNhcGFjaXR5GAcgASgNEhAKCGxvY2F0aW9uGAggASgJIiEKE0NyZWF0ZUV2ZW50UmVzcG9uc2USCgoCaWQYASABKAkiuwEKEEVkaXRFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJEhIKCnN0YXJ0X2RhdGUYBSABKAQSEAoIZW5kX2RhdGUYBiABKAQSFAoMdGlja2V0X3ByaWNlGAcgASgBEhAKCGNhcGFjaXR5GAggASgNEhAKCGxvY2F0aW9uGAkgASgJIh8KEUVkaXRFdmVudFJlc3BvbnNlEgoKAmlkGAEgASgJIiYKElBhcnRpY2lwYXRlUmVxdWVzdBIQCghldmVudF9pZBgBIAEoCSIsChNQYXJ0aWNpcGF0ZVJlc3BvbnNlEhUKDXRpY2tldF9zZWNyZXQYASABKAkyrwIKDFplbmFvU2VydmljZRJBCghFZGl0VXNlchIZLnplbmFvLnYxLkVkaXRVc2VyUmVxdWVzdBoaLnplbmFvLnYxLkVkaXRVc2VyUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkQKCUVkaXRFdmVudBIaLnplbmFvLnYxLkVkaXRFdmVudFJlcXVlc3QaGy56ZW5hby52MS5FZGl0RXZlbnRSZXNwb25zZRJKCgtQYXJ0aWNpcGF0ZRIcLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVxdWVzdBodLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
+
+/**
+ * @generated from message zenao.v1.EditUserRequest
+ */
+export type EditUserRequest = Message<"zenao.v1.EditUserRequest"> & {
+  /**
+   * @generated from field: string display_name = 1;
+   */
+  displayName: string;
+
+  /**
+   * @generated from field: string bio = 2;
+   */
+  bio: string;
+
+  /**
+   * @generated from field: string avatar_uri = 3;
+   */
+  avatarUri: string;
+};
+
+/**
+ * Describes the message zenao.v1.EditUserRequest.
+ * Use `create(EditUserRequestSchema)` to create a new message.
+ */
+export const EditUserRequestSchema: GenMessage<EditUserRequest> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 0);
+
+/**
+ * @generated from message zenao.v1.EditUserResponse
+ */
+export type EditUserResponse = Message<"zenao.v1.EditUserResponse"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message zenao.v1.EditUserResponse.
+ * Use `create(EditUserResponseSchema)` to create a new message.
+ */
+export const EditUserResponseSchema: GenMessage<EditUserResponse> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 1);
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
@@ -68,7 +112,7 @@ export type CreateEventRequest = Message<"zenao.v1.CreateEventRequest"> & {
  * Use `create(CreateEventRequestSchema)` to create a new message.
  */
 export const CreateEventRequestSchema: GenMessage<CreateEventRequest> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 0);
+  messageDesc(file_zenao_v1_zenao, 2);
 
 /**
  * @generated from message zenao.v1.CreateEventResponse
@@ -85,39 +129,75 @@ export type CreateEventResponse = Message<"zenao.v1.CreateEventResponse"> & {
  * Use `create(CreateEventResponseSchema)` to create a new message.
  */
 export const CreateEventResponseSchema: GenMessage<CreateEventResponse> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 1);
+  messageDesc(file_zenao_v1_zenao, 3);
 
 /**
- * @generated from message zenao.v1.EditUserRequest
+ * @generated from message zenao.v1.EditEventRequest
  */
-export type EditUserRequest = Message<"zenao.v1.EditUserRequest"> & {
+export type EditEventRequest = Message<"zenao.v1.EditEventRequest"> & {
   /**
-   * @generated from field: string display_name = 1;
+   * @generated from field: string event_id = 1;
    */
-  displayName: string;
+  eventId: string;
 
   /**
-   * @generated from field: string bio = 2;
+   * @generated from field: string title = 2;
    */
-  bio: string;
+  title: string;
 
   /**
-   * @generated from field: string avatar_uri = 3;
+   * @generated from field: string description = 3;
    */
-  avatarUri: string;
+  description: string;
+
+  /**
+   * @generated from field: string image_uri = 4;
+   */
+  imageUri: string;
+
+  /**
+   * unix seconds
+   *
+   * @generated from field: uint64 start_date = 5;
+   */
+  startDate: bigint;
+
+  /**
+   * unix seconds
+   *
+   * @generated from field: uint64 end_date = 6;
+   */
+  endDate: bigint;
+
+  /**
+   * XXX: use fixed point?
+   *
+   * @generated from field: double ticket_price = 7;
+   */
+  ticketPrice: number;
+
+  /**
+   * @generated from field: uint32 capacity = 8;
+   */
+  capacity: number;
+
+  /**
+   * @generated from field: string location = 9;
+   */
+  location: string;
 };
 
 /**
- * Describes the message zenao.v1.EditUserRequest.
- * Use `create(EditUserRequestSchema)` to create a new message.
+ * Describes the message zenao.v1.EditEventRequest.
+ * Use `create(EditEventRequestSchema)` to create a new message.
  */
-export const EditUserRequestSchema: GenMessage<EditUserRequest> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 2);
+export const EditEventRequestSchema: GenMessage<EditEventRequest> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 4);
 
 /**
- * @generated from message zenao.v1.EditUserResponse
+ * @generated from message zenao.v1.EditEventResponse
  */
-export type EditUserResponse = Message<"zenao.v1.EditUserResponse"> & {
+export type EditEventResponse = Message<"zenao.v1.EditEventResponse"> & {
   /**
    * @generated from field: string id = 1;
    */
@@ -125,11 +205,11 @@ export type EditUserResponse = Message<"zenao.v1.EditUserResponse"> & {
 };
 
 /**
- * Describes the message zenao.v1.EditUserResponse.
- * Use `create(EditUserResponseSchema)` to create a new message.
+ * Describes the message zenao.v1.EditEventResponse.
+ * Use `create(EditEventResponseSchema)` to create a new message.
  */
-export const EditUserResponseSchema: GenMessage<EditUserResponse> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 3);
+export const EditEventResponseSchema: GenMessage<EditEventResponse> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 5);
 
 /**
  * @generated from message zenao.v1.ParticipateRequest
@@ -146,7 +226,7 @@ export type ParticipateRequest = Message<"zenao.v1.ParticipateRequest"> & {
  * Use `create(ParticipateRequestSchema)` to create a new message.
  */
 export const ParticipateRequestSchema: GenMessage<ParticipateRequest> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 4);
+  messageDesc(file_zenao_v1_zenao, 6);
 
 /**
  * @generated from message zenao.v1.ParticipateResponse
@@ -163,13 +243,25 @@ export type ParticipateResponse = Message<"zenao.v1.ParticipateResponse"> & {
  * Use `create(ParticipateResponseSchema)` to create a new message.
  */
 export const ParticipateResponseSchema: GenMessage<ParticipateResponse> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 5);
+  messageDesc(file_zenao_v1_zenao, 7);
 
 /**
  * @generated from service zenao.v1.ZenaoService
  */
 export const ZenaoService: GenService<{
   /**
+   * USER
+   *
+   * @generated from rpc zenao.v1.ZenaoService.EditUser
+   */
+  editUser: {
+    methodKind: "unary";
+    input: typeof EditUserRequestSchema;
+    output: typeof EditUserResponseSchema;
+  },
+  /**
+   * EVENT
+   *
    * @generated from rpc zenao.v1.ZenaoService.CreateEvent
    */
   createEvent: {
@@ -178,12 +270,12 @@ export const ZenaoService: GenService<{
     output: typeof CreateEventResponseSchema;
   },
   /**
-   * @generated from rpc zenao.v1.ZenaoService.EditUser
+   * @generated from rpc zenao.v1.ZenaoService.EditEvent
    */
-  editUser: {
+  editEvent: {
     methodKind: "unary";
-    input: typeof EditUserRequestSchema;
-    output: typeof EditUserResponseSchema;
+    input: typeof EditEventRequestSchema;
+    output: typeof EditEventResponseSchema;
   },
   /**
    * @generated from rpc zenao.v1.ZenaoService.Participate
