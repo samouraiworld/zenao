@@ -40,6 +40,9 @@ export const Header: React.FC = () => {
             <SmallText variant="secondary">{t("calendar")}</SmallText>
             <SmallText variant="secondary">{t("pricing")}</SmallText>
             <SmallText variant="secondary">{t("blog")}</SmallText>
+            <Link href="/manifesto">
+              <SmallText variant="secondary">{t("manifesto")}</SmallText>
+            </Link>
           </div>
           <SignedOut>
             <SignInButton>
@@ -85,6 +88,9 @@ export const Header: React.FC = () => {
                 <SmallText>{t("calendar")}</SmallText>
                 <SmallText>{t("pricing")}</SmallText>
                 <SmallText>{t("blog")}</SmallText>
+                <Link href="/manifesto">
+                  <SmallText variant="secondary">{t("manifesto")}</SmallText>
+                </Link>
               </PopoverContent>
             </Popover>
           </div>
