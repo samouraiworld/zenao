@@ -35,7 +35,9 @@ export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
     <div className="sm:h-screen flex flex-col family-name:var(--font-geist-sans)]">
       <Header />
       <div className="sm:h-screen flex flex-col justify-center items-center">
-        {children}
+        <main className="flex flex-col justify-center items-center mb-10 sm:mb-0">
+          <div className="mx-5 sm:mx-0">{children}</div>
+        </main>
       </div>
       <Footer />
     </div>
