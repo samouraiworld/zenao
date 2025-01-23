@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import React from "react";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { useClerk } from "@clerk/nextjs";
@@ -9,7 +9,7 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { zenaoClient } from "@/app/zenao-client";
-import { eventOptions } from "@/lib/queries/event";
+import { eventCountParticipants, eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Button } from "@/components/shadcn/button";
 import { Separator } from "@/components/common/Separator";
@@ -36,11 +36,11 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 
 export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
+  const { data: countParticipants } = useQuery(eventCountParticipants(id));
   const t = useTranslations("event");
 
   const isOrganisatorRole = false;
   const isRegistered = false;
-  const participantsCount = 20;
   const iconSize = 22;
 
   if (!data) {
@@ -69,14 +69,13 @@ export function EventInfo({ id }: { id: string }) {
         )}
         <EventSection
           title={t("going", {
-            count: participantsCount,
-            capacity: data.capacity,
+            count: countParticipants,
           })}
         />
-        <EventSection title={t("hosted-by")}>
-          {/* TODO: Plug host user */}
-          <SmallText>User</SmallText>
-        </EventSection>
+        {/* TODO: Uncomment that when we can see the name of the addr */}
+        {/* <EventSection title={t("hosted-by")}> */}
+        {/*   <SmallText>User</SmallText> */}
+        {/* </EventSection> */}
         <EventSection title={""}>
           <Link
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
@@ -137,7 +136,7 @@ export function EventInfo({ id }: { id: string }) {
 
 function ParticipateButton({ eventId }: { eventId: string }) {
   const { session } = useClerk();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = React.useState("");
   const t = useTranslations("event");
   return (
     <div>

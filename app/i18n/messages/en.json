@@ -32,7 +32,7 @@
   "event": {
     "is-organisator-role": "You have organisator role for this event",
     "manage-button": "Manage",
-    "going": "{count} going / {capacity}",
+    "going": "{count} going",
     "hosted-by": "Hosted by:",
     "register-address": "Register to see address",
     "in": "You're in !",

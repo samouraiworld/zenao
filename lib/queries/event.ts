@@ -9,6 +9,7 @@ export const eventInfoSchema = z.object({
   startDate: z.coerce.bigint(),
   endDate: z.coerce.bigint(),
   capacity: z.coerce.number(),
+  creatorAddr: z.string().trim().min(1),
   // location: z.string().trim().min(1),
 });
 
@@ -16,21 +17,31 @@ export const eventOptions = (id: string) =>
   queryOptions({
     queryKey: ["event", id],
     queryFn: async () => {
-      try {
-        const client = new GnoJSONRPCProvider(
-          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        );
-        const res = await client.evaluateExpression(
-          `gno.land/r/zenao/events/e${id}`,
-          `event.GetInfoJSON()`,
-        );
-        const event = extractGnoJSONResponse(res);
-        return eventInfoSchema.parse(event);
-      } catch (err) {
-        console.error(err);
-      }
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/events/e${id}`,
+        `event.GetInfoJSON()`,
+      );
+      const event = extractGnoJSONResponse(res);
+      return eventInfoSchema.parse(event);
+    },
+  });
 
-      return null;
+export const eventCountParticipants = (id: string) =>
+  queryOptions({
+    queryKey: ["countParticipants", id],
+    queryFn: async () => {
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/events/e${id}`,
+        `event.CountParticipants()`,
+      );
+      // here res is `([participantsCount] int)` format, so i put a RegExp to get only numbers
+      return res.replace(/\D/g, "");
     },
   });
 
