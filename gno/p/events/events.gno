@@ -115,6 +115,20 @@ func (e *Event) CountParticipants() int {
 	return len(e.org.MemberModule.GetMembersWithRole("participant"))
 }
 
+func (e *Event) GetUserRolesJSON(addr string) string {
+	userRoles := e.org.MemberModule.GetMemberRoles(addr)
+	nodes := make([]*json.Node, 0)
+	for _, role := range userRoles {
+		nodes = append(nodes, json.StringNode("", role))
+	}
+	nodesArray := json.ArrayNode("", nodes)
+	bz, err := json.Marshal(nodesArray)
+	if err != nil {
+		panic(err)
+	}
+	return string(bz)
+}
+
 func (e *Event) GetInfoJSON() string {
 	obj := json.ObjectNode("", map[string]*json.Node{
 		"title":       json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "DisplayName", "")),
