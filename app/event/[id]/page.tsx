@@ -15,13 +15,9 @@ export default async function EventPage({
 
   return (
     <ScreenContainer>
-      <main className="flex flex-col max-w-[960px] mb-10">
-        <div className="mt-8 mx-5">
-          <HydrationBoundary state={dehydrate(queryClient)}>
-            <EventInfo id={p.id} />
-          </HydrationBoundary>
-        </div>
-      </main>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <EventInfo id={p.id} />
+      </HydrationBoundary>
     </ScreenContainer>
   );
 }

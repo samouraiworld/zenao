@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Input } from "@/components/shadcn/input";
 import { Button } from "@/components/shadcn/button";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
+import { VeryLargeText } from "@/components/texts/VeryLargeText";
+import { SmallText } from "@/components/texts/SmallText";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -21,19 +23,19 @@ export default function Home() {
           priority
           className="mb-5 mt-5"
         />
-        <p className="text-3xl font-semibold w-[200px] text-center">
+        <VeryLargeText className="w-[200px] text-center">
           {t("main-text")}
-        </p>
-        <p className="my-10 w-[280px] text-sm text-secondary-color text-center">
+        </VeryLargeText>
+        <SmallText className="my-10 w-[280px] text-center" variant="secondary">
           {t("secondary-text")}
-        </p>
+        </SmallText>
         <Input
           placeholder={t("placeholder")}
           className="dark:bg-secondary dark:border-secondary mb-4 h-10 flex pb-1 rounded-lg focus-visible:ring-0"
         />
         <Button asChild className="w-full flex rounded-3xl py-5">
-          <Link href="/create" className="text-sm">
-            {t("button")}
+          <Link href="/create">
+            <SmallText variant="invert">{t("button")}</SmallText>
           </Link>
         </Button>
       </main>

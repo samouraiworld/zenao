@@ -5,24 +5,33 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
+import { cn } from "@/lib/utils";
 
 export const FormFieldInputString: React.FC<FormFieldProps<string>> = ({
   control,
   name,
+  className,
+  placeholder,
 }) => {
   return (
     <FormField
+      rules={{ required: true }}
       control={control}
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{name}</FormLabel>
           <FormControl>
-            <Input placeholder={`${name}...`} {...field} />
+            <Input
+              className={cn(
+                "focus-visible:ring-0 border-none h-auto p-0 placeholder:text-secondary-color",
+                className,
+              )}
+              placeholder={placeholder || "placeholder..."}
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
