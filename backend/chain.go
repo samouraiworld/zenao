@@ -213,6 +213,10 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, req *ze
 	if err != nil {
 		return "", err
 	}
+	imgURIBz, err := json.Marshal(req.ImageUri)
+	if err != nil {
+		return "", err
+	}
 
 	m := map[string]interface{}{
 		"creatorAddr":    creatorAddr,
@@ -220,6 +224,7 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, req *ze
 		"zenaoAdminAddr": zenaoAdminAddr,
 		"title":          string(titleBz),
 		"description":    string(descBz),
+		"imageURI":       string(imgURIBz),
 	}
 	t := template.Must(template.New("").Parse(eventRealmSourceTemplate))
 	buf := strings.Builder{}
@@ -271,9 +276,9 @@ func init() {
 	}
 	event = events.NewEvent(&conf) 
 
-	profile.SetStringField(profile.DisplayName, "{{.req.Title}}")
-	profile.SetStringField(profile.Bio, "{{.req.Description}}")
-	profile.SetStringField(profile.Avatar, "{{.req.ImageUri}}")
+	profile.SetStringField(profile.DisplayName, {{.title}})
+	profile.SetStringField(profile.Bio, {{.description}})
+	profile.SetStringField(profile.Avatar, {{.imageURI}})
 }
 
 func AddParticipant(participant string) {
