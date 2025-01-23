@@ -30,7 +30,8 @@ type Event struct {
 	Capacity    uint32
 	Location    string
 	CreatorID   uint
-	Creator     User `gorm:"foreignKey:CreatorID"`
+	Creator     User         `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserEvents table ?
+	Members     []UserEvents `gorm:"many2many:user_events;"`
 }
 
 type UserEvents struct {
