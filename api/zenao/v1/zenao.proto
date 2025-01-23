@@ -7,6 +7,7 @@ service ZenaoService {
   // USER
   rpc EditUser(EditUserRequest) returns (EditUserResponse);
 
+  // EVENT
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
