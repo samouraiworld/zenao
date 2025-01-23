@@ -3,6 +3,7 @@
 import React from "react";
 import { SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
+import { SmallText } from "../texts/SmallText";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -27,12 +28,12 @@ export const SignedOutModal: React.FC = () => {
           <AlertDialogFooter>
             <SignUpButton>
               <Button variant="secondary">
-                <span>{t("sign-up")}</span>
+                <SmallText>{t("sign-up")}</SmallText>
               </Button>
             </SignUpButton>
             <SignInButton>
               <Button>
-                <span>{t("sign-in")}</span>
+                <SmallText variant="invert">{t("sign-in")}</SmallText>
               </Button>
             </SignInButton>
           </AlertDialogFooter>
