@@ -26,6 +26,11 @@ export const CreateEventForm: React.FC = () => {
   const form = useForm<EventFormSchemaType>({
     mode: "all",
     resolver: zodResolver(eventFormSchema),
+    defaultValues: {
+      imageUri: "",
+      description: "",
+      title: "",
+    },
   });
   const imageUri = form.watch("imageUri");
   const [isLoaded, setIsLoaded] = React.useState<boolean>(false);
