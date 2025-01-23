@@ -16,7 +16,12 @@ var (
 
 func TestNewEvent(t *testing.T) {
 	std.TestSetOrigCaller(alice)
-	event := NewEvent("1", alice.String(), "event", "this is an event", 0, 0, 0, 0, nil, "")
+	conf := Config{
+		Creator:     alice.String(),
+		Title:       "event",
+		Description: "this is an event",
+	}
+	event := NewEvent(&conf)
 	if event.org.MemberModule.GetMembers()[1] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[1])
 	}
@@ -27,7 +32,12 @@ func TestNewEvent(t *testing.T) {
 
 func TestAddParticipant(t *testing.T) {
 	std.TestSetOrigCaller(alice)
-	event := NewEvent("1", alice.String(), "event", "this is an event", 0, 0, 0, 0, nil, "")
+	conf := Config{
+		Creator:     alice.String(),
+		Title:       "event",
+		Description: "this is an event",
+	}
+	event := NewEvent(&conf)
 	if event.org.MemberModule.GetMembers()[1] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[1])
 	}
@@ -66,7 +76,12 @@ func TestAddParticipant(t *testing.T) {
 
 func TestRemoveParticipant(t *testing.T) {
 	std.TestSetOrigCaller(alice)
-	event := NewEvent("1", alice.String(), "event", "this is an event", 0, 0, 0, 0, nil, "")
+	conf := Config{
+		Creator:     alice.String(),
+		Title:       "event",
+		Description: "this is an event",
+	}
+	event := NewEvent(&conf)
 	if event.org.MemberModule.GetMembers()[1] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), event.org.MemberModule.GetMembers()[1])
 	}

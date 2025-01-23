@@ -17,6 +17,7 @@ message CreateEventRequest {
   uint64 end_date = 5;     // unix seconds
   double ticket_price = 6; // XXX: use fixed point?
   uint32 capacity = 7;
+  string location = 8;
 }
 
 message CreateEventResponse { string id = 1; }

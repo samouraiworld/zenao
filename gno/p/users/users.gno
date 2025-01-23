@@ -10,7 +10,7 @@ type User struct {
 	org *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
 }
 
-func NewUser(id string) *User {
+func NewUser() *User {
 	caller := std.PrevRealm().Addr().String()
 	roles := []string{"admin"}
 	members := [][]string{
@@ -20,7 +20,7 @@ func NewUser(id string) *User {
 	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"admin","count":"1"}}]`
 
 	// Don't pass the message handlers, since they are by default in the user dao
-	dao := dao_roles_based.NewDaoRolesBasedJSON("Zenao user #"+id, "Zenao managed user", roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
+	dao := dao_roles_based.NewDaoRolesBasedJSON("Zenao user", "Zenao managed user", roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	user := &User{
 		org: dao,
 	}

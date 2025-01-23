@@ -1,6 +1,15 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
-import { eventFormSchema } from "@/components/form/types";
+import { z } from "zod";
+
+export const eventInfoSchema = z.object({
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
+  imageUri: z.string().trim().min(1).url(),
+  startDate: z.coerce.bigint(),
+  endDate: z.coerce.bigint(),
+  capacity: z.coerce.number(),
+});
 
 export const eventOptions = (id: string) =>
   queryOptions({
@@ -13,7 +22,7 @@ export const eventOptions = (id: string) =>
           `event.GetInfoJSON()`,
         );
         const event = extractGnoJSONResponse(res);
-        return eventFormSchema.parse(event);
+        return eventInfoSchema.parse(event);
       } catch (err) {
         console.error(err);
       }

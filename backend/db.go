@@ -21,6 +21,7 @@ type Event struct {
 	TicketPrice float64
 	Capacity    uint32
 	CreatorID   uint
+	Location    string
 	Creator     User `gorm:"foreignKey:CreatorID"`
 }
 
@@ -79,6 +80,7 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		CreatorID:   uint(creatorIDInt),
 		TicketPrice: req.TicketPrice,
 		Capacity:    req.Capacity,
+		Location:    req.Location,
 	}
 	if err := g.db.Create(evt).Error; err != nil {
 		return "", err

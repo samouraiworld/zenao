@@ -15,32 +15,41 @@ type Event struct {
 	creator          string
 	startDate        int64
 	endDate          int64
-	ticketPrice      float64
 	capacity         int64
 	getProfileString GetProfileString
 	org              *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
+	location         string
 }
 
-func NewEvent(id string, creatorAddr string, title string, description string, startDate int64, endDate int64, ticketPrice float64, capacity int64, getProfileString GetProfileString, zenaoAdminAddr string) *Event {
+type Config struct {
+	Creator          string
+	Title            string
+	Description      string
+	StartDate        int64 // unix seconds
+	EndDate          int64 // unix seconds
+	Capacity         int64
+	GetProfileString GetProfileString
+	ZenaoAdminAddr   string
+}
+
+func NewEvent(conf *Config) *Event {
 	roles := []string{"organizer", "gatekeeper", "participant"}
 	members := [][]string{
-		{creatorAddr, "organizer"},
-		{zenaoAdminAddr, "organizer"},
+		{conf.Creator, "organizer"},
+		{conf.ZenaoAdminAddr, "organizer"},
 	}
 
 	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"organizer","count":"1"}}]`
 
 	// Don't pass the message handlers, since they are by default in the user dao
-	dao := dao_roles_based.NewDaoRolesBasedJSON(title, description, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
+	dao := dao_roles_based.NewDaoRolesBasedJSON(conf.Title, conf.Description, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	event := &Event{
-		id:               id,
-		creator:          creatorAddr,
-		startDate:        startDate,
-		endDate:          endDate,
-		ticketPrice:      ticketPrice,
-		capacity:         capacity,
+		creator:          conf.Creator,
+		startDate:        conf.StartDate,
+		endDate:          conf.EndDate,
+		capacity:         conf.Capacity,
 		org:              dao,
-		getProfileString: getProfileString,
+		getProfileString: conf.GetProfileString,
 	}
 
 	return event
@@ -114,10 +123,6 @@ func (e *Event) GetStartDate() int64 {
 	return e.startDate
 }
 
-func (e *Event) GetTicketPrice() float64 {
-	return e.ticketPrice
-}
-
 func (e *Event) GetCapacity() int64 {
 	return e.capacity
 }
@@ -129,8 +134,9 @@ func (e *Event) GetInfoJSON() string {
 		"imageUri":    json.StringNode("", e.getProfileString(std.CurrentRealm().Addr(), "Avatar", "")),
 		"startDate":   json.StringNode("", ufmt.Sprintf("%d", e.startDate)),
 		"endDate":     json.StringNode("", ufmt.Sprintf("%d", e.endDate)),
-		"ticketPrice": json.NumberNode("", float64(e.ticketPrice)),
 		"capacity":    json.NumberNode("", float64(e.capacity)),
+		"creatorAddr": json.StringNode("", e.creator),
+		"location":    json.StringNode("", e.location),
 	})
 	bz, err := json.Marshal(obj)
 	if err != nil {
