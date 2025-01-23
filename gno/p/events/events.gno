@@ -11,14 +11,15 @@ import (
 type GetProfileString func(addr std.Address, field string, def string) string
 
 type Event struct {
-	id               string
-	creator          string
-	startDate        int64
-	endDate          int64
-	capacity         int64
-	getProfileString GetProfileString
-	org              *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
-	location         string
+	ID               string
+	Creator          string
+	StartDate        int64
+	EndDate          int64
+	Capacity         uint64
+	Location         string
+	GetProfileString GetProfileString
+
+	org *dao_roles_based.DaoRolesBased
 }
 
 type Config struct {
@@ -27,7 +28,7 @@ type Config struct {
 	Description      string
 	StartDate        int64 // unix seconds
 	EndDate          int64 // unix seconds
-	Capacity         int64
+	Capacity         uint64
 	GetProfileString GetProfileString
 	ZenaoAdminAddr   string
 }
@@ -44,12 +45,12 @@ func NewEvent(conf *Config) *Event {
 	// Don't pass the message handlers, since they are by default in the user dao
 	dao := dao_roles_based.NewDaoRolesBasedJSON(conf.Title, conf.Description, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	event := &Event{
-		creator:          conf.Creator,
-		startDate:        conf.StartDate,
-		endDate:          conf.EndDate,
-		capacity:         conf.Capacity,
+		Creator:          conf.Creator,
+		StartDate:        conf.StartDate,
+		EndDate:          conf.EndDate,
+		Capacity:         conf.Capacity,
+		GetProfileString: conf.GetProfileString,
 		org:              dao,
-		getProfileString: conf.GetProfileString,
 	}
 
 	return event
@@ -103,40 +104,27 @@ func (e *Event) RemoveGatekeeper(gatekeeper string) {
 	}
 }
 
+func (e *Event) AssertCallerIsOrganizer() {
+	caller := std.PrevRealm().Addr().String()
+	if !e.org.MemberModule.HasRole(caller, "organizer") {
+		panic("caller is not organizer of the event")
+	}
+}
+
 func (e *Event) CountParticipants() int {
 	return len(e.org.MemberModule.GetMembersWithRole("participant"))
 }
 
-func (e *Event) GetID() string {
-	return e.id
-}
-
-func (e *Event) GetCreator() string {
-	return e.creator
-}
-
-func (e *Event) GetEndDate() int64 {
-	return e.endDate
-}
-
-func (e *Event) GetStartDate() int64 {
-	return e.startDate
-}
-
-func (e *Event) GetCapacity() int64 {
-	return e.capacity
-}
-
 func (e *Event) GetInfoJSON() string {
 	obj := json.ObjectNode("", map[string]*json.Node{
-		"title":       json.StringNode("", e.getProfileString(std.CurrentRealm().Addr(), "DisplayName", "")),
-		"description": json.StringNode("", e.getProfileString(std.CurrentRealm().Addr(), "Bio", "")),
-		"imageUri":    json.StringNode("", e.getProfileString(std.CurrentRealm().Addr(), "Avatar", "")),
-		"startDate":   json.StringNode("", ufmt.Sprintf("%d", e.startDate)),
-		"endDate":     json.StringNode("", ufmt.Sprintf("%d", e.endDate)),
-		"capacity":    json.NumberNode("", float64(e.capacity)),
-		"creatorAddr": json.StringNode("", e.creator),
-		"location":    json.StringNode("", e.location),
+		"title":       json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "DisplayName", "")),
+		"description": json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Bio", "")),
+		"imageUri":    json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Avatar", "")),
+		"startDate":   json.StringNode("", ufmt.Sprintf("%d", e.StartDate)),
+		"endDate":     json.StringNode("", ufmt.Sprintf("%d", e.EndDate)),
+		"capacity":    json.NumberNode("", float64(e.Capacity)),
+		"creatorAddr": json.StringNode("", e.Creator),
+		"location":    json.StringNode("", e.Location),
 	})
 	bz, err := json.Marshal(obj)
 	if err != nil {
