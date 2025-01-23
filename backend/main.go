@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"net/http"
 	"os"
 	"slices"
@@ -87,6 +89,7 @@ func execStart() error {
 	zenao := &ZenaoServer{
 		Logger:     logger,
 		GetUser:    getUserFromClerk,
+		CreateUser: createClerkUser,
 		DBTx:       db.Tx,
 		Chain:      chain,
 		MailClient: resend.NewClient(resendSecretKey),
@@ -107,13 +110,43 @@ func execStart() error {
 	)
 }
 
-func getUserFromClerk(ctx context.Context) ZenaoUser {
-	clerkUser := authn.GetInfo(ctx).(*clerk.User)
+func getUserFromClerk(ctx context.Context) *ZenaoUser {
+	iUser := authn.GetInfo(ctx)
+	if iUser == nil {
+		return nil
+	}
+	clerkUser := iUser.(*clerk.User)
 	email := ""
 	if len(clerkUser.EmailAddresses) != 0 {
 		email = clerkUser.EmailAddresses[0].EmailAddress
 	}
-	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+	return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+}
+
+func createClerkUser(ctx context.Context, email string) (*ZenaoUser, error) {
+	existing, err := user.List(ctx, &user.ListParams{EmailAddressQuery: &email})
+	if err != nil {
+		return nil, err
+	}
+	if len(existing.Users) != 0 {
+		clerkUser := existing.Users[0]
+		return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
+	}
+
+	passwordBz := make([]byte, 32)
+	if _, err := rand.Read(passwordBz); err != nil {
+		return nil, err
+	}
+	password := base64.RawURLEncoding.EncodeToString(passwordBz)
+
+	clerkUser, err := user.Create(ctx, &user.CreateParams{
+		EmailAddresses: &[]string{email},
+		Password:       &password,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {
@@ -154,7 +187,12 @@ func withRequestLogging(logger *zap.Logger) func(http.Handler) http.Handler {
 func withClerkAuth(secretKey string) func(http.Handler) http.Handler {
 	clerk.SetKey(secretKey)
 	return authn.NewMiddleware(func(_ context.Context, req *http.Request) (any, error) {
-		sessionToken := strings.TrimPrefix(req.Header.Get("Authorization"), "Bearer ")
+		authHeader := req.Header.Get("Authorization")
+		if authHeader == "" {
+			return nil, nil
+		}
+
+		sessionToken := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
 			Token: sessionToken,
