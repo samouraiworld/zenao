@@ -7,6 +7,7 @@ import { format, fromUnixTime } from "date-fns";
 import { useClerk } from "@clerk/nextjs";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { zenaoClient } from "@/app/zenao-client";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -76,6 +77,13 @@ export function EventInfo({ id }: { id: string }) {
         </EventSection>
         <EventSection title={t("hosted-by")}>
           <SmallText>User</SmallText>
+        </EventSection>
+        <EventSection title={""}>
+          <Link
+            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
+          >
+            <SmallText>See on Gnoweb</SmallText>
+          </Link>
         </EventSection>
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
