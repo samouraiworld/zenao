@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import React from "react";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { useClerk } from "@clerk/nextjs";
@@ -9,7 +9,11 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { zenaoClient } from "@/app/zenao-client";
-import { eventOptions } from "@/lib/queries/event";
+import {
+  eventCountParticipants,
+  eventOptions,
+  eventUserParticipate,
+} from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Button } from "@/components/shadcn/button";
 import { Separator } from "@/components/common/Separator";
@@ -18,10 +22,11 @@ import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { Input } from "@/components/shadcn/input";
+import { useClerkToken } from "@/app/hooks/useClerkToken";
 
 interface EventSectionProps {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
@@ -29,18 +34,19 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
     <div className="flex flex-col">
       <Text className="font-semibold">{title}</Text>
       <Separator className="mt-2 mb-3" />
-      {children}
+      {children && children}
     </div>
   );
 };
 
 export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
+  const { data: countParticipants } = useQuery(eventCountParticipants(id));
+  const token = useClerkToken();
+  const { data: isParticipate } = useQuery(eventUserParticipate(token, id));
+
   const t = useTranslations("event");
 
-  const isOrganisatorRole = true;
-  const isRegistered = false;
-  const participantsCount = 20;
   const iconSize = 22;
 
   if (!data) {
@@ -57,27 +63,22 @@ export function EventInfo({ id }: { id: string }) {
           className="flex w-full rounded-xl self-center"
         />
 
-        {isOrganisatorRole && (
-          <Card className="flex flex-row items-center">
-            <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
-            <div className="w-2/5 flex justify-end">
-              <Button variant="outline">
-                <SmallText>{t("manage-button")}</SmallText>
-              </Button>
-            </div>
-          </Card>
-        )}
-        <EventSection
-          title={t("going", {
-            count: participantsCount,
-            capacity: data.capacity,
-          })}
-        >
-          <SmallText>Avatars</SmallText>
-        </EventSection>
-        <EventSection title={t("hosted-by")}>
-          <SmallText>User</SmallText>
-        </EventSection>
+        {/* TODO: Uncomment that when edit event page exist */}
+        {/* {isOrganisatorRole && ( */}
+        {/*   <Card className="flex flex-row items-center"> */}
+        {/*     <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText> */}
+        {/*     <div className="w-2/5 flex justify-end"> */}
+        {/*       <Button variant="outline"> */}
+        {/*         <SmallText>{t("manage-button")}</SmallText> */}
+        {/*       </Button> */}
+        {/*     </div> */}
+        {/*   </Card> */}
+        {/* )} */}
+        <EventSection title={t("going", { count: countParticipants })} />
+        {/* TODO: Uncomment that when we can see the name of the addr */}
+        {/* <EventSection title={t("hosted-by")}> */}
+        {/*   <SmallText>User</SmallText> */}
+        {/* </EventSection> */}
         <EventSection title={""}>
           <Link
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
@@ -107,17 +108,17 @@ export function EventInfo({ id }: { id: string }) {
         </div>
         <div className="flex flex-row gap-4 items-center">
           <MapPin width={iconSize} height={iconSize} />
-          <LargeText>
-            {isRegistered ? "Paris, Ground Control" : t("register-address")}
-          </LargeText>
+          {/* TODO: Add location */}
+          <LargeText>{data.location}</LargeText>
         </div>
 
         <Card className="mt-2">
-          {isRegistered ? (
+          {isParticipate ? (
             <div>
               <div className="flex flex-row justify-between">
                 <LargeText>{t("in")}</LargeText>
-                <SmallText>{t("start", { count: 2 })}</SmallText>
+                {/* TODO: create a clean decount timer */}
+                {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>
               <Text className="my-4">{t("cancel-desc")}</Text>
             </div>
@@ -139,7 +140,7 @@ export function EventInfo({ id }: { id: string }) {
 
 function ParticipateButton({ eventId }: { eventId: string }) {
   const { session } = useClerk();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = React.useState("");
   const t = useTranslations("event");
   return (
     <div>

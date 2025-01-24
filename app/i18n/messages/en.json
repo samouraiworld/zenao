@@ -24,6 +24,7 @@
     "image-uri-placeholder": "Image URL...",
     "title-placeholder": "Event name...",
     "description-placeholder": "Description...",
+    "location-placeholder": "Location...",
     "capacity-placeholder": "Capacity...",
     "start-date-placeholder": "Choose your start date/time...",
     "end-date-placeholder": "Choose your end date/time..."
@@ -31,7 +32,7 @@
   "event": {
     "is-organisator-role": "You have organisator role for this event",
     "manage-button": "Manage",
-    "going": "{count} going / {capacity}",
+    "going": "{count} going",
     "hosted-by": "Hosted by:",
     "register-address": "Register to see address",
     "in": "You're in !",

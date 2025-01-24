@@ -3,9 +3,11 @@
 import React from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { FileText } from "lucide-react";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
+import { SmallText } from "@/components/texts/SmallText";
 
 export default function Manifesto() {
   const t = useTranslations("manifesto");
@@ -26,9 +28,13 @@ export default function Manifesto() {
         <div className="w-full sm:w-1/3">
           <Card>
             <div className="flex flex-col gap-3">
-              <Text variant="secondary" className="font-light">
-                {t("title")}
-              </Text>
+              <div className="flex flex-row gap-2">
+                <FileText className="text-secondary-color" width={15} />
+                <Text variant="secondary" className="font-light">
+                  {t("title")}
+                </Text>
+              </div>
+
               <Text>
                 <span className="font-semibold">ZENAO</span>
                 <span className="mx-[6px]">{t("means")}</span>
@@ -36,25 +42,27 @@ export default function Manifesto() {
                   Zen Autonomous Organizations
                 </span>
               </Text>
-              <Text>{t("p1")}</Text>
-              <Text>{t("p2")}</Text>
-              <Text>{t("p3")}</Text>
-              <Text>{t("p4")}</Text>
-              <Text>{t("p5")}</Text>
+              <SmallText>{t("p1")}</SmallText>
+              <SmallText>{t("p2")}</SmallText>
+              <SmallText>{t("p3")}</SmallText>
+              <SmallText>{t("p4")}</SmallText>
+              <SmallText>{t("p5")}</SmallText>
               <div>
-                <Text>
+                <SmallText>
                   <span>{t("p6")}</span>
                   <a href="https://samourai.world" className="mx-[6px]">
                     <span className="text-blue-600">Samourai.world</span>
                   </a>
                   <span>{t("p6-end")}</span>
-                </Text>
-                <Text variant="secondary">{t("p6-ref")}</Text>
+                </SmallText>
+                <SmallText variant="secondary">{t("p6-ref")}</SmallText>
               </div>
               <div>
-                <Text>{t("p7")}</Text>
+                <SmallText>{t("p7")}</SmallText>
                 <a href="https://www.zenao.io">
-                  <Text className="text-orange-600">www.zenao.io</Text>
+                  <SmallText className="text-orange-600">
+                    www.zenao.io
+                  </SmallText>
                 </a>
               </div>
             </div>
