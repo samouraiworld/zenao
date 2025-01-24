@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 COPY backend ./backend
 COPY .git ./.git
 
-# Build teritorid binary
+# Build binary
 RUN --mount=type=cache,target=/root/.cache/go-build \
   --mount=type=cache,target=/root/go/pkg/mod \
   go build \
@@ -43,7 +43,6 @@ FROM ${RUNNER_IMAGE}
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive \
     apt-get install --no-install-recommends --assume-yes \
-      build-essential \
       libsqlite3-dev \
       ca-certificates
 
