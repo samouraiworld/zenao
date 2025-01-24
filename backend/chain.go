@@ -236,27 +236,24 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 }
 
 func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, req *zenaov1.CreateEventRequest) (string, error) {
-	titleBz, err := json.Marshal(req.Title)
-	if err != nil {
-		return "", err
-	}
-	descBz, err := json.Marshal(req.Description)
-	if err != nil {
-		return "", err
-	}
-	imgURIBz, err := json.Marshal(req.ImageUri)
-	if err != nil {
-		return "", err
-	}
-
 	m := map[string]interface{}{
 		"creatorAddr":    creatorAddr,
 		"req":            req,
 		"zenaoAdminAddr": zenaoAdminAddr,
-		"title":          string(titleBz),
-		"description":    string(descBz),
-		"imageURI":       string(imgURIBz),
 		"namespace":      conf.gnoNamespace,
+	}
+	toMarshal := map[string]interface{}{
+		"title":       req.Title,
+		"description": req.Description,
+		"location":    req.Location,
+		"imageURI":    req.ImageUri,
+	}
+	for key, val := range toMarshal {
+		bz, err := json.Marshal(val)
+		if err != nil {
+			return "", err
+		}
+		m[key] = string(bz)
 	}
 	t := template.Must(template.New("").Parse(eventRealmSourceTemplate))
 	buf := strings.Builder{}
@@ -306,6 +303,7 @@ func init() {
 		Capacity: {{.req.Capacity}},
 		GetProfileString: profile.GetStringField,
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
+		Location: {{.location}},
 	}
 	event = events.NewEvent(&conf) 
 
@@ -348,6 +346,7 @@ func Render(path string) string {
 	s += md.Image("Event presentation", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
 	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
 	s += md.BulletList([]string{
+		ufmt.Sprintf("Location: %s", event.Location),
 		ufmt.Sprintf("Time: From %s to %s", time.Unix(event.StartDate, 0).Format(time.DateTime), time.Unix(event.EndDate, 0).Format(time.DateTime)),
 		ufmt.Sprintf("Capacity: %d/%d", event.CountParticipants(), event.Capacity),
 		ufmt.Sprintf("Organizer: %s", profile.GetStringField(std.Address(event.Creator), profile.DisplayName, "")),
