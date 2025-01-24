@@ -31,11 +31,12 @@ export default function Home() {
         </SmallText>
         <Input
           placeholder={t("placeholder")}
+          disabled
           className="dark:bg-secondary dark:border-secondary mb-4 h-10 flex pb-1 rounded-lg focus-visible:ring-0"
         />
-        <Button asChild className="w-full flex rounded-3xl py-5">
+        <Button disabled className="w-full flex rounded-3xl py-5">
           <Link href="/create">
-            <SmallText variant="invert">{t("button")}</SmallText>
+            <SmallText variant="invert">{t("button")} - Coming soon</SmallText>
           </Link>
         </Button>
       </div>

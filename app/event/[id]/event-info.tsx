@@ -9,7 +9,11 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { zenaoClient } from "@/app/zenao-client";
-import { eventCountParticipants, eventOptions } from "@/lib/queries/event";
+import {
+  eventCountParticipants,
+  eventOptions,
+  eventUserParticipate,
+} from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Button } from "@/components/shadcn/button";
 import { Separator } from "@/components/common/Separator";
@@ -40,8 +44,27 @@ export function EventInfo({ id }: { id: string }) {
   const t = useTranslations("event");
 
   const isOrganisatorRole = false;
-  const isRegistered = false;
   const iconSize = 22;
+
+  const { session } = useClerk();
+
+  // XXX: find a better way to do that
+  const [token, setToken] = React.useState<string>();
+  React.useEffect(() => {
+    const effect = async () => {
+      if (!session) {
+        return null;
+      }
+      const tok = await session.getToken();
+      if (!tok) {
+        return;
+      }
+      setToken(tok);
+    };
+    effect();
+  }, [session]);
+
+  const { data: isParticipate } = useQuery(eventUserParticipate(token, id));
 
   if (!data) {
     return <p>{`Event doesn't exist`}</p>;
@@ -110,7 +133,7 @@ export function EventInfo({ id }: { id: string }) {
         </div>
 
         <Card className="mt-2">
-          {isRegistered ? (
+          {isParticipate ? (
             <div>
               <div className="flex flex-row justify-between">
                 <LargeText>{t("in")}</LargeText>
