@@ -38,6 +38,7 @@ func main() {
 	cmd.AddSubCommands(
 		newStartCmd(),
 		newFakegenCmd(),
+		newMailCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
