@@ -6,6 +6,7 @@ import { useClerk } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
@@ -22,6 +23,7 @@ import { isValidURL } from "@/lib/utils";
 
 export const CreateEventForm: React.FC = () => {
   const { client } = useClerk();
+  const router = useRouter();
   const t = useTranslations("create");
   const form = useForm<EventFormSchemaType>({
     mode: "all",
@@ -44,12 +46,12 @@ export const CreateEventForm: React.FC = () => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      await zenaoClient.createEvent(values, {
+      const { id } = await zenaoClient.createEvent(values, {
         headers: { Authorization: "Bearer " + token },
       });
       setIsLoaded(false);
       form.reset();
-      alert("Success");
+      router.push(`/event/${id}`);
     } catch (err) {
       console.error("error", err);
     }
