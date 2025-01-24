@@ -42,6 +42,7 @@ export const FormFieldTextArea: React.FC<FormFieldProps<string>> = ({
                 className,
               )}
               placeholder={placeholder || "placeholder..."}
+              {...field}
               onChange={(e) => {
                 field.onChange(e.target.value);
                 adjustHeight();
