@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { useClerk } from "@clerk/nextjs";
@@ -41,9 +41,13 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 
 export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: countParticipants } = useQuery(eventCountParticipants(id));
+  const { data: countParticipants } = useSuspenseQuery(
+    eventCountParticipants(id),
+  );
   const token = useClerkToken();
-  const { data: isParticipate } = useQuery(eventUserParticipate(token, id));
+  const { data: isParticipate } = useSuspenseQuery(
+    eventUserParticipate(token, id),
+  );
 
   const t = useTranslations("event");
 
