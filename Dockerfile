@@ -1,0 +1,55 @@
+# syntax=docker/dockerfile:1
+
+ARG GO_VERSION="1.23"
+ARG RUNNER_IMAGE="debian:bookworm"
+
+# --------------------------------------------------------
+# Builder
+# --------------------------------------------------------
+
+FROM golang:${GO_VERSION}-bookworm AS builder
+
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes \
+      build-essential \
+      libsqlite3-dev
+
+# Download go dependencies
+WORKDIR /app
+COPY go.* ./
+RUN --mount=type=cache,target=/root/.cache/go-build \
+  --mount=type=cache,target=/root/go/pkg/mod \
+  go mod download
+
+# Copy the remaining files
+COPY backend ./backend
+COPY .git ./.git
+
+# Build teritorid binary
+RUN --mount=type=cache,target=/root/.cache/go-build \
+  --mount=type=cache,target=/root/go/pkg/mod \
+  go build \
+  -mod=readonly \
+  -o /app/build/zenao-backend \
+  ./backend
+
+# --------------------------------------------------------
+# Runner
+# --------------------------------------------------------
+
+FROM ${RUNNER_IMAGE}
+
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes \
+      build-essential \
+      libsqlite3-dev \
+      ca-certificates
+
+COPY --from=builder /app/build/zenao-backend /bin/zenao-backend
+
+ENV HOME=/app
+WORKDIR $HOME
+
+ENTRYPOINT ["/bin/zenao-backend", "start", "--bind-addr", "0.0.0.0:4242", "--chain-endpoint", "https://zenao-gno.fly.dev:26657", "--gno-chain-id", "zenao-dev", "--db", "libsql://zenao-staging-n0izn0iz.turso.io?authToken=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJnaWQiOiJlZWE4MGFmMi02MjEwLTRhMzEtODdkMy04NTI2ZjY0ZWExZjYiLCJpYXQiOjE3Mzc2ODk0MzN9.6qwOoZJX7Pxo2gEGEC0N0G_jALMXAlcXYIc5H-CP5vYYZ2ymfFlXteZTwK504b9S9TnqMye9JoqT5BkA3-lUBA"]

@@ -57,15 +57,16 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		// XXX: Replace sender name with organizer name
-
-		if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
-			From:    "Zenao <ticket@mail.zenao.io>",
-			To:      []string{user.Email},
-			Subject: fmt.Sprintf("Your ticket for %s", evt.Title),
-			Text:    "TODO",
-		}); err != nil {
-			return err
+		if conf.resendSecretKey != "" {
+			// XXX: Replace sender name with organizer name
+			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+				From:    "Zenao <ticket@mail.zenao.io>",
+				To:      []string{user.Email},
+				Subject: fmt.Sprintf("Your ticket for %s", evt.Title),
+				Text:    "TODO",
+			}); err != nil {
+				return err
+			}
 		}
 
 		return nil

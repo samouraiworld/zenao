@@ -16,7 +16,9 @@ export const eventOptions = (id: string) =>
     queryKey: ["event", id],
     queryFn: async () => {
       try {
-        const client = new GnoJSONRPCProvider("http://127.0.0.1:26657");
+        const client = new GnoJSONRPCProvider(
+          "https://zenao-gno.fly.dev:26657",
+        );
         const res = await client.evaluateExpression(
           `gno.land/r/zenao/events/e${id}`,
           `event.GetInfoJSON()`,
