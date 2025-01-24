@@ -69,3 +69,18 @@ func generateConfirmationMailHTML(evt *Event) (string, error) {
 	}
 	return buf.String(), nil
 }
+
+func generateConfirmationMailText(evt *Event) string {
+	return fmt.Sprintf(`Welcome! Tickets will be sent in a few weeks!
+
+--------------------------------------------------------------------------------
+
+Event name: %s
+Date and time: %s - %s
+Address: %s
+
+--------------------------------------------------------------------------------
+
+See on Zenao: %s
+`, evt.Title, evt.StartDate.Format(time.UnixDate), evt.EndDate.Format(time.UnixDate), evt.Location, fmt.Sprintf("https://zenao.io/event/%d", evt.ID))
+}

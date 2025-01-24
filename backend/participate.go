@@ -69,6 +69,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				To:      []string{user.Email},
 				Subject: fmt.Sprintf("%s - Confirmation", evt.Title),
 				Html:    htmlStr,
+				Text:    generateConfirmationMailText(evt),
 			}); err != nil {
 				return err
 			}
