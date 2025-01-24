@@ -17,7 +17,7 @@ export const eventOptions = (id: string) =>
     queryFn: async () => {
       try {
         const client = new GnoJSONRPCProvider(
-          "https://zenao-gno.fly.dev:26657",
+          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
         );
         const res = await client.evaluateExpression(
           `gno.land/r/zenao/events/e${id}`,
