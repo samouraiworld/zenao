@@ -89,6 +89,8 @@ func execStart() error {
 		return err
 	}
 
+	injectEnv()
+
 	chain, err := setupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, logger)
 	if err != nil {
 		return err
