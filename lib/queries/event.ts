@@ -41,7 +41,7 @@ export const eventUserParticipate = (
     queryKey: ["eventUserParticipate", authToken, id],
     queryFn: async () => {
       if (!authToken) {
-        return [];
+        return false;
       }
       const { address } = await zenaoClient.getUserAddress(
         {},
