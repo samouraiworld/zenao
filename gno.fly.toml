@@ -1,0 +1,28 @@
+# fly.toml app configuration file generated for zenao-gno on 2025-01-24T02:36:30+01:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'zenao-gno'
+primary_region = 'cdg'
+
+[build]
+dockerfile = 'gno.Dockerfile'
+
+[http_service]
+internal_port = 8888
+force_https = true
+processes = ['app']
+
+[[services]]
+protocol = 'tcp'
+internal_port = 26657
+
+[[services.ports]]
+port = 26657
+handlers = ['tls', 'http']
+
+[[vm]]
+cpu_kind = 'shared'
+cpus = 2
+memory_mb = 2048

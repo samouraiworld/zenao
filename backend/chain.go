@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"path"
 	"strings"
 	"text/template"
 
@@ -25,7 +26,7 @@ type gnoZenaoChain struct {
 	logger             *zap.Logger
 }
 
-func setupChain(adminMnemonic string, eventsIndexPkgPath string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
+func setupChain(adminMnemonic string, gnoNamespace string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
 	signer, err := gnoclient.SignerFromBip39(adminMnemonic, chainID, "", 0, 0)
 	if err != nil {
 		return nil, err
@@ -44,7 +45,7 @@ func setupChain(adminMnemonic string, eventsIndexPkgPath string, chainID string,
 
 	return &gnoZenaoChain{
 		client:             client,
-		eventsIndexPkgPath: eventsIndexPkgPath,
+		eventsIndexPkgPath: path.Join("gno.land/r", gnoNamespace, "events_reg"),
 		signerInfo:         signerInfo,
 		logger:             logger,
 	}, nil
@@ -212,11 +213,11 @@ func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) er
 }
 
 func eventRealmPkgPath(eventID string) string {
-	return fmt.Sprintf("gno.land/r/zenao/events/e%s", eventID)
+	return fmt.Sprintf("gno.land/r/%s/events/e%s", conf.gnoNamespace, eventID)
 }
 
 func userRealmPkgPath(userID string) string {
-	return fmt.Sprintf("gno.land/r/zenao/users/u%s", userID)
+	return fmt.Sprintf("gno.land/r/%s/users/u%s", conf.gnoNamespace, userID)
 }
 
 var _ ZenaoChain = (*gnoZenaoChain)(nil)
@@ -255,6 +256,7 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, req *ze
 		"title":          string(titleBz),
 		"description":    string(descBz),
 		"imageURI":       string(imgURIBz),
+		"namespace":      conf.gnoNamespace,
 	}
 	t := template.Must(template.New("").Parse(eventRealmSourceTemplate))
 	buf := strings.Builder{}
@@ -269,6 +271,7 @@ func generateUserRealmSource(id string) (string, error) {
 		"displayName": fmt.Sprintf("Zenao user #%s", id),
 		"bio":         "Zenao managed user",
 		"avatarURI":   "https://www.wikimedia.org/portal/wikimedia.org/assets/img/wikimedia_logo.png",
+		"namespace":   conf.gnoNamespace,
 	}
 
 	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
@@ -287,7 +290,7 @@ import (
 
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
-	"gno.land/p/zenao/events"
+	"gno.land/p/{{.namespace}}/events"
 	"gno.land/r/demo/profile"
 )
 
@@ -361,7 +364,7 @@ import (
 	"std"
 
 	"gno.land/p/moul/md"
-	"gno.land/p/zenao/users"
+	"gno.land/p/{{.namespace}}/users"
 	"gno.land/r/demo/profile"
 )
 

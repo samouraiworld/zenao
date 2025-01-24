@@ -40,12 +40,14 @@ func execFakegen() error {
 		return err
 	}
 
-	chain, err := setupChain(adminMnemonic, eventsIndexPkgPath, chainID, chainEndpoint, logger)
+	injectEnv()
+
+	chain, err := setupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, logger)
 	if err != nil {
 		return err
 	}
 
-	db, err := setupLocalDB(dbPath)
+	db, err := setupDB(conf.dbPath)
 	if err != nil {
 		return err
 	}

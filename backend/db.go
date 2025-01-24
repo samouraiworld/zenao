@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -40,13 +42,24 @@ type User struct {
 	AvatarURI   string
 }
 
-func setupLocalDB(path string) (*gormZenaoDB, error) {
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+func setupDB(dsn string) (*gormZenaoDB, error) {
+	var (
+		db  *gorm.DB
+		err error
+	)
+
+	if strings.HasPrefix(dsn, "libsql") {
+		db, err = gorm.Open(sqlite.New(sqlite.Config{
+			DriverName: "libsql",
+			DSN:        dsn,
+		}), &gorm.Config{})
+	} else {
+		db, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	// Migrate the schema
 	if err := db.AutoMigrate(&Event{}, &SoldTicket{}, &User{}); err != nil {
 		return nil, err
 	}
