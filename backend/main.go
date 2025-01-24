@@ -64,7 +64,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
 	flset.StringVar(&conf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
-	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "re_fj3PNvR6_Pu8PsJEHVZdV8o1xPj6qe1HE", "Resend secret key")
+	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
 }
 
 var conf config
