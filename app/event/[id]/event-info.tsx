@@ -22,6 +22,7 @@ import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { Input } from "@/components/shadcn/input";
+import { useClerkToken } from "@/app/hooks/useClerkToken";
 
 interface EventSectionProps {
   title: string;
@@ -41,30 +42,12 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 export function EventInfo({ id }: { id: string }) {
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: countParticipants } = useQuery(eventCountParticipants(id));
+  const token = useClerkToken();
+  const { data: isParticipate } = useQuery(eventUserParticipate(token, id));
+
   const t = useTranslations("event");
 
-  const isOrganisatorRole = false;
   const iconSize = 22;
-
-  const { session } = useClerk();
-
-  // XXX: find a better way to do that
-  const [token, setToken] = React.useState<string>();
-  React.useEffect(() => {
-    const effect = async () => {
-      if (!session) {
-        return null;
-      }
-      const tok = await session.getToken();
-      if (!tok) {
-        return;
-      }
-      setToken(tok);
-    };
-    effect();
-  }, [session]);
-
-  const { data: isParticipate } = useQuery(eventUserParticipate(token, id));
 
   if (!data) {
     return <p>{`Event doesn't exist`}</p>;
@@ -80,21 +63,18 @@ export function EventInfo({ id }: { id: string }) {
           className="flex w-full rounded-xl self-center"
         />
 
-        {isOrganisatorRole && (
-          <Card className="flex flex-row items-center">
-            <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
-            <div className="w-2/5 flex justify-end">
-              <Button variant="outline">
-                <SmallText>{t("manage-button")}</SmallText>
-              </Button>
-            </div>
-          </Card>
-        )}
-        <EventSection
-          title={t("going", {
-            count: countParticipants,
-          })}
-        />
+        {/* TODO: Uncomment that when edit event page exist */}
+        {/* {isOrganisatorRole && ( */}
+        {/*   <Card className="flex flex-row items-center"> */}
+        {/*     <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText> */}
+        {/*     <div className="w-2/5 flex justify-end"> */}
+        {/*       <Button variant="outline"> */}
+        {/*         <SmallText>{t("manage-button")}</SmallText> */}
+        {/*       </Button> */}
+        {/*     </div> */}
+        {/*   </Card> */}
+        {/* )} */}
+        <EventSection title={t("going", { count: countParticipants })} />
         {/* TODO: Uncomment that when we can see the name of the addr */}
         {/* <EventSection title={t("hosted-by")}> */}
         {/*   <SmallText>User</SmallText> */}
@@ -137,7 +117,8 @@ export function EventInfo({ id }: { id: string }) {
             <div>
               <div className="flex flex-row justify-between">
                 <LargeText>{t("in")}</LargeText>
-                <SmallText>{t("start", { count: 2 })}</SmallText>
+                {/* TODO: create a clean decount timer */}
+                {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>
               <Text className="my-4">{t("cancel-desc")}</Text>
             </div>
