@@ -31,6 +31,7 @@ type Config struct {
 	Capacity         uint64
 	GetProfileString GetProfileString
 	ZenaoAdminAddr   string
+	Location         string
 }
 
 func NewEvent(conf *Config) *Event {
@@ -51,6 +52,7 @@ func NewEvent(conf *Config) *Event {
 		Capacity:         conf.Capacity,
 		GetProfileString: conf.GetProfileString,
 		org:              dao,
+		Location:         conf.Location,
 	}
 
 	return event
