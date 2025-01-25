@@ -23,6 +23,7 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { Input } from "@/components/shadcn/input";
 import { useClerkToken } from "@/app/hooks/useClerkToken";
+import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 
 interface EventSectionProps {
   title: string;
@@ -135,7 +136,7 @@ export function EventInfo({ id }: { id: string }) {
           )}
         </Card>
         <EventSection title={t("about-event")}>
-          <Text>{data.description}</Text>
+          <MarkdownPreview markdownString={data.description} />
         </EventSection>
       </div>
     </div>
