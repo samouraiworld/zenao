@@ -44,7 +44,7 @@ export function EventInfo({
   authToken,
 }: {
   id: string;
-  authToken?: string;
+  authToken: string | null;
 }) {
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: countParticipants } = useSuspenseQuery(
