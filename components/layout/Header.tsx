@@ -26,12 +26,12 @@ export const Header: React.FC = () => {
             width={26}
             height={26}
             priority
-            className="sm:overflow-auto"
+            className="overflow-auto"
           />
           <Text className="font-extrabold">{t("zenao")}</Text>
         </Link>
 
-        <div className="flex flex-row gap-3 sm:gap-5 mr-3 sm:mx-4">
+        <div className="flex flex-row gap-3 mr-3">
           <SmallText variant="secondary">{t("discover")}</SmallText>
           <SmallText variant="secondary">{t("calendar")}</SmallText>
           <SmallText variant="secondary">{t("pricing")}</SmallText>
@@ -40,16 +40,7 @@ export const Header: React.FC = () => {
             <SmallText variant="secondary">{t("manifesto")}</SmallText>
           </Link>
         </div>
-        <SignedOut>
-          <SignInButton>
-            <Button variant="outline">
-              <SmallText>{t("sign-in")}</SmallText>
-            </Button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
+        <Auth />
         <ToggleThemeButton />
       </Card>
 
@@ -62,20 +53,10 @@ export const Header: React.FC = () => {
             width={26}
             height={26}
             priority
-            className="sm:overflow-auto"
           />
         </Link>
         <div className="flex gap-2">
-          <SignedOut>
-            <SignInButton>
-              <Button variant="outline">
-                <SmallText>{t("sign-in")}</SmallText>
-              </Button>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
+          <Auth />
           <Popover>
             <PopoverTrigger>
               <AlignJustifyIcon width={26} height={26} />
@@ -95,3 +76,34 @@ export const Header: React.FC = () => {
     </div>
   );
 };
+
+function Auth() {
+  const t = useTranslations("header");
+
+  return (
+    <>
+      <SignedOut>
+        <SignInButton>
+          <Button variant="outline">
+            <SmallText>{t("sign-in")}</SmallText>
+          </Button>
+        </SignInButton>
+      </SignedOut>
+      <SignedIn>
+        <UserButton
+          // we need this fallback otherwise the profile button flickers while mounting
+          fallback={
+            <Image
+              src="/pfp-fallback.png"
+              alt="User"
+              width={28}
+              height={28}
+              className="rounded-full"
+              priority
+            />
+          }
+        />
+      </SignedIn>
+    </>
+  );
+}
