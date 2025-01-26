@@ -57,7 +57,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		if conf.resendSecretKey != "" {
+		if s.MailClient != nil {
 			htmlStr, err := generateConfirmationMailHTML(evt)
 			if err != nil {
 				return err

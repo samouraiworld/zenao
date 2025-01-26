@@ -39,6 +39,7 @@ type ZenaoDB interface {
 type ZenaoChain interface {
 	CreateUser(userID string) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	UserAddress(userID string) string
 
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) error
