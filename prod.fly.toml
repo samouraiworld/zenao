@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for zenao-staging on 2025-01-26T18:17:01+01:00
+# fly.toml app configuration file generated for zenao on 2025-01-24T01:12:15+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'zenao-staging'
+app = 'zenao'
 primary_region = 'cdg'
 
 [build]
