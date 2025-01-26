@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
-	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
@@ -30,7 +29,7 @@ func (s *ZenaoServer) GetUserAddress(
 		return nil, errors.New("user is banned")
 	}
 
-	userAddr := gnolang.DerivePkgAddr(userRealmPkgPath(userID)).String()
+	userAddr := s.Chain.UserAddress(userID)
 
 	return connect.NewResponse(&zenaov1.GetUserAddressResponse{
 		Address: userAddr,

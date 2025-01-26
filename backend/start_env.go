@@ -2,7 +2,7 @@ package main
 
 import "os"
 
-func injectEnv() {
+func injectStartEnv() {
 	mappings := map[string]*string{
 		"ZENAO_ADMIN_MNEMONIC":    &conf.adminMnemonic,
 		"ZENAO_RESEND_SECRET_KEY": &conf.resendSecretKey,
