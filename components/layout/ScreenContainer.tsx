@@ -17,8 +17,8 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   return (
     <div className="sm:h-screen flex flex-col family-name:var(--font-geist-sans)]">
       <Header />
-      <div className="sm:h-screen flex flex-col items-center">
-        <main className="flex flex-col w-full max-w-[960px] mb-10 sm:mb-0">
+      <div className="flex flex-col flex-1 items-center">
+        <main className="h-full w-full max-w-[960px] mb-10 sm:mb-0">
           <div className="mt-8 mx-5">{children}</div>
         </main>
       </div>

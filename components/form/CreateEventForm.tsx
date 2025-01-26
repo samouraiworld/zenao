@@ -11,6 +11,8 @@ import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
 import { SmallText } from "../texts/SmallText";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
+import { MarkdownPreview } from "../common/MarkdownPreview";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
@@ -20,6 +22,7 @@ import { zenaoClient } from "@/app/zenao-client";
 import { Button } from "@/components/shadcn/button";
 import { Form } from "@/components/shadcn/form";
 import { isValidURL } from "@/lib/utils";
+import { Text } from "@/components/texts/DefaultText";
 
 export const CreateEventForm: React.FC = () => {
   const { client } = useClerk();
@@ -37,6 +40,7 @@ export const CreateEventForm: React.FC = () => {
     },
   });
   const imageUri = form.watch("imageUri");
+  const description = form.watch("description");
   const [isLoaded, setIsLoaded] = React.useState<boolean>(false);
 
   const onSubmit = async (values: EventFormSchemaType) => {
@@ -63,7 +67,7 @@ export const CreateEventForm: React.FC = () => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full sm:flex-row items-center sm:h-full"
       >
-        <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
+        <div className="flex flex-col sm:flex-row w-full gap-10">
           <div className="flex flex-col gap-4 w-full sm:w-2/5">
             {/* I'm obligate to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead)  */}
             {isValidURL(imageUri, urlPattern) &&
@@ -90,15 +94,34 @@ export const CreateEventForm: React.FC = () => {
             <FormFieldTextArea
               control={form.control}
               name="title"
-              className="font-semibold text-3xl"
+              className="font-semibold text-3xl overflow-hidden"
               placeholder={t("title-placeholder")}
+              maxLength={140}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  // method to prevent from default behaviour
+                  e.preventDefault();
+                }
+              }}
             />
             <Card>
-              <FormFieldInputString
-                control={form.control}
-                name="description"
-                placeholder={t("description-placeholder")}
-              />
+              <Text className="mb-3">Description</Text>
+              <Tabs defaultValue="write" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="write">Write</TabsTrigger>
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                </TabsList>
+                <TabsContent value="write">
+                  <FormFieldTextArea
+                    control={form.control}
+                    name="description"
+                    placeholder="Description..."
+                  />
+                </TabsContent>
+                <TabsContent value="preview">
+                  <MarkdownPreview markdownString={description} />
+                </TabsContent>
+              </Tabs>
             </Card>
             <Card>
               <FormFieldInputString
