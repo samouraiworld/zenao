@@ -18,20 +18,18 @@ export const Header: React.FC = () => {
   return (
     <div className="flex justify-center sm:p-2">
       {/* Desktop */}
-      <Card className="max-sm:hidden flex flex-row items-center p-2 gap-1 sm:gap-2 rounded-xl">
-        <Link href="/" className="flex flex-row gap-2">
+      <Card className="max-sm:hidden flex flex-row items-center px-3 py-2 gap-8 rounded-xl">
+        <Link href="/" className="flex flex-row gap-2 items-center">
           <Image
             src="/zenao-logo.png"
             alt="zeano logo"
-            width={26}
-            height={26}
+            width={28}
+            height={28}
             priority
-            className="sm:overflow-auto"
           />
           <Text className="font-extrabold">{t("zenao")}</Text>
         </Link>
-
-        <div className="flex flex-row gap-3 sm:gap-5 mr-3 sm:mx-4">
+        <div className="flex flex-row gap-4">
           <SmallText variant="secondary">{t("discover")}</SmallText>
           <SmallText variant="secondary">{t("calendar")}</SmallText>
           <SmallText variant="secondary">{t("pricing")}</SmallText>
@@ -40,17 +38,10 @@ export const Header: React.FC = () => {
             <SmallText variant="secondary">{t("manifesto")}</SmallText>
           </Link>
         </div>
-        <SignedOut>
-          <SignInButton>
-            <Button variant="outline">
-              <SmallText>{t("sign-in")}</SmallText>
-            </Button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
-        <ToggleThemeButton />
+        <div className="flex flex-row gap-2 items-center">
+          <Auth />
+          <ToggleThemeButton />
+        </div>
       </Card>
 
       {/* Mobile */}
@@ -59,23 +50,13 @@ export const Header: React.FC = () => {
           <Image
             src="/zenao-logo.png"
             alt="zeano logo"
-            width={26}
-            height={26}
+            width={28}
+            height={28}
             priority
-            className="sm:overflow-auto"
           />
         </Link>
-        <div className="flex gap-2">
-          <SignedOut>
-            <SignInButton>
-              <Button variant="outline">
-                <SmallText>{t("sign-in")}</SmallText>
-              </Button>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
+        <div className="flex flex-row gap-2">
+          <Auth />
           <Popover>
             <PopoverTrigger>
               <AlignJustifyIcon width={26} height={26} />
@@ -95,3 +76,34 @@ export const Header: React.FC = () => {
     </div>
   );
 };
+
+function Auth() {
+  const t = useTranslations("header");
+
+  return (
+    <>
+      <SignedOut>
+        <SignInButton>
+          <Button variant="outline">
+            <SmallText>{t("sign-in")}</SmallText>
+          </Button>
+        </SignInButton>
+      </SignedOut>
+      <SignedIn>
+        <UserButton
+          // we need this fallback otherwise the profile button flickers while mounting
+          fallback={
+            <Image
+              src="/pfp-fallback.png"
+              alt="User"
+              width={28}
+              height={28}
+              className="rounded-full"
+              priority
+            />
+          }
+        />
+      </SignedIn>
+    </>
+  );
+}
