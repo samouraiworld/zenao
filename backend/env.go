@@ -9,6 +9,7 @@ func injectEnv() {
 		"ZENAO_CLERK_SECRET_KEY":  &conf.clerkSecretKey,
 		"ZENAO_DB":                &conf.dbPath,
 		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
+		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
 	}
 
 	for key, ps := range mappings {

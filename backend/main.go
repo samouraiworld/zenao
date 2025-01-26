@@ -45,7 +45,7 @@ func main() {
 }
 
 type config struct {
-	allowedOrigin   string
+	allowedOrigins  string
 	clerkSecretKey  string
 	bindAddr        string
 	adminMnemonic   string
@@ -57,7 +57,7 @@ type config struct {
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
-	flset.StringVar(&conf.allowedOrigin, "allowed-origin", "*", "CORS allowed origin")
+	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
 	flset.StringVar(&conf.clerkSecretKey, "clerk-secret", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
 	flset.StringVar(&conf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
@@ -117,10 +117,13 @@ func execStart() error {
 		Chain:      chain,
 		MailClient: mailClient,
 	}
+
+	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
+
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
 		withRequestLogging(logger),
-		withConnectCORS(conf.allowedOrigin),
+		withConnectCORS(allowedOrigins...),
 		withClerkAuth(conf.clerkSecretKey),
 	))
 
