@@ -33,14 +33,14 @@ export const eventOptions = (id: string) =>
 const userRolesEnum = z.enum(["organizer", "participant", "gatekeeper"]);
 export const eventGetUserRolesSchema = z.array(userRolesEnum);
 
-export const eventUserParticipate = (
-  authToken: string | undefined,
-  id: string,
-) =>
+export const eventUserParticipate = (authToken: string | null, id: string) =>
   queryOptions({
     queryKey: ["eventUserParticipate", authToken, id],
     queryFn: async () => {
       if (!authToken) {
+        return false;
+      }
+      if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
         return false;
       }
       const { address } = await zenaoClient.getUserAddress(
@@ -48,17 +48,15 @@ export const eventUserParticipate = (
         { headers: { Authorization: "Bearer " + authToken } },
       );
       const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT,
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/events/e${id}`,
-        `event.GetUserRolesJSON(\`${address}\`)`,
+        `event.GetUserRolesJSON("${address}")`,
       );
       const event = extractGnoJSONResponse(res);
       const parsedEvent = eventGetUserRolesSchema.parse(event);
-      return (
-        parsedEvent.includes("participant") || parsedEvent.includes("organizer")
-      );
+      return parsedEvent.includes("participant");
     },
   });
 
@@ -78,7 +76,7 @@ export const eventCountParticipants = (id: string) =>
     },
   });
 
-function extractGnoJSONResponse(res: string): unknown {
+export function extractGnoJSONResponse(res: string): unknown {
   const jsonString = res.substring("(".length, res.length - " string)".length);
   // eslint-disable-next-line no-restricted-syntax
   const jsonStringContent = JSON.parse(jsonString);
