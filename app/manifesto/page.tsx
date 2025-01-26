@@ -59,10 +59,8 @@ export default function Manifesto() {
               </div>
               <div>
                 <SmallText>{t("p7")}</SmallText>
-                <a href="https://www.zenao.io">
-                  <SmallText className="text-orange-600">
-                    www.zenao.io
-                  </SmallText>
+                <a href="https://zenao.io">
+                  <SmallText className="text-orange-600">zenao.io</SmallText>
                 </a>
               </div>
             </div>
