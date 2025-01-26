@@ -11,10 +11,9 @@ import { Card } from "../cards/Card";
 import { SmallText } from "../texts/SmallText";
 import { Text } from "../texts/DefaultText";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
-// import { useIsMobile } from "@/app/hooks/useIsMobile";
 
 export const Header: React.FC = () => {
-  // const isMobile = useIsMobile();
+  // TODO: handle that with css media queries
   const isMobile = false;
   const t = useTranslations("header");
 
