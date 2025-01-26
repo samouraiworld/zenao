@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { SignedOutModal } from "../modals/SignedOutModal";
 import { Header } from "./Header";
