@@ -129,7 +129,9 @@ export function EventInfo({
                 {/* TODO: create a clean decount timer */}
                 {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>
-              <Text className="my-4">{t("cancel-desc")}</Text>
+              {/* add back when we can cancel
+                <Text className="my-4">{t("cancel-desc")}</Text>
+              */}
             </div>
           ) : (
             <div>
