@@ -68,7 +68,8 @@ export function EventInfo({
           src={data.imageUri}
           width={330}
           height={330}
-          alt="imageUri"
+          alt="Event"
+          priority
           className="flex w-full rounded-xl self-center"
         />
 
