@@ -18,20 +18,18 @@ export const Header: React.FC = () => {
   return (
     <div className="flex justify-center sm:p-2">
       {/* Desktop */}
-      <Card className="max-sm:hidden flex flex-row items-center p-2 gap-1 sm:gap-2 rounded-xl">
-        <Link href="/" className="flex flex-row gap-2">
+      <Card className="max-sm:hidden flex flex-row items-center px-3 py-2 gap-4 rounded-xl">
+        <Link href="/" className="flex flex-row gap-2 items-center">
           <Image
             src="/zenao-logo.png"
             alt="zeano logo"
-            width={26}
-            height={26}
+            width={28}
+            height={28}
             priority
-            className="overflow-auto"
           />
           <Text className="font-extrabold">{t("zenao")}</Text>
         </Link>
-
-        <div className="flex flex-row gap-3 mr-3">
+        <div className="flex flex-row gap-2">
           <SmallText variant="secondary">{t("discover")}</SmallText>
           <SmallText variant="secondary">{t("calendar")}</SmallText>
           <SmallText variant="secondary">{t("pricing")}</SmallText>
@@ -40,8 +38,10 @@ export const Header: React.FC = () => {
             <SmallText variant="secondary">{t("manifesto")}</SmallText>
           </Link>
         </div>
-        <Auth />
-        <ToggleThemeButton />
+        <div className="flex flex-row gap-2 items-center">
+          <Auth />
+          <ToggleThemeButton />
+        </div>
       </Card>
 
       {/* Mobile */}
@@ -50,12 +50,12 @@ export const Header: React.FC = () => {
           <Image
             src="/zenao-logo.png"
             alt="zeano logo"
-            width={26}
-            height={26}
+            width={28}
+            height={28}
             priority
           />
         </Link>
-        <div className="flex gap-2">
+        <div className="flex flex-row gap-2">
           <Auth />
           <Popover>
             <PopoverTrigger>
