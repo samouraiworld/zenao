@@ -2,7 +2,6 @@ import remarkGfm from "remark-gfm";
 import remarkYoutube from "remark-youtube";
 import ReactMarkdown from "react-markdown";
 import supersub from "remark-supersub";
-import emoji from "remark-emoji";
 import remarkHtml from "remark-html";
 import { cn } from "@/lib/utils";
 
@@ -16,8 +15,10 @@ export const MarkdownPreview: React.FC<{ markdownString: string }> = ({
       remarkPlugins={[
         // superscript and subscript support
         supersub,
-        // emoji support
-        [emoji, { emoticon: true }],
+        // remark-emoji support
+        // TODO: correctly handle it with an emoji search, and fix issue with links https://discord.com/channels/369143531920424961/1329806540776935546/1333064816784441345
+        // [emoji, { emoticon: true }],
+
         // gfm for GitHub Flavored Markdown, support autolink literals, footnotes, strikethrough, tables, tasklists
         [remarkGfm, { singleTilde: false }],
         // support embed player for youtube videos
