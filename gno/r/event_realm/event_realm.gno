@@ -13,7 +13,7 @@ import (
 var event *events.Event
 
 func init() {
-	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
+	creator := "g1m0lplhma8z4uruds4zcltmlgwlht7w739e6qlp" // replace w/ address of the user realm
 	conf := events.Config{
 		Creator:          creator,
 		Title:            "title",
