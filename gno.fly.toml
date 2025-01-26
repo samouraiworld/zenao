@@ -7,22 +7,22 @@ app = 'zenao-staging-gno'
 primary_region = 'cdg'
 
 [build]
-  dockerfile = 'gno.Dockerfile'
+dockerfile = 'gno.Dockerfile'
 
 [http_service]
-  internal_port = 8888
-  force_https = true
-  processes = ['app']
+internal_port = 8888
+force_https = true
+processes = ['app']
 
 [[services]]
-  protocol = 'tcp'
-  internal_port = 26657
+protocol = 'tcp'
+internal_port = 26657
 
-  [[services.ports]]
-    port = 26657
-    handlers = ['tls', 'http']
+[[services.ports]]
+port = 26657
+handlers = ['tls', 'http']
 
 [[vm]]
-  cpu_kind = 'shared'
-  cpus = 2
-  memory_mb = 2048
+cpu_kind = 'shared'
+cpus = 2
+memory_mb = 2048

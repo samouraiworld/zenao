@@ -7,14 +7,14 @@ app = 'zenao-staging'
 primary_region = 'cdg'
 
 [build]
-  dockerfile = 'Dockerfile'
+dockerfile = 'Dockerfile'
 
 [http_service]
-  internal_port = 4242
-  force_https = true
-  processes = ['app']
+internal_port = 4242
+force_https = true
+processes = ['app']
 
 [[vm]]
-  cpu_kind = 'shared'
-  cpus = 2
-  memory_mb = 1024
+cpu_kind = 'shared'
+cpus = 2
+memory_mb = 1024
