@@ -83,18 +83,17 @@ export function EventInfo({
         {/*     </div> */}
         {/*   </Card> */}
         {/* )} */}
-        <EventSection title={t("going", { count: countParticipants })} />
-        {/* TODO: Uncomment that when we can see the name of the addr */}
-        {/* <EventSection title={t("hosted-by")}> */}
-        {/*   <SmallText>User</SmallText> */}
-        {/* </EventSection> */}
-        <EventSection title={""}>
+        <EventSection title={t("going", { count: countParticipants })}>
           <Link
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
           >
             <SmallText>See on Gnoweb</SmallText>
           </Link>
         </EventSection>
+        {/* TODO: Uncomment that when we can see the name of the addr */}
+        {/* <EventSection title={t("hosted-by")}> */}
+        {/*   <SmallText>User</SmallText> */}
+        {/* </EventSection> */}
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
         <VeryLargeText className="mb-7">{data.title}</VeryLargeText>
