@@ -22,7 +22,6 @@ import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { Input } from "@/components/shadcn/input";
-import { useClerkToken } from "@/app/hooks/useClerkToken";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 
 interface EventSectionProps {
@@ -40,14 +39,19 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
   );
 };
 
-export function EventInfo({ id }: { id: string }) {
+export function EventInfo({
+  id,
+  authToken,
+}: {
+  id: string;
+  authToken: string | null;
+}) {
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: countParticipants } = useSuspenseQuery(
     eventCountParticipants(id),
   );
-  const token = useClerkToken();
   const { data: isParticipate } = useSuspenseQuery(
-    eventUserParticipate(token, id),
+    eventUserParticipate(authToken, id),
   );
 
   const t = useTranslations("event");

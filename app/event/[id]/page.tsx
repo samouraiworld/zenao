@@ -1,10 +1,13 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { EventInfo } from "./event-info";
 import {
+  eventCountParticipants,
   eventInfoSchema,
   eventOptions,
+  eventUserParticipate,
   extractGnoJSONResponse,
 } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -37,13 +40,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventPage({ params }: Props) {
   const p = await params;
+  const { getToken } = await auth();
+  const authToken = await getToken();
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(eventOptions(p.id));
+  void queryClient.prefetchQuery(eventCountParticipants(p.id));
+  void queryClient.prefetchQuery(eventUserParticipate(authToken, p.id));
 
   return (
     <ScreenContainer>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventInfo id={p.id} />
+        <EventInfo id={p.id} authToken={authToken} />
       </HydrationBoundary>
     </ScreenContainer>
   );
