@@ -3,6 +3,7 @@ import remarkYoutube from "remark-youtube";
 import ReactMarkdown from "react-markdown";
 import supersub from "remark-supersub";
 import emoji from "remark-emoji";
+import remarkHtml from "remark-html";
 import { cn } from "@/lib/utils";
 
 export const MarkdownPreview: React.FC<{ markdownString: string }> = ({
@@ -21,6 +22,8 @@ export const MarkdownPreview: React.FC<{ markdownString: string }> = ({
         [remarkGfm, { singleTilde: false }],
         // support embed player for youtube videos
         remarkYoutube,
+        // It’s a shortcut for .use(remarkRehype).use(rehypeSanitize).use(rehypeStringify) needed to compiles markdown to HTML
+        remarkHtml,
       ]}
       // responsive style for embed youtube videos
       components={{
