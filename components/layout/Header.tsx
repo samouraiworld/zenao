@@ -18,7 +18,7 @@ export const Header: React.FC = () => {
   return (
     <div className="flex justify-center sm:p-2">
       {/* Desktop */}
-      <Card className="max-sm:hidden flex flex-row items-center px-3 py-2 gap-4 rounded-xl">
+      <Card className="max-sm:hidden flex flex-row items-center px-3 py-2 gap-8 rounded-xl">
         <Link href="/" className="flex flex-row gap-2 items-center">
           <Image
             src="/zenao-logo.png"
@@ -29,7 +29,7 @@ export const Header: React.FC = () => {
           />
           <Text className="font-extrabold">{t("zenao")}</Text>
         </Link>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-4">
           <SmallText variant="secondary">{t("discover")}</SmallText>
           <SmallText variant="secondary">{t("calendar")}</SmallText>
           <SmallText variant="secondary">{t("pricing")}</SmallText>
