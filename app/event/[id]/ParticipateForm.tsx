@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
+import { useToast } from "@/app/hooks/use-toast";
 
 const participateFormSchema = z.object({
   email: z.string().email(),
@@ -34,6 +35,7 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
       email: "",
     },
   });
+  const { toast } = useToast();
 
   const onSubmit = async (values: ParticipateFormSchemaType) => {
     try {
@@ -47,8 +49,26 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
       } else {
         await zenaoClient.participate({ eventId, email: values.email });
       }
+      toast({
+        title: "You take part in the event!",
+      });
       form.reset();
     } catch (err) {
+      if (
+        err instanceof Error &&
+        err.message.includes("user is already participant for this event")
+      ) {
+        toast({
+          variant: "destructive",
+          title: "This email is already participant for this event!",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error on participate!",
+        });
+      }
+
       console.error(err);
     }
 
