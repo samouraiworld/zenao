@@ -2,6 +2,8 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
 import { EventInfo } from "./event-info";
 import {
   eventInfoSchema,
@@ -29,12 +31,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   );
   const event = eventInfoSchema.parse(extractGnoJSONResponse(res));
 
-  return {
-    title: event.title,
+  const meta: Metadata = {
+    title: `${event.title} | Zenao`,
     openGraph: {
       images: [{ url: event.imageUri }],
     },
   };
+
+  // Find first markdown paragraph for description
+  const ast = unified().use(remarkParse).parse(event.description);
+  for (const elem of ast.children) {
+    if (elem.type != "paragraph") {
+      continue;
+    }
+    for (const pChild of elem.children) {
+      if (pChild.type != "text") {
+        continue;
+      }
+      meta.description = pChild.value;
+      return meta;
+    }
+  }
+
+  return meta;
 }
 
 export default async function EventPage({ params }: Props) {
