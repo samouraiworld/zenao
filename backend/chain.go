@@ -24,9 +24,10 @@ type gnoZenaoChain struct {
 	eventsIndexPkgPath string
 	signerInfo         keys.Info
 	logger             *zap.Logger
+	namespace          string
 }
 
-func setupChain(adminMnemonic string, gnoNamespace string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
+func setupChain(adminMnemonic string, namespace string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
 	signer, err := gnoclient.SignerFromBip39(adminMnemonic, chainID, "", 0, 0)
 	if err != nil {
 		return nil, err
@@ -45,26 +46,27 @@ func setupChain(adminMnemonic string, gnoNamespace string, chainID string, chain
 
 	return &gnoZenaoChain{
 		client:             client,
-		eventsIndexPkgPath: path.Join("gno.land/r", gnoNamespace, "events_reg"),
+		eventsIndexPkgPath: path.Join("gno.land/r", namespace, "events_reg"),
 		signerInfo:         signerInfo,
 		logger:             logger,
+		namespace:          namespace,
 	}, nil
 }
 
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
-	creatorAddr := gnolang.DerivePkgAddr(userRealmPkgPath(creatorID)).String()
+	creatorAddr := g.UserAddress(creatorID)
 
-	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), req)
+	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
 	if err != nil {
 		return err
 	}
 
-	g.logger.Info("creating event on chain", zap.String("pkg-path", eventRealmPkgPath(evtID)))
+	g.logger.Info("creating event on chain", zap.String("pkg-path", g.eventRealmPkgPath(evtID)))
 
 	// TODO: single tx with all messages
 
-	eventPkgPath := eventRealmPkgPath(evtID)
+	eventPkgPath := g.eventRealmPkgPath(evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -107,7 +109,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 
 // EditEvent implements ZenaoChain.
 func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) error {
-	eventPkgPath := eventRealmPkgPath(evtID)
+	eventPkgPath := g.eventRealmPkgPath(evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -136,12 +138,12 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 
 // CreateUser implements ZenaoChain.
 func (g *gnoZenaoChain) CreateUser(userID string) error {
-	userRealmSrc, err := generateUserRealmSource(userID)
+	userRealmSrc, err := generateUserRealmSource(userID, g.namespace)
 	if err != nil {
 		return err
 	}
 
-	userPkgPath := userRealmPkgPath(userID)
+	userPkgPath := g.userRealmPkgPath(userID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -165,8 +167,8 @@ func (g *gnoZenaoChain) CreateUser(userID string) error {
 
 // Participate implements ZenaoChain.
 func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
-	eventPkgPath := eventRealmPkgPath(eventID)
-	userPkgPath := userRealmPkgPath(userID)
+	eventPkgPath := g.eventRealmPkgPath(eventID)
+	userPkgPath := g.userRealmPkgPath(userID)
 
 	// XXX: this won't work because the admin of the event is the event
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
@@ -189,7 +191,7 @@ func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
 
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
-	userPkgPath := userRealmPkgPath(userID)
+	userPkgPath := g.userRealmPkgPath(userID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -212,12 +214,17 @@ func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) er
 	return nil
 }
 
-func eventRealmPkgPath(eventID string) string {
-	return fmt.Sprintf("gno.land/r/%s/events/e%s", conf.gnoNamespace, eventID)
+// UserAddress implements ZenaoChain.
+func (g *gnoZenaoChain) UserAddress(userID string) string {
+	return gnolang.DerivePkgAddr(g.userRealmPkgPath(userID)).String()
 }
 
-func userRealmPkgPath(userID string) string {
-	return fmt.Sprintf("gno.land/r/%s/users/u%s", conf.gnoNamespace, userID)
+func (g *gnoZenaoChain) eventRealmPkgPath(eventID string) string {
+	return fmt.Sprintf("gno.land/r/%s/events/e%s", g.namespace, eventID)
+}
+
+func (g *gnoZenaoChain) userRealmPkgPath(userID string) string {
+	return fmt.Sprintf("gno.land/r/%s/users/u%s", g.namespace, userID)
 }
 
 var _ ZenaoChain = (*gnoZenaoChain)(nil)
@@ -235,12 +242,12 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, req *zenaov1.CreateEventRequest) (string, error) {
+func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest) (string, error) {
 	m := map[string]interface{}{
 		"creatorAddr":    creatorAddr,
 		"req":            req,
 		"zenaoAdminAddr": zenaoAdminAddr,
-		"namespace":      conf.gnoNamespace,
+		"namespace":      gnoNamespace,
 	}
 	toMarshal := map[string]interface{}{
 		"title":       req.Title,
@@ -263,12 +270,12 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, req *ze
 	return buf.String(), nil
 }
 
-func generateUserRealmSource(id string) (string, error) {
+func generateUserRealmSource(id string, gnoNamespace string) (string, error) {
 	m := map[string]string{
 		"displayName": fmt.Sprintf("Zenao user #%s", id),
 		"bio":         "Zenao managed user",
 		"avatarURI":   "https://www.wikimedia.org/portal/wikimedia.org/assets/img/wikimedia_logo.png",
-		"namespace":   conf.gnoNamespace,
+		"namespace":   gnoNamespace,
 	}
 
 	t := template.Must(template.New("").Parse(userRealmSourceTemplate))

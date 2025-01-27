@@ -30,7 +30,7 @@ type Event struct {
 type SoldTicket struct {
 	gorm.Model
 	EventID uint
-	UserID  string
+	UserID  string // XXX: should be uint
 	Price   float64
 }
 

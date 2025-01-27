@@ -39,6 +39,7 @@ func main() {
 		newStartCmd(),
 		newFakegenCmd(),
 		newMailCmd(),
+		newSyncChainCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
@@ -90,7 +91,7 @@ func execStart() error {
 		return err
 	}
 
-	injectEnv()
+	injectStartEnv()
 
 	chain, err := setupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, logger)
 	if err != nil {
