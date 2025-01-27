@@ -42,7 +42,8 @@
     "registration": "Registration",
     "join-desc": "Welcome! To join the event, please register below.",
     "participate-button": "Participate",
-    "about-event": "About event"
+    "about-event": "About event",
+    "email-placeholder": "Email..."
   },
   "manifesto": {
     "title": "MANIFESTO",
