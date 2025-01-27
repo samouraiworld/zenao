@@ -30,7 +30,7 @@ type ZenaoDB interface {
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserExists(clerkID string) (string, error)
 
-	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error)
+	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) error
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, userID string) error
