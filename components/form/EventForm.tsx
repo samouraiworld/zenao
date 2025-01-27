@@ -1,65 +1,38 @@
-"use client";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useClerk } from "@clerk/nextjs";
-import { useTranslations } from "next-intl";
+import { UseFormReturn } from "react-hook-form";
 import Image from "next/image";
-import React from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Form } from "../shadcn/form";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
-import { Separator } from "../common/Separator";
-import { SmallText } from "../texts/SmallText";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
+import { Separator } from "../common/Separator";
+import { SmallText } from "../texts/SmallText";
+import { Button } from "../shadcn/button";
 import { FormFieldInputString } from "./components/FormFieldInputString";
+import { EventFormSchemaType, urlPattern } from "./types";
+import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
-import { eventFormSchema, EventFormSchemaType, urlPattern } from "./types";
-import { FormFieldTextArea } from "./components/FormFieldTextArea";
-import { zenaoClient } from "@/app/zenao-client";
-import { Button } from "@/components/shadcn/button";
-import { Form } from "@/components/shadcn/form";
 import { isValidURL } from "@/lib/utils";
 import { Text } from "@/components/texts/DefaultText";
 
-export const CreateEventForm: React.FC = () => {
-  const { client } = useClerk();
-  const router = useRouter();
-  const t = useTranslations("create");
-  const form = useForm<EventFormSchemaType>({
-    mode: "all",
-    resolver: zodResolver(eventFormSchema),
-    defaultValues: {
-      imageUri: "",
-      description: "",
-      title: "",
-      capacity: 0,
-      location: "",
-    },
-  });
+interface EventFormProps {
+  form: UseFormReturn<EventFormSchemaType>;
+  onSubmit: (values: EventFormSchemaType) => Promise<void>;
+  isLoaded: boolean;
+  isEditing?: boolean;
+}
+
+export const EventForm: React.FC<EventFormProps> = ({
+  form,
+  onSubmit,
+  isLoaded,
+  isEditing = false,
+}) => {
   const imageUri = form.watch("imageUri");
   const description = form.watch("description");
-  const [isLoaded, setIsLoaded] = React.useState<boolean>(false);
-
-  const onSubmit = async (values: EventFormSchemaType) => {
-    try {
-      setIsLoaded(true);
-      const token = await client.activeSessions[0].getToken();
-      if (!token) {
-        throw new Error("invalid clerk token");
-      }
-      const { id } = await zenaoClient.createEvent(values, {
-        headers: { Authorization: "Bearer " + token },
-      });
-      setIsLoaded(false);
-      form.reset();
-      router.push(`/event/${id}`);
-    } catch (err) {
-      console.error("error", err);
-    }
-  };
+  const t = useTranslations("eventForm");
 
   return (
     <Form {...form}>
@@ -154,8 +127,10 @@ export const CreateEventForm: React.FC = () => {
               {/* TODO: Enhance with a spinner, so i don't put the text in i18n */}
               <SmallText variant="invert">
                 {isLoaded
-                  ? "Form submitted ! Event is creating.."
-                  : t("create-event-button")}
+                  ? "Form submitted ! Event is creating/editing.."
+                  : isEditing
+                    ? t("edit-event-button")
+                    : t("create-event-button")}
               </SmallText>
             </Button>
           </div>
