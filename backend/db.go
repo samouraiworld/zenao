@@ -107,6 +107,17 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 	if err := g.db.Create(evt).Error; err != nil {
 		return "", err
 	}
+
+	UserEvents := &UserEvents{
+		UserID:  uint(creatorIDInt),
+		EventID: evt.ID,
+		Role:    "organizer",
+	}
+
+	if err := g.db.Create(UserEvents).Error; err != nil {
+		return "", err
+	}
+
 	return fmt.Sprintf("%d", evt.ID), nil
 }
 
@@ -184,6 +195,20 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 	}
 
 	if err := g.db.Create(&SoldTicket{EventID: evt.ID, UserID: userID}).Error; err != nil {
+		return err
+	}
+
+	userIDint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+	participant := &UserEvents{
+		UserID:  uint(userIDint),
+		EventID: evt.ID,
+		Role:    "participant",
+	}
+
+	if err := g.db.Create(participant).Error; err != nil {
 		return err
 	}
 
