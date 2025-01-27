@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedOut, useClerk } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -37,21 +37,12 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
   });
   const { toast } = useToast();
 
-  const onSubmit = async (values: ParticipateFormSchemaType) => {
+  // Submit for logged-out user (with email confirmation form)
+  const onSubmitForm = async (values: ParticipateFormSchemaType) => {
     try {
       setIsLoaded(true);
-      const token = await session?.getToken();
-      if (token) {
-        await zenaoClient.participate(
-          { eventId },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-      } else {
-        await zenaoClient.participate({ eventId, email: values.email });
-      }
-      toast({
-        title: "You take part in the event!",
-      });
+      await zenaoClient.participate({ eventId, email: values.email });
+      toast({ title: t("toast-confirmation") });
       form.reset();
     } catch (err) {
       if (
@@ -60,24 +51,36 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
       ) {
         toast({
           variant: "destructive",
-          title: "This email is already participant for this event!",
+          title: t("toast-already-participant-error"),
         });
       } else {
-        toast({
-          variant: "destructive",
-          title: "Error on participate!",
-        });
+        toast({ variant: "destructive", title: t("toast-default-error") });
       }
-
       console.error(err);
     }
+    setIsLoaded(false);
+  };
 
+  // Submit for logged-in user (with clerk account)
+  const onSubmit = async () => {
+    try {
+      setIsLoaded(true);
+      const token = await session?.getToken();
+      await zenaoClient.participate(
+        { eventId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast({ title: t("toast-confirmation") });
+    } catch (err) {
+      toast({ variant: "destructive", title: t("toast-default-error") });
+      console.error(err);
+    }
     setIsLoaded(false);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmitForm)}>
         <div>
           <SignedOut>
             {/* TODO: merge with FormFieldInputString (got typescript issues) */}
@@ -101,12 +104,19 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
                 )}
               />
             </Card>
+            <ButtonWithLabel
+              loading={isLoaded}
+              label={t("participate-button")}
+              type="submit"
+            />
           </SignedOut>
-          <ButtonWithLabel
-            loading={isLoaded}
-            label={t("participate-button")}
-            type="submit"
-          />
+          <SignedIn>
+            <ButtonWithLabel
+              onClick={onSubmit}
+              loading={isLoaded}
+              label={t("participate-button")}
+            />
+          </SignedIn>
         </div>
       </form>
     </Form>
