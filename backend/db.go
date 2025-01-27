@@ -77,6 +77,20 @@ func setupDB(dsn string) (*gormZenaoDB, error) {
 	return &gormZenaoDB{db: db}, nil
 }
 
+func (e *Event) UserHasRole(userID string, role string) (bool, error) {
+	userIDint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return false, err
+	}
+
+	for _, m := range e.Members {
+		if m.UserID == uint(userIDint) && m.Role == role {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 type gormZenaoDB struct {
 	db *gorm.DB
 }
@@ -218,6 +232,7 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 	if err := g.db.Create(participant).Error; err != nil {
 		return err
 	}
+
 	return nil
 }
 

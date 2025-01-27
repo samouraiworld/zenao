@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -43,10 +42,12 @@ func (s *ZenaoServer) EditEvent(
 			return err
 		}
 
-		// TODO: we should keep track of the roles in database
-		// for now, only the creator can edit the event but all organizers should be able to
-		if fmt.Sprintf("%d", event.CreatorID) != userID {
-			return errors.New("user is not the creator of the event")
+		ok, err := event.UserHasRole(userID, "organizer")
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return errors.New("user is not an organizer")
 		}
 
 		if err := db.EditEvent(req.Msg.EventId, req.Msg); err != nil {
