@@ -78,11 +78,11 @@ func (g *gormZenaoDB) Tx(cb func(db ZenaoDB) error) error {
 }
 
 // CreateEvent implements ZenaoDB.
-func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (string, error) {
+func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error) {
 	// XXX: validate?
 	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	evt := &Event{
 		Title:       req.Title,
@@ -96,9 +96,9 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		Location:    req.Location,
 	}
 	if err := g.db.Create(evt).Error; err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("%d", evt.ID), nil
+	return evt, nil
 }
 
 // EditEvent implements ZenaoDB.
