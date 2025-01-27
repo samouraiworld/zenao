@@ -36,6 +36,7 @@ type Event struct {
 	Members     []UserEvents `gorm:"many2many:user_events;"`
 }
 
+// TODO: Use enum for role (organizer, gatekeeper, participant)
 type UserEvents struct {
 	gorm.Model
 	UserID  uint   `gorm:"index:idx_user_event_role,unique"` // Composite index
@@ -70,7 +71,7 @@ func setupDB(dsn string) (*gormZenaoDB, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(&Event{}, &SoldTicket{}, &User{}); err != nil {
+	if err := db.AutoMigrate(&Event{}, &SoldTicket{}, &User{}, &UserEvents{}); err != nil {
 		return nil, err
 	}
 
