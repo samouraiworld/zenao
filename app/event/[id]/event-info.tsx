@@ -4,7 +4,7 @@ import React from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
-import { useClerk } from "@clerk/nextjs";
+import { SignedOut, useClerk } from "@clerk/nextjs";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -130,7 +130,7 @@ export function EventInfo({
             <div>
               <LargeText>{t("registration")}</LargeText>
               <Text className="my-4">{t("join-desc")}</Text>
-              <ParticipateButton eventId={id} />
+              <ParticipateForm eventId={id} />
             </div>
           )}
         </Card>
@@ -142,19 +142,19 @@ export function EventInfo({
   );
 }
 
-function ParticipateButton({ eventId }: { eventId: string }) {
+function ParticipateForm({ eventId }: { eventId: string }) {
   const { session } = useClerk();
   const [email, setEmail] = React.useState("");
   const t = useTranslations("event");
   return (
     <div>
-      {!session && (
+      <SignedOut>
         <Input
           placeholder="Email"
           onChange={(evt) => setEmail(evt.target.value)}
           style={{ marginBottom: 8 }}
         />
-      )}
+      </SignedOut>
       <Button
         className="w-full"
         onClick={async () => {
