@@ -7,8 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { zenaoClient } from "@/app/zenao-client";
-import { Button } from "@/components/shadcn/button";
-import { SmallText } from "@/components/texts/SmallText";
 import {
   Form,
   FormControl,
@@ -18,6 +16,8 @@ import {
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
 import { Card } from "@/components/cards/Card";
+import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
+import { useToast } from "@/app/hooks/use-toast";
 
 const participateFormSchema = z.object({
   email: z.string().email(),
@@ -35,6 +35,7 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
       email: "",
     },
   });
+  const { toast } = useToast();
 
   const onSubmit = async (values: ParticipateFormSchemaType) => {
     try {
@@ -48,8 +49,26 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
       } else {
         await zenaoClient.participate({ eventId, email: values.email });
       }
+      toast({
+        title: "You take part in the event!",
+      });
       form.reset();
     } catch (err) {
+      if (
+        err instanceof Error &&
+        err.message.includes("user is already participant for this event")
+      ) {
+        toast({
+          variant: "destructive",
+          title: "This email is already participant for this event!",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error on participate!",
+        });
+      }
+
       console.error(err);
     }
 
@@ -83,13 +102,11 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
               />
             </Card>
           </SignedOut>
-          <Button className="w-full" onClick={async () => {}}>
-            <SmallText variant="invert">
-              {isLoaded
-                ? "Form sumitted ! Participating..."
-                : t("participate-button")}
-            </SmallText>
-          </Button>
+          <ButtonWithLabel
+            loading={isLoaded}
+            label={t("participate-button")}
+            type="submit"
+          />
         </div>
       </form>
     </Form>
