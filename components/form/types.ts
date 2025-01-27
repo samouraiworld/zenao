@@ -26,6 +26,6 @@ export const eventFormSchema = z.object({
   location: z.string().trim().min(1),
   // TODO: re-enable it after mvp
   // ticketPrice: z.coerce.number(),
-  capacity: z.coerce.number(),
+  capacity: z.coerce.number().min(1),
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
