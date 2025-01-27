@@ -220,6 +220,7 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 	if count != 0 {
 		return errors.New("user already have the role participant")
 	}
+
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return err
