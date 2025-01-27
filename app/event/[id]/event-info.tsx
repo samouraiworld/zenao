@@ -9,11 +9,7 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { zenaoClient } from "@/app/zenao-client";
-import {
-  eventCountParticipants,
-  eventOptions,
-  eventUserParticipate,
-} from "@/lib/queries/event";
+import { eventOptions, eventUserParticipate } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Button } from "@/components/shadcn/button";
 import { Separator } from "@/components/common/Separator";
@@ -47,9 +43,6 @@ export function EventInfo({
   authToken: string | null;
 }) {
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: countParticipants } = useSuspenseQuery(
-    eventCountParticipants(id),
-  );
   const { data: isParticipate } = useSuspenseQuery(
     eventUserParticipate(authToken, id),
   );
@@ -84,7 +77,7 @@ export function EventInfo({
         {/*     </div> */}
         {/*   </Card> */}
         {/* )} */}
-        <EventSection title={t("going", { count: countParticipants })}>
+        <EventSection title={t("going", { count: data.participants })}>
           <Link
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
           >

@@ -133,14 +133,15 @@ func (e *Event) GetUserRolesJSON(addr string) string {
 
 func (e *Event) GetInfoJSON() string {
 	obj := json.ObjectNode("", map[string]*json.Node{
-		"title":       json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "DisplayName", "")),
-		"description": json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Bio", "")),
-		"imageUri":    json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Avatar", "")),
-		"startDate":   json.StringNode("", ufmt.Sprintf("%d", e.StartDate)),
-		"endDate":     json.StringNode("", ufmt.Sprintf("%d", e.EndDate)),
-		"capacity":    json.NumberNode("", float64(e.Capacity)),
-		"creatorAddr": json.StringNode("", e.Creator),
-		"location":    json.StringNode("", e.Location),
+		"title":        json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "DisplayName", "")),
+		"description":  json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Bio", "")),
+		"imageUri":     json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Avatar", "")),
+		"startDate":    json.StringNode("", ufmt.Sprintf("%d", e.StartDate)),
+		"endDate":      json.StringNode("", ufmt.Sprintf("%d", e.EndDate)),
+		"capacity":     json.NumberNode("", float64(e.Capacity)),
+		"creatorAddr":  json.StringNode("", e.Creator),
+		"location":     json.StringNode("", e.Location),
+		"participants": json.NumberNode("", float64(e.CountParticipants())),
 	})
 	bz, err := json.Marshal(obj)
 	if err != nil {
