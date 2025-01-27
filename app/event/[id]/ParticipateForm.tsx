@@ -7,8 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { zenaoClient } from "@/app/zenao-client";
-import { Button } from "@/components/shadcn/button";
-import { SmallText } from "@/components/texts/SmallText";
 import {
   Form,
   FormControl,
@@ -18,6 +16,7 @@ import {
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
 import { Card } from "@/components/cards/Card";
+import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 
 const participateFormSchema = z.object({
   email: z.string().email(),
@@ -83,13 +82,11 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
               />
             </Card>
           </SignedOut>
-          <Button className="w-full" onClick={async () => {}}>
-            <SmallText variant="invert">
-              {isLoaded
-                ? "Form sumitted ! Participating..."
-                : t("participate-button")}
-            </SmallText>
-          </Button>
+          <ButtonWithLabel
+            loading={isLoaded}
+            label={t("participate-button")}
+            type="submit"
+          />
         </div>
       </form>
     </Form>
