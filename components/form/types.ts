@@ -23,6 +23,7 @@ export const eventFormSchema = z.object({
   imageUri: z.string().regex(urlPattern, "URL is not valid"),
   startDate: z.coerce.bigint(),
   endDate: z.coerce.bigint(),
+  location: z.string().trim().min(1),
   // TODO: re-enable it after mvp
   // ticketPrice: z.coerce.number(),
   capacity: z.coerce.number(),

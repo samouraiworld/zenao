@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
@@ -18,11 +19,29 @@ func newFakegenCmd() *commands.Command {
 			ShortUsage: "fakegen",
 			ShortHelp:  "generate fake data",
 		},
-		commands.NewEmptyConfig(),
+		&fakegenConf,
 		func(ctx context.Context, args []string) error {
 			return execFakegen()
 		},
 	)
+}
+
+var fakegenConf fakegenConfig
+
+type fakegenConfig struct {
+	adminMnemonic string
+	gnoNamespace  string
+	chainEndpoint string
+	chainID       string
+	dbPath        string
+}
+
+func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
+	flset.StringVar(&fakegenConf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
+	flset.StringVar(&fakegenConf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
+	flset.StringVar(&fakegenConf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
+	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
+	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 }
 
 type fakeEvent struct {
@@ -40,12 +59,12 @@ func execFakegen() error {
 		return err
 	}
 
-	chain, err := setupChain(adminMnemonic, eventsIndexPkgPath, chainID, chainEndpoint, logger)
+	chain, err := setupChain(fakegenConf.adminMnemonic, fakegenConf.gnoNamespace, fakegenConf.chainID, fakegenConf.chainEndpoint, logger)
 	if err != nil {
 		return err
 	}
 
-	db, err := setupLocalDB(dbPath)
+	db, err := setupDB(fakegenConf.dbPath)
 	if err != nil {
 		return err
 	}

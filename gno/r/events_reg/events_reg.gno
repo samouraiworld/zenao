@@ -18,7 +18,7 @@ var (
 )
 
 func init() {
-	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
+	initialOwner := std.Address("g1m0lplhma8z4uruds4zcltmlgwlht7w739e6qlp") // zenao-staging-admin
 	Ownable = ownable.NewWithAddress(initialOwner)
 }
 

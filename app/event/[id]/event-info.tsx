@@ -4,11 +4,12 @@ import React from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
-import { useClerk } from "@clerk/nextjs";
+import { SignedOut, useClerk } from "@clerk/nextjs";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { zenaoClient } from "@/app/zenao-client";
-import { eventOptions } from "@/lib/queries/event";
+import { eventOptions, eventUserParticipate } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Button } from "@/components/shadcn/button";
 import { Separator } from "@/components/common/Separator";
@@ -16,10 +17,12 @@ import { Text } from "@/components/texts/DefaultText";
 import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
+import { Input } from "@/components/shadcn/input";
+import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 
 interface EventSectionProps {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
@@ -27,18 +30,25 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
     <div className="flex flex-col">
       <Text className="font-semibold">{title}</Text>
       <Separator className="mt-2 mb-3" />
-      {children}
+      {children && children}
     </div>
   );
 };
 
-export function EventInfo({ id }: { id: string }) {
+export function EventInfo({
+  id,
+  authToken,
+}: {
+  id: string;
+  authToken: string | null;
+}) {
   const { data } = useSuspenseQuery(eventOptions(id));
+  const { data: isParticipate } = useSuspenseQuery(
+    eventUserParticipate(authToken, id),
+  );
+
   const t = useTranslations("event");
 
-  const isOrganisatorRole = true;
-  const isRegistered = false;
-  const participantsCount = 20;
   const iconSize = 22;
 
   if (!data) {
@@ -51,31 +61,33 @@ export function EventInfo({ id }: { id: string }) {
           src={data.imageUri}
           width={330}
           height={330}
-          alt="imageUri"
+          alt="Event"
+          priority
           className="flex w-full rounded-xl self-center"
         />
 
-        {isOrganisatorRole && (
-          <Card className="flex flex-row items-center">
-            <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
-            <div className="w-2/5 flex justify-end">
-              <Button variant="outline">
-                <SmallText>{t("manage-button")}</SmallText>
-              </Button>
-            </div>
-          </Card>
-        )}
-        <EventSection
-          title={t("going", {
-            count: participantsCount,
-            capacity: data.capacity,
-          })}
-        >
-          <SmallText>Avatars</SmallText>
+        {/* TODO: Uncomment that when edit event page exist */}
+        {/* {isOrganisatorRole && ( */}
+        {/*   <Card className="flex flex-row items-center"> */}
+        {/*     <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText> */}
+        {/*     <div className="w-2/5 flex justify-end"> */}
+        {/*       <Button variant="outline"> */}
+        {/*         <SmallText>{t("manage-button")}</SmallText> */}
+        {/*       </Button> */}
+        {/*     </div> */}
+        {/*   </Card> */}
+        {/* )} */}
+        <EventSection title={t("going", { count: data.participants })}>
+          <Link
+            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
+          >
+            <SmallText>See on Gnoweb</SmallText>
+          </Link>
         </EventSection>
-        <EventSection title={t("hosted-by")}>
-          <SmallText>User</SmallText>
-        </EventSection>
+        {/* TODO: Uncomment that when we can see the name of the addr */}
+        {/* <EventSection title={t("hosted-by")}> */}
+        {/*   <SmallText>User</SmallText> */}
+        {/* </EventSection> */}
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
         <VeryLargeText className="mb-7">{data.title}</VeryLargeText>
@@ -98,55 +110,68 @@ export function EventInfo({ id }: { id: string }) {
         </div>
         <div className="flex flex-row gap-4 items-center">
           <MapPin width={iconSize} height={iconSize} />
-          <LargeText>
-            {isRegistered ? "Paris, Ground Control" : t("register-address")}
-          </LargeText>
+          {/* TODO: Add location */}
+          <LargeText>{data.location}</LargeText>
         </div>
 
         <Card className="mt-2">
-          {isRegistered ? (
+          {isParticipate ? (
             <div>
               <div className="flex flex-row justify-between">
                 <LargeText>{t("in")}</LargeText>
-                <SmallText>{t("start", { count: 2 })}</SmallText>
+                {/* TODO: create a clean decount timer */}
+                {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>
-              <Text className="my-4">{t("cancel-desc")}</Text>
+              {/* add back when we can cancel
+                <Text className="my-4">{t("cancel-desc")}</Text>
+              */}
             </div>
           ) : (
             <div>
               <LargeText>{t("registration")}</LargeText>
               <Text className="my-4">{t("join-desc")}</Text>
-              <ParticipateButton eventId={id} />
+              <ParticipateForm eventId={id} />
             </div>
           )}
         </Card>
         <EventSection title={t("about-event")}>
-          <Text>{data.description}</Text>
+          <MarkdownPreview markdownString={data.description} />
         </EventSection>
       </div>
     </div>
   );
 }
 
-function ParticipateButton({ eventId }: { eventId: string }) {
+function ParticipateForm({ eventId }: { eventId: string }) {
   const { session } = useClerk();
+  const [email, setEmail] = React.useState("");
   const t = useTranslations("event");
   return (
-    <Button
-      className="w-full"
-      onClick={async () => {
-        const token = await session?.getToken();
-        if (!token) {
-          throw new Error("invalid token");
-        }
-        await zenaoClient.participate(
-          { eventId },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        alert("Success");
-      }}
-    >
-      <SmallText variant="invert">{t("participate-button")}</SmallText>
-    </Button>
+    <div>
+      <SignedOut>
+        <Input
+          placeholder="Email"
+          onChange={(evt) => setEmail(evt.target.value)}
+          style={{ marginBottom: 8 }}
+        />
+      </SignedOut>
+      <Button
+        className="w-full"
+        onClick={async () => {
+          const token = await session?.getToken();
+          if (token) {
+            await zenaoClient.participate(
+              { eventId },
+              { headers: { Authorization: `Bearer ${token}` } },
+            );
+          } else {
+            await zenaoClient.participate({ eventId, email });
+          }
+          alert("Success");
+        }}
+      >
+        <SmallText variant="invert">{t("participate-button")}</SmallText>
+      </Button>
+    </div>
   );
 }

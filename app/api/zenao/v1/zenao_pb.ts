@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIqsBChJDcmVhdGVFdmVudFJlcXVlc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJEhIKCnN0YXJ0X2RhdGUYBCABKAQSEAoIZW5kX2RhdGUYBSABKAQSFAoMdGlja2V0X3ByaWNlGAYgASgBEhAKCGNhcGFjaXR5GAcgASgNEhAKCGxvY2F0aW9uGAggASgJIiEKE0NyZWF0ZUV2ZW50UmVzcG9uc2USCgoCaWQYASABKAkiuwEKEEVkaXRFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJEhIKCnN0YXJ0X2RhdGUYBSABKAQSEAoIZW5kX2RhdGUYBiABKAQSFAoMdGlja2V0X3ByaWNlGAcgASgBEhAKCGNhcGFjaXR5GAggASgNEhAKCGxvY2F0aW9uGAkgASgJIh8KEUVkaXRFdmVudFJlc3BvbnNlEgoKAmlkGAEgASgJIiYKElBhcnRpY2lwYXRlUmVxdWVzdBIQCghldmVudF9pZBgBIAEoCSIsChNQYXJ0aWNpcGF0ZVJlc3BvbnNlEhUKDXRpY2tldF9zZWNyZXQYASABKAkyrwIKDFplbmFvU2VydmljZRJBCghFZGl0VXNlchIZLnplbmFvLnYxLkVkaXRVc2VyUmVxdWVzdBoaLnplbmFvLnYxLkVkaXRVc2VyUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkQKCUVkaXRFdmVudBIaLnplbmFvLnYxLkVkaXRFdmVudFJlcXVlc3QaGy56ZW5hby52MS5FZGl0RXZlbnRSZXNwb25zZRJKCgtQYXJ0aWNpcGF0ZRIcLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVxdWVzdBodLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIhcKFUdldFVzZXJBZGRyZXNzUmVxdWVzdCIpChZHZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEg8KB2FkZHJlc3MYASABKAkiqwEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SEAoIbG9jYXRpb24YCCABKAkiIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSK7AQoQRWRpdEV2ZW50UmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRINCgV0aXRsZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIRCglpbWFnZV91cmkYBCABKAkSEgoKc3RhcnRfZGF0ZRgFIAEoBBIQCghlbmRfZGF0ZRgGIAEoBBIUCgx0aWNrZXRfcHJpY2UYByABKAESEAoIY2FwYWNpdHkYCCABKA0SEAoIbG9jYXRpb24YCSABKAkiHwoRRWRpdEV2ZW50UmVzcG9uc2USCgoCaWQYASABKAkiNQoSUGFydGljaXBhdGVSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEg0KBWVtYWlsGAIgASgJIiwKE1BhcnRpY2lwYXRlUmVzcG9uc2USFQoNdGlja2V0X3NlY3JldBgBIAEoCTKEAwoMWmVuYW9TZXJ2aWNlEkEKCEVkaXRVc2VyEhkuemVuYW8udjEuRWRpdFVzZXJSZXF1ZXN0GhouemVuYW8udjEuRWRpdFVzZXJSZXNwb25zZRJTCg5HZXRVc2VyQWRkcmVzcxIfLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVxdWVzdBogLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkQKCUVkaXRFdmVudBIaLnplbmFvLnYxLkVkaXRFdmVudFJlcXVlc3QaGy56ZW5hby52MS5FZGl0RXZlbnRSZXNwb25zZRJKCgtQYXJ0aWNpcGF0ZRIcLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVxdWVzdBodLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
 
 /**
  * @generated from message zenao.v1.EditUserRequest
@@ -55,6 +55,36 @@ export type EditUserResponse = Message<"zenao.v1.EditUserResponse"> & {
  */
 export const EditUserResponseSchema: GenMessage<EditUserResponse> = /*@__PURE__*/
   messageDesc(file_zenao_v1_zenao, 1);
+
+/**
+ * @generated from message zenao.v1.GetUserAddressRequest
+ */
+export type GetUserAddressRequest = Message<"zenao.v1.GetUserAddressRequest"> & {
+};
+
+/**
+ * Describes the message zenao.v1.GetUserAddressRequest.
+ * Use `create(GetUserAddressRequestSchema)` to create a new message.
+ */
+export const GetUserAddressRequestSchema: GenMessage<GetUserAddressRequest> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 2);
+
+/**
+ * @generated from message zenao.v1.GetUserAddressResponse
+ */
+export type GetUserAddressResponse = Message<"zenao.v1.GetUserAddressResponse"> & {
+  /**
+   * @generated from field: string address = 1;
+   */
+  address: string;
+};
+
+/**
+ * Describes the message zenao.v1.GetUserAddressResponse.
+ * Use `create(GetUserAddressResponseSchema)` to create a new message.
+ */
+export const GetUserAddressResponseSchema: GenMessage<GetUserAddressResponse> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 3);
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
@@ -112,7 +142,7 @@ export type CreateEventRequest = Message<"zenao.v1.CreateEventRequest"> & {
  * Use `create(CreateEventRequestSchema)` to create a new message.
  */
 export const CreateEventRequestSchema: GenMessage<CreateEventRequest> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 2);
+  messageDesc(file_zenao_v1_zenao, 4);
 
 /**
  * @generated from message zenao.v1.CreateEventResponse
@@ -129,7 +159,7 @@ export type CreateEventResponse = Message<"zenao.v1.CreateEventResponse"> & {
  * Use `create(CreateEventResponseSchema)` to create a new message.
  */
 export const CreateEventResponseSchema: GenMessage<CreateEventResponse> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 3);
+  messageDesc(file_zenao_v1_zenao, 5);
 
 /**
  * @generated from message zenao.v1.EditEventRequest
@@ -192,7 +222,7 @@ export type EditEventRequest = Message<"zenao.v1.EditEventRequest"> & {
  * Use `create(EditEventRequestSchema)` to create a new message.
  */
 export const EditEventRequestSchema: GenMessage<EditEventRequest> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 4);
+  messageDesc(file_zenao_v1_zenao, 6);
 
 /**
  * @generated from message zenao.v1.EditEventResponse
@@ -209,7 +239,7 @@ export type EditEventResponse = Message<"zenao.v1.EditEventResponse"> & {
  * Use `create(EditEventResponseSchema)` to create a new message.
  */
 export const EditEventResponseSchema: GenMessage<EditEventResponse> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 5);
+  messageDesc(file_zenao_v1_zenao, 7);
 
 /**
  * @generated from message zenao.v1.ParticipateRequest
@@ -219,6 +249,11 @@ export type ParticipateRequest = Message<"zenao.v1.ParticipateRequest"> & {
    * @generated from field: string event_id = 1;
    */
   eventId: string;
+
+  /**
+   * @generated from field: string email = 2;
+   */
+  email: string;
 };
 
 /**
@@ -226,7 +261,7 @@ export type ParticipateRequest = Message<"zenao.v1.ParticipateRequest"> & {
  * Use `create(ParticipateRequestSchema)` to create a new message.
  */
 export const ParticipateRequestSchema: GenMessage<ParticipateRequest> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 6);
+  messageDesc(file_zenao_v1_zenao, 8);
 
 /**
  * @generated from message zenao.v1.ParticipateResponse
@@ -243,7 +278,7 @@ export type ParticipateResponse = Message<"zenao.v1.ParticipateResponse"> & {
  * Use `create(ParticipateResponseSchema)` to create a new message.
  */
 export const ParticipateResponseSchema: GenMessage<ParticipateResponse> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 7);
+  messageDesc(file_zenao_v1_zenao, 9);
 
 /**
  * @generated from service zenao.v1.ZenaoService
@@ -258,6 +293,14 @@ export const ZenaoService: GenService<{
     methodKind: "unary";
     input: typeof EditUserRequestSchema;
     output: typeof EditUserResponseSchema;
+  },
+  /**
+   * @generated from rpc zenao.v1.ZenaoService.GetUserAddress
+   */
+  getUserAddress: {
+    methodKind: "unary";
+    input: typeof GetUserAddressRequestSchema;
+    output: typeof GetUserAddressResponseSchema;
   },
   /**
    * EVENT

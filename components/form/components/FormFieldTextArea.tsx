@@ -6,12 +6,9 @@ import { FormControl, FormField, FormItem } from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/utils";
 
-export const FormFieldTextArea: React.FC<FormFieldProps<string>> = ({
-  control,
-  name,
-  className,
-  placeholder,
-}) => {
+export const FormFieldTextArea: React.FC<
+  FormFieldProps<string> & React.TextareaHTMLAttributes<HTMLTextAreaElement>
+> = ({ control, name, className, placeholder, ...otherProps }) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = () => {
@@ -20,6 +17,10 @@ export const FormFieldTextArea: React.FC<FormFieldProps<string>> = ({
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
     }
   };
+
+  React.useEffect(() => {
+    adjustHeight();
+  }, []);
 
   return (
     <FormField
@@ -30,18 +31,13 @@ export const FormFieldTextArea: React.FC<FormFieldProps<string>> = ({
         <FormItem>
           <FormControl>
             <Textarea
-              maxLength={140}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  // method to prevent from default behaviour
-                  e.preventDefault();
-                }
-              }}
               className={cn(
-                "resize-none break-words border-0 focus-visible:ring-transparent overflow-hidden p-0 w-full min-h-[52px]",
+                "resize-none break-words border-0 focus-visible:ring-transparent p-0 w-full min-h-[52px] max-h-[400px]",
                 className,
               )}
               placeholder={placeholder || "placeholder..."}
+              {...otherProps}
+              {...field}
               onChange={(e) => {
                 field.onChange(e.target.value);
                 adjustHeight();

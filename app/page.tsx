@@ -1,5 +1,3 @@
-"use client";
-
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,7 +12,7 @@ export default function Home() {
 
   return (
     <ScreenContainerCentered>
-      <main className="flex flex-col justify-center items-center mb-10 sm:mb-0">
+      <div className="flex flex-col items-center">
         <Image
           src="/zenao-logo.png"
           alt="zeano logo"
@@ -31,14 +29,15 @@ export default function Home() {
         </SmallText>
         <Input
           placeholder={t("placeholder")}
+          disabled
           className="dark:bg-secondary dark:border-secondary mb-4 h-10 flex pb-1 rounded-lg focus-visible:ring-0"
         />
-        <Button asChild className="w-full flex rounded-3xl py-5">
+        <Button disabled className="w-full flex rounded-3xl py-5">
           <Link href="/create">
-            <SmallText variant="invert">{t("button")}</SmallText>
+            <SmallText variant="invert">{t("button")} - Coming soon</SmallText>
           </Link>
         </Button>
-      </main>
+      </div>
     </ScreenContainerCentered>
   );
 }

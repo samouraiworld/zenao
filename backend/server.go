@@ -10,7 +10,8 @@ import (
 
 type ZenaoServer struct {
 	Logger     *zap.Logger
-	GetUser    func(ctx context.Context) ZenaoUser
+	GetUser    func(ctx context.Context) *ZenaoUser
+	CreateUser func(ctx context.Context, email string) (*ZenaoUser, error)
 	DBTx       func(func(db ZenaoDB) error) error
 	Chain      ZenaoChain
 	MailClient *resend.Client
@@ -38,6 +39,7 @@ type ZenaoDB interface {
 type ZenaoChain interface {
 	CreateUser(userID string) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	UserAddress(userID string) string
 
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) error

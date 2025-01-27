@@ -5,6 +5,7 @@
     "calendar": "Calendar",
     "pricing": "Pricing",
     "blog": "Blog",
+    "manifesto": "Manifesto",
     "sign-in": "Sign in"
   },
   "footer": {
@@ -23,6 +24,7 @@
     "image-uri-placeholder": "Image URL...",
     "title-placeholder": "Event name...",
     "description-placeholder": "Description...",
+    "location-placeholder": "Location...",
     "capacity-placeholder": "Capacity...",
     "start-date-placeholder": "Choose your start date/time...",
     "end-date-placeholder": "Choose your end date/time..."
@@ -30,16 +32,29 @@
   "event": {
     "is-organisator-role": "You have organisator role for this event",
     "manage-button": "Manage",
-    "going": "{count} going / {capacity}",
+    "going": "{count} going",
     "hosted-by": "Hosted by:",
     "register-address": "Register to see address",
-    "in": "You're in !",
+    "in": "You're in!",
     "start": "Start in {count} days",
     "cancel-desc": "No longer able to attend? Notify the host by canceling your registration.",
     "registration": "Registration",
     "join-desc": "Welcome! To join the event, please register below.",
     "participate-button": "Participate",
     "about-event": "About event"
+  },
+  "manifesto": {
+    "title": "MANIFESTO",
+    "means": "means",
+    "p1": "Our mission is to allow humans to organize common projects (physical or online) in a resilient, safe, and transparent way, using radically simple tools.",
+    "p2": "We believe this world need powerful open source and decentralized tools to empower humans in their common projects. Time has come to fight back centralized platforms.",
+    "p3": "We, Samouraï Coop crew, commit ourself to build sustainable tools which are made to help people to organize whatever they want, with their friends, families, and communities.",
+    "p4": "We think that an event is something that can change life, and society. As we are french, we want to remind to all that the French Revolution started with a very small group of people, discussing, voting, and creating progressively an entire movement for freedom, equality, fraternity.",
+    "p5": "Zenao is more than a simple event organization platform. It's made to allow you and your tribe to decide together what's the future of your community.",
+    "p6": "Zenao is a machine to create DAOs* in a zen philosophy, powered by",
+    "p6-end": "to enforce a new CoopNation.",
+    "p6-ref": "(*Decentralized Autonomous Organizations)",
+    "p7": "In case of emergency, keep zen, and organize."
   },
   "components": {
     "modals": {

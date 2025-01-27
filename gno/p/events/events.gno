@@ -31,6 +31,7 @@ type Config struct {
 	Capacity         uint64
 	GetProfileString GetProfileString
 	ZenaoAdminAddr   string
+	Location         string
 }
 
 func NewEvent(conf *Config) *Event {
@@ -51,6 +52,7 @@ func NewEvent(conf *Config) *Event {
 		Capacity:         conf.Capacity,
 		GetProfileString: conf.GetProfileString,
 		org:              dao,
+		Location:         conf.Location,
 	}
 
 	return event
@@ -115,16 +117,31 @@ func (e *Event) CountParticipants() int {
 	return len(e.org.MemberModule.GetMembersWithRole("participant"))
 }
 
+func (e *Event) GetUserRolesJSON(addr string) string {
+	userRoles := e.org.MemberModule.GetMemberRoles(addr)
+	nodes := make([]*json.Node, 0)
+	for _, role := range userRoles {
+		nodes = append(nodes, json.StringNode("", role))
+	}
+	nodesArray := json.ArrayNode("", nodes)
+	bz, err := json.Marshal(nodesArray)
+	if err != nil {
+		panic(err)
+	}
+	return string(bz)
+}
+
 func (e *Event) GetInfoJSON() string {
 	obj := json.ObjectNode("", map[string]*json.Node{
-		"title":       json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "DisplayName", "")),
-		"description": json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Bio", "")),
-		"imageUri":    json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Avatar", "")),
-		"startDate":   json.StringNode("", ufmt.Sprintf("%d", e.StartDate)),
-		"endDate":     json.StringNode("", ufmt.Sprintf("%d", e.EndDate)),
-		"capacity":    json.NumberNode("", float64(e.Capacity)),
-		"creatorAddr": json.StringNode("", e.Creator),
-		"location":    json.StringNode("", e.Location),
+		"title":        json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "DisplayName", "")),
+		"description":  json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Bio", "")),
+		"imageUri":     json.StringNode("", e.GetProfileString(std.CurrentRealm().Addr(), "Avatar", "")),
+		"startDate":    json.StringNode("", ufmt.Sprintf("%d", e.StartDate)),
+		"endDate":      json.StringNode("", ufmt.Sprintf("%d", e.EndDate)),
+		"capacity":     json.NumberNode("", float64(e.Capacity)),
+		"creatorAddr":  json.StringNode("", e.Creator),
+		"location":     json.StringNode("", e.Location),
+		"participants": json.NumberNode("", float64(e.CountParticipants())),
 	})
 	bz, err := json.Marshal(obj)
 	if err != nil {

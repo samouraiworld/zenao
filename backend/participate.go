@@ -15,16 +15,35 @@ import (
 func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zenaov1.ParticipateRequest]) (*connect.Response[zenaov1.ParticipateResponse], error) {
 	user := s.GetUser(ctx)
 
-	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", user.ID), zap.Bool("user-banned", user.Banned))
+	if user == nil {
+		if req.Msg.Email == "" {
+			return nil, errors.New("no user and no email")
+		}
+		var err error
+		user, err = s.CreateUser(ctx, req.Msg.Email)
+		if err != nil {
+			return nil, err
+		}
+	} else if req.Msg.Email != "" {
+		return nil, errors.New("authenticating and providing an email are mutually exclusive")
+	}
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
 	}
 
+	// retrieve auto-incremented user ID from database, do not use clerk's user ID directly for realms
+	userID, err := s.EnsureUserExists(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", userID), zap.Bool("user-banned", user.Banned))
+
 	if err := s.DBTx(func(db ZenaoDB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
 
-		if err := db.Participate(req.Msg.EventId, user.ID); err != nil {
+		if err := db.Participate(req.Msg.EventId, userID); err != nil {
 			return err
 		}
 
@@ -33,20 +52,27 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		if err := s.Chain.Participate(req.Msg.EventId, user.ID); err != nil {
+		if err := s.Chain.Participate(req.Msg.EventId, userID); err != nil {
 			// XXX: handle case where tx is broadcasted but we have an error afterwards, eg: chain has been updated but db rollbacked
 			return err
 		}
 
-		// XXX: Replace sender name with organizer name
+		if s.MailClient != nil {
+			htmlStr, err := generateConfirmationMailHTML(evt)
+			if err != nil {
+				return err
+			}
 
-		if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
-			From:    "Zenao <ticket@mail.zenao.io>",
-			To:      []string{user.Email},
-			Subject: fmt.Sprintf("Your ticket for %s", evt.Title),
-			Text:    "TODO",
-		}); err != nil {
-			return err
+			// XXX: Replace sender name with organizer name
+			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+				From:    "Zenao <ticket@mail.zenao.io>",
+				To:      []string{user.Email},
+				Subject: fmt.Sprintf("%s - Confirmation", evt.Title),
+				Html:    htmlStr,
+				Text:    generateConfirmationMailText(evt),
+			}); err != nil {
+				return err
+			}
 		}
 
 		return nil

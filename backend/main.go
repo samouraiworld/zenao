@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"flag"
 	"net/http"
 	"os"
 	"slices"
@@ -22,18 +25,6 @@ import (
 	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
 )
 
-const (
-	allowedOrigin      = "*"
-	clerkSecretKey     = "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK"
-	bindAddr           = "localhost:4242"
-	adminMnemonic      = "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique"
-	eventsIndexPkgPath = "gno.land/r/zenao/events_reg"
-	chainEndpoint      = "127.0.0.1:26657"
-	chainID            = "dev"
-	dbPath             = "dev.db"
-	resendSecretKey    = "re_fj3PNvR6_Pu8PsJEHVZdV8o1xPj6qe1HE" // be very careful with this key, it allows to send mail from zenao.io
-)
-
 func main() {
 	cmd := commands.NewCommand(
 		commands.Metadata{
@@ -47,10 +38,38 @@ func main() {
 	cmd.AddSubCommands(
 		newStartCmd(),
 		newFakegenCmd(),
+		newMailCmd(),
+		newSyncChainCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
 }
+
+type config struct {
+	allowedOrigins  string
+	clerkSecretKey  string
+	bindAddr        string
+	adminMnemonic   string
+	gnoNamespace    string
+	chainEndpoint   string
+	chainID         string
+	dbPath          string
+	resendSecretKey string
+}
+
+func (conf *config) RegisterFlags(flset *flag.FlagSet) {
+	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
+	flset.StringVar(&conf.clerkSecretKey, "clerk-secret", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
+	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
+	flset.StringVar(&conf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
+	flset.StringVar(&conf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
+	flset.StringVar(&conf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
+	flset.StringVar(&conf.chainID, "gno-chain-id", "dev", "Gno chain ID")
+	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
+	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
+}
+
+var conf config
 
 func newStartCmd() *commands.Command {
 	return commands.NewCommand(
@@ -59,7 +78,7 @@ func newStartCmd() *commands.Command {
 			ShortUsage: "start",
 			ShortHelp:  "start the server",
 		},
-		commands.NewEmptyConfig(),
+		&conf,
 		func(ctx context.Context, args []string) error {
 			return execStart()
 		},
@@ -72,48 +91,89 @@ func execStart() error {
 		return err
 	}
 
-	chain, err := setupChain(adminMnemonic, eventsIndexPkgPath, chainID, chainEndpoint, logger)
+	injectStartEnv()
+
+	chain, err := setupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, logger)
 	if err != nil {
 		return err
 	}
 
-	db, err := setupLocalDB(dbPath)
+	db, err := setupDB(conf.dbPath)
 	if err != nil {
 		return err
 	}
 
 	mux := http.NewServeMux()
 
+	mailClient := (*resend.Client)(nil)
+	if conf.resendSecretKey != "" {
+		mailClient = resend.NewClient(conf.resendSecretKey)
+	}
+
 	zenao := &ZenaoServer{
 		Logger:     logger,
 		GetUser:    getUserFromClerk,
+		CreateUser: createClerkUser,
 		DBTx:       db.Tx,
 		Chain:      chain,
-		MailClient: resend.NewClient(resendSecretKey),
+		MailClient: mailClient,
 	}
+
+	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
+
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
 	mux.Handle(path, middlewares(handler,
 		withRequestLogging(logger),
-		withConnectCORS(allowedOrigin),
-		withClerkAuth(clerkSecretKey),
+		withConnectCORS(allowedOrigins...),
+		withClerkAuth(conf.clerkSecretKey),
 	))
 
-	logger.Info("Starting server", zap.String("addr", bindAddr))
+	logger.Info("Starting server", zap.String("addr", conf.bindAddr))
 
 	return http.ListenAndServe(
-		bindAddr,
+		conf.bindAddr,
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
 }
 
-func getUserFromClerk(ctx context.Context) ZenaoUser {
-	clerkUser := authn.GetInfo(ctx).(*clerk.User)
+func getUserFromClerk(ctx context.Context) *ZenaoUser {
+	iUser := authn.GetInfo(ctx)
+	if iUser == nil {
+		return nil
+	}
+	clerkUser := iUser.(*clerk.User)
 	email := ""
 	if len(clerkUser.EmailAddresses) != 0 {
 		email = clerkUser.EmailAddresses[0].EmailAddress
 	}
-	return ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+	return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+}
+
+func createClerkUser(ctx context.Context, email string) (*ZenaoUser, error) {
+	existing, err := user.List(ctx, &user.ListParams{EmailAddressQuery: &email})
+	if err != nil {
+		return nil, err
+	}
+	if len(existing.Users) != 0 {
+		clerkUser := existing.Users[0]
+		return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
+	}
+
+	passwordBz := make([]byte, 32)
+	if _, err := rand.Read(passwordBz); err != nil {
+		return nil, err
+	}
+	password := base64.RawURLEncoding.EncodeToString(passwordBz)
+
+	clerkUser, err := user.Create(ctx, &user.CreateParams{
+		EmailAddresses: &[]string{email},
+		Password:       &password,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {
@@ -154,7 +214,12 @@ func withRequestLogging(logger *zap.Logger) func(http.Handler) http.Handler {
 func withClerkAuth(secretKey string) func(http.Handler) http.Handler {
 	clerk.SetKey(secretKey)
 	return authn.NewMiddleware(func(_ context.Context, req *http.Request) (any, error) {
-		sessionToken := strings.TrimPrefix(req.Header.Get("Authorization"), "Bearer ")
+		authHeader := req.Header.Get("Authorization")
+		if authHeader == "" {
+			return nil, nil
+		}
+
+		sessionToken := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
 			Token: sessionToken,

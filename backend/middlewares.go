@@ -9,8 +9,12 @@ import (
 
 func (s *ZenaoServer) EnsureUserExists(
 	ctx context.Context,
-	user ZenaoUser,
+	user *ZenaoUser,
 ) (string, error) {
+	if user == nil {
+		return "", errors.New("nil user")
+	}
+
 	s.Logger.Info("create-user", zap.String("user-id", user.ID))
 
 	if user.Banned {

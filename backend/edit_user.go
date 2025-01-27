@@ -14,6 +14,9 @@ func (s *ZenaoServer) EditUser(
 	req *connect.Request[zenaov1.EditUserRequest],
 ) (*connect.Response[zenaov1.EditUserResponse], error) {
 	user := s.GetUser(ctx)
+	if user == nil {
+		return nil, errors.New("unauthorized")
+	}
 
 	// retrieve auto-incremented user ID from database, do not use clerk's user ID directly for realms
 	userID, err := s.EnsureUserExists(ctx, user)
