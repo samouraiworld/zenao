@@ -4,20 +4,17 @@ import React from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
-import { SignedOut, useClerk } from "@clerk/nextjs";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { zenaoClient } from "@/app/zenao-client";
+import { ParticipateForm } from "./ParticipateForm";
 import { eventOptions, eventUserParticipate } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
-import { Button } from "@/components/shadcn/button";
 import { Separator } from "@/components/common/Separator";
 import { Text } from "@/components/texts/DefaultText";
 import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
-import { Input } from "@/components/shadcn/input";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 
 interface EventSectionProps {
@@ -138,40 +135,6 @@ export function EventInfo({
           <MarkdownPreview markdownString={data.description} />
         </EventSection>
       </div>
-    </div>
-  );
-}
-
-function ParticipateForm({ eventId }: { eventId: string }) {
-  const { session } = useClerk();
-  const [email, setEmail] = React.useState("");
-  const t = useTranslations("event");
-  return (
-    <div>
-      <SignedOut>
-        <Input
-          placeholder="Email"
-          onChange={(evt) => setEmail(evt.target.value)}
-          style={{ marginBottom: 8 }}
-        />
-      </SignedOut>
-      <Button
-        className="w-full"
-        onClick={async () => {
-          const token = await session?.getToken();
-          if (token) {
-            await zenaoClient.participate(
-              { eventId },
-              { headers: { Authorization: `Bearer ${token}` } },
-            );
-          } else {
-            await zenaoClient.participate({ eventId, email });
-          }
-          alert("Success");
-        }}
-      >
-        <SmallText variant="invert">{t("participate-button")}</SmallText>
-      </Button>
     </div>
   );
 }

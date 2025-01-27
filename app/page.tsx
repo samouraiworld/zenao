@@ -1,11 +1,10 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { Input } from "@/components/shadcn/input";
-import { Button } from "@/components/shadcn/button";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { SmallText } from "@/components/texts/SmallText";
+import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -27,16 +26,11 @@ export default function Home() {
         <SmallText className="my-10 w-[280px] text-center" variant="secondary">
           {t("secondary-text")}
         </SmallText>
-        <Input
-          placeholder={t("placeholder")}
-          disabled
-          className="dark:bg-secondary dark:border-secondary mb-4 h-10 flex pb-1 rounded-lg focus-visible:ring-0"
-        />
-        <Button disabled className="w-full flex rounded-3xl py-5">
-          <Link href="/create">
-            <SmallText variant="invert">{t("button")} - Coming soon</SmallText>
-          </Link>
-        </Button>
+        <Link href="/create">
+          <ButtonWithChildren className="w-full flex rounded-3xl py-5">
+            <SmallText variant="invert">{t("button")}</SmallText>
+          </ButtonWithChildren>
+        </Link>
       </div>
     </ScreenContainerCentered>
   );

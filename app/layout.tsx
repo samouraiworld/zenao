@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import QueryProviders from "./query-providers";
+import { Toaster } from "@/components/shadcn/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,6 +58,7 @@ export default async function RootLayout({
             </ThemeProvider>
           </QueryProviders>
         </ClerkProvider>
+        <Toaster />
       </body>
     </html>
   );
