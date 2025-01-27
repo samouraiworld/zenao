@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import React, { useCallback } from "react";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
@@ -43,8 +43,15 @@ export function EventInfo({
   const { data: isParticipate } = useSuspenseQuery(
     eventUserParticipate(authToken, id),
   );
+  const queryClient = useQueryClient();
 
   const t = useTranslations("event");
+
+  const handleParticipateSuccess = useCallback(async () => {
+    const opts = eventUserParticipate(authToken, id);
+    await queryClient.cancelQueries(opts);
+    queryClient.setQueryData(opts.queryKey, true);
+  }, [queryClient, authToken, id]);
 
   const iconSize = 22;
 
@@ -127,7 +134,10 @@ export function EventInfo({
             <div>
               <LargeText>{t("registration")}</LargeText>
               <Text className="my-4">{t("join-desc")}</Text>
-              <ParticipateForm eventId={id} />
+              <ParticipateForm
+                onSuccess={handleParticipateSuccess}
+                eventId={id}
+              />
             </div>
           )}
         </Card>
