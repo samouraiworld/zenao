@@ -24,7 +24,13 @@ const participateFormSchema = z.object({
 });
 type ParticipateFormSchemaType = z.infer<typeof participateFormSchema>;
 
-export function ParticipateForm({ eventId }: { eventId: string }) {
+export function ParticipateForm({
+  onSuccess,
+  eventId,
+}: {
+  eventId: string;
+  onSuccess?: () => void;
+}) {
   const { session } = useClerk();
   const t = useTranslations("event");
   const [isLoaded, setIsLoaded] = useState(false);
@@ -43,7 +49,7 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
       setIsLoaded(true);
       await zenaoClient.participate({ eventId, email: values.email });
       toast({ title: t("toast-confirmation") });
-      form.reset();
+      onSuccess?.();
     } catch (err) {
       if (
         err instanceof Error &&
@@ -71,6 +77,7 @@ export function ParticipateForm({ eventId }: { eventId: string }) {
         { headers: { Authorization: `Bearer ${token}` } },
       );
       toast({ title: t("toast-confirmation") });
+      onSuccess?.();
     } catch (err) {
       toast({ variant: "destructive", title: t("toast-default-error") });
       console.error(err);
