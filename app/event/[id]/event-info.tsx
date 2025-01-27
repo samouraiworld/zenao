@@ -6,7 +6,6 @@ import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { ParticipateForm } from "./ParticipateForm";
 import { eventOptions, eventUserParticipate } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -82,11 +81,12 @@ export function EventInfo({
         {/*   </Card> */}
         {/* )} */}
         <EventSection title={t("going", { count: data.participants })}>
-          <Link
+          <a
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
+            target="_blank"
           >
             <SmallText>See on Gnoweb</SmallText>
-          </Link>
+          </a>
         </EventSection>
         {/* TODO: Uncomment that when we can see the name of the addr */}
         {/* <EventSection title={t("hosted-by")}> */}
