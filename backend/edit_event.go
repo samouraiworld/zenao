@@ -47,7 +47,7 @@ func (s *ZenaoServer) EditEvent(
 			return err
 		}
 		if !ok {
-			return errors.New("user is not an organizer")
+			return errors.New("user is not organizer of the event")
 		}
 
 		if err := db.EditEvent(req.Msg.EventId, req.Msg); err != nil {
