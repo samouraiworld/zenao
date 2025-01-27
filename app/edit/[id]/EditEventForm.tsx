@@ -5,11 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions, eventUserOrganizer } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
 import { Text } from "@/components/texts/DefaultText";
 import { EventForm } from "@/components/form/EventForm";
+import { useToast } from "@/app/hooks/use-toast";
 
 export function EditEventForm({
   id,
@@ -31,6 +33,9 @@ export function EditEventForm({
   });
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
+  const { toast } = useToast();
+  const t = useTranslations("eventForm");
+
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
@@ -43,20 +48,25 @@ export function EditEventForm({
           headers: { Authorization: "Bearer " + authToken },
         },
       );
-      setIsLoaded(false);
       form.reset();
-      router.push(`/edit/${id}`);
+      toast({
+        title: t("toast-edit-success"),
+      });
+      router.push(`/event/${id}`);
     } catch (err) {
+      toast({
+        variant: "destructive",
+        title: t("toast-edit-error"),
+      });
       console.error("error", err);
     }
+    setIsLoaded(false);
   };
 
   if (!isOrganizer) {
     return (
       <div className="flex justify-center">
-        <Text>
-          {`You can't edit this event because you are not one of the organizer`}
-        </Text>
+        <Text>{t("not-organizer-message")}</Text>
       </div>
     );
   }

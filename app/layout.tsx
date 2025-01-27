@@ -21,6 +21,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Zenao",
   description: "Zenao.io - Events & Tribes Organizations",
+  openGraph: {
+    images: "/zenao-logo.png",
+  },
 };
 
 export default async function RootLayout({
