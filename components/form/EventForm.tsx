@@ -1,19 +1,18 @@
 import { UseFormReturn } from "react-hook-form";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Form } from "../shadcn/form";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
+import { Separator } from "../common/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
-import { Separator } from "../common/Separator";
-import { SmallText } from "../texts/SmallText";
-import { Button } from "../shadcn/button";
+import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { FormFieldInputString } from "./components/FormFieldInputString";
-import { EventFormSchemaType, urlPattern } from "./types";
-import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
+import { EventFormSchemaType, urlPattern } from "./types";
+import { FormFieldTextArea } from "./components/FormFieldTextArea";
+import { Form } from "@/components/shadcn/form";
 import { isValidURL } from "@/lib/utils";
 import { Text } from "@/components/texts/DefaultText";
 
@@ -123,16 +122,13 @@ export const EventForm: React.FC<EventFormProps> = ({
                 placeholder={t("end-date-placeholder")}
               />
             </Card>
-            <Button type="submit">
-              {/* TODO: Enhance with a spinner, so i don't put the text in i18n */}
-              <SmallText variant="invert">
-                {isLoaded
-                  ? "Form submitted ! Event is creating/editing.."
-                  : isEditing
-                    ? t("edit-event-button")
-                    : t("create-event-button")}
-              </SmallText>
-            </Button>
+            <ButtonWithLabel
+              loading={isLoaded}
+              label={
+                isEditing ? t("participate-button") : t("create-event-button")
+              }
+              type="submit"
+            />
           </div>
         </div>
       </form>
