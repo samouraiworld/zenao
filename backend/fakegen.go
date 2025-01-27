@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
@@ -86,12 +87,12 @@ func execFakegen() error {
 		}
 		creatorID := "1"
 
-		evtId, err := db.CreateEvent(creatorID, req)
+		evt, err := db.CreateEvent(creatorID, req)
 		if err != nil {
 			return err
 		}
 
-		if err := chain.CreateEvent(evtId, creatorID, req); err != nil {
+		if err := chain.CreateEvent(fmt.Sprintf("%d", evt.ID), creatorID, req); err != nil {
 			return err
 		}
 	}

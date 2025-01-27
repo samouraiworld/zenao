@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
+	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
@@ -36,17 +38,35 @@ func (s *ZenaoServer) CreateEvent(
 
 	// TODO: validate request
 
-	evtID := ""
+	evt := (*Event)(nil)
 
 	if err := s.DBTx(func(db ZenaoDB) error {
 		var err error
-		if evtID, err = db.CreateEvent(userID, req.Msg); err != nil {
+		if evt, err = db.CreateEvent(userID, req.Msg); err != nil {
 			return err
 		}
 
-		if err := s.Chain.CreateEvent(evtID, userID, req.Msg); err != nil {
+		if err := s.Chain.CreateEvent(fmt.Sprintf("%d", evt.ID), userID, req.Msg); err != nil {
 			s.Logger.Error("create-event", zap.Error(err))
 			return err
+		}
+
+		if s.MailClient != nil {
+			htmlStr, err := generateCreationConfirmationMailHTML(evt)
+			if err != nil {
+				return err
+			}
+
+			// XXX: Replace sender name with organizer name
+			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+				From:    "Zenao <noreply@mail.zenao.io>",
+				To:      []string{user.Email},
+				Subject: fmt.Sprintf("%s - Creation confirmed", evt.Title),
+				Html:    htmlStr,
+				Text:    generateCreationConfirmationMailText(evt),
+			}); err != nil {
+				return err
+			}
 		}
 
 		return nil
@@ -55,6 +75,6 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{
-		Id: evtID,
+		Id: fmt.Sprintf("%d", evt.ID),
 	}), nil
 }
