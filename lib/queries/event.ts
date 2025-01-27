@@ -61,6 +61,33 @@ export const eventUserParticipate = (authToken: string | null, id: string) =>
     },
   });
 
+export const eventUserOrganizer = (authToken: string | null, id: string) =>
+  queryOptions({
+    queryKey: ["eventUserOrganizer", authToken, id],
+    queryFn: async () => {
+      if (!authToken) {
+        return false;
+      }
+      if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
+        return false;
+      }
+      const { address } = await zenaoClient.getUserAddress(
+        {},
+        { headers: { Authorization: "Bearer " + authToken } },
+      );
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT,
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/events/e${id}`,
+        `event.GetUserRolesJSON("${address}")`,
+      );
+      const event = extractGnoJSONResponse(res);
+      const parsedEvent = eventGetUserRolesSchema.parse(event);
+      return parsedEvent.includes("organizer");
+    },
+  });
+
 export function extractGnoJSONResponse(res: string): unknown {
   const jsonString = res.substring("(".length, res.length - " string)".length);
   // eslint-disable-next-line no-restricted-syntax

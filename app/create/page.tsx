@@ -1,6 +1,6 @@
 "use client";
 
-import { CreateEventForm } from "@/components/form/CreateEventForm";
+import { CreateEventForm } from "./CreateEventForm";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 
 export default function CreateEventPage() {

@@ -19,8 +19,9 @@
     "placeholder": "Event name...",
     "button": "Create your event"
   },
-  "create": {
+  "eventForm": {
     "create-event-button": "Create event",
+    "edit-event-button": "Edit event",
     "image-uri-placeholder": "Image URL...",
     "title-placeholder": "Event name...",
     "description-placeholder": "Description...",
