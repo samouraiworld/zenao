@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions, eventUserOrganizer } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
@@ -21,6 +22,7 @@ export function EditEventForm({
   const { data: isOrganizer } = useSuspenseQuery(
     eventUserOrganizer(authToken, id),
   );
+  const router = useRouter();
 
   const form = useForm<EventFormSchemaType>({
     mode: "all",
@@ -43,6 +45,7 @@ export function EditEventForm({
       );
       setIsLoaded(false);
       form.reset();
+      router.push(`/edit/${id}`);
     } catch (err) {
       console.error("error", err);
     }
