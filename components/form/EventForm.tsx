@@ -15,7 +15,6 @@ import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { Form } from "@/components/shadcn/form";
 import { isValidURL } from "@/lib/utils";
-import { Text } from "@/components/texts/DefaultText";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
