@@ -4,7 +4,7 @@ import React from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
-import { SignedOut, useClerk } from "@clerk/nextjs";
+import { useClerk } from "@clerk/nextjs";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -43,7 +43,7 @@ export function EventInfo({
   authToken: string | null;
 }) {
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: isParticipate } = useSuspenseQuery(
+  const { data: participates } = useSuspenseQuery(
     eventUserParticipate(authToken, id),
   );
 
@@ -115,7 +115,7 @@ export function EventInfo({
         </div>
 
         <Card className="mt-2">
-          {isParticipate ? (
+          {participates ? (
             <div>
               <div className="flex flex-row justify-between">
                 <LargeText>{t("in")}</LargeText>
@@ -130,7 +130,7 @@ export function EventInfo({
             <div>
               <LargeText>{t("registration")}</LargeText>
               <Text className="my-4">{t("join-desc")}</Text>
-              <ParticipateForm eventId={id} />
+              <ParticipateForm loggedInServer={!!authToken} eventId={id} />
             </div>
           )}
         </Card>
@@ -142,19 +142,25 @@ export function EventInfo({
   );
 }
 
-function ParticipateForm({ eventId }: { eventId: string }) {
+function ParticipateForm({
+  loggedInServer,
+  eventId,
+}: {
+  loggedInServer: boolean;
+  eventId: string;
+}) {
   const { session } = useClerk();
   const [email, setEmail] = React.useState("");
   const t = useTranslations("event");
   return (
     <div>
-      <SignedOut>
+      {!loggedInServer && !session && (
         <Input
           placeholder="Email"
           onChange={(evt) => setEmail(evt.target.value)}
           style={{ marginBottom: 8 }}
         />
-      </SignedOut>
+      )}
       <Button
         className="w-full"
         onClick={async () => {

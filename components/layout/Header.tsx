@@ -1,10 +1,11 @@
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { SignInButton, UserButton } from "@clerk/nextjs";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
 import { AlignJustify as AlignJustifyIcon } from "lucide-react";
 import { PopoverContent } from "@radix-ui/react-popover";
+import { getTranslations } from "next-intl/server";
+import { auth } from "@clerk/nextjs/server";
 import { Button } from "../shadcn/button";
 import { Popover, PopoverTrigger } from "../shadcn/popover";
 import { Card } from "../cards/Card";
@@ -12,8 +13,8 @@ import { SmallText } from "../texts/SmallText";
 import { Text } from "../texts/DefaultText";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 
-export const Header: React.FC = () => {
-  const t = useTranslations("header");
+export async function Header() {
+  const t = await getTranslations("header");
 
   return (
     <div className="flex justify-center sm:p-2">
@@ -75,21 +76,21 @@ export const Header: React.FC = () => {
       </div>
     </div>
   );
-};
+}
 
-function Auth() {
-  const t = useTranslations("header");
+async function Auth() {
+  const t = await getTranslations("header");
+  const { sessionId } = await auth();
 
   return (
     <>
-      <SignedOut>
+      {!sessionId ? (
         <SignInButton>
           <Button variant="outline">
             <SmallText>{t("sign-in")}</SmallText>
           </Button>
         </SignInButton>
-      </SignedOut>
-      <SignedIn>
+      ) : (
         <UserButton
           // we need this fallback otherwise the profile button flickers while mounting
           fallback={
@@ -103,7 +104,7 @@ function Auth() {
             />
           }
         />
-      </SignedIn>
+      )}
     </>
   );
 }
