@@ -1,7 +1,6 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { Input } from "@/components/shadcn/input";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { SmallText } from "@/components/texts/SmallText";
