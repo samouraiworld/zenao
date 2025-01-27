@@ -37,9 +37,10 @@ type Event struct {
 }
 
 type UserEvents struct {
-	UserID  uint   `gorm:"primaryKey"`
-	EventID uint   `gorm:"primaryKey"`
-	Role    string // organizer, gatekeeper, participant
+	gorm.Model
+	UserID  uint   `gorm:"index:idx_user_event_role,unique"` // Composite index
+	EventID uint   `gorm:"index:idx_user_event_role,unique"` // Composite index
+	Role    string `gorm:"index:idx_user_event_role,unique"` // Composite index
 	Event   Event  `gorm:"foreignKey:EventID"`
 	User    User   `gorm:"foreignKey:UserID"`
 }
@@ -191,13 +192,19 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 		return err
 	}
 	if count != 0 {
-		return errors.New("user is already participant for this event")
+		return errors.New("user already bought a ticket")
 	}
 
 	if err := g.db.Create(&SoldTicket{EventID: evt.ID, UserID: userID}).Error; err != nil {
 		return err
 	}
 
+	if err := g.db.Model(&UserEvents{}).Where("event_id = ? AND user_id = ? and role = ?", evt.ID, userID, "participant").Count(&count).Error; err != nil {
+		return err
+	}
+	if count != 0 {
+		return errors.New("user already have the role participant")
+	}
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return err
@@ -211,7 +218,6 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 	if err := g.db.Create(participant).Error; err != nil {
 		return err
 	}
-
 	return nil
 }
 
