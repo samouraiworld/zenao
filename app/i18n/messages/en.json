@@ -28,7 +28,12 @@
     "location-placeholder": "Location...",
     "capacity-placeholder": "Capacity...",
     "start-date-placeholder": "Choose your start date/time...",
-    "end-date-placeholder": "Choose your end date/time..."
+    "end-date-placeholder": "Choose your end date/time...",
+    "not-organizer-message": "You can't edit this event because you are not one of the organizer.",
+    "toast-creation-success": "Event created!",
+    "toast-creation-error": "Error on creating event!",
+    "toast-edit-success": "Event edited!",
+    "toast-edit-error": "Error on editing event!"
   },
   "event": {
     "is-organisator-role": "You have organisator role for this event",
