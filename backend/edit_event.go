@@ -31,7 +31,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
