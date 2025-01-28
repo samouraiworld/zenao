@@ -23,6 +23,6 @@ port = 26657
 handlers = ['tls', 'http']
 
 [[vm]]
-cpu_kind = 'shared'
+cpu_kind = 'performance'
 cpus = 2
 memory_mb = 4096

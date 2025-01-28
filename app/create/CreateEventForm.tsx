@@ -21,7 +21,7 @@ export const CreateEventForm: React.FC = () => {
       imageUri: "",
       description: "",
       title: "",
-      capacity: 0,
+      capacity: 1,
       location: "",
     },
   });

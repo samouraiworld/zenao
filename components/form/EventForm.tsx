@@ -7,6 +7,7 @@ import { Separator } from "../common/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
+import { SmallText } from "../texts/SmallText";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
@@ -14,7 +15,6 @@ import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { Form } from "@/components/shadcn/form";
 import { isValidURL } from "@/lib/utils";
-import { Text } from "@/components/texts/DefaultText";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -77,17 +77,17 @@ export const EventForm: React.FC<EventFormProps> = ({
               }}
             />
             <Card>
-              <Text className="mb-3">Description</Text>
+              <SmallText className="mb-3">{t("description-label")}</SmallText>
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="write">Write</TabsTrigger>
-                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                  <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
+                  <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="write">
                   <FormFieldTextArea
                     control={form.control}
                     name="description"
-                    placeholder="Description..."
+                    placeholder={t("description-placeholder")}
                   />
                 </TabsContent>
                 <TabsContent value="preview">
@@ -103,6 +103,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               />
             </Card>
             <Card>
+              <SmallText className="mb-3">{t("capacity-label")}</SmallText>
               <FormFieldInputNumber
                 control={form.control}
                 name="capacity"
