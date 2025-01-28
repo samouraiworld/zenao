@@ -21,10 +21,6 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, errors.New("unauthorized")
 	}
 
-	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
-		return nil, fmt.Errorf("invalid input: %w", err)
-	}
-
 	// retrieve auto-incremented user ID from database, do not use clerk's user ID directly for realms
 	userID, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
@@ -37,7 +33,9 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	// TODO: validate request
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
+		return nil, fmt.Errorf("invalid input: %w", err)
+	}
 
 	evt := (*Event)(nil)
 
