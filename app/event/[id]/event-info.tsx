@@ -6,6 +6,7 @@ import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Event, WithContext } from "schema-dts";
 import { ParticipateForm } from "./ParticipateForm";
 import { eventOptions, eventUserParticipate } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -52,6 +53,18 @@ export function EventInfo({
     queryClient.setQueryData(opts.queryKey, true);
   }, [queryClient, authToken, id]);
 
+  const jsonLd: WithContext<Event> = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: data.title,
+    description: data.description,
+    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
+    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
+    location: data.location,
+    maximumAttendeeCapacity: data.capacity,
+    image: data.imageUri,
+  };
+
   const iconSize = 22;
 
   if (!data) {
@@ -59,6 +72,11 @@ export function EventInfo({
   }
   return (
     <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
           src={data.imageUri}
