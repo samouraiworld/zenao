@@ -206,7 +206,7 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 		return err
 	}
 	if count != 0 {
-		return errors.New("user already bought a ticket")
+		return errors.New("user is already participant for this event")
 	}
 
 	if err := g.db.Create(&SoldTicket{EventID: evt.ID, UserID: userID}).Error; err != nil {
@@ -217,7 +217,7 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 		return err
 	}
 	if count != 0 {
-		return errors.New("user already have the role participant")
+		return errors.New("user is already participant for this event")
 	}
 
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
