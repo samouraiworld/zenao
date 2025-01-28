@@ -32,16 +32,15 @@ type Event struct {
 	Capacity    uint32
 	Location    string
 	CreatorID   uint
-	Creator     User         `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserEvents table ?
-	Members     []UserEvents `gorm:"many2many:user_events;"`
+	Creator     User       `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
+	Members     []UserRole `gorm:"many2many:user_role;"`
 }
 
-// TODO: Use enum for role (organizer, gatekeeper, participant)
-type UserEvents struct {
+type UserRole struct {
 	gorm.Model
-	UserID  uint   `gorm:"index:idx_user_event_role,unique"` // Composite index
-	EventID uint   `gorm:"index:idx_user_event_role,unique"` // Composite index
-	Role    string `gorm:"index:idx_user_event_role,unique"` // Composite index
+	UserID  uint   `gorm:"index:idx_user_role,unique"` // Composite index
+	EventID uint   `gorm:"index:idx_user_role,unique"` // Composite index
+	Role    string `gorm:"index:idx_user_role,unique"` // Composite index
 	Event   Event  `gorm:"foreignKey:EventID"`
 	User    User   `gorm:"foreignKey:UserID"`
 }
@@ -71,7 +70,7 @@ func setupDB(dsn string) (*gormZenaoDB, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(&Event{}, &SoldTicket{}, &User{}, &UserEvents{}); err != nil {
+	if err := db.AutoMigrate(&Event{}, &SoldTicket{}, &User{}, &UserRole{}); err != nil {
 		return nil, err
 	}
 
@@ -124,13 +123,13 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		return nil, err
 	}
 
-	UserEvents := &UserEvents{
+	userRole := &UserRole{
 		UserID:  uint(creatorIDInt),
 		EventID: evt.ID,
 		Role:    "organizer",
 	}
 
-	if err := g.db.Create(UserEvents).Error; err != nil {
+	if err := g.db.Create(userRole).Error; err != nil {
 		return nil, err
 	}
 
@@ -214,7 +213,7 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 		return err
 	}
 
-	if err := g.db.Model(&UserEvents{}).Where("event_id = ? AND user_id = ? and role = ?", evt.ID, userID, "participant").Count(&count).Error; err != nil {
+	if err := g.db.Model(&UserRole{}).Where("event_id = ? AND user_id = ? and role = ?", evt.ID, userID, "participant").Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
@@ -225,7 +224,7 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 	if err != nil {
 		return err
 	}
-	participant := &UserEvents{
+	participant := &UserRole{
 		UserID:  uint(userIDint),
 		EventID: evt.ID,
 		Role:    "participant",
