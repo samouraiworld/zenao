@@ -31,8 +31,8 @@ func (s *ZenaoServer) EditEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	if req.Msg.TicketPrice != 0 {
-		return nil, errors.New("event with price is not supported")
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
+		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
 	var event *Event
