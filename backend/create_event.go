@@ -83,13 +83,16 @@ func validateEvent(startDate, endDate uint64, title string, description string, 
 		return errors.New("end date must be after start date")
 	}
 	if len(title) > 140 {
-		return errors.New("title must be leq 140")
+		return errors.New("title must be of length leq 140")
 	}
 	if len(description) > 10000 {
-		return errors.New("event description must be leq 10000")
+		return errors.New("event description must be of length leq 10000")
 	}
 	if _, err := url.Parse(imageURI); err != nil {
 		return fmt.Errorf("invalid image uri: %w", err)
+	}
+	if len(imageURI) > 400 {
+		return errors.New("image uri must be of length leq 400")
 	}
 	if capacity <= 0 {
 		return errors.New("capacity must be greater than 0")
