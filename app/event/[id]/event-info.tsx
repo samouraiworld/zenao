@@ -7,8 +7,13 @@ import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
+import Link from "next/link";
 import { ParticipateForm } from "./ParticipateForm";
-import { eventOptions, eventUserParticipate } from "@/lib/queries/event";
+import {
+  eventOptions,
+  eventUserOrganizer,
+  eventUserParticipate,
+} from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Separator } from "@/components/common/Separator";
 import { Text } from "@/components/texts/DefaultText";
@@ -16,6 +21,7 @@ import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
+import { Button } from "@/components/shadcn/button";
 
 interface EventSectionProps {
   title: string;
@@ -42,6 +48,9 @@ export function EventInfo({
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: isParticipate } = useSuspenseQuery(
     eventUserParticipate(authToken, id),
+  );
+  const { data: isOrganizer } = useSuspenseQuery(
+    eventUserOrganizer(authToken, id),
   );
   const queryClient = useQueryClient();
 
@@ -86,18 +95,18 @@ export function EventInfo({
           priority
           className="flex w-full rounded-xl self-center"
         />
-
-        {/* TODO: Uncomment that when edit event page exist */}
-        {/* {isOrganisatorRole && ( */}
-        {/*   <Card className="flex flex-row items-center"> */}
-        {/*     <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText> */}
-        {/*     <div className="w-2/5 flex justify-end"> */}
-        {/*       <Button variant="outline"> */}
-        {/*         <SmallText>{t("manage-button")}</SmallText> */}
-        {/*       </Button> */}
-        {/*     </div> */}
-        {/*   </Card> */}
-        {/* )} */}
+        {isOrganizer && (
+          <Card className="flex flex-row items-center">
+            <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
+            <div className="w-2/5 flex justify-end">
+              <Button variant="outline">
+                <Link href={`/edit/${id}`}>
+                  <SmallText>{t("manage-button")}</SmallText>
+                </Link>
+              </Button>
+            </div>
+          </Card>
+        )}
         <EventSection title={t("going", { count: data.participants })}>
           <a
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
