@@ -3,6 +3,7 @@
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
 import { UseFormReturn } from "react-hook-form";
+import { Matcher } from "react-day-picker";
 import { EventFormSchemaType, FormFieldProps } from "../types";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -24,20 +25,23 @@ import { SmallText } from "@/components/texts/SmallText";
 export const FormFieldDatePicker: React.FC<
   Omit<FormFieldProps<bigint>, "control"> & {
     form: UseFormReturn<EventFormSchemaType>;
+    // disabled: disabled before/after a date with Matcher format (ex: date < new Date() )
+    disabled: (date: Date) => boolean;
   }
-> = ({ name, className, placeholder, form }) => {
+> = ({ name, className, placeholder, form, disabled }) => {
   function handleDateSelect(date: Date | undefined) {
     if (date) {
       form.setValue(name, BigInt(getUnixTime(date)));
     }
   }
 
-  function handleTimeChange(
+  function timeChange(
     type: "hour" | "minute" | "ampm",
     value: string,
     currentDate: Date,
   ) {
     const newDate = new Date(currentDate);
+    console.log("newDate", newDate);
 
     if (type === "hour") {
       const hour = parseInt(value, 10);
@@ -53,7 +57,26 @@ export const FormFieldDatePicker: React.FC<
       }
     }
 
-    form.setValue(name, BigInt(getUnixTime(newDate)));
+    return newDate;
+  }
+
+  function handleTimeChange(
+    type: "hour" | "minute" | "ampm",
+    value: string,
+    currentDate: Date,
+  ) {
+    form.setValue(
+      name,
+      BigInt(getUnixTime(timeChange(type, value, currentDate))),
+    );
+  }
+
+  function testTimeChange(
+    type: "hour" | "minute" | "ampm",
+    value: string,
+    currentDate: Date,
+  ) {
+    return disabled(timeChange(type, value, currentDate));
   }
 
   return (
@@ -90,7 +113,7 @@ export const FormFieldDatePicker: React.FC<
                     mode="single"
                     selected={formattedValue}
                     onSelect={handleDateSelect}
-                    disabled={(date) => date < new Date()}
+                    disabled={disabled}
                   />
                   <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
                     <ScrollArea className="w-64 sm:w-auto">
@@ -99,6 +122,11 @@ export const FormFieldDatePicker: React.FC<
                           .reverse()
                           .map((hour) => (
                             <Button
+                              disabled={testTimeChange(
+                                "hour",
+                                hour.toString(),
+                                formattedValue,
+                              )}
                               key={hour}
                               size="icon"
                               variant={
@@ -130,6 +158,11 @@ export const FormFieldDatePicker: React.FC<
                         {Array.from({ length: 12 }, (_, i) => i * 5).map(
                           (minute) => (
                             <Button
+                              disabled={testTimeChange(
+                                "minute",
+                                minute.toString(),
+                                formattedValue,
+                              )}
                               key={minute}
                               size="icon"
                               variant={
@@ -161,6 +194,11 @@ export const FormFieldDatePicker: React.FC<
                       <div className="flex sm:flex-col p-2">
                         {["AM", "PM"].map((ampm) => (
                           <Button
+                            disabled={testTimeChange(
+                              "ampm",
+                              ampm,
+                              formattedValue,
+                            )}
                             key={ampm}
                             size="icon"
                             variant={

@@ -1,6 +1,7 @@
 import { UseFormReturn } from "react-hook-form";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { fromUnixTime, getUnixTime, isToday } from "date-fns";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
@@ -31,6 +32,7 @@ export const EventForm: React.FC<EventFormProps> = ({
 }) => {
   const imageUri = form.watch("imageUri");
   const description = form.watch("description");
+  const startDate = form.watch("startDate");
   const t = useTranslations("eventForm");
 
   return (
@@ -115,12 +117,17 @@ export const EventForm: React.FC<EventFormProps> = ({
                 form={form}
                 name="startDate"
                 placeholder={t("start-date-placeholder")}
+                disabled={(date) => date < new Date() && !isToday(date)}
               />
               <Separator className="mx-0" />
               <FormFieldDatePicker
                 form={form}
                 name="endDate"
                 placeholder={t("end-date-placeholder")}
+                disabled={(date) =>
+                  (date < new Date() && !isToday(date)) ||
+                  date < new Date(fromUnixTime(Number(startDate)))
+                }
               />
             </Card>
             <ButtonWithLabel
