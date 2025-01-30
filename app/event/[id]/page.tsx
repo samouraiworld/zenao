@@ -42,8 +42,13 @@ export default async function EventPage({ params }: Props) {
   const { getToken } = await auth();
   const authToken = await getToken();
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(eventOptions(p.id));
-  void queryClient.prefetchQuery(eventUserParticipate(authToken, p.id));
+
+  try {
+    await queryClient.prefetchQuery(eventOptions(p.id));
+    await queryClient.prefetchQuery(eventUserParticipate(authToken, p.id));
+  } catch (err) {
+    console.error(err);
+  }
 
   return (
     <ScreenContainer>

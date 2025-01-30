@@ -22,12 +22,21 @@ export const eventOptions = (id: string) =>
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/events/e${id}`,
-        `event.GetInfoJSON()`,
-      );
-      const event = extractGnoJSONResponse(res);
-      return eventInfoSchema.parse(event);
+      try {
+        const res = await client.evaluateExpression(
+          `gno.land/r/zenao/events/e${id}`,
+          `event.GetInfoJSON()`,
+        );
+        const event = extractGnoJSONResponse(res);
+        return eventInfoSchema.parse(event);
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message.includes("ABCI response is not")
+        ) {
+          throw new Error("ABCI");
+        }
+      }
     },
   });
 

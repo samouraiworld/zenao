@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
@@ -16,6 +16,7 @@ import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
+import { getQueryClient } from "@/lib/get-query-client";
 
 interface EventSectionProps {
   title: string;
@@ -39,12 +40,12 @@ export function EventInfo({
   id: string;
   authToken: string | null;
 }) {
-  const { data } = useSuspenseQuery(eventOptions(id));
+  const { data, error, isError } = useSuspenseQuery(eventOptions(id));
   const { data: isParticipate } = useSuspenseQuery(
     eventUserParticipate(authToken, id),
   );
-  const queryClient = useQueryClient();
-
+  const queryClient = getQueryClient();
+  const iconSize = 22;
   const t = useTranslations("event");
 
   const handleParticipateSuccess = useCallback(async () => {
@@ -52,6 +53,13 @@ export function EventInfo({
     await queryClient.cancelQueries(opts);
     queryClient.setQueryData(opts.queryKey, true);
   }, [queryClient, authToken, id]);
+
+  if (isError && error) {
+    return <p>{`Error: ${error.message}`}</p>;
+  }
+  if (!data) {
+    return <p>{`Event doesn't exist`}</p>;
+  }
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -65,11 +73,6 @@ export function EventInfo({
     image: data.imageUri,
   };
 
-  const iconSize = 22;
-
-  if (!data) {
-    return <p>{`Event doesn't exist`}</p>;
-  }
   return (
     <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
       <script
