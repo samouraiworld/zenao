@@ -48,3 +48,14 @@ clean-gno:
 .PHONY: lint-fix
 lint-fix:
 	npx next lint --fix
+
+
+.PHONY: migrate-local
+migrate-local:
+	atlas migrate apply \
+		--dir "file://migrations" \
+		--url "sqlite://dev.db"
+
+.PHONY: update-schema
+update-schema:
+	atlas schema inspect --env gorm --url "env://src" > schema.hcl

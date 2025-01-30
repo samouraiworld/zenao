@@ -1,4 +1,4 @@
-package main
+package gzdb
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -36,13 +37,13 @@ type SoldTicket struct {
 
 type User struct {
 	gorm.Model         // this ID should be used for any database related logic (like querying)
-	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
+	authID      string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
 	DisplayName string
 	Bio         string
 	AvatarURI   string
 }
 
-func setupDB(dsn string) (*gormZenaoDB, error) {
+func SetupDB(dsn string) (zeni.DB, error) {
 	var (
 		db  *gorm.DB
 		err error
@@ -60,10 +61,6 @@ func setupDB(dsn string) (*gormZenaoDB, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(&Event{}, &SoldTicket{}, &User{}); err != nil {
-		return nil, err
-	}
-
 	return &gormZenaoDB{db: db}, nil
 }
 
@@ -71,14 +68,14 @@ type gormZenaoDB struct {
 	db *gorm.DB
 }
 
-func (g *gormZenaoDB) Tx(cb func(db ZenaoDB) error) error {
+func (g *gormZenaoDB) Tx(cb func(db zeni.DB) error) error {
 	return g.db.Transaction(func(tx *gorm.DB) error {
 		return cb(&gormZenaoDB{db: tx})
 	})
 }
 
 // CreateEvent implements ZenaoDB.
-func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error) {
+func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*zeni.Event, error) {
 	// XXX: validate?
 	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
 	if err != nil {
@@ -98,7 +95,7 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 	if err := g.db.Create(evt).Error; err != nil {
 		return nil, err
 	}
-	return evt, nil
+	return dbEventToZeniEvent(evt), nil
 }
 
 // EditEvent implements ZenaoDB.
@@ -125,7 +122,16 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) e
 }
 
 // GetEvent implements ZenaoDB.
-func (g *gormZenaoDB) GetEvent(id string) (*Event, error) {
+func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
+	evt, err := g.getDBEvent(id)
+	if err != nil {
+		return nil, err
+	}
+	return dbEventToZeniEvent(evt), nil
+}
+
+// GetEvent implements ZenaoDB.
+func (g *gormZenaoDB) getDBEvent(id string) (*Event, error) {
 	evtIDInt, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		return nil, err
@@ -139,9 +145,9 @@ func (g *gormZenaoDB) GetEvent(id string) (*Event, error) {
 }
 
 // CreateUser implements ZenaoDB.
-func (g *gormZenaoDB) CreateUser(clerkID string) (string, error) {
+func (g *gormZenaoDB) CreateUser(authID string) (string, error) {
 	user := &User{
-		ClerkID: clerkID,
+		authID: authID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
 		return "", err
@@ -151,7 +157,7 @@ func (g *gormZenaoDB) CreateUser(clerkID string) (string, error) {
 
 // Participate implements ZenaoDB.
 func (g *gormZenaoDB) Participate(eventID string, userID string) error {
-	evt, err := g.GetEvent(eventID)
+	evt, err := g.getDBEvent(eventID)
 	if err != nil {
 		return err
 	}
@@ -195,13 +201,60 @@ func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) erro
 }
 
 // UserExists implements ZenaoDB.
-func (g *gormZenaoDB) UserExists(clerkID string) (string, error) {
+func (g *gormZenaoDB) UserExists(authID string) (string, error) {
 	var user User
-	if err := g.db.Where("clerk_id = ?", clerkID).First(&user).Error; err != nil {
+	if err := g.db.Where("clerk_id = ?", authID).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", nil
 		}
 		return "", err
 	}
 	return fmt.Sprintf("%d", user.ID), nil
+}
+
+// GetAllUsers implements zeni.ZenaoDB.
+func (g *gormZenaoDB) GetAllUsers() ([]*zeni.DBUser, error) {
+	var users []*User
+	if err := g.db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*zeni.DBUser, 0, len(users))
+	for _, u := range users {
+		res = append(res, dbUserToZeniDBUser(u))
+	}
+	return res, nil
+}
+
+// GetAllEvents implements zeni.ZenaoDB.
+func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
+	var events []*Event
+	if err := g.db.Find(&events).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*zeni.Event, 0, len(events))
+	for _, e := range events {
+		res = append(res, dbEventToZeniEvent(e))
+	}
+	return res, nil
+}
+
+func dbEventToZeniEvent(dbevt *Event) *zeni.Event {
+	return &zeni.Event{
+		ID:          fmt.Sprintf("%d", dbevt.ID),
+		Title:       dbevt.Title,
+		Description: dbevt.Description,
+		StartDate:   dbevt.StartDate,
+		EndDate:     dbevt.EndDate,
+		ImageURI:    dbevt.ImageURI,
+		TicketPrice: dbevt.TicketPrice,
+		Capacity:    dbevt.Capacity,
+		Location:    dbevt.Location,
+		CreatorID:   fmt.Sprintf("%d", dbevt.CreatorID),
+	}
+}
+
+func dbUserToZeniDBUser(dbuser *User) *zeni.DBUser {
+	return &zeni.DBUser{
+		ID: fmt.Sprintf("%d", dbuser.ID),
+	}
 }

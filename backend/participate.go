@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -40,7 +41,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", userID), zap.Bool("user-banned", user.Banned))
 
-	if err := s.DBTx(func(db ZenaoDB) error {
+	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
 
 		if err := db.Participate(req.Msg.EventId, userID); err != nil {

@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
 func (s *ZenaoServer) EnsureUserExists(
 	ctx context.Context,
-	user *ZenaoUser,
+	user *zeni.User,
 ) (string, error) {
 	if user == nil {
 		return "", errors.New("nil user")
@@ -22,7 +23,7 @@ func (s *ZenaoServer) EnsureUserExists(
 	}
 
 	userID := ""
-	if err := s.DBTx(func(db ZenaoDB) error {
+	if err := s.DB.Tx(func(db zeni.DB) error {
 		var err error
 		if userID, err = db.UserExists(user.ID); err != nil {
 			return err
