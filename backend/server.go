@@ -29,6 +29,7 @@ type ZenaoDB interface {
 	CreateUser(clerkID string) (string, error)
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserExists(clerkID string) (string, error)
+	UserRoles(userID string, eventID string) ([]string, error)
 
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) error

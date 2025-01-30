@@ -32,17 +32,18 @@ type Event struct {
 	Capacity    uint32
 	Location    string
 	CreatorID   uint
-	Creator     User       `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
-	Members     []UserRole `gorm:"many2many:user_role;"`
+	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
 }
 
 type UserRole struct {
-	gorm.Model
-	UserID  uint   `gorm:"index:idx_user_role,unique"` // Composite index
-	EventID uint   `gorm:"index:idx_user_role,unique"` // Composite index
-	Role    string `gorm:"index:idx_user_role,unique"` // Composite index
-	Event   Event  `gorm:"foreignKey:EventID"`
-	User    User   `gorm:"foreignKey:UserID"`
+	// gorm.Model without ID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	UserID  uint   `gorm:"primaryKey;autoIncrement:false"`
+	EventID uint   `gorm:"primaryKey;autoIncrement:false"`
+	Role    string `gorm:"primaryKey"`
 }
 
 type SoldTicket struct {
@@ -75,20 +76,6 @@ func setupDB(dsn string) (*gormZenaoDB, error) {
 	}
 
 	return &gormZenaoDB{db: db}, nil
-}
-
-func (e *Event) UserHasRole(userID string, role string) (bool, error) {
-	userIDint, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return false, err
-	}
-
-	for _, m := range e.Members {
-		if m.UserID == uint(userIDint) && m.Role == role {
-			return true, nil
-		}
-	}
-	return false, nil
 }
 
 type gormZenaoDB struct {
@@ -260,4 +247,17 @@ func (g *gormZenaoDB) UserExists(clerkID string) (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%d", user.ID), nil
+}
+
+// UserRoles implements ZenaoDB.
+func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error) {
+	var roles []UserRole
+	if err := g.db.Find(&roles, "user_id = ? AND event_id = ?", userID, eventID).Error; err != nil {
+		return nil, err
+	}
+	res := make([]string, 0, len(roles))
+	for _, role := range roles {
+		res = append(res, role.Role)
+	}
+	return res, nil
 }

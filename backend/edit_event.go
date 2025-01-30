@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"slices"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -34,19 +35,12 @@ func (s *ZenaoServer) EditEvent(
 		return nil, errors.New("event with price is not supported")
 	}
 
-	var event *Event
 	if err := s.DBTx(func(db ZenaoDB) error {
-		var err error
-		event, err = db.GetEvent(req.Msg.EventId)
+		roles, err := db.UserRoles(userID, req.Msg.EventId)
 		if err != nil {
-			return err
+			return nil
 		}
-
-		ok, err := event.UserHasRole(userID, "organizer")
-		if err != nil {
-			return err
-		}
-		if !ok {
+		if !slices.Contains(roles, "organizer") {
 			return errors.New("user is not organizer of the event")
 		}
 
