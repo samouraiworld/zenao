@@ -1,9 +1,7 @@
-// error.tsx
 "use client";
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useRouterRefresh } from "./hooks/useRouterRefresh";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
@@ -12,13 +10,12 @@ import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 
 export default function Error({
   error,
-  reset: _reset,
+  reset: reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
   const t = useTranslations("error");
-  const { refresh, isPending } = useRouterRefresh();
 
   useEffect(() => {
     // Optionally log the error to an error reporting service
@@ -30,15 +27,10 @@ export default function Error({
       <Text className="text-center">{t("label")}</Text>
       <br />
       <Card>
-        <code className="text-sm">{error.message}</code>
+        <code className="text-sm">{error.digest}</code>
       </Card>
       <br />
-      <ButtonWithChildren
-        onClick={async () => {
-          await refresh();
-        }}
-        loading={isPending}
-      >
+      <ButtonWithChildren onClick={() => reset()}>
         <SmallText variant="invert">{t("retry-button")}</SmallText>
       </ButtonWithChildren>
     </ScreenContainerCentered>
