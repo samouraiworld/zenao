@@ -101,7 +101,7 @@ export function EventInfo({
             <div className="w-2/5 flex justify-end">
               <Button variant="outline">
                 <Link href={`/edit/${id}`}>
-                  <SmallText>{t("manage-button")}</SmallText>
+                  <SmallText>{t("edit-button")}</SmallText>
                 </Link>
               </Button>
             </div>
