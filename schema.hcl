@@ -17,6 +17,10 @@ table "users" {
     null = true
     type = datetime
   }
+  column "clerk_id" {
+    null = true
+    type = text
+  }
   column "display_name" {
     null = true
     type = text
@@ -31,6 +35,10 @@ table "users" {
   }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_users_clerk_id" {
+    unique  = true
+    columns = [column.clerk_id]
   }
   index "idx_users_deleted_at" {
     columns = [column.deleted_at]

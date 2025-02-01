@@ -56,6 +56,35 @@ Edit the `.proto` files, when you are done, run the codegen with
 make generate
 ```
 
+## Update database schema
+
+As a prerequisite, you need to install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
+
+```bash
+make install-atlas
+```
+
+First, edit the gorm models in `./backend/gzdb`.
+New models must embbed `gorm.Model` or use a gorm annotation for at least one field.
+
+Then, update the atlas schema using the gorm adapter:
+```bash
+make update-schema
+```
+
+You can now create a new migration, replace `$MIGRATION_NAME` with the name of the migration:
+```bash
+atlas migrate diff $MIGRATION_NAME \
+		--dir "file://migrations" \
+		--to "file://schema.hcl" \
+		--dev-url "sqlite://file?mode=memory"
+```
+
+Finally you can migrate a db, replace `$ENV` by one of `dev`, `staging` or `prod`:
+```bash
+atlas migrate apply --dir "file://migrations" --env $ENV
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

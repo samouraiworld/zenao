@@ -45,6 +45,7 @@ type DB interface {
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
+	GetAllParticipants(eventID string) ([]*DBUser, error)
 }
 
 type Chain interface {

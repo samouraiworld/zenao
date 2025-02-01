@@ -84,21 +84,20 @@ func execSyncChain() error {
 			Location:    event.Location,
 		}); err != nil {
 			logger.Error("failed to create event", zap.String("event-id", event.ID), zap.Error(err))
+			continue
 		}
-	}
 
-	// TODO
-	/*
-		tickets := []*SoldTicket{}
-		if err := db.db.Find(&tickets).Error; err != nil {
-			return err
+		participants, err := db.GetAllParticipants(event.ID)
+		if err != nil {
+			logger.Error("failed to get participants of event", zap.String("event-id", event.ID), zap.Error(err))
+			continue
 		}
-		for _, ticket := range tickets {
-			if err := chain.Participate(fmt.Sprintf("%d", ticket.EventID), ticket.UserID); err != nil {
-				logger.Error("failed to add participation", zap.Uint("event-id", ticket.EventID), zap.String("user-id", ticket.UserID), zap.Error(err))
+		for _, p := range participants {
+			if err := chain.Participate(event.ID, p.ID); err != nil {
+				logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
 			}
 		}
-	*/
+	}
 
 	return nil
 }

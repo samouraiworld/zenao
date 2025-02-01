@@ -22,3 +22,22 @@ env "gorm" {
     }
   }
 }
+
+variable "token" {
+  type    = string
+  default = getenv("TURSO_TOKEN")
+}
+
+env "dev" {
+  url     = "sqlite://dev.db"
+}
+
+env "staging" {
+  url     = "libsql://zenao-staging-samourai-coop.turso.io?authToken=${var.token}"
+  exclude = ["_litestream*"]
+}
+
+env "prod" {
+  url     = "libsql://zenao-prod-samourai-coop.turso.io?authToken=${var.token}"
+  exclude = ["_litestream*"]
+}
