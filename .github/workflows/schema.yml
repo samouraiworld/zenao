@@ -1,4 +1,4 @@
-name: Go
+name: Schema
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   merge_group:
 
 jobs:
-  check-go:
+  check-schema:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
