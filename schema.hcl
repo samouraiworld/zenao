@@ -17,7 +17,7 @@ table "users" {
     null = true
     type = datetime
   }
-  column "clerk_id" {
+  column "auth_id" {
     null = true
     type = text
   }
@@ -36,9 +36,9 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
-  index "idx_users_clerk_id" {
+  index "idx_users_auth_id" {
     unique  = true
-    columns = [column.clerk_id]
+    columns = [column.auth_id]
   }
   index "idx_users_deleted_at" {
     columns = [column.deleted_at]
@@ -147,6 +147,39 @@ table "sold_tickets" {
     columns = [column.id]
   }
   index "idx_sold_tickets_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
+table "user_roles" {
+  schema = schema.main
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "user_id" {
+    null = true
+    type = integer
+  }
+  column "event_id" {
+    null = true
+    type = integer
+  }
+  column "role" {
+    null = true
+    type = text
+  }
+  primary_key {
+    columns = [column.user_id, column.event_id, column.role]
+  }
+  index "idx_user_roles_deleted_at" {
     columns = [column.deleted_at]
   }
 }
