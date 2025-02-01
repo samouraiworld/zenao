@@ -74,6 +74,10 @@
     "label": "Oups! An error has occured.",
     "retry-button": "Retry"
   },
+  "not-found": {
+    "label": "Page not found.",
+    "button": "Return Home"
+  },
   "components": {
     "modals": {
       "signed-out-modal": {
