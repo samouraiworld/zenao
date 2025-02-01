@@ -63,3 +63,4 @@ install-atlas:
 	cd atlas && git checkout c261f318ac25924555e63fdf005cc53de43fa5db
 	cd atlas/cmd/atlas && go install .
 	rm -fr atlas
+	go mod tidy
