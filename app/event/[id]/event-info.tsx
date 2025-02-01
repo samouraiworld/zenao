@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import React, { useCallback } from "react";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Event, WithContext } from "schema-dts";
 import { ParticipateForm } from "./ParticipateForm";
 import { eventOptions, eventUserParticipate } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -43,8 +43,27 @@ export function EventInfo({
   const { data: isParticipate } = useSuspenseQuery(
     eventUserParticipate(authToken, id),
   );
+  const queryClient = useQueryClient();
 
   const t = useTranslations("event");
+
+  const handleParticipateSuccess = useCallback(async () => {
+    const opts = eventUserParticipate(authToken, id);
+    await queryClient.cancelQueries(opts);
+    queryClient.setQueryData(opts.queryKey, true);
+  }, [queryClient, authToken, id]);
+
+  const jsonLd: WithContext<Event> = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: data.title,
+    description: data.description,
+    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
+    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
+    location: data.location,
+    maximumAttendeeCapacity: data.capacity,
+    image: data.imageUri,
+  };
 
   const iconSize = 22;
 
@@ -53,6 +72,11 @@ export function EventInfo({
   }
   return (
     <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
           src={data.imageUri}
@@ -75,11 +99,12 @@ export function EventInfo({
         {/*   </Card> */}
         {/* )} */}
         <EventSection title={t("going", { count: data.participants })}>
-          <Link
+          <a
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
+            target="_blank"
           >
             <SmallText>See on Gnoweb</SmallText>
-          </Link>
+          </a>
         </EventSection>
         {/* TODO: Uncomment that when we can see the name of the addr */}
         {/* <EventSection title={t("hosted-by")}> */}
@@ -127,7 +152,10 @@ export function EventInfo({
             <div>
               <LargeText>{t("registration")}</LargeText>
               <Text className="my-4">{t("join-desc")}</Text>
-              <ParticipateForm eventId={id} />
+              <ParticipateForm
+                onSuccess={handleParticipateSuccess}
+                eventId={id}
+              />
             </div>
           )}
         </Card>

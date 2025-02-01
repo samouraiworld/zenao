@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -31,14 +33,14 @@ func (s *ZenaoServer) EditEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	if req.Msg.TicketPrice != 0 {
-		return nil, errors.New("event with price is not supported")
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
+		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	if err := s.DBTx(func(db ZenaoDB) error {
+	if err := s.DB.Tx(func(db zeni.DB) error {
 		roles, err := db.UserRoles(userID, req.Msg.EventId)
 		if err != nil {
-			return nil
+			return err
 		}
 		if !slices.Contains(roles, "organizer") {
 			return errors.New("user is not organizer of the event")

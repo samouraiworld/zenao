@@ -22,7 +22,9 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
+	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
+	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
 func main() {
@@ -85,6 +87,24 @@ func newStartCmd() *commands.Command {
 	)
 }
 
+func injectStartEnv() {
+	mappings := map[string]*string{
+		"ZENAO_ADMIN_MNEMONIC":    &conf.adminMnemonic,
+		"ZENAO_RESEND_SECRET_KEY": &conf.resendSecretKey,
+		"ZENAO_CLERK_SECRET_KEY":  &conf.clerkSecretKey,
+		"ZENAO_DB":                &conf.dbPath,
+		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
+		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
+	}
+
+	for key, ps := range mappings {
+		val := os.Getenv(key)
+		if val != "" {
+			*ps = val
+		}
+	}
+}
+
 func execStart() error {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
@@ -98,7 +118,7 @@ func execStart() error {
 		return err
 	}
 
-	db, err := setupDB(conf.dbPath)
+	db, err := gzdb.SetupDB(conf.dbPath)
 	if err != nil {
 		return err
 	}
@@ -114,8 +134,8 @@ func execStart() error {
 		Logger:     logger,
 		GetUser:    getUserFromClerk,
 		CreateUser: createClerkUser,
-		DBTx:       db.Tx,
 		Chain:      chain,
+		DB:         db,
 		MailClient: mailClient,
 	}
 
@@ -137,7 +157,7 @@ func execStart() error {
 	)
 }
 
-func getUserFromClerk(ctx context.Context) *ZenaoUser {
+func getUserFromClerk(ctx context.Context) *zeni.User {
 	iUser := authn.GetInfo(ctx)
 	if iUser == nil {
 		return nil
@@ -147,17 +167,17 @@ func getUserFromClerk(ctx context.Context) *ZenaoUser {
 	if len(clerkUser.EmailAddresses) != 0 {
 		email = clerkUser.EmailAddresses[0].EmailAddress
 	}
-	return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+	return &zeni.User{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 }
 
-func createClerkUser(ctx context.Context, email string) (*ZenaoUser, error) {
+func createClerkUser(ctx context.Context, email string) (*zeni.User, error) {
 	existing, err := user.List(ctx, &user.ListParams{EmailAddressQuery: &email})
 	if err != nil {
 		return nil, err
 	}
 	if len(existing.Users) != 0 {
 		clerkUser := existing.Users[0]
-		return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
+		return &zeni.User{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 	}
 
 	passwordBz := make([]byte, 32)
@@ -173,7 +193,7 @@ func createClerkUser(ctx context.Context, email string) (*ZenaoUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ZenaoUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
+	return &zeni.User{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {

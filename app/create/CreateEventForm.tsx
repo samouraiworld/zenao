@@ -5,9 +5,11 @@ import { useForm } from "react-hook-form";
 import { useClerk } from "@clerk/nextjs";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { zenaoClient } from "@/app/zenao-client";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/EventForm";
+import { useToast } from "@/app/hooks/use-toast";
 
 export const CreateEventForm: React.FC = () => {
   const { client } = useClerk();
@@ -19,10 +21,13 @@ export const CreateEventForm: React.FC = () => {
       imageUri: "",
       description: "",
       title: "",
-      capacity: 0,
+      capacity: 1,
       location: "",
     },
   });
+  const { toast } = useToast();
+  const t = useTranslations("eventForm");
+
   const [isLoaded, setIsLoaded] = React.useState<boolean>(false);
 
   const onSubmit = async (values: EventFormSchemaType) => {
@@ -35,12 +40,19 @@ export const CreateEventForm: React.FC = () => {
       const { id } = await zenaoClient.createEvent(values, {
         headers: { Authorization: "Bearer " + token },
       });
-      setIsLoaded(false);
       form.reset();
+      toast({
+        title: t("toast-creation-success"),
+      });
       router.push(`/event/${id}`);
     } catch (err) {
+      toast({
+        variant: "destructive",
+        title: t("toast-creation-error"),
+      });
       console.error("error", err);
     }
+    setIsLoaded(false);
   };
 
   return <EventForm form={form} onSubmit={onSubmit} isLoaded={isLoaded} />;

@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
+	"github.com/samouraiworld/zenao/backend/gzdb"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
@@ -53,27 +53,27 @@ func execSyncChain() error {
 		return err
 	}
 
-	db, err := setupDB(syncChainConf.dbPath)
+	db, err := gzdb.SetupDB(syncChainConf.dbPath)
 	if err != nil {
 		return err
 	}
 
-	users := []*User{}
-	if err := db.db.Find(&users).Error; err != nil {
+	users, err := db.GetAllUsers()
+	if err != nil {
 		return err
 	}
 	for _, user := range users {
-		if err := chain.CreateUser(fmt.Sprintf("%d", user.ID)); err != nil {
-			logger.Error("failed to create user", zap.Uint("user-id", user.ID), zap.Error(err))
+		if err := chain.CreateUser(user.ID); err != nil {
+			logger.Error("failed to create user", zap.String("user-id", user.ID), zap.Error(err))
 		}
 	}
 
-	events := []*Event{}
-	if err := db.db.Find(&events).Error; err != nil {
+	events, err := db.GetAllEvents()
+	if err != nil {
 		return err
 	}
 	for _, event := range events {
-		if err := chain.CreateEvent(fmt.Sprintf("%d", event.ID), fmt.Sprintf("%d", event.CreatorID), &zenaov1.CreateEventRequest{
+		if err := chain.CreateEvent(event.ID, event.CreatorID, &zenaov1.CreateEventRequest{
 			Title:       event.Title,
 			Description: event.Description,
 			ImageUri:    event.ImageURI,
@@ -83,17 +83,19 @@ func execSyncChain() error {
 			Capacity:    event.Capacity,
 			Location:    event.Location,
 		}); err != nil {
-			logger.Error("failed to create event", zap.Uint("event-id", event.ID), zap.Error(err))
+			logger.Error("failed to create event", zap.String("event-id", event.ID), zap.Error(err))
+			continue
 		}
-	}
 
-	tickets := []*SoldTicket{}
-	if err := db.db.Find(&tickets).Error; err != nil {
-		return err
-	}
-	for _, ticket := range tickets {
-		if err := chain.Participate(fmt.Sprintf("%d", ticket.EventID), ticket.UserID); err != nil {
-			logger.Error("failed to add participation", zap.Uint("event-id", ticket.EventID), zap.String("user-id", ticket.UserID), zap.Error(err))
+		participants, err := db.GetAllParticipants(event.ID)
+		if err != nil {
+			logger.Error("failed to get participants of event", zap.String("event-id", event.ID), zap.Error(err))
+			continue
+		}
+		for _, p := range participants {
+			if err := chain.Participate(event.ID, p.ID); err != nil {
+				logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
+			}
 		}
 	}
 

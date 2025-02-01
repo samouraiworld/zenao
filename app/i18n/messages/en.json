@@ -24,11 +24,20 @@
     "edit-event-button": "Edit event",
     "image-uri-placeholder": "Image URL...",
     "title-placeholder": "Event name...",
+    "description-label": "Description",
+    "write-tab": "Write",
+    "preview-tab": "Preview",
     "description-placeholder": "Description...",
     "location-placeholder": "Location...",
+    "capacity-label": "Event capacity limit",
     "capacity-placeholder": "Capacity...",
     "start-date-placeholder": "Choose your start date/time...",
-    "end-date-placeholder": "Choose your end date/time..."
+    "end-date-placeholder": "Choose your end date/time...",
+    "not-organizer-message": "You can't edit this event because you are not one of the organizer.",
+    "toast-creation-success": "Event created!",
+    "toast-creation-error": "Error on creating event!",
+    "toast-edit-success": "Event edited!",
+    "toast-edit-error": "Error on editing event!"
   },
   "event": {
     "is-organisator-role": "You have organisator role for this event",
@@ -60,6 +69,14 @@
     "p6-end": "to enforce a new CoopNation.",
     "p6-ref": "(*Decentralized Autonomous Organizations)",
     "p7": "In case of emergency, keep zen, and organize."
+  },
+  "error": {
+    "label": "Oups! An error has occured.",
+    "retry-button": "Retry"
+  },
+  "not-found": {
+    "label": "Page not found.",
+    "button": "Return Home"
   },
   "components": {
     "modals": {
