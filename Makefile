@@ -53,6 +53,7 @@ lint-fix:
 update-schema:
 	atlas schema inspect --env gorm --url "env://src" > schema.hcl
 
+# TODO: use normal atlas binary when https://github.com/ariga/atlas/pull/3112 is merged
 .PHONY: install-atlas
 install-atlas:
 	rm -fr atlas
