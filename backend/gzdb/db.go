@@ -14,6 +14,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type User struct {
+	gorm.Model         // this ID should be used for any database related logic (like querying)
+	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
+	DisplayName string
+	Bio         string
+	AvatarURI   string
+}
+
 type Event struct {
 	gorm.Model
 	Title       string
@@ -25,7 +33,18 @@ type Event struct {
 	Capacity    uint32
 	Location    string
 	CreatorID   uint
-	Creator     User `gorm:"foreignKey:CreatorID"`
+	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
+}
+
+type UserRole struct {
+	// gorm.Model without ID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	UserID  uint   `gorm:"primaryKey;autoIncrement:false"`
+	EventID uint   `gorm:"primaryKey;autoIncrement:false"`
+	Role    string `gorm:"primaryKey"`
 }
 
 type SoldTicket struct {
@@ -33,14 +52,6 @@ type SoldTicket struct {
 	EventID uint
 	UserID  string // XXX: should be uint
 	Price   float64
-}
-
-type User struct {
-	gorm.Model         // this ID should be used for any database related logic (like querying)
-	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
-	DisplayName string
-	Bio         string
-	AvatarURI   string
 }
 
 func SetupDB(dsn string) (zeni.DB, error) {
@@ -95,6 +106,17 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 	if err := g.db.Create(evt).Error; err != nil {
 		return nil, err
 	}
+
+	userRole := &UserRole{
+		UserID:  uint(creatorIDInt),
+		EventID: evt.ID,
+		Role:    "organizer",
+	}
+
+	if err := g.db.Create(userRole).Error; err != nil {
+		return nil, err
+	}
+
 	return dbEventToZeniEvent(evt), nil
 }
 
@@ -184,6 +206,27 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 		return err
 	}
 
+	if err := g.db.Model(&UserRole{}).Where("event_id = ? AND user_id = ? and role = ?", evt.ID, userID, "participant").Count(&count).Error; err != nil {
+		return err
+	}
+	if count != 0 {
+		return errors.New("user is already participant for this event")
+	}
+
+	userIDint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+	participant := &UserRole{
+		UserID:  uint(userIDint),
+		EventID: evt.ID,
+		Role:    "participant",
+	}
+
+	if err := g.db.Create(participant).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -247,6 +290,19 @@ func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.DBUser, error)
 	res := make([]*zeni.DBUser, 0, len(tickets))
 	for _, e := range tickets {
 		res = append(res, &zeni.DBUser{ID: e.UserID})
+	}
+	return res, nil
+}
+
+// UserRoles implements zeni.DB.
+func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error) {
+	var roles []UserRole
+	if err := g.db.Find(&roles, "user_id = ? AND event_id = ?", userID, eventID).Error; err != nil {
+		return nil, err
+	}
+	res := make([]string, 0, len(roles))
+	for _, role := range roles {
+		res = append(res, role.Role)
 	}
 	return res, nil
 }

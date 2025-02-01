@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -36,18 +37,13 @@ func (s *ZenaoServer) EditEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	var event *zeni.Event
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		var err error
-		event, err = db.GetEvent(req.Msg.EventId)
+		roles, err := db.UserRoles(userID, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
-
-		// TODO: we should keep track of the roles in database
-		// for now, only the creator can edit the event but all organizers should be able to
-		if event.CreatorID != userID {
-			return errors.New("user is not the creator of the event")
+		if !slices.Contains(roles, "organizer") {
+			return errors.New("user is not organizer of the event")
 		}
 
 		if err := db.EditEvent(req.Msg.EventId, req.Msg); err != nil {

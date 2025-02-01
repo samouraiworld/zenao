@@ -38,6 +38,7 @@ type DB interface {
 	UserExists(authID string) (string, error)
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	UserRoles(userID string, eventID string) ([]string, error)
 	GetAllUsers() ([]*DBUser, error)
 
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
