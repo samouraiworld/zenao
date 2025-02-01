@@ -57,8 +57,8 @@ update-schema:
 .PHONY: install-atlas
 install-atlas:
 	rm -fr atlas
-	git clone git@github.com:ariga/atlas.git
-	cd atlas && git remote add delkopiso git@github.com:delkopiso/atlas.git
+	git clone https://github.com/ariga/atlas.git
+	cd atlas && git remote add delkopiso https://github.com/delkopiso/atlas.git
 	cd atlas && git fetch delkopiso libsql-support
 	cd atlas && git checkout c261f318ac25924555e63fdf005cc53de43fa5db
 	cd atlas/cmd/atlas && go install .
