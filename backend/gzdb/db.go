@@ -255,19 +255,6 @@ func (g *gormZenaoDB) UserExists(authID string) (string, error) {
 	return fmt.Sprintf("%d", user.ID), nil
 }
 
-// UserRoles implements ZenaoDB.
-func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error) {
-	var roles []UserRole
-	if err := g.db.Find(&roles, "user_id = ? AND event_id = ?", userID, eventID).Error; err != nil {
-		return nil, err
-	}
-	res := make([]string, 0, len(roles))
-	for _, role := range roles {
-		res = append(res, role.Role)
-	}
-	return res, nil
-}
-
 // GetAllUsers implements zeni.DB.
 func (g *gormZenaoDB) GetAllUsers() ([]*zeni.DBUser, error) {
 	var users []*User
@@ -303,6 +290,19 @@ func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.DBUser, error)
 	res := make([]*zeni.DBUser, 0, len(tickets))
 	for _, e := range tickets {
 		res = append(res, &zeni.DBUser{ID: e.UserID})
+	}
+	return res, nil
+}
+
+// UserRoles implements zeni.DB.
+func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error) {
+	var roles []UserRole
+	if err := g.db.Find(&roles, "user_id = ? AND event_id = ?", userID, eventID).Error; err != nil {
+		return nil, err
+	}
+	res := make([]string, 0, len(roles))
+	for _, role := range roles {
+		res = append(res, role.Role)
 	}
 	return res, nil
 }
