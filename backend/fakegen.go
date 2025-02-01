@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
+	"github.com/samouraiworld/zenao/backend/gzdb"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
@@ -65,7 +65,7 @@ func execFakegen() error {
 		return err
 	}
 
-	db, err := setupDB(fakegenConf.dbPath)
+	db, err := gzdb.SetupDB(fakegenConf.dbPath)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func execFakegen() error {
 			return err
 		}
 
-		if err := chain.CreateEvent(fmt.Sprintf("%d", evt.ID), creatorID, req); err != nil {
+		if err := chain.CreateEvent(evt.ID, creatorID, req); err != nil {
 			return err
 		}
 	}

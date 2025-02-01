@@ -16,6 +16,7 @@ import (
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -227,7 +228,7 @@ func (g *gnoZenaoChain) userRealmPkgPath(userID string) string {
 	return fmt.Sprintf("gno.land/r/%s/users/u%s", g.namespace, userID)
 }
 
-var _ ZenaoChain = (*gnoZenaoChain)(nil)
+var _ zeni.Chain = (*gnoZenaoChain)(nil)
 
 func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr error) (*ctypes.ResultBroadcastTxCommit, error) {
 	if baseErr != nil {
