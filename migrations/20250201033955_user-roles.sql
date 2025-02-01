@@ -3,6 +3,6 @@ CREATE TABLE `user_roles` (`created_at` datetime NULL, `updated_at` datetime NUL
 -- Create index "idx_user_roles_deleted_at" to table: "user_roles"
 CREATE INDEX `idx_user_roles_deleted_at` ON `user_roles` (`deleted_at`);
 -- Copy existing organizers
-INSERT INTO `user_roles` (`created_at`, `updated_at`, `deleted_at`, `user_id`, `event_id`, `role`) SELECT `created_at`, `updated_at`, `deleted_at`, `creator_id`, `id`, 'organizer' FROM `events`;
+INSERT INTO `user_roles` (`created_at`, `user_id`, `event_id`, `role`) SELECT `created_at`, `creator_id`, `id`, 'organizer' FROM `events`;
 -- Copy existing participants
-INSERT INTO `user_roles` (`created_at`, `updated_at`, `deleted_at`, `user_id`, `event_id`, `role`) SELECT `created_at`, `updated_at`, `deleted_at`, `user_id`, `event_id`, 'participant' FROM `sold_tickets`;
+INSERT INTO `user_roles` (`created_at`, `user_id`, `event_id`, `role`) SELECT `created_at`, `user_id`, `event_id`, 'participant' FROM `sold_tickets`;
