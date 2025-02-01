@@ -17,6 +17,16 @@ jobs:
         with:
           go-version: "1.23"
 
+      - name: Get go binaries path
+        id: go-bin-path
+        run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
+
+      - name: Cache atlas
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.go-bin-path.outputs.PATH }}
+          restore-keys: ${{ runner.os }}-atlas-bin-c261f318ac25924555e63fdf005cc53de43fa5db
+
       - name: Install atlas
         run: make install-atlas
 
