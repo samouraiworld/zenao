@@ -49,19 +49,6 @@ clean-gno:
 lint-fix:
 	npx next lint --fix
 
-.PHONY: create-migration
-create-migration:
-	atlas migrate diff TODO \
-		--dir "file://migrations" \
-		--to "file://schema.hcl" \
-		--dev-url "sqlite://file?mode=memory"
-
-.PHONY: migrate-dev
-migrate-dev:
-	atlas migrate apply \
-		--dir "file://migrations" \
-		--url "sqlite://dev.db"
-
 .PHONY: update-schema
 update-schema:
 	atlas schema inspect --env gorm --url "env://src" > schema.hcl
