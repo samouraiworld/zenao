@@ -58,11 +58,15 @@ make generate
 
 ## Update database schema
 
-As a prerequisite, you need to install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
+### Prerequisite
+
+Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
 
 ```bash
 make install-atlas
 ```
+
+### Migration flow
 
 First, edit the gorm models in `./backend/gzdb`.
 New models must embbed `gorm.Model` or use a gorm annotation for at least one field.
