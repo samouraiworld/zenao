@@ -84,6 +84,7 @@ Finally you can migrate a db, replace `$ENV` by one of `dev`, `staging` or `prod
 ```bash
 atlas migrate apply --dir "file://migrations" --env $ENV
 ```
+For `staging` and `prod` envs, you need to pass the turso token via the `TURSO_TOKEN` env var.
 
 ## Learn More
 
