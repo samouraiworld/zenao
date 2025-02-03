@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, useSession } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useClerk } from "@clerk/nextjs";
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -31,7 +31,7 @@ export function ParticipateForm({
   eventId: string;
   onSuccess?: () => void;
 }) {
-  const { session } = useSession();
+  const { session } = useClerk();
   const t = useTranslations("event");
   const [isLoaded, setIsLoaded] = useState(false);
   const form = useForm<ParticipateFormSchemaType>({
