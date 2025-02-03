@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useClerk } from "@clerk/nextjs";
+import { useSession } from "@clerk/nextjs";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions, eventUserRoles } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
@@ -21,7 +21,7 @@ export function EditEventForm({
   id: string;
   authToken: string | null;
 }) {
-  const { session } = useClerk();
+  const { session } = useSession();
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
   const isOrganizer = roles.includes("organizer");
