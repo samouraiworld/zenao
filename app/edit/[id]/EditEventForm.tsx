@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useSession } from "@clerk/nextjs";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions, eventUserRoles } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
@@ -20,6 +21,7 @@ export function EditEventForm({
   id: string;
   authToken: string | null;
 }) {
+  const { session } = useSession();
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
   const isOrganizer = roles.includes("organizer");
@@ -38,13 +40,14 @@ export function EditEventForm({
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
-      if (!authToken) {
+      const token = await session?.getToken();
+      if (!token) {
         throw new Error("invalid clerk authToken");
       }
       await zenaoClient.editEvent(
         { ...values, eventId: id },
         {
-          headers: { Authorization: "Bearer " + authToken },
+          headers: { Authorization: "Bearer " + token },
         },
       );
       form.reset();
