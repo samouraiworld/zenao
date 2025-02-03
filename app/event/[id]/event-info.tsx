@@ -100,11 +100,11 @@ export function EventInfo({
           <Card className="flex flex-row items-center">
             <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
             <div className="w-2/5 flex justify-end">
-              <Button variant="outline">
-                <Link href={`/edit/${id}`}>
+              <Link href={`/edit/${id}`}>
+                <Button variant="outline">
                   <SmallText>{t("edit-button")}</SmallText>
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </div>
           </Card>
         )}
