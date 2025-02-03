@@ -40,7 +40,7 @@
     "toast-edit-error": "Error on editing event!"
   },
   "event": {
-    "is-organisator-role": "You have organisator role for this event",
+    "is-organisator-role": "You have organisator role for this event.",
     "edit-button": "Edit",
     "going": "{count} going",
     "hosted-by": "Hosted by:",

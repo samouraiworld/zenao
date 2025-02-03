@@ -9,11 +9,7 @@ import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { ParticipateForm } from "./ParticipateForm";
-import {
-  eventOptions,
-  eventUserOrganizer,
-  eventUserParticipate,
-} from "@/lib/queries/event";
+import { eventOptions, eventUserRoles } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Separator } from "@/components/common/Separator";
 import { Text } from "@/components/texts/DefaultText";
@@ -46,20 +42,17 @@ export function EventInfo({
   authToken: string | null;
 }) {
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: isParticipate } = useSuspenseQuery(
-    eventUserParticipate(authToken, id),
-  );
-  const { data: isOrganizer } = useSuspenseQuery(
-    eventUserOrganizer(authToken, id),
-  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
+  const isOrganizer = roles && roles.includes("organizer");
+  const isParticipate = roles && roles.includes("participant");
   const queryClient = useQueryClient();
 
   const t = useTranslations("event");
 
   const handleParticipateSuccess = useCallback(async () => {
-    const opts = eventUserParticipate(authToken, id);
+    const opts = eventUserRoles(authToken, id);
     await queryClient.cancelQueries(opts);
-    queryClient.setQueryData(opts.queryKey, true);
+    queryClient.setQueryData(opts.queryKey, ["participant"]);
   }, [queryClient, authToken, id]);
 
   const jsonLd: WithContext<Event> = {
