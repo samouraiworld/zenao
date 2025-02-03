@@ -6,7 +6,7 @@ import { EventInfo } from "./event-info";
 import {
   eventInfoSchema,
   eventOptions,
-  eventUserParticipate,
+  eventUserRoles,
   extractGnoJSONResponse,
 } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -43,7 +43,7 @@ export default async function EventPage({ params }: Props) {
   const authToken = await getToken();
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(eventOptions(p.id));
-  void queryClient.prefetchQuery(eventUserParticipate(authToken, p.id));
+  void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
 
   return (
     <ScreenContainer>
