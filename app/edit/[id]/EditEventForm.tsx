@@ -22,7 +22,7 @@ export function EditEventForm({
 }) {
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
-  const isOrganizer = roles && roles.includes("organizer");
+  const isOrganizer = roles.includes("organizer");
   const router = useRouter();
 
   const form = useForm<EventFormSchemaType>({

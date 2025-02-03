@@ -39,10 +39,10 @@ export const eventUserRoles = (authToken: string | null, id: string) =>
     queryKey: ["eventUserRoles", authToken, id],
     queryFn: async () => {
       if (!authToken) {
-        return false;
+        return [];
       }
       if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
-        return false;
+        return [];
       }
       const { address } = await zenaoClient.getUserAddress(
         {},

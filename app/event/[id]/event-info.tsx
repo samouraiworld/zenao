@@ -43,8 +43,8 @@ export function EventInfo({
 }) {
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
-  const isOrganizer = roles && roles.includes("organizer");
-  const isParticipate = roles && roles.includes("participant");
+  const isOrganizer = roles.includes("organizer");
+  const isParticipate = roles.includes("participant");
   const queryClient = useQueryClient();
 
   const t = useTranslations("event");
@@ -52,7 +52,15 @@ export function EventInfo({
   const handleParticipateSuccess = useCallback(async () => {
     const opts = eventUserRoles(authToken, id);
     await queryClient.cancelQueries(opts);
-    queryClient.setQueryData(opts.queryKey, ["participant"]);
+    queryClient.setQueryData(opts.queryKey, (roles) => {
+      if (!roles) {
+        return ["participant" as const];
+      }
+      if (!roles.includes("participant")) {
+        return [...roles, "participant" as const];
+      }
+      return roles;
+    });
   }, [queryClient, authToken, id]);
 
   const jsonLd: WithContext<Event> = {
