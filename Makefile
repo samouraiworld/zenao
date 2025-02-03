@@ -48,3 +48,18 @@ clean-gno:
 .PHONY: lint-fix
 lint-fix:
 	npx next lint --fix
+
+.PHONY: update-schema
+update-schema:
+	atlas schema inspect --env gorm --url "env://src" > schema.hcl
+
+# TODO: use normal atlas binary when https://github.com/ariga/atlas/pull/3112 is merged
+.PHONY: install-atlas
+install-atlas:
+	rm -fr atlas
+	git clone https://github.com/ariga/atlas.git
+	cd atlas && git remote add delkopiso https://github.com/delkopiso/atlas.git
+	cd atlas && git fetch delkopiso libsql-support
+	cd atlas && git checkout c261f318ac25924555e63fdf005cc53de43fa5db
+	cd atlas/cmd/atlas && go install .
+	rm -fr atlas

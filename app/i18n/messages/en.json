@@ -70,6 +70,14 @@
     "p6-ref": "(*Decentralized Autonomous Organizations)",
     "p7": "In case of emergency, keep zen, and organize."
   },
+  "error": {
+    "label": "Oups! An error has occured.",
+    "retry-button": "Retry"
+  },
+  "not-found": {
+    "label": "Page not found.",
+    "button": "Return Home"
+  },
   "components": {
     "modals": {
       "signed-out-modal": {
