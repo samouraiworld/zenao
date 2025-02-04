@@ -38,12 +38,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html
-      suppressHydrationWarning
-      lang={locale}
-      style={{ colorScheme: "dark" }}
-      className="dark-theme"
-    >
+    <html suppressHydrationWarning lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -51,7 +46,7 @@ export default async function RootLayout({
           <QueryProviders>
             <ThemeProvider
               attribute="class"
-              defaultTheme="dark-theme"
+              defaultTheme="system"
               enableSystem
               disableTransitionOnChange
             >
