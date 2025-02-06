@@ -11,7 +11,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/shadcn/form";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwind";
 import { Calendar } from "@/components/shadcn/calendar";
 import { ScrollArea, ScrollBar } from "@/components/shadcn/scroll-area";
 import {

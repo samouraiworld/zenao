@@ -11,7 +11,7 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.config({
-    ignorePatterns: ["app/api/*"],
+    ignorePatterns: ["app/gen/*"],
     extends: [
       "next/core-web-vitals",
       "next/typescript",
