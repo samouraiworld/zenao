@@ -10,7 +10,7 @@ generate:
 
 .PHONY: start.gnodev
 start.gnodev:
-	gnodev --add-account g1m0lplhma8z4uruds4zcltmlgwlht7w739e6qlp=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
+	gnodev --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
 
 .PHONY: clone-gno
 clone-gno:
@@ -52,6 +52,10 @@ lint-fix:
 .PHONY: update-schema
 update-schema:
 	atlas schema inspect --env gorm --url "env://src" > schema.hcl
+
+.PHONY: migrate-local
+migrate-local:
+	atlas migrate apply --dir "file://migrations" --env dev
 
 # TODO: use normal atlas binary when https://github.com/ariga/atlas/pull/3112 is merged
 .PHONY: install-atlas

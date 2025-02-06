@@ -1,4 +1,4 @@
-package dao_realm
+package dao_demo
 
 import (
 	"gno.land/p/zenao/dao_roles_based"
