@@ -14,6 +14,7 @@ var (
 
 func TestNewUser(t *testing.T) {
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/users/u1"))
 	user := NewUser()
 	if user.org.MemberModule.GetMembers()[0] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), user.org.MemberModule.GetMembers()[0])
@@ -25,6 +26,7 @@ func TestNewUser(t *testing.T) {
 
 func TestTransferOwnership(t *testing.T) {
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/users/u1"))
 	user := NewUser()
 	std.TestSetOrigCaller(bob)
 	defer func() {

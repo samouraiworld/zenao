@@ -24,7 +24,7 @@ export const eventOptions = (id: string) =>
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/events/e${id}`,
-        `event.GetInfoJSON()`,
+        `Event.GetInfoJSON()`,
       );
       const event = extractGnoJSONResponse(res);
       return eventInfoSchema.parse(event);
@@ -53,7 +53,7 @@ export const eventUserRoles = (authToken: string | null, id: string) =>
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/events/e${id}`,
-        `event.GetUserRolesJSON("${address}")`,
+        `Event.GetUserRolesJSON(${JSON.stringify(address)})`,
       );
       const event = extractGnoJSONResponse(res);
       return eventGetUserRolesSchema.parse(event);

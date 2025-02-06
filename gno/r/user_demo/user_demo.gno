@@ -1,4 +1,4 @@
-package user_realm
+package user_demo
 
 import (
 	"std"

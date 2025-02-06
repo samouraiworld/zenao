@@ -1,4 +1,4 @@
-package dao_realm
+package dao_demo
 
 import "testing"
 
