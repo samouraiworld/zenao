@@ -16,8 +16,9 @@ import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
 import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { Form } from "@/components/shadcn/form";
-import { ipfsURIToWeb2URL, isValidURL, web2URLToIpfsURI } from "@/lib/utils";
+import { isValidURL } from "@/lib/utils";
 import { useToast } from "@/app/hooks/use-toast";
+import { web2URL, uploadResponseSchema } from "@/lib/pinata";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -57,8 +58,9 @@ export const EventForm: React.FC<EventFormProps> = ({
         method: "POST",
         body: data,
       });
-      const signedUrl = await uploadRequest.json();
-      form.setValue("imageUri", web2URLToIpfsURI(signedUrl));
+      const resRaw = await uploadRequest.json();
+      const res = uploadResponseSchema.parse(resRaw);
+      form.setValue("imageUri", res.uri);
       setUploading(false);
     } catch (e) {
       console.error(e);
@@ -82,11 +84,12 @@ export const EventForm: React.FC<EventFormProps> = ({
       >
         <div className="flex flex-col sm:flex-row w-full gap-10">
           <div className="flex flex-col gap-4 w-full sm:w-2/5">
-            {/* I'm obligate to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead)  */}
-            {isValidURL(ipfsURIToWeb2URL(imageUri), urlPattern) &&
+            {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
+            {/* TODO: find a better way */}
+            {isValidURL(web2URL(imageUri), urlPattern) &&
             !form.formState.errors.imageUri?.message ? (
               <Image
-                src={ipfsURIToWeb2URL(imageUri)}
+                src={web2URL(imageUri)}
                 width={330}
                 height={330}
                 alt="imageUri"

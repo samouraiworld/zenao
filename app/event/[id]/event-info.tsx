@@ -17,7 +17,7 @@ import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
-import { ipfsURIToWeb2URL } from "@/lib/utils";
+import { web2URL } from "@/lib/pinata";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 
 interface EventSectionProps {
@@ -91,7 +91,7 @@ export function EventInfo({
 
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
-          src={ipfsURIToWeb2URL(data.imageUri)}
+          src={web2URL(data.imageUri)}
           width={330}
           height={330}
           alt="Event"
