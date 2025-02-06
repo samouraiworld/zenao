@@ -86,7 +86,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           <div className="flex flex-col gap-4 w-full sm:w-2/5">
             {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
             {/* TODO: find a better way */}
-            {isValidURL(web2URL(imageUri), urlPattern) &&
+            {isValidURL(imageUri, urlPattern) &&
             !form.formState.errors.imageUri?.message ? (
               <Image
                 src={web2URL(imageUri)}
