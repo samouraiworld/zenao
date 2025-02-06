@@ -90,7 +90,7 @@ func validateEvent(startDate, endDate uint64, title, description, location, imag
 		return errors.New("event description must be of length 10 to 10000")
 	}
 	if len(location) < 2 || len(location) > 400 {
-		return errors.New("title must be of length 2 to 400")
+		return errors.New("location must be of length 2 to 400")
 	}
 	if len(imageURI) == 0 || len(imageURI) > 400 {
 		return errors.New("image uri must be of length 1 to 400")
