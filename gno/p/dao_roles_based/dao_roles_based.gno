@@ -34,7 +34,10 @@ func NewDaoRolesBasedJSON(name, description string, roles []string, members [][]
 
 	pkgPath := std.CurrentRealm().PkgPath()
 	firstSlashIdx := strings.Index(pkgPath, "/")
-	realmName := pkgPath[firstSlashIdx:]
+	realmName := ""
+	if firstSlashIdx != -1 {
+		realmName = pkgPath[firstSlashIdx:]
+	}
 
 	dao := &DaoRolesBased{
 		Name:             name,
