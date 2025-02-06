@@ -18,6 +18,7 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { Button } from "@/components/shadcn/button";
+import { ipfsURIToWeb2URL } from "@/lib/utils";
 
 interface EventSectionProps {
   title: string;
@@ -89,7 +90,7 @@ export function EventInfo({
 
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
-          src={data.imageUri}
+          src={ipfsURIToWeb2URL(data.imageUri)}
           width={330}
           height={330}
           alt="Event"

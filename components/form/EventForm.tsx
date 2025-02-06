@@ -16,7 +16,7 @@ import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
 import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { Form } from "@/components/shadcn/form";
-import { isValidURL } from "@/lib/utils";
+import { ipfsURIToWeb2URL, isValidURL, web2URLToIpfsURI } from "@/lib/utils";
 import { useToast } from "@/app/hooks/use-toast";
 
 interface EventFormProps {
@@ -58,7 +58,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         body: data,
       });
       const signedUrl = await uploadRequest.json();
-      form.setValue("imageUri", signedUrl);
+      form.setValue("imageUri", web2URLToIpfsURI(signedUrl));
       setUploading(false);
     } catch (e) {
       console.error(e);
@@ -83,10 +83,10 @@ export const EventForm: React.FC<EventFormProps> = ({
         <div className="flex flex-col sm:flex-row w-full gap-10">
           <div className="flex flex-col gap-4 w-full sm:w-2/5">
             {/* I'm obligate to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead)  */}
-            {isValidURL(imageUri, urlPattern) &&
+            {isValidURL(ipfsURIToWeb2URL(imageUri), urlPattern) &&
             !form.formState.errors.imageUri?.message ? (
               <Image
-                src={imageUri}
+                src={ipfsURIToWeb2URL(imageUri)}
                 width={330}
                 height={330}
                 alt="imageUri"
