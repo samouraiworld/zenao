@@ -17,8 +17,8 @@ import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
-import { Button } from "@/components/shadcn/button";
 import { ipfsURIToWeb2URL } from "@/lib/utils";
+import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 
 interface EventSectionProps {
   title: string;
@@ -49,6 +49,7 @@ export function EventInfo({
   const queryClient = useQueryClient();
 
   const t = useTranslations("event");
+  const [loading, setLoading] = React.useState<boolean>(false);
 
   const handleParticipateSuccess = useCallback(async () => {
     const opts = eventUserRoles(authToken, id);
@@ -102,9 +103,11 @@ export function EventInfo({
             <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
             <div className="w-2/5 flex justify-end">
               <Link href={`/edit/${id}`}>
-                <Button variant="outline">
-                  <SmallText>{t("edit-button")}</SmallText>
-                </Button>
+                <ButtonWithLabel
+                  label={t("edit-button")}
+                  onClick={() => setLoading(true)}
+                  loading={loading}
+                />
               </Link>
             </div>
           </Card>

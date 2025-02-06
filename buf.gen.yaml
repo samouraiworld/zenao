@@ -7,10 +7,10 @@ plugins:
     # Add more plugin options here
     opt: target=ts
 
-  - local: protoc-gen-go
+  - local: [go, run, -modfile, go.mod, google.golang.org/protobuf/cmd/protoc-gen-go]
     out: backend
     opt: paths=source_relative
     
-  - local: protoc-gen-connect-go
+  - local: [go, run, -modfile, go.mod, connectrpc.com/connect/cmd/protoc-gen-connect-go]
     out: backend
     opt: paths=source_relative
