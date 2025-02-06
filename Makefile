@@ -3,9 +3,6 @@ CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 .PHONY: generate
 generate:
 	npm i
-	go install -modfile go.mod github.com/fullstorydev/grpcurl/cmd/grpcurl
-	go install -modfile go.mod google.golang.org/protobuf/cmd/protoc-gen-go
-	go install -modfile go.mod connectrpc.com/connect/cmd/protoc-gen-connect-go
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
 
 .PHONY: start.gnodev
