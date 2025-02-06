@@ -1,9 +1,9 @@
-import { HydrationBoundary } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
 import { EditEventForm } from "./EditEventForm";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { getQueryClient } from "@/lib/get-query-client";
-import { eventOptions, eventUserOrganizer } from "@/lib/queries/event";
+import { eventOptions, eventUserRoles } from "@/lib/queries/event";
 
 export default async function EditPage({
   params,
@@ -15,11 +15,11 @@ export default async function EditPage({
   const authToken = await getToken();
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(eventOptions(p.id));
-  void queryClient.prefetchQuery(eventUserOrganizer(authToken, p.id));
+  void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
 
   return (
     <ScreenContainer>
-      <HydrationBoundary>
+      <HydrationBoundary state={dehydrate(queryClient)}>
         <EditEventForm id={p.id} authToken={authToken} />
       </HydrationBoundary>
     </ScreenContainer>

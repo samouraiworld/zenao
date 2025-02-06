@@ -43,4 +43,4 @@ COPY gno /gno
 ENV HOME=/app
 WORKDIR $HOME
 
-ENTRYPOINT ["/bin/gnodev", "--node-rpc-listener", "0.0.0.0:26657", "--web-listener", "0.0.0.0:8888", "--chain-id", "zenao-dev", "--server-mode", "--add-account", "g1m0lplhma8z4uruds4zcltmlgwlht7w739e6qlp=100000000000ugnot", "/gno"]
+ENTRYPOINT ["/bin/gnodev", "--node-rpc-listener", "0.0.0.0:26657", "--web-listener", "0.0.0.0:8888", "--chain-id", "zenao-dev", "--server-mode", "--add-account", "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot", "/gno"]

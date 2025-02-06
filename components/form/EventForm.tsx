@@ -126,7 +126,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             <ButtonWithLabel
               loading={isLoaded}
               label={
-                isEditing ? t("participate-button") : t("create-event-button")
+                isEditing ? t("edit-event-button") : t("create-event-button")
               }
               type="submit"
             />

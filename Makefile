@@ -3,14 +3,11 @@ CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 .PHONY: generate
 generate:
 	npm i
-	go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
-	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-	go install connectrpc.com/connect/cmd/protoc-gen-connect-go@latest
-	buf generate
+	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
 
 .PHONY: start.gnodev
 start.gnodev:
-	gnodev --add-account g1m0lplhma8z4uruds4zcltmlgwlht7w739e6qlp=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
+	gnodev --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
 
 .PHONY: clone-gno
 clone-gno:
@@ -48,3 +45,22 @@ clean-gno:
 .PHONY: lint-fix
 lint-fix:
 	npx next lint --fix
+
+.PHONY: update-schema
+update-schema:
+	atlas schema inspect --env gorm --url "env://src" > schema.hcl
+
+.PHONY: migrate-local
+migrate-local:
+	atlas migrate apply --dir "file://migrations" --env dev
+
+# TODO: use normal atlas binary when https://github.com/ariga/atlas/pull/3112 is merged
+.PHONY: install-atlas
+install-atlas:
+	rm -fr atlas
+	git clone https://github.com/ariga/atlas.git
+	cd atlas && git remote add delkopiso https://github.com/delkopiso/atlas.git
+	cd atlas && git fetch delkopiso libsql-support
+	cd atlas && git checkout c261f318ac25924555e63fdf005cc53de43fa5db
+	cd atlas/cmd/atlas && go install .
+	rm -fr atlas

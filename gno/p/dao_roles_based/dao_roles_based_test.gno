@@ -60,6 +60,7 @@ func TestNewDaoRolesBasedJSON(t *testing.T) {
 	resourcesJSON := `[{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	handlers := []MessageHandler{}
 
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, handlers)
 	roles = dao.MemberModule.GetRoles()
 	if len(roles) != 1 {
@@ -97,6 +98,7 @@ func TestProposeJSON(t *testing.T) {
 
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
 	validProposalJSON := `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"MockExecutableMessage","payload":{}}}`
@@ -206,6 +208,7 @@ func TestVote(t *testing.T) {
 
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"20"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 	proposalJSON := `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"MockExecutableMessage","payload":{}}}`
 	std.TestSetOrigCaller(alice)
@@ -321,6 +324,7 @@ func TestExecuteProposal(t *testing.T) {
 
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"20"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 	proposalJSON := `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"MockExecutableMessage","payload":{}}}`
 	std.TestSetOrigCaller(alice)
@@ -430,6 +434,7 @@ func TestInstantExecute(t *testing.T) {
 
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"20"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
 	proposalJSON := `{"title":"My Proposal","description":"My Proposal Description","message":{"type":"MockExecutableMessage","payload":{}}}`
@@ -510,6 +515,7 @@ func TestGetMembers(t *testing.T) {
 
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
 	expectedMembers := []string{alice.String(), bob.String(), carol.String()}
@@ -538,6 +544,7 @@ func TestAddMemberProposal(t *testing.T) {
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
 
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
 	proposalJSON := `{"title":"Add Member Proposal","description":"Add Member Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddNewMember","payload":{"address":"` + bob.String() + `","roles":["admin"]}}}`
@@ -582,6 +589,7 @@ func TestRemoveMemberProposal(t *testing.T) {
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
 
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
 	proposalJSON := `{"title":"Remove Member Proposal","description":"Remove Member Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveMember","payload": "` + bob.String() + `"}}`
@@ -620,6 +628,7 @@ func TestAddRoleToUserProposal(t *testing.T) {
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
 
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
 	proposalJSON := `{"title":"Add Role To User Proposal","description":"Add Role To User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.AddRoleToUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`
@@ -680,6 +689,7 @@ func TestRemoveRoleFromUserProposal(t *testing.T) {
 	resourcesJSON := `[{"resource":"MockExecutableMessage","condition":{"type":"members-threshold","threshold":"60"}},{"resource":"init","condition":{"type":"members-threshold","threshold":"20"}}]`
 
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/daos/d1"))
 	dao := NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
 
 	proposalJSON := `{"title":"Remove Role From User Proposal","description":"Remove Role From User Proposal Description","message":{"type":"gno.land/p/zenao/dao_roles_based.RemoveRoleFromUser","payload":{"address":"` + bob.String() + `","role":"admin"}}}`

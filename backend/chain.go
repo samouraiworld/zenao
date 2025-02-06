@@ -16,6 +16,7 @@ import (
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -46,7 +47,7 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 
 	return &gnoZenaoChain{
 		client:             client,
-		eventsIndexPkgPath: path.Join("gno.land/r", namespace, "events_reg"),
+		eventsIndexPkgPath: path.Join("gno.land/r", namespace, "eventreg"),
 		signerInfo:         signerInfo,
 		logger:             logger,
 		namespace:          namespace,
@@ -117,7 +118,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 	}, vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
 		PkgPath: eventPkgPath,
-		Func:    "EditEvent",
+		Func:    "Edit",
 		Args: []string{
 			req.Title,
 			req.Description,
@@ -227,7 +228,7 @@ func (g *gnoZenaoChain) userRealmPkgPath(userID string) string {
 	return fmt.Sprintf("gno.land/r/%s/users/u%s", g.namespace, userID)
 }
 
-var _ ZenaoChain = (*gnoZenaoChain)(nil)
+var _ zeni.Chain = (*gnoZenaoChain)(nil)
 
 func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr error) (*ctypes.ResultBroadcastTxCommit, error) {
 	if baseErr != nil {
@@ -289,78 +290,51 @@ func generateUserRealmSource(id string, gnoNamespace string) (string, error) {
 const eventRealmSourceTemplate = `package event
 
 import (
-	"std"
-	"time"
-
-	"gno.land/p/demo/ufmt"
-	"gno.land/p/moul/md"
 	"gno.land/p/{{.namespace}}/events"
 	"gno.land/r/demo/profile"
 )
 
-var event *events.Event
+var Event *events.Event
 
 func init() {
 	conf := events.Config{
 		Creator: "{{.creatorAddr}}",
 		Title: {{.title}},
 		Description: {{.description}},
+		ImageURI: {{.imageURI}},
 		StartDate: {{.req.StartDate}},
 		EndDate: {{.req.EndDate}},
 		Capacity: {{.req.Capacity}},
 		GetProfileString: profile.GetStringField,
+		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
 		Location: {{.location}},
 	}
-	event = events.NewEvent(&conf) 
-
-	profile.SetStringField(profile.DisplayName, {{.title}})
-	profile.SetStringField(profile.Bio, {{.description}})
-	profile.SetStringField(profile.Avatar, {{.imageURI}})
+	Event = events.NewEvent(&conf) 
 }
 
 func AddParticipant(participant string) {
-	event.AddParticipant(participant)
+	Event.AddParticipant(participant)
 }
 
 func RemoveParticipant(participant string) {
-	event.RemoveParticipant(participant)
+	Event.RemoveParticipant(participant)
 }
 
 func AddGatekeeper(gatekeeper string) {
-	event.AddGatekeeper(gatekeeper)
+	Event.AddGatekeeper(gatekeeper)
 }
 
 func RemoveGatekeeper(gatekeeper string) {
-	event.RemoveGatekeeper(gatekeeper)
+	Event.RemoveGatekeeper(gatekeeper)
 }
 
-func EditEvent(title, description, imageURI string, startDate, endDate int64, capacity uint64, location string) {
-	event.AssertCallerIsOrganizer()
-
-	profile.SetStringField(profile.DisplayName, title)
-	profile.SetStringField(profile.Bio, description)
-	profile.SetStringField(profile.Avatar, imageURI)
-
-	event.StartDate = startDate
-	event.EndDate = endDate
-	event.Capacity = capacity
-	event.Location = location
+func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint64, location string) {
+	Event.Edit(title, description, imageURI, startDate, endDate, capacity, location)
 }
 
 func Render(path string) string {
-	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
-	s += md.Image("Event presentation", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
-	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
-	s += md.BulletList([]string{
-		ufmt.Sprintf("Location: %s", event.Location),
-		ufmt.Sprintf("Time: From %s to %s", time.Unix(event.StartDate, 0).Format(time.DateTime), time.Unix(event.EndDate, 0).Format(time.DateTime)),
-		ufmt.Sprintf("Capacity: %d/%d", event.CountParticipants(), event.Capacity),
-		ufmt.Sprintf("Organizer: %s", profile.GetStringField(std.Address(event.Creator), profile.DisplayName, "")),
-	}) + "\n"
-	s += md.HorizontalRule()
-	s += md.Paragraph(std.CurrentRealm().Addr().String())
-	return s
+	return Event.Render(path)
 }
 `
 

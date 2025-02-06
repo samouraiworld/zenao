@@ -9,6 +9,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -37,15 +38,15 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	evt := (*Event)(nil)
+	evt := (*zeni.Event)(nil)
 
-	if err := s.DBTx(func(db ZenaoDB) error {
+	if err := s.DB.Tx(func(db zeni.DB) error {
 		var err error
 		if evt, err = db.CreateEvent(userID, req.Msg); err != nil {
 			return err
 		}
 
-		if err := s.Chain.CreateEvent(fmt.Sprintf("%d", evt.ID), userID, req.Msg); err != nil {
+		if err := s.Chain.CreateEvent(evt.ID, userID, req.Msg); err != nil {
 			s.Logger.Error("create-event", zap.Error(err))
 			return err
 		}
@@ -74,7 +75,7 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{
-		Id: fmt.Sprintf("%d", evt.ID),
+		Id: evt.ID,
 	}), nil
 }
 
