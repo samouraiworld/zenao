@@ -19,6 +19,7 @@ var (
 func TestNewEvent(t *testing.T) {
 	var profile mockProfile
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := events.Config{
 		Creator:          alice.String(),
 		Title:            "event",
@@ -37,6 +38,7 @@ func TestNewEvent(t *testing.T) {
 func TestAddParticipant(t *testing.T) {
 	var profile mockProfile
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := events.Config{
 		Creator:          alice.String(),
 		Title:            "event",
@@ -83,6 +85,7 @@ func TestAddParticipant(t *testing.T) {
 func TestRemoveParticipant(t *testing.T) {
 	var profile mockProfile
 	std.TestSetOrigCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := events.Config{
 		Creator:          alice.String(),
 		Title:            "event",
