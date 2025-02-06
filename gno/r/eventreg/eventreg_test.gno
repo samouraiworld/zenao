@@ -1,4 +1,4 @@
-package events_reg
+package eventreg
 
 import (
 	"std"
@@ -10,7 +10,7 @@ import (
 )
 
 func TestEvents(t *testing.T) {
-	initialOwner := std.Address("g1m0lplhma8z4uruds4zcltmlgwlht7w739e6qlp") // zenao-staging-admin
+	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
 	std.TestSetRealm(std.NewUserRealm(initialOwner))
 
 	nextYearUnix := time.Now().Add(time.Hour * 24 * 365).Unix()

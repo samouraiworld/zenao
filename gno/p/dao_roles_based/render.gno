@@ -11,6 +11,7 @@ import (
 
 const (
 	HOME_PATH             = ""
+	HOME_NOPROFILE_PATH   = "noprofile"
 	CONFIG_PATH           = "config"
 	PROPOSAL_HISTORY_PATH = "history"
 	MEMBER_DETAIL_PATH    = "member/{address}"
@@ -19,6 +20,7 @@ const (
 
 func (d *DaoRolesBased) initRenderingRouter() {
 	d.renderingRouter.HandleFunc(HOME_PATH, d.renderHomePage)
+	d.renderingRouter.HandleFunc(HOME_NOPROFILE_PATH, d.renderHomeNoProfilePage)
 	d.renderingRouter.HandleFunc(CONFIG_PATH, d.renderConfigPage)
 	d.renderingRouter.HandleFunc(PROPOSAL_HISTORY_PATH, d.renderProposalHistoryPage)
 	d.renderingRouter.HandleFunc(MEMBER_DETAIL_PATH, d.renderMemberDetailPage)
@@ -30,8 +32,18 @@ func (d *DaoRolesBased) Render(path string) string {
 }
 
 func (d *DaoRolesBased) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
-	res.Write(ufmt.Sprintf("# %s - %s\n\n", d.Name, std.CurrentRealm().Addr().String()))
-	res.Write(ufmt.Sprintf("> Description: %s\n\n", d.Description))
+	d.renderHomePageInternal(res, req, true)
+}
+
+func (d *DaoRolesBased) renderHomeNoProfilePage(res *mux.ResponseWriter, req *mux.Request) {
+	d.renderHomePageInternal(res, req, false)
+}
+
+func (d *DaoRolesBased) renderHomePageInternal(res *mux.ResponseWriter, req *mux.Request, showProfile bool) {
+	if showProfile {
+		res.Write(ufmt.Sprintf("# %s - %s\n\n", d.Name, std.CurrentRealm().Addr().String()))
+		res.Write(ufmt.Sprintf("> Description: %s\n\n", d.Description))
+	}
 	res.Write(ufmt.Sprintf("Discover more about this DAO on the [configuration page ⚙️](%s:%s)\n\n", d.realmName, CONFIG_PATH))
 
 	res.Write(ufmt.Sprintf("## Members 👤 \n\n"))
