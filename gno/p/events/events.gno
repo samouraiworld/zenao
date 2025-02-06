@@ -155,6 +155,7 @@ func (e *Event) Render(path string) string {
 			ufmt.Sprintf("Organizer: %s", e.GetProfileString(std.Address(info.Creator), "DisplayName", "")),
 		}) + "\n"
 		s += md.HorizontalRule()
+		path = "noprofile"
 	}
 	s += e.Org.Render(path)
 	return s
