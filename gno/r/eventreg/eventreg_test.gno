@@ -10,7 +10,7 @@ import (
 )
 
 func TestEvents(t *testing.T) {
-	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-staging-admin
+	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
 	std.TestSetRealm(std.NewUserRealm(initialOwner))
 
 	nextYearUnix := time.Now().Add(time.Hour * 24 * 365).Unix()
