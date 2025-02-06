@@ -3,7 +3,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 import { PinataSDK } from "pinata-web3";
 import { FilesPostResponse } from "@/lib/files";
 
-export const pinata = new PinataSDK({
+const pinata = new PinataSDK({
   pinataJwt: `${process.env.PINATA_JWT}`,
   pinataGateway: `${process.env.NEXT_PUBLIC_GATEWAY_URL}`,
 });
