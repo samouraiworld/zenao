@@ -17,8 +17,8 @@ import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
-import { web2URL } from "@/lib/pinata";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
+import { web2URL } from "@/lib/uris";
 
 interface EventSectionProps {
   title: string;
