@@ -1,6 +1,11 @@
 import { UseFormReturn } from "react-hook-form";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { GeoSearchControl } from "leaflet-geosearch";
+import OpenStreetMapProvider from "leaflet-geosearch/lib/providers/openStreetMapProvider.js";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import L from "leaflet";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
@@ -15,6 +20,8 @@ import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { Form } from "@/components/shadcn/form";
 import { isValidURL } from "@/lib/utils";
+import "leaflet/dist/leaflet.css";
+import "leaflet-geosearch/dist/geosearch.css";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -22,6 +29,34 @@ interface EventFormProps {
   isLoaded: boolean;
   isEditing?: boolean;
 }
+
+const SearchField = () => {
+  const map = useMap();
+  const provider = new OpenStreetMapProvider();
+
+  // @ts-expect-error any-type
+  const searchControl = new GeoSearchControl({
+    provider,
+    marker: {
+      icon: new L.Icon.Default(),
+      draggable: false,
+    },
+    classNames: {
+      input: "bg-[#FFF] text-[#000]",
+      item: "text-[#000]",
+    },
+  });
+
+  useEffect(() => {
+    map.addControl(searchControl);
+    return () => {
+      map.removeControl(searchControl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return null;
+};
 
 export const EventForm: React.FC<EventFormProps> = ({
   form,
@@ -102,6 +137,17 @@ export const EventForm: React.FC<EventFormProps> = ({
                 placeholder={t("location-placeholder")}
               />
             </Card>
+            <MapContainer
+              center={[51.505, -0.09]}
+              zoom={3}
+              className="h-[300px] w-full "
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <SearchField />
+            </MapContainer>
             <Card>
               <SmallText className="mb-3">{t("capacity-label")}</SmallText>
               <FormFieldInputNumber
