@@ -12,7 +12,7 @@ export const ButtonBase: React.FC<
   return (
     <Button className="w-full" disabled={disabled || loading} {...otherProps}>
       <div className={loading ? "opacity-0" : undefined}>{children}</div>
-      {loading && <Loader2 className="animate-spin absolute" />}
+      {!!loading && <Loader2 className="animate-spin absolute" />}
     </Button>
   );
 };
