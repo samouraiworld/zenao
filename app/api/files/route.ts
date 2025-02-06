@@ -1,6 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { pinata, UploadResponse as FilesPostResponse } from "@/lib/pinata";
+import { PinataSDK } from "pinata-web3";
+import { FilesPostResponse } from "@/lib/files";
+
+export const pinata = new PinataSDK({
+  pinataJwt: `${process.env.PINATA_JWT}`,
+  pinataGateway: `${process.env.NEXT_PUBLIC_GATEWAY_URL}`,
+});
 
 export async function POST(request: NextRequest) {
   try {

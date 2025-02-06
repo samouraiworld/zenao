@@ -17,8 +17,8 @@ import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { Form } from "@/components/shadcn/form";
 import { useToast } from "@/app/hooks/use-toast";
-import { uploadResponseSchema } from "@/lib/pinata";
 import { isValidURL, web2URL } from "@/lib/uris";
+import { filesPostResponseSchema } from "@/lib/files";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -59,7 +59,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         body: data,
       });
       const resRaw = await uploadRequest.json();
-      const res = uploadResponseSchema.parse(resRaw);
+      const res = filesPostResponseSchema.parse(resRaw);
       form.setValue("imageUri", res.uri);
       setUploading(false);
     } catch (e) {
