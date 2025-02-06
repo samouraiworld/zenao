@@ -1,8 +1,8 @@
 package dao_roles_based
 
 import (
-	"path"
 	"std"
+	"strings"
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/json"
@@ -32,6 +32,13 @@ func NewDaoRolesBasedJSON(name, description string, roles []string, members [][]
 		panic("dao description should be at least 1 characters long")
 	}
 
+	pkgPath := std.CurrentRealm().PkgPath()
+	firstSlashIdx := strings.Index(pkgPath, "/")
+	realmName := ""
+	if firstSlashIdx != -1 {
+		realmName = pkgPath[firstSlashIdx:]
+	}
+
 	dao := &DaoRolesBased{
 		Name:             name,
 		Description:      description,
@@ -40,7 +47,7 @@ func NewDaoRolesBasedJSON(name, description string, roles []string, members [][]
 		ProposalModule:   newProposalModule(),
 		MessagesRegistry: newMessagesRegistry(),
 		renderingRouter:  mux.NewRouter(),
-		realmName:        path.Base(std.CurrentRealm().PkgPath()),
+		realmName:        realmName,
 	}
 	dao.initMessagesRegistry()
 	dao.initRenderingRouter()
