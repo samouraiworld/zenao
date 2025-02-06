@@ -16,9 +16,9 @@ import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
 import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { Form } from "@/components/shadcn/form";
-import { isValidURL } from "@/lib/utils";
 import { useToast } from "@/app/hooks/use-toast";
-import { web2URL, uploadResponseSchema } from "@/lib/pinata";
+import { uploadResponseSchema } from "@/lib/pinata";
+import { isValidURL, web2URL } from "@/lib/uris";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;

@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
       cidVersion: 1,
     });
     const res: FilesPostResponse = {
-      uri: `ipfs://${uploadData.IpfsHash}`
-    }
+      uri: `ipfs://${uploadData.IpfsHash}`,
+    };
     return NextResponse.json(res, { status: 200 });
   } catch (e) {
     console.log(e);

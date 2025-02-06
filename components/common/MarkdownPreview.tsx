@@ -3,7 +3,7 @@ import remarkYoutube from "remark-youtube";
 import ReactMarkdown from "react-markdown";
 import supersub from "remark-supersub";
 import remarkHtml from "remark-html";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwind";
 
 export const MarkdownPreview: React.FC<{ markdownString: string }> = ({
   markdownString,

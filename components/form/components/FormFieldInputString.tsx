@@ -8,7 +8,7 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwind";
 
 export const FormFieldInputString: React.FC<FormFieldProps<string>> = ({
   control,

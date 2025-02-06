@@ -13,12 +13,3 @@ export const uploadResponseSchema = z.object({
 });
 
 export type UploadResponse = z.infer<typeof uploadResponseSchema>;
-
-export const web2URL = (uri: string) => {
-  if (!uri.startsWith("ipfs://")) {
-    return uri;
-  }
-  const withoutScheme = uri.substring("ipfs://".length);
-  const res = `https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${withoutScheme}`;
-  return res;
-};
