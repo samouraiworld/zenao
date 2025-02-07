@@ -11,7 +11,7 @@ export default async function TicketsPage() {
 
   const { userId, getToken } = await auth();
   if (!userId) {
-    throw new Error("unauthorized");
+    return <ScreenContainer>Log in to see your tickets</ScreenContainer>;
   }
   const token = await getToken();
   const { address } = await zenaoClient.getUserAddress(
