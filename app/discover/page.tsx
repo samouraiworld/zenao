@@ -14,7 +14,7 @@ export default async function EventsPage() {
   return (
     <ScreenContainer>
       <h2>Upcoming</h2>
-      {upcoming.map((evt) => (
+      {[...upcoming].reverse().map((evt) => (
         <Event key={evt.pkgPath} evt={evt} />
       ))}
       <h2>Past</h2>
