@@ -7,11 +7,11 @@ import { EventCard } from "@/components/cards/EventCard";
 import { zenaoClient } from "@/app/zenao-client";
 
 export default async function TicketsPage() {
-  const { userId, getToken } = await auth();
-  if (!userId) {
+  const { getToken } = await auth();
+  const token = await getToken();
+  if (!token) {
     return <ScreenContainer>Log in to see your tickets</ScreenContainer>;
   }
-  const token = await getToken();
 
   const { address } = await zenaoClient.getUserAddress(
     {},
