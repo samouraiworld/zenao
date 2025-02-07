@@ -8,11 +8,12 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useSession } from "@clerk/nextjs";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
-import { eventOptions, eventUserRoles } from "@/lib/queries/event";
+import { eventOptions } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
 import { Text } from "@/components/texts/DefaultText";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
+import { eventUserRoles } from "@/lib/queries/event-user-roles";
 
 export function EditEventForm({
   id,
