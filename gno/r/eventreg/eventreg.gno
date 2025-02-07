@@ -143,7 +143,12 @@ func AddParticipant(eventPkgPath string, userID string) {
 	key = eventPkgPath + "/" + userID
 	participantsByEvent.Set(key, userID)
 
-	UpdateIndex(eventPkgPath)
+	info := mustGetInfo(eventPkgPath)
+	infoWP := InfoWithPkgPath{
+		Info:    info,
+		PkgPath: eventPkgPath,
+	}
+	eventsByPkgPath.Set(eventPkgPath, infoWP)
 }
 
 func RemoveParticipant(eventPkgPath string, userID string) {
@@ -157,7 +162,12 @@ func RemoveParticipant(eventPkgPath string, userID string) {
 	key = eventPkgPath + "/" + userID
 	participantsByEvent.Remove(key)
 
-	UpdateIndex(eventPkgPath)
+	info := mustGetInfo(eventPkgPath)
+	infoWP := InfoWithPkgPath{
+		Info:    info,
+		PkgPath: eventPkgPath,
+	}
+	eventsByPkgPath.Set(eventPkgPath, infoWP)
 }
 
 var ErrEventNotFound = errors.New("event not found")
