@@ -34,7 +34,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
@@ -79,7 +79,7 @@ func (s *ZenaoServer) CreateEvent(
 	}), nil
 }
 
-func validateEvent(startDate, endDate uint64, title string, description string, imageURI string, capacity uint32, ticketPrice float64) error {
+func validateEvent(startDate, endDate uint64, title, description, location, imageURI string, capacity uint32, ticketPrice float64) error {
 	if startDate >= endDate {
 		return errors.New("end date must be after start date")
 	}
@@ -88,6 +88,9 @@ func validateEvent(startDate, endDate uint64, title string, description string, 
 	}
 	if len(description) < 10 || len(description) > 10000 {
 		return errors.New("event description must be of length 10 to 10000")
+	}
+	if len(location) < 2 || len(location) > 400 {
+		return errors.New("location must be of length 2 to 400")
 	}
 	if len(imageURI) == 0 || len(imageURI) > 400 {
 		return errors.New("image uri must be of length 1 to 400")

@@ -3,9 +3,10 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { GeoSearchControl } from "leaflet-geosearch";
 import OpenStreetMapProvider from "leaflet-geosearch/lib/providers/openStreetMapProvider.js";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
+import { CloudUpload, Loader2 } from "lucide-react";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
@@ -19,7 +20,9 @@ import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
 import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { Form } from "@/components/shadcn/form";
-import { isValidURL } from "@/lib/utils";
+import { useToast } from "@/app/hooks/use-toast";
+import { isValidURL, web2URL } from "@/lib/uris";
+import { filesPostResponseSchema } from "@/lib/files";
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
 
@@ -68,6 +71,45 @@ export const EventForm: React.FC<EventFormProps> = ({
   const description = form.watch("description");
   const t = useTranslations("eventForm");
 
+  const [uploading, setUploading] = useState(false);
+  const { toast } = useToast();
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target?.files?.[0];
+    try {
+      if (!file) {
+        toast({
+          variant: "destructive",
+          title: "No file selected.",
+        });
+        return;
+      }
+      setUploading(true);
+      const data = new FormData();
+      data.set("file", file);
+      const uploadRequest = await fetch("/api/files", {
+        method: "POST",
+        body: data,
+      });
+      const resRaw = await uploadRequest.json();
+      const res = filesPostResponseSchema.parse(resRaw);
+      form.setValue("imageUri", res.uri);
+      setUploading(false);
+    } catch (e) {
+      console.error(e);
+      setUploading(false);
+      toast({
+        variant: "destructive",
+        title: "Trouble uploading file!",
+      });
+    }
+  };
+
+  const handleClick = () => {
+    hiddenInputRef.current?.click();
+  };
+
   return (
     <Form {...form}>
       <form
@@ -76,25 +118,43 @@ export const EventForm: React.FC<EventFormProps> = ({
       >
         <div className="flex flex-col sm:flex-row w-full gap-10">
           <div className="flex flex-col gap-4 w-full sm:w-2/5">
-            {/* I'm obligate to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead)  */}
+            {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
+            {/* TODO: find a better way */}
             {isValidURL(imageUri, urlPattern) &&
             !form.formState.errors.imageUri?.message ? (
               <Image
-                src={imageUri}
+                src={web2URL(imageUri)}
                 width={330}
                 height={330}
                 alt="imageUri"
                 className="flex w-full rounded-xl self-center"
               />
             ) : (
-              <Skeleton className="w-full h-[330px] rounded-xnter" />
+              <Skeleton className="w-full h-[330px] rounded-xnter flex justify-center items-center">
+                {uploading && <Loader2 className="animate-spin" />}
+              </Skeleton>
             )}
-            <Card>
-              <FormFieldInputString
-                control={form.control}
-                name="imageUri"
-                placeholder={t("image-uri-placeholder")}
-              />
+            <Card className="flex flex-row gap-3">
+              <div className="w-full">
+                <FormFieldInputString
+                  control={form.control}
+                  name="imageUri"
+                  placeholder={t("image-uri-placeholder")}
+                />
+              </div>
+              <div>
+                <CloudUpload
+                  onClick={handleClick}
+                  className="w-5 cursor-pointer"
+                />
+                <input
+                  type="file"
+                  onChange={handleChange}
+                  ref={hiddenInputRef}
+                  className="hidden"
+                  disabled={uploading}
+                />
+              </div>
             </Card>
           </div>
           <div className="flex flex-col gap-4 w-full sm:w-3/5">

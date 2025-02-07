@@ -7,7 +7,7 @@ import {
   TextBaseProps,
   TextProps,
 } from "./types";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwind";
 
 const PrimaryTextBase: React.FC<TextBaseProps> = ({ className, children }) => {
   return <p className={cn("text-primary-color", className)}>{children}</p>;

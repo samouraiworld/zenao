@@ -4,7 +4,7 @@ import React from "react";
 import { FormFieldProps } from "../types";
 import { FormControl, FormField, FormItem } from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwind";
 
 export const FormFieldTextArea: React.FC<
   FormFieldProps<string> & React.TextareaHTMLAttributes<HTMLTextAreaElement>
