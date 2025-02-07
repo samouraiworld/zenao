@@ -14,6 +14,12 @@ export default async function EventsPage() {
 
   return (
     <ScreenContainer>
+      <Link
+        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
+        target="_blank"
+      >
+        -&gt; See this list on Gnoweb
+      </Link>
       <h2>Upcoming</h2>
       {[...upcoming].reverse().map((evt) => (
         <Event key={evt.pkgPath} evt={evt} />
