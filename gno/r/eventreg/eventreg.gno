@@ -1,81 +1,182 @@
 package eventreg
 
 import (
+	"errors"
 	"std"
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/ownable"
 	"gno.land/p/demo/seqid"
+	"gno.land/p/zenao/events"
 )
 
 // all dates are in unix seconds for easier interfacing with maketx call and vm/qeval
 
 var (
 	Ownable             *ownable.Ownable
-	eventsByEndDate     avl.Tree // <endDateUnixSeconds>/<eventID> -> eventID
-	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventID> -> eventID
-	eventsByCreator     avl.Tree // <creatorID>/<endDateUnixSeconds>/<eventID> -> eventID
+	eventsByPkgPath     avl.Tree // <eventPkgPath> -> event.Info
+	eventsByEndDate     avl.Tree // <endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
+	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
+	eventsByCreator     avl.Tree // <creatorID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
+	participantsByEvent avl.Tree // <eventPkgPath>/<participantID> -> participantID
 )
 
+type InfoWithPkgPath struct {
+	events.Info
+	PkgPath string
+}
+
 func init() {
-	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
-	Ownable = ownable.NewWithAddress(initialOwner)
+	Ownable = ownable.NewWithAddress(std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
 }
 
-func AddEvent(eventID string, creatorID string, eventEndDate int64) {
+func AddEvent(pkgPath string, info *events.Info) {
 	Ownable.AssertCallerIsOwner()
-
-	{
-		key := unixTimeKey(eventEndDate) + "/" + eventID
-		eventsByEndDate.Set(key, eventID)
+	if info == nil {
+		panic("nil info")
+	}
+	if prev := getEventByPkgPath(pkgPath); prev != nil {
+		panic("already added")
 	}
 
-	{
-		key := creatorID + "/" + unixTimeKey(eventEndDate) + "/" + eventID
-		eventsByCreator.Set(key, eventID)
+	infoWP := InfoWithPkgPath{
+		Info:    *info,
+		PkgPath: pkgPath,
+	}
+
+	key := pkgPath
+	eventsByPkgPath.Set(key, infoWP)
+
+	key = unixTimeKey(info.EndDate) + "/" + pkgPath
+	eventsByEndDate.Set(key, pkgPath)
+
+	key = info.Creator + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
+	eventsByCreator.Set(key, pkgPath)
+}
+
+func UpdateInfo(pkgPath string, info *events.Info) {
+	Ownable.AssertCallerIsOwner()
+	if info == nil {
+		panic("nil info")
+	}
+
+	prevInfo := mustGetEventByPkgPath(pkgPath)
+	infoWP := InfoWithPkgPath{
+		Info:    *info,
+		PkgPath: pkgPath,
+	}
+	eventsByPkgPath.Set(pkgPath, infoWP)
+
+	if prevInfo.EndDate != info.EndDate {
+		key := unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
+		eventsByEndDate.Remove(key)
+
+		newKey := unixTimeKey(info.EndDate) + "/" + pkgPath
+		eventsByEndDate.Set(newKey, pkgPath)
+
+		key = prevInfo.Creator + "/" + unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
+		eventsByCreator.Remove(key)
+
+		newKey = info.Creator + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
+		eventsByCreator.Set(newKey, pkgPath)
+
+		startKey := pkgPath + "/"
+		endKey := startKey[:len(startKey)-1] + string('/'+1)
+		participantsByEvent.Iterate(startKey, endKey, func(key string, value interface{}) bool {
+			userID := value.(string)
+
+			key = userID + "/" + unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
+			eventsByParticipant.Remove(key)
+
+			newKey = userID + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
+			eventsByParticipant.Set(newKey, pkgPath)
+
+			return false
+		})
+	} else if prevInfo.Creator != info.Creator {
+		key := prevInfo.Creator + "/" + unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
+		eventsByCreator.Remove(key)
+
+		newKey := info.Creator + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
+		eventsByCreator.Set(newKey, pkgPath)
 	}
 }
 
-func AddParticipant(eventID string, userID string, eventEndDate int64) {
+func AddParticipant(eventPkgPath string, userID string) {
 	Ownable.AssertCallerIsOwner()
 
-	key := userID + "/" + unixTimeKey(eventEndDate) + "/" + eventID
-	eventsByParticipant.Set(key, eventID)
+	evt := mustGetEventByPkgPath(eventPkgPath)
+
+	key := userID + "/" + unixTimeKey(evt.EndDate) + "/" + eventPkgPath
+	eventsByParticipant.Set(key, eventPkgPath)
+
+	key = eventPkgPath + "/" + userID
+	participantsByEvent.Set(key, userID)
 }
 
-func RemoveParticipant(eventID string, userID string, eventEndDate int64) {
+func RemoveParticipant(eventPkgPath string, userID string) {
 	Ownable.AssertCallerIsOwner()
 
-	key := userID + "/" + unixTimeKey(eventEndDate) + "/" + eventID
+	evt := mustGetEventByPkgPath(eventPkgPath)
+
+	key := userID + "/" + unixTimeKey(evt.EndDate) + "/" + eventPkgPath
 	eventsByParticipant.Remove(key)
+
+	key = eventPkgPath + "/" + userID
+	participantsByEvent.Remove(key)
 }
 
-func listEvents(from, to int64, limit uint32) []string {
-	fromKey := unixTimeKey(from)
-	toKey := unixTimeKey(to)
+var ErrEventNotFound = errors.New("event not found")
+
+func getEventByPkgPath(pkgPath string) *InfoWithPkgPath {
+	raw, ok := eventsByPkgPath.Get(pkgPath)
+	if !ok {
+		return nil
+	}
+	info := raw.(InfoWithPkgPath)
+	return &info
+}
+
+func mustGetEventByPkgPath(pkgPath string) *InfoWithPkgPath {
+	evt := getEventByPkgPath(pkgPath)
+	if evt == nil {
+		panic(ErrEventNotFound)
+	}
+	return evt
+}
+
+func listEvents(from, to int64, limit uint32) []*InfoWithPkgPath {
+	fromKey := unixTimeKey(from) + "/"
+	toKey := unixTimeKey(to) + "/"
 
 	return listEventsInternal(&eventsByEndDate, fromKey, toKey, from > to, limit)
 }
 
-func listEventsByCreator(creatorID string, from, to int64, limit uint32) []string {
-	fromKey := creatorID + "/" + unixTimeKey(from)
-	toKey := creatorID + "/" + unixTimeKey(to)
+func listEventsByCreator(creatorID string, from, to int64, limit uint32) []*InfoWithPkgPath {
+	fromKey := creatorID + "/" + unixTimeKey(from) + "/"
+	toKey := creatorID + "/" + unixTimeKey(to) + "/"
 
 	return listEventsInternal(&eventsByCreator, fromKey, toKey, from > to, limit)
 }
 
-func listEventsByParticipant(participantID string, from, to int64, limit uint32) []string {
-	fromKey := participantID + "/" + unixTimeKey(from)
-	toKey := participantID + "/" + unixTimeKey(to)
+func listEventsByParticipant(participantID string, from, to int64, limit uint32) []*InfoWithPkgPath {
+	fromKey := participantID + "/" + unixTimeKey(from) + "/"
+	toKey := participantID + "/" + unixTimeKey(to) + "/"
 
 	return listEventsInternal(&eventsByParticipant, fromKey, toKey, from > to, limit)
 }
 
-func listEventsInternal(at *avl.Tree, fromKey string, toKey string, rev bool, limit uint32) []string {
-	res := []string{}
+func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, limit uint32) []*InfoWithPkgPath {
+	res := []*InfoWithPkgPath{}
 	it := func(key string, value interface{}) bool {
-		pkgPath := value.(string)
-		res = append(res, pkgPath)
+		var evt *InfoWithPkgPath
+		switch val := value.(type) {
+		case *InfoWithPkgPath:
+			evt = val
+		case string:
+			evt = mustGetEventByPkgPath(val)
+		}
+		res = append(res, evt)
 		return uint32(len(res)) >= limit
 	}
 	if rev {

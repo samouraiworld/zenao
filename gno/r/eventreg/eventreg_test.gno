@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"gno.land/p/demo/urequire"
+	"gno.land/p/zenao/events"
 )
 
 func TestEvents(t *testing.T) {
@@ -19,11 +20,11 @@ func TestEvents(t *testing.T) {
 	// list no events
 	{
 		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
-		urequire.Equal(t, "", strings.Join(events, ", "))
+		urequire.Equal(t, 0, len(events))
 	}
 
-	// inject events
-	events := []struct {
+	// inject evts
+	evts := []struct {
 		id      string
 		creator string
 		endDate time.Time
@@ -33,37 +34,41 @@ func TestEvents(t *testing.T) {
 		{"3-past-event-hour", "alice", time.Now().Add(-time.Hour)},
 		{"4-past-event-day", "bob", time.Now().Add(-24 * time.Hour)},
 		{"5-past-event-month", "alice", time.Now().Add(-30 * 24 * time.Hour)},
+		{"6-event-will-change", "bob", time.Now().Add(-60 * 24 * time.Hour)},
 	}
-	for _, evt := range events {
-		AddEvent(evt.id, evt.creator, evt.endDate.Unix())
+	for _, evt := range evts {
+		AddEvent(evt.id, &events.Info{
+			Creator: evt.creator,
+			EndDate: evt.endDate.Unix(),
+		})
 	}
 
 	// list upcoming events
 	{
 		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
-		urequire.Equal(t, `2-future-event-day, 1-future-event-month`, strings.Join(events, ", "))
+		urequire.Equal(t, `2-future-event-day, 1-future-event-month`, eventsString(events))
 	}
 	// list past events
 	{
 		events := listEvents(time.Now().Unix(), lastYearUnix, 10)
-		urequire.Equal(t, `3-past-event-hour, 4-past-event-day, 5-past-event-month`, strings.Join(events, ", "))
+		urequire.Equal(t, `3-past-event-hour, 4-past-event-day, 5-past-event-month, 6-event-will-change`, eventsString(events))
 	}
 
 	// list events by creator
 	{
 		// from future to past
 		events := listEventsByCreator("alice", nextYearUnix, lastYearUnix, 10)
-		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, strings.Join(events, ", "))
+		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
 	}
 	{
 		// from past to future
 		events := listEventsByCreator("bob", lastYearUnix, nextYearUnix, 10)
-		urequire.Equal(t, `4-past-event-day, 2-future-event-day`, strings.Join(events, ", "))
+		urequire.Equal(t, `6-event-will-change, 4-past-event-day, 2-future-event-day`, eventsString(events))
 	}
 	{
 		// none
 		events := listEventsByCreator("eve", lastYearUnix, nextYearUnix, 10)
-		urequire.Equal(t, "", strings.Join(events, ", "))
+		urequire.Equal(t, 0, len(events))
 	}
 
 	// inject participants
@@ -72,12 +77,12 @@ func TestEvents(t *testing.T) {
 		eventIdxs []int
 	}{
 		{"eve", []int{0, 2, 4}},
-		{"carol", []int{1, 3}},
+		{"carol", []int{1, 3, 5}},
 	}
 	for _, p := range participants {
 		for _, eventIdx := range p.eventIdxs {
-			evt := events[eventIdx]
-			AddParticipant(evt.id, p.id, evt.endDate.Unix())
+			evt := evts[eventIdx]
+			AddParticipant(evt.id, p.id)
 		}
 	}
 
@@ -85,16 +90,127 @@ func TestEvents(t *testing.T) {
 	{
 		// from future to past
 		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10)
-		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, strings.Join(events, ", "))
+		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
 	}
 	{
 		// from past to future
 		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10)
-		urequire.Equal(t, `4-past-event-day, 2-future-event-day`, strings.Join(events, ", "))
+		urequire.Equal(t, `6-event-will-change, 4-past-event-day, 2-future-event-day`, eventsString(events))
 	}
 	{
 		// none
 		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10)
-		urequire.Equal(t, "", strings.Join(events, ", "))
+		urequire.Equal(t, 0, len(events))
 	}
+
+	// chane event endDate and rerun all tests
+
+	UpdateInfo("6-event-will-change", &events.Info{
+		Creator: "bob",
+		EndDate: time.Now().Add(60 * 24 * time.Hour).Unix(),
+	})
+
+	// list upcoming events
+	{
+		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
+		urequire.Equal(t, `2-future-event-day, 1-future-event-month, 6-event-will-change`, eventsString(events))
+	}
+	// list past events
+	{
+		events := listEvents(time.Now().Unix(), lastYearUnix, 10)
+		urequire.Equal(t, `3-past-event-hour, 4-past-event-day, 5-past-event-month`, eventsString(events))
+	}
+
+	// list events by creator
+	{
+		// from future to past
+		events := listEventsByCreator("alice", nextYearUnix, lastYearUnix, 10)
+		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
+	}
+	{
+		// from past to future
+		events := listEventsByCreator("bob", lastYearUnix, nextYearUnix, 10)
+		urequire.Equal(t, `4-past-event-day, 2-future-event-day, 6-event-will-change`, eventsString(events))
+	}
+
+	// list events by participant
+	{
+		// from future to past
+		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10)
+		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
+	}
+	{
+		// from past to future
+		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10)
+		urequire.Equal(t, `4-past-event-day, 2-future-event-day, 6-event-will-change`, eventsString(events))
+	}
+	{
+		// none
+		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10)
+		urequire.Equal(t, 0, len(events))
+	}
+
+	// chane event creator and rerun all tests
+
+	UpdateInfo("6-event-will-change", &events.Info{
+		Creator: "alice",
+		EndDate: time.Now().Add(60 * 24 * time.Hour).Unix(),
+	})
+
+	// list upcoming events
+	{
+		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
+		urequire.Equal(t, `2-future-event-day, 1-future-event-month, 6-event-will-change`, eventsString(events))
+	}
+	// list past events
+	{
+		events := listEvents(time.Now().Unix(), lastYearUnix, 10)
+		urequire.Equal(t, `3-past-event-hour, 4-past-event-day, 5-past-event-month`, eventsString(events))
+	}
+
+	// list events by creator
+	{
+		// from future to past
+		events := listEventsByCreator("alice", nextYearUnix, lastYearUnix, 10)
+		urequire.Equal(t, `6-event-will-change, 1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
+	}
+	{
+		// from past to future
+		events := listEventsByCreator("bob", lastYearUnix, nextYearUnix, 10)
+		urequire.Equal(t, `4-past-event-day, 2-future-event-day`, eventsString(events))
+	}
+
+	// list events by participant
+	{
+		// from future to past
+		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10)
+		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
+	}
+	{
+		// from past to future
+		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10)
+		urequire.Equal(t, `4-past-event-day, 2-future-event-day, 6-event-will-change`, eventsString(events))
+	}
+	{
+		// none
+		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10)
+		urequire.Equal(t, 0, len(events))
+	}
+}
+
+func TestEventsToJSON(t *testing.T) {
+	evts := []*InfoWithPkgPath{
+		{
+			PkgPath: "foo",
+		},
+	}
+	urequire.Equal(t, `[{"title":"","description":"","imageUri":"","startDate":"0","endDate":"0","capacity":0,"creatorAddr":"","location":"","participants":0,"pkgPath":"foo"}]`, eventsToJSON(evts))
+}
+
+func eventsString(evts []*InfoWithPkgPath) string {
+	res := []string{}
+	for _, evt := range evts {
+		res = append(res, evt.PkgPath)
+	}
+	return strings.Join(res, ", ")
 }
