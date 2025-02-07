@@ -24,7 +24,8 @@ func TestEvents(t *testing.T) {
 	}
 
 	// inject evts
-	evts := []struct {
+	getters := map[string]func() events.Info{}
+	evts := []*struct {
 		id      string
 		creator string
 		endDate time.Time
@@ -36,16 +37,16 @@ func TestEvents(t *testing.T) {
 		{"gno.land/r/zenao/events/5-past-event-month", "alice", time.Now().Add(-30 * 24 * time.Hour)},
 		{"gno.land/r/zenao/events/6-event-will-change", "bob", time.Now().Add(-60 * 24 * time.Hour)},
 	}
-	for i, evt := range evts {
-		j := i
+	for _, evt := range evts {
+		// XXX: `ev := evt` and using ev in place of evt will cause "gno.land/r/zenao/eventreg: test pkg: panic: unexpected type heapitem"
 		std.TestSetRealm(std.NewCodeRealm(evt.id))
-		getter := func() events.Info {
+		getters[evt.id] = func() events.Info {
 			return events.Info{
-				Creator: evts[j].creator,
-				EndDate: evts[j].endDate.Unix(),
+				Creator: evt.creator,
+				EndDate: evt.endDate.Unix(),
 			}
 		}
-		Register(getter)
+		Register(getters[evt.id])
 		std.TestSetRealm(std.NewUserRealm(initialOwner))
 
 		IndexEvent(evt.id)

@@ -221,5 +221,5 @@ func unixTimeKey(t int64) string {
 	if t < 0 {
 		panic("negative unix time")
 	}
-	return seqid.ID(t).String()
+	return seqid.ID(t).Binary()
 }

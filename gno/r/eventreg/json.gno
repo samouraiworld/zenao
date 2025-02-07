@@ -5,7 +5,7 @@ import (
 )
 
 func eventsToJSON(events []*InfoWithPkgPath) string {
-	nodes := make([]*json.Node, 0, len(events))
+	nodes := []*json.Node{}
 	for _, evt := range events {
 		obj := evt.ToJSON()
 		obj.AppendObject("pkgPath", json.StringNode("", evt.PkgPath))
