@@ -7,18 +7,18 @@ import { EventCard } from "@/components/cards/EventCard";
 import { zenaoClient } from "@/app/zenao-client";
 
 export default async function TicketsPage() {
-  const queryClient = getQueryClient();
-
   const { userId, getToken } = await auth();
   if (!userId) {
     return <ScreenContainer>Log in to see your tickets</ScreenContainer>;
   }
   const token = await getToken();
+
   const { address } = await zenaoClient.getUserAddress(
     {},
     { headers: { Authorization: "Bearer " + token } },
   );
 
+  const queryClient = getQueryClient();
   const now = Date.now() / 1000;
   const upcoming = await queryClient.fetchQuery(
     eventsByParticipantList(address, now, Number.MAX_SAFE_INTEGER, 20),
