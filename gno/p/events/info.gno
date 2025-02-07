@@ -16,10 +16,10 @@ type Info struct {
 	Participants int
 }
 
-type InfoGetter func() *Info
+type InfoGetter func() Info
 
-func (e *Event) Info() *Info {
-	return &Info{
+func (e *Event) Info() Info {
+	return Info{
 		Title:        e.GetProfileString(std.CurrentRealm().Addr(), "DisplayName", ""),
 		Description:  e.GetProfileString(std.CurrentRealm().Addr(), "Bio", ""),
 		ImageURI:     e.GetProfileString(std.CurrentRealm().Addr(), "Avatar", ""),

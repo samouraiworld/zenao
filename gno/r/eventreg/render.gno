@@ -10,29 +10,47 @@ import (
 )
 
 func Render(path string) string {
+	title := "Zenao Events"
+	listFn := listEvents
+	switch {
+	case strings.HasPrefix(path, "myevts/"):
+		title = "My Zenao Events"
+		listFn = func(from int64, to int64, limit uint32) []*InfoWithPkgPath {
+			return listEventsByCreator(strings.TrimPrefix(path, "myevts/"), from, to, limit)
+		}
+	case strings.HasPrefix(path, "tickets/"):
+		title = "My Zenao Tickets"
+		listFn = func(from int64, to int64, limit uint32) []*InfoWithPkgPath {
+			return listEventsByParticipant(strings.TrimPrefix(path, "tickets/"), from, to, limit)
+		}
+	}
+
 	buf := strings.Builder{}
-	buf.WriteString(md.H1("Zenao Events"))
-	renderSection(&buf, "🎉 Upcoming", time.Now().Unix(), math.MaxInt64, 10)
-	renderSection(&buf, "👴 Past", math.MinInt64, time.Now().Unix(), 10)
+	buf.WriteString(md.H1(title))
+	buf.WriteString(md.HorizontalRule())
+	renderSection(&buf, listFn, "🎉 Upcoming", time.Now().Unix()+1, math.MaxInt64, 10)
+	renderSection(&buf, listFn, "👴 Past", time.Now().Unix(), 0, 10)
 	return buf.String()
 }
 
-func renderSection(buf *strings.Builder, title string, from int64, to int64, limit uint32) {
+func renderSection(buf *strings.Builder, listFn func(int64, int64, uint32) []*InfoWithPkgPath, title string, from int64, to int64, limit uint32) {
 	buf.WriteString(md.H2(title))
-	upcoming := listEvents(from, to, limit)
-	for _, evt := range upcoming {
-		md.HorizontalRule()
+	evts := listFn(from, to, limit)
+	for _, evt := range evts {
+		buf.WriteString(md.HorizontalRule())
 		renderEvent(buf, evt)
 	}
-	if len(upcoming) != 0 {
+	if len(evts) == 0 {
 		buf.WriteString(md.HorizontalRule())
+		buf.WriteString(md.Paragraph("🤷 Nothing to show"))
 	}
+	buf.WriteString(md.HorizontalRule())
 }
 
 func renderEvent(buf *strings.Builder, evt *InfoWithPkgPath) {
-	buf.WriteString(md.H3(evt.Title))
-	buf.WriteString(md.Paragraph(ufmt.Sprintf("From %s to %s", time.Unix(evt.StartDate, 0).Format(time.DateTime), time.Unix(evt.EndDate, 0).Format(time.DateTime))))
-	buf.WriteString(md.Link("🔗 Details", ufmt.Sprintf("/%s", trimDomain(evt.PkgPath))))
+	buf.WriteString(md.H3(evt.Title + " | 📍 " + evt.Location))
+	timeStr := ufmt.Sprintf("⏱️ %s to %s", time.Unix(evt.StartDate, 0).Format(time.DateTime), time.Unix(evt.EndDate, 0).Format(time.DateTime))
+	buf.WriteString(md.Paragraph(timeStr + " | " + md.Link("🔗 Details", trimDomain(evt.PkgPath))))
 }
 
 func trimDomain(pkgPath string) string {
@@ -40,5 +58,5 @@ func trimDomain(pkgPath string) string {
 	if slashIdx == -1 {
 		return pkgPath
 	}
-	return pkgPath[slashIdx+1:]
+	return pkgPath[slashIdx:]
 }

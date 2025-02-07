@@ -13,8 +13,10 @@ import (
 // all dates are in unix seconds for easier interfacing with maketx call and vm/qeval
 
 var (
-	Ownable             *ownable.Ownable
-	eventsByPkgPath     avl.Tree // <eventPkgPath> -> event.Info
+	Ownable *ownable.Ownable
+
+	registered          avl.Tree // <eventPkgPath> -> func() events.Info
+	eventsByPkgPath     avl.Tree // <eventPkgPath> -> events.Info
 	eventsByEndDate     avl.Tree // <endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	eventsByCreator     avl.Tree // <creatorID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
@@ -30,17 +32,46 @@ func init() {
 	Ownable = ownable.NewWithAddress(std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
 }
 
-func AddEvent(pkgPath string, info *events.Info) {
-	Ownable.AssertCallerIsOwner()
-	if info == nil {
-		panic("nil info")
+// XXX: split this package into eventreg and eventsindex
+
+func Register(infoGetter events.InfoGetter) {
+	pkgPath := std.PrevRealm().PkgPath()
+
+	if infoGetter == nil {
+		registered.Remove(pkgPath)
+		// XXX: remove from index??
+		return
 	}
+
+	registered.Set(pkgPath, infoGetter)
+}
+
+func getInfo(pkgPath string) (events.Info, bool) {
+	raw, ok := registered.Get(pkgPath)
+	if !ok {
+		return events.Info{}, false
+	}
+	return raw.(events.InfoGetter)(), true
+}
+
+func mustGetInfo(pkgPath string) events.Info {
+	info, ok := getInfo(pkgPath)
+	if !ok {
+		panic(ErrEventNotFound)
+	}
+	return info
+}
+
+func IndexEvent(pkgPath string) {
+	Ownable.AssertCallerIsOwner()
+
 	if prev := getEventByPkgPath(pkgPath); prev != nil {
 		panic("already added")
 	}
 
+	info := mustGetInfo(pkgPath)
 	infoWP := InfoWithPkgPath{
-		Info:    *info,
+		Info:    info,
 		PkgPath: pkgPath,
 	}
 
@@ -54,15 +85,14 @@ func AddEvent(pkgPath string, info *events.Info) {
 	eventsByCreator.Set(key, pkgPath)
 }
 
-func UpdateInfo(pkgPath string, info *events.Info) {
+func UpdateIndex(pkgPath string) {
 	Ownable.AssertCallerIsOwner()
-	if info == nil {
-		panic("nil info")
-	}
 
 	prevInfo := mustGetEventByPkgPath(pkgPath)
+
+	info := mustGetInfo(pkgPath)
 	infoWP := InfoWithPkgPath{
-		Info:    *info,
+		Info:    info,
 		PkgPath: pkgPath,
 	}
 	eventsByPkgPath.Set(pkgPath, infoWP)

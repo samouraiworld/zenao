@@ -5,7 +5,7 @@ import (
 	"gno.land/p/demo/ufmt"
 )
 
-func (inf *Info) ToJSON() *json.Node {
+func (inf Info) ToJSON() *json.Node {
 	return json.ObjectNode("", map[string]*json.Node{
 		"title":        json.StringNode("", inf.Title),
 		"description":  json.StringNode("", inf.Description),

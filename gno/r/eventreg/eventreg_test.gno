@@ -29,18 +29,26 @@ func TestEvents(t *testing.T) {
 		creator string
 		endDate time.Time
 	}{
-		{"1-future-event-month", "alice", time.Now().Add(30 * 24 * time.Hour)},
-		{"2-future-event-day", "bob", time.Now().Add(24 * time.Hour)},
-		{"3-past-event-hour", "alice", time.Now().Add(-time.Hour)},
-		{"4-past-event-day", "bob", time.Now().Add(-24 * time.Hour)},
-		{"5-past-event-month", "alice", time.Now().Add(-30 * 24 * time.Hour)},
-		{"6-event-will-change", "bob", time.Now().Add(-60 * 24 * time.Hour)},
+		{"gno.land/r/zenao/events/1-future-event-month", "alice", time.Now().Add(30 * 24 * time.Hour)},
+		{"gno.land/r/zenao/events/2-future-event-day", "bob", time.Now().Add(24 * time.Hour)},
+		{"gno.land/r/zenao/events/3-past-event-hour", "alice", time.Now().Add(-time.Hour)},
+		{"gno.land/r/zenao/events/4-past-event-day", "bob", time.Now().Add(-24 * time.Hour)},
+		{"gno.land/r/zenao/events/5-past-event-month", "alice", time.Now().Add(-30 * 24 * time.Hour)},
+		{"gno.land/r/zenao/events/6-event-will-change", "bob", time.Now().Add(-60 * 24 * time.Hour)},
 	}
-	for _, evt := range evts {
-		AddEvent(evt.id, &events.Info{
-			Creator: evt.creator,
-			EndDate: evt.endDate.Unix(),
-		})
+	for i, evt := range evts {
+		j := i
+		std.TestSetRealm(std.NewCodeRealm(evt.id))
+		getter := func() events.Info {
+			return events.Info{
+				Creator: evts[j].creator,
+				EndDate: evts[j].endDate.Unix(),
+			}
+		}
+		Register(getter)
+		std.TestSetRealm(std.NewUserRealm(initialOwner))
+
+		IndexEvent(evt.id)
 	}
 
 	// list upcoming events
@@ -105,10 +113,8 @@ func TestEvents(t *testing.T) {
 
 	// chane event endDate and rerun all tests
 
-	UpdateInfo("6-event-will-change", &events.Info{
-		Creator: "bob",
-		EndDate: time.Now().Add(60 * 24 * time.Hour).Unix(),
-	})
+	evts[5].endDate = time.Now().Add(60 * 24 * time.Hour)
+	UpdateIndex(evts[5].id)
 
 	// list upcoming events
 	{
@@ -152,10 +158,8 @@ func TestEvents(t *testing.T) {
 
 	// chane event creator and rerun all tests
 
-	UpdateInfo("6-event-will-change", &events.Info{
-		Creator: "alice",
-		EndDate: time.Now().Add(60 * 24 * time.Hour).Unix(),
-	})
+	evts[5].creator = "alice"
+	UpdateIndex(evts[5].id)
 
 	// list upcoming events
 	{
@@ -210,7 +214,7 @@ func TestEventsToJSON(t *testing.T) {
 func eventsString(evts []*InfoWithPkgPath) string {
 	res := []string{}
 	for _, evt := range evts {
-		res = append(res, evt.PkgPath)
+		res = append(res, strings.TrimPrefix(evt.PkgPath, "gno.land/r/zenao/events/"))
 	}
 	return strings.Join(res, ", ")
 }
