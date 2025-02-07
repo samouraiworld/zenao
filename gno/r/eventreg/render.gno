@@ -1,16 +1,62 @@
 package eventreg
 
-import "gno.land/p/moul/md"
+import (
+	"math"
+	"strings"
+	"time"
+
+	"gno.land/p/demo/ufmt"
+	"gno.land/p/moul/md"
+)
 
 func Render(path string) string {
-	res := md.H1("Zenao Events")
+	title := "Zenao Events"
+	listFn := listEvents
+	switch {
+	case strings.HasPrefix(path, "created/"):
+		title = "My Zenao Events"
+		listFn = func(from int64, to int64, limit uint32) []*InfoWithPkgPath {
+			return listEventsByCreator(strings.TrimPrefix(path, "created/"), from, to, limit)
+		}
+	case strings.HasPrefix(path, "tickets/"):
+		title = "My Zenao Tickets"
+		listFn = func(from int64, to int64, limit uint32) []*InfoWithPkgPath {
+			return listEventsByParticipant(strings.TrimPrefix(path, "tickets/"), from, to, limit)
+		}
+	}
 
-	evts := []string{}
-	eventsByEndDate.ReverseIterateByOffset(0, 50, func(key string, value interface{}) bool {
-		evts = append(evts, key)
-		return false
-	})
-	res += md.BulletList(evts)
+	buf := strings.Builder{}
+	buf.WriteString(md.H1(title))
+	buf.WriteString(md.HorizontalRule())
+	renderSection(&buf, listFn, "🎉 Upcoming", time.Now().Unix()+1, math.MaxInt64, 10)
+	renderSection(&buf, listFn, "👴 Past", time.Now().Unix(), 0, 10)
+	return buf.String()
+}
 
-	return res
+func renderSection(buf *strings.Builder, listFn func(int64, int64, uint32) []*InfoWithPkgPath, title string, from int64, to int64, limit uint32) {
+	buf.WriteString(md.H2(title))
+	evts := listFn(from, to, limit)
+	for _, evt := range evts {
+		buf.WriteString(md.HorizontalRule())
+		renderEvent(buf, evt)
+	}
+	if len(evts) == 0 {
+		buf.WriteString(md.HorizontalRule())
+		buf.WriteString(md.Paragraph("🤷 Nothing to show"))
+	}
+	buf.WriteString(md.HorizontalRule())
+}
+
+func renderEvent(buf *strings.Builder, evt *InfoWithPkgPath) {
+	buf.WriteString(md.H3(evt.Title + " | 📍 " + evt.Location))
+	timeStr := ufmt.Sprintf("⏱️ %s to %s", time.Unix(evt.StartDate, 0).Format(time.DateTime), time.Unix(evt.EndDate, 0).Format(time.DateTime))
+	buf.WriteString(md.Paragraph(timeStr + " | " + md.Link("🔗 Details", trimDomain(evt.PkgPath))))
+}
+
+func trimDomain(pkgPath string) string {
+	slashIdx := strings.Index(pkgPath, "/")
+	if slashIdx == -1 {
+		return pkgPath
+	}
+	return pkgPath[slashIdx:]
 }

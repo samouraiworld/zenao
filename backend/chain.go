@@ -92,11 +92,9 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 	}, vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
 		PkgPath: g.eventsIndexPkgPath,
-		Func:    "AddEvent",
+		Func:    "IndexEvent",
 		Args: []string{
-			evtID,
-			creatorID,
-			fmt.Sprintf("%d", req.EndDate),
+			eventPkgPath,
 		},
 	}))
 	if err != nil {
@@ -134,6 +132,24 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 	}
 
 	g.logger.Info("edited event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 10000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.eventsIndexPkgPath,
+		Func:    "UpdateIndex",
+		Args: []string{
+			eventPkgPath,
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("updated index", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
 	return nil
 }
 
@@ -170,6 +186,7 @@ func (g *gnoZenaoChain) CreateUser(userID string) error {
 func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	userPkgPath := g.userRealmPkgPath(userID)
+	userAddr := gnolang.DerivePkgAddr(userPkgPath).String()
 
 	// XXX: this won't work because the admin of the event is the event
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
@@ -179,13 +196,31 @@ func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
 		Caller:  g.signerInfo.GetAddress(),
 		PkgPath: eventPkgPath,
 		Func:    "AddParticipant",
-		Args:    []string{gnolang.DerivePkgAddr(userPkgPath).String()},
+		Args:    []string{userAddr},
 	}))
 	if err != nil {
 		return err
 	}
 
 	g.logger.Info("added participant", zap.String("user", userPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 10000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.eventsIndexPkgPath,
+		Func:    "AddParticipant",
+		Args: []string{
+			eventPkgPath,
+			userAddr,
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("indexed participant", zap.String("user", userPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -292,6 +327,7 @@ const eventRealmSourceTemplate = `package event
 import (
 	"gno.land/p/{{.namespace}}/events"
 	"gno.land/r/demo/profile"
+	"gno.land/r/{{.namespace}}/eventreg"
 )
 
 var Event *events.Event
@@ -310,7 +346,8 @@ func init() {
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
 		Location: {{.location}},
 	}
-	Event = events.NewEvent(&conf) 
+	Event = events.NewEvent(&conf)
+	eventreg.Register(func() events.Info { return Event.Info() })
 }
 
 func AddParticipant(participant string) {

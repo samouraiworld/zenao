@@ -3,7 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { EditEventForm } from "./EditEventForm";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { getQueryClient } from "@/lib/get-query-client";
-import { eventOptions, eventUserRoles } from "@/lib/queries/event";
+import { eventOptions } from "@/lib/queries/event";
+import { eventUserRoles } from "@/lib/queries/event-user-roles";
 
 export default async function EditPage({
   params,

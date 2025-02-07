@@ -1,0 +1,49 @@
+import Link from "next/link";
+import { auth } from "@clerk/nextjs/server";
+import { getQueryClient } from "@/lib/get-query-client";
+import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { eventsByCreatorList } from "@/lib/queries/events-list";
+import { EventCard } from "@/components/cards/EventCard";
+import { zenaoClient } from "@/app/zenao-client";
+
+export default async function CreatedPage() {
+  const { getToken } = await auth();
+  const token = await getToken();
+  if (!token) {
+    return <ScreenContainer>Log in to see events your created</ScreenContainer>;
+  }
+
+  const { address } = await zenaoClient.getUserAddress(
+    {},
+    { headers: { Authorization: "Bearer " + token } },
+  );
+
+  const queryClient = getQueryClient();
+  const now = Date.now() / 1000;
+  const upcoming = await queryClient.fetchQuery(
+    eventsByCreatorList(address, now, Number.MAX_SAFE_INTEGER, 20),
+  );
+  const past = await queryClient.fetchQuery(
+    eventsByCreatorList(address, now - 1, 0, 20),
+  );
+
+  return (
+    <ScreenContainer>
+      <h1>Events you created</h1>
+      <Link
+        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg:created/${address}`}
+        target="_blank"
+      >
+        -&gt; See this list on Gnoweb
+      </Link>
+      <h2>Upcoming</h2>
+      {[...upcoming].reverse().map((evt) => (
+        <EventCard key={evt.pkgPath} evt={evt} />
+      ))}
+      <h2>Past</h2>
+      {past.map((evt) => (
+        <EventCard key={evt.pkgPath} evt={evt} />
+      ))}
+    </ScreenContainer>
+  );
+}
