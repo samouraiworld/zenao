@@ -12,8 +12,8 @@ import (
 func Render(path string) string {
 	buf := strings.Builder{}
 	buf.WriteString(md.H1("Zenao Events"))
-	renderSection(&buf, "Upcoming", time.Now().Unix(), math.MaxInt64, 10)
-	renderSection(&buf, "Past", math.MinInt64, time.Now().Unix(), 10)
+	renderSection(&buf, "🎉 Upcoming", time.Now().Unix(), math.MaxInt64, 10)
+	renderSection(&buf, "👴 Past", math.MinInt64, time.Now().Unix(), 10)
 	return buf.String()
 }
 
