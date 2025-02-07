@@ -13,10 +13,10 @@ func Render(path string) string {
 	title := "Zenao Events"
 	listFn := listEvents
 	switch {
-	case strings.HasPrefix(path, "myevts/"):
+	case strings.HasPrefix(path, "created/"):
 		title = "My Zenao Events"
 		listFn = func(from int64, to int64, limit uint32) []*InfoWithPkgPath {
-			return listEventsByCreator(strings.TrimPrefix(path, "myevts/"), from, to, limit)
+			return listEventsByCreator(strings.TrimPrefix(path, "created/"), from, to, limit)
 		}
 	case strings.HasPrefix(path, "tickets/"):
 		title = "My Zenao Tickets"
