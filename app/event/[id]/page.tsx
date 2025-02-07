@@ -2,9 +2,10 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { EventInfo } from "./event-info";
-import { eventOptions, eventUserRoles } from "@/lib/queries/event";
+import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { eventUserRoles } from "@/lib/queries/event-user-roles";
 
 type Props = {
   params: Promise<{ id: string }>;

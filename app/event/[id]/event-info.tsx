@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { ParticipateForm } from "./ParticipateForm";
-import { eventOptions, eventUserRoles } from "@/lib/queries/event";
+import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Separator } from "@/components/common/Separator";
 import { Text } from "@/components/texts/DefaultText";
@@ -19,6 +19,7 @@ import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { web2URL } from "@/lib/uris";
+import { eventUserRoles } from "@/lib/queries/event-user-roles";
 
 interface EventSectionProps {
   title: string;
