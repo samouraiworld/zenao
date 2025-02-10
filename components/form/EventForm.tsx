@@ -7,6 +7,7 @@ import { CloudUpload, Loader2, XIcon } from "lucide-react";
 import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import L from "leaflet";
+import { find as GeoTZFind } from "browser-geo-tz";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
@@ -73,7 +74,7 @@ export const useSearchField = (value: string) => {
 
 const FormFieldComboBox: React.FC<{
   form: UseFormReturn<EventFormSchemaType>;
-  onSelect: (marker: L.LatLng) => void;
+  onSelect: (marker: L.LatLng) => Promise<void>;
   onRemove: () => void;
 }> = ({ form, onSelect, onRemove }) => {
   const t = useTranslations("eventForm");
@@ -141,11 +142,13 @@ const FormFieldComboBox: React.FC<{
                         className="text-primary"
                         value={result.label}
                         key={result.label + index}
-                        onSelect={() => {
+                        onSelect={async () => {
                           form.setValue("location", result.label);
-                          onSelect(
-                            new L.LatLng(result.raw.lat, result.raw.lon),
+                          const latlng = new L.LatLng(
+                            result.raw.lat,
+                            result.raw.lon,
                           );
+                          await onSelect(latlng);
                           setOpen(false);
                         }}
                       >
@@ -177,6 +180,7 @@ export const EventForm: React.FC<EventFormProps> = ({
 
   const [uploading, setUploading] = useState(false);
   const [marker, setMarker] = useState<L.LatLng | null>(null);
+  const [timezone, setTimezone] = useState<string>("");
 
   const { toast } = useToast();
   const hiddenInputRef = useRef<HTMLInputElement>(null);
@@ -299,10 +303,18 @@ export const EventForm: React.FC<EventFormProps> = ({
             <Card className="p-0">
               <FormFieldComboBox
                 form={form}
-                onSelect={(marker: L.LatLng) => setMarker(marker)}
-                onRemove={() => setMarker(null)}
+                onSelect={async (marker: L.LatLng) => {
+                  setMarker(marker);
+                  const tz = await GeoTZFind(marker.lat, marker.lng);
+                  setTimezone(tz[0]);
+                }}
+                onRemove={() => {
+                  setMarker(null);
+                  setTimezone("");
+                }}
               />
             </Card>
+            {timezone && <SmallText className="mb-3">{timezone}</SmallText>}
             {location && marker && (
               <MapContainer
                 center={marker}
