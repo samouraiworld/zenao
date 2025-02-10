@@ -1,16 +1,18 @@
 import { UseFormReturn } from "react-hook-form";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { GeoSearchControl } from "leaflet-geosearch";
 import OpenStreetMapProvider from "leaflet-geosearch/lib/providers/openStreetMapProvider.js";
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { CloudUpload, Loader2, X, XIcon } from "lucide-react";
+import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import { CloudUpload, Loader2 } from "lucide-react";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
+import { Button } from "../shadcn/button";
 import { MarkdownPreview } from "../common/MarkdownPreview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { SmallText } from "../texts/SmallText";
@@ -19,12 +21,27 @@ import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
 import { EventFormSchemaType, urlPattern } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
-import { Form } from "@/components/shadcn/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/shadcn/form";
 import { useToast } from "@/app/hooks/use-toast";
 import { isValidURL, web2URL } from "@/lib/uris";
 import { filesPostResponseSchema } from "@/lib/files";
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/shadcn/command";
+import { cn } from "@/lib/tailwind";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -33,32 +50,118 @@ interface EventFormProps {
   isEditing?: boolean;
 }
 
-const SearchField = () => {
-  const map = useMap();
-  const provider = new OpenStreetMapProvider();
-
-  // @ts-expect-error any-type
-  const searchControl = new GeoSearchControl({
-    provider,
-    marker: {
-      icon: new L.Icon.Default(),
-      draggable: false,
-    },
-    classNames: {
-      input: "bg-[#FFF] text-[#000]",
-      item: "text-[#000]",
-    },
-  });
+const useSearchField = (value: string) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [results, setResults] = useState<SearchResult[]>([]);
 
   useEffect(() => {
-    map.addControl(searchControl);
-    return () => {
-      map.removeControl(searchControl);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Created a timeout else we query too many times the provider and it takes too much time to process
+    const timeoutId = setTimeout(async () => {
+      const provider = new OpenStreetMapProvider();
+      setLoading(true);
+      const results = await provider.search({ query: value });
 
-  return null;
+      setResults(results);
+      setLoading(false);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [value]);
+
+  return { loading, results };
+};
+
+const FormFieldComboBox: React.FC<{
+  form: UseFormReturn<EventFormSchemaType>;
+  onSelect: (marker: L.LatLng) => void;
+  onRemove: () => void;
+}> = ({ form, onSelect, onRemove }) => {
+  const t = useTranslations("eventForm");
+  const [search, setSearch] = useState<string>("");
+  const [open, setOpen] = useState<boolean>(false);
+  const { results } = useSearchField(search);
+
+  return (
+    <FormField
+      control={form.control}
+      name="location"
+      render={({ field }) => (
+        <FormItem className="flex flex-col w-full space-y-0">
+          <Popover open={open} onOpenChange={setOpen}>
+            <div className="flex flex-row w-full justify-between">
+              <PopoverTrigger asChild>
+                <FormControl>
+                  <Button
+                    variant="secondary"
+                    role="combobox"
+                    className="w-full flex justify-start rounded-xl px-4 py-3 h-auto backdrop-blur-sm"
+                  >
+                    <SmallText
+                      className={cn(
+                        "truncate",
+                        !field.value.length && "text-secondary-color",
+                      )}
+                    >
+                      {field.value || "Add an address..."}
+                    </SmallText>
+                  </Button>
+                </FormControl>
+              </PopoverTrigger>
+              {field.value && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="bg-secondary/80 backdrop-blur-sm self-center absolute right-1"
+                  onClick={() => {
+                    setSearch("");
+                    onRemove();
+                    form.setValue("location", "");
+                  }}
+                >
+                  <XIcon className="h-3 w-3" />
+                  <span className="sr-only">Clear</span>
+                </Button>
+              )}
+            </div>
+            <PopoverContent className="max-w-full relative p-0">
+              <Command>
+                <CommandInput
+                  placeholder={t("location-placeholder")}
+                  className="h-10"
+                  onValueChange={setSearch}
+                  value={search}
+                  typeof="search"
+                />
+                <CommandList>
+                  <CommandEmpty>No address found.</CommandEmpty>
+                  <CommandGroup>
+                    {results.map((result, index) => (
+                      <CommandItem
+                        className="text-primary"
+                        value={result.label}
+                        key={result.label + index}
+                        onSelect={() => {
+                          form.setValue("location", result.label);
+                          onSelect(
+                            new L.LatLng(result.raw.lat, result.raw.lon),
+                          );
+                          setOpen(false);
+                        }}
+                      >
+                        <SmallText>{result.label}</SmallText>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
 };
 
 export const EventForm: React.FC<EventFormProps> = ({
@@ -69,9 +172,12 @@ export const EventForm: React.FC<EventFormProps> = ({
 }) => {
   const imageUri = form.watch("imageUri");
   const description = form.watch("description");
+  const location = form.watch("location");
   const t = useTranslations("eventForm");
 
   const [uploading, setUploading] = useState(false);
+  const [marker, setMarker] = useState<L.LatLng | null>(null);
+
   const { toast } = useToast();
   const hiddenInputRef = useRef<HTMLInputElement>(null);
 
@@ -190,24 +296,26 @@ export const EventForm: React.FC<EventFormProps> = ({
                 </TabsContent>
               </Tabs>
             </Card>
-            <Card>
-              <FormFieldInputString
-                control={form.control}
-                name="location"
-                placeholder={t("location-placeholder")}
+            <Card className="p-0">
+              <FormFieldComboBox
+                form={form}
+                onSelect={(marker: L.LatLng) => setMarker(marker)}
+                onRemove={() => setMarker(null)}
               />
             </Card>
-            <MapContainer
-              center={[51.505, -0.09]}
-              zoom={3}
-              className="h-[300px] w-full "
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <SearchField />
-            </MapContainer>
+            {location && marker && (
+              <MapContainer
+                center={marker}
+                zoom={12}
+                className="h-[300px] w-full rounded-xl z-40"
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <Marker position={marker} />
+              </MapContainer>
+            )}
             <Card>
               <SmallText className="mb-3">{t("capacity-label")}</SmallText>
               <FormFieldInputNumber
