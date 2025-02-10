@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import OpenStreetMapProvider from "leaflet-geosearch/lib/providers/openStreetMapProvider.js";
 import { useEffect, useRef, useState } from "react";
-import { CloudUpload, Loader2, X, XIcon } from "lucide-react";
+import { CloudUpload, Loader2, XIcon } from "lucide-react";
 import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import L from "leaflet";
@@ -50,7 +50,7 @@ interface EventFormProps {
   isEditing?: boolean;
 }
 
-const useSearchField = (value: string) => {
+export const useSearchField = (value: string) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [results, setResults] = useState<SearchResult[]>([]);
 
@@ -313,7 +313,15 @@ export const EventForm: React.FC<EventFormProps> = ({
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                <Marker position={marker} />
+                <Marker
+                  position={marker}
+                  icon={
+                    new L.Icon({
+                      iconUrl: "/marker-icon.png",
+                      shadowUrl: "/marker-shadow.png",
+                    })
+                  }
+                />
               </MapContainer>
             )}
             <Card>

@@ -8,6 +8,8 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import L from "leaflet";
 import { ParticipateForm } from "./ParticipateForm";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -20,6 +22,8 @@ import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { web2URL } from "@/lib/uris";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { useSearchField } from "@/components/form/EventForm";
+import "leaflet/dist/leaflet.css";
 
 interface EventSectionProps {
   title: string;
@@ -48,6 +52,7 @@ export function EventInfo({
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const queryClient = useQueryClient();
+  const { results } = useSearchField(data.location);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -145,10 +150,34 @@ export function EventInfo({
             </div>
           </div>
         </div>
-        <div className="flex flex-row gap-4 items-center">
-          <MapPin width={iconSize} height={iconSize} />
-          {/* TODO: Add location */}
-          <LargeText>{data.location}</LargeText>
+        <div className="flex flex-col">
+          <div className="flex flex-row gap-4 items-center mb-2">
+            <div className="w-[22px] h-[22px]">
+              <MapPin width={iconSize} height={iconSize} />
+            </div>
+            <LargeText>{data.location}</LargeText>
+          </div>
+          {results.length === 1 && (
+            <MapContainer
+              center={new L.LatLng(results[0].raw.lat, results[0].raw.lon)}
+              zoom={12}
+              className="h-[300px] w-full rounded-xl z-40"
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <Marker
+                position={new L.LatLng(results[0].raw.lat, results[0].raw.lon)}
+                icon={
+                  new L.Icon({
+                    iconUrl: "/marker-icon.png",
+                    shadowUrl: "/marker-shadow.png",
+                  })
+                }
+              />
+            </MapContainer>
+          )}
         </div>
 
         <Card className="mt-2">
