@@ -1,5 +1,3 @@
-"use client";
-
 import { CreateEventForm } from "./CreateEventForm";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 
