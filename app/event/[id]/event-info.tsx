@@ -8,7 +8,6 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { ParticipateForm } from "./ParticipateForm";
 import { eventOptions } from "@/lib/queries/event";
@@ -24,6 +23,7 @@ import { web2URL } from "@/lib/uris";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
 import { useSearchField } from "@/components/form/EventForm";
 import "leaflet/dist/leaflet.css";
+import { Map } from "@/components/common/Map";
 
 interface EventSectionProps {
   title: string;
@@ -158,25 +158,9 @@ export function EventInfo({
             <LargeText>{data.location}</LargeText>
           </div>
           {results.length === 1 && (
-            <MapContainer
-              center={new L.LatLng(results[0].raw.lat, results[0].raw.lon)}
-              zoom={12}
-              className="h-[300px] w-full rounded-xl z-40"
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker
-                position={new L.LatLng(results[0].raw.lat, results[0].raw.lon)}
-                icon={
-                  new L.Icon({
-                    iconUrl: "/marker-icon.png",
-                    shadowUrl: "/marker-shadow.png",
-                  })
-                }
-              />
-            </MapContainer>
+            <Map
+              marker={new L.LatLng(results[0].raw.lat, results[0].raw.lon)}
+            />
           )}
         </div>
 

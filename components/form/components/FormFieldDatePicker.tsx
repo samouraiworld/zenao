@@ -2,6 +2,7 @@
 
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
+import { format as formatTZ } from "date-fns-tz";
 import { UseFormReturn } from "react-hook-form";
 import { EventFormSchemaType, FormFieldProps } from "../types";
 import { Button } from "@/components/shadcn/button";
@@ -24,8 +25,9 @@ import { SmallText } from "@/components/texts/SmallText";
 export const FormFieldDatePicker: React.FC<
   Omit<FormFieldProps<bigint>, "control"> & {
     form: UseFormReturn<EventFormSchemaType>;
+    timeZone: string;
   }
-> = ({ name, className, placeholder, form }) => {
+> = ({ name, className, placeholder, form, timeZone }) => {
   function handleDateSelect(date: Date | undefined) {
     if (date) {
       form.setValue(name, BigInt(getUnixTime(date)));
@@ -76,7 +78,13 @@ export const FormFieldDatePicker: React.FC<
                     )}
                   >
                     {field.value ? (
-                      format(formattedValue, "MM/dd/yyyy hh:mm aa")
+                      timeZone.length ? (
+                        formatTZ(formattedValue, "MM/dd/yyyy hh:mm aa zzz", {
+                          timeZone,
+                        })
+                      ) : (
+                        format(formattedValue, "MM/dd/yyyy hh:mm aa zzz")
+                      )
                     ) : (
                       <SmallText variant="secondary">{placeholder}</SmallText>
                     )}

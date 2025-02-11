@@ -5,9 +5,8 @@ import OpenStreetMapProvider from "leaflet-geosearch/lib/providers/openStreetMap
 import { useEffect, useRef, useState } from "react";
 import { CloudUpload, Loader2, XIcon } from "lucide-react";
 import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
-import L from "leaflet";
 import { find as GeoTZFind } from "browser-geo-tz";
+import L from "leaflet";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
@@ -43,6 +42,7 @@ import {
   CommandList,
 } from "@/components/shadcn/command";
 import { cn } from "@/lib/tailwind";
+import { Map } from "@/components/common/Map";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -180,7 +180,7 @@ export const EventForm: React.FC<EventFormProps> = ({
 
   const [uploading, setUploading] = useState(false);
   const [marker, setMarker] = useState<L.LatLng | null>(null);
-  const [timezone, setTimezone] = useState<string>("");
+  const [timeZone, setTimeZone] = useState<string>("");
 
   const { toast } = useToast();
   const hiddenInputRef = useRef<HTMLInputElement>(null);
@@ -306,36 +306,16 @@ export const EventForm: React.FC<EventFormProps> = ({
                 onSelect={async (marker: L.LatLng) => {
                   setMarker(marker);
                   const tz = await GeoTZFind(marker.lat, marker.lng);
-                  setTimezone(tz[0]);
+                  setTimeZone(tz[0]);
                 }}
                 onRemove={() => {
                   setMarker(null);
-                  setTimezone("");
+                  setTimeZone("");
                 }}
               />
             </Card>
-            {timezone && <SmallText className="mb-3">{timezone}</SmallText>}
-            {location && marker && (
-              <MapContainer
-                center={marker}
-                zoom={12}
-                className="h-[300px] w-full rounded-xl z-40"
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker
-                  position={marker}
-                  icon={
-                    new L.Icon({
-                      iconUrl: "/marker-icon.png",
-                      shadowUrl: "/marker-shadow.png",
-                    })
-                  }
-                />
-              </MapContainer>
-            )}
+            {timeZone && <SmallText className="mb-3">{timeZone}</SmallText>}
+            {location && marker && <Map marker={marker} />}
             <Card>
               <SmallText className="mb-3">{t("capacity-label")}</SmallText>
               <FormFieldInputNumber
@@ -349,12 +329,14 @@ export const EventForm: React.FC<EventFormProps> = ({
                 form={form}
                 name="startDate"
                 placeholder={t("start-date-placeholder")}
+                timeZone={timeZone}
               />
               <Separator className="mx-0" />
               <FormFieldDatePicker
                 form={form}
                 name="endDate"
                 placeholder={t("end-date-placeholder")}
+                timeZone={timeZone}
               />
             </Card>
             <ButtonWithLabel

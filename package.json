@@ -32,6 +32,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
     "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.2.0",
     "leaflet": "^1.9.4",
     "leaflet-geosearch": "^4.1.0",
     "lucide-react": "^0.471.1",
