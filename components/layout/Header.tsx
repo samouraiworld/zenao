@@ -23,7 +23,7 @@ const HeaderLinks: React.FC = () => {
       <Link href="/created">
         <SmallText variant="secondary">{t("calendar")}</SmallText>
       </Link>
-      <SmallText variant="secondary">{t("pricing")}</SmallText>
+      <SmallText variant="secondary">{t("features")}</SmallText>
       <SmallText variant="secondary">{t("blog")}</SmallText>
       <Link href="/manifesto">
         <SmallText variant="secondary">{t("manifesto")}</SmallText>
