@@ -47,6 +47,7 @@ export function EventInfo({
   const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
+  const isStarted = Date.now() > Number(data.startDate) * 1000;
   const queryClient = useQueryClient();
 
   const t = useTranslations("event");
@@ -162,6 +163,11 @@ export function EventInfo({
               {/* add back when we can cancel
                 <Text className="my-4">{t("cancel-desc")}</Text>
               */}
+            </div>
+          ) : isStarted ? (
+            <div>
+              <LargeText>{t("already-begun")}</LargeText>
+              <Text className="my-4">{t("too-late")}</Text>
             </div>
           ) : (
             <div>
