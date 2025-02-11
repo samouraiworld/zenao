@@ -1,16 +1,62 @@
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
+import { useTranslations } from "next-intl";
 import { getQueryClient } from "@/lib/get-query-client";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { eventsByCreatorList } from "@/lib/queries/events-list";
-import { EventCard } from "@/components/cards/EventCard";
+import {
+  ScreenContainer,
+  ScreenContainerCentered,
+} from "@/components/layout/ScreenContainer";
+import {
+  eventsByCreatorList,
+  EventsListSchemaType,
+} from "@/lib/queries/events-list";
 import { zenaoClient } from "@/app/zenao-client";
+import { VeryLargeText } from "@/components/texts/VeryLargeText";
+import { EventsList } from "@/components/lists/EventsList";
+
+const LoggedOutCreatedPage: React.FC = () => {
+  const t = useTranslations("created");
+  return (
+    <ScreenContainerCentered isSignedOutModal>
+      {t("logged-out")}
+    </ScreenContainerCentered>
+  );
+};
+
+const HeaderCreated: React.FC<{ address: string }> = ({ address }) => {
+  const t = useTranslations("created");
+  return (
+    <div className="flex flex-col sm:flex-row gap-2 items-center mb-3">
+      <VeryLargeText>{t("title")}</VeryLargeText>
+      <Link
+        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg:created/${address}`}
+        target="_blank"
+      >
+        -&gt;
+        {t("see-gnoweb")}
+      </Link>
+    </div>
+  );
+};
+
+const BodyCreated: React.FC<{
+  upcoming: EventsListSchemaType;
+  past: EventsListSchemaType;
+}> = ({ upcoming, past }) => {
+  const t = useTranslations("created");
+  return (
+    <div>
+      <EventsList list={[...upcoming].reverse()} title={t("upcoming")} />
+      <EventsList list={past} title={t("past")} />
+    </div>
+  );
+};
 
 export default async function CreatedPage() {
   const { getToken } = await auth();
   const token = await getToken();
   if (!token) {
-    return <ScreenContainer>Log in to see events your created</ScreenContainer>;
+    return <LoggedOutCreatedPage />;
   }
 
   const { address } = await zenaoClient.getUserAddress(
@@ -29,21 +75,8 @@ export default async function CreatedPage() {
 
   return (
     <ScreenContainer>
-      <h1>Events you created</h1>
-      <Link
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg:created/${address}`}
-        target="_blank"
-      >
-        -&gt; See this list on Gnoweb
-      </Link>
-      <h2>Upcoming</h2>
-      {[...upcoming].reverse().map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
-      <h2>Past</h2>
-      {past.map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
+      <HeaderCreated address={address} />
+      <BodyCreated upcoming={upcoming} past={past} />
     </ScreenContainer>
   );
 }

@@ -76,6 +76,14 @@
     "upcoming": "Upcoming",
     "past": "Past"
   },
+  "created": {
+    "logged-out": "Log in to see events your created",
+    "no-events": "No events to show.",
+    "title": "Events you created",
+    "see-gnoweb": "See on Gnoweb",
+    "upcoming": "Upcoming",
+    "past": "Past"
+  },
   "error": {
     "label": "Oups! An error has occured.",
     "retry-button": "Retry"

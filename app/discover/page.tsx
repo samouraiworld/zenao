@@ -3,9 +3,8 @@ import { useTranslations } from "next-intl";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventsList, EventsListSchemaType } from "@/lib/queries/events-list";
-import { EventCard } from "@/components/cards/EventCard";
-import { LargeText } from "@/components/texts/LargeText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
+import { EventsList } from "@/components/lists/EventsList";
 
 const HeaderDiscover: React.FC = () => {
   const t = useTranslations("discover");
@@ -30,14 +29,8 @@ const BodyDiscover: React.FC<{
   const t = useTranslations("discover");
   return (
     <div>
-      <LargeText className="mb-2">{t("upcoming")}</LargeText>
-      {[...upcoming].reverse().map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
-      <LargeText className="mb-2">{t("past")}</LargeText>
-      {past.map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
+      <EventsList list={[...upcoming].reverse()} title={t("upcoming")} />
+      <EventsList list={past} title={t("past")} />
     </div>
   );
 };
