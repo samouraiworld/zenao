@@ -3,6 +3,8 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventsList } from "@/lib/queries/events-list";
 import { EventCard } from "@/components/cards/EventCard";
+import { LargeText } from "@/components/texts/LargeText";
+import { VeryLargeText } from "@/components/texts/VeryLargeText";
 
 export default async function DiscoverPage() {
   const queryClient = getQueryClient();
@@ -14,18 +16,20 @@ export default async function DiscoverPage() {
 
   return (
     <ScreenContainer>
-      <h1>Discover events</h1>
-      <Link
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
-        target="_blank"
-      >
-        -&gt; See this list on Gnoweb
-      </Link>
-      <h2>Upcoming</h2>
+      <div className="flex flex-col sm:flex-row gap-2 items-center mb-3">
+        <VeryLargeText>Discover events</VeryLargeText>
+        <Link
+          href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
+          target="_blank"
+        >
+          -&gt; See this list on Gnoweb
+        </Link>
+      </div>
+      <LargeText className="mb-2">Upcoming</LargeText>
       {[...upcoming].reverse().map((evt) => (
         <EventCard key={evt.pkgPath} evt={evt} />
       ))}
-      <h2>Past</h2>
+      <LargeText className="mb-2">Past</LargeText>
       {past.map((evt) => (
         <EventCard key={evt.pkgPath} evt={evt} />
       ))}

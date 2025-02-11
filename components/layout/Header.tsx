@@ -30,7 +30,9 @@ export const Header: React.FC = () => {
           <Text className="font-extrabold">{t("zenao")}</Text>
         </Link>
         <div className="flex flex-row gap-4">
-          <SmallText variant="secondary">{t("discover")}</SmallText>
+          <Link href="/discover">
+            <SmallText variant="secondary">{t("discover")}</SmallText>
+          </Link>
           <SmallText variant="secondary">{t("calendar")}</SmallText>
           <SmallText variant="secondary">{t("pricing")}</SmallText>
           <SmallText variant="secondary">{t("blog")}</SmallText>
@@ -62,7 +64,9 @@ export const Header: React.FC = () => {
               <AlignJustifyIcon width={26} height={26} />
             </PopoverTrigger>
             <PopoverContent className="flex gap-1 flex-col bg-secondary rounded-xl px-4 py-2">
-              <SmallText>{t("discover")}</SmallText>
+              <Link href="/discover">
+                <SmallText>{t("discover")}</SmallText>
+              </Link>
               <SmallText>{t("calendar")}</SmallText>
               <SmallText>{t("pricing")}</SmallText>
               <SmallText>{t("blog")}</SmallText>
