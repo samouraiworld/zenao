@@ -32,7 +32,7 @@ export const Header: React.FC = () => {
         <div className="flex flex-row gap-4">
           <SmallText variant="secondary">{t("discover")}</SmallText>
           <SmallText variant="secondary">{t("calendar")}</SmallText>
-          <SmallText variant="secondary">{t("pricing")}</SmallText>
+          <SmallText variant="secondary">{t("features")}</SmallText>
           <SmallText variant="secondary">{t("blog")}</SmallText>
           <Link href="/manifesto">
             <SmallText variant="secondary">{t("manifesto")}</SmallText>
@@ -64,7 +64,7 @@ export const Header: React.FC = () => {
             <PopoverContent className="flex gap-1 flex-col bg-secondary rounded-xl px-4 py-2">
               <SmallText>{t("discover")}</SmallText>
               <SmallText>{t("calendar")}</SmallText>
-              <SmallText>{t("pricing")}</SmallText>
+              <SmallText>{t("features")}</SmallText>
               <SmallText>{t("blog")}</SmallText>
               <Link href="/manifesto">
                 <SmallText variant="secondary">{t("manifesto")}</SmallText>
