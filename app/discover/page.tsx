@@ -1,10 +1,46 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { eventsList } from "@/lib/queries/events-list";
+import { eventsList, EventsListSchemaType } from "@/lib/queries/events-list";
 import { EventCard } from "@/components/cards/EventCard";
 import { LargeText } from "@/components/texts/LargeText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
+
+const HeaderDiscover: React.FC = () => {
+  const t = useTranslations("discover");
+  return (
+    <div className="flex flex-col sm:flex-row gap-2 items-center mb-3">
+      <VeryLargeText>{t("title")}</VeryLargeText>
+      <Link
+        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
+        target="_blank"
+      >
+        -&gt;
+        {t("see-gnoweb")}
+      </Link>
+    </div>
+  );
+};
+
+const BodyDiscover: React.FC<{
+  upcoming: EventsListSchemaType;
+  past: EventsListSchemaType;
+}> = ({ upcoming, past }) => {
+  const t = useTranslations("discover");
+  return (
+    <div>
+      <LargeText className="mb-2">{t("upcoming")}</LargeText>
+      {[...upcoming].reverse().map((evt) => (
+        <EventCard key={evt.pkgPath} evt={evt} />
+      ))}
+      <LargeText className="mb-2">{t("past")}</LargeText>
+      {past.map((evt) => (
+        <EventCard key={evt.pkgPath} evt={evt} />
+      ))}
+    </div>
+  );
+};
 
 export default async function DiscoverPage() {
   const queryClient = getQueryClient();
@@ -16,23 +52,8 @@ export default async function DiscoverPage() {
 
   return (
     <ScreenContainer>
-      <div className="flex flex-col sm:flex-row gap-2 items-center mb-3">
-        <VeryLargeText>Discover events</VeryLargeText>
-        <Link
-          href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
-          target="_blank"
-        >
-          -&gt; See this list on Gnoweb
-        </Link>
-      </div>
-      <LargeText className="mb-2">Upcoming</LargeText>
-      {[...upcoming].reverse().map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
-      <LargeText className="mb-2">Past</LargeText>
-      {past.map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
+      <HeaderDiscover />
+      <BodyDiscover upcoming={upcoming} past={past} />
     </ScreenContainer>
   );
 }

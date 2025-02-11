@@ -70,6 +70,12 @@
     "p6-ref": "(*Decentralized Autonomous Organizations)",
     "p7": "In case of emergency, keep zen, and organize."
   },
+  "discover": {
+    "title": "Discover events",
+    "see-gnoweb": "See on Gnoweb",
+    "upcoming": "Upcoming",
+    "past": "Past"
+  },
   "error": {
     "label": "Oups! An error has occured.",
     "retry-button": "Retry"

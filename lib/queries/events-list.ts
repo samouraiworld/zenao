@@ -6,6 +6,7 @@ import { eventInfoSchema, extractGnoJSONResponse } from "@/lib/gno";
 const eventsListSchema = z.array(
   eventInfoSchema.extend({ pkgPath: z.string() }),
 );
+export type EventsListSchemaType = z.infer<typeof eventsListSchema>;
 
 export const eventsList = (
   fromUnixSec: number,
