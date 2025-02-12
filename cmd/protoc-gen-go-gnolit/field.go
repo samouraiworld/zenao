@@ -45,7 +45,7 @@ func fieldToLit(prefix string, g *protogen.GeneratedFile, field *protogen.Field)
 		panic("bytes not supported")
 	case protoreflect.MessageKind, protoreflect.GroupKind:
 		g.P(prefix, "if ", receiver, " != nil {")
-		g.P(prefix, `fmt.Fprintf(buf, "%s\t`, field.GoName, `: &%s,\n", linePrefix, `, receiver, `.GnoLiteral(linePrefix+"\t"))`)
+		g.P(prefix, `fmt.Fprintf(buf, "%s\t`, field.GoName, `: &%s%s,\n", linePrefix, typePrefix, `, receiver, `.GnoLiteral(typePrefix, linePrefix+"\t"))`)
 		g.P(prefix, "}")
 		return
 	}
@@ -78,7 +78,7 @@ func oneOfToLit(prefix string, g *protogen.GeneratedFile, oneOf *protogen.Oneof)
 	g.P(prefix, "switch val := ", receiver, ".(type) {")
 	for _, f := range oneOf.Fields {
 		g.P(prefix, "case *", parentTypeName, "_", f.GoName, ":")
-		g.P(prefix, `fmt.Fprintf(buf, "%s\t`, oneOf.GoName, `: &%s,\n", linePrefix, val.`, f.GoName, `.GnoLiteral(linePrefix+"\t"))`)
+		g.P(prefix, `fmt.Fprintf(buf, "%s\t`, oneOf.GoName, `: &%s,\n", linePrefix, val.`, f.GoName, `.GnoLiteral(typePrefix, linePrefix+"\t"))`)
 	}
 	g.P(prefix, "default:")
 	g.P(prefix, `	panic(errors.New("unknown `, name, ` variant"))`)

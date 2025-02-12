@@ -289,7 +289,7 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 		"req":            req,
 		"zenaoAdminAddr": zenaoAdminAddr,
 		"namespace":      gnoNamespace,
-		"location":       "&" + req.Location.GnoLiteral("\t\t"),
+		"location":       "&" + req.Location.GnoLiteral("zenaov1.", "\t\t"),
 	}
 
 	toMarshal := map[string]interface{}{
@@ -331,6 +331,7 @@ func generateUserRealmSource(id string, gnoNamespace string) (string, error) {
 const eventRealmSourceTemplate = `package event
 
 import (
+	zenaov1 "gno.land/p/{{.namespace}}/v1"
 	"gno.land/p/{{.namespace}}/events"
 	"gno.land/r/demo/profile"
 	"gno.land/r/{{.namespace}}/eventreg"

@@ -8,8 +8,9 @@ import (
 	"errors"
 )
 
-func (e *EditUserRequest) GnoLiteral(linePrefix string) string {
+func (e *EditUserRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("EditUserRequest{\n")
 	fmt.Fprintf(buf, "%s\tDisplayName: %q,\n", linePrefix, e.DisplayName)
 	fmt.Fprintf(buf, "%s\tBio: %q,\n", linePrefix, e.Bio)
@@ -19,8 +20,9 @@ func (e *EditUserRequest) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (e *EditUserResponse) GnoLiteral(linePrefix string) string {
+func (e *EditUserResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("EditUserResponse{\n")
 	fmt.Fprintf(buf, "%s\tId: %q,\n", linePrefix, e.Id)
 	buf.WriteString(linePrefix)
@@ -28,16 +30,18 @@ func (e *EditUserResponse) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (g *GetUserAddressRequest) GnoLiteral(linePrefix string) string {
+func (g *GetUserAddressRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("GetUserAddressRequest{\n")
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
 }
 
-func (g *GetUserAddressResponse) GnoLiteral(linePrefix string) string {
+func (g *GetUserAddressResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("GetUserAddressResponse{\n")
 	fmt.Fprintf(buf, "%s\tAddress: %q,\n", linePrefix, g.Address)
 	buf.WriteString(linePrefix)
@@ -45,8 +49,9 @@ func (g *GetUserAddressResponse) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (c *CreateEventRequest) GnoLiteral(linePrefix string) string {
+func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("CreateEventRequest{\n")
 	fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, c.Title)
 	fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, c.Description)
@@ -56,15 +61,16 @@ func (c *CreateEventRequest) GnoLiteral(linePrefix string) string {
 	fmt.Fprintf(buf, "%s\tTicketPrice: %g,\n", linePrefix, c.TicketPrice)
 	fmt.Fprintf(buf, "%s\tCapacity: %d,\n", linePrefix, c.Capacity)
 	if c.Location != nil {
-		fmt.Fprintf(buf, "%s\tLocation: &%s,\n", linePrefix, c.Location.GnoLiteral(linePrefix+"\t"))
+		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, c.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
 }
 
-func (c *CreateEventResponse) GnoLiteral(linePrefix string) string {
+func (c *CreateEventResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("CreateEventResponse{\n")
 	fmt.Fprintf(buf, "%s\tId: %q,\n", linePrefix, c.Id)
 	buf.WriteString(linePrefix)
@@ -72,8 +78,9 @@ func (c *CreateEventResponse) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (e *EditEventRequest) GnoLiteral(linePrefix string) string {
+func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("EditEventRequest{\n")
 	fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, e.EventId)
 	fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, e.Title)
@@ -84,15 +91,16 @@ func (e *EditEventRequest) GnoLiteral(linePrefix string) string {
 	fmt.Fprintf(buf, "%s\tTicketPrice: %g,\n", linePrefix, e.TicketPrice)
 	fmt.Fprintf(buf, "%s\tCapacity: %d,\n", linePrefix, e.Capacity)
 	if e.Location != nil {
-		fmt.Fprintf(buf, "%s\tLocation: &%s,\n", linePrefix, e.Location.GnoLiteral(linePrefix+"\t"))
+		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, e.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
 }
 
-func (e *EditEventResponse) GnoLiteral(linePrefix string) string {
+func (e *EditEventResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("EditEventResponse{\n")
 	fmt.Fprintf(buf, "%s\tId: %q,\n", linePrefix, e.Id)
 	buf.WriteString(linePrefix)
@@ -100,8 +108,9 @@ func (e *EditEventResponse) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (p *ParticipateRequest) GnoLiteral(linePrefix string) string {
+func (p *ParticipateRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("ParticipateRequest{\n")
 	fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, p.EventId)
 	fmt.Fprintf(buf, "%s\tEmail: %q,\n", linePrefix, p.Email)
@@ -110,8 +119,9 @@ func (p *ParticipateRequest) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (p *ParticipateResponse) GnoLiteral(linePrefix string) string {
+func (p *ParticipateResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("ParticipateResponse{\n")
 	fmt.Fprintf(buf, "%s\tTicketSecret: %q,\n", linePrefix, p.TicketSecret)
 	buf.WriteString(linePrefix)
@@ -119,18 +129,19 @@ func (p *ParticipateResponse) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (e *EventLocation) GnoLiteral(linePrefix string) string {
+func (e *EventLocation) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("EventLocation{\n")
 	fmt.Fprintf(buf, "%s\tVenueName: %q,\n", linePrefix, e.VenueName)
 	fmt.Fprintf(buf, "%s\tInstructions: %q,\n", linePrefix, e.Instructions)
 	switch val := e.Address.(type) {
 	case *EventLocation_Geo:
-		fmt.Fprintf(buf, "%s\tAddress: &%s,\n", linePrefix, val.Geo.GnoLiteral(linePrefix+"\t"))
+		fmt.Fprintf(buf, "%s\tAddress: &%s,\n", linePrefix, val.Geo.GnoLiteral(typePrefix, linePrefix+"\t"))
 	case *EventLocation_Virtual:
-		fmt.Fprintf(buf, "%s\tAddress: &%s,\n", linePrefix, val.Virtual.GnoLiteral(linePrefix+"\t"))
+		fmt.Fprintf(buf, "%s\tAddress: &%s,\n", linePrefix, val.Virtual.GnoLiteral(typePrefix, linePrefix+"\t"))
 	case *EventLocation_Custom:
-		fmt.Fprintf(buf, "%s\tAddress: &%s,\n", linePrefix, val.Custom.GnoLiteral(linePrefix+"\t"))
+		fmt.Fprintf(buf, "%s\tAddress: &%s,\n", linePrefix, val.Custom.GnoLiteral(typePrefix, linePrefix+"\t"))
 	default:
 		panic(errors.New("unknown address variant"))
 	}
@@ -139,8 +150,9 @@ func (e *EventLocation) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (a *AddressVirtual) GnoLiteral(linePrefix string) string {
+func (a *AddressVirtual) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("AddressVirtual{\n")
 	fmt.Fprintf(buf, "%s\tUri: %q,\n", linePrefix, a.Uri)
 	buf.WriteString(linePrefix)
@@ -148,8 +160,9 @@ func (a *AddressVirtual) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (a *AddressGeo) GnoLiteral(linePrefix string) string {
+func (a *AddressGeo) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("AddressGeo{\n")
 	fmt.Fprintf(buf, "%s\tAddress: %q,\n", linePrefix, a.Address)
 	fmt.Fprintf(buf, "%s\tLat: %g,\n", linePrefix, a.Lat)
@@ -160,8 +173,9 @@ func (a *AddressGeo) GnoLiteral(linePrefix string) string {
 	return buf.String()
 }
 
-func (a *AddressCustom) GnoLiteral(linePrefix string) string {
+func (a *AddressCustom) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
 	buf.WriteString("AddressCustom{\n")
 	fmt.Fprintf(buf, "%s\tAddress: %q,\n", linePrefix, a.Address)
 	fmt.Fprintf(buf, "%s\tTimezone: %q,\n", linePrefix, a.Timezone)

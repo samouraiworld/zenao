@@ -37,8 +37,9 @@ func generateGnoLit(gen *protogen.Plugin, file *protogen.File) {
 		typeName := m.Desc.Name()
 
 		receiver := strings.ToLower(string(typeName[0]))
-		g.P("func (", receiver, " *", typeName, ") GnoLiteral(linePrefix string) string {")
+		g.P("func (", receiver, " *", typeName, ") GnoLiteral(typePrefix string, linePrefix string) string {")
 		g.P("	buf := &strings.Builder{}")
+		g.P(`	buf.WriteString(typePrefix)`)
 		g.P(`	buf.WriteString("`, typeName, `{\n")`)
 		for _, f := range m.Fields {
 			fieldToLit("	", g, f)
