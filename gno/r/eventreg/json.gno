@@ -2,9 +2,10 @@ package eventreg
 
 import (
 	"gno.land/p/demo/json"
+	zenaov1 "gno.land/p/zenao/v1"
 )
 
-func eventsToJSON(events []*InfoWithPkgPath) string {
+func eventsToJSON(events []*zenaov1.EventInfo) string {
 	nodes := []*json.Node{}
 	for _, evt := range events {
 		obj := evt.ToJSON()

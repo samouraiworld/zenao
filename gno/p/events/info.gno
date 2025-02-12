@@ -2,24 +2,14 @@ package events
 
 import (
 	"std"
+
+	zenaov1 "gno.land/p/zenao/v1"
 )
 
-type Info struct {
-	Title        string
-	Description  string
-	ImageURI     string
-	Creator      string
-	StartDate    int64 // unix seconds
-	EndDate      int64 // unix seconds
-	Capacity     uint64
-	Location     string
-	Participants int
-}
+type InfoGetter func() *zenaov1.EventInfo
 
-type InfoGetter func() Info
-
-func (e *Event) Info() Info {
-	return Info{
+func (e *Event) Info() *zenaov1.EventInfo {
+	return &zenaov1.EventInfo{
 		Title:        e.GetProfileString(std.CurrentRealm().Addr(), "DisplayName", ""),
 		Description:  e.GetProfileString(std.CurrentRealm().Addr(), "Bio", ""),
 		ImageURI:     e.GetProfileString(std.CurrentRealm().Addr(), "Avatar", ""),
@@ -29,5 +19,6 @@ func (e *Event) Info() Info {
 		Creator:      e.Creator,
 		Location:     e.Location,
 		Participants: e.CountParticipants(),
+		PkgPath:      e.PkgPath,
 	}
 }

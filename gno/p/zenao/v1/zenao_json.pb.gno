@@ -10,31 +10,76 @@ import (
 
 func (e *EditUserRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["displayName"] = json.StringNode("", e.DisplayName)
 	fields["bio"] = json.StringNode("", e.Bio)
 	fields["avatarUri"] = json.StringNode("", e.AvatarUri)
+
 	return json.ObjectNode("", fields)
+}
+
+func (e *EditUserRequest) FromJSON(node *json.Node) {
+	*e = EditUserRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["displayName"]; ok {
+		e.DisplayName = val.MustString()
+	}
+	if val, ok := fields["bio"]; ok {
+		e.Bio = val.MustString()
+	}
+	if val, ok := fields["avatarUri"]; ok {
+		e.AvatarUri = val.MustString()
+	}
 }
 
 func (e *EditUserResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["id"] = json.StringNode("", e.Id)
+
 	return json.ObjectNode("", fields)
+}
+
+func (e *EditUserResponse) FromJSON(node *json.Node) {
+	*e = EditUserResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["id"]; ok {
+		e.Id = val.MustString()
+	}
 }
 
 func (g *GetUserAddressRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	return json.ObjectNode("", fields)
+}
+
+func (g *GetUserAddressRequest) FromJSON(node *json.Node) {
+	*g = GetUserAddressRequest{}
 }
 
 func (g *GetUserAddressResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["address"] = json.StringNode("", g.Address)
+
 	return json.ObjectNode("", fields)
+}
+
+func (g *GetUserAddressResponse) FromJSON(node *json.Node) {
+	*g = GetUserAddressResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["address"]; ok {
+		g.Address = val.MustString()
+	}
 }
 
 func (c *CreateEventRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["title"] = json.StringNode("", c.Title)
 	fields["description"] = json.StringNode("", c.Description)
 	fields["imageUri"] = json.StringNode("", c.ImageUri)
@@ -45,17 +90,71 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	if c.Location != nil {
 		fields["location"] = c.Location.ToJSON()
 	}
+
 	return json.ObjectNode("", fields)
+}
+
+func (c *CreateEventRequest) FromJSON(node *json.Node) {
+	*c = CreateEventRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["title"]; ok {
+		c.Title = val.MustString()
+	}
+	if val, ok := fields["description"]; ok {
+		c.Description = val.MustString()
+	}
+	if val, ok := fields["imageUri"]; ok {
+		c.ImageUri = val.MustString()
+	}
+	if val, ok := fields["startDate"]; ok {
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		c.StartDate = fv
+	}
+	if val, ok := fields["endDate"]; ok {
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		c.EndDate = fv
+	}
+	if val, ok := fields["ticketPrice"]; ok {
+		c.TicketPrice = val.MustNumeric()
+	}
+	if val, ok := fields["capacity"]; ok {
+		c.Capacity = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["location"]; ok {
+		if c.Location == nil {
+			c.Location = &EventLocation{}
+		}
+		c.Location.FromJSON(val)
+	}
 }
 
 func (c *CreateEventResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["id"] = json.StringNode("", c.Id)
+
 	return json.ObjectNode("", fields)
+}
+
+func (c *CreateEventResponse) FromJSON(node *json.Node) {
+	*c = CreateEventResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["id"]; ok {
+		c.Id = val.MustString()
+	}
 }
 
 func (e *EditEventRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["eventId"] = json.StringNode("", e.EventId)
 	fields["title"] = json.StringNode("", e.Title)
 	fields["description"] = json.StringNode("", e.Description)
@@ -67,32 +166,115 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Location != nil {
 		fields["location"] = e.Location.ToJSON()
 	}
+
 	return json.ObjectNode("", fields)
+}
+
+func (e *EditEventRequest) FromJSON(node *json.Node) {
+	*e = EditEventRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		e.EventId = val.MustString()
+	}
+	if val, ok := fields["title"]; ok {
+		e.Title = val.MustString()
+	}
+	if val, ok := fields["description"]; ok {
+		e.Description = val.MustString()
+	}
+	if val, ok := fields["imageUri"]; ok {
+		e.ImageUri = val.MustString()
+	}
+	if val, ok := fields["startDate"]; ok {
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		e.StartDate = fv
+	}
+	if val, ok := fields["endDate"]; ok {
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		e.EndDate = fv
+	}
+	if val, ok := fields["ticketPrice"]; ok {
+		e.TicketPrice = val.MustNumeric()
+	}
+	if val, ok := fields["capacity"]; ok {
+		e.Capacity = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["location"]; ok {
+		if e.Location == nil {
+			e.Location = &EventLocation{}
+		}
+		e.Location.FromJSON(val)
+	}
 }
 
 func (e *EditEventResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["id"] = json.StringNode("", e.Id)
+
 	return json.ObjectNode("", fields)
+}
+
+func (e *EditEventResponse) FromJSON(node *json.Node) {
+	*e = EditEventResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["id"]; ok {
+		e.Id = val.MustString()
+	}
 }
 
 func (p *ParticipateRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["eventId"] = json.StringNode("", p.EventId)
 	fields["email"] = json.StringNode("", p.Email)
+
 	return json.ObjectNode("", fields)
+}
+
+func (p *ParticipateRequest) FromJSON(node *json.Node) {
+	*p = ParticipateRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		p.EventId = val.MustString()
+	}
+	if val, ok := fields["email"]; ok {
+		p.Email = val.MustString()
+	}
 }
 
 func (p *ParticipateResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["ticketSecret"] = json.StringNode("", p.TicketSecret)
+
 	return json.ObjectNode("", fields)
+}
+
+func (p *ParticipateResponse) FromJSON(node *json.Node) {
+	*p = ParticipateResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["ticketSecret"]; ok {
+		p.TicketSecret = val.MustString()
+	}
 }
 
 func (e *EventLocation) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["venueName"] = json.StringNode("", e.VenueName)
 	fields["instructions"] = json.StringNode("", e.Instructions)
+
 	address := map[string]*json.Node{}
 	switch val := e.Address.(type) {
 	case *AddressGeo:
@@ -108,27 +290,173 @@ func (e *EventLocation) ToJSON() *json.Node {
 		panic(errors.New("unknown address variant"))
 	}
 	fields["address"] = json.ObjectNode("", address)
+
 	return json.ObjectNode("", fields)
+}
+
+func (e *EventLocation) FromJSON(node *json.Node) {
+	*e = EventLocation{}
+	fields := node.MustObject()
+
+	if val, ok := fields["venueName"]; ok {
+		e.VenueName = val.MustString()
+	}
+	if val, ok := fields["instructions"]; ok {
+		e.Instructions = val.MustString()
+	}
+
+	if union, ok := fields["address"]; ok {
+		obj := union.MustObject()
+		kind := obj["case"].MustString()
+		val := obj["value"]
+		switch kind {
+		case "geo":
+			n := AddressGeo{}
+			n.FromJSON(val)
+			e.Address = n
+		case "virtual":
+			n := AddressVirtual{}
+			n.FromJSON(val)
+			e.Address = n
+		case "custom":
+			n := AddressCustom{}
+			n.FromJSON(val)
+			e.Address = n
+		default:
+			panic(errors.New("unknown address variant"))
+		}
+	}
 }
 
 func (a *AddressVirtual) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["uri"] = json.StringNode("", a.Uri)
+
 	return json.ObjectNode("", fields)
+}
+
+func (a *AddressVirtual) FromJSON(node *json.Node) {
+	*a = AddressVirtual{}
+	fields := node.MustObject()
+
+	if val, ok := fields["uri"]; ok {
+		a.Uri = val.MustString()
+	}
 }
 
 func (a *AddressGeo) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["address"] = json.StringNode("", a.Address)
 	fields["lat"] = json.NumberNode("", float64(a.Lat))
 	fields["lng"] = json.NumberNode("", float64(a.Lng))
 	fields["size"] = json.NumberNode("", float64(a.Size))
+
 	return json.ObjectNode("", fields)
+}
+
+func (a *AddressGeo) FromJSON(node *json.Node) {
+	*a = AddressGeo{}
+	fields := node.MustObject()
+
+	if val, ok := fields["address"]; ok {
+		a.Address = val.MustString()
+	}
+	if val, ok := fields["lat"]; ok {
+		a.Lat = float32(val.MustNumeric())
+	}
+	if val, ok := fields["lng"]; ok {
+		a.Lng = float32(val.MustNumeric())
+	}
+	if val, ok := fields["size"]; ok {
+		a.Size = float32(val.MustNumeric())
+	}
 }
 
 func (a *AddressCustom) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
+
 	fields["address"] = json.StringNode("", a.Address)
 	fields["timezone"] = json.StringNode("", a.Timezone)
+
 	return json.ObjectNode("", fields)
+}
+
+func (a *AddressCustom) FromJSON(node *json.Node) {
+	*a = AddressCustom{}
+	fields := node.MustObject()
+
+	if val, ok := fields["address"]; ok {
+		a.Address = val.MustString()
+	}
+	if val, ok := fields["timezone"]; ok {
+		a.Timezone = val.MustString()
+	}
+}
+
+func (e *EventInfo) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	fields["Title"] = json.StringNode("", e.Title)
+	fields["Description"] = json.StringNode("", e.Description)
+	fields["ImageURI"] = json.StringNode("", e.ImageURI)
+	fields["Creator"] = json.StringNode("", e.Creator)
+	fields["StartDate"] = json.StringNode("", strconv.FormatInt(e.StartDate, 64))
+	fields["EndDate"] = json.StringNode("", strconv.FormatInt(e.EndDate, 64))
+	fields["Capacity"] = json.NumberNode("", float64(e.Capacity))
+	if e.Location != nil {
+		fields["Location"] = e.Location.ToJSON()
+	}
+	fields["Participants"] = json.NumberNode("", float64(e.Participants))
+	fields["PkgPath"] = json.StringNode("", e.PkgPath)
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EventInfo) FromJSON(node *json.Node) {
+	*e = EventInfo{}
+	fields := node.MustObject()
+
+	if val, ok := fields["Title"]; ok {
+		e.Title = val.MustString()
+	}
+	if val, ok := fields["Description"]; ok {
+		e.Description = val.MustString()
+	}
+	if val, ok := fields["ImageURI"]; ok {
+		e.ImageURI = val.MustString()
+	}
+	if val, ok := fields["Creator"]; ok {
+		e.Creator = val.MustString()
+	}
+	if val, ok := fields["StartDate"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		e.StartDate = fv
+	}
+	if val, ok := fields["EndDate"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		e.EndDate = fv
+	}
+	if val, ok := fields["Capacity"]; ok {
+		e.Capacity = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["Location"]; ok {
+		if e.Location == nil {
+			e.Location = &EventLocation{}
+		}
+		e.Location.FromJSON(val)
+	}
+	if val, ok := fields["Participants"]; ok {
+		e.Participants = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["PkgPath"]; ok {
+		e.PkgPath = val.MustString()
+	}
 }

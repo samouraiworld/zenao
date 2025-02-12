@@ -80,3 +80,16 @@ type AddressCustom struct {
 	Address string
 	Timezone string
 }
+
+type EventInfo struct {
+	Title string
+	Description string
+	ImageURI string
+	Creator string
+	StartDate int64
+	EndDate int64
+	Capacity uint32
+	Location *EventLocation
+	Participants uint32
+	PkgPath string
+}

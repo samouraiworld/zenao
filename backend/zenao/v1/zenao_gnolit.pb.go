@@ -183,3 +183,24 @@ func (a *AddressCustom) GnoLiteral(typePrefix string, linePrefix string) string 
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EventInfo{\n")
+	fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, e.Title)
+	fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, e.Description)
+	fmt.Fprintf(buf, "%s\tImageURI: %q,\n", linePrefix, e.ImageURI)
+	fmt.Fprintf(buf, "%s\tCreator: %q,\n", linePrefix, e.Creator)
+	fmt.Fprintf(buf, "%s\tStartDate: %d,\n", linePrefix, e.StartDate)
+	fmt.Fprintf(buf, "%s\tEndDate: %d,\n", linePrefix, e.EndDate)
+	fmt.Fprintf(buf, "%s\tCapacity: %d,\n", linePrefix, e.Capacity)
+	if e.Location != nil {
+		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, e.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
+	}
+	fmt.Fprintf(buf, "%s\tParticipants: %d,\n", linePrefix, e.Participants)
+	fmt.Fprintf(buf, "%s\tPkgPath: %q,\n", linePrefix, e.PkgPath)
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
