@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIhcKFUdldFVzZXJBZGRyZXNzUmVxdWVzdCIpChZHZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEg8KB2FkZHJlc3MYASABKAkixAEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SKQoIbG9jYXRpb24YCSABKAsyFy56ZW5hby52MS5FdmVudExvY2F0aW9uIiEKE0NyZWF0ZUV2ZW50UmVzcG9uc2USCgoCaWQYASABKAki1AEKEEVkaXRFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJEhIKCnN0YXJ0X2RhdGUYBSABKAQSEAoIZW5kX2RhdGUYBiABKAQSFAoMdGlja2V0X3ByaWNlGAcgASgBEhAKCGNhcGFjaXR5GAggASgNEikKCGxvY2F0aW9uGAogASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbiIfChFFZGl0RXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSI1ChJQYXJ0aWNpcGF0ZVJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFZW1haWwYAiABKAkiLAoTUGFydGljaXBhdGVSZXNwb25zZRIVCg10aWNrZXRfc2VjcmV0GAEgASgJIsEBCg1FdmVudExvY2F0aW9uEhIKCnZlbnVlX25hbWUYASABKAkSFAoMaW5zdHJ1Y3Rpb25zGAIgASgJEiMKA2dlbxgDIAEoCzIULnplbmFvLnYxLkFkZHJlc3NHZW9IABIrCgd2aXJ0dWFsGAQgASgLMhguemVuYW8udjEuQWRkcmVzc1ZpcnR1YWxIABIpCgZjdXN0b20YBSABKAsyFy56ZW5hby52MS5BZGRyZXNzQ3VzdG9tSABCCQoHYWRkcmVzcyIdCg5BZGRyZXNzVmlydHVhbBILCgN1cmkYASABKAkiRQoKQWRkcmVzc0dlbxIPCgdhZGRyZXNzGAEgASgJEgsKA2xhdBgCIAEoAhILCgNsbmcYAyABKAISDAoEc2l6ZRgEIAEoAiIyCg1BZGRyZXNzQ3VzdG9tEg8KB2FkZHJlc3MYASABKAkSEAoIdGltZXpvbmUYAiABKAki2gEKCUV2ZW50SW5mbxINCgVUaXRsZRgBIAEoCRITCgtEZXNjcmlwdGlvbhgCIAEoCRIQCghJbWFnZVVSSRgDIAEoCRIPCgdDcmVhdG9yGAQgASgJEhEKCVN0YXJ0RGF0ZRgFIAEoAxIPCgdFbmREYXRlGAYgASgDEhAKCENhcGFjaXR5GAcgASgNEikKCExvY2F0aW9uGAggASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbhIUCgxQYXJ0aWNpcGFudHMYCSABKA0SDwoHUGtnUGF0aBgKIAEoCTKEAwoMWmVuYW9TZXJ2aWNlEkEKCEVkaXRVc2VyEhkuemVuYW8udjEuRWRpdFVzZXJSZXF1ZXN0GhouemVuYW8udjEuRWRpdFVzZXJSZXNwb25zZRJTCg5HZXRVc2VyQWRkcmVzcxIfLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVxdWVzdBogLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkQKCUVkaXRFdmVudBIaLnplbmFvLnYxLkVkaXRFdmVudFJlcXVlc3QaGy56ZW5hby52MS5FZGl0RXZlbnRSZXNwb25zZRJKCgtQYXJ0aWNpcGF0ZRIcLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVxdWVzdBodLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIhcKFUdldFVzZXJBZGRyZXNzUmVxdWVzdCIpChZHZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEg8KB2FkZHJlc3MYASABKAkixAEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SKQoIbG9jYXRpb24YCSABKAsyFy56ZW5hby52MS5FdmVudExvY2F0aW9uIiEKE0NyZWF0ZUV2ZW50UmVzcG9uc2USCgoCaWQYASABKAki1AEKEEVkaXRFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJEhIKCnN0YXJ0X2RhdGUYBSABKAQSEAoIZW5kX2RhdGUYBiABKAQSFAoMdGlja2V0X3ByaWNlGAcgASgBEhAKCGNhcGFjaXR5GAggASgNEikKCGxvY2F0aW9uGAogASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbiIfChFFZGl0RXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSI1ChJQYXJ0aWNpcGF0ZVJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFZW1haWwYAiABKAkiLAoTUGFydGljaXBhdGVSZXNwb25zZRIVCg10aWNrZXRfc2VjcmV0GAEgASgJIsEBCg1FdmVudExvY2F0aW9uEhIKCnZlbnVlX25hbWUYASABKAkSFAoMaW5zdHJ1Y3Rpb25zGAIgASgJEiMKA2dlbxgDIAEoCzIULnplbmFvLnYxLkFkZHJlc3NHZW9IABIrCgd2aXJ0dWFsGAQgASgLMhguemVuYW8udjEuQWRkcmVzc1ZpcnR1YWxIABIpCgZjdXN0b20YBSABKAsyFy56ZW5hby52MS5BZGRyZXNzQ3VzdG9tSABCCQoHYWRkcmVzcyIdCg5BZGRyZXNzVmlydHVhbBILCgN1cmkYASABKAkiRQoKQWRkcmVzc0dlbxIPCgdhZGRyZXNzGAEgASgJEgsKA2xhdBgCIAEoAhILCgNsbmcYAyABKAISDAoEc2l6ZRgEIAEoAiIyCg1BZGRyZXNzQ3VzdG9tEg8KB2FkZHJlc3MYASABKAkSEAoIdGltZXpvbmUYAiABKAki3QEKCUV2ZW50SW5mbxINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSDwoHY3JlYXRvchgEIAEoCRISCgpzdGFydF9kYXRlGAUgASgDEhAKCGVuZF9kYXRlGAYgASgDEhAKCGNhcGFjaXR5GAcgASgNEikKCGxvY2F0aW9uGAggASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbhIUCgxwYXJ0aWNpcGFudHMYCSABKA0SDwoHcGtnUGF0aBgKIAEoCTKEAwoMWmVuYW9TZXJ2aWNlEkEKCEVkaXRVc2VyEhkuemVuYW8udjEuRWRpdFVzZXJSZXF1ZXN0GhouemVuYW8udjEuRWRpdFVzZXJSZXNwb25zZRJTCg5HZXRVc2VyQWRkcmVzcxIfLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVxdWVzdBogLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkQKCUVkaXRFdmVudBIaLnplbmFvLnYxLkVkaXRFdmVudFJlcXVlc3QaGy56ZW5hby52MS5FZGl0RXZlbnRSZXNwb25zZRJKCgtQYXJ0aWNpcGF0ZRIcLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVxdWVzdBodLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
 
 /**
  * @generated from message zenao.v1.EditUserRequest
@@ -409,58 +409,58 @@ export const AddressCustomSchema: GenMessage<AddressCustom> = /*@__PURE__*/
  */
 export type EventInfo = Message<"zenao.v1.EventInfo"> & {
   /**
-   * @generated from field: string Title = 1;
+   * @generated from field: string title = 1;
    */
-  Title: string;
+  title: string;
 
   /**
-   * @generated from field: string Description = 2;
+   * @generated from field: string description = 2;
    */
-  Description: string;
+  description: string;
 
   /**
-   * @generated from field: string ImageURI = 3;
+   * @generated from field: string image_uri = 3;
    */
-  ImageURI: string;
+  imageUri: string;
 
   /**
-   * @generated from field: string Creator = 4;
+   * @generated from field: string creator = 4;
    */
-  Creator: string;
-
-  /**
-   * unix seconds
-   *
-   * @generated from field: int64 StartDate = 5;
-   */
-  StartDate: bigint;
+  creator: string;
 
   /**
    * unix seconds
    *
-   * @generated from field: int64 EndDate = 6;
+   * @generated from field: int64 start_date = 5;
    */
-  EndDate: bigint;
+  startDate: bigint;
 
   /**
-   * @generated from field: uint32 Capacity = 7;
+   * unix seconds
+   *
+   * @generated from field: int64 end_date = 6;
    */
-  Capacity: number;
+  endDate: bigint;
 
   /**
-   * @generated from field: zenao.v1.EventLocation Location = 8;
+   * @generated from field: uint32 capacity = 7;
    */
-  Location?: EventLocation;
+  capacity: number;
 
   /**
-   * @generated from field: uint32 Participants = 9;
+   * @generated from field: zenao.v1.EventLocation location = 8;
    */
-  Participants: number;
+  location?: EventLocation;
 
   /**
-   * @generated from field: string PkgPath = 10;
+   * @generated from field: uint32 participants = 9;
    */
-  PkgPath: string;
+  participants: number;
+
+  /**
+   * @generated from field: string pkgPath = 10;
+   */
+  pkgPath: string;
 };
 
 /**

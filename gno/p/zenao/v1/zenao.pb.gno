@@ -84,7 +84,7 @@ type AddressCustom struct {
 type EventInfo struct {
 	Title string
 	Description string
-	ImageURI string
+	ImageUri string
 	Creator string
 	StartDate int64
 	EndDate int64

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -18,6 +19,7 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type gnoZenaoChain struct {
@@ -108,7 +110,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 
 // EditEvent implements ZenaoChain.
 func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) error {
-	loc, err := zeni.LocationToString(req.Location)
+	loc, err := protojson.Marshal(req.Location)
 	if err != nil {
 		return err
 	}
@@ -129,7 +131,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 			fmt.Sprintf("%d", req.StartDate),
 			fmt.Sprintf("%d", req.EndDate),
 			fmt.Sprintf("%d", req.Capacity),
-			loc,
+			strconv.Quote(string(loc)),
 		},
 	}))
 	if err != nil {

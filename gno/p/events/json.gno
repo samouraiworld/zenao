@@ -13,6 +13,10 @@ func (e *Event) GetUserRolesJSON(addr string) string {
 	return mustMarshalString(json.ArrayNode("", nodes))
 }
 
+func (e *Event) GetInfoJSON() string {
+	return mustMarshalString(e.Info().ToJSON())
+}
+
 func mustMarshalString(node *json.Node) string {
 	bz, err := json.Marshal(node)
 	if err != nil {

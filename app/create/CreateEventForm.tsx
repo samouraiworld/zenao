@@ -37,9 +37,21 @@ export const CreateEventForm: React.FC = () => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      const { id } = await zenaoClient.createEvent(values, {
-        headers: { Authorization: "Bearer " + token },
-      });
+      const { id } = await zenaoClient.createEvent(
+        {
+          ...values,
+          location: {
+            address: {
+              case: "custom",
+              value: {
+                address: values.location,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              },
+            },
+          },
+        },
+        { headers: { Authorization: "Bearer " + token } },
+      );
       form.reset();
       toast({
         title: t("toast-creation-success"),

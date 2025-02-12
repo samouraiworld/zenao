@@ -398,18 +398,18 @@ func (a *AddressCustom) FromJSON(node *json.Node) {
 func (e *EventInfo) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	fields["Title"] = json.StringNode("", e.Title)
-	fields["Description"] = json.StringNode("", e.Description)
-	fields["ImageURI"] = json.StringNode("", e.ImageURI)
-	fields["Creator"] = json.StringNode("", e.Creator)
-	fields["StartDate"] = json.StringNode("", strconv.FormatInt(e.StartDate, 64))
-	fields["EndDate"] = json.StringNode("", strconv.FormatInt(e.EndDate, 64))
-	fields["Capacity"] = json.NumberNode("", float64(e.Capacity))
+	fields["title"] = json.StringNode("", e.Title)
+	fields["description"] = json.StringNode("", e.Description)
+	fields["imageUri"] = json.StringNode("", e.ImageUri)
+	fields["creator"] = json.StringNode("", e.Creator)
+	fields["startDate"] = json.StringNode("", strconv.FormatInt(e.StartDate, 64))
+	fields["endDate"] = json.StringNode("", strconv.FormatInt(e.EndDate, 64))
+	fields["capacity"] = json.NumberNode("", float64(e.Capacity))
 	if e.Location != nil {
-		fields["Location"] = e.Location.ToJSON()
+		fields["location"] = e.Location.ToJSON()
 	}
-	fields["Participants"] = json.NumberNode("", float64(e.Participants))
-	fields["PkgPath"] = json.StringNode("", e.PkgPath)
+	fields["participants"] = json.NumberNode("", float64(e.Participants))
+	fields["pkgPath"] = json.StringNode("", e.PkgPath)
 
 	return json.ObjectNode("", fields)
 }
@@ -418,45 +418,45 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 	*e = EventInfo{}
 	fields := node.MustObject()
 
-	if val, ok := fields["Title"]; ok {
+	if val, ok := fields["title"]; ok {
 		e.Title = val.MustString()
 	}
-	if val, ok := fields["Description"]; ok {
+	if val, ok := fields["description"]; ok {
 		e.Description = val.MustString()
 	}
-	if val, ok := fields["ImageURI"]; ok {
-		e.ImageURI = val.MustString()
+	if val, ok := fields["imageUri"]; ok {
+		e.ImageUri = val.MustString()
 	}
-	if val, ok := fields["Creator"]; ok {
+	if val, ok := fields["creator"]; ok {
 		e.Creator = val.MustString()
 	}
-	if val, ok := fields["StartDate"]; ok {
+	if val, ok := fields["startDate"]; ok {
 		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
 		e.StartDate = fv
 	}
-	if val, ok := fields["EndDate"]; ok {
+	if val, ok := fields["endDate"]; ok {
 		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
 		e.EndDate = fv
 	}
-	if val, ok := fields["Capacity"]; ok {
+	if val, ok := fields["capacity"]; ok {
 		e.Capacity = uint32(val.MustNumeric())
 	}
-	if val, ok := fields["Location"]; ok {
+	if val, ok := fields["location"]; ok {
 		if e.Location == nil {
 			e.Location = &EventLocation{}
 		}
 		e.Location.FromJSON(val)
 	}
-	if val, ok := fields["Participants"]; ok {
+	if val, ok := fields["participants"]; ok {
 		e.Participants = uint32(val.MustNumeric())
 	}
-	if val, ok := fields["PkgPath"]; ok {
+	if val, ok := fields["pkgPath"]; ok {
 		e.PkgPath = val.MustString()
 	}
 }

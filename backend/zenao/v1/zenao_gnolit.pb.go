@@ -190,7 +190,7 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf.WriteString("EventInfo{\n")
 	fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, e.Title)
 	fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, e.Description)
-	fmt.Fprintf(buf, "%s\tImageURI: %q,\n", linePrefix, e.ImageURI)
+	fmt.Fprintf(buf, "%s\tImageUri: %q,\n", linePrefix, e.ImageUri)
 	fmt.Fprintf(buf, "%s\tCreator: %q,\n", linePrefix, e.Creator)
 	fmt.Fprintf(buf, "%s\tStartDate: %d,\n", linePrefix, e.StartDate)
 	fmt.Fprintf(buf, "%s\tEndDate: %d,\n", linePrefix, e.EndDate)

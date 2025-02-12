@@ -28,10 +28,19 @@ export function EditEventForm({
   const isOrganizer = roles.includes("organizer");
   const router = useRouter();
 
+  let location = "";
+  if (data.location?.address.case == "custom") {
+    location = data.location.address.value.address;
+  }
+  const defaultValues: EventFormSchemaType = {
+    ...data,
+    location,
+  };
+
   const form = useForm<EventFormSchemaType>({
     mode: "all",
     resolver: zodResolver(eventFormSchema),
-    defaultValues: data,
+    defaultValues,
   });
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
@@ -46,7 +55,13 @@ export function EditEventForm({
         throw new Error("invalid clerk authToken");
       }
       await zenaoClient.editEvent(
-        { ...values, eventId: id },
+        {
+          ...values,
+          eventId: id,
+          location: {
+            address: { case: "custom", value: { address: values.location } },
+          },
+        },
         {
           headers: { Authorization: "Bearer " + token },
         },

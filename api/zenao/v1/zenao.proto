@@ -87,14 +87,14 @@ message AddressCustom {
 }
 
 message EventInfo {
-	string Title = 1;
-	string Description = 2;
-	string ImageURI = 3;
-	string Creator = 4;
-	int64 StartDate = 5; // unix seconds
-	int64 EndDate = 6; // unix seconds
-	uint32 Capacity = 7;
-	EventLocation Location = 8;
-	uint32 Participants = 9;
-  string PkgPath = 10;
+	string title = 1;
+	string description = 2;
+	string image_uri = 3;
+	string creator = 4;
+	int64 start_date = 5; // unix seconds
+	int64 end_date = 6; // unix seconds
+	uint32 capacity = 7;
+	EventLocation location = 8;
+	uint32 participants = 9;
+  string pkgPath = 10;
 }
