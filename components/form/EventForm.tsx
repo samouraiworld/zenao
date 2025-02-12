@@ -102,7 +102,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             )}
             <Card className="flex flex-row gap-3">
               <div className="w-full">
-                <FormFieldInputString
+                <FormFieldInputString<EventFormSchemaType>
                   control={form.control}
                   name="imageUri"
                   placeholder={t("image-uri-placeholder")}
@@ -124,7 +124,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             </Card>
           </div>
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
-            <FormFieldTextArea
+            <FormFieldTextArea<EventFormSchemaType>
               control={form.control}
               name="title"
               className="font-semibold text-3xl overflow-hidden"
@@ -145,7 +145,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="write">
-                  <FormFieldTextArea
+                  <FormFieldTextArea<EventFormSchemaType>
                     control={form.control}
                     name="description"
                     placeholder={t("description-placeholder")}
@@ -157,7 +157,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               </Tabs>
             </Card>
             <Card>
-              <FormFieldInputString
+              <FormFieldInputString<EventFormSchemaType>
                 control={form.control}
                 name="location"
                 placeholder={t("location-placeholder")}
@@ -165,20 +165,20 @@ export const EventForm: React.FC<EventFormProps> = ({
             </Card>
             <Card>
               <SmallText className="mb-3">{t("capacity-label")}</SmallText>
-              <FormFieldInputNumber
+              <FormFieldInputNumber<EventFormSchemaType>
                 control={form.control}
                 name="capacity"
                 placeholder={t("capacity-placeholder")}
               />
             </Card>
             <Card className="flex flex-col gap-[10px]">
-              <FormFieldDatePicker
+              <FormFieldDatePicker<EventFormSchemaType>
                 form={form}
                 name="startDate"
                 placeholder={t("start-date-placeholder")}
               />
               <Separator className="mx-0" />
-              <FormFieldDatePicker
+              <FormFieldDatePicker<EventFormSchemaType>
                 form={form}
                 name="endDate"
                 placeholder={t("end-date-placeholder")}

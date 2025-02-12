@@ -1,5 +1,6 @@
 "use client";
 
+import { FieldValues } from "react-hook-form";
 import { FormFieldProps } from "../types";
 import {
   FormControl,
@@ -10,12 +11,12 @@ import {
 import { Input } from "@/components/shadcn/input";
 import { cn } from "@/lib/tailwind";
 
-export const FormFieldInputNumber: React.FC<FormFieldProps<number>> = ({
+export const FormFieldInputNumber = <T extends FieldValues>({
   control,
   name,
   className,
   placeholder,
-}) => {
+}: FormFieldProps<T, number>) => {
   return (
     <FormField
       control={control}

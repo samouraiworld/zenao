@@ -2,8 +2,13 @@
 
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
-import { UseFormReturn } from "react-hook-form";
-import { EventFormSchemaType, FormFieldProps } from "../types";
+import {
+  FieldPathByValue,
+  FieldValues,
+  PathValue,
+  UseFormReturn,
+} from "react-hook-form";
+import { FormFieldProps } from "../types";
 import { Button } from "@/components/shadcn/button";
 import {
   FormControl,
@@ -21,14 +26,21 @@ import {
 } from "@/components/shadcn/popover";
 import { SmallText } from "@/components/texts/SmallText";
 
-export const FormFieldDatePicker: React.FC<
-  Omit<FormFieldProps<bigint>, "control"> & {
-    form: UseFormReturn<EventFormSchemaType>;
-  }
-> = ({ name, className, placeholder, form }) => {
+export const FormFieldDatePicker = <T extends FieldValues>({
+  name,
+  className,
+  placeholder,
+  form,
+}: Omit<FormFieldProps<T, bigint>, "control"> & {
+  form: UseFormReturn<T>;
+}) => {
   function handleDateSelect(date: Date | undefined) {
     if (date) {
-      form.setValue(name, BigInt(getUnixTime(date)));
+      form.setValue(
+        name,
+        // We got this issue if we don't cast it https://github.com/orgs/react-hook-form/discussions/10419
+        BigInt(getUnixTime(date)) as PathValue<T, FieldPathByValue<T, bigint>>,
+      );
     }
   }
 
@@ -53,7 +65,11 @@ export const FormFieldDatePicker: React.FC<
       }
     }
 
-    form.setValue(name, BigInt(getUnixTime(newDate)));
+    form.setValue(
+      name,
+      // We got this issue if we don't cast it https://github.com/orgs/react-hook-form/discussions/10419
+      BigInt(getUnixTime(newDate)) as PathValue<T, FieldPathByValue<T, bigint>>,
+    );
   }
 
   return (
