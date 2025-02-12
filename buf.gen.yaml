@@ -15,6 +15,10 @@ plugins:
     out: backend
     opt: paths=source_relative
 
+  - local: [go, run, ./cmd/protoc-gen-go-gnolit]
+    out: backend
+    opt: paths=source_relative
+
   - local: [go, run, ./cmd/protoc-gen-gno]
-    out: gno/p
+    out: gno
     opt: paths=source_relative

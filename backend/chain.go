@@ -289,17 +289,12 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 		"req":            req,
 		"zenaoAdminAddr": zenaoAdminAddr,
 		"namespace":      gnoNamespace,
-	}
-
-	loc, err := zeni.LocationToString(req.Location)
-	if err != nil {
-		return "", err
+		"location":       "&" + req.Location.GnoLiteral("\t\t"),
 	}
 
 	toMarshal := map[string]interface{}{
 		"title":       req.Title,
 		"description": req.Description,
-		"location":    loc,
 		"imageURI":    req.ImageUri,
 	}
 	for key, val := range toMarshal {
