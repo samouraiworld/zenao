@@ -1,13 +1,13 @@
 package eventreg
 
 import (
-	"errors"
 	"math"
 	"strings"
 	"time"
 
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/zenao/events"
 	zenaov1 "gno.land/p/zenao/v1"
 )
 
@@ -50,7 +50,7 @@ func renderSection(buf *strings.Builder, listFn func(int64, int64, uint32) []*ze
 }
 
 func renderEvent(buf *strings.Builder, evt *zenaov1.EventInfo) {
-	locStr, err := locationString(evt.Location)
+	locStr, err := events.LocationString(evt.Location)
 	if err != nil {
 		locStr = "Error: " + err.Error()
 	}
@@ -65,31 +65,4 @@ func trimDomain(pkgPath string) string {
 		return pkgPath
 	}
 	return pkgPath[slashIdx:]
-}
-
-func locationString(location *zenaov1.EventLocation) (string, error) {
-	if location == nil {
-		return "", errors.New("nil location")
-	}
-
-	buf := &strings.Builder{}
-
-	if location.VenueName != "" {
-		buf.WriteString(location.VenueName)
-		buf.WriteString(" - ")
-	}
-
-	switch val := location.Address.(type) {
-	case *zenaov1.AddressVirtual:
-		buf.WriteString(val.Uri)
-	case *zenaov1.AddressGeo:
-		buf.WriteString(val.Address)
-		buf.WriteString(ufmt.Sprintf("- %g, %g", val.Lat, val.Lng))
-	case *zenaov1.AddressCustom:
-		buf.WriteString(val.Address)
-	default:
-		return "", errors.New("unsupported address type")
-	}
-
-	return buf.String(), nil
 }
