@@ -22,7 +22,6 @@ func (e *Event) Info() *zenaov1.EventInfo {
 		Creator:      e.Creator,
 		Location:     e.Location,
 		Participants: e.CountParticipants(),
-		PkgPath:      e.PkgPath,
 	}
 }
 

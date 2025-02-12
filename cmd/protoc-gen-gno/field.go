@@ -90,10 +90,10 @@ func fieldToJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFile,
 		g.P(prefix, fieldsObjName, "[", name, `] = json.NumberNode("", float64(`, receiver, "))")
 		return
 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-		g.P(prefix, fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatInt(`, receiver, ", 64))")
+		g.P(prefix, fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatInt(`, receiver, ", 10))")
 		return
 	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		g.P(prefix, fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatUint(`, receiver, ", 64))")
+		g.P(prefix, fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatUint(`, receiver, ", 10))")
 		return
 	case protoreflect.StringKind:
 		g.P(prefix, fieldsObjName, "[", name, `] = json.StringNode("", `, receiver, ")")

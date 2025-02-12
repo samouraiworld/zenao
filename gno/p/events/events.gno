@@ -63,7 +63,7 @@ func NewEvent(conf *Config) *Event {
 		SetProfileString: conf.SetProfileString,
 		Org:              dao,
 		Location:         conf.Location,
-		PkgPath:          std.CurrentRealm().PkgPath(),
+		// XXX: set PkgPath?
 	}
 
 	conf.SetProfileString("DisplayName", conf.Title)

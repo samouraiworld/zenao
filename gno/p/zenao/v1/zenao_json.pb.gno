@@ -83,8 +83,8 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	fields["title"] = json.StringNode("", c.Title)
 	fields["description"] = json.StringNode("", c.Description)
 	fields["imageUri"] = json.StringNode("", c.ImageUri)
-	fields["startDate"] = json.StringNode("", strconv.FormatUint(c.StartDate, 64))
-	fields["endDate"] = json.StringNode("", strconv.FormatUint(c.EndDate, 64))
+	fields["startDate"] = json.StringNode("", strconv.FormatUint(c.StartDate, 10))
+	fields["endDate"] = json.StringNode("", strconv.FormatUint(c.EndDate, 10))
 	fields["ticketPrice"] = json.NumberNode("", float64(c.TicketPrice))
 	fields["capacity"] = json.NumberNode("", float64(c.Capacity))
 	if c.Location != nil {
@@ -159,8 +159,8 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	fields["title"] = json.StringNode("", e.Title)
 	fields["description"] = json.StringNode("", e.Description)
 	fields["imageUri"] = json.StringNode("", e.ImageUri)
-	fields["startDate"] = json.StringNode("", strconv.FormatUint(e.StartDate, 64))
-	fields["endDate"] = json.StringNode("", strconv.FormatUint(e.EndDate, 64))
+	fields["startDate"] = json.StringNode("", strconv.FormatUint(e.StartDate, 10))
+	fields["endDate"] = json.StringNode("", strconv.FormatUint(e.EndDate, 10))
 	fields["ticketPrice"] = json.NumberNode("", float64(e.TicketPrice))
 	fields["capacity"] = json.NumberNode("", float64(e.Capacity))
 	if e.Location != nil {
@@ -402,8 +402,8 @@ func (e *EventInfo) ToJSON() *json.Node {
 	fields["description"] = json.StringNode("", e.Description)
 	fields["imageUri"] = json.StringNode("", e.ImageUri)
 	fields["creator"] = json.StringNode("", e.Creator)
-	fields["startDate"] = json.StringNode("", strconv.FormatInt(e.StartDate, 64))
-	fields["endDate"] = json.StringNode("", strconv.FormatInt(e.EndDate, 64))
+	fields["startDate"] = json.StringNode("", strconv.FormatInt(e.StartDate, 10))
+	fields["endDate"] = json.StringNode("", strconv.FormatInt(e.EndDate, 10))
 	fields["capacity"] = json.NumberNode("", float64(e.Capacity))
 	if e.Location != nil {
 		fields["location"] = e.Location.ToJSON()

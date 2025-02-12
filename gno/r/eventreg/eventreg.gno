@@ -192,14 +192,16 @@ func listEventsByParticipant(participantID string, from, to int64, limit uint32)
 func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, limit uint32) []*zenaov1.EventInfo {
 	res := []*zenaov1.EventInfo{}
 	it := func(key string, value interface{}) bool {
-		var evt *zenaov1.EventInfo
+		var evt zenaov1.EventInfo
 		switch val := value.(type) {
 		case *zenaov1.EventInfo:
-			evt = val
+			evt = *val
+			evt.PkgPath = key
 		case string:
-			evt = mustGetEventByPkgPath(val)
+			evt = *mustGetEventByPkgPath(val)
+			evt.PkgPath = val
 		}
-		res = append(res, evt)
+		res = append(res, &evt)
 		return uint32(len(res)) >= limit
 	}
 	if rev {

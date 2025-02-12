@@ -56,7 +56,7 @@ func TestEvents(t *testing.T) {
 	// list upcoming events
 	{
 		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
-		urequire.Equal(t, `2-future-event-day, 1-future-event-month`, eventsString(events))
+		urequire.Equal(t, `2-future-event-day, 1-future-event-month`, eventsString(events), "future events list should match")
 	}
 	// list past events
 	{
@@ -210,7 +210,7 @@ func TestEventsToJSON(t *testing.T) {
 			PkgPath: "foo",
 		},
 	}
-	urequire.Equal(t, `[{"title":"","description":"","imageUri":"","startDate":"0","endDate":"0","capacity":0,"creatorAddr":"","participants":0,"pkgPath":"foo"}]`, eventsToJSON(evts))
+	urequire.Equal(t, `[{"title":"","description":"","imageUri":"","creator":"","startDate":"0","endDate":"0","capacity":0,"participants":0,"pkgPath":"foo"}]`, eventsToJSON(evts))
 }
 
 func eventsString(evts []*zenaov1.EventInfo) string {
