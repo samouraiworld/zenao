@@ -28,13 +28,13 @@ message GetUserAddressResponse { string address = 1; }
 
 message CreateEventRequest {
   string title = 1;
-  string description = 2;
+  string description = 2; // markdown
   string image_uri = 3;
   uint64 start_date = 4;   // unix seconds
   uint64 end_date = 5;     // unix seconds
   double ticket_price = 6; // XXX: use fixed point?
   uint32 capacity = 7;
-  string location = 8;
+  EventLocation location = 9;
 }
 
 message CreateEventResponse { string id = 1; }
@@ -42,13 +42,13 @@ message CreateEventResponse { string id = 1; }
 message EditEventRequest {
   string event_id = 1;
   string title = 2;
-  string description = 3;
+  string description = 3; // markdown
   string image_uri = 4;
   uint64 start_date = 5;   // unix seconds
   uint64 end_date = 6;     // unix seconds
   double ticket_price = 7; // XXX: use fixed point?
   uint32 capacity = 8;
-  string location = 9;
+  EventLocation location = 10;
 }
 
 message EditEventResponse { string id = 1; }
@@ -59,3 +59,29 @@ message ParticipateRequest {
 }
 
 message ParticipateResponse { string ticket_secret = 1; }
+
+message EventLocation {
+  string venue_name = 1;
+  string instructions = 2; // markdown
+  oneof address {
+    AddressGeo geo = 3;
+    AddressVirtual virtual = 4;
+    AddressCustom custom = 5;
+  }
+}
+
+message AddressVirtual {
+  string uri = 1;
+}
+
+message AddressGeo {
+  string address = 1;
+  float lat = 2;
+  float lng = 3;
+  float size = 4;
+}
+
+message AddressCustom {
+  string address = 1;
+  string timezone = 2; // IANA name
+}

@@ -108,6 +108,11 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 
 // EditEvent implements ZenaoChain.
 func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) error {
+	loc, err := zeni.LocationToString(req.Location)
+	if err != nil {
+		return err
+	}
+
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
@@ -124,7 +129,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 			fmt.Sprintf("%d", req.StartDate),
 			fmt.Sprintf("%d", req.EndDate),
 			fmt.Sprintf("%d", req.Capacity),
-			req.Location,
+			loc,
 		},
 	}))
 	if err != nil {
@@ -285,10 +290,16 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 		"zenaoAdminAddr": zenaoAdminAddr,
 		"namespace":      gnoNamespace,
 	}
+
+	loc, err := zeni.LocationToString(req.Location)
+	if err != nil {
+		return "", err
+	}
+
 	toMarshal := map[string]interface{}{
 		"title":       req.Title,
 		"description": req.Description,
-		"location":    req.Location,
+		"location":    loc,
 		"imageURI":    req.ImageUri,
 	}
 	for key, val := range toMarshal {
