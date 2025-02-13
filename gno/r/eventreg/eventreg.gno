@@ -8,7 +8,7 @@ import (
 	"gno.land/p/demo/ownable"
 	"gno.land/p/demo/seqid"
 	"gno.land/p/zenao/events"
-	zenaov1 "gno.land/p/zenao/v1"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 // all dates are in unix seconds for easier interfacing with maketx call and vm/qeval

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"gno.land/p/zenao/events"
-	zenaov1 "gno.land/p/zenao/v1"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/r/demo/profile"
 )
 

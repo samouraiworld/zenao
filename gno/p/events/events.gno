@@ -9,7 +9,7 @@ import (
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	"gno.land/p/zenao/dao_roles_based"
-	zenaov1 "gno.land/p/zenao/v1"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 type Event struct {

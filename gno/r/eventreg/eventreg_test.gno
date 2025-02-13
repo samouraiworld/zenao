@@ -8,7 +8,7 @@ import (
 
 	"gno.land/p/demo/urequire"
 	"gno.land/p/zenao/events"
-	zenaov1 "gno.land/p/zenao/v1"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 func TestEvents(t *testing.T) {

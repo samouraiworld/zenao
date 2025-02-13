@@ -8,7 +8,7 @@ import (
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	"gno.land/p/zenao/events"
-	zenaov1 "gno.land/p/zenao/v1"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 func Render(path string) string {

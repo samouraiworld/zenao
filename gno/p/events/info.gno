@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"gno.land/p/demo/ufmt"
-	zenaov1 "gno.land/p/zenao/v1"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 type InfoGetter func() *zenaov1.EventInfo
