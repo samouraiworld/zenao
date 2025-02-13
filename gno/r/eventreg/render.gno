@@ -2,6 +2,7 @@ package eventreg
 
 import (
 	"math"
+	"std"
 	"strings"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"gno.land/p/moul/md"
 	"gno.land/p/zenao/events"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
+	"gno.land/r/demo/profile"
 )
 
 func Render(path string) string {
@@ -54,9 +56,16 @@ func renderEvent(buf *strings.Builder, evt *zenaov1.EventInfo) {
 	if err != nil {
 		locStr = "Error: " + err.Error()
 	}
+
+	orga := profile.GetStringField(std.Address(evt.Creator), "DisplayName", "")
+	if orga == "" {
+		orga = evt.Creator
+	}
+
 	buf.WriteString(md.H3(evt.Title + " | 📍 " + locStr))
 	timeStr := ufmt.Sprintf("⏱️ %s to %s", time.Unix(evt.StartDate, 0).Format(time.DateTime), time.Unix(evt.EndDate, 0).Format(time.DateTime))
 	buf.WriteString(md.Paragraph(timeStr + " | " + md.Link("🔗 Details", trimDomain(evt.PkgPath))))
+	buf.WriteString(md.Paragraph("Organized by " + orga))
 }
 
 func trimDomain(pkgPath string) string {
