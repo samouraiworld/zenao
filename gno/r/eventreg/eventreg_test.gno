@@ -205,12 +205,24 @@ func TestEvents(t *testing.T) {
 }
 
 func TestEventsToJSON(t *testing.T) {
-	evts := []*zenaov1.EventInfo{
-		{
-			PkgPath: "foo",
-		},
-	}
-	urequire.Equal(t, `[{"title":"","description":"","imageUri":"","creator":"","startDate":"0","endDate":"0","capacity":0,"participants":0,"pkgPath":"foo"}]`, eventsToJSON(evts))
+	evts := []*zenaov1.EventInfo{{
+		PkgPath: "foo",
+		Location: &zenaov1.EventLocation{Address: &zenaov1.AddressCustom{
+			Address:  "Paris",
+			Timezone: "Europe/Paris",
+		}},
+	}}
+	urequire.Equal(t, `[{"title":"","description":"","imageUri":"","creator":"","startDate":"0","endDate":"0","capacity":0,"location":{"venueName":"","instructions":"","address":{"case":"custom","value":{"address":"Paris","timezone":"Europe/Paris"}}},"participants":0,"pkgPath":"foo"}]`, eventsToJSON(evts))
+}
+
+func TestLocationToString(t *testing.T) {
+	loc := &zenaov1.EventLocation{Address: &zenaov1.AddressCustom{
+		Address:  "Paris",
+		Timezone: "Europe/Paris",
+	}}
+	str, err := events.LocationString(loc)
+	urequire.NoError(t, err)
+	urequire.Equal(t, "Paris", str)
 }
 
 func eventsString(evts []*zenaov1.EventInfo) string {

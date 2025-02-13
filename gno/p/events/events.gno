@@ -143,9 +143,8 @@ func (e *Event) Edit(title, description, imageURI string, startDate, endDate int
 	e.Capacity = capacity
 
 	parsedLoc := json.Must(json.Unmarshal([]byte(locationJSON)))
-	loc := &zenaov1.EventLocation{}
-	loc.FromJSON(parsedLoc)
-	e.Location = loc
+	e.Location = &zenaov1.EventLocation{}
+	e.Location.FromJSON(parsedLoc)
 
 	// XXX: update registry
 }

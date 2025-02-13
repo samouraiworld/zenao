@@ -14,6 +14,7 @@ import { Text } from "@/components/texts/DefaultText";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { currentTimezone } from "@/lib/time";
 
 export function EditEventForm({
   id,
@@ -59,7 +60,10 @@ export function EditEventForm({
           ...values,
           eventId: id,
           location: {
-            address: { case: "custom", value: { address: values.location } },
+            address: {
+              case: "custom",
+              value: { address: values.location, timezone: currentTimezone() },
+            },
           },
         },
         {

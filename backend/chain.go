@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
-	"strconv"
 	"strings"
 	"text/template"
 
@@ -115,6 +114,8 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 		return err
 	}
 
+	g.logger.Info("will edit", zap.String("loc", string(loc)), zap.Any("loc-obj", loc))
+
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
@@ -131,7 +132,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 			fmt.Sprintf("%d", req.StartDate),
 			fmt.Sprintf("%d", req.EndDate),
 			fmt.Sprintf("%d", req.Capacity),
-			strconv.Quote(string(loc)),
+			string(loc),
 		},
 	}))
 	if err != nil {
@@ -356,7 +357,7 @@ func init() {
 		Location: {{.location}},
 	}
 	Event = events.NewEvent(&conf)
-	eventreg.Register(func() events.Info { return Event.Info() })
+	eventreg.Register(func() *zenaov1.EventInfo { return Event.Info() })
 }
 
 func AddParticipant(participant string) {
@@ -375,8 +376,8 @@ func RemoveGatekeeper(gatekeeper string) {
 	Event.RemoveGatekeeper(gatekeeper)
 }
 
-func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint64, location string) {
-	Event.Edit(title, description, imageURI, startDate, endDate, capacity, location)
+func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) {
+	Event.Edit(title, description, imageURI, startDate, endDate, capacity, locationJSON)
 }
 
 func Render(path string) string {

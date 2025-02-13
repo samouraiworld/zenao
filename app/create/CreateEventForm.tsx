@@ -10,6 +10,7 @@ import { zenaoClient } from "@/app/zenao-client";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
+import { currentTimezone } from "@/lib/time";
 
 export const CreateEventForm: React.FC = () => {
   const { session } = useSession();
@@ -45,7 +46,7 @@ export const CreateEventForm: React.FC = () => {
               case: "custom",
               value: {
                 address: values.location,
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timezone: currentTimezone(),
               },
             },
           },

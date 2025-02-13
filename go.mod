@@ -195,3 +195,5 @@ require (
 	gorm.io/driver/sqlserver v1.5.4 // indirect
 	pluginrpc.com/pluginrpc v0.5.0 // indirect
 )
+
+replace google.golang.org/protobuf => /Users/norman/Code/protobuf-go
