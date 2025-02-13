@@ -196,4 +196,4 @@ require (
 	pluginrpc.com/pluginrpc v0.5.0 // indirect
 )
 
-replace google.golang.org/protobuf => /Users/norman/Code/protobuf-go
+replace google.golang.org/protobuf => github.com/samouraiworld/protobuf-go v0.0.0-20250213010339-3121799f7de8
