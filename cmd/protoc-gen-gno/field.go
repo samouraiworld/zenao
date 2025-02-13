@@ -306,7 +306,7 @@ func oneOfFromJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFil
 		if f.Message == nil {
 			panic(errors.New("only message supported in oneof field fromjson"))
 		}
-		g.P(prefix, `		n := `, g.QualifiedGoIdent(f.Message.GoIdent), `{}`)
+		g.P(prefix, `		n := &`, g.QualifiedGoIdent(f.Message.GoIdent), `{}`)
 		g.P(prefix, `		n.FromJSON(val)`)
 		g.P(prefix, `		`, receiver, " = n")
 	}

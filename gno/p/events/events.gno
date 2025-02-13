@@ -156,7 +156,12 @@ func (e *Event) Render(path string) string {
 	if path == "" {
 		locStr, err := LocationString(e.Location)
 		if err != nil {
-			locStr = "Error: " + err.Error()
+			bz, err := json.Marshal(e.Location.ToJSON())
+			if err != nil {
+				locStr = "Error: " + err.Error()
+			} else {
+				locStr = string(bz)
+			}
 		}
 
 		info := e.Info()

@@ -83,7 +83,6 @@ func execFakegen() error {
 			ImageUri:    randomPick(eventImages),
 			StartDate:   uint64(a.StartDate),
 			EndDate:     uint64(time.Unix(a.StartDate, 0).Add(time.Duration(a.DurationHours) * time.Hour).Unix()),
-			TicketPrice: a.TicketPrice,
 			Capacity:    uint32(a.Capacity),
 			Location: &zenaov1.EventLocation{
 				Address: &zenaov1.EventLocation_Custom{Custom: &zenaov1.AddressCustom{

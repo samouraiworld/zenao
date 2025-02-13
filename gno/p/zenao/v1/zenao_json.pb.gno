@@ -311,15 +311,15 @@ func (e *EventLocation) FromJSON(node *json.Node) {
 		val := obj["value"]
 		switch kind {
 		case "geo":
-			n := AddressGeo{}
+			n := &AddressGeo{}
 			n.FromJSON(val)
 			e.Address = n
 		case "virtual":
-			n := AddressVirtual{}
+			n := &AddressVirtual{}
 			n.FromJSON(val)
 			e.Address = n
 		case "custom":
-			n := AddressCustom{}
+			n := &AddressCustom{}
 			n.FromJSON(val)
 			e.Address = n
 		default:
