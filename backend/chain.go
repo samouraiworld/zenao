@@ -114,8 +114,6 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 		return err
 	}
 
-	g.logger.Info("will edit", zap.String("loc", string(loc)), zap.Any("loc-obj", loc))
-
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
