@@ -82,21 +82,31 @@ func fieldToJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFile,
 
 	switch field.Desc.Kind() {
 	case protoreflect.BoolKind:
-		g.P(prefix, fieldsObjName, "[", name, `] = json.BoolNode("", `, receiver, ")")
+		g.P(prefix, "if ", receiver, " {")
+		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.BoolNode("", `, receiver, ")")
+		g.P(prefix, "}")
 		return
 	case protoreflect.EnumKind:
 		panic("enums not supported")
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.FloatKind, protoreflect.DoubleKind:
-		g.P(prefix, fieldsObjName, "[", name, `] = json.NumberNode("", float64(`, receiver, "))")
+		g.P(prefix, "if ", receiver, "!= 0 {")
+		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.NumberNode("", float64(`, receiver, "))")
+		g.P(prefix, "}")
 		return
 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-		g.P(prefix, fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatInt(`, receiver, ", 10))")
+		g.P(prefix, "if ", receiver, "!= 0 {")
+		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatInt(`, receiver, ", 10))")
+		g.P(prefix, "}")
 		return
 	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		g.P(prefix, fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatUint(`, receiver, ", 10))")
+		g.P(prefix, "if ", receiver, "!= 0 {")
+		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatUint(`, receiver, ", 10))")
+		g.P(prefix, "}")
 		return
 	case protoreflect.StringKind:
-		g.P(prefix, fieldsObjName, "[", name, `] = json.StringNode("", `, receiver, ")")
+		g.P(prefix, "if ", receiver, `!= "" {`)
+		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.StringNode("", `, receiver, ")")
+		g.P(prefix, "}")
 		return
 	case protoreflect.BytesKind:
 		panic("bytes not supported")

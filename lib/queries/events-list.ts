@@ -1,7 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
+import { MessageInitShape } from "@bufbuild/protobuf";
 import { extractGnoJSONResponse } from "@/lib/gno";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const eventsList = (
   fromUnixSec: number,
@@ -22,7 +23,7 @@ export const eventsList = (
         `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
-      return raw as EventInfo[];
+      return raw as MessageInitShape<typeof EventInfoSchema>[];
     },
   });
 };
@@ -47,7 +48,7 @@ export const eventsByCreatorList = (
         `eventsToJSON(listEventsByCreator(${JSON.stringify(creator)}, ${fromInt}, ${toInt}, ${limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
-      return raw as EventInfo[];
+      return raw as MessageInitShape<typeof EventInfoSchema>[];
     },
   });
 };
@@ -72,7 +73,7 @@ export const eventsByParticipantList = (
         `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${fromInt}, ${toInt}, ${limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
-      return raw as EventInfo[];
+      return raw as MessageInitShape<typeof EventInfoSchema>[];
     },
   });
 };

@@ -154,12 +154,18 @@ func (e *Event) Render(path string) string {
 
 	s := ""
 	if path == "" {
+		info := e.Info()
+
 		locStr, err := LocationString(e.Location)
 		if err != nil {
 			locStr = "Error: " + err.Error()
 		}
 
-		info := e.Info()
+		orga := e.GetProfileString(std.Address(info.Creator), "DisplayName", "")
+		if orga == "" {
+			orga = info.Creator
+		}
+
 		s += md.H1(info.Title)
 		s += md.Image("Event presentation", info.ImageUri)
 		s += md.Paragraph(info.Description)
@@ -167,7 +173,7 @@ func (e *Event) Render(path string) string {
 			ufmt.Sprintf("📍 Location: %s", locStr),
 			ufmt.Sprintf("🕓 Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
 			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.Capacity),
-			ufmt.Sprintf("👤 Organizer: %s", e.GetProfileString(std.Address(info.Creator), "DisplayName", "")),
+			ufmt.Sprintf("👤 Organizer: %s", orga),
 		}) + "\n"
 		s += md.HorizontalRule()
 		path = "noprofile"
