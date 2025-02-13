@@ -74,8 +74,7 @@ func (e *Event) SetLocation(loc *zenaov1.EventLocation) error {
 
 func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 	loc := &zenaov1.EventLocation{
-		VenueName:    dbevt.LocVenueName,
-		Instructions: dbevt.Description,
+		VenueName: dbevt.LocVenueName,
 	}
 
 	switch dbevt.LocKind {
