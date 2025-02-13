@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { create, MessageInitShape } from "@bufbuild/protobuf";
+import { EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
 
-export function EventCard({ evt }: { evt: EventInfo }) {
+export function EventCard({
+  evt: evtPartial,
+}: {
+  evt: MessageInitShape<typeof EventInfoSchema>;
+}) {
+  const evt = create(EventInfoSchema, evtPartial);
   return (
     <Link href={`/event/${idFromPkgPath(evt.pkgPath)}`}>
       <div
@@ -13,7 +19,7 @@ export function EventCard({ evt }: { evt: EventInfo }) {
         }}
       >
         {JSON.stringify(
-          evt,
+          evtPartial,
           (_, v) => (typeof v === "bigint" ? v.toString() : v),
           4,
         )}
