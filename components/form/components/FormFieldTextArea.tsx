@@ -38,7 +38,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
           <FormControl>
             <Textarea
               className={cn(
-                "resize-none break-words border-0 focus-visible:ring-transparent p-0 w-full min-h-[52px] max-h-[400px]",
+                "resize-none break-words border-0 text-sm focus-visible:ring-transparent p-0 w-full min-h-[52px] max-h-[400px] placeholder:text-secondary-color",
                 className,
               )}
               placeholder={placeholder || "placeholder..."}
