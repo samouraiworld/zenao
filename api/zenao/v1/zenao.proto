@@ -96,5 +96,5 @@ message EventInfo {
 	uint32 capacity = 7;
 	EventLocation location = 8;
 	uint32 participants = 9;
-  string pkgPath = 10;
+  string pkg_path = 10;
 }
