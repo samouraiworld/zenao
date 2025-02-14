@@ -8,6 +8,8 @@ primary_region = 'cdg'
 
 [build]
 dockerfile = 'gno.Dockerfile'
+[build.args]
+ZENAO_ADMIN_ADDR = 'g1m0lplhma8z4uruds4zcltmlgwlht7w739e6qlp'
 
 [http_service]
 internal_port = 8888
