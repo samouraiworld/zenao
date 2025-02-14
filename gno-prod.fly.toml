@@ -7,7 +7,9 @@ app = 'zenao-gno'
 primary_region = 'cdg'
 
 [build]
-dockerfile = 'gno-prod.Dockerfile'
+dockerfile = 'gno.Dockerfile'
+[build.args]
+ZENAO_ADMIN_ADDR = 'g1djrkw9tf4px658j85cc6fhsvm50uf9s0g6kfsm'
 
 [http_service]
 internal_port = 8888
