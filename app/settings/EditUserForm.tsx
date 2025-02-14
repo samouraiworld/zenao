@@ -1,9 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSession } from "@clerk/nextjs";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
@@ -13,20 +14,29 @@ import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
 import { FormFieldURI } from "@/components/form/components/FormFieldURI";
+import { userOptions } from "@/lib/queries/user";
 
-export const EditUserForm: React.FC = () => {
+export const EditUserForm: React.FC<{ authToken: string | null }> = ({
+  authToken,
+}) => {
+  const { data: user } = useSuspenseQuery(userOptions(authToken));
+
   const { session } = useSession();
   const [loading, setLoading] = useState<boolean>(false);
   const form = useForm<UserFormSchemaType>({
     mode: "all",
     resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      username: "",
-      bio: "",
-      avatarUri: "",
-    },
+    defaultValues: user!,
   });
   const { toast } = useToast();
+
+  const queryClient = useQueryClient();
+
+  const handleEditUserSuccess = useCallback(async () => {
+    const opts = userOptions(authToken);
+    await queryClient.cancelQueries(opts);
+    queryClient.setQueryData(opts.queryKey, (user) => user);
+  }, [queryClient, authToken]);
 
   const onSubmit = async (values: UserFormSchemaType) => {
     try {
@@ -38,7 +48,7 @@ export const EditUserForm: React.FC = () => {
       await zenaoClient.editUser(values, {
         headers: { Authorization: "Bearer " + token },
       });
-      form.reset();
+      handleEditUserSuccess();
       toast({
         title: "Edited!",
       });
@@ -68,8 +78,8 @@ export const EditUserForm: React.FC = () => {
             <Card>
               <FormFieldInputString<UserFormSchemaType>
                 control={form.control}
-                name="username"
-                placeholder="Username..."
+                name="displayName"
+                placeholder="Display name..."
               />
             </Card>
             <Card>
