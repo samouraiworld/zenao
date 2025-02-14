@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSession } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
@@ -29,6 +30,7 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
     defaultValues: user!,
   });
   const { toast } = useToast();
+  const t = useTranslations("settings");
 
   const queryClient = useQueryClient();
 
@@ -50,12 +52,12 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
       });
       handleEditUserSuccess();
       toast({
-        title: "Edited!",
+        title: t("toast-success"),
       });
     } catch (err) {
       toast({
         variant: "destructive",
-        title: "Error on editing user!",
+        title: t("toast-error"),
       });
       console.error("error", err);
     }
@@ -72,27 +74,27 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
           <FormFieldURI<UserFormSchemaType>
             form={form}
             name="avatarUri"
-            placeholder="avatarURI"
+            placeholder={t("avatar-placeholder")}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
             <Card>
               <FormFieldInputString<UserFormSchemaType>
                 control={form.control}
                 name="displayName"
-                placeholder="Display name..."
+                placeholder={t("name-placeholder")}
               />
             </Card>
             <Card>
               <FormFieldTextArea<UserFormSchemaType>
                 control={form.control}
                 name="bio"
-                placeholder="Bio..."
+                placeholder={t("bio-placeholder")}
               />
             </Card>
             <div>
               <ButtonWithLabel
                 loading={loading}
-                label="Save changes"
+                label={t("save-button")}
                 type="submit"
               />
             </div>

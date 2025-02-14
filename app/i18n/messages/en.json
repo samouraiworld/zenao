@@ -72,6 +72,14 @@
     "p6-ref": "(*Decentralized Autonomous Organizations)",
     "p7": "In case of emergency, keep zen, and organize."
   },
+  "settings": {
+    "avatar-placeholder": "Avatar URI...",
+    "name-placeholder": "Username...",
+    "bio-placeholder": "Bio...",
+    "save-button": "Save changes",
+    "toast-success": "User correctly edited!",
+    "toast-error": "Error on editing user!"
+  },
   "error": {
     "label": "Oups! An error has occured.",
     "retry-button": "Retry"
