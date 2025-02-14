@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIhcKFUdldFVzZXJBZGRyZXNzUmVxdWVzdCIpChZHZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEg8KB2FkZHJlc3MYASABKAkiqwEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SEAoIbG9jYXRpb24YCCABKAkiIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSK7AQoQRWRpdEV2ZW50UmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRINCgV0aXRsZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIRCglpbWFnZV91cmkYBCABKAkSEgoKc3RhcnRfZGF0ZRgFIAEoBBIQCghlbmRfZGF0ZRgGIAEoBBIUCgx0aWNrZXRfcHJpY2UYByABKAESEAoIY2FwYWNpdHkYCCABKA0SEAoIbG9jYXRpb24YCSABKAkiHwoRRWRpdEV2ZW50UmVzcG9uc2USCgoCaWQYASABKAkiNQoSUGFydGljaXBhdGVSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEg0KBWVtYWlsGAIgASgJIiwKE1BhcnRpY2lwYXRlUmVzcG9uc2USFQoNdGlja2V0X3NlY3JldBgBIAEoCTKEAwoMWmVuYW9TZXJ2aWNlEkEKCEVkaXRVc2VyEhkuemVuYW8udjEuRWRpdFVzZXJSZXF1ZXN0GhouemVuYW8udjEuRWRpdFVzZXJSZXNwb25zZRJTCg5HZXRVc2VyQWRkcmVzcxIfLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVxdWVzdBogLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkQKCUVkaXRFdmVudBIaLnplbmFvLnYxLkVkaXRFdmVudFJlcXVlc3QaGy56ZW5hby52MS5FZGl0RXZlbnRSZXNwb25zZRJKCgtQYXJ0aWNpcGF0ZRIcLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVxdWVzdBodLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIhcKFUdldFVzZXJBZGRyZXNzUmVxdWVzdCIpChZHZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEg8KB2FkZHJlc3MYASABKAkixAEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SKQoIbG9jYXRpb24YCSABKAsyFy56ZW5hby52MS5FdmVudExvY2F0aW9uIiEKE0NyZWF0ZUV2ZW50UmVzcG9uc2USCgoCaWQYASABKAki1AEKEEVkaXRFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJEhIKCnN0YXJ0X2RhdGUYBSABKAQSEAoIZW5kX2RhdGUYBiABKAQSFAoMdGlja2V0X3ByaWNlGAcgASgBEhAKCGNhcGFjaXR5GAggASgNEikKCGxvY2F0aW9uGAogASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbiIfChFFZGl0RXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSI1ChJQYXJ0aWNpcGF0ZVJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFZW1haWwYAiABKAkiLAoTUGFydGljaXBhdGVSZXNwb25zZRIVCg10aWNrZXRfc2VjcmV0GAEgASgJIsEBCg1FdmVudExvY2F0aW9uEhIKCnZlbnVlX25hbWUYASABKAkSFAoMaW5zdHJ1Y3Rpb25zGAIgASgJEiMKA2dlbxgDIAEoCzIULnplbmFvLnYxLkFkZHJlc3NHZW9IABIrCgd2aXJ0dWFsGAQgASgLMhguemVuYW8udjEuQWRkcmVzc1ZpcnR1YWxIABIpCgZjdXN0b20YBSABKAsyFy56ZW5hby52MS5BZGRyZXNzQ3VzdG9tSABCCQoHYWRkcmVzcyIdCg5BZGRyZXNzVmlydHVhbBILCgN1cmkYASABKAkiRQoKQWRkcmVzc0dlbxIPCgdhZGRyZXNzGAEgASgJEgsKA2xhdBgCIAEoAhILCgNsbmcYAyABKAISDAoEc2l6ZRgEIAEoAiIyCg1BZGRyZXNzQ3VzdG9tEg8KB2FkZHJlc3MYASABKAkSEAoIdGltZXpvbmUYAiABKAki3gEKCUV2ZW50SW5mbxINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSDwoHY3JlYXRvchgEIAEoCRISCgpzdGFydF9kYXRlGAUgASgDEhAKCGVuZF9kYXRlGAYgASgDEhAKCGNhcGFjaXR5GAcgASgNEikKCGxvY2F0aW9uGAggASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbhIUCgxwYXJ0aWNpcGFudHMYCSABKA0SEAoIcGtnX3BhdGgYCiABKAkyhAMKDFplbmFvU2VydmljZRJBCghFZGl0VXNlchIZLnplbmFvLnYxLkVkaXRVc2VyUmVxdWVzdBoaLnplbmFvLnYxLkVkaXRVc2VyUmVzcG9uc2USUwoOR2V0VXNlckFkZHJlc3MSHy56ZW5hby52MS5HZXRVc2VyQWRkcmVzc1JlcXVlc3QaIC56ZW5hby52MS5HZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJECglFZGl0RXZlbnQSGi56ZW5hby52MS5FZGl0RXZlbnRSZXF1ZXN0GhsuemVuYW8udjEuRWRpdEV2ZW50UmVzcG9uc2USSgoLUGFydGljaXBhdGUSHC56ZW5hby52MS5QYXJ0aWNpcGF0ZVJlcXVlc3QaHS56ZW5hby52MS5QYXJ0aWNpcGF0ZVJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
 
 /**
  * @generated from message zenao.v1.EditUserRequest
@@ -96,6 +96,8 @@ export type CreateEventRequest = Message<"zenao.v1.CreateEventRequest"> & {
   title: string;
 
   /**
+   * markdown
+   *
    * @generated from field: string description = 2;
    */
   description: string;
@@ -132,9 +134,9 @@ export type CreateEventRequest = Message<"zenao.v1.CreateEventRequest"> & {
   capacity: number;
 
   /**
-   * @generated from field: string location = 8;
+   * @generated from field: zenao.v1.EventLocation location = 9;
    */
-  location: string;
+  location?: EventLocation;
 };
 
 /**
@@ -176,6 +178,8 @@ export type EditEventRequest = Message<"zenao.v1.EditEventRequest"> & {
   title: string;
 
   /**
+   * markdown
+   *
    * @generated from field: string description = 3;
    */
   description: string;
@@ -212,9 +216,9 @@ export type EditEventRequest = Message<"zenao.v1.EditEventRequest"> & {
   capacity: number;
 
   /**
-   * @generated from field: string location = 9;
+   * @generated from field: zenao.v1.EventLocation location = 10;
    */
-  location: string;
+  location?: EventLocation;
 };
 
 /**
@@ -279,6 +283,192 @@ export type ParticipateResponse = Message<"zenao.v1.ParticipateResponse"> & {
  */
 export const ParticipateResponseSchema: GenMessage<ParticipateResponse> = /*@__PURE__*/
   messageDesc(file_zenao_v1_zenao, 9);
+
+/**
+ * @generated from message zenao.v1.EventLocation
+ */
+export type EventLocation = Message<"zenao.v1.EventLocation"> & {
+  /**
+   * @generated from field: string venue_name = 1;
+   */
+  venueName: string;
+
+  /**
+   * markdown
+   *
+   * @generated from field: string instructions = 2;
+   */
+  instructions: string;
+
+  /**
+   * @generated from oneof zenao.v1.EventLocation.address
+   */
+  address: {
+    /**
+     * @generated from field: zenao.v1.AddressGeo geo = 3;
+     */
+    value: AddressGeo;
+    case: "geo";
+  } | {
+    /**
+     * @generated from field: zenao.v1.AddressVirtual virtual = 4;
+     */
+    value: AddressVirtual;
+    case: "virtual";
+  } | {
+    /**
+     * @generated from field: zenao.v1.AddressCustom custom = 5;
+     */
+    value: AddressCustom;
+    case: "custom";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message zenao.v1.EventLocation.
+ * Use `create(EventLocationSchema)` to create a new message.
+ */
+export const EventLocationSchema: GenMessage<EventLocation> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 10);
+
+/**
+ * @generated from message zenao.v1.AddressVirtual
+ */
+export type AddressVirtual = Message<"zenao.v1.AddressVirtual"> & {
+  /**
+   * @generated from field: string uri = 1;
+   */
+  uri: string;
+};
+
+/**
+ * Describes the message zenao.v1.AddressVirtual.
+ * Use `create(AddressVirtualSchema)` to create a new message.
+ */
+export const AddressVirtualSchema: GenMessage<AddressVirtual> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 11);
+
+/**
+ * @generated from message zenao.v1.AddressGeo
+ */
+export type AddressGeo = Message<"zenao.v1.AddressGeo"> & {
+  /**
+   * @generated from field: string address = 1;
+   */
+  address: string;
+
+  /**
+   * @generated from field: float lat = 2;
+   */
+  lat: number;
+
+  /**
+   * @generated from field: float lng = 3;
+   */
+  lng: number;
+
+  /**
+   * @generated from field: float size = 4;
+   */
+  size: number;
+};
+
+/**
+ * Describes the message zenao.v1.AddressGeo.
+ * Use `create(AddressGeoSchema)` to create a new message.
+ */
+export const AddressGeoSchema: GenMessage<AddressGeo> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 12);
+
+/**
+ * @generated from message zenao.v1.AddressCustom
+ */
+export type AddressCustom = Message<"zenao.v1.AddressCustom"> & {
+  /**
+   * @generated from field: string address = 1;
+   */
+  address: string;
+
+  /**
+   * IANA name
+   *
+   * @generated from field: string timezone = 2;
+   */
+  timezone: string;
+};
+
+/**
+ * Describes the message zenao.v1.AddressCustom.
+ * Use `create(AddressCustomSchema)` to create a new message.
+ */
+export const AddressCustomSchema: GenMessage<AddressCustom> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 13);
+
+/**
+ * @generated from message zenao.v1.EventInfo
+ */
+export type EventInfo = Message<"zenao.v1.EventInfo"> & {
+  /**
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string image_uri = 3;
+   */
+  imageUri: string;
+
+  /**
+   * @generated from field: string creator = 4;
+   */
+  creator: string;
+
+  /**
+   * unix seconds
+   *
+   * @generated from field: int64 start_date = 5;
+   */
+  startDate: bigint;
+
+  /**
+   * unix seconds
+   *
+   * @generated from field: int64 end_date = 6;
+   */
+  endDate: bigint;
+
+  /**
+   * @generated from field: uint32 capacity = 7;
+   */
+  capacity: number;
+
+  /**
+   * @generated from field: zenao.v1.EventLocation location = 8;
+   */
+  location?: EventLocation;
+
+  /**
+   * @generated from field: uint32 participants = 9;
+   */
+  participants: number;
+
+  /**
+   * @generated from field: string pkg_path = 10;
+   */
+  pkgPath: string;
+};
+
+/**
+ * Describes the message zenao.v1.EventInfo.
+ * Use `create(EventInfoSchema)` to create a new message.
+ */
+export const EventInfoSchema: GenMessage<EventInfo> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 14);
 
 /**
  * @generated from service zenao.v1.ZenaoService

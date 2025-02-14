@@ -18,6 +18,7 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type gnoZenaoChain struct {
@@ -108,6 +109,11 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 
 // EditEvent implements ZenaoChain.
 func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) error {
+	loc, err := protojson.Marshal(req.Location)
+	if err != nil {
+		return err
+	}
+
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
@@ -124,7 +130,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 			fmt.Sprintf("%d", req.StartDate),
 			fmt.Sprintf("%d", req.EndDate),
 			fmt.Sprintf("%d", req.Capacity),
-			req.Location,
+			string(loc),
 		},
 	}))
 	if err != nil {
@@ -284,11 +290,12 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 		"req":            req,
 		"zenaoAdminAddr": zenaoAdminAddr,
 		"namespace":      gnoNamespace,
+		"location":       "&" + req.Location.GnoLiteral("zenaov1.", "\t\t"),
 	}
+
 	toMarshal := map[string]interface{}{
 		"title":       req.Title,
 		"description": req.Description,
-		"location":    req.Location,
 		"imageURI":    req.ImageUri,
 	}
 	for key, val := range toMarshal {
@@ -325,6 +332,7 @@ func generateUserRealmSource(id string, gnoNamespace string) (string, error) {
 const eventRealmSourceTemplate = `package event
 
 import (
+	zenaov1 "gno.land/p/{{.namespace}}/zenao/v1"
 	"gno.land/p/{{.namespace}}/events"
 	"gno.land/r/demo/profile"
 	"gno.land/r/{{.namespace}}/eventreg"
@@ -347,7 +355,7 @@ func init() {
 		Location: {{.location}},
 	}
 	Event = events.NewEvent(&conf)
-	eventreg.Register(func() events.Info { return Event.Info() })
+	eventreg.Register(func() *zenaov1.EventInfo { return Event.Info() })
 }
 
 func AddParticipant(participant string) {
@@ -366,8 +374,8 @@ func RemoveGatekeeper(gatekeeper string) {
 	Event.RemoveGatekeeper(gatekeeper)
 }
 
-func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint64, location string) {
-	Event.Edit(title, description, imageURI, startDate, endDate, capacity, location)
+func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) {
+	Event.Edit(title, description, imageURI, startDate, endDate, capacity, locationJSON)
 }
 
 func Render(path string) string {
