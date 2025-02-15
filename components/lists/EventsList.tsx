@@ -2,10 +2,10 @@ import { useTranslations } from "next-intl";
 import { LargeText } from "../texts/LargeText";
 import { EventCard } from "../cards/EventCard";
 import { Text } from "../texts/DefaultText";
-import { EventsListSchemaType } from "@/lib/queries/events-list";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const EventsList: React.FC<{
-  list: EventsListSchemaType;
+  list: EventInfo[];
   title: string;
 }> = ({ list, title }) => {
   const t = useTranslations("created");

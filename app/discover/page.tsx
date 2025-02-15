@@ -2,29 +2,30 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { eventsList, EventsListSchemaType } from "@/lib/queries/events-list";
+import { eventsList } from "@/lib/queries/events-list";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { EventsList } from "@/components/lists/EventsList";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 
 const HeaderDiscover: React.FC = () => {
   const t = useTranslations("discover");
   return (
-    <div className="flex flex-col sm:flex-row gap-2 items-center mb-3">
+    <div className="flex flex-col gap-2 mb-3">
       <VeryLargeText>{t("title")}</VeryLargeText>
       <Link
         href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
         target="_blank"
       >
-        -&gt;
-        {t("see-gnoweb")}
+        <ButtonWithLabel className="w-auto" label={t("see-gnoweb")} />
       </Link>
     </div>
   );
 };
 
 const BodyDiscover: React.FC<{
-  upcoming: EventsListSchemaType;
-  past: EventsListSchemaType;
+  upcoming: EventInfo[];
+  past: EventInfo[];
 }> = ({ upcoming, past }) => {
   const t = useTranslations("discover");
   return (

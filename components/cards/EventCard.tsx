@@ -1,6 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, CircleUserRound, MapPin, Users } from "lucide-react";
+import {
+  Calendar,
+  CircleUserRound,
+  MapPin,
+  MessageSquareIcon,
+  Users,
+} from "lucide-react";
 import { format, fromUnixTime } from "date-fns";
 import { SmallText } from "../texts/SmallText";
 import { LargeText } from "../texts/LargeText";
@@ -54,8 +60,11 @@ export function EventCard({ evt }: { evt: EventInfo }) {
             </div>
           </div>
           <div className="flex flex-row gap-4 items-center">
+            <MessageSquareIcon width={iconSize} height={iconSize} />
+            <Text>{evt.description.split(`\n`)[0]}</Text>
+          </div>
+          <div className="flex flex-row gap-4 items-center">
             <MapPin width={iconSize} height={iconSize} />
-            {/* TODO: Add location */}
             <Text>{location}</Text>
           </div>
           <div className="flex flex-row gap-4 items-center">
