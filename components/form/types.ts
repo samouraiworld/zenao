@@ -18,6 +18,28 @@ export type FormFieldProps<TCondition> = GenericFormFieldProps<
 export const urlPattern =
   /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 export const ipfsPattern = /^ipfs:\/\//;
+export const virtualLocationSchema = z.object({
+  kind: z.literal("virtual"),
+  location: z.string().trim().min(1),
+});
+export type VirtualLocationSchemaType = z.infer<typeof virtualLocationSchema>;
+const customLocationSchema = z.object({
+  kind: z.literal("custom"),
+  address: z.string().trim().min(1),
+  timeZone: z.string().trim().min(1),
+});
+export const addressLocationSchema = z.object({
+  kind: z.literal("geo"),
+  address: z.string().trim().min(1),
+  lat: z.number(),
+  lng: z.number(),
+  size: z.number(),
+});
+const locationSchema = z.union([
+  virtualLocationSchema,
+  customLocationSchema,
+  addressLocationSchema,
+]);
 export const eventFormSchema = z.object({
   title: z.string().trim().min(2).max(140),
   description: z.string().trim().min(10).max(10000),
@@ -27,7 +49,7 @@ export const eventFormSchema = z.object({
   ]),
   startDate: z.coerce.bigint(),
   endDate: z.coerce.bigint(),
-  location: z.string().trim().min(2).max(400),
+  location: locationSchema,
   // TODO: re-enable it after mvp
   // ticketPrice: z.coerce.number(),
   capacity: z.coerce.number().min(1),

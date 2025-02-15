@@ -23,7 +23,10 @@ export const CreateEventForm: React.FC = () => {
       description: "",
       title: "",
       capacity: 1,
-      location: "",
+      location: {
+        kind: "custom",
+        address: "",
+      },
     },
   });
   const { toast } = useToast();
@@ -38,18 +41,33 @@ export const CreateEventForm: React.FC = () => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
+      // location object
+      let value = {};
+      switch (values.location.kind) {
+        case "custom":
+          value = {
+            address: values.location.address,
+            timezone: currentTimezone(),
+          };
+          break;
+        case "virtual":
+          value = { uri: values.location.location };
+          break;
+        case "geo":
+          value = {
+            address: values.location.address,
+            lat: values.location.lat,
+            lng: values.location.lng,
+            size: values.location.size,
+          };
+          break;
+        default:
+          value = {};
+      }
       const { id } = await zenaoClient.createEvent(
         {
           ...values,
-          location: {
-            address: {
-              case: "custom",
-              value: {
-                address: values.location,
-                timezone: currentTimezone(),
-              },
-            },
-          },
+          location: { address: { case: values.location.kind, value } },
         },
         { headers: { Authorization: "Bearer " + token } },
       );

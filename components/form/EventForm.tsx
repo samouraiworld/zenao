@@ -7,6 +7,7 @@ import { CloudUpload, Loader2, XIcon } from "lucide-react";
 import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
 import { find as GeoTZFind } from "browser-geo-tz";
 import L from "leaflet";
+import { z } from "zod";
 import { Skeleton } from "../shadcn/skeleton";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
@@ -16,10 +17,18 @@ import { Button } from "../shadcn/button";
 import { MarkdownPreview } from "../common/MarkdownPreview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { SmallText } from "../texts/SmallText";
+import { Switch } from "../shadcn/switch";
+import { Label } from "../shadcn/label";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
-import { EventFormSchemaType, urlPattern } from "./types";
+import {
+  addressLocationSchema,
+  EventFormSchemaType,
+  urlPattern,
+  virtualLocationSchema,
+  VirtualLocationSchemaType,
+} from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import {
   Form,
@@ -86,83 +95,95 @@ const FormFieldComboBox: React.FC<{
     <FormField
       control={form.control}
       name="location"
-      render={({ field }) => (
-        <FormItem className="flex flex-col w-full space-y-0">
-          <Popover open={open} onOpenChange={setOpen}>
-            <div className="flex flex-row w-full justify-between">
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant="secondary"
-                    role="combobox"
-                    className="w-full flex justify-start rounded-xl px-4 py-3 h-auto backdrop-blur-sm"
-                  >
-                    <SmallText
-                      className={cn(
-                        "truncate",
-                        !field.value.length && "text-secondary-color",
-                      )}
+      render={({ field }) => {
+        const object = field.value as z.infer<typeof addressLocationSchema>;
+        return (
+          <FormItem className="flex flex-col w-full space-y-0">
+            <Popover open={open} onOpenChange={setOpen}>
+              <div className="flex flex-row w-full justify-between">
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="secondary"
+                      role="combobox"
+                      className="w-full flex justify-start rounded-xl px-4 py-3 h-auto backdrop-blur-sm"
                     >
-                      {field.value || "Add an address..."}
-                    </SmallText>
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              {field.value && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="bg-secondary/80 backdrop-blur-sm self-center absolute right-1"
-                  onClick={() => {
-                    setSearch("");
-                    onRemove();
-                    form.setValue("location", "");
-                  }}
-                >
-                  <XIcon className="h-3 w-3" />
-                  <span className="sr-only">Clear</span>
-                </Button>
-              )}
-            </div>
-            <PopoverContent className="max-w-full relative p-0">
-              <Command>
-                <CommandInput
-                  placeholder={t("location-placeholder")}
-                  className="h-10"
-                  onValueChange={setSearch}
-                  value={search}
-                  typeof="search"
-                />
-                <CommandList>
-                  <CommandEmpty>No address found.</CommandEmpty>
-                  <CommandGroup>
-                    {results.map((result, index) => (
-                      <CommandItem
-                        className="text-primary"
-                        value={result.label}
-                        key={result.label + index}
-                        onSelect={async () => {
-                          form.setValue("location", result.label);
-                          const latlng = new L.LatLng(
-                            result.raw.lat,
-                            result.raw.lon,
-                          );
-                          await onSelect(latlng);
-                          setOpen(false);
-                        }}
+                      <SmallText
+                        className={cn(
+                          "truncate",
+                          !object.address && "text-secondary-color",
+                        )}
                       >
-                        <SmallText>{result.label}</SmallText>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          <FormMessage />
-        </FormItem>
-      )}
+                        {object.address || "Add an address..."}
+                      </SmallText>
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                {object.address && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="bg-secondary/80 backdrop-blur-sm self-center absolute right-1"
+                    onClick={() => {
+                      setSearch("");
+                      onRemove();
+                      form.setValue("location", {
+                        ...object,
+                        address: "",
+                      });
+                    }}
+                  >
+                    <XIcon className="h-3 w-3" />
+                    <span className="sr-only">Clear</span>
+                  </Button>
+                )}
+              </div>
+              <PopoverContent className="max-w-full relative p-0">
+                <Command>
+                  <CommandInput
+                    placeholder={t("location-placeholder")}
+                    className="h-10"
+                    onValueChange={setSearch}
+                    value={search}
+                    typeof="search"
+                  />
+                  <CommandList>
+                    <CommandEmpty>No address found.</CommandEmpty>
+                    <CommandGroup>
+                      {results.map((result, index) => (
+                        <CommandItem
+                          className="text-primary"
+                          value={result.label}
+                          key={result.label + index}
+                          onSelect={async () => {
+                            form.setValue("location", {
+                              kind: "geo",
+                              address: result.label,
+                              lat: result.raw.lat,
+                              lng: result.raw.lon,
+                              size: 0,
+                            });
+                            const latlng = new L.LatLng(
+                              result.raw.lat,
+                              result.raw.lon,
+                            );
+                            await onSelect(latlng);
+                            setOpen(false);
+                          }}
+                        >
+                          <SmallText>{result.label}</SmallText>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 };
@@ -179,6 +200,8 @@ export const EventForm: React.FC<EventFormProps> = ({
   const t = useTranslations("eventForm");
 
   const [uploading, setUploading] = useState(false);
+
+  const [isVirtual, setIsVirtual] = useState<boolean>(false);
   const [marker, setMarker] = useState<L.LatLng | null>(null);
   const [timeZone, setTimeZone] = useState<string>("");
 
@@ -300,21 +323,41 @@ export const EventForm: React.FC<EventFormProps> = ({
                 </TabsContent>
               </Tabs>
             </Card>
-            <Card className="p-0">
-              <FormFieldComboBox
-                form={form}
-                onSelect={async (marker: L.LatLng) => {
-                  setMarker(marker);
-                  const tz = await GeoTZFind(marker.lat, marker.lng);
-                  setTimeZone(tz[0]);
-                }}
-                onRemove={() => {
-                  setMarker(null);
-                  setTimeZone("");
+            <div className="flex items-center gap-2">
+              <Switch
+                id="virtual"
+                checked={isVirtual}
+                onCheckedChange={(checked) => {
+                  form.setValue("location", { kind: "virtual", location: "" });
+                  setIsVirtual(checked);
                 }}
               />
+              <Label htmlFor="virtual">Virtual address</Label>
+            </div>
+            <Card className={isVirtual ? "" : "p-0"}>
+              {isVirtual &&
+              location.kind === "virtual" &&
+              "location" in location ? (
+                <FormFieldInputString
+                  control={form.control}
+                  name="location.location"
+                  placeholder={t("location-placeholder")}
+                />
+              ) : (
+                <FormFieldComboBox
+                  form={form}
+                  onSelect={async (marker: L.LatLng) => {
+                    setMarker(marker);
+                    const tz = await GeoTZFind(marker.lat, marker.lng);
+                    setTimeZone(tz[0]);
+                  }}
+                  onRemove={() => {
+                    setMarker(null);
+                    setTimeZone("");
+                  }}
+                />
+              )}
             </Card>
-            {timeZone && <SmallText className="mb-3">{timeZone}</SmallText>}
             {location && marker && <Map marker={marker} />}
             <Card>
               <SmallText className="mb-3">{t("capacity-label")}</SmallText>
