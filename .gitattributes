@@ -1,1 +1,4 @@
 *.gno linguist-language=Go
+*.pb.gno linguist-generated=true
+*_pb.ts linguist-generated=true
+*.pb.go linguist-generated=true

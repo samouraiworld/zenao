@@ -14,6 +14,7 @@ import { Text } from "@/components/texts/DefaultText";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { currentTimezone } from "@/lib/time";
 
 export function EditEventForm({
   id,
@@ -28,10 +29,19 @@ export function EditEventForm({
   const isOrganizer = roles.includes("organizer");
   const router = useRouter();
 
+  let location = "";
+  if (data.location?.address.case == "custom") {
+    location = data.location.address.value.address;
+  }
+  const defaultValues: EventFormSchemaType = {
+    ...data,
+    location,
+  };
+
   const form = useForm<EventFormSchemaType>({
     mode: "all",
     resolver: zodResolver(eventFormSchema),
-    defaultValues: data,
+    defaultValues,
   });
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
@@ -46,7 +56,16 @@ export function EditEventForm({
         throw new Error("invalid clerk authToken");
       }
       await zenaoClient.editEvent(
-        { ...values, eventId: id },
+        {
+          ...values,
+          eventId: id,
+          location: {
+            address: {
+              case: "custom",
+              value: { address: values.location, timezone: currentTimezone() },
+            },
+          },
+        },
         {
           headers: { Authorization: "Bearer " + token },
         },

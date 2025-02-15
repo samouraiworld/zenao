@@ -3,7 +3,7 @@
     "zenao": "ZENAO",
     "discover": "Discover",
     "calendar": "Calendar",
-    "pricing": "Pricing",
+    "features": "Features",
     "blog": "Blog",
     "manifesto": "Manifesto",
     "sign-in": "Sign in"
@@ -49,6 +49,8 @@
     "start": "Start in {count} days",
     "cancel-desc": "No longer able to attend? Notify the host by canceling your registration.",
     "registration": "Registration",
+    "already-begun": "Event already begun!",
+    "too-late": "It's too late to register.",
     "join-desc": "Welcome! To join the event, please register below.",
     "participate-button": "Participate",
     "about-event": "About event",

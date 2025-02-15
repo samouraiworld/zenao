@@ -8,6 +8,7 @@ import (
 	"gno.land/p/demo/ownable"
 	"gno.land/p/demo/seqid"
 	"gno.land/p/zenao/events"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 // all dates are in unix seconds for easier interfacing with maketx call and vm/qeval
@@ -22,11 +23,6 @@ var (
 	eventsByCreator     avl.Tree // <creatorID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	participantsByEvent avl.Tree // <eventPkgPath>/<participantID> -> participantID
 )
-
-type InfoWithPkgPath struct {
-	events.Info
-	PkgPath string
-}
 
 func init() {
 	Ownable = ownable.NewWithAddress(std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
@@ -46,15 +42,15 @@ func Register(infoGetter events.InfoGetter) {
 	registered.Set(pkgPath, infoGetter)
 }
 
-func getInfo(pkgPath string) (events.Info, bool) {
+func getInfo(pkgPath string) (*zenaov1.EventInfo, bool) {
 	raw, ok := registered.Get(pkgPath)
 	if !ok {
-		return events.Info{}, false
+		return nil, false
 	}
 	return raw.(events.InfoGetter)(), true
 }
 
-func mustGetInfo(pkgPath string) events.Info {
+func mustGetInfo(pkgPath string) *zenaov1.EventInfo {
 	info, ok := getInfo(pkgPath)
 	if !ok {
 		panic(ErrEventNotFound)
@@ -70,13 +66,8 @@ func IndexEvent(pkgPath string) {
 	}
 
 	info := mustGetInfo(pkgPath)
-	infoWP := InfoWithPkgPath{
-		Info:    info,
-		PkgPath: pkgPath,
-	}
-
 	key := pkgPath
-	eventsByPkgPath.Set(key, infoWP)
+	eventsByPkgPath.Set(key, info)
 
 	key = unixTimeKey(info.EndDate) + "/" + pkgPath
 	eventsByEndDate.Set(key, pkgPath)
@@ -91,11 +82,7 @@ func UpdateIndex(pkgPath string) {
 	prevInfo := mustGetEventByPkgPath(pkgPath)
 
 	info := mustGetInfo(pkgPath)
-	infoWP := InfoWithPkgPath{
-		Info:    info,
-		PkgPath: pkgPath,
-	}
-	eventsByPkgPath.Set(pkgPath, infoWP)
+	eventsByPkgPath.Set(pkgPath, info)
 
 	if prevInfo.EndDate != info.EndDate {
 		key := unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
@@ -144,11 +131,7 @@ func AddParticipant(eventPkgPath string, userID string) {
 	participantsByEvent.Set(key, userID)
 
 	info := mustGetInfo(eventPkgPath)
-	infoWP := InfoWithPkgPath{
-		Info:    info,
-		PkgPath: eventPkgPath,
-	}
-	eventsByPkgPath.Set(eventPkgPath, infoWP)
+	eventsByPkgPath.Set(eventPkgPath, info)
 }
 
 func RemoveParticipant(eventPkgPath string, userID string) {
@@ -163,25 +146,21 @@ func RemoveParticipant(eventPkgPath string, userID string) {
 	participantsByEvent.Remove(key)
 
 	info := mustGetInfo(eventPkgPath)
-	infoWP := InfoWithPkgPath{
-		Info:    info,
-		PkgPath: eventPkgPath,
-	}
-	eventsByPkgPath.Set(eventPkgPath, infoWP)
+	eventsByPkgPath.Set(eventPkgPath, info)
 }
 
 var ErrEventNotFound = errors.New("event not found")
 
-func getEventByPkgPath(pkgPath string) *InfoWithPkgPath {
+func getEventByPkgPath(pkgPath string) *zenaov1.EventInfo {
 	raw, ok := eventsByPkgPath.Get(pkgPath)
 	if !ok {
 		return nil
 	}
-	info := raw.(InfoWithPkgPath)
-	return &info
+	info := raw.(*zenaov1.EventInfo)
+	return info
 }
 
-func mustGetEventByPkgPath(pkgPath string) *InfoWithPkgPath {
+func mustGetEventByPkgPath(pkgPath string) *zenaov1.EventInfo {
 	evt := getEventByPkgPath(pkgPath)
 	if evt == nil {
 		panic(ErrEventNotFound)
@@ -189,38 +168,40 @@ func mustGetEventByPkgPath(pkgPath string) *InfoWithPkgPath {
 	return evt
 }
 
-func listEvents(from, to int64, limit uint32) []*InfoWithPkgPath {
+func listEvents(from, to int64, limit uint32) []*zenaov1.EventInfo {
 	fromKey := unixTimeKey(from) + "/"
 	toKey := unixTimeKey(to) + "/"
 
 	return listEventsInternal(&eventsByEndDate, fromKey, toKey, from > to, limit)
 }
 
-func listEventsByCreator(creatorID string, from, to int64, limit uint32) []*InfoWithPkgPath {
+func listEventsByCreator(creatorID string, from, to int64, limit uint32) []*zenaov1.EventInfo {
 	fromKey := creatorID + "/" + unixTimeKey(from) + "/"
 	toKey := creatorID + "/" + unixTimeKey(to) + "/"
 
 	return listEventsInternal(&eventsByCreator, fromKey, toKey, from > to, limit)
 }
 
-func listEventsByParticipant(participantID string, from, to int64, limit uint32) []*InfoWithPkgPath {
+func listEventsByParticipant(participantID string, from, to int64, limit uint32) []*zenaov1.EventInfo {
 	fromKey := participantID + "/" + unixTimeKey(from) + "/"
 	toKey := participantID + "/" + unixTimeKey(to) + "/"
 
 	return listEventsInternal(&eventsByParticipant, fromKey, toKey, from > to, limit)
 }
 
-func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, limit uint32) []*InfoWithPkgPath {
-	res := []*InfoWithPkgPath{}
+func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, limit uint32) []*zenaov1.EventInfo {
+	res := []*zenaov1.EventInfo{}
 	it := func(key string, value interface{}) bool {
-		var evt *InfoWithPkgPath
+		var evt zenaov1.EventInfo
 		switch val := value.(type) {
-		case *InfoWithPkgPath:
-			evt = val
+		case *zenaov1.EventInfo:
+			evt = *val
+			evt.PkgPath = key
 		case string:
-			evt = mustGetEventByPkgPath(val)
+			evt = *mustGetEventByPkgPath(val)
+			evt.PkgPath = val
 		}
-		res = append(res, evt)
+		res = append(res, &evt)
 		return uint32(len(res)) >= limit
 	}
 	if rev {

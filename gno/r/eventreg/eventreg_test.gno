@@ -8,6 +8,7 @@ import (
 
 	"gno.land/p/demo/urequire"
 	"gno.land/p/zenao/events"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 func TestEvents(t *testing.T) {
@@ -24,7 +25,7 @@ func TestEvents(t *testing.T) {
 	}
 
 	// inject evts
-	getters := map[string]func() events.Info{}
+	getters := map[string]events.InfoGetter{}
 	evts := []*struct {
 		id      string
 		creator string
@@ -40,8 +41,8 @@ func TestEvents(t *testing.T) {
 	for _, evt := range evts {
 		// XXX: `ev := evt` and using ev in place of evt will cause "gno.land/r/zenao/eventreg: test pkg: panic: unexpected type heapitem"
 		std.TestSetRealm(std.NewCodeRealm(evt.id))
-		getters[evt.id] = func() events.Info {
-			return events.Info{
+		getters[evt.id] = func() *zenaov1.EventInfo {
+			return &zenaov1.EventInfo{
 				Creator: evt.creator,
 				EndDate: evt.endDate.Unix(),
 			}
@@ -55,7 +56,7 @@ func TestEvents(t *testing.T) {
 	// list upcoming events
 	{
 		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
-		urequire.Equal(t, `2-future-event-day, 1-future-event-month`, eventsString(events))
+		urequire.Equal(t, `2-future-event-day, 1-future-event-month`, eventsString(events), "future events list should match")
 	}
 	// list past events
 	{
@@ -204,15 +205,27 @@ func TestEvents(t *testing.T) {
 }
 
 func TestEventsToJSON(t *testing.T) {
-	evts := []*InfoWithPkgPath{
-		{
-			PkgPath: "foo",
-		},
-	}
-	urequire.Equal(t, `[{"title":"","description":"","imageUri":"","startDate":"0","endDate":"0","capacity":0,"creatorAddr":"","location":"","participants":0,"pkgPath":"foo"}]`, eventsToJSON(evts))
+	evts := []*zenaov1.EventInfo{{
+		PkgPath: "foo",
+		Location: &zenaov1.EventLocation{Address: &zenaov1.AddressCustom{
+			Address:  "Paris",
+			Timezone: "Europe/Paris",
+		}},
+	}}
+	urequire.Equal(t, `[{"location":{"address":{"case":"custom","value":{"address":"Paris","timezone":"Europe/Paris"}}},"pkgPath":"foo"}]`, eventsToJSON(evts))
 }
 
-func eventsString(evts []*InfoWithPkgPath) string {
+func TestLocationToString(t *testing.T) {
+	loc := &zenaov1.EventLocation{Address: &zenaov1.AddressCustom{
+		Address:  "Paris",
+		Timezone: "Europe/Paris",
+	}}
+	str, err := events.LocationString(loc)
+	urequire.NoError(t, err)
+	urequire.Equal(t, "Paris", str)
+}
+
+func eventsString(evts []*zenaov1.EventInfo) string {
 	res := []string{}
 	for _, evt := range evts {
 		res = append(res, strings.TrimPrefix(evt.PkgPath, "gno.land/r/zenao/events/"))

@@ -51,8 +51,14 @@ export function EventInfo({
   const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
+  const isStarted = Date.now() > Number(data.startDate) * 1000;
   const queryClient = useQueryClient();
-  const { results } = useSearchField(data.location);
+
+  let location = "";
+  if (data.location?.address.case == "custom") {
+    location = data.location.address.value.address;
+  }
+  const { results } = useSearchField(location);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -78,7 +84,7 @@ export function EventInfo({
     description: data.description,
     startDate: new Date(Number(data.startDate) * 1000).toISOString(),
     endDate: new Date(Number(data.endDate) * 1000).toISOString(),
-    location: data.location,
+    location,
     maximumAttendeeCapacity: data.capacity,
     image: data.imageUri,
   };
@@ -155,7 +161,7 @@ export function EventInfo({
             <div className="w-[22px] h-[22px]">
               <MapPin width={iconSize} height={iconSize} />
             </div>
-            <LargeText>{data.location}</LargeText>
+            <LargeText>{location}</LargeText>
           </div>
           {results.length === 1 && (
             <Map
@@ -175,6 +181,11 @@ export function EventInfo({
               {/* add back when we can cancel
                 <Text className="my-4">{t("cancel-desc")}</Text>
               */}
+            </div>
+          ) : isStarted ? (
+            <div>
+              <LargeText>{t("already-begun")}</LargeText>
+              <Text className="my-4">{t("too-late")}</Text>
             </div>
           ) : (
             <div>
