@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
+	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
@@ -32,7 +33,10 @@ func execMail() error {
 		Title:     "GET IN STEP: n0izn0iz + zooma + pwnh4",
 		StartDate: time.Now().Add(time.Hour * 24),
 		EndDate:   time.Now().Add(time.Hour * 30),
-		Location:  "Paris Ground Control",
+		Location: &zenaov1.EventLocation{Address: &zenaov1.EventLocation_Custom{Custom: &zenaov1.AddressCustom{
+			Address:  "Ground Control",
+			Timezone: "Europe/Paris",
+		}}},
 	}
 	evt.ID = "10"
 
@@ -54,11 +58,15 @@ func generateConfirmationMailHTML(evt *zeni.Event) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	tz, err := evt.Timezone()
+	if err != nil {
+		return "", err
+	}
 	// XXX: think about injections
 	m := map[string]interface{}{
 		"eventImageURL": evt.ImageURI,
 		"eventName":     evt.Title,
-		"dateTime":      fmt.Sprintf("%s - %s", evt.StartDate.Format(time.UnixDate), evt.EndDate.Format(time.UnixDate)),
+		"dateTime":      fmt.Sprintf("%s - %s", evt.StartDate.In(tz).Format(time.UnixDate), evt.EndDate.In(tz).Format(time.UnixDate)),
 		"address":       evt.Location,
 		"eventURL":      eventPublicURL(evt.ID),
 	}
@@ -92,11 +100,15 @@ func generateCreationConfirmationMailHTML(evt *zeni.Event) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	tz, err := evt.Timezone()
+	if err != nil {
+		return "", err
+	}
 	// XXX: think about injections
 	m := map[string]interface{}{
 		"eventImageURL": evt.ImageURI,
 		"eventName":     evt.Title,
-		"dateTime":      fmt.Sprintf("%s - %s", evt.StartDate.Format(time.UnixDate), evt.EndDate.Format(time.UnixDate)),
+		"dateTime":      fmt.Sprintf("%s - %s", evt.StartDate.In(tz).Format(time.UnixDate), evt.EndDate.In(tz).Format(time.UnixDate)),
 		"address":       evt.Location,
 		"eventURL":      eventPublicURL(evt.ID),
 	}

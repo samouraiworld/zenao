@@ -6,11 +6,21 @@ import { SmallText } from "../texts/SmallText";
 import { LargeText } from "../texts/LargeText";
 import { Text } from "../texts/DefaultText";
 import { Card } from "./Card";
-import { EventInfo } from "@/lib/gno";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { web2URL } from "@/lib/uris";
 
-export function EventCard({ evt }: { evt: EventInfo & { pkgPath: string } }) {
+export function EventCard({ evt }: { evt: EventInfo }) {
   const iconSize = 16;
+
+  let location = "";
+  if (
+    evt.location?.address.case === "geo" ||
+    evt.location?.address.case === "custom"
+  ) {
+    location = evt.location?.address.value.address;
+  } else if (evt.location?.address.case === "virtual") {
+    location = evt.location?.address.value.uri;
+  }
   return (
     <Link href={`/event/${idFromPkgPath(evt.pkgPath)}`}>
       <Card className="h-[275px] flex flex-col sm:flex-row mb-3 hover:bg-secondary/100">
@@ -46,7 +56,7 @@ export function EventCard({ evt }: { evt: EventInfo & { pkgPath: string } }) {
           <div className="flex flex-row gap-4 items-center">
             <MapPin width={iconSize} height={iconSize} />
             {/* TODO: Add location */}
-            <Text>{evt.location}</Text>
+            <Text>{location}</Text>
           </div>
           <div className="flex flex-row gap-4 items-center">
             <Users width={iconSize} height={iconSize} />
@@ -54,7 +64,7 @@ export function EventCard({ evt }: { evt: EventInfo & { pkgPath: string } }) {
           </div>
           <div className="hidden sm:flex sm:flex-row sm:gap-4 sm:items-center">
             <CircleUserRound width={iconSize} height={iconSize} />
-            <Text className="truncate">{evt.creatorAddr}</Text>
+            <Text className="truncate">{evt.creator}</Text>
           </div>
         </div>
       </Card>

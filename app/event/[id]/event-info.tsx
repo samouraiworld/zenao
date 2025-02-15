@@ -67,6 +67,10 @@ export function EventInfo({
     });
   }, [queryClient, authToken, id]);
 
+  let location = "";
+  if (data.location?.address.case == "custom") {
+    location = data.location.address.value.address;
+  }
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -74,7 +78,7 @@ export function EventInfo({
     description: data.description,
     startDate: new Date(Number(data.startDate) * 1000).toISOString(),
     endDate: new Date(Number(data.endDate) * 1000).toISOString(),
-    location: data.location,
+    location,
     maximumAttendeeCapacity: data.capacity,
     image: data.imageUri,
   };
@@ -149,7 +153,7 @@ export function EventInfo({
         <div className="flex flex-row gap-4 items-center">
           <MapPin width={iconSize} height={iconSize} />
           {/* TODO: Add location */}
-          <LargeText>{data.location}</LargeText>
+          <LargeText>{location}</LargeText>
         </div>
 
         <Card className="mt-2">

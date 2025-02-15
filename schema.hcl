@@ -91,13 +91,37 @@ table "events" {
     null = true
     type = integer
   }
-  column "location" {
-    null = true
-    type = text
-  }
   column "creator_id" {
     null = true
     type = integer
+  }
+  column "loc_venue_name" {
+    null = true
+    type = text
+  }
+  column "loc_kind" {
+    null = true
+    type = text
+  }
+  column "loc_address" {
+    null = true
+    type = text
+  }
+  column "loc_instructions" {
+    null = true
+    type = text
+  }
+  column "loc_timezone" {
+    null = true
+    type = text
+  }
+  column "loc_lat" {
+    null = true
+    type = real
+  }
+  column "loc_lng" {
+    null = true
+    type = real
   }
   primary_key {
     columns = [column.id]

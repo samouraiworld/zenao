@@ -5,9 +5,11 @@ import (
 	"std"
 	"time"
 
+	"gno.land/p/demo/json"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	"gno.land/p/zenao/dao_roles_based"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 type Event struct {
@@ -15,11 +17,12 @@ type Event struct {
 	Creator          string
 	StartDate        int64
 	EndDate          int64
-	Capacity         uint64
-	Location         string
+	Capacity         uint32
+	Location         *zenaov1.EventLocation
 	GetProfileString GetProfileString
 	SetProfileString SetProfileString
 	Org              *dao_roles_based.DaoRolesBased
+	PkgPath          string
 }
 
 type Config struct {
@@ -29,11 +32,11 @@ type Config struct {
 	ImageURI         string
 	StartDate        int64 // unix seconds
 	EndDate          int64 // unix seconds
-	Capacity         uint64
+	Capacity         uint32
 	GetProfileString GetProfileString
 	SetProfileString SetProfileString
 	ZenaoAdminAddr   string
-	Location         string
+	Location         *zenaov1.EventLocation
 }
 
 type GetProfileString func(addr std.Address, field string, def string) string
@@ -60,6 +63,7 @@ func NewEvent(conf *Config) *Event {
 		SetProfileString: conf.SetProfileString,
 		Org:              dao,
 		Location:         conf.Location,
+		// XXX: set PkgPath?
 	}
 
 	conf.SetProfileString("DisplayName", conf.Title)
@@ -123,11 +127,11 @@ func (e *Event) AssertCallerIsOrganizer() {
 	}
 }
 
-func (e *Event) CountParticipants() int {
-	return len(e.Org.MemberModule.GetMembersWithRole("participant"))
+func (e *Event) CountParticipants() uint32 {
+	return uint32(len(e.Org.MemberModule.GetMembersWithRole("participant")))
 }
 
-func (e *Event) Edit(title, description, imageURI string, startDate, endDate int64, capacity uint64, location string) {
+func (e *Event) Edit(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) {
 	e.AssertCallerIsOrganizer()
 
 	e.SetProfileString("DisplayName", title)
@@ -137,22 +141,39 @@ func (e *Event) Edit(title, description, imageURI string, startDate, endDate int
 	e.StartDate = startDate
 	e.EndDate = endDate
 	e.Capacity = capacity
-	e.Location = location
 
-	// XXX: update register
+	parsedLoc := json.Must(json.Unmarshal([]byte(locationJSON)))
+	e.Location = &zenaov1.EventLocation{}
+	e.Location.FromJSON(parsedLoc)
+
+	// XXX: update registry
 }
 
 func (e *Event) Render(path string) string {
+	// XXX: render location
+
 	s := ""
 	if path == "" {
 		info := e.Info()
+
+		locStr, err := LocationString(e.Location)
+		if err != nil {
+			locStr = "Error: " + err.Error()
+		}
+
+		orga := e.GetProfileString(std.Address(info.Creator), "DisplayName", "")
+		if orga == "" {
+			orga = info.Creator
+		}
+
 		s += md.H1(info.Title)
-		s += md.Image("Event presentation", info.ImageURI)
+		s += md.Image("Event presentation", info.ImageUri)
 		s += md.Paragraph(info.Description)
 		s += md.BulletList([]string{
-			ufmt.Sprintf("Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
-			ufmt.Sprintf("Capacity: %d/%d", e.CountParticipants(), e.Capacity),
-			ufmt.Sprintf("Organizer: %s", e.GetProfileString(std.Address(info.Creator), "DisplayName", "")),
+			ufmt.Sprintf("📍 Location: %s", locStr),
+			ufmt.Sprintf("🕓 Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
+			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.Capacity),
+			ufmt.Sprintf("👤 Organizer: %s", orga),
 		}) + "\n"
 		s += md.HorizontalRule()
 		path = "noprofile"
