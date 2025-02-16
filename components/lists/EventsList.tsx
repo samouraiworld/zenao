@@ -1,19 +1,44 @@
+"use client";
+
+import { CalendarIcon } from "lucide-react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { LargeText } from "../texts/LargeText";
 import { EventCard } from "../cards/EventCard";
+import { Button } from "../shadcn/button";
+import { SmallText } from "../texts/SmallText";
 import { Text } from "../texts/DefaultText";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
+const EmptyEventsList: React.FC = () => {
+  const t = useTranslations("events-list");
+  return (
+    <div className="flex flex-col items-center gap-5 mt-10">
+      <CalendarIcon
+        strokeWidth={0.5}
+        width={140}
+        height={140}
+        className="text-secondary-color"
+      />
+      <div className="text-center">
+        <Text className="font-bold">{t("no-events")}</Text>
+        <SmallText variant="secondary">{t("no-events-desc")}</SmallText>
+      </div>
+      <Button variant="secondary">
+        <Link href="/create">
+          <SmallText variant="secondary">{t("create-event")}</SmallText>
+        </Link>
+      </Button>
+    </div>
+  );
+};
+
 export const EventsList: React.FC<{
   list: EventInfo[];
-  title: string;
-}> = ({ list, title }) => {
-  const t = useTranslations("created");
+}> = ({ list }) => {
   return (
-    <div className="mb-4">
-      <LargeText className="mb-2">{title}</LargeText>
+    <div className="my-5">
       {!list.length ? (
-        <Text>{t("no-events")}</Text>
+        <EmptyEventsList />
       ) : (
         list.map((evt) => <EventCard key={evt.pkgPath} evt={evt} />)
       )}

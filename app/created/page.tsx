@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { useTranslations } from "next-intl";
+import React from "react";
 import { EventInfo } from "../gen/zenao/v1/zenao_pb";
 import { getQueryClient } from "@/lib/get-query-client";
 import {
@@ -9,9 +9,7 @@ import {
 } from "@/components/layout/ScreenContainer";
 import { eventsByCreatorList } from "@/lib/queries/events-list";
 import { zenaoClient } from "@/app/zenao-client";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
-import { EventsList } from "@/components/lists/EventsList";
-import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
+import { EventsListLayout } from "@/components/layout/EventsListLayout";
 
 const LoggedOutCreatedPage: React.FC = () => {
   const t = useTranslations("created");
@@ -22,31 +20,13 @@ const LoggedOutCreatedPage: React.FC = () => {
   );
 };
 
-const HeaderCreated: React.FC<{ address: string }> = ({ address }) => {
-  const t = useTranslations("created");
-  return (
-    <div className="flex flex-col gap-2 mb-3">
-      <VeryLargeText>{t("title")}</VeryLargeText>
-      <Link
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg:created/${address}`}
-        target="_blank"
-      >
-        <ButtonWithLabel className="w-auto" label={t("see-gnoweb")} />
-      </Link>
-    </div>
-  );
-};
-
-const BodyCreated: React.FC<{
+const CreatedPageFC: React.FC<{
   upcoming: EventInfo[];
   past: EventInfo[];
 }> = ({ upcoming, past }) => {
   const t = useTranslations("created");
   return (
-    <div>
-      <EventsList list={[...upcoming].reverse()} title={t("upcoming")} />
-      <EventsList list={past} title={t("past")} />
-    </div>
+    <EventsListLayout upcoming={upcoming} past={past} title={t("title")} />
   );
 };
 
@@ -73,8 +53,7 @@ export default async function CreatedPage() {
 
   return (
     <ScreenContainer>
-      <HeaderCreated address={address} />
-      <BodyCreated upcoming={upcoming} past={past} />
+      <CreatedPageFC upcoming={upcoming} past={past} />
     </ScreenContainer>
   );
 }

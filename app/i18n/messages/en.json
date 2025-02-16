@@ -74,14 +74,16 @@
   },
   "discover": {
     "title": "Discover events",
-    "see-gnoweb": "See on Gnoweb",
-    "upcoming": "Upcoming",
-    "past": "Past"
+    "description": "Dive into the pulse of tribes events, rave parties, hacking events, private cinema avant-premieres, and more."
   },
   "created": {
     "logged-out": "Log in to see events your created",
+    "title": "Events created"
+  },
+  "events-list": {
     "no-events": "No events to show.",
-    "title": "Events you created",
+    "no-events-desc": "You have no events. Why not create one?",
+    "create-event": "Create event",
     "see-gnoweb": "See on Gnoweb",
     "upcoming": "Upcoming",
     "past": "Past"
