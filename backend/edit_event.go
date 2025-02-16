@@ -51,7 +51,7 @@ func (s *ZenaoServer) EditEvent(
 		}
 
 		if err := s.Chain.EditEvent(req.Msg.EventId, req.Msg); err != nil {
-			s.Logger.Error("edit-event", zap.Error(err))
+			return err
 		}
 
 		return nil

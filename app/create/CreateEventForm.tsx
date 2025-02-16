@@ -10,6 +10,7 @@ import { zenaoClient } from "@/app/zenao-client";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
+import { currentTimezone } from "@/lib/time";
 
 export const CreateEventForm: React.FC = () => {
   const { session } = useSession();
@@ -37,9 +38,21 @@ export const CreateEventForm: React.FC = () => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      const { id } = await zenaoClient.createEvent(values, {
-        headers: { Authorization: "Bearer " + token },
-      });
+      const { id } = await zenaoClient.createEvent(
+        {
+          ...values,
+          location: {
+            address: {
+              case: "custom",
+              value: {
+                address: values.location,
+                timezone: currentTimezone(),
+              },
+            },
+          },
+        },
+        { headers: { Authorization: "Bearer " + token } },
+      );
       form.reset();
       toast({
         title: t("toast-creation-success"),

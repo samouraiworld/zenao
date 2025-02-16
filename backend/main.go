@@ -42,6 +42,7 @@ func main() {
 		newFakegenCmd(),
 		newMailCmd(),
 		newSyncChainCmd(),
+		newRealmsrcCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])

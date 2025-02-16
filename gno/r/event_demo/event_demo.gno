@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"gno.land/p/zenao/events"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/r/demo/profile"
 )
 
@@ -23,7 +24,7 @@ func init() {
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr:   zenaoAdmin,
-		Location:         "To be disclosed",
+		Location:         &zenaov1.EventLocation{Address: &zenaov1.AddressCustom{Address: "To be disclosed", Timezone: "Europe/Paris"}},
 	}
 	Event = events.NewEvent(&conf)
 }
@@ -44,8 +45,8 @@ func RemoveGatekeeper(gatekeeper string) {
 	Event.RemoveGatekeeper(gatekeeper)
 }
 
-func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint64, location string) {
-	Event.Edit(title, description, imageURI, startDate, endDate, capacity, location)
+func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) {
+	Event.Edit(title, description, imageURI, startDate, endDate, capacity, locationJSON)
 }
 
 func Render(path string) string {

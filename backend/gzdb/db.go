@@ -22,20 +22,6 @@ type User struct {
 	AvatarURI   string
 }
 
-type Event struct {
-	gorm.Model
-	Title       string
-	Description string
-	StartDate   time.Time
-	EndDate     time.Time
-	ImageURI    string
-	TicketPrice float64
-	Capacity    uint32
-	Location    string
-	CreatorID   uint
-	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
-}
-
 type UserRole struct {
 	// gorm.Model without ID
 	CreatedAt time.Time
@@ -87,11 +73,13 @@ func (g *gormZenaoDB) Tx(cb func(db zeni.DB) error) error {
 
 // CreateEvent implements zeni.DB.
 func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*zeni.Event, error) {
-	// XXX: validate?
+	// NOTE: request should be validated by caller
+
 	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse creator id: %w", err)
 	}
+
 	evt := &Event{
 		Title:       req.Title,
 		Description: req.Description,
@@ -101,10 +89,13 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		CreatorID:   uint(creatorIDInt),
 		TicketPrice: req.TicketPrice,
 		Capacity:    req.Capacity,
-		Location:    req.Location,
 	}
+	if err := evt.SetLocation(req.Location); err != nil {
+		return nil, fmt.Errorf("convert location: %w", err)
+	}
+
 	if err := g.db.Create(evt).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create event in db: %w", err)
 	}
 
 	userRole := &UserRole{
@@ -114,10 +105,15 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 	}
 
 	if err := g.db.Create(userRole).Error; err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create organizer role assignment in db: %w", err)
 	}
 
-	return dbEventToZeniEvent(evt), nil
+	zevt, err := dbEventToZeniEvent(evt)
+	if err != nil {
+		return nil, fmt.Errorf("convert db event to zeni event: %w", err)
+	}
+
+	return zevt, nil
 }
 
 // EditEvent implements zeni.DB.
@@ -128,7 +124,7 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) e
 		return err
 	}
 
-	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(Event{
+	evt := Event{
 		Title:       req.Title,
 		Description: req.Description,
 		ImageURI:    req.ImageUri,
@@ -136,8 +132,12 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) e
 		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
 		TicketPrice: req.TicketPrice,
 		Capacity:    req.Capacity,
-		Location:    req.Location,
-	}).Error; err != nil {
+	}
+	if err := evt.SetLocation(req.Location); err != nil {
+		return err
+	}
+
+	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(evt).Error; err != nil {
 		return err
 	}
 	return nil
@@ -149,7 +149,7 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	return dbEventToZeniEvent(evt), nil
+	return dbEventToZeniEvent(evt)
 }
 
 // GetEvent implements zeni.DB.
@@ -276,7 +276,11 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 	}
 	res := make([]*zeni.Event, 0, len(events))
 	for _, e := range events {
-		res = append(res, dbEventToZeniEvent(e))
+		zevt, err := dbEventToZeniEvent(e)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, zevt)
 	}
 	return res, nil
 }
@@ -305,21 +309,6 @@ func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error)
 		res = append(res, role.Role)
 	}
 	return res, nil
-}
-
-func dbEventToZeniEvent(dbevt *Event) *zeni.Event {
-	return &zeni.Event{
-		ID:          fmt.Sprintf("%d", dbevt.ID),
-		Title:       dbevt.Title,
-		Description: dbevt.Description,
-		StartDate:   dbevt.StartDate,
-		EndDate:     dbevt.EndDate,
-		ImageURI:    dbevt.ImageURI,
-		TicketPrice: dbevt.TicketPrice,
-		Capacity:    dbevt.Capacity,
-		Location:    dbevt.Location,
-		CreatorID:   fmt.Sprintf("%d", dbevt.CreatorID),
-	}
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.DBUser {

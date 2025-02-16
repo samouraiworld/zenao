@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { EventInfo } from "@/lib/gno";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
-export function EventCard({ evt }: { evt: EventInfo & { pkgPath: string } }) {
+export function EventCard({ evt }: { evt: EventInfo }) {
   return (
     <Link href={`/event/${idFromPkgPath(evt.pkgPath)}`}>
       <div
