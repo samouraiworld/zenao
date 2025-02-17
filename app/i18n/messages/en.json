@@ -74,7 +74,7 @@
   },
   "settings": {
     "avatar-placeholder": "Avatar URI...",
-    "name-placeholder": "Username...",
+    "name-placeholder": "Name...",
     "bio-placeholder": "Bio...",
     "save-button": "Save changes",
     "toast-success": "User correctly edited!",
