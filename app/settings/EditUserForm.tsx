@@ -71,21 +71,21 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
         className="items-center sm:h-full"
       >
         <div className="flex flex-col sm:flex-row w-full gap-10">
-          <FormFieldImage<UserFormSchemaType>
-            form={form}
+          <FormFieldImage
+            control={form.control}
             name="avatarUri"
             placeholder={t("avatar-placeholder")}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
             <Card>
-              <FormFieldInputString<UserFormSchemaType>
+              <FormFieldInputString
                 control={form.control}
                 name="displayName"
                 placeholder={t("name-placeholder")}
               />
             </Card>
             <Card>
-              <FormFieldTextArea<UserFormSchemaType>
+              <FormFieldTextArea
                 control={form.control}
                 name="bio"
                 placeholder={t("bio-placeholder")}
