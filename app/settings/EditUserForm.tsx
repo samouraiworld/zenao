@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useSession } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
@@ -98,6 +99,15 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
                 type="submit"
               />
             </div>
+            {!!user?.address && (
+              <div>
+                <Link
+                  href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/cockpit:u/${user.address}`}
+                >
+                  See your profile on gnoweb
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </form>

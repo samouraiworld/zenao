@@ -2,9 +2,12 @@ package cockpit
 
 import (
 	"std"
+	"strings"
 
 	"gno.land/p/demo/mux"
+	"gno.land/p/demo/ufmt"
 	"gno.land/p/demo/users"
+	"gno.land/p/moul/md"
 	"gno.land/r/demo/profile"
 	rusers "gno.land/r/demo/users"
 )
@@ -16,6 +19,7 @@ const (
 	usersRealm    = "r/demo/users"
 	ghLinkHint    = "r/gnoland/ghverify?help&__func=RequestVerification"
 	ghProfileHint = "/r/demo/profile:u/"
+	gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 )
 
 func Render(reqPath string) string {
@@ -47,6 +51,8 @@ func renderUser(res *mux.ResponseWriter, req *mux.Request) {
 	// FIXME: markdown injection, spam
 	res.Write("# " + profile.GetStringField(addr, profile.DisplayName, "Anon") + "\n")
 
+	res.Write(md.Image("Avatar", pfpURL(profile.GetStringField(addr, profile.Avatar, "Anon"))) + "\n")
+
 	if username != "" {
 		res.Write("- Username: [" + username + "](/" + usersRealm + ":" + username + ")\n")
 	} else {
@@ -71,4 +77,13 @@ func resolveUserBasics(aon string) (std.Address, string, bool) {
 	}
 
 	return addr, "", false
+}
+
+func pfpURL(uri string) string {
+	if !strings.HasPrefix(uri, "ipfs://") {
+		return uri
+	}
+	withoutScheme := strings.TrimPrefix(uri, "ipfs://")
+	res := ufmt.Sprintf(`https://%s/ipfs/%s?img-width=100&img-height=100&img-fit=cover&img-dpr=2`, gatewayDomain, withoutScheme)
+	return res
 }

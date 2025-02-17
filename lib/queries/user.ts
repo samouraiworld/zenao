@@ -1,15 +1,7 @@
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { queryOptions } from "@tanstack/react-query";
-import { z } from "zod";
 import { extractGnoStringResponse } from "../gno";
 import { zenaoClient } from "@/app/zenao-client";
-
-const userInfosSchema = z.object({
-  displayName: z.string().trim(),
-  bio: z.string().trim().min(1),
-  avatarUri: z.string().trim().min(1),
-});
-type UserInfoSchemaType = z.infer<typeof userInfosSchema>;
 
 export const userOptions = (authToken: string | null) =>
   queryOptions({
@@ -41,12 +33,11 @@ export const userOptions = (authToken: string | null) =>
         `GetStringField(${JSON.stringify(address)}, Avatar, "")`,
       );
 
-      const user: UserInfoSchemaType = {
+      return {
         displayName: extractGnoStringResponse(resUsername),
         bio: extractGnoStringResponse(resBio),
         avatarUri: extractGnoStringResponse(resAvatarURI),
+        address: address,
       };
-
-      return userInfosSchema.parse(user);
     },
   });
