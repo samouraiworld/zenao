@@ -10,14 +10,17 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
-type User struct {
+type AuthUser struct {
 	ID     string
 	Email  string
 	Banned bool
 }
 
-type DBUser struct {
-	ID string
+type User struct {
+	ID          string
+	DisplayName string
+	Bio         string
+	AvatarURI   string
 }
 
 type Event struct {
@@ -70,18 +73,18 @@ type DB interface {
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserRoles(userID string, eventID string) ([]string, error)
-	GetAllUsers() ([]*DBUser, error)
+	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) error
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
-	GetAllParticipants(eventID string) ([]*DBUser, error)
+	GetAllParticipants(eventID string) ([]*User, error)
 }
 
 type Chain interface {
-	CreateUser(userID string) error
+	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserAddress(userID string) string
 

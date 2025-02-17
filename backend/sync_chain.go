@@ -63,7 +63,7 @@ func execSyncChain() error {
 		return err
 	}
 	for _, user := range users {
-		if err := chain.CreateUser(user.ID); err != nil {
+		if err := chain.CreateUser(user); err != nil {
 			logger.Error("failed to create user", zap.String("user-id", user.ID), zap.Error(err))
 		}
 	}

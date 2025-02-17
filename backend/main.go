@@ -158,7 +158,7 @@ func execStart() error {
 	)
 }
 
-func getUserFromClerk(ctx context.Context) *zeni.User {
+func getUserFromClerk(ctx context.Context) *zeni.AuthUser {
 	iUser := authn.GetInfo(ctx)
 	if iUser == nil {
 		return nil
@@ -168,17 +168,17 @@ func getUserFromClerk(ctx context.Context) *zeni.User {
 	if len(clerkUser.EmailAddresses) != 0 {
 		email = clerkUser.EmailAddresses[0].EmailAddress
 	}
-	return &zeni.User{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 }
 
-func createClerkUser(ctx context.Context, email string) (*zeni.User, error) {
+func createClerkUser(ctx context.Context, email string) (*zeni.AuthUser, error) {
 	existing, err := user.List(ctx, &user.ListParams{EmailAddressQuery: &email})
 	if err != nil {
 		return nil, err
 	}
 	if len(existing.Users) != 0 {
 		clerkUser := existing.Users[0]
-		return &zeni.User{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
+		return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 	}
 
 	passwordBz := make([]byte, 32)
@@ -194,7 +194,7 @@ func createClerkUser(ctx context.Context, email string) (*zeni.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &zeni.User{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
+	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {
