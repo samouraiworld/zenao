@@ -21,3 +21,15 @@ export const eventOptions = (id: string) =>
       return create(EventInfoSchema, event);
     },
   });
+
+export const timezoneOptions = () =>
+  queryOptions({
+    queryKey: ["timezone"],
+    queryFn: async () => {
+      const res = await fetch(
+        "https://cdn.jsdelivr.net/npm/geo-tz@latest/data/timezones-1970.geojson.index.json",
+      );
+      const data: { timezones: string[]; lookup: object } = await res.json();
+      return data.timezones;
+    },
+  });

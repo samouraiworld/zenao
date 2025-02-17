@@ -10,7 +10,7 @@ import (
 
 func (s *ZenaoServer) EnsureUserExists(
 	ctx context.Context,
-	user *zeni.User,
+	user *zeni.AuthUser,
 ) (string, error) {
 	if user == nil {
 		return "", errors.New("nil user")
@@ -34,7 +34,7 @@ func (s *ZenaoServer) EnsureUserExists(
 			return err
 		}
 
-		if err := s.Chain.CreateUser(userID); err != nil {
+		if err := s.Chain.CreateUser(&zeni.User{ID: userID}); err != nil {
 			return err
 		}
 		return nil

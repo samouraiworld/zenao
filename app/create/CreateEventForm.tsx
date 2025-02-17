@@ -26,13 +26,16 @@ export const CreateEventForm: React.FC = () => {
       location: {
         kind: "custom",
         address: "",
+        timeZone: "",
       },
     },
   });
+
+  // CreateEvent call loaded value
+  const [isLoaded, setIsLoaded] = React.useState<boolean>(false);
+
   const { toast } = useToast();
   const t = useTranslations("eventForm");
-
-  const [isLoaded, setIsLoaded] = React.useState<boolean>(false);
 
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
@@ -41,7 +44,7 @@ export const CreateEventForm: React.FC = () => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      // location object
+      // Construct location object for the call
       let value = {};
       switch (values.location.kind) {
         case "custom":

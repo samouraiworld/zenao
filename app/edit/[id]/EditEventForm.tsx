@@ -29,20 +29,46 @@ export function EditEventForm({
   const isOrganizer = roles.includes("organizer");
   const router = useRouter();
 
-  let location = "";
-  if (data.location?.address.case == "custom") {
-    location = data.location.address.value.address;
+  // Correctly reconstruct location object
+  let location: EventFormSchemaType["location"] = {
+    kind: "custom",
+    address: "",
+    timeZone: "",
+  };
+  switch (data.location?.address.case) {
+    case "custom":
+      location = {
+        kind: "custom",
+        address: data.location?.address.value.address,
+        timeZone: data.location?.address.value.timezone,
+      };
+      break;
+    case "geo":
+      location = {
+        kind: "geo",
+        address: data.location?.address.value.address,
+        lat: data.location?.address.value.lat,
+        lng: data.location?.address.value.lng,
+        size: data.location?.address.value.size,
+      };
+      break;
+    case "virtual":
+      location = {
+        kind: "virtual",
+        location: data.location?.address.value.uri,
+      };
   }
   const defaultValues: EventFormSchemaType = {
     ...data,
     location,
   };
-
   const form = useForm<EventFormSchemaType>({
     mode: "all",
     resolver: zodResolver(eventFormSchema),
     defaultValues,
   });
+
+  // EditEvent call loaded value
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   const { toast } = useToast();
@@ -55,16 +81,34 @@ export function EditEventForm({
       if (!token) {
         throw new Error("invalid clerk authToken");
       }
+      // Construct location object for the call
+      let value = {};
+      switch (values.location.kind) {
+        case "custom":
+          value = {
+            address: values.location.address,
+            timezone: currentTimezone(),
+          };
+          break;
+        case "virtual":
+          value = { uri: values.location.location };
+          break;
+        case "geo":
+          value = {
+            address: values.location.address,
+            lat: values.location.lat,
+            lng: values.location.lng,
+            size: values.location.size,
+          };
+          break;
+        default:
+          value = {};
+      }
       await zenaoClient.editEvent(
         {
           ...values,
           eventId: id,
-          location: {
-            address: {
-              case: "custom",
-              value: { address: values.location, timezone: currentTimezone() },
-            },
-          },
+          location: { address: { case: values.location.kind, value } },
         },
         {
           headers: { Authorization: "Bearer " + token },

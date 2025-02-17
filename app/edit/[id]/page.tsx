@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { EditEventForm } from "./EditEventForm";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { getQueryClient } from "@/lib/get-query-client";
-import { eventOptions } from "@/lib/queries/event";
+import { eventOptions, timezoneOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
 
 export default async function EditPage({
@@ -17,6 +17,7 @@ export default async function EditPage({
   const queryClient = getQueryClient();
   void queryClient.prefetchQuery(eventOptions(p.id));
   void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
+  void queryClient.prefetchQuery(timezoneOptions());
 
   return (
     <ScreenContainer>
