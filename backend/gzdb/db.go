@@ -16,7 +16,7 @@ import (
 
 type User struct {
 	gorm.Model         // this ID should be used for any database related logic (like querying)
-	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only use for user identification & creation
+	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -256,12 +256,12 @@ func (g *gormZenaoDB) UserExists(authID string) (string, error) {
 }
 
 // GetAllUsers implements zeni.DB.
-func (g *gormZenaoDB) GetAllUsers() ([]*zeni.DBUser, error) {
+func (g *gormZenaoDB) GetAllUsers() ([]*zeni.User, error) {
 	var users []*User
 	if err := g.db.Find(&users).Error; err != nil {
 		return nil, err
 	}
-	res := make([]*zeni.DBUser, 0, len(users))
+	res := make([]*zeni.User, 0, len(users))
 	for _, u := range users {
 		res = append(res, dbUserToZeniDBUser(u))
 	}
@@ -286,14 +286,14 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 }
 
 // GetAllParticipants implements zeni.DB.
-func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.DBUser, error) {
+func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
 	var tickets []*SoldTicket
 	if err := g.db.Find(&tickets, "event_id = ?", eventID).Error; err != nil {
 		return nil, err
 	}
-	res := make([]*zeni.DBUser, 0, len(tickets))
+	res := make([]*zeni.User, 0, len(tickets))
 	for _, e := range tickets {
-		res = append(res, &zeni.DBUser{ID: e.UserID})
+		res = append(res, &zeni.User{ID: e.UserID})
 	}
 	return res, nil
 }
@@ -311,8 +311,11 @@ func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error)
 	return res, nil
 }
 
-func dbUserToZeniDBUser(dbuser *User) *zeni.DBUser {
-	return &zeni.DBUser{
-		ID: fmt.Sprintf("%d", dbuser.ID),
+func dbUserToZeniDBUser(dbuser *User) *zeni.User {
+	return &zeni.User{
+		ID:          fmt.Sprintf("%d", dbuser.ID),
+		DisplayName: dbuser.DisplayName,
+		Bio:         dbuser.Bio,
+		AvatarURI:   dbuser.AvatarURI,
 	}
 }

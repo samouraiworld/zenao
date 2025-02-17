@@ -1,30 +1,36 @@
-import { Control, FieldValues, UseFormSetValue } from "react-hook-form";
+import {
+  Control,
+  FieldPathByValue,
+  FieldValues,
+  UseFormSetValue,
+} from "react-hook-form";
 import { z } from "zod";
-import { KeysOfValue } from "@/app/types";
 
 interface GenericFormFieldProps<T extends FieldValues, TCondition> {
   control: Control<T>;
-  name: KeysOfValue<T, TCondition>;
+  name: FieldPathByValue<T, TCondition>;
   className?: string;
   placeholder?: string;
   setValue?: UseFormSetValue<EventFormSchemaType>;
 }
-export type FormFieldProps<TCondition> = GenericFormFieldProps<
-  EventFormSchemaType,
-  TCondition
->;
+export type FormFieldProps<
+  T extends FieldValues,
+  TCondition,
+> = GenericFormFieldProps<T, TCondition>;
 
 // Regular expression pattern to match a URL
 export const urlPattern =
   /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 export const ipfsPattern = /^ipfs:\/\//;
+const uriSchema = z.union([
+  z.string().min(1).max(400).regex(urlPattern, "URL is not valid"),
+  z.string().min(1).max(400).regex(ipfsPattern, "IPFS URI is not valid"),
+]);
+
 export const eventFormSchema = z.object({
   title: z.string().trim().min(2).max(140),
   description: z.string().trim().min(10).max(10000),
-  imageUri: z.union([
-    z.string().min(1).max(400).regex(urlPattern, "URL is not valid"),
-    z.string().min(1).max(400).regex(ipfsPattern, "IPFS URI is not valid"),
-  ]),
+  imageUri: uriSchema,
   startDate: z.coerce.bigint(),
   endDate: z.coerce.bigint(),
   location: z.string().trim().min(2).max(400),
@@ -33,3 +39,10 @@ export const eventFormSchema = z.object({
   capacity: z.coerce.number().min(1),
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
+
+export const userFormSchema = z.object({
+  bio: z.string().trim().min(2).max(240),
+  displayName: z.string().trim().min(1),
+  avatarUri: uriSchema,
+});
+export type UserFormSchemaType = z.infer<typeof userFormSchema>;

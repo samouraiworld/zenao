@@ -3,6 +3,7 @@ package events
 import (
 	"errors"
 	"std"
+	"strings"
 	"time"
 
 	"gno.land/p/demo/json"
@@ -11,6 +12,8 @@ import (
 	"gno.land/p/zenao/dao_roles_based"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
+
+const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 
 type Event struct {
 	ID               string
@@ -167,17 +170,26 @@ func (e *Event) Render(path string) string {
 		}
 
 		s += md.H1(info.Title)
-		s += md.Image("Event presentation", info.ImageUri)
+		s += md.Image("Event presentation", eventImageURL(info.ImageUri))
 		s += md.Paragraph(info.Description)
 		s += md.BulletList([]string{
 			ufmt.Sprintf("📍 Location: %s", locStr),
 			ufmt.Sprintf("🕓 Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
 			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.Capacity),
-			ufmt.Sprintf("👤 Organizer: %s", orga),
+			ufmt.Sprintf("👤 Organizer: %s", md.Link(orga, "/r/zenao/cockpit:u/"+info.Creator)),
 		}) + "\n"
 		s += md.HorizontalRule()
 		path = "noprofile"
 	}
 	s += e.Org.Render(path)
 	return s
+}
+
+func eventImageURL(uri string) string {
+	if !strings.HasPrefix(uri, "ipfs://") {
+		return uri
+	}
+	withoutScheme := strings.TrimPrefix(uri, "ipfs://")
+	res := ufmt.Sprintf(`https://%s/ipfs/%s?img-width=350&img-height=250&img-fit=cover&img-dpr=2`, gatewayDomain, withoutScheme)
+	return res
 }

@@ -2,8 +2,8 @@
 
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
-import { UseFormReturn } from "react-hook-form";
-import { EventFormSchemaType, FormFieldProps } from "../types";
+import { FieldValues, useController } from "react-hook-form";
+import { FormFieldProps } from "../types";
 import { Button } from "@/components/shadcn/button";
 import {
   FormControl,
@@ -21,14 +21,14 @@ import {
 } from "@/components/shadcn/popover";
 import { SmallText } from "@/components/texts/SmallText";
 
-export const FormFieldDatePicker: React.FC<
-  Omit<FormFieldProps<bigint>, "control"> & {
-    form: UseFormReturn<EventFormSchemaType>;
-  }
-> = ({ name, className, placeholder, form }) => {
+export const FormFieldDatePicker = <T extends FieldValues>(
+  props: FormFieldProps<T, bigint>,
+) => {
+  const { field } = useController(props);
+
   function handleDateSelect(date: Date | undefined) {
     if (date) {
-      form.setValue(name, BigInt(getUnixTime(date)));
+      field.onChange(BigInt(getUnixTime(date)));
     }
   }
 
@@ -53,13 +53,13 @@ export const FormFieldDatePicker: React.FC<
       }
     }
 
-    form.setValue(name, BigInt(getUnixTime(newDate)));
+    field.onChange(BigInt(getUnixTime(newDate)));
   }
 
   return (
     <FormField
-      control={form.control}
-      name={name}
+      control={props.control}
+      name={props.name}
       render={({ field }) => {
         const formattedValue = fromUnixTime(Number(field.value));
         return (
@@ -72,13 +72,15 @@ export const FormFieldDatePicker: React.FC<
                     className={cn(
                       "w-full flex focus-visible:ring-0 border-none bg-inherit hover:bg-inherit h-auto p-0",
                       !formattedValue && "text-muted-foreground",
-                      className,
+                      props.className,
                     )}
                   >
                     {field.value ? (
                       format(formattedValue, "MM/dd/yyyy hh:mm aa")
                     ) : (
-                      <SmallText variant="secondary">{placeholder}</SmallText>
+                      <SmallText variant="secondary">
+                        {props.placeholder}
+                      </SmallText>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>

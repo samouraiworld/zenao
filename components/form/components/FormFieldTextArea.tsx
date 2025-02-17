@@ -1,14 +1,20 @@
 "use client";
 
 import React from "react";
+import { FieldValues } from "react-hook-form";
 import { FormFieldProps } from "../types";
 import { FormControl, FormField, FormItem } from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
 
-export const FormFieldTextArea: React.FC<
-  FormFieldProps<string> & React.TextareaHTMLAttributes<HTMLTextAreaElement>
-> = ({ control, name, className, placeholder, ...otherProps }) => {
+export const FormFieldTextArea = <T extends FieldValues>({
+  control,
+  name,
+  className,
+  placeholder,
+  ...otherProps
+}: FormFieldProps<T, string> &
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = () => {
@@ -32,7 +38,7 @@ export const FormFieldTextArea: React.FC<
           <FormControl>
             <Textarea
               className={cn(
-                "resize-none break-words border-0 focus-visible:ring-transparent p-0 w-full min-h-[52px] max-h-[400px]",
+                "resize-none break-words border-0 text-sm focus-visible:ring-transparent p-0 w-full min-h-[52px] max-h-[400px] placeholder:text-secondary-color",
                 className,
               )}
               placeholder={placeholder || "placeholder..."}

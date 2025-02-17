@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -160,13 +161,13 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 }
 
 // CreateUser implements ZenaoChain.
-func (g *gnoZenaoChain) CreateUser(userID string) error {
-	userRealmSrc, err := generateUserRealmSource(userID, g.namespace)
+func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
+	userRealmSrc, err := generateUserRealmSource(user, g.namespace)
 	if err != nil {
 		return err
 	}
 
-	userPkgPath := g.userRealmPkgPath(userID)
+	userPkgPath := g.userRealmPkgPath(user.ID)
 
 	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
@@ -313,22 +314,6 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 	return buf.String(), nil
 }
 
-func generateUserRealmSource(id string, gnoNamespace string) (string, error) {
-	m := map[string]string{
-		"displayName": fmt.Sprintf("Zenao user #%s", id),
-		"bio":         "Zenao managed user",
-		"avatarURI":   "https://www.wikimedia.org/portal/wikimedia.org/assets/img/wikimedia_logo.png",
-		"namespace":   gnoNamespace,
-	}
-
-	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
-	buf := strings.Builder{}
-	if err := t.Execute(&buf, m); err != nil {
-		return "", err
-	}
-	return buf.String(), nil
-}
-
 const eventRealmSourceTemplate = `package event
 
 import (
@@ -383,6 +368,37 @@ func Render(path string) string {
 }
 `
 
+func generateUserRealmSource(user *zeni.User, gnoNamespace string) (string, error) {
+	displayName := user.DisplayName
+	if displayName == "" {
+		displayName = fmt.Sprintf("Zenao user #%s", user.ID)
+	}
+
+	bio := user.Bio
+	if bio == "" {
+		bio = "Zenao managed user"
+	}
+
+	avatarURI := user.AvatarURI
+	if avatarURI == "" {
+		avatarURI = "ipfs://bafkreiefzfl43okbnnjwbazkntunp6plgpwnxj7rbqbcukpcnwtstuq4bu" // zenao logo
+	}
+
+	m := map[string]string{
+		"displayName": strconv.Quote(displayName),
+		"bio":         strconv.Quote(bio),
+		"avatarURI":   strconv.Quote(avatarURI),
+		"namespace":   gnoNamespace,
+	}
+
+	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
+	buf := strings.Builder{}
+	if err := t.Execute(&buf, m); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
 const userRealmSourceTemplate = `package user
 
 import (
@@ -398,9 +414,9 @@ var user *users.User
 func init() {
 	user = users.NewUser()
 
-	profile.SetStringField(profile.DisplayName, "{{.displayName}}")
-	profile.SetStringField(profile.Bio, "{{.bio}}")
-	profile.SetStringField(profile.Avatar, "{{.avatarURI}}")
+	profile.SetStringField(profile.DisplayName, {{.displayName}})
+	profile.SetStringField(profile.Bio, {{.bio}})
+	profile.SetStringField(profile.Avatar, {{.avatarURI}})
 }
 
 func TransferOwnership(newOwner string) {
