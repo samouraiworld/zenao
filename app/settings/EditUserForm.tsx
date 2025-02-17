@@ -14,7 +14,7 @@ import { FormFieldInputString } from "@/components/form/components/FormFieldInpu
 import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
-import { FormFieldURI } from "@/components/form/components/FormFieldURI";
+import { FormFieldImage } from "@/components/form/components/FormFieldImage";
 import { userOptions } from "@/lib/queries/user";
 
 export const EditUserForm: React.FC<{ authToken: string | null }> = ({
@@ -71,7 +71,7 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
         className="items-center sm:h-full"
       >
         <div className="flex flex-col sm:flex-row w-full gap-10">
-          <FormFieldURI<UserFormSchemaType>
+          <FormFieldImage<UserFormSchemaType>
             form={form}
             name="avatarUri"
             placeholder={t("avatar-placeholder")}

@@ -11,7 +11,7 @@ import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
 import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
-import { FormFieldURI } from "./components/FormFieldURI";
+import { FormFieldImage } from "./components/FormFieldImage";
 import { Form } from "@/components/shadcn/form";
 
 interface EventFormProps {
@@ -37,13 +37,13 @@ export const EventForm: React.FC<EventFormProps> = ({
         className="flex w-full sm:flex-row items-center sm:h-full"
       >
         <div className="flex flex-col sm:flex-row w-full gap-10">
-          <FormFieldURI<EventFormSchemaType>
-            form={form}
+          <FormFieldImage
             name="imageUri"
+            control={form.control}
             placeholder={t("image-uri-placeholder")}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
-            <FormFieldTextArea<EventFormSchemaType>
+            <FormFieldTextArea
               control={form.control}
               name="title"
               className="font-semibold text-3xl overflow-hidden"
@@ -64,7 +64,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="write">
-                  <FormFieldTextArea<EventFormSchemaType>
+                  <FormFieldTextArea
                     control={form.control}
                     name="description"
                     placeholder={t("description-placeholder")}
@@ -76,7 +76,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               </Tabs>
             </Card>
             <Card>
-              <FormFieldInputString<EventFormSchemaType>
+              <FormFieldInputString
                 control={form.control}
                 name="location"
                 placeholder={t("location-placeholder")}
@@ -84,22 +84,22 @@ export const EventForm: React.FC<EventFormProps> = ({
             </Card>
             <Card>
               <SmallText className="mb-3">{t("capacity-label")}</SmallText>
-              <FormFieldInputNumber<EventFormSchemaType>
+              <FormFieldInputNumber
                 control={form.control}
                 name="capacity"
                 placeholder={t("capacity-placeholder")}
               />
             </Card>
             <Card className="flex flex-col gap-[10px]">
-              <FormFieldDatePicker<EventFormSchemaType>
-                form={form}
+              <FormFieldDatePicker
                 name="startDate"
+                control={form.control}
                 placeholder={t("start-date-placeholder")}
               />
               <Separator className="mx-0" />
-              <FormFieldDatePicker<EventFormSchemaType>
-                form={form}
+              <FormFieldDatePicker
                 name="endDate"
+                control={form.control}
                 placeholder={t("end-date-placeholder")}
               />
             </Card>

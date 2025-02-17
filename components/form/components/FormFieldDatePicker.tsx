@@ -2,12 +2,7 @@
 
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
-import {
-  FieldPathByValue,
-  FieldValues,
-  PathValue,
-  UseFormReturn,
-} from "react-hook-form";
+import { FieldValues, useController } from "react-hook-form";
 import { FormFieldProps } from "../types";
 import { Button } from "@/components/shadcn/button";
 import {
@@ -26,21 +21,14 @@ import {
 } from "@/components/shadcn/popover";
 import { SmallText } from "@/components/texts/SmallText";
 
-export const FormFieldDatePicker = <T extends FieldValues>({
-  name,
-  className,
-  placeholder,
-  form,
-}: Omit<FormFieldProps<T, bigint>, "control"> & {
-  form: UseFormReturn<T>;
-}) => {
+export const FormFieldDatePicker = <T extends FieldValues>(
+  props: FormFieldProps<T, bigint>,
+) => {
+  const { field } = useController(props);
+
   function handleDateSelect(date: Date | undefined) {
     if (date) {
-      form.setValue(
-        name,
-        // We got this issue if we don't cast it https://github.com/orgs/react-hook-form/discussions/10419
-        BigInt(getUnixTime(date)) as PathValue<T, FieldPathByValue<T, bigint>>,
-      );
+      field.onChange(BigInt(getUnixTime(date)));
     }
   }
 
@@ -65,17 +53,13 @@ export const FormFieldDatePicker = <T extends FieldValues>({
       }
     }
 
-    form.setValue(
-      name,
-      // We got this issue if we don't cast it https://github.com/orgs/react-hook-form/discussions/10419
-      BigInt(getUnixTime(newDate)) as PathValue<T, FieldPathByValue<T, bigint>>,
-    );
+    field.onChange(BigInt(getUnixTime(newDate)));
   }
 
   return (
     <FormField
-      control={form.control}
-      name={name}
+      control={props.control}
+      name={props.name}
       render={({ field }) => {
         const formattedValue = fromUnixTime(Number(field.value));
         return (
@@ -88,13 +72,15 @@ export const FormFieldDatePicker = <T extends FieldValues>({
                     className={cn(
                       "w-full flex focus-visible:ring-0 border-none bg-inherit hover:bg-inherit h-auto p-0",
                       !formattedValue && "text-muted-foreground",
-                      className,
+                      props.className,
                     )}
                   >
                     {field.value ? (
                       format(formattedValue, "MM/dd/yyyy hh:mm aa")
                     ) : (
-                      <SmallText variant="secondary">{placeholder}</SmallText>
+                      <SmallText variant="secondary">
+                        {props.placeholder}
+                      </SmallText>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
