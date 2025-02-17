@@ -21,10 +21,29 @@ const HeaderEventsList: React.FC<{
   const t = useTranslations("events-list");
   return (
     <div className="flex flex-col gap-2 mb-3">
-      <div className="flex flex-row sm:justify-between">
-        <VeryLargeText className="truncate">{title}</VeryLargeText>
-
-        <div className="min-w-[175px] min-h-[33px]">
+      <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row sm:justify-between">
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <VeryLargeText className="truncate">{title}</VeryLargeText>
+          <Button
+            variant="secondary"
+            className="w-[155px] flex flex-row items-center justify-center"
+          >
+            <Link
+              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
+              target="_blank"
+            >
+              <SmallText variant="secondary">{t("see-gnoweb")}</SmallText>
+            </Link>
+            <Image
+              src="/gno1.png"
+              alt="gno-logo"
+              width={25}
+              height={25}
+              className="rounded-[25px]"
+            />
+          </Button>
+        </div>
+        <div className="w-[175px] h-[33px]">
           <Tabs
             value={tab}
             onValueChange={(value) => setTab(value as "upcoming" | "past")}
@@ -36,27 +55,8 @@ const HeaderEventsList: React.FC<{
           </Tabs>
         </div>
       </div>
-      <div>
-        <Button
-          variant="secondary"
-          className="flex flex-row items-center justify-between"
-        >
-          <Link
-            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
-            target="_blank"
-          >
-            <SmallText variant="secondary">{t("see-gnoweb")}</SmallText>
-          </Link>
-          <Image
-            src="/gno1.png"
-            alt="gno-logo"
-            width={25}
-            height={25}
-            className="rounded-[25px]"
-          />
-        </Button>
-      </div>
-      {description && <Text>{description}</Text>}
+
+      {description && <Text className="line-clamp-2">{description}</Text>}
     </div>
   );
 };
