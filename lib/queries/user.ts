@@ -26,7 +26,7 @@ export const userOptions = (authToken: string | null) =>
         { headers: { Authorization: "Bearer " + authToken } },
       );
       const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT,
       );
       const resUsername = await client.evaluateExpression(
         `gno.land/r/demo/profile`,
