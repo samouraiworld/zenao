@@ -72,6 +72,14 @@
     "p6-ref": "(*Decentralized Autonomous Organizations)",
     "p7": "In case of emergency, keep zen, and organize."
   },
+  "settings": {
+    "avatar-placeholder": "Avatar URI...",
+    "name-placeholder": "Name...",
+    "bio-placeholder": "Bio...",
+    "save-button": "Save changes",
+    "toast-success": "User correctly edited!",
+    "toast-error": "Error on editing user!"
+  },
   "discover": {
     "title": "Discover events",
     "description": "Dive into the pulse of tribes events, rave parties, hacking events, private cinema avant-premieres, and more."
@@ -107,3 +115,4 @@
     }
   }
 }
+
