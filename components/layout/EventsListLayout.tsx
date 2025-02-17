@@ -78,7 +78,7 @@ export const EventsListLayout: React.FC<{
         title={title}
       />
       {tab === "upcoming" ? (
-        <EventsList list={[...upcoming].reverse()} />
+        <EventsList list={upcoming} />
       ) : (
         <EventsList list={past} />
       )}
