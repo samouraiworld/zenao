@@ -52,7 +52,7 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               <NextIntlClientProvider messages={messages}>
-                <NextTopLoader />
+                <NextTopLoader showSpinner={false} color="#EC7E17" />
                 {children}
               </NextIntlClientProvider>
             </ThemeProvider>
