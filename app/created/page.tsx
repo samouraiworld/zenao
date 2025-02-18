@@ -1,16 +1,40 @@
-import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
+import { useTranslations } from "next-intl";
+import React from "react";
+import { EventInfo } from "../gen/zenao/v1/zenao_pb";
 import { getQueryClient } from "@/lib/get-query-client";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import {
+  ScreenContainer,
+  ScreenContainerCentered,
+} from "@/components/layout/ScreenContainer";
 import { eventsByCreatorList } from "@/lib/queries/events-list";
-import { EventCard } from "@/components/cards/EventCard";
 import { zenaoClient } from "@/app/zenao-client";
+import { EventsListLayout } from "@/components/layout/EventsListLayout";
+
+const LoggedOutCreatedPage: React.FC = () => {
+  const t = useTranslations("created");
+  return (
+    <ScreenContainerCentered isSignedOutModal>
+      {t("logged-out")}
+    </ScreenContainerCentered>
+  );
+};
+
+const CreatedPageFC: React.FC<{
+  upcoming: EventInfo[];
+  past: EventInfo[];
+}> = ({ upcoming, past }) => {
+  const t = useTranslations("created");
+  return (
+    <EventsListLayout upcoming={upcoming} past={past} title={t("title")} />
+  );
+};
 
 export default async function CreatedPage() {
   const { getToken } = await auth();
   const token = await getToken();
   if (!token) {
-    return <ScreenContainer>Log in to see events your created</ScreenContainer>;
+    return <LoggedOutCreatedPage />;
   }
 
   const { address } = await zenaoClient.getUserAddress(
@@ -29,21 +53,7 @@ export default async function CreatedPage() {
 
   return (
     <ScreenContainer>
-      <h1>Events you created</h1>
-      <Link
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg:created/${address}`}
-        target="_blank"
-      >
-        -&gt; See this list on Gnoweb
-      </Link>
-      <h2>Upcoming</h2>
-      {[...upcoming].reverse().map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
-      <h2>Past</h2>
-      {past.map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
+      <CreatedPageFC upcoming={upcoming} past={past} />
     </ScreenContainer>
   );
 }

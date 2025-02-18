@@ -1,8 +1,24 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventsList } from "@/lib/queries/events-list";
-import { EventCard } from "@/components/cards/EventCard";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { EventsListLayout } from "@/components/layout/EventsListLayout";
+
+const DiscoverPageFC: React.FC<{
+  upcoming: EventInfo[];
+  past: EventInfo[];
+}> = ({ upcoming, past }) => {
+  const t = useTranslations("discover");
+  return (
+    <EventsListLayout
+      upcoming={upcoming}
+      past={past}
+      title={t("title")}
+      description={t("description")}
+    />
+  );
+};
 
 export default async function DiscoverPage() {
   const queryClient = getQueryClient();
@@ -14,21 +30,7 @@ export default async function DiscoverPage() {
 
   return (
     <ScreenContainer>
-      <h1>Discover events</h1>
-      <Link
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
-        target="_blank"
-      >
-        -&gt; See this list on Gnoweb
-      </Link>
-      <h2>Upcoming</h2>
-      {[...upcoming].reverse().map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
-      <h2>Past</h2>
-      {past.map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
+      <DiscoverPageFC upcoming={upcoming} past={past} />
     </ScreenContainer>
   );
 }
