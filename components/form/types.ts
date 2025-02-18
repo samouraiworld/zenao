@@ -31,7 +31,6 @@ export const virtualLocationSchema = z.object({
     .max(400)
     .regex(urlPattern, "URL is not valid"),
 });
-export type VirtualLocationSchemaType = z.infer<typeof virtualLocationSchema>;
 const customLocationSchema = z.object({
   kind: z.literal("custom"),
   address: z.string().trim().min(1),

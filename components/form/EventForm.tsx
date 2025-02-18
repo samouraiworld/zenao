@@ -23,6 +23,7 @@ import { Form } from "@/components/shadcn/form";
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
 import { Map } from "@/components/common/Map";
+import { currentTimezone } from "@/lib/time";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -96,7 +97,18 @@ export const EventForm: React.FC<EventFormProps> = ({
                 id="virtual"
                 checked={isVirtual}
                 onCheckedChange={(checked: boolean) => {
-                  form.setValue("location", { kind: "virtual", location: "" });
+                  if (checked) {
+                    form.setValue("location", {
+                      kind: "virtual",
+                      location: "",
+                    });
+                  } else {
+                    form.setValue("location", {
+                      kind: "custom",
+                      address: "",
+                      timeZone: "",
+                    });
+                  }
                   setMarker(null);
                   setTimeZone("");
                   setIsVirtual(checked);
@@ -129,6 +141,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             {!isVirtual && location && marker && <Map marker={marker} />}
             {isCustom && location.kind === "custom" && location.address && (
               <TimeZonesPopover
+                defaultValue={currentTimezone()}
                 handleSelect={(timeZone: string) => {
                   form.setValue("location", {
                     ...location,

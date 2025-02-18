@@ -23,10 +23,11 @@ import { timezoneOptions } from "@/lib/queries/event";
 
 export const TimeZonesPopover: React.FC<{
   handleSelect: (timeZone: string) => void;
-}> = ({ handleSelect }) => {
+  defaultValue: string;
+}> = ({ handleSelect, defaultValue }) => {
   const [search, setSearch] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
-  const [item, setItem] = useState<string>("");
+  const [item, setItem] = useState<string>(defaultValue || "");
   const { data: timezones } = useSuspenseQuery(timezoneOptions());
 
   return (

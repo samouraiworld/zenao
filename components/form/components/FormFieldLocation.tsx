@@ -144,8 +144,8 @@ export const FormFieldLocation: React.FC<{
                             form.setValue("location", {
                               kind: "geo",
                               address: result.label,
-                              lat: result.raw.lat,
-                              lng: result.raw.lon,
+                              lat: Number(result.raw.lat),
+                              lng: Number(result.raw.lon),
                               size: 0,
                             });
                             const latlng = new L.LatLng(
