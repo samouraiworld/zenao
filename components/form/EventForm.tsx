@@ -1,50 +1,28 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import OpenStreetMapProvider from "leaflet-geosearch/lib/providers/openStreetMapProvider.js";
-import { useEffect, useMemo, useState } from "react";
-import { Check, XIcon } from "lucide-react";
-import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
+import { useMemo, useState } from "react";
 import { find as GeoTZFind } from "browser-geo-tz";
 import L from "leaflet";
-import { z } from "zod";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
-import { Button } from "../shadcn/button";
 import { MarkdownPreview } from "../common/MarkdownPreview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
-import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
 import { SmallText } from "../texts/SmallText";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
+import { TimeZonesPopover } from "./components/TimeZonesPopover";
 import { FormFieldImage } from "./components/FormFieldImage";
-import { addressLocationSchema, EventFormSchemaType } from "./types";
+import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/shadcn/form";
+import { FormFieldLocation } from "./components/FormFieldLocation";
+import { Form } from "@/components/shadcn/form";
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/shadcn/command";
-import { cn } from "@/lib/tailwind";
 import { Map } from "@/components/common/Map";
-import { timezoneOptions } from "@/lib/queries/event";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -52,218 +30,6 @@ interface EventFormProps {
   isLoaded: boolean;
   isEditing?: boolean;
 }
-
-export const useSearchField = (value: string) => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [results, setResults] = useState<SearchResult[]>([]);
-
-  useEffect(() => {
-    // Created a timeout else we query too many times the provider and it takes too much time to process
-    const timeoutId = setTimeout(async () => {
-      const provider = new OpenStreetMapProvider();
-      setLoading(true);
-      const results = await provider.search({ query: value });
-
-      setResults(results);
-      setLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [value]);
-
-  return { loading, results };
-};
-
-const FormFieldComboBox: React.FC<{
-  form: UseFormReturn<EventFormSchemaType>;
-  onSelect: (marker: L.LatLng) => Promise<void>;
-  onRemove: () => void;
-}> = ({ form, onSelect, onRemove }) => {
-  const t = useTranslations("eventForm");
-  const [search, setSearch] = useState<string>("");
-  const [open, setOpen] = useState<boolean>(false);
-  const { results } = useSearchField(search);
-
-  return (
-    <FormField
-      control={form.control}
-      name="location"
-      render={({ field }) => {
-        const object = field.value as z.infer<typeof addressLocationSchema>;
-        return (
-          <FormItem className="flex flex-col w-full space-y-0">
-            <Popover open={open} onOpenChange={setOpen}>
-              <div className="flex flex-row w-full justify-between">
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="secondary"
-                      role="combobox"
-                      className="w-full flex justify-start rounded-xl px-4 py-3 h-auto backdrop-blur-sm"
-                    >
-                      <SmallText
-                        className={cn(
-                          "truncate",
-                          !object.address && "text-secondary-color",
-                        )}
-                      >
-                        {object.address || "Add an address..."}
-                      </SmallText>
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                {object.address && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="bg-secondary/80 backdrop-blur-sm self-center absolute right-1"
-                    onClick={() => {
-                      setSearch("");
-                      onRemove();
-                      form.setValue("location", {
-                        ...object,
-                        address: "",
-                      });
-                    }}
-                  >
-                    <XIcon className="h-3 w-3" />
-                    <span className="sr-only">Clear</span>
-                  </Button>
-                )}
-              </div>
-              <PopoverContent className="max-w-full relative p-0">
-                <Command>
-                  <CommandInput
-                    placeholder={t("location-placeholder")}
-                    className="h-10"
-                    onValueChange={setSearch}
-                    value={search}
-                    typeof="search"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        form.setValue("location", {
-                          kind: "custom",
-                          address: search,
-                          timeZone: "",
-                        });
-                        setOpen(false);
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-[2px] top-[2px]"
-                    onClick={() => {
-                      form.setValue("location", {
-                        kind: "custom",
-                        address: search,
-                        timeZone: "",
-                      });
-                      onRemove();
-                      setOpen(false);
-                    }}
-                  >
-                    <Check className="h-3 w-3" />
-                    <span className="sr-only">Select</span>
-                  </Button>
-                  <CommandList>
-                    <CommandEmpty>No address found.</CommandEmpty>
-                    <CommandGroup>
-                      {results.map((result, index) => (
-                        <CommandItem
-                          className="text-primary"
-                          value={result.label}
-                          key={result.label + index}
-                          onSelect={async () => {
-                            form.setValue("location", {
-                              kind: "geo",
-                              address: result.label,
-                              lat: result.raw.lat,
-                              lng: result.raw.lon,
-                              size: 0,
-                            });
-                            const latlng = new L.LatLng(
-                              result.raw.lat,
-                              result.raw.lon,
-                            );
-                            await onSelect(latlng);
-                            setOpen(false);
-                          }}
-                        >
-                          <SmallText>{result.label}</SmallText>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        );
-      }}
-    />
-  );
-};
-
-const TimeZonesPopover: React.FC<{
-  handleSelect: (timeZone: string) => void;
-}> = ({ handleSelect }) => {
-  const [search, setSearch] = useState<string>("");
-  const [open, setOpen] = useState<boolean>(false);
-  const [item, setItem] = useState<string>("");
-  const { data: timezones } = useSuspenseQuery(timezoneOptions());
-
-  return (
-    <div>
-      <SmallText>
-        You choose a custom location, so please select a timezone.
-      </SmallText>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger className="relative" asChild>
-          <ButtonWithChildren>
-            <SmallText variant="invert">
-              {item || "Select timezone..."}
-            </SmallText>
-          </ButtonWithChildren>
-        </PopoverTrigger>
-        <PopoverContent className="w-full relative p-0">
-          <Command>
-            <CommandInput
-              placeholder="Timezones"
-              className="h-10"
-              onValueChange={setSearch}
-              value={search}
-              typeof="search"
-            />
-            <CommandList>
-              <CommandEmpty>No timezones found.</CommandEmpty>
-              <CommandGroup>
-                {timezones.map((timezone, index) => (
-                  <CommandItem
-                    className="text-primary"
-                    value={timezone}
-                    key={timezone + index}
-                    onSelect={() => {
-                      setItem(timezone);
-                      handleSelect(timezone);
-                    }}
-                  >
-                    <SmallText>{timezone}</SmallText>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-};
 
 export const EventForm: React.FC<EventFormProps> = ({
   form,
@@ -336,17 +102,17 @@ export const EventForm: React.FC<EventFormProps> = ({
                   setIsVirtual(checked);
                 }}
               />
-              <Label htmlFor="virtual">Virtual address</Label>
+              <Label htmlFor="virtual">Online event</Label>
             </div>
             <Card className={isVirtual ? "" : "p-0"}>
               {isVirtual && location.kind === "virtual" ? (
                 <FormFieldInputString
                   control={form.control}
                   name="location.location"
-                  placeholder={t("location-placeholder")}
+                  placeholder={"URI..."}
                 />
               ) : (
-                <FormFieldComboBox
+                <FormFieldLocation
                   form={form}
                   onSelect={async (marker: L.LatLng) => {
                     setMarker(marker);

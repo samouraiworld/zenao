@@ -24,7 +24,12 @@ export const urlPattern =
 export const ipfsPattern = /^ipfs:\/\//;
 export const virtualLocationSchema = z.object({
   kind: z.literal("virtual"),
-  location: z.string().trim().min(1),
+  location: z
+    .string()
+    .trim()
+    .min(1)
+    .max(400)
+    .regex(urlPattern, "URL is not valid"),
 });
 export type VirtualLocationSchemaType = z.infer<typeof virtualLocationSchema>;
 const customLocationSchema = z.object({

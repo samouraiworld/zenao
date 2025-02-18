@@ -1,0 +1,78 @@
+"use client";
+
+import { useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/shadcn/popover";
+import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import { SmallText } from "@/components/texts/SmallText";
+import "leaflet/dist/leaflet.css";
+import "leaflet-geosearch/dist/geosearch.css";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/shadcn/command";
+import { timezoneOptions } from "@/lib/queries/event";
+
+export const TimeZonesPopover: React.FC<{
+  handleSelect: (timeZone: string) => void;
+}> = ({ handleSelect }) => {
+  const [search, setSearch] = useState<string>("");
+  const [open, setOpen] = useState<boolean>(false);
+  const [item, setItem] = useState<string>("");
+  const { data: timezones } = useSuspenseQuery(timezoneOptions());
+
+  return (
+    <div>
+      <SmallText>
+        You choose a custom location, so please select a timezone.
+      </SmallText>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger className="relative" asChild>
+          <ButtonWithChildren>
+            <SmallText variant="invert">
+              {item || "Select timezone..."}
+            </SmallText>
+          </ButtonWithChildren>
+        </PopoverTrigger>
+        <PopoverContent className="w-full relative p-0">
+          <Command>
+            <CommandInput
+              placeholder="Timezones"
+              className="h-10"
+              onValueChange={setSearch}
+              value={search}
+              typeof="search"
+            />
+            <CommandList>
+              <CommandEmpty>No timezones found.</CommandEmpty>
+              <CommandGroup>
+                {timezones.map((timezone, index) => (
+                  <CommandItem
+                    className="text-primary"
+                    value={timezone}
+                    key={timezone + index}
+                    onSelect={() => {
+                      setItem(timezone);
+                      handleSelect(timezone);
+                      setOpen(false);
+                    }}
+                  >
+                    <SmallText>{timezone}</SmallText>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+};

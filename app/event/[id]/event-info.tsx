@@ -21,9 +21,9 @@ import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { web2URL } from "@/lib/uris";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
-import { useSearchField } from "@/components/form/EventForm";
 import "leaflet/dist/leaflet.css";
 import { Map } from "@/components/common/Map";
+import { EventFormSchemaType } from "@/components/form/types";
 
 interface EventSectionProps {
   title: string;
@@ -54,11 +54,35 @@ export function EventInfo({
   const isStarted = Date.now() > Number(data.startDate) * 1000;
   const queryClient = useQueryClient();
 
-  let location = "";
-  if (data.location?.address.case == "custom") {
-    location = data.location.address.value.address;
+  // Correctly reconstruct location object
+  let location: EventFormSchemaType["location"] = {
+    kind: "custom",
+    address: "",
+    timeZone: "",
+  };
+  switch (data.location?.address.case) {
+    case "custom":
+      location = {
+        kind: "custom",
+        address: data.location?.address.value.address,
+        timeZone: data.location?.address.value.timezone,
+      };
+      break;
+    case "geo":
+      location = {
+        kind: "geo",
+        address: data.location?.address.value.address,
+        lat: data.location?.address.value.lat,
+        lng: data.location?.address.value.lng,
+        size: data.location?.address.value.size,
+      };
+      break;
+    case "virtual":
+      location = {
+        kind: "virtual",
+        location: data.location?.address.value.uri,
+      };
   }
-  const { results } = useSearchField(location);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -84,7 +108,8 @@ export function EventInfo({
     description: data.description,
     startDate: new Date(Number(data.startDate) * 1000).toISOString(),
     endDate: new Date(Number(data.endDate) * 1000).toISOString(),
-    location,
+    location:
+      location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
     image: data.imageUri,
   };
@@ -161,12 +186,14 @@ export function EventInfo({
             <div className="w-[22px] h-[22px]">
               <MapPin width={iconSize} height={iconSize} />
             </div>
-            <LargeText>{location}</LargeText>
+            <LargeText>
+              {location.kind === "virtual"
+                ? location.location
+                : location.address}
+            </LargeText>
           </div>
-          {results.length === 1 && (
-            <Map
-              marker={new L.LatLng(results[0].raw.lat, results[0].raw.lon)}
-            />
+          {location.kind === "geo" && (
+            <Map marker={new L.LatLng(location.lat, location.lng)} />
           )}
         </div>
 
