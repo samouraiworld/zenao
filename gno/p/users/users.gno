@@ -4,6 +4,7 @@ import (
 	"std"
 
 	"gno.land/p/zenao/basedao"
+	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
 	"gno.land/p/zenao/role_manager"
 )
@@ -37,15 +38,19 @@ func NewUser(conf *Config) *User {
 		},
 	}
 
+	memberStore := basedao.NewMembersStore(roles, members)
+	adminVetoCond := daocond.RoleCount(1, "admin", memberStore.HasRole)
+
 	// Don't pass the message handlers, since they are by default in the user dao
 	dao := basedao.New(&basedao.Config{
 		Name:              conf.Name,
 		Description:       conf.Description,
-		NoDefaultHandlers: false,
-		Members:           basedao.NewMembersStore(roles, members),
+		NoDefaultHandlers: true, // XXX: should be false, but it's easier to init conditions after DAO initialized
+		Members:           memberStore,
 		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
 		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
 		NoEvents:          true,
+		InitialCondition:  adminVetoCond,
 	})
 
 	user := &User{

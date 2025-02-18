@@ -74,39 +74,19 @@ func NewEvent(conf *Config) *Event {
 		},
 	}
 
+	memberStore := basedao.NewMembersStore(roles, members)
+	organizerVetoCond := daocond.RoleCount(1, "organizer", memberStore.HasRole)
+
 	dao := basedao.New(&basedao.Config{
 		Name:              conf.Title,
 		Description:       conf.Description,
-		NoDefaultHandlers: true, // XXX: should be false, but it's easier to init conditions after DAO initialized
-		Members:           basedao.NewMembersStore(roles, members),
+		NoDefaultHandlers: false,
+		Members:           memberStore,
 		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
 		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
+		InitialCondition:  organizerVetoCond,
 		NoEvents:          false,
 	})
-
-	organizerVetoCond := daocond.RoleCount(1, "organizer", dao.Members.HasRole)
-
-	resources := []*daokit.Resource{
-		{
-			Handler:   basedao.NewAddMemberHandler(dao),
-			Condition: organizerVetoCond,
-		},
-		{
-			Handler:   basedao.NewRemoveMemberHandler(dao),
-			Condition: organizerVetoCond,
-		},
-		{
-			Handler:   basedao.NewAssignRoleHandler(dao),
-			Condition: organizerVetoCond,
-		},
-		{
-			Handler:   basedao.NewUnassignRoleHandler(dao),
-			Condition: organizerVetoCond,
-		},
-	}
-	for _, r := range resources {
-		dao.Core.SetResource(r)
-	}
 
 	event := &Event{
 		Creator:          conf.Creator,
