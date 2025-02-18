@@ -9,7 +9,9 @@ import (
 	"gno.land/p/demo/json"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
-	"gno.land/p/zenao/dao_roles_based"
+	"gno.land/p/zenao/basedao"
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/role_manager"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
@@ -24,7 +26,7 @@ type Event struct {
 	Location         *zenaov1.EventLocation
 	GetProfileString GetProfileString
 	SetProfileString SetProfileString
-	Org              *dao_roles_based.DaoRolesBased
+	Org              *basedao.DAO
 	PkgPath          string
 }
 
@@ -43,20 +45,44 @@ type Config struct {
 }
 
 type GetProfileString func(addr std.Address, field string, def string) string
-
 type SetProfileString func(field string, value string) bool
 
 func NewEvent(conf *Config) *Event {
-	roles := []string{"organizer", "gatekeeper", "participant"}
-	members := [][]string{
-		{conf.Creator, "organizer"},
-		{conf.ZenaoAdminAddr, "organizer"},
+	roles := []role_manager.RoleInfo{
+		{
+			Name:        "organizer",
+			Description: "Person in charge of the organization of the event",
+		},
+		{
+			Name:        "gatekeeper",
+			Description: "Person in charge of the event's security & access control",
+		},
+		{
+			Name:        "participant",
+			Description: "Person attending the event",
+		},
+	}
+	members := []basedao.Member{
+		{
+			Address: conf.Creator,
+			Roles:   []string{"organizer"},
+		},
+		{
+			Address: conf.ZenaoAdminAddr,
+			Roles:   []string{"organizer"},
+		},
 	}
 
-	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"organizer","count":"1"}}]`
+	dao := basedao.New(&basedao.Config{
+		Name:              conf.Title,
+		Description:       conf.Description,
+		NoDefaultHandlers: false,
+		Members:           basedao.NewMembersStore(roles, members),
+		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
+		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
+		NoEvents:          true,
+	})
 
-	// Don't pass the message handlers, since they are by default in the user dao
-	dao := dao_roles_based.NewDaoRolesBasedJSON(conf.Title, conf.Description, roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
 	event := &Event{
 		Creator:          conf.Creator,
 		StartDate:        conf.StartDate,
@@ -69,69 +95,107 @@ func NewEvent(conf *Config) *Event {
 		// XXX: set PkgPath?
 	}
 
-	conf.SetProfileString("DisplayName", conf.Title)
-	conf.SetProfileString("Bio", conf.Description)
-	conf.SetProfileString("Avatar", conf.ImageURI)
-
 	return event
 }
 
 func (e *Event) AddParticipant(participant string) {
-	if e.Org.MemberModule.CountMemberRoles(participant) > 0 {
-		typeAddRole := dao_roles_based.NewAddRoleToUserMessageHandler(nil).Type()
-		proposalAddParticipantJSON := `{"title":"add participant","description":"no description","message":{"type":"` + typeAddRole + `","payload":{"address":"` + participant + `", "role":"participant"}}}`
-		e.Org.InstantExecute(proposalAddParticipantJSON)
+	if e.Org.Members.CountMemberRoles(participant) > 0 {
+		proposal := daokit.ProposalRequest{
+			Title:       "add participant",
+			Description: "no description",
+			Message: basedao.NewAssignRoleMsg(&basedao.MsgAssignRole{
+				Address: std.Address(participant),
+				Role:    "participant",
+			}),
+		}
+		e.Org.InstantExecute(proposal)
 	} else {
-		typeAddMember := dao_roles_based.NewAddNewMemberMessageHandler(nil).Type()
-		proposalAddMemberJSON := `{"title":"add member with participant role","description":"no description","message":{"type":"` + typeAddMember + `","payload":{"address":"` + participant + `","roles":["participant"]}}}`
-		e.Org.InstantExecute(proposalAddMemberJSON)
+		proposal := daokit.ProposalRequest{
+			Title:       "add member with participant role",
+			Description: "no description",
+			Message: basedao.NewAddMemberMsg(&basedao.MsgAddMember{
+				Address: std.Address(participant),
+				Roles:   []string{"participant"},
+			}),
+		}
+		e.Org.InstantExecute(proposal)
 	}
 }
 
 func (e *Event) RemoveParticipant(participant string) {
-	if e.Org.MemberModule.CountMemberRoles(participant) > 1 {
-		typeRemoveRole := dao_roles_based.NewRemoveRoleFromUserMessageHandler(nil).Type()
-		proposalRemoveParticipantJSON := `{"title":"remove participant","description":"no description","message":{"type":"` + typeRemoveRole + `","payload":{"address":"` + participant + `", "role":"participant"}}}`
-		e.Org.InstantExecute(proposalRemoveParticipantJSON)
+	if e.Org.Members.CountMemberRoles(participant) > 1 {
+		proposal := daokit.ProposalRequest{
+			Title:       "remove participant",
+			Description: "no description",
+			Message: basedao.NewUnassignRoleMsg(&basedao.MsgUnassignRole{
+				Address: std.Address(participant),
+				Role:    "participant",
+			}),
+		}
+		e.Org.InstantExecute(proposal)
 	} else {
-		typeRemoveMember := dao_roles_based.NewRemoveMemberMessageHandler(nil).Type()
-		proposalRemoveMemberJSON := `{"title":"remove member","description":"no description","message":{"type":"` + typeRemoveMember + `","payload":"` + participant + `"}}`
-		e.Org.InstantExecute(proposalRemoveMemberJSON)
+		proposal := daokit.ProposalRequest{
+			Title:       "remove member",
+			Description: "no description",
+			Message:     basedao.NewRemoveMemberMsg(std.Address(participant)),
+		}
+		e.Org.InstantExecute(proposal)
 	}
 }
 
 func (e *Event) AddGatekeeper(gatekeeper string) {
-	if e.Org.MemberModule.CountMemberRoles(gatekeeper) > 0 {
-		typeAddRole := dao_roles_based.NewAddRoleToUserMessageHandler(nil).Type()
-		proposalAddGatekeeperJSON := `{"title":"add gatekeeper","description":"no description","message":{"type":"` + typeAddRole + `","payload":{"address":"` + gatekeeper + `", "role":"gatekeeper"}}}`
-		e.Org.InstantExecute(proposalAddGatekeeperJSON)
+	if e.Org.Members.CountMemberRoles(gatekeeper) > 0 {
+		proposal := daokit.ProposalRequest{
+			Title:       "add gatekeeper",
+			Description: "no description",
+			Message: basedao.NewAssignRoleMsg(&basedao.MsgAssignRole{
+				Address: std.Address(gatekeeper),
+				Role:    "gatekeeper",
+			}),
+		}
+		e.Org.InstantExecute(proposal)
 	} else {
-		typeAddMember := dao_roles_based.NewAddNewMemberMessageHandler(nil).Type()
-		proposalAddMemberJSON := `{"title":"add member with gatekeeper role","description":"no description","message":{"type":"` + typeAddMember + `","payload":{"address":"` + gatekeeper + `","roles":["gatekeeper"]}}}`
-		e.Org.InstantExecute(proposalAddMemberJSON)
+		proposal := daokit.ProposalRequest{
+			Title:       "add member with gatekeeper role",
+			Description: "no description",
+			Message: basedao.NewAddMemberMsg(&basedao.MsgAddMember{
+				Address: std.Address(gatekeeper),
+				Roles:   []string{"gatekeeper"},
+			}),
+		}
+		e.Org.InstantExecute(proposal)
 	}
 }
 
 func (e *Event) RemoveGatekeeper(gatekeeper string) {
-	if e.Org.MemberModule.CountMemberRoles(gatekeeper) > 1 {
-		typeRemoveRole := dao_roles_based.NewRemoveRoleFromUserMessageHandler(nil).Type()
-		proposalRemoveGatekeeperJSON := `{"title":"remove participant","description":"no description","message":{"type":"` + typeRemoveRole + `","payload":{"address":"` + gatekeeper + `", "role":"gatekeeper"}}}`
-		e.Org.InstantExecute(proposalRemoveGatekeeperJSON)
+	if e.Org.Members.CountMemberRoles(gatekeeper) > 1 {
+		proposal := daokit.ProposalRequest{
+			Title:       "remove gatekeeper",
+			Description: "no description",
+			Message: basedao.NewUnassignRoleMsg(&basedao.MsgUnassignRole{
+				Address: std.Address(gatekeeper),
+				Role:    "gatekeeper",
+			}),
+		}
+		e.Org.InstantExecute(proposal)
 	} else {
-		typeRemoveMember := dao_roles_based.NewRemoveMemberMessageHandler(nil).Type()
-		proposalRemoveMemberJSON := `{"title":"remove member","description":"no description","message":{"type":"` + typeRemoveMember + `","payload":"` + gatekeeper + `"}}`
-		e.Org.InstantExecute(proposalRemoveMemberJSON)
+		proposal := daokit.ProposalRequest{
+			Title:       "remove member",
+			Description: "no description",
+			Message:     basedao.NewRemoveMemberMsg(std.Address(gatekeeper)),
+		}
+		e.Org.InstantExecute(proposal)
 	}
 }
 func (e *Event) AssertCallerIsOrganizer() {
 	caller := std.PrevRealm().Addr()
-	if !e.Org.MemberModule.HasRole(caller.String(), "organizer") {
+	if !e.Org.Members.HasRole(caller.String(), "organizer") {
 		panic(errors.New("caller is not organizer"))
 	}
 }
 
 func (e *Event) CountParticipants() uint32 {
-	return uint32(len(e.Org.MemberModule.GetMembersWithRole("participant")))
+	return uint32(len(e.Org.Members.GetMembersWithRole("participant")))
 }
 
 func (e *Event) Edit(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) {

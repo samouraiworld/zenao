@@ -5,7 +5,7 @@ import (
 )
 
 func (e *Event) GetUserRolesJSON(addr string) string {
-	userRoles := e.Org.MemberModule.GetMemberRoles(addr)
+	userRoles := e.Org.Members.GetMemberRoles(addr)
 	nodes := make([]*json.Node, 0, len(userRoles))
 	for _, role := range userRoles {
 		nodes = append(nodes, json.StringNode("", role))
