@@ -1,0 +1,169 @@
+=== RUN   TestNewDAO
+--- PASS: TestNewDAO (0.00s)
+=== RUN   TestPropose
+=== RUN   TestPropose/Success
+--- PASS: TestPropose/Success (0.00s)
+=== RUN   TestPropose/Non-member
+--- PASS: TestPropose/Non-member (0.00s)
+=== RUN   TestPropose/Unknown_message_type
+--- PASS: TestPropose/Unknown_message_type (0.00s)
+--- PASS: TestPropose (0.01s)
+=== RUN   TestVote
+=== RUN   TestVote/Success_no
+--- PASS: TestVote/Success_no (0.00s)
+=== RUN   TestVote/Success_yes
+--- PASS: TestVote/Success_yes (0.00s)
+=== RUN   TestVote/Unknown_proposal
+--- PASS: TestVote/Unknown_proposal (0.00s)
+=== RUN   TestVote/Non-member
+--- PASS: TestVote/Non-member (0.00s)
+=== RUN   TestVote/Invalid_vote
+--- PASS: TestVote/Invalid_vote (0.00s)
+--- PASS: TestVote (0.00s)
+=== RUN   TestExecuteProposal
+=== RUN   TestExecuteProposal/Conditions_not_met
+--- PASS: TestExecuteProposal/Conditions_not_met (0.00s)
+=== RUN   TestExecuteProposal/Success
+--- PASS: TestExecuteProposal/Success (0.00s)
+=== RUN   TestExecuteProposal/Unknown_proposal
+--- PASS: TestExecuteProposal/Unknown_proposal (0.00s)
+=== RUN   TestExecuteProposal/Non-member
+--- PASS: TestExecuteProposal/Non-member (0.00s)
+--- PASS: TestExecuteProposal (0.00s)
+=== RUN   TestInstantExecute
+=== RUN   TestInstantExecute/Success
+--- PASS: TestInstantExecute/Success (0.00s)
+=== RUN   TestInstantExecute/Unknown_message_type
+--- PASS: TestInstantExecute/Unknown_message_type (0.00s)
+=== RUN   TestInstantExecute/Non-member
+--- PASS: TestInstantExecute/Non-member (0.00s)
+--- PASS: TestInstantExecute (0.00s)
+=== RUN   TestGetMembers
+--- PASS: TestGetMembers (0.00s)
+=== RUN   TestAddMemberProposal
+--- PASS: TestAddMemberProposal (0.00s)
+=== RUN   TestRemoveMemberProposal
+--- PASS: TestRemoveMemberProposal (0.00s)
+=== RUN   TestAddRoleToUserProposal
+--- PASS: TestAddRoleToUserProposal (0.00s)
+=== RUN   TestRemoveRoleFromUserProposal
+--- PASS: TestRemoveRoleFromUserProposal (0.00s)
+ok      gno/p/basedao 	1.60s
+=== RUN   TestComputeVotingPowers
+=== RUN   TestComputeVotingPowers/example_1
+--- PASS: TestComputeVotingPowers/example_1 (0.00s)
+=== RUN   TestComputeVotingPowers/example_2
+--- PASS: TestComputeVotingPowers/example_2 (0.00s)
+=== RUN   TestComputeVotingPowers/example_3
+--- PASS: TestComputeVotingPowers/example_3 (0.00s)
+=== RUN   TestComputeVotingPowers/example_4
+--- PASS: TestComputeVotingPowers/example_4 (0.05s)
+=== RUN   TestComputeVotingPowers/0_-T1s
+--- PASS: TestComputeVotingPowers/0_-T1s (0.00s)
+=== RUN   TestComputeVotingPowers/100_T1,_1_T2,_1_T3
+--- PASS: TestComputeVotingPowers/100_T1,_1_T2,_1_T3 (0.00s)
+=== RUN   TestComputeVotingPowers/T3_Abstaining
+--- PASS: TestComputeVotingPowers/T3_Abstaining (0.00s)
+--- PASS: TestComputeVotingPowers (0.09s)
+=== RUN   TestEval
+=== RUN   TestEval/2/6%_Yes
+--- PASS: TestEval/2/6%_Yes (0.01s)
+=== RUN   TestEval/50%_Yes
+--- PASS: TestEval/50%_Yes (0.00s)
+=== RUN   TestEval/several_T2_&_T3
+--- PASS: TestEval/several_T2_&_T3 (0.00s)
+=== RUN   TestEval/several_T2_&_T3_eval_true
+--- PASS: TestEval/several_T2_&_T3_eval_true (0.00s)
+=== RUN   TestEval/only_T1s
+--- PASS: TestEval/only_T1s (0.00s)
+=== RUN   TestEval/only_T3s
+--- PASS: TestEval/only_T3s (0.00s)
+=== RUN   TestEval/T3_abstaining
+--- PASS: TestEval/T3_abstaining (0.00s)
+=== RUN   TestEval/T3_abstaining_w/_votes
+--- PASS: TestEval/T3_abstaining_w/_votes (0.00s)
+--- PASS: TestEval (0.01s)
+=== RUN   TestCondition
+--- PASS: TestCondition (0.00s)
+=== RUN   TestState
+=== RUN   TestState/post_with_public-relationships_basic
+--- PASS: TestState/post_with_public-relationships_basic (0.00s)
+=== RUN   TestState/post_with_public-relationships_few-votes
+--- PASS: TestState/post_with_public-relationships_few-votes (0.00s)
+=== RUN   TestState/post_without_public-relationships_basic
+--- PASS: TestState/post_without_public-relationships_basic (0.00s)
+=== RUN   TestState/post_without_public-relationships_few-votes
+--- PASS: TestState/post_without_public-relationships_few-votes (0.00s)
+=== RUN   TestState/post_after_public-relationships_changes_basic
+--- PASS: TestState/post_after_public-relationships_changes_basic (0.00s)
+=== RUN   TestState/post_after_public-relationships_changes_few-votes
+--- PASS: TestState/post_after_public-relationships_changes_few-votes (0.00s)
+=== RUN   TestState/post_public-relationships_alone_basic
+--- PASS: TestState/post_public-relationships_alone_basic (0.00s)
+=== RUN   TestState/post_public-relationships_alone_few-votes
+--- PASS: TestState/post_public-relationships_alone_few-votes (0.00s)
+=== RUN   TestState/invest_with_finance_officer_basic
+--- PASS: TestState/invest_with_finance_officer_basic (0.00s)
+=== RUN   TestState/invest_with_finance_officer_few-votes
+--- PASS: TestState/invest_with_finance_officer_few-votes (0.00s)
+=== RUN   TestState/invest_without_finance_officer_basic
+--- PASS: TestState/invest_without_finance_officer_basic (0.00s)
+=== RUN   TestState/invest_without_finance_officer_few-votes
+--- PASS: TestState/invest_without_finance_officer_few-votes (0.00s)
+=== RUN   TestState/invest_alone_basic
+--- PASS: TestState/invest_alone_basic (0.00s)
+=== RUN   TestState/invest_alone_few-votes
+--- PASS: TestState/invest_alone_few-votes (0.00s)
+--- PASS: TestState (0.00s)
+ok      gno/p/daocond 	0.14s
+=== RUN   TestNewDAO
+--- PASS: TestNewDAO (0.00s)
+ok      gno/p/daokit 	0.01s
+=== RUN   TestNewEvent
+--- PASS: TestNewEvent (0.00s)
+=== RUN   TestAddParticipant
+--- PASS: TestAddParticipant (0.00s)
+=== RUN   TestRemoveParticipant
+--- PASS: TestRemoveParticipant (0.00s)
+ok      gno/p/events 	0.04s
+?       gno/p/jsonutil 	[no test files]
+=== RUN   TestNewWithAddress
+--- PASS: TestNewWithAddress (0.00s)
+=== RUN   TestCreateNewRole
+--- PASS: TestCreateNewRole (0.00s)
+=== RUN   TestDeleteRole
+--- PASS: TestDeleteRole (0.00s)
+=== RUN   TestAddPermissionToRole
+--- PASS: TestAddPermissionToRole (0.00s)
+=== RUN   TestRemovePermissionFromRole
+--- PASS: TestRemovePermissionFromRole (0.00s)
+=== RUN   TestAddRoleToUser
+--- PASS: TestAddRoleToUser (0.00s)
+=== RUN   TestRemoveRoleFromUser
+--- PASS: TestRemoveRoleFromUser (0.00s)
+=== RUN   TestHasPermission
+--- PASS: TestHasPermission (0.00s)
+=== RUN   TestHasRole
+--- PASS: TestHasRole (0.00s)
+=== RUN   TestRemoveAllRolesFromUser
+--- PASS: TestRemoveAllRolesFromUser (0.00s)
+ok      gno/p/role_manager 	0.02s
+=== RUN   TestNewUser
+--- PASS: TestNewUser (0.00s)
+=== RUN   TestTransferOwnership
+--- PASS: TestTransferOwnership (0.00s)
+ok      gno/p/users 	0.03s
+?       gno/p/zenao/v1 	[no test files]
+?       gno/r/cockpit 	[no test files]
+=== RUN   TestInit
+--- PASS: TestInit (0.00s)
+ok      gno/r/dao_demo 	0.08s
+?       gno/r/event_demo 	[no test files]
+=== RUN   TestEvents
+--- PASS: TestEvents (0.01s)
+=== RUN   TestEventsToJSON
+--- PASS: TestEventsToJSON (0.00s)
+=== RUN   TestLocationToString
+--- PASS: TestLocationToString (0.00s)
+ok      gno/r/eventreg 	0.08s
+?       gno/r/user_demo 	[no test files]

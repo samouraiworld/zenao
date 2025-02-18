@@ -25,6 +25,7 @@ func TestNewEvent(t *testing.T) {
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
 	}
 	event := events.NewEvent(&conf)
 	if event.Org.Members.GetMembers()[1] != alice.String() {
@@ -44,6 +45,7 @@ func TestAddParticipant(t *testing.T) {
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
 	}
 	event := events.NewEvent(&conf)
 	if event.Org.Members.GetMembers()[1] != alice.String() {
@@ -91,6 +93,7 @@ func TestRemoveParticipant(t *testing.T) {
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
 	}
 	event := events.NewEvent(&conf)
 	if event.Org.Members.GetMembers()[1] != alice.String() {
@@ -139,6 +142,14 @@ func TestRemoveParticipant(t *testing.T) {
 
 type mockProfile struct {
 	fields avl.Tree
+}
+
+func (p *mockProfile) GetProfileString(addr std.Address, field string, def string) string {
+	v, ok := p.fields.Get(field)
+	if !ok {
+		return def
+	}
+	return v.(string)
 }
 
 func (p *mockProfile) SetStringField(field, value string) bool {

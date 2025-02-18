@@ -10,6 +10,7 @@ import (
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	"gno.land/p/zenao/basedao"
+	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
 	"gno.land/p/zenao/role_manager"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
@@ -76,12 +77,36 @@ func NewEvent(conf *Config) *Event {
 	dao := basedao.New(&basedao.Config{
 		Name:              conf.Title,
 		Description:       conf.Description,
-		NoDefaultHandlers: false,
+		NoDefaultHandlers: true, // XXX: should be false, but it's easier to init conditions after DAO initialized
 		Members:           basedao.NewMembersStore(roles, members),
 		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
 		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
-		NoEvents:          true,
+		NoEvents:          false,
 	})
+
+	organizerVetoCond := daocond.RoleCount(1, "organizer", dao.Members.HasRole)
+
+	resources := []*daokit.Resource{
+		{
+			Handler:   basedao.NewAddMemberHandler(dao),
+			Condition: organizerVetoCond,
+		},
+		{
+			Handler:   basedao.NewRemoveMemberHandler(dao),
+			Condition: organizerVetoCond,
+		},
+		{
+			Handler:   basedao.NewAssignRoleHandler(dao),
+			Condition: organizerVetoCond,
+		},
+		{
+			Handler:   basedao.NewUnassignRoleHandler(dao),
+			Condition: organizerVetoCond,
+		},
+	}
+	for _, r := range resources {
+		dao.Core.SetResource(r)
+	}
 
 	event := &Event{
 		Creator:          conf.Creator,
