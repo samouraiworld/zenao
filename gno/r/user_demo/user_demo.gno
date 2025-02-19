@@ -13,7 +13,7 @@ var user *users.User
 func init() {
 	config := users.Config{
 		Name:             "user",
-		Description:      "this is a user",
+		Bio:              "this is a user",
 		SetProfileString: profile.SetStringField,
 		GetProfileString: profile.GetStringField,
 		ZenaoAdminAddr:   std.PrevRealm().Addr().String(),

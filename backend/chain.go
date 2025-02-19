@@ -321,9 +321,12 @@ import (
 	"gno.land/p/{{.namespace}}/events"
 	"gno.land/r/demo/profile"
 	"gno.land/r/{{.namespace}}/eventreg"
+	"gno.land/p/{{.namespace}}/basedao"
 )
 
 var Event *events.Event
+
+var dao *basedao.DAO
 
 func init() {
 	conf := events.Config{
@@ -340,6 +343,7 @@ func init() {
 		Location: {{.location}},
 	}
 	Event = events.NewEvent(&conf)
+	dao = Event.Org
 	eventreg.Register(func() *zenaov1.EventInfo { return Event.Info() })
 }
 
@@ -412,11 +416,16 @@ import (
 var user *users.User
 
 func init() {
-	user = users.NewUser()
+	conf := &users.Config{
+		Name: {{.displayName}},
+		Bio: {{.bio}},
+		AvatarURI: {{.avatarURI}},
+		GetProfileString: profile.GetStringField,
+		SetProfileString: profile.SetStringField,
+		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
+	}
 
-	profile.SetStringField(profile.DisplayName, {{.displayName}})
-	profile.SetStringField(profile.Bio, {{.bio}})
-	profile.SetStringField(profile.Avatar, {{.avatarURI}})
+	user = users.NewUser(conf)
 }
 
 func TransferOwnership(newOwner string) {

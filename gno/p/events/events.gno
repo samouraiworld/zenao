@@ -80,6 +80,7 @@ func NewEvent(conf *Config) *Event {
 	dao := basedao.New(&basedao.Config{
 		Name:              conf.Title,
 		Description:       conf.Description,
+		ImageURI:          conf.ImageURI,
 		NoDefaultHandlers: false,
 		Members:           memberStore,
 		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),

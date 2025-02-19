@@ -27,6 +27,7 @@ type Config struct {
 	InitialCondition  daocond.Condition
 	SetProfileString  ProfileStringSetter
 	GetProfileString  ProfileStringGetter
+	NoCreationEvent   bool
 }
 
 type ProfileStringSetter func(field string, value string) bool
@@ -90,7 +91,9 @@ func New(conf *Config) *DAO {
 		}
 	}
 
-	emitBaseDAOCreated()
+	if !conf.NoCreationEvent {
+		emitBaseDAOCreated()
+	}
 
 	return dao
 }

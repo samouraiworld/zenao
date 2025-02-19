@@ -13,6 +13,7 @@ import (
 
 const (
 	HOME_PATH             = ""
+	HOME_NO_PROFILE_PATH  = "noprofile"
 	CONFIG_PATH           = "config"
 	PROPOSAL_HISTORY_PATH = "history"
 	MEMBER_DETAIL_PATH    = "member/{address}"
@@ -25,6 +26,7 @@ func (d *DAO) initRenderingRouter() {
 		d.RenderRouter = mux.NewRouter()
 	}
 	d.RenderRouter.HandleFunc(HOME_PATH, d.renderHomePage)
+	d.RenderRouter.HandleFunc(HOME_NO_PROFILE_PATH, d.renderHomePage)
 	d.RenderRouter.HandleFunc(CONFIG_PATH, d.renderConfigPage)
 	d.RenderRouter.HandleFunc(PROPOSAL_HISTORY_PATH, d.renderProposalHistoryPage)
 	d.RenderRouter.HandleFunc(MEMBER_DETAIL_PATH, d.renderMemberDetailPage)
@@ -41,8 +43,11 @@ func (d *DAO) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
 
-	res.Write(ufmt.Sprintf("# %s\n\n", name))
-	res.Write(ufmt.Sprintf("%s\n\n", description))
+	if req.Path != "noprofile" {
+		res.Write(ufmt.Sprintf("# %s\n\n", name))
+		res.Write(ufmt.Sprintf("%s\n\n", description))
+	}
+
 	res.Write(ufmt.Sprintf("> Realm address: %s\n\n", d.Realm.Addr()))
 	res.Write(ufmt.Sprintf("Discover more about this DAO on the [configuration page ⚙️](%s:%s)\n\n", linkPath, CONFIG_PATH))
 

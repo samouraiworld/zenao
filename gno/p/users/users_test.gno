@@ -12,7 +12,7 @@ var (
 	bob    = testutils.TestAddress("bob")
 	config = Config{
 		Name:             "user",
-		Description:      "this is a user",
+		Bio:              "this is a user",
 		SetProfileString: mockSetProfileString,
 		GetProfileString: mockGetProfileString,
 		ZenaoAdminAddr:   alice.String(),
