@@ -58,6 +58,8 @@ func execSyncChain() error {
 		return err
 	}
 
+	chain.FillAdminProfile()
+
 	users, err := db.GetAllUsers()
 	if err != nil {
 		return err

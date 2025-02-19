@@ -1,44 +1,52 @@
 package dao_demo
 
 import (
-	"gno.land/p/zenao/dao_roles_based"
+	"gno.land/p/zenao/basedao"
+	"gno.land/p/zenao/daocond"
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/role_manager"
 	"gno.land/r/demo/profile"
 )
 
-var dao *dao_roles_based.DaoRolesBased
+var dao *basedao.DAO
 
 func init() {
-	name := "Demo DAO"
-	description := "This is a demo DAO"
-
-	roles := []string{"admin", "public-relationships", "finance-officer"}
-	members := [][]string{
-		{"g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", "admin", "public-relationships"},
-		{"g1ld6uaykyugld4rnm63rcy7vju4zx23lufml3jv", "public-relationships"},
-		{"g1r69l0vhp7tqle3a0rk8m8fulr8sjvj4h7n0tth", "finance-officer"},
-		{"g16jv3rpz7mkt0gqulxas56se2js7v5vmc6n6e0r"},
+	initialRoles := []role_manager.RoleInfo{
+		{Name: "admin", Description: "Admin is the superuser"},
+		{Name: "public-relationships", Description: "Responsible of communication with the public"},
+		{Name: "finance-officer", Description: "Responsible of funds management"},
 	}
 
-	messagesHandlers := []dao_roles_based.MessageHandler{}
-	resourcesJSON := `[{"resource":"init","condition":{"type":"members-threshold","threshold":"60"}}]`
+	initialMembers := []basedao.Member{
+		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"admin", "public-relationships"}},
+		{Address: "g1ld6uaykyugld4rnm63rcy7vju4zx23lufml3jv", Roles: []string{"public-relationships"}},
+		{Address: "g1r69l0vhp7tqle3a0rk8m8fulr8sjvj4h7n0tth", Roles: []string{"finance-officer"}},
+		{Address: "g16jv3rpz7mkt0gqulxas56se2js7v5vmc6n6e0r", Roles: []string{}},
+	}
 
-	dao = dao_roles_based.NewDaoRolesBasedJSON(name, description, roles, members, resourcesJSON, messagesHandlers)
-
-	profile.SetStringField(profile.DisplayName, name)
-	profile.SetStringField(profile.Bio, description)
-	profile.SetStringField(profile.Avatar, "")
+	dao = basedao.New(&basedao.Config{
+		Name:             "Demo DAO",
+		Description:      "This is a demo DAO",
+		Members:          basedao.NewMembersStore(initialRoles, initialMembers),
+		GetProfileString: profile.GetStringField,
+		SetProfileString: profile.SetStringField,
+	})
 }
 
-func ProposeJSON(proposalJSON string) {
-	dao.ProposeJSON(proposalJSON)
+func Propose(proposal daokit.ProposalRequest) {
+	dao.Propose(proposal)
+}
+
+func Vote(proposalID uint64, vote daocond.Vote) {
+	dao.Vote(proposalID, vote)
 }
 
 func Execute(proposalID uint64) {
 	dao.Execute(proposalID)
 }
 
-func Vote(proposalID uint64, vote string) {
-	dao.Vote(proposalID, vote)
+func InstantExecute(proposal daokit.ProposalRequest) {
+	dao.InstantExecute(proposal)
 }
 
 func Render(path string) string {

@@ -11,17 +11,21 @@ import (
 var user *users.User
 
 func init() {
-	user = users.NewUser()
-
-	profile.SetStringField(profile.DisplayName, "User 1")
-	profile.SetStringField(profile.Bio, "This is a user")
-	profile.SetStringField(profile.Avatar, "")
+	config := users.Config{
+		Name:             "user",
+		Bio:              "this is a user",
+		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetStringField,
+		ZenaoAdminAddr:   std.PrevRealm().Addr().String(),
+	}
+	user = users.NewUser(&config)
 }
 
 func TransferOwnership(newOwner string) {
 	user.TransferOwnership(newOwner)
 }
 
+// Use proposals instead
 func EditUser(displayName, bio, avatar string) {
 	if !user.IsOwner() {
 		panic("caller is not owner/admin of the user realm")
