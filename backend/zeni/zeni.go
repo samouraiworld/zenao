@@ -84,6 +84,7 @@ type DB interface {
 }
 
 type Chain interface {
+	FillAdminProfile()
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserAddress(userID string) string

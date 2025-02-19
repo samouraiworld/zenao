@@ -22,14 +22,6 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-type gnoZenaoChain struct {
-	client             gnoclient.Client
-	eventsIndexPkgPath string
-	signerInfo         keys.Info
-	logger             *zap.Logger
-	namespace          string
-}
-
 func setupChain(adminMnemonic string, namespace string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
 	signer, err := gnoclient.SignerFromBip39(adminMnemonic, chainID, "", 0, 0)
 	if err != nil {
@@ -54,6 +46,61 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 		logger:             logger,
 		namespace:          namespace,
 	}, nil
+}
+
+type gnoZenaoChain struct {
+	client             gnoclient.Client
+	eventsIndexPkgPath string
+	signerInfo         keys.Info
+	logger             *zap.Logger
+	namespace          string
+}
+
+const zenaoLogo = "ipfs://bafybeieheyxtro2id7y6fqsqvgkyripgcrcx5fvvzxizylf4vveueajgkq"
+
+// FillAdminProfile implements zeni.Chain.
+func (g *gnoZenaoChain) FillAdminProfile() {
+	if broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 10000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: "gno.land/r/demo/users",
+		Func:    "Register",
+		Args: []string{
+			"",
+			"zenaoadm",
+			"",
+		},
+	})); err != nil {
+		g.logger.Error("failed to book admin username", zap.Error(err), zap.String("admin-addr", g.signerInfo.GetAddress().String()))
+	} else {
+		g.logger.Info("booked admin username", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	}
+
+	kv := [][2]string{
+		{"DisplayName", "Zenao Admin"},
+		{"Avatar", zenaoLogo},
+		{"Bio", "This is the root zenao admin, it is responsible for managing accounts until they become self-custodial"},
+	}
+	for _, field := range kv {
+		if broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+			GasFee:    "1000000ugnot",
+			GasWanted: 10000000,
+		}, vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: "gno.land/r/demo/profile",
+			Func:    "SetStringField",
+			Args: []string{
+				field[0],
+				field[1],
+			},
+		})); err != nil {
+			g.logger.Error("failed to set admin profile field", zap.String("name", field[0]), zap.String("value", field[1]), zap.Error(err), zap.String("admin-addr", g.signerInfo.GetAddress().String()))
+		} else {
+			g.logger.Info("admin profile field set", zap.String("name", field[0]), zap.String("value", field[1]), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+		}
+	}
 }
 
 // CreateEvent implements ZenaoChain.
@@ -385,7 +432,7 @@ func generateUserRealmSource(user *zeni.User, gnoNamespace string) (string, erro
 
 	avatarURI := user.AvatarURI
 	if avatarURI == "" {
-		avatarURI = "ipfs://bafkreiefzfl43okbnnjwbazkntunp6plgpwnxj7rbqbcukpcnwtstuq4bu" // zenao logo
+		avatarURI = zenaoLogo
 	}
 
 	m := map[string]string{
