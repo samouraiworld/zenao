@@ -15,14 +15,35 @@ import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
 import { FormFieldImage } from "@/components/form/components/FormFieldImage";
-import { userOptions } from "@/lib/queries/user";
+import { userOptions, UserSchemaType } from "@/lib/queries/user";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
+import { VeryLargeText } from "@/components/texts/VeryLargeText";
 
-export const EditUserForm: React.FC<{ authToken: string | null }> = ({
+export const EditUser: React.FC<{ authToken: string | null }> = ({
   authToken,
 }) => {
   const { data: user } = useSuspenseQuery(userOptions(authToken));
 
+  return (
+    <div>
+      {!!user?.address && (
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:mb-3">
+          <VeryLargeText className="truncate">Settings</VeryLargeText>
+          <GnowebButton
+            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/cockpit:u/${user.address}`}
+            label="See your profile on gnoweb"
+          />
+        </div>
+      )}
+      <EditUserForm authToken={authToken} user={user} />
+    </div>
+  );
+};
+
+const EditUserForm: React.FC<{
+  authToken: string | null;
+  user: UserSchemaType | null;
+}> = ({ authToken, user }) => {
   const { session } = useSession();
   const [loading, setLoading] = useState<boolean>(false);
   const form = useForm<UserFormSchemaType>({
@@ -99,12 +120,6 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
                 type="submit"
               />
             </div>
-            {!!user?.address && (
-              <GnowebButton
-                href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/cockpit:u/${user.address}`}
-                label="See your profile on gnoweb"
-              />
-            )}
           </div>
         </div>
       </form>

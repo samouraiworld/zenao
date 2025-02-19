@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { EditUserForm } from "./EditUserForm";
+import { EditUser } from "./EditUser";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { userOptions } from "@/lib/queries/user";
@@ -15,7 +15,7 @@ export default async function SettingsPage() {
   return (
     <ScreenContainer>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EditUserForm authToken={authToken} />
+        <EditUser authToken={authToken} />
       </HydrationBoundary>
     </ScreenContainer>
   );
