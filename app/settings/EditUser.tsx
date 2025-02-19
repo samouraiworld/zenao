@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSession } from "@clerk/nextjs";
+import { SignOutButton, useSession } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { zenaoClient } from "../zenao-client";
@@ -18,6 +18,9 @@ import { FormFieldImage } from "@/components/form/components/FormFieldImage";
 import { userOptions, UserSchemaType } from "@/lib/queries/user";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
+import { Button } from "@/components/shadcn/button";
+import { SmallText } from "@/components/texts/SmallText";
+import { Separator } from "@/components/shadcn/separator";
 
 export const EditUser: React.FC<{ authToken: string | null }> = ({
   authToken,
@@ -36,6 +39,13 @@ export const EditUser: React.FC<{ authToken: string | null }> = ({
         </div>
       )}
       <EditUserForm authToken={authToken} user={user} />
+
+      <Separator className="my-5" />
+      <SignOutButton>
+        <Button variant="destructive">
+          <SmallText>Sign out</SmallText>
+        </Button>
+      </SignOutButton>
     </div>
   );
 };

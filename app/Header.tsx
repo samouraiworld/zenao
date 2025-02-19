@@ -103,7 +103,7 @@ async function Auth() {
   const user = await queryClient.fetchQuery(userOptions(authToken));
 
   return (
-    <Link href="/settings">
+    <>
       <SignedOut>
         <SignInButton>
           <Button variant="outline">
@@ -113,12 +113,14 @@ async function Auth() {
       </SignedOut>
       <SignedIn>
         {user && (
-          <Avatar className="h-8 w-8 self-center">
-            <AvatarImage src={user.avatarUri} alt="avatar-uri" />
-            <AvatarFallback>avatar</AvatarFallback>
-          </Avatar>
+          <Link href="/settings">
+            <Avatar className="h-8 w-8 self-center">
+              <AvatarImage src={user.avatarUri} alt="avatar-uri" />
+              <AvatarFallback>avatar</AvatarFallback>
+            </Avatar>
+          </Link>
         )}
       </SignedIn>
-    </Link>
+    </>
   );
 }
