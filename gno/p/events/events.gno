@@ -75,7 +75,7 @@ func NewEvent(conf *Config) *Event {
 	}
 
 	memberStore := basedao.NewMembersStore(roles, members)
-	organizerVetoCond := daocond.RoleCount(1, "organizer", memberStore.HasRole)
+	organizerCond := daocond.RoleCount(1, "organizer", memberStore.HasRole)
 
 	dao := basedao.New(&basedao.Config{
 		Name:              conf.Title,
@@ -84,7 +84,7 @@ func NewEvent(conf *Config) *Event {
 		Members:           memberStore,
 		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
 		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
-		InitialCondition:  organizerVetoCond,
+		InitialCondition:  organizerCond,
 		NoEvents:          false,
 	})
 
