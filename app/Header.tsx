@@ -18,9 +18,9 @@ import {
 } from "@/components/shadcn/avatar";
 import { getQueryClient } from "@/lib/get-query-client";
 import { Button } from "@/components/shadcn/button";
-import { userOptions } from "@/lib/queries/user";
+import { userOptions, UserSchemaType } from "@/lib/queries/user";
 
-const HeaderLinks: React.FC = () => {
+const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   const t = useTranslations("header");
 
   return (
@@ -28,12 +28,16 @@ const HeaderLinks: React.FC = () => {
       <Link href="/discover">
         <SmallText variant="secondary">{t("discover")}</SmallText>
       </Link>
-      <Link href="/created">
-        <SmallText variant="secondary">Your events</SmallText>
-      </Link>
-      <Link href="/tickets">
-        <SmallText variant="secondary">Your tickets</SmallText>
-      </Link>
+      {isLogged && (
+        <Link href="/created">
+          <SmallText variant="secondary">{t("your-events")}</SmallText>
+        </Link>
+      )}
+      {isLogged && (
+        <Link href="/tickets">
+          <SmallText variant="secondary">{t("your-tickets")}</SmallText>
+        </Link>
+      )}
       <SmallText variant="secondary">{t("features")}</SmallText>
       <Link href="/manifesto">
         <SmallText variant="secondary">{t("manifesto")}</SmallText>
@@ -42,8 +46,12 @@ const HeaderLinks: React.FC = () => {
   );
 };
 
-export const Header: React.FC = () => {
-  const t = useTranslations("header");
+export async function Header() {
+  const queryClient = getQueryClient();
+  const { getToken } = await auth();
+  const authToken = await getToken();
+  const t = await getTranslations("header");
+  const user = await queryClient.fetchQuery(userOptions(authToken));
 
   return (
     <div className="flex justify-center sm:p-2">
@@ -60,10 +68,10 @@ export const Header: React.FC = () => {
           <Text className="font-extrabold">{t("zenao")}</Text>
         </Link>
         <div className="flex flex-row gap-3">
-          <HeaderLinks />
+          <HeaderLinks isLogged={user ? true : false} />
         </div>
         <div className="flex flex-row gap-2 items-center justify-center">
-          <Auth />
+          <Auth user={user} />
           <ToggleThemeButton />
         </div>
       </Card>
@@ -80,28 +88,23 @@ export const Header: React.FC = () => {
           />
         </Link>
         <div className="flex flex-row gap-2">
-          <Auth />
+          <Auth user={user} />
           <Popover>
             <PopoverTrigger>
               <AlignJustifyIcon width={26} height={26} />
             </PopoverTrigger>
             <PopoverContent className="flex gap-1 flex-col bg-secondary rounded-xl px-4 py-2">
-              <HeaderLinks />
+              <HeaderLinks isLogged={user ? true : false} />
             </PopoverContent>
           </Popover>
         </div>
       </div>
     </div>
   );
-};
+}
 
-async function Auth() {
-  const queryClient = getQueryClient();
-  const { getToken } = await auth();
-  const authToken = await getToken();
-  const t = await getTranslations("header");
-  const user = await queryClient.fetchQuery(userOptions(authToken));
-
+const Auth: React.FC<{ user: UserSchemaType | null }> = ({ user }) => {
+  const t = useTranslations("header");
   return (
     <>
       <SignedOut>
@@ -123,4 +126,4 @@ async function Auth() {
       </SignedIn>
     </>
   );
-}
+};

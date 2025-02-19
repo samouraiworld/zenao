@@ -2,10 +2,10 @@
   "header": {
     "zenao": "ZENAO",
     "discover": "Discover",
-    "calendar": "Calendar",
     "features": "Features",
-    "blog": "Blog",
     "manifesto": "Manifesto",
+    "your-events": "Your events",
+    "your-tickets": "Your tickets",
     "sign-in": "Sign in"
   },
   "footer": {
@@ -115,4 +115,3 @@
     }
   }
 }
-
