@@ -13,12 +13,12 @@ interface GnowebButtonProps {
 }
 
 export const GnowebButton: React.FC<GnowebButtonProps> = ({ href, label }) => {
-  const t = useTranslations("events-list");
+  const t = useTranslations("components.buttons");
 
   return (
     <Button variant="secondary" className="w-max">
       <Link href={href} target="_blank">
-        <SmallText variant="secondary">{label || t("see-gnoweb")}</SmallText>
+        <SmallText variant="secondary">{label || t("gnoweb-button")}</SmallText>
       </Link>
       <Image
         src="/gno1.png"

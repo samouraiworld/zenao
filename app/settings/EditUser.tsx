@@ -26,15 +26,16 @@ export const EditUser: React.FC<{ authToken: string | null }> = ({
   authToken,
 }) => {
   const { data: user } = useSuspenseQuery(userOptions(authToken));
+  const t = useTranslations("settings");
 
   return (
     <div>
       {!!user?.address && (
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:mb-3">
-          <VeryLargeText className="truncate">Settings</VeryLargeText>
+          <VeryLargeText className="truncate">{t("title")}</VeryLargeText>
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/cockpit:u/${user.address}`}
-            label="See your profile on gnoweb"
+            label={t("gnoweb-label")}
           />
         </div>
       )}
@@ -43,7 +44,7 @@ export const EditUser: React.FC<{ authToken: string | null }> = ({
       <Separator className="my-5" />
       <SignOutButton>
         <Button variant="destructive">
-          <SmallText>Sign out</SmallText>
+          <SmallText>{t("sign-out")}</SmallText>
         </Button>
       </SignOutButton>
     </div>
