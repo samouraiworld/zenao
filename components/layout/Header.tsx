@@ -12,6 +12,26 @@ import { SmallText } from "../texts/SmallText";
 import { Text } from "../texts/DefaultText";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 
+const HeaderLinks: React.FC = () => {
+  const t = useTranslations("header");
+
+  return (
+    <>
+      <Link href="/discover">
+        <SmallText variant="secondary">{t("discover")}</SmallText>
+      </Link>
+      <Link href="/created">
+        <SmallText variant="secondary">{t("calendar")}</SmallText>
+      </Link>
+      <SmallText variant="secondary">{t("features")}</SmallText>
+      <SmallText variant="secondary">{t("blog")}</SmallText>
+      <Link href="/manifesto">
+        <SmallText variant="secondary">{t("manifesto")}</SmallText>
+      </Link>
+    </>
+  );
+};
+
 export const Header: React.FC = () => {
   const t = useTranslations("header");
 
@@ -30,13 +50,7 @@ export const Header: React.FC = () => {
           <Text className="font-extrabold">{t("zenao")}</Text>
         </Link>
         <div className="flex flex-row gap-4">
-          <SmallText variant="secondary">{t("discover")}</SmallText>
-          <SmallText variant="secondary">{t("calendar")}</SmallText>
-          <SmallText variant="secondary">{t("features")}</SmallText>
-          <SmallText variant="secondary">{t("blog")}</SmallText>
-          <Link href="/manifesto">
-            <SmallText variant="secondary">{t("manifesto")}</SmallText>
-          </Link>
+          <HeaderLinks />
         </div>
         <div className="flex flex-row gap-2 items-center">
           <Auth />
@@ -62,13 +76,7 @@ export const Header: React.FC = () => {
               <AlignJustifyIcon width={26} height={26} />
             </PopoverTrigger>
             <PopoverContent className="flex gap-1 flex-col bg-secondary rounded-xl px-4 py-2">
-              <SmallText>{t("discover")}</SmallText>
-              <SmallText>{t("calendar")}</SmallText>
-              <SmallText>{t("features")}</SmallText>
-              <SmallText>{t("blog")}</SmallText>
-              <Link href="/manifesto">
-                <SmallText variant="secondary">{t("manifesto")}</SmallText>
-              </Link>
+              <HeaderLinks />
             </PopoverContent>
           </Popover>
         </div>
