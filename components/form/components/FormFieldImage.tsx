@@ -2,13 +2,11 @@
 
 import { FieldValues, useController, useWatch } from "react-hook-form";
 import { useRef, useState } from "react";
-import { CloudUpload, Loader2 } from "lucide-react";
+import { Image as ImageIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { FormFieldProps, urlPattern } from "../types";
-import { FormFieldInputString } from "./FormFieldInputString";
 import { useToast } from "@/app/hooks/use-toast";
 import { filesPostResponseSchema } from "@/lib/files";
-import { Card } from "@/components/cards/Card";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { isValidURL, web2URL } from "@/lib/uris";
 
@@ -57,7 +55,7 @@ export const FormFieldImage = <T extends FieldValues>(
     hiddenInputRef.current?.click();
   };
   return (
-    <div className="flex flex-col gap-4 w-full sm:w-2/5">
+    <div className="flex flex-col w-full sm:w-2/5">
       {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
       {/* TODO: find a better way */}
       {isValidURL(imageUri, urlPattern) && !fieldState.error?.message ? (
@@ -66,30 +64,23 @@ export const FormFieldImage = <T extends FieldValues>(
           width={330}
           height={330}
           alt="imageUri"
-          className="flex w-full rounded-xl self-center"
+          className="flex w-full rounded-xl self-center border"
         />
       ) : (
-        <Skeleton className="w-full h-[330px] rounded-xnter flex justify-center items-center">
+        <Skeleton className="w-full h-[330px] rounded-xnter flex justify-center items-center border">
           {uploading && <Loader2 className="animate-spin" />}
         </Skeleton>
       )}
-      <Card>
-        <div className="flex flex-row gap-3">
-          <div className="w-full">
-            <FormFieldInputString {...props} />
-          </div>
-          <div>
-            <CloudUpload onClick={handleClick} className="w-5 cursor-pointer" />
-            <input
-              type="file"
-              onChange={handleChange}
-              ref={hiddenInputRef}
-              className="hidden"
-              disabled={uploading}
-            />
-          </div>
-        </div>
-      </Card>
+      <div className="self-end relative bottom-8 right-2">
+        <ImageIcon onClick={handleClick} className="w-5 cursor-pointer" />
+        <input
+          type="file"
+          onChange={handleChange}
+          ref={hiddenInputRef}
+          className="hidden"
+          disabled={uploading}
+        />
+      </div>
     </div>
   );
 };
