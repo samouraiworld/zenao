@@ -59,7 +59,6 @@ export function EventInfo({
     ...userFromAddress(data.creator),
     enabled: !!data.creator,
   });
-  console.log("host", host);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -139,12 +138,14 @@ export function EventInfo({
         </EventSection>
         {host && (
           <EventSection title={t("hosted-by")}>
-            <div className="flex flex-row items-center gap-2">
-              <Avatar className="h-5 w-5">
-                <AvatarImage src={web2URL(host.avatarUri)} alt="avatar" />
-              </Avatar>
-              <SmallText>{host.displayName}</SmallText>
-            </div>
+            <Link href={`/profile/${data.creator}`}>
+              <div className="flex flex-row items-center gap-2">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage src={web2URL(host.avatarUri)} alt="avatar" />
+                </Avatar>
+                <SmallText>{host.displayName}</SmallText>
+              </div>
+            </Link>
           </EventSection>
         )}
       </div>
