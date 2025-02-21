@@ -6,6 +6,7 @@ import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { userFromAddress } from "@/lib/queries/user";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -30,7 +31,13 @@ export default async function EventPage({ params }: Props) {
   const { getToken } = await auth();
   const authToken = await getToken();
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(eventOptions(p.id));
+
+  await queryClient.prefetchQuery(eventOptions(p.id));
+  const event = queryClient.getQueryData(eventOptions(p.id).queryKey);
+  if (event) {
+    await queryClient.prefetchQuery(userFromAddress(event.creator));
+  }
+
   void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
 
   return (

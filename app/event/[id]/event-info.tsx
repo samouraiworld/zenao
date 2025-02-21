@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
@@ -20,6 +24,8 @@ import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { web2URL } from "@/lib/uris";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { userFromAddress } from "@/lib/queries/user";
+import { Avatar, AvatarImage } from "@/components/shadcn/avatar";
 
 interface EventSectionProps {
   title: string;
@@ -49,6 +55,11 @@ export function EventInfo({
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
   const queryClient = useQueryClient();
+  const { data: host } = useQuery({
+    ...userFromAddress(data.creator),
+    enabled: !!data.creator,
+  });
+  console.log("host", host);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -126,10 +137,16 @@ export function EventInfo({
             <SmallText>See on Gnoweb</SmallText>
           </a>
         </EventSection>
-        {/* TODO: Uncomment that when we can see the name of the addr */}
-        {/* <EventSection title={t("hosted-by")}> */}
-        {/*   <SmallText>User</SmallText> */}
-        {/* </EventSection> */}
+        {host && (
+          <EventSection title={t("hosted-by")}>
+            <div className="flex flex-row items-center gap-2">
+              <Avatar className="h-5 w-5">
+                <AvatarImage src={web2URL(host.avatarUri)} alt="avatar" />
+              </Avatar>
+              <SmallText>{host.displayName}</SmallText>
+            </div>
+          </EventSection>
+        )}
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
         <VeryLargeText className="mb-7">{data.title}</VeryLargeText>
