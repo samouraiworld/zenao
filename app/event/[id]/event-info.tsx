@@ -20,6 +20,7 @@ import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { web2URL } from "@/lib/uris";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
 import { Separator } from "@/components/shadcn/separator";
+import { GnowebButton } from "@/components/buttons/GnowebButton";
 
 interface EventSectionProps {
   title: string;
@@ -119,12 +120,9 @@ export function EventInfo({
           </Card>
         )}
         <EventSection title={t("going", { count: data.participants })}>
-          <a
+          <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
-            target="_blank"
-          >
-            <SmallText>See on Gnoweb</SmallText>
-          </a>
+          />
         </EventSection>
         {/* TODO: Uncomment that when we can see the name of the addr */}
         {/* <EventSection title={t("hosted-by")}> */}
