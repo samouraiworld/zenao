@@ -49,7 +49,6 @@ export const profiles = createBatcher({
       `queryJSON(${JSON.stringify(JSON.stringify(req))})`,
     );
     const resu = extractGnoJSONResponse(resRaw) as unknown[][];
-    console.log("resu", resu);
     const res: GnoProfile[] = [];
     for (let i = 0; i < addrs.length; i++) {
       res.push({
