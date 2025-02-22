@@ -64,13 +64,18 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				return err
 			}
 
+			text, err := generateConfirmationMailText(evt)
+			if err != nil {
+				return err
+			}
+
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:    "Zenao <ticket@mail.zenao.io>",
 				To:      []string{user.Email},
 				Subject: fmt.Sprintf("%s - Confirmation", evt.Title),
 				Html:    htmlStr,
-				Text:    generateConfirmationMailText(evt),
+				Text:    text,
 			}); err != nil {
 				return err
 			}
