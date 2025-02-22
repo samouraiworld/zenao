@@ -59,13 +59,18 @@ func (s *ZenaoServer) CreateEvent(
 				return err
 			}
 
+			text, err := generateCreationConfirmationMailText(evt)
+			if err != nil {
+				return err
+			}
+
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:    "Zenao <noreply@mail.zenao.io>",
 				To:      []string{user.Email},
 				Subject: fmt.Sprintf("%s - Creation confirmed", evt.Title),
 				Html:    htmlStr,
-				Text:    generateCreationConfirmationMailText(evt),
+				Text:    text,
 			}); err != nil {
 				return err
 			}

@@ -209,7 +209,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 
 // CreateUser implements ZenaoChain.
 func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
-	userRealmSrc, err := generateUserRealmSource(user, g.namespace)
+	userRealmSrc, err := generateUserRealmSource(user, g.namespace, g.signerInfo.GetAddress().String())
 	if err != nil {
 		return err
 	}
@@ -419,7 +419,7 @@ func Render(path string) string {
 }
 `
 
-func generateUserRealmSource(user *zeni.User, gnoNamespace string) (string, error) {
+func generateUserRealmSource(user *zeni.User, gnoNamespace string, zenaoAdminAddr string) (string, error) {
 	displayName := user.DisplayName
 	if displayName == "" {
 		displayName = fmt.Sprintf("Zenao user #%s", user.ID)
@@ -436,10 +436,11 @@ func generateUserRealmSource(user *zeni.User, gnoNamespace string) (string, erro
 	}
 
 	m := map[string]string{
-		"displayName": strconv.Quote(displayName),
-		"bio":         strconv.Quote(bio),
-		"avatarURI":   strconv.Quote(avatarURI),
-		"namespace":   gnoNamespace,
+		"displayName":    strconv.Quote(displayName),
+		"bio":            strconv.Quote(bio),
+		"avatarURI":      strconv.Quote(avatarURI),
+		"namespace":      gnoNamespace,
+		"zenaoAdminAddr": strconv.Quote(zenaoAdminAddr),
 	}
 
 	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
@@ -469,7 +470,7 @@ func init() {
 		AvatarURI: {{.avatarURI}},
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
-		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
+		ZenaoAdminAddr: {{.zenaoAdminAddr}},
 	}
 
 	user = users.NewUser(conf)
