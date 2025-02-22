@@ -204,3 +204,15 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (b *BatchProfileField) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("BatchProfileField{\n")
+	fmt.Fprintf(buf, "%s\tType: %q,\n", linePrefix, b.Type)
+	fmt.Fprintf(buf, "%s\tKey: %q,\n", linePrefix, b.Key)
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
