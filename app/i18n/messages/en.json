@@ -90,7 +90,7 @@
   },
   "tickets": {
     "title": "Your tickets",
-    "description": "Events for which you participate."
+    "description": "Events you are attending."
   },
   "events-list": {
     "no-events": "No events to show.",
