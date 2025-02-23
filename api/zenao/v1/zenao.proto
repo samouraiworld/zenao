@@ -98,3 +98,13 @@ message EventInfo {
   uint32 participants = 9;
   string pkg_path = 10;
 }
+
+message BatchProfileField {
+  string type = 1;
+  string key = 2;
+}
+
+message BatchProfileRequest {
+  repeated BatchProfileField fields = 1;
+  repeated string addresses = 2;
+}

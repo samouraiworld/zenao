@@ -62,12 +62,16 @@ func generateConfirmationMailHTML(evt *zeni.Event) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	locStr, err := zeni.LocationToString(evt.Location)
+	if err != nil {
+		return "", err
+	}
 	// XXX: think about injections
 	m := map[string]interface{}{
-		"eventImageURL": evt.ImageURI,
+		"eventImageURL": web2URL(evt.ImageURI),
 		"eventName":     evt.Title,
 		"dateTime":      fmt.Sprintf("%s - %s", evt.StartDate.In(tz).Format(time.UnixDate), evt.EndDate.In(tz).Format(time.UnixDate)),
-		"address":       evt.Location,
+		"address":       locStr,
 		"eventURL":      eventPublicURL(evt.ID),
 	}
 	buf := strings.Builder{}
@@ -77,7 +81,11 @@ func generateConfirmationMailHTML(evt *zeni.Event) (string, error) {
 	return buf.String(), nil
 }
 
-func generateConfirmationMailText(evt *zeni.Event) string {
+func generateConfirmationMailText(evt *zeni.Event) (string, error) {
+	locStr, err := zeni.LocationToString(evt.Location)
+	if err != nil {
+		return "", err
+	}
 	return fmt.Sprintf(`Welcome! Tickets will be sent in a few weeks!
 
 --------------------------------------------------------------------------------
@@ -89,7 +97,7 @@ Address: %s
 --------------------------------------------------------------------------------
 
 See on Zenao: %s
-`, evt.Title, evt.StartDate.Format(time.UnixDate), evt.EndDate.Format(time.UnixDate), evt.Location, eventPublicURL(evt.ID))
+`, evt.Title, evt.StartDate.Format(time.UnixDate), evt.EndDate.Format(time.UnixDate), locStr, eventPublicURL(evt.ID)), nil
 }
 
 //go:embed create-event-mail.tmpl.html
@@ -104,12 +112,16 @@ func generateCreationConfirmationMailHTML(evt *zeni.Event) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	locStr, err := zeni.LocationToString(evt.Location)
+	if err != nil {
+		return "", err
+	}
 	// XXX: think about injections
 	m := map[string]interface{}{
-		"eventImageURL": evt.ImageURI,
+		"eventImageURL": web2URL(evt.ImageURI),
 		"eventName":     evt.Title,
 		"dateTime":      fmt.Sprintf("%s - %s", evt.StartDate.In(tz).Format(time.UnixDate), evt.EndDate.In(tz).Format(time.UnixDate)),
-		"address":       evt.Location,
+		"address":       locStr,
 		"eventURL":      eventPublicURL(evt.ID),
 	}
 	buf := strings.Builder{}
@@ -119,7 +131,11 @@ func generateCreationConfirmationMailHTML(evt *zeni.Event) (string, error) {
 	return buf.String(), nil
 }
 
-func generateCreationConfirmationMailText(evt *zeni.Event) string {
+func generateCreationConfirmationMailText(evt *zeni.Event) (string, error) {
+	locStr, err := zeni.LocationToString(evt.Location)
+	if err != nil {
+		return "", err
+	}
 	return fmt.Sprintf(`Event created!
 
 --------------------------------------------------------------------------------
@@ -131,9 +147,20 @@ Address: %s
 --------------------------------------------------------------------------------
 
 See on Zenao: %s
-`, evt.Title, evt.StartDate.Format(time.UnixDate), evt.EndDate.Format(time.UnixDate), evt.Location, eventPublicURL(evt.ID))
+`, evt.Title, evt.StartDate.Format(time.UnixDate), evt.EndDate.Format(time.UnixDate), locStr, eventPublicURL(evt.ID)), nil
 }
 
 func eventPublicURL(eventID string) string {
 	return fmt.Sprintf("https://zenao.io/event/%s", eventID)
 }
+
+func web2URL(uri string) string {
+	if !strings.HasPrefix(uri, "ipfs://") {
+		return uri
+	}
+	withoutScheme := strings.TrimPrefix(uri, "ipfs://")
+	res := fmt.Sprintf(`https://%s/ipfs/%s`, gatewayDomain, withoutScheme)
+	return res
+}
+
+const gatewayDomain = `rose-many-bass-859.mypinata.cloud`

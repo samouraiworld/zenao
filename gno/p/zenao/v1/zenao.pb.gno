@@ -93,3 +93,13 @@ type EventInfo struct {
 	Participants uint32
 	PkgPath string
 }
+
+type BatchProfileField struct {
+	Type string
+	Key string
+}
+
+type BatchProfileRequest struct {
+	Fields []*BatchProfileField
+	Addresses []string
+}
