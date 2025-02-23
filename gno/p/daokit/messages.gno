@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"gno.land/p/demo/ufmt"
+	"gno.land/p/moul/md"
 )
 
 type ExecutableMessage interface {
@@ -79,4 +80,33 @@ func NewExecuteLambdaHandler() MessageHandler {
 
 func NewExecuteLambdaMsg(cb func()) ExecutableMessage {
 	return NewMessage(MsgExecuteLambdaKind, cb)
+}
+
+const MsgInstantExecuteKind = "gno.land/p/zenao/daokit.InstantExecute"
+
+type msgInstantExecute struct {
+	dao DAO
+	req ProposalRequest
+}
+
+func (m *msgInstantExecute) String() string {
+	// XXX: find a way to be explicit about the subdao
+	s := ""
+	s += md.Paragraph(md.Blockquote(m.req.Message.Type()))
+	s += md.Paragraph(m.req.Message.String())
+	return s
+}
+
+func NewInstantExecuteHandler() MessageHandler {
+	return NewMessageHandler(MsgInstantExecuteKind, func(i interface{}) {
+		msg, ok := i.(*msgInstantExecute)
+		if !ok {
+			panic(errors.New("invalid msg type"))
+		}
+		InstantExecute(msg.dao, msg.req)
+	})
+}
+
+func NewInstantExecuteMsg(dao DAO, req ProposalRequest) ExecutableMessage {
+	return NewMessage(MsgInstantExecuteKind, &msgInstantExecute{dao: dao, req: req})
 }

@@ -185,19 +185,17 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: %q,
-		Message: daokit.NewExecuteLambdaMsg(func() {
-			daokit.InstantExecute(event.DAO, daokit.ProposalRequest{
-				Title: "Edit event",
-				Message: events.NewEditEventMsg(
-					%q,
-					%q,
-					%q,
-					%d,
-					%d,
-					%d,
-					%q,
-				),
-			})
+		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Title: "Edit event",
+			Message: events.NewEditEventMsg(
+				%q,
+				%q,
+				%q,
+				%d,
+				%d,
+				%d,
+				%q,
+			),
 		}),
 	})
 }
@@ -287,11 +285,9 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: %q,
-		Message: daokit.NewExecuteLambdaMsg(func() {
-			daokit.InstantExecute(event.DAO, daokit.ProposalRequest{
-				Title: "Add participant",
-				Message: events.NewAddParticipantMsg(%q),
-			})
+		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Title: "Add participant",
+			Message: events.NewAddParticipantMsg(%q),
 		}),
 	})
 }

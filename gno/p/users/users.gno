@@ -52,12 +52,17 @@ func NewUser(conf *Config) *User {
 		SetProfileString: conf.SetProfileString,
 		GetProfileString: conf.GetProfileString,
 		InitialCondition: adminVetoCond,
-		NoCreationEvent:  true,
+		NoCreationEvent:  true, // don't list users in dao registries
 	})
 
 	privdao.Core.Resources.Set(&daokit.Resource{
 		Condition: adminVetoCond,
 		Handler:   daokit.NewExecuteLambdaHandler(),
+	})
+
+	privdao.Core.Resources.Set(&daokit.Resource{
+		Condition: adminVetoCond,
+		Handler:   daokit.NewInstantExecuteHandler(),
 	})
 
 	user := &User{

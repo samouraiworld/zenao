@@ -3,6 +3,7 @@ package events
 import (
 	"errors"
 	"std"
+	"strconv"
 	"strings"
 	"time"
 
@@ -241,6 +242,36 @@ type msgEditEvent struct {
 	endDate     int64
 	capacity    uint32
 	location    *zenaov1.EventLocation
+}
+
+func (msg *msgEditEvent) String() string {
+	elems := []string{}
+	if msg.title != "" {
+		elems = append(elems, "Title: "+msg.title)
+	}
+	if msg.description != "" {
+		elems = append(elems, "Description: "+msg.description)
+	}
+	if msg.startDate != 0 {
+		elems = append(elems, "Start date: "+time.Unix(msg.startDate, 0).Format(time.DateTime))
+	}
+	if msg.endDate != 0 {
+		elems = append(elems, "End date: "+time.Unix(msg.endDate, 0).Format(time.DateTime))
+	}
+	if msg.capacity != 0 {
+		elems = append(elems, "Capacity: "+strconv.FormatUint(uint64(msg.capacity), 10))
+	}
+	if msg.location != nil {
+		locStr, err := LocationString(msg.location)
+		if err != nil {
+			locStr = err.Error()
+		}
+		elems = append(elems, "Location: "+locStr)
+	}
+	if msg.imageURI != "" {
+		elems = append(elems, "Image: "+msg.imageURI+"\n  "+md.Image("Event presentation", eventImageURL(msg.imageURI)))
+	}
+	return md.BulletList(elems)
 }
 
 func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) daokit.ExecutableMessage {
