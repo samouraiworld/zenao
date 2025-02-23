@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useSession } from "@clerk/nextjs";
@@ -38,12 +38,13 @@ export function EditEventForm({
     location,
   };
 
-  const form = useForm<EventFormSchemaType>({
+  const form = useForm({
     mode: "all",
     resolver: zodResolver(eventFormSchema),
     defaultValues,
   });
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   const { toast } = useToast();
   const t = useTranslations("eventForm");
@@ -70,7 +71,7 @@ export function EditEventForm({
           headers: { Authorization: "Bearer " + token },
         },
       );
-      form.reset();
+      await queryClient.invalidateQueries(eventOptions(id));
       toast({
         title: t("toast-edit-success"),
       });

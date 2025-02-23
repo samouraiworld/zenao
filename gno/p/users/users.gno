@@ -30,7 +30,7 @@ func NewUser(conf *Config) *User {
 	roles := []role_manager.RoleInfo{
 		{
 			Name:        "zenao-admin",
-			Description: "admin role",
+			Description: "Admin responsible for managing the account until it becomes self-custodial",
 		},
 	}
 	members := []basedao.Member{
