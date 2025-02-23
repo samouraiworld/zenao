@@ -21,7 +21,8 @@ WORKDIR /app
 RUN git clone https://github.com/gnolang/gno.git
 
 WORKDIR /app/gno
-RUN git checkout 85b3c0b7957e57fee0bba1e8fe030bf64931e19e
+COPY .gnoversion .gnoversion
+RUN git checkout $(cat .gnoversion)
 
 WORKDIR /app/gno/contribs/gnodev
 RUN --mount=type=cache,target=/root/.cache/go-build \
