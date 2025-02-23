@@ -18,10 +18,10 @@ RUN apt-get update \
       ca-certificates
 
 WORKDIR /app
-RUN git clone https://github.com/n0izn0iz/gno.git
+RUN git clone https://github.com/gnolang/gno.git
 
 WORKDIR /app/gno
-RUN git checkout gnodev-server
+RUN git checkout 85b3c0b7957e57fee0bba1e8fe030bf64931e19e
 
 WORKDIR /app/gno/contribs/gnodev
 RUN --mount=type=cache,target=/root/.cache/go-build \
@@ -52,4 +52,4 @@ COPY --from=builder /app/genesis_balances.txt /genesis_balances.txt
 ENV HOME=/app
 WORKDIR $HOME
 
-ENTRYPOINT ["/bin/gnodev", "--node-rpc-listener", "0.0.0.0:26657", "--web-listener", "0.0.0.0:8888", "--chain-id", "zenao-dev", "--server-mode", "--balance-file", "/genesis_balances.txt", "/packages"]
+ENTRYPOINT ["/bin/gnodev", "staging", "--node-rpc-listener", "0.0.0.0:26657", "--web-listener", "0.0.0.0:8888", "--chain-id", "zenao-dev", "--server-mode", "--balance-file", "/genesis_balances.txt", "/packages"]
