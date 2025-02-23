@@ -291,7 +291,7 @@ func main() {
 		}),
 	})
 }
-`, callerPkgPath, eventPkgPath, "Participate in "+eventPkgPath, participantAddr)}},
+`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr)}},
 		},
 	}))
 	if err != nil {
