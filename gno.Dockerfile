@@ -53,4 +53,4 @@ COPY --from=builder /app/genesis_balances.txt /genesis_balances.txt
 ENV HOME=/app
 WORKDIR $HOME
 
-ENTRYPOINT ["/bin/gnodev", "staging", "--node-rpc-listener", "0.0.0.0:26657", "--web-listener", "0.0.0.0:8888", "--chain-id", "zenao-dev", "--server-mode", "--balance-file", "/genesis_balances.txt", "/packages"]
+ENTRYPOINT exec gnodev staging --node-rpc-listener 0.0.0.0:26657 --web-listener 0.0.0.0:8888 --chain-id zenao-dev --balance-file /genesis_balances.txt $(find /packages -name gno.mod -type f -exec dirname {} \;)
