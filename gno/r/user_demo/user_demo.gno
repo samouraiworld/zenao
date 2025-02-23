@@ -16,14 +16,14 @@ func init() {
 		Bio:              "this is a user",
 		SetProfileString: profile.SetStringField,
 		GetProfileString: profile.GetStringField,
-		ZenaoAdminAddr:   std.PrevRealm().Addr().String(),
+		ZenaoAdminAddr:   std.PreviousRealm().Address().String(),
 	}
 	user = users.NewUser(&config)
 }
 
 func Render(path string) string {
-	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
-	s += md.Image("User avatar", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
-	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
+	s := md.H1(profile.GetStringField(std.CurrentRealm().Address(), profile.DisplayName, ""))
+	s += md.Image("User avatar", profile.GetStringField(std.CurrentRealm().Address(), profile.Avatar, ""))
+	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Address(), profile.Bio, ""))
 	return s
 }

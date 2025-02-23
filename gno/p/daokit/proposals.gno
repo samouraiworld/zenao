@@ -76,7 +76,7 @@ func (p *ProposalsStore) newProposal(proposer string, req ProposalRequest, condi
 		ConditionState: conditionState,
 		Votes:          map[string]daocond.Vote{},
 		CreatedAt:      time.Now(),
-		CreatedHeight:  std.GetHeight(),
+		CreatedHeight:  std.ChainHeight(),
 	}
 	p.Tree.Set(id.String(), proposal)
 	return proposal

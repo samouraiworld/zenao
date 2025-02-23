@@ -74,7 +74,7 @@ func NewUser(conf *Config) *User {
 }
 
 func (u *User) Render(path string) string {
-	addr := std.CurrentRealm().Addr()
+	addr := std.CurrentRealm().Address()
 	s := ""
 	if path == "" {
 		s += md.H1(u.DAOPrivate.GetProfileString(addr, "DisplayName", "Anon"))

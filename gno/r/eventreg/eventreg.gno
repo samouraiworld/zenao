@@ -31,7 +31,7 @@ func init() {
 // XXX: split this package into eventreg and eventsindex
 
 func Register(infoGetter events.InfoGetter) {
-	pkgPath := std.PrevRealm().PkgPath()
+	pkgPath := std.PreviousRealm().PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)

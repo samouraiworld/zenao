@@ -20,13 +20,13 @@ var (
 )
 
 func TestNewUser(t *testing.T) {
-	std.TestSetOrigCaller(alice)
+	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/users/u1"))
 	user := NewUser(&config)
 	if user.DAOPrivate.Members.GetMembers()[0] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), user.DAOPrivate.Members.GetMembers()[0])
 	}
-	if !user.DAOPrivate.Members.HasRole(alice.String(), "admin") {
+	if !user.DAOPrivate.Members.HasRole(alice.String(), "zenao-admin") {
 		t.Fatalf("expected user to have admin role")
 	}
 }

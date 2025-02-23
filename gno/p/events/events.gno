@@ -129,7 +129,7 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 		if e.DAOPrivate.Members.CountMemberRoles(participant) > 0 {
 			e.DAOPrivate.Members.AddRoleToMember(participant, "participant")
 		} else {
-			e.DAOPrivate.Members.AddMember(participant, []string{participant})
+			e.DAOPrivate.Members.AddMember(participant, []string{"participant"})
 		}
 	})
 }
@@ -146,7 +146,7 @@ func (e *Event) removeParticipantHandler() daokit.MessageHandler {
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-		if e.DAOPrivate.Members.CountMemberRoles(participant) != 1 {
+		if e.DAOPrivate.Members.CountMemberRoles(participant) > 1 {
 			e.DAOPrivate.Members.RemoveRoleFromMember(participant, "participant")
 		} else {
 			e.DAOPrivate.Members.RemoveMember(participant)
@@ -169,7 +169,7 @@ func (e *Event) addGatekeeperHandler() daokit.MessageHandler {
 		if e.DAOPrivate.Members.CountMemberRoles(gatekeeper) > 0 {
 			e.DAOPrivate.Members.AddRoleToMember(gatekeeper, "gatekeeper")
 		} else {
-			e.DAOPrivate.Members.AddMember(gatekeeper, []string{gatekeeper})
+			e.DAOPrivate.Members.AddMember(gatekeeper, []string{"gatekeeper"})
 		}
 	})
 }

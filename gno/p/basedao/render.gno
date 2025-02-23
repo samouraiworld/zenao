@@ -38,8 +38,8 @@ func (d *DAOPrivate) Render(path string) string {
 }
 
 func (d *DAOPrivate) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
-	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
-	description := d.GetProfileString(d.Realm.Addr(), "Bio", "Created with daokit")
+	name := d.GetProfileString(d.Realm.Address(), "DisplayName", "DAO")
+	description := d.GetProfileString(d.Realm.Address(), "Bio", "Created with daokit")
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
 
@@ -48,7 +48,7 @@ func (d *DAOPrivate) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
 		res.Write(ufmt.Sprintf("%s\n\n", description))
 	}
 
-	res.Write(ufmt.Sprintf("> Realm address: %s\n\n", d.Realm.Addr()))
+	res.Write(ufmt.Sprintf("> Realm address: %s\n\n", d.Realm.Address()))
 	res.Write(ufmt.Sprintf("Discover more about this DAO on the [configuration page ⚙️](%s:%s)\n\n", linkPath, CONFIG_PATH))
 
 	res.Write(ufmt.Sprintf("## Members 👤 \n\n"))
@@ -89,7 +89,7 @@ func (d *DAOPrivate) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
 }
 
 func (d *DAOPrivate) renderConfigPage(res *mux.ResponseWriter, req *mux.Request) {
-	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
+	name := d.GetProfileString(d.Realm.Address(), "DisplayName", "DAO")
 
 	res.Write(ufmt.Sprintf("# %s - Config ⚙️\n\n", name))
 	roles := d.Members.GetRoles()
@@ -113,7 +113,7 @@ func (d *DAOPrivate) renderConfigPage(res *mux.ResponseWriter, req *mux.Request)
 }
 
 func (d *DAOPrivate) renderProposalHistoryPage(res *mux.ResponseWriter, req *mux.Request) {
-	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
+	name := d.GetProfileString(d.Realm.Address(), "DisplayName", "DAO")
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
 
@@ -135,7 +135,7 @@ func (d *DAOPrivate) renderProposalHistoryPage(res *mux.ResponseWriter, req *mux
 }
 
 func (d *DAOPrivate) renderMemberDetailPage(res *mux.ResponseWriter, req *mux.Request) {
-	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
+	name := d.GetProfileString(d.Realm.Address(), "DisplayName", "DAO")
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
 
@@ -158,7 +158,7 @@ func (d *DAOPrivate) renderMemberDetailPage(res *mux.ResponseWriter, req *mux.Re
 }
 
 func (d *DAOPrivate) renderProposalDetailPage(res *mux.ResponseWriter, req *mux.Request) {
-	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
+	name := d.GetProfileString(d.Realm.Address(), "DisplayName", "DAO")
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
 

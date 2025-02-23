@@ -15,7 +15,7 @@ var (
 )
 
 func TestNewDAO(t *testing.T) {
-	std.TestSetOrigCaller(alice)
+	std.TestSetOriginCaller(alice)
 	dao := NewCore()
 
 	resourcesLen := dao.Resources.Tree.Size()

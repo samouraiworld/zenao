@@ -135,7 +135,7 @@ func (d *DAOPrivate) Propose(req daokit.ProposalRequest) uint64 {
 }
 
 func (d *DAOPrivate) assertCallerIsMember() string {
-	id := std.PrevRealm().Addr().String()
+	id := std.PreviousRealm().Address().String()
 	if !d.Members.IsMember(id) {
 		panic(errors.New("caller is not a member"))
 	}

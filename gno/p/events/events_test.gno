@@ -18,7 +18,7 @@ var (
 
 func TestNewEvent(t *testing.T) {
 	var profile mockProfile
-	std.TestSetOrigCaller(alice)
+	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Creator:          alice.String(),
@@ -38,7 +38,7 @@ func TestNewEvent(t *testing.T) {
 
 func TestAddParticipant(t *testing.T) {
 	var profile mockProfile
-	std.TestSetOrigCaller(alice)
+	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Creator:          alice.String(),
@@ -80,13 +80,13 @@ func TestAddParticipant(t *testing.T) {
 		}
 	}()
 
-	std.TestSetOrigCaller(bob)
+	std.TestSetOriginCaller(bob)
 	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(carol.String())))
 }
 
 func TestRemoveParticipant(t *testing.T) {
 	var profile mockProfile
-	std.TestSetOrigCaller(alice)
+	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Creator:          alice.String(),

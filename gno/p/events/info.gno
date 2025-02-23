@@ -10,9 +10,9 @@ type InfoGetter func() *zenaov1.EventInfo
 
 func (e *Event) Info() *zenaov1.EventInfo {
 	return &zenaov1.EventInfo{
-		Title:        e.getProfileString(std.CurrentRealm().Addr(), "DisplayName", ""),
-		Description:  e.getProfileString(std.CurrentRealm().Addr(), "Bio", ""),
-		ImageUri:     e.getProfileString(std.CurrentRealm().Addr(), "Avatar", ""),
+		Title:        e.getProfileString(std.CurrentRealm().Address(), "DisplayName", ""),
+		Description:  e.getProfileString(std.CurrentRealm().Address(), "Bio", ""),
+		ImageUri:     e.getProfileString(std.CurrentRealm().Address(), "Avatar", ""),
 		StartDate:    e.startDate,
 		EndDate:      e.endDate,
 		Capacity:     e.capacity,
