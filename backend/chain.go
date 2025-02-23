@@ -22,14 +22,6 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-type gnoZenaoChain struct {
-	client             gnoclient.Client
-	eventsIndexPkgPath string
-	signerInfo         keys.Info
-	logger             *zap.Logger
-	namespace          string
-}
-
 func setupChain(adminMnemonic string, namespace string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
 	signer, err := gnoclient.SignerFromBip39(adminMnemonic, chainID, "", 0, 0)
 	if err != nil {
@@ -54,6 +46,61 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 		logger:             logger,
 		namespace:          namespace,
 	}, nil
+}
+
+type gnoZenaoChain struct {
+	client             gnoclient.Client
+	eventsIndexPkgPath string
+	signerInfo         keys.Info
+	logger             *zap.Logger
+	namespace          string
+}
+
+const zenaoLogo = "ipfs://bafybeieheyxtro2id7y6fqsqvgkyripgcrcx5fvvzxizylf4vveueajgkq"
+
+// FillAdminProfile implements zeni.Chain.
+func (g *gnoZenaoChain) FillAdminProfile() {
+	if broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 10000000,
+	}, vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: "gno.land/r/demo/users",
+		Func:    "Register",
+		Args: []string{
+			"",
+			"zenaoadm",
+			"",
+		},
+	})); err != nil {
+		g.logger.Error("failed to book admin username", zap.Error(err), zap.String("admin-addr", g.signerInfo.GetAddress().String()))
+	} else {
+		g.logger.Info("booked admin username", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	}
+
+	kv := [][2]string{
+		{"DisplayName", "Zenao Admin"},
+		{"Avatar", zenaoLogo},
+		{"Bio", "This is the root zenao admin, it is responsible for managing accounts until they become self-custodial"},
+	}
+	for _, field := range kv {
+		if broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+			GasFee:    "1000000ugnot",
+			GasWanted: 10000000,
+		}, vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: "gno.land/r/demo/profile",
+			Func:    "SetStringField",
+			Args: []string{
+				field[0],
+				field[1],
+			},
+		})); err != nil {
+			g.logger.Error("failed to set admin profile field", zap.String("name", field[0]), zap.String("value", field[1]), zap.Error(err), zap.String("admin-addr", g.signerInfo.GetAddress().String()))
+		} else {
+			g.logger.Info("admin profile field set", zap.String("name", field[0]), zap.String("value", field[1]), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+		}
+	}
 }
 
 // CreateEvent implements ZenaoChain.
@@ -162,7 +209,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) e
 
 // CreateUser implements ZenaoChain.
 func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
-	userRealmSrc, err := generateUserRealmSource(user, g.namespace)
+	userRealmSrc, err := generateUserRealmSource(user, g.namespace, g.signerInfo.GetAddress().String())
 	if err != nil {
 		return err
 	}
@@ -321,9 +368,12 @@ import (
 	"gno.land/p/{{.namespace}}/events"
 	"gno.land/r/demo/profile"
 	"gno.land/r/{{.namespace}}/eventreg"
+	"gno.land/p/{{.namespace}}/basedao"
 )
 
 var Event *events.Event
+
+var dao *basedao.DAO
 
 func init() {
 	conf := events.Config{
@@ -340,6 +390,7 @@ func init() {
 		Location: {{.location}},
 	}
 	Event = events.NewEvent(&conf)
+	dao = Event.Org
 	eventreg.Register(func() *zenaov1.EventInfo { return Event.Info() })
 }
 
@@ -368,7 +419,7 @@ func Render(path string) string {
 }
 `
 
-func generateUserRealmSource(user *zeni.User, gnoNamespace string) (string, error) {
+func generateUserRealmSource(user *zeni.User, gnoNamespace string, zenaoAdminAddr string) (string, error) {
 	displayName := user.DisplayName
 	if displayName == "" {
 		displayName = fmt.Sprintf("Zenao user #%s", user.ID)
@@ -381,14 +432,15 @@ func generateUserRealmSource(user *zeni.User, gnoNamespace string) (string, erro
 
 	avatarURI := user.AvatarURI
 	if avatarURI == "" {
-		avatarURI = "ipfs://bafkreiefzfl43okbnnjwbazkntunp6plgpwnxj7rbqbcukpcnwtstuq4bu" // zenao logo
+		avatarURI = zenaoLogo
 	}
 
 	m := map[string]string{
-		"displayName": strconv.Quote(displayName),
-		"bio":         strconv.Quote(bio),
-		"avatarURI":   strconv.Quote(avatarURI),
-		"namespace":   gnoNamespace,
+		"displayName":    strconv.Quote(displayName),
+		"bio":            strconv.Quote(bio),
+		"avatarURI":      strconv.Quote(avatarURI),
+		"namespace":      gnoNamespace,
+		"zenaoAdminAddr": strconv.Quote(zenaoAdminAddr),
 	}
 
 	t := template.Must(template.New("").Parse(userRealmSourceTemplate))
@@ -412,11 +464,16 @@ import (
 var user *users.User
 
 func init() {
-	user = users.NewUser()
+	conf := &users.Config{
+		Name: {{.displayName}},
+		Bio: {{.bio}},
+		AvatarURI: {{.avatarURI}},
+		GetProfileString: profile.GetStringField,
+		SetProfileString: profile.SetStringField,
+		ZenaoAdminAddr: {{.zenaoAdminAddr}},
+	}
 
-	profile.SetStringField(profile.DisplayName, {{.displayName}})
-	profile.SetStringField(profile.Bio, {{.bio}})
-	profile.SetStringField(profile.Avatar, {{.avatarURI}})
+	user = users.NewUser(conf)
 }
 
 func TransferOwnership(newOwner string) {

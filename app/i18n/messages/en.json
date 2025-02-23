@@ -80,6 +80,22 @@
     "toast-success": "User correctly edited!",
     "toast-error": "Error on editing user!"
   },
+  "discover": {
+    "title": "Discover events",
+    "description": "Dive into the pulse of tribes events, rave parties, hacking events, private cinema avant-premieres, and more."
+  },
+  "created": {
+    "logged-out": "Log in to see events your created",
+    "title": "Events created"
+  },
+  "events-list": {
+    "no-events": "No events to show.",
+    "no-events-desc": "You have no events. Why not create one?",
+    "create-event": "Create event",
+    "see-gnoweb": "See on Gnoweb",
+    "upcoming": "Upcoming",
+    "past": "Past"
+  },
   "error": {
     "label": "Oups! An error has occured.",
     "retry-button": "Retry"
@@ -99,3 +115,4 @@
     }
   }
 }
+

@@ -3,24 +3,59 @@ package users
 import (
 	"std"
 
-	"gno.land/p/zenao/dao_roles_based"
+	"gno.land/p/zenao/basedao"
+	"gno.land/p/zenao/daocond"
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/role_manager"
 )
 
 type User struct {
-	org *dao_roles_based.DaoRolesBased // don't export to limit the access to all dao methods
+	org *basedao.DAO
 }
 
-func NewUser() *User {
-	caller := std.PrevRealm().Addr().String()
-	roles := []string{"admin"}
-	members := [][]string{
-		{caller, "admin"},
+type Config struct {
+	Name             string
+	Bio              string
+	AvatarURI        string
+	ZenaoAdminAddr   string
+	GetProfileString GetProfileString
+	SetProfileString SetProfileString
+}
+
+type GetProfileString func(addr std.Address, field string, def string) string
+type SetProfileString func(field string, value string) bool
+
+func NewUser(conf *Config) *User {
+	roles := []role_manager.RoleInfo{
+		{
+			Name:        "admin",
+			Description: "admin role",
+		},
+	}
+	members := []basedao.Member{
+		{
+			Address: conf.ZenaoAdminAddr,
+			Roles:   []string{"admin"},
+		},
 	}
 
-	var resourcesJSON = `[{"resource":"init","condition":{"type":"role-count","role":"admin","count":"1"}}]`
+	memberStore := basedao.NewMembersStore(roles, members)
+	adminVetoCond := daocond.RoleCount(1, "admin", memberStore.HasRole)
 
 	// Don't pass the message handlers, since they are by default in the user dao
-	dao := dao_roles_based.NewDaoRolesBasedJSON("Zenao user", "Zenao managed user", roles, members, resourcesJSON, []dao_roles_based.MessageHandler{})
+	dao := basedao.New(&basedao.Config{
+		Name:              conf.Name,
+		Description:       conf.Bio,
+		ImageURI:          conf.AvatarURI,
+		NoDefaultHandlers: true, // XXX: should be false, but it's easier to init conditions after DAO initialized
+		Members:           memberStore,
+		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
+		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
+		NoEvents:          true,
+		InitialCondition:  adminVetoCond,
+		NoCreationEvent:   true,
+	})
+
 	user := &User{
 		org: dao,
 	}
@@ -29,19 +64,25 @@ func NewUser() *User {
 }
 
 func (u *User) TransferOwnership(newOwner string) {
-	caller := std.PrevRealm().Addr().String()
-
-	typeAddMember := dao_roles_based.NewAddNewMemberMessageHandler(nil).Type()
-	typeRemoveMember := dao_roles_based.NewRemoveMemberMessageHandler(nil).Type()
-
-	proposalAddMemberJSON := `{"title":"add member with admin role","description":"no description","message":{"type":"` + typeAddMember + `","payload":{"address":"` + newOwner + `","roles":["admin"]}}}`
-	proposalRemoveMemberJSON := `{"title":"remove member","description":"no description","message":{"type":"` + typeRemoveMember + `","payload":{"address":"` + caller + `"}}}`
-
-	u.org.InstantExecute(proposalAddMemberJSON)
-	u.org.InstantExecute(proposalRemoveMemberJSON)
+	caller := std.PrevRealm().Addr()
+	proposalReqAddMember := daokit.ProposalRequest{
+		Title:       "add member with admin role",
+		Description: "no description",
+		Message: basedao.NewAddMemberMsg(&basedao.MsgAddMember{
+			Address: std.Address(newOwner),
+			Roles:   []string{"admin"},
+		}),
+	}
+	proposalReqRemoveMember := daokit.ProposalRequest{
+		Title:       "remove member",
+		Description: "no description",
+		Message:     basedao.NewRemoveMemberMsg(caller),
+	}
+	u.org.InstantExecute(proposalReqAddMember)
+	u.org.InstantExecute(proposalReqRemoveMember)
 }
 
 func (u *User) IsOwner() bool {
 	caller := std.PrevRealm().Addr().String()
-	return u.org.MemberModule.HasRole(caller, "admin")
+	return u.org.Members.HasRole(caller, "admin")
 }
