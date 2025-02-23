@@ -156,29 +156,53 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 }
 
 // EditEvent implements ZenaoChain.
-func (g *gnoZenaoChain) EditEvent(evtID string, req *zenaov1.EditEventRequest) error {
+func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.EditEventRequest) error {
 	loc, err := protojson.Marshal(req.Location)
 	if err != nil {
 		return err
 	}
 
 	eventPkgPath := g.eventRealmPkgPath(evtID)
+	userRealmPkgPath := g.userRealmPkgPath(callerID)
 
-	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
-		GasWanted: 10000000,
-	}, vm.MsgCall{
-		Caller:  g.signerInfo.GetAddress(),
-		PkgPath: eventPkgPath,
-		Func:    "Edit",
-		Args: []string{
-			req.Title,
-			req.Description,
-			req.ImageUri,
-			fmt.Sprintf("%d", req.StartDate),
-			fmt.Sprintf("%d", req.EndDate),
-			fmt.Sprintf("%d", req.Capacity),
-			string(loc),
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+import (
+	user %q
+	event %q
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/events"
+)
+
+func main() {
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: %q,
+		Message: daokit.NewExecuteLambdaMsg(func() {
+			daokit.InstantExecute(event.DAO, daokit.ProposalRequest{
+				Title: "Edit event",
+				Message: events.NewEditEventMsg(
+					%q,
+					%q,
+					%q,
+					%d,
+					%d,
+					%d,
+					%q,
+				),
+			})
+		}),
+	})
+}
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc),
+			}},
 		},
 	}))
 	if err != nil {
@@ -237,26 +261,48 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 }
 
 // Participate implements ZenaoChain.
-func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
+func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string) error {
 	eventPkgPath := g.eventRealmPkgPath(eventID)
-	userPkgPath := g.userRealmPkgPath(userID)
-	userAddr := gnolang.DerivePkgAddr(userPkgPath).String()
+	callerPkgPath := g.userRealmPkgPath(callerID)
+	participantPkgPath := g.userRealmPkgPath(participantID)
+	participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
 
-	// XXX: this won't work because the admin of the event is the event
-	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "10000000ugnot",
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
 		GasWanted: 100000000,
-	}, vm.MsgCall{
-		Caller:  g.signerInfo.GetAddress(),
-		PkgPath: eventPkgPath,
-		Func:    "AddParticipant",
-		Args:    []string{userAddr},
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+import (
+	user %q
+	event %q
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/events"
+)
+
+func main() {
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: %q,
+		Message: daokit.NewExecuteLambdaMsg(func() {
+			daokit.InstantExecute(event.DAO, daokit.ProposalRequest{
+				Title: "Add participant",
+				Message: events.NewAddParticipantMsg(%q),
+			})
+		}),
+	})
+}
+`, callerPkgPath, eventPkgPath, "Participate in "+eventPkgPath, participantAddr)}},
+		},
 	}))
 	if err != nil {
 		return err
 	}
 
-	g.logger.Info("added participant", zap.String("user", userPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("added participant", zap.String("user", participantPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -267,33 +313,50 @@ func (g *gnoZenaoChain) Participate(eventID string, userID string) error {
 		Func:    "AddParticipant",
 		Args: []string{
 			eventPkgPath,
-			userAddr,
+			participantAddr,
 		},
 	}))
 	if err != nil {
 		return err
 	}
 
-	g.logger.Info("indexed participant", zap.String("user", userPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("indexed participant", zap.String("user", participantPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
 
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
-	userPkgPath := g.userRealmPkgPath(userID)
+	userRealmPkgPath := g.userRealmPkgPath(userID)
 
-	broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
-		GasWanted: 10000000,
-	}, vm.MsgCall{
-		Caller:  g.signerInfo.GetAddress(),
-		PkgPath: userPkgPath,
-		Func:    "EditUser",
-		Args: []string{
-			req.DisplayName,
-			req.Bio,
-			req.AvatarUri,
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+import (
+	user %q
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/basedao"
+)
+
+func main() {
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: "Edit profile",
+		Message: basedao.NewEditProfileMsg([][2]string{
+			{"DisplayName", %q},
+			{"Bio", %q},
+			{"Avatar", %q},
+		}...),
+	})
+}
+`, userRealmPkgPath, req.DisplayName, req.Bio, req.AvatarUri),
+			}},
 		},
 	}))
 	if err != nil {
@@ -366,14 +429,18 @@ const eventRealmSourceTemplate = `package event
 import (
 	zenaov1 "gno.land/p/{{.namespace}}/zenao/v1"
 	"gno.land/p/{{.namespace}}/events"
+	"gno.land/p/{{.namespace}}/basedao"
+	"gno.land/p/{{.namespace}}/daokit"
+	"gno.land/p/{{.namespace}}/daocond"
 	"gno.land/r/demo/profile"
 	"gno.land/r/{{.namespace}}/eventreg"
-	"gno.land/p/{{.namespace}}/basedao"
 )
 
-var Event *events.Event
-
-var dao *basedao.DAO
+var (
+	DAO daokit.DAO
+	daoPrivate *basedao.DAOPrivate
+	event *events.Event
+)
 
 func init() {
 	conf := events.Config{
@@ -389,33 +456,23 @@ func init() {
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
 		Location: {{.location}},
 	}
-	Event = events.NewEvent(&conf)
-	dao = Event.Org
-	eventreg.Register(func() *zenaov1.EventInfo { return Event.Info() })
+	event = events.NewEvent(&conf)
+	daoPrivate = event.DAOPrivate
+	DAO = event.DAO
+	eventreg.Register(func() *zenaov1.EventInfo { return event.Info() })
 }
 
-func AddParticipant(participant string) {
-	Event.AddParticipant(participant)
+
+func Vote(proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(proposalID, vote)
 }
 
-func RemoveParticipant(participant string) {
-	Event.RemoveParticipant(participant)
-}
-
-func AddGatekeeper(gatekeeper string) {
-	Event.AddGatekeeper(gatekeeper)
-}
-
-func RemoveGatekeeper(gatekeeper string) {
-	Event.RemoveGatekeeper(gatekeeper)
-}
-
-func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) {
-	Event.Edit(title, description, imageURI, startDate, endDate, capacity, locationJSON)
+func Execute(proposalID uint64) {
+	DAO.Execute(proposalID)
 }
 
 func Render(path string) string {
-	return Event.Render(path)
+	return event.Render(path)
 }
 `
 
@@ -454,45 +511,41 @@ func generateUserRealmSource(user *zeni.User, gnoNamespace string, zenaoAdminAdd
 const userRealmSourceTemplate = `package user
 
 import (
-	"std"
-
-	"gno.land/p/moul/md"
 	"gno.land/p/{{.namespace}}/users"
 	"gno.land/r/demo/profile"
+	"gno.land/p/{{.namespace}}/basedao"
+	"gno.land/p/{{.namespace}}/daokit"
+	"gno.land/p/{{.namespace}}/daocond"
 )
 
-var user *users.User
+var (
+	DAO daokit.DAO
+	daoPrivate *basedao.DAOPrivate
+	user *users.User
+)
 
 func init() {
-	conf := &users.Config{
+	user = users.NewUser(&users.Config{
 		Name: {{.displayName}},
 		Bio: {{.bio}},
 		AvatarURI: {{.avatarURI}},
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: {{.zenaoAdminAddr}},
-	}
-
-	user = users.NewUser(conf)
+	})
+	DAO = user.DAO
+	daoPrivate = user.DAOPrivate
 }
 
-func TransferOwnership(newOwner string) {
-	user.TransferOwnership(newOwner)
+func Vote(proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(proposalID, vote)
 }
-	
-func EditUser(displayName, bio, avatar string) {
-	if !user.IsOwner() {
-		panic("caller is not owner/admin of the user realm")
-	}
-	profile.SetStringField(profile.DisplayName, displayName)
-	profile.SetStringField(profile.Bio, bio)
-	profile.SetStringField(profile.Avatar, avatar)
+
+func Execute(proposalID uint64) {
+	DAO.Execute(proposalID)
 }
 
 func Render(path string) string {
-	s := md.H1(profile.GetStringField(std.CurrentRealm().Addr(), profile.DisplayName, ""))
-	s += md.Image("User avatar", profile.GetStringField(std.CurrentRealm().Addr(), profile.Avatar, ""))
-	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Addr(), profile.Bio, ""))
-	return s
+	return user.Render(path)
 }
 `

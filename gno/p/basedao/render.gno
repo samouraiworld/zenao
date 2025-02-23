@@ -21,7 +21,7 @@ const (
 	FALLBACK_DISPLAY_NAME = "Anon"
 )
 
-func (d *DAO) initRenderingRouter() {
+func (d *DAOPrivate) initRenderingRouter() {
 	if d.RenderRouter == nil {
 		d.RenderRouter = mux.NewRouter()
 	}
@@ -33,11 +33,11 @@ func (d *DAO) initRenderingRouter() {
 	d.RenderRouter.HandleFunc(PROPOSAL_DETAIL_PATH, d.renderProposalDetailPage)
 }
 
-func (d *DAO) Render(path string) string {
+func (d *DAOPrivate) Render(path string) string {
 	return d.RenderRouter.Render(path)
 }
 
-func (d *DAO) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
+func (d *DAOPrivate) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
 	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
 	description := d.GetProfileString(d.Realm.Addr(), "Bio", "Created with daokit")
 	pkgPath := d.Realm.PkgPath()
@@ -66,7 +66,7 @@ func (d *DAO) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
 
 	res.Write(ufmt.Sprintf("## Running Proposals 🗳️\n\n"))
 	i = 0
-	d.Core.ProposalModule.Proposals.Iterate("", "", func(key string, value interface{}) bool {
+	d.Core.Proposals.Tree.Iterate("", "", func(key string, value interface{}) bool {
 		proposal := value.(*daokit.Proposal)
 		if proposal.Status != daokit.ProposalStatusOpen {
 			return false
@@ -88,7 +88,7 @@ func (d *DAO) renderHomePage(res *mux.ResponseWriter, req *mux.Request) {
 	res.Write(ufmt.Sprintf("[Add a new proposal 🗳️](%s$help)\n\n", linkPath))
 }
 
-func (d *DAO) renderConfigPage(res *mux.ResponseWriter, req *mux.Request) {
+func (d *DAOPrivate) renderConfigPage(res *mux.ResponseWriter, req *mux.Request) {
 	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
 
 	res.Write(ufmt.Sprintf("# %s - Config ⚙️\n\n", name))
@@ -102,7 +102,7 @@ func (d *DAO) renderConfigPage(res *mux.ResponseWriter, req *mux.Request) {
 	res.Write(ufmt.Sprintf("\n--------------------------------\n"))
 	res.Write(ufmt.Sprintf("## Resources 📦\n\n"))
 	i := 1
-	d.Core.Resources.Resources.Iterate("", "", func(key string, value interface{}) bool {
+	d.Core.Resources.Tree.Iterate("", "", func(key string, value interface{}) bool {
 		resource := value.(*daokit.Resource)
 		res.Write(ufmt.Sprintf("- **Resource #%d: %s**\n\n", i, key))
 		// TODO: add doc to handler and print here
@@ -112,7 +112,7 @@ func (d *DAO) renderConfigPage(res *mux.ResponseWriter, req *mux.Request) {
 	})
 }
 
-func (d *DAO) renderProposalHistoryPage(res *mux.ResponseWriter, req *mux.Request) {
+func (d *DAOPrivate) renderProposalHistoryPage(res *mux.ResponseWriter, req *mux.Request) {
 	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
@@ -120,7 +120,7 @@ func (d *DAO) renderProposalHistoryPage(res *mux.ResponseWriter, req *mux.Reques
 	res.Write(ufmt.Sprintf("# %s - Proposal History\n\n", name))
 	res.Write(ufmt.Sprintf("## Proposals 🗳️\n\n"))
 	i := 1
-	d.Core.ProposalModule.Proposals.Iterate("", "", func(key string, value interface{}) bool {
+	d.Core.Proposals.Tree.Iterate("", "", func(key string, value interface{}) bool {
 		proposal := value.(*daokit.Proposal)
 		id, err := seqid.FromString(key)
 		if err != nil {
@@ -134,7 +134,7 @@ func (d *DAO) renderProposalHistoryPage(res *mux.ResponseWriter, req *mux.Reques
 	res.Write(ufmt.Sprintf("[Add a new proposal 🗳️](%s$help)\n\n", linkPath))
 }
 
-func (d *DAO) renderMemberDetailPage(res *mux.ResponseWriter, req *mux.Request) {
+func (d *DAOPrivate) renderMemberDetailPage(res *mux.ResponseWriter, req *mux.Request) {
 	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
@@ -157,7 +157,7 @@ func (d *DAO) renderMemberDetailPage(res *mux.ResponseWriter, req *mux.Request) 
 	res.Write(ufmt.Sprintf("> Learn more about the roles on the [configuration page ⚙️](%s:%s)\n\n", linkPath, CONFIG_PATH))
 }
 
-func (d *DAO) renderProposalDetailPage(res *mux.ResponseWriter, req *mux.Request) {
+func (d *DAOPrivate) renderProposalDetailPage(res *mux.ResponseWriter, req *mux.Request) {
 	name := d.GetProfileString(d.Realm.Addr(), "DisplayName", "DAO")
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
@@ -168,7 +168,7 @@ func (d *DAO) renderProposalDetailPage(res *mux.ResponseWriter, req *mux.Request
 	}
 	id := seqid.ID(idu)
 	res.Write(ufmt.Sprintf("# %s - Proposal #%d\n\n", name, uint64(id)))
-	proposal := d.Core.ProposalModule.GetProposal(uint64(id))
+	proposal := d.Core.Proposals.GetProposal(uint64(id))
 	res.Write(ufmt.Sprintf("## Title - %s 📜\n\n", proposal.Title))
 	res.Write(ufmt.Sprintf("## Description 📝\n\n%s\n\n", proposal.Description))
 	res.Write(ufmt.Sprintf("## Resource - %s 📦\n\n", proposal.Message.Type()))

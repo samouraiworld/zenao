@@ -1,4 +1,4 @@
-package events_test
+package events
 
 import (
 	"std"
@@ -6,7 +6,7 @@ import (
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/testutils"
-	"gno.land/p/zenao/events"
+	"gno.land/p/zenao/daokit"
 )
 
 var (
@@ -20,18 +20,18 @@ func TestNewEvent(t *testing.T) {
 	var profile mockProfile
 	std.TestSetOrigCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
-	conf := events.Config{
+	conf := Config{
 		Creator:          alice.String(),
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
 		GetProfileString: profile.GetProfileString,
 	}
-	event := events.NewEvent(&conf)
-	if event.Org.Members.GetMembers()[1] != alice.String() {
-		t.Fatalf("expected %s, got %s", alice.String(), event.Org.Members.GetMembers()[1])
+	event := NewEvent(&conf)
+	if event.DAOPrivate.Members.GetMembers()[1] != alice.String() {
+		t.Fatalf("expected %s, got %s", alice.String(), event.DAOPrivate.Members.GetMembers()[1])
 	}
-	if !event.Org.Members.HasRole(alice.String(), "organizer") {
+	if !event.DAOPrivate.Members.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
 }
@@ -40,37 +40,37 @@ func TestAddParticipant(t *testing.T) {
 	var profile mockProfile
 	std.TestSetOrigCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
-	conf := events.Config{
+	conf := Config{
 		Creator:          alice.String(),
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
 		GetProfileString: profile.GetProfileString,
 	}
-	event := events.NewEvent(&conf)
-	if event.Org.Members.GetMembers()[1] != alice.String() {
-		t.Fatalf("expected %s, got %s", alice.String(), event.Org.Members.GetMembers()[1])
+	event := NewEvent(&conf)
+	if event.DAOPrivate.Members.GetMembers()[1] != alice.String() {
+		t.Fatalf("expected %s, got %s", alice.String(), event.DAOPrivate.Members.GetMembers()[1])
 	}
-	if !event.Org.Members.HasRole(alice.String(), "organizer") {
+	if !event.DAOPrivate.Members.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
-	event.AddParticipant(bob.String())
-	if event.Org.Members.GetMembers()[2] != bob.String() {
-		t.Fatalf("expected %s, got %s", bob.String(), event.Org.Members.GetMembers()[2])
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String())))
+	if event.DAOPrivate.Members.GetMembers()[2] != bob.String() {
+		t.Fatalf("expected %s, got %s", bob.String(), event.DAOPrivate.Members.GetMembers()[2])
 	}
-	if !event.Org.Members.HasRole(bob.String(), "participant") {
+	if !event.DAOPrivate.Members.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to have participant role")
 	}
 
-	event.AddGatekeeper(dave.String())
-	event.AddParticipant(dave.String())
-	if len(event.Org.Members.GetMembers()) != 4 {
-		t.Fatalf("expected 4, got %d", len(event.Org.Members.GetMembers()))
+	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperMsg(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String())))
+	if len(event.DAOPrivate.Members.GetMembers()) != 4 {
+		t.Fatalf("expected 4, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
-	if !event.Org.Members.HasRole(dave.String(), "gatekeeper") {
+	if !event.DAOPrivate.Members.HasRole(dave.String(), "gatekeeper") {
 		t.Fatalf("expected dave to have gatekeeper role")
 	}
-	if !event.Org.Members.HasRole(dave.String(), "participant") {
+	if !event.DAOPrivate.Members.HasRole(dave.String(), "participant") {
 		t.Fatalf("expected dave to have participant role")
 	}
 
@@ -81,61 +81,61 @@ func TestAddParticipant(t *testing.T) {
 	}()
 
 	std.TestSetOrigCaller(bob)
-	event.AddParticipant(carol.String())
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(carol.String())))
 }
 
 func TestRemoveParticipant(t *testing.T) {
 	var profile mockProfile
 	std.TestSetOrigCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
-	conf := events.Config{
+	conf := Config{
 		Creator:          alice.String(),
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
 		GetProfileString: profile.GetProfileString,
 	}
-	event := events.NewEvent(&conf)
-	if event.Org.Members.GetMembers()[1] != alice.String() {
-		t.Fatalf("expected %s, got %s", alice.String(), event.Org.Members.GetMembers()[1])
+	event := NewEvent(&conf)
+	if event.DAOPrivate.Members.GetMembers()[1] != alice.String() {
+		t.Fatalf("expected %s, got %s", alice.String(), event.DAOPrivate.Members.GetMembers()[1])
 	}
-	if !event.Org.Members.HasRole(alice.String(), "organizer") {
+	if !event.DAOPrivate.Members.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
-	event.AddParticipant(bob.String())
-	if event.Org.Members.GetMembers()[2] != bob.String() {
-		t.Fatalf("expected %s, got %s", bob.String(), event.Org.Members.GetMembers()[2])
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String())))
+	if event.DAOPrivate.Members.GetMembers()[2] != bob.String() {
+		t.Fatalf("expected %s, got %s", bob.String(), event.DAOPrivate.Members.GetMembers()[2])
 	}
-	if !event.Org.Members.HasRole(bob.String(), "participant") {
+	if !event.DAOPrivate.Members.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to have participant role")
 	}
-	event.RemoveParticipant(bob.String())
-	if len(event.Org.Members.GetMembers()) != 2 {
-		t.Fatalf("expected 2 member, got %d", len(event.Org.Members.GetMembers()))
+	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(bob.String())))
+	if len(event.DAOPrivate.Members.GetMembers()) != 2 {
+		t.Fatalf("expected 2 member, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
-	if event.Org.Members.HasRole(bob.String(), "participant") {
+	if event.DAOPrivate.Members.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to not have participant role")
 	}
-	event.AddGatekeeper(dave.String())
-	event.AddParticipant(dave.String())
-	event.RemoveParticipant(dave.String())
-	if len(event.Org.Members.GetMembers()) != 3 {
-		t.Fatalf("expected 3 member, got %d", len(event.Org.Members.GetMembers()))
+	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperMsg(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(dave.String())))
+	if len(event.DAOPrivate.Members.GetMembers()) != 3 {
+		t.Fatalf("expected 3 member, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
-	if !event.Org.Members.HasRole(dave.String(), "gatekeeper") {
+	if !event.DAOPrivate.Members.HasRole(dave.String(), "gatekeeper") {
 		t.Fatalf("expected dave to have gatekeeper role")
 	}
-	if !event.Org.Members.IsMember(dave.String()) {
+	if !event.DAOPrivate.Members.IsMember(dave.String()) {
 		t.Fatalf("expected dave be a member")
 	}
-	event.RemoveGatekeeper(dave.String())
-	if len(event.Org.Members.GetMembers()) != 2 {
-		t.Fatalf("expected 2 members, got %d", len(event.Org.Members.GetMembers()))
+	daokit.InstantExecute(event.DAO, testReq(NewRemoveGatekeeperMsg(dave.String())))
+	if len(event.DAOPrivate.Members.GetMembers()) != 2 {
+		t.Fatalf("expected 2 members, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
-	if event.Org.Members.HasRole(dave.String(), "gatekeeper") {
+	if event.DAOPrivate.Members.HasRole(dave.String(), "gatekeeper") {
 		t.Fatalf("expected dave to not have gatekeeper role")
 	}
-	if event.Org.Members.IsMember(dave.String()) {
+	if event.DAOPrivate.Members.IsMember(dave.String()) {
 		t.Fatalf("expected dave to not be a member")
 	}
 }
@@ -154,4 +154,10 @@ func (p *mockProfile) GetProfileString(addr std.Address, field string, def strin
 
 func (p *mockProfile) SetStringField(field, value string) bool {
 	return p.fields.Set(field, value)
+}
+
+func testReq(msg daokit.ExecutableMessage) daokit.ProposalRequest {
+	return daokit.ProposalRequest{
+		Message: msg,
+	}
 }

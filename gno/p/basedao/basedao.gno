@@ -9,7 +9,24 @@ import (
 	"gno.land/p/zenao/daokit"
 )
 
-type DAO struct {
+type daoPublic struct {
+	impl *DAOPrivate
+}
+
+func (d *daoPublic) Propose(req daokit.ProposalRequest) uint64 {
+	return d.impl.Propose(req)
+}
+
+func (d *daoPublic) Execute(id uint64) {
+	d.impl.Execute(id)
+}
+
+func (d *daoPublic) Vote(id uint64, vote daocond.Vote) {
+	d.impl.Vote(id, vote)
+}
+
+// DAO is meant for internal realm usage and should not be exposed
+type DAOPrivate struct {
 	Core             *daokit.Core
 	Members          *MembersStore
 	RenderRouter     *mux.Router
@@ -39,7 +56,7 @@ func emitBaseDAOCreated() {
 	std.Emit(EventBaseDAOCreated)
 }
 
-func New(conf *Config) *DAO {
+func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 	// XXX: emit events from memberstore
 
 	members := conf.Members
@@ -54,7 +71,7 @@ func New(conf *Config) *DAO {
 	core := daokit.NewCore()
 	core.NoEvents = conf.NoEvents
 
-	dao := &DAO{
+	dao := &DAOPrivate{
 		Core:             core,
 		Members:          members,
 		GetProfileString: conf.GetProfileString,
@@ -74,7 +91,7 @@ func New(conf *Config) *DAO {
 		}
 
 		if conf.SetProfileString != nil {
-			dao.Core.SetResource(&daokit.Resource{
+			dao.Core.Resources.Set(&daokit.Resource{
 				Handler:   NewEditProfileHandler(conf.SetProfileString, []string{"DisplayName", "Bio", "Avatar"}),
 				Condition: conf.InitialCondition,
 			})
@@ -87,7 +104,7 @@ func New(conf *Config) *DAO {
 			NewAssignRoleHandler(dao),
 			NewUnassignRoleHandler(dao),
 		} {
-			dao.Core.SetResource(&daokit.Resource{Handler: m, Condition: conf.InitialCondition})
+			dao.Core.Resources.Set(&daokit.Resource{Handler: m, Condition: conf.InitialCondition})
 		}
 	}
 
@@ -95,10 +112,10 @@ func New(conf *Config) *DAO {
 		emitBaseDAOCreated()
 	}
 
-	return dao
+	return &daoPublic{impl: dao}, dao
 }
 
-func (d *DAO) Vote(proposalID uint64, vote daocond.Vote) {
+func (d *DAOPrivate) Vote(proposalID uint64, vote daocond.Vote) {
 	if len(vote) > 16 {
 		panic("invalid vote")
 	}
@@ -107,22 +124,17 @@ func (d *DAO) Vote(proposalID uint64, vote daocond.Vote) {
 	d.Core.Vote(voterID, proposalID, vote)
 }
 
-func (d *DAO) Execute(proposalID uint64) {
+func (d *DAOPrivate) Execute(proposalID uint64) {
 	_ = d.assertCallerIsMember()
 	d.Core.Execute(proposalID)
 }
 
-func (d *DAO) Propose(req daokit.ProposalRequest) {
+func (d *DAOPrivate) Propose(req daokit.ProposalRequest) uint64 {
 	proposerID := d.assertCallerIsMember()
-	d.Core.Propose(proposerID, req)
+	return d.Core.Propose(proposerID, req)
 }
 
-func (d *DAO) InstantExecute(req daokit.ProposalRequest) {
-	executorID := d.assertCallerIsMember()
-	d.Core.InstantExecute(executorID, req)
-}
-
-func (d *DAO) assertCallerIsMember() string {
+func (d *DAOPrivate) assertCallerIsMember() string {
 	id := std.PrevRealm().Addr().String()
 	if !d.Members.IsMember(id) {
 		panic(errors.New("caller is not a member"))

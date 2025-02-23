@@ -64,3 +64,19 @@ func (g *genericMessageHandler) Instantiate() ExecutableMessage {
 func (g *genericMessageHandler) Type() string {
 	return g.kind
 }
+
+const MsgExecuteLambdaKind = "gno.land/p/zenao/daokit.ExecuteLambda"
+
+func NewExecuteLambdaHandler() MessageHandler {
+	return NewMessageHandler(MsgExecuteLambdaKind, func(i interface{}) {
+		cb, ok := i.(func())
+		if !ok {
+			panic(errors.New("invalid msg type"))
+		}
+		cb()
+	})
+}
+
+func NewExecuteLambdaMsg(cb func()) ExecutableMessage {
+	return NewMessage(MsgExecuteLambdaKind, cb)
+}

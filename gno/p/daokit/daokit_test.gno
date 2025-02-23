@@ -18,7 +18,7 @@ func TestNewDAO(t *testing.T) {
 	std.TestSetOrigCaller(alice)
 	dao := NewCore()
 
-	resourcesLen := dao.Resources.Resources.Size()
+	resourcesLen := dao.Resources.Tree.Size()
 	if resourcesLen != 0 { // There is 0 default resources
 		t.Errorf("Expected 0 resources, got %d", resourcesLen)
 	}

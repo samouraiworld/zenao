@@ -18,17 +18,19 @@ import (
 
 const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 
+// Event can be exposed
 type Event struct {
-	ID               string
-	Creator          string
-	StartDate        int64
-	EndDate          int64
-	Capacity         uint32
-	Location         *zenaov1.EventLocation
-	GetProfileString GetProfileString
-	SetProfileString SetProfileString
-	Org              *basedao.DAO
-	PkgPath          string
+	id               string
+	creator          string
+	startDate        int64
+	endDate          int64
+	capacity         uint32
+	location         *zenaov1.EventLocation
+	getProfileString basedao.ProfileStringGetter
+	setProfileString basedao.ProfileStringSetter
+	DAOPrivate       *basedao.DAOPrivate
+	DAO              daokit.DAO
+	pkgPath          string
 }
 
 type Config struct {
@@ -39,17 +41,18 @@ type Config struct {
 	StartDate        int64 // unix seconds
 	EndDate          int64 // unix seconds
 	Capacity         uint32
-	GetProfileString GetProfileString
-	SetProfileString SetProfileString
+	GetProfileString basedao.ProfileStringGetter
+	SetProfileString basedao.ProfileStringSetter
 	ZenaoAdminAddr   string
 	Location         *zenaov1.EventLocation
 }
 
-type GetProfileString func(addr std.Address, field string, def string) string
-type SetProfileString func(field string, value string) bool
-
 func NewEvent(conf *Config) *Event {
 	roles := []role_manager.RoleInfo{
+		{
+			Name:        "zenao-admin",
+			Description: "Admin responsible for managing the DAO until it becomes self-custodial",
+		},
 		{
 			Name:        "organizer",
 			Description: "Person in charge of the organization of the event",
@@ -70,171 +73,205 @@ func NewEvent(conf *Config) *Event {
 		},
 		{
 			Address: conf.ZenaoAdminAddr,
-			Roles:   []string{"organizer"},
+			Roles:   []string{"zenao-admin"},
 		},
 	}
 
 	memberStore := basedao.NewMembersStore(roles, members)
+	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
 	organizerCond := daocond.RoleCount(1, "organizer", memberStore.HasRole)
 
-	dao := basedao.New(&basedao.Config{
-		Name:              conf.Title,
-		Description:       conf.Description,
-		ImageURI:          conf.ImageURI,
-		NoDefaultHandlers: false,
-		Members:           memberStore,
-		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
-		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
-		InitialCondition:  organizerCond,
-		NoEvents:          false,
+	pubdao, privdao := basedao.New(&basedao.Config{
+		Name:             conf.Title,
+		Description:      conf.Description,
+		ImageURI:         conf.ImageURI,
+		Members:          memberStore,
+		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
+		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
+		InitialCondition: adminCond,
 	})
 
 	event := &Event{
-		Creator:          conf.Creator,
-		StartDate:        conf.StartDate,
-		EndDate:          conf.EndDate,
-		Capacity:         conf.Capacity,
-		GetProfileString: conf.GetProfileString,
-		SetProfileString: conf.SetProfileString,
-		Org:              dao,
-		Location:         conf.Location,
+		creator:          conf.Creator,
+		startDate:        conf.StartDate,
+		endDate:          conf.EndDate,
+		capacity:         conf.Capacity,
+		getProfileString: conf.GetProfileString,
+		setProfileString: conf.SetProfileString,
+		DAOPrivate:       privdao,
+		DAO:              pubdao,
+		location:         conf.Location,
 		// XXX: set PkgPath?
+	}
+
+	for _, res := range []daokit.MessageHandler{
+		event.addParticipantHandler(),
+		event.removeParticipantHandler(),
+		event.addGatekeeperHandler(),
+		event.removeGatekeeperHandler(),
+		event.editEventHandler(),
+	} {
+		event.DAOPrivate.Core.Resources.Set(&daokit.Resource{Handler: res, Condition: organizerCond})
 	}
 
 	return event
 }
 
-func (e *Event) AddParticipant(participant string) {
-	if e.Org.Members.CountMemberRoles(participant) > 0 {
-		proposal := daokit.ProposalRequest{
-			Title:       "add participant",
-			Description: "no description",
-			Message: basedao.NewAssignRoleMsg(&basedao.MsgAssignRole{
-				Address: std.Address(participant),
-				Role:    "participant",
-			}),
+const MsgAddParticipantKind = "gno.land/p/zenao/events.AddParticipant"
+
+func (e *Event) addParticipantHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgAddParticipantKind, func(i interface{}) {
+		participant, ok := i.(string)
+		if !ok {
+			panic(errors.New("invalid payload type"))
 		}
-		e.Org.InstantExecute(proposal)
-	} else {
-		proposal := daokit.ProposalRequest{
-			Title:       "add member with participant role",
-			Description: "no description",
-			Message: basedao.NewAddMemberMsg(&basedao.MsgAddMember{
-				Address: std.Address(participant),
-				Roles:   []string{"participant"},
-			}),
+		if e.DAOPrivate.Members.CountMemberRoles(participant) > 0 {
+			e.DAOPrivate.Members.AddRoleToMember(participant, "participant")
+		} else {
+			e.DAOPrivate.Members.AddMember(participant, []string{participant})
 		}
-		e.Org.InstantExecute(proposal)
-	}
+	})
 }
 
-func (e *Event) RemoveParticipant(participant string) {
-	if e.Org.Members.CountMemberRoles(participant) > 1 {
-		proposal := daokit.ProposalRequest{
-			Title:       "remove participant",
-			Description: "no description",
-			Message: basedao.NewUnassignRoleMsg(&basedao.MsgUnassignRole{
-				Address: std.Address(participant),
-				Role:    "participant",
-			}),
-		}
-		e.Org.InstantExecute(proposal)
-	} else {
-		proposal := daokit.ProposalRequest{
-			Title:       "remove member",
-			Description: "no description",
-			Message:     basedao.NewRemoveMemberMsg(std.Address(participant)),
-		}
-		e.Org.InstantExecute(proposal)
-	}
+func NewAddParticipantMsg(participant string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddParticipantKind, participant)
 }
 
-func (e *Event) AddGatekeeper(gatekeeper string) {
-	if e.Org.Members.CountMemberRoles(gatekeeper) > 0 {
-		proposal := daokit.ProposalRequest{
-			Title:       "add gatekeeper",
-			Description: "no description",
-			Message: basedao.NewAssignRoleMsg(&basedao.MsgAssignRole{
-				Address: std.Address(gatekeeper),
-				Role:    "gatekeeper",
-			}),
+const MsgRemoveParticipantKind = "gno.land/p/zenao/events.RemoveParticipant"
+
+func (e *Event) removeParticipantHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgRemoveParticipantKind, func(i interface{}) {
+		participant, ok := i.(string)
+		if !ok {
+			panic(errors.New("invalid payload type"))
 		}
-		e.Org.InstantExecute(proposal)
-	} else {
-		proposal := daokit.ProposalRequest{
-			Title:       "add member with gatekeeper role",
-			Description: "no description",
-			Message: basedao.NewAddMemberMsg(&basedao.MsgAddMember{
-				Address: std.Address(gatekeeper),
-				Roles:   []string{"gatekeeper"},
-			}),
+		if e.DAOPrivate.Members.CountMemberRoles(participant) != 1 {
+			e.DAOPrivate.Members.RemoveRoleFromMember(participant, "participant")
+		} else {
+			e.DAOPrivate.Members.RemoveMember(participant)
 		}
-		e.Org.InstantExecute(proposal)
-	}
+	})
 }
 
-func (e *Event) RemoveGatekeeper(gatekeeper string) {
-	if e.Org.Members.CountMemberRoles(gatekeeper) > 1 {
-		proposal := daokit.ProposalRequest{
-			Title:       "remove gatekeeper",
-			Description: "no description",
-			Message: basedao.NewUnassignRoleMsg(&basedao.MsgUnassignRole{
-				Address: std.Address(gatekeeper),
-				Role:    "gatekeeper",
-			}),
-		}
-		e.Org.InstantExecute(proposal)
-	} else {
-		proposal := daokit.ProposalRequest{
-			Title:       "remove member",
-			Description: "no description",
-			Message:     basedao.NewRemoveMemberMsg(std.Address(gatekeeper)),
-		}
-		e.Org.InstantExecute(proposal)
-	}
+func NewRemoveParticipantMsg(participant string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgRemoveParticipantKind, participant)
 }
-func (e *Event) AssertCallerIsOrganizer() {
-	caller := std.PrevRealm().Addr()
-	if !e.Org.Members.HasRole(caller.String(), "organizer") {
-		panic(errors.New("caller is not organizer"))
-	}
+
+const MsgAddGatekeeperKind = "gno.land/p/zenao/events.AddGatekeeper"
+
+func (e *Event) addGatekeeperHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgAddGatekeeperKind, func(i interface{}) {
+		gatekeeper, ok := i.(string)
+		if !ok {
+			panic(errors.New("invalid payload type"))
+		}
+		if e.DAOPrivate.Members.CountMemberRoles(gatekeeper) > 0 {
+			e.DAOPrivate.Members.AddRoleToMember(gatekeeper, "gatekeeper")
+		} else {
+			e.DAOPrivate.Members.AddMember(gatekeeper, []string{gatekeeper})
+		}
+	})
+}
+
+func NewAddGatekeeperMsg(gatekeeper string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddGatekeeperKind, gatekeeper)
+}
+
+const MsgRemoveGatekeeperKind = "gno.land/p/zenao/events.RemoveGatekeeper"
+
+func (e *Event) removeGatekeeperHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgRemoveGatekeeperKind, func(i interface{}) {
+		gatekeeper, ok := i.(string)
+		if !ok {
+			panic(errors.New("invalid payload type"))
+		}
+		if e.DAOPrivate.Members.CountMemberRoles(gatekeeper) != 1 {
+			e.DAOPrivate.Members.RemoveRoleFromMember(gatekeeper, "gatekeeper")
+		} else {
+			e.DAOPrivate.Members.RemoveMember(gatekeeper)
+		}
+	})
+}
+
+func NewRemoveGatekeeperMsg(gatekeeper string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgRemoveGatekeeperKind, gatekeeper)
 }
 
 func (e *Event) CountParticipants() uint32 {
-	return uint32(len(e.Org.Members.GetMembersWithRole("participant")))
+	return uint32(len(e.DAOPrivate.Members.GetMembersWithRole("participant")))
 }
 
-func (e *Event) Edit(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) {
-	e.AssertCallerIsOrganizer()
+const MsgEditEventKind = "gno.land/p/zenao/events.EditEvent"
 
-	e.SetProfileString("DisplayName", title)
-	e.SetProfileString("Bio", description)
-	e.SetProfileString("Avatar", imageURI)
+func (e *Event) editEventHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgEditEventKind, func(i interface{}) {
+		msg, ok := i.(*msgEditEvent)
+		if !ok {
+			panic(errors.New("invalid payload type"))
+		}
+		if msg.title != "" {
+			e.setProfileString("DisplayName", msg.title)
+		}
+		if msg.description != "" {
+			e.setProfileString("Bio", msg.description)
+		}
+		if msg.imageURI != "" {
+			e.setProfileString("Avatar", msg.imageURI)
+		}
+		if msg.startDate != 0 {
+			e.startDate = msg.startDate
+		}
+		if msg.endDate != 0 {
+			e.endDate = msg.endDate
+		}
+		if msg.capacity != 0 {
+			e.capacity = msg.capacity
+		}
+		if msg.location != nil {
+			e.location = msg.location
+		}
+	})
+}
 
-	e.StartDate = startDate
-	e.EndDate = endDate
-	e.Capacity = capacity
+type msgEditEvent struct {
+	title       string
+	description string
+	imageURI    string
+	startDate   int64
+	endDate     int64
+	capacity    uint32
+	location    *zenaov1.EventLocation
+}
 
-	parsedLoc := json.Must(json.Unmarshal([]byte(locationJSON)))
-	e.Location = &zenaov1.EventLocation{}
-	e.Location.FromJSON(parsedLoc)
-
-	// XXX: update registry
+func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) daokit.ExecutableMessage {
+	loc := &zenaov1.EventLocation{}
+	j, err := json.UnmarshalSafe([]byte(locationJSON))
+	if err != nil {
+		panic(err)
+	}
+	loc.FromJSON(j)
+	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
+		title:       title,
+		description: description,
+		imageURI:    imageURI,
+		startDate:   startDate,
+		endDate:     endDate,
+		capacity:    capacity,
+		location:    loc,
+	})
 }
 
 func (e *Event) Render(path string) string {
-	// XXX: render location
-
 	s := ""
 	if path == "" {
 		info := e.Info()
 
-		locStr, err := LocationString(e.Location)
+		locStr, err := LocationString(e.location)
 		if err != nil {
 			locStr = "Error: " + err.Error()
 		}
 
-		orga := e.GetProfileString(std.Address(info.Creator), "DisplayName", "")
+		orga := e.getProfileString(std.Address(info.Creator), "DisplayName", "")
 		if orga == "" {
 			orga = info.Creator
 		}
@@ -245,13 +282,13 @@ func (e *Event) Render(path string) string {
 		s += md.BulletList([]string{
 			ufmt.Sprintf("📍 Location: %s", locStr),
 			ufmt.Sprintf("🕓 Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
-			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.Capacity),
+			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.capacity),
 			ufmt.Sprintf("👤 Organizer: %s", md.Link(orga, "/r/zenao/cockpit:u/"+info.Creator)),
 		}) + "\n"
 		s += md.HorizontalRule()
 		path = "noprofile"
 	}
-	s += e.Org.Render(path)
+	s += e.DAOPrivate.Render(path)
 	return s
 }
 
@@ -262,4 +299,31 @@ func eventImageURL(uri string) string {
 	withoutScheme := strings.TrimPrefix(uri, "ipfs://")
 	res := ufmt.Sprintf(`https://%s/ipfs/%s?img-width=350&img-height=250&img-fit=cover&img-dpr=2`, gatewayDomain, withoutScheme)
 	return res
+}
+
+func LocationString(location *zenaov1.EventLocation) (string, error) {
+	if location == nil {
+		return "", errors.New("nil location")
+	}
+
+	buf := &strings.Builder{}
+
+	if location.VenueName != "" {
+		buf.WriteString(location.VenueName)
+		buf.WriteString(" - ")
+	}
+
+	switch val := location.Address.(type) {
+	case *zenaov1.AddressVirtual:
+		buf.WriteString(val.Uri)
+	case *zenaov1.AddressGeo:
+		buf.WriteString(val.Address)
+		buf.WriteString(ufmt.Sprintf("- %g, %g", val.Lat, val.Lng))
+	case *zenaov1.AddressCustom:
+		buf.WriteString(val.Address)
+	default:
+		return "", errors.New("unsupported address type")
+	}
+
+	return buf.String(), nil
 }
