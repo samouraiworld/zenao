@@ -8,7 +8,7 @@ import { web3ImgLoader } from "@/lib/web3-img-loader";
 interface ScreenContainerProps {
   children: React.ReactNode;
   isSignedOutModal?: boolean;
-  background: ImageLoaderProps;
+  background?: ImageLoaderProps;
 }
 
 export const ScreenContainer: React.FC<ScreenContainerProps> = ({
@@ -16,7 +16,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   isSignedOutModal,
   background,
 }) => {
-  let backgroundContent;
+  let backgroundContent = null;
   if (background) {
     const url = web3ImgLoader(background);
     const style = {
