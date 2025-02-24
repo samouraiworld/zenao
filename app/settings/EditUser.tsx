@@ -15,13 +15,13 @@ import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
 import { FormFieldImage } from "@/components/form/components/FormFieldImage";
-import { userOptions, UserSchemaType } from "@/lib/queries/user";
+import { userOptions } from "@/lib/queries/user";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { Button } from "@/components/shadcn/button";
 import { SmallText } from "@/components/texts/SmallText";
 import { Separator } from "@/components/shadcn/separator";
-import { profileOptions } from "@/lib/queries/profile";
+import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 
 export const EditUser: React.FC<{ authToken: string | null }> = ({
   authToken,
@@ -54,7 +54,7 @@ export const EditUser: React.FC<{ authToken: string | null }> = ({
 
 const EditUserForm: React.FC<{
   authToken: string | null;
-  user: UserSchemaType | null;
+  user: GnoProfile | null;
 }> = ({ authToken, user }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const form = useForm({

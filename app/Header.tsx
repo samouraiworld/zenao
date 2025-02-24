@@ -18,7 +18,8 @@ import {
 } from "@/components/shadcn/avatar";
 import { getQueryClient } from "@/lib/get-query-client";
 import { Button } from "@/components/shadcn/button";
-import { userOptions, UserSchemaType } from "@/lib/queries/user";
+import { userOptions } from "@/lib/queries/user";
+import { GnoProfile } from "@/lib/queries/profile";
 
 const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   const t = useTranslations("header");
@@ -103,7 +104,7 @@ export async function Header() {
   );
 }
 
-const Auth: React.FC<{ user: UserSchemaType | null }> = ({ user }) => {
+const Auth: React.FC<{ user: GnoProfile | null }> = ({ user }) => {
   const t = useTranslations("header");
   return (
     <>
