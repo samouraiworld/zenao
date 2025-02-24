@@ -18,12 +18,11 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   const backgroundStyle: React.CSSProperties = backgroundSource
     ? {
         backgroundImage: `url(${web2URL(backgroundSource)})`,
-        filter: `blur(200px)`,
+        filter: `blur(8rem)`,
         backgroundSize: "100% auto",
         position: `absolute`,
         width: "100%",
         height: "100%",
-        opacity: 0.15,
         transition: "background-image 2s",
         zIndex: -1,
       }
@@ -31,7 +30,9 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
 
   return (
     <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
-      {!!backgroundSource && <div style={backgroundStyle}></div>}
+      {!!backgroundSource && (
+        <div style={backgroundStyle} className="opacity-25 sm:opacity-10"></div>
+      )}
       <Header />
       <div className="flex flex-col flex-1 items-center">
         <main className="h-full w-full max-w-[960px] mb-10 sm:mb-0">
