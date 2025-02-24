@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "mail-dev": "email dev",
+    "mail-build": "email export --outDir backend/mails/html && email export -t --outDir backend/mails/text"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.3",
@@ -25,6 +27,7 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
     "@radix-ui/react-toast": "^1.2.5",
+    "@react-email/components": "0.0.33",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.64.1",
     "@tanstack/react-query-devtools": "^5.64.1",
@@ -38,9 +41,9 @@
     "next-themes": "^0.4.4",
     "nextjs-toploader": "^3.7.15",
     "pinata-web3": "^0.5.4",
-    "react": "^19.0.0",
+    "react": "19.0.0",
     "react-day-picker": "^9.5.0",
-    "react-dom": "^19.0.0",
+    "react-dom": "19.0.0",
     "react-hook-form": "^7.54.2",
     "react-markdown": "^9.0.3",
     "remark-gfm": "^4.0.0",
@@ -65,6 +68,7 @@
     "eslint-plugin-prettier": "^5.2.2",
     "postcss": "^8",
     "prettier": "^3.4.2",
+    "react-email": "3.0.7",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
