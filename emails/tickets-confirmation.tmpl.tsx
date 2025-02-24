@@ -143,7 +143,7 @@ const welcome = {
 const box = {
   backgroundColor: "#F5F5F5",
   borderRadius: 10,
-  padding: 14,
+  padding: 12,
   height: "100%",
 } as const;
 
