@@ -8,7 +8,10 @@ import (
 	"gno.land/r/demo/profile"
 )
 
-var dao *basedao.DAO
+var (
+	DAO        daokit.DAO
+	daoPrivate *basedao.DAOPrivate
+)
 
 func init() {
 	initialRoles := []role_manager.RoleInfo{
@@ -24,7 +27,7 @@ func init() {
 		{Address: "g16jv3rpz7mkt0gqulxas56se2js7v5vmc6n6e0r", Roles: []string{}},
 	}
 
-	dao = basedao.New(&basedao.Config{
+	DAO, daoPrivate = basedao.New(&basedao.Config{
 		Name:             "Demo DAO",
 		Description:      "This is a demo DAO",
 		Members:          basedao.NewMembersStore(initialRoles, initialMembers),
@@ -33,22 +36,14 @@ func init() {
 	})
 }
 
-func Propose(proposal daokit.ProposalRequest) {
-	dao.Propose(proposal)
-}
-
 func Vote(proposalID uint64, vote daocond.Vote) {
-	dao.Vote(proposalID, vote)
+	DAO.Vote(proposalID, vote)
 }
 
 func Execute(proposalID uint64) {
-	dao.Execute(proposalID)
-}
-
-func InstantExecute(proposal daokit.ProposalRequest) {
-	dao.InstantExecute(proposal)
+	DAO.Execute(proposalID)
 }
 
 func Render(path string) string {
-	return dao.Render(path)
+	return daoPrivate.Render(path)
 }
