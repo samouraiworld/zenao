@@ -62,8 +62,7 @@ export function EventCard({ evt }: { evt: EventInfo }) {
             <div className="">
               <div className="min-w-[80px] min-h-[80px] w-[80px] h-[80px] sm:w-[120px] sm:h-[120px] relative">
                 <Image
-                  src={web2URL(evt.imageUri)}
-                  priority
+                  src={web2URL(evt.imageUri) + "?img-width=240"}
                   fill
                   alt="event-image"
                   className="object-cover rounded-xl"
