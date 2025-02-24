@@ -6,25 +6,34 @@ import (
 	"gno.land/p/zenao/daocond"
 )
 
+type DAO interface {
+	Propose(req ProposalRequest) uint64
+	Execute(id uint64)
+	Vote(id uint64, vote daocond.Vote)
+}
+
+func InstantExecute(d DAO, req ProposalRequest) uint64 {
+	id := d.Propose(req)
+	d.Vote(id, daocond.VoteYes)
+	d.Execute(id)
+	return id
+}
+
 type Core struct {
-	Resources      *resourcesStore
-	ProposalModule *ProposalModule
-	NoEvents       bool
+	Resources *ResourcesStore
+	Proposals *ProposalsStore
+	NoEvents  bool
 }
 
 func NewCore() *Core {
 	return &Core{
-		Resources:      newResourcesStore(),
-		ProposalModule: newProposalModule(),
+		Resources: NewResourcesStore(),
+		Proposals: NewProposalsStore(),
 	}
 }
 
-func (d *Core) SetResource(res *Resource) {
-	d.Resources.setResource(res)
-}
-
 func (d *Core) Vote(voterID string, proposalID uint64, vote daocond.Vote) {
-	proposal := d.ProposalModule.GetProposal(proposalID)
+	proposal := d.Proposals.GetProposal(proposalID)
 	if proposal == nil {
 		panic("proposal not found")
 	}
@@ -46,7 +55,7 @@ func (d *Core) Vote(voterID string, proposalID uint64, vote daocond.Vote) {
 }
 
 func (d *Core) Execute(proposalID uint64) {
-	proposal := d.ProposalModule.GetProposal(proposalID)
+	proposal := d.Proposals.GetProposal(proposalID)
 	if proposal == nil {
 		panic("proposal not found")
 	}
@@ -64,32 +73,23 @@ func (d *Core) Execute(proposalID uint64) {
 		panic("proposal does not meet the condition(s) or is already closed/executed")
 	}
 
-	d.Resources.getResource(proposal.Message.Type()).Handler.Execute(proposal.Message)
+	d.Resources.Get(proposal.Message.Type()).Handler.Execute(proposal.Message)
 	proposal.Status = ProposalStatusExecuted
 	proposal.ExecutedAt = time.Now()
 }
 
-func (d *Core) Propose(proposerID string, req ProposalRequest) {
-	d.propose(proposerID, req)
-}
-
-func (d *Core) InstantExecute(executorID string, req ProposalRequest) {
-	proposal := d.propose(executorID, req)
-	d.Vote(executorID, uint64(proposal.ID), "yes")
-	d.Execute(uint64(proposal.ID))
-}
-
-func (d *Core) ResourcesCount() int {
-	return d.Resources.Resources.Size()
-}
-
-func (d *Core) propose(proposer string, req ProposalRequest) *Proposal {
+func (d *Core) Propose(proposerID string, req ProposalRequest) uint64 {
 	messageType := req.Message.Type()
 
-	resource := d.Resources.getResource(messageType)
+	resource := d.Resources.Get(messageType)
 	if resource == nil {
 		panic("message type is not registered as a resource")
 	}
 
-	return d.ProposalModule.newProposal(proposer, req, resource.Condition.NewState())
+	prop := d.Proposals.newProposal(proposerID, req, resource.Condition.NewState())
+	return uint64(prop.ID)
+}
+
+func (d *Core) ResourcesCount() int {
+	return d.Resources.Tree.Size()
 }

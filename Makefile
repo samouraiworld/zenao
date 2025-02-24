@@ -4,10 +4,11 @@ CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 generate:
 	npm i
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
+	npm run mail-build
 
 .PHONY: start.gnodev
 start.gnodev:
-	gnodev --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
+	gnodev staging --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
 
 .PHONY: clone-gno
 clone-gno:
@@ -27,7 +28,7 @@ build-gno:
 
 .PHONY: lint-gno
 lint-gno:
-	./gnobuild/gno/gnovm/build/gno lint ./gno/. -v
+	./gnobuild/gno/gnovm/build/gno tool lint ./gno/. -v
 
 .PHONY: test-gno
 test-gno:

@@ -1,16 +1,23 @@
-import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 import { getQueryClient } from "@/lib/get-query-client";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import {
+  ScreenContainer,
+  ScreenContainerCentered,
+} from "@/components/layout/ScreenContainer";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
-import { EventCard } from "@/components/cards/EventCard";
 import { zenaoClient } from "@/app/zenao-client";
+import { EventsListLayout } from "@/components/layout/EventsListLayout";
 
 export default async function TicketsPage() {
   const { getToken } = await auth();
   const token = await getToken();
   if (!token) {
-    return <ScreenContainer>Log in to see your tickets</ScreenContainer>;
+    return (
+      <ScreenContainerCentered isSignedOutModal>
+        Log in to see your tickets
+      </ScreenContainerCentered>
+    );
   }
 
   const { address } = await zenaoClient.getUserAddress(
@@ -26,24 +33,16 @@ export default async function TicketsPage() {
   const past = await queryClient.fetchQuery(
     eventsByParticipantList(address, now - 1, 0, 20),
   );
+  const t = await getTranslations("tickets");
 
   return (
     <ScreenContainer>
-      <h1>Your tickets</h1>
-      <Link
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg:tickets/${address}`}
-        target="_blank"
-      >
-        -&gt; See this list on Gnoweb
-      </Link>
-      <h2>Upcoming</h2>
-      {[...upcoming].reverse().map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
-      <h2>Past</h2>
-      {past.map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
+      <EventsListLayout
+        upcoming={upcoming}
+        past={past}
+        title={t("title")}
+        description={t("description")}
+      />
     </ScreenContainer>
   );
 }

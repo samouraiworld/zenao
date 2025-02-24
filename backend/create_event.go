@@ -54,7 +54,7 @@ func (s *ZenaoServer) CreateEvent(
 		}
 
 		if s.MailClient != nil {
-			htmlStr, err := generateCreationConfirmationMailHTML(evt)
+			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
 			if err != nil {
 				return err
 			}
@@ -65,7 +65,7 @@ func (s *ZenaoServer) CreateEvent(
 				To:      []string{user.Email},
 				Subject: fmt.Sprintf("%s - Creation confirmed", evt.Title),
 				Html:    htmlStr,
-				Text:    generateCreationConfirmationMailText(evt),
+				Text:    text,
 			}); err != nil {
 				return err
 			}

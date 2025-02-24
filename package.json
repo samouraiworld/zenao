@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "mail-dev": "email dev",
+    "mail-build": "email export --outDir backend/mails/html && email export -t --outDir backend/mails/text"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.3",
@@ -25,9 +27,11 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
     "@radix-ui/react-toast": "^1.2.5",
+    "@react-email/components": "0.0.33",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/react-query": "^5.64.1",
     "@tanstack/react-query-devtools": "^5.64.1",
+    "@yornaath/batshit": "^0.10.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -64,6 +68,7 @@
     "eslint-plugin-prettier": "^5.2.2",
     "postcss": "^8",
     "prettier": "^3.4.2",
+    "react-email": "3.0.7",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }
