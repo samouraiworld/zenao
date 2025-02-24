@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { ParticipateForm } from "./ParticipateForm";
+import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Separator } from "@/components/common/Separator";
@@ -18,8 +19,8 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { web2URL } from "@/lib/uris";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { web3ImgLoader } from "@/lib/web3-img-loader";
 
 interface EventSectionProps {
   title: string;
@@ -97,12 +98,13 @@ export function EventInfo({
 
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
-          src={web2URL(data.imageUri) + "?img-width=600"}
-          width={330}
+          src={data.imageUri}
+          width={imageWidth}
           height={330}
           alt="Event"
           priority
           className="flex w-full rounded-xl self-center"
+          loader={web3ImgLoader}
         />
         {isOrganizer && (
           <Card className="flex flex-row items-center">
