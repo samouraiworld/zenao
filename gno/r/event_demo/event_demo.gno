@@ -3,12 +3,17 @@ package event_demo
 import (
 	"time"
 
+	"gno.land/p/zenao/basedao"
+	"gno.land/p/zenao/daocond"
+	"gno.land/p/zenao/daokit"
 	"gno.land/p/zenao/events"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/r/demo/profile"
 )
 
-var Event *events.Event
+var DAO daokit.DAO
+var daoPrivate *basedao.DAOPrivate
+var event *events.Event
 
 func init() {
 	zenaoAdmin := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94"
@@ -26,29 +31,19 @@ func init() {
 		ZenaoAdminAddr:   zenaoAdmin,
 		Location:         &zenaov1.EventLocation{Address: &zenaov1.AddressCustom{Address: "To be disclosed", Timezone: "Europe/Paris"}},
 	}
-	Event = events.NewEvent(&conf)
+	event = events.NewEvent(&conf)
+	daoPrivate = event.DAOPrivate
+	DAO = event.DAO
 }
 
-func AddParticipant(participant string) {
-	Event.AddParticipant(participant)
+func Vote(proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(proposalID, vote)
 }
 
-func RemoveParticipant(participant string) {
-	Event.RemoveParticipant(participant)
-}
-
-func AddGatekeeper(gatekeeper string) {
-	Event.AddGatekeeper(gatekeeper)
-}
-
-func RemoveGatekeeper(gatekeeper string) {
-	Event.RemoveGatekeeper(gatekeeper)
-}
-
-func Edit(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) {
-	Event.Edit(title, description, imageURI, startDate, endDate, capacity, locationJSON)
+func Execute(proposalID uint64) {
+	DAO.Execute(proposalID)
 }
 
 func Render(path string) string {
-	return Event.Render(path)
+	return event.Render(path)
 }

@@ -90,8 +90,8 @@ type Chain interface {
 	UserAddress(userID string) string
 
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
-	EditEvent(eventID string, req *zenaov1.EditEventRequest) error
-	Participate(eventID string, userID string) error
+	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
+	Participate(eventID string, callerID string, participantID string) error
 }
 
 func LocationToString(location *zenaov1.EventLocation) (string, error) {
