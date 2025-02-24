@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { ParticipateForm } from "./ParticipateForm";
+import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Separator } from "@/components/common/Separator";
@@ -98,7 +99,7 @@ export function EventInfo({
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
           src={data.imageUri}
-          width={330}
+          width={imageWidth}
           height={330}
           alt="Event"
           priority
