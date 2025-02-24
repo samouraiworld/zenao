@@ -19,6 +19,7 @@ import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { web3ImgLoader } from "@/lib/web3-img-loader";
 
 interface EventSectionProps {
   title: string;
@@ -102,6 +103,7 @@ export function EventInfo({
           alt="Event"
           priority
           className="flex w-full rounded-xl self-center"
+          loader={web3ImgLoader}
         />
         {isOrganizer && (
           <Card className="flex flex-row items-center">
