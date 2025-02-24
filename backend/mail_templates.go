@@ -24,7 +24,7 @@ func init() {
 	}
 	ticketsConfirmationTmplHTML = tmpl
 
-	tmpl, err = template.New("ticketsConfirmationText").Parse(ticketsConfirmationTmplHTMLSrc)
+	tmpl, err = template.New("ticketsConfirmationText").Parse(ticketsConfirmationTmplTextSrc)
 	if err != nil {
 		panic(err)
 	}
