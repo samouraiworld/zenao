@@ -142,7 +142,7 @@ const welcome = {
 
 const box = {
   backgroundColor: "#F5F5F5",
-  borderRadius: 10,
+  borderRadius: 4,
   padding: 12,
   height: "100%",
 } as const;
@@ -202,13 +202,15 @@ const details = {
   },
   seeEventButton: {
     backgroundColor: "#000000",
-    color: "#F5F5F5",
-    fontSize: 14,
+    color: "#FFFFFF",
+    fontSize: 16,
+    lineHeight: 1.3,
     width: "100%",
-    borderRadius: 10,
+    borderRadius: 4,
     marginTop: 16,
     textAlign: "center",
     paddingTop: 14,
     paddingBottom: 14,
+    fontWeight: 500,
   },
 } as const;
