@@ -29,9 +29,7 @@ export const TicketsConfirmationEmail = () => (
           height={400}
         />
         <Section style={welcome.section}>
-          <Text style={welcome.text}>
-            Welcome! Tickets will be sent in a few weeks!
-          </Text>
+          <Text style={welcome.text}>{"{{.WelcomeText}}"}</Text>
         </Section>
         <Section style={details.section}>
           <Row>

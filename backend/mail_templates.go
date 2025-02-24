@@ -39,9 +39,10 @@ type ticketsConfirmation struct {
 	EventURL        string
 	CalendarIconURL string
 	PinIconURL      string
+	WelcomeText     string
 }
 
-func ticketsConfirmationMailContent(event *zeni.Event) (string, string, error) {
+func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string) (string, string, error) {
 	locStr, err := zeni.LocationToString(event.Location)
 	if err != nil {
 		return "", "", err
@@ -58,6 +59,7 @@ func ticketsConfirmationMailContent(event *zeni.Event) (string, string, error) {
 		TimeText:        event.StartDate.In(tz).Format(time.ANSIC) + " - " + event.EndDate.In(tz).Format(time.ANSIC),
 		LocationText:    locStr,
 		EventURL:        eventPublicURL(event.ID),
+		WelcomeText:     welcomeText,
 	}
 
 	buf := &strings.Builder{}

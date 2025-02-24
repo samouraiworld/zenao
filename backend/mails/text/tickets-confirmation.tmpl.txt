@@ -12,7 +12,7 @@ Tickets for {{.EventName}}
 ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿ ‌
 ‍‎‏﻿ ‌ ‍‎‏﻿ ‌ ‍‎‏﻿
 
-Welcome! Tickets will be sent in a few weeks!
+{{.WelcomeText}}
 
 
 EVENT DETAILS:
