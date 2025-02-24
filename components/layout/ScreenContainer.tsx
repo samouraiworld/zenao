@@ -25,6 +25,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
         height: "100%",
         opacity: 0.15,
         transition: "background-image 2s",
+        zIndex: -1,
       }
     : {};
 
