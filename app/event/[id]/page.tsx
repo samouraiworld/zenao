@@ -30,11 +30,11 @@ export default async function EventPage({ params }: Props) {
   const { getToken } = await auth();
   const authToken = await getToken();
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(eventOptions(p.id));
+  const eventData = await queryClient.fetchQuery(eventOptions(p.id));
   void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
 
   return (
-    <ScreenContainer>
+    <ScreenContainer backgroundSource={eventData.imageUri}>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <EventInfo id={p.id} authToken={authToken} />
       </HydrationBoundary>

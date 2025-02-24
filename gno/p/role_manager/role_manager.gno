@@ -4,6 +4,7 @@ import (
 	"std"
 
 	"gno.land/p/demo/avl"
+	"gno.land/p/demo/ufmt"
 )
 
 const (
@@ -58,7 +59,7 @@ func (rm *RoleManager) CreateNewRole(roleName string, description string, permis
 
 func (rm *RoleManager) DeleteRole(roleName string) {
 	if !rm.roles.Has(roleName) {
-		panic("role does not exist")
+		panic("role " + roleName + " does not exist")
 	}
 
 	role := rm.mustGetRole(roleName)
@@ -124,7 +125,7 @@ func (rm *RoleManager) HasPermission(user std.Address, permission string) bool {
 	userRoles.Iterate("", "", func(key string, value interface{}) bool {
 		role, ok := value.(*Role)
 		if !ok {
-			panic("role does not exist")
+			panic(ufmt.Errorf("role %q does not exist", role))
 		}
 		if role.permissions.Has(permission) || role.permissions.Has(PermissionAll) {
 			res = true
@@ -215,7 +216,7 @@ func (rm *RoleManager) RemoveAllRolesFromUser(user std.Address) {
 func (rm *RoleManager) mustGetRole(roleName string) *Role {
 	role, ok := rm.roles.Get(roleName)
 	if !ok {
-		panic("role does not exist")
+		panic("role " + roleName + " does not exist")
 	}
 	return role.(*Role)
 }

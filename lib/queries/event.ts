@@ -13,7 +13,7 @@ export const eventOptions = (id: string) =>
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/events/e${id}`,
-        `Event.GetInfoJSON()`,
+        `event.GetInfoJSON()`,
       );
       const event = extractGnoJSONResponse(res) as MessageInitShape<
         typeof EventInfoSchema

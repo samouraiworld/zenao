@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSession } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
 import { FormFieldImage } from "@/components/form/components/FormFieldImage";
 import { userOptions } from "@/lib/queries/user";
+import { profileOptions } from "@/lib/queries/profile";
 
 export const EditUserForm: React.FC<{ authToken: string | null }> = ({
   authToken,
@@ -25,7 +26,7 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
 
   const { session } = useSession();
   const [loading, setLoading] = useState<boolean>(false);
-  const form = useForm<UserFormSchemaType>({
+  const form = useForm({
     mode: "all",
     resolver: zodResolver(userFormSchema),
     defaultValues: user!,
@@ -35,15 +36,12 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
 
   const queryClient = useQueryClient();
 
-  const handleEditUserSuccess = useCallback(async () => {
-    const opts = userOptions(authToken);
-    await queryClient.cancelQueries(opts);
-    queryClient.setQueryData(opts.queryKey, (user) => user);
-  }, [queryClient, authToken]);
-
   const onSubmit = async (values: UserFormSchemaType) => {
     try {
       setLoading(true);
+      if (!user) {
+        throw new Error("no user");
+      }
       const token = await session?.getToken();
       if (!token) {
         throw new Error("invalid clerk token");
@@ -51,7 +49,7 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
       await zenaoClient.editUser(values, {
         headers: { Authorization: "Bearer " + token },
       });
-      handleEditUserSuccess();
+      await queryClient.invalidateQueries(profileOptions(user.address));
       toast({
         title: t("toast-success"),
       });

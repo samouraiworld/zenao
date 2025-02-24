@@ -5,8 +5,8 @@ import (
 	"gno.land/p/zenao/daocond"
 )
 
-type resourcesStore struct {
-	Resources *avl.Tree // string -> daocond.Condition
+type ResourcesStore struct {
+	Tree *avl.Tree // string -> daocond.Condition
 }
 
 type Resource struct {
@@ -14,18 +14,18 @@ type Resource struct {
 	Condition daocond.Condition
 }
 
-func newResourcesStore() *resourcesStore {
-	return &resourcesStore{
-		Resources: avl.NewTree(),
+func NewResourcesStore() *ResourcesStore {
+	return &ResourcesStore{
+		Tree: avl.NewTree(),
 	}
 }
 
-func (r *resourcesStore) setResource(resource *Resource) {
-	r.Resources.Set(resource.Handler.Type(), resource)
+func (r *ResourcesStore) Set(resource *Resource) {
+	r.Tree.Set(resource.Handler.Type(), resource)
 }
 
-func (r *resourcesStore) getResource(name string) *Resource {
-	value, ok := r.Resources.Get(name)
+func (r *ResourcesStore) Get(name string) *Resource {
+	value, ok := r.Tree.Get(name)
 	if !ok {
 		return nil
 	}

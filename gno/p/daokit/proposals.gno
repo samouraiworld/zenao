@@ -47,9 +47,9 @@ type Proposal struct {
 	Votes          map[string]daocond.Vote
 }
 
-type ProposalModule struct {
-	Proposals         *avl.Tree // int -> Proposal
-	proposalIDCounter seqid.ID
+type ProposalsStore struct {
+	Tree  *avl.Tree // int -> Proposal
+	genID seqid.ID
 }
 
 type ProposalRequest struct {
@@ -58,14 +58,14 @@ type ProposalRequest struct {
 	Message     ExecutableMessage
 }
 
-func newProposalModule() *ProposalModule {
-	return &ProposalModule{
-		Proposals: avl.NewTree(),
+func NewProposalsStore() *ProposalsStore {
+	return &ProposalsStore{
+		Tree: avl.NewTree(),
 	}
 }
 
-func (p *ProposalModule) newProposal(proposer string, req ProposalRequest, conditionState daocond.State) *Proposal {
-	id := p.proposalIDCounter.Next()
+func (p *ProposalsStore) newProposal(proposer string, req ProposalRequest, conditionState daocond.State) *Proposal {
+	id := p.genID.Next()
 	proposal := &Proposal{
 		ID:             id,
 		Title:          req.Title,
@@ -76,14 +76,14 @@ func (p *ProposalModule) newProposal(proposer string, req ProposalRequest, condi
 		ConditionState: conditionState,
 		Votes:          map[string]daocond.Vote{},
 		CreatedAt:      time.Now(),
-		CreatedHeight:  std.GetHeight(),
+		CreatedHeight:  std.ChainHeight(),
 	}
-	p.Proposals.Set(id.String(), proposal)
+	p.Tree.Set(id.String(), proposal)
 	return proposal
 }
 
-func (p *ProposalModule) GetProposal(id uint64) *Proposal {
-	value, ok := p.Proposals.Get(seqid.ID(id).String())
+func (p *ProposalsStore) GetProposal(id uint64) *Proposal {
+	value, ok := p.Tree.Get(seqid.ID(id).String())
 	if !ok {
 		return nil
 	}
@@ -98,10 +98,10 @@ func (p *Proposal) UpdateStatus() {
 	}
 }
 
-func (p *ProposalModule) GetProposalsJSON() string {
-	props := make([]*json.Node, 0, p.Proposals.Size())
+func (p *ProposalsStore) GetProposalsJSON() string {
+	props := make([]*json.Node, 0, p.Tree.Size())
 	// XXX: pagination
-	p.Proposals.Iterate("", "", func(key string, value interface{}) bool {
+	p.Tree.Iterate("", "", func(key string, value interface{}) bool {
 		prop, ok := value.(*Proposal)
 		if !ok {
 			panic(errors.New("unexpected invalid proposal type"))

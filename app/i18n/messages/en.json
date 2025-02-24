@@ -88,6 +88,10 @@
     "logged-out": "Log in to see events your created",
     "title": "Events created"
   },
+  "tickets": {
+    "title": "Your tickets",
+    "description": "Events you are attending."
+  },
   "events-list": {
     "no-events": "No events to show.",
     "no-events-desc": "You have no events. Why not create one?",
@@ -115,4 +119,3 @@
     }
   }
 }
-
