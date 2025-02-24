@@ -59,12 +59,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 
 		if s.MailClient != nil {
-			htmlStr, err := generateConfirmationMailHTML(evt)
-			if err != nil {
-				return err
-			}
-
-			text, err := generateConfirmationMailText(evt)
+			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets will be sent in a few weeks!")
 			if err != nil {
 				return err
 			}

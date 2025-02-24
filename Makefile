@@ -4,6 +4,7 @@ CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 generate:
 	npm i
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
+	npm run mail-build
 
 .PHONY: start.gnodev
 start.gnodev:
