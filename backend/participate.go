@@ -53,13 +53,13 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		if err := s.Chain.Participate(req.Msg.EventId, userID); err != nil {
+		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, userID); err != nil {
 			// XXX: handle case where tx is broadcasted but we have an error afterwards, eg: chain has been updated but db rollbacked
 			return err
 		}
 
 		if s.MailClient != nil {
-			htmlStr, err := generateConfirmationMailHTML(evt)
+			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets will be sent in a few weeks!")
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				To:      []string{user.Email},
 				Subject: fmt.Sprintf("%s - Confirmation", evt.Title),
 				Html:    htmlStr,
-				Text:    generateConfirmationMailText(evt),
+				Text:    text,
 			}); err != nil {
 				return err
 			}

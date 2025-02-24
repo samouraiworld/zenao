@@ -98,7 +98,7 @@ export function EventInfo({
 
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
-          src={web2URL(data.imageUri)}
+          src={web2URL(data.imageUri) + "?img-width=600"}
           width={330}
           height={330}
           alt="Event"

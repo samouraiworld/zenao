@@ -67,67 +67,71 @@ func fieldGnoType(g *protogen.GeneratedFile, field *protogen.Field) (goType stri
 //
 // Ported from protogen
 func fieldToJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFile, field *protogen.Field) {
+	if field.Oneof != nil {
+		return
+	}
+
 	if field.Desc.IsWeak() {
 		panic("weak fields not supported")
+	}
+	if field.Desc.IsMap() {
+		panic("map not supported")
 	}
 
 	name := strconv.Quote(field.Desc.JSONName())
 	parentTypeName := field.Parent.Desc.Name()
 	parentReceiver := strings.ToLower(string(parentTypeName[0]))
-	receiver := parentReceiver + "." + field.GoName
+	accessor := parentReceiver + "." + field.GoName
+	receiver := fieldsObjName + "[" + name + "]"
+	isList := field.Desc.IsList()
 
-	if field.Oneof != nil {
-		return
+	printField := func(zeroValue string, converter func(accessor string) string) {
+		if isList {
+			g.P(prefix, "if len(", accessor, ") != 0 {")
+			g.P(prefix, `	arr := make([]*json.Node, len(`, accessor, `))`)
+			g.P(prefix, `	for i, val := range `, accessor, ` {`)
+			g.P(prefix, `		arr[i] = `, converter("val"))
+			g.P(prefix, `	}`)
+			g.P(prefix, `	`, receiver, ` = json.ArrayNode("", arr)`)
+		} else {
+			g.P(prefix, "if ", accessor, " != ", zeroValue, " {")
+			g.P(prefix, `	`, receiver, ` = `, converter(accessor))
+		}
+		g.P(prefix, "}")
 	}
 
 	switch field.Desc.Kind() {
 	case protoreflect.BoolKind:
-		g.P(prefix, "if ", receiver, " {")
-		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.BoolNode("", `, receiver, ")")
-		g.P(prefix, "}")
-		return
+		printField(`false`, func(accessor string) string {
+			return `json.BoolNode("", ` + accessor + `)`
+		})
 	case protoreflect.EnumKind:
 		panic("enums not supported")
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.FloatKind, protoreflect.DoubleKind:
-		g.P(prefix, "if ", receiver, "!= 0 {")
-		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.NumberNode("", float64(`, receiver, "))")
-		g.P(prefix, "}")
-		return
+		printField(`0`, func(accessor string) string {
+			return `json.NumberNode("", float64(` + accessor + `))`
+		})
 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-		g.P(prefix, "if ", receiver, "!= 0 {")
-		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatInt(`, receiver, ", 10))")
-		g.P(prefix, "}")
-		return
+		printField(`0`, func(accessor string) string {
+			return `json.StringNode("", strconv.FormatInt(` + accessor + `, 10))`
+		})
 	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		g.P(prefix, "if ", receiver, "!= 0 {")
-		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.StringNode("", strconv.FormatUint(`, receiver, ", 10))")
-		g.P(prefix, "}")
-		return
+		printField(`0`, func(accessor string) string {
+			return `json.StringNode("", strconv.FormatUint(` + accessor + `, 10))`
+		})
 	case protoreflect.StringKind:
-		g.P(prefix, "if ", receiver, `!= "" {`)
-		g.P(prefix, "	", fieldsObjName, "[", name, `] = json.StringNode("", `, receiver, ")")
-		g.P(prefix, "}")
-		return
+		printField(`""`, func(accessor string) string {
+			return `json.StringNode("", ` + accessor + `)`
+		})
 	case protoreflect.BytesKind:
 		panic("bytes not supported")
 	case protoreflect.MessageKind, protoreflect.GroupKind:
-		g.P(prefix, "if ", receiver, " != nil {")
-		g.P(prefix, "	", fieldsObjName, "[", name, `] = `, receiver, ".ToJSON()")
-		g.P(prefix, "}")
-		return
+		printField(`nil`, func(accessor string) string {
+			return accessor + `.ToJSON()`
+		})
+	default:
+		panic(fmt.Errorf("unexpected field type %q", field.Desc.Kind().String()))
 	}
-	switch {
-	case field.Desc.IsList():
-		panic("list not supported")
-	case field.Desc.IsMap():
-		panic("map not supported")
-		/*
-			keyType, _ := fieldGoType(g, f, field.Message.Fields[0])
-			valType, _ := fieldGoType(g, f, field.Message.Fields[1])
-			return fmt.Sprintf("map[%v]%v", keyType, valType), false
-		*/
-	}
-	panic(fmt.Errorf("unexpected field type %q", field.Desc.Kind().String()))
 }
 
 // fieldGnoType returns the Go type used for a field.
@@ -143,70 +147,7 @@ func fieldFromJSON(prefix string, g *protogen.GeneratedFile, field *protogen.Fie
 	if field.Desc.IsWeak() {
 		panic("weak fields not supported")
 	}
-
-	name := strconv.Quote(field.Desc.JSONName())
-	parentTypeName := field.Parent.Desc.Name()
-	parentReceiver := strings.ToLower(string(parentTypeName[0]))
-	receiver := parentReceiver + "." + field.GoName
-
-	basicField := func(converter string) {
-		g.P(prefix, `if val, ok := fields[`, name, `]; ok {`)
-		g.P(prefix, `	`, receiver, ` = `, converter)
-		g.P(prefix, `}`)
-	}
-
-	parsedField := func(parser string) {
-		g.P(prefix, `if val, ok := fields[`, name, `]; ok {`)
-		g.P(prefix, "	fv, err := ", parser)
-		g.P(prefix, "	if err != nil {")
-		g.P(prefix, "		panic(err)")
-		g.P(prefix, "	}")
-		g.P(prefix, `	`, receiver, ` = fv`)
-		g.P(prefix, `}`)
-	}
-
-	switch field.Desc.Kind() {
-	case protoreflect.BoolKind:
-		basicField("val.MustBool()")
-		return
-	case protoreflect.EnumKind:
-		panic("enums not supported")
-	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
-		basicField("int32(val.MustNumeric())")
-		return
-	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
-		basicField("uint32(val.MustNumeric())")
-		return
-	case protoreflect.FloatKind:
-		basicField("float32(val.MustNumeric())")
-		return
-	case protoreflect.DoubleKind:
-		basicField("val.MustNumeric()")
-		return
-	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-		parsedField("strconv.ParseInt(val.MustString(), 10, 64)")
-		return
-	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		parsedField("strconv.ParseUint(val.MustString(), 10, 64)")
-		return
-	case protoreflect.StringKind:
-		basicField("val.MustString()")
-		return
-	case protoreflect.BytesKind:
-		panic("bytes not supported")
-	case protoreflect.MessageKind, protoreflect.GroupKind:
-		g.P(prefix, `if val, ok := fields[`, name, `]; ok {`)
-		g.P(prefix, `	if `, receiver, ` == nil {`)
-		g.P(prefix, `		`, receiver, ` = &`, g.QualifiedGoIdent(field.Message.GoIdent), `{}`)
-		g.P(prefix, `	}`)
-		g.P(prefix, `	`, receiver, `.FromJSON(val)`)
-		g.P(prefix, `}`)
-		return
-	}
-	switch {
-	case field.Desc.IsList():
-		panic("list not supported")
-	case field.Desc.IsMap():
+	if field.Desc.IsMap() {
 		panic("map not supported")
 		/*
 			keyType, _ := fieldGoType(g, f, field.Message.Fields[0])
@@ -214,7 +155,66 @@ func fieldFromJSON(prefix string, g *protogen.GeneratedFile, field *protogen.Fie
 			return fmt.Sprintf("map[%v]%v", keyType, valType), false
 		*/
 	}
-	panic(fmt.Errorf("unexpected field type %q", field.Desc.Kind().String()))
+
+	gnoType, _ := fieldGnoType(g, field)
+	name := strconv.Quote(field.Desc.JSONName())
+	parentTypeName := field.Parent.Desc.Name()
+	parentReceiver := strings.ToLower(string(parentTypeName[0]))
+	receiver := parentReceiver + "." + field.GoName
+	accessor := `fields[` + name + `]`
+
+	printField := func(prelude string, converter string) {
+		printPrelude := func(pp string) {
+			if prelude != "" {
+				lines := strings.Split(prelude, "\n")
+				for _, line := range lines {
+					g.P(prefix, pp, line)
+				}
+			}
+		}
+
+		g.P(prefix, `if val, ok := `, accessor, `; ok {`)
+		if field.Desc.IsList() {
+			g.P(prefix, `	jarr := val.MustArray()`)
+			g.P(prefix, `	arr := make(`, gnoType, `, len(jarr))`)
+			g.P(prefix, `	for i, val := range jarr {`)
+			printPrelude(`		`)
+			g.P(prefix, `		arr[i] = `, converter)
+			g.P(prefix, `	}`)
+			g.P(prefix, `	`, receiver, ` = arr`)
+		} else {
+			printPrelude(`	`)
+			g.P(prefix, `	`, receiver, ` = `, converter)
+		}
+		g.P(prefix, `}`)
+	}
+
+	switch field.Desc.Kind() {
+	case protoreflect.BoolKind:
+		printField("", "val.MustBool()")
+	case protoreflect.EnumKind:
+		panic("enums not supported")
+	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
+		printField("", "int32(val.MustNumeric())")
+	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
+		printField("", "uint32(val.MustNumeric())")
+	case protoreflect.FloatKind:
+		printField("", "float32(val.MustNumeric())")
+	case protoreflect.DoubleKind:
+		printField("", "val.MustNumeric()")
+	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
+		printField("fv, err := strconv.ParseInt(val.MustString(), 10, 64);\nif err != nil {\n	panic(err)\n}", "fv")
+	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
+		printField("fv, err := strconv.ParseUint(val.MustString(), 10, 64);\nif err != nil {\n	panic(err)\n}", "fv")
+	case protoreflect.StringKind:
+		printField("", "val.MustString()")
+	case protoreflect.BytesKind:
+		panic("bytes not supported")
+	case protoreflect.MessageKind, protoreflect.GroupKind:
+		printField("fv := &"+g.QualifiedGoIdent(field.Message.GoIdent)+"{}\nfv.FromJSON(val)", "fv")
+	default:
+		panic(fmt.Errorf("unexpected field type %q", field.Desc.Kind().String()))
+	}
 }
 
 // fieldGnoType returns the Go type used for a field.

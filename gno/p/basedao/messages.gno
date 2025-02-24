@@ -22,7 +22,7 @@ func (m *MsgAddMember) String() string {
 	return ufmt.Sprintf("Add member %s with roles %v", m.Address, m.Roles)
 }
 
-func NewAddMemberHandler(dao *DAO) daokit.MessageHandler {
+func NewAddMemberHandler(dao *DAOPrivate) daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgAddMemberKind, func(ipayload interface{}) {
 		payload, ok := ipayload.(*MsgAddMember)
 		if !ok {
@@ -40,7 +40,7 @@ func NewAddMemberMsg(payload *MsgAddMember) daokit.ExecutableMessage {
 
 const MsgRemoveMemberKind = "gno.land/p/zenao/basedao.RemoveMember"
 
-func NewRemoveMemberHandler(dao *DAO) daokit.MessageHandler {
+func NewRemoveMemberHandler(dao *DAOPrivate) daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgRemoveMemberKind, func(ipayload interface{}) {
 		address, ok := ipayload.(std.Address)
 		if !ok {
@@ -67,7 +67,7 @@ func (m *MsgAssignRole) String() string {
 	return ufmt.Sprintf("Assign role %q to user %s", m.Role, m.Address)
 }
 
-func NewAssignRoleHandler(dao *DAO) daokit.MessageHandler {
+func NewAssignRoleHandler(dao *DAOPrivate) daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgAssignRoleKind, func(i interface{}) {
 		payload, ok := i.(*MsgAssignRole)
 		if !ok {
@@ -94,7 +94,7 @@ func (m *MsgUnassignRole) String() string {
 	return ufmt.Sprintf("Remove role %q from user %s", m.Role, m.Address)
 }
 
-func NewUnassignRoleHandler(dao *DAO) daokit.MessageHandler {
+func NewUnassignRoleHandler(dao *DAOPrivate) daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgUnassignRoleKind, func(i interface{}) {
 		payload, ok := i.(*MsgUnassignRole)
 		if !ok {

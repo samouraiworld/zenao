@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { SignOutButton, useSession } from "@clerk/nextjs";
+import { SignOutButton } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { zenaoClient } from "../zenao-client";
@@ -21,6 +21,7 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { Button } from "@/components/shadcn/button";
 import { SmallText } from "@/components/texts/SmallText";
 import { Separator } from "@/components/shadcn/separator";
+import { profileOptions } from "@/lib/queries/profile";
 
 export const EditUser: React.FC<{ authToken: string | null }> = ({
   authToken,
@@ -55,9 +56,8 @@ const EditUserForm: React.FC<{
   authToken: string | null;
   user: UserSchemaType | null;
 }> = ({ authToken, user }) => {
-  const { session } = useSession();
   const [loading, setLoading] = useState<boolean>(false);
-  const form = useForm<UserFormSchemaType>({
+  const form = useForm({
     mode: "all",
     resolver: zodResolver(userFormSchema),
     defaultValues: user!,
@@ -67,23 +67,16 @@ const EditUserForm: React.FC<{
 
   const queryClient = useQueryClient();
 
-  const handleEditUserSuccess = useCallback(async () => {
-    const opts = userOptions(authToken);
-    await queryClient.cancelQueries(opts);
-    queryClient.setQueryData(opts.queryKey, (user) => user);
-  }, [queryClient, authToken]);
-
   const onSubmit = async (values: UserFormSchemaType) => {
     try {
       setLoading(true);
-      const token = await session?.getToken();
-      if (!token) {
-        throw new Error("invalid clerk token");
+      if (!user) {
+        throw new Error("no user");
       }
       await zenaoClient.editUser(values, {
-        headers: { Authorization: "Bearer " + token },
+        headers: { Authorization: "Bearer " + authToken },
       });
-      handleEditUserSuccess();
+      await queryClient.invalidateQueries(profileOptions(user.address));
       toast({
         title: t("toast-success"),
       });

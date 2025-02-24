@@ -121,7 +121,7 @@ func (m *MembersStore) AddRoleToMember(member string, role string) {
 		panic("member does not exist")
 	}
 	if !m.RoleManager.RoleExists(role) {
-		panic("role does not exist")
+		panic("role " + role + " does not exist")
 	}
 	if m.HasRole(member, role) {
 		panic("member already has the role")
@@ -134,7 +134,7 @@ func (m *MembersStore) RemoveRoleFromMember(member string, role string) {
 		panic("member does not exist")
 	}
 	if !m.RoleManager.RoleExists(role) {
-		panic("role does not exist")
+		panic("role " + role + " does not exist")
 	}
 	if !m.HasRole(member, role) {
 		panic("member does not have the role")
