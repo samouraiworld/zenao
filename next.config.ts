@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
+    loader: "custom",
+    loaderFile: "./lib/loader.ts",
   },
   experimental: {
     serverComponentsHmrCache: false, // defaults to true

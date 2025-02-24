@@ -17,7 +17,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
 }) => {
   const backgroundStyle: React.CSSProperties = backgroundSource
     ? {
-        backgroundImage: `url(${web2URL(backgroundSource)}?img-width=600)`,
+        backgroundImage: `url(${web2URL(backgroundSource)}?img-width=330&img-dpr=2)`,
         filter: `blur(8rem)`,
         backgroundSize: "100% 100%",
         position: `absolute`,

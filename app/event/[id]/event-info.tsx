@@ -18,7 +18,6 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { web2URL } from "@/lib/uris";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
 
 interface EventSectionProps {
@@ -97,7 +96,7 @@ export function EventInfo({
 
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
-          src={web2URL(data.imageUri) + "?img-width=600"}
+          src={data.imageUri}
           width={330}
           height={330}
           alt="Event"
