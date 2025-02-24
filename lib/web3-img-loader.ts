@@ -1,5 +1,3 @@
-"use client";
-
 import { ImageLoaderProps } from "next/image";
 import { web2URL } from "./uris";
 
