@@ -23,7 +23,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
         position: `absolute`,
         width: "100%",
         height: "100%",
-        opacity: 0.2,
+        opacity: 0.15,
         transition: "background-image 2s",
       }
     : {};
