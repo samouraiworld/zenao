@@ -1,3 +1,5 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { EventInfo } from "./event-info";
 import { imageWidth } from "./constants";
@@ -9,14 +11,6 @@ import { eventUserRoles } from "@/lib/queries/event-user-roles";
 type Props = {
   params: Promise<{ id: string }>;
 };
-
-export const revalidate = 60;
-
-export const dynamicParams = true;
-
-export async function generateStaticParams() {
-  return [];
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
@@ -34,25 +28,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventPage({ params }: Props) {
   const p = await params;
-
-  const authToken = null;
-
+  const { getToken } = await auth();
+  const authToken = await getToken();
   const queryClient = getQueryClient();
-  const [eventData, userRoles] = await Promise.all([
-    queryClient.fetchQuery(eventOptions(p.id)),
-    queryClient.fetchQuery(eventUserRoles(authToken, p.id)),
-  ]);
+  const eventData = await queryClient.fetchQuery(eventOptions(p.id));
+  void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
 
   return (
     <ScreenContainer
       background={{ src: eventData.imageUri, width: imageWidth }}
     >
-      <EventInfo
-        id={p.id}
-        event={eventData}
-        userRoles={userRoles}
-        authToken={authToken}
-      />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <EventInfo id={p.id} authToken={authToken} />
+      </HydrationBoundary>
     </ScreenContainer>
   );
 }
