@@ -12,7 +12,7 @@ export function BackgroundImage(props: ImageLoaderProps) {
       height={props.width}
       priority
       loader={web3ImgLoader}
-      className={`absolute -z-1 w-full h-full blur-[8rem] opacity-25 sm:opacity-15`}
+      className={`absolute pointer-events-none w-full h-full blur-[8rem] opacity-25 sm:opacity-15`}
     />
   );
 }
