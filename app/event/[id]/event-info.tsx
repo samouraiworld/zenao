@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
@@ -10,7 +9,6 @@ import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { ParticipateForm } from "./ParticipateForm";
 import { imageWidth } from "./constants";
-import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Separator } from "@/components/common/Separator";
 import { Text } from "@/components/texts/DefaultText";
@@ -21,6 +19,8 @@ import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
+import { EventInfo as EventInfoType } from "@/app/gen/zenao/v1/zenao_pb";
+import { getQueryClient } from "@/lib/get-query-client";
 
 interface EventSectionProps {
   title: string;
@@ -40,16 +40,18 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 export function EventInfo({
   id,
   authToken,
+  event: data,
+  userRoles: roles,
 }: {
   id: string;
   authToken: string | null;
+  event: EventInfoType;
+  userRoles: string[];
 }) {
-  const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
-  const queryClient = useQueryClient();
+  const queryClient = getQueryClient();
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);

@@ -38,27 +38,29 @@ export const Header: React.FC = () => {
   const t = useTranslations("header");
 
   return (
-    <div className="flex justify-center sm:p-2">
+    <div className="flex sm:p-2 w-full">
       {/* Desktop */}
-      <Card className="max-sm:hidden flex flex-row items-center px-3 py-2 gap-8 rounded-xl">
-        <Link href="/" className="flex flex-row gap-2 items-center">
-          <Image
-            src="/zenao-logo.png"
-            alt="zeano logo"
-            width={28}
-            height={28}
-            priority
-          />
-          <Text className="font-extrabold">{t("zenao")}</Text>
-        </Link>
-        <div className="flex flex-row gap-4">
-          <HeaderLinks />
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <Auth />
-          <ToggleThemeButton />
-        </div>
-      </Card>
+      <div className="max-sm:hidden flex flex-row w-full items-center justify-center">
+        <Card className="flex flex-row items-center px-3 py-2 gap-8 rounded-xl">
+          <Link href="/" className="flex flex-row gap-2 items-center">
+            <Image
+              src="/zenao-logo.png"
+              alt="zeano logo"
+              width={28}
+              height={28}
+              priority
+            />
+            <Text className="font-extrabold">{t("zenao")}</Text>
+          </Link>
+          <div className="flex flex-row gap-4">
+            <HeaderLinks />
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            <ToggleThemeButton />
+          </div>
+        </Card>
+        <Auth className="flex absolute right-5" />
+      </div>
 
       {/* Mobile */}
       <div className="sm:hidden flex flex-row justify-between w-full p-3 px-4 py-3 bg-secondary/80 backdrop-blur-sm">
@@ -87,11 +89,11 @@ export const Header: React.FC = () => {
   );
 };
 
-function Auth() {
+function Auth({ className }: { className?: string }) {
   const t = useTranslations("header");
 
   return (
-    <>
+    <div className={className}>
       <SignedOut>
         <SignInButton>
           <Button variant="outline">
@@ -114,6 +116,6 @@ function Auth() {
           }
         />
       </SignedIn>
-    </>
+    </div>
   );
 }
