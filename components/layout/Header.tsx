@@ -1,15 +1,14 @@
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AlignJustify as AlignJustifyIcon } from "lucide-react";
 import { PopoverContent } from "@radix-ui/react-popover";
-import { Button } from "../shadcn/button";
 import { Popover, PopoverTrigger } from "../shadcn/popover";
 import { Card } from "../cards/Card";
 import { SmallText } from "../texts/SmallText";
 import { Text } from "../texts/DefaultText";
+import { Auth } from "./Auth";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 
 const HeaderLinks: React.FC = () => {
@@ -70,7 +69,6 @@ export const Header: React.FC = () => {
           />
         </Link>
         <div className="flex flex-row gap-2">
-          <Auth />
           <Popover>
             <PopoverTrigger>
               <AlignJustifyIcon width={26} height={26} />
@@ -84,34 +82,3 @@ export const Header: React.FC = () => {
     </div>
   );
 };
-
-function Auth() {
-  const t = useTranslations("header");
-
-  return (
-    <>
-      <SignedOut>
-        <SignInButton>
-          <Button variant="outline">
-            <SmallText>{t("sign-in")}</SmallText>
-          </Button>
-        </SignInButton>
-      </SignedOut>
-      <SignedIn>
-        <UserButton
-          // we need this fallback otherwise the profile button flickers while mounting
-          fallback={
-            <Image
-              src="/pfp-fallback.png"
-              alt="User"
-              width={28}
-              height={28}
-              className="rounded-full"
-              priority
-            />
-          }
-        />
-      </SignedIn>
-    </>
-  );
-}

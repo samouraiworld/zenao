@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverComponentsHmrCache: false, // defaults to true
+    ppr: "incremental",
   },
 };
 

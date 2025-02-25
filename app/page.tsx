@@ -1,13 +1,13 @@
-import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { SmallText } from "@/components/texts/SmallText";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 
-export default function Home() {
-  const t = useTranslations("home");
+export default async function Home() {
+  const t = await getTranslations("home");
 
   return (
     <ScreenContainerCentered>

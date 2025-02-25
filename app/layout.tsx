@@ -1,13 +1,11 @@
-import NextTopLoader from "nextjs-toploader";
-import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
-import QueryProviders from "./query-providers";
-import { Toaster } from "@/components/shadcn/toaster";
+
+export const experimental_ppr = true;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,25 +38,20 @@ export default async function RootLayout({
 
   return (
     <html suppressHydrationWarning lang={locale}>
+      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClerkProvider>
-          <QueryProviders>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <NextIntlClientProvider messages={messages}>
-                <NextTopLoader showSpinner={false} color="#EC7E17" />
-                {children}
-              </NextIntlClientProvider>
-            </ThemeProvider>
-          </QueryProviders>
-        </ClerkProvider>
-        <Toaster />
+        <NextIntlClientProvider messages={messages}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

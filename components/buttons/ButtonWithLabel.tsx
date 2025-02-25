@@ -1,5 +1,3 @@
-"use client";
-
 import { SmallText } from "../texts/SmallText";
 import { ButtonBase } from "./ButtonBases";
 import { ButtonProps } from "./types";

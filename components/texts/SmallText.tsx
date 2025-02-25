@@ -1,5 +1,3 @@
-"use client";
-
 import { TextProps } from "./types";
 import { TextBase } from "./TextBase";
 import { cn } from "@/lib/tailwind";

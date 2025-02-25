@@ -1,5 +1,3 @@
-"use client";
-
 import { ButtonBase } from "./ButtonBases";
 import { ButtonProps } from "./types";
 

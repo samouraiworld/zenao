@@ -1,6 +1,5 @@
 import React from "react";
 import { ImageLoaderProps } from "next/image";
-import { SignedOutModal } from "../modals/SignedOutModal";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { BackgroundImage } from "./background-image";
@@ -13,7 +12,6 @@ interface ScreenContainerProps {
 
 export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   children,
-  isSignedOutModal,
   background,
 }) => {
   return (
@@ -25,7 +23,6 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
           <div className="mt-8 mx-5">{children}</div>
         </main>
       </div>
-      {isSignedOutModal && <SignedOutModal />}
       <Footer />
     </div>
   );
@@ -33,7 +30,6 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
 
 export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
   children,
-  isSignedOutModal,
 }) => {
   return (
     <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
@@ -43,7 +39,6 @@ export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
           <div className="mt-8 mx-5">{children}</div>
         </main>
       </div>
-      {isSignedOutModal && <SignedOutModal />}
       <Footer />
     </div>
   );
