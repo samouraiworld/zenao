@@ -69,6 +69,7 @@ export const Header: React.FC = () => {
           />
         </Link>
         <div className="flex flex-row gap-2">
+          <Auth />
           <Popover>
             <PopoverTrigger>
               <AlignJustifyIcon width={26} height={26} />

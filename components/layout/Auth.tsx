@@ -1,26 +1,13 @@
 "use client";
 
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
-import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { SmallText } from "../texts/SmallText";
 import { Button } from "../shadcn/button";
 
 export function Auth() {
-  return (
-    <Suspense fallback={<PfPFallback />}>
-      <ClerkProvider dynamic>
-        <AuthInternal />
-      </ClerkProvider>
-    </Suspense>
-  );
+  return <AuthInternal />;
 }
 
 function AuthInternal() {
