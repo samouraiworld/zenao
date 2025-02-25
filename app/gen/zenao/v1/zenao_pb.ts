@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIhcKFUdldFVzZXJBZGRyZXNzUmVxdWVzdCIpChZHZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEg8KB2FkZHJlc3MYASABKAkixAEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SKQoIbG9jYXRpb24YCSABKAsyFy56ZW5hby52MS5FdmVudExvY2F0aW9uIiEKE0NyZWF0ZUV2ZW50UmVzcG9uc2USCgoCaWQYASABKAki1AEKEEVkaXRFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJEhIKCnN0YXJ0X2RhdGUYBSABKAQSEAoIZW5kX2RhdGUYBiABKAQSFAoMdGlja2V0X3ByaWNlGAcgASgBEhAKCGNhcGFjaXR5GAggASgNEikKCGxvY2F0aW9uGAogASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbiIfChFFZGl0RXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSI1ChJQYXJ0aWNpcGF0ZVJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFZW1haWwYAiABKAkiLAoTUGFydGljaXBhdGVSZXNwb25zZRIVCg10aWNrZXRfc2VjcmV0GAEgASgJIsEBCg1FdmVudExvY2F0aW9uEhIKCnZlbnVlX25hbWUYASABKAkSFAoMaW5zdHJ1Y3Rpb25zGAIgASgJEiMKA2dlbxgDIAEoCzIULnplbmFvLnYxLkFkZHJlc3NHZW9IABIrCgd2aXJ0dWFsGAQgASgLMhguemVuYW8udjEuQWRkcmVzc1ZpcnR1YWxIABIpCgZjdXN0b20YBSABKAsyFy56ZW5hby52MS5BZGRyZXNzQ3VzdG9tSABCCQoHYWRkcmVzcyIdCg5BZGRyZXNzVmlydHVhbBILCgN1cmkYASABKAkiRQoKQWRkcmVzc0dlbxIPCgdhZGRyZXNzGAEgASgJEgsKA2xhdBgCIAEoAhILCgNsbmcYAyABKAISDAoEc2l6ZRgEIAEoAiIyCg1BZGRyZXNzQ3VzdG9tEg8KB2FkZHJlc3MYASABKAkSEAoIdGltZXpvbmUYAiABKAki3gEKCUV2ZW50SW5mbxINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSDwoHY3JlYXRvchgEIAEoCRISCgpzdGFydF9kYXRlGAUgASgDEhAKCGVuZF9kYXRlGAYgASgDEhAKCGNhcGFjaXR5GAcgASgNEikKCGxvY2F0aW9uGAggASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbhIUCgxwYXJ0aWNpcGFudHMYCSABKA0SEAoIcGtnX3BhdGgYCiABKAkiLgoRQmF0Y2hQcm9maWxlRmllbGQSDAoEdHlwZRgBIAEoCRILCgNrZXkYAiABKAkiVQoTQmF0Y2hQcm9maWxlUmVxdWVzdBIrCgZmaWVsZHMYASADKAsyGy56ZW5hby52MS5CYXRjaFByb2ZpbGVGaWVsZBIRCglhZGRyZXNzZXMYAiADKAkyhAMKDFplbmFvU2VydmljZRJBCghFZGl0VXNlchIZLnplbmFvLnYxLkVkaXRVc2VyUmVxdWVzdBoaLnplbmFvLnYxLkVkaXRVc2VyUmVzcG9uc2USUwoOR2V0VXNlckFkZHJlc3MSHy56ZW5hby52MS5HZXRVc2VyQWRkcmVzc1JlcXVlc3QaIC56ZW5hby52MS5HZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJECglFZGl0RXZlbnQSGi56ZW5hby52MS5FZGl0RXZlbnRSZXF1ZXN0GhsuemVuYW8udjEuRWRpdEV2ZW50UmVzcG9uc2USSgoLUGFydGljaXBhdGUSHC56ZW5hby52MS5QYXJ0aWNpcGF0ZVJlcXVlc3QaHS56ZW5hby52MS5QYXJ0aWNpcGF0ZVJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw");
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIhcKFUdldFVzZXJBZGRyZXNzUmVxdWVzdCIpChZHZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEg8KB2FkZHJlc3MYASABKAkixAEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SKQoIbG9jYXRpb24YCSABKAsyFy56ZW5hby52MS5FdmVudExvY2F0aW9uIiEKE0NyZWF0ZUV2ZW50UmVzcG9uc2USCgoCaWQYASABKAki1AEKEEVkaXRFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJEhIKCnN0YXJ0X2RhdGUYBSABKAQSEAoIZW5kX2RhdGUYBiABKAQSFAoMdGlja2V0X3ByaWNlGAcgASgBEhAKCGNhcGFjaXR5GAggASgNEikKCGxvY2F0aW9uGAogASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbiIfChFFZGl0RXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSI1ChJQYXJ0aWNpcGF0ZVJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFZW1haWwYAiABKAkiLAoTUGFydGljaXBhdGVSZXNwb25zZRIVCg10aWNrZXRfc2VjcmV0GAEgASgJIsEBCg1FdmVudExvY2F0aW9uEhIKCnZlbnVlX25hbWUYASABKAkSFAoMaW5zdHJ1Y3Rpb25zGAIgASgJEiMKA2dlbxgDIAEoCzIULnplbmFvLnYxLkFkZHJlc3NHZW9IABIrCgd2aXJ0dWFsGAQgASgLMhguemVuYW8udjEuQWRkcmVzc1ZpcnR1YWxIABIpCgZjdXN0b20YBSABKAsyFy56ZW5hby52MS5BZGRyZXNzQ3VzdG9tSABCCQoHYWRkcmVzcyIdCg5BZGRyZXNzVmlydHVhbBILCgN1cmkYASABKAkiRQoKQWRkcmVzc0dlbxIPCgdhZGRyZXNzGAEgASgJEgsKA2xhdBgCIAEoAhILCgNsbmcYAyABKAISDAoEc2l6ZRgEIAEoAiIyCg1BZGRyZXNzQ3VzdG9tEg8KB2FkZHJlc3MYASABKAkSEAoIdGltZXpvbmUYAiABKAki3gEKCUV2ZW50SW5mbxINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSDwoHY3JlYXRvchgEIAEoCRISCgpzdGFydF9kYXRlGAUgASgDEhAKCGVuZF9kYXRlGAYgASgDEhAKCGNhcGFjaXR5GAcgASgNEikKCGxvY2F0aW9uGAggASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbhIUCgxwYXJ0aWNpcGFudHMYCSABKA0SEAoIcGtnX3BhdGgYCiABKAkiLgoRQmF0Y2hQcm9maWxlRmllbGQSDAoEdHlwZRgBIAEoCRILCgNrZXkYAiABKAkiVQoTQmF0Y2hQcm9maWxlUmVxdWVzdBIrCgZmaWVsZHMYASADKAsyGy56ZW5hby52MS5CYXRjaFByb2ZpbGVGaWVsZBIRCglhZGRyZXNzZXMYAiADKAkiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIj8KBlBvc3RJRBIQCghsb2NhbF9pZBgBIAEoCRIPCgdmZWVkX2lkGAIgASgJEhIKCm5ldHdvcmtfaWQYAyABKAkitAEKClBvc3RDb21tb24SEgoKY2hhbm5lbF9pZBgBIAEoCRIOCgZhdXRob3IYAiABKAkSIwoJcGFyZW50X2lkGAMgASgLMhAuemVuYW8udjEuUG9zdElEEiEKA2xvYxgEIAEoCzIULnplbmFvLnYxLlBvc3RHZW9Mb2MSEgoKY3JlYXRlZF9hdBgFIAEoAxISCgp1cGRhdGVkX2F0GAYgASgDEhIKCmRlbGV0ZWRfYXQYByABKAMiRQoMU3RhbmRhcmRQb3N0EiQKBmNvbW1vbhgBIAEoCzIULnplbmFvLnYxLlBvc3RDb21tb24SDwoHY29udGVudBgCIAEoCSKEAQoLQXJ0aWNsZVBvc3QSJAoGY29tbW9uGAEgASgLMhQuemVuYW8udjEuUG9zdENvbW1vbhINCgV0aXRsZRgCIAEoCRIUCgxwcmV2aWV3X3RleHQYAyABKAkSGQoRcHJldmlld19pbWFnZV91cmkYBCABKAkSDwoHY29udGVudBgFIAEoCSI7CghMaW5rUG9zdBIiCgRwb3N0GAEgASgLMhQuemVuYW8udjEuUG9zdENvbW1vbhILCgN1cmkYAiABKAkiVwoJSW1hZ2VQb3N0EiIKBHBvc3QYASABKAsyFC56ZW5hby52MS5Qb3N0Q29tbW9uEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhEKCWltYWdlX3VyaRgDIAEoCSJ0CglWaWRlb1Bvc3QSIgoEcG9zdBgBIAEoCzIULnplbmFvLnYxLlBvc3RDb21tb24SEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJdmlkZW9fdXJpGAMgASgJEhsKE3RodW1ibmFpbF9pbWFnZV91cmkYBCABKAkiTAoIUmVhY3Rpb24SIQoHcG9zdF9pZBgBIAEoCzIQLnplbmFvLnYxLlBvc3RJRBIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDItQBCgRQb3N0EioKCHN0YW5kYXJkGAEgASgLMhYuemVuYW8udjEuU3RhbmRhcmRQb3N0SAASKAoHYXJ0aWNsZRgCIAEoCzIVLnplbmFvLnYxLkFydGljbGVQb3N0SAASIgoEbGluaxgDIAEoCzISLnplbmFvLnYxLkxpbmtQb3N0SAASJAoFaW1hZ2UYBCABKAsyEy56ZW5hby52MS5JbWFnZVBvc3RIABIkCgV2aWRlbxgFIAEoCzITLnplbmFvLnYxLlZpZGVvUG9zdEgAQgYKBHBvc3QiGAoKU29jaWFsRmVlZBIKCgJpZBgBIAEoCTKEAwoMWmVuYW9TZXJ2aWNlEkEKCEVkaXRVc2VyEhkuemVuYW8udjEuRWRpdFVzZXJSZXF1ZXN0GhouemVuYW8udjEuRWRpdFVzZXJSZXNwb25zZRJTCg5HZXRVc2VyQWRkcmVzcxIfLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVxdWVzdBogLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkQKCUVkaXRFdmVudBIaLnplbmFvLnYxLkVkaXRFdmVudFJlcXVlc3QaGy56ZW5hby52MS5FZGl0RXZlbnRSZXNwb25zZRJKCgtQYXJ0aWNpcGF0ZRIcLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVxdWVzdBodLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z");
 
 /**
  * @generated from message zenao.v1.EditUserRequest
@@ -888,6 +888,375 @@ export type BatchProfileRequestJson = {
  */
 export const BatchProfileRequestSchema: GenMessage<BatchProfileRequest, BatchProfileRequestJson> = /*@__PURE__*/
   messageDesc(file_zenao_v1_zenao, 16);
+
+/**
+ * @generated from message zenao.v1.PostGeoLoc
+ */
+export type PostGeoLoc = Message<"zenao.v1.PostGeoLoc"> & {
+  /**
+   * @generated from field: float lat = 2;
+   */
+  lat: number;
+
+  /**
+   * @generated from field: float lng = 3;
+   */
+  lng: number;
+};
+
+/**
+ * Describes the message zenao.v1.PostGeoLoc.
+ * Use `create(PostGeoLocSchema)` to create a new message.
+ */
+export const PostGeoLocSchema: GenMessage<PostGeoLoc> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 17);
+
+/**
+ * @generated from message zenao.v1.PostID
+ */
+export type PostID = Message<"zenao.v1.PostID"> & {
+  /**
+   * @generated from field: string local_id = 1;
+   */
+  localId: string;
+
+  /**
+   * mainly a contract of social feed factory
+   *
+   * @generated from field: string feed_id = 2;
+   */
+  feedId: string;
+
+  /**
+   * @generated from field: string network_id = 3;
+   */
+  networkId: string;
+};
+
+/**
+ * Describes the message zenao.v1.PostID.
+ * Use `create(PostIDSchema)` to create a new message.
+ */
+export const PostIDSchema: GenMessage<PostID> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 18);
+
+/**
+ * XXX: put this in Post directly?
+ *
+ * @generated from message zenao.v1.PostCommon
+ */
+export type PostCommon = Message<"zenao.v1.PostCommon"> & {
+  /**
+   * @generated from field: string channel_id = 1;
+   */
+  channelId: string;
+
+  /**
+   * @generated from field: string author = 2;
+   */
+  author: string;
+
+  /**
+   * @generated from field: zenao.v1.PostID parent_id = 3;
+   */
+  parentId?: PostID;
+
+  /**
+   * XXX: map any extentions = 10;
+   *
+   * @generated from field: zenao.v1.PostGeoLoc loc = 4;
+   */
+  loc?: PostGeoLoc;
+
+  /**
+   * @generated from field: int64 created_at = 5;
+   */
+  createdAt: bigint;
+
+  /**
+   * @generated from field: int64 updated_at = 6;
+   */
+  updatedAt: bigint;
+
+  /**
+   * if != 0 -> deleted
+   *
+   * @generated from field: int64 deleted_at = 7;
+   */
+  deletedAt: bigint;
+};
+
+/**
+ * Describes the message zenao.v1.PostCommon.
+ * Use `create(PostCommonSchema)` to create a new message.
+ */
+export const PostCommonSchema: GenMessage<PostCommon> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 19);
+
+/**
+ * @generated from message zenao.v1.StandardPost
+ */
+export type StandardPost = Message<"zenao.v1.StandardPost"> & {
+  /**
+   * @generated from field: zenao.v1.PostCommon common = 1;
+   */
+  common?: PostCommon;
+
+  /**
+   * @generated from field: string content = 2;
+   */
+  content: string;
+};
+
+/**
+ * Describes the message zenao.v1.StandardPost.
+ * Use `create(StandardPostSchema)` to create a new message.
+ */
+export const StandardPostSchema: GenMessage<StandardPost> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 20);
+
+/**
+ * @generated from message zenao.v1.ArticlePost
+ */
+export type ArticlePost = Message<"zenao.v1.ArticlePost"> & {
+  /**
+   * @generated from field: zenao.v1.PostCommon common = 1;
+   */
+  common?: PostCommon;
+
+  /**
+   * @generated from field: string title = 2;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string preview_text = 3;
+   */
+  previewText: string;
+
+  /**
+   * @generated from field: string preview_image_uri = 4;
+   */
+  previewImageUri: string;
+
+  /**
+   * @generated from field: string content = 5;
+   */
+  content: string;
+};
+
+/**
+ * Describes the message zenao.v1.ArticlePost.
+ * Use `create(ArticlePostSchema)` to create a new message.
+ */
+export const ArticlePostSchema: GenMessage<ArticlePost> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 21);
+
+/**
+ * @generated from message zenao.v1.LinkPost
+ */
+export type LinkPost = Message<"zenao.v1.LinkPost"> & {
+  /**
+   * @generated from field: zenao.v1.PostCommon post = 1;
+   */
+  post?: PostCommon;
+
+  /**
+   * @generated from field: string uri = 2;
+   */
+  uri: string;
+};
+
+/**
+ * Describes the message zenao.v1.LinkPost.
+ * Use `create(LinkPostSchema)` to create a new message.
+ */
+export const LinkPostSchema: GenMessage<LinkPost> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 22);
+
+/**
+ * @generated from message zenao.v1.ImagePost
+ */
+export type ImagePost = Message<"zenao.v1.ImagePost"> & {
+  /**
+   * @generated from field: zenao.v1.PostCommon post = 1;
+   */
+  post?: PostCommon;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string image_uri = 3;
+   */
+  imageUri: string;
+};
+
+/**
+ * Describes the message zenao.v1.ImagePost.
+ * Use `create(ImagePostSchema)` to create a new message.
+ */
+export const ImagePostSchema: GenMessage<ImagePost> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 23);
+
+/**
+ * @generated from message zenao.v1.VideoPost
+ */
+export type VideoPost = Message<"zenao.v1.VideoPost"> & {
+  /**
+   * @generated from field: zenao.v1.PostCommon post = 1;
+   */
+  post?: PostCommon;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string video_uri = 3;
+   */
+  videoUri: string;
+
+  /**
+   * @generated from field: string thumbnail_image_uri = 4;
+   */
+  thumbnailImageUri: string;
+};
+
+/**
+ * Describes the message zenao.v1.VideoPost.
+ * Use `create(VideoPostSchema)` to create a new message.
+ */
+export const VideoPostSchema: GenMessage<VideoPost> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 24);
+
+/**
+ * @generated from message zenao.v1.Reaction
+ */
+export type Reaction = Message<"zenao.v1.Reaction"> & {
+  /**
+   * @generated from field: zenao.v1.PostID post_id = 1;
+   */
+  postId?: PostID;
+
+  /**
+   * @generated from field: string icon = 2;
+   */
+  icon: string;
+
+  /**
+   * @generated from field: string user_id = 3;
+   */
+  userId: string;
+};
+
+/**
+ * Describes the message zenao.v1.Reaction.
+ * Use `create(ReactionSchema)` to create a new message.
+ */
+export const ReactionSchema: GenMessage<Reaction> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 25);
+
+/**
+ * Only on local chaine from the related post
+ *
+ * @generated from message zenao.v1.Tip
+ */
+export type Tip = Message<"zenao.v1.Tip"> & {
+  /**
+   * @generated from field: string post_local_id = 1;
+   */
+  postLocalId: string;
+
+  /**
+   * @generated from field: string denom = 3;
+   */
+  denom: string;
+
+  /**
+   * XXX: use string encoding?
+   *
+   * @generated from field: int64 amount = 4;
+   */
+  amount: bigint;
+};
+
+/**
+ * Describes the message zenao.v1.Tip.
+ * Use `create(TipSchema)` to create a new message.
+ */
+export const TipSchema: GenMessage<Tip> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 26);
+
+/**
+ * @generated from message zenao.v1.Post
+ */
+export type Post = Message<"zenao.v1.Post"> & {
+  /**
+   * @generated from oneof zenao.v1.Post.post
+   */
+  post: {
+    /**
+     * @generated from field: zenao.v1.StandardPost standard = 1;
+     */
+    value: StandardPost;
+    case: "standard";
+  } | {
+    /**
+     * @generated from field: zenao.v1.ArticlePost article = 2;
+     */
+    value: ArticlePost;
+    case: "article";
+  } | {
+    /**
+     * @generated from field: zenao.v1.LinkPost link = 3;
+     */
+    value: LinkPost;
+    case: "link";
+  } | {
+    /**
+     * @generated from field: zenao.v1.ImagePost image = 4;
+     */
+    value: ImagePost;
+    case: "image";
+  } | {
+    /**
+     * @generated from field: zenao.v1.VideoPost video = 5;
+     */
+    value: VideoPost;
+    case: "video";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message zenao.v1.Post.
+ * Use `create(PostSchema)` to create a new message.
+ */
+export const PostSchema: GenMessage<Post> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 27);
+
+/**
+ * contains the authorization layer, each DAO has its own feed but could have
+ * multiple feeds
+ *
+ * @generated from message zenao.v1.SocialFeed
+ */
+export type SocialFeed = Message<"zenao.v1.SocialFeed"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message zenao.v1.SocialFeed.
+ * Use `create(SocialFeedSchema)` to create a new message.
+ */
+export const SocialFeedSchema: GenMessage<SocialFeed> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 28);
 
 /**
  * @generated from service zenao.v1.ZenaoService
