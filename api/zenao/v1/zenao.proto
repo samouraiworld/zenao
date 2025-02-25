@@ -115,8 +115,8 @@ message PostGeoLoc {
 }
 
 message PostID {
-  string local_id = 1;
-  string feed_id = 2; // mainly a contract of social feed factory
+  string local_id = 1; // indexed by feed_id e.g "feed_id:local_post_id"
+  string feed_id = 2;  // mainly a contract of social feed factory
   string network_id = 3;
 }
 
