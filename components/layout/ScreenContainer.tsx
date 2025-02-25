@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { ImageLoaderProps } from "next/image";
 import { SignedOutModal } from "../modals/SignedOutModal";
