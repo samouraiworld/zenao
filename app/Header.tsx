@@ -57,7 +57,7 @@ export async function Header() {
   const user = await queryClient.fetchQuery(userOptions(authToken));
 
   return (
-    <div className="flex sm:p-2 w-full">
+    <div className="flex sm:justify-center sm:p-2 w-full">
       {/* Desktop */}
       <Card className="max-sm:hidden flex flex-row items-center px-3 py-2 gap-7 rounded-xl">
         <Link href="/" className="flex flex-row gap-2 items-center">
