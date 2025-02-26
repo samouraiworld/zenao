@@ -134,6 +134,27 @@ func DeletePost(postID string) {
 	common.DeletedAt = time.Now().Unix()
 }
 
+// / XXX: should we restrict editing to the same kind of post?
+func EditPost(postID string, newPost *zenaov1.Post) {
+	creator := std.PreviousRealm()
+	postRaw, ok := posts.Get(postID)
+	if !ok {
+		panic("post not found")
+	}
+	post := postRaw.(*zenaov1.Post)
+	common := getPostCommon(post)
+	if common.Author != creator.Address().String() {
+		panic("you are not the author of this post")
+	}
+	if common == nil {
+		panic("post common is nil")
+	}
+	if common.DeletedAt != 0 {
+		panic("post is deleted")
+	}
+	posts.Set(postID, newPost)
+}
+
 func getPostCommon(post *zenaov1.Post) *zenaov1.PostCommon {
 	if post == nil {
 		panic("post is nil")
