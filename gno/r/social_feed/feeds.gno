@@ -34,6 +34,9 @@ func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string 
 		authFunc:     authFunc,
 	}
 	feedId := creator.Address().String() + ":" + slug
+	if feeds.Has(feedId) {
+		panic("feed already exists")
+	}
 	feeds.Set(feedId, feed)
 	return feedId
 }
