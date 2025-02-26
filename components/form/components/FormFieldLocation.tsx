@@ -124,9 +124,8 @@ export const FormFieldLocation: React.FC<{
                       if (e.key === "Enter") {
                         e.preventDefault();
                         form.setValue("location", {
-                          kind: "custom",
+                          ...object,
                           address: search,
-                          timeZone: "",
                         });
                         setOpen(false);
                       }
@@ -165,9 +164,8 @@ export const FormFieldLocation: React.FC<{
                         key={search}
                         onSelect={async () => {
                           form.setValue("location", {
-                            kind: "custom",
+                            ...object,
                             address: search,
-                            timeZone: "",
                           });
                           onRemove();
                           setOpen(false);

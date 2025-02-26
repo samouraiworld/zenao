@@ -38,7 +38,9 @@ export const EventForm: React.FC<EventFormProps> = ({
   const location = form.watch("location");
   const t = useTranslations("eventForm");
 
-  const [isVirtual, setIsVirtual] = useState<boolean>(false);
+  const [isVirtual, setIsVirtual] = useState<boolean>(
+    location.kind === "virtual" || false,
+  );
   const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(
     null,
   );
@@ -104,7 +106,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                     form.setValue("location", {
                       kind: "custom",
                       address: "",
-                      timeZone: "",
+                      timeZone: currentTimezone(),
                     });
                   }
                   setMarker(null);
@@ -142,7 +144,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             )}
             {isCustom && location.kind === "custom" && location.address && (
               <TimeZonesPopover
-                defaultValue={currentTimezone()}
+                defaultValue={location.timeZone}
                 handleSelect={(timeZone: string) => {
                   form.setValue("location", {
                     ...location,
