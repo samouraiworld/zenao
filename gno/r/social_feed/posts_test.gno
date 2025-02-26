@@ -136,6 +136,194 @@ func TestGetPost(t *testing.T) {
 	}
 }
 
+func TestDeletePost(t *testing.T) {
+	setupTest()
+
+	type input struct {
+		localPostId string
+		caller      std.Address
+	}
+
+	type output struct {
+		panic bool
+	}
+
+	type test struct {
+		input  input
+		output output
+	}
+
+	type testTable = map[string]test
+
+	tests := testTable{
+		"valid post": {
+			input: input{
+				localPostId: "public:0000001",
+				caller:      alice,
+			},
+			output: output{
+				panic: false,
+			},
+		},
+		"invalid post": {
+			input: input{
+				localPostId: "public:0000002",
+				caller:      alice,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+		"not the creator": {
+			input: input{
+				localPostId: "public:0000001",
+				caller:      bob,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+		"already deleted": {
+			input: input{
+				localPostId: "public:0000001",
+				caller:      alice,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+	}
+
+	post := &zenaov1.Post{
+		Post: &zenaov1.StandardPost{
+			Common: &zenaov1.PostCommon{
+				Author:    alice.String(),
+				DeletedAt: 0,
+			},
+		},
+	}
+
+	std.TestSetOriginCaller(alice)
+	NewPost("public", post)
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if tc.output.panic {
+				defer func() {
+					if r := recover(); r == nil {
+						t.Errorf("expected panic")
+					}
+				}()
+			}
+			std.TestSetOriginCaller(tc.input.caller)
+			DeletePost(tc.input.localPostId)
+		})
+	}
+}
+
+func TestEditPost(t *testing.T) {
+	setupTest()
+
+	type input struct {
+		localPostId string
+		newPost     *zenaov1.Post
+	}
+
+	type output struct {
+		panic bool
+	}
+
+	type test struct {
+		input  input
+		output output
+	}
+
+	type testTable = map[string]test
+
+	post := &zenaov1.Post{
+		Post: &zenaov1.StandardPost{
+			Common: &zenaov1.PostCommon{
+				Author:    alice.String(),
+				DeletedAt: 0,
+			},
+		},
+	}
+
+	deletedPost := &zenaov1.Post{
+		Post: &zenaov1.StandardPost{
+			Common: &zenaov1.PostCommon{
+				Author:    alice.String(),
+				DeletedAt: 1,
+			},
+		},
+	}
+
+	newPost := &zenaov1.Post{
+		Post: &zenaov1.StandardPost{
+			Common: &zenaov1.PostCommon{
+				Author:    bob.String(),
+				DeletedAt: 0,
+			},
+		},
+	}
+
+	std.TestSetOriginCaller(alice)
+	NewPost("public", post)
+	NewPost("public", deletedPost)
+
+	tests := testTable{
+		"valid post": {
+			input: input{
+				localPostId: "public:0000001",
+				newPost:     newPost,
+			},
+			output: output{
+				panic: false,
+			},
+		},
+		"invalid post": {
+			input: input{
+				localPostId: "public:0000003",
+				newPost:     newPost,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+		"not the creator": {
+			input: input{
+				localPostId: "public:0000001",
+				newPost:     newPost,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+		"already deleted": {
+			input: input{
+				localPostId: "public:0000002",
+				newPost:     newPost,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if tc.output.panic {
+				defer func() {
+					if r := recover(); r == nil {
+						t.Errorf("expected panic")
+					}
+				}()
+			}
+			EditPost(tc.input.localPostId, tc.input.newPost)
+		})
+	}
+}
+
 func setupTest() {
 	id = seqid.ID(0)
 }
