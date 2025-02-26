@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -61,18 +62,6 @@ func execE2EInfra() error {
 		wg.Wait()
 	}()
 
-	// prepare db
-	{
-		if err := os.RemoveAll(dbPath); err != nil {
-			return err
-		}
-
-		args := []string{"atlas", "migrate", "apply", "--dir", "file://migrations", "--env", "e2e"}
-		if err := runCommand(ctx, "db", "#317738", args); err != nil {
-			return err
-		}
-	}
-
 	// start gnodev in background
 	{
 		args := []string{"make", "start.gnodev-e2e"}
@@ -81,32 +70,98 @@ func execE2EInfra() error {
 			defer wg.Done()
 			runCommand(ctx, "gnodev", "#7D56F4", args)
 		}()
-	}
-
-	// start backend in background
-	{
-		args := []string{"go", "run", "./backend", "start", "--db", dbPath}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			go runCommand(ctx, "backend", "#C2675E", args)
-		}()
-	}
-
-	// XXX: backend should be ready before gnodev but it would be better to check the connection
-
-	// wait for gnodev to be ready
-	if err := waitHTTPOK(ctx, 60*time.Second, "http://localhost:26657/health"); err != nil {
-		return err
-	}
-
-	// run fakegen
-	{
-		args := []string{"go", "run", "./backend", "fakegen", "--events", "5", "--db", dbPath}
-		if err := runCommand(ctx, "fakegen", "#317738", args); err != nil {
+		// wait for gnodev to be ready
+		if err := waitHTTPStatus(ctx, 60*time.Second, "http://localhost:26657/health", 200); err != nil {
 			return err
 		}
 	}
+
+	backendCtx, cancelBackendCtx := context.WithCancel(ctx)
+	defer cancelBackendCtx()
+	backendDone := make(chan struct{}, 1)
+	resetMu := &sync.Mutex{}
+
+	startBackend := func() error {
+		defer func() { backendDone <- struct{}{} }()
+
+		// prepare db
+		{
+			if err := os.RemoveAll(dbPath); err != nil {
+				return err
+			}
+
+			args := []string{"atlas", "migrate", "apply", "--dir", "file://migrations", "--env", "e2e"}
+			if err := runCommand(backendCtx, "db", "#317738", args); err != nil {
+				return err
+			}
+		}
+
+		// start backend in background
+		{
+			args := []string{"go", "run", "./backend", "start", "--db", dbPath}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				go runCommand(backendCtx, "backend", "#C2675E", args)
+			}()
+		}
+
+		// wait for backend to be ready
+		if err := waitHTTPStatus(ctx, 60*time.Second, "http://localhost:4242", 404); err != nil {
+			return err
+		}
+
+		// run fakegen
+		// XXX: replace with golden files
+		{
+			args := []string{"go", "run", "./backend", "fakegen", "--events", "5", "--db", dbPath}
+			if err := runCommand(backendCtx, "fakegen", "#317738", args); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
+	if err := startBackend(); err != nil {
+		return err
+	}
+
+	go func() {
+		http.DefaultServeMux.Handle("/reset", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			resetMu.Lock()
+			defer resetMu.Unlock()
+
+			fmt.Println("RESET   | ----------------------------")
+
+			// reset gnodev
+			if _, err := http.Get("http://localhost:8888/reset"); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+				return
+			}
+
+			// reset backend
+			cancelBackendCtx()
+			<-backendDone
+			backendCtx, cancelBackendCtx = context.WithCancel(ctx)
+			backendDone = make(chan struct{}, 1)
+			if err := startBackend(); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
+			}
+			fmt.Println("READY   | ----------------------------")
+		}))
+		conn, err := net.Listen("tcp", "0.0.0.0:4243")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, fmt.Errorf("failed to open http server conn: %w", err))
+			return
+		}
+		if err := http.Serve(conn, nil); err != nil {
+			fmt.Fprintln(os.Stderr, fmt.Errorf("failed to start http server: %w", err))
+			return
+		}
+	}()
 
 	if !e2eInfraConf.ci {
 		fmt.Println("READY   | ----------------------------")
@@ -126,7 +181,7 @@ func execE2EInfra() error {
 	return nil
 }
 
-func waitHTTPOK(ctx context.Context, timeout time.Duration, url string) error {
+func waitHTTPStatus(ctx context.Context, timeout time.Duration, url string, status int) error {
 	healthCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	client := http.Client{
@@ -138,7 +193,7 @@ func waitHTTPOK(ctx context.Context, timeout time.Duration, url string) error {
 			return err
 		}
 		res, err := client.Do(req)
-		if err == nil && res.StatusCode == 200 {
+		if err == nil && res.StatusCode == status {
 			return nil
 		}
 		select {

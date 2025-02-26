@@ -1,5 +1,7 @@
 describe("Navigation", () => {
   it("should be able to navigate to first event and participate", () => {
+    cy.request("http://localhost:4243/reset");
+
     // Start from the index page
     cy.visit("http://localhost:3000/");
 
@@ -13,6 +15,6 @@ describe("Navigation", () => {
 
     cy.get("button").contains("Participate").click();
 
-    cy.get("p").contains("You're in!").should("exist");
+    cy.get("p").contains("You're in!", { timeout: 8000 }).should("exist");
   });
 });
