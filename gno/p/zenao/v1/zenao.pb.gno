@@ -139,18 +139,18 @@ type ArticlePost struct {
 }
 
 type LinkPost struct {
-	Post *PostCommon
+	Common *PostCommon
 	Uri string
 }
 
 type ImagePost struct {
-	Post *PostCommon
+	Common *PostCommon
 	Description string
 	ImageUri string
 }
 
 type VideoPost struct {
-	Post *PostCommon
+	Common *PostCommon
 	Description string
 	VideoUri string
 	ThumbnailImageUri string

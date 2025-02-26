@@ -439,8 +439,8 @@ func (l *LinkPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("LinkPost{\n")
-	if l.Post != nil {
-		fmt.Fprintf(buf, "%s\tPost: &%s%s,\n", linePrefix, typePrefix, l.Post.GnoLiteral(typePrefix, linePrefix+"\t"))
+	if l.Common != nil {
+		fmt.Fprintf(buf, "%s\tCommon: &%s%s,\n", linePrefix, typePrefix, l.Common.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	if l.Uri != "" {
 		fmt.Fprintf(buf, "%s\tUri: %q,\n", linePrefix, l.Uri)
@@ -454,8 +454,8 @@ func (i *ImagePost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("ImagePost{\n")
-	if i.Post != nil {
-		fmt.Fprintf(buf, "%s\tPost: &%s%s,\n", linePrefix, typePrefix, i.Post.GnoLiteral(typePrefix, linePrefix+"\t"))
+	if i.Common != nil {
+		fmt.Fprintf(buf, "%s\tCommon: &%s%s,\n", linePrefix, typePrefix, i.Common.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	if i.Description != "" {
 		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, i.Description)
@@ -472,8 +472,8 @@ func (v *VideoPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("VideoPost{\n")
-	if v.Post != nil {
-		fmt.Fprintf(buf, "%s\tPost: &%s%s,\n", linePrefix, typePrefix, v.Post.GnoLiteral(typePrefix, linePrefix+"\t"))
+	if v.Common != nil {
+		fmt.Fprintf(buf, "%s\tCommon: &%s%s,\n", linePrefix, typePrefix, v.Common.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	if v.Description != "" {
 		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, v.Description)

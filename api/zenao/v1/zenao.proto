@@ -147,18 +147,18 @@ message ArticlePost {
 }
 
 message LinkPost {
-  PostCommon post = 1;
+  PostCommon common = 1;
   string uri = 2;
 }
 
 message ImagePost {
-  PostCommon post = 1;
+  PostCommon common = 1;
   string description = 2;
   string image_uri = 3;
 }
 
 message VideoPost {
-  PostCommon post = 1;
+  PostCommon common = 1;
   string description = 2;
   string video_uri = 3;
   string thumbnail_image_uri = 4;
