@@ -20,17 +20,17 @@ func NewPost(feedId string, post *zenaov1.Post) string {
 	return localPostId
 }
 
-func GetPost(postID string) zenaov1.Post {
-	postRaw, ok := posts.Get(postID)
+func GetPost(localPostId string) *zenaov1.Post {
+	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
 	}
-	return postRaw.(zenaov1.Post)
+	return postRaw.(*zenaov1.Post)
 }
 
-func DeletePost(postID string) {
+func DeletePost(localPostId string) {
 	creator := std.PreviousRealm()
-	postRaw, ok := posts.Get(postID)
+	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
 	}
@@ -49,9 +49,9 @@ func DeletePost(postID string) {
 }
 
 // / XXX: should we restrict editing to the same kind of post?
-func EditPost(postID string, newPost *zenaov1.Post) {
+func EditPost(localPostId string, newPost *zenaov1.Post) {
 	creator := std.PreviousRealm()
-	postRaw, ok := posts.Get(postID)
+	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
 	}
@@ -66,7 +66,7 @@ func EditPost(postID string, newPost *zenaov1.Post) {
 	if common.DeletedAt != 0 {
 		panic("post is deleted")
 	}
-	posts.Set(postID, newPost)
+	posts.Set(localPostId, newPost)
 }
 
 func getPostCommon(post *zenaov1.Post) *zenaov1.PostCommon {
