@@ -26,6 +26,7 @@ jobs:
 
       - name: Install gnodev
         run: |
+          mkdir gnobuild
           cd gnobuild
           git clone https://github.com/gnolang/gno.git
           cd gno
