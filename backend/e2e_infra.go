@@ -68,7 +68,9 @@ func execE2EInfra() error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			runCommand(ctx, "gnodev", "#7D56F4", args)
+			if err := runCommand(ctx, "gnodev", "#7D56F4", args); err != nil {
+				fmt.Println("RUN_ERR | gnodev:", err)
+			}
 		}()
 	}
 
@@ -97,7 +99,11 @@ func execE2EInfra() error {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				go runCommand(backendCtx, "backend", "#C2675E", args)
+				go func() {
+					if err := runCommand(backendCtx, "backend", "#C2675E", args); err != nil {
+						fmt.Println("RUN_ERR | backend:", err)
+					}
+				}()
 			}()
 		}
 
@@ -174,7 +180,11 @@ func execE2EInfra() error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		go runCommand(ctx, "nextjs", "#E1CC4F", args)
+		go func() {
+			if err := runCommand(ctx, "nextjs", "#E1CC4F", args); err != nil {
+				fmt.Println("RUN_ERR | nextjs:", err)
+			}
+		}()
 	}()
 
 	wg.Wait()
@@ -214,9 +224,15 @@ func runCommand(ctx context.Context, name, color string, args []string) error {
 
 	fmt.Fprintln(wr, strings.Join(args, " "))
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+
+	// prefix log lines
 	cmd.Stdout = wr
 	cmd.Stderr = prefixStream(os.Stderr, streamPrefix)
+
+	// ensure the command will get terminated if unresponsive
 	cmd.WaitDelay = 2 * time.Second
+
+	// kill all children processes and not just parent
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Cancel = func() error {
 		pgid, err := syscall.Getpgid(cmd.Process.Pid)
@@ -236,6 +252,7 @@ func prefixStream(out io.Writer, prefix string) io.Writer {
 	return wr
 }
 
+// this is used to join reset requests when one is already ongoing
 type requestsJoiner struct {
 	mu      sync.Mutex
 	process func() (int, []byte)
