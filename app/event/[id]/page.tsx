@@ -2,6 +2,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { EventInfo } from "./event-info";
+import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
@@ -42,7 +43,9 @@ export default async function EventPage({ params }: Props) {
   void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
 
   return (
-    <ScreenContainer backgroundSource={eventData.imageUri}>
+    <ScreenContainer
+      background={{ src: eventData.imageUri, width: imageWidth }}
+    >
       <HydrationBoundary state={dehydrate(queryClient)}>
         <EventInfo id={p.id} authToken={authToken} />
       </HydrationBoundary>
