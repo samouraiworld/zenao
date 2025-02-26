@@ -13,9 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-go@v3
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
         with:
-          go-version: "1.22"
+          go-version-file: go.mod
+
       - name: Clean gno
         run: make clean-gno
 

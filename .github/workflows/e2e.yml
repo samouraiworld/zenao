@@ -13,15 +13,16 @@ jobs:
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
-        
+
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           cache: "npm"
           node-version-file: ".nvmrc"
-      - uses: actions/setup-go@v3
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
         with:
-          go-version: "1.23"
+          go-version-file: go.mod
 
       - name: Get go binaries path
         id: go-bin-path
