@@ -49,3 +49,6 @@ gnobuild/
 
 # db
 /*.db
+
+# cypress
+/cypress/screenshots
