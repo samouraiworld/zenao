@@ -20,6 +20,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { Button } from "@/components/shadcn/button";
 import { userOptions } from "@/lib/queries/user";
 import { GnoProfile } from "@/lib/queries/profile";
+import { web2URL } from "@/lib/uris";
 
 const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   const t = useTranslations("header");
@@ -118,8 +119,8 @@ const Auth: React.FC<{ user: GnoProfile | null }> = ({ user }) => {
       <SignedIn>
         {user && (
           <Link href="/settings">
-            <Avatar className="h-8 w-8 self-center">
-              <AvatarImage src={user.avatarUri} alt="avatar-uri" />
+            <Avatar className="h-[30px] w-[30px] self-center">
+              <AvatarImage src={web2URL(user.avatarUri)} alt="avatar-uri" />
               <AvatarFallback>avatar</AvatarFallback>
             </Avatar>
           </Link>
