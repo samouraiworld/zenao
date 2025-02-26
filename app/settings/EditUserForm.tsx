@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSession } from "@clerk/nextjs";
+import { useAuth, useSession } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -16,13 +16,15 @@ import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
 import { FormFieldImage } from "@/components/form/components/FormFieldImage";
-import { userOptions } from "@/lib/queries/user";
+import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { profileOptions } from "@/lib/queries/profile";
 
-export const EditUserForm: React.FC<{ authToken: string | null }> = ({
-  authToken,
-}) => {
-  const { data: user } = useSuspenseQuery(userOptions(authToken));
+export const EditUserForm: React.FC = () => {
+  const { getToken, userId } = useAuth();
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: user } = useSuspenseQuery(userOptions(address));
 
   const { session } = useSession();
   const [loading, setLoading] = useState<boolean>(false);

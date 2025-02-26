@@ -70,16 +70,11 @@ func execE2EInfra() error {
 			defer wg.Done()
 			runCommand(ctx, "gnodev", "#7D56F4", args)
 		}()
-		// wait for gnodev to be ready
-		if err := waitHTTPStatus(ctx, 60*time.Second, "http://localhost:26657/health", 200); err != nil {
-			return err
-		}
 	}
 
 	backendCtx, cancelBackendCtx := context.WithCancel(ctx)
 	defer cancelBackendCtx()
 	backendDone := make(chan struct{}, 1)
-	resetMu := &sync.Mutex{}
 
 	startBackend := func() error {
 		defer func() { backendDone <- struct{}{} }()
@@ -106,6 +101,11 @@ func execE2EInfra() error {
 			}()
 		}
 
+		// wait for gnodev to be ready
+		if err := waitHTTPStatus(ctx, 60*time.Second, "http://localhost:26657/health", 200); err != nil {
+			return err
+		}
+
 		// wait for backend to be ready
 		if err := waitHTTPStatus(ctx, 60*time.Second, "http://localhost:4242", 404); err != nil {
 			return err
@@ -114,7 +114,7 @@ func execE2EInfra() error {
 		// run fakegen
 		// XXX: replace with golden files
 		{
-			args := []string{"go", "run", "./backend", "fakegen", "--events", "5", "--db", dbPath}
+			args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--db", dbPath}
 			if err := runCommand(backendCtx, "fakegen", "#317738", args); err != nil {
 				return err
 			}
@@ -127,30 +127,30 @@ func execE2EInfra() error {
 		return err
 	}
 
+	resetReqJoiner := requestsJoiner{process: func() (int, []byte) {
+		fmt.Println("RESET   | ----------------------------")
+
+		// reset gnodev
+		if _, err := http.Get("http://localhost:8888/reset"); err != nil {
+			return http.StatusInternalServerError, []byte(err.Error())
+		}
+
+		// reset backend
+		cancelBackendCtx()
+		<-backendDone
+		backendCtx, cancelBackendCtx = context.WithCancel(ctx)
+		backendDone = make(chan struct{}, 1)
+		if err := startBackend(); err != nil {
+			return http.StatusInternalServerError, []byte(err.Error())
+		}
+		fmt.Println("READY   | ----------------------------")
+
+		return http.StatusOK, nil
+	}}
+
 	go func() {
 		http.DefaultServeMux.Handle("/reset", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			resetMu.Lock()
-			defer resetMu.Unlock()
-
-			fmt.Println("RESET   | ----------------------------")
-
-			// reset gnodev
-			if _, err := http.Get("http://localhost:8888/reset"); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
-				return
-			}
-
-			// reset backend
-			cancelBackendCtx()
-			<-backendDone
-			backendCtx, cancelBackendCtx = context.WithCancel(ctx)
-			backendDone = make(chan struct{}, 1)
-			if err := startBackend(); err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(err.Error()))
-			}
-			fmt.Println("READY   | ----------------------------")
+			<-resetReqJoiner.req(w)
 		}))
 		conn, err := net.Listen("tcp", "0.0.0.0:4243")
 		if err != nil {
@@ -234,4 +234,41 @@ func prefixStream(out io.Writer, prefix string) io.Writer {
 	pfix := prefixer.New(rd, prefix)
 	go io.Copy(out, pfix)
 	return wr
+}
+
+type requestsJoiner struct {
+	mu      sync.Mutex
+	process func() (int, []byte)
+	reqs    []http.ResponseWriter
+	chans   []chan struct{}
+}
+
+func (r *requestsJoiner) req(w http.ResponseWriter) chan struct{} {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.reqs = append(r.reqs, w)
+
+	doneCh := make(chan struct{}, 1)
+	r.chans = append(r.chans, doneCh)
+
+	if len(r.reqs) != 1 {
+		return doneCh
+	}
+
+	go func() {
+		status, body := r.process()
+
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		for i, w := range r.reqs {
+			w.WriteHeader(status)
+			w.Write(body)
+			close(r.chans[i])
+		}
+		r.reqs = nil
+		r.chans = nil
+	}()
+
+	return doneCh
 }

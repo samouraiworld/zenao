@@ -3,19 +3,17 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { EditUserForm } from "./EditUserForm";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { userOptions } from "@/lib/queries/user";
+import { userAddressOptions } from "@/lib/queries/user";
 
 export default async function SettingsPage() {
   const queryClient = getQueryClient();
-  const { getToken } = await auth();
-  const authToken = await getToken();
-
-  void queryClient.prefetchQuery(userOptions(authToken));
+  const { getToken, userId } = await auth();
+  void queryClient.prefetchQuery(userAddressOptions(getToken, userId));
 
   return (
     <ScreenContainer>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EditUserForm authToken={authToken} />
+        <EditUserForm />
       </HydrationBoundary>
     </ScreenContainer>
   );

@@ -51,7 +51,7 @@ type fakeEvent struct {
 	Title            string  `faker:"sentence"`
 	Description      string  `faker:"paragraph"`
 	TicketPrice      float64 `faker:"amount"`
-	Capacity         float64 `faker:"amount"`
+	Capacity         float64 `faker:"boundary_start=10, boundary_end=5000"`
 	StartOffsetHours int     `faker:"oneof: 24, 48, 72, 96"`
 	DurationHours    int     `faker:"oneof: 1, 6, 12"`
 	Location         string  `faker:"sentence"`
