@@ -1,12 +1,13 @@
-"use client";
-
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useRef } from "react";
+import { MapContainer, TileLayer, Marker } from "./MapComponents";
 
 export const Map: React.FC<{ marker: L.LatLng }> = ({ marker }) => {
+  const mapRef = useRef(null);
   return (
     <MapContainer
+      ref={mapRef}
       center={marker}
       zoom={12}
       className="h-[300px] w-full rounded-xl z-40"

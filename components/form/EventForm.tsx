@@ -20,9 +20,7 @@ import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldLocation } from "./components/FormFieldLocation";
 import { Form } from "@/components/shadcn/form";
-import "leaflet/dist/leaflet.css";
-import "leaflet-geosearch/dist/geosearch.css";
-import { Map } from "@/components/common/Map";
+import { Map } from "@/components/common/map/Map";
 import { currentTimezone } from "@/lib/time";
 
 interface EventFormProps {
