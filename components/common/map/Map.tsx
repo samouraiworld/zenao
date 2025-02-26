@@ -1,13 +1,19 @@
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { useRef } from "react";
-import { MapContainer, TileLayer, Marker } from "./MapComponents";
+"use client";
 
-export const Map: React.FC<{ marker: L.LatLng }> = ({ marker }) => {
-  const mapRef = useRef(null);
+import { LatLng, Icon } from "leaflet";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
+
+import "leaflet/dist/leaflet.css";
+
+export interface MapProps {
+  lat: number;
+  lng: number;
+}
+
+export const Map: React.FC<MapProps> = ({ lat, lng }) => {
+  const marker = new LatLng(lat, lng);
   return (
     <MapContainer
-      ref={mapRef}
       center={marker}
       zoom={12}
       className="h-[300px] w-full rounded-xl z-40"
@@ -19,7 +25,7 @@ export const Map: React.FC<{ marker: L.LatLng }> = ({ marker }) => {
       <Marker
         position={marker}
         icon={
-          new L.Icon({
+          new Icon({
             iconUrl: "/marker-icon.png",
             shadowUrl: "/marker-shadow.png",
           })

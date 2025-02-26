@@ -1,8 +1,15 @@
-import { Map } from "leaflet";
-import { Ref } from "react";
-import { MapContainer as LMapContainer } from "react-leaflet";
+"use client";
 
-export const MapContainer: React.FC<{ forwardedRef: Ref<Map> }> = ({
-  forwardedRef,
-  ...props
-}) => <LMapContainer {...props} ref={forwardedRef} />;
+import dynamic from "next/dynamic";
+import { MapProps } from "./Map";
+
+const LazyMap = dynamic(() => import("./Map").then((m) => m.Map), {
+  ssr: false,
+  loading: () => <p>Loading...</p>,
+});
+
+function MapCaller(props: MapProps) {
+  return <LazyMap {...props} />;
+}
+
+export default MapCaller;

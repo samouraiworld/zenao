@@ -8,7 +8,6 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
-import L from "leaflet";
 import { ParticipateForm } from "./ParticipateForm";
 import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
@@ -21,10 +20,9 @@ import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
-import "leaflet/dist/leaflet.css";
-import { Map } from "@/components/common/Map";
 import { EventFormSchemaType } from "@/components/form/types";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
+import MapCaller from "@/components/common/map/MapLazyComponents";
 
 interface EventSectionProps {
   title: string;
@@ -195,7 +193,7 @@ export function EventInfo({
             </LargeText>
           </div>
           {location.kind === "geo" && (
-            <Map marker={new L.LatLng(location.lat, location.lng)} />
+            <MapCaller lat={location.lat} lng={location.lng} />
           )}
         </div>
 

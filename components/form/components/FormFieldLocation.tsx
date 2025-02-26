@@ -1,9 +1,9 @@
 "use client";
+
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { XIcon } from "lucide-react";
-import L from "leaflet";
 import { z } from "zod";
 import OpenStreetMapProvider from "leaflet-geosearch/lib/providers/openStreetMapProvider.js";
 import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
@@ -56,7 +56,7 @@ export const useSearchField = (value: string) => {
 
 export const FormFieldLocation: React.FC<{
   form: UseFormReturn<EventFormSchemaType>;
-  onSelect: (marker: L.LatLng) => Promise<void>;
+  onSelect: (marker: { lat: number; lng: number }) => Promise<void>;
   onRemove: () => void;
 }> = ({ form, onSelect, onRemove }) => {
   const t = useTranslations("eventForm");
@@ -141,18 +141,16 @@ export const FormFieldLocation: React.FC<{
                           value={result.label}
                           key={result.label + index}
                           onSelect={async () => {
+                            const lat = Number(result.raw.lat);
+                            const lng = Number(result.raw.lon);
                             form.setValue("location", {
                               kind: "geo",
                               address: result.label,
-                              lat: Number(result.raw.lat),
-                              lng: Number(result.raw.lon),
+                              lat,
+                              lng,
                               size: 0,
                             });
-                            const latlng = new L.LatLng(
-                              result.raw.lat,
-                              result.raw.lon,
-                            );
-                            await onSelect(latlng);
+                            await onSelect({ lat, lng });
                             setOpen(false);
                           }}
                         >

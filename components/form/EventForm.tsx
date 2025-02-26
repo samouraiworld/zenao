@@ -1,8 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { find as GeoTZFind } from "browser-geo-tz";
-import L from "leaflet";
 import { Card } from "../cards/Card";
 import { Separator } from "../common/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
@@ -11,6 +9,7 @@ import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { SmallText } from "../texts/SmallText";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
+import MapCaller from "../common/map/MapLazyComponents";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
@@ -20,7 +19,6 @@ import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldLocation } from "./components/FormFieldLocation";
 import { Form } from "@/components/shadcn/form";
-import { Map } from "@/components/common/map/Map";
 import { currentTimezone } from "@/lib/time";
 
 interface EventFormProps {
@@ -41,7 +39,9 @@ export const EventForm: React.FC<EventFormProps> = ({
   const t = useTranslations("eventForm");
 
   const [isVirtual, setIsVirtual] = useState<boolean>(false);
-  const [marker, setMarker] = useState<L.LatLng | null>(null);
+  const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
   const [timeZone, setTimeZone] = useState<string>("");
 
@@ -124,8 +124,9 @@ export const EventForm: React.FC<EventFormProps> = ({
               ) : (
                 <FormFieldLocation
                   form={form}
-                  onSelect={async (marker: L.LatLng) => {
+                  onSelect={async (marker: { lat: number; lng: number }) => {
                     setMarker(marker);
+                    const GeoTZFind = (await import("browser-geo-tz")).find;
                     const tz = await GeoTZFind(marker.lat, marker.lng);
                     setTimeZone(tz[0]);
                   }}
@@ -136,7 +137,9 @@ export const EventForm: React.FC<EventFormProps> = ({
                 />
               )}
             </Card>
-            {!isVirtual && location && marker && <Map marker={marker} />}
+            {!isVirtual && location && marker && (
+              <MapCaller lat={marker.lat} lng={marker.lng} />
+            )}
             {isCustom && location.kind === "custom" && location.address && (
               <TimeZonesPopover
                 defaultValue={currentTimezone()}
