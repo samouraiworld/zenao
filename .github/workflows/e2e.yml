@@ -24,6 +24,14 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install gnodev
+        run: |
+          cd gnobuild
+          git clone https://github.com/gnolang/gno.git
+          cd gno
+          git checkout $(shell $(CAT) .gnoversion)
+          make install.gnodev
+
       - name: Get go binaries path
         id: go-bin-path
         run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
