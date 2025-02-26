@@ -33,6 +33,12 @@ make install
 cd ..
 ```
 
+Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
+
+```bash
+make install-atlas
+```
+
 Override local env with dev env
 ```bash
 cp .env.dev .env.local
@@ -44,9 +50,10 @@ Now, start gnodev with the admin account:
 make start.gnodev
 ```
 
-In another terminal, start the backend:
+In another terminal, initialize the db and start the backend:
 
 ```bash
+make migrate-local
 go run ./backend start
 ```
 
@@ -80,6 +87,12 @@ git clone git@github.com:gnolang/gno.git
 cd gno
 make install
 cd ..
+```
+
+Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
+
+```bash
+make install-atlas
 ```
 
 Override local env with dev env
