@@ -13,6 +13,7 @@ jobs:
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.12.1
+        
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -21,7 +22,22 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.23"
+
+      - name: Get go binaries path
+        id: go-bin-path
+        run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
+      - name: Cache atlas
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.go-bin-path.outputs.PATH }}
+          key: ${{ runner.os }}-atlas-bin-c261f318ac25924555e63fdf005cc53de43fa5db
+      - name: Install atlas
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: make install-atlas
+
       - run: go install ./backend
+
       - uses: cypress-io/github-action@v6
         with:
           browser: chrome
