@@ -96,7 +96,7 @@ func execE2EInfra() error {
 	// XXX: backend should be ready before gnodev but it would be better to check the connection
 
 	// wait for gnodev to be ready
-	if err := waitHTTPOK(ctx, 20*time.Second, "http://localhost:26657/health"); err != nil {
+	if err := waitHTTPOK(ctx, 60*time.Second, "http://localhost:26657/health"); err != nil {
 		return err
 	}
 
