@@ -1,6 +1,6 @@
 const testEmail = "alice+clerk_test@example.com"; // this account exists in our clerk dev env
 
-describe("Participation with email", () => {
+describe("Basics", () => {
   it("should prepare state", () => {
     cy.request({
       url: "http://localhost:4243/reset",
