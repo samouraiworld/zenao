@@ -817,8 +817,8 @@ func (a *ArticlePost) FromJSON(node *json.Node) {
 func (l *LinkPost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if l.Post != nil {
-		fields["post"] = l.Post.ToJSON()
+	if l.Common != nil {
+		fields["common"] = l.Common.ToJSON()
 	}
 	if l.Uri != "" {
 		fields["uri"] = json.StringNode("", l.Uri)
@@ -831,10 +831,10 @@ func (l *LinkPost) FromJSON(node *json.Node) {
 	*l = LinkPost{}
 	fields := node.MustObject()
 
-	if val, ok := fields["post"]; ok {
+	if val, ok := fields["common"]; ok {
 		fv := &PostCommon{}
 		fv.FromJSON(val)
-		l.Post = fv
+		l.Common = fv
 	}
 	if val, ok := fields["uri"]; ok {
 		l.Uri = val.MustString()
@@ -844,8 +844,8 @@ func (l *LinkPost) FromJSON(node *json.Node) {
 func (i *ImagePost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if i.Post != nil {
-		fields["post"] = i.Post.ToJSON()
+	if i.Common != nil {
+		fields["common"] = i.Common.ToJSON()
 	}
 	if i.Description != "" {
 		fields["description"] = json.StringNode("", i.Description)
@@ -861,10 +861,10 @@ func (i *ImagePost) FromJSON(node *json.Node) {
 	*i = ImagePost{}
 	fields := node.MustObject()
 
-	if val, ok := fields["post"]; ok {
+	if val, ok := fields["common"]; ok {
 		fv := &PostCommon{}
 		fv.FromJSON(val)
-		i.Post = fv
+		i.Common = fv
 	}
 	if val, ok := fields["description"]; ok {
 		i.Description = val.MustString()
@@ -877,8 +877,8 @@ func (i *ImagePost) FromJSON(node *json.Node) {
 func (v *VideoPost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if v.Post != nil {
-		fields["post"] = v.Post.ToJSON()
+	if v.Common != nil {
+		fields["common"] = v.Common.ToJSON()
 	}
 	if v.Description != "" {
 		fields["description"] = json.StringNode("", v.Description)
@@ -897,10 +897,10 @@ func (v *VideoPost) FromJSON(node *json.Node) {
 	*v = VideoPost{}
 	fields := node.MustObject()
 
-	if val, ok := fields["post"]; ok {
+	if val, ok := fields["common"]; ok {
 		fv := &PostCommon{}
 		fv.FromJSON(val)
-		v.Post = fv
+		v.Common = fv
 	}
 	if val, ok := fields["description"]; ok {
 		v.Description = val.MustString()

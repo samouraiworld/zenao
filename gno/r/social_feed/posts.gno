@@ -105,3 +105,51 @@ func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
 	return res
 
 }
+
+func GetPost(postID string) zenaov1.Post {
+	postRaw, ok := posts.Get(postID)
+	if !ok {
+		panic("post not found")
+	}
+	return postRaw.(zenaov1.Post)
+}
+
+func DeletePost(postID string) {
+	creator := std.PreviousRealm()
+	postRaw, ok := posts.Get(postID)
+	if !ok {
+		panic("post not found")
+	}
+	post := postRaw.(*zenaov1.Post)
+	common := getPostCommon(post)
+	if common.Author != creator.Address().String() {
+		panic("you are not the author of this post")
+	}
+	if common == nil {
+		panic("post common is nil")
+	}
+	if common.DeletedAt != 0 {
+		panic("post is already deleted")
+	}
+	common.DeletedAt = time.Now().Unix()
+}
+
+func getPostCommon(post *zenaov1.Post) *zenaov1.PostCommon {
+	if post == nil {
+		panic("post is nil")
+	}
+	switch v := post.Post.(type) {
+	case *zenaov1.StandardPost:
+		return v.Common
+	case *zenaov1.ArticlePost:
+		return v.Common
+	case *zenaov1.LinkPost:
+		return v.Common
+	case *zenaov1.ImagePost:
+		return v.Common
+	case *zenaov1.VideoPost:
+		return v.Common
+	default:
+		panic("unknown post type")
+	}
+}
