@@ -4,6 +4,8 @@ import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventsList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/layout/EventsListLayout";
 
+export const revalidate = 60;
+
 export default async function DiscoverPage() {
   const queryClient = getQueryClient();
   const now = Date.now() / 1000;
