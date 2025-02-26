@@ -59,25 +59,27 @@ export async function Header() {
   return (
     <div className="flex sm:justify-center sm:p-2 w-full">
       {/* Desktop */}
-      <Card className="max-sm:hidden flex flex-row items-center px-3 py-2 gap-7 rounded-xl">
-        <Link href="/" className="flex flex-row gap-2 items-center">
-          <Image
-            src="/zenao-logo.png"
-            alt="zeano logo"
-            width={28}
-            height={28}
-            priority
-          />
-          <Text className="font-extrabold">{t("zenao")}</Text>
-        </Link>
-        <div className="flex flex-row gap-3">
-          <HeaderLinks isLogged={user ? true : false} />
-        </div>
-        <div className="flex flex-row gap-2 items-center justify-center">
-          <Auth user={user} />
-          <ToggleThemeButton />
-        </div>
-      </Card>
+      <div className="max-sm:hidden flex flex-row w-full items-center justify-center">
+        <Card className="flex flex-row items-center px-3 py-2 gap-7 rounded-xl">
+          <Link href="/" className="flex flex-row gap-2 items-center">
+            <Image
+              src="/zenao-logo.png"
+              alt="zeano logo"
+              width={28}
+              height={28}
+              priority
+            />
+            <Text className="font-extrabold">{t("zenao")}</Text>
+          </Link>
+          <div className="flex flex-row gap-3">
+            <HeaderLinks isLogged={user ? true : false} />
+          </div>
+          <div className="flex flex-row gap-2 items-center justify-center">
+            <ToggleThemeButton />
+          </div>
+        </Card>
+        <Auth user={user} className="flex absolute right-5" />
+      </div>
 
       {/* Mobile */}
       <div className="sm:hidden flex flex-row justify-between w-full p-3 px-4 py-3 bg-secondary/80 backdrop-blur-sm">
@@ -90,11 +92,11 @@ export async function Header() {
             priority
           />
         </Link>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 items-center">
           <Auth user={user} />
           <Popover>
             <PopoverTrigger>
-              <AlignJustifyIcon width={26} height={26} />
+              <AlignJustifyIcon className="h-7 w-7" />
             </PopoverTrigger>
             <PopoverContent className="flex gap-1 flex-col bg-secondary rounded-xl px-4 py-2">
               <HeaderLinks isLogged={user ? true : false} />
@@ -106,10 +108,13 @@ export async function Header() {
   );
 }
 
-const Auth: React.FC<{ user: GnoProfile | null }> = ({ user }) => {
+const Auth: React.FC<{ user: GnoProfile | null; className?: string }> = ({
+  user,
+  className,
+}) => {
   const t = useTranslations("header");
   return (
-    <div>
+    <div className={className}>
       <SignedOut>
         <SignInButton>
           <Button variant="outline">
@@ -120,7 +125,7 @@ const Auth: React.FC<{ user: GnoProfile | null }> = ({ user }) => {
       <SignedIn>
         {user && (
           <Link href="/settings">
-            <Avatar className="h-[30px] w-[30px] self-center">
+            <Avatar className="h-7 w-7 sm:h-[30px] sm:w-[30px]">
               <AvatarImage src={web2URL(user.avatarUri)} alt="avatar-uri" />
               <AvatarFallback>avatar</AvatarFallback>
             </Avatar>
