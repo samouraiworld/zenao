@@ -186,11 +186,15 @@ export function EventInfo({
             <div className="w-[22px] h-[22px]">
               <MapPin width={iconSize} height={iconSize} />
             </div>
-            <LargeText>
-              {location.kind === "virtual"
-                ? location.location
-                : location.address}
-            </LargeText>
+            {location.kind === "virtual" ? (
+              <Link href={location.location} target="_blank">
+                <LargeText className="hover:underline hover:underline-offset-1">
+                  {location.location}
+                </LargeText>
+              </Link>
+            ) : (
+              <LargeText>{location.address}</LargeText>
+            )}
           </div>
           {location.kind === "geo" && (
             <MapCaller lat={location.lat} lng={location.lng} />
