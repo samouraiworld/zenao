@@ -21,11 +21,12 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: "1.23"
+      - run: go install ./backend
       - uses: cypress-io/github-action@v6
         with:
           browser: chrome
           build: cp .env.dev .env.local
-          start: go run ./backend e2e-infra --ci
+          start: backend e2e-infra --ci
           wait-on: "http://localhost:3000"
       - name: Upload errors screenshots
         uses: actions/upload-artifact@v4
