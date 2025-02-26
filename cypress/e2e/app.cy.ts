@@ -1,6 +1,10 @@
 describe("Navigation", () => {
   it("should be able to navigate to first event and participate", () => {
-    cy.request("http://localhost:4243/reset");
+    // @ts-expect-error: request object is badly typed
+    cy.request({
+      url: "http://localhost:4243/reset",
+      responseTimeout: 120000,
+    });
 
     // Start from the index page
     cy.visit("http://localhost:3000/");
