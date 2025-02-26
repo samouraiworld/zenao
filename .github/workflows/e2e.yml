@@ -23,6 +23,7 @@ jobs:
         uses: magnetikonline/action-golang-cache@v5
         with:
           go-version-file: go.mod
+          cache-key-suffix: e2e
 
       - name: Install gnodev
         run: |

@@ -22,6 +22,7 @@ jobs:
         uses: magnetikonline/action-golang-cache@v5
         with:
           go-version-file: go.mod
+          cache-key-suffix: buf
 
       - uses: bufbuild/buf-setup-action@v1.50.0
         with:

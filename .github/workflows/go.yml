@@ -17,6 +17,7 @@ jobs:
         uses: magnetikonline/action-golang-cache@v5
         with:
           go-version-file: go.mod
+          cache-key-suffix: backend
 
       - name: Tidy go.mod
         run: go mod tidy
