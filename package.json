@@ -75,6 +75,7 @@
     "prettier": "^3.4.2",
     "react-email": "3.0.7",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^8.0.2"
   }
 }
