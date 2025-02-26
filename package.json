@@ -7,8 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "mail-dev": "email dev",
-    "mail-build": "email export --outDir backend/mails/html && email export -t --outDir backend/mails/text"
+    "mail:dev": "email dev",
+    "mail:build": "email export --outDir backend/mails/html && email export -t --outDir backend/mails/text",
+    "cypress:open": "cypress open",
+    "cypress:e2e": "cypress open --e2e",
+    "cypress:e2e:headless": "cypress run --e2e"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.3",
@@ -58,10 +61,12 @@
   "devDependencies": {
     "@bufbuild/buf": "^1.49.0",
     "@bufbuild/protoc-gen-es": "^2.2.3",
+    "@clerk/testing": "^1.4.23",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cypress": "^13.17.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
     "eslint-config-prettier": "^10.0.1",

@@ -43,6 +43,7 @@ func main() {
 		newMailCmd(),
 		newSyncChainCmd(),
 		newRealmsrcCmd(),
+		newE2EInfraCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])

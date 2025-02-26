@@ -35,6 +35,7 @@ type fakegenConfig struct {
 	chainEndpoint string
 	chainID       string
 	dbPath        string
+	eventsCount   uint
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -43,16 +44,17 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
 	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
+	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 }
 
 type fakeEvent struct {
-	Title         string  `faker:"sentence"`
-	Description   string  `faker:"paragraph"`
-	TicketPrice   float64 `faker:"amount"`
-	Capacity      float64 `faker:"amount"`
-	StartDate     int64   `faker:"unix_time"`
-	DurationHours int     `faker:"oneof: 1, 24, 72"`
-	Location      string  `faker:"sentence"`
+	Title            string  `faker:"sentence"`
+	Description      string  `faker:"paragraph"`
+	TicketPrice      float64 `faker:"amount"`
+	Capacity         float64 `faker:"amount"`
+	StartOffsetHours int     `faker:"oneof: 24, 48, 72, 96"`
+	DurationHours    int     `faker:"oneof: 1, 6, 12"`
+	Location         string  `faker:"sentence"`
 }
 
 func execFakegen() error {
@@ -71,18 +73,23 @@ func execFakegen() error {
 		return err
 	}
 
-	for range 20 {
+	for i := range fakegenConf.eventsCount {
 		a := fakeEvent{}
 		err := faker.FakeData(&a)
 		if err != nil {
 			return err
 		}
+		before := i <= (fakegenConf.eventsCount / 2)
+		if before {
+			a.StartOffsetHours = -a.StartOffsetHours
+		}
+		startDate := time.Now().Add(time.Duration(a.StartOffsetHours) * time.Hour)
 		req := &zenaov1.CreateEventRequest{
 			Title:       a.Title,
 			Description: a.Description,
 			ImageUri:    randomPick(eventImages),
-			StartDate:   uint64(a.StartDate),
-			EndDate:     uint64(time.Unix(a.StartDate, 0).Add(time.Duration(a.DurationHours) * time.Hour).Unix()),
+			StartDate:   uint64(startDate.Unix()),
+			EndDate:     uint64(startDate.Add(time.Duration(a.DurationHours) * time.Hour).Unix()),
 			Capacity:    uint32(a.Capacity),
 			Location: &zenaov1.EventLocation{
 				Address: &zenaov1.EventLocation_Custom{Custom: &zenaov1.AddressCustom{
