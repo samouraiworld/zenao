@@ -16,6 +16,7 @@ export const userOptions = (address: string | null | undefined) =>
 
 type GetToken = ReturnType<typeof useAuth>["getToken"];
 
+// getToken is not used in the query key
 export const userAddressOptions = (
   getToken: GetToken,
   userId: string | null | undefined,
@@ -27,6 +28,9 @@ export const userAddressOptions = (
         return null;
       }
       const authToken = await getToken();
+      if (authToken == null) {
+        return null;
+      }
       const { address } = await zenaoClient.getUserAddress(
         {},
         { headers: { Authorization: "Bearer " + authToken } },
