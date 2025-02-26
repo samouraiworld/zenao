@@ -10,7 +10,7 @@ describe("Basics", () => {
 
   it("should be able to navigate to manifesto from home", () => {
     // start from the index page
-    cy.visit("http://localhost:3000/");
+    cy.visit("/");
 
     // go to manifesto page
     cy.get("a").contains("Manifesto").click();
@@ -25,7 +25,7 @@ describe("Basics", () => {
 
   it("should be able to navigate to home from manifesto", () => {
     // start from the index page
-    cy.visit("http://localhost:3000/manifesto");
+    cy.visit("/manifesto");
 
     // go to home page
     cy.get("a").contains("ZENAO").click();
@@ -36,7 +36,7 @@ describe("Basics", () => {
 
   it("should be able to participate without login", () => {
     // start from the index page
-    cy.visit("http://localhost:3000/");
+    cy.visit("/");
 
     // go to discover page
     cy.get("a").contains("Discover").click();
@@ -56,7 +56,7 @@ describe("Basics", () => {
 
   it("should be able to participate while signed in", () => {
     // start from the index page
-    cy.visit("http://localhost:3000/");
+    cy.visit("/");
 
     // go to discover page
     cy.get("a").contains("Discover").click();
