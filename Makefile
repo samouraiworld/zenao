@@ -5,7 +5,7 @@ GNODEV := gnodev staging --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=
 generate:
 	npm i
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
-	npm run mail-build
+	npm run mail:build
 
 .PHONY: start.gnodev
 start.gnodev:
