@@ -123,7 +123,6 @@ func execE2EInfra() error {
 	}()
 
 	wg.Wait()
-
 	return nil
 }
 
