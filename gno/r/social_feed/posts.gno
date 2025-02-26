@@ -15,9 +15,9 @@ func NewPost(feedId string, post *zenaov1.Post) string {
 			panic("this is a private feed and you are not authorized to post on it")
 		}
 	}
-	postID := feedId + ":" + id.Next().String()
-	posts.Set(feedId, post)
-	return postID
+	localPostId := feedId + ":" + id.Next().String()
+	posts.Set(localPostId, post)
+	return localPostId
 }
 
 func GetPost(postID string) zenaov1.Post {
