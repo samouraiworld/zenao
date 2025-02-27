@@ -3,6 +3,9 @@
 import Image, { ImageLoaderProps } from "next/image";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 
+// XXX: the 8rem blur on firefox is very ugly because ff has a 100px cap on blur
+// see https://bugzilla.mozilla.org/show_bug.cgi?id=1530810
+
 export function BackgroundImage(props: ImageLoaderProps) {
   return (
     <Image
