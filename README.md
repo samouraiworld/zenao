@@ -122,12 +122,10 @@ Wait for the stack to warm up, you should get the following line in the e2e-infr
 READY   | ----------------------------
 ```
 
-In a third terminal, open cypress
+In a third terminal, open cypress in e2e mode
 ```bash
-npm run cypress:open
+npm run cypress:e2e
 ```
-
-Click `Start E2E Testing in Chrome`, this will open a controlled chrome browser.
 
 Select a test like `main.cy.ts`, this will automatically start runnning the test and when done watch for changes in the test file located at `cypress/e2e/main.cy.ts`.
 
