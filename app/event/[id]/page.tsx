@@ -6,7 +6,7 @@ import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { eventUserRoles, eventUsersWithRole } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 
 type Props = {
