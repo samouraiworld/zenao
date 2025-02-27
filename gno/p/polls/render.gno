@@ -1,10 +1,14 @@
 package polls
 
-// func (p *Poll) Render() string {
+import (
+	"gno.land/p/moul/md"
+)
 
-// 	md.H1(p.Question)
-// 	md.HorizontalRule()
-// 	md.HorizontalRule()
-// 	md.H2("Results")
+func (p *Poll) Render() string {
 
-// }
+	md.H1(p.Question)
+	md.HorizontalRule()
+	md.HorizontalRule()
+	md.H2("Results")
+	return ""
+}

@@ -59,3 +59,19 @@ func (p *Poll) Vote(addr std.Address, option string) {
 		votes.Set(addr.String(), struct{}{})
 	}
 }
+
+func (p *Poll) GetInfo() PollInfo {
+	info := PollInfo{
+		Question: p.Question,
+		Options:  []PollResult{},
+	}
+	p.Results.Iterate("", "", func(key string, value interface{}) bool {
+		votes := value.(*avl.Tree)
+		info.Options = append(info.Options, PollResult{
+			Option: key,
+			Votes:  votes.Size(),
+		})
+		return false
+	})
+	return info
+}
