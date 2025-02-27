@@ -4,7 +4,7 @@ import { EditEventForm } from "./EditEventForm";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 
 export default async function EditPage({

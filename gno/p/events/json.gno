@@ -13,6 +13,15 @@ func (e *Event) GetUserRolesJSON(addr string) string {
 	return mustMarshalString(json.ArrayNode("", nodes))
 }
 
+func (e *Event) GetUsersWithRoleJSON(role string) string {
+	users := e.DAOPrivate.Members.GetMembersWithRole(role)
+	nodes := make([]*json.Node, 0, len(users))
+	for _, role := range users {
+		nodes = append(nodes, json.StringNode("", role))
+	}
+	return mustMarshalString(json.ArrayNode("", nodes))
+}
+
 func (e *Event) GetInfoJSON() string {
 	return mustMarshalString(e.Info().ToJSON())
 }

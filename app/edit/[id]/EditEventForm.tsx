@@ -13,7 +13,7 @@ import { zenaoClient } from "@/app/zenao-client";
 import { Text } from "@/components/texts/DefaultText";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import { currentTimezone } from "@/lib/time";
 import { userAddressOptions } from "@/lib/queries/user";
 

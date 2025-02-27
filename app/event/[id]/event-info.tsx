@@ -20,7 +20,7 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
