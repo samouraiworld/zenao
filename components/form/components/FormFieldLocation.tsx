@@ -32,6 +32,7 @@ import {
   CommandList,
 } from "@/components/shadcn/command";
 import { cn } from "@/lib/tailwind";
+import { currentTimezone } from "@/lib/time";
 
 export const useSearchField = (value: string) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -157,6 +158,7 @@ export const FormFieldLocation: React.FC<{
                         </CommandItem>
                       ))}
                     </CommandGroup>
+                    {/* Use custom location */}
                     {search && (
                       <CommandItem
                         className="text-primary p-2 m-1"
@@ -164,8 +166,9 @@ export const FormFieldLocation: React.FC<{
                         key={search}
                         onSelect={async () => {
                           form.setValue("location", {
-                            ...object,
+                            kind: "custom",
                             address: search,
+                            timeZone: currentTimezone(),
                           });
                           onRemove();
                           setOpen(false);
