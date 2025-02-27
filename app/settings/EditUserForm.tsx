@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSession } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -16,25 +16,36 @@ import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
 import { FormFieldImage } from "@/components/form/components/FormFieldImage";
-import { userOptions } from "@/lib/queries/user";
-import { profileOptions } from "@/lib/queries/profile";
+import { userAddressOptions, userOptions } from "@/lib/queries/user";
+import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 
-export const EditUserForm: React.FC<{ authToken: string | null }> = ({
-  authToken,
-}) => {
-  const { data: user } = useSuspenseQuery(userOptions(authToken));
+export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
+  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
 
-  const { session } = useSession();
+  const queryClient = useQueryClient();
+
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+
+  const { data: user } = useSuspenseQuery(userOptions(address));
+
   const [loading, setLoading] = useState<boolean>(false);
-  const form = useForm({
+
+  const defaultValues: GnoProfile = user || {
+    address: address || "",
+    displayName: "",
+    bio: "",
+    avatarUri: "",
+  };
+
+  const form = useForm<UserFormSchemaType>({
     mode: "all",
     resolver: zodResolver(userFormSchema),
-    defaultValues: user!,
+    defaultValues,
   });
   const { toast } = useToast();
   const t = useTranslations("settings");
-
-  const queryClient = useQueryClient();
 
   const onSubmit = async (values: UserFormSchemaType) => {
     try {
@@ -42,7 +53,7 @@ export const EditUserForm: React.FC<{ authToken: string | null }> = ({
       if (!user) {
         throw new Error("no user");
       }
-      const token = await session?.getToken();
+      const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
       }

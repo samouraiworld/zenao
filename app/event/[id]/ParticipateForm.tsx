@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, useSession } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -31,9 +31,9 @@ export function ParticipateForm({
   eventId: string;
   onSuccess?: () => void;
 }) {
-  const { session } = useSession();
+  const { getToken } = useAuth();
   const t = useTranslations("event");
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<ParticipateFormSchemaType>({
     mode: "all",
     resolver: zodResolver(participateFormSchema),
@@ -44,9 +44,9 @@ export function ParticipateForm({
   const { toast } = useToast();
 
   // Submit for logged-out user (with email confirmation form)
-  const onSubmitForm = async (values: ParticipateFormSchemaType) => {
+  const onSubmitSignedOut = async (values: ParticipateFormSchemaType) => {
     try {
-      setIsLoaded(true);
+      setIsLoading(true);
       await zenaoClient.participate({ eventId, email: values.email });
       toast({ title: t("toast-confirmation") });
       onSuccess?.();
@@ -64,14 +64,17 @@ export function ParticipateForm({
       }
       console.error(err);
     }
-    setIsLoaded(false);
+    setIsLoading(false);
   };
 
   // Submit for logged-in user (with clerk account)
-  const onSubmit = async () => {
+  const onSubmitSignedIn = async () => {
     try {
-      setIsLoaded(true);
-      const token = await session?.getToken();
+      setIsLoading(true);
+      const token = await getToken();
+      if (!token) {
+        throw new Error("invalid clerk token");
+      }
       await zenaoClient.participate(
         { eventId },
         { headers: { Authorization: `Bearer ${token}` } },
@@ -82,12 +85,12 @@ export function ParticipateForm({
       toast({ variant: "destructive", title: t("toast-default-error") });
       console.error(err);
     }
-    setIsLoaded(false);
+    setIsLoading(false);
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmitForm)}>
+      <form onSubmit={form.handleSubmit(onSubmitSignedOut)}>
         <div>
           <SignedOut>
             {/* TODO: merge with FormFieldInputString (got typescript issues) */}
@@ -112,15 +115,15 @@ export function ParticipateForm({
               />
             </Card>
             <ButtonWithLabel
-              loading={isLoaded}
+              loading={isLoading}
               label={t("participate-button")}
               type="submit"
             />
           </SignedOut>
           <SignedIn>
             <ButtonWithLabel
-              onClick={onSubmit}
-              loading={isLoaded}
+              onClick={onSubmitSignedIn}
+              loading={isLoading}
               label={t("participate-button")}
             />
           </SignedIn>

@@ -6,26 +6,24 @@ import { useForm } from "react-hook-form";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useSession } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
 import { Text } from "@/components/texts/DefaultText";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import { currentTimezone } from "@/lib/time";
+import { userAddressOptions } from "@/lib/queries/user";
 
-export function EditEventForm({
-  id,
-  authToken,
-}: {
-  id: string;
-  authToken: string | null;
-}) {
-  const { session } = useSession();
+export function EditEventForm({ id, userId }: { id: string; userId: string }) {
+  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
   const isOrganizer = roles.includes("organizer");
   const router = useRouter();
 
@@ -52,7 +50,7 @@ export function EditEventForm({
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
-      const token = await session?.getToken();
+      const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk authToken");
       }

@@ -13,9 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v3
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
         with:
-          go-version: "1.23"
+          go-version-file: go.mod
+          cache-key-suffix: backend
 
       - name: Tidy go.mod
         run: go mod tidy

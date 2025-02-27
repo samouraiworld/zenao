@@ -5,6 +5,8 @@ import { eventsList } from "@/lib/queries/events-list";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { EventsListLayout } from "@/components/layout/EventsListLayout";
 
+export const revalidate = 60;
+
 const DiscoverPageFC: React.FC<{
   upcoming: EventInfo[];
   past: EventInfo[];
