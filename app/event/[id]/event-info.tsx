@@ -23,6 +23,7 @@ import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { userAddressOptions } from "@/lib/queries/user";
+import { web2URL } from "@/lib/uris";
 
 interface EventSectionProps {
   title: string;
@@ -87,7 +88,7 @@ export function EventInfo({
     endDate: new Date(Number(data.endDate) * 1000).toISOString(),
     location,
     maximumAttendeeCapacity: data.capacity,
-    image: data.imageUri,
+    image: web2URL(data.imageUri),
   };
 
   const iconSize = 22;
