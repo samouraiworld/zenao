@@ -8,8 +8,7 @@ import (
 
 type Poll struct {
 	Question string
-	Options  []string
-	Answers  *avl.Tree // string -> avl.Tree of string -> struct{}
+	Results  *avl.Tree // string -> avl.Tree of string -> struct{}
 }
 
 type PollResult struct {
@@ -31,8 +30,7 @@ func NewPoll(id, question string, options []string) *Poll {
 	}
 	poll := &Poll{
 		Question: question,
-		Options:  options,
-		Answers:  avl.NewTree(),
+		Results:  avl.NewTree(),
 	}
 	for _, option := range options {
 		if option == "" {
@@ -41,16 +39,16 @@ func NewPoll(id, question string, options []string) *Poll {
 		if len(option) > 32 {
 			panic("option cannot be longer than 32 characters")
 		}
-		if poll.Answers.Has(option) {
+		if poll.Results.Has(option) {
 			panic("duplicate option")
 		}
-		poll.Answers.Set(option, avl.NewTree())
+		poll.Results.Set(option, avl.NewTree())
 	}
 	return poll
 }
 
 func (p *Poll) Vote(addr std.Address, option string) {
-	optionRaw, ok := p.Answers.Get(option)
+	optionRaw, ok := p.Results.Get(option)
 	if !ok {
 		panic("invalid option")
 	}
