@@ -1,8 +1,13 @@
 package polls
 
 import (
+	"std"
 	"testing"
+
+	"gno.land/p/demo/testutils"
 )
+
+var alice = testutils.TestAddress("alice")
 
 func TestNewPoll(t *testing.T) {
 	type input struct {
@@ -98,6 +103,81 @@ func TestNewPoll(t *testing.T) {
 			}()
 
 			NewPoll(test.input.id, test.input.question, test.input.options)
+		})
+	}
+}
+
+func TestVote(t *testing.T) {
+	type input struct {
+		poll   *Poll
+		option string
+	}
+
+	type output struct {
+		voted bool
+		panic bool
+	}
+
+	type test struct {
+		input  input
+		output output
+	}
+
+	type testTable = map[string]test
+
+	poll := NewPoll("poll1", "What is your favorite color?", []string{"red", "blue", "green"})
+
+	tests := testTable{
+		"valid vote": {
+			input: input{
+				poll:   poll,
+				option: "red",
+			},
+			output: output{
+				voted: true,
+				panic: false,
+			},
+		},
+		"invalid option": {
+			input: input{
+				poll:   poll,
+				option: "yellow",
+			},
+			output: output{
+				panic: true,
+			},
+		},
+		"remove vote": {
+			input: input{
+				poll:   poll,
+				option: "red",
+			},
+			output: output{
+				voted: false,
+				panic: false,
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			defer func() {
+				r := recover()
+				if r != nil && !test.output.panic {
+					t.Errorf("unexpected panic: %v", r)
+				}
+				if r == nil && test.output.panic {
+					t.Errorf("expected panic")
+				}
+			}()
+
+			std.TestSetOriginCaller(alice)
+			if test.output.voted {
+				test.input.poll.Vote(alice, test.input.option)
+			} else {
+				test.input.poll.Vote(alice, test.input.option)
+				test.input.poll.Vote(alice, test.input.option)
+			}
 		})
 	}
 }
