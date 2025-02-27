@@ -5,6 +5,7 @@ import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { userAddressOptions } from "@/lib/queries/user";
 
 export default async function EditPage({
   params,
@@ -12,16 +13,18 @@ export default async function EditPage({
   params: Promise<{ id: string }>;
 }) {
   const p = await params;
-  const { getToken } = await auth();
-  const authToken = await getToken();
+  const { getToken, userId } = await auth();
   const queryClient = getQueryClient();
+  const address = await queryClient.fetchQuery(
+    userAddressOptions(getToken, userId),
+  );
   void queryClient.prefetchQuery(eventOptions(p.id));
-  void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
+  void queryClient.prefetchQuery(eventUserRoles(p.id, address));
 
   return (
-    <ScreenContainer>
+    <ScreenContainer isSignedOutModal={!userId}>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EditEventForm id={p.id} authToken={authToken} />
+        {userId && <EditEventForm id={p.id} userId={userId} />}
       </HydrationBoundary>
     </ScreenContainer>
   );

@@ -1,0 +1,73 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: "npm"
+          node-version-file: ".nvmrc"
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
+        with:
+          go-version-file: go.mod
+          cache-key-suffix: e2e
+
+      - name: Next.js cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          # Generate a new cache whenever packages or source files change.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache.
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Install gnodev
+        run: |
+          mkdir gnobuild
+          cd gnobuild
+          git clone https://github.com/gnolang/gno.git
+          cd gno
+          git checkout $(shell $(CAT) .gnoversion)
+          make install.gnodev
+
+      - name: Get go binaries path
+        id: go-bin-path
+        run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
+      - name: Cache atlas
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.go-bin-path.outputs.PATH }}
+          key: ${{ runner.os }}-atlas-bin-c261f318ac25924555e63fdf005cc53de43fa5db
+      - name: Install atlas
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: make install-atlas
+
+      - run: go install ./backend
+
+      - uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          build: cp .env.dev .env.local
+          start: backend e2e-infra --ci
+          wait-on: 'npx wait-on --timeout 250000 http://localhost:3000'
+      - name: Upload errors screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
