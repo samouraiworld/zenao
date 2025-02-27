@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"connectrpc.com/authn"
+	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
@@ -43,6 +44,7 @@ func main() {
 		newMailCmd(),
 		newSyncChainCmd(),
 		newRealmsrcCmd(),
+		newE2EInfraCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
@@ -142,9 +144,10 @@ func execStart() error {
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
 
-	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao)
+	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao,
+		connect.WithInterceptors(NewLoggingInterceptor(logger)),
+	)
 	mux.Handle(path, middlewares(handler,
-		withRequestLogging(logger),
 		withConnectCORS(allowedOrigins...),
 		withClerkAuth(conf.clerkSecretKey),
 	))
@@ -219,19 +222,6 @@ func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
 	}
 }
 
-func withRequestLogging(logger *zap.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			logger.Info("Request",
-				zap.String("method", r.Method),
-				zap.String("path", r.RequestURI),
-				zap.String("host", r.Host),
-			)
-			next.ServeHTTP(w, r)
-		})
-	}
-}
-
 func withClerkAuth(secretKey string) func(http.Handler) http.Handler {
 	clerk.SetKey(secretKey)
 	return authn.NewMiddleware(func(_ context.Context, req *http.Request) (any, error) {
@@ -255,4 +245,21 @@ func withClerkAuth(secretKey string) func(http.Handler) http.Handler {
 		}
 		return usr, nil
 	}).Wrap
+}
+
+func NewLoggingInterceptor(logger *zap.Logger) connect.UnaryInterceptorFunc {
+	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
+		return connect.UnaryFunc(func(
+			ctx context.Context,
+			req connect.AnyRequest,
+		) (connect.AnyResponse, error) {
+			logger.Info(req.Spec().Procedure, zap.Any("payload", req.Any()), zap.Any("peer", req.Peer()))
+			res, err := next(ctx, req)
+			if err != nil {
+				logger.Error(req.Spec().Procedure, zap.Any("payload", req.Any()), zap.Any("peer", req.Peer()), zap.Error(err))
+			}
+			return res, err
+		})
+	}
+	return connect.UnaryInterceptorFunc(interceptor)
 }

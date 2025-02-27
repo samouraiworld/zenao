@@ -13,10 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: bufbuild/buf-setup-action@v1.50.0
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
         with:
-          version: 1.50.0
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          go-version-file: go.mod
+          cache-key-suffix: buf-lint
 
       - name: Buf lint
-        run: buf lint
+        run: make lint-buf

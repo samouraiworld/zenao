@@ -6,7 +6,8 @@ import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { userAddressOptions } from "@/lib/queries/user";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -28,18 +29,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventPage({ params }: Props) {
   const p = await params;
-  const { getToken } = await auth();
-  const authToken = await getToken();
+  const { getToken, userId } = await auth();
   const queryClient = getQueryClient();
+  const address = await queryClient.fetchQuery(
+    userAddressOptions(getToken, userId),
+  );
   const eventData = await queryClient.fetchQuery(eventOptions(p.id));
-  void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
+  void queryClient.prefetchQuery(eventUserRoles(p.id, address));
 
   return (
     <ScreenContainer
       background={{ src: eventData.imageUri, width: imageWidth }}
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventInfo id={p.id} authToken={authToken} />
+        <EventInfo id={p.id} userId={userId} />
       </HydrationBoundary>
     </ScreenContainer>
   );

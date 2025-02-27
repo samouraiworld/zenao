@@ -8,6 +8,7 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
 import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
@@ -19,10 +20,12 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import { EventFormSchemaType } from "@/components/form/types";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import MapCaller from "@/components/common/map/MapLazyComponents";
+import { userAddressOptions } from "@/lib/queries/user";
+import { web2URL } from "@/lib/uris";
 
 interface EventSectionProps {
   title: string;
@@ -41,13 +44,17 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 
 export function EventInfo({
   id,
-  authToken,
+  userId,
 }: {
   id: string;
-  authToken: string | null;
+  userId: string | null;
 }) {
+  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
@@ -87,7 +94,7 @@ export function EventInfo({
   const [loading, setLoading] = React.useState<boolean>(false);
 
   const handleParticipateSuccess = useCallback(async () => {
-    const opts = eventUserRoles(authToken, id);
+    const opts = eventUserRoles(id, address);
     await queryClient.cancelQueries(opts);
     queryClient.setQueryData(opts.queryKey, (roles) => {
       if (!roles) {
@@ -98,7 +105,7 @@ export function EventInfo({
       }
       return roles;
     });
-  }, [queryClient, authToken, id]);
+  }, [queryClient, id, address]);
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -110,7 +117,7 @@ export function EventInfo({
     location:
       location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
-    image: data.imageUri,
+    image: web2URL(data.imageUri),
   };
 
   const iconSize = 22;
