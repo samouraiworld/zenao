@@ -6,6 +6,7 @@ import { SignedOutModal } from "../modals/SignedOutModal";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { BackgroundImage } from "./background-image";
+import { web2URL } from "@/lib/uris";
 
 interface ScreenContainerProps {
   children: React.ReactNode;
@@ -13,10 +14,17 @@ interface ScreenContainerProps {
   background?: ImageLoaderProps;
 }
 
+const defaultBackground: ImageLoaderProps = {
+  src: web2URL(
+    "ipfs://bafkreiefzfl43okbnnjwbazkntunp6plgpwnxj7rbqbcukpcnwtstuq4bu",
+  ),
+  width: 10,
+};
+
 export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   children,
   isSignedOutModal,
-  background,
+  background = defaultBackground,
 }) => {
   return (
     <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
@@ -36,9 +44,11 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
 export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
   children,
   isSignedOutModal,
+  background = defaultBackground,
 }) => {
   return (
     <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
+      {background && <BackgroundImage {...background} />}
       <Header />
       <div className="h-screen flex flex-col items-center justify-center">
         <main className="flex flex-col w-full justify-center items-center mb-10 sm:mb-0">
