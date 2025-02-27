@@ -11,7 +11,7 @@ func NewPost(feedId string, post *zenaov1.Post) string {
 	feedRaw, ok := feeds.Get(feedId)
 	if ok {
 		feed := feedRaw.(*Feed)
-		if !feed.authFunc(std.PreviousRealm().Address().String()) {
+		if feed.authFunc != nil && !feed.authFunc(std.PreviousRealm().Address().String()) {
 			panic("this is a private feed and you are not authorized to post on it")
 		}
 	}

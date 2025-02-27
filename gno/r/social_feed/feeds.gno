@@ -49,14 +49,19 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32) []*zenaov1.Post {
 	}
 	var res []*zenaov1.Post
 	i := 0
-	posts.Iterate(feedId, "", func(key string, value interface{}) bool {
+	start := feedId + ":"
+	end := feedId + ";"
+	posts.Iterate(start, end, func(key string, value interface{}) bool {
 		// XXX: implement offset & limit
 		post := value.(*zenaov1.Post)
 		if i >= int(offset) {
 			res = append(res, post)
 		}
 		i++
-		return true
+		if i >= int(offset+limit) {
+			return true
+		}
+		return false
 	})
 	return res
 }
