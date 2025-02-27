@@ -16,7 +16,6 @@ var (
 
 func TestNewPoll(t *testing.T) {
 	type input struct {
-		id       string
 		question string
 		options  []string
 	}
@@ -35,7 +34,6 @@ func TestNewPoll(t *testing.T) {
 	tests := testTable{
 		"valid poll": {
 			input: input{
-				id:       "poll1",
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green"},
 			},
@@ -45,7 +43,6 @@ func TestNewPoll(t *testing.T) {
 		},
 		"not enough options": {
 			input: input{
-				id:       "poll2",
 				question: "What is your favorite color?",
 				options:  []string{"red"},
 			},
@@ -55,7 +52,6 @@ func TestNewPoll(t *testing.T) {
 		},
 		"too many options": {
 			input: input{
-				id:       "poll3",
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black"},
 			},
@@ -65,7 +61,6 @@ func TestNewPoll(t *testing.T) {
 		},
 		"empty option": {
 			input: input{
-				id:       "poll4",
 				question: "What is your favorite color?",
 				options:  []string{"red", "", "green"},
 			},
@@ -75,7 +70,6 @@ func TestNewPoll(t *testing.T) {
 		},
 		"long option": {
 			input: input{
-				id:       "poll5",
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black", "this option is too too too too too too long"},
 			},
@@ -85,7 +79,6 @@ func TestNewPoll(t *testing.T) {
 		},
 		"duplicate option": {
 			input: input{
-				id:       "poll6",
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "blue"},
 			},
@@ -107,7 +100,7 @@ func TestNewPoll(t *testing.T) {
 				}
 			}()
 
-			NewPoll(test.input.id, test.input.question, test.input.options)
+			NewPoll(test.input.question, test.input.options)
 		})
 	}
 }
@@ -130,7 +123,7 @@ func TestVote(t *testing.T) {
 
 	type testTable = map[string]test
 
-	poll := NewPoll("poll1", "What is your favorite color?", []string{"red", "blue", "green"})
+	poll := NewPoll("What is your favorite color?", []string{"red", "blue", "green"})
 
 	tests := testTable{
 		"valid vote": {
@@ -204,8 +197,8 @@ func TestGetInfo(t *testing.T) {
 
 	type testTable = map[string]test
 
-	poll := NewPoll("poll1", "What is your favorite color?", []string{"red", "blue", "green"})
-	emptyPoll := NewPoll("poll2", "What is your favorite color?", []string{"red", "blue", "green"})
+	poll := NewPoll("What is your favorite color?", []string{"red", "blue", "green"})
+	emptyPoll := NewPoll("What is your favorite color?", []string{"red", "blue", "green"})
 	poll.Vote(alice, "red")
 	poll.Vote(bob, "blue")
 	poll.Vote(carol, "blue")

@@ -1,1 +1,1 @@
-module gno.land/p/teritori/polls
+module gno.land/p/zenao/polls

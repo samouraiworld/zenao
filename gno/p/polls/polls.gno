@@ -21,7 +21,7 @@ type PollInfo struct {
 	Options  []PollResult
 }
 
-func NewPoll(id, question string, options []string) *Poll {
+func NewPoll(question string, options []string) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
