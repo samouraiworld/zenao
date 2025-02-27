@@ -32,6 +32,10 @@ env "dev" {
   url     = "sqlite://dev.db"
 }
 
+env "e2e" {
+  url     = "sqlite://e2e.db"
+}
+
 env "staging" {
   url     = "libsql://zenao-staging-samourai-coop.turso.io?authToken=${var.token}"
   exclude = ["_litestream*"]
