@@ -4,6 +4,7 @@ import (
 	"std"
 	"testing"
 
+	"gno.land/p/demo/avl"
 	"gno.land/p/demo/testutils"
 )
 
@@ -172,11 +173,12 @@ func TestVote(t *testing.T) {
 			}()
 
 			std.TestSetOriginCaller(alice)
-			if test.output.voted {
-				test.input.poll.Vote(alice, test.input.option)
-			} else {
-				test.input.poll.Vote(alice, test.input.option)
-				test.input.poll.Vote(alice, test.input.option)
+			test.input.poll.Vote(alice, test.input.option)
+			resultRaw, _ := test.input.poll.Results.Get(test.input.option)
+			result := resultRaw.(*avl.Tree)
+			voted := result.Has(alice.String())
+			if voted != test.output.voted {
+				t.Errorf("expected voted=%v, got voted=%v", test.output.voted, voted)
 			}
 		})
 	}
