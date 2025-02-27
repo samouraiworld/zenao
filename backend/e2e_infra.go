@@ -69,7 +69,7 @@ func execE2EInfra() error {
 		go func() {
 			defer wg.Done()
 			if err := runCommand(ctx, "gnodev", "#7D56F4", args); err != nil {
-				fmt.Println("RUN_ERR | gnodev:", err)
+				fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
 			}
 		}()
 	}
@@ -101,7 +101,7 @@ func execE2EInfra() error {
 				defer wg.Done()
 				go func() {
 					if err := runCommand(backendCtx, "backend", "#C2675E", args); err != nil {
-						fmt.Println("RUN_ERR | backend:", err)
+						fmt.Printf("%-10s | backend: %v\n", "RUN_ERR", err)
 					}
 				}()
 			}()
@@ -134,7 +134,7 @@ func execE2EInfra() error {
 	}
 
 	resetReqJoiner := requestsJoiner{process: func() (int, []byte) {
-		fmt.Println("RESET   | ----------------------------")
+		fmt.Printf("%-10s | ----------------------------\n", "RESET")
 
 		// reset gnodev
 		if _, err := http.Get("http://localhost:8888/reset"); err != nil {
@@ -149,7 +149,8 @@ func execE2EInfra() error {
 		if err := startBackend(); err != nil {
 			return http.StatusInternalServerError, []byte(err.Error())
 		}
-		fmt.Println("READY   | ----------------------------")
+
+		fmt.Printf("%-10s | ----------------------------\n", "READY")
 
 		return http.StatusOK, nil
 	}}
@@ -170,7 +171,7 @@ func execE2EInfra() error {
 	}()
 
 	if !e2eInfraConf.ci {
-		fmt.Println("READY   | ----------------------------")
+		fmt.Printf("%-10s | ----------------------------\n", "READY")
 		wg.Wait()
 		return nil
 	}
@@ -182,7 +183,7 @@ func execE2EInfra() error {
 		defer wg.Done()
 		go func() {
 			if err := runCommand(ctx, "nextjs", "#E1CC4F", args); err != nil {
-				fmt.Println("RUN_ERR | nextjs:", err)
+				fmt.Printf("%-10s | nextjs: %v\n", "RUN_ERR", err)
 			}
 		}()
 	}()

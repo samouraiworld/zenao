@@ -41,7 +41,7 @@ export const eventFormSchema = z.object({
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
 export const userFormSchema = z.object({
-  bio: z.string().trim().min(2).max(240),
+  bio: z.string().trim().min(2).max(10000),
   displayName: z.string().trim().min(1),
   avatarUri: uriSchema,
 });

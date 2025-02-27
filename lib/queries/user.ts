@@ -37,4 +37,5 @@ export const userAddressOptions = (
       );
       return address;
     },
+    enabled: !!userId,
   });

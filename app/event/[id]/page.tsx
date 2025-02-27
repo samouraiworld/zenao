@@ -42,7 +42,7 @@ export default async function EventPage({ params }: Props) {
       background={{ src: eventData.imageUri, width: imageWidth }}
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventInfo id={p.id} />
+        <EventInfo id={p.id} userId={userId} />
       </HydrationBoundary>
     </ScreenContainer>
   );

@@ -17,6 +17,8 @@ export const FormFieldImage = <T extends FieldValues>(
   const { field, fieldState } = useController(props);
   const imageUri = useWatch({ control: props.control, name: props.name });
 
+  console.log("imageUri", imageUri);
+
   const hiddenInputRef = useRef<HTMLInputElement>(null);
 
   const [uploading, setUploading] = useState<boolean>(false);

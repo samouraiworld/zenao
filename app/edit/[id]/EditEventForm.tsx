@@ -3,11 +3,7 @@
 import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import {
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
@@ -21,10 +17,12 @@ import { eventUserRoles } from "@/lib/queries/event-user-roles";
 import { currentTimezone } from "@/lib/time";
 import { userAddressOptions } from "@/lib/queries/user";
 
-export function EditEventForm({ id }: { id: string }) {
-  const { getToken, userId } = useAuth();
+export function EditEventForm({ id, userId }: { id: string; userId: string }) {
+  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: address } = useQuery(userAddressOptions(getToken, userId));
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
   const isOrganizer = roles.includes("organizer");
   const router = useRouter();

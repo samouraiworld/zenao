@@ -22,9 +22,9 @@ export default async function EditPage({
   void queryClient.prefetchQuery(eventUserRoles(p.id, address));
 
   return (
-    <ScreenContainer>
+    <ScreenContainer isSignedOutModal={!userId}>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EditEventForm id={p.id} />
+        {userId && <EditEventForm id={p.id} userId={userId} />}
       </HydrationBoundary>
     </ScreenContainer>
   );

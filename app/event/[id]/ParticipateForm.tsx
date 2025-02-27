@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, SignedOut, useSession } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -31,7 +31,7 @@ export function ParticipateForm({
   eventId: string;
   onSuccess?: () => void;
 }) {
-  const { session } = useSession();
+  const { getToken } = useAuth();
   const t = useTranslations("event");
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<ParticipateFormSchemaType>({
@@ -71,7 +71,10 @@ export function ParticipateForm({
   const onSubmitSignedIn = async () => {
     try {
       setIsLoading(true);
-      const token = await session?.getToken();
+      const token = await getToken();
+      if (!token) {
+        throw new Error("invalid clerk token");
+      }
       await zenaoClient.participate(
         { eventId },
         { headers: { Authorization: `Bearer ${token}` } },

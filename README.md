@@ -129,7 +129,7 @@ npm run cypress:open
 
 Click `Start E2E Testing in Chrome`, this will open a controlled chrome browser.
 
-Select a test like `basics.cy.ts`, this will automatically start runnning the test and when done watch for changes in the test file located at `cypress/e2e/basics.cy.ts`.
+Select a test like `main.cy.ts`, this will automatically start runnning the test and when done watch for changes in the test file located at `cypress/e2e/main.cy.ts`.
 
 You can now edit the tests and they will automatically re-run on save. If you only edited app sources, you can run the tests manually by clicking on the refresh icon in cypress ui.
 

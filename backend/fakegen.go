@@ -10,6 +10,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -73,6 +74,15 @@ func execFakegen() error {
 		return err
 	}
 
+	userId, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
+	if err != nil {
+		return err
+	}
+
+	if err := chain.CreateUser(&zeni.User{ID: userId}); err != nil {
+		return err
+	}
+
 	for i := range fakegenConf.eventsCount {
 		a := fakeEvent{}
 		err := faker.FakeData(&a)
@@ -98,7 +108,7 @@ func execFakegen() error {
 				}},
 			},
 		}
-		creatorID := "1"
+		creatorID := userId
 
 		evt, err := db.CreateEvent(creatorID, req)
 		if err != nil {
