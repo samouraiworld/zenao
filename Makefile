@@ -7,6 +7,9 @@ generate:
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
 	npm run mail:build
 
+.PHONY: lint-buf:
+	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf lint
+
 .PHONY: start.gnodev
 start.gnodev:
 	$(GNODEV)
