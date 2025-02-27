@@ -8,7 +8,11 @@ import (
 	"gno.land/p/demo/testutils"
 )
 
-var alice = testutils.TestAddress("alice")
+var (
+	alice = testutils.TestAddress("alice")
+	bob   = testutils.TestAddress("bob")
+	carol = testutils.TestAddress("carol")
+)
 
 func TestNewPoll(t *testing.T) {
 	type input struct {
@@ -179,6 +183,83 @@ func TestVote(t *testing.T) {
 			voted := result.Has(alice.String())
 			if voted != test.output.voted {
 				t.Errorf("expected voted=%v, got voted=%v", test.output.voted, voted)
+			}
+		})
+	}
+}
+
+func TestGetInfo(t *testing.T) {
+	type input struct {
+		poll *Poll
+	}
+
+	type output struct {
+		info PollInfo
+	}
+
+	type test struct {
+		input  input
+		output output
+	}
+
+	type testTable = map[string]test
+
+	poll := NewPoll("poll1", "What is your favorite color?", []string{"red", "blue", "green"})
+	emptyPoll := NewPoll("poll2", "What is your favorite color?", []string{"red", "blue", "green"})
+	poll.Vote(alice, "red")
+	poll.Vote(bob, "blue")
+	poll.Vote(carol, "blue")
+
+	tests := testTable{
+		"valid poll": {
+			input: input{
+				poll: poll,
+			},
+			output: output{
+				info: PollInfo{
+					Question: "What is your favorite color?",
+					Options: []PollResult{ // XXX: keep it sorted ascending
+						{Option: "blue", Votes: 2},
+						{Option: "green", Votes: 0},
+						{Option: "red", Votes: 1},
+					},
+				},
+			},
+		},
+		"empty poll": {
+			input: input{
+				poll: emptyPoll,
+			},
+			output: output{
+				info: PollInfo{
+					Question: "What is your favorite color?",
+					Options: []PollResult{ // XXX: keep it sorted ascending
+						{Option: "blue", Votes: 0},
+						{Option: "green", Votes: 0},
+						{Option: "red", Votes: 0},
+					},
+				},
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			info := test.input.poll.GetInfo()
+			if info.Question != test.output.info.Question {
+				t.Errorf("expected question=%q, got question=%q", test.output.info.Question, info.Question)
+			}
+			if len(info.Options) != len(test.output.info.Options) {
+				t.Errorf("expected %d options, got %d options", len(test.output.info.Options), len(info.Options))
+			}
+			for i, expected := range test.output.info.Options {
+				actual := info.Options[i]
+				if expected.Option != actual.Option {
+					t.Errorf("expected option=%q, got option=%q", expected.Option, actual.Option)
+				}
+				if expected.Votes != actual.Votes {
+					t.Errorf("expected votes=%d, got votes=%d", expected.Votes, actual.Votes)
+				}
 			}
 		})
 	}
