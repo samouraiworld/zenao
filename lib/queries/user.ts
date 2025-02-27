@@ -19,7 +19,7 @@ type GetToken = ReturnType<typeof useAuth>["getToken"];
 // getToken is not used in the query key
 export const userAddressOptions = (
   getToken: GetToken,
-  userId: string | null | undefined,
+  userId: string | null | undefined, // this should be the authUserId not backend userId and is meant to be only used as the query key
 ) =>
   queryOptions({
     queryKey: ["userAddress", userId],
