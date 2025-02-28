@@ -2,13 +2,21 @@ package polls
 
 import (
 	"std"
+	"time"
 
 	"gno.land/p/demo/avl"
 )
 
 type Poll struct {
-	Question string
-	Results  *avl.Tree // string -> avl.Tree of string -> struct{}
+	Question        string
+	MultipleAnswers bool
+	Results         *avl.Tree // string -> avl.Tree of string -> struct{}
+
+	StarTime int64
+	EndTime  int64
+
+	CreatedAt int64
+	CreatedBy std.Address
 }
 
 type PollResult struct {
@@ -21,16 +29,30 @@ type PollInfo struct {
 	Options  []PollResult
 }
 
-func NewPoll(question string, options []string) *Poll {
+func NewPoll(question string, multipleAnswers bool, startTime, endTime int64, options []string) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
 	if len(options) > 8 {
 		panic("poll must have at most 8 options")
 	}
+	if endTime != 0 && startTime >= endTime {
+		panic("start time must be before end time")
+	}
+	if startTime != 0 && startTime < time.Now().Unix() {
+		panic("start time must be in the future")
+	}
+	if endTime != 0 && endTime < time.Now().Unix() {
+		panic("end time must be in the future")
+	}
 	poll := &Poll{
-		Question: question,
-		Results:  avl.NewTree(),
+		Question:        question,
+		MultipleAnswers: multipleAnswers,
+		Results:         avl.NewTree(),
+		StarTime:        startTime,
+		EndTime:         endTime,
+		CreatedAt:       time.Now().Unix(),
+		CreatedBy:       std.PreviousRealm().Address(),
 	}
 	for _, option := range options {
 		if option == "" {

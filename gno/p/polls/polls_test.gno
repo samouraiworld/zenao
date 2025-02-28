@@ -100,7 +100,7 @@ func TestNewPoll(t *testing.T) {
 				}
 			}()
 
-			NewPoll(test.input.question, test.input.options)
+			NewPoll(test.input.question, true, 0, 0, test.input.options)
 		})
 	}
 }
@@ -123,7 +123,7 @@ func TestVote(t *testing.T) {
 
 	type testTable = map[string]test
 
-	poll := NewPoll("What is your favorite color?", []string{"red", "blue", "green"})
+	poll := NewPoll("What is your favorite color?", true, 0, 0, []string{"red", "blue", "green"})
 
 	tests := testTable{
 		"valid vote": {
@@ -197,8 +197,8 @@ func TestGetInfo(t *testing.T) {
 
 	type testTable = map[string]test
 
-	poll := NewPoll("What is your favorite color?", []string{"red", "blue", "green"})
-	emptyPoll := NewPoll("What is your favorite color?", []string{"red", "blue", "green"})
+	poll := NewPoll("What is your favorite color?", true, 0, 0, []string{"red", "blue", "green"})
+	emptyPoll := NewPoll("What is your favorite color?", true, 0, 0, []string{"red", "blue", "green"})
 	poll.Vote(alice, "red")
 	poll.Vote(bob, "blue")
 	poll.Vote(carol, "blue")
