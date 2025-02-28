@@ -3,6 +3,12 @@ syntax = "proto3";
 package polls.v1;
 option go_package = "github.com/samouraiworld/zenao/backend/polls/v1;pollsv1";
 
+enum PollKind {
+  POLL_KIND_UNSPECIFIED = 0;
+  POLL_KIND_SINGLE_CHOICE = 1;
+  POLL_KIND_MULTIPLE_CHOICE = 2;
+}
+
 message PollResult {
   string option = 1;
   uint32 count = 2;
@@ -12,7 +18,7 @@ message PollResult {
 message Poll {
   string question = 1;
   repeated PollResult results = 2;
-  bool multiple_answers = 3;
+  PollKind kind = 3;
   int64 duration = 4;
   int64 created_at = 5;
   string created_by = 6;
