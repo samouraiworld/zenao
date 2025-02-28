@@ -8,6 +8,7 @@ import (
 )
 
 // XXX: Modify Answers by Choices
+// XXX: Add an auth callback func to handle who can vote on the poll
 
 type Poll struct {
 	Question        string
