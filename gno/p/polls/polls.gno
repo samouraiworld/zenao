@@ -29,28 +29,28 @@ type PollInfo struct {
 	Options  []PollResult
 }
 
-func NewPoll(question string, multipleAnswers bool, startTime, endTime int64, options []string) *Poll {
+func NewPoll(question string, multipleAnswers bool, start int64, end int64, options []string) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
 	if len(options) > 8 {
 		panic("poll must have at most 8 options")
 	}
-	if endTime != 0 && startTime >= endTime {
+	if end != 0 && start >= end {
 		panic("start time must be before end time")
 	}
-	if startTime != 0 && startTime < time.Now().Unix() {
+	if start != 0 && start < time.Now().Unix() {
 		panic("start time must be in the future")
 	}
-	if endTime != 0 && endTime < time.Now().Unix() {
+	if end != 0 && end < time.Now().Unix() {
 		panic("end time must be in the future")
 	}
 	poll := &Poll{
 		Question:        question,
 		MultipleAnswers: multipleAnswers,
 		Results:         avl.NewTree(),
-		StarTime:        startTime,
-		EndTime:         endTime,
+		StarTime:        start,
+		EndTime:         end,
 		CreatedAt:       time.Now().Unix(),
 		CreatedBy:       std.PreviousRealm().Address(),
 	}
