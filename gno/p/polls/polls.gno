@@ -69,6 +69,8 @@ func NewPoll(question string, multipleAnswers bool, start int64, end int64, opti
 	return poll
 }
 
+// TODO: Add time validation
+// TODO: Add validation for multiple answers
 func (p *Poll) Vote(addr std.Address, option string) {
 	optionRaw, ok := p.Results.Get(option)
 	if !ok {
@@ -82,6 +84,7 @@ func (p *Poll) Vote(addr std.Address, option string) {
 	}
 }
 
+// TODO: Add start, end time, multiple answers, created at, created by
 func (p *Poll) GetInfo() PollInfo {
 	info := PollInfo{
 		Question: p.Question,
