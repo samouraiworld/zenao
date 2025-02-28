@@ -13,7 +13,7 @@ var poll *polls.Poll
 func init() {
 	question := "What is your favorite color?"
 	answers := []string{"Red", "Green", "Blue", "Yellow"}
-	poll = polls.NewPoll(question, answers)
+	poll = polls.NewPoll(question, true, 0, 0, answers)
 }
 
 func Vote(answer string) {
