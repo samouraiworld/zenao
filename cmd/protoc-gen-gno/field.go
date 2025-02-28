@@ -105,7 +105,11 @@ func fieldToJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFile,
 		printField(`false`, func(accessor string) string {
 			return `json.BoolNode("", ` + accessor + `)`
 		})
-	case protoreflect.EnumKind, protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.FloatKind, protoreflect.DoubleKind:
+	case protoreflect.EnumKind:
+		printField(`0`, func(accessor string) string {
+			return `json.StringNode("", ` + accessor + `.ToString())`
+		})
+	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.FloatKind, protoreflect.DoubleKind:
 		printField(`0`, func(accessor string) string {
 			return `json.NumberNode("", float64(` + accessor + `))`
 		})
@@ -191,7 +195,7 @@ func fieldFromJSON(prefix string, g *protogen.GeneratedFile, field *protogen.Fie
 	case protoreflect.BoolKind:
 		printField("", "val.MustBool()")
 	case protoreflect.EnumKind:
-		printField("", g.QualifiedGoIdent(field.Enum.GoIdent)+"(val.MustNumeric())")
+		printField("", g.QualifiedGoIdent(field.Enum.GoIdent)+"FromString(val.MustString())")
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
 		printField("", "int32(val.MustNumeric())")
 	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:

@@ -2,13 +2,41 @@
 
 package pollsv1
 
+import "errors"
+
 type PollKind uint32
 
 const (
-	PollKind_POLL_KIND_UNSPECIFIED     = PollKind(0)
-	PollKind_POLL_KIND_SINGLE_CHOICE   = PollKind(1)
-	PollKind_POLL_KIND_MULTIPLE_CHOICE = PollKind(2)
+	POLL_KIND_UNSPECIFIED     = PollKind(0)
+	POLL_KIND_SINGLE_CHOICE   = PollKind(1)
+	POLL_KIND_MULTIPLE_CHOICE = PollKind(2)
 )
+
+func PollKindFromString(str string) PollKind {
+	switch str {
+	case "POLL_KIND_UNSPECIFIED":
+		return POLL_KIND_UNSPECIFIED
+	case "POLL_KIND_SINGLE_CHOICE":
+		return POLL_KIND_SINGLE_CHOICE
+	case "POLL_KIND_MULTIPLE_CHOICE":
+		return POLL_KIND_MULTIPLE_CHOICE
+	default:
+		panic(errors.New("unknown variant " + str))
+	}
+}
+
+func (e PollKind) ToString() string {
+	switch e {
+	case POLL_KIND_UNSPECIFIED:
+		return "POLL_KIND_UNSPECIFIED"
+	case POLL_KIND_SINGLE_CHOICE:
+		return "POLL_KIND_SINGLE_CHOICE"
+	case POLL_KIND_MULTIPLE_CHOICE:
+		return "POLL_KIND_MULTIPLE_CHOICE"
+	default:
+		panic(errors.New("unknown variant"))
+	}
+}
 
 type PollResult struct {
 	Option       string
