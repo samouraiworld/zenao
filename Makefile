@@ -5,6 +5,7 @@ GNODEV := gnodev staging --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=
 generate:
 	npm i
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
+	gno fmt -w ./gno/...
 	npm run mail:build
 
 .PHONY: lint-buf

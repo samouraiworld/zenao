@@ -3,9 +3,9 @@
 package zenaov1
 
 import (
-	"strings"
-	"fmt"
-	"errors"
+	errors "errors"
+	fmt "fmt"
+	strings "strings"
 )
 
 func (e *EditUserRequest) GnoLiteral(typePrefix string, linePrefix string) string {
