@@ -7,6 +7,8 @@ import (
 	"gno.land/p/demo/avl"
 )
 
+// XXX: Modify Answers by Choices
+
 type Poll struct {
 	Question        string
 	MultipleAnswers bool

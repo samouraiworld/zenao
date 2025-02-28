@@ -39,3 +39,9 @@ func GetInfoJSON() string {
 func Render(path string) string {
 	return poll.Render()
 }
+
+// make the target kind constants in a standalone pkg with doc. associated for each kind
+// // implement teritori social feed API
+// func FeedLinkTargetKind() string {
+// 	return "poll"
+// }
