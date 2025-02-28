@@ -26,14 +26,10 @@ jobs:
 
       - name: Install gno
         run: |
-          mkdir gnobuild
+          git clone https://github.com/gnolang/gno.git gnobuild
           cd gnobuild
-          git clone https://github.com/gnolang/gno.git
-          cd gno
           git checkout $(shell $(CAT) .gnoversion)
           make install.gno
-          cd ../..
-          rm -fr gnobuild
 
       - name: Generate
         run: make generate
