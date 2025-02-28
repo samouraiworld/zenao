@@ -3,6 +3,7 @@ package polls
 import (
 	"std"
 	"testing"
+	"time"
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/testutils"
@@ -18,6 +19,8 @@ func TestNewPoll(t *testing.T) {
 	type input struct {
 		question string
 		options  []string
+		start    int64
+		end      int64
 	}
 
 	type output struct {
@@ -36,6 +39,8 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green"},
+				start:    0,
+				end:      0,
 			},
 			output: output{
 				panic: false,
@@ -45,6 +50,8 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red"},
+				start:    0,
+				end:      0,
 			},
 			output: output{
 				panic: true,
@@ -54,6 +61,8 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black"},
+				start:    0,
+				end:      0,
 			},
 			output: output{
 				panic: true,
@@ -63,6 +72,8 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "", "green"},
+				start:    0,
+				end:      0,
 			},
 			output: output{
 				panic: true,
@@ -72,6 +83,8 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black", "this option is too too too too too too long"},
+				start:    0,
+				end:      0,
 			},
 			output: output{
 				panic: true,
@@ -81,9 +94,55 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "blue"},
+				start:    0,
+				end:      0,
 			},
 			output: output{
 				panic: true,
+			},
+		},
+		"start time after end time": {
+			input: input{
+				question: "What is your favorite color?",
+				options:  []string{"red", "blue", "green"},
+				start:    time.Now().Unix() + 5,
+				end:      time.Now().Unix() + 4,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+		"start time in the past": {
+			input: input{
+				question: "What is your favorite color?",
+				options:  []string{"red", "blue", "green"},
+				start:    2,
+				end:      0,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+		"end time in the past": {
+			input: input{
+				question: "What is your favorite color?",
+				options:  []string{"red", "blue", "green"},
+				start:    0,
+				end:      2,
+			},
+			output: output{
+				panic: true,
+			},
+		},
+		"valid start & endtime": {
+			input: input{
+				question: "What is your favorite color?",
+				options:  []string{"red", "blue", "green"},
+				start:    time.Now().Unix() + 5,
+				end:      time.Now().Unix() + 10,
+			},
+			output: output{
+				panic: false,
 			},
 		},
 	}
@@ -100,7 +159,7 @@ func TestNewPoll(t *testing.T) {
 				}
 			}()
 
-			NewPoll(test.input.question, true, 0, 0, test.input.options)
+			NewPoll(test.input.question, true, test.input.start, test.input.end, test.input.options)
 		})
 	}
 }
