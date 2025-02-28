@@ -32,6 +32,8 @@ jobs:
           cd gno
           git checkout $(shell $(CAT) .gnoversion)
           make install.gno
+          cd ../..
+          rm -fr gnobuild
 
       - name: Generate
         run: make generate
