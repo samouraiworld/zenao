@@ -6,6 +6,7 @@ import (
 	"gno.land/p/moul/md"
 )
 
+// TODO: Add informations like start, end, multiple answers, created by, created at
 func (p *Poll) Render() string {
 	s := ""
 	s += md.H1(p.Question)
