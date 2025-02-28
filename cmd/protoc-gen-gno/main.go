@@ -38,6 +38,20 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 	g.P()
 	g.P("package ", file.GoPackageName)
 
+	for _, en := range file.Enums {
+		g.P()
+
+		typeName := en.Desc.Name()
+
+		g.P("type ", typeName, " uint32")
+		g.P()
+		g.P("const (")
+		for _, ca := range en.Values {
+			g.P("	", ca.GoIdent.GoName, " = ", en.GoIdent.GoName, "(", ca.Desc.Index(), ")")
+		}
+		g.P(")")
+	}
+
 	for _, m := range file.Messages {
 		g.P()
 
@@ -65,6 +79,7 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 	g.P()
 	g.P("package ", file.GoPackageName)
 	g.P()
+
 	g.P("import (")
 	g.P(`	"errors"`)
 	g.P(`	"strconv"`)

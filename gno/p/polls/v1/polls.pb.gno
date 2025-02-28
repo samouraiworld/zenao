@@ -2,17 +2,25 @@
 
 package pollsv1
 
+type PollKind uint32
+
+const (
+	PollKind_POLL_KIND_UNSPECIFIED     = PollKind(0)
+	PollKind_POLL_KIND_SINGLE_CHOICE   = PollKind(1)
+	PollKind_POLL_KIND_MULTIPLE_CHOICE = PollKind(2)
+)
+
 type PollResult struct {
-	Option string
-	Count uint32
+	Option       string
+	Count        uint32
 	HasUserVoted bool
 }
 
 type Poll struct {
-	Question string
-	Results []*PollResult
-	MultipleAnswers bool
-	Duration int64
+	Question  string
+	Results   []*PollResult
+	Kind      PollKind
+	Duration  int64
 	CreatedAt int64
 	CreatedBy string
 }

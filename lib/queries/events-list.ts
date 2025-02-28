@@ -1,8 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
-import { create, MessageInitShape } from "@bufbuild/protobuf";
+import { fromJson } from "@bufbuild/protobuf";
 import { extractGnoJSONResponse } from "@/lib/gno";
-import { EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
+import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const eventsList = (
   fromUnixSec: number,
@@ -80,7 +80,5 @@ export const eventsByParticipantList = (
 
 function createEventList(raw: unknown) {
   const list = raw as unknown[];
-  return list.map((elem) =>
-    create(EventInfoSchema, elem as MessageInitShape<typeof EventInfoSchema>),
-  );
+  return list.map((elem) => fromJson(EventInfoSchema, elem as EventInfoJson));
 }
