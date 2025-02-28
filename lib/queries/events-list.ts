@@ -23,7 +23,7 @@ export const eventsList = (
         `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
-      return createEventList(raw);
+      return eventListFromJson(raw);
     },
   });
 };
@@ -48,7 +48,7 @@ export const eventsByCreatorList = (
         `eventsToJSON(listEventsByCreator(${JSON.stringify(creator)}, ${fromInt}, ${toInt}, ${limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
-      return createEventList(raw);
+      return eventListFromJson(raw);
     },
   });
 };
@@ -73,12 +73,12 @@ export const eventsByParticipantList = (
         `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${fromInt}, ${toInt}, ${limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
-      return createEventList(raw);
+      return eventListFromJson(raw);
     },
   });
 };
 
-function createEventList(raw: unknown) {
+function eventListFromJson(raw: unknown) {
   const list = raw as unknown[];
   return list.map((elem) => fromJson(EventInfoSchema, elem as EventInfoJson));
 }
