@@ -100,6 +100,14 @@
     "upcoming": "Upcoming",
     "past": "Past"
   },
+  "polls-list": {
+    "no-polls": "No polls to show.",
+    "no-polls-desc": "You have no polls. Why not create one?",
+    "create-poll": "Create poll",
+    "see-gnoweb": "See on Gnoweb",
+    "upcoming": "Upcoming",
+    "past": "Past"
+  },
   "error": {
     "label": "Oups! An error has occured.",
     "retry-button": "Retry"
