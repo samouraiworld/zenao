@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -18,6 +18,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/shadcn/command";
+import { timezones } from "@/lib/timezones";
 
 export const TimeZonesPopover: React.FC<{
   handleSelect: (timeZone: string) => void;
@@ -26,21 +27,6 @@ export const TimeZonesPopover: React.FC<{
   const [search, setSearch] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [item, setItem] = useState<string>(defaultValue || "");
-  const [timezones, setTimezones] = useState([]);
-
-  useEffect(() => {
-    const getTimezones = async () => {
-      const uploadRequest = await fetch("/api/timezones", {
-        method: "GET",
-      });
-      const resRaw = await uploadRequest.json();
-      setTimezones(resRaw);
-    };
-
-    getTimezones();
-  }, []);
-
-  console.log("item", item);
 
   return (
     <div>
