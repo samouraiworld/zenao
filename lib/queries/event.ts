@@ -1,8 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
-import { create, MessageInitShape } from "@bufbuild/protobuf";
+import { fromJson } from "@bufbuild/protobuf";
 import { extractGnoJSONResponse } from "@/lib/gno";
-import { EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
+import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const eventOptions = (id: string) =>
   queryOptions({
@@ -15,9 +15,7 @@ export const eventOptions = (id: string) =>
         `gno.land/r/zenao/events/e${id}`,
         `event.GetInfoJSON()`,
       );
-      const event = extractGnoJSONResponse(res) as MessageInitShape<
-        typeof EventInfoSchema
-      >;
-      return create(EventInfoSchema, event);
+      const event = extractGnoJSONResponse(res) as EventInfoJson;
+      return fromJson(EventInfoSchema, event);
     },
   });

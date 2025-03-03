@@ -21,6 +21,7 @@ func fieldToLit(prefix string, g *protogen.GeneratedFile, field *protogen.Field)
 	parentTypeName := field.Parent.Desc.Name()
 	parentReceiver := strings.ToLower(string(parentTypeName[0]))
 	receiver := parentReceiver + "." + field.GoName
+	fieldType, _ := fieldGnoType(g, field)
 
 	if field.Oneof != nil {
 		return
@@ -57,7 +58,7 @@ func fieldToLit(prefix string, g *protogen.GeneratedFile, field *protogen.Field)
 	case protoreflect.BoolKind:
 		printField("%t", "false")
 	case protoreflect.EnumKind:
-		panic("enums not supported")
+		printField("%d", fieldType+"(0)")
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind, protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
 		printField("%d", "0")
 	case protoreflect.FloatKind, protoreflect.DoubleKind:
@@ -96,6 +97,7 @@ func oneOfToLit(prefix string, g *protogen.GeneratedFile, oneOf *protogen.Oneof)
 		g.P(prefix, `fmt.Fprintf(buf, "%s\t`, oneOf.GoName, `: &%s,\n", linePrefix, val.`, f.GoName, `.GnoLiteral(typePrefix, linePrefix+"\t"))`)
 	}
 	g.P(prefix, "default:")
+	g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "errors"})
 	g.P(prefix, `	panic(errors.New("unknown `, name, ` variant"))`)
 	g.P(prefix, "}")
 }
