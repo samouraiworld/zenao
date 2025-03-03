@@ -8,6 +8,7 @@ import (
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/seqid"
 	"gno.land/p/demo/testutils"
+	pollsv1 "gno.land/p/zenao/polls/v1"
 )
 
 var (
@@ -311,82 +312,131 @@ func TestVote(t *testing.T) {
 	}
 }
 
-// func TestGetInfo(t *testing.T) {
-// 	type input struct {
-// 		poll *Poll
-// 	}
+func TestGetInfo(t *testing.T) {
+	setupTest()
+	type input struct {
+		id   uint64
+		user std.Address
+	}
 
-// 	type output struct {
-// 		info PollInfo
-// 	}
+	type output struct {
+		info *pollsv1.Poll
+	}
 
-// 	type test struct {
-// 		input  input
-// 		output output
-// 	}
+	type test struct {
+		input  input
+		output output
+	}
 
-// 	type testTable = map[string]test
+	type testTable = map[string]test
 
-// 	poll := NewPoll("What is your favorite color?", true, 0, 0, []string{"red", "blue", "green"})
-// 	emptyPoll := NewPoll("What is your favorite color?", true, 0, 0, []string{"red", "blue", "green"})
-// 	poll.Vote(alice, "red")
-// 	poll.Vote(bob, "blue")
-// 	poll.Vote(carol, "blue")
+	poll := NewPoll("What is your favorite color?", true, int64(time.Hour), []string{"red", "blue", "green"}, nil)
+	emptyPoll := NewPoll("What is your favorite color?", true, int64(time.Hour), []string{"red", "blue", "green"}, nil)
+	std.TestSetOriginCaller(alice)
+	Vote(1, "blue")
+	std.TestSetOriginCaller(bob)
+	Vote(1, "blue")
+	std.TestSetOriginCaller(carol)
+	Vote(1, "red")
 
-// 	tests := testTable{
-// 		"valid poll": {
-// 			input: input{
-// 				poll: poll,
-// 			},
-// 			output: output{
-// 				info: PollInfo{
-// 					Question: "What is your favorite color?",
-// 					Options: []PollResult{ // XXX: keep it sorted ascending
-// 						{Option: "blue", Votes: 2},
-// 						{Option: "green", Votes: 0},
-// 						{Option: "red", Votes: 1},
-// 					},
-// 				},
-// 			},
-// 		},
-// 		"empty poll": {
-// 			input: input{
-// 				poll: emptyPoll,
-// 			},
-// 			output: output{
-// 				info: PollInfo{
-// 					Question: "What is your favorite color?",
-// 					Options: []PollResult{ // XXX: keep it sorted ascending
-// 						{Option: "blue", Votes: 0},
-// 						{Option: "green", Votes: 0},
-// 						{Option: "red", Votes: 0},
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
+	tests := testTable{
+		"valid poll alice": {
+			input: input{
+				id:   1,
+				user: alice,
+			},
+			output: output{
+				info: &pollsv1.Poll{
+					Question: "What is your favorite color?",
+					Results: []*pollsv1.PollResult{
+						{Option: "blue", Count: 2, HasUserVoted: true},
+						{Option: "green", Count: 0, HasUserVoted: false},
+						{Option: "red", Count: 1, HasUserVoted: false},
+					},
+					MultipleChoices: true,
+					Duration:        int64(time.Hour),
+					CreatedAt:       poll.CreatedAt,
+					CreatedBy:       poll.CreatedBy.String(),
+				},
+			},
+		},
+		"valid poll carol": {
+			input: input{
+				id:   1,
+				user: carol,
+			},
+			output: output{
+				info: &pollsv1.Poll{
+					Question: "What is your favorite color?",
+					Results: []*pollsv1.PollResult{
+						{Option: "blue", Count: 2, HasUserVoted: false},
+						{Option: "green", Count: 0, HasUserVoted: false},
+						{Option: "red", Count: 1, HasUserVoted: true},
+					},
+					MultipleChoices: true,
+					Duration:        int64(time.Hour),
+					CreatedAt:       poll.CreatedAt,
+					CreatedBy:       poll.CreatedBy.String(),
+				},
+			},
+		},
+		"empty poll": {
+			input: input{
+				id:   2,
+				user: alice,
+			},
+			output: output{
+				info: &pollsv1.Poll{
+					Question: "What is your favorite color?",
+					Results: []*pollsv1.PollResult{
+						{Option: "blue", Count: 0, HasUserVoted: false},
+						{Option: "green", Count: 0, HasUserVoted: false},
+						{Option: "red", Count: 0, HasUserVoted: false},
+					},
+					MultipleChoices: true,
+					Duration:        int64(time.Hour),
+					CreatedAt:       emptyPoll.CreatedAt,
+					CreatedBy:       emptyPoll.CreatedBy.String(),
+				},
+			},
+		},
+	}
 
-// 	for name, test := range tests {
-// 		t.Run(name, func(t *testing.T) {
-// 			info := test.input.poll.GetInfo()
-// 			if info.Question != test.output.info.Question {
-// 				t.Errorf("expected question=%q, got question=%q", test.output.info.Question, info.Question)
-// 			}
-// 			if len(info.Options) != len(test.output.info.Options) {
-// 				t.Errorf("expected %d options, got %d options", len(test.output.info.Options), len(info.Options))
-// 			}
-// 			for i, expected := range test.output.info.Options {
-// 				actual := info.Options[i]
-// 				if expected.Option != actual.Option {
-// 					t.Errorf("expected option=%q, got option=%q", expected.Option, actual.Option)
-// 				}
-// 				if expected.Votes != actual.Votes {
-// 					t.Errorf("expected votes=%d, got votes=%d", expected.Votes, actual.Votes)
-// 				}
-// 			}
-// 		})
-// 	}
-// }
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			info := GetInfo(test.input.id, test.input.user.String())
+			if info.Question != test.output.info.Question {
+				t.Errorf("expected question %q, got %q", test.output.info.Question, info.Question)
+			}
+			if info.MultipleChoices != test.output.info.MultipleChoices {
+				t.Errorf("expected multiple choices %v, got %v", test.output.info.MultipleChoices, info.MultipleChoices)
+			}
+			if info.Duration != test.output.info.Duration {
+				t.Errorf("expected duration %v, got %v", test.output.info.Duration, info.Duration)
+			}
+			if info.CreatedAt != test.output.info.CreatedAt {
+				t.Errorf("expected created at %v, got %v", test.output.info.CreatedAt, info.CreatedAt)
+			}
+			if info.CreatedBy != test.output.info.CreatedBy {
+				t.Errorf("expected created by %q, got %q", test.output.info.CreatedBy, info.CreatedBy)
+			}
+			if len(info.Results) != len(test.output.info.Results) {
+				t.Errorf("expected %d results, got %d", len(test.output.info.Results), len(info.Results))
+			}
+			for i, result := range info.Results {
+				if result.Option != test.output.info.Results[i].Option {
+					t.Errorf("expected option %q, got %q", test.output.info.Results[i].Option, result.Option)
+				}
+				if result.Count != test.output.info.Results[i].Count {
+					t.Errorf("expected votes %d, got %d", test.output.info.Results[i].Count, result.Count)
+				}
+				if result.HasUserVoted != test.output.info.Results[i].HasUserVoted {
+					t.Errorf("expected has user voted %v, got %v", test.output.info.Results[i].HasUserVoted, result.HasUserVoted)
+				}
+			}
+		})
+	}
+}
 
 func setupTest() {
 	polls = avl.NewTree()

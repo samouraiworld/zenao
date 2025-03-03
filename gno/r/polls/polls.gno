@@ -108,23 +108,23 @@ func (p *Poll) Vote(option string) {
 		panic("poll is not running")
 	}
 
-	// Remove previous vote if multiple answers are not allowed
+	// Remove previous choice if multiple answers are not allowed
 	if !p.MultipleChoices {
 		p.Results.Iterate("", "", func(key string, value interface{}) bool {
-			votes := value.(*avl.Tree)
-			if votes.Has(addr.String()) {
-				votes.Remove(addr.String())
+			choices := value.(*avl.Tree)
+			if choices.Has(addr.String()) {
+				choices.Remove(addr.String())
 				return true
 			}
 			return false
 		})
 	}
 
-	votes := optionRaw.(*avl.Tree)
-	if votes.Has(addr.String()) {
-		votes.Remove(addr.String())
+	choices := optionRaw.(*avl.Tree)
+	if choices.Has(addr.String()) {
+		choices.Remove(addr.String())
 	} else {
-		votes.Set(addr.String(), struct{}{})
+		choices.Set(addr.String(), struct{}{})
 	}
 }
 
@@ -138,11 +138,11 @@ func (p *Poll) GetInfo(user string) *pollsv1.Poll {
 		CreatedBy:       p.CreatedBy.String(),
 	}
 	p.Results.Iterate("", "", func(key string, value interface{}) bool {
-		votes := value.(*avl.Tree)
+		count := value.(*avl.Tree)
 		info.Results = append(info.Results, &pollsv1.PollResult{
 			Option:       key,
-			Count:        uint32(votes.Size()),
-			HasUserVoted: votes.Has(user),
+			Count:        uint32(count.Size()),
+			HasUserVoted: count.Has(user),
 		})
 		return false
 	})
