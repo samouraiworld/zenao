@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	polls *avl.Tree
+	polls *avl.Tree // string (seqid.ID) -> *Poll
 	id    seqid.ID
 )
 
@@ -18,13 +18,11 @@ func init() {
 	polls = avl.NewTree()
 }
 
-// XXX: Add an auth callback func to handle who can vote on the poll
-
 type Poll struct {
 	ID              seqid.ID
 	Question        string
 	MultipleChoices bool
-	Results         *avl.Tree // string -> avl.Tree of string -> struct{}
+	Results         *avl.Tree // string (options) -> avl.Tree of string (address of users) -> struct{}
 
 	Duration int64
 
@@ -81,6 +79,7 @@ func Vote(pollID uint64, option string) {
 	if !ok {
 		panic("poll not found")
 	}
+
 	poll := pollRaw.(*Poll)
 	poll.Vote(option)
 }
@@ -133,7 +132,7 @@ func (p *Poll) GetInfo(user string) *pollsv1.Poll {
 	info := &pollsv1.Poll{
 		Question:        p.Question,
 		Results:         []*pollsv1.PollResult{},
-		MultipleAnswers: p.MultipleChoices,
+		MultipleChoices: p.MultipleChoices,
 		Duration:        p.Duration,
 		CreatedAt:       p.CreatedAt,
 		CreatedBy:       p.CreatedBy.String(),

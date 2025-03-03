@@ -6,6 +6,10 @@ import (
 	"gno.land/p/moul/md"
 )
 
+func Render(path string) string {
+	return "TODO"
+}
+
 // TODO: Add informations like start, end, multiple answers, created by, created at
 func (p *Poll) Render() string {
 	s := ""
