@@ -3,7 +3,6 @@
 package pollsv1
 
 import (
-	"errors"
 	"strconv"
 	"gno.land/p/demo/json"
 )
