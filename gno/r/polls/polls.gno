@@ -5,57 +5,57 @@ import (
 	"time"
 
 	"gno.land/p/demo/avl"
+	"gno.land/p/demo/seqid"
+	pollsv1 "gno.land/p/zenao/polls/v1"
 )
 
-// XXX: Modify Answers by Choices
+var (
+	polls *avl.Tree
+	id    seqid.ID
+)
+
+func init() {
+	polls = avl.NewTree()
+}
+
 // XXX: Add an auth callback func to handle who can vote on the poll
 
 type Poll struct {
+	ID              seqid.ID
 	Question        string
-	MultipleAnswers bool
+	MultipleChoices bool
 	Results         *avl.Tree // string -> avl.Tree of string -> struct{}
 
-	StarTime int64
-	EndTime  int64
+	Duration int64
 
 	CreatedAt int64
 	CreatedBy std.Address
+
+	authFunc func(std.Address) bool
 }
 
-type PollResult struct {
-	Option string
-	Votes  int
-}
-
-type PollInfo struct {
-	Question string
-	Options  []PollResult
-}
-
-func NewPoll(question string, multipleAnswers bool, start int64, end int64, options []string) *Poll {
+func NewPoll(question string, multipleChoices bool, duration int64, options []string, authFunc func(std.Address) bool) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
 	if len(options) > 8 {
 		panic("poll must have at most 8 options")
 	}
-	if end != 0 && start >= end {
-		panic("start time must be before end time")
+	if duration < int64(time.Minute)*15 {
+		panic("duration must be at least 15 minutes")
 	}
-	if start != 0 && start < time.Now().Unix() {
-		panic("start time must be in the future")
-	}
-	if end != 0 && end < time.Now().Unix() {
-		panic("end time must be in the future")
+	if duration > int64(time.Hour)*24*30 {
+		panic("duration must be at most 1 month")
 	}
 	poll := &Poll{
+		ID:              id.Next(),
 		Question:        question,
-		MultipleAnswers: multipleAnswers,
+		MultipleChoices: multipleChoices,
 		Results:         avl.NewTree(),
-		StarTime:        start,
-		EndTime:         end,
+		Duration:        duration,
 		CreatedAt:       time.Now().Unix(),
 		CreatedBy:       std.PreviousRealm().Address(),
+		authFunc:        authFunc,
 	}
 	for _, option := range options {
 		if option == "" {
@@ -69,16 +69,58 @@ func NewPoll(question string, multipleAnswers bool, start int64, end int64, opti
 		}
 		poll.Results.Set(option, avl.NewTree())
 	}
+
+	polls.Set(poll.ID.String(), poll)
+
 	return poll
 }
 
-// TODO: Add time validation
-// TODO: Add validation for multiple answers
-func (p *Poll) Vote(addr std.Address, option string) {
+func Vote(pollID uint64, option string) {
+	id := seqid.ID(pollID)
+	pollRaw, ok := polls.Get(id.String())
+	if !ok {
+		panic("poll not found")
+	}
+	poll := pollRaw.(*Poll)
+	poll.Vote(option)
+}
+
+func GetInfo(pollID uint64, user string) *pollsv1.Poll {
+	id := seqid.ID(pollID)
+	pollRaw, ok := polls.Get(id.String())
+	if !ok {
+		panic("poll not found")
+	}
+	poll := pollRaw.(*Poll)
+	return poll.GetInfo(user)
+}
+
+func (p *Poll) Vote(option string) {
+	addr := std.PreviousRealm().Address()
+	if p.authFunc != nil && !p.authFunc(addr) {
+		panic("the user is not allowed to interact with this poll")
+	}
 	optionRaw, ok := p.Results.Get(option)
 	if !ok {
 		panic("invalid option")
 	}
+
+	if !p.IsRunning() {
+		panic("poll is not running")
+	}
+
+	// Remove previous vote if multiple answers are not allowed
+	if !p.MultipleChoices {
+		p.Results.Iterate("", "", func(key string, value interface{}) bool {
+			votes := value.(*avl.Tree)
+			if votes.Has(addr.String()) {
+				votes.Remove(addr.String())
+				return true
+			}
+			return false
+		})
+	}
+
 	votes := optionRaw.(*avl.Tree)
 	if votes.Has(addr.String()) {
 		votes.Remove(addr.String())
@@ -87,19 +129,27 @@ func (p *Poll) Vote(addr std.Address, option string) {
 	}
 }
 
-// TODO: Add start, end time, multiple answers, created at, created by
-func (p *Poll) GetInfo() PollInfo {
-	info := PollInfo{
-		Question: p.Question,
-		Options:  []PollResult{},
+func (p *Poll) GetInfo(user string) *pollsv1.Poll {
+	info := &pollsv1.Poll{
+		Question:        p.Question,
+		Results:         []*pollsv1.PollResult{},
+		MultipleAnswers: p.MultipleChoices,
+		Duration:        p.Duration,
+		CreatedAt:       p.CreatedAt,
+		CreatedBy:       p.CreatedBy.String(),
 	}
 	p.Results.Iterate("", "", func(key string, value interface{}) bool {
 		votes := value.(*avl.Tree)
-		info.Options = append(info.Options, PollResult{
-			Option: key,
-			Votes:  votes.Size(),
+		info.Results = append(info.Results, &pollsv1.PollResult{
+			Option:       key,
+			Count:        uint32(votes.Size()),
+			HasUserVoted: votes.Has(user),
 		})
 		return false
 	})
 	return info
+}
+
+func (p *Poll) IsRunning() bool {
+	return time.Now().Unix() < p.CreatedAt+p.Duration
 }

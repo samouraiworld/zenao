@@ -42,8 +42,8 @@ func (p *Poll) GnoLiteral(typePrefix string, linePrefix string) string {
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
-	if p.MultipleAnswers != false {
-		fmt.Fprintf(buf, "%s\tMultipleAnswers: %t,\n", linePrefix, p.MultipleAnswers)
+	if p.MultipleChoices != false {
+		fmt.Fprintf(buf, "%s\tMultipleChoices: %t,\n", linePrefix, p.MultipleChoices)
 	}
 	if p.Duration != 0 {
 		fmt.Fprintf(buf, "%s\tDuration: %d,\n", linePrefix, p.Duration)

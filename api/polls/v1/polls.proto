@@ -12,7 +12,7 @@ message PollResult {
 message Poll {
   string question = 1;
   repeated PollResult results = 2;
-  bool multiple_answers = 3;
+  bool multiple_choices = 3;
   int64 duration = 4;
   int64 created_at = 5;
   string created_by = 6;

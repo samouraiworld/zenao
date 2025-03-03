@@ -52,8 +52,8 @@ func (p *Poll) ToJSON() *json.Node {
 		}
 		fields["results"] = json.ArrayNode("", arr)
 	}
-	if p.MultipleAnswers != false {
-		fields["multipleAnswers"] = json.BoolNode("", p.MultipleAnswers)
+	if p.MultipleChoices != false {
+		fields["multipleChoices"] = json.BoolNode("", p.MultipleChoices)
 	}
 	if p.Duration != 0 {
 		fields["duration"] = json.StringNode("", strconv.FormatInt(p.Duration, 10))
@@ -85,8 +85,8 @@ func (p *Poll) FromJSON(node *json.Node) {
 		}
 		p.Results = arr
 	}
-	if val, ok := fields["multipleAnswers"]; ok {
-		p.MultipleAnswers = val.MustBool()
+	if val, ok := fields["multipleChoices"]; ok {
+		p.MultipleChoices = val.MustBool()
 	}
 	if val, ok := fields["duration"]; ok {
 		fv, err := strconv.ParseInt(val.MustString(), 10, 64);

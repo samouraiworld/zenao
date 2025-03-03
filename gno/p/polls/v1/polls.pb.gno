@@ -11,7 +11,7 @@ type PollResult struct {
 type Poll struct {
 	Question string
 	Results []*PollResult
-	MultipleAnswers bool
+	MultipleChoices bool
 	Duration int64
 	CreatedAt int64
 	CreatedBy string

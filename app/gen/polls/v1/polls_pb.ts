@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file polls/v1/polls.proto.
  */
 export const file_polls_v1_polls: GenFile = /*@__PURE__*/
-  fileDesc("ChRwb2xscy92MS9wb2xscy5wcm90bxIIcG9sbHMudjEiQwoKUG9sbFJlc3VsdBIOCgZvcHRpb24YASABKAkSDQoFY291bnQYAiABKA0SFgoOaGFzX3VzZXJfdm90ZWQYAyABKAgikwEKBFBvbGwSEAoIcXVlc3Rpb24YASABKAkSJQoHcmVzdWx0cxgCIAMoCzIULnBvbGxzLnYxLlBvbGxSZXN1bHQSGAoQbXVsdGlwbGVfYW5zd2VycxgDIAEoCBIQCghkdXJhdGlvbhgEIAEoAxISCgpjcmVhdGVkX2F0GAUgASgDEhIKCmNyZWF0ZWRfYnkYBiABKAlCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvcG9sbHMvdjE7cG9sbHN2MWIGcHJvdG8z");
+  fileDesc("ChRwb2xscy92MS9wb2xscy5wcm90bxIIcG9sbHMudjEiQwoKUG9sbFJlc3VsdBIOCgZvcHRpb24YASABKAkSDQoFY291bnQYAiABKA0SFgoOaGFzX3VzZXJfdm90ZWQYAyABKAgikwEKBFBvbGwSEAoIcXVlc3Rpb24YASABKAkSJQoHcmVzdWx0cxgCIAMoCzIULnBvbGxzLnYxLlBvbGxSZXN1bHQSGAoQbXVsdGlwbGVfY2hvaWNlcxgDIAEoCBIQCghkdXJhdGlvbhgEIAEoAxISCgpjcmVhdGVkX2F0GAUgASgDEhIKCmNyZWF0ZWRfYnkYBiABKAlCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvcG9sbHMvdjE7cG9sbHN2MWIGcHJvdG8z");
 
 /**
  * @generated from message polls.v1.PollResult
@@ -54,9 +54,9 @@ export type Poll = Message<"polls.v1.Poll"> & {
   results: PollResult[];
 
   /**
-   * @generated from field: bool multiple_answers = 3;
+   * @generated from field: bool multiple_choices = 3;
    */
-  multipleAnswers: boolean;
+  multipleChoices: boolean;
 
   /**
    * @generated from field: int64 duration = 4;
