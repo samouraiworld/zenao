@@ -2,7 +2,7 @@ import pluralize from "pluralize";
 import { ExtraSmallText } from "../texts/ExtraSmallText";
 import { Gauge } from "@/components/common/Gauge";
 import { SmallText } from "@/components/texts/SmallText";
-import { Checkable, CheckableRounded } from "@/components/common/Checkable";
+import { Checkbox, CheckboxRounded } from "@/components/common/Checkbox";
 import { cn } from "@/lib/tailwind";
 import { PollResult } from "@/app/gen/polls/v1/polls_pb";
 
@@ -46,7 +46,7 @@ const PollResultSingle: React.FC<{
       )}
     >
       <PollResultBase totalVotesCount={totalVotesCount} pollResult={pollResult}>
-        <CheckableRounded checked={pollResult.hasUserVoted} />
+        <CheckboxRounded checked={pollResult.hasUserVoted} />
       </PollResultBase>
     </div>
   );
@@ -68,7 +68,7 @@ const PollResultMultiple: React.FC<{
       )}
     >
       <PollResultBase totalVotesCount={totalVotesCount} pollResult={pollResult}>
-        <Checkable checked={pollResult.hasUserVoted} />
+        <Checkbox checked={pollResult.hasUserVoted} />
       </PollResultBase>
     </div>
   );

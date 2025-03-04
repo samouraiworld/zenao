@@ -24,7 +24,7 @@ const EmptyPollsList: React.FC = () => {
       <Button variant="secondary">
         {/*TODO: create-poll route*/}
         <Link href="/create-poll">
-          <SmallText variant="secondary">{t("create-poll")}</SmallText>
+          <SmallText variant="secondary">Create your poll</SmallText>
         </Link>
       </Button>
     </div>

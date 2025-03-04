@@ -1,8 +1,11 @@
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { PollsListLayout } from "@/components/layout/PollsListLayout";
 import { fakePolls } from "@/app/polls/fake-polls";
 import { Poll } from "@/app/gen/polls/v1/polls_pb";
+import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import { SmallText } from "@/components/texts/SmallText";
 
 // export interface UserPollVotes {
 //     pollId: string;
@@ -258,6 +261,14 @@ export default async function PollsPage() {
 
   return (
     <ScreenContainer>
+      <div className="w-full flex justify-center mb-6">
+        <Link href="/create-poll">
+          <ButtonWithChildren className="rounded-3xl py-5">
+            <SmallText variant="invert">Create your poll</SmallText>
+          </ButtonWithChildren>
+        </Link>
+      </div>
+
       <PollsPageFC started={fakePolls} ended={[]} />
     </ScreenContainer>
   );
