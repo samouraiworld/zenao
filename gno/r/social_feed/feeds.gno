@@ -29,6 +29,7 @@ func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string 
 	if crossNetwork && authFunc != nil {
 		panic("crossNetwork feeds cannot have an authFunc")
 	}
+
 	feed := &Feed{
 		crossNetwork: crossNetwork,
 		authFunc:     authFunc,
@@ -52,7 +53,6 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32) []*zenaov1.Post {
 	start := feedId + ":"
 	end := feedId + ";"
 	posts.Iterate(start, end, func(key string, value interface{}) bool {
-		// XXX: implement offset & limit
 		post := value.(*zenaov1.Post)
 		if i >= int(offset) {
 			res = append(res, post)
