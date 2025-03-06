@@ -1,27 +1,28 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AlignJustify as AlignJustifyIcon } from "lucide-react";
 import { PopoverContent } from "@radix-ui/react-popover";
-import { auth } from "@clerk/nextjs/server";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
-import { getTranslations } from "next-intl/server";
+import {
+  ClerkLoading,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  useAuth,
+} from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Popover, PopoverTrigger } from "@/components/shadcn/popover";
 import { Card } from "@/components/cards/Card";
 import { SmallText } from "@/components/texts/SmallText";
 import { Text } from "@/components/texts/DefaultText";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
-import {
-  AvatarImage,
-  Avatar,
-  AvatarFallback,
-} from "@/components/shadcn/avatar";
-import { getQueryClient } from "@/lib/get-query-client";
 import { Button } from "@/components/shadcn/button";
-import { userOptions } from "@/lib/queries/user";
+import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { GnoProfile } from "@/lib/queries/profile";
-import { web2URL } from "@/lib/uris";
+import { Avatar, AvatarLoader } from "@/components/common/Avatar";
 
 const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   const t = useTranslations("header");
@@ -49,12 +50,13 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   );
 };
 
-export async function Header() {
-  const queryClient = getQueryClient();
-  const { getToken } = await auth();
-  const authToken = await getToken();
-  const t = await getTranslations("header");
-  const user = await queryClient.fetchQuery(userOptions(authToken));
+export function Header() {
+  const { getToken, userId } = useAuth();
+  const t = useTranslations("header");
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: user } = useSuspenseQuery(userOptions(address));
 
   return (
     <div className="flex sm:justify-center sm:p-2 w-full">
@@ -72,7 +74,7 @@ export async function Header() {
             <Text className="font-extrabold">{t("zenao")}</Text>
           </Link>
           <div className="flex flex-row gap-3">
-            <HeaderLinks isLogged={user ? true : false} />
+            <HeaderLinks isLogged={address ? true : false} />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
             <ToggleThemeButton />
@@ -99,7 +101,7 @@ export async function Header() {
               <AlignJustifyIcon className="h-7 w-7" />
             </PopoverTrigger>
             <PopoverContent className="flex gap-1 flex-col bg-secondary rounded-xl px-4 py-2">
-              <HeaderLinks isLogged={user ? true : false} />
+              <HeaderLinks isLogged={address ? true : false} />
             </PopoverContent>
           </Popover>
         </div>
@@ -115,6 +117,7 @@ const Auth: React.FC<{ user: GnoProfile | null; className?: string }> = ({
   const t = useTranslations("header");
   return (
     <div className={className}>
+      {/* Signed out state */}
       <SignedOut>
         <SignInButton>
           <Button variant="outline">
@@ -122,14 +125,18 @@ const Auth: React.FC<{ user: GnoProfile | null; className?: string }> = ({
           </Button>
         </SignInButton>
       </SignedOut>
+      {/* Loading state */}
+      <ClerkLoading>
+        <AvatarLoader />
+      </ClerkLoading>
+      {/* Signed in state */}
       <SignedIn>
-        {user && (
+        {user?.avatarUri ? (
           <Link href="/settings">
-            <Avatar className="h-7 w-7 sm:h-[30px] sm:w-[30px]">
-              <AvatarImage src={web2URL(user.avatarUri)} alt="avatar-uri" />
-              <AvatarFallback>avatar</AvatarFallback>
-            </Avatar>
+            <Avatar uri={user.avatarUri} />
           </Link>
+        ) : (
+          <AvatarLoader />
         )}
       </SignedIn>
     </div>
