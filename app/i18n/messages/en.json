@@ -2,10 +2,10 @@
   "header": {
     "zenao": "ZENAO",
     "discover": "Discover",
-    "calendar": "Calendar",
     "features": "Features",
-    "blog": "Blog",
     "manifesto": "Manifesto",
+    "your-events": "Your events",
+    "your-tickets": "Your tickets",
     "sign-in": "Sign in"
   },
   "footer": {
@@ -73,12 +73,15 @@
     "p7": "In case of emergency, keep zen, and organize."
   },
   "settings": {
+    "title": "Settings",
+    "gnoweb-label": "See your profile on gnoweb",
     "avatar-placeholder": "Avatar URI...",
     "name-placeholder": "Name...",
     "bio-placeholder": "Bio...",
     "save-button": "Save changes",
     "toast-success": "User correctly edited!",
-    "toast-error": "Error on editing user!"
+    "toast-error": "Error on editing user!",
+    "sign-out": "Sign out"
   },
   "discover": {
     "title": "Discover events",
@@ -96,7 +99,6 @@
     "no-events": "No events to show.",
     "no-events-desc": "You have no events. Why not create one?",
     "create-event": "Create event",
-    "see-gnoweb": "See on Gnoweb",
     "upcoming": "Upcoming",
     "past": "Past"
   },
@@ -116,6 +118,9 @@
         "sign-in": "Sign in",
         "sign-up": "Sign up"
       }
+    },
+    "buttons": {
+      "gnoweb-button": "See on gnoweb"
     }
   }
 }

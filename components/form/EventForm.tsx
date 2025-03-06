@@ -1,11 +1,11 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Card } from "../cards/Card";
-import { Separator } from "../common/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { SmallText } from "../texts/SmallText";
+import { Separator } from "../shadcn/separator";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";

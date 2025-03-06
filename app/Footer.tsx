@@ -1,7 +1,7 @@
 import { FacebookIcon, LinkedinIcon, TwitterIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
-import { SmallText } from "../texts/SmallText";
+import { SmallText } from "@/components/texts/SmallText";
 
 export const Footer: React.FC = () => {
   const t = useTranslations("footer");
