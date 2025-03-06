@@ -8,6 +8,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
+import { web2URL } from "@/lib/uris";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: event.title,
     openGraph: {
-      images: [{ url: event.imageUri }],
+      images: [{ url: web2URL(event.imageUri) }],
     },
   };
 }

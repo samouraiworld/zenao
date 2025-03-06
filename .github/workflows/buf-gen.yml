@@ -24,6 +24,13 @@ jobs:
           go-version-file: go.mod
           cache-key-suffix: buf-gen
 
+      - name: Install gno
+        run: |
+          git clone https://github.com/gnolang/gno.git gnobuild
+          cd gnobuild
+          git checkout $(shell $(CAT) .gnoversion)
+          make install.gno
+
       - name: Generate
         run: make generate
 
