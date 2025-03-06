@@ -212,7 +212,7 @@ func TestEventsToJSON(t *testing.T) {
 			Timezone: "Europe/Paris",
 		}},
 	}}
-	urequire.Equal(t, `[{"location":{"address":{"case":"custom","value":{"address":"Paris","timezone":"Europe/Paris"}}},"pkgPath":"foo"}]`, eventsToJSON(evts))
+	urequire.Equal(t, `[{"location":{"custom":{"address":"Paris","timezone":"Europe/Paris"}},"pkgPath":"foo"}]`, eventsToJSON(evts))
 }
 
 func TestLocationToString(t *testing.T) {

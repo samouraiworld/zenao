@@ -3,9 +3,8 @@
 package pollsv1
 
 import (
-	"strings"
-	"fmt"
-	"errors"
+	fmt "fmt"
+	strings "strings"
 )
 
 func (p *PollResult) GnoLiteral(typePrefix string, linePrefix string) string {
@@ -42,8 +41,8 @@ func (p *Poll) GnoLiteral(typePrefix string, linePrefix string) string {
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
-	if p.MultipleChoices != false {
-		fmt.Fprintf(buf, "%s\tMultipleChoices: %t,\n", linePrefix, p.MultipleChoices)
+	if p.Kind != PollKind(0) {
+		fmt.Fprintf(buf, "%s\tKind: %d,\n", linePrefix, p.Kind)
 	}
 	if p.Duration != 0 {
 		fmt.Fprintf(buf, "%s\tDuration: %d,\n", linePrefix, p.Duration)

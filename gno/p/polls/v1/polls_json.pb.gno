@@ -4,6 +4,7 @@ package pollsv1
 
 import (
 	"strconv"
+
 	"gno.land/p/demo/json"
 )
 
@@ -51,8 +52,8 @@ func (p *Poll) ToJSON() *json.Node {
 		}
 		fields["results"] = json.ArrayNode("", arr)
 	}
-	if p.MultipleChoices != false {
-		fields["multipleChoices"] = json.BoolNode("", p.MultipleChoices)
+	if p.Kind != 0 {
+		fields["kind"] = json.StringNode("", p.Kind.ToString())
 	}
 	if p.Duration != 0 {
 		fields["duration"] = json.StringNode("", strconv.FormatInt(p.Duration, 10))
@@ -84,18 +85,18 @@ func (p *Poll) FromJSON(node *json.Node) {
 		}
 		p.Results = arr
 	}
-	if val, ok := fields["multipleChoices"]; ok {
-		p.MultipleChoices = val.MustBool()
+	if val, ok := fields["kind"]; ok {
+		p.Kind = PollKindFromString(val.MustString())
 	}
 	if val, ok := fields["duration"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64);
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
 		p.Duration = fv
 	}
 	if val, ok := fields["createdAt"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64);
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
