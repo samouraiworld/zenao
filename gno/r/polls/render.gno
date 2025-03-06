@@ -7,6 +7,7 @@ import (
 	"gno.land/p/demo/mux"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	pollsv1 "gno.land/p/zenao/polls/v1"
 )
 
 var router *mux.Router
@@ -55,7 +56,7 @@ func DetailPollPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 func (p *Poll) Render() string {
 	s := ""
 	s += md.H1(p.Question + "❓")
-	if p.MultipleChoices {
+	if p.Kind == pollsv1.POLL_KIND_MULTIPLE_CHOICE {
 		s += md.Paragraph("Multiple choices allowed ✅")
 	} else {
 		s += md.Paragraph("Only one choice allowed ❌")

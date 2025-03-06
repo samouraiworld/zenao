@@ -132,7 +132,7 @@ func TestNewPoll(t *testing.T) {
 				}
 			}()
 
-			NewPoll(test.input.question, true, test.input.duration, test.input.options, nil)
+			NewPoll(test.input.question, pollsv1.POLL_KIND_MULTIPLE_CHOICE, test.input.duration, test.input.options, nil)
 		})
 	}
 }
@@ -166,9 +166,9 @@ func TestVote(t *testing.T) {
 		return false
 
 	}
-	poll := NewPoll("What is your favorite color?", true, int64(time.Hour), []string{"red", "blue", "green"}, nil)
-	pollPv := NewPoll("What is your favorite color?", true, int64(time.Hour), []string{"red", "blue", "green"}, pvFunc)
-	pollSingle := NewPoll("What is your favorite color?", false, int64(time.Hour), []string{"red", "blue", "green"}, nil)
+	poll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, nil)
+	pollPv := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, pvFunc)
+	pollSingle := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_SINGLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, nil)
 
 	tests := testTable{
 		"valid vote": {
@@ -330,8 +330,8 @@ func TestGetInfo(t *testing.T) {
 
 	type testTable = map[string]test
 
-	poll := NewPoll("What is your favorite color?", true, int64(time.Hour), []string{"red", "blue", "green"}, nil)
-	emptyPoll := NewPoll("What is your favorite color?", true, int64(time.Hour), []string{"red", "blue", "green"}, nil)
+	poll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, nil)
+	emptyPoll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, nil)
 	std.TestSetOriginCaller(alice)
 	Vote(1, "blue")
 	std.TestSetOriginCaller(bob)
@@ -353,10 +353,10 @@ func TestGetInfo(t *testing.T) {
 						{Option: "green", Count: 0, HasUserVoted: false},
 						{Option: "red", Count: 1, HasUserVoted: false},
 					},
-					MultipleChoices: true,
-					Duration:        int64(time.Hour),
-					CreatedAt:       poll.CreatedAt,
-					CreatedBy:       poll.CreatedBy.String(),
+					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
+					Duration:  int64(time.Hour),
+					CreatedAt: poll.CreatedAt,
+					CreatedBy: poll.CreatedBy.String(),
 				},
 			},
 		},
@@ -373,10 +373,10 @@ func TestGetInfo(t *testing.T) {
 						{Option: "green", Count: 0, HasUserVoted: false},
 						{Option: "red", Count: 1, HasUserVoted: true},
 					},
-					MultipleChoices: true,
-					Duration:        int64(time.Hour),
-					CreatedAt:       poll.CreatedAt,
-					CreatedBy:       poll.CreatedBy.String(),
+					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
+					Duration:  int64(time.Hour),
+					CreatedAt: poll.CreatedAt,
+					CreatedBy: poll.CreatedBy.String(),
 				},
 			},
 		},
@@ -393,10 +393,10 @@ func TestGetInfo(t *testing.T) {
 						{Option: "green", Count: 0, HasUserVoted: false},
 						{Option: "red", Count: 0, HasUserVoted: false},
 					},
-					MultipleChoices: true,
-					Duration:        int64(time.Hour),
-					CreatedAt:       emptyPoll.CreatedAt,
-					CreatedBy:       emptyPoll.CreatedBy.String(),
+					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
+					Duration:  int64(time.Hour),
+					CreatedAt: emptyPoll.CreatedAt,
+					CreatedBy: emptyPoll.CreatedBy.String(),
 				},
 			},
 		},
@@ -408,8 +408,8 @@ func TestGetInfo(t *testing.T) {
 			if info.Question != test.output.info.Question {
 				t.Errorf("expected question %q, got %q", test.output.info.Question, info.Question)
 			}
-			if info.MultipleChoices != test.output.info.MultipleChoices {
-				t.Errorf("expected multiple choices %v, got %v", test.output.info.MultipleChoices, info.MultipleChoices)
+			if info.Kind != test.output.info.Kind {
+				t.Errorf("expected poll kind %v, got %v", test.output.info.Kind, info.Kind)
 			}
 			if info.Duration != test.output.info.Duration {
 				t.Errorf("expected duration %v, got %v", test.output.info.Duration, info.Duration)

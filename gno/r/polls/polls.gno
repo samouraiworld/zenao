@@ -19,10 +19,10 @@ func init() {
 }
 
 type Poll struct {
-	ID              seqid.ID
-	Question        string
-	MultipleChoices bool
-	Results         *avl.Tree // string (options) -> avl.Tree of string (address of users) -> struct{}
+	ID       seqid.ID
+	Question string
+	Kind     pollsv1.PollKind
+	Results  *avl.Tree // string (options) -> avl.Tree of string (address of users) -> struct{}
 
 	Duration int64
 
@@ -32,7 +32,7 @@ type Poll struct {
 	authFunc func(std.Address) bool
 }
 
-func NewPoll(question string, multipleChoices bool, duration int64, options []string, authFunc func(std.Address) bool) *Poll {
+func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []string, authFunc func(std.Address) bool) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
@@ -46,14 +46,14 @@ func NewPoll(question string, multipleChoices bool, duration int64, options []st
 		panic("duration must be at most 1 month")
 	}
 	poll := &Poll{
-		ID:              id.Next(),
-		Question:        question,
-		MultipleChoices: multipleChoices,
-		Results:         avl.NewTree(),
-		Duration:        duration,
-		CreatedAt:       time.Now().Unix(),
-		CreatedBy:       std.PreviousRealm().Address(),
-		authFunc:        authFunc,
+		ID:        id.Next(),
+		Question:  question,
+		Kind:      kind,
+		Results:   avl.NewTree(),
+		Duration:  duration,
+		CreatedAt: time.Now().Unix(),
+		CreatedBy: std.PreviousRealm().Address(),
+		authFunc:  authFunc,
 	}
 	for _, option := range options {
 		if option == "" {
@@ -109,7 +109,7 @@ func (p *Poll) Vote(option string) {
 	}
 
 	// Remove previous choice if multiple answers are not allowed
-	if !p.MultipleChoices {
+	if p.Kind != pollsv1.POLL_KIND_MULTIPLE_CHOICE {
 		p.Results.Iterate("", "", func(key string, value interface{}) bool {
 			choices := value.(*avl.Tree)
 			if choices.Has(addr.String()) {
@@ -130,12 +130,12 @@ func (p *Poll) Vote(option string) {
 
 func (p *Poll) GetInfo(user string) *pollsv1.Poll {
 	info := &pollsv1.Poll{
-		Question:        p.Question,
-		Results:         []*pollsv1.PollResult{},
-		MultipleChoices: p.MultipleChoices,
-		Duration:        p.Duration,
-		CreatedAt:       p.CreatedAt,
-		CreatedBy:       p.CreatedBy.String(),
+		Question:  p.Question,
+		Results:   []*pollsv1.PollResult{},
+		Kind:      p.Kind,
+		Duration:  p.Duration,
+		CreatedAt: p.CreatedAt,
+		CreatedBy: p.CreatedBy.String(),
 	}
 	p.Results.Iterate("", "", func(key string, value interface{}) bool {
 		count := value.(*avl.Tree)
