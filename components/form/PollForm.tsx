@@ -119,7 +119,7 @@ const PollAnswerItem: React.FC<{
         <FormFieldInputString
           control={control}
           name={name}
-          placeholder="Enter your answer"
+          placeholder="Enter an answer"
           className="h-6"
         />
       </div>
@@ -136,14 +136,12 @@ const AddAnswerButton: React.FC<{
   return (
     <div onClick={onClick}>
       <ButtonWithChildren
+        variant="ghost"
         className="flex flex-row w-full justify-start"
-        type="button"
       >
         <div className="flex flex-row justify-start items-center w-full">
-          <PlusIcon className="h-4 w-4" />
-          <SmallText className="ml-2" variant="invert">
-            Add another answer
-          </SmallText>
+          <PlusIcon className="h-4 w-4" color="#FFFFFF" />
+          <SmallText className="ml-2">Add another answer</SmallText>
         </div>
       </ButtonWithChildren>
     </div>

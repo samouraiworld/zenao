@@ -10,12 +10,12 @@ import {
 } from "@/components/shadcn/form";
 import { CheckboxWithLabel } from "@/components/common/Checkbox";
 
-export const FormFieldCheckbox = <T extends FieldValues & { label?: string }>({
+export const FormFieldCheckbox = <T extends FieldValues>({
   control,
   name,
   className,
   label,
-}: FormFieldProps<T, string>) => {
+}: FormFieldProps<T, string> & { label?: string }) => {
   return (
     <FormField
       rules={{ required: true }}
