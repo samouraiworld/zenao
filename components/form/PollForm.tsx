@@ -67,7 +67,7 @@ export const PollForm: React.FC<PollFormProps> = ({
               }
             }}
           />
-          <Card className="flex flex-col gap-[10px]">
+          <div className="flex flex-col gap-4">
             {answerFields.map((field, index) => (
               <PollAnswerItem
                 key={field.id}
@@ -78,9 +78,9 @@ export const PollForm: React.FC<PollFormProps> = ({
               />
             ))}
             <AddAnswerButton onClick={onClickAddAnswer} />
-          </Card>
+          </div>
 
-          <Card className="flex flex-col gap-[10px]">
+          <Card>
             <FormFieldDatePicker
               name="endDate"
               control={form.control}
@@ -114,18 +114,15 @@ const PollAnswerItem: React.FC<{
   canRemove: boolean;
 }> = ({ name, control, onClickRemove, canRemove }) => {
   return (
-    <div className="flex flex-row justify-between items-center w-full bg-muted p-2 rounded-lg">
-      <div className="w-full rounded-lg bg-secondary/80 p-2">
+    <div className="flex flex-row items-center gap-2 w-full">
+      <Card className="w-full">
         <FormFieldInputString
           control={control}
           name={name}
           placeholder="Enter an answer"
-          className="h-6"
         />
-      </div>
-      {canRemove && (
-        <RemoveAnswerButton onClick={onClickRemove} className="ml-2" />
-      )}
+      </Card>
+      {canRemove && <RemoveAnswerButton onClick={onClickRemove} />}
     </div>
   );
 };
@@ -140,7 +137,7 @@ const AddAnswerButton: React.FC<{
         className="flex flex-row w-full justify-start"
       >
         <div className="flex flex-row justify-start items-center w-full">
-          <PlusIcon className="h-4 w-4" color="#FFFFFF" />
+          <PlusIcon className="size-4" color="#FFFFFF" />
           <SmallText className="ml-2">Add another answer</SmallText>
         </div>
       </ButtonWithChildren>
@@ -153,8 +150,14 @@ const RemoveAnswerButton: React.FC<{
   className?: string;
 }> = ({ onClick, className }) => {
   return (
-    <div onClick={onClick} className={cn("hover:cursor-pointer", className)}>
-      <Trash2Icon className="h-4 w-4" />
+    <div
+      onClick={onClick}
+      className={cn(
+        "hover:cursor-pointer hover:bg-accent flex items-center justify-center rounded-lg size-11",
+        className,
+      )}
+    >
+      <Trash2Icon className="size-4" />
     </div>
   );
 };
