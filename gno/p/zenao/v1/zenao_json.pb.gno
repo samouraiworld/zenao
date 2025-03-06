@@ -5,6 +5,7 @@ package zenaov1
 import (
 	"errors"
 	"strconv"
+
 	"gno.land/p/demo/json"
 )
 
@@ -132,14 +133,14 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 		c.ImageUri = val.MustString()
 	}
 	if val, ok := fields["startDate"]; ok {
-		fv, err := strconv.ParseUint(val.MustString(), 10, 64);
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
 		c.StartDate = fv
 	}
 	if val, ok := fields["endDate"]; ok {
-		fv, err := strconv.ParseUint(val.MustString(), 10, 64);
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
@@ -228,14 +229,14 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 		e.ImageUri = val.MustString()
 	}
 	if val, ok := fields["startDate"]; ok {
-		fv, err := strconv.ParseUint(val.MustString(), 10, 64);
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
 		e.StartDate = fv
 	}
 	if val, ok := fields["endDate"]; ok {
-		fv, err := strconv.ParseUint(val.MustString(), 10, 64);
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
@@ -327,21 +328,16 @@ func (e *EventLocation) ToJSON() *json.Node {
 		fields["instructions"] = json.StringNode("", e.Instructions)
 	}
 
-	address := map[string]*json.Node{}
 	switch val := e.Address.(type) {
 	case *AddressGeo:
-		address["case"] = json.StringNode("", "geo")
-		address["value"] = val.ToJSON()
+		fields["geo"] = val.ToJSON()
 	case *AddressVirtual:
-		address["case"] = json.StringNode("", "virtual")
-		address["value"] = val.ToJSON()
+		fields["virtual"] = val.ToJSON()
 	case *AddressCustom:
-		address["case"] = json.StringNode("", "custom")
-		address["value"] = val.ToJSON()
+		fields["custom"] = val.ToJSON()
 	default:
 		panic(errors.New("unknown address variant"))
 	}
-	fields["address"] = json.ObjectNode("", address)
 
 	return json.ObjectNode("", fields)
 }
@@ -357,26 +353,31 @@ func (e *EventLocation) FromJSON(node *json.Node) {
 		e.Instructions = val.MustString()
 	}
 
-	if union, ok := fields["address"]; ok {
-		obj := union.MustObject()
-		kind := obj["case"].MustString()
-		val := obj["value"]
-		switch kind {
-		case "geo":
-			n := &AddressGeo{}
-			n.FromJSON(val)
-			e.Address = n
-		case "virtual":
-			n := &AddressVirtual{}
-			n.FromJSON(val)
-			e.Address = n
-		case "custom":
-			n := &AddressCustom{}
-			n.FromJSON(val)
-			e.Address = n
-		default:
-			panic(errors.New("unknown address variant"))
+	variantFieldNames := []string{"geo", "virtual", "custom"}
+	var selectedVariant *json.Node
+	var selectedVariantName string
+	for _, variantName := range variantFieldNames {
+		if variant, ok := fields[variantName]; ok {
+			selectedVariantName = variantName
+			selectedVariant = variant
 		}
+		break
+	}
+	switch selectedVariantName {
+	case "geo":
+		n := &AddressGeo{}
+		n.FromJSON(selectedVariant)
+		e.Address = n
+	case "virtual":
+		n := &AddressVirtual{}
+		n.FromJSON(selectedVariant)
+		e.Address = n
+	case "custom":
+		n := &AddressCustom{}
+		n.FromJSON(selectedVariant)
+		e.Address = n
+	default:
+		panic(errors.New("address variant not found"))
 	}
 }
 
@@ -515,14 +516,14 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 		e.Creator = val.MustString()
 	}
 	if val, ok := fields["startDate"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64);
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
 		e.StartDate = fv
 	}
 	if val, ok := fields["endDate"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64);
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}

@@ -4,8 +4,8 @@ package zenaov1
 
 type EditUserRequest struct {
 	DisplayName string
-	Bio string
-	AvatarUri string
+	Bio         string
+	AvatarUri   string
 }
 
 type EditUserResponse struct {
@@ -20,14 +20,14 @@ type GetUserAddressResponse struct {
 }
 
 type CreateEventRequest struct {
-	Title string
+	Title       string
 	Description string
-	ImageUri string
-	StartDate uint64
-	EndDate uint64
+	ImageUri    string
+	StartDate   uint64
+	EndDate     uint64
 	TicketPrice float64
-	Capacity uint32
-	Location *EventLocation
+	Capacity    uint32
+	Location    *EventLocation
 }
 
 type CreateEventResponse struct {
@@ -35,15 +35,15 @@ type CreateEventResponse struct {
 }
 
 type EditEventRequest struct {
-	EventId string
-	Title string
+	EventId     string
+	Title       string
 	Description string
-	ImageUri string
-	StartDate uint64
-	EndDate uint64
+	ImageUri    string
+	StartDate   uint64
+	EndDate     uint64
 	TicketPrice float64
-	Capacity uint32
-	Location *EventLocation
+	Capacity    uint32
+	Location    *EventLocation
 }
 
 type EditEventResponse struct {
@@ -52,7 +52,7 @@ type EditEventResponse struct {
 
 type ParticipateRequest struct {
 	EventId string
-	Email string
+	Email   string
 }
 
 type ParticipateResponse struct {
@@ -60,9 +60,9 @@ type ParticipateResponse struct {
 }
 
 type EventLocation struct {
-	VenueName string
+	VenueName    string
 	Instructions string
-	Address interface{}
+	Address      interface{}
 }
 
 type AddressVirtual struct {
@@ -71,36 +71,36 @@ type AddressVirtual struct {
 
 type AddressGeo struct {
 	Address string
-	Lat float32
-	Lng float32
-	Size float32
+	Lat     float32
+	Lng     float32
+	Size    float32
 }
 
 type AddressCustom struct {
-	Address string
+	Address  string
 	Timezone string
 }
 
 type EventInfo struct {
-	Title string
-	Description string
-	ImageUri string
-	Creator string
-	StartDate int64
-	EndDate int64
-	Capacity uint32
-	Location *EventLocation
+	Title        string
+	Description  string
+	ImageUri     string
+	Creator      string
+	StartDate    int64
+	EndDate      int64
+	Capacity     uint32
+	Location     *EventLocation
 	Participants uint32
-	PkgPath string
+	PkgPath      string
 }
 
 type BatchProfileField struct {
 	Type string
-	Key string
+	Key  string
 }
 
 type BatchProfileRequest struct {
-	Fields []*BatchProfileField
+	Fields    []*BatchProfileField
 	Addresses []string
 }
 

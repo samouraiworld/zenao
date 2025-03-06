@@ -106,7 +106,9 @@ func fieldToJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFile,
 			return `json.BoolNode("", ` + accessor + `)`
 		})
 	case protoreflect.EnumKind:
-		panic("enums not supported")
+		printField(`0`, func(accessor string) string {
+			return `json.StringNode("", ` + accessor + `.ToString())`
+		})
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.FloatKind, protoreflect.DoubleKind:
 		printField(`0`, func(accessor string) string {
 			return `json.NumberNode("", float64(` + accessor + `))`
@@ -193,7 +195,7 @@ func fieldFromJSON(prefix string, g *protogen.GeneratedFile, field *protogen.Fie
 	case protoreflect.BoolKind:
 		printField("", "val.MustBool()")
 	case protoreflect.EnumKind:
-		panic("enums not supported")
+		printField("", g.QualifiedGoIdent(field.Enum.GoIdent)+"FromString(val.MustString())")
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind:
 		printField("", "int32(val.MustNumeric())")
 	case protoreflect.Uint32Kind, protoreflect.Fixed32Kind:
@@ -222,54 +224,6 @@ func fieldFromJSON(prefix string, g *protogen.GeneratedFile, field *protogen.Fie
 // If it returns pointer=true, the struct field is a pointer to the type.
 //
 // Ported from protogen
-func oneOfFieldToJSON(fieldsObjName string, receiver string, prefix string, g *protogen.GeneratedFile, field *protogen.Field) {
-	if field.Desc.IsWeak() {
-		panic("weak fields not supported")
-	}
-
-	switch field.Desc.Kind() {
-	case protoreflect.BoolKind:
-		g.P(prefix, fieldsObjName, ` = json.BoolNode("", `, receiver, ")")
-		return
-	case protoreflect.EnumKind:
-		panic("enums not supported")
-	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind, protoreflect.Uint32Kind, protoreflect.Fixed32Kind, protoreflect.FloatKind, protoreflect.DoubleKind:
-		g.P(prefix, fieldsObjName, `  = json.NumberNode("", float64(`, receiver, "))")
-		return
-	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
-		g.P(prefix, fieldsObjName, ` = json.StringNode("", strconv.FormatInt(`, receiver, ", 64))")
-		return
-	case protoreflect.Uint64Kind, protoreflect.Fixed64Kind:
-		g.P(prefix, fieldsObjName, ` = json.StringNode("", strconv.FormatUint(`, receiver, ", 64))")
-		return
-	case protoreflect.StringKind:
-		g.P(prefix, fieldsObjName, ` = json.StringNode("", `, receiver, ")")
-		return
-	case protoreflect.BytesKind:
-		panic("bytes not supported")
-	case protoreflect.MessageKind, protoreflect.GroupKind:
-		g.P(prefix, fieldsObjName, ` = `, receiver, ".ToJSON()")
-		return
-	}
-	switch {
-	case field.Desc.IsList():
-		panic("list not supported")
-	case field.Desc.IsMap():
-		panic("map not supported")
-		/*
-			keyType, _ := fieldGoType(g, f, field.Message.Fields[0])
-			valType, _ := fieldGoType(g, f, field.Message.Fields[1])
-			return fmt.Sprintf("map[%v]%v", keyType, valType), false
-		*/
-	}
-	panic(fmt.Errorf("unexpected field type %q", field.Desc.Kind().String()))
-}
-
-// fieldGnoType returns the Go type used for a field.
-//
-// If it returns pointer=true, the struct field is a pointer to the type.
-//
-// Ported from protogen
 func oneOfToJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFile, oneOf *protogen.Oneof) {
 	name := JSONCamelCase(string(oneOf.Desc.Name()))
 
@@ -277,18 +231,15 @@ func oneOfToJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFile,
 	parentReceiver := strings.ToLower(string(parentTypeName[0]))
 	receiver := parentReceiver + "." + oneOf.GoName
 
-	g.P(prefix, name, " := map[string]*json.Node{}")
 	g.P(prefix, "switch val := ", receiver, ".(type) {")
 	for _, f := range oneOf.Fields {
 		gnoType, _ := fieldGnoType(g, f)
 		g.P(prefix, "case ", gnoType, ":")
-		g.P(prefix, "	", name+`["case"] = json.StringNode("", `, strconv.Quote(f.Desc.JSONName()), ")")
-		oneOfFieldToJSON(name+`["value"]`, "val", prefix+"	", g, f)
+		g.P(prefix, `	`, fieldsObjName, "[", strconv.Quote(f.Desc.JSONName()), `] = val.ToJSON()`)
 	}
 	g.P(prefix, "default:")
 	g.P(prefix, `	panic(errors.New("unknown `, name, ` variant"))`)
 	g.P(prefix, "}")
-	g.P(prefix, fieldsObjName, "[", strconv.Quote(name), `] = json.ObjectNode("", `, name, ")")
 }
 
 // fieldGnoType returns the Go type used for a field.
@@ -303,27 +254,36 @@ func oneOfFromJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFil
 	parentReceiver := strings.ToLower(string(parentTypeName[0]))
 	receiver := parentReceiver + "." + oneOf.GoName
 
-	g.P(prefix, `if union, ok := fields[`, strconv.Quote(name), `]; ok {`)
-	g.P(prefix, `	obj := union.MustObject()`)
-	g.P(prefix, `	kind := obj["case"].MustString()`)
-	g.P(prefix, `	val := obj["value"]`)
-	g.P(prefix, "	switch kind {")
+	variants := []string{}
+	for _, f := range oneOf.Fields {
+		variants = append(variants, strconv.Quote(f.Desc.JSONName()))
+	}
+	g.P(prefix, `variantFieldNames := []string{`, strings.Join(variants, ", "), `}`)
+	g.P(prefix, `var selectedVariant *json.Node`)
+	g.P(prefix, `var selectedVariantName string`)
+	g.P(prefix, `for _, variantName := range variantFieldNames {`)
+	g.P(prefix, `	if variant, ok := fields[variantName]; ok {`)
+	g.P(prefix, `		selectedVariantName = variantName`)
+	g.P(prefix, `		selectedVariant = variant`)
+	g.P(prefix, `	}`)
+	g.P(prefix, `	break`)
+	g.P(prefix, `}`)
+	g.P(prefix, "switch selectedVariantName {")
 	for _, f := range oneOf.Fields {
 		variantKindVal := strconv.Quote(f.Desc.JSONName())
 		// gnoType, _ := fieldGnoType(g, f)
-		g.P(prefix, "	case ", variantKindVal, ":")
+		g.P(prefix, "case ", variantKindVal, ":")
 		// XXX: suport all variant kinds, not only message
 		if f.Message == nil {
 			panic(errors.New("only message supported in oneof field fromjson"))
 		}
-		g.P(prefix, `		n := &`, g.QualifiedGoIdent(f.Message.GoIdent), `{}`)
-		g.P(prefix, `		n.FromJSON(val)`)
-		g.P(prefix, `		`, receiver, " = n")
+		g.P(prefix, `	n := &`, g.QualifiedGoIdent(f.Message.GoIdent), `{}`)
+		g.P(prefix, `	n.FromJSON(selectedVariant)`)
+		g.P(prefix, `	`, receiver, " = n")
 	}
-	g.P(prefix, "	default:")
-	g.P(prefix, `		panic(errors.New("unknown `, name, ` variant"))`)
-	g.P(prefix, "	}")
-	g.P(prefix, `}`)
+	g.P(prefix, "default:")
+	g.P(prefix, `	panic(errors.New("`, name, ` variant not found"))`)
+	g.P(prefix, "}")
 }
 
 // JSONCamelCase converts a snake_case identifier to a camelCase identifier,

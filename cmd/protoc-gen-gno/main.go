@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
@@ -38,6 +39,46 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 	g.P()
 	g.P("package ", file.GoPackageName)
 
+	for _, en := range file.Enums {
+		g.P()
+
+		typeName := en.Desc.Name()
+
+		g.P("type ", typeName, " uint32")
+		g.P()
+		g.P("const (")
+		for _, ca := range en.Values {
+			g.P("	", ca.Desc.Name(), " = ", en.GoIdent.GoName, "(", ca.Desc.Index(), ")")
+		}
+		g.P(")")
+
+		g.P("func ", typeName, "FromString(str string) ", typeName, " {")
+		g.P("	switch str {")
+		for _, va := range en.Values {
+			//gnoType, _ := fieldGnoType(g, va)
+			g.P("	case ", strconv.Quote(string(va.Desc.Name())), ":")
+			g.P(`		return `, va.Desc.Name())
+		}
+		g.P("	default:")
+		g.P(`		panic(errors.New("unknown variant " + str))`)
+		g.P("	}")
+		g.P("}")
+
+		g.P("")
+
+		g.P("func (e " + typeName + ") ToString() string {")
+		g.P("	switch e {")
+		for _, va := range en.Values {
+			//gnoType, _ := fieldGnoType(g, va)
+			g.P("	case ", va.Desc.Name(), ":")
+			g.P(`		return `, strconv.Quote(string(va.Desc.Name())))
+		}
+		g.P("	default:")
+		g.P(`		panic(errors.New("unknown variant"))`)
+		g.P("	}")
+		g.P("}")
+	}
+
 	for _, m := range file.Messages {
 		g.P()
 
@@ -65,6 +106,7 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 	g.P()
 	g.P("package ", file.GoPackageName)
 	g.P()
+
 	g.P("import (")
 	g.P(`	"errors"`)
 	g.P(`	"strconv"`)
