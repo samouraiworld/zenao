@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { EditUserForm } from "./EditUserForm";
+import { EditUserForm } from "./EditUser";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";

@@ -13,7 +13,6 @@ import { ParticipateForm } from "./ParticipateForm";
 import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
-import { Separator } from "@/components/common/Separator";
 import { Text } from "@/components/texts/DefaultText";
 import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
@@ -22,6 +21,8 @@ import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { EventFormSchemaType } from "@/components/form/types";
+import { Separator } from "@/components/shadcn/separator";
+import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -157,12 +158,9 @@ export function EventInfo({
           </Card>
         )}
         <EventSection title={t("going", { count: data.participants })}>
-          <a
+          <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
-            target="_blank"
-          >
-            <SmallText>See on Gnoweb</SmallText>
-          </a>
+          />
         </EventSection>
         {/* TODO: Uncomment that when we can see the name of the addr */}
         {/* <EventSection title={t("hosted-by")}> */}
