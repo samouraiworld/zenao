@@ -21,6 +21,60 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// not directly used in link post type, but should be used as return value of
+// Kind() method of contract set in a link post
+type LinkPostKind int32
+
+const (
+	LinkPostKind_LINK_POST_KIND_UNSPECIFIED LinkPostKind = 0
+	LinkPostKind_LINK_POST_KIND_POLL        LinkPostKind = 1
+	LinkPostKind_LINK_POST_KIND_EVENT       LinkPostKind = 2
+	LinkPostKind_LINK_POST_KIND_PROPOSAL    LinkPostKind = 3
+)
+
+// Enum value maps for LinkPostKind.
+var (
+	LinkPostKind_name = map[int32]string{
+		0: "LINK_POST_KIND_UNSPECIFIED",
+		1: "LINK_POST_KIND_POLL",
+		2: "LINK_POST_KIND_EVENT",
+		3: "LINK_POST_KIND_PROPOSAL",
+	}
+	LinkPostKind_value = map[string]int32{
+		"LINK_POST_KIND_UNSPECIFIED": 0,
+		"LINK_POST_KIND_POLL":        1,
+		"LINK_POST_KIND_EVENT":       2,
+		"LINK_POST_KIND_PROPOSAL":    3,
+	}
+)
+
+func (x LinkPostKind) Enum() *LinkPostKind {
+	p := new(LinkPostKind)
+	*p = x
+	return p
+}
+
+func (x LinkPostKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LinkPostKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_zenao_v1_zenao_proto_enumTypes[0].Descriptor()
+}
+
+func (LinkPostKind) Type() protoreflect.EnumType {
+	return &file_zenao_v1_zenao_proto_enumTypes[0]
+}
+
+func (x LinkPostKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LinkPostKind.Descriptor instead.
+func (LinkPostKind) EnumDescriptor() ([]byte, []int) {
+	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{0}
+}
+
 type EditUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DisplayName   string                 `protobuf:"bytes,1,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
@@ -2136,7 +2190,15 @@ var file_zenao_v1_zenao_proto_rawDesc = string([]byte{
 	0x50, 0x6f, 0x73, 0x74, 0x48, 0x00, 0x52, 0x05, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x42, 0x06, 0x0a,
 	0x04, 0x70, 0x6f, 0x73, 0x74, 0x22, 0x1c, 0x0a, 0x0a, 0x53, 0x6f, 0x63, 0x69, 0x61, 0x6c, 0x46,
 	0x65, 0x65, 0x64, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x02, 0x69, 0x64, 0x32, 0x84, 0x03, 0x0a, 0x0c, 0x5a, 0x65, 0x6e, 0x61, 0x6f, 0x53, 0x65, 0x72,
+	0x02, 0x69, 0x64, 0x2a, 0x7e, 0x0a, 0x0c, 0x4c, 0x69, 0x6e, 0x6b, 0x50, 0x6f, 0x73, 0x74, 0x4b,
+	0x69, 0x6e, 0x64, 0x12, 0x1e, 0x0a, 0x1a, 0x4c, 0x49, 0x4e, 0x4b, 0x5f, 0x50, 0x4f, 0x53, 0x54,
+	0x5f, 0x4b, 0x49, 0x4e, 0x44, 0x5f, 0x55, 0x4e, 0x53, 0x50, 0x45, 0x43, 0x49, 0x46, 0x49, 0x45,
+	0x44, 0x10, 0x00, 0x12, 0x17, 0x0a, 0x13, 0x4c, 0x49, 0x4e, 0x4b, 0x5f, 0x50, 0x4f, 0x53, 0x54,
+	0x5f, 0x4b, 0x49, 0x4e, 0x44, 0x5f, 0x50, 0x4f, 0x4c, 0x4c, 0x10, 0x01, 0x12, 0x18, 0x0a, 0x14,
+	0x4c, 0x49, 0x4e, 0x4b, 0x5f, 0x50, 0x4f, 0x53, 0x54, 0x5f, 0x4b, 0x49, 0x4e, 0x44, 0x5f, 0x45,
+	0x56, 0x45, 0x4e, 0x54, 0x10, 0x02, 0x12, 0x1b, 0x0a, 0x17, 0x4c, 0x49, 0x4e, 0x4b, 0x5f, 0x50,
+	0x4f, 0x53, 0x54, 0x5f, 0x4b, 0x49, 0x4e, 0x44, 0x5f, 0x50, 0x52, 0x4f, 0x50, 0x4f, 0x53, 0x41,
+	0x4c, 0x10, 0x03, 0x32, 0x84, 0x03, 0x0a, 0x0c, 0x5a, 0x65, 0x6e, 0x61, 0x6f, 0x53, 0x65, 0x72,
 	0x76, 0x69, 0x63, 0x65, 0x12, 0x41, 0x0a, 0x08, 0x45, 0x64, 0x69, 0x74, 0x55, 0x73, 0x65, 0x72,
 	0x12, 0x19, 0x2e, 0x7a, 0x65, 0x6e, 0x61, 0x6f, 0x2e, 0x76, 0x31, 0x2e, 0x45, 0x64, 0x69, 0x74,
 	0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1a, 0x2e, 0x7a, 0x65,
@@ -2179,69 +2241,71 @@ func file_zenao_v1_zenao_proto_rawDescGZIP() []byte {
 	return file_zenao_v1_zenao_proto_rawDescData
 }
 
+var file_zenao_v1_zenao_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_zenao_v1_zenao_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_zenao_v1_zenao_proto_goTypes = []any{
-	(*EditUserRequest)(nil),        // 0: zenao.v1.EditUserRequest
-	(*EditUserResponse)(nil),       // 1: zenao.v1.EditUserResponse
-	(*GetUserAddressRequest)(nil),  // 2: zenao.v1.GetUserAddressRequest
-	(*GetUserAddressResponse)(nil), // 3: zenao.v1.GetUserAddressResponse
-	(*CreateEventRequest)(nil),     // 4: zenao.v1.CreateEventRequest
-	(*CreateEventResponse)(nil),    // 5: zenao.v1.CreateEventResponse
-	(*EditEventRequest)(nil),       // 6: zenao.v1.EditEventRequest
-	(*EditEventResponse)(nil),      // 7: zenao.v1.EditEventResponse
-	(*ParticipateRequest)(nil),     // 8: zenao.v1.ParticipateRequest
-	(*ParticipateResponse)(nil),    // 9: zenao.v1.ParticipateResponse
-	(*EventLocation)(nil),          // 10: zenao.v1.EventLocation
-	(*AddressVirtual)(nil),         // 11: zenao.v1.AddressVirtual
-	(*AddressGeo)(nil),             // 12: zenao.v1.AddressGeo
-	(*AddressCustom)(nil),          // 13: zenao.v1.AddressCustom
-	(*EventInfo)(nil),              // 14: zenao.v1.EventInfo
-	(*BatchProfileField)(nil),      // 15: zenao.v1.BatchProfileField
-	(*BatchProfileRequest)(nil),    // 16: zenao.v1.BatchProfileRequest
-	(*PostGeoLoc)(nil),             // 17: zenao.v1.PostGeoLoc
-	(*PostID)(nil),                 // 18: zenao.v1.PostID
-	(*PostCommon)(nil),             // 19: zenao.v1.PostCommon
-	(*StandardPost)(nil),           // 20: zenao.v1.StandardPost
-	(*ArticlePost)(nil),            // 21: zenao.v1.ArticlePost
-	(*LinkPost)(nil),               // 22: zenao.v1.LinkPost
-	(*ImagePost)(nil),              // 23: zenao.v1.ImagePost
-	(*VideoPost)(nil),              // 24: zenao.v1.VideoPost
-	(*Reaction)(nil),               // 25: zenao.v1.Reaction
-	(*Tip)(nil),                    // 26: zenao.v1.Tip
-	(*Post)(nil),                   // 27: zenao.v1.Post
-	(*SocialFeed)(nil),             // 28: zenao.v1.SocialFeed
+	(LinkPostKind)(0),              // 0: zenao.v1.LinkPostKind
+	(*EditUserRequest)(nil),        // 1: zenao.v1.EditUserRequest
+	(*EditUserResponse)(nil),       // 2: zenao.v1.EditUserResponse
+	(*GetUserAddressRequest)(nil),  // 3: zenao.v1.GetUserAddressRequest
+	(*GetUserAddressResponse)(nil), // 4: zenao.v1.GetUserAddressResponse
+	(*CreateEventRequest)(nil),     // 5: zenao.v1.CreateEventRequest
+	(*CreateEventResponse)(nil),    // 6: zenao.v1.CreateEventResponse
+	(*EditEventRequest)(nil),       // 7: zenao.v1.EditEventRequest
+	(*EditEventResponse)(nil),      // 8: zenao.v1.EditEventResponse
+	(*ParticipateRequest)(nil),     // 9: zenao.v1.ParticipateRequest
+	(*ParticipateResponse)(nil),    // 10: zenao.v1.ParticipateResponse
+	(*EventLocation)(nil),          // 11: zenao.v1.EventLocation
+	(*AddressVirtual)(nil),         // 12: zenao.v1.AddressVirtual
+	(*AddressGeo)(nil),             // 13: zenao.v1.AddressGeo
+	(*AddressCustom)(nil),          // 14: zenao.v1.AddressCustom
+	(*EventInfo)(nil),              // 15: zenao.v1.EventInfo
+	(*BatchProfileField)(nil),      // 16: zenao.v1.BatchProfileField
+	(*BatchProfileRequest)(nil),    // 17: zenao.v1.BatchProfileRequest
+	(*PostGeoLoc)(nil),             // 18: zenao.v1.PostGeoLoc
+	(*PostID)(nil),                 // 19: zenao.v1.PostID
+	(*PostCommon)(nil),             // 20: zenao.v1.PostCommon
+	(*StandardPost)(nil),           // 21: zenao.v1.StandardPost
+	(*ArticlePost)(nil),            // 22: zenao.v1.ArticlePost
+	(*LinkPost)(nil),               // 23: zenao.v1.LinkPost
+	(*ImagePost)(nil),              // 24: zenao.v1.ImagePost
+	(*VideoPost)(nil),              // 25: zenao.v1.VideoPost
+	(*Reaction)(nil),               // 26: zenao.v1.Reaction
+	(*Tip)(nil),                    // 27: zenao.v1.Tip
+	(*Post)(nil),                   // 28: zenao.v1.Post
+	(*SocialFeed)(nil),             // 29: zenao.v1.SocialFeed
 }
 var file_zenao_v1_zenao_proto_depIdxs = []int32{
-	10, // 0: zenao.v1.CreateEventRequest.location:type_name -> zenao.v1.EventLocation
-	10, // 1: zenao.v1.EditEventRequest.location:type_name -> zenao.v1.EventLocation
-	12, // 2: zenao.v1.EventLocation.geo:type_name -> zenao.v1.AddressGeo
-	11, // 3: zenao.v1.EventLocation.virtual:type_name -> zenao.v1.AddressVirtual
-	13, // 4: zenao.v1.EventLocation.custom:type_name -> zenao.v1.AddressCustom
-	10, // 5: zenao.v1.EventInfo.location:type_name -> zenao.v1.EventLocation
-	15, // 6: zenao.v1.BatchProfileRequest.fields:type_name -> zenao.v1.BatchProfileField
-	18, // 7: zenao.v1.PostCommon.parent_id:type_name -> zenao.v1.PostID
-	17, // 8: zenao.v1.PostCommon.loc:type_name -> zenao.v1.PostGeoLoc
-	19, // 9: zenao.v1.StandardPost.common:type_name -> zenao.v1.PostCommon
-	19, // 10: zenao.v1.ArticlePost.common:type_name -> zenao.v1.PostCommon
-	19, // 11: zenao.v1.LinkPost.common:type_name -> zenao.v1.PostCommon
-	19, // 12: zenao.v1.ImagePost.common:type_name -> zenao.v1.PostCommon
-	19, // 13: zenao.v1.VideoPost.common:type_name -> zenao.v1.PostCommon
-	18, // 14: zenao.v1.Reaction.post_id:type_name -> zenao.v1.PostID
-	20, // 15: zenao.v1.Post.standard:type_name -> zenao.v1.StandardPost
-	21, // 16: zenao.v1.Post.article:type_name -> zenao.v1.ArticlePost
-	22, // 17: zenao.v1.Post.link:type_name -> zenao.v1.LinkPost
-	23, // 18: zenao.v1.Post.image:type_name -> zenao.v1.ImagePost
-	24, // 19: zenao.v1.Post.video:type_name -> zenao.v1.VideoPost
-	0,  // 20: zenao.v1.ZenaoService.EditUser:input_type -> zenao.v1.EditUserRequest
-	2,  // 21: zenao.v1.ZenaoService.GetUserAddress:input_type -> zenao.v1.GetUserAddressRequest
-	4,  // 22: zenao.v1.ZenaoService.CreateEvent:input_type -> zenao.v1.CreateEventRequest
-	6,  // 23: zenao.v1.ZenaoService.EditEvent:input_type -> zenao.v1.EditEventRequest
-	8,  // 24: zenao.v1.ZenaoService.Participate:input_type -> zenao.v1.ParticipateRequest
-	1,  // 25: zenao.v1.ZenaoService.EditUser:output_type -> zenao.v1.EditUserResponse
-	3,  // 26: zenao.v1.ZenaoService.GetUserAddress:output_type -> zenao.v1.GetUserAddressResponse
-	5,  // 27: zenao.v1.ZenaoService.CreateEvent:output_type -> zenao.v1.CreateEventResponse
-	7,  // 28: zenao.v1.ZenaoService.EditEvent:output_type -> zenao.v1.EditEventResponse
-	9,  // 29: zenao.v1.ZenaoService.Participate:output_type -> zenao.v1.ParticipateResponse
+	11, // 0: zenao.v1.CreateEventRequest.location:type_name -> zenao.v1.EventLocation
+	11, // 1: zenao.v1.EditEventRequest.location:type_name -> zenao.v1.EventLocation
+	13, // 2: zenao.v1.EventLocation.geo:type_name -> zenao.v1.AddressGeo
+	12, // 3: zenao.v1.EventLocation.virtual:type_name -> zenao.v1.AddressVirtual
+	14, // 4: zenao.v1.EventLocation.custom:type_name -> zenao.v1.AddressCustom
+	11, // 5: zenao.v1.EventInfo.location:type_name -> zenao.v1.EventLocation
+	16, // 6: zenao.v1.BatchProfileRequest.fields:type_name -> zenao.v1.BatchProfileField
+	19, // 7: zenao.v1.PostCommon.parent_id:type_name -> zenao.v1.PostID
+	18, // 8: zenao.v1.PostCommon.loc:type_name -> zenao.v1.PostGeoLoc
+	20, // 9: zenao.v1.StandardPost.common:type_name -> zenao.v1.PostCommon
+	20, // 10: zenao.v1.ArticlePost.common:type_name -> zenao.v1.PostCommon
+	20, // 11: zenao.v1.LinkPost.common:type_name -> zenao.v1.PostCommon
+	20, // 12: zenao.v1.ImagePost.common:type_name -> zenao.v1.PostCommon
+	20, // 13: zenao.v1.VideoPost.common:type_name -> zenao.v1.PostCommon
+	19, // 14: zenao.v1.Reaction.post_id:type_name -> zenao.v1.PostID
+	21, // 15: zenao.v1.Post.standard:type_name -> zenao.v1.StandardPost
+	22, // 16: zenao.v1.Post.article:type_name -> zenao.v1.ArticlePost
+	23, // 17: zenao.v1.Post.link:type_name -> zenao.v1.LinkPost
+	24, // 18: zenao.v1.Post.image:type_name -> zenao.v1.ImagePost
+	25, // 19: zenao.v1.Post.video:type_name -> zenao.v1.VideoPost
+	1,  // 20: zenao.v1.ZenaoService.EditUser:input_type -> zenao.v1.EditUserRequest
+	3,  // 21: zenao.v1.ZenaoService.GetUserAddress:input_type -> zenao.v1.GetUserAddressRequest
+	5,  // 22: zenao.v1.ZenaoService.CreateEvent:input_type -> zenao.v1.CreateEventRequest
+	7,  // 23: zenao.v1.ZenaoService.EditEvent:input_type -> zenao.v1.EditEventRequest
+	9,  // 24: zenao.v1.ZenaoService.Participate:input_type -> zenao.v1.ParticipateRequest
+	2,  // 25: zenao.v1.ZenaoService.EditUser:output_type -> zenao.v1.EditUserResponse
+	4,  // 26: zenao.v1.ZenaoService.GetUserAddress:output_type -> zenao.v1.GetUserAddressResponse
+	6,  // 27: zenao.v1.ZenaoService.CreateEvent:output_type -> zenao.v1.CreateEventResponse
+	8,  // 28: zenao.v1.ZenaoService.EditEvent:output_type -> zenao.v1.EditEventResponse
+	10, // 29: zenao.v1.ZenaoService.Participate:output_type -> zenao.v1.ParticipateResponse
 	25, // [25:30] is the sub-list for method output_type
 	20, // [20:25] is the sub-list for method input_type
 	20, // [20:20] is the sub-list for extension type_name
@@ -2271,13 +2335,14 @@ func file_zenao_v1_zenao_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_zenao_v1_zenao_proto_rawDesc), len(file_zenao_v1_zenao_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   29,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_zenao_v1_zenao_proto_goTypes,
 		DependencyIndexes: file_zenao_v1_zenao_proto_depIdxs,
+		EnumInfos:         file_zenao_v1_zenao_proto_enumTypes,
 		MessageInfos:      file_zenao_v1_zenao_proto_msgTypes,
 	}.Build()
 	File_zenao_v1_zenao_proto = out.File

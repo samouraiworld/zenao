@@ -109,6 +109,15 @@ message BatchProfileRequest {
 
 // SOCIAL FEED
 
+// not directly used in link post type, but should be used as return value of
+// Kind() method of contract set in a link post
+enum LinkPostKind {
+  LINK_POST_KIND_UNSPECIFIED = 0;
+  LINK_POST_KIND_POLL = 1;
+  LINK_POST_KIND_EVENT = 2;
+  LINK_POST_KIND_PROPOSAL = 3;
+}
+
 message PostGeoLoc {
   float lat = 2;
   float lng = 3;
