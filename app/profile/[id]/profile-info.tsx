@@ -12,6 +12,12 @@ import { Card } from "@/components/cards/Card";
 export function ProfileInfo({ address }: { address: string }) {
   const { data } = useSuspenseQuery(userFromAddress(address));
 
+  // userFromAddress return array of empty string (except address)
+  // So to detect if a user doesn't exist we have to check if all strings are empty (except address)
+  if (!data?.bio && !data?.displayName && !data?.avatarUri) {
+    return <p>{`Profile doesn't exist`}</p>;
+  }
+
   const jsonLd: WithContext<Person> = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -19,10 +25,6 @@ export function ProfileInfo({ address }: { address: string }) {
     image: data?.avatarUri,
     knowsAbout: data?.bio,
   };
-
-  if (!data) {
-    return <p>{`Profile doesn't exist`}</p>;
-  }
   return (
     <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
       <script
@@ -31,7 +33,7 @@ export function ProfileInfo({ address }: { address: string }) {
       />
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
-          src={web2URL(data?.avatarUri)}
+          src={web2URL(data.avatarUri)}
           width={330}
           height={330}
           alt="Event"
@@ -40,7 +42,7 @@ export function ProfileInfo({ address }: { address: string }) {
         />
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
-        <VeryLargeText className="mb-7">{data?.displayName}</VeryLargeText>
+        <VeryLargeText className="mb-7">{data.displayName}</VeryLargeText>
         <Card>
           <Text>{data.bio}</Text>
         </Card>
