@@ -720,21 +720,21 @@ func (p *PostCommon) FromJSON(node *json.Node) {
 		p.Loc = fv
 	}
 	if val, ok := fields["createdAt"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64);
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
 		p.CreatedAt = fv
 	}
 	if val, ok := fields["updatedAt"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64);
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
 		p.UpdatedAt = fv
 	}
 	if val, ok := fields["deletedAt"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64);
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
@@ -823,6 +823,9 @@ func (l *LinkPost) ToJSON() *json.Node {
 	if l.Uri != "" {
 		fields["uri"] = json.StringNode("", l.Uri)
 	}
+	if l.EntityId != "" {
+		fields["entityId"] = json.StringNode("", l.EntityId)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -838,6 +841,9 @@ func (l *LinkPost) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["uri"]; ok {
 		l.Uri = val.MustString()
+	}
+	if val, ok := fields["entityId"]; ok {
+		l.EntityId = val.MustString()
 	}
 }
 
@@ -973,7 +979,7 @@ func (t *Tip) FromJSON(node *json.Node) {
 		t.Denom = val.MustString()
 	}
 	if val, ok := fields["amount"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64);
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}
@@ -984,28 +990,20 @@ func (t *Tip) FromJSON(node *json.Node) {
 func (p *Post) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-
-	post := map[string]*json.Node{}
 	switch val := p.Post.(type) {
 	case *StandardPost:
-		post["case"] = json.StringNode("", "standard")
-		post["value"] = val.ToJSON()
+		fields["standard"] = val.ToJSON()
 	case *ArticlePost:
-		post["case"] = json.StringNode("", "article")
-		post["value"] = val.ToJSON()
+		fields["article"] = val.ToJSON()
 	case *LinkPost:
-		post["case"] = json.StringNode("", "link")
-		post["value"] = val.ToJSON()
+		fields["link"] = val.ToJSON()
 	case *ImagePost:
-		post["case"] = json.StringNode("", "image")
-		post["value"] = val.ToJSON()
+		fields["image"] = val.ToJSON()
 	case *VideoPost:
-		post["case"] = json.StringNode("", "video")
-		post["value"] = val.ToJSON()
+		fields["video"] = val.ToJSON()
 	default:
 		panic(errors.New("unknown post variant"))
 	}
-	fields["post"] = json.ObjectNode("", post)
 
 	return json.ObjectNode("", fields)
 }
@@ -1014,35 +1012,39 @@ func (p *Post) FromJSON(node *json.Node) {
 	*p = Post{}
 	fields := node.MustObject()
 
-
-	if union, ok := fields["post"]; ok {
-		obj := union.MustObject()
-		kind := obj["case"].MustString()
-		val := obj["value"]
-		switch kind {
-		case "standard":
-			n := &StandardPost{}
-			n.FromJSON(val)
-			p.Post = n
-		case "article":
-			n := &ArticlePost{}
-			n.FromJSON(val)
-			p.Post = n
-		case "link":
-			n := &LinkPost{}
-			n.FromJSON(val)
-			p.Post = n
-		case "image":
-			n := &ImagePost{}
-			n.FromJSON(val)
-			p.Post = n
-		case "video":
-			n := &VideoPost{}
-			n.FromJSON(val)
-			p.Post = n
-		default:
-			panic(errors.New("unknown post variant"))
+	variantFieldNames := []string{"standard", "article", "link", "image", "video"}
+	var selectedVariant *json.Node
+	var selectedVariantName string
+	for _, variantName := range variantFieldNames {
+		if variant, ok := fields[variantName]; ok {
+			selectedVariantName = variantName
+			selectedVariant = variant
 		}
+		break
+	}
+	switch selectedVariantName {
+	case "standard":
+		n := &StandardPost{}
+		n.FromJSON(selectedVariant)
+		p.Post = n
+	case "article":
+		n := &ArticlePost{}
+		n.FromJSON(selectedVariant)
+		p.Post = n
+	case "link":
+		n := &LinkPost{}
+		n.FromJSON(selectedVariant)
+		p.Post = n
+	case "image":
+		n := &ImagePost{}
+		n.FromJSON(selectedVariant)
+		p.Post = n
+	case "video":
+		n := &VideoPost{}
+		n.FromJSON(selectedVariant)
+		p.Post = n
+	default:
+		panic(errors.New("post variant not found"))
 	}
 }
 

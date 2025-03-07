@@ -110,62 +110,63 @@ type PostGeoLoc struct {
 }
 
 type PostID struct {
-	LocalId string
-	FeedId string
+	LocalId   string
+	FeedId    string
 	NetworkId string
 }
 
 type PostCommon struct {
 	ChannelId string
-	Author string
-	ParentId *PostID
-	Loc *PostGeoLoc
+	Author    string
+	ParentId  *PostID
+	Loc       *PostGeoLoc
 	CreatedAt int64
 	UpdatedAt int64
 	DeletedAt int64
 }
 
 type StandardPost struct {
-	Common *PostCommon
+	Common  *PostCommon
 	Content string
 }
 
 type ArticlePost struct {
-	Common *PostCommon
-	Title string
-	PreviewText string
+	Common          *PostCommon
+	Title           string
+	PreviewText     string
 	PreviewImageUri string
-	Content string
+	Content         string
 }
 
 type LinkPost struct {
-	Common *PostCommon
-	Uri string
+	Common   *PostCommon
+	Uri      string
+	EntityId string
 }
 
 type ImagePost struct {
-	Common *PostCommon
+	Common      *PostCommon
 	Description string
-	ImageUri string
+	ImageUri    string
 }
 
 type VideoPost struct {
-	Common *PostCommon
-	Description string
-	VideoUri string
+	Common            *PostCommon
+	Description       string
+	VideoUri          string
 	ThumbnailImageUri string
 }
 
 type Reaction struct {
 	PostId *PostID
-	Icon string
+	Icon   string
 	UserId string
 }
 
 type Tip struct {
 	PostLocalId string
-	Denom string
-	Amount int64
+	Denom       string
+	Amount      int64
 }
 
 type Post struct {

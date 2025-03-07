@@ -149,6 +149,7 @@ message ArticlePost {
 message LinkPost {
   PostCommon common = 1;
   string uri = 2;
+  string entity_id = 3; // useful to interact with factory interfaces
 }
 
 message ImagePost {
