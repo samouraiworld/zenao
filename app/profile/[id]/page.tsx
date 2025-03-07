@@ -2,7 +2,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { ProfileInfo } from "./profile-info";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { getQueryClient } from "@/lib/get-query-client";
-import { userFromAddress } from "@/lib/queries/user";
+import { userOptions } from "@/lib/queries/user";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -12,7 +12,7 @@ export default async function ProfilePage({ params }: Props) {
   const p = await params;
   const queryClient = getQueryClient();
 
-  void queryClient.prefetchQuery(userFromAddress(p.id));
+  void queryClient.prefetchQuery(userOptions(p.id));
 
   return (
     <ScreenContainer>

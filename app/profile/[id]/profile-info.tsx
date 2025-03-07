@@ -3,16 +3,16 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Person, WithContext } from "schema-dts";
 import Image from "next/image";
-import { userFromAddress } from "@/lib/queries/user";
+import { userOptions } from "@/lib/queries/user";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { web2URL } from "@/lib/uris";
 import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
 
 export function ProfileInfo({ address }: { address: string }) {
-  const { data } = useSuspenseQuery(userFromAddress(address));
+  const { data } = useSuspenseQuery(userOptions(address));
 
-  // userFromAddress return array of empty string (except address)
+  // userOptions return array of empty string (except address)
   // So to detect if a user doesn't exist we have to check if all strings are empty (except address)
   if (!data?.bio && !data?.displayName && !data?.avatarUri) {
     return <p>{`Profile doesn't exist`}</p>;

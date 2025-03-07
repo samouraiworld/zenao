@@ -23,7 +23,7 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { userFromAddress } from "@/lib/queries/user";
+import { userOptions } from "@/lib/queries/user";
 import { Avatar, AvatarImage } from "@/components/shadcn/avatar";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -65,7 +65,7 @@ export function EventInfo({
   const isStarted = Date.now() > Number(data.startDate) * 1000;
   const queryClient = useQueryClient();
   const { data: host } = useQuery({
-    ...userFromAddress(data.creator),
+    ...userOptions(data.creator),
     enabled: !!data.creator,
   });
 

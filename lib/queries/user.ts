@@ -39,14 +39,3 @@ export const userAddressOptions = (
     },
     enabled: !!userId,
   });
-
-export const userFromAddress = (address: string) =>
-  queryOptions({
-    queryKey: ["userFromAddress", address],
-    queryFn: async () => {
-      if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
-        return null;
-      }
-      return profiles.fetch(address);
-    },
-  });
