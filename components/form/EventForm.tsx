@@ -109,6 +109,9 @@ export const EventForm: React.FC<EventFormProps> = ({
                       timeZone: currentTimezone(),
                     });
                   }
+                  // We have to clear errors between changing location kinds
+                  // If we have an error in virtual location and we change to custom, error stay as undefined and can't be clear
+                  form.clearErrors("location");
                   setMarker(null);
                   setTimeZone("");
                   setIsVirtual(checked);
