@@ -25,11 +25,9 @@ func generateGnoLit(gen *protogen.Plugin, file *protogen.File) {
 	g.P()
 	g.P("package ", file.GoPackageName)
 	g.P()
-	g.P("import (")
-	g.P(`	"strings"`)
-	g.P(`	"fmt"`)
-	g.P(`	"errors"`)
-	g.P(")")
+
+	g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "strings"})
+	g.QualifiedGoIdent(protogen.GoIdent{GoImportPath: "fmt"})
 
 	for _, m := range file.Messages {
 		g.P()

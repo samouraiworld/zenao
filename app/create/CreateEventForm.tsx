@@ -2,10 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useSession } from "@clerk/nextjs";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useAuth } from "@clerk/nextjs";
 import { zenaoClient } from "@/app/zenao-client";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/EventForm";
@@ -13,7 +13,7 @@ import { useToast } from "@/app/hooks/use-toast";
 import { currentTimezone } from "@/lib/time";
 
 export const CreateEventForm: React.FC = () => {
-  const { session } = useSession();
+  const { getToken } = useAuth();
   const router = useRouter();
   const form = useForm<EventFormSchemaType>({
     mode: "all",
@@ -34,7 +34,7 @@ export const CreateEventForm: React.FC = () => {
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
-      const token = await session?.getToken();
+      const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
       }

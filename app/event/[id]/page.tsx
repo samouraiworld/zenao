@@ -6,8 +6,10 @@ import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
 import { userFromAddress } from "@/lib/queries/user";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { userAddressOptions } from "@/lib/queries/user";
+import { web2URL } from "@/lib/uris";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -22,32 +24,32 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: event.title,
     openGraph: {
-      images: [{ url: event.imageUri }],
+      images: [{ url: web2URL(event.imageUri) }],
     },
   };
 }
 
 export default async function EventPage({ params }: Props) {
   const p = await params;
-  const { getToken } = await auth();
-  const authToken = await getToken();
+  const { getToken, userId } = await auth();
   const queryClient = getQueryClient();
 
-  await queryClient.prefetchQuery(eventOptions(p.id));
-  const event = queryClient.getQueryData(eventOptions(p.id).queryKey);
-  if (event) {
-    await queryClient.prefetchQuery(userFromAddress(event.creator));
+  const eventData = await queryClient.fetchQuery(eventOptions(p.id));
+  if (eventData) {
+    await queryClient.prefetchQuery(userFromAddress(eventData.creator));
   }
 
-  const eventData = await queryClient.fetchQuery(eventOptions(p.id));
-  void queryClient.prefetchQuery(eventUserRoles(authToken, p.id));
+  const address = await queryClient.fetchQuery(
+    userAddressOptions(getToken, userId),
+  );
+  void queryClient.prefetchQuery(eventUserRoles(p.id, address));
 
   return (
     <ScreenContainer
       background={{ src: eventData.imageUri, width: imageWidth }}
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventInfo id={p.id} authToken={authToken} />
+        <EventInfo id={p.id} userId={userId} />
       </HydrationBoundary>
     </ScreenContainer>
   );

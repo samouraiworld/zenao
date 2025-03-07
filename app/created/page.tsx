@@ -1,7 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
-import { useTranslations } from "next-intl";
 import React from "react";
-import { EventInfo } from "../gen/zenao/v1/zenao_pb";
+import { getTranslations } from "next-intl/server";
 import { getQueryClient } from "@/lib/get-query-client";
 import {
   ScreenContainer,
@@ -11,30 +10,18 @@ import { eventsByCreatorList } from "@/lib/queries/events-list";
 import { zenaoClient } from "@/app/zenao-client";
 import { EventsListLayout } from "@/components/layout/EventsListLayout";
 
-const LoggedOutCreatedPage: React.FC = () => {
-  const t = useTranslations("created");
-  return (
-    <ScreenContainerCentered isSignedOutModal>
-      {t("logged-out")}
-    </ScreenContainerCentered>
-  );
-};
-
-const CreatedPageFC: React.FC<{
-  upcoming: EventInfo[];
-  past: EventInfo[];
-}> = ({ upcoming, past }) => {
-  const t = useTranslations("created");
-  return (
-    <EventsListLayout upcoming={upcoming} past={past} title={t("title")} />
-  );
-};
-
 export default async function CreatedPage() {
   const { getToken } = await auth();
   const token = await getToken();
+  const t = await getTranslations("created");
+
+  // Logged out
   if (!token) {
-    return <LoggedOutCreatedPage />;
+    return (
+      <ScreenContainerCentered isSignedOutModal>
+        {t("logged-out")}
+      </ScreenContainerCentered>
+    );
   }
 
   const { address } = await zenaoClient.getUserAddress(
@@ -53,7 +40,7 @@ export default async function CreatedPage() {
 
   return (
     <ScreenContainer>
-      <CreatedPageFC upcoming={upcoming} past={past} />
+      <EventsListLayout upcoming={upcoming} past={past} title={t("title")} />
     </ScreenContainer>
   );
 }

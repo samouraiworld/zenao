@@ -12,21 +12,24 @@ import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
 import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
-import { Separator } from "@/components/common/Separator";
 import { Text } from "@/components/texts/DefaultText";
 import { SmallText } from "@/components/texts/SmallText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { eventUserRoles } from "@/lib/queries/event-user-roles";
 import { userFromAddress } from "@/lib/queries/user";
 import { Avatar, AvatarImage } from "@/components/shadcn/avatar";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { Separator } from "@/components/shadcn/separator";
+import { GnowebButton } from "@/components/buttons/GnowebButton";
+import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 
 interface EventSectionProps {
@@ -46,13 +49,17 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 
 export function EventInfo({
   id,
-  authToken,
+  userId,
 }: {
   id: string;
-  authToken: string | null;
+  userId: string | null;
 }) {
+  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: roles } = useSuspenseQuery(eventUserRoles(authToken, id));
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
@@ -66,7 +73,7 @@ export function EventInfo({
   const [loading, setLoading] = React.useState<boolean>(false);
 
   const handleParticipateSuccess = useCallback(async () => {
-    const opts = eventUserRoles(authToken, id);
+    const opts = eventUserRoles(id, address);
     await queryClient.cancelQueries(opts);
     queryClient.setQueryData(opts.queryKey, (roles) => {
       if (!roles) {
@@ -77,7 +84,7 @@ export function EventInfo({
       }
       return roles;
     });
-  }, [queryClient, authToken, id]);
+  }, [queryClient, id, address]);
 
   let location = "";
   if (data.location?.address.case == "custom") {
@@ -92,7 +99,7 @@ export function EventInfo({
     endDate: new Date(Number(data.endDate) * 1000).toISOString(),
     location,
     maximumAttendeeCapacity: data.capacity,
-    image: data.imageUri,
+    image: web2URL(data.imageUri),
   };
 
   const iconSize = 22;
@@ -132,12 +139,9 @@ export function EventInfo({
           </Card>
         )}
         <EventSection title={t("going", { count: data.participants })}>
-          <a
+          <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
-            target="_blank"
-          >
-            <SmallText>See on Gnoweb</SmallText>
-          </a>
+          />
         </EventSection>
         {host && (
           <EventSection title={t("hosted-by")}>
