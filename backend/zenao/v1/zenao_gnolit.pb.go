@@ -445,6 +445,9 @@ func (l *LinkPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	if l.Uri != "" {
 		fmt.Fprintf(buf, "%s\tUri: %q,\n", linePrefix, l.Uri)
 	}
+	if l.EntityId != "" {
+		fmt.Fprintf(buf, "%s\tEntityId: %q,\n", linePrefix, l.EntityId)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
