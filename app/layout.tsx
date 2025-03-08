@@ -7,6 +7,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import QueryProviders from "./query-providers";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
 import { Toaster } from "@/components/shadcn/toaster";
 
 const geistSans = Geist({
@@ -53,7 +55,11 @@ export default async function RootLayout({
             >
               <NextIntlClientProvider messages={messages}>
                 <NextTopLoader showSpinner={false} color="#EC7E17" />
-                {children}
+                <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
+                  <Header />
+                  {children}
+                  <Footer />
+                </div>
               </NextIntlClientProvider>
             </ThemeProvider>
           </QueryProviders>

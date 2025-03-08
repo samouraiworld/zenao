@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAuth } from "@clerk/nextjs";
+import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
@@ -18,6 +17,8 @@ import { FormFieldTextArea } from "@/components/form/components/FormFieldTextAre
 import { FormFieldImage } from "@/components/form/components/FormFieldImage";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
+import { Separator } from "@/components/shadcn/separator";
+import { Button } from "@/components/shadcn/button";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -27,7 +28,6 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-
   const { data: user } = useSuspenseQuery(userOptions(address));
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -108,17 +108,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
                 type="submit"
               />
             </div>
-            {!!user?.address && (
-              <div>
-                <Link
-                  href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/cockpit:u/${user.address}`}
-                >
-                  See your profile on gnoweb
-                </Link>
-              </div>
-            )}
           </div>
         </div>
+        <Separator className="mb-2" />
+        <Button asChild variant="destructive" type="button">
+          <SignOutButton />
+        </Button>
       </form>
     </Form>
   );
