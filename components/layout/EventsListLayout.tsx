@@ -1,16 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction, useState } from "react";
-import Image from "next/image";
+import { GnowebButton } from "../buttons/GnowebButton";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { EventsList } from "@/components/lists/EventsList";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { Text } from "@/components/texts/DefaultText";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
-import { Button } from "@/components/shadcn/button";
-import { SmallText } from "@/components/texts/SmallText";
 
 const HeaderEventsList: React.FC<{
   tab: "upcoming" | "past";
@@ -24,24 +21,9 @@ const HeaderEventsList: React.FC<{
       <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row sm:justify-between">
         <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
           <VeryLargeText className="truncate">{title}</VeryLargeText>
-          <Button
-            variant="secondary"
-            className="w-[155px] flex flex-row items-center justify-center"
-          >
-            <Link
-              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
-              target="_blank"
-            >
-              <SmallText variant="secondary">{t("see-gnoweb")}</SmallText>
-            </Link>
-            <Image
-              src="/gno1.png"
-              alt="gno-logo"
-              width={25}
-              height={25}
-              className="rounded-[25px]"
-            />
-          </Button>
+          <GnowebButton
+            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
+          />
         </div>
         <div className="w-[175px] h-[33px]">
           <Tabs
