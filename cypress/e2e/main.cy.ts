@@ -191,7 +191,12 @@ describe("main", () => {
     cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
       delay: 1,
     });
+
+    // custom location
+    cy.get("button").contains("Add an address...").click();
     cy.get('input[placeholder="Location..."]').type(testEventLocation);
+    cy.get("p").contains(`Use ${testEventLocation}`).trigger("click");
+
     cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
 
     // choose dates in the start of next month
