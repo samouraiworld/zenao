@@ -41,7 +41,7 @@ jobs:
           cd gnobuild
           git clone https://github.com/gnolang/gno.git
           cd gno
-          git checkout $(shell $(CAT) .gnoversion)
+          git checkout $(cat ../../.gnoversion)
           make install.gnodev
 
       - name: Get go binaries path
