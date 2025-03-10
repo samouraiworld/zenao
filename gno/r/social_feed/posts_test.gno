@@ -6,7 +6,7 @@ import (
 
 	"gno.land/p/demo/seqid"
 	"gno.land/p/demo/testutils"
-	zenaov1 "gno.land/p/zenao/zenao/v1"
+	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
 var (
@@ -18,7 +18,7 @@ func TestNewPost(t *testing.T) {
 	setupTest()
 	type input struct {
 		feedId string
-		post   *zenaov1.Post
+		post   *feedsv1.Post
 	}
 
 	type output struct {
@@ -37,7 +37,7 @@ func TestNewPost(t *testing.T) {
 		"valid post": {
 			input: input{
 				feedId: "public",
-				post:   &zenaov1.Post{},
+				post:   &feedsv1.Post{},
 			},
 			output: output{
 				localPostId: "public:0000001",
@@ -47,7 +47,7 @@ func TestNewPost(t *testing.T) {
 		"private feed": {
 			input: input{
 				feedId: alice.String() + ":private",
-				post:   &zenaov1.Post{},
+				post:   &feedsv1.Post{},
 			},
 			output: output{
 				panic: true,
@@ -83,7 +83,7 @@ func TestGetPost(t *testing.T) {
 	}
 
 	type output struct {
-		post  *zenaov1.Post
+		post  *feedsv1.Post
 		panic bool
 	}
 
@@ -94,7 +94,7 @@ func TestGetPost(t *testing.T) {
 
 	type testTable = map[string]test
 
-	validPost := &zenaov1.Post{}
+	validPost := &feedsv1.Post{}
 
 	tests := testTable{
 		"valid post": {
@@ -194,13 +194,10 @@ func TestDeletePost(t *testing.T) {
 		},
 	}
 
-	post := &zenaov1.Post{
-		Post: &zenaov1.StandardPost{
-			Common: &zenaov1.PostCommon{
-				Author:    alice.String(),
-				DeletedAt: 0,
-			},
-		},
+	post := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 0,
+		Post:      &feedsv1.StandardPost{},
 	}
 
 	std.TestSetOriginCaller(alice)
@@ -226,7 +223,7 @@ func TestEditPost(t *testing.T) {
 
 	type input struct {
 		localPostId string
-		newPost     *zenaov1.Post
+		newPost     *feedsv1.Post
 	}
 
 	type output struct {
@@ -240,31 +237,22 @@ func TestEditPost(t *testing.T) {
 
 	type testTable = map[string]test
 
-	post := &zenaov1.Post{
-		Post: &zenaov1.StandardPost{
-			Common: &zenaov1.PostCommon{
-				Author:    alice.String(),
-				DeletedAt: 0,
-			},
-		},
+	post := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 0,
+		Post:      &feedsv1.StandardPost{},
 	}
 
-	deletedPost := &zenaov1.Post{
-		Post: &zenaov1.StandardPost{
-			Common: &zenaov1.PostCommon{
-				Author:    alice.String(),
-				DeletedAt: 1,
-			},
-		},
+	deletedPost := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 1,
+		Post:      &feedsv1.StandardPost{},
 	}
 
-	newPost := &zenaov1.Post{
-		Post: &zenaov1.StandardPost{
-			Common: &zenaov1.PostCommon{
-				Author:    bob.String(),
-				DeletedAt: 0,
-			},
-		},
+	newPost := &feedsv1.Post{
+		Author:    bob.String(),
+		DeletedAt: 0,
+		Post:      &feedsv1.StandardPost{},
 	}
 
 	std.TestSetOriginCaller(alice)

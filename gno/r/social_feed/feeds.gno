@@ -5,7 +5,8 @@ import (
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/seqid"
-	zenaov1 "gno.land/p/zenao/zenao/v1"
+
+	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
 type Feed struct {
@@ -44,16 +45,16 @@ func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string 
 
 // XXX: do a registry by user & one by parentID ?
 // XXX: handle flagged posts
-func GetFeedPosts(feedId string, offset uint32, limit uint32) []*zenaov1.Post {
+func GetFeedPosts(feedId string, offset uint32, limit uint32) []*feedsv1.Post {
 	if feedId == "" {
 		panic("feedId is empty")
 	}
-	var res []*zenaov1.Post
+	var res []*feedsv1.Post
 	i := 0
 	start := feedId + ":"
 	end := feedId + ";"
 	posts.Iterate(start, end, func(key string, value interface{}) bool {
-		post := value.(*zenaov1.Post)
+		post := value.(*feedsv1.Post)
 		if i >= int(offset) {
 			res = append(res, post)
 		}

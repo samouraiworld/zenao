@@ -4,7 +4,7 @@ import (
 	"std"
 	"testing"
 
-	zenaov1 "gno.land/p/zenao/zenao/v1"
+	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
 func TestNewFeed(t *testing.T) {
@@ -117,7 +117,7 @@ func TestGetFeedPosts(t *testing.T) {
 	}
 
 	type output struct {
-		posts []*zenaov1.Post
+		posts []*feedsv1.Post
 		panic bool
 	}
 
@@ -128,31 +128,25 @@ func TestGetFeedPosts(t *testing.T) {
 
 	type testTable = map[string]test
 
-	posts := []*zenaov1.Post{
+	posts := []*feedsv1.Post{
 		{
-			Post: &zenaov1.StandardPost{
-				Common: &zenaov1.PostCommon{
-					Author:    alice.String(),
-					DeletedAt: 0,
-				},
+			Author:    alice.String(),
+			DeletedAt: 0,
+			Post: &feedsv1.StandardPost{
 				Content: "hello",
 			},
 		},
 		{
-			Post: &zenaov1.LinkPost{
-				Common: &zenaov1.PostCommon{
-					Author:    alice.String(),
-					DeletedAt: 0,
-				},
+			Author:    alice.String(),
+			DeletedAt: 0,
+			Post: &feedsv1.LinkPost{
 				Uri: "https://example.com",
 			},
 		},
 		{
-			Post: &zenaov1.ImagePost{
-				Common: &zenaov1.PostCommon{
-					Author:    alice.String(),
-					DeletedAt: 0,
-				},
+			Author:    alice.String(),
+			DeletedAt: 0,
+			Post: &feedsv1.ImagePost{
 				Description: "an image",
 				ImageUri:    "https://example.com/image.jpg",
 			},
@@ -178,7 +172,7 @@ func TestGetFeedPosts(t *testing.T) {
 				limit:  10,
 			},
 			output: output{
-				posts: []*zenaov1.Post{},
+				posts: []*feedsv1.Post{},
 				panic: false,
 			},
 		},
@@ -247,29 +241,27 @@ func TestGetFeedPosts(t *testing.T) {
 				t.Fatalf("expected %d posts, got %d", len(test.output.posts), len(res))
 			}
 			for i, post := range res {
-				common := getPostCommon(post)
-				commonExpected := getPostCommon(test.output.posts[i])
-				if common.Author != commonExpected.Author {
-					t.Errorf("expected author %q, got %q", commonExpected.Author, common.Author)
+				if post.Author != test.output.posts[i].Author {
+					t.Errorf("expected author %q, got %q", test.output.posts[i].Author, post.Author)
 				}
-				if common.DeletedAt != commonExpected.DeletedAt {
-					t.Errorf("expected deletedAt %d, got %d", commonExpected.DeletedAt, common.DeletedAt)
+				if post.DeletedAt != test.output.posts[i].DeletedAt {
+					t.Errorf("expected deletedAt %d, got %d", test.output.posts[i].DeletedAt, post.DeletedAt)
 				}
 				switch v := post.Post.(type) {
-				case *zenaov1.StandardPost:
-					if v.Content != test.output.posts[i].Post.(*zenaov1.StandardPost).Content {
-						t.Errorf("expected content %q, got %q", test.output.posts[i].Post.(*zenaov1.StandardPost).Content, v.Content)
+				case *feedsv1.StandardPost:
+					if v.Content != test.output.posts[i].Post.(*feedsv1.StandardPost).Content {
+						t.Errorf("expected content %q, got %q", test.output.posts[i].Post.(*feedsv1.StandardPost).Content, v.Content)
 					}
-				case *zenaov1.LinkPost:
-					if v.Uri != test.output.posts[i].Post.(*zenaov1.LinkPost).Uri {
-						t.Errorf("expected uri %q, got %q", test.output.posts[i].Post.(*zenaov1.LinkPost).Uri, v.Uri)
+				case *feedsv1.LinkPost:
+					if v.Uri != test.output.posts[i].Post.(*feedsv1.LinkPost).Uri {
+						t.Errorf("expected uri %q, got %q", test.output.posts[i].Post.(*feedsv1.LinkPost).Uri, v.Uri)
 					}
-				case *zenaov1.ImagePost:
-					if v.Description != test.output.posts[i].Post.(*zenaov1.ImagePost).Description {
-						t.Errorf("expected description %q, got %q", test.output.posts[i].Post.(*zenaov1.ImagePost).Description, v.Description)
+				case *feedsv1.ImagePost:
+					if v.Description != test.output.posts[i].Post.(*feedsv1.ImagePost).Description {
+						t.Errorf("expected description %q, got %q", test.output.posts[i].Post.(*feedsv1.ImagePost).Description, v.Description)
 					}
-					if v.ImageUri != test.output.posts[i].Post.(*zenaov1.ImagePost).ImageUri {
-						t.Errorf("expected imageUri %q, got %q", test.output.posts[i].Post.(*zenaov1.ImagePost).ImageUri, v.ImageUri)
+					if v.ImageUri != test.output.posts[i].Post.(*feedsv1.ImagePost).ImageUri {
+						t.Errorf("expected imageUri %q, got %q", test.output.posts[i].Post.(*feedsv1.ImagePost).ImageUri, v.ImageUri)
 					}
 				}
 			}

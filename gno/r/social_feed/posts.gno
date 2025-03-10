@@ -4,10 +4,10 @@ import (
 	"std"
 	"time"
 
-	zenaov1 "gno.land/p/zenao/zenao/v1"
+	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
-func NewPost(feedId string, post *zenaov1.Post) string {
+func NewPost(feedId string, post *feedsv1.Post) string {
 	feedRaw, ok := feeds.Get(feedId)
 	if ok {
 		feed := feedRaw.(*Feed)
@@ -20,12 +20,12 @@ func NewPost(feedId string, post *zenaov1.Post) string {
 	return localPostId
 }
 
-func GetPost(localPostId string) *zenaov1.Post {
+func GetPost(localPostId string) *feedsv1.Post {
 	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
 	}
-	return postRaw.(*zenaov1.Post)
+	return postRaw.(*feedsv1.Post)
 }
 
 func DeletePost(localPostId string) {
@@ -34,57 +34,28 @@ func DeletePost(localPostId string) {
 	if !ok {
 		panic("post not found")
 	}
-	post := postRaw.(*zenaov1.Post)
-	common := getPostCommon(post)
-	if common.Author != creator.Address().String() {
+	post := postRaw.(*feedsv1.Post)
+	if post.Author != creator.Address().String() {
 		panic("you are not the author of this post")
 	}
-	if common == nil {
-		panic("post common is nil")
+	if post.DeletedAt != 0 {
+		panic("post is deleted")
 	}
-	if common.DeletedAt != 0 {
-		panic("post is already deleted")
-	}
-	common.DeletedAt = time.Now().Unix()
+	post.DeletedAt = time.Now().Unix()
 }
 
-// / XXX: should we restrict editing to the same kind of post?
-func EditPost(localPostId string, newPost *zenaov1.Post) {
+func EditPost(localPostId string, newPost *feedsv1.Post) {
 	creator := std.PreviousRealm()
 	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
 	}
-	post := postRaw.(*zenaov1.Post)
-	common := getPostCommon(post)
-	if common.Author != creator.Address().String() {
+	post := postRaw.(*feedsv1.Post)
+	if post.Author != creator.Address().String() {
 		panic("you are not the author of this post")
 	}
-	if common == nil {
-		panic("post common is nil")
-	}
-	if common.DeletedAt != 0 {
+	if post.DeletedAt != 0 {
 		panic("post is deleted")
 	}
 	posts.Set(localPostId, newPost)
-}
-
-func getPostCommon(post *zenaov1.Post) *zenaov1.PostCommon {
-	if post == nil {
-		panic("post is nil")
-	}
-	switch v := post.Post.(type) {
-	case *zenaov1.StandardPost:
-		return v.Common
-	case *zenaov1.ArticlePost:
-		return v.Common
-	case *zenaov1.LinkPost:
-		return v.Common
-	case *zenaov1.ImagePost:
-		return v.Common
-	case *zenaov1.VideoPost:
-		return v.Common
-	default:
-		panic("unknown post type")
-	}
 }

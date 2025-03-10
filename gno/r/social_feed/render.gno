@@ -4,7 +4,7 @@ import (
 	"gno.land/p/demo/mux"
 	"gno.land/p/moul/md"
 
-	zenaov1 "gno.land/p/zenao/zenao/v1"
+	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
 var router *mux.Router
@@ -63,7 +63,7 @@ func DetailSocialFeedPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 	start := id + ":"
 	end := id + ";"
 	posts.Iterate(start, end, func(key string, postRaw interface{}) bool {
-		post := postRaw.(*zenaov1.Post)
+		post := postRaw.(*feedsv1.Post)
 		res.Write(renderZenaoPost(post))
 		if i >= 20 {
 			return true
@@ -74,44 +74,39 @@ func DetailSocialFeedPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 	})
 }
 
-func renderZenaoPost(post *zenaov1.Post) string {
-	switch t := post.Post.(type) {
-	case *zenaov1.StandardPost:
-		return renderStandardPost(t)
-	case *zenaov1.ArticlePost:
-		return renderArticlePost(t)
-	case *zenaov1.LinkPost:
-		return renderLinkPost(t)
-	case *zenaov1.ImagePost:
-		return renderImagePost(t)
-	case *zenaov1.VideoPost:
-		return renderVideoPost(t)
+func renderZenaoPost(post *feedsv1.Post) string {
+	switch ext := post.Post.(type) {
+	case *feedsv1.StandardPost:
+		return renderStandardPost(post, ext)
+	case *feedsv1.ArticlePost:
+		return renderArticlePost(post, ext)
+	case *feedsv1.LinkPost:
+		return renderLinkPost(post, ext)
+	case *feedsv1.ImagePost:
+		return renderImagePost(post, ext)
+	case *feedsv1.VideoPost:
+		return renderVideoPost(post, ext)
 	default:
 		return md.Paragraph("Unknown post type")
 	}
 }
 
-func renderStandardPost(post *zenaov1.StandardPost) string {
-	common := post.Common
-	return md.H3("POST KIND: STANDARD") + md.Paragraph(post.Content) + md.Paragraph(md.Blockquote("Author: "+common.Author))
+func renderStandardPost(post *feedsv1.Post, ext *feedsv1.StandardPost) string {
+	return md.H3("POST KIND: STANDARD") + md.Paragraph(ext.Content) + md.Paragraph(md.Blockquote("Author: "+post.Author))
 }
 
-func renderArticlePost(post *zenaov1.ArticlePost) string {
-	common := post.Common
-	return md.H3("POST KIND: ARTICLE") + md.H3(post.Title) + md.Paragraph(post.PreviewText) + md.Image("article preview", post.PreviewImageUri) + md.Paragraph(post.Content) + md.Paragraph(md.Blockquote("Author: "+common.Author))
+func renderArticlePost(post *feedsv1.Post, ext *feedsv1.ArticlePost) string {
+	return md.H3("POST KIND: ARTICLE") + md.H3(ext.Title) + md.Paragraph(ext.PreviewText) + md.Image("article preview", ext.PreviewImageUri) + md.Paragraph(ext.Content) + md.Paragraph(md.Blockquote("Author: "+post.Author))
 }
 
-func renderLinkPost(post *zenaov1.LinkPost) string {
-	common := post.Common
-	return md.H3("POST KIND: LINK") + md.Link(post.Uri, post.Uri) + md.Paragraph(md.Blockquote("Author: "+common.Author))
+func renderLinkPost(post *feedsv1.Post, ext *feedsv1.LinkPost) string {
+	return md.H3("POST KIND: LINK") + md.Link(ext.Uri, ext.Uri) + md.Paragraph(md.Blockquote("Author: "+post.Author))
 }
 
-func renderImagePost(post *zenaov1.ImagePost) string {
-	common := post.Common
-	return md.H3("POST KIND: IMAGE") + md.Image("image", post.ImageUri) + md.Paragraph(post.Description) + md.Paragraph(md.Blockquote("Author: "+common.Author))
+func renderImagePost(post *feedsv1.Post, ext *feedsv1.ImagePost) string {
+	return md.H3("POST KIND: IMAGE") + md.Image("image", ext.ImageUri) + md.Paragraph(ext.Description) + md.Paragraph(md.Blockquote("Author: "+post.Author))
 }
 
-func renderVideoPost(post *zenaov1.VideoPost) string {
-	common := post.Common
-	return md.H3("POST KIND: VIDEO") + md.Link(post.VideoUri, post.VideoUri) + md.Image("video thumbnail", post.ThumbnailImageUri) + md.Paragraph(post.Description) + md.Paragraph(md.Blockquote("Author: "+common.Author))
+func renderVideoPost(post *feedsv1.Post, ext *feedsv1.VideoPost) string {
+	return md.H3("POST KIND: VIDEO") + md.Link(ext.VideoUri, ext.VideoUri) + md.Image("video thumbnail", ext.ThumbnailImageUri) + md.Paragraph(ext.Description) + md.Paragraph(md.Blockquote("Author: "+post.Author))
 }
