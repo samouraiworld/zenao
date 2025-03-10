@@ -1,5 +1,4 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { EventInfo } from "./event-info";
 import { imageWidth } from "./constants";
@@ -7,8 +6,6 @@ import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { userOptions } from "@/lib/queries/user";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 
 type Props = {
@@ -39,7 +36,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventPage({ params }: Props) {
   const p = await params;
-  const { getToken, userId } = await auth();
   const queryClient = getQueryClient();
 
   const eventData = await queryClient.fetchQuery(eventOptions(p.id));
@@ -47,17 +43,12 @@ export default async function EventPage({ params }: Props) {
     void queryClient.prefetchQuery(userOptions(eventData.creator));
   }
 
-  const address = await queryClient.fetchQuery(
-    userAddressOptions(getToken, userId),
-  );
-  void queryClient.prefetchQuery(eventUserRoles(p.id, address));
-
   return (
     <ScreenContainer
       background={{ src: eventData.imageUri, width: imageWidth }}
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventInfo id={p.id} userId={userId} />
+        <EventInfo id={p.id} />
       </HydrationBoundary>
     </ScreenContainer>
   );
