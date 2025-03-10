@@ -6,6 +6,7 @@ import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { userOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
@@ -32,10 +33,15 @@ export default async function EventPage({ params }: Props) {
   const p = await params;
   const { getToken, userId } = await auth();
   const queryClient = getQueryClient();
+
+  const eventData = await queryClient.fetchQuery(eventOptions(p.id));
+  if (eventData) {
+    void queryClient.prefetchQuery(userOptions(eventData.creator));
+  }
+
   const address = await queryClient.fetchQuery(
     userAddressOptions(getToken, userId),
   );
-  const eventData = await queryClient.fetchQuery(eventOptions(p.id));
   void queryClient.prefetchQuery(eventUserRoles(p.id, address));
 
   return (
