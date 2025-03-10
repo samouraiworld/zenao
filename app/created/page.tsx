@@ -1,14 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
-import React from "react";
 import { getTranslations } from "next-intl/server";
 import { getQueryClient } from "@/lib/get-query-client";
 import {
   ScreenContainer,
   ScreenContainerCentered,
-} from "@/components/layout/ScreenContainer";
+} from "@/components/layout/screen-container";
 import { eventsByCreatorList } from "@/lib/queries/events-list";
 import { zenaoClient } from "@/app/zenao-client";
-import { EventsListLayout } from "@/components/layout/EventsListLayout";
+import { EventsListContainer } from "@/components/layout/events-list-container";
 
 export default async function CreatedPage() {
   const { getToken } = await auth();
@@ -40,7 +39,7 @@ export default async function CreatedPage() {
 
   return (
     <ScreenContainer>
-      <EventsListLayout upcoming={upcoming} past={past} title={t("title")} />
+      <EventsListContainer upcoming={upcoming} past={past} title={t("title")} />
     </ScreenContainer>
   );
 }

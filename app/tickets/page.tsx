@@ -4,10 +4,10 @@ import { getQueryClient } from "@/lib/get-query-client";
 import {
   ScreenContainer,
   ScreenContainerCentered,
-} from "@/components/layout/ScreenContainer";
+} from "@/components/layout/screen-container";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { zenaoClient } from "@/app/zenao-client";
-import { EventsListLayout } from "@/components/layout/EventsListLayout";
+import { EventsListContainer } from "@/components/layout/events-list-container";
 
 export default async function TicketsPage() {
   const { getToken } = await auth();
@@ -37,7 +37,7 @@ export default async function TicketsPage() {
 
   return (
     <ScreenContainer>
-      <EventsListLayout
+      <EventsListContainer
         upcoming={upcoming}
         past={past}
         title={t("title")}

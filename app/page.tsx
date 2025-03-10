@@ -3,10 +3,10 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
-import { SmallText } from "@/components/texts/SmallText";
-import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import { ScreenContainerCentered } from "@/components/layout/screen-container";
+import { ExtraLargeText } from "@/components/texts/extra-large-text";
+import { SmallText } from "@/components/texts/small-text";
+import { ButtonWithChildren } from "@/components/buttons/button-with-children";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -22,9 +22,9 @@ export default function Home() {
           priority
           className="mb-5 mt-5"
         />
-        <VeryLargeText className="w-[200px] text-center">
+        <ExtraLargeText className="w-[200px] text-center">
           {t("main-text")}
-        </VeryLargeText>
+        </ExtraLargeText>
         <SmallText className="my-10 w-[280px] text-center" variant="secondary">
           {t("secondary-text")}
         </SmallText>

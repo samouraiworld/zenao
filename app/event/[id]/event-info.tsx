@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
@@ -9,13 +9,12 @@ import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { ParticipateForm } from "./ParticipateForm";
+import { ParticipateForm } from "./participate-form";
 import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Text } from "@/components/texts/DefaultText";
 import { SmallText } from "@/components/texts/SmallText";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
@@ -29,13 +28,14 @@ import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { Avatar } from "@/components/common/Avatar";
+import { ExtraLargeText } from "@/components/texts/extra-large-text";
 
 interface EventSectionProps {
   title: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
-const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
+function EventSection({ title, children }: EventSectionProps) {
   return (
     <div className="flex flex-col">
       <Text className="font-semibold">{title}</Text>
@@ -43,7 +43,7 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
       {children && children}
     </div>
   );
-};
+}
 
 export function EventInfo({
   id,
@@ -95,7 +95,7 @@ export function EventInfo({
   }
 
   const t = useTranslations("event");
-  const [loading, setLoading] = React.useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleParticipateSuccess = useCallback(async () => {
     const opts = eventUserRoles(id, address);
@@ -177,7 +177,7 @@ export function EventInfo({
         )}
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
-        <VeryLargeText className="mb-7">{data.title}</VeryLargeText>
+        <ExtraLargeText className="mb-7">{data.title}</ExtraLargeText>
         <div className="flex flex-row gap-4 items-center">
           <Calendar width={iconSize} height={iconSize} />
           <div className="flex flex-col">

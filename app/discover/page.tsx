@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { getQueryClient } from "@/lib/get-query-client";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { ScreenContainer } from "@/components/layout/screen-container";
 import { eventsList } from "@/lib/queries/events-list";
-import { EventsListLayout } from "@/components/layout/EventsListLayout";
+import { EventsListContainer } from "@/components/layout/events-list-container";
 
 export const revalidate = 60;
 
@@ -17,7 +17,7 @@ export default async function DiscoverPage() {
 
   return (
     <ScreenContainer>
-      <EventsListLayout
+      <EventsListContainer
         upcoming={upcoming}
         past={past}
         title={t("title")}
