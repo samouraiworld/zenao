@@ -15,12 +15,14 @@ type Feed struct {
 }
 
 var (
-	id    seqid.ID
-	posts *avl.Tree // local_post_id -> Post
-	feeds *avl.Tree // slug -> Feed
+	id        seqid.ID
+	reactions *avl.Tree // post_id:icon -> string
+	posts     *avl.Tree // local_post_id -> Post
+	feeds     *avl.Tree // slug -> Feed
 )
 
 func init() {
+	reactions = avl.NewTree()
 	posts = avl.NewTree()
 	feeds = avl.NewTree()
 }
@@ -45,18 +47,21 @@ func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string 
 
 // XXX: do a registry by user & one by parentID ?
 // XXX: handle flagged posts
-func GetFeedPosts(feedId string, offset uint32, limit uint32) []*feedsv1.Post {
+func GetFeedPosts(feedId string, offset uint32, limit uint32, user string) []*feedsv1.PostView {
 	if feedId == "" {
 		panic("feedId is empty")
 	}
-	var res []*feedsv1.Post
+	var res []*feedsv1.PostView
 	i := 0
 	start := feedId + ":"
 	end := feedId + ";"
 	posts.Iterate(start, end, func(key string, value interface{}) bool {
-		post := value.(*feedsv1.Post)
 		if i >= int(offset) {
-			res = append(res, post)
+			postView := &feedsv1.PostView{
+				Post:      value.(*feedsv1.Post),
+				Reactions: GetPostReactions(key, user),
+			}
+			res = append(res, postView)
 		}
 		i++
 		if i >= int(offset+limit) {

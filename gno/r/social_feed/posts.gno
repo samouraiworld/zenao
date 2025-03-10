@@ -59,3 +59,48 @@ func EditPost(localPostId string, newPost *feedsv1.Post) {
 	}
 	posts.Set(localPostId, newPost)
 }
+
+func ReactPost(localPostId string, icon string) {
+	caller := std.PreviousRealm().Address()
+	reactId := localPostId + ":" + icon
+
+	var reacts []string
+	reactRaw, ok := reactions.Get(reactId)
+	if !ok {
+		reacts = []string{caller.String()}
+	} else {
+		reacts = reactRaw.([]string)
+		for i, v := range reacts {
+			if v == caller.String() {
+				reacts = append(reacts[:i], reacts[i+1:]...)
+				reactions.Set(reactId, reacts)
+				return
+			}
+		}
+		reacts = append(reacts, caller.String())
+	}
+	reactions.Set(reactId, reacts)
+}
+
+func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
+	var res []*feedsv1.ReactionView
+	start := localPostId + ":"
+	end := localPostId + ";"
+	reactions.Iterate(start, end, func(key string, value interface{}) bool {
+		react := &feedsv1.ReactionView{
+			Icon:         key[len(localPostId)+1:],
+			Count:        uint32(len(value.([]string))),
+			UserHasVoted: false,
+		}
+		for _, v := range value.([]string) {
+			if v == user {
+				react.UserHasVoted = true
+				break
+			}
+		}
+		res = append(res, react)
+		return false
+	})
+	return res
+
+}
