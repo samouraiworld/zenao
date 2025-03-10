@@ -2,6 +2,7 @@ package social_feed
 
 import (
 	"std"
+	"strings"
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/seqid"
@@ -47,7 +48,7 @@ func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string 
 
 // XXX: do a registry by user & one by parentID ?
 // XXX: handle flagged posts
-func GetFeedPosts(feedId string, offset uint32, limit uint32, user string) []*feedsv1.PostView {
+func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user string) []*feedsv1.PostView {
 	if feedId == "" {
 		panic("feedId is empty")
 	}
@@ -55,10 +56,17 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, user string) []*fe
 	i := 0
 	start := feedId + ":"
 	end := feedId + ";"
+	tagsSplit := strings.Split(tags, ";")
 	posts.Iterate(start, end, func(key string, value interface{}) bool {
+		post := value.(*feedsv1.Post)
+		for _, tag := range tagsSplit {
+			if !hasTag(post.Tags, tag) {
+				return false
+			}
+		}
 		if i >= int(offset) {
 			postView := &feedsv1.PostView{
-				Post:      value.(*feedsv1.Post),
+				Post:      post,
 				Reactions: GetPostReactions(key, user),
 			}
 			res = append(res, postView)
@@ -70,4 +78,13 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, user string) []*fe
 		return false
 	})
 	return res
+}
+
+func hasTag(tags []string, tag string) bool {
+	for _, t := range tags {
+		if t == tag {
+			return true
+		}
+	}
+	return false
 }
