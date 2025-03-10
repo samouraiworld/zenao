@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import {
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
@@ -62,14 +58,11 @@ export function EventInfo({
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+  const { data: host } = useSuspenseQuery(userOptions(data.creator));
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
   const queryClient = useQueryClient();
-  const { data: host } = useQuery({
-    ...userOptions(data.creator),
-    enabled: !!data.creator,
-  });
 
   // Correctly reconstruct location object
   let location: EventFormSchemaType["location"] = {
