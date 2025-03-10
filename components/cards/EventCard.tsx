@@ -66,7 +66,7 @@ export function EventCard({ evt }: { evt: EventInfo }) {
                   width={80}
                   height={80}
                   alt="Event presentation"
-                  className="object-cover rounded-xl"
+                  className="object-cover rounded-xl w-full h-full"
                   loader={web3ImgLoader}
                 />
               </div>
