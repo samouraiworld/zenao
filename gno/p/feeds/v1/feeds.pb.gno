@@ -23,7 +23,15 @@ type LinkPost struct {
 }
 
 type ImagePost struct {
+	Title       string
 	Description string
+	ImageUri    string
+}
+
+type AudioPost struct {
+	Title       string
+	Description string
+	AudioUri    string
 	ImageUri    string
 }
 

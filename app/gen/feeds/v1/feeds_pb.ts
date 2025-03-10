@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file feeds/v1/feeds.proto.
  */
 export const file_feeds_v1_feeds: GenFile = /*@__PURE__*/
-  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSIzCglJbWFnZVBvc3QSEwoLZGVzY3JpcHRpb24YASABKAkSEQoJaW1hZ2VfdXJpGAIgASgJIlAKCVZpZGVvUG9zdBITCgtkZXNjcmlwdGlvbhgBIAEoCRIRCgl2aWRlb191cmkYAiABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgDIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIuUCCgRQb3N0Eg4KBmF1dGhvchgCIAEoCRISCgpwYXJlbnRfdXJpGAMgASgJEiEKA2xvYxgEIAEoCzIULmZlZWRzLnYxLlBvc3RHZW9Mb2MSEgoKY3JlYXRlZF9hdBgFIAEoAxISCgp1cGRhdGVkX2F0GAYgASgDEhIKCmRlbGV0ZWRfYXQYByABKAMSDAoEdGFncxgIIAMoCRIqCghzdGFuZGFyZBgJIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCiABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYCyABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGAwgASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDSABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIAEIGCgRwb3N0IlMKCFBvc3RWaWV3EhwKBHBvc3QYASABKAsyDi5mZWVkcy52MS5Qb3N0EikKCXJlYWN0aW9ucxgCIAMoCzIWLmZlZWRzLnYxLlJlYWN0aW9uVmlldyJDCgxSZWFjdGlvblZpZXcSDAoEaWNvbhgBIAEoCRINCgVjb3VudBgCIAEoDRIWCg51c2VyX2hhc192b3RlZBgDIAEoCEI5WjdnaXRodWIuY29tL3NhbW91cmFpd29ybGQvemVuYW8vYmFja2VuZC9mZWVkcy92MTtmZWVkc3YxYgZwcm90bzM");
+  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIlAKCVZpZGVvUG9zdBITCgtkZXNjcmlwdGlvbhgBIAEoCRIRCgl2aWRlb191cmkYAiABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgDIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIosDCgRQb3N0Eg4KBmF1dGhvchgCIAEoCRISCgpwYXJlbnRfdXJpGAMgASgJEiEKA2xvYxgEIAEoCzIULmZlZWRzLnYxLlBvc3RHZW9Mb2MSEgoKY3JlYXRlZF9hdBgFIAEoAxISCgp1cGRhdGVkX2F0GAYgASgDEhIKCmRlbGV0ZWRfYXQYByABKAMSDAoEdGFncxgIIAMoCRIqCghzdGFuZGFyZBgJIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCiABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYCyABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGAwgASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDSABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgOIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiUwoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSKQoJcmVhY3Rpb25zGAIgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw");
 
 /**
  * @generated from message feeds.v1.PostGeoLoc
@@ -165,12 +165,17 @@ export const LinkPostSchema: GenMessage<LinkPost, LinkPostJson> = /*@__PURE__*/
  */
 export type ImagePost = Message<"feeds.v1.ImagePost"> & {
   /**
-   * @generated from field: string description = 1;
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 2;
    */
   description: string;
 
   /**
-   * @generated from field: string image_uri = 2;
+   * @generated from field: string image_uri = 3;
    */
   imageUri: string;
 };
@@ -180,12 +185,17 @@ export type ImagePost = Message<"feeds.v1.ImagePost"> & {
  */
 export type ImagePostJson = {
   /**
-   * @generated from field: string description = 1;
+   * @generated from field: string title = 1;
+   */
+  title?: string;
+
+  /**
+   * @generated from field: string description = 2;
    */
   description?: string;
 
   /**
-   * @generated from field: string image_uri = 2;
+   * @generated from field: string image_uri = 3;
    */
   imageUri?: string;
 };
@@ -196,6 +206,63 @@ export type ImagePostJson = {
  */
 export const ImagePostSchema: GenMessage<ImagePost, ImagePostJson> = /*@__PURE__*/
   messageDesc(file_feeds_v1_feeds, 4);
+
+/**
+ * @generated from message feeds.v1.AudioPost
+ */
+export type AudioPost = Message<"feeds.v1.AudioPost"> & {
+  /**
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string audio_uri = 3;
+   */
+  audioUri: string;
+
+  /**
+   * @generated from field: string image_uri = 4;
+   */
+  imageUri: string;
+};
+
+/**
+ * @generated from message feeds.v1.AudioPost
+ */
+export type AudioPostJson = {
+  /**
+   * @generated from field: string title = 1;
+   */
+  title?: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description?: string;
+
+  /**
+   * @generated from field: string audio_uri = 3;
+   */
+  audioUri?: string;
+
+  /**
+   * @generated from field: string image_uri = 4;
+   */
+  imageUri?: string;
+};
+
+/**
+ * Describes the message feeds.v1.AudioPost.
+ * Use `create(AudioPostSchema)` to create a new message.
+ */
+export const AudioPostSchema: GenMessage<AudioPost, AudioPostJson> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 5);
 
 /**
  * @generated from message feeds.v1.VideoPost
@@ -242,7 +309,7 @@ export type VideoPostJson = {
  * Use `create(VideoPostSchema)` to create a new message.
  */
 export const VideoPostSchema: GenMessage<VideoPost, VideoPostJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 5);
+  messageDesc(file_feeds_v1_feeds, 6);
 
 /**
  * @generated from message feeds.v1.Reaction
@@ -289,7 +356,7 @@ export type ReactionJson = {
  * Use `create(ReactionSchema)` to create a new message.
  */
 export const ReactionSchema: GenMessage<Reaction, ReactionJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 6);
+  messageDesc(file_feeds_v1_feeds, 7);
 
 /**
  * Only on local chaine from the related post
@@ -344,7 +411,7 @@ export type TipJson = {
  * Use `create(TipSchema)` to create a new message.
  */
 export const TipSchema: GenMessage<Tip, TipJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 7);
+  messageDesc(file_feeds_v1_feeds, 8);
 
 /**
  * @generated from message feeds.v1.Post
@@ -422,6 +489,12 @@ export type Post = Message<"feeds.v1.Post"> & {
      */
     value: VideoPost;
     case: "video";
+  } | {
+    /**
+     * @generated from field: feeds.v1.AudioPost audio = 14;
+     */
+    value: AudioPost;
+    case: "audio";
   } | { case: undefined; value?: undefined };
 };
 
@@ -492,6 +565,11 @@ export type PostJson = {
    * @generated from field: feeds.v1.VideoPost video = 13;
    */
   video?: VideoPostJson;
+
+  /**
+   * @generated from field: feeds.v1.AudioPost audio = 14;
+   */
+  audio?: AudioPostJson;
 };
 
 /**
@@ -499,7 +577,7 @@ export type PostJson = {
  * Use `create(PostSchema)` to create a new message.
  */
 export const PostSchema: GenMessage<Post, PostJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 8);
+  messageDesc(file_feeds_v1_feeds, 9);
 
 /**
  * @generated from message feeds.v1.PostView
@@ -536,7 +614,7 @@ export type PostViewJson = {
  * Use `create(PostViewSchema)` to create a new message.
  */
 export const PostViewSchema: GenMessage<PostView, PostViewJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 9);
+  messageDesc(file_feeds_v1_feeds, 10);
 
 /**
  * @generated from message feeds.v1.ReactionView
@@ -583,5 +661,5 @@ export type ReactionViewJson = {
  * Use `create(ReactionViewSchema)` to create a new message.
  */
 export const ReactionViewSchema: GenMessage<ReactionView, ReactionViewJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 10);
+  messageDesc(file_feeds_v1_feeds, 11);
 

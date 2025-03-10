@@ -112,6 +112,9 @@ func (l *LinkPost) FromJSON(node *json.Node) {
 func (i *ImagePost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if i.Title != "" {
+		fields["title"] = json.StringNode("", i.Title)
+	}
 	if i.Description != "" {
 		fields["description"] = json.StringNode("", i.Description)
 	}
@@ -126,11 +129,51 @@ func (i *ImagePost) FromJSON(node *json.Node) {
 	*i = ImagePost{}
 	fields := node.MustObject()
 
+	if val, ok := fields["title"]; ok {
+		i.Title = val.MustString()
+	}
 	if val, ok := fields["description"]; ok {
 		i.Description = val.MustString()
 	}
 	if val, ok := fields["imageUri"]; ok {
 		i.ImageUri = val.MustString()
+	}
+}
+
+func (a *AudioPost) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if a.Title != "" {
+		fields["title"] = json.StringNode("", a.Title)
+	}
+	if a.Description != "" {
+		fields["description"] = json.StringNode("", a.Description)
+	}
+	if a.AudioUri != "" {
+		fields["audioUri"] = json.StringNode("", a.AudioUri)
+	}
+	if a.ImageUri != "" {
+		fields["imageUri"] = json.StringNode("", a.ImageUri)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (a *AudioPost) FromJSON(node *json.Node) {
+	*a = AudioPost{}
+	fields := node.MustObject()
+
+	if val, ok := fields["title"]; ok {
+		a.Title = val.MustString()
+	}
+	if val, ok := fields["description"]; ok {
+		a.Description = val.MustString()
+	}
+	if val, ok := fields["audioUri"]; ok {
+		a.AudioUri = val.MustString()
+	}
+	if val, ok := fields["imageUri"]; ok {
+		a.ImageUri = val.MustString()
 	}
 }
 
@@ -271,6 +314,8 @@ func (p *Post) ToJSON() *json.Node {
 		fields["image"] = val.ToJSON()
 	case *VideoPost:
 		fields["video"] = val.ToJSON()
+	case *AudioPost:
+		fields["audio"] = val.ToJSON()
 	default:
 		panic(errors.New("unknown post variant"))
 	}
@@ -323,7 +368,7 @@ func (p *Post) FromJSON(node *json.Node) {
 		p.Tags = arr
 	}
 
-	variantFieldNames := []string{"standard", "article", "link", "image", "video"}
+	variantFieldNames := []string{"standard", "article", "link", "image", "video", "audio"}
 	var selectedVariant *json.Node
 	var selectedVariantName string
 	for _, variantName := range variantFieldNames {
@@ -352,6 +397,10 @@ func (p *Post) FromJSON(node *json.Node) {
 		p.Post = n
 	case "video":
 		n := &VideoPost{}
+		n.FromJSON(selectedVariant)
+		p.Post = n
+	case "audio":
+		n := &AudioPost{}
 		n.FromJSON(selectedVariant)
 		p.Post = n
 	default:

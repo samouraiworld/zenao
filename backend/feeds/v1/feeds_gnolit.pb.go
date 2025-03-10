@@ -72,11 +72,35 @@ func (i *ImagePost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("ImagePost{\n")
+	if i.Title != "" {
+		fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, i.Title)
+	}
 	if i.Description != "" {
 		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, i.Description)
 	}
 	if i.ImageUri != "" {
 		fmt.Fprintf(buf, "%s\tImageUri: %q,\n", linePrefix, i.ImageUri)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (a *AudioPost) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("AudioPost{\n")
+	if a.Title != "" {
+		fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, a.Title)
+	}
+	if a.Description != "" {
+		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, a.Description)
+	}
+	if a.AudioUri != "" {
+		fmt.Fprintf(buf, "%s\tAudioUri: %q,\n", linePrefix, a.AudioUri)
+	}
+	if a.ImageUri != "" {
+		fmt.Fprintf(buf, "%s\tImageUri: %q,\n", linePrefix, a.ImageUri)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -179,6 +203,8 @@ func (p *Post) GnoLiteral(typePrefix string, linePrefix string) string {
 		fmt.Fprintf(buf, "%s\tPost: &%s,\n", linePrefix, val.Image.GnoLiteral(typePrefix, linePrefix+"\t"))
 	case *Post_Video:
 		fmt.Fprintf(buf, "%s\tPost: &%s,\n", linePrefix, val.Video.GnoLiteral(typePrefix, linePrefix+"\t"))
+	case *Post_Audio:
+		fmt.Fprintf(buf, "%s\tPost: &%s,\n", linePrefix, val.Audio.GnoLiteral(typePrefix, linePrefix+"\t"))
 	default:
 		panic(errors.New("unknown post variant"))
 	}

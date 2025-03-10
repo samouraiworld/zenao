@@ -69,6 +69,7 @@ message Post {
     LinkPost link = 11;
     ImagePost image = 12;
     VideoPost video = 13;
+    AudioPost audio = 14;
   }
 }
 
