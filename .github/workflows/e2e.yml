@@ -52,7 +52,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.go-bin-path.outputs.PATH }}
-          key: ${{ runner.os }}-atlas-bin-c261f318ac25924555e63fdf005cc53de43fa5db
+          key: ${{ runner.os }}-atlas-bin2-c261f318ac25924555e63fdf005cc53de43fa5db
       - name: Install atlas
         if: steps.cache.outputs.cache-hit != 'true'
         run: make install-atlas
