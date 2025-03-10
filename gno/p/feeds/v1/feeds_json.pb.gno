@@ -234,9 +234,6 @@ func (t *Tip) FromJSON(node *json.Node) {
 func (p *Post) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if p.ChannelId != "" {
-		fields["channelId"] = json.StringNode("", p.ChannelId)
-	}
 	if p.Author != "" {
 		fields["author"] = json.StringNode("", p.Author)
 	}
@@ -285,9 +282,6 @@ func (p *Post) FromJSON(node *json.Node) {
 	*p = Post{}
 	fields := node.MustObject()
 
-	if val, ok := fields["channelId"]; ok {
-		p.ChannelId = val.MustString()
-	}
 	if val, ok := fields["author"]; ok {
 		p.Author = val.MustString()
 	}

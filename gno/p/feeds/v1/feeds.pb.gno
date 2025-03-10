@@ -46,7 +46,6 @@ type Tip struct {
 }
 
 type Post struct {
-	ChannelId string
 	Author    string
 	ParentUri string
 	Loc       *PostGeoLoc

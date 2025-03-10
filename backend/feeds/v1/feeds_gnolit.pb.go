@@ -141,9 +141,6 @@ func (p *Post) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("Post{\n")
-	if p.ChannelId != "" {
-		fmt.Fprintf(buf, "%s\tChannelId: %q,\n", linePrefix, p.ChannelId)
-	}
 	if p.Author != "" {
 		fmt.Fprintf(buf, "%s\tAuthor: %q,\n", linePrefix, p.Author)
 	}

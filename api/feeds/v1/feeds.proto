@@ -44,7 +44,6 @@ message Tip {
 }
 
 message Post {
-  string channel_id = 1;
   string author = 2;
   string parent_uri = 3;
   PostGeoLoc loc = 4;
