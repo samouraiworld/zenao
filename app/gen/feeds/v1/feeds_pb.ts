@@ -2,15 +2,15 @@
 // @generated from file feeds/v1/feeds.proto (package feeds.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
-import { enumDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
+import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
+import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file feeds/v1/feeds.proto.
  */
 export const file_feeds_v1_feeds: GenFile = /*@__PURE__*/
-  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIj8KBlBvc3RJRBIQCghsb2NhbF9pZBgBIAEoCRIPCgdmZWVkX2lkGAIgASgJEhIKCm5ldHdvcmtfaWQYAyABKAkiHwoMU3RhbmRhcmRQb3N0Eg8KB2NvbnRlbnQYASABKAkiXgoLQXJ0aWNsZVBvc3QSDQoFdGl0bGUYASABKAkSFAoMcHJldmlld190ZXh0GAIgASgJEhkKEXByZXZpZXdfaW1hZ2VfdXJpGAMgASgJEg8KB2NvbnRlbnQYBCABKAkiFwoITGlua1Bvc3QSCwoDdXJpGAEgASgJIjMKCUltYWdlUG9zdBITCgtkZXNjcmlwdGlvbhgBIAEoCRIRCglpbWFnZV91cmkYAiABKAkiUAoJVmlkZW9Qb3N0EhMKC2Rlc2NyaXB0aW9uGAEgASgJEhEKCXZpZGVvX3VyaRgCIAEoCRIbChN0aHVtYm5haWxfaW1hZ2VfdXJpGAMgASgJIkwKCFJlYWN0aW9uEiEKB3Bvc3RfaWQYASABKAsyEC5mZWVkcy52MS5Qb3N0SUQSDAoEaWNvbhgCIAEoCRIPCgd1c2VyX2lkGAMgASgJIjsKA1RpcBIVCg1wb3N0X2xvY2FsX2lkGAEgASgJEg0KBWRlbm9tGAMgASgJEg4KBmFtb3VudBgEIAEoAyKKAwoEUG9zdBISCgpjaGFubmVsX2lkGAEgASgJEg4KBmF1dGhvchgCIAEoCRIjCglwYXJlbnRfaWQYAyABKAsyEC5mZWVkcy52MS5Qb3N0SUQSIQoDbG9jGAQgASgLMhQuZmVlZHMudjEuUG9zdEdlb0xvYxISCgpjcmVhdGVkX2F0GAUgASgDEhIKCnVwZGF0ZWRfYXQYBiABKAMSEgoKZGVsZXRlZF9hdBgHIAEoAxIMCgR0YWdzGAggAygJEioKCHN0YW5kYXJkGAkgASgLMhYuZmVlZHMudjEuU3RhbmRhcmRQb3N0SAASKAoHYXJ0aWNsZRgKIAEoCzIVLmZlZWRzLnYxLkFydGljbGVQb3N0SAASIgoEbGluaxgLIAEoCzISLmZlZWRzLnYxLkxpbmtQb3N0SAASJAoFaW1hZ2UYDCABKAsyEy5mZWVkcy52MS5JbWFnZVBvc3RIABIkCgV2aWRlbxgNIAEoCzITLmZlZWRzLnYxLlZpZGVvUG9zdEgAQgYKBHBvc3QqfgoMTGlua1Bvc3RLaW5kEh4KGkxJTktfUE9TVF9LSU5EX1VOU1BFQ0lGSUVEEAASFwoTTElOS19QT1NUX0tJTkRfUE9MTBABEhgKFExJTktfUE9TVF9LSU5EX0VWRU5UEAISGwoXTElOS19QT1NUX0tJTkRfUFJPUE9TQUwQA0I5WjdnaXRodWIuY29tL3NhbW91cmFpd29ybGQvemVuYW8vYmFja2VuZC9mZWVkcy92MTtmZWVkc3YxYgZwcm90bzM");
+  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIlAKCVZpZGVvUG9zdBITCgtkZXNjcmlwdGlvbhgBIAEoCRIRCgl2aWRlb191cmkYAiABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgDIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIosDCgRQb3N0Eg4KBmF1dGhvchgCIAEoCRISCgpwYXJlbnRfdXJpGAMgASgJEiEKA2xvYxgEIAEoCzIULmZlZWRzLnYxLlBvc3RHZW9Mb2MSEgoKY3JlYXRlZF9hdBgFIAEoAxISCgp1cGRhdGVkX2F0GAYgASgDEhIKCmRlbGV0ZWRfYXQYByABKAMSDAoEdGFncxgIIAMoCRIqCghzdGFuZGFyZBgJIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCiABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYCyABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGAwgASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDSABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgOIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiUwoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSKQoJcmVhY3Rpb25zGAIgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw");
 
 /**
  * @generated from message feeds.v1.PostGeoLoc
@@ -50,61 +50,6 @@ export const PostGeoLocSchema: GenMessage<PostGeoLoc, PostGeoLocJson> = /*@__PUR
   messageDesc(file_feeds_v1_feeds, 0);
 
 /**
- * @generated from message feeds.v1.PostID
- */
-export type PostID = Message<"feeds.v1.PostID"> & {
-  /**
-   * indexed by feed_id e.g "feed_id:local_post_id"
-   *
-   * @generated from field: string local_id = 1;
-   */
-  localId: string;
-
-  /**
-   * mainly a contract of social feed factory
-   *
-   * @generated from field: string feed_id = 2;
-   */
-  feedId: string;
-
-  /**
-   * @generated from field: string network_id = 3;
-   */
-  networkId: string;
-};
-
-/**
- * @generated from message feeds.v1.PostID
- */
-export type PostIDJson = {
-  /**
-   * indexed by feed_id e.g "feed_id:local_post_id"
-   *
-   * @generated from field: string local_id = 1;
-   */
-  localId?: string;
-
-  /**
-   * mainly a contract of social feed factory
-   *
-   * @generated from field: string feed_id = 2;
-   */
-  feedId?: string;
-
-  /**
-   * @generated from field: string network_id = 3;
-   */
-  networkId?: string;
-};
-
-/**
- * Describes the message feeds.v1.PostID.
- * Use `create(PostIDSchema)` to create a new message.
- */
-export const PostIDSchema: GenMessage<PostID, PostIDJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 1);
-
-/**
  * @generated from message feeds.v1.StandardPost
  */
 export type StandardPost = Message<"feeds.v1.StandardPost"> & {
@@ -129,7 +74,7 @@ export type StandardPostJson = {
  * Use `create(StandardPostSchema)` to create a new message.
  */
 export const StandardPostSchema: GenMessage<StandardPost, StandardPostJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 2);
+  messageDesc(file_feeds_v1_feeds, 1);
 
 /**
  * @generated from message feeds.v1.ArticlePost
@@ -186,7 +131,7 @@ export type ArticlePostJson = {
  * Use `create(ArticlePostSchema)` to create a new message.
  */
 export const ArticlePostSchema: GenMessage<ArticlePost, ArticlePostJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 3);
+  messageDesc(file_feeds_v1_feeds, 2);
 
 /**
  * @generated from message feeds.v1.LinkPost
@@ -213,19 +158,24 @@ export type LinkPostJson = {
  * Use `create(LinkPostSchema)` to create a new message.
  */
 export const LinkPostSchema: GenMessage<LinkPost, LinkPostJson> = /*@__PURE__*/
-  messageDesc(file_feeds_v1_feeds, 4);
+  messageDesc(file_feeds_v1_feeds, 3);
 
 /**
  * @generated from message feeds.v1.ImagePost
  */
 export type ImagePost = Message<"feeds.v1.ImagePost"> & {
   /**
-   * @generated from field: string description = 1;
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 2;
    */
   description: string;
 
   /**
-   * @generated from field: string image_uri = 2;
+   * @generated from field: string image_uri = 3;
    */
   imageUri: string;
 };
@@ -235,12 +185,17 @@ export type ImagePost = Message<"feeds.v1.ImagePost"> & {
  */
 export type ImagePostJson = {
   /**
-   * @generated from field: string description = 1;
+   * @generated from field: string title = 1;
+   */
+  title?: string;
+
+  /**
+   * @generated from field: string description = 2;
    */
   description?: string;
 
   /**
-   * @generated from field: string image_uri = 2;
+   * @generated from field: string image_uri = 3;
    */
   imageUri?: string;
 };
@@ -250,6 +205,63 @@ export type ImagePostJson = {
  * Use `create(ImagePostSchema)` to create a new message.
  */
 export const ImagePostSchema: GenMessage<ImagePost, ImagePostJson> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 4);
+
+/**
+ * @generated from message feeds.v1.AudioPost
+ */
+export type AudioPost = Message<"feeds.v1.AudioPost"> & {
+  /**
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string audio_uri = 3;
+   */
+  audioUri: string;
+
+  /**
+   * @generated from field: string image_uri = 4;
+   */
+  imageUri: string;
+};
+
+/**
+ * @generated from message feeds.v1.AudioPost
+ */
+export type AudioPostJson = {
+  /**
+   * @generated from field: string title = 1;
+   */
+  title?: string;
+
+  /**
+   * @generated from field: string description = 2;
+   */
+  description?: string;
+
+  /**
+   * @generated from field: string audio_uri = 3;
+   */
+  audioUri?: string;
+
+  /**
+   * @generated from field: string image_uri = 4;
+   */
+  imageUri?: string;
+};
+
+/**
+ * Describes the message feeds.v1.AudioPost.
+ * Use `create(AudioPostSchema)` to create a new message.
+ */
+export const AudioPostSchema: GenMessage<AudioPost, AudioPostJson> = /*@__PURE__*/
   messageDesc(file_feeds_v1_feeds, 5);
 
 /**
@@ -304,9 +316,9 @@ export const VideoPostSchema: GenMessage<VideoPost, VideoPostJson> = /*@__PURE__
  */
 export type Reaction = Message<"feeds.v1.Reaction"> & {
   /**
-   * @generated from field: feeds.v1.PostID post_id = 1;
+   * @generated from field: string post_uri = 1;
    */
-  postId?: PostID;
+  postUri: string;
 
   /**
    * @generated from field: string icon = 2;
@@ -324,9 +336,9 @@ export type Reaction = Message<"feeds.v1.Reaction"> & {
  */
 export type ReactionJson = {
   /**
-   * @generated from field: feeds.v1.PostID post_id = 1;
+   * @generated from field: string post_uri = 1;
    */
-  postId?: PostIDJson;
+  postUri?: string;
 
   /**
    * @generated from field: string icon = 2;
@@ -406,19 +418,14 @@ export const TipSchema: GenMessage<Tip, TipJson> = /*@__PURE__*/
  */
 export type Post = Message<"feeds.v1.Post"> & {
   /**
-   * @generated from field: string channel_id = 1;
-   */
-  channelId: string;
-
-  /**
    * @generated from field: string author = 2;
    */
   author: string;
 
   /**
-   * @generated from field: feeds.v1.PostID parent_id = 3;
+   * @generated from field: string parent_uri = 3;
    */
-  parentId?: PostID;
+  parentUri: string;
 
   /**
    * XXX: map any extentions = 10;
@@ -482,6 +489,12 @@ export type Post = Message<"feeds.v1.Post"> & {
      */
     value: VideoPost;
     case: "video";
+  } | {
+    /**
+     * @generated from field: feeds.v1.AudioPost audio = 14;
+     */
+    value: AudioPost;
+    case: "audio";
   } | { case: undefined; value?: undefined };
 };
 
@@ -490,19 +503,14 @@ export type Post = Message<"feeds.v1.Post"> & {
  */
 export type PostJson = {
   /**
-   * @generated from field: string channel_id = 1;
-   */
-  channelId?: string;
-
-  /**
    * @generated from field: string author = 2;
    */
   author?: string;
 
   /**
-   * @generated from field: feeds.v1.PostID parent_id = 3;
+   * @generated from field: string parent_uri = 3;
    */
-  parentId?: PostIDJson;
+  parentUri?: string;
 
   /**
    * XXX: map any extentions = 10;
@@ -557,6 +565,11 @@ export type PostJson = {
    * @generated from field: feeds.v1.VideoPost video = 13;
    */
   video?: VideoPostJson;
+
+  /**
+   * @generated from field: feeds.v1.AudioPost audio = 14;
+   */
+  audio?: AudioPostJson;
 };
 
 /**
@@ -567,38 +580,86 @@ export const PostSchema: GenMessage<Post, PostJson> = /*@__PURE__*/
   messageDesc(file_feeds_v1_feeds, 9);
 
 /**
- * @generated from enum feeds.v1.LinkPostKind
+ * @generated from message feeds.v1.PostView
  */
-export enum LinkPostKind {
+export type PostView = Message<"feeds.v1.PostView"> & {
   /**
-   * @generated from enum value: LINK_POST_KIND_UNSPECIFIED = 0;
+   * @generated from field: feeds.v1.Post post = 1;
    */
-  UNSPECIFIED = 0,
+  post?: Post;
 
   /**
-   * @generated from enum value: LINK_POST_KIND_POLL = 1;
+   * @generated from field: repeated feeds.v1.ReactionView reactions = 2;
    */
-  POLL = 1,
-
-  /**
-   * @generated from enum value: LINK_POST_KIND_EVENT = 2;
-   */
-  EVENT = 2,
-
-  /**
-   * @generated from enum value: LINK_POST_KIND_PROPOSAL = 3;
-   */
-  PROPOSAL = 3,
-}
+  reactions: ReactionView[];
+};
 
 /**
- * @generated from enum feeds.v1.LinkPostKind
+ * @generated from message feeds.v1.PostView
  */
-export type LinkPostKindJson = "LINK_POST_KIND_UNSPECIFIED" | "LINK_POST_KIND_POLL" | "LINK_POST_KIND_EVENT" | "LINK_POST_KIND_PROPOSAL";
+export type PostViewJson = {
+  /**
+   * @generated from field: feeds.v1.Post post = 1;
+   */
+  post?: PostJson;
+
+  /**
+   * @generated from field: repeated feeds.v1.ReactionView reactions = 2;
+   */
+  reactions?: ReactionViewJson[];
+};
 
 /**
- * Describes the enum feeds.v1.LinkPostKind.
+ * Describes the message feeds.v1.PostView.
+ * Use `create(PostViewSchema)` to create a new message.
  */
-export const LinkPostKindSchema: GenEnum<LinkPostKind, LinkPostKindJson> = /*@__PURE__*/
-  enumDesc(file_feeds_v1_feeds, 0);
+export const PostViewSchema: GenMessage<PostView, PostViewJson> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 10);
+
+/**
+ * @generated from message feeds.v1.ReactionView
+ */
+export type ReactionView = Message<"feeds.v1.ReactionView"> & {
+  /**
+   * @generated from field: string icon = 1;
+   */
+  icon: string;
+
+  /**
+   * @generated from field: uint32 count = 2;
+   */
+  count: number;
+
+  /**
+   * @generated from field: bool user_has_voted = 3;
+   */
+  userHasVoted: boolean;
+};
+
+/**
+ * @generated from message feeds.v1.ReactionView
+ */
+export type ReactionViewJson = {
+  /**
+   * @generated from field: string icon = 1;
+   */
+  icon?: string;
+
+  /**
+   * @generated from field: uint32 count = 2;
+   */
+  count?: number;
+
+  /**
+   * @generated from field: bool user_has_voted = 3;
+   */
+  userHasVoted?: boolean;
+};
+
+/**
+ * Describes the message feeds.v1.ReactionView.
+ * Use `create(ReactionViewSchema)` to create a new message.
+ */
+export const ReactionViewSchema: GenMessage<ReactionView, ReactionViewJson> = /*@__PURE__*/
+  messageDesc(file_feeds_v1_feeds, 11);
 

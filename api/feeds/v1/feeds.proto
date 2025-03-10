@@ -3,22 +3,9 @@ syntax = "proto3";
 package feeds.v1;
 option go_package = "github.com/samouraiworld/zenao/backend/feeds/v1;feedsv1";
 
-enum LinkPostKind {
-  LINK_POST_KIND_UNSPECIFIED = 0;
-  LINK_POST_KIND_POLL = 1;
-  LINK_POST_KIND_EVENT = 2;
-  LINK_POST_KIND_PROPOSAL = 3;
-}
-
 message PostGeoLoc {
   float lat = 2;
   float lng = 3;
-}
-
-message PostID {
-  string local_id = 1; // indexed by feed_id e.g "feed_id:local_post_id"
-  string feed_id = 2;  // mainly a contract of social feed factory
-  string network_id = 3;
 }
 
 message StandardPost { string content = 1; }
@@ -33,8 +20,16 @@ message ArticlePost {
 message LinkPost { string uri = 1; }
 
 message ImagePost {
-  string description = 1;
-  string image_uri = 2;
+  string title = 1;
+  string description = 2;
+  string image_uri = 3;
+}
+
+message AudioPost {
+  string title = 1;
+  string description = 2;
+  string audio_uri = 3;
+  string image_uri = 4;
 }
 
 message VideoPost {
@@ -44,7 +39,7 @@ message VideoPost {
 }
 
 message Reaction {
-  PostID post_id = 1;
+  string post_uri = 1;
   string icon = 2;
   string user_id = 3;
 }
@@ -57,9 +52,8 @@ message Tip {
 }
 
 message Post {
-  string channel_id = 1;
   string author = 2;
-  PostID parent_id = 3;
+  string parent_uri = 3;
   PostGeoLoc loc = 4;
   // XXX: map any extentions = 10;
 
@@ -75,5 +69,17 @@ message Post {
     LinkPost link = 11;
     ImagePost image = 12;
     VideoPost video = 13;
+    AudioPost audio = 14;
   }
+}
+
+message PostView {
+  Post post = 1;
+  repeated ReactionView reactions = 2;
+}
+
+message ReactionView {
+  string icon = 1;
+  uint32 count = 2;
+  bool user_has_voted = 3;
 }
