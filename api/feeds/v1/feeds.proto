@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package feeds.v1;
+option go_package = "github.com/samouraiworld/zenao/backend/feeds/v1;feedsv1";
+
+enum LinkPostKind {
+  LINK_POST_KIND_UNSPECIFIED = 0;
+  LINK_POST_KIND_POLL = 1;
+  LINK_POST_KIND_EVENT = 2;
+  LINK_POST_KIND_PROPOSAL = 3;
+}
+
+message PostGeoLoc {
+  float lat = 2;
+  float lng = 3;
+}
+
+message PostID {
+  string local_id = 1; // indexed by feed_id e.g "feed_id:local_post_id"
+  string feed_id = 2;  // mainly a contract of social feed factory
+  string network_id = 3;
+}
+
+message StandardPost { string content = 1; }
+
+message ArticlePost {
+  string title = 1;
+  string preview_text = 2;
+  string preview_image_uri = 3;
+  string content = 4;
+}
+
+message LinkPost { string uri = 1; }
+
+message ImagePost {
+  string description = 1;
+  string image_uri = 2;
+}
+
+message VideoPost {
+  string description = 1;
+  string video_uri = 2;
+  string thumbnail_image_uri = 3;
+}
+
+message Reaction {
+  PostID post_id = 1;
+  string icon = 2;
+  string user_id = 3;
+}
+
+// Only on local chaine from the related post
+message Tip {
+  string post_local_id = 1;
+  string denom = 3;
+  int64 amount = 4; // XXX: use string encoding?
+}
+
+message Post {
+  string channel_id = 1;
+  string author = 2;
+  PostID parent_id = 3;
+  PostGeoLoc loc = 4;
+  // XXX: map any extentions = 10;
+
+  int64 created_at = 5;
+  int64 updated_at = 6;
+  int64 deleted_at = 7; // if != 0 -> deleted
+
+  repeated string tags = 8;
+
+  oneof post {
+    StandardPost standard = 9;
+    ArticlePost article = 10;
+    LinkPost link = 11;
+    ImagePost image = 12;
+    VideoPost video = 13;
+  }
+}

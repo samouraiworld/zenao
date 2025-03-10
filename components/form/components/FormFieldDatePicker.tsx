@@ -2,6 +2,7 @@
 
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
+import { format as formatTZ } from "date-fns-tz";
 import { FieldValues, useController } from "react-hook-form";
 import { FormFieldProps } from "../types";
 import { Button } from "@/components/shadcn/button";
@@ -22,7 +23,7 @@ import {
 import { SmallText } from "@/components/texts/SmallText";
 
 export const FormFieldDatePicker = <T extends FieldValues>(
-  props: FormFieldProps<T, bigint>,
+  props: FormFieldProps<T, bigint> & { timeZone: string },
 ) => {
   const { field } = useController(props);
 
@@ -76,7 +77,13 @@ export const FormFieldDatePicker = <T extends FieldValues>(
                     )}
                   >
                     {field.value ? (
-                      format(formattedValue, "MM/dd/yyyy hh:mm aa")
+                      props.timeZone.length ? (
+                        formatTZ(formattedValue, "MM/dd/yyyy hh:mm aa zzz", {
+                          timeZone: props.timeZone,
+                        })
+                      ) : (
+                        format(formattedValue, "MM/dd/yyyy hh:mm aa zzz")
+                      )
                     ) : (
                       <SmallText variant="secondary">
                         {props.placeholder}

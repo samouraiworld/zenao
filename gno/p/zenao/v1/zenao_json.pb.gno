@@ -671,83 +671,9 @@ func (p *PostID) FromJSON(node *json.Node) {
 	}
 }
 
-func (p *PostCommon) ToJSON() *json.Node {
-	fields := map[string]*json.Node{}
-
-	if p.ChannelId != "" {
-		fields["channelId"] = json.StringNode("", p.ChannelId)
-	}
-	if p.Author != "" {
-		fields["author"] = json.StringNode("", p.Author)
-	}
-	if p.ParentId != nil {
-		fields["parentId"] = p.ParentId.ToJSON()
-	}
-	if p.Loc != nil {
-		fields["loc"] = p.Loc.ToJSON()
-	}
-	if p.CreatedAt != 0 {
-		fields["createdAt"] = json.StringNode("", strconv.FormatInt(p.CreatedAt, 10))
-	}
-	if p.UpdatedAt != 0 {
-		fields["updatedAt"] = json.StringNode("", strconv.FormatInt(p.UpdatedAt, 10))
-	}
-	if p.DeletedAt != 0 {
-		fields["deletedAt"] = json.StringNode("", strconv.FormatInt(p.DeletedAt, 10))
-	}
-
-	return json.ObjectNode("", fields)
-}
-
-func (p *PostCommon) FromJSON(node *json.Node) {
-	*p = PostCommon{}
-	fields := node.MustObject()
-
-	if val, ok := fields["channelId"]; ok {
-		p.ChannelId = val.MustString()
-	}
-	if val, ok := fields["author"]; ok {
-		p.Author = val.MustString()
-	}
-	if val, ok := fields["parentId"]; ok {
-		fv := &PostID{}
-		fv.FromJSON(val)
-		p.ParentId = fv
-	}
-	if val, ok := fields["loc"]; ok {
-		fv := &PostGeoLoc{}
-		fv.FromJSON(val)
-		p.Loc = fv
-	}
-	if val, ok := fields["createdAt"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		p.CreatedAt = fv
-	}
-	if val, ok := fields["updatedAt"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		p.UpdatedAt = fv
-	}
-	if val, ok := fields["deletedAt"]; ok {
-		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		p.DeletedAt = fv
-	}
-}
-
 func (s *StandardPost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if s.Common != nil {
-		fields["common"] = s.Common.ToJSON()
-	}
 	if s.Content != "" {
 		fields["content"] = json.StringNode("", s.Content)
 	}
@@ -759,11 +685,6 @@ func (s *StandardPost) FromJSON(node *json.Node) {
 	*s = StandardPost{}
 	fields := node.MustObject()
 
-	if val, ok := fields["common"]; ok {
-		fv := &PostCommon{}
-		fv.FromJSON(val)
-		s.Common = fv
-	}
 	if val, ok := fields["content"]; ok {
 		s.Content = val.MustString()
 	}
@@ -772,9 +693,6 @@ func (s *StandardPost) FromJSON(node *json.Node) {
 func (a *ArticlePost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if a.Common != nil {
-		fields["common"] = a.Common.ToJSON()
-	}
 	if a.Title != "" {
 		fields["title"] = json.StringNode("", a.Title)
 	}
@@ -795,11 +713,6 @@ func (a *ArticlePost) FromJSON(node *json.Node) {
 	*a = ArticlePost{}
 	fields := node.MustObject()
 
-	if val, ok := fields["common"]; ok {
-		fv := &PostCommon{}
-		fv.FromJSON(val)
-		a.Common = fv
-	}
 	if val, ok := fields["title"]; ok {
 		a.Title = val.MustString()
 	}
@@ -817,14 +730,8 @@ func (a *ArticlePost) FromJSON(node *json.Node) {
 func (l *LinkPost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if l.Common != nil {
-		fields["common"] = l.Common.ToJSON()
-	}
 	if l.Uri != "" {
 		fields["uri"] = json.StringNode("", l.Uri)
-	}
-	if l.EntityId != "" {
-		fields["entityId"] = json.StringNode("", l.EntityId)
 	}
 
 	return json.ObjectNode("", fields)
@@ -834,25 +741,14 @@ func (l *LinkPost) FromJSON(node *json.Node) {
 	*l = LinkPost{}
 	fields := node.MustObject()
 
-	if val, ok := fields["common"]; ok {
-		fv := &PostCommon{}
-		fv.FromJSON(val)
-		l.Common = fv
-	}
 	if val, ok := fields["uri"]; ok {
 		l.Uri = val.MustString()
-	}
-	if val, ok := fields["entityId"]; ok {
-		l.EntityId = val.MustString()
 	}
 }
 
 func (i *ImagePost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if i.Common != nil {
-		fields["common"] = i.Common.ToJSON()
-	}
 	if i.Description != "" {
 		fields["description"] = json.StringNode("", i.Description)
 	}
@@ -867,11 +763,6 @@ func (i *ImagePost) FromJSON(node *json.Node) {
 	*i = ImagePost{}
 	fields := node.MustObject()
 
-	if val, ok := fields["common"]; ok {
-		fv := &PostCommon{}
-		fv.FromJSON(val)
-		i.Common = fv
-	}
 	if val, ok := fields["description"]; ok {
 		i.Description = val.MustString()
 	}
@@ -883,9 +774,6 @@ func (i *ImagePost) FromJSON(node *json.Node) {
 func (v *VideoPost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if v.Common != nil {
-		fields["common"] = v.Common.ToJSON()
-	}
 	if v.Description != "" {
 		fields["description"] = json.StringNode("", v.Description)
 	}
@@ -903,11 +791,6 @@ func (v *VideoPost) FromJSON(node *json.Node) {
 	*v = VideoPost{}
 	fields := node.MustObject()
 
-	if val, ok := fields["common"]; ok {
-		fv := &PostCommon{}
-		fv.FromJSON(val)
-		v.Common = fv
-	}
 	if val, ok := fields["description"]; ok {
 		v.Description = val.MustString()
 	}
@@ -990,6 +873,28 @@ func (t *Tip) FromJSON(node *json.Node) {
 func (p *Post) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if p.ChannelId != "" {
+		fields["channelId"] = json.StringNode("", p.ChannelId)
+	}
+	if p.Author != "" {
+		fields["author"] = json.StringNode("", p.Author)
+	}
+	if p.ParentId != nil {
+		fields["parentId"] = p.ParentId.ToJSON()
+	}
+	if p.Loc != nil {
+		fields["loc"] = p.Loc.ToJSON()
+	}
+	if p.CreatedAt != 0 {
+		fields["createdAt"] = json.StringNode("", strconv.FormatInt(p.CreatedAt, 10))
+	}
+	if p.UpdatedAt != 0 {
+		fields["updatedAt"] = json.StringNode("", strconv.FormatInt(p.UpdatedAt, 10))
+	}
+	if p.DeletedAt != 0 {
+		fields["deletedAt"] = json.StringNode("", strconv.FormatInt(p.DeletedAt, 10))
+	}
+
 	switch val := p.Post.(type) {
 	case *StandardPost:
 		fields["standard"] = val.ToJSON()
@@ -1011,6 +916,44 @@ func (p *Post) ToJSON() *json.Node {
 func (p *Post) FromJSON(node *json.Node) {
 	*p = Post{}
 	fields := node.MustObject()
+
+	if val, ok := fields["channelId"]; ok {
+		p.ChannelId = val.MustString()
+	}
+	if val, ok := fields["author"]; ok {
+		p.Author = val.MustString()
+	}
+	if val, ok := fields["parentId"]; ok {
+		fv := &PostID{}
+		fv.FromJSON(val)
+		p.ParentId = fv
+	}
+	if val, ok := fields["loc"]; ok {
+		fv := &PostGeoLoc{}
+		fv.FromJSON(val)
+		p.Loc = fv
+	}
+	if val, ok := fields["createdAt"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		p.CreatedAt = fv
+	}
+	if val, ok := fields["updatedAt"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		p.UpdatedAt = fv
+	}
+	if val, ok := fields["deletedAt"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		p.DeletedAt = fv
+	}
 
 	variantFieldNames := []string{"standard", "article", "link", "image", "video"}
 	var selectedVariant *json.Node
