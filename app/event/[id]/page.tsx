@@ -15,6 +15,14 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+// enable ssg for all events
+export async function generateStaticParams() {
+  return [];
+}
+
+// revalidate every 60 seconds
+export const revalidate = 60;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
 
