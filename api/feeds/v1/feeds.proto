@@ -67,11 +67,13 @@ message Post {
   int64 updated_at = 6;
   int64 deleted_at = 7; // if != 0 -> deleted
 
+  repeated string tags = 8;
+
   oneof post {
-    StandardPost standard = 8;
-    ArticlePost article = 9;
-    LinkPost link = 10;
-    ImagePost image = 11;
-    VideoPost video = 12;
+    StandardPost standard = 9;
+    ArticlePost article = 10;
+    LinkPost link = 11;
+    ImagePost image = 12;
+    VideoPost video = 13;
   }
 }
