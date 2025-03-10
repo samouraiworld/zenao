@@ -24,7 +24,6 @@ import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { userOptions } from "@/lib/queries/user";
-import { Avatar, AvatarImage } from "@/components/shadcn/avatar";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { EventFormSchemaType } from "@/components/form/types";
@@ -33,6 +32,7 @@ import { GnowebButton } from "@/components/buttons/GnowebButton";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
+import { Avatar } from "@/components/common/Avatar";
 
 interface EventSectionProps {
   title: string;
@@ -176,9 +176,7 @@ export function EventInfo({
           <EventSection title={t("hosted-by")}>
             <Link href={`/profile/${data.creator}`}>
               <div className="flex flex-row items-center gap-2">
-                <Avatar className="h-5 w-5">
-                  <AvatarImage src={web2URL(host.avatarUri)} alt="avatar" />
-                </Avatar>
+                <Avatar uri={host.avatarUri} />
                 <SmallText>{host.displayName}</SmallText>
               </div>
             </Link>
