@@ -46,7 +46,7 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 };
 
 export function EventInfo({ id }: { id: string }) {
-  const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+  const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
