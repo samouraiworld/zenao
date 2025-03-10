@@ -36,7 +36,7 @@ export default async function EventPage({ params }: Props) {
 
   const eventData = await queryClient.fetchQuery(eventOptions(p.id));
   if (eventData) {
-    await queryClient.prefetchQuery(userOptions(eventData.creator));
+    void queryClient.prefetchQuery(userOptions(eventData.creator));
   }
 
   const address = await queryClient.fetchQuery(

@@ -5,9 +5,10 @@ import { Person, WithContext } from "schema-dts";
 import Image from "next/image";
 import { userOptions } from "@/lib/queries/user";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
-import { web2URL } from "@/lib/uris";
 import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
+import { web3ImgLoader } from "@/lib/web3-img-loader";
+import { Skeleton } from "@/components/shadcn/skeleton";
 
 export function ProfileInfo({ address }: { address: string }) {
   const { data } = useSuspenseQuery(userOptions(address));
@@ -32,14 +33,19 @@ export function ProfileInfo({ address }: { address: string }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
-        <Image
-          src={web2URL(data.avatarUri)}
-          width={330}
-          height={330}
-          alt="Event"
-          priority
-          className="flex w-full rounded-xl self-center"
-        />
+        {data.avatarUri ? (
+          <Image
+            src={data.avatarUri}
+            width={330}
+            height={330}
+            alt="Event"
+            priority
+            className="flex w-full rounded-xl self-center"
+            loader={web3ImgLoader}
+          />
+        ) : (
+          <Skeleton className="flex w-full rounded-xl self-center" />
+        )}
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
         <VeryLargeText className="mb-7">{data.displayName}</VeryLargeText>
