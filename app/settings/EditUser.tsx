@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
@@ -111,9 +112,16 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
         </div>
         <Separator className="mb-2" />
-        <Button asChild variant="destructive" type="button">
-          <SignOutButton />
-        </Button>
+        <div className="flex flex-row gap-2">
+          <Link href={`/profile/${user?.address}`}>
+            <Button variant="secondary" type="button">
+              Profile
+            </Button>
+          </Link>
+          <Button asChild variant="destructive" type="button">
+            <SignOutButton />
+          </Button>
+        </div>
       </form>
     </Form>
   );

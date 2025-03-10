@@ -9,6 +9,7 @@ import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import { GnowebButton } from "@/components/buttons/GnowebButton";
 
 export function ProfileInfo({ address }: { address: string }) {
   const { data } = useSuspenseQuery(userOptions(address));
@@ -46,6 +47,9 @@ export function ProfileInfo({ address }: { address: string }) {
         ) : (
           <Skeleton className="flex w-full rounded-xl self-center" />
         )}
+        <GnowebButton
+          href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${data.address}`}
+        />
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
         <VeryLargeText className="mb-7">{data.displayName}</VeryLargeText>
