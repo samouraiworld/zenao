@@ -23,7 +23,7 @@ import { Button } from "@/components/shadcn/button";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { GnoProfile } from "@/lib/queries/profile";
 import { HeaderAvatarLoader, HeaderAvatar } from "@/components/common/Avatar";
-import { AvatarFallback } from "@/components/shadcn/avatar";
+import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
 
 const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   const t = useTranslations("header");
@@ -137,7 +137,9 @@ const Auth: React.FC<{ user: GnoProfile | null; className?: string }> = ({
             <HeaderAvatar uri={user.avatarUri} />
           </Link>
         ) : (
-          <AvatarFallback>Avatar</AvatarFallback>
+          <Avatar>
+            <AvatarFallback>Avatar</AvatarFallback>
+          </Avatar>
         )}
       </SignedIn>
     </div>
