@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useQueryClient,
+  useSuspenseQueries,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
@@ -19,7 +23,7 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { eventUserRoles } from "@/lib/queries/event-users";
+import { eventUserRoles, eventUsersWithRole } from "@/lib/queries/event-users";
 import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
@@ -27,6 +31,15 @@ import { web3ImgLoader } from "@/lib/web3-img-loader";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
+import { GnoProfile, profileOptions } from "@/lib/queries/profile";
+import { Avatar } from "@/components/common/Avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/shadcn/dialog";
 
 interface EventSectionProps {
   title: string;
@@ -39,6 +52,45 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
       <Text className="font-semibold">{title}</Text>
       <Separator className="mt-2 mb-3" />
       {children && children}
+    </div>
+  );
+};
+
+const ParticipantsAvatarsPreview: React.FC<{
+  participants: (GnoProfile | null)[];
+}> = ({ participants }) => {
+  return (
+    <div className="flex p-1 -space-x-2 overflow-hidden">
+      {participants &&
+        participants.map((participant) => (
+          <Avatar
+            key={participant?.displayName}
+            className="flex ring-2 ring-background/80"
+            uri={participant?.avatarUri || ""}
+          />
+        ))}
+    </div>
+  );
+};
+
+const ParticipantsNamesPreview: React.FC<{
+  participants: (GnoProfile | null)[];
+}> = ({ participants }) => {
+  return (
+    <div className="flex flex-row">
+      {participants.length > 2 ? (
+        <div>
+          <SmallText>{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</SmallText>
+        </div>
+      ) : (
+        <div>
+          {participants.map((participant) => (
+            <SmallText key={participant?.displayName}>
+              {participant?.displayName}
+            </SmallText>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -56,6 +108,18 @@ export function EventInfo({
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+  const { data: participantsAddresses } = useSuspenseQuery(
+    eventUsersWithRole(id, "participant"),
+  );
+  const participants = useSuspenseQueries({
+    queries: participantsAddresses.map((address) => profileOptions(address)),
+    combine: (results) => {
+      if (results.some((item) => !item.isSuccess)) {
+        return;
+      }
+      return results.map((item) => item.data);
+    },
+  });
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
@@ -133,6 +197,7 @@ export function EventInfo({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* Left Section */}
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
           src={data.imageUri}
@@ -143,6 +208,7 @@ export function EventInfo({
           className="flex w-full rounded-xl self-center"
           loader={web3ImgLoader}
         />
+        {/* If the user is organizer, link to /edit page */}
         {isOrganizer && (
           <Card className="flex flex-row items-center">
             <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
@@ -157,16 +223,59 @@ export function EventInfo({
             </div>
           </Card>
         )}
+        {/* Participants preview and dialog section */}
         <EventSection title={t("going", { count: data.participants })}>
-          <GnowebButton
-            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
-          />
+          <div className="flex flex-col gap-5">
+            {participants && (
+              <Dialog>
+                <DialogTrigger>
+                  <div className="flex flex-col gap-2">
+                    {/* 6 because we decide to show the first 6 participants avatars as preview */}
+                    <ParticipantsAvatarsPreview
+                      participants={
+                        participants.length > 6
+                          ? participants.slice(0, 6)
+                          : participants
+                      }
+                    />
+                    <ParticipantsNamesPreview participants={participants} />
+                  </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Participants list</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-2">
+                    {participants.map((participant) => {
+                      if (!participant) {
+                        return null;
+                      }
+                      return (
+                        <div
+                          key={participant?.displayName}
+                          className="flex h-10 p-1 flex-row gap-3 items-center"
+                        >
+                          <Avatar uri={participant.avatarUri} />
+                          <SmallText>{participant?.displayName}</SmallText>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+            <GnowebButton
+              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
+            />
+          </div>
         </EventSection>
         {/* TODO: Uncomment that when we can see the name of the addr */}
         {/* <EventSection title={t("hosted-by")}> */}
         {/*   <SmallText>User</SmallText> */}
         {/* </EventSection> */}
       </div>
+
+      {/* Right Section */}
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
         <VeryLargeText className="mb-7">{data.title}</VeryLargeText>
         <div className="flex flex-row gap-4 items-center">
@@ -206,6 +315,7 @@ export function EventInfo({
           )}
         </div>
 
+        {/* Participate Card */}
         <Card className="mt-2">
           {isParticipate ? (
             <div>
@@ -234,6 +344,8 @@ export function EventInfo({
             </div>
           )}
         </Card>
+
+        {/* Markdown Description */}
         <EventSection title={t("about-event")}>
           <MarkdownPreview markdownString={data.description} />
         </EventSection>

@@ -6,9 +6,10 @@ import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { eventUserRoles } from "@/lib/queries/event-users";
+import { eventUserRoles, eventUsersWithRole } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
+import { profileOptions } from "@/lib/queries/profile";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -37,6 +38,16 @@ export default async function EventPage({ params }: Props) {
   );
   const eventData = await queryClient.fetchQuery(eventOptions(p.id));
   void queryClient.prefetchQuery(eventUserRoles(p.id, address));
+
+  // Prefetch all participants profiles
+  const addresses = await queryClient.fetchQuery(
+    eventUsersWithRole(p.id, "participant"),
+  );
+  await Promise.all([
+    addresses.map((address) =>
+      queryClient.prefetchQuery(profileOptions(address)),
+    ),
+  ]);
 
   return (
     <ScreenContainer
