@@ -21,7 +21,7 @@ import { ToggleThemeButton } from "@/components/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { GnoProfile } from "@/lib/queries/profile";
-import { HeaderAvatarLoader, HeaderAvatar } from "@/components/common/Avatar";
+import { HeaderAvatarLoader, HeaderAvatar } from "@/components/common/avatar";
 import { AvatarFallback } from "@/components/shadcn/avatar";
 
 function HeaderLinks({ isLogged }: { isLogged: boolean }) {

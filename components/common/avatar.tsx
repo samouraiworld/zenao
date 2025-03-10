@@ -9,7 +9,7 @@ interface AvatarProps {
   uri: string;
 }
 
-export function HeaderAvatar({ uri }: AvatarProps)  {
+export function HeaderAvatar({ uri }: AvatarProps) {
   return (
     <ShadcnAvatar className="h-7 w-7 sm:h-[30px] sm:w-[30px]">
       <Image
@@ -43,12 +43,12 @@ export function Avatar({ uri }: AvatarProps) {
       />
     </ShadcnAvatar>
   );
-};
+}
 
-export const AvatarLoader: React.FC = () => {
+export function AvatarLoader() {
   return (
     <ShadcnAvatar className="h-5 w-5">
       <Skeleton className="h-5 w-5" />
     </ShadcnAvatar>
   );
-};
+}
