@@ -12,11 +12,10 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import React from "react";
 
 // To generate an example, run `make generate && go run ./backend mail > tickets-confirmation.html`
 
-export const TicketsConfirmationEmail = () => (
+export default function TicketsConfirmationEmail(){return (
   <Html>
     <Head />
     <Body style={main}>
@@ -71,14 +70,14 @@ export const TicketsConfirmationEmail = () => (
       </Container>
     </Body>
   </Html>
-);
+)}
 
-const Box = (props: {
+function Box (props: {
   title: string;
   icon: string;
   iconAlt: string;
   content: string;
-}) => {
+}) {
   return (
     <Section style={box}>
       <Row style={{ height: "100%" }}>
@@ -106,8 +105,6 @@ const Box = (props: {
     </Section>
   );
 };
-
-export default TicketsConfirmationEmail;
 
 const main = {
   backgroundColor: "#ffffff",

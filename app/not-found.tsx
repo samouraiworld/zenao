@@ -2,11 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
-import { Text } from "@/components/texts/DefaultText";
-import { SmallText } from "@/components/texts/SmallText";
-import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
-import { LargeText } from "@/components/texts/LargeText";
+import { ScreenContainerCentered } from "@/components/layout/screen-container";
+import { Text } from "@/components/texts/default-text";
+import { SmallText } from "@/components/texts/small-text";
+import { ButtonWithChildren } from "@/components/buttons/button-with-children";
+import { LargeText } from "@/components/texts/large-text";
 
 export default function NotFound() {
   const t = useTranslations("not-found");

@@ -1,7 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { CreateEventForm } from "./CreateEventForm";
+import { CreateEventYform } from "./create-event-yform";
 import { getQueryClient } from "@/lib/get-query-client";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { ScreenContainer } from "@/components/layout/screen-container";
 
 export default function CreateEventPage() {
   const queryClient = getQueryClient();
@@ -9,7 +9,7 @@ export default function CreateEventPage() {
   return (
     <ScreenContainer isSignedOutModal>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <CreateEventForm />
+        <CreateEventYform />
       </HydrationBoundary>
     </ScreenContainer>
   );

@@ -1,11 +1,10 @@
-import React from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { FileText } from "lucide-react";
-import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
-import { Text } from "@/components/texts/DefaultText";
-import { Card } from "@/components/cards/Card";
-import { SmallText } from "@/components/texts/SmallText";
+import { ScreenContainerCentered } from "@/components/layout/screen-container";
+import { Text } from "@/components/texts/default-text";
+import { Card } from "@/components/cards/card";
+import { SmallText } from "@/components/texts/small-text";
 
 export default function Manifesto() {
   const t = useTranslations("manifesto");
