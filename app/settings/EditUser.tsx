@@ -19,7 +19,7 @@ import { FormFieldImage } from "@/components/form/components/FormFieldImage";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import { Separator } from "@/components/shadcn/separator";
-import { Button } from "@/components/shadcn/button";
+import { Button, buttonVariants } from "@/components/shadcn/button";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -113,10 +113,11 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         </div>
         <Separator className="mb-2" />
         <div className="flex flex-row gap-2">
-          <Link href={`/profile/${user?.address}`}>
-            <Button variant="secondary" type="button">
-              Profile
-            </Button>
+          <Link
+            href={`/profile/${user?.address}`}
+            className={buttonVariants({ variant: "secondary" })}
+          >
+            Profile
           </Link>
           <Button asChild variant="destructive" type="button">
             <SignOutButton />
