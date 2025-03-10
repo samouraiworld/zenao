@@ -2,8 +2,11 @@ import BlogPostCard from "./blog-post-card";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Text } from "@/components/texts/DefaultText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
+import { getPostsMetadata } from "@/lib/blog";
 
-export default function Blog() {
+export default async function Blog() {
+  const posts = await getPostsMetadata();
+
   return (
     <ScreenContainer>
       <div className="flex flex-col gap-12">
@@ -12,57 +15,16 @@ export default function Blog() {
           <Text className="line-clamp-2">Some description coming soon...</Text>
         </div>
 
-        {/* Layout by columns */}
         <div className="grid justify-items-center grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Layout by rows */}
-          {/* <div className="grid justify-items-center gap-8 grid-cols-1"> */}
-          <BlogPostCard
-            title="Blog post title"
-            description="Blog post description"
-            url="/blog/post"
-          />
-
-          <BlogPostCard
-            title="Blog post title"
-            description="Blog post description"
-            url="/blog/post"
-          />
-
-          <BlogPostCard
-            title="Blog post title"
-            description="Blog post description"
-            url="/blog/post"
-          />
-
-          <BlogPostCard
-            title="Blog post title"
-            description="Blog post description"
-            url="/blog/post"
-          />
-
-          <BlogPostCard
-            title="Blog post title"
-            description="Blog post description"
-            url="/blog/post"
-          />
-
-          <BlogPostCard
-            title="Blog post title"
-            description="Blog post description"
-            url="/blog/post"
-          />
-
-          <BlogPostCard
-            title="Blog post title"
-            description="Blog post description"
-            url="/blog/post"
-          />
-
-          <BlogPostCard
-            title="Blog post title"
-            description="Blog post description"
-            url="/blog/post"
-          />
+          {posts.map((post) => (
+            <BlogPostCard
+              key={post.slug}
+              slug={post.slug}
+              title={post.title}
+              description={post.title}
+              date={new Date(post.date)}
+            />
+          ))}
         </div>
       </div>
     </ScreenContainer>
