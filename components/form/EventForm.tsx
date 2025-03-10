@@ -1,18 +1,25 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { useMemo, useState } from "react";
 import { Card } from "../cards/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { SmallText } from "../texts/SmallText";
+import { Switch } from "../shadcn/switch";
+import { Label } from "../shadcn/label";
+import MapCaller from "../common/map/MapLazyComponents";
 import { Separator } from "../shadcn/separator";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
+import { TimeZonesPopover } from "./components/TimeZonesPopover";
+import { FormFieldImage } from "./components/FormFieldImage";
 import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
-import { FormFieldImage } from "./components/FormFieldImage";
+import { FormFieldLocation } from "./components/FormFieldLocation";
 import { Form } from "@/components/shadcn/form";
+import { currentTimezone } from "@/lib/time";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -28,7 +35,17 @@ export const EventForm: React.FC<EventFormProps> = ({
   isEditing = false,
 }) => {
   const description = form.watch("description");
+  const location = form.watch("location");
   const t = useTranslations("eventForm");
+
+  const [isVirtual, setIsVirtual] = useState<boolean>(
+    location.kind === "virtual" || false,
+  );
+  const [marker, setMarker] = useState<{ lat: number; lng: number } | null>(
+    null,
+  );
+  const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
+  const [timeZone, setTimeZone] = useState<string>("");
 
   return (
     <Form {...form}>
@@ -75,13 +92,70 @@ export const EventForm: React.FC<EventFormProps> = ({
                 </TabsContent>
               </Tabs>
             </Card>
-            <Card>
-              <FormFieldInputString
-                control={form.control}
-                name="location"
-                placeholder={t("location-placeholder")}
+            <div className="flex items-center gap-2">
+              <Switch
+                id="virtual"
+                checked={isVirtual}
+                onCheckedChange={(checked: boolean) => {
+                  if (checked) {
+                    form.setValue("location", {
+                      kind: "virtual",
+                      location: "",
+                    });
+                  } else {
+                    form.setValue("location", {
+                      kind: "custom",
+                      address: "",
+                      timeZone: currentTimezone(),
+                    });
+                  }
+                  // We have to clear errors between changing location kinds
+                  // If we have an error in virtual location and we change to custom, error stay as undefined and can't be clear
+                  form.clearErrors("location");
+                  setMarker(null);
+                  setTimeZone("");
+                  setIsVirtual(checked);
+                }}
               />
+              <Label htmlFor="virtual">Online event</Label>
+            </div>
+            <Card className={isVirtual ? "" : "p-0"}>
+              {isVirtual && location.kind === "virtual" ? (
+                <FormFieldInputString
+                  control={form.control}
+                  name="location.location"
+                  placeholder={"URI..."}
+                />
+              ) : (
+                <FormFieldLocation
+                  form={form}
+                  onSelect={async (marker: { lat: number; lng: number }) => {
+                    setMarker(marker);
+                    const GeoTZFind = (await import("browser-geo-tz")).find;
+                    const tz = await GeoTZFind(marker.lat, marker.lng);
+                    setTimeZone(tz[0]);
+                  }}
+                  onRemove={() => {
+                    setMarker(null);
+                    setTimeZone("");
+                  }}
+                />
+              )}
             </Card>
+            {!isVirtual && location && marker && (
+              <MapCaller lat={marker.lat} lng={marker.lng} />
+            )}
+            {isCustom && location.kind === "custom" && location.address && (
+              <TimeZonesPopover
+                defaultValue={location.timeZone}
+                handleSelect={(timeZone: string) => {
+                  form.setValue("location", {
+                    ...location,
+                    timeZone,
+                  });
+                }}
+              />
+            )}
             <Card>
               <SmallText className="mb-3">{t("capacity-label")}</SmallText>
               <FormFieldInputNumber
@@ -95,12 +169,14 @@ export const EventForm: React.FC<EventFormProps> = ({
                 name="startDate"
                 control={form.control}
                 placeholder={t("start-date-placeholder")}
+                timeZone={timeZone}
               />
               <Separator className="mx-0" />
               <FormFieldDatePicker
                 name="endDate"
                 control={form.control}
                 placeholder={t("end-date-placeholder")}
+                timeZone={timeZone}
               />
             </Card>
             <ButtonWithLabel

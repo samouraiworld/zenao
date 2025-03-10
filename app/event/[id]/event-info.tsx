@@ -27,8 +27,10 @@ import { userOptions } from "@/lib/queries/user";
 import { Avatar, AvatarImage } from "@/components/shadcn/avatar";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { eventUserRoles } from "@/lib/queries/event-users";
+import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
+import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 
@@ -69,6 +71,36 @@ export function EventInfo({
     enabled: !!data.creator,
   });
 
+  // Correctly reconstruct location object
+  let location: EventFormSchemaType["location"] = {
+    kind: "custom",
+    address: "",
+    timeZone: "",
+  };
+  switch (data.location?.address.case) {
+    case "custom":
+      location = {
+        kind: "custom",
+        address: data.location?.address.value.address,
+        timeZone: data.location?.address.value.timezone,
+      };
+      break;
+    case "geo":
+      location = {
+        kind: "geo",
+        address: data.location?.address.value.address,
+        lat: data.location?.address.value.lat,
+        lng: data.location?.address.value.lng,
+        size: data.location?.address.value.size,
+      };
+      break;
+    case "virtual":
+      location = {
+        kind: "virtual",
+        location: data.location?.address.value.uri,
+      };
+  }
+
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
 
@@ -86,10 +118,6 @@ export function EventInfo({
     });
   }, [queryClient, id, address]);
 
-  let location = "";
-  if (data.location?.address.case == "custom") {
-    location = data.location.address.value.address;
-  }
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -97,7 +125,8 @@ export function EventInfo({
     description: data.description,
     startDate: new Date(Number(data.startDate) * 1000).toISOString(),
     endDate: new Date(Number(data.endDate) * 1000).toISOString(),
-    location,
+    location:
+      location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
     image: web2URL(data.imageUri),
   };
@@ -175,10 +204,24 @@ export function EventInfo({
             </div>
           </div>
         </div>
-        <div className="flex flex-row gap-4 items-center">
-          <MapPin width={iconSize} height={iconSize} />
-          {/* TODO: Add location */}
-          <LargeText>{location}</LargeText>
+        <div className="flex flex-col">
+          <div className="flex flex-row gap-4 items-center mb-2">
+            <div className="w-[22px] h-[22px]">
+              <MapPin width={iconSize} height={iconSize} />
+            </div>
+            {location.kind === "virtual" ? (
+              <Link href={location.location} target="_blank">
+                <LargeText className="hover:underline hover:underline-offset-1">
+                  {location.location}
+                </LargeText>
+              </Link>
+            ) : (
+              <LargeText>{location.address}</LargeText>
+            )}
+          </div>
+          {location.kind === "geo" && (
+            <MapCaller lat={location.lat} lng={location.lng} />
+          )}
         </div>
 
         <Card className="mt-2">
