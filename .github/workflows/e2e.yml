@@ -65,6 +65,9 @@ jobs:
           build: cp .env.backend-dev .env.local
           start: backend e2e-infra --ci
           wait-on: 'npx wait-on --timeout 250000 http://localhost:3000'
+        env: # Or as an environment variable
+          PINATA_JWT: ${{ secrets.TEST_PINATA_JWT }}
+          CLERK_SECRET_KEY: ${{ secrets.TEST_CLERK_SECRET_KEY }}
       - name: Upload errors screenshots
         uses: actions/upload-artifact@v4
         if: failure()
