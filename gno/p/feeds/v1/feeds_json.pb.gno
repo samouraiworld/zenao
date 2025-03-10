@@ -34,37 +34,6 @@ func (p *PostGeoLoc) FromJSON(node *json.Node) {
 	}
 }
 
-func (p *PostID) ToJSON() *json.Node {
-	fields := map[string]*json.Node{}
-
-	if p.LocalId != "" {
-		fields["localId"] = json.StringNode("", p.LocalId)
-	}
-	if p.FeedId != "" {
-		fields["feedId"] = json.StringNode("", p.FeedId)
-	}
-	if p.NetworkId != "" {
-		fields["networkId"] = json.StringNode("", p.NetworkId)
-	}
-
-	return json.ObjectNode("", fields)
-}
-
-func (p *PostID) FromJSON(node *json.Node) {
-	*p = PostID{}
-	fields := node.MustObject()
-
-	if val, ok := fields["localId"]; ok {
-		p.LocalId = val.MustString()
-	}
-	if val, ok := fields["feedId"]; ok {
-		p.FeedId = val.MustString()
-	}
-	if val, ok := fields["networkId"]; ok {
-		p.NetworkId = val.MustString()
-	}
-}
-
 func (s *StandardPost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -199,8 +168,8 @@ func (v *VideoPost) FromJSON(node *json.Node) {
 func (r *Reaction) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if r.PostId != nil {
-		fields["postId"] = r.PostId.ToJSON()
+	if r.PostUri != "" {
+		fields["postUri"] = json.StringNode("", r.PostUri)
 	}
 	if r.Icon != "" {
 		fields["icon"] = json.StringNode("", r.Icon)
@@ -216,10 +185,8 @@ func (r *Reaction) FromJSON(node *json.Node) {
 	*r = Reaction{}
 	fields := node.MustObject()
 
-	if val, ok := fields["postId"]; ok {
-		fv := &PostID{}
-		fv.FromJSON(val)
-		r.PostId = fv
+	if val, ok := fields["postUri"]; ok {
+		r.PostUri = val.MustString()
 	}
 	if val, ok := fields["icon"]; ok {
 		r.Icon = val.MustString()
@@ -273,8 +240,8 @@ func (p *Post) ToJSON() *json.Node {
 	if p.Author != "" {
 		fields["author"] = json.StringNode("", p.Author)
 	}
-	if p.ParentId != nil {
-		fields["parentId"] = p.ParentId.ToJSON()
+	if p.ParentUri != "" {
+		fields["parentUri"] = json.StringNode("", p.ParentUri)
 	}
 	if p.Loc != nil {
 		fields["loc"] = p.Loc.ToJSON()
@@ -324,10 +291,8 @@ func (p *Post) FromJSON(node *json.Node) {
 	if val, ok := fields["author"]; ok {
 		p.Author = val.MustString()
 	}
-	if val, ok := fields["parentId"]; ok {
-		fv := &PostID{}
-		fv.FromJSON(val)
-		p.ParentId = fv
+	if val, ok := fields["parentUri"]; ok {
+		p.ParentUri = val.MustString()
 	}
 	if val, ok := fields["loc"]; ok {
 		fv := &PostGeoLoc{}
@@ -397,5 +362,74 @@ func (p *Post) FromJSON(node *json.Node) {
 		p.Post = n
 	default:
 		panic(errors.New("post variant not found"))
+	}
+}
+
+func (p *PostView) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if p.Post != nil {
+		fields["post"] = p.Post.ToJSON()
+	}
+	if len(p.Reactions) != 0 {
+		arr := make([]*json.Node, len(p.Reactions))
+		for i, val := range p.Reactions {
+			arr[i] = val.ToJSON()
+		}
+		fields["reactions"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (p *PostView) FromJSON(node *json.Node) {
+	*p = PostView{}
+	fields := node.MustObject()
+
+	if val, ok := fields["post"]; ok {
+		fv := &Post{}
+		fv.FromJSON(val)
+		p.Post = fv
+	}
+	if val, ok := fields["reactions"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*ReactionView, len(jarr))
+		for i, val := range jarr {
+			fv := &ReactionView{}
+			fv.FromJSON(val)
+			arr[i] = fv
+		}
+		p.Reactions = arr
+	}
+}
+
+func (r *ReactionView) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if r.Icon != "" {
+		fields["icon"] = json.StringNode("", r.Icon)
+	}
+	if r.Count != 0 {
+		fields["count"] = json.NumberNode("", float64(r.Count))
+	}
+	if r.UserHasVoted != false {
+		fields["userHasVoted"] = json.BoolNode("", r.UserHasVoted)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactionView) FromJSON(node *json.Node) {
+	*r = ReactionView{}
+	fields := node.MustObject()
+
+	if val, ok := fields["icon"]; ok {
+		r.Icon = val.MustString()
+	}
+	if val, ok := fields["count"]; ok {
+		r.Count = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["userHasVoted"]; ok {
+		r.UserHasVoted = val.MustBool()
 	}
 }

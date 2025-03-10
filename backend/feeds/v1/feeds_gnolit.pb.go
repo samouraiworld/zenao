@@ -23,24 +23,6 @@ func (p *PostGeoLoc) GnoLiteral(typePrefix string, linePrefix string) string {
 	return buf.String()
 }
 
-func (p *PostID) GnoLiteral(typePrefix string, linePrefix string) string {
-	buf := &strings.Builder{}
-	buf.WriteString(typePrefix)
-	buf.WriteString("PostID{\n")
-	if p.LocalId != "" {
-		fmt.Fprintf(buf, "%s\tLocalId: %q,\n", linePrefix, p.LocalId)
-	}
-	if p.FeedId != "" {
-		fmt.Fprintf(buf, "%s\tFeedId: %q,\n", linePrefix, p.FeedId)
-	}
-	if p.NetworkId != "" {
-		fmt.Fprintf(buf, "%s\tNetworkId: %q,\n", linePrefix, p.NetworkId)
-	}
-	buf.WriteString(linePrefix)
-	buf.WriteString("}")
-	return buf.String()
-}
-
 func (s *StandardPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -123,8 +105,8 @@ func (r *Reaction) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("Reaction{\n")
-	if r.PostId != nil {
-		fmt.Fprintf(buf, "%s\tPostId: &%s%s,\n", linePrefix, typePrefix, r.PostId.GnoLiteral(typePrefix, linePrefix+"\t"))
+	if r.PostUri != "" {
+		fmt.Fprintf(buf, "%s\tPostUri: %q,\n", linePrefix, r.PostUri)
 	}
 	if r.Icon != "" {
 		fmt.Fprintf(buf, "%s\tIcon: %q,\n", linePrefix, r.Icon)
@@ -165,8 +147,8 @@ func (p *Post) GnoLiteral(typePrefix string, linePrefix string) string {
 	if p.Author != "" {
 		fmt.Fprintf(buf, "%s\tAuthor: %q,\n", linePrefix, p.Author)
 	}
-	if p.ParentId != nil {
-		fmt.Fprintf(buf, "%s\tParentId: &%s%s,\n", linePrefix, typePrefix, p.ParentId.GnoLiteral(typePrefix, linePrefix+"\t"))
+	if p.ParentUri != "" {
+		fmt.Fprintf(buf, "%s\tParentUri: %q,\n", linePrefix, p.ParentUri)
 	}
 	if p.Loc != nil {
 		fmt.Fprintf(buf, "%s\tLoc: &%s%s,\n", linePrefix, typePrefix, p.Loc.GnoLiteral(typePrefix, linePrefix+"\t"))
@@ -202,6 +184,45 @@ func (p *Post) GnoLiteral(typePrefix string, linePrefix string) string {
 		fmt.Fprintf(buf, "%s\tPost: &%s,\n", linePrefix, val.Video.GnoLiteral(typePrefix, linePrefix+"\t"))
 	default:
 		panic(errors.New("unknown post variant"))
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (p *PostView) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("PostView{\n")
+	if p.Post != nil {
+		fmt.Fprintf(buf, "%s\tPost: &%s%s,\n", linePrefix, typePrefix, p.Post.GnoLiteral(typePrefix, linePrefix+"\t"))
+	}
+	if len(p.Reactions) != 0 {
+		fmt.Fprintf(buf, "%s\tReactions: {\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range p.Reactions {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (r *ReactionView) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ReactionView{\n")
+	if r.Icon != "" {
+		fmt.Fprintf(buf, "%s\tIcon: %q,\n", linePrefix, r.Icon)
+	}
+	if r.Count != 0 {
+		fmt.Fprintf(buf, "%s\tCount: %d,\n", linePrefix, r.Count)
+	}
+	if r.UserHasVoted != false {
+		fmt.Fprintf(buf, "%s\tUserHasVoted: %t,\n", linePrefix, r.UserHasVoted)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
