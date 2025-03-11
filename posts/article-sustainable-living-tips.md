@@ -18,3 +18,5 @@ Many companies are embracing sustainability through ethical sourcing and eco-fri
 
 ## The Bigger Picture
 Every small action contributes to a larger movement. Together, we can create a greener, healthier planet.
+
+[go beyond](https://linkedin.com/in/twilson-fr)
