@@ -1,20 +1,26 @@
 import { readdir, readFile } from "fs/promises";
 import path from "path";
+import { z } from "zod";
 import matter from "gray-matter";
 
 const postsDirectory = path.join(process.cwd(), "posts");
 const ARTICLE_PREFIX = "article-";
 
-export type BlogPostMetadata = {
+const headerSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  previewImageUrl: z.string().optional(),
+  date: z.string().refine((value) => !isNaN(Date.parse(value))),
+});
+
+type BlogPostHeader = z.infer<typeof headerSchema>;
+
+export interface BlogPostMetadata extends BlogPostHeader {
   slug: string;
-  title: string;
-  description: string;
-  previewImageUrl?: string;
-  date: string;
-};
+}
 
 export type BlogPost = {
-  data: Omit<BlogPostMetadata, "slug">;
+  data: BlogPostHeader;
   content: string;
 };
 
@@ -27,12 +33,15 @@ export async function getPostsMetadata(): Promise<BlogPostMetadata[]> {
       const filePath = path.join(postsDirectory, fileName);
       const fileContents = await readFile(filePath, "utf8");
       const { data } = matter(fileContents);
+
+      const validatedData = headerSchema.parse(data);
+
       return {
         slug,
-        title: data.title,
-        date: data.date,
-        description: data.description,
-        previewImageUrl: data.previewImageUrl,
+        title: validatedData.title,
+        date: validatedData.date,
+        description: validatedData.description,
+        previewImageUrl: validatedData.previewImageUrl,
       };
     });
 
@@ -51,12 +60,14 @@ export async function getPostContent(slug: string): Promise<BlogPost | null> {
 
     const { data, content } = matter(fileContent);
 
+    const validatedData = headerSchema.parse(data);
+
     return {
       data: {
-        title: data.title,
-        date: data.date,
-        description: data.description,
-        previewImageUrl: data.previewImageUrl,
+        title: validatedData.title,
+        date: validatedData.date,
+        description: validatedData.description,
+        previewImageUrl: validatedData.previewImageUrl,
       },
       content,
     };
