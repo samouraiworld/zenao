@@ -70,9 +70,7 @@ message EventLocation {
   }
 }
 
-message AddressVirtual {
-  string uri = 1;
-}
+message AddressVirtual { string uri = 1; }
 
 message AddressGeo {
   string address = 1;
@@ -92,7 +90,7 @@ message EventInfo {
   string image_uri = 3;
   string creator = 4;
   int64 start_date = 5; // unix seconds
-  int64 end_date = 6; // unix seconds
+  int64 end_date = 6;   // unix seconds
   uint32 capacity = 7;
   EventLocation location = 8;
   uint32 participants = 9;
