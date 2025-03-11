@@ -22,7 +22,7 @@ export function EventCard({ evt }: { evt: EventInfo }) {
     location = evt.location?.address.value.uri;
   }
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between">
+    <div className="flex flex-col md:flex-row md:justify-between">
       <div className="min-w-32 left-6 relative sm:left-0 sm:flex">
         <div className="flex flex-row items-center gap-[6px] mb-3 sm:items-start sm:mb-0 sm:gap-0 sm:flex-col">
           <Text>{format(fromUnixTime(Number(evt.startDate)), "MMM d")}</Text>
