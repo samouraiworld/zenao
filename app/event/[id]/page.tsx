@@ -1,7 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { EventInfo } from "./event-info";
-import { imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
@@ -46,9 +45,7 @@ export default async function EventPage({ params }: Props) {
   }
 
   return (
-    <ScreenContainer
-      background={{ src: eventData.imageUri, width: imageWidth }}
-    >
+    <ScreenContainer background={{ src: eventData.imageUri }}>
       <HydrationBoundary state={dehydrate(queryClient)}>
         <EventInfo id={p.id} />
       </HydrationBoundary>
