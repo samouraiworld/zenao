@@ -20,13 +20,19 @@ start.gnodev:
 start.gnodev-e2e:
 	$(GNODEV) --unsafe-api
 
-.PHONY: clone-gno
-clone-gno:
+.PHONY: clone-testing-gno
+clone-testing-gno:
 	rm -fr gnobuild
 	mkdir -p gnobuild
 	cd gnobuild && git clone https://github.com/gnolang/gno.git && cd gno && git checkout $(shell $(CAT) .gnoversion)
 	cp -r ./gno/p ./gnobuild/gno/examples/gno.land/p/zenao
 	cp -r ./gno/r ./gnobuild/gno/examples/gno.land/r/zenao
+
+.PHONY: clone-gno:
+clone-gno:
+	rm -fr gnobuild
+	mkdir -p gnobuild
+	cd gnobuild && git clone https://github.com/gnolang/gno.git && cd gno && git checkout $(shell $(CAT) .gnoversion)
 
 .PHONY: install-gno
 install-gno:
