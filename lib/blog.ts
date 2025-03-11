@@ -13,8 +13,7 @@ export type BlogPostMetadata = {
 };
 
 export type BlogPost = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: Record<string, any>;
+  data: Record<string, string>;
   content: string;
 };
 
