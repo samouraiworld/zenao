@@ -247,13 +247,15 @@ export function EventInfo({ id }: { id: string }) {
                         return null;
                       }
                       return (
-                        <div
+                        <Link
+                          href={`/profile/${participant.address}`}
                           key={participant?.displayName}
-                          className="flex h-10 p-1 flex-row gap-3 items-center"
                         >
-                          <Avatar uri={participant.avatarUri} />
-                          <SmallText>{participant?.displayName}</SmallText>
-                        </div>
+                          <div className="flex h-10 p-1 flex-row gap-3 items-center">
+                            <Avatar uri={participant.avatarUri} />
+                            <SmallText>{participant?.displayName}</SmallText>
+                          </div>
+                        </Link>
                       );
                     })}
                   </div>
