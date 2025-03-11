@@ -8,7 +8,7 @@ import { BackgroundImage } from "./background-image";
 interface ScreenContainerProps {
   children: React.ReactNode;
   isSignedOutModal?: boolean;
-  background?: Omit<ImageLoaderProps, "width">;
+  background?: ImageLoaderProps;
 }
 
 export const ScreenContainer: React.FC<ScreenContainerProps> = ({
@@ -17,7 +17,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   background,
 }) => {
   return (
-    <div className="h-screen flex flex-col flex-1 items-center">
+    <div className="flex flex-col flex-1 items-center">
       {background && <BackgroundImage {...background} />}
       <main className="h-full w-full max-w-[960px] mb-10 sm:mb-0">
         <div className="mt-8 mx-5">{children}</div>
