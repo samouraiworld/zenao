@@ -9,7 +9,7 @@ export type BlogPostMetadata = {
   slug: string;
   title: string;
   description: string;
-  previewImage: string;
+  previewImageUrl?: string;
   date: string;
 };
 
@@ -32,7 +32,7 @@ export async function getPostsMetadata(): Promise<BlogPostMetadata[]> {
         title: data.title,
         date: data.date,
         description: data.description,
-        previewImage: data.previewImage,
+        previewImageUrl: data.previewImageUrl,
       };
     });
 
@@ -56,7 +56,7 @@ export async function getPostContent(slug: string): Promise<BlogPost | null> {
         title: data.title,
         date: data.date,
         description: data.description,
-        previewImage: data.previewImage,
+        previewImageUrl: data.previewImageUrl,
       },
       content,
     };

@@ -28,6 +28,7 @@ export default async function Blog() {
               slug={post.slug}
               title={post.title}
               description={post.title}
+              previewImageUrl={post.previewImageUrl}
               date={new Date(post.date)}
             />
           ))}
