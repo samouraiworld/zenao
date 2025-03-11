@@ -1,8 +1,14 @@
+import { Metadata } from "next";
 import BlogPostCard from "./blog-post-card";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { Text } from "@/components/texts/DefaultText";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { getPostsMetadata } from "@/lib/blog";
+
+export const metadata: Metadata = {
+  title: "Blog | Zenao",
+  description: "Zenao blog",
+};
 
 export default async function Blog() {
   const posts = await getPostsMetadata();
