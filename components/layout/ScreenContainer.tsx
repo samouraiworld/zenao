@@ -21,8 +21,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
     <div className="flex flex-col flex-1 items-center">
       {background && <BackgroundImage {...background} />}
       <main
-        className="h-full w-full mb-10 sm:mb-0"
-        style={{ maxWidth: screenContainerMaxWidth }}
+        className={`h-full w-full mb-10 sm:mb-0 max-w-[${screenContainerMaxWidth}px]`}
       >
         <div className="mt-8 mx-5">{children}</div>
       </main>

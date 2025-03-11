@@ -8,6 +8,7 @@ import { PostCard } from "@/components/cards/social-feed/post-card";
 import { AvatarWithLoaderAndFallback } from "@/components/common/Avatar";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { Textarea } from "@/components/shadcn/textarea";
+import { footerHeight } from "@/app/Footer";
 
 function FeedInput() {
   const { getToken, userId } = useAuth();
@@ -46,7 +47,7 @@ export function EventFeed(
   return (
     <div
       className="flex flex-col gap-4 min-h-0 pt-4"
-      style={{ maxHeight: "calc(100vh - 52px)" }}
+      style={{ maxHeight: `calc(100vh - ${footerHeight}px)` }}
     >
       <FeedInput />
 

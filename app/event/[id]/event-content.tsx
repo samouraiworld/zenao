@@ -48,14 +48,8 @@ function EventSection({
 const eventTabs = ["global-feed", "polls-feed"] as const;
 export type EventTab = (typeof eventTabs)[number];
 
-export function EventContent({
-  eventId,
-  userId,
-}: {
-  eventId: string;
-  userId: string | null;
-}) {
-  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+export function EventContent({ eventId }: { eventId: string }) {
+  const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data: event } = useSuspenseQuery(eventOptions(eventId));
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -112,8 +106,7 @@ export function EventContent({
           height={200}
           alt="Event hero"
           priority
-          className="object-cover w-full h-[200px] rounded-xl self-center absolute top-0 self-center -z-10"
-          style={{ maxWidth: screenContainerMaxWidth }}
+          className={`object-cover w-full h-[200px] max-w-[${screenContainerMaxWidth}px] rounded-xl self-center absolute top-0 self-center -z-10`}
           loader={web3ImgLoader}
         />
       )}
@@ -253,12 +246,7 @@ export function EventContent({
       {/* ---- Tabs */}
       <div className="flex flex-col gap-4">
         <Tabs value={tab} onValueChange={(value) => setTab(value as EventTab)}>
-          <TabsList
-            className="grid w-full"
-            style={{
-              gridTemplateColumns: `repeat(${eventTabs.length}, minmax(0, 1fr))`,
-            }}
-          >
+          <TabsList className={`grid w-full grid-cols-${eventTabs.length}`}>
             {Object.values(eventTabs).map((tab) => (
               <TabsTrigger key={tab} value={tab}>
                 {t(tab)}
