@@ -14,7 +14,6 @@ import {
   useAuth,
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { headerHeight, mobileHeaderHeight } from "./constants";
 import { Popover, PopoverTrigger } from "@/components/shadcn/popover";
 import { Card } from "@/components/cards/Card";
 import { SmallText } from "@/components/texts/SmallText";
@@ -62,12 +61,10 @@ export function Header() {
 
   return (
     <div
-      className={`flex w-full h-[${mobileHeaderHeight}px] md:h-[${headerHeight}px] md:justify-center md:p-2 `}
+      className={`flex w-full h-[var(--mobile-header)] md:h-[var(--header)] md:justify-center md:p-2 `}
     >
       {/* Desktop */}
-      <div
-        className={`max-md:hidden flex flex-row w-full items-center justify-center`}
-      >
+      <div className="max-md:hidden flex flex-row w-full items-center justify-center">
         <Card className="flex flex-row items-center px-3 py-2 gap-7 rounded-xl">
           <Link href="/" className="flex flex-row gap-2 items-center">
             <Image
