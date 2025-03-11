@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import BlogPostCard from "./blog-post-card";
+import BlogHeader from "./blog-header";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { Text } from "@/components/texts/DefaultText";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { getPostsMetadata } from "@/lib/blog";
 
 export const metadata: Metadata = {
@@ -16,11 +15,7 @@ export default async function Blog() {
   return (
     <ScreenContainer>
       <div className="flex flex-col gap-12">
-        <div className="flex flex-col gap-2">
-          <VeryLargeText className="truncate">Latest news</VeryLargeText>
-          <Text className="line-clamp-2">Some description coming soon...</Text>
-        </div>
-
+        <BlogHeader />
         <div className="grid justify-items-center grid-cols-1 gap-8 lg:grid-cols-2">
           {posts.map((post) => (
             <BlogPostCard
