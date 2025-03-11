@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
+import { format } from "date-fns";
 import { getPostContent, getPostsMetadata } from "@/lib/blog";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import MarkdownRenderer from "@/components/common/markdown/markdown-renderer";
+import { MarkdownPreview } from "@/components/common/MarkdownPreview";
+import Text from "@/components/texts/text";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -35,7 +37,15 @@ export default async function Post({ params }: Props) {
 
   return (
     <ScreenContainer>
-      <MarkdownRenderer md={post.content} />
+      <div className="flex justify-center">
+        <div className="w-fit flex flex-col items-center gap-4">
+          <Text className="self-start text-gray-500">
+            Published at: {format(new Date(post.data.date), "dd-MM-yyyy")}
+          </Text>
+
+          <MarkdownPreview markdownString={post.content} />
+        </div>
+      </div>
     </ScreenContainer>
   );
 }
