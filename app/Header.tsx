@@ -62,11 +62,11 @@ export function Header() {
 
   return (
     <div
-      className={`flex w-full h-[${mobileHeaderHeight}px] sm:h-[${headerHeight}px] sm:justify-center sm:p-2 `}
+      className={`flex w-full h-[${mobileHeaderHeight}px] md:h-[${headerHeight}px] md:justify-center md:p-2 `}
     >
       {/* Desktop */}
       <div
-        className={`max-sm:hidden flex flex-row w-full items-center justify-center`}
+        className={`max-md:hidden flex flex-row w-full items-center justify-center`}
       >
         <Card className="flex flex-row items-center px-3 py-2 gap-7 rounded-xl">
           <Link href="/" className="flex flex-row gap-2 items-center">
@@ -90,7 +90,7 @@ export function Header() {
       </div>
 
       {/* Mobile */}
-      <div className="sm:hidden flex flex-row justify-between w-full p-3 px-4 py-3 bg-secondary/80 backdrop-blur-sm">
+      <div className="md:hidden flex flex-row justify-between w-full p-3 px-4 py-3 bg-secondary/80 backdrop-blur-sm">
         <Link href="/" className="flex flex-row items-center">
           <Image
             src="/zenao-logo.png"
