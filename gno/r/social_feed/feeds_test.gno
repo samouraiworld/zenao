@@ -114,6 +114,8 @@ func TestGetFeedPosts(t *testing.T) {
 		feedId string
 		offset uint32
 		limit  uint32
+		tags   string
+		user   string
 	}
 
 	type output struct {
@@ -136,6 +138,7 @@ func TestGetFeedPosts(t *testing.T) {
 				Post: &feedsv1.StandardPost{
 					Content: "hello",
 				},
+				Tags: []string{"tag1", "tag2"},
 			},
 		},
 		{
@@ -145,6 +148,7 @@ func TestGetFeedPosts(t *testing.T) {
 				Post: &feedsv1.LinkPost{
 					Uri: "https://example.com",
 				},
+				Tags: []string{"tag1"},
 			},
 		},
 		{
@@ -165,6 +169,8 @@ func TestGetFeedPosts(t *testing.T) {
 				feedId: alice.String() + ":public",
 				offset: 0,
 				limit:  10,
+				tags:   "",
+				user:   "",
 			},
 			output: output{
 				posts: posts,
@@ -176,6 +182,8 @@ func TestGetFeedPosts(t *testing.T) {
 				feedId: alice.String() + ":empty",
 				offset: 0,
 				limit:  10,
+				tags:   "",
+				user:   "",
 			},
 			output: output{
 				posts: []*feedsv1.PostView{},
@@ -187,6 +195,8 @@ func TestGetFeedPosts(t *testing.T) {
 				feedId: "",
 				offset: 0,
 				limit:  10,
+				tags:   "",
+				user:   "",
 			},
 			output: output{
 				panic: true,
@@ -197,6 +207,8 @@ func TestGetFeedPosts(t *testing.T) {
 				feedId: alice.String() + ":public",
 				offset: 0,
 				limit:  2,
+				tags:   "",
+				user:   "",
 			},
 			output: output{
 				posts: posts[:2],
@@ -208,6 +220,8 @@ func TestGetFeedPosts(t *testing.T) {
 				feedId: alice.String() + ":public",
 				offset: 1,
 				limit:  10,
+				tags:   "",
+				user:   "",
 			},
 			output: output{
 				posts: posts[1:],
@@ -219,9 +233,37 @@ func TestGetFeedPosts(t *testing.T) {
 				feedId: "",
 				offset: 0,
 				limit:  10,
+				tags:   "",
+				user:   "",
 			},
 			output: output{
 				panic: true,
+			},
+		},
+		"tag filter": {
+			input: input{
+				feedId: alice.String() + ":public",
+				offset: 0,
+				limit:  10,
+				tags:   "tag1",
+				user:   "",
+			},
+			output: output{
+				posts: posts[:2],
+				panic: false,
+			},
+		},
+		"tag filter 2": {
+			input: input{
+				feedId: alice.String() + ":public",
+				offset: 0,
+				limit:  10,
+				tags:   "tag2",
+				user:   "",
+			},
+			output: output{
+				posts: posts[:1],
+				panic: false,
 			},
 		},
 	}
@@ -242,7 +284,7 @@ func TestGetFeedPosts(t *testing.T) {
 				}()
 			}
 
-			res := GetFeedPosts(test.input.feedId, test.input.offset, test.input.limit, "", "")
+			res := GetFeedPosts(test.input.feedId, test.input.offset, test.input.limit, test.input.tags, test.input.user)
 			if len(res) != len(test.output.posts) {
 				t.Fatalf("expected %d posts, got %d", len(test.output.posts), len(res))
 			}

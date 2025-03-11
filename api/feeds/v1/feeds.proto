@@ -38,6 +38,7 @@ message VideoPost {
   string thumbnail_image_uri = 3;
 }
 
+// XXX: not used yet in contracts
 message Reaction {
   string post_uri = 1;
   string icon = 2;

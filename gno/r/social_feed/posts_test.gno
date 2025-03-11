@@ -315,3 +315,133 @@ func TestEditPost(t *testing.T) {
 func setupTest() {
 	id = seqid.ID(0)
 }
+
+func TestReactPost(t *testing.T) {
+	setupTest()
+
+	type input struct {
+		localPostId string
+		user        string
+	}
+
+	type output struct {
+		reactions []*feedsv1.ReactionView
+	}
+
+	type test struct {
+		input  input
+		output output
+	}
+
+	type testTable = map[string]test
+
+	post := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 0,
+		Post:      &feedsv1.StandardPost{},
+	}
+
+	post2 := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 0,
+		Post:      &feedsv1.StandardPost{},
+	}
+
+	post3 := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 0,
+		Post:      &feedsv1.StandardPost{},
+	}
+
+	std.TestSetOriginCaller(alice)
+	NewPost("public", post)
+	NewPost("public", post2)
+	NewPost("public", post3)
+	ReactPost("public:0000001", "like")
+	ReactPost("public:0000001", "dislike")
+	std.TestSetOriginCaller(bob)
+	ReactPost("public:0000001", "like")
+	ReactPost("public:0000002", "like")
+
+	tests := testTable{
+		"post without reaction": {
+			input: input{
+				localPostId: "public:0000003",
+				user:        alice.String(),
+			},
+			output: output{
+				reactions: []*feedsv1.ReactionView{},
+			},
+		},
+		"post with reaction": {
+			input: input{
+				localPostId: "public:0000001",
+				user:        alice.String(),
+			},
+			output: output{
+				reactions: []*feedsv1.ReactionView{
+					{
+						Icon:         "dislike", // keep it sorted
+						Count:        1,
+						UserHasVoted: true,
+					},
+					{
+						Icon:         "like",
+						Count:        2,
+						UserHasVoted: true,
+					},
+				},
+			},
+		},
+		"post with reaction from another user": {
+			input: input{
+				localPostId: "public:0000001",
+				user:        bob.String(),
+			},
+			output: output{
+				reactions: []*feedsv1.ReactionView{
+					{
+						Icon:         "dislike",
+						Count:        1,
+						UserHasVoted: false,
+					},
+					{
+						Icon:         "like",
+						Count:        2,
+						UserHasVoted: true,
+					},
+				},
+			},
+		},
+		"post without reactions": {
+			input: input{
+				localPostId: "public:0000003",
+				user:        alice.String(),
+			},
+			output: output{
+				reactions: []*feedsv1.ReactionView{},
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := GetPostReactions(tc.input.localPostId, tc.input.user)
+			if len(got) != len(tc.output.reactions) {
+				t.Errorf("expected %d reactions, got %d", len(tc.output.reactions), len(got))
+			}
+			for i, r := range got {
+				if r.Icon != tc.output.reactions[i].Icon {
+					t.Errorf("expected %q, got %q", tc.output.reactions[i].Icon, r.Icon)
+				}
+				if r.Count != tc.output.reactions[i].Count {
+					t.Errorf("expected %d, got %d", tc.output.reactions[i].Count, r.Count)
+				}
+				if r.UserHasVoted != tc.output.reactions[i].UserHasVoted {
+					t.Errorf("expected %t, got %t", tc.output.reactions[i].UserHasVoted, r.UserHasVoted)
+				}
+			}
+		})
+	}
+
+}
