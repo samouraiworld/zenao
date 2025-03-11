@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file feeds/v1/feeds.proto.
  */
 export const file_feeds_v1_feeds: GenFile = /*@__PURE__*/
-  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIlAKCVZpZGVvUG9zdBITCgtkZXNjcmlwdGlvbhgBIAEoCRIRCgl2aWRlb191cmkYAiABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgDIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIosDCgRQb3N0Eg4KBmF1dGhvchgCIAEoCRISCgpwYXJlbnRfdXJpGAMgASgJEiEKA2xvYxgEIAEoCzIULmZlZWRzLnYxLlBvc3RHZW9Mb2MSEgoKY3JlYXRlZF9hdBgFIAEoAxISCgp1cGRhdGVkX2F0GAYgASgDEhIKCmRlbGV0ZWRfYXQYByABKAMSDAoEdGFncxgIIAMoCRIqCghzdGFuZGFyZBgJIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCiABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYCyABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGAwgASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDSABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgOIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiUwoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSKQoJcmVhY3Rpb25zGAIgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw");
+  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIlAKCVZpZGVvUG9zdBITCgtkZXNjcmlwdGlvbhgBIAEoCRIRCgl2aWRlb191cmkYAiABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgDIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIosDCgRQb3N0Eg4KBmF1dGhvchgBIAEoCRISCgpwYXJlbnRfdXJpGAIgASgJEiEKA2xvYxgDIAEoCzIULmZlZWRzLnYxLlBvc3RHZW9Mb2MSEgoKY3JlYXRlZF9hdBgEIAEoAxISCgp1cGRhdGVkX2F0GAUgASgDEhIKCmRlbGV0ZWRfYXQYBiABKAMSDAoEdGFncxgHIAMoCRIqCghzdGFuZGFyZBgIIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCSABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYCiABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGAsgASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDCABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgNIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiUwoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSKQoJcmVhY3Rpb25zGAIgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw");
 
 /**
  * @generated from message feeds.v1.PostGeoLoc
@@ -312,6 +312,8 @@ export const VideoPostSchema: GenMessage<VideoPost, VideoPostJson> = /*@__PURE__
   messageDesc(file_feeds_v1_feeds, 6);
 
 /**
+ * XXX: not used yet in contracts
+ *
  * @generated from message feeds.v1.Reaction
  */
 export type Reaction = Message<"feeds.v1.Reaction"> & {
@@ -332,6 +334,8 @@ export type Reaction = Message<"feeds.v1.Reaction"> & {
 };
 
 /**
+ * XXX: not used yet in contracts
+ *
  * @generated from message feeds.v1.Reaction
  */
 export type ReactionJson = {
@@ -418,41 +422,41 @@ export const TipSchema: GenMessage<Tip, TipJson> = /*@__PURE__*/
  */
 export type Post = Message<"feeds.v1.Post"> & {
   /**
-   * @generated from field: string author = 2;
+   * @generated from field: string author = 1;
    */
   author: string;
 
   /**
-   * @generated from field: string parent_uri = 3;
+   * @generated from field: string parent_uri = 2;
    */
   parentUri: string;
 
   /**
    * XXX: map any extentions = 10;
    *
-   * @generated from field: feeds.v1.PostGeoLoc loc = 4;
+   * @generated from field: feeds.v1.PostGeoLoc loc = 3;
    */
   loc?: PostGeoLoc;
 
   /**
-   * @generated from field: int64 created_at = 5;
+   * @generated from field: int64 created_at = 4;
    */
   createdAt: bigint;
 
   /**
-   * @generated from field: int64 updated_at = 6;
+   * @generated from field: int64 updated_at = 5;
    */
   updatedAt: bigint;
 
   /**
    * if != 0 -> deleted
    *
-   * @generated from field: int64 deleted_at = 7;
+   * @generated from field: int64 deleted_at = 6;
    */
   deletedAt: bigint;
 
   /**
-   * @generated from field: repeated string tags = 8;
+   * @generated from field: repeated string tags = 7;
    */
   tags: string[];
 
@@ -461,37 +465,37 @@ export type Post = Message<"feeds.v1.Post"> & {
    */
   post: {
     /**
-     * @generated from field: feeds.v1.StandardPost standard = 9;
+     * @generated from field: feeds.v1.StandardPost standard = 8;
      */
     value: StandardPost;
     case: "standard";
   } | {
     /**
-     * @generated from field: feeds.v1.ArticlePost article = 10;
+     * @generated from field: feeds.v1.ArticlePost article = 9;
      */
     value: ArticlePost;
     case: "article";
   } | {
     /**
-     * @generated from field: feeds.v1.LinkPost link = 11;
+     * @generated from field: feeds.v1.LinkPost link = 10;
      */
     value: LinkPost;
     case: "link";
   } | {
     /**
-     * @generated from field: feeds.v1.ImagePost image = 12;
+     * @generated from field: feeds.v1.ImagePost image = 11;
      */
     value: ImagePost;
     case: "image";
   } | {
     /**
-     * @generated from field: feeds.v1.VideoPost video = 13;
+     * @generated from field: feeds.v1.VideoPost video = 12;
      */
     value: VideoPost;
     case: "video";
   } | {
     /**
-     * @generated from field: feeds.v1.AudioPost audio = 14;
+     * @generated from field: feeds.v1.AudioPost audio = 13;
      */
     value: AudioPost;
     case: "audio";
@@ -503,71 +507,71 @@ export type Post = Message<"feeds.v1.Post"> & {
  */
 export type PostJson = {
   /**
-   * @generated from field: string author = 2;
+   * @generated from field: string author = 1;
    */
   author?: string;
 
   /**
-   * @generated from field: string parent_uri = 3;
+   * @generated from field: string parent_uri = 2;
    */
   parentUri?: string;
 
   /**
    * XXX: map any extentions = 10;
    *
-   * @generated from field: feeds.v1.PostGeoLoc loc = 4;
+   * @generated from field: feeds.v1.PostGeoLoc loc = 3;
    */
   loc?: PostGeoLocJson;
 
   /**
-   * @generated from field: int64 created_at = 5;
+   * @generated from field: int64 created_at = 4;
    */
   createdAt?: string;
 
   /**
-   * @generated from field: int64 updated_at = 6;
+   * @generated from field: int64 updated_at = 5;
    */
   updatedAt?: string;
 
   /**
    * if != 0 -> deleted
    *
-   * @generated from field: int64 deleted_at = 7;
+   * @generated from field: int64 deleted_at = 6;
    */
   deletedAt?: string;
 
   /**
-   * @generated from field: repeated string tags = 8;
+   * @generated from field: repeated string tags = 7;
    */
   tags?: string[];
 
   /**
-   * @generated from field: feeds.v1.StandardPost standard = 9;
+   * @generated from field: feeds.v1.StandardPost standard = 8;
    */
   standard?: StandardPostJson;
 
   /**
-   * @generated from field: feeds.v1.ArticlePost article = 10;
+   * @generated from field: feeds.v1.ArticlePost article = 9;
    */
   article?: ArticlePostJson;
 
   /**
-   * @generated from field: feeds.v1.LinkPost link = 11;
+   * @generated from field: feeds.v1.LinkPost link = 10;
    */
   link?: LinkPostJson;
 
   /**
-   * @generated from field: feeds.v1.ImagePost image = 12;
+   * @generated from field: feeds.v1.ImagePost image = 11;
    */
   image?: ImagePostJson;
 
   /**
-   * @generated from field: feeds.v1.VideoPost video = 13;
+   * @generated from field: feeds.v1.VideoPost video = 12;
    */
   video?: VideoPostJson;
 
   /**
-   * @generated from field: feeds.v1.AudioPost audio = 14;
+   * @generated from field: feeds.v1.AudioPost audio = 13;
    */
   audio?: AudioPostJson;
 };

@@ -41,7 +41,7 @@ type e2eInfraConfig struct {
 }
 
 func (conf *e2eInfraConfig) RegisterFlags(flset *flag.FlagSet) {
-	flset.BoolVar(&e2eInfraConf.ci, "ci", false, "Enable CI mode which runs cypress tests automatically")
+	flset.BoolVar(&e2eInfraConf.ci, "ci", false, "Enable CI mode which also starts the web server in production mode")
 }
 
 func execE2EInfra() error {
