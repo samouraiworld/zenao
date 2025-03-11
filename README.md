@@ -4,9 +4,21 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started (Staging)
 
-First, [node + npm via nvm](https://github.com/nvm-sh/nvm).
+First, install [node + npm via nvm](https://github.com/nvm-sh/nvm).
 
-The `.env.local` default env file present on main branch is populated with values targeting the staging environment.
+Install the [vercel cli](https://vercel.com/docs/cli)
+
+Get the staging by linking the vercel project and pulling the env
+
+```bash
+vercel link
+```
+
+```bash
+vercel env pull
+```
+
+The `.env.local` file should be populated with values targeting the staging environment.
 
 Now run the development server:
 
