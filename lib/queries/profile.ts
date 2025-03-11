@@ -26,7 +26,6 @@ export const profileOptions = (addr: string | null) =>
 
       return profiles.fetch(addr);
     },
-    enabled: addr !== undefined,
   });
 
 export const profiles = createBatcher({

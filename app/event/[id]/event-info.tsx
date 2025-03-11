@@ -21,7 +21,6 @@ import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userOptions } from "@/lib/queries/user";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
@@ -29,6 +28,7 @@ import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { Avatar } from "@/components/common/Avatar";
+import { profileOptions } from "@/lib/queries/profile";
 
 interface EventSectionProps {
   title: string;
@@ -52,7 +52,7 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
-  const { data: host } = useSuspenseQuery(userOptions(data.creator));
+  const { data: host } = useSuspenseQuery(profileOptions(data.creator));
 
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");

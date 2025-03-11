@@ -6,7 +6,6 @@ import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
-import { userOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { profileOptions } from "@/lib/queries/profile";
 
@@ -44,7 +43,7 @@ export default async function EventPage({ params }: Props) {
 
   const eventData = await queryClient.fetchQuery(eventOptions(p.id));
   if (eventData) {
-    void queryClient.prefetchQuery(userOptions(eventData.creator));
+    void queryClient.prefetchQuery(profileOptions(eventData.creator));
   }
 
   // Prefetch all participants profiles

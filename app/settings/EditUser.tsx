@@ -16,7 +16,7 @@ import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
 import { FormFieldImage } from "@/components/form/components/FormFieldImage";
-import { userAddressOptions, userOptions } from "@/lib/queries/user";
+import { userAddressOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import { Separator } from "@/components/shadcn/separator";
 import { Button, buttonVariants } from "@/components/shadcn/button";
@@ -29,7 +29,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data: user } = useSuspenseQuery(userOptions(address));
+  const { data: user } = useSuspenseQuery(profileOptions(address));
 
   const [loading, setLoading] = useState<boolean>(false);
 

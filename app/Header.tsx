@@ -20,8 +20,8 @@ import { SmallText } from "@/components/texts/SmallText";
 import { Text } from "@/components/texts/DefaultText";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
-import { userAddressOptions, userOptions } from "@/lib/queries/user";
-import { GnoProfile } from "@/lib/queries/profile";
+import { userAddressOptions } from "@/lib/queries/user";
+import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import { HeaderAvatarLoader, HeaderAvatar } from "@/components/common/Avatar";
 import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
 
@@ -57,7 +57,7 @@ export function Header() {
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data: user } = useSuspenseQuery(userOptions(address));
+  const { data: user } = useSuspenseQuery(profileOptions(address));
 
   return (
     <div className="flex sm:justify-center sm:p-2 w-full">
