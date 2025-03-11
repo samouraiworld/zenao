@@ -26,7 +26,7 @@ function ParticipantsAvatarsPreview({
       {participants &&
         participants.map((participant) => (
           <Avatar
-            key={participant?.displayName}
+            key={participant?.address}
             className="flex ring-2 ring-background/80"
             uri={participant?.avatarUri || ""}
           />
@@ -49,7 +49,7 @@ function ParticipantsNamesPreview({
       ) : (
         <div>
           {participants.map((participant) => (
-            <SmallText key={participant?.displayName}>
+            <SmallText key={participant?.address}>
               {participant?.displayName}
             </SmallText>
           ))}
