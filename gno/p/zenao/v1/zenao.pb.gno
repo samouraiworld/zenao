@@ -2,47 +2,6 @@
 
 package zenaov1
 
-import "errors"
-
-type LinkPostKind uint32
-
-const (
-	LINK_POST_KIND_UNSPECIFIED = LinkPostKind(0)
-	LINK_POST_KIND_POLL        = LinkPostKind(1)
-	LINK_POST_KIND_EVENT       = LinkPostKind(2)
-	LINK_POST_KIND_PROPOSAL    = LinkPostKind(3)
-)
-
-func LinkPostKindFromString(str string) LinkPostKind {
-	switch str {
-	case "LINK_POST_KIND_UNSPECIFIED":
-		return LINK_POST_KIND_UNSPECIFIED
-	case "LINK_POST_KIND_POLL":
-		return LINK_POST_KIND_POLL
-	case "LINK_POST_KIND_EVENT":
-		return LINK_POST_KIND_EVENT
-	case "LINK_POST_KIND_PROPOSAL":
-		return LINK_POST_KIND_PROPOSAL
-	default:
-		panic(errors.New("unknown variant " + str))
-	}
-}
-
-func (e LinkPostKind) ToString() string {
-	switch e {
-	case LINK_POST_KIND_UNSPECIFIED:
-		return "LINK_POST_KIND_UNSPECIFIED"
-	case LINK_POST_KIND_POLL:
-		return "LINK_POST_KIND_POLL"
-	case LINK_POST_KIND_EVENT:
-		return "LINK_POST_KIND_EVENT"
-	case LINK_POST_KIND_PROPOSAL:
-		return "LINK_POST_KIND_PROPOSAL"
-	default:
-		panic(errors.New("unknown variant"))
-	}
-}
-
 type EditUserRequest struct {
 	DisplayName string
 	Bio         string
@@ -143,68 +102,4 @@ type BatchProfileField struct {
 type BatchProfileRequest struct {
 	Fields    []*BatchProfileField
 	Addresses []string
-}
-
-type PostGeoLoc struct {
-	Lat float32
-	Lng float32
-}
-
-type PostID struct {
-	LocalId   string
-	FeedId    string
-	NetworkId string
-}
-
-type StandardPost struct {
-	Content string
-}
-
-type ArticlePost struct {
-	Title           string
-	PreviewText     string
-	PreviewImageUri string
-	Content         string
-}
-
-type LinkPost struct {
-	Uri string
-}
-
-type ImagePost struct {
-	Description string
-	ImageUri    string
-}
-
-type VideoPost struct {
-	Description       string
-	VideoUri          string
-	ThumbnailImageUri string
-}
-
-type Reaction struct {
-	PostId *PostID
-	Icon   string
-	UserId string
-}
-
-type Tip struct {
-	PostLocalId string
-	Denom       string
-	Amount      int64
-}
-
-type Post struct {
-	ChannelId string
-	Author    string
-	ParentId  *PostID
-	Loc       *PostGeoLoc
-	CreatedAt int64
-	UpdatedAt int64
-	DeletedAt int64
-	Post      interface{}
-}
-
-type SocialFeed struct {
-	Id string
 }
