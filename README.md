@@ -8,7 +8,7 @@ First, install [node + npm via nvm](https://github.com/nvm-sh/nvm).
 
 Install the [vercel cli](https://vercel.com/docs/cli)
 
-Get the staging by linking the vercel project and pulling the env
+Get the staging env by linking the vercel project and pulling the env
 
 ```bash
 vercel link
@@ -39,10 +39,8 @@ First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](htt
 Install gno tools if you don't have them:
 
 ```bash
-git clone git@github.com:gnolang/gno.git
-cd gno
-make install
-cd ..
+make clone-gno
+make install-gno
 ```
 
 Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
@@ -53,8 +51,12 @@ make install-atlas
 
 Override local env with dev env
 ```bash
-cp .env.dev .env.local
+cp .env.backend-dev .env.local
 ```
+
+If you need to test file uploads, add back the `PINATA_JWT` in `.env.local`
+
+Be careful not to commit the PINATA_JWT or clerk secret!
 
 Now, start gnodev with the admin account:
 
@@ -62,12 +64,15 @@ Now, start gnodev with the admin account:
 make start.gnodev
 ```
 
-In another terminal, initialize the db and start the backend:
+In another terminal, initialize the db, inject the clerk secret and start the backend:
 
 ```bash
 make migrate-local
+export ZENAO_CLERK_SECRET_KEY=<clerk-testing-secret-key>
 go run ./backend start
 ```
+
+You can get the clerk testing secret with `vercel env pull`
 
 Optionally, generate fake data:
 ```bash
@@ -95,10 +100,8 @@ First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](htt
 Install gno tools if you don't have them:
 
 ```bash
-git clone git@github.com:gnolang/gno.git
-cd gno
-make install
-cd ..
+make clone-gno
+make install-gno
 ```
 
 Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
@@ -109,13 +112,20 @@ make install-atlas
 
 Override local env with dev env
 ```bash
-cp .env.dev .env.local
+cp .env.backend-dev .env.local
 ```
+
+Add back the `PINATA_JWT` in `.env.local`
+
+Be careful not to commit the PINATA_JWT or clerk secret!
 
 Now, run the e2e stack
 ```bash
+export ZENAO_CLERK_SECRET_KEY=<clerk-testing-secret-key>
 go run ./backend e2e-infra
 ```
+
+You can get the clerk testing secret with `vercel env pull`
 
 This prepares the local db, starts gnodev as well as the backend, run fakegen and print logs in a single terminal.
 
