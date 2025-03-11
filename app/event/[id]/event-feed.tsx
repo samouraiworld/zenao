@@ -5,13 +5,11 @@ import Link from "next/link";
 import { PollCard } from "@/components/cards/social-feed/poll-card";
 import { fakePolls } from "@/app/event/[id]/fake-polls";
 import { PostCard } from "@/components/cards/social-feed/post-card";
-import { cn } from "@/lib/tailwind";
-import { ButtonBase } from "@/components/buttons/ButtonBases";
-import { Text } from "@/components/texts/DefaultText";
 import { AvatarWithLoaderAndFallback } from "@/components/common/Avatar";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";
+import { Textarea } from "@/components/shadcn/textarea";
 
-function FeedInput({ className }: { className?: string }) {
+function FeedInput() {
   const { getToken, userId } = useAuth();
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -20,17 +18,17 @@ function FeedInput({ className }: { className?: string }) {
 
   return (
     <>
-      <div className={cn("flex flex-row items-center gap-4", className)}>
+      <div className="flex flex-row items-center gap-4">
         {user?.avatarUri && (
           <Link href="/settings">
             <AvatarWithLoaderAndFallback user={user} />
           </Link>
         )}
-        <ButtonBase className="flex-1 justify-start h-auto px-4 py-3 rounded-xl border-secondary/80 bg-transparent backdrop-blur-sm hover:bg-neutral-700 ">
-          <Text className="!text-lg font-semibold">
-            {"Don't be shy, say something!"}
-          </Text>
-        </ButtonBase>
+        {/*TODO: Make textarea auto shrink, and grow until max height*/}
+        <Textarea
+          className="cursor-pointer border-0 h-[54px] min-h-[54px] focus-visible:ring-transparent rounded-xl text-base text-sm px-4 py-3 w-full max-h-[200px] placeholder:text-primary-color  text-lg hover:bg-neutral-700"
+          placeholder={"Don't be shy, say something!"}
+        />
       </div>
     </>
   );
@@ -47,10 +45,10 @@ export function EventFeed(
 ) {
   return (
     <div
-      className="flex flex-col gap-4 min-h-0"
+      className="flex flex-col gap-4 min-h-0 pt-4"
       style={{ maxHeight: "calc(100vh - 52px)" }}
     >
-      <FeedInput className="mt-4" />
+      <FeedInput />
 
       <div className="flex flex-col w-full rounded-xl overflow-y-auto gap-4">
         <PostCard />

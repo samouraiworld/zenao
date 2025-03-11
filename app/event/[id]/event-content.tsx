@@ -112,7 +112,7 @@ export function EventContent({
           height={200}
           alt="Event hero"
           priority
-          className="w-full h-[200px] rounded-xl self-center absolute top-0 self-center -z-10"
+          className="object-cover w-full h-[200px] rounded-xl self-center absolute top-0 self-center -z-10"
           style={{ maxWidth: screenContainerMaxWidth }}
           loader={web3ImgLoader}
         />
