@@ -24,10 +24,11 @@ import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles, eventUsersWithRole } from "@/lib/queries/event-users";
+import { userOptions } from "@/lib/queries/user";
+import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
@@ -95,14 +96,8 @@ const ParticipantsNamesPreview: React.FC<{
   );
 };
 
-export function EventInfo({
-  id,
-  userId,
-}: {
-  id: string;
-  userId: string | null;
-}) {
-  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+export function EventInfo({ id }: { id: string }) {
+  const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -120,6 +115,7 @@ export function EventInfo({
       return results.map((item) => item.data);
     },
   });
+  const { data: host } = useSuspenseQuery(userOptions(data.creator));
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
@@ -269,10 +265,16 @@ export function EventInfo({
             />
           </div>
         </EventSection>
-        {/* TODO: Uncomment that when we can see the name of the addr */}
-        {/* <EventSection title={t("hosted-by")}> */}
-        {/*   <SmallText>User</SmallText> */}
-        {/* </EventSection> */}
+        {host && (
+          <EventSection title={t("hosted-by")}>
+            <Link href={`/profile/${data.creator}`}>
+              <div className="flex flex-row items-center gap-2">
+                <Avatar uri={host.avatarUri} />
+                <SmallText>{host.displayName}</SmallText>
+              </div>
+            </Link>
+          </EventSection>
+        )}
       </div>
 
       {/* Right Section */}
