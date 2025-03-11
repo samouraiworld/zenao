@@ -15,42 +15,34 @@ interface AvatarLoaderProps {
   className?: string;
 }
 
-export const HeaderAvatar: React.FC<AvatarProps> = ({ uri, className }) => {
+export function HeaderAvatar({ uri, className }: AvatarProps) {
   return (
     <ShadcnAvatar className={cn("h-7 w-7 sm:h-8 sm:w-8", className)}>
       <Image alt="avatar" src={uri} loader={web3ImgLoader} fill />
     </ShadcnAvatar>
   );
-};
+}
 
-export const HeaderAvatarLoader: React.FC<AvatarLoaderProps> = ({
-  className,
-}) => {
+export function HeaderAvatarLoader({ className }: AvatarLoaderProps) {
   return (
     <ShadcnAvatar className={cn("h-7 w-7 sm:h-[30px] sm:w-[30px]", className)}>
       <Skeleton className={cn("h-7 w-7 sm:h-[30px] sm:w-[30px]", className)} />
     </ShadcnAvatar>
   );
-};
+}
 
-export const Avatar: React.FC<AvatarProps> = ({ uri, className }) => {
+export function Avatar({ uri, className }: AvatarProps) {
   return (
-    <ShadcnAvatar className={cn("h-5 w-5", className)}>
-      <Image
-        alt="avatar"
-        width={20}
-        height={20}
-        src={uri}
-        loader={web3ImgLoader}
-      />
+    <ShadcnAvatar className={cn("h-6 w-6", className)}>
+      <Image alt="avatar" src={uri} loader={web3ImgLoader} fill />
     </ShadcnAvatar>
   );
-};
+}
 
-export const AvatarLoader: React.FC<AvatarLoaderProps> = ({ className }) => {
+export function AvatarLoader({ className }: AvatarLoaderProps) {
   return (
-    <ShadcnAvatar className={cn("h-5 w-5", className)}>
-      <Skeleton className="h-5 w-5" />
+    <ShadcnAvatar className={cn("h-6 w-6", className)}>
+      <Skeleton className="h-6 w-6" />
     </ShadcnAvatar>
   );
-};
+}

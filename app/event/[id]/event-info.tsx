@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import {
-  useQueryClient,
-  useSuspenseQueries,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
@@ -15,6 +11,7 @@ import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
 import { imageWidth } from "./constants";
+import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Text } from "@/components/texts/DefaultText";
@@ -23,24 +20,15 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { eventUserRoles, eventUsersWithRole } from "@/lib/queries/event-users";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import { userOptions } from "@/lib/queries/user";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
-import { GnowebButton } from "@/components/buttons/GnowebButton";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
-import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import { Avatar } from "@/components/common/Avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/shadcn/dialog";
 
 interface EventSectionProps {
   title: string;
@@ -57,45 +45,6 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
   );
 };
 
-const ParticipantsAvatarsPreview: React.FC<{
-  participants: (GnoProfile | null)[];
-}> = ({ participants }) => {
-  return (
-    <div className="flex p-1 -space-x-2 overflow-hidden">
-      {participants &&
-        participants.map((participant) => (
-          <Avatar
-            key={participant?.displayName}
-            className="flex ring-2 ring-background/80"
-            uri={participant?.avatarUri || ""}
-          />
-        ))}
-    </div>
-  );
-};
-
-const ParticipantsNamesPreview: React.FC<{
-  participants: (GnoProfile | null)[];
-}> = ({ participants }) => {
-  return (
-    <div className="flex flex-row">
-      {participants.length > 2 ? (
-        <div>
-          <SmallText>{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</SmallText>
-        </div>
-      ) : (
-        <div>
-          {participants.map((participant) => (
-            <SmallText key={participant?.displayName}>
-              {participant?.displayName}
-            </SmallText>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
 export function EventInfo({ id }: { id: string }) {
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(id));
@@ -103,19 +52,8 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
-  const { data: participantsAddresses } = useSuspenseQuery(
-    eventUsersWithRole(id, "participant"),
-  );
-  const participants = useSuspenseQueries({
-    queries: participantsAddresses.map((address) => profileOptions(address)),
-    combine: (results) => {
-      if (results.some((item) => !item.isSuccess)) {
-        return;
-      }
-      return results.map((item) => item.data);
-    },
-  });
   const { data: host } = useSuspenseQuery(userOptions(data.creator));
+
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
@@ -219,54 +157,13 @@ export function EventInfo({ id }: { id: string }) {
             </div>
           </Card>
         )}
+
         {/* Participants preview and dialog section */}
         <EventSection title={t("going", { count: data.participants })}>
-          <div className="flex flex-col gap-5">
-            {participants && (
-              <Dialog>
-                <DialogTrigger>
-                  <div className="flex flex-col gap-2">
-                    {/* 6 because we decide to show the first 6 participants avatars as preview */}
-                    <ParticipantsAvatarsPreview
-                      participants={
-                        participants.length > 6
-                          ? participants.slice(0, 6)
-                          : participants
-                      }
-                    />
-                    <ParticipantsNamesPreview participants={participants} />
-                  </div>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Participants list</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex flex-col gap-2">
-                    {participants.map((participant) => {
-                      if (!participant) {
-                        return null;
-                      }
-                      return (
-                        <Link
-                          href={`/profile/${participant.address}`}
-                          key={participant?.displayName}
-                        >
-                          <div className="flex h-10 p-1 flex-row gap-3 items-center">
-                            <Avatar uri={participant.avatarUri} />
-                            <SmallText>{participant?.displayName}</SmallText>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
-            <GnowebButton
-              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
-            />
-          </div>
+          <ParticipantsSection id={id} />
         </EventSection>
+
+        {/* Host section */}
         {host && (
           <EventSection title={t("hosted-by")}>
             <Link href={`/profile/${data.creator}`}>
