@@ -87,6 +87,8 @@ export function EventContent({
     event.location?.address.case == "custom"
       ? event.location.address.value.address
       : "";
+  const fakeImageUri =
+    "https://maroon-horizontal-bobolink-562.mypinata.cloud/ipfs/QmVxDaUBtkkT2AHKsW6wcX44AegLzfzCFkr4KMAbckFfMU";
 
   const iconSize = 22;
 
@@ -96,12 +98,25 @@ export function EventContent({
     return <p>{`Event doesn't exist`}</p>;
   }
   return (
-    <div className="flex flex-col w-full sm:h-full gap-10 pt-[140px]">
+    <div
+      className={cn(
+        "flex flex-col w-full sm:h-full gap-10",
+        fakeImageUri && "pt-[140px]",
+      )}
+    >
       {/* ---- Event hero image */}
-      <div
-        className="w-full h-[200px] bg-amber-100 absolute top-0 self-center -z-10"
-        style={{ maxWidth: screenContainerMaxWidth }}
-      />
+      {!!fakeImageUri && (
+        <Image
+          src={fakeImageUri}
+          width={screenContainerMaxWidth}
+          height={200}
+          alt="Event hero"
+          priority
+          className="w-full h-[200px] rounded-xl self-center absolute top-0 self-center -z-10"
+          style={{ maxWidth: screenContainerMaxWidth }}
+          loader={web3ImgLoader}
+        />
+      )}
 
       <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10 max-h-[920px]">
         <div className="flex flex-col gap-4 w-full sm:w-2/5">
@@ -110,7 +125,7 @@ export function EventContent({
             src={event.imageUri}
             width={330}
             height={330}
-            alt="Event"
+            alt="Event image"
             priority
             className="flex w-full rounded-xl self-center"
             loader={web3ImgLoader}
