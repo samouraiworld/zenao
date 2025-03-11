@@ -18,8 +18,8 @@ const HeaderEventsList: React.FC<{
   const t = useTranslations("events-list");
   return (
     <div className="flex flex-col gap-2 mb-3">
-      <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row sm:justify-between">
-        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+      <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between">
+        <div className="flex flex-col md:flex-row gap-2 md:items-center">
           <VeryLargeText className="truncate">{title}</VeryLargeText>
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}

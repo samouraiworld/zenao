@@ -23,7 +23,7 @@ jobs:
         run: make clean-gno
 
       - name: Clone gno
-        run: make clone-gno
+        run: make clone-testing-gno
 
       - name: Build GnoVM
         run: make build-gno
