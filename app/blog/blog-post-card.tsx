@@ -17,8 +17,8 @@ export default function BlogPostCard({
   slug,
 }: BlogPostCardProps) {
   return (
-    <Link href={`/blog/${slug}`} className="w-full max-w-md">
-      <Card className="flex flex-col gap-8 hover:bg-secondary/60 transition-colors">
+    <Link href={`/blog/${slug}`} className="w-full max-w-md h-full">
+      <Card className="flex flex-col h-full gap-8 hover:bg-secondary/60 transition-colors">
         <div className="flex aspect-[16/7] justify-center items-center bg-background rounded-lg">
           <Image
             src="/zenao-logo.png"
@@ -28,9 +28,10 @@ export default function BlogPostCard({
             className="w-16 h-16"
           />
         </div>
-        <LargeText>{title}</LargeText>
-        <Text>{description}</Text>
-
+        <div className="flex flex-col h-full gap-4">
+          <LargeText>{title}</LargeText>
+          <Text>{description}</Text>
+        </div>
         <Text>View more...</Text>
       </Card>
     </Link>
