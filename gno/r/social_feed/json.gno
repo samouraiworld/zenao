@@ -1,14 +1,18 @@
 package social_feed
 
-import "gno.land/p/demo/json"
+import (
+	"gno.land/p/demo/json"
+	feedsv1 "gno.land/p/zenao/feeds/v1"
+)
 
-func GetFeedPostsJSON(feedId string, offset uint32, limit uint32, tags string, user string) string {
-	posts := GetFeedPosts(feedId, offset, limit, tags, user)
+// XXX: TODO use array of string for tags
+func ViewPostsToJSON(posts []*feedsv1.PostView) string {
 	nodes := []*json.Node{}
 	for _, post := range posts {
 		nodes = append(nodes, post.ToJSON())
 	}
-	bz, err := json.Marshal(nodes)
+	nodeArray := json.ArrayNode("", nodes)
+	bz, err := json.Marshal(nodeArray)
 	if err != nil {
 		panic(err)
 	}

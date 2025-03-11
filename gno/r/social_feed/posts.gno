@@ -60,6 +60,7 @@ func EditPost(localPostId string, newPost *feedsv1.Post) {
 	posts.Set(localPostId, newPost)
 }
 
+// XXX: create a tree just for addresses that have reacted to a post
 func ReactPost(localPostId string, icon string) {
 	caller := std.PreviousRealm().Address()
 	reactId := localPostId + ":" + icon

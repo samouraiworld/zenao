@@ -48,6 +48,8 @@ func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string 
 
 // XXX: do a registry by user & one by parentID ?
 // XXX: handle flagged posts
+// XXX: handle tags with an array of string
+// XXX: optimize research by tags with a new tree ?
 func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user string) []*feedsv1.PostView {
 	if feedId == "" {
 		panic("feedId is empty")
@@ -56,7 +58,10 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 	i := 0
 	start := feedId + ":"
 	end := feedId + ";"
-	tagsSplit := strings.Split(tags, ";")
+	tagsSplit := []string{}
+	if tags != "" {
+		tagsSplit = strings.Split(tags, ",")
+	}
 	posts.Iterate(start, end, func(key string, value interface{}) bool {
 		post := value.(*feedsv1.Post)
 		for _, tag := range tagsSplit {

@@ -117,7 +117,7 @@ func TestGetFeedPosts(t *testing.T) {
 	}
 
 	type output struct {
-		posts []*feedsv1.Post
+		posts []*feedsv1.PostView
 		panic bool
 	}
 
@@ -128,27 +128,33 @@ func TestGetFeedPosts(t *testing.T) {
 
 	type testTable = map[string]test
 
-	posts := []*feedsv1.Post{
+	posts := []*feedsv1.PostView{
 		{
-			Author:    alice.String(),
-			DeletedAt: 0,
-			Post: &feedsv1.StandardPost{
-				Content: "hello",
+			Post: &feedsv1.Post{
+				Author:    alice.String(),
+				DeletedAt: 0,
+				Post: &feedsv1.StandardPost{
+					Content: "hello",
+				},
 			},
 		},
 		{
-			Author:    alice.String(),
-			DeletedAt: 0,
-			Post: &feedsv1.LinkPost{
-				Uri: "https://example.com",
+			Post: &feedsv1.Post{
+				Author:    alice.String(),
+				DeletedAt: 0,
+				Post: &feedsv1.LinkPost{
+					Uri: "https://example.com",
+				},
 			},
 		},
 		{
-			Author:    alice.String(),
-			DeletedAt: 0,
-			Post: &feedsv1.ImagePost{
-				Description: "an image",
-				ImageUri:    "https://example.com/image.jpg",
+			Post: &feedsv1.Post{
+				Author:    alice.String(),
+				DeletedAt: 0,
+				Post: &feedsv1.ImagePost{
+					Description: "an image",
+					ImageUri:    "https://example.com/image.jpg",
+				},
 			},
 		},
 	}
@@ -172,7 +178,7 @@ func TestGetFeedPosts(t *testing.T) {
 				limit:  10,
 			},
 			output: output{
-				posts: []*feedsv1.Post{},
+				posts: []*feedsv1.PostView{},
 				panic: false,
 			},
 		},
@@ -222,7 +228,7 @@ func TestGetFeedPosts(t *testing.T) {
 
 	std.TestSetOriginCaller(alice)
 	for _, post := range posts {
-		NewPost(alice.String()+":public", post)
+		NewPost(alice.String()+":public", post.Post)
 	}
 
 	for name, test := range tests {
@@ -236,32 +242,33 @@ func TestGetFeedPosts(t *testing.T) {
 				}()
 			}
 
-			res := GetFeedPosts(test.input.feedId, test.input.offset, test.input.limit)
+			res := GetFeedPosts(test.input.feedId, test.input.offset, test.input.limit, "", "")
 			if len(res) != len(test.output.posts) {
 				t.Fatalf("expected %d posts, got %d", len(test.output.posts), len(res))
 			}
-			for i, post := range res {
-				if post.Author != test.output.posts[i].Author {
-					t.Errorf("expected author %q, got %q", test.output.posts[i].Author, post.Author)
+			for i, postView := range res {
+				post := postView.Post
+				if post.Author != test.output.posts[i].Post.Author {
+					t.Errorf("expected author %q, got %q", test.output.posts[i].Post.Author, post.Author)
 				}
-				if post.DeletedAt != test.output.posts[i].DeletedAt {
-					t.Errorf("expected deletedAt %d, got %d", test.output.posts[i].DeletedAt, post.DeletedAt)
+				if post.DeletedAt != test.output.posts[i].Post.DeletedAt {
+					t.Errorf("expected deletedAt %d, got %d", test.output.posts[i].Post.DeletedAt, post.DeletedAt)
 				}
 				switch v := post.Post.(type) {
 				case *feedsv1.StandardPost:
-					if v.Content != test.output.posts[i].Post.(*feedsv1.StandardPost).Content {
-						t.Errorf("expected content %q, got %q", test.output.posts[i].Post.(*feedsv1.StandardPost).Content, v.Content)
+					if v.Content != test.output.posts[i].Post.Post.(*feedsv1.StandardPost).Content {
+						t.Errorf("expected content %q, got %q", test.output.posts[i].Post.Post.(*feedsv1.StandardPost).Content, v.Content)
 					}
 				case *feedsv1.LinkPost:
-					if v.Uri != test.output.posts[i].Post.(*feedsv1.LinkPost).Uri {
-						t.Errorf("expected uri %q, got %q", test.output.posts[i].Post.(*feedsv1.LinkPost).Uri, v.Uri)
+					if v.Uri != test.output.posts[i].Post.Post.(*feedsv1.LinkPost).Uri {
+						t.Errorf("expected uri %q, got %q", test.output.posts[i].Post.Post.(*feedsv1.LinkPost).Uri, v.Uri)
 					}
 				case *feedsv1.ImagePost:
-					if v.Description != test.output.posts[i].Post.(*feedsv1.ImagePost).Description {
-						t.Errorf("expected description %q, got %q", test.output.posts[i].Post.(*feedsv1.ImagePost).Description, v.Description)
+					if v.Description != test.output.posts[i].Post.Post.(*feedsv1.ImagePost).Description {
+						t.Errorf("expected description %q, got %q", test.output.posts[i].Post.Post.(*feedsv1.ImagePost).Description, v.Description)
 					}
-					if v.ImageUri != test.output.posts[i].Post.(*feedsv1.ImagePost).ImageUri {
-						t.Errorf("expected imageUri %q, got %q", test.output.posts[i].Post.(*feedsv1.ImagePost).ImageUri, v.ImageUri)
+					if v.ImageUri != test.output.posts[i].Post.Post.(*feedsv1.ImagePost).ImageUri {
+						t.Errorf("expected imageUri %q, got %q", test.output.posts[i].Post.Post.(*feedsv1.ImagePost).ImageUri, v.ImageUri)
 					}
 				}
 			}
