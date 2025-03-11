@@ -9,11 +9,12 @@ export type BlogPostMetadata = {
   slug: string;
   title: string;
   description: string;
+  previewImage: string;
   date: string;
 };
 
 export type BlogPost = {
-  data: Record<string, string>;
+  data: Omit<BlogPostMetadata, "slug">;
   content: string;
 };
 
@@ -31,6 +32,7 @@ export async function getPostsMetadata(): Promise<BlogPostMetadata[]> {
         title: data.title,
         date: data.date,
         description: data.description,
+        previewImage: data.previewImage,
       };
     });
 
@@ -49,9 +51,16 @@ export async function getPostContent(slug: string): Promise<BlogPost | null> {
 
     const { data, content } = matter(fileContent);
 
-    return { data, content };
-  } catch (err) {
-    console.log(err);
+    return {
+      data: {
+        title: data.title,
+        date: data.date,
+        description: data.description,
+        previewImage: data.previewImage,
+      },
+      content,
+    };
+  } catch (_) {
     return null;
   }
 }
