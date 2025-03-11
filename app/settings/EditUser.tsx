@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
@@ -18,7 +19,7 @@ import { FormFieldImage } from "@/components/form/components/FormFieldImage";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import { Separator } from "@/components/shadcn/separator";
-import { Button } from "@/components/shadcn/button";
+import { Button, buttonVariants } from "@/components/shadcn/button";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -111,9 +112,17 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
         </div>
         <Separator className="mb-2" />
-        <Button asChild variant="destructive" type="button">
-          <SignOutButton />
-        </Button>
+        <div className="flex flex-row gap-2">
+          <Link
+            href={`/profile/${user?.address}`}
+            className={buttonVariants({ variant: "secondary" })}
+          >
+            Profile
+          </Link>
+          <Button asChild variant="destructive" type="button">
+            <SignOutButton />
+          </Button>
+        </div>
       </form>
     </Form>
   );

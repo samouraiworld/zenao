@@ -69,9 +69,8 @@ migrate-local:
 .PHONY: install-atlas
 install-atlas:
 	rm -fr atlas
-	git clone https://github.com/ariga/atlas.git
-	cd atlas && git remote add delkopiso https://github.com/delkopiso/atlas.git
-	cd atlas && git fetch delkopiso libsql-support
+	git clone https://github.com/samouraiworld/atlas.git
+	cd atlas && git fetch origin versioned-libsql-support
 	cd atlas && git checkout c261f318ac25924555e63fdf005cc53de43fa5db
 	cd atlas/cmd/atlas && go install .
 	rm -fr atlas

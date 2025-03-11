@@ -1,0 +1,24 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { ProfileInfo } from "./profile-info";
+import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { getQueryClient } from "@/lib/get-query-client";
+import { userOptions } from "@/lib/queries/user";
+
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function ProfilePage({ params }: Props) {
+  const p = await params;
+  const queryClient = getQueryClient();
+
+  void queryClient.prefetchQuery(userOptions(p.id));
+
+  return (
+    <ScreenContainer>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <ProfileInfo address={p.id} />
+      </HydrationBoundary>
+    </ScreenContainer>
+  );
+}

@@ -7,7 +7,7 @@ import { LargeText } from "../texts/LargeText";
 import { Text } from "../texts/DefaultText";
 import { Card } from "./Card";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { web2URL } from "@/lib/uris";
+import { web3ImgLoader } from "@/lib/web3-img-loader";
 
 export function EventCard({ evt }: { evt: EventInfo }) {
   const iconSize = 16;
@@ -62,11 +62,12 @@ export function EventCard({ evt }: { evt: EventInfo }) {
             <div>
               <div className="min-w-[80px] min-h-[80px] w-[80px] h-[80px] sm:w-[120px] sm:h-[120px] relative">
                 <Image
-                  src={web2URL(evt.imageUri) + "?img-width=240"}
-                  priority
-                  fill
-                  alt="event-image"
-                  className="object-cover rounded-xl"
+                  src={evt.imageUri}
+                  width={80}
+                  height={80}
+                  alt="Event presentation"
+                  className="object-cover rounded-xl w-full h-full"
+                  loader={web3ImgLoader}
                 />
               </div>
             </div>
