@@ -28,7 +28,7 @@ clone-testing-gno:
 	cp -r ./gno/p ./gnobuild/gno/examples/gno.land/p/zenao
 	cp -r ./gno/r ./gnobuild/gno/examples/gno.land/r/zenao
 
-.PHONY: clone-gno:
+.PHONY: clone-gno
 clone-gno:
 	rm -fr gnobuild
 	mkdir -p gnobuild
