@@ -7,13 +7,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AlignJustify as AlignJustifyIcon } from "lucide-react";
 import { PopoverContent } from "@radix-ui/react-popover";
-import {
-  ClerkLoading,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  useAuth,
-} from "@clerk/nextjs";
+import { SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { Popover, PopoverTrigger } from "@/components/shadcn/popover";
@@ -185,6 +179,7 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
           <UserAvatar address={userAddress} className={avatarClassName} />
         </SettingsLink>
       </SignedIn>
+      {/*<AvatarWithLoaderAndFallback user={user} />*/}
     </div>
   );
 };

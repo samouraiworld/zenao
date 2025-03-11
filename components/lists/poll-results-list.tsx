@@ -27,7 +27,7 @@ function PollResult({
       className={cn(
         "flex flex-row items-center justify-between gap-2 px-4 w-full h-10 relative rounded-lg",
         !isPollEnded && "hover:opacity-50 cursor-pointer",
-        pollResult.hasUserVoted && "border border-gray-500",
+        pollResult.hasUserVoted && "border border-gray-600",
       )}
     >
       <Gauge percent={percent} className="absolute -z-10 left-0" />

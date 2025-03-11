@@ -5,10 +5,10 @@ import {
   fromUnixTime,
   isAfter,
 } from "date-fns";
-import { SmallText } from "../texts/SmallText";
-import { LargeText } from "../texts/LargeText";
-import { Text } from "../texts/DefaultText";
-import { Card } from "./Card";
+import { SmallText } from "../../texts/SmallText";
+import { LargeText } from "../../texts/LargeText";
+import { Text } from "../../texts/DefaultText";
+import { Card } from "../Card";
 import { Poll, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PollResultsList } from "@/components/lists/poll-results-list";
 
@@ -27,7 +27,6 @@ export function PollCard({ poll }: { poll: Poll }) {
   const remainingTimeText = isPollEnded
     ? "Ended"
     : `${formatDistanceToNowStrict(fromUnixTime(Number(endTime)))} remaining`;
-  const endTimeText = `End: ${format(fromUnixTime(Number(endTime)), "Pp")}`;
   const startTimeText = `Started on ${format(fromUnixTime(Number(poll.createdAt)), "Pp")}`;
 
   const onClickResult = (pollResult: PollResult) => {
@@ -36,9 +35,7 @@ export function PollCard({ poll }: { poll: Poll }) {
 
   return (
     <Card
-      className={
-        "w-full min-w-full max-w-full flex flex-row justify-between mb-3"
-      }
+      className={"w-full min-w-full max-w-full flex flex-row justify-between"}
     >
       <div className="flex flex-col gap-2 w-full">
         <div className="flex flex-row items-center gap-2">
@@ -47,7 +44,7 @@ export function PollCard({ poll }: { poll: Poll }) {
           <Text variant="secondary">{remainingTimeText}</Text>
         </div>
         <LargeText className="mb-1 line-clamp-3">{poll.question}</LargeText>
-        {/*• ◦ • ‣ ⁃ ○ ◙ ⦾ ⦿ ¤ Bullet ...*/}
+
         <PollResultsList
           list={poll.results}
           isPollEnded={isPollEnded}
@@ -66,9 +63,4 @@ export function PollCard({ poll }: { poll: Poll }) {
       </div>
     </Card>
   );
-}
-
-function idFromPkgPath(pkgPath: string): string {
-  const res = /(e\d+)$/.exec(pkgPath);
-  return res?.[1].substring(1) || "";
 }
