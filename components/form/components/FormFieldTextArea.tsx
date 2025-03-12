@@ -11,15 +11,21 @@ import {
 } from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
+import { SmallText } from "@/components/texts/SmallText";
+
+type FormFieldTextAreaProps<T extends FieldValues> = FormFieldProps<T, string> &
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+    wordCounter?: boolean;
+  };
 
 export const FormFieldTextArea = <T extends FieldValues>({
   control,
   name,
   className,
   placeholder,
+  wordCounter,
   ...otherProps
-}: FormFieldProps<T, string> &
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
+}: FormFieldTextAreaProps<T>) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = () => {
@@ -33,13 +39,14 @@ export const FormFieldTextArea = <T extends FieldValues>({
     adjustHeight();
   }, []);
 
+  console.log(otherProps.maxLength);
   return (
     <FormField
       rules={{ required: true }}
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="relative">
           <FormControl>
             <Textarea
               className={cn(
@@ -57,6 +64,14 @@ export const FormFieldTextArea = <T extends FieldValues>({
             />
           </FormControl>
           <FormMessage />
+          {wordCounter && (
+            <div className="absolute right-1 bottom-0">
+              <SmallText className="text-foreground/80">
+                <span>{field.value.length}</span> /
+                <span>{otherProps.maxLength}</span>
+              </SmallText>
+            </div>
+          )}
         </FormItem>
       )}
     />
