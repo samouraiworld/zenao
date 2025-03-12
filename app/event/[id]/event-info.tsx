@@ -10,7 +10,7 @@ import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
-import { imageWidth } from "./constants";
+import { imageHeight, imageWidth } from "./constants";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -134,7 +134,7 @@ export function EventInfo({ id }: { id: string }) {
         <Image
           src={data.imageUri}
           width={imageWidth}
-          height={330}
+          height={imageHeight}
           alt="Event"
           priority
           className="flex w-full rounded-xl self-center"
