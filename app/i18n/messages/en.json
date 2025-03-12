@@ -123,5 +123,10 @@
     "buttons": {
       "gnoweb-button": "See on gnoweb"
     }
+  },
+  "blog": {
+    "pageTitle": "Blog",
+    "pageSubheading": "Explore the exciting updates and innovations of Zenao",
+    "publishedAt": "Published at"
   }
 }
