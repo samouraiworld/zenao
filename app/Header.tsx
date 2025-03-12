@@ -61,9 +61,7 @@ export function Header() {
   );
 
   return (
-    <div
-      className={`flex w-full h-[var(--mobile-header)] md:h-[var(--header)] md:justify-center md:p-2 `}
-    >
+    <div className="flex md:justify-center md:p-2 w-full">
       {/* Desktop */}
       <div className="max-md:hidden flex flex-row w-full items-center justify-center">
         <Card className="flex flex-row items-center px-3 py-2 gap-7 rounded-xl">
