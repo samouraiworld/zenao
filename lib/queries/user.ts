@@ -1,18 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
-import { GnoProfile, profiles } from "./profile";
 import { zenaoClient } from "@/app/zenao-client";
-
-export const userOptions = (address: string | null | undefined) =>
-  queryOptions({
-    queryKey: ["user", address],
-    queryFn: async (): Promise<GnoProfile | null> => {
-      if (!address || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
-        return null;
-      }
-      return profiles.fetch(address);
-    },
-  });
 
 type GetToken = ReturnType<typeof useAuth>["getToken"];
 

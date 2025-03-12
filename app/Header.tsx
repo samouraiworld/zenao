@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -20,10 +20,8 @@ import { SmallText } from "@/components/texts/SmallText";
 import { Text } from "@/components/texts/DefaultText";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
-import { userAddressOptions, userOptions } from "@/lib/queries/user";
-import { GnoProfile } from "@/lib/queries/profile";
-import { HeaderAvatarLoader, HeaderAvatar } from "@/components/common/Avatar";
-import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
+import { userAddressOptions } from "@/lib/queries/user";
+import { UserAvatarSkeleton, UserAvatar } from "@/components/common/user";
 
 const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   const t = useTranslations("header");
@@ -51,13 +49,16 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   );
 };
 
+// XXX: there is an hydration error on header links and the top-right avatar
+// but only when you hard-refresh the discover page, must investigate.
+// Since it does not seem to affect functionality, we can ignore it for now
+
 export function Header() {
   const { getToken, userId } = useAuth();
   const t = useTranslations("header");
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data: user } = useSuspenseQuery(userOptions(address));
 
   return (
     <div
@@ -77,13 +78,13 @@ export function Header() {
             <Text className="font-extrabold">{t("zenao")}</Text>
           </Link>
           <div className="flex flex-row gap-3">
-            <HeaderLinks isLogged={address ? true : false} />
+            <HeaderLinks isLogged={!!userId} />
           </div>
           <div className="flex flex-row gap-2 items-center justify-center">
             <ToggleThemeButton />
           </div>
         </Card>
-        <Auth user={user} className="flex absolute right-5" />
+        <Auth userAddress={address} className="flex absolute right-5" />
       </div>
 
       {/* Mobile */}
@@ -98,13 +99,13 @@ export function Header() {
           />
         </Link>
         <div className="flex flex-row gap-2 items-center">
-          <Auth user={user} />
+          <Auth userAddress={address} className="flex items-center" />
           <Popover>
             <PopoverTrigger>
               <AlignJustifyIcon className="h-7 w-7" />
             </PopoverTrigger>
             <PopoverContent className="flex gap-1 flex-col bg-secondary rounded-xl px-4 py-2">
-              <HeaderLinks isLogged={address ? true : false} />
+              <HeaderLinks isLogged={!!userId} />
             </PopoverContent>
           </Popover>
         </div>
@@ -113,9 +114,11 @@ export function Header() {
   );
 }
 
-const Auth: React.FC<{ user: GnoProfile | null; className?: string }> = ({
-  user,
+const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
+
+const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
   className,
+  userAddress,
 }) => {
   const t = useTranslations("header");
   return (
@@ -130,20 +133,24 @@ const Auth: React.FC<{ user: GnoProfile | null; className?: string }> = ({
       </SignedOut>
       {/* Loading state */}
       <ClerkLoading>
-        <HeaderAvatarLoader />
+        <SettingsLink>
+          <UserAvatarSkeleton className={avatarClassName} />
+        </SettingsLink>
       </ClerkLoading>
       {/* Signed in state */}
       <SignedIn>
-        {user?.avatarUri ? (
-          <Link href="/settings">
-            <HeaderAvatar uri={user.avatarUri} />
-          </Link>
-        ) : (
-          <Avatar>
-            <AvatarFallback>Avatar</AvatarFallback>
-          </Avatar>
-        )}
+        <SettingsLink>
+          <UserAvatar address={userAddress} className={avatarClassName} />
+        </SettingsLink>
       </SignedIn>
     </div>
   );
 };
+
+function SettingsLink({ children }: { children: ReactNode }) {
+  return (
+    <Link href="/settings" className="flex items-center">
+      {children}
+    </Link>
+  );
+}

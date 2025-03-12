@@ -16,7 +16,7 @@ export type GnoProfile = {
   avatarUri: string;
 };
 
-export const profileOptions = (addr: string | null) =>
+export const profileOptions = (addr: string | null | undefined) =>
   queryOptions({
     queryKey: ["profile", addr],
     queryFn: async () => {
