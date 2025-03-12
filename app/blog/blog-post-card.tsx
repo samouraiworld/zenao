@@ -42,7 +42,7 @@ export default function BlogPostCard({
           <LargeText>{title}</LargeText>
           <Text>{description}</Text>
         </div>
-        <Text>{t("viewMore")}</Text>
+        <Text className="hover:text-foreground/80">{t("viewMore")}</Text>
       </Card>
     </Link>
   );
