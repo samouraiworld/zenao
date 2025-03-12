@@ -6,6 +6,7 @@ import {
   useSuspenseQuery,
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { SmallText } from "@/components/texts/SmallText";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
@@ -75,6 +76,7 @@ export function ParticipantsSection({ id }: { id: string }) {
   const { data: participantsAddresses } = useSuspenseQuery(
     eventUsersWithRole(id, "participant"),
   );
+  const t = useTranslations("event");
 
   return (
     <div className="flex flex-col gap-5">
@@ -94,7 +96,7 @@ export function ParticipantsSection({ id }: { id: string }) {
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Participants list</DialogTitle>
+            <DialogTitle>{t("participants-list")}</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2">
             {participantsAddresses.map((address) => {
