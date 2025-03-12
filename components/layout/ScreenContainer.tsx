@@ -1,14 +1,13 @@
 "use client";
 
 import React from "react";
-import { ImageLoaderProps } from "next/image";
 import { SignedOutModal } from "../modals/SignedOutModal";
-import { BackgroundImage } from "./background-image";
+import { BackgroundImage, BackgroundProps } from "./background-image";
 
 interface ScreenContainerProps {
   children: React.ReactNode;
   isSignedOutModal?: boolean;
-  background?: ImageLoaderProps;
+  background?: BackgroundProps;
 }
 
 export const ScreenContainer: React.FC<ScreenContainerProps> = ({
