@@ -3,7 +3,12 @@
 import React from "react";
 import { FieldValues } from "react-hook-form";
 import { FormFieldProps } from "../types";
-import { FormControl, FormField, FormItem } from "@/components/shadcn/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
 
@@ -51,6 +56,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
               ref={textAreaRef}
             />
           </FormControl>
+          <FormMessage />
         </FormItem>
       )}
     />
