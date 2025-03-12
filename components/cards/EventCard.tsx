@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CircleUserRound, MapPin, Users } from "lucide-react";
+import { MapPin, Users } from "lucide-react";
 import { format, fromUnixTime } from "date-fns";
 import { SmallText } from "../texts/SmallText";
 import { LargeText } from "../texts/LargeText";
 import { Text } from "../texts/DefaultText";
+import { UserAvatarWithName } from "../common/user";
 import { Card } from "./Card";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
@@ -50,13 +51,12 @@ export function EventCard({ evt }: { evt: EventInfo }) {
                 <MapPin width={iconSize} height={iconSize} />
                 <Text className="line-clamp-1">{location} </Text>
               </div>
-              <div className="flex flex-row gap-4 items-center">
+              <div className="flex flex-row gap-2 items-center">
                 <Users width={iconSize} height={iconSize} />
                 <Text className="truncate">{evt.participants} going</Text>
               </div>
-              <div className="hidden md:flex md:flex-row md:gap-4 md:items-center">
-                <CircleUserRound width={iconSize} height={iconSize} />
-                <Text className="truncate">{evt.creator}</Text>
+              <div className="flex flex-row gap-2 items-center">
+                Hosted by <UserAvatarWithName address={evt.creator} />
               </div>
             </div>
             <div>

@@ -10,7 +10,8 @@ import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
-import { imageWidth } from "./constants";
+import { imageHeight, imageWidth } from "./constants";
+import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { Text } from "@/components/texts/DefaultText";
@@ -19,16 +20,14 @@ import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { userOptions } from "@/lib/queries/user";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { eventUserRoles } from "@/lib/queries/event-users";
+import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
-import { GnowebButton } from "@/components/buttons/GnowebButton";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
-import { Avatar } from "@/components/common/Avatar";
+import { UserAvatarWithName } from "@/components/common/user";
 
 interface EventSectionProps {
   title: string;
@@ -52,7 +51,7 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
-  const { data: host } = useSuspenseQuery(userOptions(data.creator));
+
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
@@ -130,16 +129,18 @@ export function EventInfo({ id }: { id: string }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* Left Section */}
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image
           src={data.imageUri}
           width={imageWidth}
-          height={330}
+          height={imageHeight}
           alt="Event"
           priority
           className="flex w-full rounded-xl self-center"
           loader={web3ImgLoader}
         />
+        {/* If the user is organizer, link to /edit page */}
         {isOrganizer && (
           <Card className="flex flex-row items-center">
             <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
@@ -154,22 +155,19 @@ export function EventInfo({ id }: { id: string }) {
             </div>
           </Card>
         )}
+
+        {/* Participants preview and dialog section */}
         <EventSection title={t("going", { count: data.participants })}>
-          <GnowebButton
-            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
-          />
+          <ParticipantsSection id={id} />
         </EventSection>
-        {host && (
-          <EventSection title={t("hosted-by")}>
-            <Link href={`/profile/${data.creator}`}>
-              <div className="flex flex-row items-center gap-2">
-                <Avatar uri={host.avatarUri} />
-                <SmallText>{host.displayName}</SmallText>
-              </div>
-            </Link>
-          </EventSection>
-        )}
+
+        {/* Host section */}
+        <EventSection title={t("hosted-by")}>
+          <UserAvatarWithName linkToProfile address={data.creator} />
+        </EventSection>
       </div>
+
+      {/* Right Section */}
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
         <VeryLargeText className="mb-7">{data.title}</VeryLargeText>
         <div className="flex flex-row gap-4 items-center">
@@ -209,6 +207,7 @@ export function EventInfo({ id }: { id: string }) {
           )}
         </div>
 
+        {/* Participate Card */}
         <Card className="mt-2">
           {isParticipate ? (
             <div>
@@ -237,6 +236,8 @@ export function EventInfo({ id }: { id: string }) {
             </div>
           )}
         </Card>
+
+        {/* Markdown Description */}
         <EventSection title={t("about-event")}>
           <MarkdownPreview markdownString={data.description} />
         </EventSection>
