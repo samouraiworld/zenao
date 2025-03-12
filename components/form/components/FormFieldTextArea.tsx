@@ -39,7 +39,6 @@ export const FormFieldTextArea = <T extends FieldValues>({
     adjustHeight();
   }, []);
 
-  console.log(otherProps.maxLength);
   return (
     <FormField
       rules={{ required: true }}
