@@ -27,8 +27,7 @@ import { Separator } from "@/components/shadcn/separator";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
-import { Avatar } from "@/components/common/Avatar";
-import { profileOptions } from "@/lib/queries/profile";
+import { UserAvatarWithName } from "@/components/common/user";
 
 interface EventSectionProps {
   title: string;
@@ -52,7 +51,6 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
-  const { data: host } = useSuspenseQuery(profileOptions(data.creator));
 
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
@@ -164,16 +162,9 @@ export function EventInfo({ id }: { id: string }) {
         </EventSection>
 
         {/* Host section */}
-        {host && (
-          <EventSection title={t("hosted-by")}>
-            <Link href={`/profile/${data.creator}`}>
-              <div className="flex flex-row items-center gap-2">
-                <Avatar uri={host.avatarUri} />
-                <SmallText>{host.displayName}</SmallText>
-              </div>
-            </Link>
-          </EventSection>
-        )}
+        <EventSection title={t("hosted-by")}>
+          <UserAvatarWithName linkToProfile address={data.creator} />
+        </EventSection>
       </div>
 
       {/* Right Section */}
