@@ -71,7 +71,8 @@ export async function getPostContent(slug: string): Promise<BlogPost | null> {
       },
       content,
     };
-  } catch (_) {
+  } catch (err) {
+    console.error(err);
     return null;
   }
 }
