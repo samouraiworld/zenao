@@ -127,9 +127,6 @@
   "blog": {
     "pageTitle": "Blog",
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
-    "blogPostCard" : {
-      "viewMore": "View more..."
-    },
     "publishedAt": "Published at"
   }
 }

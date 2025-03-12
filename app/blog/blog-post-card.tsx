@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 import { Card } from "@/components/cards/Card";
 import { Text } from "@/components/texts/DefaultText";
 import { LargeText } from "@/components/texts/LargeText";
@@ -19,7 +18,6 @@ export default function BlogPostCard({
   slug,
   previewImageUrl,
 }: BlogPostCardProps) {
-  const t = useTranslations("blog.blogPostCard");
   const { alt, ...imageProps } = previewImageUrl
     ? {
         src: previewImageUrl,
@@ -42,7 +40,6 @@ export default function BlogPostCard({
           <LargeText>{title}</LargeText>
           <Text>{description}</Text>
         </div>
-        <Text className="hover:text-foreground/80">{t("viewMore")}</Text>
       </Card>
     </Link>
   );
