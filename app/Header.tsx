@@ -1,6 +1,7 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import { UrlObject } from "url";
+import React, { ReactNode, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -14,6 +15,7 @@ import {
   useAuth,
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { usePathname } from "next/navigation";
 import { Popover, PopoverTrigger } from "@/components/shadcn/popover";
 import { Card } from "@/components/cards/Card";
 import { SmallText } from "@/components/texts/SmallText";
@@ -23,28 +25,70 @@ import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
 import { UserAvatarSkeleton, UserAvatar } from "@/components/common/user";
 
+type NavItem = {
+  key: string;
+  to: string | UrlObject;
+  needsAuth: boolean;
+  children: React.ReactNode;
+};
+
 const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
   const t = useTranslations("header");
+  const pathname = usePathname();
+
+  const navItems: NavItem[] = useMemo(
+    () => [
+      {
+        key: "discover",
+        to: "/discover",
+        needsAuth: false,
+        children: t("discover"),
+      },
+      {
+        key: "your-events",
+        to: "/created",
+        needsAuth: true,
+        children: t("your-events"),
+      },
+      {
+        key: "tickets",
+        to: "/tickets",
+        needsAuth: true,
+        children: t("your-tickets"),
+      },
+      {
+        key: "manifesto",
+        to: "/manifesto",
+        needsAuth: false,
+        children: t("manifesto"),
+      },
+      {
+        key: "features",
+        to: "#",
+        needsAuth: false,
+        children: t("features"),
+      },
+    ],
+    [t],
+  );
 
   return (
     <>
-      <Link href="/discover">
-        <SmallText variant="secondary">{t("discover")}</SmallText>
-      </Link>
-      {isLogged && (
-        <Link href="/created">
-          <SmallText variant="secondary">{t("your-events")}</SmallText>
-        </Link>
-      )}
-      {isLogged && (
-        <Link href="/tickets">
-          <SmallText variant="secondary">{t("your-tickets")}</SmallText>
-        </Link>
-      )}
-      <SmallText variant="secondary">{t("features")}</SmallText>
-      <Link href="/manifesto">
-        <SmallText variant="secondary">{t("manifesto")}</SmallText>
-      </Link>
+      {navItems.map((item) => {
+        if (item.needsAuth && !isLogged) {
+          return null;
+        }
+
+        const isActive = pathname === item.to;
+
+        return (
+          <Link key={item.key} href={item.to}>
+            <SmallText variant={isActive ? "primary" : "secondary"}>
+              {item.children}
+            </SmallText>
+          </Link>
+        );
+      })}
     </>
   );
 };
