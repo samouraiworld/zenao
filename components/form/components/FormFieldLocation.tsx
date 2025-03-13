@@ -106,6 +106,7 @@ export const FormFieldLocation: React.FC<{
                         ...object,
                         address: "",
                       });
+                      form.trigger("location");
                     }}
                   >
                     <XIcon className="h-3 w-3" />
@@ -128,6 +129,7 @@ export const FormFieldLocation: React.FC<{
                           ...object,
                           address: search,
                         });
+                        form.trigger("location");
                         setOpen(false);
                       }
                     }}
@@ -150,6 +152,7 @@ export const FormFieldLocation: React.FC<{
                               lng,
                               size: 0,
                             });
+                            form.trigger("location");
                             await onSelect({ lat, lng });
                             setOpen(false);
                           }}
@@ -170,6 +173,7 @@ export const FormFieldLocation: React.FC<{
                             address: search,
                             timeZone: currentTimezone(),
                           });
+                          form.trigger("location");
                           onRemove();
                           setOpen(false);
                         }}
