@@ -8,6 +8,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
+  useFormField,
 } from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
@@ -45,7 +46,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className="relative">
+        <FormItem className="relative pb-6">
           <FormControl>
             <Textarea
               className={cn(
@@ -62,15 +63,15 @@ export const FormFieldTextArea = <T extends FieldValues>({
               ref={textAreaRef}
             />
           </FormControl>
-          <FormMessage />
-          {wordCounter && (
-            <div className="absolute right-1 bottom-0">
+          <div className="absolute flex w-full justify-between bottom-0">
+            <FormMessage />
+            {wordCounter && (
               <SmallText className="text-foreground/80">
                 <span>{field.value.length}</span> /
                 <span>{otherProps.maxLength}</span>
               </SmallText>
-            </div>
-          )}
+            )}
+          </div>
         </FormItem>
       )}
     />
