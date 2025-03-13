@@ -8,4 +8,12 @@ export default defineConfig({
       return clerkSetup({ config });
     },
   },
+
+  component: {
+    devServer: {
+      framework: "next",
+      bundler: "webpack",
+    },
+    indexHtmlFile: "cypress/support/component-index.html",
+  },
 });

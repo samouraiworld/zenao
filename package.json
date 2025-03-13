@@ -10,6 +10,7 @@
     "mail:dev": "email dev",
     "mail:build": "email export --outDir backend/mails/html && email export -t --outDir backend/mails/text",
     "cypress:open": "cypress open",
+    "cypress:components:headless": "cypress run --component -b chrome",
     "cypress:e2e": "cypress open --e2e -b chrome",
     "cypress:e2e:headless": "cypress run --e2e -b chrome"
   },
@@ -77,7 +78,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "cypress": "^13.17.0",
+    "cypress": "^14.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
     "eslint-config-prettier": "^10.0.1",
