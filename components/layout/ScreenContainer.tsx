@@ -11,6 +11,7 @@ interface ScreenContainerProps {
 }
 
 export const screenContainerMaxWidth = 960;
+export const screenContainerMarginHorizontal = 20;
 
 export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   children,
@@ -24,7 +25,15 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
         className="h-full w-full mb-10 sm:mb-0"
         style={{ maxWidth: screenContainerMaxWidth }}
       >
-        <div className="mt-8 mx-5">{children}</div>
+        <div
+          className="mt-8"
+          style={{
+            marginLeft: screenContainerMarginHorizontal,
+            marginRight: screenContainerMarginHorizontal,
+          }}
+        >
+          {children}
+        </div>
       </main>
       {isSignedOutModal && <SignedOutModal />}
     </div>

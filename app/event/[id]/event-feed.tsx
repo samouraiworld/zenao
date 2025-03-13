@@ -1,14 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
-import Link from "next/link";
-import { PollCard } from "@/components/cards/social-feed/poll-card";
+import { PollPostCard } from "@/components/cards/social-feed/poll-post-card";
 import { fakePolls } from "@/app/event/[id]/fake-polls";
-import { PostCard } from "@/components/cards/social-feed/post-card";
+import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
 import { AvatarWithLoaderAndFallback } from "@/components/common/Avatar";
 import { userAddressOptions, userOptions } from "@/lib/queries/user";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
+import {
+  screenContainerMarginHorizontal,
+  screenContainerMaxWidth,
+  // screenContainerMxCn,
+} from "@/components/layout/ScreenContainer";
+
+export const textareaMinHeight = 54;
 
 function FeedInput({ className }: { className?: string }) {
   const { getToken, userId } = useAuth();
@@ -20,7 +26,6 @@ function FeedInput({ className }: { className?: string }) {
   // Auto shrink and grow textarea
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [textareaValue, setTextAreaValue] = useState("");
-  const textareaMinHeight = 54;
   const textareaMaxHeight = 300;
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -31,15 +36,12 @@ function FeedInput({ className }: { className?: string }) {
 
   return (
     <div className={cn("flex flex-row items-center gap-4", className)}>
-      {user?.avatarUri && (
-        <Link href="/settings">
-          <AvatarWithLoaderAndFallback user={user} />
-        </Link>
-      )}
+      <AvatarWithLoaderAndFallback user={user} />
       <Textarea
         ref={textareaRef}
         onChange={(evt) => setTextAreaValue(evt.target.value)}
-        className={`cursor-pointer border-0 min-h-[${textareaMinHeight}px] focus-visible:ring-transparent rounded-xl text-base text-sm px-4 py-3 w-full max-h-[${textareaMaxHeight}px] placeholder:text-primary-color  text-lg hover:bg-neutral-700`}
+        className="cursor-pointer border-0 focus-visible:ring-transparent rounded-xl text-base text-sm px-4 py-3 w-full placeholder:text-primary-color  text-lg hover:bg-neutral-700"
+        style={{ minHeight: textareaMinHeight, maxHeight: textareaMaxHeight }}
         placeholder={"Don't be shy, say something!"}
       />
     </div>
@@ -65,28 +67,11 @@ export function EventFeed({
   }, []);
 
   //  Stuff used to stick FeedInput when scroll bellow of it
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
+  const feedMaxWidth =
+    screenContainerMaxWidth - screenContainerMarginHorizontal * 2;
   const inputRef = useRef<HTMLDivElement>(null);
   const [isInputSticky, setInputSticky] = useState(false);
   const [inputOffsetTop, setInputOffsetTop] = useState(0);
-  // TODO: ResizeObserver to get the new container width after resize, or regular way ?
-  // useEffect(() => {
-  //   if (containerRef.current) {
-  //     setContainerWidth(containerRef.current.getBoundingClientRect().width);
-  //   }
-  // }, []);
-  useEffect(() => {
-    const observer = new ResizeObserver(() => {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.getBoundingClientRect().width);
-      }
-    });
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-    return () => observer.disconnect();
-  }, [containerRef]);
   useEffect(() => {
     if (inputRef.current) {
       setInputOffsetTop(inputRef.current.offsetTop);
@@ -106,7 +91,7 @@ export function EventFeed({
   // --------
 
   return (
-    <div className="flex flex-col gap-4 min-h-0 pt-4" ref={containerRef}>
+    <div className="flex flex-col gap-4 min-h-0 pt-4">
       <div
         ref={inputRef}
         className={cn(
@@ -115,23 +100,28 @@ export function EventFeed({
         )}
         style={{ backgroundColor: bgColor }}
       >
-        <div style={{ width: containerWidth }}>
+        <div
+          className="w-full"
+          style={{
+            maxWidth: feedMaxWidth,
+          }}
+        >
           <FeedInput />
         </div>
       </div>
 
       <div className="flex flex-col w-full rounded-xl overflow-y-auto gap-4">
-        <PostCard />
-        <PollCard poll={fakePolls[0]} />
-        <PollCard poll={fakePolls[1]} />
+        <StandardPostCard />
+        <PollPostCard poll={fakePolls[0]} />
+        <PollPostCard poll={fakePolls[1]} />
 
-        <PostCard />
-        <PostCard />
-        <PollCard poll={fakePolls[2]} />
+        <StandardPostCard />
+        <StandardPostCard />
+        <PollPostCard poll={fakePolls[2]} />
 
-        <PostCard />
-        <PostCard />
-        <PollCard poll={fakePolls[3]} />
+        <StandardPostCard />
+        <StandardPostCard />
+        <PollPostCard poll={fakePolls[3]} />
       </div>
     </div>
   );
