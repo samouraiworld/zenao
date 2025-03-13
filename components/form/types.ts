@@ -47,9 +47,11 @@ export const addressLocationSchema = z.object({
 const locationSchema = z
   .union([virtualLocationSchema, customLocationSchema, addressLocationSchema])
   .superRefine((data, ctx) => {
+    console.log(data);
     if (
-      data.kind === "custom" &&
-      !customLocationSchema.safeParse(data).success
+      !virtualLocationSchema.safeParse(data).success &&
+      !customLocationSchema.safeParse(data).success &&
+      !addressLocationSchema.safeParse(data).success
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
