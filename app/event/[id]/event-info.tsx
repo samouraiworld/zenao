@@ -1,18 +1,14 @@
 "use client";
 
 import { ReactNode, useCallback, useRef, useState } from "react";
-import { useCallback } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
-import { Calendar, MapPin } from "lucide-react";
 import { Calendar, ChevronDownIcon, ChevronUpIcon, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
-import { imageHeight, imageWidth } from "./constants";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -24,19 +20,15 @@ import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { Separator } from "@/components/shadcn/separator";
-import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { EventFormSchemaType } from "@/components/form/types";
-import { Separator } from "@/components/shadcn/separator";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { EventFeed } from "@/app/event/[id]/event-feed";
-import { ParticipateForm } from "@/app/event/[id]/ParticipateForm";
 import { cn } from "@/lib/tailwind";
 import { screenContainerMaxWidth } from "@/components/layout/ScreenContainer";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
-import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 
 function EventSection({
@@ -103,8 +95,6 @@ export function EventInfo({ id }: { id: string }) {
   }
 
   const t = useTranslations("event");
-  const [loading, setLoading] = React.useState<boolean>(false);
-
   const [loading, setLoading] = useState<boolean>(false);
   const [isDescExpanded, setDescExpanded] = useState(false);
   const [tab, setTab] = useState<EventTab>("global-feed");

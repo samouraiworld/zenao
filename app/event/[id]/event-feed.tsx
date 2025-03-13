@@ -4,24 +4,22 @@ import { useAuth } from "@clerk/nextjs";
 import { PollPostCard } from "@/components/cards/social-feed/poll-post-card";
 import { fakePolls } from "@/app/event/[id]/fake-polls";
 import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
-import { AvatarWithLoaderAndFallback } from "@/components/common/Avatar";
-import { userAddressOptions, userOptions } from "@/lib/queries/user";
+import { userAddressOptions } from "@/lib/queries/user";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
 import {
   screenContainerMarginHorizontal,
   screenContainerMaxWidth,
-  // screenContainerMxCn,
 } from "@/components/layout/ScreenContainer";
+import { UserLinkedAvatarWithLoaderAndFallback } from "@/components/common/user";
 
 export const textareaMinHeight = 54;
 
 function FeedInput({ className }: { className?: string }) {
   const { getToken, userId } = useAuth();
-  const { data: address } = useSuspenseQuery(
+  const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data: user } = useSuspenseQuery(userOptions(address));
 
   // Auto shrink and grow textarea
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -36,7 +34,7 @@ function FeedInput({ className }: { className?: string }) {
 
   return (
     <div className={cn("flex flex-row items-center gap-4", className)}>
-      <AvatarWithLoaderAndFallback user={user} />
+      <UserLinkedAvatarWithLoaderAndFallback userAddress={userAddress} />
       <Textarea
         ref={textareaRef}
         onChange={(evt) => setTextAreaValue(evt.target.value)}

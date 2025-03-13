@@ -1,8 +1,8 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
+import { Event, WithContext } from "schema-dts";
 import { EventInfo } from "./event-info";
 import { imageHeight, imageWidth } from "./constants";
-import { Event, WithContext } from "schema-dts";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";

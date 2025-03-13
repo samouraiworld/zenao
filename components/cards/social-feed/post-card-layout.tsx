@@ -3,22 +3,20 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
-import { userAddressOptions, userOptions } from "@/lib/queries/user";
-import { AvatarWithLoaderAndFallback } from "@/components/common/Avatar";
+import { userAddressOptions } from "@/lib/queries/user";
 import { textareaMinHeight } from "@/app/event/[id]/event-feed";
+import { UserLinkedAvatarWithLoaderAndFallback } from "@/components/common/user";
 
 export function PostCardLayout({ children }: { children: ReactNode }) {
   const { getToken, userId } = useAuth();
-  const { data: address } = useSuspenseQuery(
+  const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data: user } = useSuspenseQuery(userOptions(address));
-
   return (
     <div className="flex flex-row gap-4">
       {/*TODO: post auhor here*/}
       <div className="flex items-center" style={{ height: textareaMinHeight }}>
-        <AvatarWithLoaderAndFallback user={user} />
+        <UserLinkedAvatarWithLoaderAndFallback userAddress={userAddress} />
       </div>
 
       <Card className="w-full flex flex-col gap-2">
