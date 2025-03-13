@@ -29,13 +29,13 @@ export const TimeZonesPopover: React.FC<{
   const [item, setItem] = useState<string>(defaultValue || "");
 
   return (
-    <div>
+    <div className="flex flex-col gap-2">
       <SmallText>
         You choose a custom location, so please select a timezone.
       </SmallText>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger className="relative" asChild>
-          <ButtonWithChildren>
+          <ButtonWithChildren className="w-fit">
             <SmallText variant="invert">
               {(timezones && item) || "Select timezone..."}
             </SmallText>

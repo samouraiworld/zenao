@@ -72,6 +72,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   e.preventDefault();
                 }
               }}
+              wordCounter
             />
             <Card>
               <SmallText className="mb-3">{t("description-label")}</SmallText>
