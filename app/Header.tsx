@@ -57,16 +57,16 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
         children: t("your-tickets"),
       },
       {
-        key: "manifesto",
-        to: "/manifesto",
-        needsAuth: false,
-        children: t("manifesto"),
-      },
-      {
         key: "features",
         to: "#",
         needsAuth: false,
         children: t("features"),
+      },
+      {
+        key: "manifesto",
+        to: "/manifesto",
+        needsAuth: false,
+        children: t("manifesto"),
       },
     ],
     [t],
