@@ -151,7 +151,7 @@ const FormMessage = React.forwardRef<
   const body = error ? String(error?.message) : children;
 
   if (!body) {
-    return <span />;
+    return <span className="w-0 h-0" />;
   }
 
   return (
