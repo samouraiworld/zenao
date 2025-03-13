@@ -45,7 +45,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className="relative pb-6">
+        <FormItem className={cn("relative", wordCounter ? "pb-6" : null)}>
           <FormControl>
             <Textarea
               className={cn(
@@ -62,7 +62,12 @@ export const FormFieldTextArea = <T extends FieldValues>({
               ref={textAreaRef}
             />
           </FormControl>
-          <div className="absolute flex w-full justify-between bottom-0">
+          <div
+            className={cn(
+              "flex w-full justify-between",
+              wordCounter ? "absolute bottom-0" : null,
+            )}
+          >
             <FormMessage />
             {wordCounter && (
               <SmallText className="text-foreground/80">
