@@ -10,6 +10,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/webhook"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -51,6 +52,28 @@ func (s *ZenaoServer) CreateEvent(
 		if err := s.Chain.CreateEvent(evt.ID, userID, req.Msg); err != nil {
 			s.Logger.Error("create-event", zap.Error(err))
 			return err
+		}
+
+		if s.TokenDiscord != "" {
+			locationStr, err := zeni.LocationToString(evt.Location)
+			if err != nil {
+				s.Logger.Error("Erreur:", zap.Error(err))
+				return err
+			}
+
+			EventURL := fmt.Sprintf("https://zenao.io/event/%s", evt.ID)
+			err = webhook.SendDiscordWebhook(
+				s.Logger,
+				s.TokenDiscord,
+				evt.Title,
+				evt.StartDate.Format("2006-01-02 15:04:05"), // Date de début formatée
+				evt.EndDate.Format("2006-01-02 15:04:05"),   // Date de fin formatée
+				locationStr,
+				EventURL,
+			)
+			if err != nil {
+				s.Logger.Error("error send discord msg", zap.Error(err))
+			}
 		}
 
 		if s.MailClient != nil {
