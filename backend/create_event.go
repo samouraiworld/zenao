@@ -54,17 +54,16 @@ func (s *ZenaoServer) CreateEvent(
 			return err
 		}
 
-		// Vérifie que le TokenDiscord n'est pas vide avant d'envoyer le webhook
 		if s.TokenDiscord != "" {
 			locationStr, err := zeni.LocationToString(evt.Location)
 			if err != nil {
-				fmt.Println("Erreur:", err)
+				s.Logger.Error("Erreur:", zap.Error(err))
 				return err
 			}
 
-			// Envoi du message sur Discord
 			EventURL := fmt.Sprintf("https://zenao.io/event/%s", evt.ID)
 			err = webhook.SendDiscordWebhook(
+				s.Logger,
 				s.TokenDiscord,
 				evt.Title,
 				evt.StartDate.Format("2006-01-02 15:04:05"), // Date de début formatée
@@ -73,7 +72,7 @@ func (s *ZenaoServer) CreateEvent(
 				EventURL,
 			)
 			if err != nil {
-				s.Logger.Error("Erreur lors de l'envoi du webhook Discord", zap.Error(err))
+				s.Logger.Error("error send discord msg", zap.Error(err))
 			}
 		}
 

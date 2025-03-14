@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
-// Structure du message Discord
 type DiscordWebhook struct {
 	Content string `json:"content"`
 }
 
-func SendDiscordWebhook(token, eventName, eventstart, eventend, eventLocation, eventURL string) error {
+func SendDiscordWebhook(logger *zap.Logger, token, eventName, eventstart, eventend, eventLocation, eventURL string) error {
 
 	webhookURL := fmt.Sprintf("https://discord.com/api/webhooks/%s", token)
 
@@ -26,14 +27,12 @@ func SendDiscordWebhook(token, eventName, eventstart, eventend, eventLocation, e
 		eventName, eventstart, eventend, eventLocation, eventURL,
 	)
 
-	// Création de la charge utile JSON
 	payload := DiscordWebhook{Content: message}
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
 
-	// Envoi de la requête POST
 	resp, err := http.Post(webhookURL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
@@ -41,9 +40,9 @@ func SendDiscordWebhook(token, eventName, eventstart, eventend, eventLocation, e
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("erreur lors de l'envoi du webhook: %s", resp.Status)
+		return fmt.Errorf("error send webhook: %s", resp.Status)
 	}
 
-	fmt.Println("Message envoyé avec succès sur Discord !")
+	logger.Info("Message successfully sent on Discord.!")
 	return nil
 }
