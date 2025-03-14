@@ -7,6 +7,7 @@ import (
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/seqid"
 	pollsv1 "gno.land/p/zenao/polls/v1"
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
 var (
@@ -151,4 +152,8 @@ func (p *Poll) GetInfo(user string) *pollsv1.Poll {
 
 func (p *Poll) IsRunning() bool {
 	return time.Now().Unix() < p.CreatedAt+p.Duration
+}
+
+func Kind() zenaov1.LinkPostKind {
+	return zenaov1.LINK_POST_KIND_POLL
 }
