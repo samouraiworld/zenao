@@ -156,23 +156,11 @@ type PostID struct {
 	NetworkId string
 }
 
-type PostCommon struct {
-	ChannelId string
-	Author    string
-	ParentId  *PostID
-	Loc       *PostGeoLoc
-	CreatedAt int64
-	UpdatedAt int64
-	DeletedAt int64
-}
-
 type StandardPost struct {
-	Common  *PostCommon
 	Content string
 }
 
 type ArticlePost struct {
-	Common          *PostCommon
 	Title           string
 	PreviewText     string
 	PreviewImageUri string
@@ -180,19 +168,15 @@ type ArticlePost struct {
 }
 
 type LinkPost struct {
-	Common   *PostCommon
-	Uri      string
-	EntityId string
+	Uri string
 }
 
 type ImagePost struct {
-	Common      *PostCommon
 	Description string
 	ImageUri    string
 }
 
 type VideoPost struct {
-	Common            *PostCommon
 	Description       string
 	VideoUri          string
 	ThumbnailImageUri string
@@ -211,7 +195,14 @@ type Tip struct {
 }
 
 type Post struct {
-	Post interface{}
+	ChannelId string
+	Author    string
+	ParentId  *PostID
+	Loc       *PostGeoLoc
+	CreatedAt int64
+	UpdatedAt int64
+	DeletedAt int64
+	Post      interface{}
 }
 
 type SocialFeed struct {

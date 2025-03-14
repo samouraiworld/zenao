@@ -164,7 +164,7 @@ export function EventInfo({ id }: { id: string }) {
     return <p>{`Event doesn't exist`}</p>;
   }
   return (
-    <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
+    <div className="flex flex-col w-full sm:h-full gap-10">
       {/* ---- Event hero image */}
       {!!fakeImageUri && (
         <Image

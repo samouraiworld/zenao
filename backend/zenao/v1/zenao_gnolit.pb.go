@@ -366,43 +366,10 @@ func (p *PostID) GnoLiteral(typePrefix string, linePrefix string) string {
 	return buf.String()
 }
 
-func (p *PostCommon) GnoLiteral(typePrefix string, linePrefix string) string {
-	buf := &strings.Builder{}
-	buf.WriteString(typePrefix)
-	buf.WriteString("PostCommon{\n")
-	if p.ChannelId != "" {
-		fmt.Fprintf(buf, "%s\tChannelId: %q,\n", linePrefix, p.ChannelId)
-	}
-	if p.Author != "" {
-		fmt.Fprintf(buf, "%s\tAuthor: %q,\n", linePrefix, p.Author)
-	}
-	if p.ParentId != nil {
-		fmt.Fprintf(buf, "%s\tParentId: &%s%s,\n", linePrefix, typePrefix, p.ParentId.GnoLiteral(typePrefix, linePrefix+"\t"))
-	}
-	if p.Loc != nil {
-		fmt.Fprintf(buf, "%s\tLoc: &%s%s,\n", linePrefix, typePrefix, p.Loc.GnoLiteral(typePrefix, linePrefix+"\t"))
-	}
-	if p.CreatedAt != 0 {
-		fmt.Fprintf(buf, "%s\tCreatedAt: %d,\n", linePrefix, p.CreatedAt)
-	}
-	if p.UpdatedAt != 0 {
-		fmt.Fprintf(buf, "%s\tUpdatedAt: %d,\n", linePrefix, p.UpdatedAt)
-	}
-	if p.DeletedAt != 0 {
-		fmt.Fprintf(buf, "%s\tDeletedAt: %d,\n", linePrefix, p.DeletedAt)
-	}
-	buf.WriteString(linePrefix)
-	buf.WriteString("}")
-	return buf.String()
-}
-
 func (s *StandardPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("StandardPost{\n")
-	if s.Common != nil {
-		fmt.Fprintf(buf, "%s\tCommon: &%s%s,\n", linePrefix, typePrefix, s.Common.GnoLiteral(typePrefix, linePrefix+"\t"))
-	}
 	if s.Content != "" {
 		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, s.Content)
 	}
@@ -415,9 +382,6 @@ func (a *ArticlePost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("ArticlePost{\n")
-	if a.Common != nil {
-		fmt.Fprintf(buf, "%s\tCommon: &%s%s,\n", linePrefix, typePrefix, a.Common.GnoLiteral(typePrefix, linePrefix+"\t"))
-	}
 	if a.Title != "" {
 		fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, a.Title)
 	}
@@ -439,14 +403,8 @@ func (l *LinkPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("LinkPost{\n")
-	if l.Common != nil {
-		fmt.Fprintf(buf, "%s\tCommon: &%s%s,\n", linePrefix, typePrefix, l.Common.GnoLiteral(typePrefix, linePrefix+"\t"))
-	}
 	if l.Uri != "" {
 		fmt.Fprintf(buf, "%s\tUri: %q,\n", linePrefix, l.Uri)
-	}
-	if l.EntityId != "" {
-		fmt.Fprintf(buf, "%s\tEntityId: %q,\n", linePrefix, l.EntityId)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -457,9 +415,6 @@ func (i *ImagePost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("ImagePost{\n")
-	if i.Common != nil {
-		fmt.Fprintf(buf, "%s\tCommon: &%s%s,\n", linePrefix, typePrefix, i.Common.GnoLiteral(typePrefix, linePrefix+"\t"))
-	}
 	if i.Description != "" {
 		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, i.Description)
 	}
@@ -475,9 +430,6 @@ func (v *VideoPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("VideoPost{\n")
-	if v.Common != nil {
-		fmt.Fprintf(buf, "%s\tCommon: &%s%s,\n", linePrefix, typePrefix, v.Common.GnoLiteral(typePrefix, linePrefix+"\t"))
-	}
 	if v.Description != "" {
 		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, v.Description)
 	}
@@ -532,6 +484,27 @@ func (p *Post) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("Post{\n")
+	if p.ChannelId != "" {
+		fmt.Fprintf(buf, "%s\tChannelId: %q,\n", linePrefix, p.ChannelId)
+	}
+	if p.Author != "" {
+		fmt.Fprintf(buf, "%s\tAuthor: %q,\n", linePrefix, p.Author)
+	}
+	if p.ParentId != nil {
+		fmt.Fprintf(buf, "%s\tParentId: &%s%s,\n", linePrefix, typePrefix, p.ParentId.GnoLiteral(typePrefix, linePrefix+"\t"))
+	}
+	if p.Loc != nil {
+		fmt.Fprintf(buf, "%s\tLoc: &%s%s,\n", linePrefix, typePrefix, p.Loc.GnoLiteral(typePrefix, linePrefix+"\t"))
+	}
+	if p.CreatedAt != 0 {
+		fmt.Fprintf(buf, "%s\tCreatedAt: %d,\n", linePrefix, p.CreatedAt)
+	}
+	if p.UpdatedAt != 0 {
+		fmt.Fprintf(buf, "%s\tUpdatedAt: %d,\n", linePrefix, p.UpdatedAt)
+	}
+	if p.DeletedAt != 0 {
+		fmt.Fprintf(buf, "%s\tDeletedAt: %d,\n", linePrefix, p.DeletedAt)
+	}
 	switch val := p.Post.(type) {
 	case *Post_Standard:
 		fmt.Fprintf(buf, "%s\tPost: &%s,\n", linePrefix, val.Standard.GnoLiteral(typePrefix, linePrefix+"\t"))

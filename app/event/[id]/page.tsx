@@ -82,7 +82,7 @@ export default async function EventPage({ params }: Props) {
       }}
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventInfo eventId={p.id} />
+        <EventInfo id={p.id} />
       </HydrationBoundary>
     </ScreenContainer>
   );
