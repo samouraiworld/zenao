@@ -4,11 +4,11 @@ import {
   fromUnixTime,
   isAfter,
 } from "date-fns";
-import { LargeText } from "../../texts/LargeText";
 import { Text } from "../../texts/DefaultText";
 import { Poll, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PollResultsList } from "@/components/lists/poll-results-list";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
+import { SmallText } from "@/components/texts/SmallText";
 
 export function PollPostCard({ poll }: { poll: Poll }) {
   const now = new Date();
@@ -29,20 +29,22 @@ export function PollPostCard({ poll }: { poll: Poll }) {
 
   return (
     <PostCardLayout>
-      <div className="flex flex-row items-center gap-2">
-        <Text variant="secondary">{`${totalVotesCount} votes`}</Text>
-        <Text variant="secondary">•</Text>
-        <Text variant="secondary">{remainingTimeText}</Text>
-      </div>
-      <LargeText className="line-clamp-3">{poll.question}</LargeText>
+      <div className="w-full flex flex-col gap-2">
+        <div className="flex flex-row items-center gap-2">
+          <SmallText>{`${totalVotesCount} votes`}</SmallText>
+          <SmallText>•</SmallText>
+          <SmallText>{remainingTimeText}</SmallText>
+        </div>
+        <Text className="line-clamp-3">{poll.question}</Text>
 
-      <PollResultsList
-        list={poll.results}
-        isPollEnded={isPollEnded}
-        // isMultipleAnswers={poll.multipleAnswers}
-        isMultipleAnswers={true}
-        onClickResult={onClickResult}
-      />
+        <PollResultsList
+          list={poll.results}
+          isPollEnded={isPollEnded}
+          // isMultipleAnswers={poll.multipleAnswers}
+          isMultipleAnswers={true}
+          onClickResult={onClickResult}
+        />
+      </div>
     </PostCardLayout>
   );
 }

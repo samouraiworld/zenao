@@ -1,22 +1,20 @@
 import { Text } from "@/components/texts/DefaultText";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
+import { Post } from "@/app/gen/feeds/v1/feeds_pb";
 
 //TODO
 
-export function StandardPostCard() {
+export function StandardPostCard({ post }: { post: Post }) {
+  if (post.post.case !== "standard") {
+    return null;
+  }
+  const standardPost = post.post.value;
+
   return (
     <PostCardLayout>
-      <div className="flex flex-row items-center gap-2">
-        <Text variant="secondary">xxxxxxx</Text>
+      <div className="w-full flex flex-col gap-2">
+        <Text>{standardPost.content}</Text>
       </div>
-      <Text>
-        xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx
-        xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxxxxx xxxxx xxxxx xxxxx xxxxx
-        xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx
-        xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx
-        xxxxx xxxxx xxxxx xxxxx xxxxx xx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx
-        xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx{" "}
-      </Text>
     </PostCardLayout>
   );
 }

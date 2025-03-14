@@ -68,7 +68,7 @@ export function PollResultsList({
     0,
   );
   return (
-    <div className="flex flex-col items-center gap-2 my-2">
+    <div className="flex flex-col items-center gap-2">
       {list.map((pollResult, index) => (
         <PollResult
           key={index}

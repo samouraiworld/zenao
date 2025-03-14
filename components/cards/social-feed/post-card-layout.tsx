@@ -1,33 +1,40 @@
-import { ReactNode } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Text } from "@/components/texts/DefaultText";
+import React, { ReactNode } from "react";
 import { Card } from "@/components/cards/Card";
-import { userAddressOptions } from "@/lib/queries/user";
-import { textareaMinHeight } from "@/app/event/[id]/event-feed";
-import { UserLinkedAvatarWithLoaderAndFallback } from "@/components/common/user";
+import { UserAvatar } from "@/components/common/user";
+import { SmallText } from "@/components/texts/SmallText";
+import { ExtraSmallText } from "@/components/texts/extra-small-text";
 
 export function PostCardLayout({ children }: { children: ReactNode }) {
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
   return (
-    <div className="flex flex-row gap-4">
-      {/*TODO: post auhor here*/}
-      <div className="flex items-center" style={{ height: textareaMinHeight }}>
-        <UserLinkedAvatarWithLoaderAndFallback userAddress={userAddress} />
-      </div>
+    <Card className="w-full flex flex-col gap-2">
+      <div className="flex flex-col sm:flex-row items-start gap-2">
+        <div className="w-full flex flex-row items-center gap-3">
+          <UserAvatar
+            // key={address}
+            className="flex ring-2 ring-background/80"
+            address={"todo"}
+          />
 
-      <Card className="w-full flex flex-col gap-2">
-        {children}
+          <div className="w-full flex flex-col">
+            <SmallText>TODO: Author here</SmallText>
 
-        {/* TODO: Footer here (Reactions, comments, tips, etc)*/}
-        <div className="flex flex-row items-center justify-between">
-          <Text>xx xxxxxxxxxxxxxx xx</Text>
-          <Text>xx xx xx xx xx xx</Text>
+            <ExtraSmallText variant="secondary">
+              TODO: "X days ago" here
+            </ExtraSmallText>
+          </div>
         </div>
-      </Card>
-    </div>
+
+        <div className="flex flex-row items-center gap-2 w-full sm:justify-end">
+          <SmallText variant="secondary">TODO: Location here?</SmallText>
+          <SmallText variant="secondary">•</SmallText>
+          <SmallText variant="secondary">TODO: Tags here?</SmallText>
+        </div>
+      </div>
+      <div className="my-1">{children}</div>
+      <div className="flex flex-col justify-between sm:flex-row sm:items-center gap-2">
+        <SmallText variant="secondary">TODO: Reactions here?</SmallText>
+        <SmallText>TODO: Some actions here? </SmallText>
+      </div>
+    </Card>
   );
 }

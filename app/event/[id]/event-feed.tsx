@@ -12,8 +12,7 @@ import {
   screenContainerMaxWidth,
 } from "@/components/layout/ScreenContainer";
 import { UserLinkedAvatarWithLoaderAndFallback } from "@/components/common/user";
-
-export const textareaMinHeight = 54;
+import { fakeStandardPosts } from "@/app/event/[id]/fake-posts";
 
 function FeedInput({ className }: { className?: string }) {
   const { getToken, userId } = useAuth();
@@ -25,6 +24,7 @@ function FeedInput({ className }: { className?: string }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [textareaValue, setTextAreaValue] = useState("");
   const textareaMaxHeight = 300;
+  const textareaMinHeight = 54;
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -109,16 +109,20 @@ export function EventFeed({
       </div>
 
       <div className="flex flex-col w-full rounded-xl overflow-y-auto gap-4">
-        <StandardPostCard />
+        {fakeStandardPosts.map((post, index) => (
+          <StandardPostCard post={post} key={index} />
+        ))}
+
+        {/*<StandardPostCard />*/}
         <PollPostCard poll={fakePolls[0]} />
         <PollPostCard poll={fakePolls[1]} />
 
-        <StandardPostCard />
-        <StandardPostCard />
+        {/*<StandardPostCard />*/}
+        {/*<StandardPostCard />*/}
         <PollPostCard poll={fakePolls[2]} />
 
-        <StandardPostCard />
-        <StandardPostCard />
+        {/*<StandardPostCard />*/}
+        {/*<StandardPostCard />*/}
         <PollPostCard poll={fakePolls[3]} />
       </div>
     </div>
