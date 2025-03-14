@@ -63,7 +63,6 @@ export function EventFeed({
     const cssVar = computedStyle.getPropertyValue("--background").trim();
     setBgColor(`hsl(${cssVar} / .9)`);
   }, []);
-
   //  Stuff used to stick FeedInput when scroll bellow of it
   const feedMaxWidth =
     screenContainerMaxWidth - screenContainerMarginHorizontal * 2;
@@ -87,6 +86,13 @@ export function EventFeed({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [inputOffsetTop]);
   // --------
+
+  // LinkPost => uri => parse and get poll id
+  //TODO: query polls.gno Kind(linkPostUri) => get LinkPostKind
+  //TODO: Control LINK_POST_KIND_POLL
+  //TODO: query polls.gno GetInfo(pollId)
+
+  // TODO: Show skeleton while loading
 
   return (
     <div className="flex flex-col gap-4 min-h-0 pt-4">
@@ -114,16 +120,16 @@ export function EventFeed({
         ))}
 
         {/*<StandardPostCard />*/}
-        <PollPostCard poll={fakePolls[0]} />
-        <PollPostCard poll={fakePolls[1]} />
+        <PollPostCard poll={fakePolls[0]} post={fakeStandardPosts[0]} />
+        <PollPostCard poll={fakePolls[1]} post={fakeStandardPosts[1]} />
 
         {/*<StandardPostCard />*/}
         {/*<StandardPostCard />*/}
-        <PollPostCard poll={fakePolls[2]} />
+        <PollPostCard poll={fakePolls[2]} post={fakeStandardPosts[2]} />
 
         {/*<StandardPostCard />*/}
         {/*<StandardPostCard />*/}
-        <PollPostCard poll={fakePolls[3]} />
+        <PollPostCard poll={fakePolls[3]} post={fakeStandardPosts[3]} />
       </div>
     </div>
   );

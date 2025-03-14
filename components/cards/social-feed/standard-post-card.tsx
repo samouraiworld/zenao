@@ -11,7 +11,7 @@ export function StandardPostCard({ post }: { post: Post }) {
   const standardPost = post.post.value;
 
   return (
-    <PostCardLayout>
+    <PostCardLayout post={post}>
       <div className="w-full flex flex-col gap-2">
         <Text>{standardPost.content}</Text>
       </div>

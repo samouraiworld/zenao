@@ -9,8 +9,9 @@ import { Poll, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PollResultsList } from "@/components/lists/poll-results-list";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import { SmallText } from "@/components/texts/SmallText";
+import { Post } from "@/app/gen/feeds/v1/feeds_pb";
 
-export function PollPostCard({ poll }: { poll: Poll }) {
+export function PollPostCard({ poll, post }: { poll: Poll; post: Post }) {
   const now = new Date();
   const endTime = Number(poll.createdAt) + Number(poll.duration);
   const isPollEnded = isAfter(now, new Date(endTime * 1000));
@@ -28,7 +29,7 @@ export function PollPostCard({ poll }: { poll: Poll }) {
   };
 
   return (
-    <PostCardLayout>
+    <PostCardLayout post={post}>
       <div className="w-full flex flex-col gap-2">
         <div className="flex flex-row items-center gap-2">
           <SmallText>{`${totalVotesCount} votes`}</SmallText>
