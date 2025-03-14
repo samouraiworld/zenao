@@ -26,6 +26,7 @@ import (
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
 	"github.com/samouraiworld/zenao/backend/zeni"
+
 )
 
 func main() {
@@ -60,11 +61,12 @@ type config struct {
 	chainID         string
 	dbPath          string
 	resendSecretKey string
+	tokendiscord 		string
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
-	flset.StringVar(&conf.clerkSecretKey, "clerk-secret", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
+	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_IgysJrr68FOVwOvMG5mECmYVIOI8yFBKhYR0yxyIAB", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
 	flset.StringVar(&conf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
 	flset.StringVar(&conf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
@@ -72,6 +74,8 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
+	flset.StringVar(&conf.tokendiscord, "token-discord", "", "Token Discord")
+
 }
 
 var conf config
@@ -98,6 +102,7 @@ func injectStartEnv() {
 		"ZENAO_DB":                &conf.dbPath,
 		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
+		"TOKEN_DISCORD":					 &conf.tokendiscord,
 	}
 
 	for key, ps := range mappings {
@@ -106,6 +111,7 @@ func injectStartEnv() {
 			*ps = val
 		}
 	}
+
 }
 
 func execStart() error {
@@ -140,6 +146,7 @@ func execStart() error {
 		Chain:      chain,
 		DB:         db,
 		MailClient: mailClient,
+		TokenDiscord: conf.tokendiscord,
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")

@@ -1,6 +1,7 @@
 package main
 
 import (
+
 	"context"
 	"errors"
 	"fmt"
@@ -13,6 +14,9 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
+	"github.com/samouraiworld/zenao/backend/webhook"
+
+
 )
 
 func (s *ZenaoServer) CreateEvent(
@@ -52,6 +56,31 @@ func (s *ZenaoServer) CreateEvent(
 			s.Logger.Error("create-event", zap.Error(err))
 			return err
 		}
+
+
+		// Vérifie que le TokenDiscord n'est pas vide avant d'envoyer le webhook
+	if s.TokenDiscord != "" {
+	    locationStr, err := zeni.LocationToString(evt.Location)
+	    if err != nil {
+	        fmt.Println("Erreur:", err)
+	        return err
+	    }
+
+	    // Envoi du message sur Discord
+	    EventURL := fmt.Sprintf("https://zenao.io/event/%s", evt.ID)
+	    err = webhook.SendDiscordWebhook(
+	        s.TokenDiscord,
+	        evt.Title,
+	        evt.StartDate.Format("2006-01-02 15:04:05"), // Date de début formatée
+	        evt.EndDate.Format("2006-01-02 15:04:05"),   // Date de fin formatée
+	        locationStr,
+	        EventURL,
+	    )
+	    if err != nil {
+	        s.Logger.Error("Erreur lors de l'envoi du webhook Discord", zap.Error(err))
+	    }
+	}
+
 
 		if s.MailClient != nil {
 			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
