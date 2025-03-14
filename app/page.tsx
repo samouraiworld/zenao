@@ -3,29 +3,13 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { VeryLargeText } from "@/components/texts/VeryLargeText";
 import { SmallText } from "@/components/texts/SmallText";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
-import { FormFieldDatePickerV2 } from "@/components/form/components/form-field-date-picker";
-import { Form } from "@/components/shadcn/form";
 
 export default function Home() {
   const t = useTranslations("home");
-
-  const form = useForm<{
-    startDate: bigint /* Timestamp */;
-  }>({
-    mode: "all",
-    defaultValues: {
-      startDate: BigInt(0),
-    },
-  });
-
-  const onSubmit = ({ startDate }: { startDate: bigint }) => {
-    console.log(startDate);
-  };
 
   return (
     <ScreenContainerCentered>
@@ -49,18 +33,6 @@ export default function Home() {
             <SmallText variant="invert">{t("button")}</SmallText>
           </ButtonWithChildren>
         </Link>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex w-full sm:flex-row items-center sm:h-full"
-          >
-            <FormFieldDatePickerV2
-              control={form.control}
-              name="startDate"
-              timeZone=""
-            />
-          </form>
-        </Form>
       </div>
     </ScreenContainerCentered>
   );
