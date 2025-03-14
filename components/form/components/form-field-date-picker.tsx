@@ -1,15 +1,16 @@
 "use client";
 
-import { FieldValues } from "react-hook-form";
+import { FieldValues, useController } from "react-hook-form";
 import React, { useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Matcher } from "react-day-picker";
+import { useEffect } from "react";
+import { useRef } from "react";
 import { FormFieldProps } from "../types";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormMessage,
@@ -38,7 +39,25 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
     dateRangeMatcher?: Matcher | Matcher[];
   },
 ) {
+  const { field } = useController({ ...props });
   const [isOpen, setIsOpen] = useState(false);
+  const firstCheck = useRef(0);
+  const [time, setTime] = useState<string>("09:00");
+
+  useEffect(() => {
+    if (firstCheck.current > 0) return;
+
+    firstCheck.current += 1;
+
+    if (field.value) {
+      const formattedValue = fromUnixTime(Number(field.value));
+
+      const hours = formattedValue.getHours().toString().padStart(2, "0");
+      const minutes = formattedValue.getMinutes().toString().padStart(2, "0");
+
+      setTime(`${hours}:${minutes}`);
+    }
+  }, [field.value, firstCheck]);
 
   return (
     <div className="flex w-full gap-4">
@@ -47,7 +66,6 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
         name={props.name}
         render={({ field }) => {
           const formattedValue = fromUnixTime(Number(field.value));
-
           return (
             <FormItem className="flex flex-col w-full">
               <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -81,23 +99,31 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
                   <Calendar
                     mode="single"
                     captionLayout="dropdown"
-                    selected={formattedValue}
+                    selected={
+                      !Number.isNaN(formattedValue.getTime())
+                        ? formattedValue
+                        : undefined
+                    }
                     onSelect={(selectedDate) => {
-                      const hours = formattedValue.getHours();
-                      const minutes = formattedValue.getMinutes();
-
-                      selectedDate?.setHours(hours, minutes);
+                      const [hours, minutes] = time.split(":")!;
+                      selectedDate?.setHours(
+                        parseInt(hours),
+                        parseInt(minutes),
+                      );
                       if (selectedDate) {
                         field.onChange(BigInt(getUnixTime(selectedDate)));
                       }
                     }}
                     onDayClick={() => setIsOpen(false)}
                     disabled={props.dateRangeMatcher}
-                    defaultMonth={formattedValue}
+                    defaultMonth={
+                      !Number.isNaN(formattedValue.getTime())
+                        ? formattedValue
+                        : undefined
+                    }
                   />
                 </PopoverContent>
               </Popover>
-              <FormDescription>Set your date and time.</FormDescription>
               <FormMessage />
             </FormItem>
           );
@@ -108,26 +134,20 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
         name={props.name}
         render={({ field }) => {
           const formattedValue = fromUnixTime(Number(field.value));
-
-          const hour = formattedValue.getHours().toString().padStart(2, "0");
-          const minutes = formattedValue
-            .getMinutes()
-            .toString()
-            .padStart(2, "0");
-          const time = `${hour}:${minutes}`;
-
           return (
             <FormItem className="flex flex-col">
               <FormControl>
                 <Select
+                  disabled={!field.value}
                   defaultValue={time}
                   onValueChange={(e) => {
-                    const [hours, minutes] = e.split(":");
-
-                    const newDate = new Date(formattedValue);
-
-                    newDate.setHours(parseInt(hours), parseInt(minutes));
-                    field.onChange(BigInt(getUnixTime(newDate)));
+                    setTime(e);
+                    if (field.value) {
+                      const [hours, minutes] = e.split(":");
+                      const newDate = new Date(formattedValue);
+                      newDate.setHours(parseInt(hours), parseInt(minutes));
+                      field.onChange(BigInt(getUnixTime(newDate)));
+                    }
                   }}
                 >
                   <SelectTrigger className="font-normal focus:ring-0 w-[120px] focus:ring-offset-0">
