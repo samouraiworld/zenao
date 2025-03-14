@@ -26,7 +26,6 @@ import (
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
 	"github.com/samouraiworld/zenao/backend/zeni"
-
 )
 
 func main() {
@@ -61,7 +60,7 @@ type config struct {
 	chainID         string
 	dbPath          string
 	resendSecretKey string
-	tokendiscord 		string
+	tokendiscord    string
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
@@ -102,7 +101,7 @@ func injectStartEnv() {
 		"ZENAO_DB":                &conf.dbPath,
 		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
-		"TOKEN_DISCORD":					 &conf.tokendiscord,
+		"TOKEN_DISCORD":           &conf.tokendiscord,
 	}
 
 	for key, ps := range mappings {
@@ -140,12 +139,12 @@ func execStart() error {
 	}
 
 	zenao := &ZenaoServer{
-		Logger:     logger,
-		GetUser:    getUserFromClerk,
-		CreateUser: createClerkUser,
-		Chain:      chain,
-		DB:         db,
-		MailClient: mailClient,
+		Logger:       logger,
+		GetUser:      getUserFromClerk,
+		CreateUser:   createClerkUser,
+		Chain:        chain,
+		DB:           db,
+		MailClient:   mailClient,
 		TokenDiscord: conf.tokendiscord,
 	}
 
