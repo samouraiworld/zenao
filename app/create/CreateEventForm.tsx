@@ -88,5 +88,12 @@ export const CreateEventForm: React.FC = () => {
     setIsLoaded(false);
   };
 
-  return <EventForm form={form} onSubmit={onSubmit} isLoaded={isLoaded} />;
+  return (
+    <EventForm
+      form={form}
+      onSubmit={onSubmit}
+      isLoaded={isLoaded}
+      enabledDateRange={{ min: new Date() }}
+    />
+  );
 };

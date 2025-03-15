@@ -36,7 +36,8 @@ import { SmallText } from "@/components/texts/SmallText";
 export function FormFieldDatePickerV2<T extends FieldValues>(
   props: FormFieldProps<T, bigint> & {
     timeZone: string;
-    dateRangeMatcher?: Matcher | Matcher[];
+    disabledDates?: Matcher | Matcher[];
+    onChange?: (date: Date) => void;
   },
 ) {
   const { field } = useController({ ...props });
@@ -45,7 +46,7 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
   const [time, setTime] = useState<string>("09:00");
 
   useEffect(() => {
-    if (firstCheck.current > 0) return;
+    // if (firstCheck.current > 0) return;
 
     firstCheck.current += 1;
 
@@ -57,7 +58,7 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
 
       setTime(`${hours}:${minutes}`);
     }
-  }, [field.value, firstCheck]);
+  }, [props.name, field.value, firstCheck]);
 
   return (
     <div className="flex w-full gap-4">
@@ -111,11 +112,15 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
                         parseInt(minutes),
                       );
                       if (selectedDate) {
-                        field.onChange(BigInt(getUnixTime(selectedDate)));
+                        const value = BigInt(getUnixTime(selectedDate));
+                        field.onChange(value);
+                        if (props.onChange) {
+                          props.onChange(selectedDate);
+                        }
                       }
                     }}
                     onDayClick={() => setIsOpen(false)}
-                    disabled={props.dateRangeMatcher}
+                    disabled={props.disabledDates}
                     defaultMonth={
                       !Number.isNaN(formattedValue.getTime())
                         ? formattedValue
@@ -140,6 +145,7 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
                 <Select
                   disabled={!field.value}
                   defaultValue={time}
+                  value={time}
                   onValueChange={(e) => {
                     setTime(e);
                     if (field.value) {
@@ -147,6 +153,9 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
                       const newDate = new Date(formattedValue);
                       newDate.setHours(parseInt(hours), parseInt(minutes));
                       field.onChange(BigInt(getUnixTime(newDate)));
+                      if (props.onChange) {
+                        props.onChange(newDate);
+                      }
                     }
                   }}
                 >

@@ -1,6 +1,7 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { fromUnixTime, getUnixTime, isSameDay } from "date-fns";
 import { Card } from "../cards/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
@@ -25,16 +26,20 @@ interface EventFormProps {
   onSubmit: (values: EventFormSchemaType) => Promise<void>;
   isLoaded: boolean;
   isEditing?: boolean;
+  enabledDateRange?: { min?: Date; max?: Date };
 }
 
 export const EventForm: React.FC<EventFormProps> = ({
   form,
   onSubmit,
   isLoaded,
+  enabledDateRange,
   isEditing = false,
 }) => {
   const description = form.watch("description");
   const location = form.watch("location");
+  const startDate = form.watch("startDate");
+  const endDate = form.watch("endDate");
   const t = useTranslations("eventForm");
 
   const [isVirtual, setIsVirtual] = useState<boolean>(
@@ -172,6 +177,18 @@ export const EventForm: React.FC<EventFormProps> = ({
                 control={form.control}
                 placeholder={t("pick-a-date-placeholder")}
                 timeZone={timeZone}
+                onChange={(date) => {
+                  if (endDate && date > fromUnixTime(Number(endDate))) {
+                    form.setValue("endDate", BigInt(getUnixTime(date)));
+                  }
+                }}
+                disabledDates={[
+                  (date) =>
+                    ((enabledDateRange?.min && date < enabledDateRange?.min) ||
+                      (enabledDateRange?.max &&
+                        date > enabledDateRange?.max)) ??
+                    false,
+                ]}
               />
               <FormLabel>to</FormLabel>
               <FormFieldDatePickerV2
@@ -179,6 +196,24 @@ export const EventForm: React.FC<EventFormProps> = ({
                 control={form.control}
                 placeholder={t("pick-a-date-placeholder")}
                 timeZone={timeZone}
+                disabledDates={[
+                  (date) =>
+                    ((enabledDateRange?.min && date < enabledDateRange?.min) ||
+                      (enabledDateRange?.max &&
+                        date > enabledDateRange?.max)) ??
+                    false,
+                  (date) => {
+                    if (startDate) {
+                      // We accept events on the same day
+                      const currentStartDate = fromUnixTime(Number(startDate));
+                      return (
+                        !isSameDay(date, currentStartDate) &&
+                        date < currentStartDate
+                      );
+                    }
+                    return false;
+                  },
+                ]}
               />
               <FormDescription>
                 Displayed time corresponds to {timeZone}
