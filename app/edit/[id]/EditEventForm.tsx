@@ -136,6 +136,12 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     );
   }
   return (
-    <EventForm form={form} onSubmit={onSubmit} isLoaded={isLoaded} isEditing />
+    <EventForm
+      form={form}
+      onSubmit={onSubmit}
+      isLoaded={isLoaded}
+      isEditing
+      enabledDateRange={{ min: new Date() }}
+    />
   );
 }
