@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { ChevronsUpDown } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
-import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import { SmallText } from "@/components/texts/SmallText";
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
@@ -19,27 +20,31 @@ import {
   CommandList,
 } from "@/components/shadcn/command";
 import { timezones } from "@/lib/timezones";
+import { Button } from "@/components/shadcn/button";
 
 export const TimeZonesPopover: React.FC<{
   handleSelect: (timeZone: string) => void;
   defaultValue: string;
 }> = ({ handleSelect, defaultValue }) => {
+  const t = useTranslations("eventForm");
   const [search, setSearch] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [item, setItem] = useState<string>(defaultValue || "");
 
   return (
-    <div>
-      <SmallText>
-        You choose a custom location, so please select a timezone.
-      </SmallText>
+    <div className="flex flex-col gap-2">
+      <SmallText>{t("custom-timezone-select")}</SmallText>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger className="relative" asChild>
-          <ButtonWithChildren>
-            <SmallText variant="invert">
-              {(timezones && item) || "Select timezone..."}
-            </SmallText>
-          </ButtonWithChildren>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-[250px] justify-between"
+          >
+            {(timezones && item) || "Select timezone..."}
+            <ChevronsUpDown className="opacity-50" />
+          </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full relative p-0">
           <Command>
@@ -51,7 +56,7 @@ export const TimeZonesPopover: React.FC<{
               typeof="search"
             />
             <CommandList>
-              <CommandEmpty>No timezones found.</CommandEmpty>
+              <CommandEmpty>{t("no-timezone-found")}</CommandEmpty>
               <CommandGroup>
                 {timezones &&
                   timezones?.map((timezone, index) => (
