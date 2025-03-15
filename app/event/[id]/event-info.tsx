@@ -6,7 +6,6 @@ import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
@@ -22,12 +21,11 @@ import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
-import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
 import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
-import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
+import { eventLocation } from "@/lib/event-location";
 
 interface EventSectionProps {
   title: string;
@@ -57,35 +55,7 @@ export function EventInfo({ id }: { id: string }) {
   const isStarted = Date.now() > Number(data.startDate) * 1000;
   const queryClient = useQueryClient();
 
-  // Correctly reconstruct location object
-  let location: EventFormSchemaType["location"] = {
-    kind: "custom",
-    address: "",
-    timeZone: "",
-  };
-  switch (data.location?.address.case) {
-    case "custom":
-      location = {
-        kind: "custom",
-        address: data.location?.address.value.address,
-        timeZone: data.location?.address.value.timezone,
-      };
-      break;
-    case "geo":
-      location = {
-        kind: "geo",
-        address: data.location?.address.value.address,
-        lat: data.location?.address.value.lat,
-        lng: data.location?.address.value.lng,
-        size: data.location?.address.value.size,
-      };
-      break;
-    case "virtual":
-      location = {
-        kind: "virtual",
-        location: data.location?.address.value.uri,
-      };
-  }
+  const location = eventLocation(data);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -104,19 +74,6 @@ export function EventInfo({ id }: { id: string }) {
     });
   }, [queryClient, id, address]);
 
-  const jsonLd: WithContext<Event> = {
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: data.title,
-    description: data.description,
-    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
-    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
-    location:
-      location.kind === "virtual" ? location.location : location.address,
-    maximumAttendeeCapacity: data.capacity,
-    image: web2URL(data.imageUri),
-  };
-
   const iconSize = 22;
 
   if (!data) {
@@ -124,11 +81,6 @@ export function EventInfo({ id }: { id: string }) {
   }
   return (
     <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
       {/* Left Section */}
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <Image

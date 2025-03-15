@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
+import { Event, WithContext } from "schema-dts";
 import { EventInfo } from "./event-info";
 import { imageHeight, imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
@@ -8,6 +9,7 @@ import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
 import { web2URL } from "@/lib/uris";
 import { profileOptions } from "@/lib/queries/profile";
+import { eventLocation } from "@/lib/event-location";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -27,10 +29,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const queryClient = getQueryClient();
   const event = await queryClient.fetchQuery(eventOptions(id));
 
+  const location = eventLocation(event);
+  const jsonLd: WithContext<Event> = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description,
+    startDate: new Date(Number(event.startDate) * 1000).toISOString(),
+    endDate: new Date(Number(event.endDate) * 1000).toISOString(),
+    location:
+      location.kind === "virtual" ? location.location : location.address,
+    maximumAttendeeCapacity: event.capacity,
+    image: web2URL(event.imageUri),
+  };
+
   return {
     title: event.title,
     openGraph: {
       images: [{ url: web2URL(event.imageUri) }],
+    },
+    other: {
+      "application/ld+json": JSON.stringify(jsonLd),
     },
   };
 }
