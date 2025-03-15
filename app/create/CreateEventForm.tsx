@@ -10,6 +10,7 @@ import { zenaoClient } from "@/app/zenao-client";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
+import { eventFormLocationValue } from "@/lib/event-location";
 
 export const CreateEventForm: React.FC = () => {
   const { getToken } = useAuth();
@@ -43,33 +44,15 @@ export const CreateEventForm: React.FC = () => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      // Construct location object for the call
-      let value = {};
-      switch (values.location.kind) {
-        case "custom":
-          value = {
-            address: values.location.address,
-            timezone: values.location.timeZone,
-          };
-          break;
-        case "virtual":
-          value = { uri: values.location.location };
-          break;
-        case "geo":
-          value = {
-            address: values.location.address,
-            lat: values.location.lat,
-            lng: values.location.lng,
-            size: values.location.size,
-          };
-          break;
-        default:
-          value = {};
-      }
       const { id } = await zenaoClient.createEvent(
         {
           ...values,
-          location: { address: { case: values.location.kind, value } },
+          location: {
+            address: {
+              case: values.location.kind,
+              value: eventFormLocationValue(values),
+            },
+          },
         },
         { headers: { Authorization: "Bearer " + token } },
       );
