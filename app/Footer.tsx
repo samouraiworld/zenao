@@ -6,7 +6,7 @@ import { SmallText } from "@/components/texts/SmallText";
 export const Footer: React.FC = () => {
   const t = useTranslations("footer");
   return (
-    <footer className={`flex flex-row justify-between items-end p-4 h-[52px]`}>
+    <footer className="flex flex-row justify-between items-end p-4">
       <div className="flex flex-row gap-3 sm:gap-5">
         <SmallText variant="secondary" className="underline underline-offset-1">
           {t("terms")}

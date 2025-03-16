@@ -4,8 +4,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
 import Image, { getImageProps } from "next/image";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { ClerkLoading, SignedIn } from "@clerk/nextjs";
-import React, { ReactNode } from "react";
 import { Skeleton } from "../shadcn/skeleton";
 import { SmallText } from "../texts/SmallText";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
@@ -50,32 +48,6 @@ export function UserAvatarSkeleton({ className }: { className?: string }) {
   return <Skeleton className={cn(avatarClassName, className)} />;
 }
 
-export function UserLinkedAvatarWithLoaderAndFallback({
-  userAddress,
-  className,
-}: {
-  userAddress: string | null;
-  className?: string;
-}) {
-  const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
-  return (
-    <div className={className}>
-      <ClerkLoading>
-        {/* Loading state */}
-        <SettingsLink>
-          <UserAvatarSkeleton className={avatarClassName} />
-        </SettingsLink>
-      </ClerkLoading>
-      {/* Signed in state */}
-      <SignedIn>
-        <SettingsLink>
-          <UserAvatar address={userAddress} className={avatarClassName} />
-        </SettingsLink>
-      </SignedIn>
-    </div>
-  );
-}
-
 export function UserAvatarWithName({
   address,
   className,
@@ -102,12 +74,4 @@ export function UserAvatarWithName({
   }
 
   return <div className={className}>{content}</div>;
-}
-
-function SettingsLink({ children }: { children: ReactNode }) {
-  return (
-    <Link href="/settings" className="flex items-center">
-      {children}
-    </Link>
-  );
 }

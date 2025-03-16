@@ -8,6 +8,7 @@ import { Calendar, ChevronDownIcon, ChevronUpIcon, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { Event, WithContext } from "schema-dts";
 import { ParticipateForm } from "./ParticipateForm";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
@@ -30,6 +31,7 @@ import { cn } from "@/lib/tailwind";
 import { screenContainerMaxWidth } from "@/components/layout/ScreenContainer";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
 import { UserAvatarWithName } from "@/components/common/user";
+import { web2URL } from "@/lib/uris";
 
 function EventSection({
   title,
@@ -113,6 +115,19 @@ export function EventInfo({ id }: { id: string }) {
     });
   }, [queryClient, id, address]);
 
+  const jsonLd: WithContext<Event> = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: data.title,
+    description: data.description,
+    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
+    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
+    location:
+      location.kind === "virtual" ? location.location : location.address,
+    maximumAttendeeCapacity: data.capacity,
+    image: web2URL(data.imageUri),
+  };
+
   const descLineClamp = 8;
   const descLineClampClassName = "line-clamp-[8]"; // Dynamic "8" value doesn't work here and inline style with WebkitLineClamp neither
   const descContainerRef = useRef<HTMLDivElement>(null);
@@ -165,6 +180,10 @@ export function EventInfo({ id }: { id: string }) {
   }
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ---- Event hero image */}
       {!!fakeImageUri && (
         <Image

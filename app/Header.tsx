@@ -1,13 +1,19 @@
 "use client";
 
 import { UrlObject } from "url";
-import React, { useMemo } from "react";
+import React, { ReactNode, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AlignJustify as AlignJustifyIcon } from "lucide-react";
 import { PopoverContent } from "@radix-ui/react-popover";
-import { SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
+import {
+  ClerkLoading,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  useAuth,
+} from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { Popover, PopoverTrigger } from "@/components/shadcn/popover";
@@ -17,7 +23,7 @@ import { Text } from "@/components/texts/DefaultText";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
-import { UserLinkedAvatarWithLoaderAndFallback } from "@/components/common/user";
+import { UserAvatarSkeleton, UserAvatar } from "@/components/common/user";
 
 type NavItem = {
   key: string;
@@ -150,6 +156,8 @@ export function Header() {
   );
 }
 
+const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
+
 const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
   className,
   userAddress,
@@ -165,7 +173,26 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
           </Button>
         </SignInButton>
       </SignedOut>
-      <UserLinkedAvatarWithLoaderAndFallback userAddress={userAddress} />
+      {/* Loading state */}
+      <ClerkLoading>
+        <SettingsLink>
+          <UserAvatarSkeleton className={avatarClassName} />
+        </SettingsLink>
+      </ClerkLoading>
+      {/* Signed in state */}
+      <SignedIn>
+        <SettingsLink>
+          <UserAvatar address={userAddress} className={avatarClassName} />
+        </SettingsLink>
+      </SignedIn>
     </div>
   );
 };
+
+function SettingsLink({ children }: { children: ReactNode }) {
+  return (
+    <Link href="/settings" className="flex items-center">
+      {children}
+    </Link>
+  );
+}
