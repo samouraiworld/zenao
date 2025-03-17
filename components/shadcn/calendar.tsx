@@ -40,6 +40,7 @@ function Calendar({
       options,
       "aria-label": arialLabel,
     }: React.ComponentProps<typeof DropDownDayPicker>) => {
+      console.log(options);
       const selected = options?.find((option) => option.value === value);
       const handleChange = (value: string) => {
         const changeEvent = {

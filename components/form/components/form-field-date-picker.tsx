@@ -117,6 +117,8 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
                         }
                       }
                     }}
+                    fromYear={new Date().getFullYear()}
+                    toYear={new Date().getFullYear() + 10}
                     onDayClick={() => setIsOpen(false)}
                     disabled={props.disabledDates}
                     defaultMonth={
