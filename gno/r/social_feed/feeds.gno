@@ -21,7 +21,10 @@ var (
 	reactions     *avl.Tree // post_id:icon -> count
 	userReactions *avl.Tree // post_id:icon:user_address -> struct{}
 
-	posts *avl.Tree // local_post_id -> Post
+	posts      *avl.Tree // feed_id:timestamp:local_post_id -> *Post // for search with specific feed sorted by timestamp
+	postsByTag *avl.Tree // feed_id:tag:timestamp:local_post_id -> *Post // for search with specific tag sorted by timestamp
+	postsById  *avl.Tree // id -> *Post // for search with specific id
+
 	feeds *avl.Tree // slug -> Feed
 )
 
@@ -30,6 +33,9 @@ func init() {
 	userReactions = avl.NewTree()
 
 	posts = avl.NewTree()
+	postsByTag = avl.NewTree()
+	postsById = avl.NewTree()
+
 	feeds = avl.NewTree()
 }
 
@@ -54,7 +60,6 @@ func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string 
 // XXX: do a registry by user & one by parentID ?
 // XXX: handle flagged posts
 // XXX: handle tags with an array of string
-// XXX: optimize research by tags with a new tree ?
 func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user string) []*feedsv1.PostView {
 	if feedId == "" {
 		panic("feedId is empty")
