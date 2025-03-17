@@ -212,7 +212,13 @@ describe("main", () => {
     cy.get('table[role="grid"]').find("button").contains("13").click();
 
     cy.get("button").contains("Pick a end date...").click();
-    cy.get("button").contains("");
+    cy.get('div[role="option"]').contains("April").click();
+
+    cy.get('button[aria-label="Choose the Year"').click();
+    cy.get('div[role="option"]')
+      .contains(`${new Date().getFullYear() + 1}`)
+      .click();
+
     cy.wait(500); // wait for start date calendar to disapear so there is only one "Choose the Month" button present
     cy.get('button[aria-label="Choose the Month"').click();
     cy.get('table[role="grid"]').find("button").contains("14").click();
