@@ -26,14 +26,16 @@ interface EventFormProps {
   onSubmit: (values: EventFormSchemaType) => Promise<void>;
   isLoaded: boolean;
   isEditing?: boolean;
-  enabledDateRange?: { min?: Date; max?: Date };
+  minDateRange?: Date;
+  maxDateRange?: Date;
 }
 
 export const EventForm: React.FC<EventFormProps> = ({
   form,
   onSubmit,
   isLoaded,
-  enabledDateRange,
+  minDateRange,
+  maxDateRange,
   isEditing = false,
 }) => {
   const description = form.watch("description");
@@ -183,11 +185,20 @@ export const EventForm: React.FC<EventFormProps> = ({
                   }
                 }}
                 disabledDates={[
-                  (date) =>
-                    ((enabledDateRange?.min && date < enabledDateRange?.min) ||
-                      (enabledDateRange?.max &&
-                        date > enabledDateRange?.max)) ??
-                    false,
+                  ...(minDateRange
+                    ? [
+                        {
+                          before: minDateRange,
+                        },
+                      ]
+                    : []),
+                  ...(maxDateRange
+                    ? [
+                        {
+                          after: maxDateRange,
+                        },
+                      ]
+                    : []),
                 ]}
               />
               <FormLabel>{t("to")}</FormLabel>
@@ -197,21 +208,49 @@ export const EventForm: React.FC<EventFormProps> = ({
                 placeholder={t("pick-a-end-date-placeholder")}
                 timeZone={timeZone}
                 disabled={!startDate}
-                disabledDates={[
-                  (date) =>
-                    ((enabledDateRange?.min && date < enabledDateRange?.min) ||
-                      (enabledDateRange?.max &&
-                        date > enabledDateRange?.max)) ??
-                    false,
+                disabledHours={[
                   (date) => {
                     if (startDate) {
                       // We accept events on the same day
                       const currentStartDate = fromUnixTime(Number(startDate));
+
                       return (
-                        !isSameDay(date, currentStartDate) &&
-                        date < currentStartDate
+                        isSameDay(currentStartDate, date) &&
+                        currentStartDate.getHours() * 60 +
+                          currentStartDate.getMinutes() >
+                          date.getHours() * 60 + date.getMinutes()
                       );
                     }
+
+                    return false;
+                  },
+                ]}
+                disabledDates={[
+                  ...(minDateRange
+                    ? [
+                        {
+                          before: minDateRange,
+                        },
+                      ]
+                    : []),
+                  ...(maxDateRange
+                    ? [
+                        {
+                          after: maxDateRange,
+                        },
+                      ]
+                    : []),
+                  (date) => {
+                    if (startDate) {
+                      // We accept events on the same day
+                      const currentStartDate = fromUnixTime(Number(startDate));
+
+                      return (
+                        !isSameDay(currentStartDate, date) &&
+                        currentStartDate > date
+                      );
+                    }
+
                     return false;
                   },
                 ]}

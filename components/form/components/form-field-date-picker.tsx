@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
-import { Matcher } from "react-day-picker";
+import { DateInterval, DateRange, Matcher } from "react-day-picker";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { FormFieldProps } from "../types";
@@ -33,11 +33,47 @@ import {
 import { ScrollArea } from "@/components/shadcn/scroll-area";
 import { SmallText } from "@/components/texts/SmallText";
 
+function isDateDisabled(date: Date, matcher: Matcher): boolean {
+  if (!matcher) return false;
+
+  if (typeof matcher === "boolean") return matcher;
+
+  // If it's a date, check for direct equality
+  if (matcher instanceof Date) {
+    return date.getTime() === matcher.getTime();
+  }
+
+  // If it's an array, check if any matcher in the array applies
+  if (Array.isArray(matcher)) {
+    return matcher.some((m) => isDateDisabled(date, m));
+  }
+
+  // If it's a function, call it
+  if (typeof matcher === "function") {
+    return matcher(date);
+  }
+
+  // If it's a DateRange, check if the date falls within the range
+  if ("from" in matcher && "to" in matcher) {
+    const { from, to } = matcher as DateRange;
+    return from && to ? date >= from && date <= to : false;
+  }
+
+  // If it's a DateInterval, check interval conditions
+  if ("before" in matcher || "after" in matcher) {
+    const { before, after } = matcher as DateInterval;
+    return (before ? date < before : true) && (after ? date > after : true);
+  }
+
+  return false;
+}
+
 export function FormFieldDatePickerV2<T extends FieldValues>(
   props: FormFieldProps<T, bigint> & {
     timeZone: string;
     disabled?: boolean;
     disabledDates?: Matcher | Matcher[];
+    disabledHours?: Matcher | Matcher[];
     onChange?: (date: Date) => void;
   },
 ) {
@@ -61,6 +97,33 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
       setTime(`${hours}:${minutes}`);
     }
   }, [props.name, field.value, firstCheck]);
+
+  const isTimeDisabled = React.useCallback(
+    (date: Date, hours: number, minutes: number) => {
+      if (!props.disabledHours) {
+        return false;
+      }
+
+      if (isNaN(date.getTime())) {
+        return true;
+      }
+
+      const newDate = new Date(date);
+
+      newDate.setHours(hours);
+      newDate.setMinutes(minutes);
+
+      const disabled = Array.isArray(props.disabledHours)
+        ? props.disabledHours.reduce<boolean>(
+            (acc, matcher) => acc || isDateDisabled(newDate, matcher),
+            false,
+          )
+        : isDateDisabled(newDate, props.disabledHours);
+
+      return disabled;
+    },
+    [props.disabledHours],
+  );
 
   return (
     <div className="flex w-full gap-4">
@@ -176,8 +239,21 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
                         const minute = ((i % 4) * 15)
                           .toString()
                           .padStart(2, "0");
+
                         return (
-                          <SelectItem key={i} value={`${hour}:${minute}`}>
+                          <SelectItem
+                            key={i}
+                            value={`${hour}:${minute}`}
+                            disabled={
+                              props.disabledHours
+                                ? isTimeDisabled(
+                                    formattedValue,
+                                    parseInt(hour),
+                                    parseInt(minute),
+                                  )
+                                : undefined
+                            }
+                          >
                             {hour}:{minute}
                           </SelectItem>
                         );
