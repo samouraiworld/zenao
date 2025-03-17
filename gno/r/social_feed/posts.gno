@@ -1,11 +1,9 @@
 package social_feed
 
 import (
-	"fmt"
 	"std"
 	"time"
 
-	"gno.land/p/demo/ufmt"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
@@ -18,16 +16,15 @@ func NewPost(feedId string, post *feedsv1.Post) string {
 		}
 	}
 
-	timestamp := time.Now().Unix()
+	post.CreatedAt = time.Now().Unix()
 	localPostId := id.Next().String()
-	post.CreatedAt = timestamp
 	post.LocalPostId = localPostId
 
-	timeKey := ufmt.Sprintf("%s:%d:%s", feedId, post.CreatedAt, localPostId)
-	posts.Set(timeKey, post)
+	feedKey := feedId + ":" + localPostId
+	posts.Set(feedKey, post)
 
 	for _, tag := range post.Tags {
-		tagKey := fmt.Sprintf("%s:%s:%d:%s", feedId, tag, post.CreatedAt, localPostId)
+		tagKey := feedId + ":" + tag + ":" + localPostId
 		postsByTag.Set(tagKey, post)
 	}
 	postsById.Set(localPostId, post)
@@ -102,13 +99,13 @@ func EditPost(feedId string, localPostId string, newPost *feedsv1.Post) {
 
 		for tag := range oldTags {
 			if !newTags[tag] {
-				tagKey := fmt.Sprintf("%s:%s:%d:%s", feedId, tag, post.CreatedAt, localPostId)
+				tagKey := feedId + ":" + tag + ":" + localPostId
 				postsByTag.Remove(tagKey)
 			}
 		}
 		for tag := range newTags {
 			if !oldTags[tag] {
-				tagKey := fmt.Sprintf("%s:%s:%d:%s", feedId, tag, post.CreatedAt, localPostId)
+				tagKey := feedId + ":" + tag + ":" + localPostId
 				postsByTag.Set(tagKey, post)
 			}
 		}

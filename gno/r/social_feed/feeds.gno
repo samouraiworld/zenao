@@ -20,9 +20,9 @@ var (
 
 	reactions *avl.Tree
 
-	posts      *avl.Tree // feed_id:timestamp:local_post_id -> *Post // for search with specific feed sorted by timestamp
-	postsByTag *avl.Tree // feed_id:tag:timestamp:local_post_id -> *Post // for search with specific tag sorted by timestamp
-	postsById  *avl.Tree // id -> *Post // for search with specific id
+	posts      *avl.Tree // feed_id:local_post_id -> *Post // for search with specific feed
+	postsByTag *avl.Tree // feed_id:tag:local_post_id -> *Post // for search with specific tag
+	postsById  *avl.Tree // id -> *Post // for search with specific id (get/delete)
 
 	feeds *avl.Tree // slug -> Feed
 )
@@ -62,42 +62,60 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 	if feedId == "" {
 		panic("feedId is empty")
 	}
+
 	var res []*feedsv1.PostView
 	i := 0
-	start := feedId + ":"
-	end := feedId + ";"
 	tagsSplit := []string{}
 	if tags != "" {
 		tagsSplit = strings.Split(tags, ",")
 	}
-	posts.Iterate(start, end, func(key string, value interface{}) bool {
-		post := value.(*feedsv1.Post)
-		for _, tag := range tagsSplit {
-			if !hasTag(post.Tags, tag) {
-				return false
+
+	//XXX: Should we skip deleted posts ?
+	if len(tagsSplit) == 0 {
+		start := feedId + ":"
+		end := feedId + ";"
+		posts.Iterate(start, end, func(key string, value interface{}) bool {
+			if i >= int(offset) {
+				post := value.(*feedsv1.Post)
+				postView := &feedsv1.PostView{
+					Post:      post,
+					Reactions: GetPostReactions(post.LocalPostId, user),
+				}
+				res = append(res, postView)
 			}
-		}
+			i++
+			return i >= int(offset+limit)
+		})
+		return res
+	}
+
+	firstTag := tagsSplit[0]
+	tagStart := feedId + ":" + firstTag + ":"
+	tagEnd := feedId + ":" + firstTag + ";"
+	postsByTag.Iterate(tagStart, tagEnd, func(key string, value interface{}) bool {
 		if i >= int(offset) {
-			postView := &feedsv1.PostView{
-				Post:      post,
-				Reactions: GetPostReactions(post.LocalPostId, user),
+			post := value.(*feedsv1.Post)
+			hasAllTags := true
+			for _, tag := range tagsSplit {
+				tagKey := feedId + ":" + tag + ":" + post.LocalPostId
+				if !postsByTag.Has(tagKey) {
+					hasAllTags = false
+					break
+				}
 			}
-			res = append(res, postView)
+
+			if hasAllTags {
+				postView := &feedsv1.PostView{
+					Post:      post,
+					Reactions: GetPostReactions(post.LocalPostId, user),
+				}
+				res = append(res, postView)
+				i++
+			}
+		} else {
+			i++
 		}
-		i++
-		if i >= int(offset+limit) {
-			return true
-		}
-		return false
+		return i >= int(offset+limit)
 	})
 	return res
-}
-
-func hasTag(tags []string, tag string) bool {
-	for _, t := range tags {
-		if t == tag {
-			return true
-		}
-	}
-	return false
 }
