@@ -33,6 +33,8 @@
     "capacity-placeholder": "Capacity...",
     "pick-a-start-date-placeholder": "Pick a start date...",
     "pick-a-end-date-placeholder": "Pick a end date...",
+    "from": "From",
+    "to": "to",
     "custom-timezone-select": "You choose a custom location, so please select a timezone.",
     "no-timezone-found": "No timezones found.",
     "not-organizer-message": "You can't edit this event because you are not one of the organizer.",

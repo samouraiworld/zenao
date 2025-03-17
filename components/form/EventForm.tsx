@@ -171,7 +171,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               />
             </Card>
             <Card className="flex flex-col gap-[10px]">
-              <FormLabel>From</FormLabel>
+              <FormLabel>{t("from")}</FormLabel>
               <FormFieldDatePickerV2
                 name="startDate"
                 control={form.control}
@@ -190,12 +190,13 @@ export const EventForm: React.FC<EventFormProps> = ({
                     false,
                 ]}
               />
-              <FormLabel>to</FormLabel>
+              <FormLabel>{t("to")}</FormLabel>
               <FormFieldDatePickerV2
                 name="endDate"
                 control={form.control}
                 placeholder={t("pick-a-end-date-placeholder")}
                 timeZone={timeZone}
+                disabled={!startDate}
                 disabledDates={[
                   (date) =>
                     ((enabledDateRange?.min && date < enabledDateRange?.min) ||

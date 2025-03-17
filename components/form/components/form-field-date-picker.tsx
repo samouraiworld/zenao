@@ -36,11 +36,15 @@ import { SmallText } from "@/components/texts/SmallText";
 export function FormFieldDatePickerV2<T extends FieldValues>(
   props: FormFieldProps<T, bigint> & {
     timeZone: string;
+    disabled?: boolean;
     disabledDates?: Matcher | Matcher[];
     onChange?: (date: Date) => void;
   },
 ) {
-  const { field } = useController({ ...props });
+  const { field } = useController({
+    name: props.name,
+    control: props.control,
+  });
   const [isOpen, setIsOpen] = useState(false);
   const firstCheck = useRef(0);
   const [time, setTime] = useState<string>("09:00");
@@ -72,6 +76,7 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
                   <FormControl>
                     <Button
                       variant={"outline"}
+                      disabled={props.disabled}
                       className={cn(
                         "w-full font-normal",
                         !field.value && "text-muted-foreground",
@@ -143,7 +148,7 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
             <FormItem className="flex flex-col">
               <FormControl>
                 <Select
-                  disabled={!field.value}
+                  disabled={props.disabled || !field.value}
                   defaultValue={time}
                   value={time}
                   onValueChange={(e) => {
