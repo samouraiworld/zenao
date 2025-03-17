@@ -1,5 +1,4 @@
-import { ButtonProps as ShadCnButtonProps } from "../shadcn/button";
-
-export interface ButtonProps extends ShadCnButtonProps {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
 }

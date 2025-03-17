@@ -111,6 +111,7 @@ function AddAnswerButton({ onClick }: { onClick: () => void }) {
   return (
     <div onClick={onClick}>
       <ButtonWithChildren
+        type="button"
         variant="ghost"
         className="flex flex-row w-full justify-start hover:bg-neutral-700 rounded-full"
       >

@@ -1,11 +1,11 @@
 "use client";
 
-import { ExtraSmallText } from "../texts/extra-small-text";
 import { Checkbox } from "../shadcn/checkbox";
 import { Gauge } from "@/components/common/gauge";
 import { SmallText } from "@/components/texts/SmallText";
 import { cn } from "@/lib/tailwind";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
+import Text from "@/components/texts/text";
 
 function PollResultItem({
   pollResult,
@@ -38,7 +38,7 @@ function PollResultItem({
 
       <div className="flex flex-row items-center gap-3">
         <div className="flex flex-row items-center gap-2">
-          <ExtraSmallText>{`${pollResult.count} votes`}</ExtraSmallText>
+          <Text className="text-xs">{`${pollResult.count} votes`}</Text>
           <SmallText>{`${percent}%`}</SmallText>
         </div>
         <Checkbox
