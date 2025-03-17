@@ -66,8 +66,8 @@ func (s *ZenaoServer) CreateEvent(
 				s.Logger,
 				s.TokenDiscord,
 				evt.Title,
-				evt.StartDate.Format("2006-01-02 15:04:05"), // Date de début formatée
-				evt.EndDate.Format("2006-01-02 15:04:05"),   // Date de fin formatée
+				evt.StartDate.Format("2006-01-02 15:04:05"),
+				evt.EndDate.Format("2006-01-02 15:04:05"),
 				locationStr,
 				EventURL,
 			)
