@@ -1,3 +1,5 @@
+"use client";
+
 import { Text } from "@/components/texts/DefaultText";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import { Post } from "@/app/gen/feeds/v1/feeds_pb";

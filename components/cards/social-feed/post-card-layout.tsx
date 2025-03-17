@@ -1,3 +1,5 @@
+"use client";
+
 import React, { ReactNode } from "react";
 import { Card } from "@/components/cards/Card";
 import { UserAvatar } from "@/components/common/user";

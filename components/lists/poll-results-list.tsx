@@ -1,22 +1,24 @@
+"use client";
+
 import { ExtraSmallText } from "../texts/extra-small-text";
 import { Checkbox } from "../shadcn/checkbox";
 import { Gauge } from "@/components/common/gauge";
 import { SmallText } from "@/components/texts/SmallText";
 import { cn } from "@/lib/tailwind";
-import { PollResult } from "@/app/gen/polls/v1/polls_pb";
+import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 
-function PollResult({
+function PollResultItem({
   pollResult,
   totalVotesCount,
   isPollEnded,
   onCheckedChange,
-  isMultipleAnswers,
+  pollKind,
 }: {
   pollResult: PollResult;
   totalVotesCount: number;
   isPollEnded: boolean;
   onCheckedChange: (checked: boolean) => void;
-  isMultipleAnswers: boolean;
+  pollKind: PollKind;
 }) {
   const percent =
     totalVotesCount > 0
@@ -44,7 +46,7 @@ function PollResult({
           onCheckedChange={onCheckedChange}
           className={cn(
             isPollEnded ? "cursor-default" : "cursor-pointer",
-            !isMultipleAnswers && "rounded-lg",
+            pollKind === PollKind.SINGLE_CHOICE && "rounded-lg",
           )}
         />
       </div>
@@ -55,12 +57,12 @@ function PollResult({
 export function PollResultsList({
   list,
   isPollEnded,
-  isMultipleAnswers,
+  pollKind,
   onClickResult,
 }: {
   list: PollResult[];
   isPollEnded: boolean;
-  isMultipleAnswers: boolean;
+  pollKind: PollKind;
   onClickResult: (pollResult: PollResult) => void;
 }) {
   const totalVotesCount = list.reduce(
@@ -70,13 +72,13 @@ export function PollResultsList({
   return (
     <div className="flex flex-col items-center gap-2">
       {list.map((pollResult, index) => (
-        <PollResult
+        <PollResultItem
           key={index}
           pollResult={pollResult}
           totalVotesCount={totalVotesCount}
           isPollEnded={isPollEnded}
           onCheckedChange={() => {}}
-          isMultipleAnswers={isMultipleAnswers}
+          pollKind={pollKind}
         />
       ))}
     </div>

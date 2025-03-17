@@ -1,4 +1,5 @@
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+import { ButtonProps as ShadCnButtonProps } from "../shadcn/button";
+
+export interface ButtonProps extends ShadCnButtonProps {
   loading?: boolean;
 }

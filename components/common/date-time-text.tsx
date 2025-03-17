@@ -1,3 +1,5 @@
+"use client";
+
 import { format, formatDistanceToNowStrict, fromUnixTime } from "date-fns";
 import React, { useState } from "react";
 import { TextProps } from "@/components/texts/types";

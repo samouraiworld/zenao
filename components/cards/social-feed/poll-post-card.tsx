@@ -1,3 +1,5 @@
+"use client";
+
 import {
   format,
   formatDistanceToNowStrict,
@@ -41,8 +43,7 @@ export function PollPostCard({ poll, post }: { poll: Poll; post: Post }) {
         <PollResultsList
           list={poll.results}
           isPollEnded={isPollEnded}
-          // isMultipleAnswers={poll.multipleAnswers}
-          isMultipleAnswers={true}
+          pollKind={poll.kind}
           onClickResult={onClickResult}
         />
       </div>

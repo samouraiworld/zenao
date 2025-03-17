@@ -1,3 +1,5 @@
+"use client";
+
 import remarkGfm from "remark-gfm";
 import remarkYoutube from "remark-youtube";
 import ReactMarkdown from "react-markdown";

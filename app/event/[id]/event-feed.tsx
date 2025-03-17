@@ -1,7 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { SendHorizonal, Vote } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { PollPostCard } from "@/components/cards/social-feed/poll-post-card";
 import { fakePolls } from "@/app/event/[id]/fake-polls";
 import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
@@ -13,6 +17,14 @@ import {
   screenContainerMaxWidth,
 } from "@/components/layout/ScreenContainer";
 import { fakeStandardPosts } from "@/app/event/[id]/fake-posts";
+import {
+  pollFormSchema,
+  PollFormSchemaType,
+  // standardPostFormSchema,
+  // StandardPostFormSchemaType
+} from "@/components/form/types";
+import { PollForm } from "@/components/form/poll-form";
+import { useToast } from "@/app/hooks/use-toast";
 
 type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -21,7 +33,22 @@ function FeedInput() {
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const { toast } = useToast();
   const [mode, setMode] = useState<FeedInputMode>("STANDARD_POST");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const pollForm = useForm<PollFormSchemaType>({
+    resolver: zodResolver(pollFormSchema),
+  });
+  // const standardPostForm = useForm<StandardPostFormSchemaType>({
+  //   resolver: zodResolver(standardPostFormSchema),
+  // });
+  const textareaMaxLength =
+    mode === "POLL"
+      ? pollFormSchema.shape.question._def.checks.find(
+          (check) => check.kind === "max",
+        )?.value
+      : undefined;
 
   // Auto shrink and grow textarea
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -39,18 +66,42 @@ function FeedInput() {
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [textareaValue]);
 
+  // Functions
+  const onSubmitPoll = async (values: PollFormSchemaType) => {
+    try {
+      setIsLoading(true);
+      const token = await getToken();
+      if (!token) {
+        throw new Error("invalid clerk token");
+      }
+      //TODO
+      pollForm.reset();
+      toast({
+        // title: t("toast-creation-success"),
+        title: "TODO: trad (Poll creation success)",
+      });
+      // router.push(`/polls`);
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        // title: t("toast-creation-error"),
+        title: "TODO: trad (Poll creation error)",
+      });
+      console.error("error", err);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row items-center gap-4 pr-3">
-        {/*<div className="flex justify-center">*/}
-        {/*  <UserAvatar address={userAddress} className="size-7 sm:size-8" />*/}
-        {/*</div>*/}
         <Textarea
           ref={textareaRef}
           onChange={(evt) => setTextAreaValue(evt.target.value)}
           className="cursor-pointer border-0 focus-visible:ring-transparent rounded-xl px-4 py-2 placeholder:text-primary-color text-lg hover:bg-neutral-700"
           style={{ minHeight: textareaMinHeight, maxHeight: textareaMaxHeight }}
           placeholder={placeholder}
+          maxLength={textareaMaxLength}
         />
         <div
           className={cn(
@@ -76,9 +127,13 @@ function FeedInput() {
           <SendHorizonal color="white" size={22} />
         </div>
       </div>
+
       {mode === "POLL" && (
-        // TODO: mode === "POLL" must open the Poll inputs here
-        <div className="w-full h-[200px] bg-amber-100" />
+        <PollForm
+          form={pollForm}
+          onSubmit={onSubmitPoll}
+          isLoading={isLoading}
+        />
       )}
     </div>
   );

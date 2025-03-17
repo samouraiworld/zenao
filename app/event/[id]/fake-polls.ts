@@ -1,4 +1,4 @@
-import { Poll } from "@/app/gen/polls/v1/polls_pb";
+import { Poll, PollKind } from "@/app/gen/polls/v1/polls_pb";
 
 export const fakePolls: Poll[] = [
   {
@@ -6,10 +6,10 @@ export const fakePolls: Poll[] = [
     results: [
       { option: "Pepperoni", count: 120, hasUserVoted: true },
       { option: "Mushrooms", count: 80, hasUserVoted: false },
-      { option: "Pineapple", count: 50, hasUserVoted: false },
+      { option: "Pineapple", count: 50, hasUserVoted: true },
       { option: "Extra Cheese", count: 90, hasUserVoted: false },
     ],
-    multipleAnswers: true,
+    kind: PollKind.MULTIPLE_CHOICE,
     duration: BigInt(2819200),
     createdAt: BigInt(1738369957),
     createdBy: "pizzaLover99",
@@ -22,7 +22,7 @@ export const fakePolls: Poll[] = [
       { option: "Fall", count: 100, hasUserVoted: false },
       { option: "Winter", count: 75, hasUserVoted: false },
     ],
-    multipleAnswers: false,
+    kind: PollKind.SINGLE_CHOICE,
     duration: BigInt(12419200),
     createdAt: BigInt(1738369957),
     createdBy: "natureFanatic",
@@ -35,7 +35,7 @@ export const fakePolls: Poll[] = [
       { option: "Cereal", count: 100, hasUserVoted: false },
       { option: "Avocado Toast", count: 70, hasUserVoted: false },
     ],
-    multipleAnswers: false,
+    kind: PollKind.SINGLE_CHOICE,
     duration: BigInt(91432000),
     createdAt: BigInt(1738369957),
     createdBy: "breakfastKing",
@@ -48,7 +48,7 @@ export const fakePolls: Poll[] = [
       { option: "Tony Stark", count: 110, hasUserVoted: false },
       { option: "SpongeBob SquarePants", count: 60, hasUserVoted: false },
     ],
-    multipleAnswers: false,
+    kind: PollKind.SINGLE_CHOICE,
     duration: BigInt(100500),
     createdAt: BigInt(1738369957),
     createdBy: "storyLover22",
@@ -61,7 +61,7 @@ export const fakePolls: Poll[] = [
       { option: "Shopping", count: 80, hasUserVoted: false },
       { option: "Cooking", count: 70, hasUserVoted: false },
     ],
-    multipleAnswers: true,
+    kind: PollKind.MULTIPLE_CHOICE,
     duration: BigInt(259200),
     createdAt: BigInt(1738369957),
     createdBy: "weekendWarrior",

@@ -72,3 +72,18 @@ export const userFormSchema = z.object({
   avatarUri: uriSchema,
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
+
+const pollOptionFormSchema = z.object({
+  text: z.string().trim().min(1, "Required").max(55),
+});
+export const pollFormSchema = z.object({
+  question: z.string().trim().min(1, "Required").max(300),
+  options: z
+    .array(pollOptionFormSchema)
+    .min(1)
+    .max(10)
+    .default([{ text: "" }, { text: "" }]),
+  isMultipleAnswers: z.boolean().default(false),
+  endDate: z.coerce.bigint(),
+});
+export type PollFormSchemaType = z.infer<typeof pollFormSchema>;

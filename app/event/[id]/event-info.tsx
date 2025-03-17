@@ -61,6 +61,10 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+
+  // TODO: Fix this call
+  // const { data: posts } = useSuspenseQuery(feedPosts(id, 0, 100, "", address || ""));
+
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;

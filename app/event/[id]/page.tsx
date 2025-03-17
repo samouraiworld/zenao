@@ -37,9 +37,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventPage({ params }: Props) {
   // NOTE: we don't prefetch everything because using `auth()` breaks static generation
-
   const p = await params;
   const queryClient = getQueryClient();
+
+  // const { getToken, userId } = await auth();
+  // const userAddress = await queryClient.fetchQuery(
+  //   userAddressOptions(getToken, userId)
+  // );
 
   const eventData = await queryClient.fetchQuery(eventOptions(p.id));
   if (eventData) {
@@ -53,6 +57,14 @@ export default async function EventPage({ params }: Props) {
   addresses.forEach(
     (address) => void queryClient.prefetchQuery(profileOptions(address)),
   );
+
+  // TODO: Fix this call
+  // Prefetch Event's social feed posts
+  // void queryClient.prefetchQuery(
+  //   // TODO: Handle offset and limit with infinite scroll
+  //   // TODO: Handle tags
+  //   feedPosts(p.id, 0, 100, "", userAddress || "")
+  // );
 
   return (
     <ScreenContainer
