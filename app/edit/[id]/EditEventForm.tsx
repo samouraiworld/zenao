@@ -141,7 +141,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       onSubmit={onSubmit}
       isLoaded={isLoaded}
       isEditing
-      enabledDateRange={{ min: new Date() }}
+      maxDateRange={new Date()}
     />
   );
 }
