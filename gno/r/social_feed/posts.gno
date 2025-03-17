@@ -115,14 +115,27 @@ func EditPost(feedId string, localPostId string, newPost *feedsv1.Post) {
 	}
 }
 
+// XXX: create a tree just for addresses that have reacted to a post
 func ReactPost(localPostId string, icon string) {
 	caller := std.PreviousRealm().Address()
-	reactId := localPostId + ":" + icon + ":" + caller.String()
-	if reactions.Has(reactId) {
-		reactions.Remove(reactId)
+	reactId := localPostId + ":" + icon
+
+	var reacts []string
+	reactRaw, ok := reactions.Get(reactId)
+	if !ok {
+		reacts = []string{caller.String()}
 	} else {
-		reactions.Set(reactId, struct{}{})
+		reacts = reactRaw.([]string)
+		for i, v := range reacts {
+			if v == caller.String() {
+				reacts = append(reacts[:i], reacts[i+1:]...)
+				reactions.Set(reactId, reacts)
+				return
+			}
+		}
+		reacts = append(reacts, caller.String())
 	}
+	reactions.Set(reactId, reacts)
 }
 
 func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
@@ -145,4 +158,5 @@ func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
 		return false
 	})
 	return res
+
 }

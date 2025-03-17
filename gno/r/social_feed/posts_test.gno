@@ -496,7 +496,6 @@ func setupTest() {
 	id = seqid.ID(0)
 
 	reactions = avl.NewTree()
-	userReactions = avl.NewTree()
 
 	posts = avl.NewTree()
 	postsByTag = avl.NewTree()

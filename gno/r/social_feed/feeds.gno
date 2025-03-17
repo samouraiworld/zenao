@@ -18,8 +18,7 @@ type Feed struct {
 var (
 	id seqid.ID
 
-	reactions     *avl.Tree // post_id:icon -> count
-	userReactions *avl.Tree // post_id:icon:user_address -> struct{}
+	reactions *avl.Tree
 
 	posts      *avl.Tree // feed_id:timestamp:local_post_id -> *Post // for search with specific feed sorted by timestamp
 	postsByTag *avl.Tree // feed_id:tag:timestamp:local_post_id -> *Post // for search with specific tag sorted by timestamp
@@ -30,7 +29,6 @@ var (
 
 func init() {
 	reactions = avl.NewTree()
-	userReactions = avl.NewTree()
 
 	posts = avl.NewTree()
 	postsByTag = avl.NewTree()
