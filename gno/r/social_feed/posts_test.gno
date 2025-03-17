@@ -255,6 +255,7 @@ func TestEditPost(t *testing.T) {
 		Author:    alice.String(),
 		DeletedAt: 0,
 		UpdatedAt: 0,
+		Tags:      []string{"tag1", "tag2"},
 		Post:      &feedsv1.StandardPost{Content: "original content"},
 	}
 
@@ -262,6 +263,7 @@ func TestEditPost(t *testing.T) {
 		Author:    alice.String(),
 		DeletedAt: 1,
 		UpdatedAt: 0,
+		Tags:      []string{"tag1", "tag2"},
 		Post:      &feedsv1.StandardPost{Content: "original content"},
 	}
 
@@ -269,6 +271,7 @@ func TestEditPost(t *testing.T) {
 		Author:    bob.String(),
 		DeletedAt: 0,
 		UpdatedAt: 0,
+		Tags:      []string{"tag1", "tag3"},
 		Post:      &feedsv1.StandardPost{Content: "new content"},
 	}
 
@@ -351,6 +354,14 @@ func TestEditPost(t *testing.T) {
 				}
 				if got.DeletedAt != tc.output.post.DeletedAt {
 					t.Errorf("expected deleted at %d, got %d", tc.output.post.DeletedAt, got.DeletedAt)
+				}
+				if len(got.Tags) != len(tc.output.post.Tags) {
+					t.Errorf("expected %d tags, got %d", len(tc.output.post.Tags), len(got.Tags))
+				}
+				for i, tag := range got.Tags {
+					if tag != tc.output.post.Tags[i] {
+						t.Errorf("expected tag %q, got %q", tc.output.post.Tags[i], tag)
+					}
 				}
 				stdExpected := tc.output.post.Post.(*feedsv1.StandardPost)
 				stdGot := got.Post.(*feedsv1.StandardPost)
