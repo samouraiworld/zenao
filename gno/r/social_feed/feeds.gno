@@ -96,7 +96,7 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 		if i >= int(offset) {
 			post := value.(*feedsv1.Post)
 			hasAllTags := true
-			for _, tag := range tagsSplit {
+			for _, tag := range tagsSplit[1:] {
 				tagKey := feedId + ":" + tag + ":" + post.LocalPostId
 				if !postsByTag.Has(tagKey) {
 					hasAllTags = false
