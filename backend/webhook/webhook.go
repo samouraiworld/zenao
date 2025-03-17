@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -40,7 +41,10 @@ func SendDiscordWebhook(logger *zap.Logger, token, eventName, eventstart, evente
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("error send webhook: %s", resp.Status)
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("error sending webhook: %s - %s", resp.Status, string(body))
+		//return fmt.Errorf("error send webhook: %s", resp.Status)
+
 	}
 
 	logger.Info("Message successfully sent on Discord.!")
