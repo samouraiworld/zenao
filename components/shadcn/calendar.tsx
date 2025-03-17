@@ -38,6 +38,7 @@ function Calendar({
       value,
       onChange,
       options,
+      "aria-label": arialLabel,
     }: React.ComponentProps<typeof DropDownDayPicker>) => {
       const selected = options?.find((option) => option.value === value);
       const handleChange = (value: string) => {
@@ -53,7 +54,10 @@ function Calendar({
             handleChange(value);
           }}
         >
-          <SelectTrigger className="outline-none focus:ring-0 focus:ring-offset-0">
+          <SelectTrigger
+            className="outline-none focus:ring-0 focus:ring-offset-0"
+            aria-label={arialLabel}
+          >
             <SelectValue>{selected?.label}</SelectValue>
           </SelectTrigger>
           <SelectContent position="popper" align="center">

@@ -46,8 +46,6 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
   const [time, setTime] = useState<string>("09:00");
 
   useEffect(() => {
-    // if (firstCheck.current > 0) return;
-
     firstCheck.current += 1;
 
     if (field.value) {

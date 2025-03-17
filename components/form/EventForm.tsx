@@ -175,7 +175,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               <FormFieldDatePickerV2
                 name="startDate"
                 control={form.control}
-                placeholder={t("pick-a-date-placeholder")}
+                placeholder={t("pick-a-start-date-placeholder")}
                 timeZone={timeZone}
                 onChange={(date) => {
                   if (endDate && date > fromUnixTime(Number(endDate))) {
@@ -194,7 +194,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               <FormFieldDatePickerV2
                 name="endDate"
                 control={form.control}
-                placeholder={t("pick-a-date-placeholder")}
+                placeholder={t("pick-a-end-date-placeholder")}
                 timeZone={timeZone}
                 disabledDates={[
                   (date) =>
