@@ -1,12 +1,17 @@
 "use client";
 
 import { UrlObject } from "url";
-import React, { ReactNode, useMemo } from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AlignJustify as AlignJustifyIcon } from "lucide-react";
-import { PopoverContent } from "@radix-ui/react-popover";
+import {
+  BookOpenText,
+  CalendarDays,
+  CompassIcon,
+  LucideProps,
+  Tickets,
+} from "lucide-react";
 import {
   ClerkLoading,
   SignedIn,
@@ -16,18 +21,28 @@ import {
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
-import { Popover, PopoverTrigger } from "@/components/shadcn/popover";
-import { Card } from "@/components/cards/Card";
+import { useRouter } from "next/navigation";
 import { SmallText } from "@/components/texts/SmallText";
 import { Text } from "@/components/texts/DefaultText";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
 import { UserAvatarSkeleton, UserAvatar } from "@/components/common/user";
+import { cn } from "@/lib/tailwind";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/dropdown-menu";
 
 type NavItem = {
   key: string;
   to: string | UrlObject;
+  icon: React.ForwardRefExoticComponent<
+    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+  >;
   needsAuth: boolean;
   children: React.ReactNode;
 };
@@ -41,30 +56,28 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
       {
         key: "discover",
         to: "/discover",
+        icon: CompassIcon,
         needsAuth: false,
         children: t("discover"),
       },
       {
         key: "your-events",
         to: "/created",
+        icon: CalendarDays,
         needsAuth: true,
         children: t("your-events"),
       },
       {
         key: "tickets",
         to: "/tickets",
+        icon: Tickets,
         needsAuth: true,
         children: t("your-tickets"),
       },
       {
-        key: "features",
-        to: "#",
-        needsAuth: false,
-        children: t("features"),
-      },
-      {
         key: "manifesto",
         to: "/manifesto",
+        icon: BookOpenText,
         needsAuth: false,
         children: t("manifesto"),
       },
@@ -83,9 +96,21 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
 
         return (
           <Link key={item.key} href={item.to}>
-            <SmallText variant={isActive ? "primary" : "secondary"}>
-              {item.children}
-            </SmallText>
+            <div
+              className={cn(
+                "flex gap-1 items-center",
+                isActive ? "text-primary-color" : "text-secondary-color",
+                "hover:text-primary-color",
+              )}
+            >
+              <item.icon className="w-5 h-5 text-inherit" />
+              <SmallText
+                variant={isActive ? "primary" : "secondary"}
+                className="text-inherit max-[450px]:hidden"
+              >
+                {item.children}
+              </SmallText>
+            </div>
           </Link>
         );
       })}
@@ -105,52 +130,32 @@ export function Header() {
   );
 
   return (
-    <div className="flex md:justify-center md:p-2 w-full">
+    <div className="flex justify-between p-4 w-full items-center">
       {/* Desktop */}
-      <div className="max-md:hidden flex flex-row w-full items-center justify-center">
-        <Card className="flex flex-row items-center px-3 py-2 gap-7 rounded-xl">
-          <Link href="/" className="flex flex-row gap-2 items-center">
-            <Image
-              src="/zenao-logo.png"
-              alt="zeano logo"
-              width={28}
-              height={28}
-              priority
-            />
-            <Text className="font-extrabold">{t("zenao")}</Text>
-          </Link>
-          <div className="flex flex-row gap-3">
-            <HeaderLinks isLogged={!!userId} />
-          </div>
-          <div className="flex flex-row gap-2 items-center justify-center">
-            <ToggleThemeButton />
-          </div>
-        </Card>
-        <Auth userAddress={address} className="flex absolute right-5" />
-      </div>
-
-      {/* Mobile */}
-      <div className="md:hidden flex flex-row justify-between w-full p-3 px-4 py-3 bg-secondary/80 backdrop-blur-sm">
-        <Link href="/" className="flex flex-row items-center">
+      <div className="flex max-[450px]:gap-4 gap-6 items-center">
+        <Link href="/" className="flex gap-2 items-center">
           <Image
             src="/zenao-logo.png"
-            alt="zeano logo"
+            alt="zenao logo"
             width={28}
             height={28}
+            className="max-[450px]:w-6 max-[450px]:h-6"
             priority
           />
+          <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
         </Link>
-        <div className="flex flex-row gap-2 items-center">
-          <Auth userAddress={address} className="flex items-center" />
-          <Popover>
-            <PopoverTrigger>
-              <AlignJustifyIcon className="h-7 w-7" />
-            </PopoverTrigger>
-            <PopoverContent className="flex gap-1 flex-col bg-secondary rounded-xl px-4 py-2">
-              <HeaderLinks isLogged={!!userId} />
-            </PopoverContent>
-          </Popover>
+
+        <div className="flex flex-row gap-4">
+          <HeaderLinks isLogged={!!userId} />
         </div>
+      </div>
+
+      <div className="flex gap-2 items-center">
+        <div className="max-md:hidden">
+          <ToggleThemeButton />
+        </div>
+
+        <Auth userAddress={address} className="h-fit" />
       </div>
     </div>
   );
@@ -163,6 +168,9 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
   userAddress,
 }) => {
   const t = useTranslations("header");
+  const { signOut } = useAuth();
+  const router = useRouter();
+
   return (
     <div className={className}>
       {/* Signed out state */}
@@ -173,26 +181,38 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
           </Button>
         </SignInButton>
       </SignedOut>
-      {/* Loading state */}
-      <ClerkLoading>
-        <SettingsLink>
-          <UserAvatarSkeleton className={avatarClassName} />
-        </SettingsLink>
-      </ClerkLoading>
-      {/* Signed in state */}
-      <SignedIn>
-        <SettingsLink>
-          <UserAvatar address={userAddress} className={avatarClassName} />
-        </SettingsLink>
-      </SignedIn>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          {/* Loading state */}
+          <div>
+            <ClerkLoading>
+              <div className={avatarClassName}>
+                <UserAvatarSkeleton className={avatarClassName} />
+              </div>
+            </ClerkLoading>
+            {/* Signed in state */}
+            <SignedIn>
+              <div className={avatarClassName}>
+                <UserAvatar address={userAddress} className={avatarClassName} />
+              </div>
+            </SignedIn>
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-[200px] mt-2 mr-4">
+          <DropdownMenuItem onClick={() => router.push("/settings")}>
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => {
+              signOut();
+            }}
+          >
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };
-
-function SettingsLink({ children }: { children: ReactNode }) {
-  return (
-    <Link href="/settings" className="flex items-center">
-      {children}
-    </Link>
-  );
-}

@@ -40,9 +40,9 @@ export const Footer = () => {
           </div>
         </div>
         <div className="flex flex-row gap-3 sm:gap-3">
-          <TwitterIcon className="h-5 w-5 text-secondary" />
-          <FacebookIcon className="h-5 w-5 text-secondary" />
-          <LinkedinIcon className="h-5 w-5 text-secondary" />
+          <TwitterIcon className="h-5 w-5 text-secondary-color" />
+          <FacebookIcon className="h-5 w-5 text-secondary-color" />
+          <LinkedinIcon className="h-5 w-5 text-secondary-color" />
         </div>
       </div>
       <div className="flex flex-row gap-2 sm:gap-3">
