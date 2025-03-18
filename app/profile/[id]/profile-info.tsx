@@ -3,13 +3,13 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Person, WithContext } from "schema-dts";
 import Image from "next/image";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
-import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { profileOptions } from "@/lib/queries/profile";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
 
 export function ProfileInfo({ address }: { address: string }) {
   const { data } = useSuspenseQuery(profileOptions(address));
@@ -52,9 +52,11 @@ export function ProfileInfo({ address }: { address: string }) {
         />
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
-        <VeryLargeText className="mb-7">{data.displayName}</VeryLargeText>
+        <Heading level={1} variant="primary" size="4xl" className="mb-7">
+          {data.displayName}
+        </Heading>
         <Card>
-          <Text>{data.bio}</Text>
+          <Text variant="primary">{data.bio}</Text>
         </Card>
       </div>
     </div>

@@ -3,10 +3,10 @@
 import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction, useState } from "react";
 import { GnowebButton } from "../buttons/GnowebButton";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
+import Heading from "../texts/heading";
+import Text from "../texts/text";
 import { EventsList } from "@/components/lists/EventsList";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { Text } from "@/components/texts/DefaultText";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 
 const HeaderEventsList: React.FC<{
@@ -20,7 +20,9 @@ const HeaderEventsList: React.FC<{
     <div className="flex flex-col gap-2 mb-3">
       <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between">
         <div className="flex flex-col md:flex-row gap-2 md:items-center">
-          <VeryLargeText className="truncate">{title}</VeryLargeText>
+          <Heading level={1} size="4xl" className="truncate">
+            {title}
+          </Heading>
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
           />
@@ -38,7 +40,11 @@ const HeaderEventsList: React.FC<{
         </div>
       </div>
 
-      {description && <Text className="line-clamp-2">{description}</Text>}
+      {description && (
+        <Text variant="secondary" className="line-clamp-2">
+          {description}
+        </Text>
+      )}
     </div>
   );
 };
