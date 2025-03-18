@@ -8,10 +8,19 @@
     "your-tickets": "Your tickets",
     "sign-in": "Sign in"
   },
-  "footer": {
-    "terms": "Terms",
-    "privacy": "Privacy",
-    "security": "Security"
+  "navigation": {
+    "zenao": "ZENAO",
+    "your-events": "Your events",
+    "your-tickets": "Your tickets",
+    "sign-in": "Sign in",
+    "discover": "Discover",
+    "features": "Features",
+    "manifesto": "Manifesto",
+    "footer": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "security": "Security"
+    }
   },
   "home": {
     "main-text": "Organize event(s) in seconds",
