@@ -47,7 +47,6 @@ export const addressLocationSchema = z.object({
 const locationSchema = z
   .union([virtualLocationSchema, customLocationSchema, addressLocationSchema])
   .superRefine((data, ctx) => {
-    console.log("HEREE");
     if (
       (data.kind === "virtual" &&
         !virtualLocationSchema.safeParse(data).success) ||
