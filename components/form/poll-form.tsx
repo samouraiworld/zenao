@@ -25,8 +25,8 @@ export function PollForm({
 }) {
   const {
     fields: optionFields,
-    append: appendAnswer,
-    remove: removeAnswer,
+    append: appendOption,
+    remove: removeOption,
   } = useFieldArray({
     control: form.control,
     name: "options",
@@ -34,8 +34,8 @@ export function PollForm({
 
   const t = useTranslations("eventForm");
 
-  const onClickAddAnswer = () => {
-    appendAnswer({ text: "" });
+  const onClickAddOption = () => {
+    appendOption({ text: "" });
   };
 
   return (
@@ -49,15 +49,17 @@ export function PollForm({
         <div className="flex flex-col gap-4 w-full">
           <div className="flex flex-col gap-4">
             {optionFields.map((field, index) => (
-              <PollAnswerItem
+              <PollOptionItem
                 key={field.id}
                 name={`options.${index}.text`}
                 control={form.control}
-                onClickRemove={() => removeAnswer(index)}
-                canRemove={optionFields.length > 1}
+                onClickRemove={() => removeOption(index)}
+                canRemove={optionFields.length > 2}
               />
             ))}
-            <AddAnswerButton onClick={onClickAddAnswer} />
+            {optionFields.length < 9 && (
+              <AddOptionButton onClick={onClickAddOption} />
+            )}
           </div>
 
           <Card>
@@ -71,7 +73,7 @@ export function PollForm({
 
           <Card>
             <FormFieldCheckbox
-              name="isMultipleAnswers"
+              name="allowMultipleOptions"
               control={form.control}
               label="Allow multiple answers"
             />
@@ -82,7 +84,7 @@ export function PollForm({
   );
 }
 
-function PollAnswerItem({
+function PollOptionItem({
   name,
   control,
   onClickRemove,
@@ -102,12 +104,12 @@ function PollAnswerItem({
           placeholder="Enter an answer"
         />
       </Card>
-      {canRemove && <RemoveAnswerButton onClick={onClickRemove} />}
+      {canRemove && <RemoveOptionButton onClick={onClickRemove} />}
     </div>
   );
 }
 
-function AddAnswerButton({ onClick }: { onClick: () => void }) {
+function AddOptionButton({ onClick }: { onClick: () => void }) {
   return (
     <div onClick={onClick}>
       <ButtonWithChildren
@@ -124,7 +126,7 @@ function AddAnswerButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function RemoveAnswerButton({
+function RemoveOptionButton({
   onClick,
   className,
 }: {
@@ -135,7 +137,7 @@ function RemoveAnswerButton({
     <div
       onClick={onClick}
       className={cn(
-        "hover:cursor-pointer hover:bg-destructive flex items-center justify-center rounded-full size-11",
+        "hover:cursor-pointer hover:bg-destructive flex items-center justify-center rounded-full size-11 aspect-square",
         className,
       )}
     >

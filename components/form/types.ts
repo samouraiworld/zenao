@@ -78,12 +78,8 @@ const pollOptionFormSchema = z.object({
 });
 export const pollFormSchema = z.object({
   question: z.string().trim().min(1, "Required").max(300),
-  options: z
-    .array(pollOptionFormSchema)
-    .min(1)
-    .max(10)
-    .default([{ text: "" }, { text: "" }]),
-  isMultipleAnswers: z.boolean().default(false),
+  options: z.array(pollOptionFormSchema).min(2).max(8),
+  allowMultipleOptions: z.boolean(),
   endDate: z.coerce.bigint(),
 });
 export type PollFormSchemaType = z.infer<typeof pollFormSchema>;

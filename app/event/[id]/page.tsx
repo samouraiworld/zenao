@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
+import { auth } from "@clerk/nextjs/server";
 import { EventInfo } from "./event-info";
 import { imageHeight, imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
@@ -8,6 +9,8 @@ import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
 import { web2URL } from "@/lib/uris";
 import { profileOptions } from "@/lib/queries/profile";
+import { userAddressOptions } from "@/lib/queries/user";
+import { feedPosts } from "@/lib/queries/social-feed";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -40,10 +43,10 @@ export default async function EventPage({ params }: Props) {
   const p = await params;
   const queryClient = getQueryClient();
 
-  // const { getToken, userId } = await auth();
-  // const userAddress = await queryClient.fetchQuery(
-  //   userAddressOptions(getToken, userId)
-  // );
+  const { getToken, userId } = await auth();
+  const userAddress = await queryClient.fetchQuery(
+    userAddressOptions(getToken, userId),
+  );
 
   const eventData = await queryClient.fetchQuery(eventOptions(p.id));
   if (eventData) {
@@ -58,13 +61,12 @@ export default async function EventPage({ params }: Props) {
     (address) => void queryClient.prefetchQuery(profileOptions(address)),
   );
 
-  // TODO: Fix this call
   // Prefetch Event's social feed posts
-  // void queryClient.prefetchQuery(
-  //   // TODO: Handle offset and limit with infinite scroll
-  //   // TODO: Handle tags
-  //   feedPosts(p.id, 0, 100, "", userAddress || "")
-  // );
+  void queryClient.prefetchQuery(
+    // TODO: Handle offset and limit with infinite scroll
+    // TODO: Handle tags
+    feedPosts(p.id, 0, 100, "", userAddress || ""),
+  );
 
   return (
     <ScreenContainer

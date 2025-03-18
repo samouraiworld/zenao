@@ -59,6 +59,7 @@
     "react-hook-form": "^7.54.2",
     "react-leaflet": "^5.0.0",
     "react-markdown": "^9.1.0",
+    "react-responsive": "^10.0.1",
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
     "remark-supersub": "^1.0.0",

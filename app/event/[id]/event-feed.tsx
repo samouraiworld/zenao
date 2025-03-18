@@ -1,5 +1,5 @@
 "use client";
-
+import { useMediaQuery } from "react-responsive";
 import { useEffect, useRef, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
@@ -34,11 +34,16 @@ function FeedInput() {
     userAddressOptions(getToken, userId),
   );
   const { toast } = useToast();
+  const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const [mode, setMode] = useState<FeedInputMode>("STANDARD_POST");
   const [isLoading, setIsLoading] = useState(false);
 
   const pollForm = useForm<PollFormSchemaType>({
     resolver: zodResolver(pollFormSchema),
+    defaultValues: {
+      options: [{ text: "" }, { text: "" }],
+      allowMultipleOptions: false,
+    },
   });
   // const standardPostForm = useForm<StandardPostFormSchemaType>({
   //   resolver: zodResolver(standardPostFormSchema),
@@ -57,8 +62,12 @@ function FeedInput() {
   const textareaMinHeight = 48;
   const placeholder =
     mode === "POLL"
-      ? "What do you wanna ask to the community? "
-      : "Don't be shy, say something!";
+      ? isSmallScreen
+        ? "Ask something"
+        : "What do you wanna ask to the community?"
+      : isSmallScreen
+        ? "Say something"
+        : "Don't be shy, say something!";
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -94,11 +103,11 @@ function FeedInput() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row items-center gap-4 pr-3">
+      <div className="flex flex-row items-center gap-4">
         <Textarea
           ref={textareaRef}
           onChange={(evt) => setTextAreaValue(evt.target.value)}
-          className="cursor-pointer border-0 focus-visible:ring-transparent rounded-xl px-4 py-2 placeholder:text-primary-color text-lg hover:bg-neutral-700"
+          className="cursor-pointer border-0 focus-visible:ring-transparent rounded-xl px-4 placeholder:text-primary-color hover:bg-neutral-700 text-md py-3"
           style={{ minHeight: textareaMinHeight, maxHeight: textareaMaxHeight }}
           placeholder={placeholder}
           maxLength={textareaMaxLength}
@@ -193,7 +202,8 @@ export function EventFeed({
         ref={inputRef}
         className={cn(
           "flex justify-center w-full transition-all duration-300",
-          isInputSticky && "fixed top-0 py-4 left-0 z-50 backdrop-blur-sm",
+          isInputSticky &&
+            "fixed bottom-0 py-4 px-5 left-0 z-50 backdrop-blur-sm",
         )}
         style={{ backgroundColor: bgColor }}
       >

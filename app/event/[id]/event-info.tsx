@@ -32,6 +32,7 @@ import { screenContainerMaxWidth } from "@/components/layout/ScreenContainer";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
 import { UserAvatarWithName } from "@/components/common/user";
 import { web2URL } from "@/lib/uris";
+import { feedPosts } from "@/lib/queries/social-feed";
 
 function EventSection({
   title,
@@ -63,7 +64,10 @@ export function EventInfo({ id }: { id: string }) {
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
 
   // TODO: Fix this call
-  // const { data: posts } = useSuspenseQuery(feedPosts(id, 0, 100, "", address || ""));
+
+  const { data: posts } = useSuspenseQuery(
+    feedPosts(id, 0, 100, "", address || ""),
+  );
 
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
