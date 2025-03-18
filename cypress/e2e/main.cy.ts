@@ -63,7 +63,7 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // check the participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 8000 }).should("be.visible");
+    cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
   });
 
   it("participate while signed in", () => {
@@ -89,7 +89,9 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // check the participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 16000 }).should("be.visible");
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
 
     // check that we have a ticket
     cy.visit("/tickets");
@@ -237,7 +239,7 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // wait for participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 8000 }).should("be.visible");
+    cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
 
     // check that we have a ticket with the event name visible
     cy.visit("/tickets");
