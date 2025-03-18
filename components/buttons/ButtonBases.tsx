@@ -2,9 +2,10 @@
 
 import { Loader2 } from "lucide-react";
 import { Button } from "../shadcn/button";
+import { ButtonProps } from "@/components/buttons/types";
 
 export const ButtonBase: React.FC<
-  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  ButtonProps & {
     children: React.ReactNode;
     loading?: boolean;
   }
