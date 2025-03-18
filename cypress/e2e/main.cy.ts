@@ -219,7 +219,7 @@ describe("main", () => {
     toastShouldContain("Event created!");
 
     cy.get("h1").contains(testEventName).should("be.visible");
-    cy.get("p").contains(testEventLocation).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
     cy.get("p")
       .contains(
         "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
