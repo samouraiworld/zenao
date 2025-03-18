@@ -213,7 +213,7 @@ describe("main", () => {
 
     cy.wait(500);
 
-    cy.get("button").contains(`"04/13/${year}"`).eq(2).click();
+    cy.get("button").contains(`04/13/${year}`).eq(2).click();
     cy.get('button[aria-label="Choose the Month"').click();
     cy.get('div[role="option"]').contains("April").click();
 
