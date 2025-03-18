@@ -106,7 +106,7 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
               <item.icon className="w-5 h-5 text-inherit" />
               <SmallText
                 variant={isActive ? "primary" : "secondary"}
-                className="text-inherit max-[450px]:hidden"
+                className="text-inherit max-[550px]:hidden"
               >
                 {item.children}
               </SmallText>
