@@ -1,18 +1,11 @@
 {
-  "header": {
-    "zenao": "ZENAO",
-    "discover": "Discover",
-    "features": "Features",
-    "manifesto": "Manifesto",
-    "your-events": "Your events",
-    "your-tickets": "Your tickets",
-    "sign-in": "Sign in"
-  },
   "navigation": {
     "zenao": "ZENAO",
     "your-events": "Your events",
     "your-tickets": "Your tickets",
     "sign-in": "Sign in",
+    "sign-out": "Sign out",
+    "settings": "Settings",
     "discover": "Discover",
     "features": "Features",
     "manifesto": "Manifesto",

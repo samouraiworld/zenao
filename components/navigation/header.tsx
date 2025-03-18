@@ -48,7 +48,7 @@ type NavItem = {
 };
 
 const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
-  const t = useTranslations("header");
+  const t = useTranslations("navigation");
   const pathname = usePathname();
 
   const navItems: NavItem[] = useMemo(
@@ -124,7 +124,7 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
 
 export function Header() {
   const { getToken, userId } = useAuth();
-  const t = useTranslations("header");
+  const t = useTranslations("navigation");
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
@@ -167,7 +167,7 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
   className,
   userAddress,
 }) => {
-  const t = useTranslations("header");
+  const t = useTranslations("navigation");
   const { signOut } = useAuth();
   const router = useRouter();
 
@@ -201,7 +201,7 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
           <DropdownMenuItem onClick={() => router.push("/settings")}>
-            Settings
+            {t("settings")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -209,7 +209,7 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
               signOut();
             }}
           >
-            Sign out
+            {t("sign-out")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
