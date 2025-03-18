@@ -20,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
-import { SmallText } from "@/components/texts/SmallText";
+import Text from "@/components/texts/text";
 
 export const FormFieldDatePicker = <T extends FieldValues>(
   props: FormFieldProps<T, bigint> & { timeZone: string },
@@ -85,9 +85,9 @@ export const FormFieldDatePicker = <T extends FieldValues>(
                         format(formattedValue, "MM/dd/yyyy hh:mm aa zzz")
                       )
                     ) : (
-                      <SmallText variant="secondary">
+                      <Text size="sm" variant="secondary">
                         {props.placeholder}
-                      </SmallText>
+                      </Text>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
