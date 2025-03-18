@@ -237,8 +237,8 @@ describe("main", () => {
         "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
       )
       .should("be.visible"); // desc
-    cy.get("p").contains("/13/").should("be.visible"); // start date
-    cy.get("p").contains("/14/").should("be.visible"); // end date
+    cy.get("p").contains(" 13th, ").should("be.visible"); // start date
+    cy.get("p").contains(" 14, ").should("be.visible"); // end date
 
     cy.get("button").contains("Participate").should("be.visible");
 
