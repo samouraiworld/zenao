@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import { fromUnixTime, getUnixTime, isSameDay } from "date-fns";
+import { fromUnixTime, getUnixTime, isSameDay, minutesToMilliseconds, minutesToSeconds } from "date-fns";
 import { Card } from "../cards/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
@@ -180,8 +180,11 @@ export const EventForm: React.FC<EventFormProps> = ({
                 placeholder={t("pick-a-start-date-placeholder")}
                 timeZone={timeZone}
                 onChange={(date) => {
-                  if (endDate && date > fromUnixTime(Number(endDate))) {
-                    form.setValue("endDate", BigInt(getUnixTime(date)));
+                  if (!endDate || date > fromUnixTime(Number(endDate))) {
+                    form.setValue(
+                      "endDate",
+                      BigInt(getUnixTime(date) + minutesToSeconds(15)),
+                    );
                   }
                 }}
                 disabledDates={[
@@ -217,7 +220,8 @@ export const EventForm: React.FC<EventFormProps> = ({
                       return (
                         isSameDay(currentStartDate, date) &&
                         currentStartDate.getHours() * 60 +
-                          currentStartDate.getMinutes() >
+                          currentStartDate.getMinutes() +
+                          15 /* Event duration 15 minutes minimum */ >
                           date.getHours() * 60 + date.getMinutes()
                       );
                     }
