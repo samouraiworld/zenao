@@ -125,7 +125,7 @@ describe("main", () => {
     cy.get("a").contains("ZENAO").click();
 
     // check that home text is present
-    cy.get("p").contains("Organize event(s) in seconds").should("be.visible");
+    cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
   });
 
   it("edit it's profile", () => {
@@ -218,7 +218,7 @@ describe("main", () => {
 
     toastShouldContain("Event created!");
 
-    cy.get("p").contains(testEventName).should("be.visible");
+    cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("p").contains(testEventLocation).should("be.visible");
     cy.get("p")
       .contains(
