@@ -139,6 +139,7 @@ export function FormFieldDatePickerV2<T extends FieldValues>(
                   <FormControl>
                     <Button
                       variant={"outline"}
+                      aria-label="Pick date"
                       disabled={props.disabled}
                       className={cn(
                         "w-full font-normal",
