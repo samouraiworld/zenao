@@ -7,8 +7,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import QueryProviders from "./query-providers";
-import { Header } from "./Header";
-import { Footer } from "./Footer";
+import { Header } from "@/components/navigation/header";
+import { Footer } from "@/components/navigation/footer";
 import { Toaster } from "@/components/shadcn/toaster";
 
 const geistSans = Geist({

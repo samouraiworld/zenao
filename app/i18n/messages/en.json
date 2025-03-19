@@ -1,17 +1,19 @@
 {
-  "header": {
+  "navigation": {
     "zenao": "ZENAO",
+    "your-events": "Your events",
+    "your-tickets": "Your tickets",
+    "sign-in": "Sign in",
+    "sign-out": "Sign out",
+    "settings": "Settings",
     "discover": "Discover",
     "features": "Features",
     "manifesto": "Manifesto",
-    "your-events": "Your events",
-    "your-tickets": "Your tickets",
-    "sign-in": "Sign in"
-  },
-  "footer": {
-    "terms": "Terms",
-    "privacy": "Privacy",
-    "security": "Security"
+    "footer": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "security": "Security"
+    }
   },
   "home": {
     "main-text": "Organize event(s) in seconds",
