@@ -22,8 +22,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { SmallText } from "@/components/texts/SmallText";
-import { Text } from "@/components/texts/DefaultText";
+import Text from "../texts/text";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -104,12 +103,13 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
               )}
             >
               <item.icon className="w-5 h-5 text-inherit" />
-              <SmallText
+              <Text
+                size="sm"
                 variant={isActive ? "primary" : "secondary"}
                 className="text-inherit max-[550px]:hidden"
               >
                 {item.children}
-              </SmallText>
+              </Text>
             </div>
           </Link>
         );
@@ -177,7 +177,7 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
       <SignedOut>
         <SignInButton>
           <Button variant="outline">
-            <SmallText>{t("sign-in")}</SmallText>
+            <Text size="sm">{t("sign-in")}</Text>
           </Button>
         </SignInButton>
       </SignedOut>
