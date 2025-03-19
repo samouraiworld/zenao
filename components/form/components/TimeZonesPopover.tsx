@@ -8,7 +8,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
-import { SmallText } from "@/components/texts/SmallText";
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
 import {
@@ -20,6 +19,7 @@ import {
   CommandList,
 } from "@/components/shadcn/command";
 import { timezones } from "@/lib/timezones";
+import Text from "@/components/texts/text";
 import { Button } from "@/components/shadcn/button";
 
 export const TimeZonesPopover: React.FC<{
@@ -33,7 +33,7 @@ export const TimeZonesPopover: React.FC<{
 
   return (
     <div className="flex flex-col gap-2">
-      <SmallText>{t("custom-timezone-select")}</SmallText>
+      <Text size="sm">{t("custom-timezone-select")}</Text>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger className="relative" asChild>
           <Button
@@ -70,7 +70,7 @@ export const TimeZonesPopover: React.FC<{
                         setOpen(false);
                       }}
                     >
-                      <SmallText>{timezone}</SmallText>
+                      <Text size="sm">{timezone}</Text>
                     </CommandItem>
                   ))}
               </CommandGroup>

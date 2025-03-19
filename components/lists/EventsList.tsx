@@ -5,8 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { EventCard } from "../cards/EventCard";
 import { Button } from "../shadcn/button";
-import { SmallText } from "../texts/SmallText";
-import { Text } from "../texts/DefaultText";
+import Text from "../texts/text";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 const EmptyEventsList: React.FC = () => {
@@ -21,11 +20,15 @@ const EmptyEventsList: React.FC = () => {
       />
       <div className="text-center">
         <Text className="font-bold">{t("no-events")}</Text>
-        <SmallText variant="secondary">{t("no-events-desc")}</SmallText>
+        <Text size="sm" variant="secondary">
+          {t("no-events-desc")}
+        </Text>
       </div>
       <Button variant="secondary">
         <Link href="/create">
-          <SmallText variant="secondary">{t("create-event")}</SmallText>
+          <Text size="sm" variant="secondary">
+            {t("create-event")}
+          </Text>
         </Link>
       </Button>
     </div>

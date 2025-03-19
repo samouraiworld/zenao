@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/shadcn/select";
 import { ScrollArea } from "@/components/shadcn/scroll-area";
-import { SmallText } from "@/components/texts/SmallText";
+import Text from "@/components/texts/text";
 
 function isDateDisabled(date: Date, matcher: Matcher): boolean {
   if (!matcher) return false;
@@ -155,9 +155,9 @@ export function FormFieldDatePicker<T extends FieldValues>(
                           format(formattedValue, "MM/dd/yyyy")
                         )
                       ) : (
-                        <SmallText variant="secondary">
+                        <Text variant="secondary" size="sm">
                           {props.placeholder}
-                        </SmallText>
+                        </Text>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>

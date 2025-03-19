@@ -11,10 +11,10 @@ import { Card } from "../cards/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
-import { SmallText } from "../texts/SmallText";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/MapLazyComponents";
+import Text from "../texts/text";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { TimeZonesPopover } from "./components/TimeZonesPopover";
@@ -86,7 +86,9 @@ export const EventForm: React.FC<EventFormProps> = ({
               wordCounter
             />
             <Card>
-              <SmallText className="mb-3">{t("description-label")}</SmallText>
+              <Text size="sm" className="mb-3">
+                {t("description-label")}
+              </Text>
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
@@ -171,7 +173,9 @@ export const EventForm: React.FC<EventFormProps> = ({
               />
             )}
             <Card>
-              <SmallText className="mb-3">{t("capacity-label")}</SmallText>
+              <Text size="sm" className="mb-3">
+                {t("capacity-label")}
+              </Text>
               <FormFieldInputNumber
                 control={form.control}
                 name="capacity"
