@@ -200,13 +200,27 @@ describe("main", () => {
     cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
 
     // choose dates in the start of next month
-    cy.get("button").contains("Choose your start date/time...").click();
-    cy.get('button[aria-label="Go to the Next Month"').click();
+    cy.get("button").contains("Pick a start date...").click();
+    cy.get('button[aria-label="Choose the Month"').click();
+
+    cy.get('div[role="option"]').contains("April").click();
+
+    const year = new Date().getFullYear() + 1;
+
+    cy.get('button[aria-label="Choose the Year"').click();
+    cy.get('div[role="option"]').contains(`${year}`).click();
     cy.get('table[role="grid"]').find("button").contains("13").click();
 
-    cy.get("button").contains("Choose your end date/time...").click();
-    cy.wait(500); // wait for start date calendar to disapear so there is only one "Go to the next month" button present
-    cy.get('button[aria-label="Go to the Next Month"').click();
+    cy.wait(1000);
+
+    cy.get('button[aria-label="Pick date"]').eq(1).click();
+    cy.get('button[aria-label="Choose the Month"').click();
+    cy.get('div[role="option"]').contains("April").click();
+
+    cy.get('button[aria-label="Choose the Year"').click();
+    cy.get('div[role="option"]').contains(`${year}`).click();
+    cy.wait(500); // wait for start date calendar to disapear so there is only one "Choose the Month" button present
+
     cy.get('table[role="grid"]').find("button").contains("14").click();
 
     cy.get("button").contains("Create event").click();
