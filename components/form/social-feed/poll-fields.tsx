@@ -3,10 +3,9 @@
 import { Control, useFieldArray, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { PlusIcon, Trash2Icon } from "lucide-react";
-import { Card } from "../cards/Card";
-import { FormFieldInputString } from "./components/FormFieldInputString";
-import { PollFormSchemaType } from "./types";
-import { Form } from "@/components/shadcn/form";
+import { Card } from "../../cards/Card";
+import { FormFieldInputString } from "../components/FormFieldInputString";
+import { PollFormSchemaType } from "../types";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import { cn } from "@/lib/tailwind";
 import { currentTimezone } from "@/lib/time";
@@ -14,14 +13,10 @@ import { FormFieldCheckbox } from "@/components/form/components/form-field-check
 import Text from "@/components/texts/text";
 import { FormFieldDatePicker } from "@/components/form/components/form-field-date-picker";
 
-export function PollForm({
+export function PollFields({
   form,
-  onSubmit,
-  isLoading,
 }: {
   form: UseFormReturn<PollFormSchemaType>;
-  onSubmit: (values: PollFormSchemaType) => Promise<void>;
-  isLoading: boolean;
 }) {
   const {
     fields: optionFields,
@@ -39,48 +34,41 @@ export function PollForm({
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit, (e) => {
-          console.log("s,nbezg,ekl", e);
-        })}
-        className="flex w-full sm:flex-row items-center sm:h-full"
-      >
-        <div className="flex flex-col gap-4 w-full">
-          <div className="flex flex-col gap-4">
-            {optionFields.map((field, index) => (
-              <PollOptionItem
-                key={field.id}
-                name={`options.${index}.text`}
-                control={form.control}
-                onClickRemove={() => removeOption(index)}
-                canRemove={optionFields.length > 2}
-              />
-            ))}
-            {optionFields.length < 9 && (
-              <AddOptionButton onClick={onClickAddOption} />
-            )}
-          </div>
-
-          <Card>
-            <FormFieldDatePicker
-              name="endDate"
+    <div className="flex w-full sm:flex-row items-center sm:h-full">
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-4">
+          {optionFields.map((field, index) => (
+            <PollOptionItem
+              key={field.id}
+              name={`options.${index}.text`}
               control={form.control}
-              placeholder={t("end-date-placeholder")}
-              timeZone={currentTimezone()}
+              onClickRemove={() => removeOption(index)}
+              canRemove={optionFields.length > 2}
             />
-          </Card>
-
-          <Card>
-            <FormFieldCheckbox
-              name="allowMultipleOptions"
-              control={form.control}
-              label="Allow multiple answers"
-            />
-          </Card>
+          ))}
+          {optionFields.length < 9 && (
+            <AddOptionButton onClick={onClickAddOption} />
+          )}
         </div>
-      </form>
-    </Form>
+
+        <Card>
+          <FormFieldDatePicker
+            name="endDate"
+            control={form.control}
+            placeholder={t("end-date-placeholder")}
+            timeZone={currentTimezone()}
+          />
+        </Card>
+
+        <Card>
+          <FormFieldCheckbox
+            name="allowMultipleOptions"
+            control={form.control}
+            label="Allow multiple answers"
+          />
+        </Card>
+      </div>
+    </div>
   );
 }
 

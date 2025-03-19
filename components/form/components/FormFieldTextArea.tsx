@@ -45,7 +45,9 @@ export const FormFieldTextArea = <T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={cn("relative", wordCounter ? "pb-6" : null)}>
+        <FormItem
+          className={cn("relative w-full", wordCounter ? "pb-6" : null)}
+        >
           <FormControl>
             <Textarea
               className={cn(
