@@ -8,6 +8,13 @@ import (
 )
 
 func NewPost(feedId string, post *feedsv1.Post) string {
+
+	creator := std.PreviousRealm().Address().String()
+	post.Author = creator
+	post.CreatedAt = time.Now().Unix()
+	post.UpdatedAt = time.Now().Unix()
+	post.DeletedAt = 0
+
 	feedRaw, ok := feeds.Get(feedId)
 	if ok {
 		feed := feedRaw.(*Feed)

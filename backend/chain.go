@@ -368,6 +368,13 @@ func (g *gnoZenaoChain) UserAddress(userID string) string {
 	return gnolang.DerivePkgAddr(g.userRealmPkgPath(userID)).String()
 }
 
+// CreatePoll implements ZenaoChain
+func (g *gnoZenaoChain) CreatePoll(userID string, eventID string) error {
+	userRealmPkgPath := g.userRealmPkgPath(userID)
+
+	return nil
+}
+
 func (g *gnoZenaoChain) eventRealmPkgPath(eventID string) string {
 	return fmt.Sprintf("gno.land/r/%s/events/e%s", g.namespace, eventID)
 }

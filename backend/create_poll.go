@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
@@ -29,7 +28,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, errors.New("user is banned")
 	}
 
-	if err := validatePoll(req.Msg.Question, req.Msg.Options, req.Msg.Kind, req.Msg.Duration); err != nil {
+	if err := validatePoll(req.Msg.Question, req.Msg.Options /*req.Msg.Kind,*/, req.Msg.Duration); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
@@ -48,7 +47,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 
 }
 
-func validatePoll(question string, options []string, kind pollsv1.PollKind, duration int64) error {
+func validatePoll(question string, options []string, duration int64) error {
 	if len(options) < 2 {
 		return errors.New("poll must have at least 2 options")
 	}
@@ -61,8 +60,9 @@ func validatePoll(question string, options []string, kind pollsv1.PollKind, dura
 	if duration > int64(time.Hour)*24*30 {
 		return errors.New("duration must be at most 1 month")
 	}
-	if kind == pollsv1.PollKind_POLL_KIND_UNSPECIFIED {
-		return errors.New("poll cannot have an unspecified kind")
-	}
+	// XXX: need gno proto to handle import
+	// if kind == pollsv1.PollKind_POLL_KIND_UNSPECIFIED {
+	// 	return errors.New("poll cannot have an unspecified kind")
+	// }
 	return nil
 }

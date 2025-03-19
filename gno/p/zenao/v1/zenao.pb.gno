@@ -109,7 +109,6 @@ type CreatePollRequest struct {
 	Question string
 	Options  []string
 	Duration int64
-	Kind     v1.PollKind
 }
 
 type CreatePollResponse struct {

@@ -634,9 +634,6 @@ func (c *CreatePollRequest) ToJSON() *json.Node {
 	if c.Duration != 0 {
 		fields["duration"] = json.StringNode("", strconv.FormatInt(c.Duration, 10))
 	}
-	if c.Kind != 0 {
-		fields["kind"] = json.StringNode("", c.Kind.ToString())
-	}
 
 	return json.ObjectNode("", fields)
 }
@@ -665,9 +662,6 @@ func (c *CreatePollRequest) FromJSON(node *json.Node) {
 			panic(err)
 		}
 		c.Duration = fv
-	}
-	if val, ok := fields["kind"]; ok {
-		c.Kind = v1.PollKindFromString(val.MustString())
 	}
 }
 

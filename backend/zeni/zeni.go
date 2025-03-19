@@ -93,7 +93,7 @@ type Chain interface {
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
 	Participate(eventID string, callerID string, participantID string) error
 
-	CreatePoll(eventID string) error
+	CreatePoll(userID string, eventID string) error
 }
 
 func LocationToString(location *zenaov1.EventLocation) (string, error) {
