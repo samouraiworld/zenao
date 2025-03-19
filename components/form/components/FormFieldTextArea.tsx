@@ -11,7 +11,7 @@ import {
 } from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
-import { SmallText } from "@/components/texts/SmallText";
+import Text from "@/components/texts/text";
 
 type FormFieldTextAreaProps<T extends FieldValues> = FormFieldProps<T, string> &
   React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
@@ -70,10 +70,10 @@ export const FormFieldTextArea = <T extends FieldValues>({
           >
             <FormMessage />
             {wordCounter && (
-              <SmallText className="text-foreground/80">
+              <Text size="sm" className="text-primary-color/80">
                 <span>{field.value.length}</span> /
                 <span>{otherProps.maxLength}</span>
-              </SmallText>
+              </Text>
             )}
           </div>
         </FormItem>
