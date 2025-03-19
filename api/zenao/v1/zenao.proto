@@ -3,6 +3,8 @@ syntax = "proto3";
 package zenao.v1;
 option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
 
+import "polls/v1/polls.proto";
+
 service ZenaoService {
   // USER
   rpc EditUser(EditUserRequest) returns (EditUserResponse);
@@ -12,6 +14,9 @@ service ZenaoService {
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+
+  // FEED
+  rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
 }
 
 message EditUserRequest {
@@ -106,3 +111,12 @@ message BatchProfileRequest {
   repeated BatchProfileField fields = 1;
   repeated string addresses = 2;
 }
+
+message CreatePollRequest {
+  string question = 1;
+  repeated string options = 2;
+  uint64 duration = 3; // unix seconds
+  polls.v1.PollKind kind = 4;
+}
+
+message CreatePollResponse { string id = 1; }

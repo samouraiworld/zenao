@@ -103,3 +103,14 @@ type BatchProfileRequest struct {
 	Fields    []*BatchProfileField
 	Addresses []string
 }
+
+type CreatePollRequest struct {
+	Question string
+	Options  []string
+	Duration uint64
+	Kind     v1.PollKind
+}
+
+type CreatePollResponse struct {
+	Id string
+}
