@@ -629,7 +629,7 @@ func (c *CreatePollRequest) ToJSON() *json.Node {
 		fields["options"] = json.ArrayNode("", arr)
 	}
 	if c.Duration != 0 {
-		fields["duration"] = json.StringNode("", strconv.FormatUint(c.Duration, 10))
+		fields["duration"] = json.StringNode("", strconv.FormatInt(c.Duration, 10))
 	}
 	if c.Kind != 0 {
 		fields["kind"] = json.StringNode("", c.Kind.ToString())
@@ -654,7 +654,7 @@ func (c *CreatePollRequest) FromJSON(node *json.Node) {
 		c.Options = arr
 	}
 	if val, ok := fields["duration"]; ok {
-		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
 		if err != nil {
 			panic(err)
 		}

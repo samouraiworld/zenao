@@ -107,7 +107,7 @@ type BatchProfileRequest struct {
 type CreatePollRequest struct {
 	Question string
 	Options  []string
-	Duration uint64
+	Duration int64
 	Kind     v1.PollKind
 }
 
