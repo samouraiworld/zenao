@@ -3,9 +3,9 @@
 import React, { ReactNode } from "react";
 import { Card } from "@/components/cards/Card";
 import { UserAvatar } from "@/components/common/user";
-import { SmallText } from "@/components/texts/SmallText";
 import { Post } from "@/app/gen/feeds/v1/feeds_pb";
 import { DateTimeText } from "@/components/common/date-time-text";
+import Text from "@/components/texts/text";
 
 export function PostCardLayout({
   post,
@@ -23,7 +23,7 @@ export function PostCardLayout({
             address={post.author}
           />
           <div className="flex flex-col">
-            <SmallText>{post.author}</SmallText>
+            <Text className="text-sm">{post.author}</Text>
             <DateTimeText
               variant="secondary"
               className="text-xs"
@@ -32,19 +32,25 @@ export function PostCardLayout({
           </div>
         </div>
         <div className="flex flex-row items-center gap-2 w-full sm:justify-end">
-          <SmallText variant="secondary">TODO: Location here?</SmallText>
-          <SmallText variant="secondary">•</SmallText>
-          <SmallText variant="secondary">
+          <Text className="text-sm" variant="secondary">
+            TODO: Location here?
+          </Text>
+          <Text className="text-sm" variant="secondary">
+            •
+          </Text>
+          <Text className="text-sm" variant="secondary">
             {post.tags.map((tag) => ` #${tag}`)}
-          </SmallText>
+          </Text>
         </div>
       </div>
 
       <div className="my-1">{children}</div>
 
       <div className="flex flex-col justify-between sm:flex-row sm:items-center gap-2">
-        <SmallText variant="secondary">TODO: Reactions here?</SmallText>
-        <SmallText>TODO: Some actions here? </SmallText>
+        <Text className="text-sm" variant="secondary">
+          TODO: Reactions here?
+        </Text>
+        <Text className="text-sm">TODO: Some actions here? </Text>
       </div>
     </Card>
   );

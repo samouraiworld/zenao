@@ -6,12 +6,11 @@ import {
   fromUnixTime,
   isAfter,
 } from "date-fns";
-import { Text } from "../../texts/DefaultText";
 import { Poll, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PollResultsList } from "@/components/lists/poll-results-list";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
-import { SmallText } from "@/components/texts/SmallText";
 import { Post } from "@/app/gen/feeds/v1/feeds_pb";
+import Text from "@/components/texts/text";
 
 export function PollPostCard({ poll, post }: { poll: Poll; post: Post }) {
   const now = new Date();
@@ -34,9 +33,9 @@ export function PollPostCard({ poll, post }: { poll: Poll; post: Post }) {
     <PostCardLayout post={post}>
       <div className="w-full flex flex-col gap-2">
         <div className="flex flex-row items-center gap-2">
-          <SmallText>{`${totalVotesCount} votes`}</SmallText>
-          <SmallText>•</SmallText>
-          <SmallText>{remainingTimeText}</SmallText>
+          <Text className="text-sm">{`${totalVotesCount} votes`}</Text>
+          <Text className="text-sm">•</Text>
+          <Text className="text-sm">{remainingTimeText}</Text>
         </div>
         <Text className="line-clamp-3">{poll.question}</Text>
 

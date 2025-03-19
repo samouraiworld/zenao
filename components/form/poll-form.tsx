@@ -4,15 +4,15 @@ import { Control, useFieldArray, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { Card } from "../cards/Card";
-import { SmallText } from "../texts/SmallText";
 import { FormFieldInputString } from "./components/FormFieldInputString";
-import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
 import { PollFormSchemaType } from "./types";
 import { Form } from "@/components/shadcn/form";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import { cn } from "@/lib/tailwind";
 import { currentTimezone } from "@/lib/time";
 import { FormFieldCheckbox } from "@/components/form/components/form-field-checkbox";
+import Text from "@/components/texts/text";
+import { FormFieldDatePicker } from "@/components/form/components/form-field-date-picker";
 
 export function PollForm({
   form,
@@ -119,7 +119,7 @@ function AddOptionButton({ onClick }: { onClick: () => void }) {
       >
         <div className="flex flex-row justify-start items-center w-full">
           <PlusIcon className="size-4" color="#FFFFFF" />
-          <SmallText className="ml-2">Add another answer</SmallText>
+          <Text className="text-sm ml-2">Add another answer</Text>
         </div>
       </ButtonWithChildren>
     </div>

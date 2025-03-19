@@ -9,8 +9,8 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { Checkbox } from "@/components/shadcn/checkbox";
-import { SmallText } from "@/components/texts/SmallText";
 import { Label } from "@/components/shadcn/label";
+import Text from "@/components/texts/text";
 
 export function FormFieldCheckbox<T extends FieldValues>({
   control,
@@ -31,7 +31,7 @@ export function FormFieldCheckbox<T extends FieldValues>({
                 htmlFor={checkboxId}
                 className="hover:cursor-pointer w-full"
               >
-                <SmallText>{label}</SmallText>
+                <Text classNmae="text-sm">{label}</Text>
               </Label>
               <Checkbox
                 id={checkboxId}

@@ -26,7 +26,6 @@ import { EventFeed } from "@/app/event/[id]/event-feed";
 import { cn } from "@/lib/tailwind";
 import { screenContainerMaxWidth } from "@/components/layout/ScreenContainer";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
-import { UserAvatarWithName } from "@/components/common/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";

@@ -2,7 +2,6 @@
 
 import { Checkbox } from "../shadcn/checkbox";
 import { Gauge } from "@/components/common/gauge";
-import { SmallText } from "@/components/texts/SmallText";
 import { cn } from "@/lib/tailwind";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import Text from "@/components/texts/text";
@@ -34,12 +33,12 @@ function PollResultItem({
     >
       <Gauge percent={percent} className="absolute -z-10 left-0" />
 
-      <SmallText className="line-clamp-2">{pollResult.option}</SmallText>
+      <Text className="text-sm line-clamp-2">{pollResult.option}</Text>
 
       <div className="flex flex-row items-center gap-3">
         <div className="flex flex-row items-center gap-2">
           <Text className="text-xs">{`${pollResult.count} votes`}</Text>
-          <SmallText>{`${percent}%`}</SmallText>
+          <Text className="text-sm">{`${percent}%`}</Text>
         </div>
         <Checkbox
           checked={pollResult.hasUserVoted}
