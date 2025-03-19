@@ -36,6 +36,7 @@ const customLocationSchema = z.object({
   address: z.string().trim().min(1),
   timeZone: z.string().trim().min(1),
 });
+
 export const addressLocationSchema = z.object({
   kind: z.literal("geo"),
   address: z.string().trim().min(1),
@@ -43,14 +44,35 @@ export const addressLocationSchema = z.object({
   lng: z.number(),
   size: z.number(),
 });
-const locationSchema = z.union([
-  virtualLocationSchema,
-  customLocationSchema,
-  addressLocationSchema,
-]);
+const locationSchema = z
+  .union([virtualLocationSchema, customLocationSchema, addressLocationSchema])
+  .superRefine((data, ctx) => {
+    if (
+      (data.kind === "virtual" &&
+        !virtualLocationSchema.safeParse(data).success) ||
+      (data.kind === "custom" &&
+        !customLocationSchema.safeParse(data).success) ||
+      (data.kind === "geo" && !addressLocationSchema.safeParse(data).success)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Valid location required",
+        path: [],
+      });
+    }
+  });
+
 const uriSchema = z.union([
-  z.string().min(1).max(400).regex(urlPattern, "URL is not valid"),
-  z.string().min(1).max(400).regex(ipfsPattern, "IPFS URI is not valid"),
+  z
+    .string()
+    .min(1, "An image is required")
+    .max(400)
+    .regex(urlPattern, "URL is not valid"),
+  z
+    .string()
+    .min(1, "An image is required")
+    .max(400)
+    .regex(ipfsPattern, "IPFS URI is not valid"),
 ]);
 
 export const eventFormSchema = z.object({

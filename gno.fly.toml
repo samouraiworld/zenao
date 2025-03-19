@@ -9,7 +9,7 @@ primary_region = 'cdg'
 [build]
 dockerfile = 'gno.Dockerfile'
 [build.args]
-ZENAO_ADMIN_ADDR = 'g1m0lplhma8z4uruds4zcltmlgwlht7w739e6qlp'
+ZENAO_ADMIN_ADDR = 'g1qjkqq0ycmvq0g6f5gyvm60phcj0fpam6z8zvd4'
 
 [http_service]
 internal_port = 8888

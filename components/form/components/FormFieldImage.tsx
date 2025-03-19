@@ -9,6 +9,7 @@ import { useToast } from "@/app/hooks/use-toast";
 import { filesPostResponseSchema } from "@/lib/files";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { isValidURL, web2URL } from "@/lib/uris";
+import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
 
 export const FormFieldImage = <T extends FieldValues>(
   props: FormFieldProps<T, string>,
@@ -55,32 +56,39 @@ export const FormFieldImage = <T extends FieldValues>(
     hiddenInputRef.current?.click();
   };
   return (
-    <div className="flex flex-col w-full sm:w-2/5">
-      {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
-      {/* TODO: find a better way */}
-      {isValidURL(imageUri, urlPattern) && !fieldState.error?.message ? (
-        <Image
-          src={web2URL(imageUri)}
-          width={330}
-          height={330}
-          alt="imageUri"
-          className="flex w-full rounded-xl self-center border"
-        />
-      ) : (
-        <Skeleton className="w-full h-[330px] rounded-xnter flex justify-center items-center border">
-          {uploading && <Loader2 className="animate-spin" />}
-        </Skeleton>
+    <FormField
+      control={props.control}
+      name={props.name}
+      render={() => (
+        <FormItem className="space-y-0 flex flex-col w-full sm:w-2/5">
+          {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
+          {/* TODO: find a better way */}
+          {isValidURL(imageUri, urlPattern) && !fieldState.error?.message ? (
+            <Image
+              src={web2URL(imageUri)}
+              width={330}
+              height={330}
+              alt="imageUri"
+              className="flex w-full rounded-xl self-center border"
+            />
+          ) : (
+            <Skeleton className="w-full h-[330px] rounded-xnter flex justify-center items-center border">
+              {uploading && <Loader2 className="animate-spin" />}
+            </Skeleton>
+          )}
+          <div className="self-end relative bottom-8 right-2">
+            <ImageIcon onClick={handleClick} className="w-5 cursor-pointer" />
+            <input
+              type="file"
+              onChange={handleChange}
+              ref={hiddenInputRef}
+              className="hidden"
+              disabled={uploading}
+            />
+          </div>
+          <FormMessage />
+        </FormItem>
       )}
-      <div className="self-end relative bottom-8 right-2">
-        <ImageIcon onClick={handleClick} className="w-5 cursor-pointer" />
-        <input
-          type="file"
-          onChange={handleChange}
-          ref={hiddenInputRef}
-          className="hidden"
-          disabled={uploading}
-        />
-      </div>
-    </div>
+    />
   );
 };
