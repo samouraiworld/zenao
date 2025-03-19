@@ -68,7 +68,7 @@ function isDateDisabled(date: Date, matcher: Matcher): boolean {
   return false;
 }
 
-export function FormFieldDatePickerV2<T extends FieldValues>(
+export function FormFieldDatePicker<T extends FieldValues>(
   props: FormFieldProps<T, bigint> & {
     timeZone: string;
     disabled?: boolean;

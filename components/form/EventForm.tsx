@@ -22,7 +22,7 @@ import { FormFieldImage } from "./components/FormFieldImage";
 import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldLocation } from "./components/FormFieldLocation";
-import { FormFieldDatePickerV2 } from "./components/form-field-date-picker";
+import { FormFieldDatePicker } from "./components/form-field-date-picker";
 import { Form, FormDescription, FormLabel } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 
@@ -180,7 +180,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             </Card>
             <Card className="flex flex-col gap-[10px]">
               <FormLabel>{t("from")}</FormLabel>
-              <FormFieldDatePickerV2
+              <FormFieldDatePicker
                 name="startDate"
                 control={form.control}
                 placeholder={t("pick-a-start-date-placeholder")}
@@ -211,7 +211,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                 ]}
               />
               <FormLabel>{t("to")}</FormLabel>
-              <FormFieldDatePickerV2
+              <FormFieldDatePicker
                 name="endDate"
                 control={form.control}
                 placeholder={t("pick-a-end-date-placeholder")}
