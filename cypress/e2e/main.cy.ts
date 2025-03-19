@@ -122,7 +122,7 @@ describe("main", () => {
     logout();
 
     // go to home page
-    cy.get("a").contains("ZENAO").click({ force: true });
+    cy.get("a").contains("ZENAO").click();
 
     // check that home text is present
     cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
