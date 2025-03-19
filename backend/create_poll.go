@@ -33,7 +33,14 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	//TODO: Do a s.Chain.CreatePoll
+	//XXX: if saving post to db, use a gorm Tx
+	roles, err := s.DB.UserRoles(userID, req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return nil, errors.New("user is not a member of the event")
+	}
 
 	return connect.NewResponse(&zenaov1.CreatePollResponse{
 		Id: "1",
