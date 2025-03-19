@@ -1,6 +1,12 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import {
+  fromUnixTime,
+  getUnixTime,
+  isSameDay,
+  minutesToSeconds,
+} from "date-fns";
 import { Card } from "../cards/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/MarkdownPreview";
@@ -8,17 +14,16 @@ import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/MapLazyComponents";
-import { Separator } from "../shadcn/separator";
 import Text from "../texts/text";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
-import { FormFieldDatePicker } from "./components/FormFieldDatePicker";
 import { TimeZonesPopover } from "./components/TimeZonesPopover";
 import { FormFieldImage } from "./components/FormFieldImage";
 import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldLocation } from "./components/FormFieldLocation";
-import { Form } from "@/components/shadcn/form";
+import { FormFieldDatePicker } from "./components/form-field-date-picker";
+import { Form, FormDescription, FormLabel } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 
 interface EventFormProps {
@@ -26,16 +31,22 @@ interface EventFormProps {
   onSubmit: (values: EventFormSchemaType) => Promise<void>;
   isLoaded: boolean;
   isEditing?: boolean;
+  minDateRange?: Date;
+  maxDateRange?: Date;
 }
 
 export const EventForm: React.FC<EventFormProps> = ({
   form,
   onSubmit,
   isLoaded,
+  minDateRange,
+  maxDateRange,
   isEditing = false,
 }) => {
   const description = form.watch("description");
   const location = form.watch("location");
+  const startDate = form.watch("startDate");
+  const endDate = form.watch("endDate");
   const t = useTranslations("eventForm");
 
   const [isVirtual, setIsVirtual] = useState<boolean>(
@@ -45,7 +56,7 @@ export const EventForm: React.FC<EventFormProps> = ({
     null,
   );
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
-  const [timeZone, setTimeZone] = useState<string>("");
+  const [timeZone, setTimeZone] = useState<string>(currentTimezone());
 
   return (
     <Form {...form}>
@@ -116,7 +127,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   // If we have an error in virtual location and we change to custom, error stay as undefined and can't be clear
                   form.clearErrors("location");
                   setMarker(null);
-                  setTimeZone("");
+                  setTimeZone(currentTimezone());
                   setIsVirtual(checked);
                 }}
               />
@@ -137,10 +148,11 @@ export const EventForm: React.FC<EventFormProps> = ({
                     const GeoTZFind = (await import("browser-geo-tz")).find;
                     const tz = await GeoTZFind(marker.lat, marker.lng);
                     setTimeZone(tz[0]);
+                    console.log(tz[0]);
                   }}
                   onRemove={() => {
                     setMarker(null);
-                    setTimeZone("");
+                    setTimeZone(currentTimezone());
                   }}
                 />
               )}
@@ -156,6 +168,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                     ...location,
                     timeZone,
                   });
+                  setTimeZone(timeZone);
                 }}
               />
             )}
@@ -170,19 +183,95 @@ export const EventForm: React.FC<EventFormProps> = ({
               />
             </Card>
             <Card className="flex flex-col gap-[10px]">
+              <FormLabel>{t("from")}</FormLabel>
               <FormFieldDatePicker
                 name="startDate"
                 control={form.control}
-                placeholder={t("start-date-placeholder")}
+                placeholder={t("pick-a-start-date-placeholder")}
                 timeZone={timeZone}
+                onChange={(date) => {
+                  if (!endDate || date > fromUnixTime(Number(endDate))) {
+                    form.setValue(
+                      "endDate",
+                      BigInt(getUnixTime(date) + minutesToSeconds(15)),
+                    );
+                  }
+                }}
+                disabledDates={[
+                  ...(minDateRange
+                    ? [
+                        {
+                          before: minDateRange,
+                        },
+                      ]
+                    : []),
+                  ...(maxDateRange
+                    ? [
+                        {
+                          after: maxDateRange,
+                        },
+                      ]
+                    : []),
+                ]}
               />
-              <Separator className="mx-0" />
+              <FormLabel>{t("to")}</FormLabel>
               <FormFieldDatePicker
                 name="endDate"
                 control={form.control}
-                placeholder={t("end-date-placeholder")}
+                placeholder={t("pick-a-end-date-placeholder")}
                 timeZone={timeZone}
+                disabled={!startDate}
+                disabledHours={[
+                  (date) => {
+                    if (startDate) {
+                      // We accept events on the same day
+                      const currentStartDate = fromUnixTime(Number(startDate));
+
+                      return (
+                        isSameDay(currentStartDate, date) &&
+                        currentStartDate.getHours() * 60 +
+                          currentStartDate.getMinutes() +
+                          15 /* Event duration 15 minutes minimum */ >
+                          date.getHours() * 60 + date.getMinutes()
+                      );
+                    }
+
+                    return false;
+                  },
+                ]}
+                disabledDates={[
+                  ...(minDateRange
+                    ? [
+                        {
+                          before: minDateRange,
+                        },
+                      ]
+                    : []),
+                  ...(maxDateRange
+                    ? [
+                        {
+                          after: maxDateRange,
+                        },
+                      ]
+                    : []),
+                  (date) => {
+                    if (startDate) {
+                      // We accept events on the same day
+                      const currentStartDate = fromUnixTime(Number(startDate));
+
+                      return (
+                        !isSameDay(currentStartDate, date) &&
+                        currentStartDate > date
+                      );
+                    }
+
+                    return false;
+                  },
+                ]}
               />
+              <FormDescription>
+                Displayed time corresponds to {timeZone}
+              </FormDescription>
             </Card>
             <ButtonWithLabel
               loading={isLoaded}

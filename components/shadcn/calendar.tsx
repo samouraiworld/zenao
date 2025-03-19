@@ -2,30 +2,96 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, Dropdown as DropDownDayPicker } from "react-day-picker";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
+import { ScrollArea } from "./scroll-area";
 import { cn } from "@/lib/tailwind";
 import { buttonVariants } from "@/components/shadcn/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  dropdownsClassName?: string;
+};
 
 function Calendar({
   className,
   classNames,
+  hideNavigation,
   showOutsideDays = true,
+  components: customComponents,
   ...props
 }: CalendarProps) {
+  const _dropdownsClassName = cn(
+    "flex items-center justify-center gap-2 w-full",
+    hideNavigation ? "w-full" : "",
+    props.dropdownsClassName,
+  );
+
+  const Dropdown = React.useCallback(
+    ({
+      value,
+      onChange,
+      options,
+      "aria-label": arialLabel,
+    }: React.ComponentProps<typeof DropDownDayPicker>) => {
+      const selected = options?.find((option) => option.value === value);
+      const handleChange = (value: string) => {
+        const changeEvent = {
+          target: { value },
+        } as React.ChangeEvent<HTMLSelectElement>;
+        onChange?.(changeEvent);
+      };
+      return (
+        <Select
+          value={value?.toString()}
+          onValueChange={(value) => {
+            handleChange(value);
+          }}
+        >
+          <SelectTrigger
+            className="outline-none focus:ring-0 focus:ring-offset-0"
+            aria-label={arialLabel}
+          >
+            <SelectValue>{selected?.label}</SelectValue>
+          </SelectTrigger>
+          <SelectContent position="popper" align="center">
+            <ScrollArea className="h-80">
+              {options?.map(({ value, label, disabled }, id) => (
+                <SelectItem
+                  key={`${value}-${id}`}
+                  value={value?.toString()}
+                  disabled={disabled}
+                >
+                  {label}
+                </SelectItem>
+              ))}
+            </ScrollArea>
+          </SelectContent>
+        </Select>
+      );
+    },
+    [],
+  );
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
+      hideNavigation
       classNames={{
         month: "space-y-4",
         months: "flex flex-col sm:flex-row space-y-4 sm:space-y-0 relative",
         month_caption: "flex justify-center pt-1 relative items-center",
         month_grid: "w-full border-collapse space-y-1",
         caption_label: "text-sm font-medium",
-        nav: "flex items-center justify-between absolute inset-x-0",
+        // nav: "flex items-center justify-between absolute inset-x-0",
+        nav: "hidden",
         button_previous: cn(
           buttonVariants({ variant: "outline" }),
           "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 z-10",
@@ -34,6 +100,7 @@ function Calendar({
           buttonVariants({ variant: "outline" }),
           "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 z-10",
         ),
+        dropdowns: _dropdownsClassName,
         weeks: "w-full border-collapse space-y-",
         weekdays: "flex",
         weekday:
@@ -58,6 +125,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
+        Dropdown,
         Chevron: ({ className, ...props }) => {
           if (props.orientation === "left") {
             return (
@@ -68,6 +136,7 @@ function Calendar({
             <ChevronRight className={cn("h-4 w-4", className)} {...props} />
           );
         },
+        ...customComponents,
       }}
       {...props}
     />
