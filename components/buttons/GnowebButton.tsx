@@ -4,8 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Url } from "next/dist/shared/lib/router/router";
-import { SmallText } from "../texts/SmallText";
 import { buttonVariants } from "../shadcn/button";
+import Text from "../texts/text";
 import { cn } from "@/lib/tailwind";
 
 interface GnowebButtonProps {
@@ -22,7 +22,9 @@ export const GnowebButton: React.FC<GnowebButtonProps> = ({ href, label }) => {
       href={href}
       target="_blank"
     >
-      <SmallText variant="secondary">{label || t("gnoweb-button")}</SmallText>
+      <Text variant="secondary" size="sm">
+        {label || t("gnoweb-button")}
+      </Text>
       <Image
         src="/gno1.png"
         alt="gno-logo"

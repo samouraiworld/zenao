@@ -3,18 +3,29 @@
 import React from "react";
 import { FieldValues } from "react-hook-form";
 import { FormFieldProps } from "../types";
-import { FormControl, FormField, FormItem } from "@/components/shadcn/form";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
+import Text from "@/components/texts/text";
+
+type FormFieldTextAreaProps<T extends FieldValues> = FormFieldProps<T, string> &
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+    wordCounter?: boolean;
+  };
 
 export const FormFieldTextArea = <T extends FieldValues>({
   control,
   name,
   className,
   placeholder,
+  wordCounter,
   ...otherProps
-}: FormFieldProps<T, string> &
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>) => {
+}: FormFieldTextAreaProps<T>) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = () => {
@@ -34,7 +45,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className={cn("relative", wordCounter ? "pb-6" : null)}>
           <FormControl>
             <Textarea
               className={cn(
@@ -51,6 +62,20 @@ export const FormFieldTextArea = <T extends FieldValues>({
               ref={textAreaRef}
             />
           </FormControl>
+          <div
+            className={cn(
+              "flex w-full justify-between",
+              wordCounter ? "absolute bottom-0" : null,
+            )}
+          >
+            <FormMessage />
+            {wordCounter && (
+              <Text size="sm" className="text-primary-color/80">
+                <span>{field.value.length}</span> /
+                <span>{otherProps.maxLength}</span>
+              </Text>
+            )}
+          </div>
         </FormItem>
       )}
     />

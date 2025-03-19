@@ -13,10 +13,6 @@ import { ParticipateForm } from "./ParticipateForm";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
-import { Text } from "@/components/texts/DefaultText";
-import { SmallText } from "@/components/texts/SmallText";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
-import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -32,7 +28,11 @@ import { screenContainerMaxWidth } from "@/components/layout/ScreenContainer";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
 import { UserAvatarWithName } from "@/components/common/user";
 import { web2URL } from "@/lib/uris";
+import { UserAvatarWithName } from "@/components/common/user";
+import Text from "@/components/texts/text";
+import Heading from "@/components/texts/heading";
 import { feedPosts } from "@/lib/queries/social-feed";
+import { imageHeight, imageWidth } from "@/app/event/[id]/constants";
 
 function EventSection({
   title,
@@ -192,7 +192,7 @@ export function EventInfo({ id }: { id: string }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {/* ---- Event hero image */}
+      {/* Hero image */}
       {!!fakeImageUri && (
         <Image
           src={fakeImageUri}
@@ -205,26 +205,22 @@ export function EventInfo({ id }: { id: string }) {
           loader={web3ImgLoader}
         />
       )}
+      {/* Left Section */}
       <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
         <div className="flex flex-col gap-4 w-full sm:w-2/5">
-          {/* ---- Event image */}
           <Image
             src={data.imageUri}
-            width={330}
-            height={330}
-            alt="Event image"
+            width={imageWidth}
+            height={imageHeight}
+            alt="Event"
             priority
             className="flex w-full rounded-xl self-center"
             loader={web3ImgLoader}
           />
-
-          {/* ---- Edit button */}
           {/* If the user is organizer, link to /edit page */}
           {isOrganizer && (
             <Card className="flex flex-row items-center">
-              <SmallText className="w-3/5">
-                {t("is-organisator-role")}
-              </SmallText>
+              <Text className="w-3/5">{t("is-organisator-role")}</Text>
               <div className="w-2/5 flex justify-end">
                 <Link href={`/edit/${id}`}>
                   <ButtonWithLabel
@@ -248,41 +244,50 @@ export function EventInfo({ id }: { id: string }) {
           </EventSection>
         </div>
 
+        {/* Right Section */}
         <div className="flex flex-col gap-4 w-full sm:w-3/5">
-          {/* ---- Event title, dates */}
-          <VeryLargeText className="mb-7">{data.title}</VeryLargeText>
+          <Heading level={1} size="4xl" className="mb-7">
+            {data.title}
+          </Heading>
           <div className="flex flex-row gap-4 items-center">
             <Calendar width={iconSize} height={iconSize} />
             <div className="flex flex-col">
-              <LargeText>
+              <Heading level={2} size="xl">
                 {format(fromUnixTime(Number(data.startDate)), "PPP")}
-              </LargeText>
+              </Heading>
               <div className="flex flex-row text-sm gap-1">
-                <SmallText variant="secondary">
+                <Text variant="secondary" size="sm">
                   {format(fromUnixTime(Number(data.startDate)), "p")}
-                </SmallText>
-                <SmallText variant="secondary">-</SmallText>
-                <SmallText variant="secondary">
+                </Text>
+                <Text variant="secondary" size="sm">
+                  -
+                </Text>
+                <Text variant="secondary" size="sm">
                   {format(fromUnixTime(Number(data.endDate)), "PPp")}
-                </SmallText>
+                </Text>
               </div>
             </div>
           </div>
 
           <div className="flex flex-col">
-            {/* ---- Event location */}
             <div className="flex flex-row gap-4 items-center mb-2">
               <div className="w-[22px] h-[22px]">
                 <MapPin width={iconSize} height={iconSize} />
               </div>
               {location.kind === "virtual" ? (
                 <Link href={location.location} target="_blank">
-                  <LargeText className="hover:underline hover:underline-offset-1">
+                  <Heading
+                    level={2}
+                    size="xl"
+                    className="hover:underline hover:underline-offset-1"
+                  >
                     {location.location}
-                  </LargeText>
+                  </Heading>
                 </Link>
               ) : (
-                <LargeText>{location.address}</LargeText>
+                <Heading level={2} size="xl">
+                  {location.address}
+                </Heading>
               )}
             </div>
             {location.kind === "geo" && (
@@ -290,12 +295,14 @@ export function EventInfo({ id }: { id: string }) {
             )}
           </div>
 
-          {/* ---- Event user's participation */}
+          {/* Participate Card */}
           <Card className="mt-2">
             {isParticipate ? (
               <div>
                 <div className="flex flex-row justify-between">
-                  <LargeText>{t("in")}</LargeText>
+                  <Heading level={2} size="xl">
+                    {t("in")}
+                  </Heading>
                   {/* TODO: create a clean decount timer */}
                   {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
                 </div>
@@ -305,12 +312,16 @@ export function EventInfo({ id }: { id: string }) {
               </div>
             ) : isStarted ? (
               <div>
-                <LargeText>{t("already-begun")}</LargeText>
+                <Heading level={2} size="xl">
+                  {t("already-begun")}
+                </Heading>
                 <Text className="my-4">{t("too-late")}</Text>
               </div>
             ) : (
               <div>
-                <LargeText>{t("registration")}</LargeText>
+                <Heading level={2} size="xl">
+                  {t("registration")}
+                </Heading>
                 <Text className="my-4">{t("join-desc")}</Text>
                 <ParticipateForm
                   onSuccess={handleParticipateSuccess}
@@ -320,7 +331,7 @@ export function EventInfo({ id }: { id: string }) {
             )}
           </Card>
 
-          {/* ---- Event description */}
+          {/* Markdown Description */}
           <EventSection title={t("about-event")}>
             <div ref={descContainerRef}>
               <MarkdownPreview
@@ -332,7 +343,7 @@ export function EventInfo({ id }: { id: string }) {
               />
             </div>
 
-            {/* ---- See More button */}
+            {/* See More button */}
             {isDescTruncated && (
               <div
                 className="w-full flex justify-center cursor-pointer "
@@ -346,7 +357,8 @@ export function EventInfo({ id }: { id: string }) {
           </EventSection>
         </div>
       </div>
-      {/* ---- Tabs */}
+
+      {/* Tabs */}
       <div className="flex flex-col gap-4">
         <Tabs value={tab} onValueChange={(value) => setTab(value as EventTab)}>
           <TabsList className={`grid w-full grid-cols-${eventTabs.length}`}>
@@ -358,10 +370,9 @@ export function EventInfo({ id }: { id: string }) {
           </TabsList>
         </Tabs>
 
-        {/* ---- Social Feed */}
+        {/* Social Feed */}
         <EventFeed isDescExpanded={isDescExpanded} />
       </div>
-      ;
     </div>
   );
 }

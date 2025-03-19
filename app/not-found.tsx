@@ -3,22 +3,25 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
-import { Text } from "@/components/texts/DefaultText";
-import { SmallText } from "@/components/texts/SmallText";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
-import { LargeText } from "@/components/texts/LargeText";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
 
 export default function NotFound() {
   const t = useTranslations("not-found");
 
   return (
     <ScreenContainerCentered>
-      <LargeText className="text-center text-4xl">404</LargeText>
+      <Heading level={1} size="4xl" className="text-center">
+        404
+      </Heading>
       <Text className="text-center">{t("label")}</Text>
       <br />
       <Link href="/">
         <ButtonWithChildren>
-          <SmallText variant="invert">{t("button")}</SmallText>
+          <Text variant="invert" size="sm">
+            {t("button")}
+          </Text>
         </ButtonWithChildren>
       </Link>
     </ScreenContainerCentered>
