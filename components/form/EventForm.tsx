@@ -71,6 +71,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             control={form.control}
             placeholder={t("image-uri-placeholder")}
             aspectRatio={1 / 1}
+            className="sm:w-2/5"
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">

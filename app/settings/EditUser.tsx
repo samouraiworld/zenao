@@ -88,6 +88,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             name="avatarUri"
             placeholder={t("avatar-placeholder")}
             aspectRatio={1 / 1}
+            className="sm:w-2/5"
             tooltip={<Text size="sm">{t("change-avatar")}</Text>}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">

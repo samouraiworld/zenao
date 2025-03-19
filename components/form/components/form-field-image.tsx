@@ -72,7 +72,9 @@ export const FormFieldImage = <T extends FieldValues>(
       control={props.control}
       name={props.name}
       render={() => (
-        <FormItem className="space-y-0 flex flex-col w-full sm:w-2/5">
+        <FormItem
+          className={cn("space-y-0 flex flex-col w-full", props.className)}
+        >
           <TooltipProvider>
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
