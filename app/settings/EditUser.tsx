@@ -15,11 +15,12 @@ import { FormFieldInputString } from "@/components/form/components/FormFieldInpu
 import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
-import { FormFieldImage } from "@/components/form/components/FormFieldImage";
+import { FormFieldImage } from "@/components/form/components/form-field-image";
 import { userAddressOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import { Separator } from "@/components/shadcn/separator";
 import { Button, buttonVariants } from "@/components/shadcn/button";
+import Text from "@/components/texts/text";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -87,6 +88,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             name="avatarUri"
             placeholder={t("avatar-placeholder")}
             aspectRatio={1 / 1}
+            tooltip={<Text size="sm">{t("change-avatar")}</Text>}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
             <Card>
