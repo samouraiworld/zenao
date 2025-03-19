@@ -10,12 +10,12 @@ import { useAuth } from "@clerk/nextjs";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
-import { Text } from "@/components/texts/DefaultText";
 import { EventForm } from "@/components/form/EventForm";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { currentTimezone } from "@/lib/time";
 import { userAddressOptions } from "@/lib/queries/user";
+import Text from "@/components/texts/text";
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values

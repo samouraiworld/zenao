@@ -2,10 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
 import { format, fromUnixTime } from "date-fns";
-import { SmallText } from "../texts/SmallText";
-import { LargeText } from "../texts/LargeText";
-import { Text } from "../texts/DefaultText";
 import { UserAvatarWithName } from "../common/user";
+import Text from "../texts/text";
+import Heading from "../texts/heading";
 import { Card } from "./Card";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
@@ -27,9 +26,9 @@ export function EventCard({ evt }: { evt: EventInfo }) {
       <div className="min-w-32 left-6 relative md:left-0 md:flex">
         <div className="flex flex-row items-center gap-[6px] mb-3 md:items-start md:mb-0 md:gap-0 md:flex-col">
           <Text>{format(fromUnixTime(Number(evt.startDate)), "MMM d")}</Text>
-          <SmallText variant="secondary">
+          <Text variant="secondary" size="sm">
             {format(fromUnixTime(Number(evt.startDate)), "iiii")}
-          </SmallText>
+          </Text>
         </div>
       </div>
       <div className="flex flex-row w-full justify-between">
@@ -46,7 +45,9 @@ export function EventCard({ evt }: { evt: EventInfo }) {
               <Text variant="secondary">
                 {format(fromUnixTime(Number(evt.startDate)), "h:mm a")}
               </Text>
-              <LargeText className="mb-1 line-clamp-3">{evt.title}</LargeText>
+              <Heading level={1} size="xl" className="mb-1 line-clamp-3">
+                {evt.title}
+              </Heading>
               <div className="flex flex-row gap-2 items-center">
                 <MapPin width={iconSize} height={iconSize} />
                 <Text className="line-clamp-1">{location} </Text>

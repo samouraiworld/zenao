@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/cards/Card";
-import { Text } from "@/components/texts/DefaultText";
-import { LargeText } from "@/components/texts/LargeText";
+import Text from "@/components/texts/text";
+import Heading from "@/components/texts/heading";
 
 interface BlogPostCardProps {
   title: string;
@@ -37,7 +37,9 @@ export default function BlogPostCard({
           <Image alt={alt} width={800} height={800} {...imageProps} />
         </div>
         <div className="flex flex-col h-full gap-4">
-          <LargeText>{title}</LargeText>
+          <Heading level={2} size="xl">
+            {title}
+          </Heading>
           <Text>{description}</Text>
         </div>
       </Card>

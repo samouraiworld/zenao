@@ -63,7 +63,7 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // check the participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 8000 }).should("be.visible");
+    cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
   });
 
   it("participate while signed in", () => {
@@ -89,7 +89,9 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // check the participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 16000 }).should("be.visible");
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
 
     // check that we have a ticket
     cy.visit("/tickets");
@@ -123,7 +125,7 @@ describe("main", () => {
     cy.get("a").contains("ZENAO").click({ force: true });
 
     // check that home text is present
-    cy.get("p").contains("Organize event(s) in seconds").should("be.visible");
+    cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
   });
 
   it("edit it's profile", () => {
@@ -230,14 +232,14 @@ describe("main", () => {
 
     toastShouldContain("Event created!");
 
-    cy.get("p").contains(testEventName).should("be.visible");
-    cy.get("p").contains(testEventLocation).should("be.visible");
+    cy.get("h1").contains(testEventName).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
     cy.get("p")
       .contains(
         "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
       )
       .should("be.visible"); // desc
-    cy.get("p").contains(" 13th, ").should("be.visible"); // start date
+    cy.get("h2").contains(" 13th, ").should("be.visible"); // start date
     cy.get("p").contains(" 14, ").should("be.visible"); // end date
 
     cy.get("button").contains("Participate").should("be.visible");
@@ -251,7 +253,7 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // wait for participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 8000 }).should("be.visible");
+    cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
 
     // check that we have a ticket with the event name visible
     cy.visit("/tickets");

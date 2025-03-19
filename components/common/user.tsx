@@ -5,7 +5,7 @@ import Image, { getImageProps } from "next/image";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Skeleton } from "../shadcn/skeleton";
-import { SmallText } from "../texts/SmallText";
+import Text from "../texts/text";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { profileOptions } from "@/lib/queries/profile";
 import { cn } from "@/lib/tailwind";
@@ -58,7 +58,7 @@ export function UserAvatarWithName({
   const content = (
     <div className="flex flex-row gap-2 items-center">
       <UserAvatar address={profile?.address} />
-      <SmallText>{profile?.displayName}</SmallText>
+      <Text size="sm">{profile?.displayName}</Text>
     </div>
   );
 
