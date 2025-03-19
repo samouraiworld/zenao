@@ -133,7 +133,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
         render={({ field }) => {
           const formattedValue = fromUnixTime(Number(field.value));
           return (
-            <FormItem className="flex flex-col w-full">
+            <FormItem className="flex flex-col w-full space-y-0">
               <Popover open={isOpen} onOpenChange={setIsOpen}>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -209,7 +209,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
         render={({ field }) => {
           const formattedValue = fromUnixTime(Number(field.value));
           return (
-            <FormItem className="flex flex-col">
+            <FormItem className="flex flex-col space-y-0">
               <FormControl>
                 <Select
                   disabled={props.disabled || !field.value}
