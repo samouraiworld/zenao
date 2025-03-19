@@ -83,7 +83,10 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
 
         return (
           <Link key={item.key} href={item.to}>
-            <SmallText variant={isActive ? "primary" : "secondary"}>
+            <SmallText
+              variant={isActive ? "primary" : "secondary"}
+              className="hover:text-primary"
+            >
               {item.children}
             </SmallText>
           </Link>
