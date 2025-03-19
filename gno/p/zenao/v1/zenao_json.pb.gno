@@ -618,6 +618,9 @@ func (b *BatchProfileRequest) FromJSON(node *json.Node) {
 func (c *CreatePollRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
 	if c.Question != "" {
 		fields["question"] = json.StringNode("", c.Question)
 	}
@@ -642,6 +645,9 @@ func (c *CreatePollRequest) FromJSON(node *json.Node) {
 	*c = CreatePollRequest{}
 	fields := node.MustObject()
 
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
+	}
 	if val, ok := fields["question"]; ok {
 		c.Question = val.MustString()
 	}

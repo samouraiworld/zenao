@@ -113,10 +113,11 @@ message BatchProfileRequest {
 }
 
 message CreatePollRequest {
-  string question = 1;
-  repeated string options = 2;
-  int64 duration = 3; // unix seconds
-  polls.v1.PollKind kind = 4;
+  string event_id = 1;
+  string question = 2;
+  repeated string options = 3;
+  int64 duration = 4; // unix seconds
+  polls.v1.PollKind kind = 5;
 }
 
 message CreatePollResponse { string id = 1; }
