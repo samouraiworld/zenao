@@ -1,10 +1,11 @@
 import { FacebookIcon, LinkedinIcon, TwitterIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
-import Text from "@/components/texts/text";
+import Text from "../texts/text";
 
-export const Footer: React.FC = () => {
-  const t = useTranslations("footer");
+export const Footer = () => {
+  const t = useTranslations("navigation");
+
   return (
     <footer className="flex flex-row justify-between items-end p-4">
       <div className="flex flex-row gap-3 sm:gap-5">
@@ -13,21 +14,21 @@ export const Footer: React.FC = () => {
           variant="secondary"
           className="underline underline-offset-1"
         >
-          {t("terms")}
+          {t("footer.terms")}
         </Text>
         <Text
           size="sm"
           variant="secondary"
           className="underline underline-offset-1"
         >
-          {t("privacy")}
+          {t("footer.privacy")}
         </Text>
         <Text
           size="sm"
           variant="secondary"
           className="underline underline-offset-1"
         >
-          {t("security")}
+          {t("footer.security")}
         </Text>
       </div>
       <div className="flex flex-row gap-3 sm:gap-5">
