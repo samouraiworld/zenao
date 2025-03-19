@@ -21,7 +21,7 @@ func init() {
 		AvatarURI:        "",
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
-		ZenaoAdminAddr:   "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg",
+		ZenaoAdminAddr:   "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", // XXX: change this to interact as the user demo
 	})
 	DAO = user.DAO
 	daoPrivate = user.DAOPrivate
