@@ -52,11 +52,11 @@ export function ProfileInfo({ address }: { address: string }) {
         />
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
-        <Heading level={1} variant="primary" size="4xl" className="mb-7">
+        <Heading level={1} size="4xl" className="mb-7">
           {data.displayName}
         </Heading>
         <Card>
-          <Text variant="primary">{data.bio}</Text>
+          <Text>{data.bio}</Text>
         </Card>
       </div>
     </div>

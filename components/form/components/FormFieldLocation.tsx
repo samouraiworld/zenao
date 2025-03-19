@@ -72,7 +72,7 @@ export const FormFieldLocation: React.FC<{
       render={({ field }) => {
         const object = field.value as z.infer<typeof addressLocationSchema>;
         return (
-          <FormItem className="flex flex-col w-full space-y-0">
+          <FormItem className="flex flex-col w-full space-y-0 gap-0 space-x-2">
             <Popover open={open} onOpenChange={setOpen}>
               <div className="flex flex-row w-full justify-between">
                 <PopoverTrigger asChild>
@@ -107,6 +107,7 @@ export const FormFieldLocation: React.FC<{
                         ...object,
                         address: "",
                       });
+                      form.trigger("location");
                     }}
                   >
                     <XIcon className="h-3 w-3" />
@@ -129,6 +130,7 @@ export const FormFieldLocation: React.FC<{
                           ...object,
                           address: search,
                         });
+                        form.trigger("location");
                         setOpen(false);
                       }
                     }}
@@ -151,6 +153,7 @@ export const FormFieldLocation: React.FC<{
                               lng,
                               size: 0,
                             });
+                            form.trigger("location");
                             await onSelect({ lat, lng });
                             setOpen(false);
                           }}
@@ -171,6 +174,7 @@ export const FormFieldLocation: React.FC<{
                             address: search,
                             timeZone: currentTimezone(),
                           });
+                          form.trigger("location");
                           onRemove();
                           setOpen(false);
                         }}
@@ -182,7 +186,7 @@ export const FormFieldLocation: React.FC<{
                 </Command>
               </PopoverContent>
             </Popover>
-            <FormMessage />
+            <FormMessage className="pb-2 pt-2" />
           </FormItem>
         );
       }}

@@ -141,9 +141,7 @@ export function EventInfo({ id }: { id: string }) {
         {/* If the user is organizer, link to /edit page */}
         {isOrganizer && (
           <Card className="flex flex-row items-center">
-            <Text variant="primary" className="w-3/5">
-              {t("is-organisator-role")}
-            </Text>
+            <Text className="w-3/5">{t("is-organisator-role")}</Text>
             <div className="w-2/5 flex justify-end">
               <Link href={`/edit/${id}`}>
                 <ButtonWithLabel
@@ -169,13 +167,13 @@ export function EventInfo({ id }: { id: string }) {
 
       {/* Right Section */}
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
-        <Heading level={1} variant="primary" size="4xl" className="mb-7">
+        <Heading level={1} size="4xl" className="mb-7">
           {data.title}
         </Heading>
         <div className="flex flex-row gap-4 items-center">
           <Calendar width={iconSize} height={iconSize} />
           <div className="flex flex-col">
-            <Heading level={2} variant="primary" size="xl">
+            <Heading level={2} size="xl">
               {format(fromUnixTime(Number(data.startDate)), "PPP")}
             </Heading>
             <div className="flex flex-row text-sm gap-1">
@@ -200,7 +198,6 @@ export function EventInfo({ id }: { id: string }) {
               <Link href={location.location} target="_blank">
                 <Heading
                   level={2}
-                  variant="primary"
                   size="xl"
                   className="hover:underline hover:underline-offset-1"
                 >
@@ -208,7 +205,7 @@ export function EventInfo({ id }: { id: string }) {
                 </Heading>
               </Link>
             ) : (
-              <Heading level={2} variant="primary" size="xl">
+              <Heading level={2} size="xl">
                 {location.address}
               </Heading>
             )}
@@ -223,7 +220,7 @@ export function EventInfo({ id }: { id: string }) {
           {isParticipate ? (
             <div>
               <div className="flex flex-row justify-between">
-                <Heading level={2} variant="primary" size="xl">
+                <Heading level={2} size="xl">
                   {t("in")}
                 </Heading>
                 {/* TODO: create a clean decount timer */}
@@ -235,14 +232,14 @@ export function EventInfo({ id }: { id: string }) {
             </div>
           ) : isStarted ? (
             <div>
-              <Heading level={2} variant="primary" size="xl">
+              <Heading level={2} size="xl">
                 {t("already-begun")}
               </Heading>
               <Text className="my-4">{t("too-late")}</Text>
             </div>
           ) : (
             <div>
-              <Heading level={2} variant="primary" size="xl">
+              <Heading level={2} size="xl">
                 {t("registration")}
               </Heading>
               <Text className="my-4">{t("join-desc")}</Text>

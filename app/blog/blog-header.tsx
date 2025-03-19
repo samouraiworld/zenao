@@ -7,12 +7,7 @@ export default function BlogHeader() {
 
   return (
     <div className="flex flex-col gap-2">
-      <Heading
-        level={1}
-        variant="primary"
-        size="4xl"
-        className="text-4xl truncate"
-      >
+      <Heading level={1} size="4xl" className="text-4xl truncate">
         {t("pageTitle")}
       </Heading>
       <Text variant="secondary" className="line-clamp-2">

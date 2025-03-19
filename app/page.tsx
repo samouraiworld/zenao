@@ -20,12 +20,7 @@ export default function Home() {
           priority
           className="mb-5 mt-5"
         />
-        <Heading
-          level={1}
-          variant="primary"
-          size="4xl"
-          className="w-[200px] text-center"
-        >
+        <Heading level={1} size="4xl" className="w-[200px] text-center">
           {t("main-text")}
         </Heading>
         <Text
