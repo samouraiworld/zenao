@@ -1,13 +1,11 @@
 "use client";
 
 import { FieldValues, useController } from "react-hook-form";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { DateInterval, DateRange, Matcher } from "react-day-picker";
-import { useEffect } from "react";
-import { useRef } from "react";
 import { FormFieldProps } from "../types";
 import {
   FormControl,
@@ -82,21 +80,21 @@ export function FormFieldDatePicker<T extends FieldValues>(
     control: props.control,
   });
   const [isOpen, setIsOpen] = useState(false);
-  const firstCheck = useRef(0);
-  const [time, setTime] = useState<string>("09:00");
 
-  useEffect(() => {
-    firstCheck.current += 1;
-
+  const defaultTime = useMemo(() => {
     if (field.value) {
       const formattedValue = fromUnixTime(Number(field.value));
 
       const hours = formattedValue.getHours().toString().padStart(2, "0");
       const minutes = formattedValue.getMinutes().toString().padStart(2, "0");
 
-      setTime(`${hours}:${minutes}`);
+      return `${hours}:${minutes}`;
     }
-  }, [props.name, field.value, firstCheck]);
+
+    return "09:00";
+  }, [field.value]);
+
+  const [time, setTime] = useState<string>(defaultTime);
 
   const isTimeDisabled = React.useCallback(
     (date: Date, hours: number, minutes: number) => {
@@ -218,8 +216,10 @@ export function FormFieldDatePicker<T extends FieldValues>(
                   onValueChange={(e) => {
                     setTime(e);
                     if (field.value) {
+                      console.log(field.value);
                       const [hours, minutes] = e.split(":");
                       const newDate = new Date(formattedValue);
+                      console.log(formattedValue);
                       newDate.setHours(parseInt(hours), parseInt(minutes));
                       field.onChange(BigInt(getUnixTime(newDate)));
                       if (props.onChange) {
