@@ -112,5 +112,4 @@ type CreatePollRequest struct {
 }
 
 type CreatePollResponse struct {
-	Id string
 }

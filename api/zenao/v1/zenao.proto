@@ -3,7 +3,7 @@ syntax = "proto3";
 package zenao.v1;
 option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
 
-import "polls/v1/polls.proto";
+// import "polls/v1/polls.proto";
 
 service ZenaoService {
   // USER
@@ -120,4 +120,4 @@ message CreatePollRequest {
   // polls.v1.PollKind kind = 5; XXX: need gno protoc to handle this
 }
 
-message CreatePollResponse { string id = 1; }
+message CreatePollResponse {}
