@@ -9,6 +9,7 @@ import (
 	"gno.land/p/zenao/events"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/r/demo/profile"
+	"gno.land/r/zenao/social_feed"
 )
 
 var DAO daokit.DAO
@@ -16,8 +17,8 @@ var daoPrivate *basedao.DAOPrivate
 var event *events.Event
 
 func init() {
-	zenaoAdmin := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94"
-	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
+	zenaoAdmin := "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg" // XXX: change this to interact as the user demo
+	creator := "g1szs0a4ntf84qwxdpr4qhu97yc9u06f3kkjmszx"    // replace w/ address of the user realm
 	conf := events.Config{
 		Creator:          creator,
 		Title:            "Demo",
@@ -34,6 +35,7 @@ func init() {
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
+	social_feed.NewFeed("main", false, daoPrivate.Members.IsMember)
 }
 
 func Vote(proposalID uint64, vote daocond.Vote) {

@@ -371,7 +371,66 @@ func (g *gnoZenaoChain) UserAddress(userID string) string {
 // CreatePoll implements ZenaoChain
 func (g *gnoZenaoChain) CreatePoll(userID string, eventID string) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
+	eventPkgPath := g.eventRealmPkgPath(eventID)
+	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
 
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+
+import (
+	"gno.land/p/zenao/daokit"
+	feedsv1 "gno.land/p/zenao/feeds/v1"
+	pollsv1 "gno.land/p/zenao/polls/v1"
+	"gno.land/r/zenao/polls"
+	"gno.land/r/zenao/social_feed"
+	user %q
+)
+
+func main() {
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: "Add new poll",
+		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
+			Title: "Add new poll",
+			Message: daokit.NewExecuteLambdaMsg(
+				NewPoll,
+			),
+		}),
+	})
+}
+
+func NewPoll() {
+	question := "What is your favorite color?"
+	options := []string{"Red", "Green", "Blue", "Yellow"}
+	polls.NewPoll(question, pollsv1.POLL_KIND_MULTIPLE_CHOICE, 60000000000*30, options, nil)
+
+	feedID := %q
+	post := &feedsv1.Post{
+		Loc:  nil,
+		Tags: []string{"poll"},
+		Post: &feedsv1.LinkPost{
+			Uri: "todo",
+		},
+	}
+
+	social_feed.NewPost(feedID, post)
+}
+`, userRealmPkgPath, feedID),
+			}},
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("created poll", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	return nil
 }
 
@@ -437,6 +496,7 @@ import (
 	"gno.land/p/{{.namespace}}/daocond"
 	"gno.land/r/demo/profile"
 	"gno.land/r/{{.namespace}}/eventreg"
+	"gno.land/r/{{.namespace}}/social_feed"
 )
 
 var (
@@ -463,6 +523,7 @@ func init() {
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
 	eventreg.Register(func() *zenaov1.EventInfo { return event.Info() })
+	social_feed.NewFeed("main", false, daoPrivate.Members.IsMember)
 }
 
 
