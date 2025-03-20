@@ -117,6 +117,7 @@ message CreatePollRequest {
   string question = 2;
   repeated string options = 3;
   int64 duration = 4; // unix seconds
+  bool multiple_choices = 5;
   // polls.v1.PollKind kind = 5; XXX: need gno protoc to handle this
 }
 

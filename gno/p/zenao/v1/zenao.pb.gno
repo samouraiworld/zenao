@@ -105,10 +105,11 @@ type BatchProfileRequest struct {
 }
 
 type CreatePollRequest struct {
-	EventId  string
-	Question string
-	Options  []string
-	Duration int64
+	EventId         string
+	Question        string
+	Options         []string
+	Duration        int64
+	MultipleChoices bool
 }
 
 type CreatePollResponse struct {

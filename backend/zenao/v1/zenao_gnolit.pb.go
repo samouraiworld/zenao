@@ -355,6 +355,9 @@ func (c *CreatePollRequest) GnoLiteral(typePrefix string, linePrefix string) str
 	if c.Duration != 0 {
 		fmt.Fprintf(buf, "%s\tDuration: %d,\n", linePrefix, c.Duration)
 	}
+	if c.MultipleChoices != false {
+		fmt.Fprintf(buf, "%s\tMultipleChoices: %t,\n", linePrefix, c.MultipleChoices)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

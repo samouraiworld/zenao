@@ -634,6 +634,9 @@ func (c *CreatePollRequest) ToJSON() *json.Node {
 	if c.Duration != 0 {
 		fields["duration"] = json.StringNode("", strconv.FormatInt(c.Duration, 10))
 	}
+	if c.MultipleChoices != false {
+		fields["multipleChoices"] = json.BoolNode("", c.MultipleChoices)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -662,6 +665,9 @@ func (c *CreatePollRequest) FromJSON(node *json.Node) {
 			panic(err)
 		}
 		c.Duration = fv
+	}
+	if val, ok := fields["multipleChoices"]; ok {
+		c.MultipleChoices = val.MustBool()
 	}
 }
 

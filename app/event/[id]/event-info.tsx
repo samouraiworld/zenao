@@ -1,31 +1,32 @@
 "use client";
 
-import React, { useCallback } from "react";
+import { zenaoClient } from "@/app/zenao-client";
+import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
+import { Card } from "@/components/cards/Card";
+import { MarkdownPreview } from "@/components/common/MarkdownPreview";
+import MapCaller from "@/components/common/map/MapLazyComponents";
+import { UserAvatarWithName } from "@/components/common/user";
+import { EventFormSchemaType } from "@/components/form/types";
+import { Separator } from "@/components/shadcn/separator";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
+import { eventOptions } from "@/lib/queries/event";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { userAddressOptions } from "@/lib/queries/user";
+import { web2URL } from "@/lib/uris";
+import { web3ImgLoader } from "@/lib/web3-img-loader";
+import { useAuth } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Event, WithContext } from "schema-dts";
+import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import React, { useCallback } from "react";
+import { Event, WithContext } from "schema-dts";
 import { ParticipateForm } from "./ParticipateForm";
 import { imageHeight, imageWidth } from "./constants";
 import { ParticipantsSection } from "./participants-section";
-import { eventOptions } from "@/lib/queries/event";
-import { Card } from "@/components/cards/Card";
-import { MarkdownPreview } from "@/components/common/MarkdownPreview";
-import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
-import { EventFormSchemaType } from "@/components/form/types";
-import { Separator } from "@/components/shadcn/separator";
-import MapCaller from "@/components/common/map/MapLazyComponents";
-import { userAddressOptions } from "@/lib/queries/user";
-import { web2URL } from "@/lib/uris";
-import { UserAvatarWithName } from "@/components/common/user";
-import Text from "@/components/texts/text";
-import Heading from "@/components/texts/heading";
 
 interface EventSectionProps {
   title: string;
@@ -116,6 +117,16 @@ export function EventInfo({ id }: { id: string }) {
   };
 
   const iconSize = 22;
+  const onTestingPoll = async () => {
+    try {
+      const token = await getToken();
+      await zenaoClient.createPoll({ eventId: id, question: "test", options: ["test1", "test2"], duration: BigInt(1000000000000000), multipleChoices: false },
+        { headers: { Authorization: "Bearer " + token } },);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   if (!data) {
     return <p>{`Event doesn't exist`}</p>;
@@ -126,6 +137,10 @@ export function EventInfo({ id }: { id: string }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      <button onClick={onTestingPoll}>
+        test
+      </button>
 
       {/* Left Section */}
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
