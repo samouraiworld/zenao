@@ -4,7 +4,7 @@ import { LatLng, Icon, Map as MapType } from "leaflet";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 export interface MapProps {
   lat: number;
@@ -12,7 +12,7 @@ export interface MapProps {
 }
 
 export const Map: React.FC<MapProps> = ({ lat, lng }) => {
-  const marker = new LatLng(lat, lng);
+  const marker = useMemo(() => new LatLng(lat, lng), [lat, lng]);
   const mapRef = useRef<MapType>(null);
 
   useEffect(() => {
