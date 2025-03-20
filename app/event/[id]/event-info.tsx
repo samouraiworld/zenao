@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -26,6 +27,8 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
+import { currentTimezone } from "@/lib/time";
+import { TZDate } from "react-day-picker";
 
 interface EventSectionProps {
   title: string;
@@ -56,34 +59,62 @@ export function EventInfo({ id }: { id: string }) {
   const queryClient = useQueryClient();
 
   // Correctly reconstruct location object
-  let location: EventFormSchemaType["location"] = {
-    kind: "custom",
-    address: "",
-    timeZone: "",
-  };
-  switch (data.location?.address.case) {
-    case "custom":
-      location = {
-        kind: "custom",
-        address: data.location?.address.value.address,
-        timeZone: data.location?.address.value.timezone,
-      };
-      break;
-    case "geo":
-      location = {
-        kind: "geo",
-        address: data.location?.address.value.address,
-        lat: data.location?.address.value.lat,
-        lng: data.location?.address.value.lng,
-        size: data.location?.address.value.size,
-      };
-      break;
-    case "virtual":
-      location = {
-        kind: "virtual",
-        location: data.location?.address.value.uri,
-      };
-  }
+  
+  let location = useMemo<EventFormSchemaType["location"]>(() => {
+    switch (data.location?.address.case) {
+      case "custom":
+        return {
+          kind: "custom",
+          address: data.location?.address.value.address,
+          timeZone: data.location?.address.value.timezone,
+        };
+        break;
+      case "geo":
+        return {
+          kind: "geo",
+          address: data.location?.address.value.address,
+          lat: data.location?.address.value.lat,
+          lng: data.location?.address.value.lng,
+          size: data.location?.address.value.size,
+        };
+        break;
+      case "virtual":
+        return {
+          kind: "virtual",
+          location: data.location?.address.value.uri,
+          // TODO Add timeZone
+        };
+    }
+
+    return {
+      kind: "custom",
+      address: "",
+      timeZone: "",
+    };
+  }, [data]);
+  
+  const [timezone, setTimezone] = useState<string>(currentTimezone());
+  
+  useLayoutEffect(() => {
+    const determineTimezone = async () => {
+      switch (location.kind) {
+        case "custom":
+          return location.timeZone;
+        case "virtual":
+          // ! Change to organizer timezone (#286)
+          return currentTimezone();
+        case "geo":
+          const GeoTZFind = (await import("browser-geo-tz")).find;
+          const tz = await GeoTZFind(location.lat, location.lng);
+          return tz[0];
+      }
+    }
+    
+    determineTimezone()
+      .then((found) => {
+        setTimezone(found);
+      })
+  }, [location]);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -107,8 +138,8 @@ export function EventInfo({ id }: { id: string }) {
     "@type": "Event",
     name: data.title,
     description: data.description,
-    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
-    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
+    startDate: new TZDate(Number(data.startDate) * 1000, timezone).toISOString(),
+    endDate: new TZDate(Number(data.endDate) * 1000, timezone).toISOString(),
     location:
       location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
@@ -184,7 +215,7 @@ export function EventInfo({ id }: { id: string }) {
                 -
               </Text>
               <Text variant="secondary" size="sm">
-                {format(fromUnixTime(Number(data.endDate)), "PPp")}
+                {formatTZ(fromUnixTime(Number(data.endDate)), "PPp O", { timeZone: timezone })}
               </Text>
             </div>
           </div>
