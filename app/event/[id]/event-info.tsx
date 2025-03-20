@@ -29,6 +29,7 @@ import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
 import { currentTimezone } from "@/lib/time";
 import { TZDate } from "react-day-picker";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 
 interface EventSectionProps {
   title: string;
@@ -92,29 +93,8 @@ export function EventInfo({ id }: { id: string }) {
       timeZone: "",
     };
   }, [data]);
-  
-  const [timezone, setTimezone] = useState<string>(currentTimezone());
-  
-  useLayoutEffect(() => {
-    const determineTimezone = async () => {
-      switch (location.kind) {
-        case "custom":
-          return location.timeZone;
-        case "virtual":
-          // ! Change to organizer timezone (#286)
-          return currentTimezone();
-        case "geo":
-          const GeoTZFind = (await import("browser-geo-tz")).find;
-          const tz = await GeoTZFind(location.lat, location.lng);
-          return tz[0];
-      }
-    }
-    
-    determineTimezone()
-      .then((found) => {
-        setTimezone(found);
-      })
-  }, [location]);
+
+  const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
