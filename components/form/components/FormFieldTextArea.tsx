@@ -70,10 +70,13 @@ export const FormFieldTextArea = <T extends FieldValues>({
           >
             <FormMessage />
             {wordCounter && (
-              <Text size="sm" className="text-primary-color/80">
-                <span>{field.value.length}</span> /
-                <span>{otherProps.maxLength}</span>
-              </Text>
+              <>
+                <div />
+                <Text size="sm" className="text-primary-color/80">
+                  <span>{field.value.length}</span> /
+                  <span>{otherProps.maxLength}</span>
+                </Text>
+              </>
             )}
           </div>
         </FormItem>

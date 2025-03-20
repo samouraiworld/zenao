@@ -150,7 +150,7 @@ const FormMessage = React.forwardRef<
   const { error, formMessageId } = useFormField();
   const body = error ? String(error?.message) : children;
   if (!body) {
-    return <span className="w-0 h-0" />;
+    return null;
   }
 
   return (
