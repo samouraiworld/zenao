@@ -126,6 +126,11 @@ func execStart() error {
 		return err
 	}
 
+	err = RegisterMultiAddrProtocols()
+	if err != nil {
+		return err
+	}
+
 	mux := http.NewServeMux()
 
 	mailClient := (*resend.Client)(nil)

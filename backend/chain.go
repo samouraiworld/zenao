@@ -386,6 +386,7 @@ func (g *gnoZenaoChain) CreatePoll(userID string, eventID string) error {
 				Body: fmt.Sprintf(`package main
 
 import (
+	"gno.land/p/demo/ufmt"
 	"gno.land/p/zenao/daokit"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 	pollsv1 "gno.land/p/zenao/polls/v1"
@@ -409,14 +410,15 @@ func main() {
 func NewPoll() {
 	question := "What is your favorite color?"
 	options := []string{"Red", "Green", "Blue", "Yellow"}
-	polls.NewPoll(question, pollsv1.POLL_KIND_MULTIPLE_CHOICE, 60000000000*30, options, nil)
+	p := polls.NewPoll(question, pollsv1.POLL_KIND_MULTIPLE_CHOICE, 60000000000*30, options, nil)
+	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
 
 	feedID := %q
 	post := &feedsv1.Post{
 		Loc:  nil,
 		Tags: []string{"poll"},
 		Post: &feedsv1.LinkPost{
-			Uri: "todo",
+			Uri: uri,
 		},
 	}
 
