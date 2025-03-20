@@ -369,10 +369,14 @@ func (g *gnoZenaoChain) UserAddress(userID string) string {
 }
 
 // CreatePoll implements ZenaoChain
-func (g *gnoZenaoChain) CreatePoll(userID string, eventID string) error {
+func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
-	eventPkgPath := g.eventRealmPkgPath(eventID)
+	eventPkgPath := g.eventRealmPkgPath(req.EventId)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+	options := ""
+	for _, option := range req.Options {
+		options += fmt.Sprintf(`%q, `, option)
+	}
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -408,9 +412,9 @@ func main() {
 }
 
 func NewPoll() {
-	question := "What is your favorite color?"
-	options := []string{"Red", "Green", "Blue", "Yellow"}
-	p := polls.NewPoll(question, pollsv1.POLL_KIND_MULTIPLE_CHOICE, 60000000000*30, options, nil)
+	question := %q
+	options := []string{%s}
+	p := polls.NewPoll(question, pollsv1.POLL_KIND_MULTIPLE_CHOICE, %d, options, nil)
 	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
 
 	feedID := %q
@@ -424,7 +428,7 @@ func NewPoll() {
 
 	social_feed.NewPost(feedID, post)
 }
-`, userRealmPkgPath, feedID),
+`, userRealmPkgPath, req.Question, options, req.Duration, feedID),
 			}},
 		},
 	}))

@@ -41,7 +41,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, errors.New("user is not a member of the event")
 	}
 
-	if err := s.Chain.CreatePoll(userID, req.Msg.EventId); err != nil {
+	if err := s.Chain.CreatePoll(userID, req.Msg); err != nil {
 		s.Logger.Error("create-poll", zap.Error(err))
 	}
 
