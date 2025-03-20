@@ -14,6 +14,7 @@ require (
 	github.com/gnolang/gno v0.0.0-20250221164641-85b3c0b7957e
 	github.com/go-faker/faker/v4 v4.5.0
 	github.com/goware/prefixer v0.0.0-20160118172347-395022866408
+	github.com/multiformats/go-multiaddr v0.15.0
 	github.com/resend/resend-go/v2 v2.14.0
 	github.com/ringsaturn/tzf v0.16.1
 	github.com/rs/cors v1.11.1
@@ -138,7 +139,6 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
 	github.com/multiformats/go-base36 v0.2.0 // indirect
-	github.com/multiformats/go-multiaddr v0.15.0 // indirect
 	github.com/multiformats/go-multibase v0.2.0 // indirect
 	github.com/multiformats/go-multihash v0.2.3 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
