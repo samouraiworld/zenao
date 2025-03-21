@@ -41,6 +41,8 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", userID), zap.Bool("user-banned", user.Banned))
 
+	evt := (*zeni.Event)(nil)
+
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
 
@@ -48,7 +50,8 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		evt, err := db.GetEvent(req.Msg.EventId)
+		var err error
+		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -58,12 +61,16 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		if s.MailClient != nil {
-			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets will be sent in a few weeks!")
-			if err != nil {
-				return err
-			}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
 
+	if s.MailClient != nil && evt != nil {
+		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets will be sent in a few weeks!")
+		if err != nil {
+			s.Logger.Error("generate-participate-email-content", zap.Error(err))
+		} else {
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:    "Zenao <ticket@mail.zenao.io>",
@@ -72,13 +79,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				Html:    htmlStr,
 				Text:    text,
 			}); err != nil {
-				return err
+				s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("user-email", user.Email))
 			}
 		}
-
-		return nil
-	}); err != nil {
-		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.ParticipateResponse{}), nil
