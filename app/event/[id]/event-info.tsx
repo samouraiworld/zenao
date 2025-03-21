@@ -24,7 +24,6 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { EventFeed } from "@/app/event/[id]/event-feed";
 import { cn } from "@/lib/tailwind";
-import { screenContainerMaxWidth } from "@/components/layout/ScreenContainer";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
@@ -132,9 +131,6 @@ export function EventInfo({ id }: { id: string }) {
   const descLineClampClassName = "line-clamp-[8]"; // Dynamic "8" value doesn't work here and inline style with WebkitLineClamp neither
   const descContainerRef = useRef<HTMLDivElement>(null);
   const isDescTruncated = useIsLinesTruncated(descContainerRef, descLineClamp);
-
-  const fakeImageUri =
-    "https://maroon-horizontal-bobolink-562.mypinata.cloud/ipfs/bafybeibl3cw6zmdcb3mgkjbyrxzpziyynkt4u2z3mijkxutxtvhvbgirr4";
   const iconSize = 22;
 
   if (!data) {
@@ -146,21 +142,9 @@ export function EventInfo({ id }: { id: string }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {/* Hero image */}
-      {!!fakeImageUri && (
-        <Image
-          src={fakeImageUri}
-          width={screenContainerMaxWidth}
-          height={200}
-          alt="Event hero"
-          priority
-          className="object-cover w-full h-[200px] rounded-xl self-center self-center"
-          style={{ maxWidth: screenContainerMaxWidth }}
-          loader={web3ImgLoader}
-        />
-      )}
-      {/* Left Section */}
+
       <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
+        {/* Left Section */}
         <div className="flex flex-col gap-4 w-full sm:w-2/5">
           <Image
             src={data.imageUri}
