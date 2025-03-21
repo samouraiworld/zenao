@@ -216,10 +216,8 @@ export function FormFieldDatePicker<T extends FieldValues>(
                   onValueChange={(e) => {
                     setTime(e);
                     if (field.value) {
-                      console.log(field.value);
                       const [hours, minutes] = e.split(":");
                       const newDate = new Date(formattedValue);
-                      console.log(formattedValue);
                       newDate.setHours(parseInt(hours), parseInt(minutes));
                       field.onChange(BigInt(getUnixTime(newDate)));
                       if (props.onChange) {
