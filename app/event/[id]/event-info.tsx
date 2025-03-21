@@ -10,7 +10,6 @@ import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
-import { imageHeight, imageWidth } from "./constants";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -26,6 +25,7 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 
 interface EventSectionProps {
   title: string;
@@ -129,15 +129,19 @@ export function EventInfo({ id }: { id: string }) {
 
       {/* Left Section */}
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
-        <Image
-          src={data.imageUri}
-          width={imageWidth}
-          height={imageHeight}
-          alt="Event"
-          priority
-          className="flex w-full rounded-xl self-center"
-          loader={web3ImgLoader}
-        />
+        <AspectRatio ratio={1 / 1}>
+          <Image
+            src={data.imageUri}
+            sizes="(max-width: 768px) 100vw,
+            (max-width: 1200px) 50vw,
+            33vw"
+            fill
+            alt="Event"
+            priority
+            className="flex w-full rounded-xl self-center object-cover"
+            loader={web3ImgLoader}
+          />
+        </AspectRatio>
         {/* If the user is organizer, link to /edit page */}
         {isOrganizer && (
           <Card className="flex flex-row items-center">

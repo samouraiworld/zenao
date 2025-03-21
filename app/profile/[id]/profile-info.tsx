@@ -10,6 +10,7 @@ import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { profileOptions } from "@/lib/queries/profile";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 
 export function ProfileInfo({ address }: { address: string }) {
   const { data } = useSuspenseQuery(profileOptions(address));
@@ -35,15 +36,19 @@ export function ProfileInfo({ address }: { address: string }) {
       />
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         {data.avatarUri ? (
-          <Image
-            src={data.avatarUri}
-            width={330}
-            height={330}
-            alt="Event"
-            priority
-            className="flex w-full rounded-xl self-center"
-            loader={web3ImgLoader}
-          />
+          <AspectRatio ratio={1 / 1}>
+            <Image
+              src={data.avatarUri}
+              alt="Event"
+              priority
+              fill
+              sizes="(max-width: 768px) 100vw,
+              (max-width: 1200px) 50vw,
+              33vw"
+              className="flex w-full rounded-xl self-center object-cover"
+              loader={web3ImgLoader}
+            />
+          </AspectRatio>
         ) : (
           <Skeleton className="flex w-full rounded-xl self-center" />
         )}
