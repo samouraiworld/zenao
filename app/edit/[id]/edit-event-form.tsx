@@ -10,12 +10,13 @@ import { useAuth } from "@clerk/nextjs";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
-import { EventForm } from "@/components/form/EventForm";
+import { EventForm } from "@/components/form/event-form";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { currentTimezone } from "@/lib/time";
 import { userAddressOptions } from "@/lib/queries/user";
 import Text from "@/components/texts/text";
+import { makeLocationFromEvent } from "@/lib/location";
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -28,38 +29,12 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const router = useRouter();
 
   // Correctly reconstruct location object
-  let location: EventFormSchemaType["location"] = {
-    kind: "custom",
-    address: "",
-    timeZone: "",
-  };
-  switch (data.location?.address.case) {
-    case "custom":
-      location = {
-        kind: "custom",
-        address: data.location?.address.value.address,
-        timeZone: data.location?.address.value.timezone,
-      };
-      break;
-    case "geo":
-      location = {
-        kind: "geo",
-        address: data.location?.address.value.address,
-        lat: data.location?.address.value.lat,
-        lng: data.location?.address.value.lng,
-        size: data.location?.address.value.size,
-      };
-      break;
-    case "virtual":
-      location = {
-        kind: "virtual",
-        location: data.location?.address.value.uri,
-      };
-  }
+  const location = makeLocationFromEvent(data.location);
   const defaultValues: EventFormSchemaType = {
     ...data,
     location,
   };
+
   const form = useForm<EventFormSchemaType>({
     mode: "all",
     resolver: zodResolver(eventFormSchema),

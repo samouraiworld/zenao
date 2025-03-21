@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { zenaoClient } from "@/app/zenao-client";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
-import { EventForm } from "@/components/form/EventForm";
+import { EventForm } from "@/components/form/event-form";
 import { useToast } from "@/app/hooks/use-toast";
 
 export const CreateEventForm: React.FC = () => {
