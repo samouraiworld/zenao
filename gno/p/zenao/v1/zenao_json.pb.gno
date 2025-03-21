@@ -680,3 +680,38 @@ func (c *CreatePollResponse) ToJSON() *json.Node {
 func (c *CreatePollResponse) FromJSON(node *json.Node) {
 	*c = CreatePollResponse{}
 }
+
+func (v *VotePollRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if v.PollId != "" {
+		fields["pollId"] = json.StringNode("", v.PollId)
+	}
+	if v.Option != "" {
+		fields["option"] = json.StringNode("", v.Option)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (v *VotePollRequest) FromJSON(node *json.Node) {
+	*v = VotePollRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["pollId"]; ok {
+		v.PollId = val.MustString()
+	}
+	if val, ok := fields["option"]; ok {
+		v.Option = val.MustString()
+	}
+}
+
+func (v *VotePollResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (v *VotePollResponse) FromJSON(node *json.Node) {
+	*v = VotePollResponse{}
+}
