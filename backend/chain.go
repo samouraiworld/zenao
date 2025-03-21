@@ -472,7 +472,7 @@ func main() {
 		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
 			Title: "Vote on poll",
 			Message: daokit.NewExecuteLambdaMsg(
-				NewPoll,
+				VoteOnPoll,
 			),
 		}),
 	})
@@ -481,7 +481,7 @@ func main() {
 func VoteOnPoll() {
 	pollID := %s
 	option := %q
-	polls.Vote(pollID, option)
+	polls.Vote(uint64(pollID), option)
 }
 `, userRealmPkgPath, req.PollId, req.Option),
 			}},
