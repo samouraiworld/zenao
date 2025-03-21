@@ -23,6 +23,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Text from "../texts/text";
+import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -151,10 +152,17 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center">
+        <Link passHref href="/create">
+          <ButtonWithChildren
+            variant="outline"
+            className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
+          >
+            {t("create-event")}
+          </ButtonWithChildren>
+        </Link>
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
-
         <Auth userAddress={address} className="h-fit" />
       </div>
     </div>
