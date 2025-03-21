@@ -7,11 +7,9 @@ import React, {
 } from "react";
 import { SendHorizonal, Vote } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMediaQuery } from "react-responsive";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { userAddressOptions } from "@/lib/queries/user";
 import { useToast } from "@/app/hooks/use-toast";
 import {
   pollFormSchema,
@@ -38,12 +36,11 @@ export function FeedInputPoll({
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
 }) {
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
+  const { getToken } = useAuth();
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
+
+  // TODO: Disable stuff if isLoading
   const [isLoading, setIsLoading] = useState(false);
 
   const pollForm = useForm<PollFormSchemaType>({
@@ -150,12 +147,11 @@ export function FeedInput({
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
 }) {
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
+  const { getToken } = useAuth();
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
+
+  // TODO: Disable stuff if isLoading
   const [isLoading, setIsLoading] = useState(false);
 
   const standardPostForm = useForm<StandardPostFormSchemaType>({

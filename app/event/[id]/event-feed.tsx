@@ -1,29 +1,42 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { PollPostCard } from "@/components/cards/social-feed/poll-post-card";
-import { fakePolls } from "@/app/event/[id]/fake-polls";
-import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/nextjs";
 import { cn } from "@/lib/tailwind";
 import {
   screenContainerMarginHorizontal,
   screenContainerMaxWidth,
 } from "@/components/layout/ScreenContainer";
-import { fakeStandardPosts } from "@/app/event/[id]/fake-posts";
 import {
   FeedInput,
   FeedInputMode,
   FeedInputPoll,
 } from "@/components/form/social-feed/feed-input";
+import { PostsList } from "@/components/lists/posts-list";
+import { fakePollPosts, fakeStandardPosts } from "@/lib/social-feed";
+import { PollsList } from "@/components/lists/polls-list";
+import { feedPosts } from "@/lib/queries/social-feed";
+import { userAddressOptions } from "@/lib/queries/user";
 
 export function EventFeed({
-  // id,
-  // userId,
+  eventId,
   isDescExpanded,
 }: {
-  // id: string;
-  // userId: string | null;
+  eventId: string;
   isDescExpanded: boolean;
 }) {
+  const { getToken, userId } = useAuth();
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+
+  // TODO: Exploit fetched posts from here
+  const { data: posts } = useSuspenseQuery(
+    // TODO: Handle offset and limit to make an infinite scroll
+
+    feedPosts(eventId, 0, 100, "", address || ""),
+  );
+
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
 
@@ -35,6 +48,7 @@ export function EventFeed({
     const cssVar = computedStyle.getPropertyValue("--background").trim();
     setBgColor(`hsl(${cssVar} / .9)`);
   }, []);
+
   //  Stuff used to stick FeedInput when scroll bellow of it
   const feedMaxWidth =
     screenContainerMaxWidth - screenContainerMarginHorizontal * 2;
@@ -59,14 +73,9 @@ export function EventFeed({
   }, [inputOffsetTop]);
   // --------
 
-  // LinkPost => uri => parse and get poll id
-  //TODO: query polls.gno Kind(linkPostUri) => get LinkPostKind
-  //TODO: Control LINK_POST_KIND_POLL
-  //TODO: query polls.gno GetInfo(pollId)
-
-  // TODO: Show skeleton while loading
-
   return (
+    // TODO: Show skeleton while loading (Input and Lists)
+
     <div className="flex flex-col gap-4 min-h-0 pt-4">
       <div
         ref={inputRef}
@@ -97,23 +106,9 @@ export function EventFeed({
         </div>
       </div>
 
-      <div className="flex flex-col w-full rounded-xl overflow-y-auto gap-4">
-        {fakeStandardPosts.map((post, index) => (
-          <StandardPostCard post={post} key={index} />
-        ))}
-
-        {/*<StandardPostCard />*/}
-        <PollPostCard poll={fakePolls[0]} post={fakeStandardPosts[0]} />
-        <PollPostCard poll={fakePolls[1]} post={fakeStandardPosts[1]} />
-
-        {/*<StandardPostCard />*/}
-        {/*<StandardPostCard />*/}
-        <PollPostCard poll={fakePolls[2]} post={fakeStandardPosts[2]} />
-
-        {/*<StandardPostCard />*/}
-        {/*<StandardPostCard />*/}
-        <PollPostCard poll={fakePolls[3]} post={fakeStandardPosts[3]} />
-      </div>
+      {/*TODO: Show list depending on feedInputMode*/}
+      <PostsList list={fakeStandardPosts} />
+      <PollsList list={fakePollPosts} />
     </div>
   );
 }

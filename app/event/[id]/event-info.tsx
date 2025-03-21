@@ -30,7 +30,6 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
-import { feedPosts } from "@/lib/queries/social-feed";
 import { imageHeight, imageWidth } from "@/app/event/[id]/constants";
 
 function EventSection({
@@ -61,12 +60,6 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
-
-  // TODO: Fix this call
-
-  const { data: posts } = useSuspenseQuery(
-    feedPosts(id, 0, 100, "", address || ""),
-  );
 
   const isOrganizer = roles.includes("organizer");
   const isParticipate = roles.includes("participant");
@@ -142,44 +135,6 @@ export function EventInfo({ id }: { id: string }) {
 
   const fakeImageUri =
     "https://maroon-horizontal-bobolink-562.mypinata.cloud/ipfs/bafybeibl3cw6zmdcb3mgkjbyrxzpziyynkt4u2z3mijkxutxtvhvbgirr4";
-  const fakeMarkdownString =
-    "L’ère numérique a transformé notre quotidien à une vitesse fulgurante. " +
-    "Internet, qui était initialement un simple outil de communication, est devenu un espace" +
-    " incontournable où se mêlent informations, divertissements et interactions sociales. Les " +
-    "réseaux sociaux ont bouleversé notre manière de nous exprimer et de partager nos expériences, co" +
-    "nnectant les individus à travers le monde en un instant. Cependant, cette interconnexion massi" +
-    "ve soulève aussi des questions essentielles sur la protection des données personnelles, la cybersécu" +
-    "rité et l’impact des nouvelles technologies sur nos vies.\n\nL’intelligence artificielle jo" +
-    "ue aujourd’hui un rôle central dans cette transformation numérique. Elle est présente dans pr" +
-    "esque tous les domaines : médecine, finance, industrie, éducation, et même l’art. Grâce aux " +
-    "algorithmes de machine learning, les diagnostics médicaux deviennent plus précis, les prévi" +
-    "sions économiques plus fiables et les services personnalisés plus efficaces. Pourtant, cet" +
-    "te omniprésence de l’IA soulève des interrogations. Comment s’assurer que ces systèmes rest" +
-    "ent éthiques ? Quels mécanismes de régulation mettre en place pour éviter les biais et garan" +
-    "tir une utilisation responsable ?\n\nParallèlement, la blockchain et les cryptomonnaies redéfinis" +
-    "sent les transactions numériques. Elles apportent une transparence et une sécurité accrues, n" +
-    "otamment grâce aux contrats intelligents qui automatisent des processus sans intermédiaire. Cet" +
-    "te technologie a un potentiel immense, mais elle reste encore méconnue du grand public et su" +
-    "scite parfois de la méfiance. Sa démocratisation passera par une meilleure éducation sur son fo" +
-    "nctionnement et ses avantages réels.\n\nUn autre défi majeur du numérique est la gestion des" +
-    " données personnelles. À une époque où chaque action en ligne laisse une empreinte, la question d" +
-    "e la confidentialité devient primordiale. De nombreuses entreprises collectent et analysen" +
-    "t nos comportements pour proposer des services plus adaptés, mais cela pose un problème de contrô" +
-    "le et de consentement. Des régulations comme le RGPD tentent d’encadrer ces pratiques, mai" +
-    "s la sensibilisation du public reste essentielle. Les utilisateurs doivent être conscients des in" +
-    "formations qu’ils partagent et des outils à leur disposition pour protéger leur vie privée.\n\nEn" +
-    " parallèle, les nouvelles formes de travail émergent grâce à la technologie. Le télétravail, au" +
-    "trefois marginal, s’est généralisé, offrant flexibilité et autonomie à de nombreux professionn" +
-    "els. Cependant, il apporte aussi son lot de défis, notamment en matière de gestion du temps, de " +
-    "séparation entre vie professionnelle et personnelle, et d’accès aux opportunités pour tous.\n\n" +
-    "Enfin, la question environnementale ne peut être ignorée. Si le numérique apporte des solutions i" +
-    "nnovantes pour réduire notre empreinte carbone (optimisation des transports, smart grids, réducti" +
-    "on des déchets grâce à l’IA), il est aussi responsable d’une consommation énergétique croissant" +
-    "e. Les centres de données, les blockchains et la fabrication des appareils électroniques néce" +
-    "ssitent d’importantes ressources. Il est donc crucial de développer des technologies plus dura" +
-    "bles et de promouvoir une utilisation responsable du numérique.\n\nFace à ces défis, il est es" +
-    "sentiel que chacun s’implique dans cette transition numérique. Entre innovations et régulati" +
-    "ons, opportunités et risques, l’avenir du digital dépend des choix que nous faisons aujourd’hui.";
   const iconSize = 22;
 
   if (!data) {
@@ -338,7 +293,7 @@ export function EventInfo({ id }: { id: string }) {
                   "overflow-hidden text-ellipsis",
                   !isDescExpanded && descLineClampClassName,
                 )}
-                markdownString={fakeMarkdownString}
+                markdownString={data.description}
               />
             </div>
 
@@ -357,6 +312,7 @@ export function EventInfo({ id }: { id: string }) {
         </div>
       </div>
 
+      {/*TODO: Make these tabs pretty and cute uwu */}
       {/* Tabs */}
       <div className="flex flex-col gap-4">
         <Tabs value={tab} onValueChange={(value) => setTab(value as EventTab)}>
@@ -370,7 +326,7 @@ export function EventInfo({ id }: { id: string }) {
         </Tabs>
 
         {/* Social Feed */}
-        <EventFeed isDescExpanded={isDescExpanded} />
+        <EventFeed isDescExpanded={isDescExpanded} eventId={id} />
       </div>
     </div>
   );

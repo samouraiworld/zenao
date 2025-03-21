@@ -63,8 +63,8 @@ export default async function EventPage({ params }: Props) {
 
   // Prefetch Event's social feed posts
   void queryClient.prefetchQuery(
-    // TODO: Handle offset and limit with infinite scroll
-    // TODO: Handle tags
+    // TODO: Handle offset and limit to make an infinite scroll
+
     feedPosts(p.id, 0, 100, "", userAddress || ""),
   );
 
