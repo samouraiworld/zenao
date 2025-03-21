@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useCallback, useRef, useState } from "react";
+import React, { ReactNode, useCallback, useRef, useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
@@ -30,6 +30,10 @@ import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
 import { imageHeight, imageWidth } from "@/app/event/[id]/constants";
+import { feedPosts } from "@/lib/queries/social-feed";
+import { PostsList } from "@/components/lists/posts-list";
+import { fakePollPosts, fakeStandardPosts } from "@/lib/social-feed";
+import { PollsList } from "@/components/lists/polls-list";
 
 function EventSection({
   title,
@@ -64,6 +68,13 @@ export function EventInfo({ id }: { id: string }) {
   const isParticipate = roles.includes("participant");
   const isStarted = Date.now() > Number(data.startDate) * 1000;
   const queryClient = useQueryClient();
+
+  // TODO: Exploit fetched posts from here
+  const { data: posts } = useSuspenseQuery(
+    // TODO: Handle offset and limit to make an infinite scroll
+
+    feedPosts(id, 0, 100, "", address || ""),
+  );
 
   // Correctly reconstruct location object
   let location: EventFormSchemaType["location"] = {
@@ -296,8 +307,9 @@ export function EventInfo({ id }: { id: string }) {
         </div>
       </div>
 
-      {/*TODO: Make these tabs pretty and cute uwu */}
       {/* Tabs */}
+      {/*TODO: Make these tabs pretty and cute uwu */}
+
       <div className="flex flex-col gap-4">
         <Tabs value={tab} onValueChange={(value) => setTab(value as EventTab)}>
           <TabsList className={`grid w-full grid-cols-${eventTabs.length}`}>
@@ -310,7 +322,13 @@ export function EventInfo({ id }: { id: string }) {
         </Tabs>
 
         {/* Social Feed */}
-        <EventFeed isDescExpanded={isDescExpanded} eventId={id} />
+        <EventFeed isDescExpanded={isDescExpanded} posts={posts}>
+          <>
+            {/*TODO: Show list depending on tab*/}
+            <PostsList list={fakeStandardPosts} />
+            <PollsList list={fakePollPosts} />
+          </>
+        </EventFeed>
       </div>
     </div>
   );

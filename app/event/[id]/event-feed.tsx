@@ -1,7 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/nextjs";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/tailwind";
 import {
   screenContainerMarginHorizontal,
@@ -12,31 +10,17 @@ import {
   FeedInputMode,
   FeedInputPoll,
 } from "@/components/form/social-feed/feed-input";
-import { PostsList } from "@/components/lists/posts-list";
-import { fakePollPosts, fakeStandardPosts } from "@/lib/social-feed";
-import { PollsList } from "@/components/lists/polls-list";
-import { feedPosts } from "@/lib/queries/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 
 export function EventFeed({
-  eventId,
   isDescExpanded,
+  posts,
+  children,
 }: {
-  eventId: string;
   isDescExpanded: boolean;
+  posts: PostView[];
+  children: ReactNode;
 }) {
-  const { getToken, userId } = useAuth();
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
-
-  // TODO: Exploit fetched posts from here
-  const { data: posts } = useSuspenseQuery(
-    // TODO: Handle offset and limit to make an infinite scroll
-
-    feedPosts(eventId, 0, 100, "", address || ""),
-  );
-
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
 
@@ -106,9 +90,7 @@ export function EventFeed({
         </div>
       </div>
 
-      {/*TODO: Show list depending on feedInputMode*/}
-      <PostsList list={fakeStandardPosts} />
-      <PollsList list={fakePollPosts} />
+      {children}
     </div>
   );
 }
