@@ -4,7 +4,7 @@ import React, { useCallback } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format, fromUnixTime } from "date-fns";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
@@ -26,6 +26,8 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
+import { cn } from "@/lib/tailwind";
+import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
 
 interface EventSectionProps {
   title: string;
@@ -87,6 +89,11 @@ export function EventInfo({ id }: { id: string }) {
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [isDescExpanded, setDescExpanded] = React.useState(false);
+  const descLineClamp = 10;
+  const descExpandedCn = "line-clamp-[10]";
+  const descContainerRef = React.useRef<HTMLDivElement>(null);
+  const isDescTruncated = useIsLinesTruncated(descContainerRef, descLineClamp);
 
   const handleParticipateSuccess = useCallback(async () => {
     const opts = eventUserRoles(id, address);
@@ -253,7 +260,27 @@ export function EventInfo({ id }: { id: string }) {
 
         {/* Markdown Description */}
         <EventSection title={t("about-event")}>
-          <MarkdownPreview markdownString={data.description} />
+          <div ref={descContainerRef}>
+            <MarkdownPreview
+              className={cn(
+                "overflow-hidden text-ellipsis",
+                !isDescExpanded && descExpandedCn,
+              )}
+              markdownString={data.description}
+            />
+          </div>
+
+          {/* See More button */}
+          {isDescTruncated && (
+            <div
+              className="w-full flex justify-center cursor-pointer "
+              onClick={() =>
+                setDescExpanded((isDescExpanded) => !isDescExpanded)
+              }
+            >
+              {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          )}
         </EventSection>
       </div>
     </div>
