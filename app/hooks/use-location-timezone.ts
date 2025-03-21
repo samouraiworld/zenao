@@ -15,7 +15,6 @@ export const useLocationTimezone = (
             ? currentTimezone()
             : location.timeZone;
         case "virtual":
-          // ! Change to organizer timezone (#286)
           return currentTimezone();
         case "geo":
           const GeoTZFind = (await import("browser-geo-tz")).find;
