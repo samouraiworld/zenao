@@ -560,6 +560,7 @@ import (
 	"gno.land/r/{{.namespace}}/social_feed"
 )
 
+
 var (
 	DAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
@@ -584,9 +585,12 @@ func init() {
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
 	eventreg.Register(func() *zenaov1.EventInfo { return event.Info() })
-	social_feed.NewFeed("main", false, daoPrivate.Members.IsMember)
+	social_feed.NewFeed("main", false, IsMember)
 }
 
+func IsMember(memberId string) bool {
+	return daoPrivate.Members.IsMember(memberId)
+}
 
 func Vote(proposalID uint64, vote daocond.Vote) {
 	DAO.Vote(proposalID, vote)
