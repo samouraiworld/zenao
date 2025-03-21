@@ -10,6 +10,8 @@ interface ScreenContainerProps {
   background?: BackgroundProps;
 }
 
+export const screenContainerMaxWidth = 960;
+
 export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   children,
   isSignedOutModal,
@@ -18,7 +20,10 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   return (
     <div className="flex flex-col flex-1 items-center">
       {background && <BackgroundImage {...background} />}
-      <main className="h-full w-full max-w-[960px] mb-10 sm:mb-0">
+      <main
+        className="h-full w-full mb-10 sm:mb-0"
+        style={{ maxWidth: screenContainerMaxWidth }}
+      >
         <div className="mt-8 mx-5">{children}</div>
       </main>
       {isSignedOutModal && <SignedOutModal />}
