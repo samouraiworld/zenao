@@ -60,31 +60,33 @@ export const FormFieldImage = <T extends FieldValues>(
       control={props.control}
       name={props.name}
       render={() => (
-        <FormItem className="space-y-0 flex flex-col w-full sm:w-2/5">
-          {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
-          {/* TODO: find a better way */}
-          {isValidURL(imageUri, urlPattern) && !fieldState.error?.message ? (
-            <Image
-              src={web2URL(imageUri)}
-              width={330}
-              height={330}
-              alt="imageUri"
-              className="flex w-full rounded-xl self-center border"
-            />
-          ) : (
-            <Skeleton className="w-full h-[330px] rounded-xnter flex justify-center items-center border">
-              {uploading && <Loader2 className="animate-spin" />}
-            </Skeleton>
-          )}
-          <div className="self-end relative bottom-8 right-2">
-            <ImageIcon onClick={handleClick} className="w-5 cursor-pointer" />
-            <input
-              type="file"
-              onChange={handleChange}
-              ref={hiddenInputRef}
-              className="hidden"
-              disabled={uploading}
-            />
+        <FormItem className="flex flex-col w-full sm:w-2/5 h-fit">
+          <div className="relative">
+            {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
+            {/* TODO: find a better way */}
+            {isValidURL(imageUri, urlPattern) && !fieldState.error?.message ? (
+              <Image
+                src={web2URL(imageUri)}
+                width={330}
+                height={330}
+                alt="imageUri"
+                className="flex w-full rounded-xl self-center border"
+              />
+            ) : (
+              <Skeleton className="w-full h-[330px] rounded-xnter flex justify-center items-center border">
+                {uploading && <Loader2 className="animate-spin" />}
+              </Skeleton>
+            )}
+            <div className="absolute bottom-2 right-2">
+              <ImageIcon onClick={handleClick} className="w-5 cursor-pointer" />
+              <input
+                type="file"
+                onChange={handleChange}
+                ref={hiddenInputRef}
+                className="hidden"
+                disabled={uploading}
+              />
+            </div>
           </div>
           <FormMessage />
         </FormItem>
