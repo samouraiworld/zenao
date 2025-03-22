@@ -1,29 +1,40 @@
 package user_demo
 
 import (
-	"std"
-
-	"gno.land/p/moul/md"
+	"gno.land/p/zenao/basedao"
+	"gno.land/p/zenao/daocond"
+	"gno.land/p/zenao/daokit"
 	"gno.land/p/zenao/users"
 	"gno.land/r/demo/profile"
 )
 
-var user *users.User
+var (
+	DAO        daokit.DAO
+	daoPrivate *basedao.DAOPrivate
+	user       *users.User
+)
 
 func init() {
-	config := users.Config{
+	user = users.NewUser(&users.Config{
 		Name:             "user",
 		Bio:              "this is a user",
-		SetProfileString: profile.SetStringField,
+		AvatarURI:        "",
 		GetProfileString: profile.GetStringField,
-		ZenaoAdminAddr:   std.PreviousRealm().Address().String(),
-	}
-	user = users.NewUser(&config)
+		SetProfileString: profile.SetStringField,
+		ZenaoAdminAddr:   "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94",
+	})
+	DAO = user.DAO
+	daoPrivate = user.DAOPrivate
+}
+
+func Vote(proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(proposalID, vote)
+}
+
+func Execute(proposalID uint64) {
+	DAO.Execute(proposalID)
 }
 
 func Render(path string) string {
-	s := md.H1(profile.GetStringField(std.CurrentRealm().Address(), profile.DisplayName, ""))
-	s += md.Image("User avatar", profile.GetStringField(std.CurrentRealm().Address(), profile.Avatar, ""))
-	s += md.Paragraph(profile.GetStringField(std.CurrentRealm().Address(), profile.Bio, ""))
-	return s
+	return user.Render(path)
 }

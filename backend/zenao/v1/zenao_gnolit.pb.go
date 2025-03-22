@@ -332,3 +332,42 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (c *CreatePollRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePollRequest{\n")
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	}
+	if c.Question != "" {
+		fmt.Fprintf(buf, "%s\tQuestion: %q,\n", linePrefix, c.Question)
+	}
+	if len(c.Options) != 0 {
+		fmt.Fprintf(buf, "%s\tOptions: {\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Options {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if c.Duration != 0 {
+		fmt.Fprintf(buf, "%s\tDuration: %d,\n", linePrefix, c.Duration)
+	}
+	if c.MultipleChoices != false {
+		fmt.Fprintf(buf, "%s\tMultipleChoices: %t,\n", linePrefix, c.MultipleChoices)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePollResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePollResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
