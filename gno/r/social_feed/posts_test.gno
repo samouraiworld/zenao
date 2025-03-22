@@ -245,7 +245,7 @@ func TestEditPost(t *testing.T) {
 
 	deletedPost := &feedsv1.Post{
 		Author:    alice.String(),
-		DeletedAt: 1,
+		DeletedAt: 0,
 		Post:      &feedsv1.StandardPost{},
 	}
 
@@ -258,6 +258,7 @@ func TestEditPost(t *testing.T) {
 	std.TestSetOriginCaller(alice)
 	NewPost("public", post)
 	NewPost("public", deletedPost)
+	DeletePost("public:0000002")
 
 	tests := testTable{
 		"valid post": {
