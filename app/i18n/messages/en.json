@@ -30,6 +30,7 @@
     "description-label": "Description",
     "write-tab": "Write",
     "preview-tab": "Preview",
+    "change-image": "Change image",
     "description-placeholder": "Description...",
     "location-placeholder": "Location...",
     "capacity-label": "Event capacity limit",
@@ -87,6 +88,7 @@
     "name-placeholder": "Name...",
     "bio-placeholder": "Bio...",
     "save-button": "Save changes",
+    "change-avatar": "Change avatar",
     "toast-success": "User correctly edited!",
     "toast-error": "Error on editing user!",
     "sign-out": "Sign out"
