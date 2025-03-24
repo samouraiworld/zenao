@@ -56,7 +56,7 @@ type gnoZenaoChain struct {
 	namespace          string
 }
 
-const zenaoLogo = "ipfs://bafybeieheyxtro2id7y6fqsqvgkyripgcrcx5fvvzxizylf4vveueajgkq"
+const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
 
 // FillAdminProfile implements zeni.Chain.
 func (g *gnoZenaoChain) FillAdminProfile() {
@@ -80,7 +80,7 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 
 	kv := [][2]string{
 		{"DisplayName", "Zenao Admin"},
-		{"Avatar", zenaoLogo},
+		{"Avatar", userDefaultAvatar},
 		{"Bio", "This is the root zenao admin, it is responsible for managing accounts until they become self-custodial"},
 	}
 	for _, field := range kv {
@@ -485,7 +485,7 @@ func generateUserRealmSource(user *zeni.User, gnoNamespace string, zenaoAdminAdd
 
 	avatarURI := user.AvatarURI
 	if avatarURI == "" {
-		avatarURI = zenaoLogo
+		avatarURI = userDefaultAvatar
 	}
 
 	m := map[string]string{
