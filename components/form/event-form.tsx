@@ -18,7 +18,7 @@ import Text from "../texts/text";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { TimeZonesPopover } from "./components/TimeZonesPopover";
-import { FormFieldImage } from "./components/FormFieldImage";
+import { FormFieldImage } from "./components/form-field-image";
 import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldLocation } from "./components/form-field-location";
@@ -48,6 +48,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   const location = form.watch("location");
   const startDate = form.watch("startDate");
   const endDate = form.watch("endDate");
+  const imageUri = form.watch("imageUri");
   const t = useTranslations("eventForm");
 
   const [isVirtual, setIsVirtual] = useState<boolean>(
@@ -76,6 +77,9 @@ export const EventForm: React.FC<EventFormProps> = ({
             name="imageUri"
             control={form.control}
             placeholder={t("image-uri-placeholder")}
+            aspectRatio={1 / 1}
+            className="sm:w-2/5"
+            tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
             <FormFieldTextArea
