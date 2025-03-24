@@ -10,9 +10,7 @@ export const ButtonWithLabel: React.FC<ButtonProps & { label: string }> = ({
 }) => {
   return (
     <ButtonBase {...otherProps}>
-      <Text size={otherProps.size} variant="invert">
-        {label}
-      </Text>
+      <Text variant="invert">{label}</Text>
     </ButtonBase>
   );
 };
