@@ -78,7 +78,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             <FormFieldTextArea
               control={form.control}
               name="title"
-              className="font-semibold text-3xl md:text-3xl overflow-hidden"
+              className="font-semibold text-3xl overflow-hidden"
               placeholder={t("title-placeholder")}
               maxLength={140}
               onKeyDown={(e) => {
@@ -173,10 +173,8 @@ export const EventForm: React.FC<EventFormProps> = ({
                 }}
               />
             )}
-            <Card>
-              <Text size="sm" className="mb-3">
-                {t("capacity-label")}
-              </Text>
+            <Card className="flex flex-col gap-4">
+              <Label>{t("capacity-label")}</Label>
               <FormFieldInputNumber
                 control={form.control}
                 name="capacity"

@@ -84,7 +84,7 @@ export const FormFieldLocation: React.FC<{
                     >
                       <Text
                         className={cn(
-                          "text-base md:text-sm truncate",
+                          "text-base truncate",
                           !object.address && "text-secondary-color",
                         )}
                       >

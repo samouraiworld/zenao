@@ -106,9 +106,7 @@ export const FormFieldImage = <T extends FieldValues>(
                           strokeWidth={1}
                           className="w-16 h-16 text-secondary-color"
                         />
-                        <Text variant="secondary" size="sm">
-                          Upload an image
-                        </Text>
+                        <Text variant="secondary">Upload an image</Text>
                         {uploading && <Loader2 className="animate-spin" />}
                       </>
                     )}
