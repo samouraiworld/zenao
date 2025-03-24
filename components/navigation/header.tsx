@@ -107,7 +107,7 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
               <Text
                 size="sm"
                 variant={isActive ? "primary" : "secondary"}
-                className="text-inherit max-[550px]:hidden"
+                className="text-inherit max-[624px]:hidden"
               >
                 {item.children}
               </Text>
