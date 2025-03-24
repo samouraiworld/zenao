@@ -65,7 +65,7 @@ type config struct {
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
-	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_IgysJrr68FOVwOvMG5mECmYVIOI8yFBKhYR0yxyIAB", "Clerk secret key")
+	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
 	flset.StringVar(&conf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
 	flset.StringVar(&conf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")

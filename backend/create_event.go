@@ -54,27 +54,7 @@ func (s *ZenaoServer) CreateEvent(
 			return err
 		}
 
-		if s.TokenDiscord != "" {
-			locationStr, err := zeni.LocationToString(evt.Location)
-			if err != nil {
-				s.Logger.Error("Erreur:", zap.Error(err))
-				return err
-			}
-
-			EventURL := fmt.Sprintf("https://zenao.io/event/%s", evt.ID)
-			err = webhook.SendDiscordWebhook(
-				s.Logger,
-				s.TokenDiscord,
-				evt.Title,
-				evt.StartDate.Format("2006-01-02 15:04:05"),
-				evt.EndDate.Format("2006-01-02 15:04:05"),
-				locationStr,
-				EventURL,
-			)
-			if err != nil {
-				s.Logger.Error("error send discord msg", zap.Error(err))
-			}
-		}
+		webhook.TrySendDiscordMessage(s.Logger, s.TokenDiscord, evt)
 
 		if s.MailClient != nil {
 			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
