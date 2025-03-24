@@ -56,7 +56,7 @@ type gnoZenaoChain struct {
 	namespace          string
 }
 
-const userDefaultAvatar = "ipfs://bafybeieheyxtro2id7y6fqsqvgkyripgcrcx5fvvzxizylf4vveueajgkq"
+const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
 
 // FillAdminProfile implements zeni.Chain.
 func (g *gnoZenaoChain) FillAdminProfile() {
