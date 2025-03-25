@@ -10,14 +10,9 @@ import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./ParticipateForm";
-import { imageHeight, imageWidth } from "./constants";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
-import { Text } from "@/components/texts/DefaultText";
-import { SmallText } from "@/components/texts/SmallText";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
-import { LargeText } from "@/components/texts/LargeText";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -28,6 +23,9 @@ import MapCaller from "@/components/common/map/MapLazyComponents";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
+import Text from "@/components/texts/text";
+import Heading from "@/components/texts/heading";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 
 interface EventSectionProps {
   title: string;
@@ -131,19 +129,23 @@ export function EventInfo({ id }: { id: string }) {
 
       {/* Left Section */}
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
-        <Image
-          src={data.imageUri}
-          width={imageWidth}
-          height={imageHeight}
-          alt="Event"
-          priority
-          className="flex w-full rounded-xl self-center"
-          loader={web3ImgLoader}
-        />
+        <AspectRatio ratio={1 / 1}>
+          <Image
+            src={data.imageUri}
+            sizes="(max-width: 768px) 100vw,
+            (max-width: 1200px) 50vw,
+            33vw"
+            fill
+            alt="Event"
+            priority
+            className="flex w-full rounded-xl self-center object-cover"
+            loader={web3ImgLoader}
+          />
+        </AspectRatio>
         {/* If the user is organizer, link to /edit page */}
         {isOrganizer && (
           <Card className="flex flex-row items-center">
-            <SmallText className="w-3/5">{t("is-organisator-role")}</SmallText>
+            <Text className="w-3/5">{t("is-organisator-role")}</Text>
             <div className="w-2/5 flex justify-end">
               <Link href={`/edit/${id}`}>
                 <ButtonWithLabel
@@ -169,21 +171,25 @@ export function EventInfo({ id }: { id: string }) {
 
       {/* Right Section */}
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
-        <VeryLargeText className="mb-7">{data.title}</VeryLargeText>
+        <Heading level={1} size="4xl" className="mb-7">
+          {data.title}
+        </Heading>
         <div className="flex flex-row gap-4 items-center">
           <Calendar width={iconSize} height={iconSize} />
           <div className="flex flex-col">
-            <LargeText>
+            <Heading level={2} size="xl">
               {format(fromUnixTime(Number(data.startDate)), "PPP")}
-            </LargeText>
+            </Heading>
             <div className="flex flex-row text-sm gap-1">
-              <SmallText variant="secondary">
+              <Text variant="secondary" size="sm">
                 {format(fromUnixTime(Number(data.startDate)), "p")}
-              </SmallText>
-              <SmallText variant="secondary">-</SmallText>
-              <SmallText variant="secondary">
+              </Text>
+              <Text variant="secondary" size="sm">
+                -
+              </Text>
+              <Text variant="secondary" size="sm">
                 {format(fromUnixTime(Number(data.endDate)), "PPp")}
-              </SmallText>
+              </Text>
             </div>
           </div>
         </div>
@@ -194,12 +200,18 @@ export function EventInfo({ id }: { id: string }) {
             </div>
             {location.kind === "virtual" ? (
               <Link href={location.location} target="_blank">
-                <LargeText className="hover:underline hover:underline-offset-1">
+                <Heading
+                  level={2}
+                  size="xl"
+                  className="hover:underline hover:underline-offset-1"
+                >
                   {location.location}
-                </LargeText>
+                </Heading>
               </Link>
             ) : (
-              <LargeText>{location.address}</LargeText>
+              <Heading level={2} size="xl">
+                {location.address}
+              </Heading>
             )}
           </div>
           {location.kind === "geo" && (
@@ -212,7 +224,9 @@ export function EventInfo({ id }: { id: string }) {
           {isParticipate ? (
             <div>
               <div className="flex flex-row justify-between">
-                <LargeText>{t("in")}</LargeText>
+                <Heading level={2} size="xl">
+                  {t("in")}
+                </Heading>
                 {/* TODO: create a clean decount timer */}
                 {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>
@@ -222,12 +236,16 @@ export function EventInfo({ id }: { id: string }) {
             </div>
           ) : isStarted ? (
             <div>
-              <LargeText>{t("already-begun")}</LargeText>
+              <Heading level={2} size="xl">
+                {t("already-begun")}
+              </Heading>
               <Text className="my-4">{t("too-late")}</Text>
             </div>
           ) : (
             <div>
-              <LargeText>{t("registration")}</LargeText>
+              <Heading level={2} size="xl">
+                {t("registration")}
+              </Heading>
               <Text className="my-4">{t("join-desc")}</Text>
               <ParticipateForm
                 onSuccess={handleParticipateSuccess}

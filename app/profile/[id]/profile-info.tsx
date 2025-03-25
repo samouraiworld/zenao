@@ -3,13 +3,14 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Person, WithContext } from "schema-dts";
 import Image from "next/image";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
-import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { profileOptions } from "@/lib/queries/profile";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 
 export function ProfileInfo({ address }: { address: string }) {
   const { data } = useSuspenseQuery(profileOptions(address));
@@ -35,15 +36,19 @@ export function ProfileInfo({ address }: { address: string }) {
       />
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         {data.avatarUri ? (
-          <Image
-            src={data.avatarUri}
-            width={330}
-            height={330}
-            alt="Event"
-            priority
-            className="flex w-full rounded-xl self-center"
-            loader={web3ImgLoader}
-          />
+          <AspectRatio ratio={1 / 1}>
+            <Image
+              src={data.avatarUri}
+              alt="Event"
+              priority
+              fill
+              sizes="(max-width: 768px) 100vw,
+              (max-width: 1200px) 50vw,
+              33vw"
+              className="flex w-full rounded-xl self-center object-cover"
+              loader={web3ImgLoader}
+            />
+          </AspectRatio>
         ) : (
           <Skeleton className="flex w-full rounded-xl self-center" />
         )}
@@ -52,7 +57,9 @@ export function ProfileInfo({ address }: { address: string }) {
         />
       </div>
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
-        <VeryLargeText className="mb-7">{data.displayName}</VeryLargeText>
+        <Heading level={1} size="4xl" className="mb-7">
+          {data.displayName}
+        </Heading>
         <Card>
           <Text>{data.bio}</Text>
         </Card>

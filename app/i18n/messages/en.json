@@ -1,17 +1,20 @@
 {
-  "header": {
+  "navigation": {
     "zenao": "ZENAO",
+    "your-events": "Your events",
+    "your-tickets": "Your tickets",
+    "sign-in": "Sign in",
+    "sign-out": "Sign out",
+    "settings": "Settings",
     "discover": "Discover",
     "features": "Features",
     "manifesto": "Manifesto",
-    "your-events": "Your events",
-    "your-tickets": "Your tickets",
-    "sign-in": "Sign in"
-  },
-  "footer": {
-    "terms": "Terms",
-    "privacy": "Privacy",
-    "security": "Security"
+    "create-event": "Create Event",
+    "footer": {
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "security": "Security"
+    }
   },
   "home": {
     "main-text": "Organize event(s) in seconds",
@@ -27,12 +30,17 @@
     "description-label": "Description",
     "write-tab": "Write",
     "preview-tab": "Preview",
+    "change-image": "Change image",
     "description-placeholder": "Description...",
     "location-placeholder": "Location...",
     "capacity-label": "Event capacity limit",
     "capacity-placeholder": "Capacity...",
-    "start-date-placeholder": "Choose your start date/time...",
-    "end-date-placeholder": "Choose your end date/time...",
+    "pick-a-start-date-placeholder": "Pick a start date...",
+    "pick-a-end-date-placeholder": "Pick a end date...",
+    "from": "From",
+    "to": "to",
+    "custom-timezone-select": "You choose a custom location, so please select a timezone.",
+    "no-timezone-found": "No timezones found.",
     "not-organizer-message": "You can't edit this event because you are not one of the organizer.",
     "toast-creation-success": "Event created!",
     "toast-creation-error": "Error on creating event!",
@@ -80,6 +88,7 @@
     "name-placeholder": "Name...",
     "bio-placeholder": "Bio...",
     "save-button": "Save changes",
+    "change-avatar": "Change avatar",
     "toast-success": "User correctly edited!",
     "toast-error": "Error on editing user!",
     "sign-out": "Sign out"

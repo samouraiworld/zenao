@@ -1,6 +1,6 @@
 "use client";
 
-import { SmallText } from "../texts/SmallText";
+import Text from "../texts/text";
 import { ButtonBase } from "./ButtonBases";
 import { ButtonProps } from "./types";
 
@@ -10,7 +10,9 @@ export const ButtonWithLabel: React.FC<ButtonProps & { label: string }> = ({
 }) => {
   return (
     <ButtonBase {...otherProps}>
-      <SmallText variant="invert">{label}</SmallText>
+      <Text size="sm" variant="invert">
+        {label}
+      </Text>
     </ButtonBase>
   );
 };

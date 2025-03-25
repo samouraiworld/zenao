@@ -14,7 +14,6 @@ import {
   PopoverTrigger,
 } from "@/components/shadcn/popover";
 import { Button } from "@/components/shadcn/button";
-import { SmallText } from "@/components/texts/SmallText";
 import {
   FormControl,
   FormField,
@@ -33,6 +32,7 @@ import {
 } from "@/components/shadcn/command";
 import { cn } from "@/lib/tailwind";
 import { currentTimezone } from "@/lib/time";
+import Text from "@/components/texts/text";
 
 export const useSearchField = (value: string) => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -72,7 +72,7 @@ export const FormFieldLocation: React.FC<{
       render={({ field }) => {
         const object = field.value as z.infer<typeof addressLocationSchema>;
         return (
-          <FormItem className="flex flex-col w-full space-y-0">
+          <FormItem className="flex flex-col w-full gap-0">
             <Popover open={open} onOpenChange={setOpen}>
               <div className="flex flex-row w-full justify-between">
                 <PopoverTrigger asChild>
@@ -82,14 +82,15 @@ export const FormFieldLocation: React.FC<{
                       role="combobox"
                       className="w-full flex justify-start rounded-xl px-4 py-3 h-auto backdrop-blur-sm"
                     >
-                      <SmallText
+                      <Text
+                        size="sm"
                         className={cn(
                           "truncate",
                           !object.address && "text-secondary-color",
                         )}
                       >
                         {object.address || "Add an address..."}
-                      </SmallText>
+                      </Text>
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
@@ -106,6 +107,7 @@ export const FormFieldLocation: React.FC<{
                         ...object,
                         address: "",
                       });
+                      form.trigger("location");
                     }}
                   >
                     <XIcon className="h-3 w-3" />
@@ -128,6 +130,7 @@ export const FormFieldLocation: React.FC<{
                           ...object,
                           address: search,
                         });
+                        form.trigger("location");
                         setOpen(false);
                       }
                     }}
@@ -150,11 +153,12 @@ export const FormFieldLocation: React.FC<{
                               lng,
                               size: 0,
                             });
+                            form.trigger("location");
                             await onSelect({ lat, lng });
                             setOpen(false);
                           }}
                         >
-                          <SmallText>{result.label}</SmallText>
+                          <Text size="sm">{result.label}</Text>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -170,18 +174,19 @@ export const FormFieldLocation: React.FC<{
                             address: search,
                             timeZone: currentTimezone(),
                           });
+                          form.trigger("location");
                           onRemove();
                           setOpen(false);
                         }}
                       >
-                        <SmallText>{`Use ${search}`}</SmallText>
+                        <Text size="sm">{`Use ${search}`}</Text>
                       </CommandItem>
                     )}
                   </CommandList>
                 </Command>
               </PopoverContent>
             </Popover>
-            <FormMessage />
+            <FormMessage className="pb-2 px-4" />
           </FormItem>
         );
       }}

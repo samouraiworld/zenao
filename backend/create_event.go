@@ -54,14 +54,17 @@ func (s *ZenaoServer) CreateEvent(
 			return err
 		}
 
-		webhook.TrySendDiscordMessage(s.Logger, s.TokenDiscord, evt)
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	webhook.TrySendDiscordMessage(s.Logger, s.TokenDiscord, evt)
 
-		if s.MailClient != nil {
-			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
-			if err != nil {
-				return err
-			}
-
+	if s.MailClient != nil {
+		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
+		if err != nil {
+			s.Logger.Error("generate-event-email-content", zap.Error(err), zap.String("event-id", evt.ID))
+		} else {
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:    "Zenao <noreply@mail.zenao.io>",
@@ -70,13 +73,9 @@ func (s *ZenaoServer) CreateEvent(
 				Html:    htmlStr,
 				Text:    text,
 			}); err != nil {
-				return err
+				s.Logger.Error("send-event-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID))
 			}
 		}
-
-		return nil
-	}); err != nil {
-		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{
