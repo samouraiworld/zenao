@@ -56,6 +56,7 @@ function ParticipantsNamesPreview({
   return (
     <div className="flex flex-row">
       {participants.length > 2 ? (
+
         <div>
           <Text size="sm">{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</Text>
         </div>
@@ -67,6 +68,20 @@ function ParticipantsNamesPreview({
             </Text>
           ))}
         </div>
+
+        <>
+          <Text
+            size="sm"
+            className="text-start"
+          >{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</Text>
+        </>
+      ) : (
+        <Text size="sm">
+          {participants
+            .map((participant) => participant?.displayName)
+            .join(", ")}
+        </Text>
+
       )}
     </div>
   );
