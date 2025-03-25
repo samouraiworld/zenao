@@ -30,6 +30,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+
   const { data: user } = useSuspenseQuery(profileOptions(address));
 
   const [loading, setLoading] = useState<boolean>(false);
