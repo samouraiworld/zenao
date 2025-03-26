@@ -25,6 +25,7 @@ import { FormFieldLocation } from "./components/FormFieldLocation";
 import { FormFieldDatePicker } from "./components/form-field-date-picker";
 import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
+import { cn } from "@/lib/tailwind";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -78,7 +79,10 @@ export const EventForm: React.FC<EventFormProps> = ({
             <FormFieldTextArea
               control={form.control}
               name="title"
-              className="font-semibold text-3xl overflow-hidden bg-transparent"
+              className={cn(
+                "font-semibold text-3xl overflow-hidden bg-transparent",
+                "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+              )}
               placeholder={t("title-placeholder")}
               maxLength={140}
               onKeyDown={(e) => {
@@ -100,7 +104,10 @@ export const EventForm: React.FC<EventFormProps> = ({
                     control={form.control}
                     name="description"
                     placeholder={t("description-placeholder")}
-                    className="bg-transparent"
+                    className={cn(
+                      "bg-transparent",
+                      "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+                    )}
                     maxLength={10000}
                     wordCounter
                   />

@@ -12,7 +12,6 @@ import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
-import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
 import { FormFieldImage } from "@/components/form/components/form-field-image";
@@ -92,20 +91,16 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             tooltip={<Text size="sm">{t("change-avatar")}</Text>}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
-            <Card>
-              <FormFieldInputString
-                control={form.control}
-                name="displayName"
-                placeholder={t("name-placeholder")}
-              />
-            </Card>
-            <Card>
-              <FormFieldTextArea
-                control={form.control}
-                name="bio"
-                placeholder={t("bio-placeholder")}
-              />
-            </Card>
+            <FormFieldInputString
+              control={form.control}
+              name="displayName"
+              placeholder={t("name-placeholder")}
+            />
+            <FormFieldTextArea
+              control={form.control}
+              name="bio"
+              placeholder={t("bio-placeholder")}
+            />
             <div>
               <ButtonWithLabel
                 loading={loading}
