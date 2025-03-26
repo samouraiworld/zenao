@@ -23,7 +23,7 @@ import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldLocation } from "./components/FormFieldLocation";
 import { FormFieldDatePicker } from "./components/form-field-date-picker";
-import { Form, FormDescription, FormLabel } from "@/components/shadcn/form";
+import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 
 interface EventFormProps {
@@ -78,7 +78,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             <FormFieldTextArea
               control={form.control}
               name="title"
-              className="font-semibold text-3xl overflow-hidden"
+              className="font-semibold text-3xl overflow-hidden bg-transparent"
               placeholder={t("title-placeholder")}
               maxLength={140}
               onKeyDown={(e) => {
@@ -90,9 +90,6 @@ export const EventForm: React.FC<EventFormProps> = ({
               wordCounter
             />
             <Card>
-              <Text size="sm" className="mb-3">
-                {t("description-label")}
-              </Text>
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
@@ -103,6 +100,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                     control={form.control}
                     name="description"
                     placeholder={t("description-placeholder")}
+                    className="bg-transparent"
                   />
                 </TabsContent>
                 <TabsContent value="preview">
@@ -176,25 +174,23 @@ export const EventForm: React.FC<EventFormProps> = ({
                 }}
               />
             )}
-            <Card>
-              <Text size="sm" className="mb-3">
-                {t("capacity-label")}
-              </Text>
-              <FormFieldInputNumber
-                control={form.control}
-                name="capacity"
-                placeholder={t("capacity-placeholder")}
-              />
-            </Card>
+            <FormFieldInputNumber
+              control={form.control}
+              name="capacity"
+              placeholder={t("capacity-placeholder")}
+              label={t("capacity-label")}
+            />
             <Card className="flex flex-col gap-[10px]">
-              <FormLabel>{t("from")}</FormLabel>
               <FormFieldDatePicker
                 name="startDate"
+                label={t("from")}
                 control={form.control}
                 placeholder={t("pick-a-start-date-placeholder")}
                 timeZone={timeZone}
                 onChange={(date) => {
                   if (!endDate || date > fromUnixTime(Number(endDate))) {
+                    console.log("here");
+
                     form.setValue(
                       "endDate",
                       BigInt(getUnixTime(date) + minutesToSeconds(15)),
@@ -218,9 +214,9 @@ export const EventForm: React.FC<EventFormProps> = ({
                     : []),
                 ]}
               />
-              <FormLabel>{t("to")}</FormLabel>
               <FormFieldDatePicker
                 name="endDate"
+                label={t("to")}
                 control={form.control}
                 placeholder={t("pick-a-end-date-placeholder")}
                 timeZone={timeZone}
