@@ -89,7 +89,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               }}
               wordCounter
             />
-            <Card>
+            <Card className="rounded px-3 border-custom-input-border">
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
@@ -101,6 +101,8 @@ export const EventForm: React.FC<EventFormProps> = ({
                     name="description"
                     placeholder={t("description-placeholder")}
                     className="bg-transparent"
+                    maxLength={10000}
+                    wordCounter
                   />
                 </TabsContent>
                 <TabsContent value="preview">
@@ -180,7 +182,6 @@ export const EventForm: React.FC<EventFormProps> = ({
               placeholder={t("capacity-placeholder")}
               label={t("capacity-label")}
             />
-            {/* <Card className="flex flex-col gap-[10px]"> */}
             <FormFieldDatePicker
               name="startDate"
               label={t("from")}
@@ -272,7 +273,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             <FormDescription>
               Displayed time corresponds to {timeZone}
             </FormDescription>
-            {/* </Card> */}
+
             <ButtonWithLabel
               loading={isLoaded}
               label={
