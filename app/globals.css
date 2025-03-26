@@ -37,7 +37,7 @@ body {
     --radius: 0.5rem;
 
     /* Custom input variables */
-    --input-bg: 251, 234, 225, 1;
+    --input-bg: 255, 255, 255, 1;
     --input-border: #EC7E17;
   }
   .dark {
