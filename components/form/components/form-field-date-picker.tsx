@@ -1,7 +1,7 @@
 "use client";
 
 import { FieldValues, useController } from "react-hook-form";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
@@ -86,7 +86,6 @@ export function FormFieldDatePicker<T extends FieldValues>(
   const defaultTime = useMemo(() => {
     if (field.value) {
       const formattedValue = fromUnixTime(Number(field.value));
-      if (field.name === "endDate") console.log(formattedValue);
 
       const hours = formattedValue.getHours().toString().padStart(2, "0");
       const minutes = formattedValue.getMinutes().toString().padStart(2, "0");
@@ -96,14 +95,6 @@ export function FormFieldDatePicker<T extends FieldValues>(
 
     return "09:00";
   }, [field.value]);
-
-  const [time, setTime] = useState<string>(defaultTime);
-
-  useEffect(() => {
-    if (defaultTime !== time) {
-      setTime(defaultTime);
-    }
-  }, [defaultTime]);
 
   const isTimeDisabled = React.useCallback(
     (date: Date, hours: number, minutes: number) => {
@@ -152,11 +143,11 @@ export function FormFieldDatePicker<T extends FieldValues>(
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant="input"
                         aria-label="Pick date"
                         disabled={props.disabled}
                         className={cn(
-                          "w-full font-normal",
+                          "w-full",
                           !field.value && "text-muted-foreground",
                         )}
                       >
@@ -187,7 +178,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
                           : undefined
                       }
                       onSelect={(selectedDate) => {
-                        const [hours, minutes] = time.split(":")!;
+                        const [hours, minutes] = defaultTime.split(":")!;
                         selectedDate?.setHours(
                           parseInt(hours),
                           parseInt(minutes),
@@ -218,10 +209,9 @@ export function FormFieldDatePicker<T extends FieldValues>(
                 <FormControl>
                   <Select
                     disabled={props.disabled || !field.value}
-                    defaultValue={time}
-                    value={time}
+                    defaultValue={defaultTime}
+                    value={defaultTime}
                     onValueChange={(e) => {
-                      setTime(e);
                       if (field.value) {
                         const [hours, minutes] = e.split(":");
                         const newDate = new Date(formattedValue);
