@@ -81,7 +81,7 @@ export const FormFieldImage = <T extends FieldValues>(
                   {/* TODO: find a better way */}
                   <Card
                     className={cn(
-                      "border-dashed w-full h-full flex flex-col gap-2 justify-center items-center rounded-xnter border-2 border-[#EC7E17]",
+                      "border-dashed w-full h-full flex flex-col gap-2 justify-center items-center rounded border-2 border-[#EC7E17]",
                       "hover:bg-secondary cursor-pointer",
                     )}
                   >
@@ -95,7 +95,7 @@ export const FormFieldImage = <T extends FieldValues>(
                       (max-width: 1200px) 70vw,
                       33vw"
                         className={cn(
-                          "flex object-cover rounded-xl self-center border cursor-pointer",
+                          "flex object-cover rounded self-center cursor-pointer",
                           "hover:brightness-[60%] transition-all",
                         )}
                       />
