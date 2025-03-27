@@ -91,11 +91,11 @@ export const EventForm: React.FC<EventFormProps> = ({
             />
             <Card>
               <Tabs defaultValue="write" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
                   <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
                   <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
                 </TabsList>
-                <TabsContent value="write">
+                <TabsContent value="write" tabIndex={-1}>
                   <FormFieldTextArea
                     control={form.control}
                     name="description"
