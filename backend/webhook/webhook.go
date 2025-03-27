@@ -11,11 +11,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type DiscordWebhook struct {
+type discordWebhook struct {
 	Content string `json:"content"`
 }
 
-func SendDiscordWebhook(logger *zap.Logger, token, eventName, eventstart, eventend, eventLocation, eventURL string) error {
+func SendDiscordWebhook(logger *zap.Logger, token, eventName, eventStart, eventEnd, eventLocation, eventURL string) error {
 
 	webhookURL := fmt.Sprintf("https://discord.com/api/webhooks/%s", token)
 
@@ -26,10 +26,10 @@ func SendDiscordWebhook(logger *zap.Logger, token, eventName, eventstart, evente
 			"**End Date :** %s\n"+
 			"**Location :** %s\n"+
 			"🔗 **Détails :** [Voir l'événement](%s)",
-		eventName, eventstart, eventend, eventLocation, eventURL,
+		eventName, eventStart, eventEnd, eventLocation, eventURL,
 	)
 
-	payload := DiscordWebhook{Content: message}
+	payload := discordWebhook{Content: message}
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func TrySendDiscordMessage(logger *zap.Logger, token string, evt *zeni.Event) {
 		return
 	}
 
-	EventURL := fmt.Sprintf("https://zenao.io/event/%s", evt.ID)
+	eventURL := fmt.Sprintf("https://zenao.io/event/%s", evt.ID)
 	err = SendDiscordWebhook(
 		logger,
 		token,
@@ -70,7 +70,7 @@ func TrySendDiscordMessage(logger *zap.Logger, token string, evt *zeni.Event) {
 		evt.StartDate.Format("2006-01-02 15:04:05"),
 		evt.EndDate.Format("2006-01-02 15:04:05"),
 		locationStr,
-		EventURL,
+		eventURL,
 	)
 	if err != nil {
 		logger.Error("Error sending Discord message", zap.Error(err))
