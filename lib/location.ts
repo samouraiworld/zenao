@@ -25,7 +25,6 @@ export const makeLocationFromEvent = (
       return {
         kind: "virtual",
         location: eventLocation?.address.value.uri,
-        // ! TODO Add timeZone
       };
   }
   return {
