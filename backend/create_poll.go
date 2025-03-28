@@ -42,7 +42,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 	}
 
 	if err := s.Chain.CreatePoll(userID, req.Msg); err != nil {
-		s.Logger.Error("create-poll", zap.Error(err))
+		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.CreatePollResponse{}), nil
