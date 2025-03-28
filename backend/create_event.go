@@ -10,6 +10,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/webhook"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -57,6 +58,7 @@ func (s *ZenaoServer) CreateEvent(
 	}); err != nil {
 		return nil, err
 	}
+	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
 
 	if s.MailClient != nil {
 		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
