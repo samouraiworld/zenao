@@ -30,11 +30,7 @@ export const FormFieldInputNumber = <T extends FieldValues>({
             <Input
               type="number"
               min={0}
-              className={cn(
-                "peer",
-                // "focus-visible:ring-0 border-none h-auto p-0 placeholder:text-secondary-color",
-                className,
-              )}
+              className={cn("peer", className)}
               placeholder={placeholder}
               {...field}
             />
