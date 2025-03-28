@@ -13,6 +13,7 @@ import { Toaster } from "@/components/shadcn/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
+  weight: ["100", "300", "500", "600", "700", "900"],
   subsets: ["latin"],
 });
 

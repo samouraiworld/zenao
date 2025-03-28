@@ -97,9 +97,6 @@ export const EventForm: React.FC<EventFormProps> = ({
               wordCounter
             />
             <Card>
-              <Text size="sm" className="mb-3">
-                {t("description-label")}
-              </Text>
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
                   <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
@@ -171,10 +168,8 @@ export const EventForm: React.FC<EventFormProps> = ({
                 }}
               />
             )}
-            <Card>
-              <Text size="sm" className="mb-3">
-                {t("capacity-label")}
-              </Text>
+            <Card className="flex flex-col gap-4">
+              <Label>{t("capacity-label")}</Label>
               <FormFieldInputNumber
                 control={form.control}
                 name="capacity"
