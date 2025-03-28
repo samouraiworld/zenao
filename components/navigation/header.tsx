@@ -107,7 +107,7 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
               <Text
                 size="sm"
                 variant={isActive ? "primary" : "secondary"}
-                className="text-inherit max-[550px]:hidden"
+                className="text-inherit max-[624px]:hidden"
               >
                 {item.children}
               </Text>
@@ -155,6 +155,7 @@ export function Header() {
         <Link passHref href="/create">
           <ButtonWithChildren
             variant="outline"
+            size="sm"
             className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
           >
             {t("create-event")}
@@ -208,6 +209,11 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
+          <DropdownMenuItem
+            onClick={() => router.push(`/profile/${userAddress}`)}
+          >
+            {t("view-profile")}
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/settings")}>
             {t("settings")}
           </DropdownMenuItem>

@@ -12,7 +12,7 @@ export default async function ProfilePage({ params }: Props) {
   const p = await params;
   const queryClient = getQueryClient();
 
-  void queryClient.prefetchQuery(profileOptions(p.id));
+  queryClient.prefetchQuery(profileOptions(p.id));
 
   return (
     <ScreenContainer>

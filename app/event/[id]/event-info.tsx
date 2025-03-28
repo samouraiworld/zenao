@@ -3,12 +3,14 @@
 import React, { useCallback } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { TZDate } from "react-day-picker";
 import { ParticipateForm } from "./ParticipateForm";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
@@ -17,14 +19,15 @@ import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { web3ImgLoader } from "@/lib/web3-img-loader";
-import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
-import MapCaller from "@/components/common/map/MapLazyComponents";
+import MapCaller from "@/components/common/map/map-lazy-components";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 
 interface EventSectionProps {
@@ -56,34 +59,8 @@ export function EventInfo({ id }: { id: string }) {
   const queryClient = useQueryClient();
 
   // Correctly reconstruct location object
-  let location: EventFormSchemaType["location"] = {
-    kind: "custom",
-    address: "",
-    timeZone: "",
-  };
-  switch (data.location?.address.case) {
-    case "custom":
-      location = {
-        kind: "custom",
-        address: data.location?.address.value.address,
-        timeZone: data.location?.address.value.timezone,
-      };
-      break;
-    case "geo":
-      location = {
-        kind: "geo",
-        address: data.location?.address.value.address,
-        lat: data.location?.address.value.lat,
-        lng: data.location?.address.value.lng,
-        size: data.location?.address.value.size,
-      };
-      break;
-    case "virtual":
-      location = {
-        kind: "virtual",
-        location: data.location?.address.value.uri,
-      };
-  }
+  const location = makeLocationFromEvent(data.location);
+  const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -107,8 +84,11 @@ export function EventInfo({ id }: { id: string }) {
     "@type": "Event",
     name: data.title,
     description: data.description,
-    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
-    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
+    startDate: new TZDate(
+      Number(data.startDate) * 1000,
+      timezone,
+    ).toISOString(),
+    endDate: new TZDate(Number(data.endDate) * 1000, timezone).toISOString(),
     location:
       location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
@@ -188,7 +168,9 @@ export function EventInfo({ id }: { id: string }) {
                 -
               </Text>
               <Text variant="secondary" size="sm">
-                {format(fromUnixTime(Number(data.endDate)), "PPp")}
+                {formatTZ(fromUnixTime(Number(data.endDate)), "PPp O", {
+                  timeZone: timezone,
+                })}
               </Text>
             </div>
           </div>

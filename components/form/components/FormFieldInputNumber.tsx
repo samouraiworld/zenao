@@ -6,6 +6,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
@@ -16,21 +17,20 @@ export const FormFieldInputNumber = <T extends FieldValues>({
   name,
   className,
   placeholder,
-}: FormFieldProps<T, number>) => {
+  label,
+}: FormFieldProps<T, number> & { label?: string }) => {
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => (
         <FormItem>
+          {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <Input
               type="number"
               min={0}
-              className={cn(
-                "focus-visible:ring-0 border-none h-auto p-0 placeholder:text-secondary-color",
-                className,
-              )}
+              className={cn("peer", className)}
               placeholder={placeholder}
               {...field}
             />
