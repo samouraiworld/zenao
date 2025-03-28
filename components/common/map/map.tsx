@@ -24,7 +24,7 @@ export const Map: React.FC<MapProps> = ({ lat, lng }) => {
       ref={mapRef}
       center={marker}
       zoom={12}
-      className="h-[300px] w-full rounded-xl z-40"
+      className="h-[300px] w-full rounded z-40"
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
