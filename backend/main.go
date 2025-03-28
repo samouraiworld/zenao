@@ -101,7 +101,7 @@ func injectStartEnv() {
 		"ZENAO_DB":                &conf.dbPath,
 		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
-		"TOKEN_DISCORD":           &conf.discordtoken,
+		"DISCORD_TOKEN":           &conf.discordtoken,
 	}
 
 	for key, ps := range mappings {
