@@ -187,8 +187,6 @@ export const EventForm: React.FC<EventFormProps> = ({
               timeZone={timeZone}
               onChange={(date) => {
                 if (!endDate || date > fromUnixTime(Number(endDate))) {
-                  console.log("here");
-
                   form.setValue(
                     "endDate",
                     BigInt(getUnixTime(date) + minutesToSeconds(15)),

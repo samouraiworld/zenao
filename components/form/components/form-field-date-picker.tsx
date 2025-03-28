@@ -130,10 +130,6 @@ export function FormFieldDatePicker<T extends FieldValues>(
       render={({ field }) => {
         const formattedValue = fromUnixTime(Number(field.value));
 
-        if (field.name === "endDate") {
-          console.log("End date: ", formattedValue);
-        }
-
         return (
           <div className="flex flex-col w-full gap-2">
             {props.label && <FormLabel>{props.label}</FormLabel>}
