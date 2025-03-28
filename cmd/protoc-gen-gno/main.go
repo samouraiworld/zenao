@@ -165,8 +165,7 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 func genImportStmts(gen *protogen.Plugin, g *protogen.GeneratedFile, file *protogen.File) {
 	for i, imps := 0, file.Desc.Imports(); i < imps.Len(); i++ {
 		imp := imps.Get(i)
-		impFile, ok := gen.FilesByPath[imp.FileDescriptor.Path()]
-
+		impFile, ok := gen.FilesByPath[imp.Path()]
 		if !ok {
 			continue
 		}
