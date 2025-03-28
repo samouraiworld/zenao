@@ -83,9 +83,8 @@ export const FormFieldLocation: React.FC<{
                       className="w-full flex justify-start rounded-xl px-4 py-3 h-auto backdrop-blur-sm"
                     >
                       <Text
-                        size="sm"
                         className={cn(
-                          "truncate",
+                          "text-base truncate",
                           !object.address && "text-secondary-color",
                         )}
                       >
@@ -159,7 +158,7 @@ export const FormFieldLocation: React.FC<{
                             setOpen(false);
                           }}
                         >
-                          <Text size="sm">{result.label}</Text>
+                          <Text className="md:text-sm">{result.label}</Text>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -180,7 +179,7 @@ export const FormFieldLocation: React.FC<{
                           setOpen(false);
                         }}
                       >
-                        <Text size="sm">{`Use ${search}`}</Text>
+                        <Text className="md:text-sm">{`Use ${search}`}</Text>
                       </CommandItem>
                     )}
                   </CommandList>
