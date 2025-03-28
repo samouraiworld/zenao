@@ -29,43 +29,41 @@ export function ProfileInfo({ address }: { address: string }) {
     knowsAbout: data?.bio,
   };
   return (
-    <div className="flex flex-col gap-4 w-full sm:h-full">
+    <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Card className="w-full py-4 sm:py-8">
-        <div className="flex flex-col w-full items-center gap-8">
-          {data.avatarUri ? (
-            <div className="w-full max-w-[256px] sm:w-[256px]">
-              <AspectRatio ratio={1 / 1}>
-                <Image
-                  src={data.avatarUri}
-                  alt="Event"
-                  priority
-                  fill
-                  sizes="(max-width: 768px) 100vw,
-              (max-width: 1200px) 30vw,
+      <div className="flex flex-col gap-4 w-full sm:w-2/5">
+        {data.avatarUri ? (
+          <AspectRatio ratio={1 / 1}>
+            <Image
+              src={data.avatarUri}
+              alt="Event"
+              priority
+              fill
+              sizes="(max-width: 768px) 100vw,
+              (max-width: 1200px) 50vw,
               33vw"
-                  className="flex rounded-xl self-center object-cover"
-                  loader={web3ImgLoader}
-                />
-              </AspectRatio>
-            </div>
-          ) : (
-            <Skeleton className="flex w-full rounded-xl self-center" />
-          )}
-          <div className="flex flex-col items-center gap-2">
-            <Heading level={1} size="3xl">
-              {data.displayName}
-            </Heading>
-            <Text>{data.bio}</Text>
-          </div>
-        </div>
-      </Card>
-      <GnowebButton
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${data.address}`}
-      />
+              className="flex w-full rounded-xl self-center object-cover"
+              loader={web3ImgLoader}
+            />
+          </AspectRatio>
+        ) : (
+          <Skeleton className="flex w-full rounded-xl self-center" />
+        )}
+        <GnowebButton
+          href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${data.address}`}
+        />
+      </div>
+      <div className="flex flex-col gap-4 w-full sm:w-3/5">
+        <Heading level={1} size="4xl" className="mb-7">
+          {data.displayName}
+        </Heading>
+        <Card>
+          <Text>{data.bio}</Text>
+        </Card>
+      </div>
     </div>
   );
 }
