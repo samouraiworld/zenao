@@ -27,7 +27,7 @@ const HeaderEventsList: React.FC<{
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
           />
         </div>
-        <div className="w-[205px] h-[33px]">
+        <div>
           <Tabs
             value={tab}
             onValueChange={(value) => setTab(value as "upcoming" | "past")}
