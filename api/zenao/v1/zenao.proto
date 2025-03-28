@@ -3,8 +3,6 @@ syntax = "proto3";
 package zenao.v1;
 option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
 
-// import "polls/v1/polls.proto";
-
 service ZenaoService {
   // USER
   rpc EditUser(EditUserRequest) returns (EditUserResponse);
@@ -118,7 +116,9 @@ message CreatePollRequest {
   repeated string options = 3;
   int64 duration = 4; // unix seconds
   bool multiple_choices = 5;
-  // polls.v1.PollKind kind = 5; XXX: need gno protoc to handle this
+
+  // TODO: need gno protoc to handle import statements
+  // polls.v1.PollKind kind = 5;
 }
 
 message CreatePollResponse {}
