@@ -60,7 +60,7 @@ type config struct {
 	chainID         string
 	dbPath          string
 	resendSecretKey string
-	tokendiscord    string
+	discordtoken    string
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
@@ -73,7 +73,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
-	flset.StringVar(&conf.tokendiscord, "token-discord", "", "Token Discord")
+	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
 
 }
 
@@ -101,7 +101,7 @@ func injectStartEnv() {
 		"ZENAO_DB":                &conf.dbPath,
 		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
-		"TOKEN_DISCORD":           &conf.tokendiscord,
+		"TOKEN_DISCORD":           &conf.discordtoken,
 	}
 
 	for key, ps := range mappings {
@@ -145,7 +145,7 @@ func execStart() error {
 		Chain:        chain,
 		DB:           db,
 		MailClient:   mailClient,
-		TokenDiscord: conf.tokendiscord,
+		DiscordToken: conf.discordtoken,
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")

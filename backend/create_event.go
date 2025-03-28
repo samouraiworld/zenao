@@ -58,7 +58,7 @@ func (s *ZenaoServer) CreateEvent(
 	}); err != nil {
 		return nil, err
 	}
-	webhook.TrySendDiscordMessage(s.Logger, s.TokenDiscord, evt)
+	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
 
 	if s.MailClient != nil {
 		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
