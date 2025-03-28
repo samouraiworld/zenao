@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -40,32 +39,9 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 	g.P()
 	g.P("package ", file.GoPackageName)
 
-	hasImport := false
-	importsLen := file.Desc.Imports().Len()
-	for i := 0; i < importsLen; i++ {
-		importDesc := file.Desc.Imports().Get(i)
-		if !importDesc.IsWeak {
-			continue
-		}
-
-		prefix := importDesc.FileDescriptor.Path()
-		ext := path.Ext(prefix)
-		if ext != ".proto" {
-			continue
-		}
-		prefix = prefix[:len(prefix)-len(ext)]
-
-		if !hasImport {
-			g.P("import (")
-			hasImport = true
-		}
-
-		g.P("	", "gno.land/p/zenao/"+filepath.ToSlash(filepath.Dir(prefix)))
-	}
-
-	if hasImport {
-		g.P(")")
-	}
+	g.P("import (")
+	genImportStmts(gen, g, file)
+	g.P(")")
 
 	for _, en := range file.Enums {
 		g.P()
@@ -139,6 +115,7 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 	g.P(`	"errors"`)
 	g.P(`	"strconv"`)
 	g.P(`	"gno.land/p/demo/json"`)
+	genImportStmts(gen, g, file)
 	g.P(")")
 
 	for _, m := range file.Messages {
@@ -182,5 +159,21 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 			oneOfFromJSON("fields", "	", g, f)
 		}
 		g.P("}")
+	}
+}
+
+func genImportStmts(gen *protogen.Plugin, g *protogen.GeneratedFile, file *protogen.File) {
+	for i, imps := 0, file.Desc.Imports(); i < imps.Len(); i++ {
+		imp := imps.Get(i)
+		impFile, ok := gen.FilesByPath[imp.FileDescriptor.Path()]
+
+		if !ok {
+			continue
+		}
+
+		alias := g.QualifiedGoIdent(impFile.GoImportPath.Ident(""))
+		alias = strings.TrimSuffix(alias, ".")
+		prefix := filepath.ToSlash(filepath.Dir(impFile.GeneratedFilenamePrefix))
+		g.P("	", alias, " ", `"gno.land/p/zenao/`, prefix, `"`)
 	}
 }
