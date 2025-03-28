@@ -18,7 +18,7 @@ const HeaderEventsList: React.FC<{
   const t = useTranslations("events-list");
   return (
     <div className="flex flex-col gap-2 mb-3">
-      <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between">
+      <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between md:items-center">
         <div className="flex flex-col md:flex-row gap-2 md:items-center">
           <Heading level={1} size="4xl" className="truncate">
             {title}
