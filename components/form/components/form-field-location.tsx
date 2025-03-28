@@ -57,7 +57,7 @@ export const useSearchField = (value: string) => {
 
 export const FormFieldLocation: React.FC<{
   form: UseFormReturn<EventFormSchemaType>;
-  onSelect: (marker: { lat: number; lng: number }) => Promise<void>;
+  onSelect?: (marker: { lat: number; lng: number }) => Promise<void>;
   onRemove: () => void;
 }> = ({ form, onSelect, onRemove }) => {
   const t = useTranslations("eventForm");
@@ -101,11 +101,12 @@ export const FormFieldLocation: React.FC<{
                     className="bg-secondary/80 backdrop-blur-sm self-center absolute right-1"
                     onClick={() => {
                       setSearch("");
-                      onRemove();
                       form.setValue("location", {
-                        ...object,
+                        kind: "custom",
                         address: "",
+                        timeZone: currentTimezone(),
                       });
+                      onRemove();
                       form.trigger("location");
                     }}
                   >
@@ -153,7 +154,7 @@ export const FormFieldLocation: React.FC<{
                               size: 0,
                             });
                             form.trigger("location");
-                            await onSelect({ lat, lng });
+                            if (onSelect) await onSelect({ lat, lng });
                             setOpen(false);
                           }}
                         >
@@ -168,13 +169,13 @@ export const FormFieldLocation: React.FC<{
                         value={search}
                         key={search}
                         onSelect={async () => {
+                          onRemove();
                           form.setValue("location", {
                             kind: "custom",
                             address: search,
                             timeZone: currentTimezone(),
                           });
                           form.trigger("location");
-                          onRemove();
                           setOpen(false);
                         }}
                       >

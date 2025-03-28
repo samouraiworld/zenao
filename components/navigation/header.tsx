@@ -209,6 +209,11 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
+          <DropdownMenuItem
+            onClick={() => router.push(`/profile/${userAddress}`)}
+          >
+            {t("view-profile")}
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/settings")}>
             {t("settings")}
           </DropdownMenuItem>

@@ -7,6 +7,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
@@ -24,8 +25,9 @@ export const FormFieldTextArea = <T extends FieldValues>({
   className,
   placeholder,
   wordCounter,
+  label,
   ...otherProps
-}: FormFieldTextAreaProps<T>) => {
+}: FormFieldTextAreaProps<T> & { label?: string }) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = () => {
@@ -46,6 +48,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem className={cn("relative", wordCounter ? "pb-6" : null)}>
+          {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <Textarea
               className={cn(
