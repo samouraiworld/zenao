@@ -56,17 +56,18 @@ function ParticipantsNamesPreview({
   return (
     <div className="flex flex-row">
       {participants.length > 2 ? (
-        <div>
-          <Text size="sm">{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</Text>
-        </div>
+        <>
+          <Text
+            size="sm"
+            className="text-start"
+          >{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</Text>
+        </>
       ) : (
-        <div>
-          {participants.map((participant) => (
-            <Text size="sm" key={participant?.address}>
-              {participant?.displayName}
-            </Text>
-          ))}
-        </div>
+        <Text size="sm">
+          {participants
+            .map((participant) => participant?.displayName)
+            .join(", ")}
+        </Text>
       )}
     </div>
   );
