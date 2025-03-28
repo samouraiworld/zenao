@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   fromUnixTime,
   getUnixTime,
@@ -13,7 +13,7 @@ import { MarkdownPreview } from "../common/MarkdownPreview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
-import MapCaller from "../common/map/MapLazyComponents";
+import MapCaller from "../common/map/map-lazy-components";
 import Text from "../texts/text";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
@@ -21,10 +21,11 @@ import { TimeZonesPopover } from "./components/TimeZonesPopover";
 import { FormFieldImage } from "./components/form-field-image";
 import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
-import { FormFieldLocation } from "./components/FormFieldLocation";
+import { FormFieldLocation } from "./components/form-field-location";
 import { FormFieldDatePicker } from "./components/form-field-date-picker";
 import { Form, FormDescription, FormLabel } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -57,7 +58,13 @@ export const EventForm: React.FC<EventFormProps> = ({
     null,
   );
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
-  const [timeZone, setTimeZone] = useState<string>(currentTimezone());
+  const timeZone = useLocationTimezone(location);
+
+  useEffect(() => {
+    if (location.kind === "geo") {
+      setMarker({ lat: location.lat, lng: location.lng });
+    }
+  }, [location]);
 
   return (
     <Form {...form}>
@@ -90,9 +97,6 @@ export const EventForm: React.FC<EventFormProps> = ({
               wordCounter
             />
             <Card>
-              <Text size="sm" className="mb-3">
-                {t("description-label")}
-              </Text>
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
                   <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
@@ -131,7 +135,6 @@ export const EventForm: React.FC<EventFormProps> = ({
                   // If we have an error in virtual location and we change to custom, error stay as undefined and can't be clear
                   form.clearErrors("location");
                   setMarker(null);
-                  setTimeZone(currentTimezone());
                   setIsVirtual(checked);
                 }}
               />
@@ -147,17 +150,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               ) : (
                 <FormFieldLocation
                   form={form}
-                  onSelect={async (marker: { lat: number; lng: number }) => {
-                    setMarker(marker);
-                    const GeoTZFind = (await import("browser-geo-tz")).find;
-                    const tz = await GeoTZFind(marker.lat, marker.lng);
-                    setTimeZone(tz[0]);
-                    console.log(tz[0]);
-                  }}
-                  onRemove={() => {
-                    setMarker(null);
-                    setTimeZone(currentTimezone());
-                  }}
+                  onRemove={() => setMarker(null)}
                 />
               )}
             </Card>
@@ -172,14 +165,11 @@ export const EventForm: React.FC<EventFormProps> = ({
                     ...location,
                     timeZone,
                   });
-                  setTimeZone(timeZone);
                 }}
               />
             )}
-            <Card>
-              <Text size="sm" className="mb-3">
-                {t("capacity-label")}
-              </Text>
+            <Card className="flex flex-col gap-4">
+              <Label>{t("capacity-label")}</Label>
               <FormFieldInputNumber
                 control={form.control}
                 name="capacity"

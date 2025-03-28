@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { SignOutButton, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
@@ -18,8 +17,6 @@ import { FormFieldTextArea } from "@/components/form/components/FormFieldTextAre
 import { FormFieldImage } from "@/components/form/components/form-field-image";
 import { userAddressOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
-import { Separator } from "@/components/shadcn/separator";
-import { Button, buttonVariants } from "@/components/shadcn/button";
 import Text from "@/components/texts/text";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
@@ -97,6 +94,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
                 control={form.control}
                 name="displayName"
                 placeholder={t("name-placeholder")}
+                label={"Display name"}
               />
             </Card>
             <Card>
@@ -104,6 +102,9 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
                 control={form.control}
                 name="bio"
                 placeholder={t("bio-placeholder")}
+                label={"Bio"}
+                wordCounter
+                maxLength={1000}
               />
             </Card>
             <div>
@@ -114,18 +115,6 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               />
             </div>
           </div>
-        </div>
-        <Separator className="mb-2" />
-        <div className="flex flex-row gap-2">
-          <Link
-            href={`/profile/${user?.address}`}
-            className={buttonVariants({ variant: "secondary" })}
-          >
-            Profile
-          </Link>
-          <Button asChild variant="destructive" type="button">
-            <SignOutButton />
-          </Button>
         </div>
       </form>
     </Form>

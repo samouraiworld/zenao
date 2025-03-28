@@ -1,9 +1,10 @@
 "use client";
 
-import { LatLng, Icon } from "leaflet";
+import { LatLng, Icon, Map as MapType } from "leaflet";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
+import { useEffect, useMemo, useRef } from "react";
 
 export interface MapProps {
   lat: number;
@@ -11,9 +12,16 @@ export interface MapProps {
 }
 
 export const Map: React.FC<MapProps> = ({ lat, lng }) => {
-  const marker = new LatLng(lat, lng);
+  const marker = useMemo(() => new LatLng(lat, lng), [lat, lng]);
+  const mapRef = useRef<MapType>(null);
+
+  useEffect(() => {
+    mapRef.current?.setView(marker);
+  }, [marker, mapRef]);
+
   return (
     <MapContainer
+      ref={mapRef}
       center={marker}
       zoom={12}
       className="h-[300px] w-full rounded-xl z-40"

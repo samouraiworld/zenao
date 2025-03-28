@@ -140,7 +140,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
                       aria-label="Pick date"
                       disabled={props.disabled}
                       className={cn(
-                        "w-full font-normal",
+                        "w-full px-3 py-5 font-normal",
                         !field.value && "text-muted-foreground",
                       )}
                     >
@@ -153,9 +153,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
                           format(formattedValue, "MM/dd/yyyy")
                         )
                       ) : (
-                        <Text variant="secondary" size="sm">
-                          {props.placeholder}
-                        </Text>
+                        <Text variant="secondary">{props.placeholder}</Text>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -226,7 +224,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
                     }
                   }}
                 >
-                  <SelectTrigger className="font-normal focus:ring-0 w-[120px] focus:ring-offset-0">
+                  <SelectTrigger className="font-normal focus:ring-0 w-[120px] focus:ring-offset-0 px-3 py-5">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
