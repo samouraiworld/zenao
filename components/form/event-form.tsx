@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   fromUnixTime,
   getUnixTime,
+  hoursToMinutes,
   isSameDay,
   minutesToSeconds,
 } from "date-fns";
@@ -225,7 +226,7 @@ export const EventForm: React.FC<EventFormProps> = ({
 
                     return (
                       isSameDay(currentStartDate, date) &&
-                      currentStartDate.getHours() * 60 +
+                      hoursToMinutes(currentStartDate.getHours()) +
                         currentStartDate.getMinutes() +
                         15 /* Event duration 15 minutes minimum */ >
                         date.getHours() * 60 + date.getMinutes()
