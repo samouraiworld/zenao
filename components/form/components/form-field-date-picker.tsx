@@ -156,9 +156,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
                             format(formattedValue, "MM/dd/yyyy")
                           )
                         ) : (
-                          <Text variant="secondary" size="sm">
-                            {props.placeholder}
-                          </Text>
+                          <Text variant="secondary">{props.placeholder}</Text>
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
