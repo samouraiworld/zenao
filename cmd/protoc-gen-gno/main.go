@@ -162,6 +162,7 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 	}
 }
 
+// TODO: fork proto gen go into a clean proto gen gno instead of this
 func genImportStmts(gen *protogen.Plugin, g *protogen.GeneratedFile, file *protogen.File) {
 	for i, imps := 0, file.Desc.Imports(); i < imps.Len(); i++ {
 		imp := imps.Get(i)
