@@ -6,7 +6,6 @@ import { profileOptions } from "@/lib/queries/profile";
 import { eventsByCreatorList } from "@/lib/queries/events-list";
 
 export const revalidate = 60;
-export const dynamicParams = true;
 
 type Props = {
   params: Promise<{ address: string }>;
