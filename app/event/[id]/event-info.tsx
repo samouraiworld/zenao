@@ -11,7 +11,7 @@ import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { TZDate } from "react-day-picker";
-import { ParticipateForm } from "./ParticipateForm";
+import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
