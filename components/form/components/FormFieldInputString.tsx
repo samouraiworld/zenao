@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
-import { cn } from "@/lib/tailwind";
 
 export const FormFieldInputString = <T extends FieldValues>({
   control,
@@ -30,10 +29,7 @@ export const FormFieldInputString = <T extends FieldValues>({
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <Input
-              className={cn(
-                "focus-visible:ring-0 border-none h-auto p-0 placeholder:text-secondary-color",
-                className,
-              )}
+              className={className}
               placeholder={placeholder || "placeholder..."}
               {...field}
             />

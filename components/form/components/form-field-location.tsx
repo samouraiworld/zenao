@@ -74,13 +74,13 @@ export const FormFieldLocation: React.FC<{
         return (
           <FormItem className="flex flex-col w-full gap-0">
             <Popover open={open} onOpenChange={setOpen}>
-              <div className="flex flex-row w-full justify-between">
+              <div className="flex flex-row w-full relative">
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
-                      variant="secondary"
+                      variant="input"
                       role="combobox"
-                      className="w-full flex justify-start rounded-xl px-4 py-3 h-auto backdrop-blur-sm"
+                      className="w-full flex justify-start px-4 py-3 h-auto backdrop-blur-sm"
                     >
                       <Text
                         className={cn(
@@ -98,7 +98,7 @@ export const FormFieldLocation: React.FC<{
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="bg-secondary/80 backdrop-blur-sm self-center absolute right-1"
+                    className="backdrop-blur-sm self-center absolute right-1"
                     onClick={() => {
                       setSearch("");
                       form.setValue("location", {
@@ -186,7 +186,7 @@ export const FormFieldLocation: React.FC<{
                 </Command>
               </PopoverContent>
             </Popover>
-            <FormMessage className="pb-2 px-4" />
+            <FormMessage />
           </FormItem>
         );
       }}

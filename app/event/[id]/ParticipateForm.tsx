@@ -7,17 +7,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { zenaoClient } from "@/app/zenao-client";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/shadcn/form";
-import { Input } from "@/components/shadcn/input";
-import { Card } from "@/components/cards/Card";
+import { Form } from "@/components/shadcn/form";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { useToast } from "@/app/hooks/use-toast";
+import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
 
 const participateFormSchema = z.object({
   email: z.string().email(),
@@ -93,32 +86,18 @@ export function ParticipateForm({
       <form onSubmit={form.handleSubmit(onSubmitSignedOut)}>
         <div>
           <SignedOut>
-            {/* TODO: merge with FormFieldInputString (got typescript issues) */}
-            <Card className="bg-background mb-2">
-              <FormField
-                rules={{ required: true }}
+            <div className="flex flex-col gap-2">
+              <FormFieldInputString
                 control={form.control}
                 name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        className="focus-visible:ring-0 border-none h-auto p-0 placeholder:text-secondary-color"
-                        placeholder={t("email-placeholder")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder={t("email-placeholder")}
               />
-            </Card>
-            <ButtonWithLabel
-              loading={isLoading}
-              label={t("participate-button")}
-              type="submit"
-            />
+              <ButtonWithLabel
+                loading={isLoading}
+                label={t("participate-button")}
+                type="submit"
+              />
+            </div>
           </SignedOut>
           <SignedIn>
             <ButtonWithLabel
