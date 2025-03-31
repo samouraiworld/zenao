@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { Card } from "@/components/cards/Card";
