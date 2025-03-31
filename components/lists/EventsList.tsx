@@ -3,7 +3,7 @@
 import { CalendarIcon } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { EventCard } from "../cards/EventCard";
+import { EventCard } from "../cards/event-card";
 import { Button } from "../shadcn/button";
 import Text from "../texts/text";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
