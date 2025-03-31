@@ -59,24 +59,6 @@ export const useEventParticipateLoggedIn = (queryClient: QueryClient) => {
         eventUsersWithRoleOpts.queryKey,
       );
 
-      // Optimistic updates
-      queryClient.setQueryData(eventUserRolesOpts.queryKey, (old) => [
-        ...(old ?? []),
-        "participant" as const,
-      ]);
-      queryClient.setQueryData(eventOptionsOpts.queryKey, (old) =>
-        !old
-          ? undefined
-          : {
-              ...old,
-              participants: old.participants + 1,
-            },
-      );
-      queryClient.setQueryData(eventUsersWithRoleOpts.queryKey, (old) => [
-        ...(old ?? []),
-        variables.userAddress,
-      ]);
-
       return {
         previousEventUserRoles,
         previousEventOptions,
