@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useCallback, useMemo } from "react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import React, { useMemo } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
@@ -46,7 +46,6 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 };
 
 export function EventInfo({ id }: { id: string }) {
-  // const queryClient = useQueryClient();
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: address } = useSuspenseQuery(
@@ -64,21 +63,6 @@ export function EventInfo({ id }: { id: string }) {
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
-
-  // Optimistic update for participant role
-  // const handleParticipateSuccess = useCallback(async () => {
-  //   const opts = eventUserRoles(id, address);
-  //   await queryClient.cancelQueries(opts);
-  //   queryClient.setQueryData(opts.queryKey, (roles) => {
-  //     if (!roles) {
-  //       return ["participant" as const];
-  //     }
-  //     if (!roles.includes("participant")) {
-  //       return [...roles, "participant" as const];
-  //     }
-  //     return roles;
-  //   });
-  // }, [queryClient, id, address]);
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -231,9 +215,9 @@ export function EventInfo({ id }: { id: string }) {
               </Heading>
               <Text className="my-4">{t("join-desc")}</Text>
               <ParticipateForm
-                // onSuccess={handleParticipateSuccess}
                 eventId={id}
-                user={userId && address ? { id: userId, address } : undefined}
+                userId={userId}
+                userAddress={address}
               />
             </div>
           )}

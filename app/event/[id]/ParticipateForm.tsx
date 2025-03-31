@@ -1,18 +1,20 @@
 "use client";
 
 import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { zenaoClient } from "@/app/zenao-client";
 import { Form } from "@/components/shadcn/form";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { useToast } from "@/app/hooks/use-toast";
 import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
-import { useEventParticipateLoggedIn } from "@/lib/mutations/event-participate";
+import {
+  useEventParticipateGuest,
+  useEventParticipateLoggedIn,
+} from "@/lib/mutations/event-participate";
 
 const participateFormSchema = z.object({
   email: z.string().email(),
@@ -20,22 +22,24 @@ const participateFormSchema = z.object({
 type ParticipateFormSchemaType = z.infer<typeof participateFormSchema>;
 
 export function ParticipateForm({
-  onSuccess,
+  onSuccess: _,
   eventId,
-  user,
+  userId,
+  userAddress,
 }: {
   eventId: string;
-  user?: {
-    id: string;
-    address: string;
-  };
+  userId?: string | null;
+  userAddress: string | null;
   onSuccess?: () => void;
 }) {
   const { getToken } = useAuth();
-  const queryClient = useQueryClient();
-  const { participate, isPending } = useEventParticipateLoggedIn(queryClient);
   const t = useTranslations("event");
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const { participate: participateLoggedIn, isPending: isPendingLoggedIn } =
+    useEventParticipateLoggedIn(queryClient);
+  const { participate: participateGuest, isPending: isPendingGuest } =
+    useEventParticipateGuest(queryClient);
+
   const form = useForm<ParticipateFormSchemaType>({
     mode: "all",
     resolver: zodResolver(participateFormSchema),
@@ -48,10 +52,12 @@ export function ParticipateForm({
   // Submit for logged-out user (with email confirmation form)
   const onSubmitSignedOut = async (values: ParticipateFormSchemaType) => {
     try {
-      setIsLoading(true);
-      await zenaoClient.participate({ eventId, email: values.email });
+      await participateGuest({
+        eventId,
+        email: values.email,
+        userAddress: userAddress,
+      });
       toast({ title: t("toast-confirmation") });
-      onSuccess?.();
     } catch (err) {
       if (
         err instanceof Error &&
@@ -66,7 +72,6 @@ export function ParticipateForm({
       }
       console.error(err);
     }
-    setIsLoading(false);
   };
 
   // Submit for logged-in user (with clerk account)
@@ -76,15 +81,15 @@ export function ParticipateForm({
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      if (!user) {
-        throw new Error("missing user");
+      if (!userId || !userAddress) {
+        throw new Error("missing user id or user address");
       }
 
-      await participate({
+      await participateLoggedIn({
         eventId,
         token,
-        userId: user.id,
-        userAddress: user.address,
+        userId: userId,
+        userAddress: userAddress,
       });
 
       toast({ title: t("toast-confirmation") });
@@ -106,7 +111,7 @@ export function ParticipateForm({
                 placeholder={t("email-placeholder")}
               />
               <ButtonWithLabel
-                loading={isLoading}
+                loading={isPendingGuest}
                 label={t("participate-button")}
                 type="submit"
               />
@@ -115,7 +120,7 @@ export function ParticipateForm({
           <SignedIn>
             <ButtonWithLabel
               onClick={onSubmitSignedIn}
-              loading={isPending}
+              loading={isPendingLoggedIn}
               label={t("participate-button")}
             />
           </SignedIn>

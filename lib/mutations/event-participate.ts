@@ -3,9 +3,17 @@ import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventOptions } from "../queries/event";
 import { zenaoClient } from "@/app/zenao-client";
 
-const getRelatedQueriesOptions = (
-  variables: EventParticipateLoggedInRequest,
-) => {
+type EventParticipateLoggedInRequest = {
+  eventId: string;
+  token: string;
+  userId: string;
+  userAddress: string;
+};
+
+const getRelatedQueriesOptions = (variables: {
+  eventId: string;
+  userAddress: string | null;
+}) => {
   const eventUserRolesOpts = eventUserRoles(
     variables.eventId,
     variables.userAddress,
@@ -23,21 +31,9 @@ const getRelatedQueriesOptions = (
   };
 };
 
-type EventParticipateLoggedInRequest = {
-  eventId: string;
-  token: string;
-  userId: string;
-  userAddress: string;
-};
-
 export const useEventParticipateLoggedIn = (queryClient: QueryClient) => {
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
-    mutationFn: async ({
-      eventId,
-      token,
-      userId: _id,
-      userAddress: _address,
-    }: EventParticipateLoggedInRequest) => {
+    mutationFn: async ({ eventId, token }: EventParticipateLoggedInRequest) => {
       await zenaoClient.participate(
         { eventId },
         { headers: { Authorization: `Bearer ${token}` } },
@@ -115,6 +111,36 @@ export const useEventParticipateLoggedIn = (queryClient: QueryClient) => {
       );
     },
     mutationKey: ["eventParticipate"],
+  });
+
+  return {
+    participate: mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
+};
+
+type EventParticipateGuestRequest = {
+  eventId: string;
+  email: string;
+  userAddress: string | null;
+};
+
+export const useEventParticipateGuest = (queryClient: QueryClient) => {
+  const { isPending, mutateAsync, isSuccess, isError } = useMutation({
+    mutationFn: async ({ eventId, email }: EventParticipateGuestRequest) => {
+      await zenaoClient.participate({ eventId, email });
+    },
+    onSuccess: (_, variables) => {
+      const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
+        getRelatedQueriesOptions(variables);
+
+      // Invalidate queries
+      queryClient.invalidateQueries(eventUserRolesOpts);
+      queryClient.invalidateQueries(eventOptionsOpts);
+      queryClient.invalidateQueries(eventUsersWithRoleOpts);
+    },
   });
 
   return {
