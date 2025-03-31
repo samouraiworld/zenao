@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useCallback } from "react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import React, { useMemo } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
@@ -11,7 +11,7 @@ import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { TZDate } from "react-day-picker";
-import { ParticipateForm } from "./ParticipateForm";
+import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -53,10 +53,9 @@ export function EventInfo({ id }: { id: string }) {
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
 
-  const isOrganizer = roles.includes("organizer");
-  const isParticipate = roles.includes("participant");
+  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
+  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
-  const queryClient = useQueryClient();
 
   // Correctly reconstruct location object
   const location = makeLocationFromEvent(data.location);
@@ -64,20 +63,6 @@ export function EventInfo({ id }: { id: string }) {
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
-
-  const handleParticipateSuccess = useCallback(async () => {
-    const opts = eventUserRoles(id, address);
-    await queryClient.cancelQueries(opts);
-    queryClient.setQueryData(opts.queryKey, (roles) => {
-      if (!roles) {
-        return ["participant" as const];
-      }
-      if (!roles.includes("participant")) {
-        return [...roles, "participant" as const];
-      }
-      return roles;
-    });
-  }, [queryClient, id, address]);
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -203,7 +188,7 @@ export function EventInfo({ id }: { id: string }) {
 
         {/* Participate Card */}
         <Card className="mt-2">
-          {isParticipate ? (
+          {isParticipant ? (
             <div>
               <div className="flex flex-row justify-between">
                 <Heading level={2} size="xl">
@@ -230,8 +215,9 @@ export function EventInfo({ id }: { id: string }) {
               </Heading>
               <Text className="my-4">{t("join-desc")}</Text>
               <ParticipateForm
-                onSuccess={handleParticipateSuccess}
                 eventId={id}
+                userId={userId}
+                userAddress={address}
               />
             </div>
           )}
