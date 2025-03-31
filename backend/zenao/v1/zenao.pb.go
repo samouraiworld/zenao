@@ -1100,8 +1100,8 @@ type CreatePollRequest struct {
 	EventId         string                 `protobuf:"bytes,1,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 	Question        string                 `protobuf:"bytes,2,opt,name=question,proto3" json:"question,omitempty"`
 	Options         []string               `protobuf:"bytes,3,rep,name=options,proto3" json:"options,omitempty"`
-	Duration        int64                  `protobuf:"varint,4,opt,name=duration,proto3" json:"duration,omitempty"`                                      // unix seconds
-	MultipleChoices bool                   `protobuf:"varint,5,opt,name=multiple_choices,json=multipleChoices,proto3" json:"multiple_choices,omitempty"` // polls.v1.PollKind kind = 5; XXX: need gno protoc to handle this
+	Duration        int64                  `protobuf:"varint,4,opt,name=duration,proto3" json:"duration,omitempty"` // unix seconds
+	MultipleChoices bool                   `protobuf:"varint,5,opt,name=multiple_choices,json=multipleChoices,proto3" json:"multiple_choices,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }

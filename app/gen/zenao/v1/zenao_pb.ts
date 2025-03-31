@@ -916,8 +916,6 @@ export type CreatePollRequest = Message<"zenao.v1.CreatePollRequest"> & {
   duration: bigint;
 
   /**
-   * polls.v1.PollKind kind = 5; XXX: need gno protoc to handle this
-   *
    * @generated from field: bool multiple_choices = 5;
    */
   multipleChoices: boolean;
@@ -950,8 +948,6 @@ export type CreatePollRequestJson = {
   duration?: string;
 
   /**
-   * polls.v1.PollKind kind = 5; XXX: need gno protoc to handle this
-   *
    * @generated from field: bool multiple_choices = 5;
    */
   multipleChoices?: boolean;
