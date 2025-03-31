@@ -55,16 +55,21 @@ export function ProfileInfo({
         Hosting events ({upcomingEvents.length})
       </Heading>
 
-      {upcomingEvents.map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
+      <div className="flex flex-col gap-0">
+        {upcomingEvents.map((evt) => (
+          <EventCard key={evt.pkgPath} evt={evt} />
+        ))}
+      </div>
+
       <Heading level={2} size="lg">
         Past events ({pastEvents.length})
       </Heading>
 
-      {pastEvents.map((evt) => (
-        <EventCard key={evt.pkgPath} evt={evt} />
-      ))}
+      <div className="flex flex-col gap-0">
+        {pastEvents.map((evt) => (
+          <EventCard key={evt.pkgPath} evt={evt} />
+        ))}
+      </div>
     </div>
   );
 }
