@@ -74,9 +74,6 @@ func fieldToLit(prefix string, g *protogen.GeneratedFile, field *protogen.Field)
 	default:
 		panic(fmt.Errorf("unexpected field type %q", field.Desc.Kind().String()))
 	}
-
-	if field.Desc.IsList() {
-	}
 }
 
 // fieldGnoType returns the Go type used for a field.
