@@ -20,4 +20,4 @@ jobs:
           cache-key-suffix: golangci-lint
 
       - name: Run golangci-lint
-        run: go run -modfile go.mod github.com/golangci/golangci-lint/cmd/golangci-lint run ./... 
+        run: go run -modfile go.mod github.com/golangci/golangci-lint/cmd/golangci-lint run ./... --timeout=5m 
