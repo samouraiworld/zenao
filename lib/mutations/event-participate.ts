@@ -119,9 +119,15 @@ export const useEventParticipateGuest = (queryClient: QueryClient) => {
         getRelatedQueriesOptions(variables);
 
       // Invalidate queries
-      queryClient.invalidateQueries(eventUserRolesOpts);
-      queryClient.invalidateQueries(eventOptionsOpts);
       queryClient.invalidateQueries(eventUsersWithRoleOpts);
+      queryClient.invalidateQueries(eventOptionsOpts);
+
+      // User role optimistic update
+      queryClient.cancelQueries(eventUserRolesOpts);
+      queryClient.setQueryData(eventUserRolesOpts.queryKey, (old) => [
+        ...(old ?? []),
+        "participant" as const,
+      ]);
     },
   });
 
