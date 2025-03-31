@@ -231,7 +231,7 @@ export function EventInfo({ id }: { id: string }) {
               </Heading>
               <Text className="my-4">{t("join-desc")}</Text>
               <ParticipateForm
-                onSuccess={handleParticipateSuccess}
+                // onSuccess={handleParticipateSuccess}
                 eventId={id}
                 user={userId && address ? { id: userId, address } : undefined}
               />
