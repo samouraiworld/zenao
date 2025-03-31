@@ -1,0 +1,23 @@
+name: Golangci-lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+
+jobs:
+  golangci-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
+        with:
+          go-version-file: go.mod
+          cache-key-suffix: golangci-lint
+
+      - name: Run golangci-lint
+        run: go run -modfile go.mod github.com/golangci/golangci-lint/cmd/golangci-lint run ./... 
