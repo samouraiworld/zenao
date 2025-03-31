@@ -5,13 +5,7 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import {
-  BookOpenText,
-  CalendarDays,
-  CompassIcon,
-  LucideProps,
-  Tickets,
-} from "lucide-react";
+import { BookOpenText, CompassIcon, LucideProps, Tickets } from "lucide-react";
 import {
   ClerkLoading,
   SignedIn,
@@ -59,13 +53,6 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
         icon: CompassIcon,
         needsAuth: false,
         children: t("discover"),
-      },
-      {
-        key: "your-events",
-        to: "/created",
-        icon: CalendarDays,
-        needsAuth: true,
-        children: t("your-events"),
       },
       {
         key: "tickets",

@@ -7,6 +7,7 @@ import { profileOptions } from "@/lib/queries/profile";
 import Heading from "@/components/texts/heading";
 import { eventsByCreatorList } from "@/lib/queries/events-list";
 import { EventCard } from "@/components/cards/event-card";
+import { Separator } from "@/components/shadcn/separator";
 
 export function ProfileInfo({
   address,
@@ -51,6 +52,9 @@ export function ProfileInfo({
           avatarUri={profile.avatarUri}
         />
       </div>
+
+      <Separator />
+
       <Heading level={2} size="lg">
         Hosting events ({upcomingEvents.length})
       </Heading>
