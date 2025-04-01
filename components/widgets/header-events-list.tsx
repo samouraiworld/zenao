@@ -1,22 +1,24 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Dispatch, SetStateAction } from "react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-import { GnowebButton } from "../buttons/GnowebButton";
 import Heading from "../texts/heading";
+import { GnowebButton } from "../buttons/GnowebButton";
 import Text from "../texts/text";
-import { EventsList } from "@/components/lists/EventsList";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 
 const HeaderEventsList: React.FC<{
-  tab: "upcoming" | "past";
-  setTab: Dispatch<SetStateAction<"upcoming" | "past">>;
   title: string;
   description?: string;
-}> = ({ tab, setTab, title, description }) => {
+}> = ({ title, description }) => {
+  const [tab, setTab] = useQueryState<"upcoming" | "past">(
+    "from",
+    parseAsStringLiteral(["upcoming", "past"] as const)
+      .withDefault("upcoming")
+      .withOptions({ shallow: false, throttleMs: 200 }),
+  );
   const t = useTranslations("events-list");
+
   return (
     <div className="flex flex-col gap-2 mb-3">
       <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between md:items-center">
@@ -50,32 +52,4 @@ const HeaderEventsList: React.FC<{
   );
 };
 
-export const EventsListLayout: React.FC<{
-  upcoming: EventInfo[];
-  past: EventInfo[];
-  title: string;
-  description?: string;
-}> = ({ upcoming, past, title, description }) => {
-  const [tab, setTab] = useQueryState<"upcoming" | "past">(
-    "from",
-    parseAsStringLiteral(["upcoming", "past"] as const)
-      .withDefault("upcoming")
-      .withOptions({ shallow: false }),
-  );
-
-  return (
-    <div>
-      <HeaderEventsList
-        tab={tab}
-        setTab={setTab}
-        description={description}
-        title={title}
-      />
-      {tab === "upcoming" ? (
-        <EventsList list={upcoming} />
-      ) : (
-        <EventsList list={past} />
-      )}
-    </div>
-  );
-};
+export default HeaderEventsList;
