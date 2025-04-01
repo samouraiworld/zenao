@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { GnowebButton } from "../buttons/GnowebButton";
 import Heading from "../texts/heading";
 import Text from "../texts/text";
@@ -55,7 +56,12 @@ export const EventsListLayout: React.FC<{
   title: string;
   description?: string;
 }> = ({ upcoming, past, title, description }) => {
-  const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
+  const [tab, setTab] = useQueryState<"upcoming" | "past">(
+    "from",
+    parseAsStringLiteral(["upcoming", "past"] as const)
+      .withDefault("upcoming")
+      .withOptions({ shallow: false }),
+  );
 
   return (
     <div>
