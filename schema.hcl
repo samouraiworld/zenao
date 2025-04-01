@@ -136,6 +136,300 @@ table "events" {
     columns = [column.deleted_at]
   }
 }
+table "feeds" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "slug" {
+    null = true
+    type = text
+  }
+  column "event_id" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_feeds_event" {
+    columns     = [column.event_id]
+    ref_columns = [table.events.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_feeds_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
+table "posts" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "kind" {
+    null = true
+    type = text
+  }
+  column "parent_uri" {
+    null = true
+    type = text
+  }
+  column "latitude" {
+    null = true
+    type = real
+  }
+  column "longitude" {
+    null = true
+    type = real
+  }
+  column "tags" {
+    null = true
+    type = text
+  }
+  column "content" {
+    null = true
+    type = text
+  }
+  column "title" {
+    null = true
+    type = text
+  }
+  column "preview_text" {
+    null = true
+    type = text
+  }
+  column "preview_image_uri" {
+    null = true
+    type = text
+  }
+  column "uri" {
+    null = true
+    type = text
+  }
+  column "description" {
+    null = true
+    type = text
+  }
+  column "image_uri" {
+    null = true
+    type = text
+  }
+  column "audio_uri" {
+    null = true
+    type = text
+  }
+  column "video_uri" {
+    null = true
+    type = text
+  }
+  column "thumbnail_image_uri" {
+    null = true
+    type = text
+  }
+  column "user_id" {
+    null = true
+    type = integer
+  }
+  column "feed_id" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_posts_feed" {
+    columns     = [column.feed_id]
+    ref_columns = [table.feeds.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_posts_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
+table "polls" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "question" {
+    null = true
+    type = text
+  }
+  column "kind" {
+    null = true
+    type = integer
+  }
+  column "duration" {
+    null = true
+    type = integer
+  }
+  column "post_id" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_polls_post" {
+    columns     = [column.post_id]
+    ref_columns = [table.posts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_polls_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
+table "poll_options" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "option" {
+    null = true
+    type = text
+  }
+  column "count" {
+    null = true
+    type = integer
+  }
+  column "poll_id" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_polls_options" {
+    columns     = [column.poll_id]
+    ref_columns = [table.polls.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_poll_options_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
+table "poll_votes" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "poll_id" {
+    null = true
+    type = integer
+  }
+  column "poll_option_id" {
+    null = true
+    type = integer
+  }
+  column "user_id" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_poll_votes_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_poll_votes_poll_option" {
+    columns     = [column.poll_option_id]
+    ref_columns = [table.poll_options.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_poll_votes_poll" {
+    columns     = [column.poll_id]
+    ref_columns = [table.polls.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_poll_votes_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
 table "sold_tickets" {
   schema = schema.main
   column "id" {

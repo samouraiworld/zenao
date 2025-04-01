@@ -64,10 +64,10 @@ type PollOption struct {
 type PollVote struct {
 	gorm.Model
 
-	PollID     uint
-	Poll       Poll
-	OptionID   uint
-	PollOption PollOption
-	UserID     string
-	User       User
+	PollID       uint
+	Poll         Poll
+	PollOptionID uint
+	PollOption   PollOption
+	UserID       string
+	User         User
 }
