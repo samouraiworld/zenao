@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventsList } from "@/lib/queries/events-list";
@@ -17,12 +18,14 @@ export default async function DiscoverPage() {
 
   return (
     <ScreenContainer>
-      <EventsListLayout
-        upcoming={upcoming}
-        past={past}
-        title={t("title")}
-        description={t("description")}
-      />
+      <Suspense>
+        <EventsListLayout
+          upcoming={upcoming}
+          past={past}
+          title={t("title")}
+          description={t("description")}
+        />
+      </Suspense>
     </ScreenContainer>
   );
 }
