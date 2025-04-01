@@ -614,3 +614,69 @@ func (b *BatchProfileRequest) FromJSON(node *json.Node) {
 		b.Addresses = arr
 	}
 }
+
+func (c *CreatePollRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
+	if c.Question != "" {
+		fields["question"] = json.StringNode("", c.Question)
+	}
+	if len(c.Options) != 0 {
+		arr := make([]*json.Node, len(c.Options))
+		for i, val := range c.Options {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["options"] = json.ArrayNode("", arr)
+	}
+	if c.Duration != 0 {
+		fields["duration"] = json.StringNode("", strconv.FormatInt(c.Duration, 10))
+	}
+	if c.MultipleChoices != false {
+		fields["multipleChoices"] = json.BoolNode("", c.MultipleChoices)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePollRequest) FromJSON(node *json.Node) {
+	*c = CreatePollRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
+	}
+	if val, ok := fields["question"]; ok {
+		c.Question = val.MustString()
+	}
+	if val, ok := fields["options"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Options = arr
+	}
+	if val, ok := fields["duration"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		c.Duration = fv
+	}
+	if val, ok := fields["multipleChoices"]; ok {
+		c.MultipleChoices = val.MustBool()
+	}
+}
+
+func (c *CreatePollResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePollResponse) FromJSON(node *json.Node) {
+	*c = CreatePollResponse{}
+}
