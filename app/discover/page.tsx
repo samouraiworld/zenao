@@ -28,10 +28,6 @@ export default async function DiscoverPage({ searchParams }: PageProps) {
       break;
   }
 
-  // const upcoming = await queryClient.fetchQuery(
-  //   eventsList(now, Number.MAX_SAFE_INTEGER, 20),
-  // );
-  // const past = await queryClient.fetchQuery(eventsList(now - 1, 0, 20));
   const t = await getTranslations("discover");
 
   return (
