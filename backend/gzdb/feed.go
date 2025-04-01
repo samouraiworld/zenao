@@ -1,6 +1,8 @@
 package gzdb
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Feed struct {
 	gorm.Model
@@ -36,4 +38,36 @@ type Post struct {
 	User   User
 	FeedID uint
 	Feed   Feed
+}
+
+type Poll struct {
+	gorm.Model
+	Question string
+	Kind     int
+	Duration int64
+
+	PostID uint
+	Post   Post
+
+	Options []PollOption
+}
+
+type PollOption struct {
+	gorm.Model
+	Option string
+	Count  uint32
+
+	PollID uint
+	Poll   Poll
+}
+
+type PollVote struct {
+	gorm.Model
+
+	PollID     uint
+	Poll       Poll
+	OptionID   uint
+	PollOption PollOption
+	UserID     string
+	User       User
 }
