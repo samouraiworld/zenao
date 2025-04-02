@@ -1,17 +1,25 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { FromFilter } from "@/lib/searchParams";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
+// import { FromFilter } from "@/lib/searchParams";
 import { eventsList } from "@/lib/queries/events-list";
 import { EventsList } from "@/components/lists/events-list";
 
 export function DiscoverEventsList({
   now,
-  from,
+  // from,
 }: {
   now: number;
-  from: FromFilter;
+  // from: FromFilter;
 }) {
+  const [from] = useQueryState<"upcoming" | "past">(
+    "from",
+    parseAsStringLiteral(["upcoming", "past"] as const)
+      .withDefault("upcoming")
+      .withOptions({ shallow: false, throttleMs: 200 }),
+  );
+
   const { data: events } = useSuspenseQuery(
     from === "upcoming"
       ? eventsList(now, Number.MAX_SAFE_INTEGER, 20)
