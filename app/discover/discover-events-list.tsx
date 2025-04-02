@@ -2,17 +2,10 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-// import { FromFilter } from "@/lib/searchParams";
 import { eventsList } from "@/lib/queries/events-list";
 import { EventsList } from "@/components/lists/events-list";
 
-export function DiscoverEventsList({
-  now,
-  // from,
-}: {
-  now: number;
-  // from: FromFilter;
-}) {
+export function DiscoverEventsList({ now }: { now: number }) {
   const [from] = useQueryState<"upcoming" | "past">(
     "from",
     parseAsStringLiteral(["upcoming", "past"] as const)
