@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
 import { format, fromUnixTime } from "date-fns";
+import Image from "next/image";
 import { UserAvatarWithName } from "../common/user";
 import Text from "../texts/text";
 import Heading from "../texts/heading";
-import Web3Image from "../images/web3-image";
 import { Card } from "./Card";
 import EventDateTime from "./event-date-time";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
@@ -62,7 +62,7 @@ export function EventCard({ evt }: { evt: EventInfo }) {
             </div>
             <div>
               <div className="min-w-[80px] min-h-[80px] w-[80px] h-[80px] md:w-[120px] md:h-[120px] relative">
-                <Web3Image
+                <Image
                   src={evt.imageUri}
                   width={80}
                   height={80}
