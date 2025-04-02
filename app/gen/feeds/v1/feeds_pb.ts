@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file feeds/v1/feeds.proto.
  */
 export const file_feeds_v1_feeds: GenFile = /*@__PURE__*/
-  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIlAKCVZpZGVvUG9zdBITCgtkZXNjcmlwdGlvbhgBIAEoCRIRCgl2aWRlb191cmkYAiABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgDIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIosDCgRQb3N0Eg4KBmF1dGhvchgBIAEoCRISCgpwYXJlbnRfdXJpGAIgASgJEiEKA2xvYxgDIAEoCzIULmZlZWRzLnYxLlBvc3RHZW9Mb2MSEgoKY3JlYXRlZF9hdBgEIAEoAxISCgp1cGRhdGVkX2F0GAUgASgDEhIKCmRlbGV0ZWRfYXQYBiABKAMSDAoEdGFncxgHIAMoCRIqCghzdGFuZGFyZBgIIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCSABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYCiABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGAsgASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDCABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgNIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiUwoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSKQoJcmVhY3Rpb25zGAIgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw");
+  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIl8KCVZpZGVvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCgl2aWRlb191cmkYAyABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgEIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIosDCgRQb3N0Eg4KBmF1dGhvchgBIAEoCRISCgpwYXJlbnRfdXJpGAIgASgJEiEKA2xvYxgDIAEoCzIULmZlZWRzLnYxLlBvc3RHZW9Mb2MSEgoKY3JlYXRlZF9hdBgEIAEoAxISCgp1cGRhdGVkX2F0GAUgASgDEhIKCmRlbGV0ZWRfYXQYBiABKAMSDAoEdGFncxgHIAMoCRIqCghzdGFuZGFyZBgIIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCSABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYCiABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGAsgASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDCABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgNIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiUwoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSKQoJcmVhY3Rpb25zGAIgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw");
 
 /**
  * @generated from message feeds.v1.PostGeoLoc
@@ -269,17 +269,22 @@ export const AudioPostSchema: GenMessage<AudioPost, AudioPostJson> = /*@__PURE__
  */
 export type VideoPost = Message<"feeds.v1.VideoPost"> & {
   /**
-   * @generated from field: string description = 1;
+   * @generated from field: string title = 1;
+   */
+  title: string;
+
+  /**
+   * @generated from field: string description = 2;
    */
   description: string;
 
   /**
-   * @generated from field: string video_uri = 2;
+   * @generated from field: string video_uri = 3;
    */
   videoUri: string;
 
   /**
-   * @generated from field: string thumbnail_image_uri = 3;
+   * @generated from field: string thumbnail_image_uri = 4;
    */
   thumbnailImageUri: string;
 };
@@ -289,17 +294,22 @@ export type VideoPost = Message<"feeds.v1.VideoPost"> & {
  */
 export type VideoPostJson = {
   /**
-   * @generated from field: string description = 1;
+   * @generated from field: string title = 1;
+   */
+  title?: string;
+
+  /**
+   * @generated from field: string description = 2;
    */
   description?: string;
 
   /**
-   * @generated from field: string video_uri = 2;
+   * @generated from field: string video_uri = 3;
    */
   videoUri?: string;
 
   /**
-   * @generated from field: string thumbnail_image_uri = 3;
+   * @generated from field: string thumbnail_image_uri = 4;
    */
   thumbnailImageUri?: string;
 };

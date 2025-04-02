@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/ringsaturn/tzf"
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
@@ -34,6 +36,28 @@ type Event struct {
 	Capacity    uint32
 	CreatorID   string
 	Location    *zenaov1.EventLocation
+}
+
+type Feed struct {
+	ID      string
+	Slug    string
+	EventID string
+}
+
+type Post struct {
+	ID     string
+	Post   *feedsv1.Post
+	UserID string
+	FeedID string
+}
+
+type Poll struct {
+	ID       string
+	Question string
+	Kind     *pollsv1.PollKind
+	Duration int64
+	Results  []*pollsv1.PollResult
+	PostID   string
 }
 
 var tzFinder tzf.F
@@ -81,6 +105,10 @@ type DB interface {
 	Participate(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetAllParticipants(eventID string) ([]*User, error)
+
+	CreateFeed(eventID string, slug string) (*Feed, error)
+	CreatePost(feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	CreatePoll(postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
 }
 
 type Chain interface {

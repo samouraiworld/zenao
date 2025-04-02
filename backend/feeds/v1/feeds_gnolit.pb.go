@@ -111,6 +111,9 @@ func (v *VideoPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("VideoPost{\n")
+	if v.Title != "" {
+		fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, v.Title)
+	}
 	if v.Description != "" {
 		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, v.Description)
 	}

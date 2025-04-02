@@ -330,7 +330,7 @@ table "polls" {
     columns = [column.deleted_at]
   }
 }
-table "poll_options" {
+table "poll_results" {
   schema = schema.main
   column "id" {
     null           = true
@@ -364,40 +364,19 @@ table "poll_options" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_polls_options" {
+  foreign_key "fk_polls_results" {
     columns     = [column.poll_id]
     ref_columns = [table.polls.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
-  index "idx_poll_options_deleted_at" {
+  index "idx_poll_results_deleted_at" {
     columns = [column.deleted_at]
   }
 }
 table "poll_votes" {
   schema = schema.main
-  column "id" {
-    null           = true
-    type           = integer
-    auto_increment = true
-  }
-  column "created_at" {
-    null = true
-    type = datetime
-  }
-  column "updated_at" {
-    null = true
-    type = datetime
-  }
-  column "deleted_at" {
-    null = true
-    type = datetime
-  }
-  column "poll_id" {
-    null = true
-    type = integer
-  }
-  column "poll_option_id" {
+  column "poll_result_id" {
     null = true
     type = integer
   }
@@ -406,28 +385,19 @@ table "poll_votes" {
     type = integer
   }
   primary_key {
-    columns = [column.id]
+    columns = [column.poll_result_id, column.user_id]
+  }
+  foreign_key "fk_poll_votes_poll_result" {
+    columns     = [column.poll_result_id]
+    ref_columns = [table.poll_results.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
   }
   foreign_key "fk_poll_votes_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
-  }
-  foreign_key "fk_poll_votes_poll_option" {
-    columns     = [column.poll_option_id]
-    ref_columns = [table.poll_options.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  foreign_key "fk_poll_votes_poll" {
-    columns     = [column.poll_id]
-    ref_columns = [table.polls.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  index "idx_poll_votes_deleted_at" {
-    columns = [column.deleted_at]
   }
 }
 table "sold_tickets" {

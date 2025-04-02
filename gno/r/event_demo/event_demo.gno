@@ -37,17 +37,9 @@ func init() {
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
-<<<<<<< HEAD
 	social_feed.NewFeed("main", false, func(memberId string) bool {
 		return daoPrivate.Members.IsMember(memberId)
 	})
-=======
-	social_feed.NewFeed("main", false, IsMember)
-}
-
-func IsMember(memberId string) bool {
-	return daoPrivate.Members.IsMember(memberId)
->>>>>>> feature/backend-voting-on-polls
 }
 
 func Vote(proposalID uint64, vote daocond.Vote) {

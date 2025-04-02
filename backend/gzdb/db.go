@@ -3,10 +3,12 @@ package gzdb
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
@@ -309,6 +311,109 @@ func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error)
 		res = append(res, role.Role)
 	}
 	return res, nil
+}
+
+func (g *gormZenaoDB) CreateFeed(eventID string, slug string) (*zeni.Feed, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	feed := &Feed{
+		Slug:    slug,
+		EventID: uint(evtIDInt),
+	}
+
+	if err := g.db.Create(feed).Error; err != nil {
+		return nil, err
+	}
+
+	zfeed, err := dbFeedToZeniFeed(feed)
+	if err != nil {
+		return nil, err
+	}
+
+	return zfeed, nil
+}
+
+func (g *gormZenaoDB) CreatePost(feedID string, userID string, post *feedsv1.Post) (*zeni.Post, error) {
+	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	dbPost := &Post{
+		Kind:      reflect.TypeOf(post.Post).String(),
+		ParentURI: post.ParentUri,
+		UserID:    uint(userIDInt),
+		FeedID:    uint(feedIDInt),
+	}
+
+	switch dbPost.Kind {
+	case reflect.TypeOf(feedsv1.Post_Standard{}).String():
+		dbPost.Content = post.GetStandard().Content
+	case reflect.TypeOf(feedsv1.Post_Article{}).String():
+		dbPost.Title = post.GetArticle().Title
+		dbPost.Content = post.GetArticle().Content
+	case reflect.TypeOf(feedsv1.Post_Link{}).String():
+		dbPost.URI = post.GetLink().Uri
+	case reflect.TypeOf(feedsv1.Post_Image{}).String():
+		dbPost.Title = post.GetImage().Title
+		dbPost.Description = post.GetImage().Description
+		dbPost.ImageURI = post.GetImage().ImageUri
+	case reflect.TypeOf(feedsv1.Post_Video{}).String():
+		dbPost.Title = post.GetVideo().Title
+		dbPost.Description = post.GetVideo().Description
+		dbPost.VideoURI = post.GetVideo().VideoUri
+		dbPost.ThumbnailImageURI = post.GetVideo().ThumbnailImageUri
+	case reflect.TypeOf(feedsv1.Post_Audio{}).String():
+		dbPost.Title = post.GetAudio().Title
+		dbPost.Description = post.GetAudio().Description
+		dbPost.AudioURI = post.GetAudio().AudioUri
+	}
+
+	if err := g.db.Create(dbPost).Error; err != nil {
+		return nil, err
+	}
+
+	zpost, err := dbPostToZeniPost(dbPost)
+	if err != nil {
+		return nil, err
+	}
+	return zpost, nil
+}
+
+func (g *gormZenaoDB) CreatePoll(postID string, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	dbPoll := &Poll{
+		Question: req.Question,
+		Kind:     0, // TODO: MERGE GNO PROTOC IMPORT UPGRADE & USE IT INSTEAD OF BOOL
+		Duration: req.Duration,
+		Results:  []PollResult{},
+		PostID:   uint(postIDInt),
+	}
+
+	for _, option := range req.Options {
+		dbPoll.Results = append(dbPoll.Results, PollResult{
+			Option: option,
+			Count:  0,
+		})
+	}
+
+	if err := g.db.Create(dbPoll).Error; err != nil {
+		return nil, err
+	}
+
+	return dbPollToZeniPoll(dbPoll)
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
