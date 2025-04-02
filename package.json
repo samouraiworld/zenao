@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build | go run ./cmd/next-route-checker",
     "start": "next start",
     "lint": "next lint",
     "mail:dev": "email dev",
