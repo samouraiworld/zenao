@@ -13,11 +13,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
   experimental: {
     serverComponentsHmrCache: false, // defaults to true
   },
