@@ -1,27 +1,28 @@
-import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
 import { format, fromUnixTime } from "date-fns";
-import { format as formatTZ } from "date-fns-tz";
+import Image from "next/image";
 import { UserAvatarWithName } from "../common/user";
 import Text from "../texts/text";
 import Heading from "../texts/heading";
 import { Card } from "./Card";
+import EventDateTime from "./event-date-time";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { makeLocationFromEvent } from "@/lib/location";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { determineTimezone } from "@/lib/determine-timezone";
+import { web3ImgLoader } from "@/lib/web3-img-loader";
 
 export function EventCard({ evt }: { evt: EventInfo }) {
   const iconSize = 16;
 
   const location = makeLocationFromEvent(evt.location);
-  const timezone = useLocationTimezone(location);
+  const timezone = determineTimezone(location);
 
   const locationString =
     location.kind === "geo" || location.kind === "custom"
       ? location.address
       : location.location;
+
   return (
     <div className="flex flex-col md:flex-row md:justify-between">
       <div className="min-w-32 left-6 relative md:left-0 md:flex">
@@ -43,11 +44,7 @@ export function EventCard({ evt }: { evt: EventInfo }) {
         >
           <Card className="md:h-[185px] w-full min-w-full max-w-full flex flex-row justify-between mb-3 hover:bg-secondary/100">
             <div className="flex flex-col gap-2">
-              <Text variant="secondary">
-                {formatTZ(fromUnixTime(Number(evt.startDate)), "p O", {
-                  timeZone: timezone,
-                })}
-              </Text>
+              <EventDateTime startDate={evt.startDate} timezone={timezone} />
               <Heading level={1} size="xl" className="mb-1 line-clamp-3">
                 {evt.title}
               </Heading>
