@@ -201,18 +201,16 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => router.push(`/profile/${userAddress}`)}
-          >
-            {t("view-profile")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => router.push("/settings")}
-          >
-            {t("settings")}
-          </DropdownMenuItem>
+          <Link href={`/profile/${userAddress}`}>
+            <DropdownMenuItem className="cursor-pointer">
+              {t("view-profile")}
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/settings">
+            <DropdownMenuItem className="cursor-pointer">
+              {t("settings")}
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="cursor-pointer"
