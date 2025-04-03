@@ -113,6 +113,7 @@ type CreatePollRequest struct {
 }
 
 type CreatePollResponse struct {
+	PostId string
 }
 
 type VotePollRequest struct {

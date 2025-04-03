@@ -122,7 +122,7 @@ message CreatePollRequest {
   // polls.v1.PollKind kind = 5;
 }
 
-message CreatePollResponse {}
+message CreatePollResponse { string post_id = 1; }
 
 // XXX: we could directly pass the multiaddr of the LinkPost but in this case
 // XXX: user would control what tx is signed by our backend

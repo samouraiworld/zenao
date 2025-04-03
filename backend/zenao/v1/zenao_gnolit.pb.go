@@ -367,6 +367,9 @@ func (c *CreatePollResponse) GnoLiteral(typePrefix string, linePrefix string) st
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("CreatePollResponse{\n")
+	if c.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

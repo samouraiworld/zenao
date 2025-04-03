@@ -313,6 +313,7 @@ func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error)
 	return res, nil
 }
 
+// CreateFeed implements zeni.DB.
 func (g *gormZenaoDB) CreateFeed(eventID string, slug string) (*zeni.Feed, error) {
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
 	if err != nil {
@@ -336,7 +337,31 @@ func (g *gormZenaoDB) CreateFeed(eventID string, slug string) (*zeni.Feed, error
 	return zfeed, nil
 }
 
-func (g *gormZenaoDB) CreatePost(feedID string, userID string, post *feedsv1.Post) (*zeni.Post, error) {
+// GetFeed implements zeni.DB.
+func (g *gormZenaoDB) GetFeed(eventID string, slug string) (*zeni.Feed, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var feed Feed
+	if err := g.db.Where("event_id = ? AND slug = ?", evtIDInt, slug).First(&feed).Error; err != nil {
+		return nil, err
+	}
+
+	zfeed, err := dbFeedToZeniFeed(&feed)
+	if err != nil {
+		return nil, err
+	}
+	return zfeed, nil
+}
+
+// CreatePost implements zeni.DB.
+func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*zeni.Post, error) {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
 	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -348,6 +373,7 @@ func (g *gormZenaoDB) CreatePost(feedID string, userID string, post *feedsv1.Pos
 	}
 
 	dbPost := &Post{
+		Model:     gorm.Model{ID: uint(postIDInt)},
 		Kind:      reflect.TypeOf(post.Post).String(),
 		ParentURI: post.ParentUri,
 		UserID:    uint(userIDInt),
@@ -388,13 +414,19 @@ func (g *gormZenaoDB) CreatePost(feedID string, userID string, post *feedsv1.Pos
 	return zpost, nil
 }
 
-func (g *gormZenaoDB) CreatePoll(postID string, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
+// CreatePoll implements zeni.DB.
+func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
+	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
 	postIDInt, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
 	dbPoll := &Poll{
+		Model:    gorm.Model{ID: uint(pollIDint)},
 		Question: req.Question,
 		Kind:     0, // TODO: MERGE GNO PROTOC IMPORT UPGRADE & USE IT INSTEAD OF BOOL
 		Duration: req.Duration,

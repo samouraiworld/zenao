@@ -107,8 +107,9 @@ type DB interface {
 	GetAllParticipants(eventID string) ([]*User, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
-	CreatePost(feedID string, userID string, post *feedsv1.Post) (*Post, error)
-	CreatePoll(postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
+	GetFeed(eventID string, slug string) (*Feed, error)
+	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
 }
 
 type Chain interface {
@@ -121,7 +122,7 @@ type Chain interface {
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
 	Participate(eventID string, callerID string, participantID string) error
 
-	CreatePoll(userID string, req *zenaov1.CreatePollRequest) error
+	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }
 

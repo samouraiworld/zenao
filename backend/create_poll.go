@@ -7,7 +7,10 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
+	ma "github.com/multiformats/go-multiaddr"
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -41,11 +44,44 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, errors.New("user is not a member of the event")
 	}
 
-	if err := s.Chain.CreatePoll(userID, req.Msg); err != nil {
+	zpost := (*zeni.Post)(nil)
+	if err := s.DB.Tx(func(db zeni.DB) error {
+		pollID, postID, err := s.Chain.CreatePoll(userID, req.Msg)
+		if err != nil {
+			return err
+		}
+
+		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno.land/r/zenao/polls", pollID))
+		if err != nil {
+			return err
+		}
+
+		post := &feedsv1.Post{
+			Post: &feedsv1.Post_Link{
+				Link: &feedsv1.LinkPost{
+					Uri: postURI.String(),
+				},
+			},
+		}
+
+		feed, err := db.GetFeed(req.Msg.EventId, "main")
+		if err != nil {
+			return err
+		}
+
+		if zpost, err = db.CreatePost(postID, feed.ID, userID, post); err != nil {
+			return err
+		}
+
+		if _, err := db.CreatePoll(pollID, postID, req.Msg); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
-	return connect.NewResponse(&zenaov1.CreatePollResponse{}), nil
+	return connect.NewResponse(&zenaov1.CreatePollResponse{PostId: zpost.ID}), nil
 
 }
 

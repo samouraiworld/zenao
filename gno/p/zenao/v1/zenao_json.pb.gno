@@ -674,11 +674,20 @@ func (c *CreatePollRequest) FromJSON(node *json.Node) {
 func (c *CreatePollResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if c.PostId != "" {
+		fields["postId"] = json.StringNode("", c.PostId)
+	}
+
 	return json.ObjectNode("", fields)
 }
 
 func (c *CreatePollResponse) FromJSON(node *json.Node) {
 	*c = CreatePollResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		c.PostId = val.MustString()
+	}
 }
 
 func (v *VotePollRequest) ToJSON() *json.Node {
