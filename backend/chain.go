@@ -415,7 +415,7 @@ func NewPoll() {
 	question := %q
 	options := []string{%s}
 	kind := pollsv1.PollKind(%d)
-	p := polls.NewPoll(question, %s, %d, options, nil)
+	p := polls.NewPoll(question, kind, %d, options, nil)
 	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
 
 	feedID := %q
