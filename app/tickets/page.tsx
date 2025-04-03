@@ -54,7 +54,11 @@ export default async function TicketsPage({ searchParams }: PageProps) {
 
   return (
     <ScreenContainer>
-      <EventsListLayout title={t("title")} description={t("description")}>
+      <EventsListLayout
+        from={from}
+        title={t("title")}
+        description={t("description")}
+      >
         <TicketsEventsList address={address} from={from} now={now} />
       </EventsListLayout>
     </ScreenContainer>

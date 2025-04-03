@@ -40,7 +40,11 @@ export default async function DiscoverPage({ params }: PageProps) {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ScreenContainer>
-        <EventsListLayout title={t("title")} description={t("description")}>
+        <EventsListLayout
+          from={from}
+          title={t("title")}
+          description={t("description")}
+        >
           <DiscoverEventsList from={from} now={now} />
         </EventsListLayout>
       </ScreenContainer>
