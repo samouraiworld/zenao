@@ -249,7 +249,12 @@ func runCommand(ctx context.Context, name, color string, args []string) error {
 func prefixStream(out io.Writer, prefix string) io.Writer {
 	rd, wr := io.Pipe()
 	pfix := prefixer.New(rd, prefix)
-	go io.Copy(out, pfix)
+	go func() {
+		_, err := io.Copy(out, pfix)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error copying prefixed stream: %v\n", err)
+		}
+	}()
 	return wr
 }
 
@@ -281,7 +286,10 @@ func (r *requestsJoiner) req(w http.ResponseWriter) chan struct{} {
 		defer r.mu.Unlock()
 		for i, w := range r.reqs {
 			w.WriteHeader(status)
-			w.Write(body)
+			_, err := w.Write(body)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error writing response: %v\n", err)
+			}
 			close(r.chans[i])
 		}
 		r.reqs = nil
