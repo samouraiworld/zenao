@@ -1,13 +1,15 @@
 import HeaderEventsList from "../widgets/header-events-list";
+import { FromFilter } from "@/lib/searchParams";
 
 export const EventsListLayout: React.FC<{
+  from: FromFilter;
   title: string;
   description?: string;
   children: React.ReactNode | React.ReactNode[];
-}> = ({ title, description, children }) => {
+}> = ({ from, title, description, children }) => {
   return (
     <div>
-      <HeaderEventsList description={description} title={title} />
+      <HeaderEventsList from={from} description={description} title={title} />
       {children}
     </div>
   );

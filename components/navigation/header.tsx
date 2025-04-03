@@ -14,7 +14,6 @@ import {
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import Text from "../texts/text";
 import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
 import Web3Image from "../images/web3-image";
@@ -165,7 +164,6 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
 }) => {
   const t = useTranslations("navigation");
   const { signOut } = useAuth();
-  const router = useRouter();
 
   return (
     <div className={className}>
@@ -201,18 +199,16 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => router.push(`/profile/${userAddress}`)}
-          >
-            {t("view-profile")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => router.push("/settings")}
-          >
-            {t("settings")}
-          </DropdownMenuItem>
+          <Link href={`/profile/${userAddress}`}>
+            <DropdownMenuItem className="cursor-pointer">
+              {t("view-profile")}
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/settings">
+            <DropdownMenuItem className="cursor-pointer">
+              {t("settings")}
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="cursor-pointer"

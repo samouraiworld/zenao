@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
 import { format, fromUnixTime } from "date-fns";
