@@ -6,6 +6,7 @@ import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import QueryProviders from "./query-providers";
 import { Header } from "@/components/navigation/header";
 import { Footer } from "@/components/navigation/footer";
@@ -40,21 +41,23 @@ export default async function RootLayout({
       <body className={`${albertSans.variable} antialiased`}>
         <ClerkProvider>
           <QueryProviders>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <NextIntlClientProvider messages={messages}>
-                <NextTopLoader showSpinner={false} color="#EC7E17" />
-                <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
-                  <Header />
-                  {children}
-                  <Footer />
-                </div>
-              </NextIntlClientProvider>
-            </ThemeProvider>
+            <NuqsAdapter>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <NextIntlClientProvider messages={messages}>
+                  <NextTopLoader showSpinner={false} color="#EC7E17" />
+                  <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
+                    <Header />
+                    {children}
+                    <Footer />
+                  </div>
+                </NextIntlClientProvider>
+              </ThemeProvider>
+            </NuqsAdapter>
           </QueryProviders>
         </ClerkProvider>
         <Toaster />

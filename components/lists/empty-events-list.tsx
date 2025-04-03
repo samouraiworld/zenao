@@ -1,12 +1,8 @@
-"use client";
-
 import { CalendarIcon } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { EventCard } from "../cards/event-card";
 import { Button } from "../shadcn/button";
 import Text from "../texts/text";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 const EmptyEventsList: React.FC = () => {
   const t = useTranslations("events-list");
@@ -35,16 +31,4 @@ const EmptyEventsList: React.FC = () => {
   );
 };
 
-export const EventsList: React.FC<{
-  list: EventInfo[];
-}> = ({ list }) => {
-  return (
-    <div className="my-5">
-      {!list.length ? (
-        <EmptyEventsList />
-      ) : (
-        list.map((evt) => <EventCard key={evt.pkgPath} evt={evt} />)
-      )}
-    </div>
-  );
-};
+export default EmptyEventsList;
