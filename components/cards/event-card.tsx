@@ -6,7 +6,7 @@ import { format, fromUnixTime } from "date-fns";
 import { UserAvatarWithName } from "../common/user";
 import Text from "../texts/text";
 import Heading from "../texts/heading";
-import Web3Image from "../images/web3-image";
+import { Web3Image } from "../images/web3-image";
 import { Card } from "./Card";
 import EventDateTime from "./event-date-time";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";

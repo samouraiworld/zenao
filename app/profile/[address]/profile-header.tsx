@@ -4,7 +4,7 @@ import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
-import Web3Image from "@/components/images/web3-image";
+import { Web3Image } from "@/components/images/web3-image";
 
 type ProfileHeaderProps = {
   address: string;

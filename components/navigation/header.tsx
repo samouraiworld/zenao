@@ -16,7 +16,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import Text from "../texts/text";
 import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
-import Web3Image from "../images/web3-image";
+import { Web3Image } from "../images/web3-image";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Card } from "@/components/cards/Card";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
-import Web3Image from "@/components/images/web3-image";
+import { Web3Image } from "@/components/images/web3-image";
 
 interface BlogPostCardProps {
   title: string;

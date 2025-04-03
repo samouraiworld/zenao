@@ -4,7 +4,7 @@ import { FileText } from "lucide-react";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { Card } from "@/components/cards/Card";
 import Text from "@/components/texts/text";
-import Web3Image from "@/components/images/web3-image";
+import { Web3Image } from "@/components/images/web3-image";
 
 export default function Manifesto() {
   const t = useTranslations("manifesto");

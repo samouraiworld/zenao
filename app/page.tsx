@@ -4,7 +4,7 @@ import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
-import Web3Image from "@/components/images/web3-image";
+import { Web3Image } from "@/components/images/web3-image";
 
 export default function Home() {
   const t = useTranslations("home");

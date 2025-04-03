@@ -27,7 +27,7 @@ import Heading from "@/components/texts/heading";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import Web3Image from "@/components/images/web3-image";
+import { Web3Image } from "@/components/images/web3-image";
 
 interface EventSectionProps {
   title: string;
