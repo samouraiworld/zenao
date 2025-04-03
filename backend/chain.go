@@ -377,12 +377,6 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 	for _, option := range req.Options {
 		options += fmt.Sprintf(`%q, `, option)
 	}
-	kind := ""
-	if req.MultipleChoices {
-		kind = "pollsv1.POLL_KIND_MULTIPLE_CHOICE"
-	} else {
-		kind = "pollsv1.POLL_KIND_SINGLE_CHOICE"
-	}
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -420,7 +414,8 @@ func main() {
 func NewPoll() {
 	question := %q
 	options := []string{%s}
-	p := polls.NewPoll(question, %s, %d, options, nil)
+	kind := pollsv1.PollKind(%d)
+	p := polls.NewPoll(question, kind, %d, options, nil)
 	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
 
 	feedID := %q
@@ -434,7 +429,7 @@ func NewPoll() {
 
 	social_feed.NewPost(feedID, post)
 }
-`, userRealmPkgPath, req.Question, options, kind, req.Duration, feedID),
+`, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, feedID),
 			}},
 		},
 	}))
@@ -585,11 +580,9 @@ func init() {
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
 	eventreg.Register(func() *zenaov1.EventInfo { return event.Info() })
-	social_feed.NewFeed("main", false, IsMember)
-}
-
-func IsMember(memberId string) bool {
-	return daoPrivate.Members.IsMember(memberId)
+	social_feed.NewFeed("main", false, func(memberId string) bool {
+		return daoPrivate.Members.IsMember(memberId)
+	})
 }
 
 func Vote(proposalID uint64, vote daocond.Vote) {

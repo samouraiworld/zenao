@@ -2,6 +2,10 @@
 
 package zenaov1
 
+import (
+	v1 "gno.land/p/zenao/polls/v1"
+)
+
 type EditUserRequest struct {
 	DisplayName string
 	Bio         string
@@ -105,11 +109,11 @@ type BatchProfileRequest struct {
 }
 
 type CreatePollRequest struct {
-	EventId         string
-	Question        string
-	Options         []string
-	Duration        int64
-	MultipleChoices bool
+	EventId  string
+	Question string
+	Options  []string
+	Duration int64
+	Kind     v1.PollKind
 }
 
 type CreatePollResponse struct {

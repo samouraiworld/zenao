@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"gno.land/p/demo/json"
+	v1 "gno.land/p/zenao/polls/v1"
 )
 
 func (e *EditUserRequest) ToJSON() *json.Node {
@@ -634,8 +635,8 @@ func (c *CreatePollRequest) ToJSON() *json.Node {
 	if c.Duration != 0 {
 		fields["duration"] = json.StringNode("", strconv.FormatInt(c.Duration, 10))
 	}
-	if c.MultipleChoices != false {
-		fields["multipleChoices"] = json.BoolNode("", c.MultipleChoices)
+	if c.Kind != 0 {
+		fields["kind"] = json.StringNode("", c.Kind.ToString())
 	}
 
 	return json.ObjectNode("", fields)
@@ -666,8 +667,8 @@ func (c *CreatePollRequest) FromJSON(node *json.Node) {
 		}
 		c.Duration = fv
 	}
-	if val, ok := fields["multipleChoices"]; ok {
-		c.MultipleChoices = val.MustBool()
+	if val, ok := fields["kind"]; ok {
+		c.Kind = v1.PollKindFromString(val.MustString())
 	}
 }
 

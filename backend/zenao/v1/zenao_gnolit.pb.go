@@ -5,6 +5,7 @@ package zenaov1
 import (
 	errors "errors"
 	fmt "fmt"
+	v1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	strings "strings"
 )
 
@@ -355,8 +356,8 @@ func (c *CreatePollRequest) GnoLiteral(typePrefix string, linePrefix string) str
 	if c.Duration != 0 {
 		fmt.Fprintf(buf, "%s\tDuration: %d,\n", linePrefix, c.Duration)
 	}
-	if c.MultipleChoices != false {
-		fmt.Fprintf(buf, "%s\tMultipleChoices: %t,\n", linePrefix, c.MultipleChoices)
+	if c.Kind != v1.PollKind(0) {
+		fmt.Fprintf(buf, "%s\tKind: %d,\n", linePrefix, c.Kind)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
