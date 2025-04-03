@@ -7,7 +7,7 @@ import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventsList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/layout/events-list-layout";
 
-export const revalidate = 10;
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   return [];
