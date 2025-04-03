@@ -15,7 +15,6 @@ import {
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import Text from "../texts/text";
 import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
@@ -165,7 +164,6 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
 }) => {
   const t = useTranslations("navigation");
   const { signOut } = useAuth();
-  const router = useRouter();
 
   return (
     <div className={className}>
