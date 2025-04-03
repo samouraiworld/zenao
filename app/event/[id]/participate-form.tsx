@@ -1,23 +1,20 @@
 "use client";
 
 import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
-import React, { useState } from "react";
+import React from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { zenaoClient } from "@/app/zenao-client";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/shadcn/form";
-import { Input } from "@/components/shadcn/input";
-import { Card } from "@/components/cards/Card";
+import { useQueryClient } from "@tanstack/react-query";
+import { Form } from "@/components/shadcn/form";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { useToast } from "@/app/hooks/use-toast";
+import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
+import {
+  useEventParticipateGuest,
+  useEventParticipateLoggedIn,
+} from "@/lib/mutations/event-participate";
 
 const participateFormSchema = z.object({
   email: z.string().email(),
@@ -25,15 +22,24 @@ const participateFormSchema = z.object({
 type ParticipateFormSchemaType = z.infer<typeof participateFormSchema>;
 
 export function ParticipateForm({
-  onSuccess,
+  onSuccess: _,
   eventId,
+  userId,
+  userAddress,
 }: {
   eventId: string;
+  userId?: string | null;
+  userAddress: string | null;
   onSuccess?: () => void;
 }) {
   const { getToken } = useAuth();
   const t = useTranslations("event");
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
+  const { participate: participateLoggedIn, isPending: isPendingLoggedIn } =
+    useEventParticipateLoggedIn(queryClient);
+  const { participate: participateGuest, isPending: isPendingGuest } =
+    useEventParticipateGuest(queryClient);
+
   const form = useForm<ParticipateFormSchemaType>({
     mode: "all",
     resolver: zodResolver(participateFormSchema),
@@ -46,10 +52,12 @@ export function ParticipateForm({
   // Submit for logged-out user (with email confirmation form)
   const onSubmitSignedOut = async (values: ParticipateFormSchemaType) => {
     try {
-      setIsLoading(true);
-      await zenaoClient.participate({ eventId, email: values.email });
+      await participateGuest({
+        eventId,
+        email: values.email,
+        userAddress: userAddress,
+      });
       toast({ title: t("toast-confirmation") });
-      onSuccess?.();
     } catch (err) {
       if (
         err instanceof Error &&
@@ -64,28 +72,31 @@ export function ParticipateForm({
       }
       console.error(err);
     }
-    setIsLoading(false);
   };
 
   // Submit for logged-in user (with clerk account)
   const onSubmitSignedIn = async () => {
     try {
-      setIsLoading(true);
       const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      await zenaoClient.participate(
-        { eventId },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      if (!userId || !userAddress) {
+        throw new Error("missing user id or user address");
+      }
+
+      await participateLoggedIn({
+        eventId,
+        token,
+        userId: userId,
+        userAddress: userAddress,
+      });
+
       toast({ title: t("toast-confirmation") });
-      onSuccess?.();
     } catch (err) {
       toast({ variant: "destructive", title: t("toast-default-error") });
       console.error(err);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -93,37 +104,23 @@ export function ParticipateForm({
       <form onSubmit={form.handleSubmit(onSubmitSignedOut)}>
         <div>
           <SignedOut>
-            {/* TODO: merge with FormFieldInputString (got typescript issues) */}
-            <Card className="bg-background mb-2">
-              <FormField
-                rules={{ required: true }}
+            <div className="flex flex-col gap-2">
+              <FormFieldInputString
                 control={form.control}
                 name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        className="focus-visible:ring-0 border-none h-auto p-0 placeholder:text-secondary-color"
-                        placeholder={t("email-placeholder")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                placeholder={t("email-placeholder")}
               />
-            </Card>
-            <ButtonWithLabel
-              loading={isLoading}
-              label={t("participate-button")}
-              type="submit"
-            />
+              <ButtonWithLabel
+                loading={isPendingGuest}
+                label={t("participate-button")}
+                type="submit"
+              />
+            </div>
           </SignedOut>
           <SignedIn>
             <ButtonWithLabel
               onClick={onSubmitSignedIn}
-              loading={isLoading}
+              loading={isPendingLoggedIn}
               label={t("participate-button")}
             />
           </SignedIn>
