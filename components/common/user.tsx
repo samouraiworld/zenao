@@ -1,12 +1,11 @@
 "use client";
 
-import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar";
-import Image, { getImageProps } from "next/image";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import { Skeleton } from "../shadcn/skeleton";
 import Text from "../texts/text";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
+import Web3Image from "../images/web3-image";
 import { profileOptions } from "@/lib/queries/profile";
 import { cn } from "@/lib/tailwind";
 
@@ -24,21 +23,17 @@ const avatarClassName = "w-6 h-6 rounded-full overflow-hidden inline-block";
 
 export function UserAvatar({ address, className }: UserComponentProps) {
   const { data: profile } = useSuspenseQuery(profileOptions(address));
-  const { props: imageProps } = getImageProps({
-    src: profile?.avatarUri || "/zenao-logo.png",
-    loader: profile?.avatarUri ? web3ImgLoader : undefined,
-    width: 45,
-    height: 45,
-    alt: "Avatar",
-    className: "w-full h-full object-cover",
-  });
+
   return (
     <Avatar className={cn(avatarClassName, className)}>
-      <AvatarImage {...imageProps} />
       <AvatarFallback>
-        {/* the linter does not properly detect the alt prop coming from imageProps */}
-        {/* eslint-disable-next-line jsx-a11y/alt-text */}
-        <Image {...imageProps} />
+        <Web3Image
+          src={profile?.avatarUri ?? "/zenao-logo.png"}
+          width={45}
+          height={45}
+          alt="Avatar"
+          className="w-full h-full object-cover"
+        />
       </AvatarFallback>
     </Avatar>
   );

@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Url } from "next/dist/shared/lib/router/router";
 import { buttonVariants } from "../shadcn/button";
 import Text from "../texts/text";
+import Web3Image from "../images/web3-image";
 import { cn } from "@/lib/tailwind";
 
 interface GnowebButtonProps {
@@ -25,7 +25,7 @@ export const GnowebButton: React.FC<GnowebButtonProps> = ({ href, label }) => {
       <Text variant="secondary" size="sm">
         {label || t("gnoweb-button")}
       </Text>
-      <Image
+      <Web3Image
         src="/gno1.png"
         alt="gno-logo"
         width={25}

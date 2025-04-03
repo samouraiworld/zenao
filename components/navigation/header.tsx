@@ -2,7 +2,6 @@
 
 import { UrlObject } from "url";
 import React, { useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { BookOpenText, CompassIcon, LucideProps, Tickets } from "lucide-react";
@@ -18,6 +17,7 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Text from "../texts/text";
 import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import Web3Image from "../images/web3-image";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -122,7 +122,7 @@ export function Header() {
       {/* Desktop */}
       <div className="flex max-[450px]:gap-4 gap-6 items-center">
         <Link href="/" className="flex gap-2 items-center">
-          <Image
+          <Web3Image
             src="/zenao-logo.png"
             alt="zenao logo"
             width={28}
