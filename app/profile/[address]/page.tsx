@@ -10,8 +10,10 @@ type Props = {
 };
 
 export const revalidate = 60;
-export const dynamicParams = true;
-export const dynamic = "force-static";
+
+export async function generateStaticParams() {
+  return [];
+}
 
 export default async function ProfilePage({ params }: Props) {
   const p = await params;
