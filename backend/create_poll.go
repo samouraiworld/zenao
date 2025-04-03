@@ -9,6 +9,7 @@ import (
 	"connectrpc.com/connect"
 	ma "github.com/multiformats/go-multiaddr"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -31,7 +32,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, errors.New("user is banned")
 	}
 
-	if err := validatePoll(req.Msg.Question, req.Msg.Options /*req.Msg.Kind,*/, req.Msg.Duration); err != nil {
+	if err := validatePoll(req.Msg); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
@@ -85,22 +86,21 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 
 }
 
-func validatePoll(question string, options []string, duration int64) error {
-	if len(options) < 2 {
+func validatePoll(req *zenaov1.CreatePollRequest) error {
+	if len(req.Options) < 2 {
 		return errors.New("poll must have at least 2 options")
 	}
-	if len(options) > 8 {
+	if len(req.Options) > 8 {
 		return errors.New("poll must have at most 8 options")
 	}
-	if duration < int64(time.Minute)*15 {
+	if req.Duration < int64(time.Minute)*15 {
 		return errors.New("duration must be at least 15 minutes")
 	}
-	if duration > int64(time.Hour)*24*30 {
+	if req.Duration > int64(time.Hour)*24*30 {
 		return errors.New("duration must be at most 1 month")
 	}
-	// XXX: need gno proto to handle import
-	// if kind == pollsv1.PollKind_POLL_KIND_UNSPECIFIED {
-	// 	return errors.New("poll cannot have an unspecified kind")
-	// }
+	if req.Kind == pollsv1.PollKind_POLL_KIND_UNSPECIFIED {
+		return errors.New("poll cannot have an unspecified kind")
+	}
 	return nil
 }

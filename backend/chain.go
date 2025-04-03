@@ -381,12 +381,6 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 	for _, option := range req.Options {
 		options += fmt.Sprintf(`%q, `, option)
 	}
-	kind := ""
-	if req.MultipleChoices {
-		kind = "pollsv1.POLL_KIND_MULTIPLE_CHOICE"
-	} else {
-		kind = "pollsv1.POLL_KIND_SINGLE_CHOICE"
-	}
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -426,7 +420,8 @@ func main() {
 func NewPoll() {
 	question := %q
 	options := []string{%s}
-	p := polls.NewPoll(question, %s, %d, options, nil)
+	kind := pollsv1.PollKind(%d)
+	p := polls.NewPoll(question, kind, %d, options, nil)
 	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
 	std.Emit(%q, "pollID", p.ID.String())
 
@@ -442,7 +437,7 @@ func NewPoll() {
 	postID := social_feed.NewPost(feedID, post)
 	std.Emit(%q, "postID", postID)
 }
-`, userRealmPkgPath, req.Question, options, kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
+`, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, feedID),
 			}},
 		},
 	}))
