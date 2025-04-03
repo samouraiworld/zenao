@@ -7,7 +7,7 @@ import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventsList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/layout/events-list-layout";
 
-export const revalidate = 60;
+export const revalidate = 10;
 
 export async function generateStaticParams() {
   return [];
@@ -30,9 +30,7 @@ export default async function DiscoverPage({ params }: PageProps) {
   queryClient.prefetchQuery(
     from === "upcoming"
       ? eventsList(now, Number.MAX_SAFE_INTEGER, 20)
-      : eventsList(now - 1, 0, 20, {
-          staleTime: 60000,
-        }),
+      : eventsList(now - 1, 0, 20),
   );
 
   const t = await getTranslations("discover");
