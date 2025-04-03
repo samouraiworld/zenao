@@ -63,8 +63,6 @@ type Poll struct {
 type PollResult struct {
 	gorm.Model
 	Option string
-	Count  uint32
-
 	PollID uint
 	Poll   Poll
 	Users  []User `gorm:"many2many:poll_votes;"`
@@ -164,7 +162,7 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 	for _, result := range poll.Results {
 		zpoll.Results = append(zpoll.Results, &pollsv1.PollResult{
 			Option:       result.Option,
-			Count:        result.Count,
+			Count:        uint32(len(result.Users)),
 			HasUserVoted: false, // TODO: check if user has voted
 		})
 	}

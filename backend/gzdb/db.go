@@ -9,6 +9,7 @@ import (
 	"time"
 
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
@@ -152,6 +153,20 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 		return nil, err
 	}
 	return dbEventToZeniEvent(evt)
+}
+
+func (g *gormZenaoDB) GetEventByPollID(pollID string) (*zeni.Event, error) {
+	pollIDInt, err := strconv.ParseUint(pollID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var poll Poll
+	if err := g.db.Where("id = ?", pollIDInt).Preload("Post").Preload("Post.Feed").Preload("Post.Feed.Event").First(&poll).Error; err != nil {
+		return nil, err
+	}
+
+	return dbEventToZeniEvent(&poll.Post.Feed.Event)
 }
 
 // GetEvent implements zeni.DB.
@@ -428,7 +443,7 @@ func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.Crea
 	dbPoll := &Poll{
 		Model:    gorm.Model{ID: uint(pollIDint)},
 		Question: req.Question,
-		Kind:     0, // TODO: MERGE GNO PROTOC IMPORT UPGRADE & USE IT INSTEAD OF BOOL
+		Kind:     int(req.Kind),
 		Duration: req.Duration,
 		Results:  []PollResult{},
 		PostID:   uint(postIDInt),
@@ -437,7 +452,6 @@ func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.Crea
 	for _, option := range req.Options {
 		dbPoll.Results = append(dbPoll.Results, PollResult{
 			Option: option,
-			Count:  0,
 		})
 	}
 
@@ -446,6 +460,57 @@ func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.Crea
 	}
 
 	return dbPollToZeniPoll(dbPoll)
+}
+
+// TODO: Test it
+// VotePoll implements zeni.DB.
+func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) error {
+	pollIDint, err := strconv.ParseUint(req.PollId, 10, 64)
+	if err != nil {
+		return nil
+	}
+	userIDint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	var poll Poll
+	if err := g.db.Where("id = ?", pollIDint).Preload("Results").First(&poll).Error; err != nil {
+		return err
+	}
+
+	var selectedResult PollResult
+	if err := g.db.Where("poll_id = ? AND option = ?", pollIDint, req.Option).First(&selectedResult).Error; err != nil {
+		return err
+	}
+
+	// usage of table since i did not create a custom model for many2many relation
+	var userVoteCount int64
+	if err := g.db.Table("poll_votes").Where("poll_result_id = ? AND user_id = ?", selectedResult.ID, userIDint).Count(&userVoteCount).Error; err != nil {
+		return err
+	}
+
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if userVoteCount > 0 {
+			if err := tx.Table("poll_votes").Where("poll_result_id = ? AND user_id = ?", selectedResult.ID, userIDint).Delete(nil).Error; err != nil {
+				return err
+			}
+		} else {
+			if poll.Kind == int(pollsv1.PollKind_POLL_KIND_SINGLE_CHOICE) {
+				if err := tx.Table("poll_votes").Where("user_id = ? AND poll_result_id IN (SELECT id FROM poll_results WHERE poll_id = ?)", userIDint, pollIDint).Delete(nil).Error; err != nil {
+					return err
+				}
+			}
+			if err := tx.Table("poll_votes").Create(map[string]interface{}{
+				"poll_result_id": selectedResult.ID,
+				"user_id":        userIDint,
+			}).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {

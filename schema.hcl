@@ -36,12 +36,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
+  }
   index "idx_users_clerk_id" {
     unique  = true
     columns = [column.clerk_id]
-  }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
   }
 }
 table "events" {
@@ -353,10 +353,6 @@ table "poll_results" {
     null = true
     type = text
   }
-  column "count" {
-    null = true
-    type = integer
-  }
   column "poll_id" {
     null = true
     type = integer
@@ -387,15 +383,15 @@ table "poll_votes" {
   primary_key {
     columns = [column.poll_result_id, column.user_id]
   }
-  foreign_key "fk_poll_votes_poll_result" {
-    columns     = [column.poll_result_id]
-    ref_columns = [table.poll_results.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_poll_votes_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_poll_votes_poll_result" {
+    columns     = [column.poll_result_id]
+    ref_columns = [table.poll_results.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
