@@ -5,11 +5,15 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { profileOptions } from "@/lib/queries/profile";
 import { eventsByCreatorList } from "@/lib/queries/events-list";
 
-export const revalidate = 60;
-
 type Props = {
   params: Promise<{ address: string }>;
 };
+
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  return [];
+}
 
 export default async function ProfilePage({ params }: Props) {
   const p = await params;
