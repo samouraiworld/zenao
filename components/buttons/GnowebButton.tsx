@@ -11,14 +11,23 @@ import { cn } from "@/lib/tailwind";
 interface GnowebButtonProps {
   href: Url;
   label?: string;
+  className?: string;
 }
 
-export const GnowebButton: React.FC<GnowebButtonProps> = ({ href, label }) => {
+export const GnowebButton: React.FC<GnowebButtonProps> = ({
+  href,
+  label,
+  className,
+}) => {
   const t = useTranslations("components.buttons");
 
   return (
     <Link
-      className={cn(buttonVariants({ variant: "secondary" }), "w-max")}
+      className={cn(
+        buttonVariants({ variant: "secondary" }),
+        "w-max",
+        className,
+      )}
       href={href}
       target="_blank"
     >

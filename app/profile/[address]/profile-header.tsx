@@ -40,6 +40,7 @@ export default function ProfileHeader({
         )}
         <GnowebButton
           href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${address}`}
+          className="w-full"
         />
       </div>
       <div className="flex flex-col gap-8 sm:gap-12 w-full sm:w-4/5">
