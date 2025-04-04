@@ -368,6 +368,33 @@ func (c *CreatePollResponse) GnoLiteral(typePrefix string, linePrefix string) st
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("CreatePollResponse{\n")
+	if c.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (v *VotePollRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("VotePollRequest{\n")
+	if v.PollId != "" {
+		fmt.Fprintf(buf, "%s\tPollId: %q,\n", linePrefix, v.PollId)
+	}
+	if v.Option != "" {
+		fmt.Fprintf(buf, "%s\tOption: %q,\n", linePrefix, v.Option)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (v *VotePollResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("VotePollResponse{\n")
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

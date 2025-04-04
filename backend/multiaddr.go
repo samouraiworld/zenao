@@ -6,7 +6,6 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 )
 
-// NOT USED FOR NOW SINCE I GENERATE THE LINK IN GNO CODE
 var generalTranscoder = ma.NewTranscoderFromFunctions(generalStB, generalBtS, nil)
 
 var ZenaoProtocols []*ma.Protocol = []*ma.Protocol{

@@ -33,9 +33,10 @@ message AudioPost {
 }
 
 message VideoPost {
-  string description = 1;
-  string video_uri = 2;
-  string thumbnail_image_uri = 3;
+  string title = 1;
+  string description = 2;
+  string video_uri = 3;
+  string thumbnail_image_uri = 4;
 }
 
 // XXX: not used yet in contracts

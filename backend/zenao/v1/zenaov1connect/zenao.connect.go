@@ -48,6 +48,8 @@ const (
 	ZenaoServiceParticipateProcedure = "/zenao.v1.ZenaoService/Participate"
 	// ZenaoServiceCreatePollProcedure is the fully-qualified name of the ZenaoService's CreatePoll RPC.
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
+	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
+	ZenaoServiceVotePollProcedure = "/zenao.v1.ZenaoService/VotePoll"
 )
 
 // ZenaoServiceClient is a client for the zenao.v1.ZenaoService service.
@@ -61,6 +63,7 @@ type ZenaoServiceClient interface {
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
+	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
 }
 
 // NewZenaoServiceClient constructs a client for the zenao.v1.ZenaoService service. By default, it
@@ -110,6 +113,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("CreatePoll")),
 			connect.WithClientOptions(opts...),
 		),
+		votePoll: connect.NewClient[v1.VotePollRequest, v1.VotePollResponse](
+			httpClient,
+			baseURL+ZenaoServiceVotePollProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("VotePoll")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -121,6 +130,7 @@ type zenaoServiceClient struct {
 	editEvent      *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
 	participate    *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
 	createPoll     *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
+	votePoll       *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 }
 
 // EditUser calls zenao.v1.ZenaoService.EditUser.
@@ -153,6 +163,11 @@ func (c *zenaoServiceClient) CreatePoll(ctx context.Context, req *connect.Reques
 	return c.createPoll.CallUnary(ctx, req)
 }
 
+// VotePoll calls zenao.v1.ZenaoService.VotePoll.
+func (c *zenaoServiceClient) VotePoll(ctx context.Context, req *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error) {
+	return c.votePoll.CallUnary(ctx, req)
+}
+
 // ZenaoServiceHandler is an implementation of the zenao.v1.ZenaoService service.
 type ZenaoServiceHandler interface {
 	// USER
@@ -164,6 +179,7 @@ type ZenaoServiceHandler interface {
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
+	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
 }
 
 // NewZenaoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -209,6 +225,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("CreatePoll")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceVotePollHandler := connect.NewUnaryHandler(
+		ZenaoServiceVotePollProcedure,
+		svc.VotePoll,
+		connect.WithSchema(zenaoServiceMethods.ByName("VotePoll")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/zenao.v1.ZenaoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ZenaoServiceEditUserProcedure:
@@ -223,6 +245,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceParticipateHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
+		case ZenaoServiceVotePollProcedure:
+			zenaoServiceVotePollHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -254,4 +278,8 @@ func (UnimplementedZenaoServiceHandler) Participate(context.Context, *connect.Re
 
 func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreatePoll is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.VotePoll is not implemented"))
 }

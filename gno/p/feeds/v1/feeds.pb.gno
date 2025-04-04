@@ -36,6 +36,7 @@ type AudioPost struct {
 }
 
 type VideoPost struct {
+	Title             string
 	Description       string
 	VideoUri          string
 	ThumbnailImageUri string
