@@ -437,7 +437,7 @@ func NewPoll() {
 	postID := social_feed.NewPost(feedID, post)
 	std.Emit(%q, "postID", postID)
 }
-`, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, feedID),
+`, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
 			}},
 		},
 	}))
