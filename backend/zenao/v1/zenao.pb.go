@@ -1208,8 +1208,6 @@ func (*CreatePollResponse) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{18}
 }
 
-// XXX: we could directly pass the multiaddr of the LinkPost but in this case
-// XXX: user would control what tx is signed by our backend
 type VotePollRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PollId        string                 `protobuf:"bytes,1,opt,name=poll_id,json=pollId,proto3" json:"poll_id,omitempty"`

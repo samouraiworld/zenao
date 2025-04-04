@@ -441,6 +441,7 @@ func NewPoll() {
 	return nil
 }
 
+<<<<<<< HEAD
 func (g *gnoZenaoChain) VotePoll(userID string, req *zenaov1.VotePollRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 
@@ -490,6 +491,8 @@ func VoteOnPoll() {
 	return nil
 }
 
+=======
+>>>>>>> main
 func (g *gnoZenaoChain) eventRealmPkgPath(eventID string) string {
 	return fmt.Sprintf("gno.land/r/%s/events/e%s", g.namespace, eventID)
 }

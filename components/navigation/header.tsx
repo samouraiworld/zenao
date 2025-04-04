@@ -2,7 +2,6 @@
 
 import { UrlObject } from "url";
 import React, { useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { BookOpenText, CompassIcon, LucideProps, Tickets } from "lucide-react";
@@ -15,9 +14,9 @@ import {
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import Text from "../texts/text";
 import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import { Web3Image } from "../images/web3-image";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -122,7 +121,7 @@ export function Header() {
       {/* Desktop */}
       <div className="flex max-[450px]:gap-4 gap-6 items-center">
         <Link href="/" className="flex gap-2 items-center">
-          <Image
+          <Web3Image
             src="/zenao-logo.png"
             alt="zenao logo"
             width={28}
@@ -165,7 +164,6 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
 }) => {
   const t = useTranslations("navigation");
   const { signOut } = useAuth();
-  const router = useRouter();
 
   return (
     <div className={className}>
@@ -201,18 +199,16 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => router.push(`/profile/${userAddress}`)}
-          >
-            {t("view-profile")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => router.push("/settings")}
-          >
-            {t("settings")}
-          </DropdownMenuItem>
+          <Link href={`/profile/${userAddress}`}>
+            <DropdownMenuItem className="cursor-pointer">
+              {t("view-profile")}
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/settings">
+            <DropdownMenuItem className="cursor-pointer">
+              {t("settings")}
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="cursor-pointer"
