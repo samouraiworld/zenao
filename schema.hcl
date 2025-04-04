@@ -36,12 +36,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
-  }
   index "idx_users_clerk_id" {
     unique  = true
     columns = [column.clerk_id]
+  }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
   }
 }
 table "events" {
