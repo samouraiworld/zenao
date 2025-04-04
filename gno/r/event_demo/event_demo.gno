@@ -12,8 +12,6 @@ import (
 	"gno.land/r/zenao/social_feed"
 )
 
-type IsMemberFunc func(string) bool
-
 var DAO daokit.DAO
 var daoPrivate *basedao.DAOPrivate
 var event *events.Event

@@ -555,7 +555,6 @@ import (
 	"gno.land/r/{{.namespace}}/social_feed"
 )
 
-
 var (
 	DAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
