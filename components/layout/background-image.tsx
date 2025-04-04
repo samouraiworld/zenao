@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
+import { Web3Image } from "../images/web3-image";
 
 export interface BackgroundProps {
   src: string;
@@ -11,13 +10,12 @@ export interface BackgroundProps {
 
 export function BackgroundImage(props: BackgroundProps) {
   return (
-    <Image
+    <Web3Image
       alt="Background"
       src={props.src}
       width={props.width}
       height={props.height}
       priority
-      loader={web3ImgLoader}
       className="absolute pointer-events-none w-full h-full top-0 blur-[8rem] opacity-25 sm:opacity-15"
     />
   );

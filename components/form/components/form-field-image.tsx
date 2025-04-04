@@ -3,7 +3,6 @@
 import { FieldValues, useController, useWatch } from "react-hook-form";
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
-import Image from "next/image";
 import { FormFieldProps, urlPattern } from "../types";
 import { useToast } from "@/app/hooks/use-toast";
 import { filesPostResponseSchema } from "@/lib/files";
@@ -19,6 +18,7 @@ import {
 } from "@/components/shadcn/tooltip";
 import { Card } from "@/components/cards/Card";
 import { cn } from "@/lib/tailwind";
+import { Web3Image } from "@/components/images/web3-image";
 
 export const FormFieldImage = <T extends FieldValues>(
   props: FormFieldProps<T, string> & {
@@ -87,7 +87,7 @@ export const FormFieldImage = <T extends FieldValues>(
                   >
                     {isValidURL(imageUri, urlPattern) &&
                     !fieldState.error?.message ? (
-                      <Image
+                      <Web3Image
                         src={web2URL(imageUri)}
                         alt="imageUri"
                         fill

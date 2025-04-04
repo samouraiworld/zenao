@@ -1,11 +1,10 @@
-import Image from "next/image";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { Card } from "@/components/cards/Card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
+import { Web3Image } from "@/components/images/web3-image";
 
 type ProfileHeaderProps = {
   address: string;
@@ -25,7 +24,7 @@ export default function ProfileHeader({
       <div className="flex flex-col gap-4 w-full sm:w-1/5">
         {avatarUri ? (
           <AspectRatio ratio={1 / 1}>
-            <Image
+            <Web3Image
               src={avatarUri}
               alt="Event"
               priority
@@ -34,7 +33,6 @@ export default function ProfileHeader({
               (max-width: 1200px) 50vw,
               33vw"
               className="flex w-full rounded-xl self-center object-cover"
-              loader={web3ImgLoader}
             />
           </AspectRatio>
         ) : (
@@ -42,6 +40,7 @@ export default function ProfileHeader({
         )}
         <GnowebButton
           href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${address}`}
+          className="w-full"
         />
       </div>
       <div className="flex flex-col gap-8 sm:gap-12 w-full sm:w-4/5">
