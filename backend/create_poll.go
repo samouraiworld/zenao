@@ -36,7 +36,6 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	//XXX: if saving post to db, use a gorm Tx
 	roles, err := s.DB.UserRoles(userID, req.Msg.EventId)
 	if err != nil {
 		return nil, err
