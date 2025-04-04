@@ -123,8 +123,6 @@ message CreatePollRequest {
 
 message CreatePollResponse { string post_id = 1; }
 
-// XXX: we could directly pass the multiaddr of the LinkPost but in this case
-// XXX: user would control what tx is signed by our backend
 message VotePollRequest {
   string poll_id = 1;
   string option = 2;

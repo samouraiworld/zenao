@@ -1,13 +1,21 @@
-import { queryOptions } from "@tanstack/react-query";
+import { queryOptions, UseQueryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
 import { extractGnoJSONResponse } from "@/lib/gno";
-import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
+import {
+  EventInfo,
+  EventInfoJson,
+  EventInfoSchema,
+} from "@/app/gen/zenao/v1/zenao_pb";
 
 export const eventsList = (
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
+  options?: Omit<
+    UseQueryOptions<EventInfo[], Error, EventInfo[], (string | number)[]>,
+    "queryKey" | "queryFn"
+  >,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -25,6 +33,7 @@ export const eventsList = (
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
     },
+    ...options,
   });
 };
 

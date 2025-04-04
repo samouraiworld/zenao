@@ -990,9 +990,6 @@ export const CreatePollResponseSchema: GenMessage<CreatePollResponse, CreatePoll
   messageDesc(file_zenao_v1_zenao, 18);
 
 /**
- * XXX: we could directly pass the multiaddr of the LinkPost but in this case
- * XXX: user would control what tx is signed by our backend
- *
  * @generated from message zenao.v1.VotePollRequest
  */
 export type VotePollRequest = Message<"zenao.v1.VotePollRequest"> & {
@@ -1008,9 +1005,6 @@ export type VotePollRequest = Message<"zenao.v1.VotePollRequest"> & {
 };
 
 /**
- * XXX: we could directly pass the multiaddr of the LinkPost but in this case
- * XXX: user would control what tx is signed by our backend
- *
  * @generated from message zenao.v1.VotePollRequest
  */
 export type VotePollRequestJson = {

@@ -1,5 +1,6 @@
 "use client";
 
+import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { zenaoClient } from "@/app/zenao-client";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
@@ -7,6 +8,7 @@ import { Card } from "@/components/cards/Card";
 import MapCaller from "@/components/common/map/map-lazy-components";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { UserAvatarWithName } from "@/components/common/user";
+import { Web3Image } from "@/components/images/web3-image";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/texts/heading";
@@ -16,14 +18,12 @@ import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 import React, { useMemo } from "react";
 import { TZDate } from "react-day-picker";
@@ -90,7 +90,7 @@ export function EventInfo({ id }: { id: string }) {
       question: "What is the best way to do this?",
       options: ["Option 1", "Option 2", "Option 3"],
       duration: BigInt(1000 * 1000 * 1000 * 60 * 60 * 24), // 1 day
-      multipleChoices: false,
+      kind: PollKind.MULTIPLE_CHOICE,
     },
       { headers: { Authorization: `Bearer ${token}` } },
     );
@@ -115,7 +115,7 @@ export function EventInfo({ id }: { id: string }) {
       {/* Left Section */}
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
         <AspectRatio ratio={1 / 1}>
-          <Image
+          <Web3Image
             src={data.imageUri}
             sizes="(max-width: 768px) 100vw,
             (max-width: 1200px) 50vw,
@@ -124,7 +124,6 @@ export function EventInfo({ id }: { id: string }) {
             alt="Event"
             priority
             className="flex w-full rounded-xl self-center object-cover"
-            loader={web3ImgLoader}
           />
         </AspectRatio>
         {/* If the user is organizer, link to /edit page */}

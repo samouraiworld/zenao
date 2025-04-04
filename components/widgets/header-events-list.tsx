@@ -1,13 +1,14 @@
-import { Suspense } from "react";
 import Heading from "../texts/heading";
 import { GnowebButton } from "../buttons/GnowebButton";
 import Text from "../texts/text";
 import FromFilterTab from "./from-filter-tab";
+import { FromFilter } from "@/lib/searchParams";
 
 const HeaderEventsList: React.FC<{
+  from: FromFilter;
   title: string;
   description?: string;
-}> = ({ title, description }) => {
+}> = ({ from, title, description }) => {
   return (
     <div className="flex flex-col gap-2 mb-3">
       <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between md:items-center">
@@ -20,9 +21,7 @@ const HeaderEventsList: React.FC<{
           />
         </div>
         <div>
-          <Suspense>
-            <FromFilterTab />
-          </Suspense>
+          <FromFilterTab from={from} />
         </div>
       </div>
 
