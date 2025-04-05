@@ -441,6 +441,55 @@ func NewPoll() {
 	return nil
 }
 
+func (g *gnoZenaoChain) VotePoll(userID string, req *zenaov1.VotePollRequest) error {
+	userRealmPkgPath := g.userRealmPkgPath(userID)
+
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+				
+import (
+	"gno.land/p/zenao/daokit"
+	"gno.land/r/zenao/polls"
+	user %q
+)
+
+func main() {
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: "Vote on poll",
+		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
+			Title: "Vote on poll",
+			Message: daokit.NewExecuteLambdaMsg(
+				VoteOnPoll,
+			),
+		}),
+	})
+}
+
+func VoteOnPoll() {
+	pollID := %s
+	option := %q
+	polls.Vote(uint64(pollID), option)
+}
+`, userRealmPkgPath, req.PollId, req.Option),
+			}},
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("voted on poll", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	return nil
+}
+
 func (g *gnoZenaoChain) eventRealmPkgPath(eventID string) string {
 	return fmt.Sprintf("gno.land/r/%s/events/e%s", g.namespace, eventID)
 }

@@ -17,6 +17,7 @@ service ZenaoService {
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
+  rpc VotePoll(VotePollRequest) returns (VotePollResponse);
 }
 
 message EditUserRequest {
@@ -121,3 +122,10 @@ message CreatePollRequest {
 }
 
 message CreatePollResponse {}
+
+message VotePollRequest {
+  string poll_id = 1;
+  string option = 2;
+}
+
+message VotePollResponse {}
