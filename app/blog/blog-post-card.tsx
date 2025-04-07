@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Card } from "@/components/cards/Card";
-import { Text } from "@/components/texts/DefaultText";
-import { LargeText } from "@/components/texts/LargeText";
+import Text from "@/components/texts/text";
+import Heading from "@/components/texts/heading";
+import { Web3Image } from "@/components/images/web3-image";
 
 interface BlogPostCardProps {
   title: string;
@@ -34,10 +34,12 @@ export default function BlogPostCard({
     <Link href={`/blog/${slug}`} className="w-full max-w-md h-full">
       <Card className="flex flex-col h-full gap-8 hover:bg-secondary/60 transition-colors">
         <div className="flex relative aspect-[16/7] justify-center items-center bg-background rounded-lg">
-          <Image alt={alt} width={800} height={800} {...imageProps} />
+          <Web3Image alt={alt} width={800} height={800} {...imageProps} />
         </div>
         <div className="flex flex-col h-full gap-4">
-          <LargeText>{title}</LargeText>
+          <Heading level={2} size="xl">
+            {title}
+          </Heading>
           <Text>{description}</Text>
         </div>
       </Card>

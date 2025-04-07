@@ -3,23 +3,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { SignOutButton, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
-import { Card } from "@/components/cards/Card";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { FormFieldTextArea } from "@/components/form/components/FormFieldTextArea";
-import { FormFieldImage } from "@/components/form/components/FormFieldImage";
+import { FormFieldImage } from "@/components/form/components/form-field-image";
 import { userAddressOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
-import { Separator } from "@/components/shadcn/separator";
-import { Button, buttonVariants } from "@/components/shadcn/button";
+import Text from "@/components/texts/text";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -86,22 +83,25 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             control={form.control}
             name="avatarUri"
             placeholder={t("avatar-placeholder")}
+            aspectRatio={1 / 1}
+            className="sm:w-2/5"
+            tooltip={<Text size="sm">{t("change-avatar")}</Text>}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
-            <Card>
-              <FormFieldInputString
-                control={form.control}
-                name="displayName"
-                placeholder={t("name-placeholder")}
-              />
-            </Card>
-            <Card>
-              <FormFieldTextArea
-                control={form.control}
-                name="bio"
-                placeholder={t("bio-placeholder")}
-              />
-            </Card>
+            <FormFieldInputString
+              control={form.control}
+              name="displayName"
+              label={t("name-label")}
+              placeholder={t("name-placeholder")}
+            />
+            <FormFieldTextArea
+              control={form.control}
+              name="bio"
+              placeholder={t("bio-placeholder")}
+              label={t("bio-label")}
+              wordCounter
+              maxLength={1000}
+            />
             <div>
               <ButtonWithLabel
                 loading={loading}
@@ -110,18 +110,6 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               />
             </div>
           </div>
-        </div>
-        <Separator className="mb-2" />
-        <div className="flex flex-row gap-2">
-          <Link
-            href={`/profile/${user?.address}`}
-            className={buttonVariants({ variant: "secondary" })}
-          >
-            Profile
-          </Link>
-          <Button asChild variant="destructive" type="button">
-            <SignOutButton />
-          </Button>
         </div>
       </form>
     </Form>

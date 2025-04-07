@@ -278,6 +278,7 @@ func TestEditPost(t *testing.T) {
 	std.TestSetOriginCaller(alice)
 	NewPost("public", post)
 	NewPost("public", deletedPost)
+	DeletePost("public:0000002")
 
 	tests := testTable{
 		"valid post": {

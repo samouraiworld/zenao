@@ -63,7 +63,7 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // check the participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 8000 }).should("be.visible");
+    cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
   });
 
   it("participate while signed in", () => {
@@ -89,7 +89,9 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // check the participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 16000 }).should("be.visible");
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
 
     // check that we have a ticket
     cy.visit("/tickets");
@@ -123,7 +125,7 @@ describe("main", () => {
     cy.get("a").contains("ZENAO").click();
 
     // check that home text is present
-    cy.get("p").contains("Organize event(s) in seconds").should("be.visible");
+    cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
   });
 
   it("edit it's profile", () => {
@@ -200,13 +202,27 @@ describe("main", () => {
     cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
 
     // choose dates in the start of next month
-    cy.get("button").contains("Choose your start date/time...").click();
-    cy.get('button[aria-label="Go to the Next Month"').click();
+    cy.get("button").contains("Pick a start date...").click();
+    cy.get('button[aria-label="Choose the Month"').click();
+
+    cy.get('div[role="option"]').contains("April").click();
+
+    const year = new Date().getFullYear() + 1;
+
+    cy.get('button[aria-label="Choose the Year"').click();
+    cy.get('div[role="option"]').contains(`${year}`).click();
     cy.get('table[role="grid"]').find("button").contains("13").click();
 
-    cy.get("button").contains("Choose your end date/time...").click();
-    cy.wait(500); // wait for start date calendar to disapear so there is only one "Go to the next month" button present
-    cy.get('button[aria-label="Go to the Next Month"').click();
+    cy.wait(1000);
+
+    cy.get('button[aria-label="Pick date"]').eq(1).click();
+    cy.get('button[aria-label="Choose the Month"').click();
+    cy.get('div[role="option"]').contains("April").click();
+
+    cy.get('button[aria-label="Choose the Year"').click();
+    cy.get('div[role="option"]').contains(`${year}`).click();
+    cy.wait(500); // wait for start date calendar to disapear so there is only one "Choose the Month" button present
+
     cy.get('table[role="grid"]').find("button").contains("14").click();
 
     cy.get("button").contains("Create event").click();
@@ -216,14 +232,14 @@ describe("main", () => {
 
     toastShouldContain("Event created!");
 
-    cy.get("p").contains(testEventName).should("be.visible");
-    cy.get("p").contains(testEventLocation).should("be.visible");
+    cy.get("h1").contains(testEventName).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
     cy.get("p")
       .contains(
         "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
       )
       .should("be.visible"); // desc
-    cy.get("p").contains(" 13th, ").should("be.visible"); // start date
+    cy.get("h2").contains(" 13th, ").should("be.visible"); // start date
     cy.get("p").contains(" 14, ").should("be.visible"); // end date
 
     cy.get("button").contains("Participate").should("be.visible");
@@ -237,7 +253,7 @@ describe("main", () => {
     cy.get("button").contains("Participate").click();
 
     // wait for participation confirmation
-    cy.get("p").contains("You're in!", { timeout: 8000 }).should("be.visible");
+    cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
 
     // check that we have a ticket with the event name visible
     cy.visit("/tickets");

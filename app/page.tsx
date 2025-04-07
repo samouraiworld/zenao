@@ -1,12 +1,10 @@
-"use client";
-
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import Link from "next/link";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
-import { VeryLargeText } from "@/components/texts/VeryLargeText";
-import { SmallText } from "@/components/texts/SmallText";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
+import { Web3Image } from "@/components/images/web3-image";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -14,7 +12,7 @@ export default function Home() {
   return (
     <ScreenContainerCentered>
       <div className="flex flex-col items-center">
-        <Image
+        <Web3Image
           src="/zenao-logo.png"
           alt="zeano logo"
           width={200}
@@ -22,15 +20,21 @@ export default function Home() {
           priority
           className="mb-5 mt-5"
         />
-        <VeryLargeText className="w-[200px] text-center">
+        <Heading level={1} size="4xl" className="w-[200px] text-center">
           {t("main-text")}
-        </VeryLargeText>
-        <SmallText className="my-10 w-[280px] text-center" variant="secondary">
+        </Heading>
+        <Text
+          size="sm"
+          className="my-10 w-[280px] text-center"
+          variant="secondary"
+        >
           {t("secondary-text")}
-        </SmallText>
+        </Text>
         <Link href="/create">
           <ButtonWithChildren className="w-full flex rounded-3xl py-5">
-            <SmallText variant="invert">{t("button")}</SmallText>
+            <Text variant="invert" className="text-sm">
+              {t("button")}
+            </Text>
           </ButtonWithChildren>
         </Link>
       </div>

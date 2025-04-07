@@ -8,6 +8,13 @@ import (
 )
 
 func NewPost(feedId string, post *feedsv1.Post) string {
+
+	creator := std.PreviousRealm().Address().String()
+	post.Author = creator
+	post.CreatedAt = time.Now().Unix()
+	post.UpdatedAt = time.Now().Unix()
+	post.DeletedAt = 0
+
 	feedRaw, ok := feeds.Get(feedId)
 	if ok {
 		feed := feedRaw.(*Feed)
@@ -112,27 +119,35 @@ func EditPost(feedId string, localPostId string, newPost *feedsv1.Post) {
 	}
 }
 
-// XXX: create a tree just for addresses that have reacted to a post
 func ReactPost(localPostId string, icon string) {
 	caller := std.PreviousRealm().Address()
+
+	userReactId := localPostId + ":" + icon + ":" + caller.String()
 	reactId := localPostId + ":" + icon
 
-	var reacts []string
-	reactRaw, ok := reactions.Get(reactId)
-	if !ok {
-		reacts = []string{caller.String()}
-	} else {
-		reacts = reactRaw.([]string)
-		for i, v := range reacts {
-			if v == caller.String() {
-				reacts = append(reacts[:i], reacts[i+1:]...)
-				reactions.Set(reactId, reacts)
-				return
+	if userReactions.Has(userReactId) {
+		userReactions.Remove(userReactId)
+
+		count := uint32(1)
+		if reactions.Has(reactId) {
+			countRaw, _ := reactions.Get(reactId)
+			count = countRaw.(uint32)
+			if count > 1 {
+				reactions.Set(reactId, count-1)
+			} else {
+				reactions.Remove(reactId)
 			}
 		}
-		reacts = append(reacts, caller.String())
+	} else {
+		userReactions.Set(userReactId, struct{}{})
+
+		count := uint32(0)
+		if reactions.Has(reactId) {
+			countRaw, _ := reactions.Get(reactId)
+			count = countRaw.(uint32)
+		}
+		reactions.Set(reactId, count+1)
 	}
-	reactions.Set(reactId, reacts)
 }
 
 func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
@@ -140,16 +155,16 @@ func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
 	start := localPostId + ":"
 	end := localPostId + ";"
 	reactions.Iterate(start, end, func(key string, value interface{}) bool {
+		icon := key[len(localPostId)+1:]
+		count := value.(uint32)
+
+		userReactKey := localPostId + ":" + icon + ":" + user
+		userHasVoted := userReactions.Has(userReactKey)
+
 		react := &feedsv1.ReactionView{
-			Icon:         key[len(localPostId)+1:],
-			Count:        uint32(len(value.([]string))),
-			UserHasVoted: false,
-		}
-		for _, v := range value.([]string) {
-			if v == user {
-				react.UserHasVoted = true
-				break
-			}
+			Icon:         icon,
+			Count:        count,
+			UserHasVoted: userHasVoted,
 		}
 		res = append(res, react)
 		return false

@@ -7,7 +7,6 @@ import {
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { SmallText } from "@/components/texts/SmallText";
 import { GnowebButton } from "@/components/buttons/GnowebButton";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import {
@@ -19,6 +18,7 @@ import {
 } from "@/components/shadcn/dialog";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
 import { UserAvatar, UserAvatarWithName } from "@/components/common/user";
+import Text from "@/components/texts/text";
 
 function ParticipantsAvatarsPreview({
   participants,
@@ -56,17 +56,18 @@ function ParticipantsNamesPreview({
   return (
     <div className="flex flex-row">
       {participants.length > 2 ? (
-        <div>
-          <SmallText>{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</SmallText>
-        </div>
+        <>
+          <Text
+            size="sm"
+            className="text-start"
+          >{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</Text>
+        </>
       ) : (
-        <div>
-          {participants.map((participant) => (
-            <SmallText key={participant?.address}>
-              {participant?.displayName}
-            </SmallText>
-          ))}
-        </div>
+        <Text size="sm">
+          {participants
+            .map((participant) => participant?.displayName)
+            .join(", ")}
+        </Text>
       )}
     </div>
   );

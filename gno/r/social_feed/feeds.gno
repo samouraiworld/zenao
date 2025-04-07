@@ -18,17 +18,19 @@ type Feed struct {
 var (
 	id seqid.ID
 
-	reactions *avl.Tree
-
 	posts      *avl.Tree // feed_id:local_post_id -> *Post // for search with specific feed
 	postsByTag *avl.Tree // feed_id:tag:local_post_id -> *Post // for search with specific tag
 	postsById  *avl.Tree // id -> *Post // for search with specific id (get/delete)
+
+	reactions     *avl.Tree // post_id:icon -> count
+	userReactions *avl.Tree // post_id:icon:user_address -> struct{}
 
 	feeds *avl.Tree // slug -> Feed
 )
 
 func init() {
 	reactions = avl.NewTree()
+	userReactions = avl.NewTree()
 
 	posts = avl.NewTree()
 	postsByTag = avl.NewTree()

@@ -1,11 +1,10 @@
 import React from "react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { FileText } from "lucide-react";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
-import { Text } from "@/components/texts/DefaultText";
 import { Card } from "@/components/cards/Card";
-import { SmallText } from "@/components/texts/SmallText";
+import Text from "@/components/texts/text";
+import { Web3Image } from "@/components/images/web3-image";
 
 export default function Manifesto() {
   const t = useTranslations("manifesto");
@@ -16,7 +15,7 @@ export default function Manifesto() {
         <div className="w-full flex justify-center my-10 lg:my-0 lg:w-1/3 lg:self-center lg:justify-evenly">
           <div />
           <div />
-          <Image
+          <Web3Image
             src="/zenao-logo.png"
             alt="zeano logo"
             width={200}
@@ -40,25 +39,29 @@ export default function Manifesto() {
                   Zen Autonomous Organizations
                 </span>
               </Text>
-              <SmallText>{t("p1")}</SmallText>
-              <SmallText>{t("p2")}</SmallText>
-              <SmallText>{t("p3")}</SmallText>
-              <SmallText>{t("p4")}</SmallText>
-              <SmallText>{t("p5")}</SmallText>
+              <Text size="sm">{t("p1")}</Text>
+              <Text size="sm">{t("p2")}</Text>
+              <Text size="sm">{t("p3")}</Text>
+              <Text size="sm">{t("p4")}</Text>
+              <Text size="sm">{t("p5")}</Text>
               <div>
-                <SmallText>
+                <Text size="sm">
                   <span>{t("p6")}</span>
                   <a href="https://samourai.world" className="mx-[6px]">
                     <span className="text-blue-600">Samourai.world</span>
                   </a>
                   <span>{t("p6-end")}</span>
-                </SmallText>
-                <SmallText variant="secondary">{t("p6-ref")}</SmallText>
+                </Text>
+                <Text size="sm" variant="secondary">
+                  {t("p6-ref")}
+                </Text>
               </div>
               <div>
-                <SmallText>{t("p7")}</SmallText>
+                <Text size="sm">{t("p7")}</Text>
                 <a href="https://zenao.io">
-                  <SmallText className="text-orange-600">zenao.io</SmallText>
+                  <Text size="sm" className="text-orange-600">
+                    zenao.io
+                  </Text>
                 </a>
               </div>
             </div>
