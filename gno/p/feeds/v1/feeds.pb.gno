@@ -55,14 +55,15 @@ type Tip struct {
 }
 
 type Post struct {
-	Author    string
-	ParentUri string
-	Loc       *PostGeoLoc
-	CreatedAt int64
-	UpdatedAt int64
-	DeletedAt int64
-	Tags      []string
-	Post      interface{}
+	LocalPostId string
+	Author      string
+	ParentUri   string
+	Loc         *PostGeoLoc
+	CreatedAt   int64
+	UpdatedAt   int64
+	DeletedAt   int64
+	Tags        []string
+	Post        interface{}
 }
 
 type PostView struct {
