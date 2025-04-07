@@ -14,7 +14,7 @@ import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 
 export function EventFeed({
   isDescExpanded,
-  posts,
+  posts: _, // TODO make use of the posts
   children,
 }: {
   isDescExpanded: boolean;

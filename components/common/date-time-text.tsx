@@ -2,8 +2,7 @@
 
 import { format, formatDistanceToNowStrict, fromUnixTime } from "date-fns";
 import React, { useState } from "react";
-import { TextProps } from "@/components/texts/types";
-import Text from "@/components/texts/text";
+import Text, { type TextProps } from "@/components/texts/text";
 
 interface DateTimeTextProps extends Omit<TextProps, "children"> {
   datetime: bigint;

@@ -31,7 +31,7 @@ export function FormFieldCheckbox<T extends FieldValues>({
                 htmlFor={checkboxId}
                 className="hover:cursor-pointer w-full"
               >
-                <Text classNmae="text-sm">{label}</Text>
+                <Text className="text-sm">{label}</Text>
               </Label>
               <Checkbox
                 id={checkboxId}

@@ -41,7 +41,7 @@ export function FeedInputPoll({
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
 
   // TODO: Disable stuff if isLoading
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
 
   const pollForm = useForm<PollFormSchemaType>({
     resolver: zodResolver(pollFormSchema),
@@ -71,7 +71,7 @@ export function FeedInputPoll({
   }, [question]);
 
   // Functions
-  const onSubmitPoll = async (values: PollFormSchemaType) => {
+  const onSubmitPoll = async (_values: PollFormSchemaType) => {
     try {
       setIsLoading(true);
       const token = await getToken();
@@ -152,7 +152,7 @@ export function FeedInput({
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
 
   // TODO: Disable stuff if isLoading
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
 
   const standardPostForm = useForm<StandardPostFormSchemaType>({
     resolver: zodResolver(standardPostFormSchema),
@@ -180,7 +180,7 @@ export function FeedInput({
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [content]);
 
-  const onSubmitStandardPost = async (values: StandardPostFormSchemaType) => {
+  const onSubmitStandardPost = async (_values: StandardPostFormSchemaType) => {
     try {
       setIsLoading(true);
       const token = await getToken();

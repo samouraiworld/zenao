@@ -57,7 +57,7 @@ export const useSearchField = (value: string) => {
 
 export const FormFieldLocation: React.FC<{
   form: UseFormReturn<EventFormSchemaType>;
-  onSelect: (marker: { lat: number; lng: number }) => Promise<void>;
+  onSelect?: (marker: { lat: number; lng: number }) => Promise<void>;
   onRemove: () => void;
 }> = ({ form, onSelect, onRemove }) => {
   const t = useTranslations("eventForm");
@@ -74,18 +74,17 @@ export const FormFieldLocation: React.FC<{
         return (
           <FormItem className="flex flex-col w-full gap-0">
             <Popover open={open} onOpenChange={setOpen}>
-              <div className="flex flex-row w-full justify-between">
+              <div className="flex flex-row w-full relative">
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
-                      variant="secondary"
+                      variant="input"
                       role="combobox"
-                      className="w-full flex justify-start rounded-xl px-4 py-3 h-auto backdrop-blur-sm"
+                      className="w-full flex justify-start px-4 py-3 h-auto backdrop-blur-sm"
                     >
                       <Text
-                        size="sm"
                         className={cn(
-                          "truncate",
+                          "text-base truncate",
                           !object.address && "text-secondary-color",
                         )}
                       >
@@ -99,14 +98,15 @@ export const FormFieldLocation: React.FC<{
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="bg-secondary/80 backdrop-blur-sm self-center absolute right-1"
+                    className="backdrop-blur-sm self-center absolute right-1"
                     onClick={() => {
                       setSearch("");
-                      onRemove();
                       form.setValue("location", {
-                        ...object,
+                        kind: "custom",
                         address: "",
+                        timeZone: currentTimezone(),
                       });
+                      onRemove();
                       form.trigger("location");
                     }}
                   >
@@ -154,11 +154,11 @@ export const FormFieldLocation: React.FC<{
                               size: 0,
                             });
                             form.trigger("location");
-                            await onSelect({ lat, lng });
+                            if (onSelect) await onSelect({ lat, lng });
                             setOpen(false);
                           }}
                         >
-                          <Text size="sm">{result.label}</Text>
+                          <Text className="md:text-sm">{result.label}</Text>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -169,24 +169,24 @@ export const FormFieldLocation: React.FC<{
                         value={search}
                         key={search}
                         onSelect={async () => {
+                          onRemove();
                           form.setValue("location", {
                             kind: "custom",
                             address: search,
                             timeZone: currentTimezone(),
                           });
                           form.trigger("location");
-                          onRemove();
                           setOpen(false);
                         }}
                       >
-                        <Text size="sm">{`Use ${search}`}</Text>
+                        <Text className="md:text-sm">{`Use ${search}`}</Text>
                       </CommandItem>
                     )}
                   </CommandList>
                 </Command>
               </PopoverContent>
             </Popover>
-            <FormMessage className="pb-2 px-4" />
+            <FormMessage />
           </FormItem>
         );
       }}

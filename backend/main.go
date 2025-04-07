@@ -60,11 +60,12 @@ type config struct {
 	chainID         string
 	dbPath          string
 	resendSecretKey string
+	discordtoken    string
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
-	flset.StringVar(&conf.clerkSecretKey, "clerk-secret", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
+	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
 	flset.StringVar(&conf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
 	flset.StringVar(&conf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
@@ -72,6 +73,8 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
+	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
+
 }
 
 var conf config
@@ -98,6 +101,7 @@ func injectStartEnv() {
 		"ZENAO_DB":                &conf.dbPath,
 		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
+		"DISCORD_TOKEN":           &conf.discordtoken,
 	}
 
 	for key, ps := range mappings {
@@ -106,6 +110,7 @@ func injectStartEnv() {
 			*ps = val
 		}
 	}
+
 }
 
 func execStart() error {
@@ -126,6 +131,11 @@ func execStart() error {
 		return err
 	}
 
+	err = RegisterMultiAddrProtocols()
+	if err != nil {
+		return err
+	}
+
 	mux := http.NewServeMux()
 
 	mailClient := (*resend.Client)(nil)
@@ -134,12 +144,13 @@ func execStart() error {
 	}
 
 	zenao := &ZenaoServer{
-		Logger:     logger,
-		GetUser:    getUserFromClerk,
-		CreateUser: createClerkUser,
-		Chain:      chain,
-		DB:         db,
-		MailClient: mailClient,
+		Logger:       logger,
+		GetUser:      getUserFromClerk,
+		CreateUser:   createClerkUser,
+		Chain:        chain,
+		DB:           db,
+		MailClient:   mailClient,
+		DiscordToken: conf.discordtoken,
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")

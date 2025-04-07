@@ -1,26 +1,29 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
 import { MapPin, Users } from "lucide-react";
 import { format, fromUnixTime } from "date-fns";
 import { UserAvatarWithName } from "../common/user";
 import Text from "../texts/text";
 import Heading from "../texts/heading";
+import { Web3Image } from "../images/web3-image";
 import { Card } from "./Card";
+import EventDateTime from "./event-date-time";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
+import { makeLocationFromEvent } from "@/lib/location";
+import { determineTimezone } from "@/lib/determine-timezone";
 
 export function EventCard({ evt }: { evt: EventInfo }) {
   const iconSize = 16;
 
-  let location = "";
-  if (
-    evt.location?.address.case === "geo" ||
-    evt.location?.address.case === "custom"
-  ) {
-    location = evt.location?.address.value.address;
-  } else if (evt.location?.address.case === "virtual") {
-    location = evt.location?.address.value.uri;
-  }
+  const location = makeLocationFromEvent(evt.location);
+  const timezone = determineTimezone(location);
+
+  const locationString =
+    location.kind === "geo" || location.kind === "custom"
+      ? location.address
+      : location.location;
+
   return (
     <div className="flex flex-col md:flex-row md:justify-between">
       <div className="min-w-32 left-6 relative md:left-0 md:flex">
@@ -42,15 +45,13 @@ export function EventCard({ evt }: { evt: EventInfo }) {
         >
           <Card className="md:h-[185px] w-full min-w-full max-w-full flex flex-row justify-between mb-3 hover:bg-secondary/100">
             <div className="flex flex-col gap-2">
-              <Text variant="secondary">
-                {format(fromUnixTime(Number(evt.startDate)), "h:mm a")}
-              </Text>
+              <EventDateTime startDate={evt.startDate} timezone={timezone} />
               <Heading level={1} size="xl" className="mb-1 line-clamp-3">
                 {evt.title}
               </Heading>
               <div className="flex flex-row gap-2 items-center">
                 <MapPin width={iconSize} height={iconSize} />
-                <Text className="line-clamp-1">{location} </Text>
+                <Text className="line-clamp-1">{locationString} </Text>
               </div>
               <div className="flex flex-row gap-2 items-center">
                 <Users width={iconSize} height={iconSize} />
@@ -62,13 +63,12 @@ export function EventCard({ evt }: { evt: EventInfo }) {
             </div>
             <div>
               <div className="min-w-[80px] min-h-[80px] w-[80px] h-[80px] md:w-[120px] md:h-[120px] relative">
-                <Image
+                <Web3Image
                   src={evt.imageUri}
                   width={80}
                   height={80}
                   alt="Event presentation"
                   className="object-cover rounded-xl w-full h-full"
-                  loader={web3ImgLoader}
                 />
               </div>
             </div>

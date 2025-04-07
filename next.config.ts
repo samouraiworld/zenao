@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
   experimental: {
     serverComponentsHmrCache: false, // defaults to true
   },
+  async rewrites() {
+    return [
+      {
+        source: "/discover",
+        destination: "/discover/upcoming",
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

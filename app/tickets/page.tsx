@@ -1,5 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
+import { SearchParams } from "nuqs";
+import { TicketsEventsList } from "./tickets-events-list";
 import { getQueryClient } from "@/lib/get-query-client";
 import {
   ScreenContainer,
@@ -7,11 +9,17 @@ import {
 } from "@/components/layout/ScreenContainer";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { zenaoClient } from "@/app/zenao-client";
-import { EventsListLayout } from "@/components/layout/EventsListLayout";
+import { EventsListLayout } from "@/components/layout/events-list-layout";
+import { loadEventFilterSearchParams } from "@/lib/searchParams";
 
-export default async function TicketsPage() {
+type PageProps = {
+  searchParams: Promise<SearchParams>;
+};
+
+export default async function TicketsPage({ searchParams }: PageProps) {
   const { getToken } = await auth();
   const token = await getToken();
+
   if (!token) {
     return (
       <ScreenContainerCentered isSignedOutModal>
@@ -27,22 +35,32 @@ export default async function TicketsPage() {
 
   const queryClient = getQueryClient();
   const now = Date.now() / 1000;
-  const upcoming = await queryClient.fetchQuery(
-    eventsByParticipantList(address, now, Number.MAX_SAFE_INTEGER, 20),
-  );
-  const past = await queryClient.fetchQuery(
-    eventsByParticipantList(address, now - 1, 0, 20),
-  );
+  const { from } = await loadEventFilterSearchParams(searchParams);
+
+  switch (from) {
+    case "upcoming":
+      queryClient.prefetchQuery(
+        eventsByParticipantList(address, now, Number.MAX_SAFE_INTEGER, 20),
+      );
+      break;
+    case "past":
+      queryClient.prefetchQuery(
+        eventsByParticipantList(address, now - 1, 0, 20),
+      );
+      break;
+  }
+
   const t = await getTranslations("tickets");
 
   return (
     <ScreenContainer>
       <EventsListLayout
-        upcoming={upcoming}
-        past={past}
+        from={from}
         title={t("title")}
         description={t("description")}
-      />
+      >
+        <TicketsEventsList address={address} from={from} now={now} />
+      </EventsListLayout>
     </ScreenContainer>
   );
 }

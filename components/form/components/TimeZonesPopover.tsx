@@ -37,7 +37,7 @@ export const TimeZonesPopover: React.FC<{
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger className="relative" asChild>
           <Button
-            variant="outline"
+            variant="input"
             role="combobox"
             aria-expanded={open}
             className="w-[250px] justify-between"
