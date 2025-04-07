@@ -20,7 +20,7 @@ var ZenaoProtocols []*ma.Protocol = []*ma.Protocol{
 		Name:       "poll",
 		Code:       0x301,
 		VCode:      ma.CodeToVarint(0x301),
-		Size:       64, // Fixed size of exactly 8 bytes
+		Size:       56, // Fixed size of exactly 7 bytes -> size of a seqid in gno
 		Transcoder: generalTranscoder,
 	},
 }

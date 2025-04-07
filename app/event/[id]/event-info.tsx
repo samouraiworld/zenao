@@ -96,6 +96,33 @@ export function EventInfo({ id }: { id: string }) {
     );
   };
 
+  const onVotingPoll = async () => {
+    const token = await getToken();
+    zenaoClient.votePoll({
+      pollId: "1",
+      option: "Option 1",
+    }, { headers: { Authorization: `Bearer ${token}` } },
+    );
+  };
+
+  const UnknowPollOption = async () => {
+    const token = await getToken();
+    zenaoClient.votePoll({
+      pollId: "1",
+      option: "Option 4",
+    }, { headers: { Authorization: `Bearer ${token}` } },
+    );
+  };
+
+  const WrongPollId = async () => {
+    const token = await getToken();
+    zenaoClient.votePoll({
+      pollId: "22",
+      option: "Option 1",
+    }, { headers: { Authorization: `Bearer ${token}` } },
+    );
+  };
+
   if (!data) {
     return <p>{`Event doesn't exist`}</p>;
   }
@@ -107,6 +134,25 @@ export function EventInfo({ id }: { id: string }) {
       >
         Create Poll
       </button>
+      <button
+        style={{ backgroundColor: "blue" }}
+        onClick={onVotingPoll}
+      >
+        Vote Poll
+      </button>
+      <button
+        style={{ backgroundColor: "green" }}
+        onClick={UnknowPollOption}
+      >
+        Unknown Poll Option
+      </button>
+      <button
+        style={{ backgroundColor: "yellow" }}
+        onClick={WrongPollId}
+      >
+        Wrong Poll ID
+      </button>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

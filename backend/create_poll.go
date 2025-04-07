@@ -51,7 +51,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
-		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno.land/r/zenao/polls", pollID))
+		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
 		if err != nil {
 			return err
 		}
