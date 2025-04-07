@@ -148,6 +148,7 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 				Title:       post.Title,
 				Description: post.Description,
 				AudioUri:    post.AudioURI,
+				ImageUri:    post.ThumbnailImageURI,
 			},
 		}
 	default:

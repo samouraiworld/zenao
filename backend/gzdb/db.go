@@ -423,6 +423,7 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 		dbPost.Title = v.Audio.Title
 		dbPost.Description = v.Audio.Description
 		dbPost.AudioURI = v.Audio.AudioUri
+		dbPost.ThumbnailImageURI = v.Audio.ImageUri
 	default:
 		return nil, fmt.Errorf("unknown post kind: %T", post.Post)
 	}
