@@ -1,9 +1,9 @@
 package gzdb
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -387,35 +387,44 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 		return nil, err
 	}
 
+	tagsJson, _ := json.Marshal(post.Tags)
 	dbPost := &Post{
 		Model:     gorm.Model{ID: uint(postIDInt)},
-		Kind:      reflect.TypeOf(post.Post).String(),
 		ParentURI: post.ParentUri,
 		UserID:    uint(userIDInt),
 		FeedID:    uint(feedIDInt),
+		Tags:      string(tagsJson),
 	}
 
-	switch dbPost.Kind {
-	case reflect.TypeOf(feedsv1.Post_Standard{}).String():
-		dbPost.Content = post.GetStandard().Content
-	case reflect.TypeOf(feedsv1.Post_Article{}).String():
-		dbPost.Title = post.GetArticle().Title
-		dbPost.Content = post.GetArticle().Content
-	case reflect.TypeOf(feedsv1.Post_Link{}).String():
-		dbPost.URI = post.GetLink().Uri
-	case reflect.TypeOf(feedsv1.Post_Image{}).String():
-		dbPost.Title = post.GetImage().Title
-		dbPost.Description = post.GetImage().Description
-		dbPost.ImageURI = post.GetImage().ImageUri
-	case reflect.TypeOf(feedsv1.Post_Video{}).String():
-		dbPost.Title = post.GetVideo().Title
-		dbPost.Description = post.GetVideo().Description
-		dbPost.VideoURI = post.GetVideo().VideoUri
-		dbPost.ThumbnailImageURI = post.GetVideo().ThumbnailImageUri
-	case reflect.TypeOf(feedsv1.Post_Audio{}).String():
-		dbPost.Title = post.GetAudio().Title
-		dbPost.Description = post.GetAudio().Description
-		dbPost.AudioURI = post.GetAudio().AudioUri
+	switch v := post.Post.(type) {
+	case *feedsv1.Post_Standard:
+		dbPost.Kind = PostTypeStandard
+		dbPost.Content = v.Standard.Content
+	case *feedsv1.Post_Article:
+		dbPost.Kind = PostTypeArticle
+		dbPost.Title = v.Article.Title
+		dbPost.Content = v.Article.Content
+	case *feedsv1.Post_Link:
+		dbPost.Kind = PostTypeLink
+		dbPost.URI = v.Link.Uri
+	case *feedsv1.Post_Image:
+		dbPost.Kind = PostTypeImage
+		dbPost.Title = v.Image.Title
+		dbPost.Description = v.Image.Description
+		dbPost.ImageURI = v.Image.ImageUri
+	case *feedsv1.Post_Video:
+		dbPost.Kind = PostTypeVideo
+		dbPost.Title = v.Video.Title
+		dbPost.Description = v.Video.Description
+		dbPost.VideoURI = v.Video.VideoUri
+		dbPost.ThumbnailImageURI = v.Video.ThumbnailImageUri
+	case *feedsv1.Post_Audio:
+		dbPost.Kind = PostTypeAudio
+		dbPost.Title = v.Audio.Title
+		dbPost.Description = v.Audio.Description
+		dbPost.AudioURI = v.Audio.AudioUri
+	default:
+		return nil, fmt.Errorf("unknown post kind: %T", post.Post)
 	}
 
 	if err := g.db.Create(dbPost).Error; err != nil {

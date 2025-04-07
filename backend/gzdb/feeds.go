@@ -3,13 +3,21 @@ package gzdb
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 	"strconv"
 
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"gorm.io/gorm"
+)
+
+const (
+	PostTypeStandard = "standard"
+	PostTypeArticle  = "article"
+	PostTypeLink     = "link"
+	PostTypeImage    = "image"
+	PostTypeVideo    = "video"
+	PostTypeAudio    = "audio"
 )
 
 type Feed struct {
@@ -99,26 +107,26 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 	}
 
 	switch post.Kind {
-	case reflect.TypeOf(feedsv1.Post_Standard{}).String():
+	case PostTypeStandard:
 		zpost.Post.Post = &feedsv1.Post_Standard{
 			Standard: &feedsv1.StandardPost{
 				Content: post.Content,
 			},
 		}
-	case reflect.TypeOf(feedsv1.Post_Article{}).String():
+	case PostTypeArticle:
 		zpost.Post.Post = &feedsv1.Post_Article{
 			Article: &feedsv1.ArticlePost{
 				Title:   post.Title,
 				Content: post.Content,
 			},
 		}
-	case reflect.TypeOf(feedsv1.Post_Link{}).String():
+	case PostTypeLink:
 		zpost.Post.Post = &feedsv1.Post_Link{
 			Link: &feedsv1.LinkPost{
 				Uri: post.URI,
 			},
 		}
-	case reflect.TypeOf(feedsv1.Post_Image{}).String():
+	case PostTypeImage:
 		zpost.Post.Post = &feedsv1.Post_Image{
 			Image: &feedsv1.ImagePost{
 				Title:       post.Title,
@@ -126,7 +134,7 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 				ImageUri:    post.ImageURI,
 			},
 		}
-	case reflect.TypeOf(feedsv1.Post_Video{}).String():
+	case PostTypeVideo:
 		zpost.Post.Post = &feedsv1.Post_Video{
 			Video: &feedsv1.VideoPost{
 				Description:       post.Description,
@@ -134,7 +142,7 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 				ThumbnailImageUri: post.ThumbnailImageURI,
 			},
 		}
-	case reflect.TypeOf(feedsv1.Post_Audio{}).String():
+	case PostTypeAudio:
 		zpost.Post.Post = &feedsv1.Post_Audio{
 			Audio: &feedsv1.AudioPost{
 				Title:       post.Title,
