@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMediaQuery } from "react-responsive";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { hoursToMilliseconds, minutesToMilliseconds } from "date-fns";
 import { pollFormSchema, PollFormSchemaType } from "../types";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
@@ -17,19 +18,26 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/shadcn/form";
+import { useCreatePoll } from "@/lib/mutations/create-poll";
+import { getQueryClient } from "@/lib/get-query-client";
+import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
 export function PollPostForm({
+  eventId,
   feedInputMode,
   setFeedInputMode,
 }: {
+  eventId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
 }) {
+  const queryClient = getQueryClient();
   const { getToken } = useAuth();
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
+  const { createPoll, isPending } = useCreatePoll(queryClient);
 
   // TODO: Disable stuff if isLoading
   const [_isLoading, setIsLoading] = useState(false);
@@ -40,6 +48,11 @@ export function PollPostForm({
       question: "",
       options: [{ text: "" }, { text: "" }],
       allowMultipleOptions: false,
+      duration: {
+        days: 1,
+        hours: 0,
+        minutes: 0,
+      },
     },
   });
   const question = pollForm.watch("question");
@@ -70,10 +83,30 @@ export function PollPostForm({
         throw new Error("invalid clerk token");
       }
 
-      //TODO: Plug endpoint here
-      console.log(values);
+      const pollKind = values.allowMultipleOptions
+        ? PollKind.MULTIPLE_CHOICE
+        : PollKind.SINGLE_CHOICE;
 
-      pollForm.reset();
+      // TODO Calculate duration here
+      const duration = BigInt(
+        (hoursToMilliseconds(
+          values.duration.days * 24 + values.duration.hours,
+        ) +
+          minutesToMilliseconds(values.duration.minutes)) *
+          1000,
+      );
+
+      // Call backend
+      // await createPoll({
+      //   eventId,
+      //   question: values.question,
+      //   duration: BigInt(duration),
+      //   options: values.options.map((option) => option.text),
+      //   kind: pollKind,
+      //   token: await getToken(),
+      // });
+
+      // pollForm.reset();
       toast({
         // title: t("toast-creation-success"),
         title: "TODO: trad (Poll creation success)",
@@ -123,6 +156,7 @@ export function PollPostForm({
             buttonSize={textareaMinHeight}
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
+            isLoading={isPending}
           />
         </div>
 

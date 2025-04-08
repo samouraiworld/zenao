@@ -142,5 +142,10 @@
     "pageTitle": "Blog",
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
     "publishedAt": "Published at"
+  },
+  "polls": {
+    "days": "Days",
+    "minutes": "Minutes",
+    "hours": "Hours"
   }
 }

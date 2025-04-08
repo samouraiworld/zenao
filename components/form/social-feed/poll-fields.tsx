@@ -4,13 +4,12 @@ import { Control, useFieldArray, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { FormFieldInputString } from "../components/FormFieldInputString";
-import { PollFormSchemaType } from "../types";
+import { pollFormSchema, PollFormSchemaType } from "../types";
+import { FormFieldInputNumber } from "../components/FormFieldInputNumber";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import { cn } from "@/lib/tailwind";
-import { currentTimezone } from "@/lib/time";
 import { FormFieldCheckbox } from "@/components/form/components/form-field-checkbox";
 import Text from "@/components/texts/text";
-import { FormFieldDatePicker } from "@/components/form/components/form-field-date-picker";
 
 export function PollFields({
   form,
@@ -25,8 +24,6 @@ export function PollFields({
     control: form.control,
     name: "options",
   });
-
-  const t = useTranslations("eventForm");
 
   const onClickAddOption = () => {
     appendOption({ text: "" });
@@ -59,12 +56,7 @@ export function PollFields({
           </div>
         </div>
 
-        <FormFieldDatePicker
-          name="endDate"
-          control={form.control}
-          placeholder={t("pick-a-end-date-placeholder")}
-          timeZone={currentTimezone()}
-        />
+        <PollFormDuration form={form} />
       </div>
     </div>
   );
@@ -127,6 +119,66 @@ function RemoveOptionButton({
       )}
     >
       <Trash2Icon className="size-4" />
+    </div>
+  );
+}
+
+function PollFormDuration({
+  form,
+}: {
+  form: UseFormReturn<PollFormSchemaType>;
+}) {
+  const t = useTranslations("polls");
+
+  const minutesMin =
+    pollFormSchema.shape.duration.shape.minutes._def.checks.find(
+      (check) => check.kind === "min",
+    )?.value;
+  const minutesMax =
+    pollFormSchema.shape.duration.shape.minutes._def.checks.find(
+      (check) => check.kind === "max",
+    )?.value;
+  const hoursMin = pollFormSchema.shape.duration.shape.hours._def.checks.find(
+    (check) => check.kind === "min",
+  )?.value;
+  const hoursMax = pollFormSchema.shape.duration.shape.hours._def.checks.find(
+    (check) => check.kind === "max",
+  )?.value;
+
+  const daysMin = pollFormSchema.shape.duration.shape.days._def.checks.find(
+    (check) => check.kind === "min",
+  )?.value;
+  const daysMax = pollFormSchema.shape.duration.shape.days._def.checks.find(
+    (check) => check.kind === "max",
+  )?.value;
+
+  return (
+    <div className="flex flex-col gap-4 w-full">
+      <Text>Duration of the poll</Text>
+      <div className="flex w-full gap-2">
+        <FormFieldInputNumber
+          control={form.control}
+          name="duration.days"
+          className="w-full"
+          label={t("days")}
+          min={daysMin}
+          max={daysMax}
+        />
+        <FormFieldInputNumber
+          control={form.control}
+          name="duration.hours"
+          label={t("hours")}
+          min={hoursMin}
+          max={hoursMax}
+        />
+        <FormFieldInputNumber
+          control={form.control}
+          name="duration.minutes"
+          label={t("minutes")}
+          min={minutesMin}
+          max={minutesMax}
+        />
+      </div>
     </div>
   );
 }

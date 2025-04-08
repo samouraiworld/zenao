@@ -6,11 +6,10 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
 import { Checkbox } from "@/components/shadcn/checkbox";
-import { Label } from "@/components/shadcn/label";
-import Text from "@/components/texts/text";
 
 export function FormFieldCheckbox<T extends FieldValues>({
   control,
@@ -27,14 +26,12 @@ export function FormFieldCheckbox<T extends FieldValues>({
         <FormItem>
           <FormControl>
             <div className="flex flex-row items-center gap-2">
-              <Label htmlFor={checkboxId} className="hover:cursor-pointer">
-                <Text className="text-sm">{label}</Text>
-              </Label>
+              <FormLabel className="cursor-pointer">{label}</FormLabel>
               <Checkbox
                 id={checkboxId}
                 checked={field.value}
                 className={className}
-                onChange={() => field.onChange(!field.value)}
+                onCheckedChange={field.onChange}
               />
             </div>
           </FormControl>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -24,7 +24,13 @@ import { PollsList } from "@/components/lists/polls-list";
 const eventTabs = ["global-feed", "polls-feed"] as const;
 export type EventTab = (typeof eventTabs)[number];
 
-export function EventFeedForm({ isDescExpanded }: { isDescExpanded: boolean }) {
+export function EventFeedForm({
+  eventId,
+  isDescExpanded,
+}: {
+  eventId: string;
+  isDescExpanded: boolean;
+}) {
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
@@ -80,12 +86,13 @@ export function EventFeedForm({ isDescExpanded }: { isDescExpanded: boolean }) {
         }}
       >
         {feedInputMode === "POLL" ? (
-          <StandardPostForm
+          <PollPostForm
+            eventId={eventId}
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
           />
         ) : (
-          <PollPostForm
+          <StandardPostForm
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
           />
@@ -133,7 +140,7 @@ export function EventFeed({
       </Tabs>
 
       <div className="flex flex-col gap-12 min-h-0 pt-4 pb-12">
-        <EventFeedForm isDescExpanded={isDescExpanded} />
+        <EventFeedForm eventId={eventId} isDescExpanded={isDescExpanded} />
         {tab === "global-feed" ? (
           <PostsList list={fakeStandardPosts} />
         ) : (
