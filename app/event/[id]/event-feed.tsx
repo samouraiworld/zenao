@@ -133,7 +133,7 @@ export function EventFeed({
         </TabsList>
       </Tabs>
 
-      <div className="flex flex-col gap-4 min-h-0 pt-4 pb-12">
+      <div className="flex flex-col gap-12 min-h-0 pt-4 pb-12">
         <EventFeedInputContainer isDescExpanded={isDescExpanded} />
         {tab === "global-feed" ? (
           <PostsList list={fakeStandardPosts} />

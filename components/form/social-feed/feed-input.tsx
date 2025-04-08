@@ -43,7 +43,7 @@ export function FeedInput({
   const standardPostForm = useForm<StandardPostFormSchemaType>({
     resolver: zodResolver(standardPostFormSchema),
     defaultValues: {
-      content: "rzfezffef",
+      content: "",
     },
   });
   const content = standardPostForm.watch("content");
@@ -66,7 +66,7 @@ export function FeedInput({
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [content]);
 
-  const onSubmitStandardPost = async (_values: StandardPostFormSchemaType) => {
+  const onSubmitStandardPost = async (values: StandardPostFormSchemaType) => {
     try {
       setIsLoading(true);
       const token = await getToken();
@@ -75,6 +75,7 @@ export function FeedInput({
       }
 
       //TODO: Plug endpoint here
+      console.log(values);
 
       standardPostForm.reset();
       toast({
@@ -99,13 +100,13 @@ export function FeedInput({
         onSubmit={standardPostForm.handleSubmit(onSubmitStandardPost)}
         className="flex flex-col gap-4"
       >
-        <div className="flex flex-row items-center gap-4">
+        <div className="flex flex-row gap-4">
           <FormField
             rules={{ required: true }}
             control={standardPostForm.control}
             name="content"
             render={({ field }) => (
-              <FormItem className="relative w-full space-y-0">
+              <FormItem className="relative w-full">
                 <FormControl>
                   <Textarea
                     ref={textareaRef}

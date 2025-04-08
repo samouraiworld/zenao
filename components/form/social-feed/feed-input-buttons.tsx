@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction } from "react";
 import { SendHorizonal, Vote } from "lucide-react";
 import { FeedInputMode } from "./feed-input";
 import { cn } from "@/lib/tailwind";
+import { Button } from "@/components/shadcn/button";
 
 export function FeedInputButtons({
   buttonSize,
@@ -33,12 +34,13 @@ export function FeedInputButtons({
       >
         <Vote color={feedInputMode === "POLL" ? "black" : "white"} size={24} />
       </div>
-      <div
+      <Button
+        variant="link"
         className="flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-700 cursor-pointer"
         style={{ height: buttonSize, width: buttonSize }}
       >
         <SendHorizonal color="white" size={24} />
-      </div>
+      </Button>
     </>
   );
 }

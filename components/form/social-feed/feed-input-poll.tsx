@@ -15,6 +15,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormMessage,
 } from "@/components/shadcn/form";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
@@ -36,7 +37,7 @@ export function FeedInputPoll({
   const pollForm = useForm<PollFormSchemaType>({
     resolver: zodResolver(pollFormSchema),
     defaultValues: {
-      question: "é&eezg",
+      question: "",
       options: [{ text: "" }, { text: "" }],
       allowMultipleOptions: false,
     },
@@ -61,7 +62,7 @@ export function FeedInputPoll({
   }, [question]);
 
   // Functions
-  const onSubmitPoll = async (_values: PollFormSchemaType) => {
+  const onSubmitPoll = async (values: PollFormSchemaType) => {
     try {
       setIsLoading(true);
       const token = await getToken();
@@ -70,6 +71,7 @@ export function FeedInputPoll({
       }
 
       //TODO: Plug endpoint here
+      console.log(values);
 
       pollForm.reset();
       toast({
@@ -94,13 +96,13 @@ export function FeedInputPoll({
         onSubmit={pollForm.handleSubmit(onSubmitPoll)}
         className="flex flex-col gap-4"
       >
-        <div className="flex flex-row items-center gap-4">
+        <div className="flex flex-row gap-4">
           <FormField
             rules={{ required: true }}
             control={pollForm.control}
             name="question"
             render={({ field }) => (
-              <FormItem className="relative w-full space-y-0">
+              <FormItem className="relative w-full">
                 <FormControl>
                   <Textarea
                     ref={textareaRef}
@@ -113,6 +115,7 @@ export function FeedInputPoll({
                     maxLength={textareaMaxLength}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
