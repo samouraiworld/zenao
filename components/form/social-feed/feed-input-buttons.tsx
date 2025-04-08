@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction } from "react";
 import { SendHorizonal, Vote } from "lucide-react";
-import { FeedInputMode } from "./feed-input";
+import { FeedInputMode } from "./standard-post-form";
 import { cn } from "@/lib/tailwind";
 import { Button } from "@/components/shadcn/button";
 

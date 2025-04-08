@@ -10,11 +10,11 @@ import {
   screenContainerMaxWidth,
 } from "@/components/layout/ScreenContainer";
 import {
-  FeedInput,
+  StandardPostForm,
   FeedInputMode,
-} from "@/components/form/social-feed/feed-input";
+} from "@/components/form/social-feed/standard-post-form";
 import { fakePollPosts, fakeStandardPosts } from "@/lib/social-feed";
-import { FeedInputPoll } from "@/components/form/social-feed/feed-input-poll";
+import { PollPostForm } from "@/components/form/social-feed/poll-post-form";
 import { userAddressOptions } from "@/lib/queries/user";
 import { feedPosts } from "@/lib/queries/social-feed";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
@@ -24,23 +24,20 @@ import { PollsList } from "@/components/lists/polls-list";
 const eventTabs = ["global-feed", "polls-feed"] as const;
 export type EventTab = (typeof eventTabs)[number];
 
-export function EventFeedInputContainer({
-  isDescExpanded,
-}: {
-  isDescExpanded: boolean;
-}) {
+export function EventFeedForm({ isDescExpanded }: { isDescExpanded: boolean }) {
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
   const [isInputSticky, setInputSticky] = useState(false);
   const [inputOffsetTop, setInputOffsetTop] = useState(0);
 
-  const bgColor = useMemo(() => {
+  const [bgColor, setBgColor] = useState<string>("");
+  useEffect(() => {
     const root = document.documentElement;
     const computedStyle = getComputedStyle(root);
     const cssVar = computedStyle.getPropertyValue("--background").trim();
 
-    return `hsl(${cssVar} / .9)`;
+    setBgColor(`hsl(${cssVar} / .9)`);
   }, []);
 
   const feedMaxWidth =
@@ -83,12 +80,12 @@ export function EventFeedInputContainer({
         }}
       >
         {feedInputMode === "POLL" ? (
-          <FeedInputPoll
+          <StandardPostForm
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
           />
         ) : (
-          <FeedInput
+          <PollPostForm
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
           />
@@ -114,12 +111,14 @@ export function EventFeed({
   );
 
   // Event's social feed posts
-  const { data: _posts } = useSuspenseQuery(
+  const { data: posts } = useSuspenseQuery(
     // TODO: Handle offset and limit to make an infinite scroll
     feedPosts(eventId, 0, 100, "", userAddress || ""),
   );
 
   const t = useTranslations("event");
+
+  console.log(posts);
 
   return (
     <div className="flex flex-col gap-4">
@@ -134,7 +133,7 @@ export function EventFeed({
       </Tabs>
 
       <div className="flex flex-col gap-12 min-h-0 pt-4 pb-12">
-        <EventFeedInputContainer isDescExpanded={isDescExpanded} />
+        <EventFeedForm isDescExpanded={isDescExpanded} />
         {tab === "global-feed" ? (
           <PostsList list={fakeStandardPosts} />
         ) : (

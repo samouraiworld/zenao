@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from "react";
 import { Hash, MapPin } from "lucide-react";
+import Link from "next/link";
 import { Card } from "@/components/cards/Card";
 import { UserAvatar } from "@/components/common/user";
 import { PostView, ReactionView } from "@/app/gen/feeds/v1/feeds_pb";
@@ -24,13 +25,17 @@ export function PostCardLayout({
       <div className="flex flex-col sm:flex-row items-start gap-2">
         <div className="w-full flex flex-row items-center gap-3">
           {/*TODO: On click author avatar*/}
+          <Link href={`/profile/${post.post.author}`}>
+            <UserAvatar
+              className="flex ring-2 ring-background/80 cursor-pointer hover:scale-110 transition-transform ease-out"
+              address={post.post.author}
+            />
+          </Link>
 
-          <UserAvatar
-            className="flex ring-2 ring-background/80"
-            address={post.post.author}
-          />
           <div className="flex flex-col">
-            <Text className="text-sm">{post.post.author}</Text>
+            <Link href={`/profile/${post.post.author}`}>
+              <Text className="text-sm">{post.post.author}</Text>
+            </Link>
             <DateTimeText
               variant="secondary"
               className="text-xs"
@@ -75,7 +80,7 @@ export function PostCardLayout({
 
       <div className="flex flex-col justify-between sm:flex-row sm:items-center gap-2">
         <Reactions reactions={post.reactions} />
-        <Text className="text-sm">TODO: Some actions here? </Text>
+        {/* <Text className="text-sm">TODO: Some actions here? </Text> */}
       </div>
     </Card>
   );

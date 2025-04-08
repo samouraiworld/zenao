@@ -1,20 +1,15 @@
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+"use client";
+
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMediaQuery } from "react-responsive";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { pollFormSchema, PollFormSchemaType } from "../types";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
-import {
-  standardPostFormSchema,
-  StandardPostFormSchemaType,
-} from "@/components/form/types";
+import { PollFields } from "@/components/form/social-feed/poll-fields";
+import { Textarea } from "@/components/shadcn/textarea";
 import {
   Form,
   FormControl,
@@ -22,11 +17,10 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/shadcn/form";
-import { Textarea } from "@/components/shadcn/textarea";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
-export function FeedInput({
+export function PollPostForm({
   feedInputMode,
   setFeedInputMode,
 }: {
@@ -40,33 +34,35 @@ export function FeedInput({
   // TODO: Disable stuff if isLoading
   const [_isLoading, setIsLoading] = useState(false);
 
-  const standardPostForm = useForm<StandardPostFormSchemaType>({
-    resolver: zodResolver(standardPostFormSchema),
+  const pollForm = useForm<PollFormSchemaType>({
+    resolver: zodResolver(pollFormSchema),
     defaultValues: {
-      content: "",
+      question: "",
+      options: [{ text: "" }, { text: "" }],
+      allowMultipleOptions: false,
     },
   });
-  const content = standardPostForm.watch("content");
-  const textareaMaxLength =
-    standardPostFormSchema.shape.content._def.checks.find(
-      (check) => check.kind === "max",
-    )?.value;
+  const question = pollForm.watch("question");
+  const textareaMaxLength = pollFormSchema.shape.question._def.checks.find(
+    (check) => check.kind === "max",
+  )?.value;
 
   // Auto shrink and grow textarea
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const textareaMaxHeight = 300;
   const textareaMinHeight = 48;
   const placeholder = isSmallScreen
-    ? "Say something"
-    : "Don't be shy, say something!";
+    ? "Ask something"
+    : "What do you wanna ask to the community?";
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = `${textareaMinHeight}px`;
     textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [content]);
+  }, [question]);
 
-  const onSubmitStandardPost = async (values: StandardPostFormSchemaType) => {
+  // Functions
+  const onSubmitPoll = async (values: PollFormSchemaType) => {
     try {
       setIsLoading(true);
       const token = await getToken();
@@ -77,17 +73,17 @@ export function FeedInput({
       //TODO: Plug endpoint here
       console.log(values);
 
-      standardPostForm.reset();
+      pollForm.reset();
       toast({
         // title: t("toast-creation-success"),
-        title: "TODO: trad (Post creation success)",
+        title: "TODO: trad (Poll creation success)",
       });
       // router.push(`/polls`);
     } catch (err) {
       toast({
         variant: "destructive",
         // title: t("toast-creation-error"),
-        title: "TODO: trad (Post creation error)",
+        title: "TODO: trad (Poll creation error)",
       });
       console.error("error", err);
     }
@@ -95,23 +91,26 @@ export function FeedInput({
   };
 
   return (
-    <Form {...standardPostForm}>
+    <Form {...pollForm}>
       <form
-        onSubmit={standardPostForm.handleSubmit(onSubmitStandardPost)}
+        onSubmit={pollForm.handleSubmit(onSubmitPoll)}
         className="flex flex-col gap-4"
       >
         <div className="flex flex-row gap-4">
           <FormField
             rules={{ required: true }}
-            control={standardPostForm.control}
-            name="content"
+            control={pollForm.control}
+            name="question"
             render={({ field }) => (
               <FormItem className="relative w-full">
                 <FormControl>
                   <Textarea
                     ref={textareaRef}
                     onChange={(e) => field.onChange(e.target.value)}
-                    className={`!min-h-[${textareaMinHeight}px] !max-h-[${textareaMaxHeight}px]`}
+                    style={{
+                      minHeight: textareaMinHeight,
+                      maxHeight: textareaMaxHeight,
+                    }}
                     placeholder={placeholder}
                     maxLength={textareaMaxLength}
                   />
@@ -126,6 +125,8 @@ export function FeedInput({
             setFeedInputMode={setFeedInputMode}
           />
         </div>
+
+        <PollFields form={pollForm} />
       </form>
     </Form>
   );
