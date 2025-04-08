@@ -55,7 +55,7 @@ export function PollFields({
           <FormFieldDatePicker
             name="endDate"
             control={form.control}
-            placeholder={t("end-date-placeholder")}
+            placeholder={t("pick-a-end-date-placeholder")}
             timeZone={currentTimezone()}
           />
         </Card>

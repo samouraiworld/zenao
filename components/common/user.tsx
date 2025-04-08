@@ -27,7 +27,11 @@ export function UserAvatar({ address, className }: UserComponentProps) {
     <Avatar className={cn(avatarClassName, className)}>
       <AvatarFallback>
         <Web3Image
-          src={profile?.avatarUri ?? "/zenao-logo.png"}
+          src={
+            (profile?.avatarUri && profile.avatarUri !== ""
+              ? profile.avatarUri
+              : undefined) ?? "/zenao-logo.png"
+          }
           width={45}
           height={45}
           alt="Avatar"

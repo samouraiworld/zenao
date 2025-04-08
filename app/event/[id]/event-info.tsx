@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
@@ -12,15 +12,14 @@ import { Event, WithContext } from "schema-dts";
 import { TZDate } from "react-day-picker";
 import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
+import { EventSection } from "./event-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { Separator } from "@/components/shadcn/separator";
 import MapCaller from "@/components/common/map/map-lazy-components";
 import { userAddressOptions } from "@/lib/queries/user";
-import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { EventFeed } from "@/app/event/[id]/event-feed";
 import { cn } from "@/lib/tailwind";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
@@ -28,35 +27,10 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
-import { feedPosts } from "@/lib/queries/social-feed";
-import { PostsList } from "@/components/lists/posts-list";
-import { fakePollPosts, fakeStandardPosts } from "@/lib/social-feed";
-import { PollsList } from "@/components/lists/polls-list";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
-
-function EventSection({
-  title,
-  children,
-  className,
-}: {
-  title: string;
-  children?: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn("flex flex-col", className)}>
-      <Text className="font-semibold">{title}</Text>
-      <Separator className="mt-2 mb-3" />
-      {children && children}
-    </div>
-  );
-}
-
-const eventTabs = ["global-feed", "polls-feed"] as const;
-export type EventTab = (typeof eventTabs)[number];
 
 export function EventInfo({ id }: { id: string }) {
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -70,14 +44,6 @@ export function EventInfo({ id }: { id: string }) {
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
 
-  // TODO: Exploit fetched posts from here
-  const { data: posts } = useSuspenseQuery(
-    // TODO: Handle offset and limit to make an infinite scroll
-
-    feedPosts(id, 0, 100, "", address || ""),
-  );
-
-  // Correctly reconstruct location object
   const location = makeLocationFromEvent(data.location);
   const timezone = useLocationTimezone(location);
 
@@ -86,7 +52,6 @@ export function EventInfo({ id }: { id: string }) {
   // TODO REMOVE DYNAMIC CODE FROM EVENT_INFO
   const [loading, setLoading] = useState<boolean>(false);
   const [isDescExpanded, setDescExpanded] = useState(false);
-  const [tab, setTab] = useState<EventTab>("global-feed");
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -119,7 +84,6 @@ export function EventInfo({ id }: { id: string }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
         {/* Left Section */}
         <div className="flex flex-col gap-4 w-full sm:w-2/5">
@@ -279,29 +243,8 @@ export function EventInfo({ id }: { id: string }) {
         </div>
       </div>
 
-      {/* Tabs */}
-      {/*TODO: Make these tabs pretty and cute uwu */}
-
-      <div className="flex flex-col gap-4">
-        <Tabs value={tab} onValueChange={(value) => setTab(value as EventTab)}>
-          <TabsList className={`grid w-full grid-cols-${eventTabs.length}`}>
-            {Object.values(eventTabs).map((tab) => (
-              <TabsTrigger key={tab} value={tab}>
-                {t(tab)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-
-        {/* Social Feed */}
-        <EventFeed isDescExpanded={isDescExpanded} posts={posts}>
-          <>
-            {/*TODO: Show list depending on tab*/}
-            <PostsList list={fakeStandardPosts} />
-            <PollsList list={fakePollPosts} />
-          </>
-        </EventFeed>
-      </div>
+      {/* Social Feed */}
+      <EventFeed eventId={id} isDescExpanded={isDescExpanded} />
     </div>
   );
 }

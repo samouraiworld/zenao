@@ -1,5 +1,9 @@
 "use client";
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/tailwind";
 import {
   screenContainerMarginHorizontal,
@@ -8,42 +12,40 @@ import {
 import {
   FeedInput,
   FeedInputMode,
-  FeedInputPoll,
 } from "@/components/form/social-feed/feed-input";
-import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
+import { fakePollPosts, fakeStandardPosts } from "@/lib/social-feed";
+import { FeedInputPoll } from "@/components/form/social-feed/feed-input-poll";
+import { userAddressOptions } from "@/lib/queries/user";
+import { feedPosts } from "@/lib/queries/social-feed";
+import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
+import { PostsList } from "@/components/lists/posts-list";
+import { PollsList } from "@/components/lists/polls-list";
 
-export function EventFeed({
+const eventTabs = ["global-feed", "polls-feed"] as const;
+export type EventTab = (typeof eventTabs)[number];
+
+export function EventFeedInputContainer({
   isDescExpanded,
-  posts: _, // TODO make use of the posts
-  children,
 }: {
   isDescExpanded: boolean;
-  posts: PostView[];
-  children: ReactNode;
 }) {
+  const inputContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
+  const [isInputSticky, setInputSticky] = useState(false);
+  const [inputOffsetTop, setInputOffsetTop] = useState(0);
 
-  // Getting --background value. Used for sticky FeedInput background
-  const [bgColor, setBgColor] = useState("");
-  useEffect(() => {
+  const bgColor = useMemo(() => {
     const root = document.documentElement;
     const computedStyle = getComputedStyle(root);
     const cssVar = computedStyle.getPropertyValue("--background").trim();
-    setBgColor(`hsl(${cssVar} / .9)`);
+
+    return `hsl(${cssVar} / .9)`;
   }, []);
 
-  //  Stuff used to stick FeedInput when scroll bellow of it
   const feedMaxWidth =
     screenContainerMaxWidth - screenContainerMarginHorizontal * 2;
-  const inputRef = useRef<HTMLDivElement>(null);
-  const [isInputSticky, setInputSticky] = useState(false);
-  const [inputOffsetTop, setInputOffsetTop] = useState(0);
-  useEffect(() => {
-    if (inputRef.current) {
-      setInputOffsetTop(inputRef.current.offsetTop);
-    }
-  }, [isDescExpanded]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > inputOffsetTop) {
@@ -55,42 +57,87 @@ export function EventFeed({
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [inputOffsetTop]);
-  // --------
+
+  useEffect(() => {
+    if (inputContainerRef.current) {
+      setInputOffsetTop(inputContainerRef.current.offsetTop);
+    }
+  }, [isDescExpanded, inputContainerRef]);
 
   return (
-    // TODO: Show skeleton while loading (Input and Lists)
-
-    <div className="flex flex-col gap-4 min-h-0 pt-4">
+    <div
+      ref={inputContainerRef}
+      className={cn(
+        "flex justify-center w-full transition-all duration-300",
+        isInputSticky &&
+          `fixed bottom-0 py-4 px-5 left-0 z-50 backdrop-blur-sm bg-[${bgColor}]`,
+      )}
+    >
       <div
-        ref={inputRef}
-        className={cn(
-          "flex justify-center w-full transition-all duration-300",
-          isInputSticky &&
-            "fixed bottom-0 py-4 px-5 left-0 z-50 backdrop-blur-sm",
-        )}
-        style={{ backgroundColor: bgColor }}
+        className="w-full"
+        style={{
+          maxWidth: feedMaxWidth,
+        }}
       >
-        <div
-          className="w-full"
-          style={{
-            maxWidth: feedMaxWidth,
-          }}
-        >
-          {feedInputMode === "POLL" ? (
-            <FeedInputPoll
-              feedInputMode={feedInputMode}
-              setFeedInputMode={setFeedInputMode}
-            />
-          ) : (
-            <FeedInput
-              feedInputMode={feedInputMode}
-              setFeedInputMode={setFeedInputMode}
-            />
-          )}
-        </div>
+        {feedInputMode === "POLL" ? (
+          <FeedInputPoll
+            feedInputMode={feedInputMode}
+            setFeedInputMode={setFeedInputMode}
+          />
+        ) : (
+          <FeedInput
+            feedInputMode={feedInputMode}
+            setFeedInputMode={setFeedInputMode}
+          />
+        )}
       </div>
+    </div>
+  );
+}
 
-      {children}
+export function EventFeed({
+  eventId,
+  isDescExpanded,
+}: {
+  eventId: string;
+  isDescExpanded: boolean;
+}) {
+  const [tab, setTab] = useState<EventTab>("global-feed");
+
+  // Check which user is logged in
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+
+  // Event's social feed posts
+  const { data: _posts } = useSuspenseQuery(
+    // TODO: Handle offset and limit to make an infinite scroll
+    feedPosts(eventId, 0, 100, "", userAddress || ""),
+  );
+
+  const t = useTranslations("event");
+
+  return (
+    <div className="flex flex-col gap-4">
+      <Tabs value={tab} onValueChange={(value) => setTab(value as EventTab)}>
+        <TabsList className={`grid w-full grid-cols-${eventTabs.length}`}>
+          {Object.values(eventTabs).map((tab) => (
+            <TabsTrigger key={tab} value={tab}>
+              {t(tab)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      <div className="flex flex-col gap-4 min-h-0 pt-4 pb-12">
+        <EventFeedInputContainer isDescExpanded={isDescExpanded} />
+        {tab === "global-feed" ? (
+          <PostsList list={fakeStandardPosts} />
+        ) : (
+          <PollsList list={fakePollPosts} />
+        )}
+      </div>
     </div>
   );
 }
