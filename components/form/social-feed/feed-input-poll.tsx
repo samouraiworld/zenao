@@ -105,7 +105,6 @@ export function FeedInputPoll({
                   <Textarea
                     ref={textareaRef}
                     onChange={(e) => field.onChange(e.target.value)}
-                    className="cursor-pointer border-0 focus-visible:ring-transparent rounded-xl px-4 placeholder:text-primary-color hover:bg-neutral-700 text-md py-3"
                     style={{
                       minHeight: textareaMinHeight,
                       maxHeight: textareaMaxHeight,

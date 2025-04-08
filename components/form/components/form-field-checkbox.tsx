@@ -26,11 +26,8 @@ export function FormFieldCheckbox<T extends FieldValues>({
       render={({ field }) => (
         <FormItem>
           <FormControl>
-            <div className="flex flex-row items-center justify-between">
-              <Label
-                htmlFor={checkboxId}
-                className="hover:cursor-pointer w-full"
-              >
+            <div className="flex flex-row items-center gap-2">
+              <Label htmlFor={checkboxId} className="hover:cursor-pointer">
                 <Text className="text-sm">{label}</Text>
               </Label>
               <Checkbox

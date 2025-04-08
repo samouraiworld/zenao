@@ -70,8 +70,11 @@ export function EventFeedInputContainer({
       className={cn(
         "flex justify-center w-full transition-all duration-300",
         isInputSticky &&
-          `fixed bottom-0 py-4 px-5 left-0 z-50 backdrop-blur-sm bg-[${bgColor}]`,
+          `fixed bottom-0 py-4 px-5 left-0 z-50 backdrop-blur-sm`,
       )}
+      style={{
+        backgroundColor: bgColor,
+      }}
     >
       <div
         className="w-full"

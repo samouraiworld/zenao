@@ -3,7 +3,6 @@
 import { Control, useFieldArray, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { PlusIcon, Trash2Icon } from "lucide-react";
-import { Card } from "../../cards/Card";
 import { FormFieldInputString } from "../components/FormFieldInputString";
 import { PollFormSchemaType } from "../types";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
@@ -46,27 +45,26 @@ export function PollFields({
               canRemove={optionFields.length > 2}
             />
           ))}
-          {optionFields.length < 9 && (
-            <AddOptionButton onClick={onClickAddOption} />
-          )}
+
+          <div className="flex justify-between items-center w-full">
+            {optionFields.length < 9 && (
+              <AddOptionButton onClick={onClickAddOption} />
+            )}
+
+            <FormFieldCheckbox
+              name="allowMultipleOptions"
+              control={form.control}
+              label="Allow multiple answers"
+            />
+          </div>
         </div>
 
-        <Card>
-          <FormFieldDatePicker
-            name="endDate"
-            control={form.control}
-            placeholder={t("pick-a-end-date-placeholder")}
-            timeZone={currentTimezone()}
-          />
-        </Card>
-
-        <Card>
-          <FormFieldCheckbox
-            name="allowMultipleOptions"
-            control={form.control}
-            label="Allow multiple answers"
-          />
-        </Card>
+        <FormFieldDatePicker
+          name="endDate"
+          control={form.control}
+          placeholder={t("pick-a-end-date-placeholder")}
+          timeZone={currentTimezone()}
+        />
       </div>
     </div>
   );
@@ -85,13 +83,12 @@ function PollOptionItem({
 }) {
   return (
     <div className="flex flex-row items-center gap-2 w-full">
-      <Card className="w-full">
-        <FormFieldInputString
-          control={control}
-          name={name}
-          placeholder="Enter an answer"
-        />
-      </Card>
+      <FormFieldInputString
+        control={control}
+        name={name}
+        placeholder="Enter an answer"
+        className="w-full"
+      />
       {canRemove && <RemoveOptionButton onClick={onClickRemove} />}
     </div>
   );
@@ -102,8 +99,8 @@ function AddOptionButton({ onClick }: { onClick: () => void }) {
     <div onClick={onClick}>
       <ButtonWithChildren
         type="button"
-        variant="ghost"
-        className="flex flex-row w-full justify-start hover:bg-neutral-700 rounded-full"
+        variant="outline"
+        className="flex flex-row w-full md:w-fit justify-start rounded"
       >
         <div className="flex flex-row justify-start items-center w-full">
           <PlusIcon className="size-4" color="#FFFFFF" />
