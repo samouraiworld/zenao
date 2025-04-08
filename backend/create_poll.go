@@ -57,6 +57,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		}
 
 		post := &feedsv1.Post{
+			Tags: []string{"poll"},
 			Post: &feedsv1.Post_Link{
 				Link: &feedsv1.LinkPost{
 					Uri: postURI.String(),
