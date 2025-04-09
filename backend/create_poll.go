@@ -57,10 +57,12 @@ func validatePoll(req *zenaov1.CreatePollRequest) error {
 	if len(req.Options) > 8 {
 		return errors.New("poll must have at most 8 options")
 	}
-	if req.Duration < int64(time.Minute)*15 {
+	minDuration := int64(time.Minute) * 15 / int64(time.Second)
+	maxDuration := int64(time.Hour) * 24 * 30 / int64(time.Second)
+	if req.Duration < minDuration {
 		return errors.New("duration must be at least 15 minutes")
 	}
-	if req.Duration > int64(time.Hour)*24*30 {
+	if req.Duration > maxDuration {
 		return errors.New("duration must be at most 1 month")
 	}
 	if req.Kind == pollsv1.PollKind_POLL_KIND_UNSPECIFIED {
