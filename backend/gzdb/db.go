@@ -472,7 +472,6 @@ func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.Crea
 	return dbPollToZeniPoll(dbPoll)
 }
 
-// TODO: Test it
 // VotePoll implements zeni.DB.
 func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) error {
 	pollIDint, err := strconv.ParseUint(req.PollId, 10, 64)
@@ -484,23 +483,23 @@ func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) erro
 		return err
 	}
 
-	var poll Poll
-	if err := g.db.Where("id = ?", pollIDint).Preload("Results").First(&poll).Error; err != nil {
-		return err
-	}
-
-	var selectedResult PollResult
-	if err := g.db.Where("poll_id = ? AND option = ?", pollIDint, req.Option).First(&selectedResult).Error; err != nil {
-		return err
-	}
-
-	// usage of table since i did not create a custom model for many2many relation
-	var userVoteCount int64
-	if err := g.db.Table("poll_votes").Where("poll_result_id = ? AND user_id = ?", selectedResult.ID, userIDint).Count(&userVoteCount).Error; err != nil {
-		return err
-	}
-
 	return g.db.Transaction(func(tx *gorm.DB) error {
+		var poll Poll
+		if err := tx.Where("id = ?", pollIDint).Preload("Results").First(&poll).Error; err != nil {
+			return err
+		}
+
+		var selectedResult PollResult
+		if err := tx.Where("poll_id = ? AND option = ?", pollIDint, req.Option).First(&selectedResult).Error; err != nil {
+			return err
+		}
+
+		// usage of table since i did not create a custom model for many2many relation
+		var userVoteCount int64
+		if err := tx.Table("poll_votes").Where("poll_result_id = ? AND user_id = ?", selectedResult.ID, userIDint).Count(&userVoteCount).Error; err != nil {
+			return err
+		}
+
 		if userVoteCount > 0 {
 			if err := tx.Table("poll_votes").Where("poll_result_id = ? AND user_id = ?", selectedResult.ID, userIDint).Delete(nil).Error; err != nil {
 				return err

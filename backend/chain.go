@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"path"
 	"strconv"
@@ -463,6 +464,13 @@ func NewPoll() {
 		} else {
 			g.logger.Info("unknown event type", zap.Any("event", event))
 		}
+	}
+
+	if pollID == "" {
+		return "", "", errors.New("an empty string has been extracted for pollID from tx events")
+	}
+	if postID == "" {
+		return "", "", errors.New("an empty string has been extracted for postID from tx events")
 	}
 
 	g.logger.Info("created poll", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))

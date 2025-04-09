@@ -36,16 +36,16 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	roles, err := s.DB.UserRoles(userID, req.Msg.EventId)
-	if err != nil {
-		return nil, err
-	}
-	if len(roles) == 0 {
-		return nil, errors.New("user is not a member of the event")
-	}
-
 	zpost := (*zeni.Post)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
+		roles, err := db.UserRoles(userID, req.Msg.EventId)
+		if err != nil {
+			return err
+		}
+		if len(roles) == 0 {
+			return errors.New("user is not a member of the event")
+		}
+
 		pollID, postID, err := s.Chain.CreatePoll(userID, req.Msg)
 		if err != nil {
 			return err
