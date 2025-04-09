@@ -1,0 +1,33 @@
+diff --git a/node_modules/@multiformats/multiaddr/src/index.ts b/node_modules/@multiformats/multiaddr/src/index.ts
+index f4e5e60..e354650 100644
+--- a/node_modules/@multiformats/multiaddr/src/index.ts
++++ b/node_modules/@multiformats/multiaddr/src/index.ts
+@@ -95,7 +95,7 @@
+ 
+ import { stringTuplesToTuples, tuplesToBytes } from './codec.js'
+ import { Multiaddr as MultiaddrClass, symbol } from './multiaddr.js'
+-import { getProtocol } from './protocols-table.js'
++import { getProtocol, registerProtocol } from './protocols-table.js'
+ import type { Resolver } from './resolvers/index.js'
+ import type { DNS } from '@multiformats/dns'
+ 
+@@ -627,4 +627,4 @@ export function multiaddr (addr?: MultiaddrInput): Multiaddr {
+   return new MultiaddrClass(addr)
+ }
+ 
+-export { getProtocol as protocols }
++export { getProtocol as protocols, registerProtocol }
+diff --git a/node_modules/@multiformats/multiaddr/src/protocols-table.ts b/node_modules/@multiformats/multiaddr/src/protocols-table.ts
+index 0d85beb..e48c6b0 100644
+--- a/node_modules/@multiformats/multiaddr/src/protocols-table.ts
++++ b/node_modules/@multiformats/multiaddr/src/protocols-table.ts
+@@ -96,3 +96,8 @@ export function getProtocol (proto: number | string): Protocol {
+ 
+   throw new Error(`invalid protocol id type: ${typeof proto}`)
+ }
++
++export function registerProtocol (protocol: Protocol): void {
++  codes[protocol.code] = protocol
++  names[protocol.name] = protocol
++}
+\ No newline at end of file
