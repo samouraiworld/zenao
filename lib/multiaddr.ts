@@ -1,4 +1,9 @@
-import { multiaddr, resolvers, createProtocol } from "@multiformats/multiaddr";
+import {
+  multiaddr,
+  resolvers,
+  createProtocol,
+  registerProtocol,
+} from "@multiformats/multiaddr";
 import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 
 export const tryOut = (posts: PostView[]) => {
@@ -6,6 +11,7 @@ export const tryOut = (posts: PostView[]) => {
     return post.post?.post.case === "link" && post.post?.tags?.includes("poll");
   });
 
+  // registerProtocol();
   console.log("Polls: ", polls);
 
   // muut
