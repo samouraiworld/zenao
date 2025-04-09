@@ -94,7 +94,11 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 	zpost := &zeni.Post{
 		ID: strconv.FormatUint(uint64(post.ID), 10),
 		Post: &feedsv1.Post{
-			//TODO: fill author
+			// Need to convert this to chain address later.
+			// Using two-step process: first store the ID here,
+			// then in the controller retrieve and set the actual address.
+			Author: fmt.Sprintf("%d", post.UserID),
+
 			CreatedAt: post.CreatedAt.Unix(),
 			UpdatedAt: post.UpdatedAt.Unix(),
 			DeletedAt: post.DeletedAt.Time.Unix(),
