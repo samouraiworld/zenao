@@ -27,19 +27,18 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 		return nil, errors.New("user is banned")
 	}
 
-	evt, err := s.DB.GetEventByPollID(req.Msg.PollId)
-	if err != nil {
-		return nil, err
-	}
-	roles, err := s.DB.UserRoles(userID, evt.ID)
-	if err != nil {
-		return nil, err
-	}
-	if len(roles) == 0 {
-		return nil, errors.New("user is not a member of the event")
-	}
-
 	if err := s.DB.Tx(func(db zeni.DB) error {
+		evt, err := db.GetEventByPollID(req.Msg.PollId)
+		if err != nil {
+			return err
+		}
+		roles, err := db.UserRoles(userID, evt.ID)
+		if err != nil {
+			return err
+		}
+		if len(roles) == 0 {
+			return errors.New("user is not a member of the event")
+		}
 		if err = db.VotePoll(userID, req.Msg); err != nil {
 			return err
 		}
