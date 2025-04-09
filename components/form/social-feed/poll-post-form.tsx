@@ -93,20 +93,22 @@ export function PollPostForm({
           values.duration.days * 24 + values.duration.hours,
         ) +
           minutesToMilliseconds(values.duration.minutes)) *
-          1000,
+          1_000_000,
       );
 
-      // Call backend
-      // await createPoll({
-      //   eventId,
-      //   question: values.question,
-      //   duration: BigInt(duration),
-      //   options: values.options.map((option) => option.text),
-      //   kind: pollKind,
-      //   token: await getToken(),
-      // });
+      console.log("duration", duration);
 
+      // Call backend
+      await createPoll({
+        eventId,
+        question: values.question,
+        duration,
+        options: values.options.map((option) => option.text),
+        kind: pollKind,
+        token: await getToken(),
+      });
       // pollForm.reset();
+
       toast({
         // title: t("toast-creation-success"),
         title: "TODO: trad (Poll creation success)",

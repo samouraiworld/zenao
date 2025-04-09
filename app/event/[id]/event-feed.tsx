@@ -104,9 +104,11 @@ export function EventFeedForm({
 
 export function EventFeed({
   eventId,
+  pkgPath,
   isDescExpanded,
 }: {
   eventId: string;
+  pkgPath: string;
   isDescExpanded: boolean;
 }) {
   const [tab, setTab] = useState<EventTab>("global-feed");
@@ -120,9 +122,8 @@ export function EventFeed({
   // Event's social feed posts
   const { data: posts } = useSuspenseQuery(
     // TODO: Handle offset and limit to make an infinite scroll
-    feedPosts(eventId, 0, 100, "", userAddress || ""),
+    feedPosts(eventId, pkgPath, 0, 100, "", userAddress || ""),
   );
-
   const t = useTranslations("event");
 
   console.log(posts);
