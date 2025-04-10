@@ -1,7 +1,6 @@
 package gzdb
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -28,6 +27,12 @@ type Feed struct {
 	Event   Event
 }
 
+type Tag struct {
+	PostID uint   `gorm:"primaryKey"`
+	Name   string `gorm:"primaryKey"`
+	Post   Post
+}
+
 type Post struct {
 	gorm.Model
 	Kind      string
@@ -36,7 +41,7 @@ type Post struct {
 	Latitude  float32
 	Longitude float32
 
-	Tags string // JSON array of tags
+	Tags []Tag `gorm:"foreignKey:PostID"`
 
 	// Content fields based on post type
 	Content           string // StandardPost
@@ -86,9 +91,8 @@ func dbFeedToZeniFeed(feed *Feed) (*zeni.Feed, error) {
 
 func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 	var tags []string
-	err := json.Unmarshal([]byte(post.Tags), &tags)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal tags: %w", err)
+	for _, tag := range post.Tags {
+		tags = append(tags, tag.Name)
 	}
 
 	zpost := &zeni.Post{

@@ -1,7 +1,6 @@
 package gzdb
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -387,13 +386,20 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 		return nil, err
 	}
 
-	tagsJson, _ := json.Marshal(post.Tags)
+	var tags []Tag
+	for _, tagName := range post.Tags {
+		tags = append(tags, Tag{
+			PostID: uint(postIDInt),
+			Name:   tagName,
+		})
+	}
+
 	dbPost := &Post{
 		Model:     gorm.Model{ID: uint(postIDInt)},
 		ParentURI: post.ParentUri,
 		UserID:    uint(userIDInt),
 		FeedID:    uint(feedIDInt),
-		Tags:      string(tagsJson),
+		Tags:      tags,
 	}
 
 	switch v := post.Post.(type) {

@@ -211,10 +211,6 @@ table "posts" {
     null = true
     type = real
   }
-  column "tags" {
-    null = true
-    type = text
-  }
   column "content" {
     null = true
     type = text
@@ -432,6 +428,26 @@ table "sold_tickets" {
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]
+  }
+}
+table "tags" {
+  schema = schema.main
+  column "post_id" {
+    null = true
+    type = integer
+  }
+  column "name" {
+    null = true
+    type = text
+  }
+  primary_key {
+    columns = [column.post_id, column.name]
+  }
+  foreign_key "fk_posts_tags" {
+    columns     = [column.post_id]
+    ref_columns = [table.posts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
   }
 }
 table "user_roles" {
