@@ -35,11 +35,7 @@ function postViewsFromJson(raw: unknown) {
   return list.map((elem) => fromJson(PostViewSchema, elem as PostViewJson));
 }
 
-export const fetchPoll = (
-  packagePath: string,
-  pollId: string,
-  userAddress: string,
-) =>
+export const fetchPoll = (pollId: string, userAddress: string) =>
   queryOptions({
     queryKey: ["poll", pollId],
     queryFn: async () => {
@@ -48,7 +44,7 @@ export const fetchPoll = (
       );
 
       const res = await client.evaluateExpression(
-        packagePath,
+        "gno.land/r/zenao/polls",
         `pollToJSON(GetInfo(${parseInt(pollId)}, "${userAddress}"))`,
       );
 

@@ -1,4 +1,5 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
+import { fetchPoll } from "../queries/social-feed";
 import {
   CreatePollRequestJson,
   VotePollRequestJson,
@@ -38,6 +39,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
 
 interface VotePollRequestMutation extends Required<VotePollRequestJson> {
   token: string | null;
+  userAddress: string;
 }
 
 export const useVotePoll = (queryClient: QueryClient) => {
@@ -45,14 +47,33 @@ export const useVotePoll = (queryClient: QueryClient) => {
 
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ token, ...request }: VotePollRequestMutation) => {
-      await zenaoClient.votePoll(request, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await zenaoClient.votePoll(
+        {
+          pollId: request.pollId,
+          option: request.option,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
     },
-    // TODO Optimistic updates
-    // onMutate: async (variables) => {}
-    // onSuccess: (_, variables) => {}
-    // onError: (_, variables, context) => {}
+    onMutate: async (variables) => {
+      const fetchPollOpts = fetchPoll(variables.pollId, variables.userAddress);
+      const previousPollPost = queryClient.getQueryData(fetchPollOpts.queryKey);
+
+      return { previousPollPost };
+    },
+    onSuccess: (_, variables) => {
+      const fetchPollOpts = fetchPoll(variables.pollId, variables.userAddress);
+      queryClient.invalidateQueries(fetchPollOpts);
+    },
+    onError: (_, variables, context) => {
+      const fetchPollOpts = fetchPoll(variables.pollId, variables.userAddress);
+      queryClient.setQueryData(
+        fetchPollOpts.queryKey,
+        context?.previousPollPost,
+      );
+    },
   });
 
   return {

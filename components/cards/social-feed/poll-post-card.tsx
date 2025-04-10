@@ -18,9 +18,11 @@ import { Button } from "@/components/shadcn/button";
 export function PollPostCard({
   pollId,
   pollPost,
+  userAddress,
 }: {
   pollId: string;
   pollPost: PollPostViewInfo;
+  userAddress: string;
 }) {
   const queryClient = getQueryClient();
   const { getToken } = useAuth();
@@ -46,13 +48,12 @@ export function PollPostCard({
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      console.log("voting");
 
-      console.log(pollId, option);
       await votePoll({
         token,
         pollId,
         option,
+        userAddress,
       });
       toast({
         // title: t("toast-creation-success"),
@@ -118,6 +119,7 @@ function PollResultItem({
 
   return (
     <Button
+      asChild
       variant="outline"
       disabled={disabled}
       className={cn(
@@ -131,24 +133,26 @@ function PollResultItem({
         }
       }}
     >
-      <Gauge percent={percent} className="absolute -z-10 left-0" />
+      <div>
+        <Gauge percent={percent} className="absolute -z-10 left-0" />
 
-      <Text className="text-sm line-clamp-2">{pollResult.option}</Text>
+        <Text className="text-sm line-clamp-2">{pollResult.option}</Text>
 
-      <div className="flex flex-row items-center gap-3">
-        <div className="flex flex-row items-center gap-2">
-          <Text className="text-xs">{`${pollResult.count} votes`}</Text>
-          <Text className="text-sm">{`${percent}%`}</Text>
+        <div className="flex flex-row items-center gap-3">
+          <div className="flex flex-row items-center gap-2">
+            <Text className="text-xs">{`${pollResult.count} votes`}</Text>
+            <Text className="text-sm">{`${percent}%`}</Text>
+          </div>
+          <Checkbox
+            ref={checkboxRef}
+            checked={pollResult.hasUserVoted}
+            onCheckedChange={onCheckedChange}
+            className={cn(
+              disabled ? "cursor-default" : "cursor-pointer",
+              pollKind === PollKind.SINGLE_CHOICE && "rounded-lg",
+            )}
+          />
         </div>
-        <Checkbox
-          ref={checkboxRef}
-          checked={pollResult.hasUserVoted}
-          onCheckedChange={onCheckedChange}
-          className={cn(
-            disabled ? "cursor-default" : "cursor-pointer",
-            pollKind === PollKind.SINGLE_CHOICE && "rounded-lg",
-          )}
-        />
       </div>
     </Button>
   );

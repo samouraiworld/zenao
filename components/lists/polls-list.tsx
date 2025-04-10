@@ -29,17 +29,11 @@ export function PollsList({ list }: { list: PollPostView[] }) {
         <EmptyPollsList />
       ) : (
         list.map((pollPost) => {
-          const { packagePath, pollId } = parsePollUri(
-            pollPost.post.post.value.uri,
-          );
+          const { pollId } = parsePollUri(pollPost.post.post.value.uri);
 
           return (
             <Suspense fallback={<PollPostCardSkeleton />} key={pollId}>
-              <PollPost
-                packagePath={packagePath}
-                pollId={pollId}
-                pollPost={pollPost}
-              />
+              <PollPost pollId={pollId} pollPost={pollPost} />
             </Suspense>
           );
         })
@@ -49,11 +43,9 @@ export function PollsList({ list }: { list: PollPostView[] }) {
 }
 
 function PollPost({
-  packagePath,
   pollId,
   pollPost,
 }: {
-  packagePath: string;
   pollId: string;
   pollPost: PollPostView;
 }) {
@@ -61,9 +53,7 @@ function PollPost({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data } = useSuspenseQuery(
-    fetchPoll(packagePath, pollId, userAddress || ""),
-  );
+  const { data } = useSuspenseQuery(fetchPoll(pollId, userAddress || ""));
 
   const combined: PollPostViewInfo = useMemo(() => {
     return {
@@ -72,5 +62,11 @@ function PollPost({
     };
   }, [pollPost, data]);
 
-  return <PollPostCard pollId={pollId} pollPost={combined} />;
+  return (
+    <PollPostCard
+      pollId={pollId}
+      pollPost={combined}
+      userAddress={userAddress || ""}
+    />
+  );
 }
