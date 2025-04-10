@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMediaQuery } from "react-responsive";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { hoursToMilliseconds, minutesToMilliseconds } from "date-fns";
+import { hoursToSeconds, minutesToSeconds } from "date-fns";
 import { pollFormSchema, PollFormSchemaType } from "../types";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
@@ -87,16 +87,10 @@ export function PollPostForm({
         ? PollKind.MULTIPLE_CHOICE
         : PollKind.SINGLE_CHOICE;
 
-      // TODO Calculate duration here
       const duration = BigInt(
-        (hoursToMilliseconds(
-          values.duration.days * 24 + values.duration.hours,
-        ) +
-          minutesToMilliseconds(values.duration.minutes)) *
-          1_000_000,
+        hoursToSeconds(values.duration.days * 24 + values.duration.hours) +
+          minutesToSeconds(values.duration.minutes),
       );
-
-      console.log("duration", duration);
 
       // Call backend
       await createPoll({

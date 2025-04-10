@@ -4,12 +4,12 @@ import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import Text from "@/components/texts/text";
-import { PollPostView } from "@/lib/social-feed";
+import { PollPostViewInfo } from "@/lib/social-feed";
 import { cn } from "@/lib/tailwind";
 import { Gauge } from "@/components/common/gauge";
 import { Checkbox } from "@/components/shadcn/checkbox";
 
-export function PollPostCard({ pollPost }: { pollPost: PollPostView }) {
+export function PollPostCard({ pollPost }: { pollPost: PollPostViewInfo }) {
   if (!pollPost.post) {
     return null;
   }

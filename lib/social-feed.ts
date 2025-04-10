@@ -1,9 +1,19 @@
-import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
+import { LinkPost, Post, PostView } from "@/app/gen/feeds/v1/feeds_pb";
 import { Poll, PollKind } from "@/app/gen/polls/v1/polls_pb";
 
-export interface PollPostView extends PostView {
+export type PollPostView = PostView & {
+  post: Post & {
+    tags: (string | "poll")[]; // Ensures "poll" is included in tags
+    post: {
+      value: LinkPost;
+      case: "link";
+    };
+  };
+};
+
+export type PollPostViewInfo = PollPostView & {
   poll: Poll;
-}
+};
 
 export const fakeStandardPosts: PostView[] = [
   {
@@ -254,7 +264,7 @@ export const fakeStandardPosts: PostView[] = [
   },
 ];
 
-export const fakePollPosts: PollPostView[] = [
+export const fakePollPosts: PollPostViewInfo[] = [
   {
     reactions: [
       {
@@ -278,7 +288,7 @@ export const fakePollPosts: PollPostView[] = [
     ],
     post: {
       parentUri: "",
-      tags: ["typescript", "web3"],
+      tags: ["typescript", "web3", "poll"],
       // @ts-expect-error Fake Type mock
       loc: { lat: 48.8566, lng: 2.3522 },
       deletedAt: BigInt(0),
@@ -327,7 +337,7 @@ export const fakePollPosts: PollPostView[] = [
 
     post: {
       parentUri: "",
-      tags: ["typescript", "web3"],
+      tags: ["typescript", "web3", "poll"],
       // @ts-expect-error Fake Type mock
       loc: { lat: 40.7128, lng: -74.006 },
       deletedAt: BigInt(0),
@@ -405,7 +415,7 @@ export const fakePollPosts: PollPostView[] = [
 
     post: {
       parentUri: "",
-      tags: ["typescript", "web3"],
+      tags: ["typescript", "web3", "poll"],
       // @ts-expect-error Fake Type mock
       loc: { lat: 34.0522, lng: -118.2437 },
       deletedAt: BigInt(0),
@@ -476,7 +486,7 @@ export const fakePollPosts: PollPostView[] = [
     ],
     post: {
       parentUri: "",
-      tags: ["typescript", "web3"],
+      tags: ["typescript", "web3", "poll"],
       // @ts-expect-error Fake Type mock
       loc: { lat: 51.5074, lng: -0.1278 },
       deletedAt: BigInt(0),
@@ -548,7 +558,7 @@ export const fakePollPosts: PollPostView[] = [
 
     post: {
       parentUri: "",
-      tags: ["typescript", "web3"],
+      tags: ["typescript", "web3", "poll"],
       // @ts-expect-error Fake Type mock
       loc: { lat: 37.7749, lng: -122.4194 },
       deletedAt: BigInt(0),

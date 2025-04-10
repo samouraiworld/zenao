@@ -79,8 +79,6 @@ export function EventInfo({ id }: { id: string }) {
     return <p>{`Event doesn't exist`}</p>;
   }
 
-  // console.log("Event data", data);
-
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
       <script
@@ -247,13 +245,7 @@ export function EventInfo({ id }: { id: string }) {
       </div>
 
       {/* Social Feed */}
-      <EventFeed
-        eventId={id}
-        // ! TODO: get pkgPath from event data
-        pkgPath="gno.land/r/zenao/events/e24"
-        // pkgPath={data.pkgPath}
-        isDescExpanded={isDescExpanded}
-      />
+      <EventFeed eventId={id} isDescExpanded={isDescExpanded} />
     </div>
   );
 }

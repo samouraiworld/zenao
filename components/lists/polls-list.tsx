@@ -1,8 +1,18 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { Suspense, useMemo } from "react";
 import Text from "../texts/text";
+import { PollPostCardSkeleton } from "../loader/social-feed/poll-post-card-skeleton";
+import { userAddressOptions } from "@/lib/queries/user";
 import { PollPostCard } from "@/components/cards/social-feed/poll-post-card";
-import { PollPostView } from "@/lib/social-feed";
+import {
+  PollPostView,
+  PollPostViewInfo,
+  fakePollPosts,
+} from "@/lib/social-feed";
+import { parsePollUri } from "@/lib/multiaddr";
 
 function EmptyPollsList() {
   return (
@@ -21,10 +31,49 @@ export function PollsList({ list }: { list: PollPostView[] }) {
       {!list.length ? (
         <EmptyPollsList />
       ) : (
-        list.map((pollPost, index) => (
-          <PollPostCard key={index} pollPost={pollPost} />
-        )) // TODO; Better key?
+        list.map((pollPost) => {
+          const { packagePath, pollId } = parsePollUri(
+            pollPost.post.post.value.uri,
+          );
+
+          return (
+            <Suspense fallback={<PollPostCardSkeleton />} key={pollId}>
+              <PollPost
+                packagePath={packagePath}
+                pollId={pollId}
+                pollPost={pollPost}
+              />
+            </Suspense>
+          );
+        })
       )}
     </div>
   );
+}
+
+function PollPost({
+  packagePath: _pkgPath,
+  pollId: _pollId,
+  pollPost: _pollPost,
+}: {
+  packagePath: string;
+  pollId: string;
+  pollPost: PollPostView;
+}) {
+  const { getToken, userId } = useAuth();
+  const { data: _userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  // const { data } = useSuspenseQuery(
+  //   fetchPoll(packagePath, pollId, userAddress || ""),
+  // );
+
+  // const combined: PollPostViewInfo = useMemo(() => {
+  //   return {
+  //     ...pollPost,
+  //     poll: data,
+  //   };
+  // }, [pollPost, data]);
+
+  return <PollPostCard pollPost={fakePollPosts[0]} />;
 }

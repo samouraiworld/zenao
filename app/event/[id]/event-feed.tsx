@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -13,7 +13,7 @@ import {
   StandardPostForm,
   FeedInputMode,
 } from "@/components/form/social-feed/standard-post-form";
-import { fakePollPosts, fakeStandardPosts } from "@/lib/social-feed";
+import { fakeStandardPosts, PollPostView } from "@/lib/social-feed";
 import { PollPostForm } from "@/components/form/social-feed/poll-post-form";
 import { userAddressOptions } from "@/lib/queries/user";
 import { feedPosts } from "@/lib/queries/social-feed";
@@ -104,11 +104,9 @@ export function EventFeedForm({
 
 export function EventFeed({
   eventId,
-  pkgPath,
   isDescExpanded,
 }: {
   eventId: string;
-  pkgPath: string;
   isDescExpanded: boolean;
 }) {
   const [tab, setTab] = useState<EventTab>("global-feed");
@@ -122,11 +120,15 @@ export function EventFeed({
   // Event's social feed posts
   const { data: posts } = useSuspenseQuery(
     // TODO: Handle offset and limit to make an infinite scroll
-    feedPosts(eventId, pkgPath, 0, 100, "", userAddress || ""),
+    feedPosts(eventId, 0, 100, "", userAddress || ""),
   );
-  const t = useTranslations("event");
 
-  console.log(posts);
+  // Filter polls from posts
+  const polls = posts.filter((post): post is PollPostView => {
+    return post.post?.post.case === "link" && post.post?.tags?.includes("poll");
+  });
+
+  const t = useTranslations("event");
 
   return (
     <div className="flex flex-col gap-4">
@@ -145,7 +147,9 @@ export function EventFeed({
         {tab === "global-feed" ? (
           <PostsList list={fakeStandardPosts} />
         ) : (
-          <PollsList list={fakePollPosts} />
+          <Suspense fallback={<p>Loading...</p>}>
+            <PollsList list={polls} />
+          </Suspense>
         )}
       </div>
     </div>

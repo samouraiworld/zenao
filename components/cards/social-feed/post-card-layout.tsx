@@ -24,7 +24,6 @@ export function PostCardLayout({
     <Card className="w-full flex flex-col gap-2">
       <div className="flex flex-col sm:flex-row items-start gap-2">
         <div className="w-full flex flex-row items-center gap-3">
-          {/*TODO: On click author avatar*/}
           <Link href={`/profile/${post.post.author}`}>
             <UserAvatar
               className="flex ring-2 ring-background/80 cursor-pointer hover:scale-110 transition-transform ease-out"
@@ -49,8 +48,6 @@ export function PostCardLayout({
               {/*TODO: Handle display if a lot of tags*/}
 
               {post.post.tags.map((tag, index) => (
-                // TODO: on click tag
-
                 <div
                   className="flex flex-row items-center gap-0.5 cursor-pointer hover:opacity-50"
                   key={index}
@@ -64,8 +61,6 @@ export function PostCardLayout({
             </div>
           )}
           {post.post.loc && (
-            // TODO: on click location
-
             <div className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50">
               <MapPin size={14} color="hsl(var(--secondary-color))" />
               <Text className="text-sm" variant="secondary">
@@ -80,7 +75,6 @@ export function PostCardLayout({
 
       <div className="flex flex-col justify-between sm:flex-row sm:items-center gap-2">
         <Reactions reactions={post.reactions} />
-        {/* <Text className="text-sm">TODO: Some actions here? </Text> */}
       </div>
     </Card>
   );
