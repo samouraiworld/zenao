@@ -61,7 +61,7 @@ func (p *Poll) Render() string {
 	} else {
 		s += md.Paragraph("Only one choice allowed ❌")
 	}
-	s += md.Paragraph(md.Italic("Duration: " + time.Duration(p.Duration).String() + "⌛"))
+	s += md.Paragraph(md.Italic("Duration: " + time.Duration(p.Duration*int64(time.Second)).String() + "⌛"))
 	s += md.Paragraph(md.Italic("Created by " + p.CreatedBy.String() + "👤"))
 	s += md.Paragraph(md.Italic("Created at " + time.Unix(p.CreatedAt, 0).Format("2006-01-02 15:04:05") + "🕒"))
 	s += md.HorizontalRule()
