@@ -1,5 +1,5 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
-import { fetchPoll } from "../queries/social-feed";
+import { feedPosts, fetchPoll } from "../queries/social-feed";
 import {
   CreatePollRequestJson,
   VotePollRequestJson,
@@ -12,6 +12,7 @@ interface CreatePollRequestMutation
   kind: PollKind;
   duration: bigint;
   token: string | null;
+  userAddress: string;
 }
 
 export const useCreatePoll = (queryClient: QueryClient) => {
@@ -23,10 +24,45 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         headers: { Authorization: `Bearer ${token}` },
       });
     },
-    // TODO Optimistic updates
-    // onMutate: async (variables) => {}
-    // onSuccess: (_, variables) => {}
-    // onError: (_, variables, context) => {}
+    onMutate: async (variables) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        0,
+        100,
+        "",
+        variables.userAddress,
+      );
+      const previousFeedPosts = queryClient.getQueryData(
+        feedPostsOpts.queryKey,
+      );
+
+      return { previousFeedPosts };
+    },
+    onSuccess: (_, variables) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        0,
+        100,
+        "",
+        variables.userAddress,
+      );
+
+      queryClient.invalidateQueries(feedPostsOpts);
+    },
+    onError: (_, variables, context) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        0,
+        100,
+        "",
+        variables.userAddress,
+      );
+
+      queryClient.setQueryData(
+        feedPostsOpts.queryKey,
+        context?.previousFeedPosts,
+      );
+    },
   });
 
   return {

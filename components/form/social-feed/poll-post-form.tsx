@@ -6,6 +6,7 @@ import { useMediaQuery } from "react-responsive";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { hoursToSeconds, minutesToSeconds } from "date-fns";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { pollFormSchema, PollFormSchemaType } from "../types";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
@@ -21,6 +22,7 @@ import {
 import { useCreatePoll } from "@/lib/mutations/social-feed";
 import { getQueryClient } from "@/lib/get-query-client";
 import { PollKind } from "@/app/gen/polls/v1/polls_pb";
+import { userAddressOptions } from "@/lib/queries/user";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -34,7 +36,10 @@ export function PollPostForm({
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
 }) {
   const queryClient = getQueryClient();
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const { createPoll, isPending } = useCreatePoll(queryClient);
@@ -96,6 +101,7 @@ export function PollPostForm({
         options: values.options.map((option) => option.text),
         kind: pollKind,
         token: await getToken(),
+        userAddress: userAddress || "",
       });
       pollForm.reset();
 
