@@ -44,8 +44,11 @@ func (s *ZenaoServer) CreateEvent(
 	evt := (*zeni.Event)(nil)
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		var err error
 		if evt, err = db.CreateEvent(userID, req.Msg); err != nil {
+			return err
+		}
+
+		if _, err = db.CreateFeed(evt.ID, "main"); err != nil {
 			return err
 		}
 

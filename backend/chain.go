@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"path"
 	"strconv"
@@ -13,6 +14,7 @@ import (
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/gnovm"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
+	"github.com/gnolang/gno/gnovm/stdlibs/std"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
@@ -369,10 +371,13 @@ func (g *gnoZenaoChain) UserAddress(userID string) string {
 }
 
 // CreatePoll implements ZenaoChain
-func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest) error {
+func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error) {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	eventPkgPath := g.eventRealmPkgPath(req.EventId)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+	gnoEventPollCreate := "zenao-poll-create"
+	gnoEventPostCreate := "zenao-post-create"
+
 	options := ""
 	for _, option := range req.Options {
 		options += fmt.Sprintf(`%q, `, option)
@@ -390,6 +395,8 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 				Body: fmt.Sprintf(`package main
 
 import (
+	"std"
+
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/zenao/daokit"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
@@ -417,6 +424,7 @@ func NewPoll() {
 	kind := pollsv1.PollKind(%d)
 	p := polls.NewPoll(question, kind, %d, options, nil)
 	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
+	std.Emit(%q, "pollID", p.ID.String())
 
 	feedID := %q
 	post := &feedsv1.Post{
@@ -427,18 +435,45 @@ func NewPoll() {
 		},
 	}
 
-	social_feed.NewPost(feedID, post)
+	postID := social_feed.NewPost(feedID, post)
+	std.Emit(%q, "postID", postID)
 }
-`, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, feedID),
+`, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
 			}},
 		},
 	}))
 	if err != nil {
-		return err
+		return "", "", err
+	}
+
+	for _, event := range broadcastRes.DeliverTx.Events {
+		if gnoEvent, ok := event.(std.GnoEvent); ok {
+			if gnoEvent.Type == gnoEventPollCreate {
+				pollID, err = extractEventAttribute(gnoEvent, "pollID")
+				if err != nil {
+					return "", "", err
+				}
+			}
+			if gnoEvent.Type == gnoEventPostCreate {
+				postID, err = extractEventAttribute(gnoEvent, "postID")
+				if err != nil {
+					return "", "", err
+				}
+			}
+		} else {
+			g.logger.Info("unknown event type", zap.Any("event", event))
+		}
+	}
+
+	if pollID == "" {
+		return "", "", errors.New("an empty string has been extracted for pollID from tx events")
+	}
+	if postID == "" {
+		return "", "", errors.New("an empty string has been extracted for postID from tx events")
 	}
 
 	g.logger.Info("created poll", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
-	return nil
+	return pollID, postID, nil
 }
 
 func (g *gnoZenaoChain) VotePoll(userID string, req *zenaov1.VotePollRequest) error {
@@ -670,3 +705,12 @@ func Render(path string) string {
 	return user.Render(path)
 }
 `
+
+func extractEventAttribute(event std.GnoEvent, key string) (string, error) {
+	for _, attr := range event.Attributes {
+		if attr.Key == key {
+			return attr.Value, nil
+		}
+	}
+	return "", fmt.Errorf("event %s attribute %s not found", event.Type, key)
+}

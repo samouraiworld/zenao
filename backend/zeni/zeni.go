@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/ringsaturn/tzf"
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
@@ -34,6 +36,28 @@ type Event struct {
 	Capacity    uint32
 	CreatorID   string
 	Location    *zenaov1.EventLocation
+}
+
+type Feed struct {
+	ID      string
+	Slug    string
+	EventID string
+}
+
+type Post struct {
+	ID     string
+	Post   *feedsv1.Post
+	UserID string
+	FeedID string
+}
+
+type Poll struct {
+	ID       string
+	Question string
+	Kind     *pollsv1.PollKind
+	Duration int64
+	Results  []*pollsv1.PollResult
+	PostID   string
 }
 
 var tzFinder tzf.F
@@ -80,7 +104,14 @@ type DB interface {
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
+	GetEventByPollID(pollID string) (*Event, error)
 	GetAllParticipants(eventID string) ([]*User, error)
+
+	CreateFeed(eventID string, slug string) (*Feed, error)
+	GetFeed(eventID string, slug string) (*Feed, error)
+	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
+	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }
 
 type Chain interface {
@@ -93,7 +124,7 @@ type Chain interface {
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
 	Participate(eventID string, callerID string, participantID string) error
 
-	CreatePoll(userID string, req *zenaov1.CreatePollRequest) error
+	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }
 

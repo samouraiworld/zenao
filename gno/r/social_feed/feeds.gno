@@ -21,8 +21,9 @@ var (
 	reactions     *avl.Tree // post_id:icon -> count
 	userReactions *avl.Tree // post_id:icon:user_address -> struct{}
 
-	posts *avl.Tree // local_post_id -> Post
-	feeds *avl.Tree // slug -> Feed
+	posts       *avl.Tree // local_post_id -> *Post // for search with specific id (get/delete)
+	postsByFeed *avl.Tree // feed_id:local_post_id -> *Post // for search with feed id (iterate)
+	feeds       *avl.Tree // slug -> Feed
 )
 
 func init() {
@@ -30,6 +31,7 @@ func init() {
 	userReactions = avl.NewTree()
 
 	posts = avl.NewTree()
+	postsByFeed = avl.NewTree()
 	feeds = avl.NewTree()
 }
 
@@ -67,7 +69,7 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 	if tags != "" {
 		tagsSplit = strings.Split(tags, ",")
 	}
-	posts.Iterate(start, end, func(key string, value interface{}) bool {
+	postsByFeed.Iterate(start, end, func(key string, value interface{}) bool {
 		post := value.(*feedsv1.Post)
 		for _, tag := range tagsSplit {
 			if !hasTag(post.Tags, tag) {

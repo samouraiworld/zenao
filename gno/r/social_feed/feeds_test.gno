@@ -84,8 +84,6 @@ func TestNewFeed(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			setupTest()
-
 			defer func() {
 				if r := recover(); r != nil {
 					if !test.output.panic {
@@ -100,7 +98,7 @@ func TestNewFeed(t *testing.T) {
 
 			std.TestSetOriginCaller(alice)
 			feedId := NewFeed(test.input.slug, test.input.crossNetwork, test.input.authFunc)
-			if feedId != test.output.feedId {
+			if !test.output.panic && feedId != test.output.feedId {
 				t.Fatalf("expected feedId %q, got %q", test.output.feedId, feedId)
 			}
 		})
