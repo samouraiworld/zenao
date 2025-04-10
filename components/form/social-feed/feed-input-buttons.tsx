@@ -23,7 +23,9 @@ export function FeedInputButtons({
         variant="link"
         className={cn(
           "flex items-center justify-center rounded-full aspect-square cursor-pointer",
-          feedInputMode === "POLL" ? "bg-white" : "hover:bg-neutral-700",
+          feedInputMode === "POLL"
+            ? "dark:bg-white bg-black"
+            : "hover:bg-neutral-700",
         )}
         style={{
           height: buttonSize,
@@ -37,18 +39,22 @@ export function FeedInputButtons({
         disabled={isLoading}
       >
         <VoteIcon
-          color={feedInputMode === "POLL" ? "black" : "white"}
-          className="!h-6 !w-6"
+          className={cn(
+            "!h-6 !w-6",
+            feedInputMode === "POLL"
+              ? "dark:text-black text-white"
+              : "dark:text-white text-black",
+          )}
         />
       </ButtonBase>
       <ButtonBase
         variant="link"
-        className="flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-700 cursor-pointer"
+        className="text-black flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-700 cursor-pointer"
         style={{ height: buttonSize, width: buttonSize }}
         loading={isLoading}
         disabled={isLoading}
       >
-        <SendHorizonalIcon color="white" className="!h-6 !w-6" />
+        <SendHorizonalIcon className="!h-6 !w-6 dark:text-white" />
       </ButtonBase>
     </>
   );

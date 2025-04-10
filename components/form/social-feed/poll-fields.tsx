@@ -95,7 +95,7 @@ function AddOptionButton({ onClick }: { onClick: () => void }) {
         className="flex flex-row w-full md:w-fit justify-start rounded"
       >
         <div className="flex flex-row justify-start items-center w-full">
-          <PlusIcon className="size-4" color="#FFFFFF" />
+          <PlusIcon className="size-4 dark:text-white text-black" />
           <Text className="text-sm ml-2">Add another answer</Text>
         </div>
       </ButtonWithChildren>
