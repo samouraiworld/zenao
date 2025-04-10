@@ -28,7 +28,7 @@ export const parsePollUri = (uri: string) => {
     throw new Error("Invalid URI: missing package path");
   }
 
-  const pollId = new TextDecoder().decode(parsed.tuples()[0][1]);
+  const pollId = new TextDecoder().decode(parsed.tuples()[0][1]).slice(1);
 
   return { packagePath, pollId };
 };

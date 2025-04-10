@@ -49,9 +49,9 @@ export const fetchPoll = (
 
       const res = await client.evaluateExpression(
         packagePath,
-        `pollToJSON(GetInfo(${pollId}, ${userAddress}))`,
+        `pollToJSON(GetInfo(${parseInt(pollId)}, "${userAddress}"))`,
       );
-      console.log("res", res);
+
       const raw = extractGnoJSONResponse(res) as PollJson;
       return fromJson(PollSchema, raw);
     },
