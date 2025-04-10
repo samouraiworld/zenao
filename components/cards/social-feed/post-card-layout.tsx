@@ -9,12 +9,15 @@ import { PostView, ReactionView } from "@/app/gen/feeds/v1/feeds_pb";
 import { DateTimeText } from "@/components/common/date-time-text";
 import Text from "@/components/texts/text";
 import { cn } from "@/lib/tailwind";
+import { GnoProfile } from "@/lib/queries/profile";
 
 export function PostCardLayout({
   post,
+  createdBy,
   children,
 }: {
   post: PostView;
+  createdBy: GnoProfile | null;
   children: ReactNode;
 }) {
   if (!post.post) {
@@ -33,7 +36,7 @@ export function PostCardLayout({
 
           <div className="flex flex-col">
             <Link href={`/profile/${post.post.author}`}>
-              <Text className="text-sm">{post.post.author}</Text>
+              <Text className="text-sm">{createdBy?.displayName}</Text>
             </Link>
             <DateTimeText
               variant="secondary"
@@ -47,17 +50,19 @@ export function PostCardLayout({
             <div className="flex flex-row items-center gap-2">
               {/*TODO: Handle display if a lot of tags*/}
 
-              {post.post.tags.map((tag, index) => (
-                <div
-                  className="flex flex-row items-center gap-0.5 cursor-pointer hover:opacity-50"
-                  key={index}
-                >
-                  <Hash size={14} color="hsl(var(--secondary-color))" />
-                  <Text className="text-sm" variant="secondary">
-                    {tag}
-                  </Text>
-                </div>
-              ))}
+              {post.post.tags
+                .filter((tag) => tag !== "poll")
+                .map((tag, index) => (
+                  <div
+                    className="flex flex-row items-center gap-0.5 cursor-pointer hover:opacity-50"
+                    key={index}
+                  >
+                    <Hash size={14} color="hsl(var(--secondary-color))" />
+                    <Text className="text-sm" variant="secondary">
+                      {tag}
+                    </Text>
+                  </div>
+                ))}
             </div>
           )}
           {post.post.loc && (

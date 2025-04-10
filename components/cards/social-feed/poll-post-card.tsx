@@ -3,6 +3,7 @@
 import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
 import { useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import Text from "@/components/texts/text";
@@ -14,6 +15,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { useVotePoll } from "@/lib/mutations/social-feed";
 import { Button } from "@/components/shadcn/button";
+import { profileOptions } from "@/lib/queries/profile";
 
 export function PollPostCard({
   pollId,
@@ -27,6 +29,10 @@ export function PollPostCard({
   const queryClient = getQueryClient();
   const { getToken } = useAuth();
   const { toast } = useToast();
+
+  const { data: createdBy } = useSuspenseQuery(
+    profileOptions(pollPost.post.author),
+  );
 
   const { votePoll, isPending } = useVotePoll(queryClient);
 
@@ -70,7 +76,7 @@ export function PollPostCard({
   };
 
   return (
-    <PostCardLayout post={pollPost}>
+    <PostCardLayout post={pollPost} createdBy={createdBy}>
       <div className="w-full flex flex-col gap-2">
         <div className="flex flex-row items-center gap-2">
           <Text className="text-sm">{`${totalVotesCount} votes`}</Text>
