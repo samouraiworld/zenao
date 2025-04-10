@@ -1,6 +1,8 @@
 "use client";
 
 import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
+import { useRef } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import Text from "@/components/texts/text";
@@ -8,11 +10,24 @@ import { PollPostViewInfo } from "@/lib/social-feed";
 import { cn } from "@/lib/tailwind";
 import { Gauge } from "@/components/common/gauge";
 import { Checkbox } from "@/components/shadcn/checkbox";
+import { getQueryClient } from "@/lib/get-query-client";
+import { useToast } from "@/app/hooks/use-toast";
+import { useVotePoll } from "@/lib/mutations/social-feed";
+import { Button } from "@/components/shadcn/button";
 
-export function PollPostCard({ pollPost }: { pollPost: PollPostViewInfo }) {
-  if (!pollPost.post) {
-    return null;
-  }
+export function PollPostCard({
+  pollId,
+  pollPost,
+}: {
+  pollId: string;
+  pollPost: PollPostViewInfo;
+}) {
+  const queryClient = getQueryClient();
+  const { getToken } = useAuth();
+  const { toast } = useToast();
+
+  const { votePoll, isPending } = useVotePoll(queryClient);
+
   const now = new Date();
   const endTime =
     Number(pollPost.poll.createdAt) + Number(pollPost.poll.duration);
@@ -24,6 +39,34 @@ export function PollPostCard({ pollPost }: { pollPost: PollPostViewInfo }) {
   const remainingTimeText = isPollEnded
     ? "Ended"
     : `${formatDistanceToNowStrict(fromUnixTime(Number(endTime)))} remaining`;
+
+  const onVote = async (option: string) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("invalid clerk token");
+      }
+      console.log("voting");
+
+      console.log(pollId, option);
+      await votePoll({
+        token,
+        pollId,
+        option,
+      });
+      toast({
+        // title: t("toast-creation-success"),
+        title: "TODO: trad (Poll vote success)",
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        // title: t("toast-vote-error"),
+        title: "TODO: trad (Poll vote error)",
+      });
+      console.error("error", err);
+    }
+  };
 
   return (
     <PostCardLayout post={pollPost}>
@@ -41,9 +84,9 @@ export function PollPostCard({ pollPost }: { pollPost: PollPostViewInfo }) {
               key={index}
               pollResult={pollResult}
               totalVotesCount={totalVotesCount}
-              disabled={isPollEnded}
+              disabled={isPollEnded || isPending}
               onCheckedChange={() => {
-                // TODO: Vote / Unvote / Change vote (So, UpdateVote)
+                onVote(pollResult.option);
               }}
               pollKind={pollPost.poll.kind}
             />
@@ -71,13 +114,22 @@ function PollResultItem({
     totalVotesCount > 0
       ? Math.round((pollResult.count * 100) / totalVotesCount)
       : 0;
+  const checkboxRef = useRef<HTMLButtonElement>(null);
+
   return (
-    <div
+    <Button
+      variant="outline"
+      disabled={disabled}
       className={cn(
-        "flex flex-row items-center justify-between gap-2 px-4 w-full h-10 relative rounded-lg",
+        "flex items-center justify-between gap-2 px-4 w-full h-10 relative rounded-lg bg-transparent",
         !disabled && "hover:opacity-50 cursor-pointer",
         pollResult.hasUserVoted && "border border-gray-600",
       )}
+      onClick={() => {
+        if (!disabled) {
+          checkboxRef.current?.click();
+        }
+      }}
     >
       <Gauge percent={percent} className="absolute -z-10 left-0" />
 
@@ -89,6 +141,7 @@ function PollResultItem({
           <Text className="text-sm">{`${percent}%`}</Text>
         </div>
         <Checkbox
+          ref={checkboxRef}
           checked={pollResult.hasUserVoted}
           onCheckedChange={onCheckedChange}
           className={cn(
@@ -97,6 +150,6 @@ function PollResultItem({
           )}
         />
       </div>
-    </div>
+    </Button>
   );
 }

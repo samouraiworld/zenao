@@ -7,12 +7,9 @@ import Text from "../texts/text";
 import { PollPostCardSkeleton } from "../loader/social-feed/poll-post-card-skeleton";
 import { userAddressOptions } from "@/lib/queries/user";
 import { PollPostCard } from "@/components/cards/social-feed/poll-post-card";
-import {
-  PollPostView,
-  PollPostViewInfo,
-  fakePollPosts,
-} from "@/lib/social-feed";
+import { PollPostView, PollPostViewInfo } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
+import { fetchPoll } from "@/lib/queries/social-feed";
 
 function EmptyPollsList() {
   return (
@@ -52,28 +49,28 @@ export function PollsList({ list }: { list: PollPostView[] }) {
 }
 
 function PollPost({
-  packagePath: _pkgPath,
-  pollId: _pollId,
-  pollPost: _pollPost,
+  packagePath,
+  pollId,
+  pollPost,
 }: {
   packagePath: string;
   pollId: string;
   pollPost: PollPostView;
 }) {
   const { getToken, userId } = useAuth();
-  const { data: _userAddress } = useSuspenseQuery(
+  const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  // const { data } = useSuspenseQuery(
-  //   fetchPoll(packagePath, pollId, userAddress || ""),
-  // );
+  const { data } = useSuspenseQuery(
+    fetchPoll(packagePath, pollId, userAddress || ""),
+  );
 
-  // const combined: PollPostViewInfo = useMemo(() => {
-  //   return {
-  //     ...pollPost,
-  //     poll: data,
-  //   };
-  // }, [pollPost, data]);
+  const combined: PollPostViewInfo = useMemo(() => {
+    return {
+      ...pollPost,
+      poll: data,
+    };
+  }, [pollPost, data]);
 
-  return <PollPostCard pollPost={fakePollPosts[0]} />;
+  return <PollPostCard pollId={pollId} pollPost={combined} />;
 }

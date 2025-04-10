@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMediaQuery } from "react-responsive";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +18,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/shadcn/form";
-import { useCreatePoll } from "@/lib/mutations/create-poll";
+import { useCreatePoll } from "@/lib/mutations/social-feed";
 import { getQueryClient } from "@/lib/get-query-client";
 import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 
@@ -38,9 +38,6 @@ export function PollPostForm({
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const { createPoll, isPending } = useCreatePoll(queryClient);
-
-  // TODO: Disable stuff if isLoading
-  const [_isLoading, setIsLoading] = useState(false);
 
   const pollForm = useForm<PollFormSchemaType>({
     resolver: zodResolver(pollFormSchema),
@@ -77,7 +74,6 @@ export function PollPostForm({
   // Functions
   const onSubmitPoll = async (values: PollFormSchemaType) => {
     try {
-      setIsLoading(true);
       const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
@@ -101,7 +97,7 @@ export function PollPostForm({
         kind: pollKind,
         token: await getToken(),
       });
-      // pollForm.reset();
+      pollForm.reset();
 
       toast({
         // title: t("toast-creation-success"),
@@ -116,7 +112,6 @@ export function PollPostForm({
       });
       console.error("error", err);
     }
-    setIsLoading(false);
   };
 
   return (
