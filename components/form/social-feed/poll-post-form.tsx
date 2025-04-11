@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { hoursToSeconds, minutesToSeconds } from "date-fns";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { pollFormSchema, PollFormSchemaType } from "../types";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
@@ -40,6 +41,7 @@ export function PollPostForm({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const t = useTranslations("event-feed.poll-form");
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const { createPoll, isPending } = useCreatePoll(queryClient);
@@ -67,8 +69,9 @@ export function PollPostForm({
   const textareaMaxHeight = 300;
   const textareaMinHeight = 48;
   const placeholder = isSmallScreen
-    ? "Ask something"
-    : "What do you wanna ask to the community?";
+    ? t("question-placeholder-sm")
+    : t("question-placeholder-lg");
+
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -76,7 +79,6 @@ export function PollPostForm({
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [question]);
 
-  // Functions
   const onSubmitPoll = async (values: PollFormSchemaType) => {
     try {
       const token = await getToken();
@@ -93,7 +95,6 @@ export function PollPostForm({
           minutesToSeconds(values.duration.minutes),
       );
 
-      // Call backend
       await createPoll({
         eventId,
         question: values.question,
@@ -106,15 +107,12 @@ export function PollPostForm({
       pollForm.reset();
 
       toast({
-        // title: t("toast-creation-success"),
-        title: "TODO: trad (Poll creation success)",
+        title: t("toast-poll-creation-success"),
       });
-      // router.push(`/polls`);
     } catch (err) {
       toast({
         variant: "destructive",
-        // title: t("toast-creation-error"),
-        title: "TODO: trad (Poll creation error)",
+        title: t("toast-poll-creation-error"),
       });
       console.error("error", err);
     }

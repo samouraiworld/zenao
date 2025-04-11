@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  forwardRef,
-  Suspense,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -126,8 +120,6 @@ export function EventFeed({
   isDescExpanded: boolean;
 }) {
   const [tab, setTab] = useState<EventTab>("global-feed");
-
-  // Check which user is logged in
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -135,6 +127,7 @@ export function EventFeed({
   const [stickyBottomPadding, setStickyBottomPadding] = useState(0);
 
   const feedFormRef = useRef<HTMLDivElement>(null);
+
   // Event's social feed posts
   const { data: posts } = useSuspenseQuery(
     // TODO: Handle offset and limit to make an infinite scroll
@@ -186,9 +179,7 @@ export function EventFeed({
         {tab === "global-feed" ? (
           <PostsList list={fakeStandardPosts} />
         ) : (
-          <Suspense fallback={<p>Loading...</p>}>
-            <PollsList list={polls} />
-          </Suspense>
+          <PollsList list={polls} />
         )}
       </div>
     </div>

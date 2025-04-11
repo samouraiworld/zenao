@@ -143,9 +143,19 @@
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
     "publishedAt": "Published at"
   },
-  "polls": {
-    "days": "Days",
-    "minutes": "Minutes",
-    "hours": "Hours"
+  "event-feed": {
+    "poll-form": {
+      "question-placeholder-sm": "Ask a question...",
+      "question-placeholder-lg": "What do you wanna ask to the community ?",
+      "toast-poll-creation-success": "Poll created !",
+      "toast-poll-creation-error": "Error on creating poll !",
+      "label-allow-multiple-answers": "Allow multiple answers",
+      "option-input-placeholder": "Enter an answer",
+      "add-other-answer": "Add another answer",
+      "poll-duration-label": "Duration of the poll",
+      "days": "Days",
+      "minutes": "Minutes",
+      "hours": "Hours"
+    }
   }
 }

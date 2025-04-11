@@ -16,6 +16,7 @@ export function PollFields({
 }: {
   form: UseFormReturn<PollFormSchemaType>;
 }) {
+  const t = useTranslations("event-feed.poll-form");
   const {
     fields: optionFields,
     append: appendOption,
@@ -51,7 +52,7 @@ export function PollFields({
             <FormFieldCheckbox
               name="allowMultipleOptions"
               control={form.control}
-              label="Allow multiple answers"
+              label={t("label-allow-multiple-answers")}
             />
           </div>
         </div>
@@ -73,12 +74,14 @@ function PollOptionItem({
   onClickRemove: () => void;
   canRemove: boolean;
 }) {
+  const t = useTranslations("event-feed.poll-form");
+
   return (
     <div className="flex flex-row items-center gap-2 w-full">
       <FormFieldInputString
         control={control}
         name={name}
-        placeholder="Enter an answer"
+        placeholder={t("option-input-placeholder")}
         className="w-full"
       />
       {canRemove && <RemoveOptionButton onClick={onClickRemove} />}
@@ -87,6 +90,8 @@ function PollOptionItem({
 }
 
 function AddOptionButton({ onClick }: { onClick: () => void }) {
+  const t = useTranslations("event-feed.poll-form");
+
   return (
     <div onClick={onClick}>
       <ButtonWithChildren
@@ -96,7 +101,7 @@ function AddOptionButton({ onClick }: { onClick: () => void }) {
       >
         <div className="flex flex-row justify-start items-center w-full">
           <PlusIcon className="size-4 dark:text-white text-black" />
-          <Text className="text-sm ml-2">Add another answer</Text>
+          <Text className="text-sm ml-2">{t("add-other-answer")}</Text>
         </div>
       </ButtonWithChildren>
     </div>
@@ -128,7 +133,7 @@ function PollFormDuration({
 }: {
   form: UseFormReturn<PollFormSchemaType>;
 }) {
-  const t = useTranslations("polls");
+  const t = useTranslations("event-feed.poll-form");
 
   const minutesMin =
     pollFormSchema.shape.duration.shape.minutes._def.checks.find(
@@ -154,7 +159,7 @@ function PollFormDuration({
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      <Text>Duration of the poll</Text>
+      <Text>{t("poll-duration-label")}</Text>
       <div className="flex w-full gap-2">
         <FormFieldInputNumber
           control={form.control}
