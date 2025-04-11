@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -38,6 +39,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		}
 	}
 
+	zpost := (*zeni.Post)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		roles, err := db.UserRoles(userID, req.Msg.EventId)
 		if err != nil {
@@ -47,13 +49,34 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 			return errors.New("user is not a member of the event")
 		}
 
-		// XXX: Create on Chain Post
+		post := &feedsv1.Post{
+			Loc:  nil,
+			Tags: req.Msg.Tags,
+			Post: &feedsv1.Post_Standard{
+				Standard: &feedsv1.StandardPost{
+					Content: req.Msg.Content,
+				},
+			},
+		}
 
-		// XXX: Create in DB
+		postID, err := s.Chain.CreatePost(userID, req.Msg.EventId, post)
+		if err != nil {
+			return err
+		}
+
+		feed, err := db.GetFeed(req.Msg.EventId, "main")
+		if err != nil {
+			return err
+		}
+
+		if zpost, err = db.CreatePost(postID, feed.ID, userID, post); err != nil {
+			return err
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return connect.NewResponse(&zenaov1.CreatePostResponse{PostId: "1"}), nil
+	return connect.NewResponse(&zenaov1.CreatePostResponse{PostId: zpost.ID}), nil
 }

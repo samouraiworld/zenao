@@ -377,20 +377,10 @@ func (g *gnoZenaoChain) UserAddress(userID string) string {
 }
 
 // CreatePost implements ZenaoChain
-func (g *gnoZenaoChain) CreatePost(userID string, req *zenaov1.CreatePostRequest) (postID string, err error) {
+func (g *gnoZenaoChain) CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error) {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
-	eventPkgPath := g.eventRealmPkgPath(req.EventId)
+	eventPkgPath := g.eventRealmPkgPath(eventID)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
-
-	post := &feedsv1.Post{
-		Loc:  nil,
-		Tags: req.Tags,
-		Post: &feedsv1.Post_Standard{
-			Standard: &feedsv1.StandardPost{
-				Content: req.Content,
-			},
-		},
-	}
 	postStr := post.GnoLiteral("zenaov1.", "\t\t")
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{

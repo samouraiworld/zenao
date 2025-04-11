@@ -124,7 +124,7 @@ type Chain interface {
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
 	Participate(eventID string, callerID string, participantID string) error
 
-	CreatePost(userID string, req *zenaov1.CreatePostRequest) (postID string, err error)
+	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }
