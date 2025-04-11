@@ -39,10 +39,12 @@ func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []s
 	if len(options) > 8 {
 		panic("poll must have at most 8 options")
 	}
-	if duration < int64(time.Minute)*15 {
+	minDuration := int64(time.Minute) * 15 / int64(time.Second)
+	maxDuration := int64(time.Hour) * 24 * 30 / int64(time.Second)
+	if duration < minDuration {
 		panic("duration must be at least 15 minutes")
 	}
-	if duration > int64(time.Hour)*24*30 {
+	if duration > maxDuration {
 		panic("duration must be at most 1 month")
 	}
 	poll := &Poll{
