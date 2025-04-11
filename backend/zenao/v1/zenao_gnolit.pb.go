@@ -312,7 +312,7 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 	buf.WriteString(typePrefix)
 	buf.WriteString("BatchProfileRequest{\n")
 	if len(b.Fields) != 0 {
-		fmt.Fprintf(buf, "%s\tFields: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tFields: []*BatchProfileField{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range b.Fields {
 			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
@@ -321,7 +321,7 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	if len(b.Addresses) != 0 {
-		fmt.Fprintf(buf, "%s\tAddresses: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tAddresses: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range b.Addresses {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
@@ -345,7 +345,7 @@ func (c *CreatePollRequest) GnoLiteral(typePrefix string, linePrefix string) str
 		fmt.Fprintf(buf, "%s\tQuestion: %q,\n", linePrefix, c.Question)
 	}
 	if len(c.Options) != 0 {
-		fmt.Fprintf(buf, "%s\tOptions: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tOptions: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range c.Options {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
@@ -395,6 +395,42 @@ func (v *VotePollResponse) GnoLiteral(typePrefix string, linePrefix string) stri
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("VotePollResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePostRequest{\n")
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	}
+	if c.Content != "" {
+		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, c.Content)
+	}
+	if len(c.Tags) != 0 {
+		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Tags {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePostResponse{\n")
+	if c.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
