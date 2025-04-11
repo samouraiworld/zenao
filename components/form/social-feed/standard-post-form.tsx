@@ -9,6 +9,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMediaQuery } from "react-responsive";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
 import {
@@ -33,6 +34,7 @@ export function StandardPostForm({
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
 }) {
+  const t = useTranslations("event-feed.standard-post-form");
   const { getToken } = useAuth();
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
@@ -57,8 +59,8 @@ export function StandardPostForm({
   const textareaMaxHeight = 300;
   const textareaMinHeight = 48;
   const placeholder = isSmallScreen
-    ? "Say something"
-    : "Don't be shy, say something!";
+    ? t("message-placeholder-sm")
+    : t("message-placeholder-lg");
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -79,15 +81,12 @@ export function StandardPostForm({
 
       standardPostForm.reset();
       toast({
-        // title: t("toast-creation-success"),
-        title: "TODO: trad (Post creation success)",
+        title: t("toast-post-creation-success"),
       });
-      // router.push(`/polls`);
     } catch (err) {
       toast({
         variant: "destructive",
-        // title: t("toast-creation-error"),
-        title: "TODO: trad (Post creation error)",
+        title: t("toast-post-creation-error"),
       });
       console.error("error", err);
     }
