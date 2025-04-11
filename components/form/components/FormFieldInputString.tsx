@@ -25,14 +25,10 @@ export const FormFieldInputString = <T extends FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className={className}>
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
-            <Input
-              className={className}
-              placeholder={placeholder || "placeholder..."}
-              {...field}
-            />
+            <Input placeholder={placeholder || "placeholder..."} {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>

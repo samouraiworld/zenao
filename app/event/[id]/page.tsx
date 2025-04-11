@@ -37,13 +37,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventPage({ params }: Props) {
   // NOTE: we don't prefetch everything because using `auth()` breaks static generation
-
   const p = await params;
   const queryClient = getQueryClient();
 
   const eventData = await queryClient.fetchQuery(eventOptions(p.id));
   if (eventData) {
-    void queryClient.prefetchQuery(profileOptions(eventData.creator));
+    queryClient.prefetchQuery(profileOptions(eventData.creator));
   }
 
   // Prefetch all participants profiles

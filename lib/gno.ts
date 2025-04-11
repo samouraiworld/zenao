@@ -1,3 +1,6 @@
+import { bech32 } from "bech32";
+import shajs from "sha.js";
+
 export function extractGnoJSONResponse(res: string): unknown {
   const str = extractGnoStringResponse(res);
   // eslint-disable-next-line no-restricted-syntax
@@ -15,3 +18,11 @@ export function extractGnoStringResponse(res: string): string {
   }
   return jsonStringContent;
 }
+
+export const derivePkgAddr = (pkgPath: string): string => {
+  const h = shajs("sha256")
+    .update("pkgPath:" + pkgPath)
+    .digest()
+    .subarray(0, 20);
+  return bech32.encode("g", bech32.toWords(h));
+};
