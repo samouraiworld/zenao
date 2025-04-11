@@ -726,7 +726,7 @@ func (v *VotePollResponse) FromJSON(node *json.Node) {
 	*v = VotePollResponse{}
 }
 
-func (c *CreateStandardPostRequest) ToJSON() *json.Node {
+func (c *CreatePostRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
 	if c.EventId != "" {
@@ -746,8 +746,8 @@ func (c *CreateStandardPostRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreateStandardPostRequest) FromJSON(node *json.Node) {
-	*c = CreateStandardPostRequest{}
+func (c *CreatePostRequest) FromJSON(node *json.Node) {
+	*c = CreatePostRequest{}
 	fields := node.MustObject()
 
 	if val, ok := fields["eventId"]; ok {
@@ -766,7 +766,7 @@ func (c *CreateStandardPostRequest) FromJSON(node *json.Node) {
 	}
 }
 
-func (c *CreateStandardPostResponse) ToJSON() *json.Node {
+func (c *CreatePostResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
 	if c.PostId != "" {
@@ -776,8 +776,8 @@ func (c *CreateStandardPostResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreateStandardPostResponse) FromJSON(node *json.Node) {
-	*c = CreateStandardPostResponse{}
+func (c *CreatePostResponse) FromJSON(node *json.Node) {
+	*c = CreatePostResponse{}
 	fields := node.MustObject()
 
 	if val, ok := fields["postId"]; ok {

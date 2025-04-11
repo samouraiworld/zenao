@@ -400,10 +400,10 @@ func (v *VotePollResponse) GnoLiteral(typePrefix string, linePrefix string) stri
 	return buf.String()
 }
 
-func (c *CreateStandardPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+func (c *CreatePostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("CreateStandardPostRequest{\n")
+	buf.WriteString("CreatePostRequest{\n")
 	if c.EventId != "" {
 		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
 	}
@@ -424,10 +424,10 @@ func (c *CreateStandardPostRequest) GnoLiteral(typePrefix string, linePrefix str
 	return buf.String()
 }
 
-func (c *CreateStandardPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+func (c *CreatePostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("CreateStandardPostResponse{\n")
+	buf.WriteString("CreatePostResponse{\n")
 	if c.PostId != "" {
 		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
 	}

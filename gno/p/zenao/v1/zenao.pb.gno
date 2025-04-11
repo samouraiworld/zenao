@@ -128,12 +128,12 @@ type VotePollRequest struct {
 type VotePollResponse struct {
 }
 
-type CreateStandardPostRequest struct {
+type CreatePostRequest struct {
 	EventId string
 	Content string
 	Tags    []string
 }
 
-type CreateStandardPostResponse struct {
+type CreatePostResponse struct {
 	PostId string
 }
