@@ -131,6 +131,7 @@ function PollResultItem({
       className={cn(
         "flex items-center justify-between gap-2 px-4 w-full h-10 relative rounded-lg bg-transparent",
         !disabled && "hover:opacity-50 cursor-pointer",
+        disabled && "hover:bg-transparent",
         pollResult.hasUserVoted && "border border-gray-600",
       )}
       onClick={() => {
@@ -142,7 +143,14 @@ function PollResultItem({
       <div>
         <Gauge percent={percent} className="absolute -z-10 left-0" />
 
-        <Text className="text-sm line-clamp-2">{pollResult.option}</Text>
+        <Text
+          className={cn(
+            "text-sm line-clamp-2",
+            pollResult.hasUserVoted && "text-white",
+          )}
+        >
+          {pollResult.option}
+        </Text>
 
         <div className="flex flex-row items-center gap-3">
           <div className="flex flex-row items-center gap-2">
