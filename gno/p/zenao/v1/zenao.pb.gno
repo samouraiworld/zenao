@@ -127,3 +127,21 @@ type VotePollRequest struct {
 
 type VotePollResponse struct {
 }
+
+type CreatePostRequest struct {
+	EventId string
+	Content string
+	Tags    []string
+}
+
+type CreatePostResponse struct {
+	PostId string
+}
+
+type ReactPostRequest struct {
+	PostId string
+	Icon   string
+}
+
+type ReactPostResponse struct {
+}

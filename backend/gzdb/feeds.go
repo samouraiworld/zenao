@@ -33,6 +33,16 @@ type Tag struct {
 	Post   Post
 }
 
+// XXX: can optimize high volume read performance with reaction_count table
+type Reaction struct {
+	gorm.Model
+	Icon   string
+	PostID uint
+	Post   Post
+	UserID uint
+	User   User
+}
+
 type Post struct {
 	gorm.Model
 	Kind      string
@@ -41,7 +51,8 @@ type Post struct {
 	Latitude  float32
 	Longitude float32
 
-	Tags []Tag `gorm:"foreignKey:PostID"`
+	Tags      []Tag      `gorm:"foreignKey:PostID"`
+	Reactions []Reaction `gorm:"foreignKey:PostID"`
 
 	// Content fields based on post type
 	Content           string // StandardPost

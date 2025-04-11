@@ -1,0 +1,61 @@
+package main
+
+import (
+	"context"
+	"errors"
+
+	"connectrpc.com/connect"
+	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.uber.org/zap"
+)
+
+func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov1.ReactPostRequest]) (*connect.Response[zenaov1.ReactPostResponse], error) {
+	user := s.GetUser(ctx)
+	if user == nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	userID, err := s.EnsureUserExists(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	s.Logger.Info("react-post", zap.String("post-id", req.Msg.PostId), zap.String("icon", req.Msg.Icon), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+
+	if user.Banned {
+		return nil, errors.New("user is banned")
+	}
+
+	if len(req.Msg.Icon) == 0 {
+		return nil, errors.New("icon cannot be empty")
+	}
+
+	if err := s.DB.Tx(func(db zeni.DB) error {
+		event, err := db.GetEventByPostID(req.Msg.PostId)
+		if err != nil {
+			return err
+		}
+		roles, err := db.UserRoles(userID, event.ID)
+		if err != nil {
+			return err
+		}
+		if len(roles) == 0 {
+			return errors.New("user is not a member of the event")
+		}
+
+		if err = db.ReactPost(userID, req.Msg); err != nil {
+			return err
+		}
+
+		if err = s.Chain.ReactPost(userID, event.ID, req.Msg); err != nil {
+			return err
+		}
+
+		return nil
+
+	}); err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&zenaov1.ReactPostResponse{}), nil
+}

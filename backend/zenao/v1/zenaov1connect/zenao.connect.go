@@ -50,6 +50,10 @@ const (
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
 	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
 	ZenaoServiceVotePollProcedure = "/zenao.v1.ZenaoService/VotePoll"
+	// ZenaoServiceCreatePostProcedure is the fully-qualified name of the ZenaoService's CreatePost RPC.
+	ZenaoServiceCreatePostProcedure = "/zenao.v1.ZenaoService/CreatePost"
+	// ZenaoServiceReactPostProcedure is the fully-qualified name of the ZenaoService's ReactPost RPC.
+	ZenaoServiceReactPostProcedure = "/zenao.v1.ZenaoService/ReactPost"
 )
 
 // ZenaoServiceClient is a client for the zenao.v1.ZenaoService service.
@@ -64,6 +68,8 @@ type ZenaoServiceClient interface {
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
+	CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error)
+	ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error)
 }
 
 // NewZenaoServiceClient constructs a client for the zenao.v1.ZenaoService service. By default, it
@@ -119,6 +125,18 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("VotePoll")),
 			connect.WithClientOptions(opts...),
 		),
+		createPost: connect.NewClient[v1.CreatePostRequest, v1.CreatePostResponse](
+			httpClient,
+			baseURL+ZenaoServiceCreatePostProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("CreatePost")),
+			connect.WithClientOptions(opts...),
+		),
+		reactPost: connect.NewClient[v1.ReactPostRequest, v1.ReactPostResponse](
+			httpClient,
+			baseURL+ZenaoServiceReactPostProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("ReactPost")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -131,6 +149,8 @@ type zenaoServiceClient struct {
 	participate    *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
 	createPoll     *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll       *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
+	createPost     *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
+	reactPost      *connect.Client[v1.ReactPostRequest, v1.ReactPostResponse]
 }
 
 // EditUser calls zenao.v1.ZenaoService.EditUser.
@@ -168,6 +188,16 @@ func (c *zenaoServiceClient) VotePoll(ctx context.Context, req *connect.Request[
 	return c.votePoll.CallUnary(ctx, req)
 }
 
+// CreatePost calls zenao.v1.ZenaoService.CreatePost.
+func (c *zenaoServiceClient) CreatePost(ctx context.Context, req *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error) {
+	return c.createPost.CallUnary(ctx, req)
+}
+
+// ReactPost calls zenao.v1.ZenaoService.ReactPost.
+func (c *zenaoServiceClient) ReactPost(ctx context.Context, req *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error) {
+	return c.reactPost.CallUnary(ctx, req)
+}
+
 // ZenaoServiceHandler is an implementation of the zenao.v1.ZenaoService service.
 type ZenaoServiceHandler interface {
 	// USER
@@ -180,6 +210,8 @@ type ZenaoServiceHandler interface {
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
+	CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error)
+	ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error)
 }
 
 // NewZenaoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -231,6 +263,18 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("VotePoll")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceCreatePostHandler := connect.NewUnaryHandler(
+		ZenaoServiceCreatePostProcedure,
+		svc.CreatePost,
+		connect.WithSchema(zenaoServiceMethods.ByName("CreatePost")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceReactPostHandler := connect.NewUnaryHandler(
+		ZenaoServiceReactPostProcedure,
+		svc.ReactPost,
+		connect.WithSchema(zenaoServiceMethods.ByName("ReactPost")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/zenao.v1.ZenaoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ZenaoServiceEditUserProcedure:
@@ -247,6 +291,10 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
 		case ZenaoServiceVotePollProcedure:
 			zenaoServiceVotePollHandler.ServeHTTP(w, r)
+		case ZenaoServiceCreatePostProcedure:
+			zenaoServiceCreatePostHandler.ServeHTTP(w, r)
+		case ZenaoServiceReactPostProcedure:
+			zenaoServiceReactPostHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -282,4 +330,12 @@ func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Req
 
 func (UnimplementedZenaoServiceHandler) VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.VotePoll is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreatePost is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ReactPost is not implemented"))
 }
