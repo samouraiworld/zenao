@@ -36,12 +36,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
-  }
   index "idx_users_clerk_id" {
     unique  = true
     columns = [column.clerk_id]
+  }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
   }
 }
 table "events" {
@@ -426,15 +426,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_reactions" {
-    columns     = [column.post_id]
-    ref_columns = [table.posts.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_reactions_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_reactions" {
+    columns     = [column.post_id]
+    ref_columns = [table.posts.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
