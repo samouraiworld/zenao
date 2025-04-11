@@ -482,6 +482,7 @@ import (
 	"gno.land/p/zenao/daokit"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 	pollsv1 "gno.land/p/zenao/polls/v1"
+	event %q
 	"gno.land/r/zenao/polls"
 	"gno.land/r/zenao/social_feed"
 	user %q
@@ -503,7 +504,7 @@ func NewPoll() {
 	question := %q
 	options := []string{%s}
 	kind := pollsv1.PollKind(%d)
-	p := polls.NewPoll(question, kind, %d, options, nil)
+	p := polls.NewPoll(question, kind, %d, options, event.IsMember)
 	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
 	std.Emit(%q, "pollID", p.ID.String())
 
@@ -519,7 +520,7 @@ func NewPoll() {
 	postID := social_feed.NewPost(feedID, post)
 	std.Emit(%q, "postID", postID)
 }
-`, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
+`, eventPkgPath, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
 			}},
 		},
 	}))

@@ -35,9 +35,12 @@ func init() {
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
-	social_feed.NewFeed("main", false, func(memberId string) bool {
-		return daoPrivate.Members.IsMember(memberId)
-	})
+	social_feed.NewFeed("main", false, IsMember)
+}
+
+// Set public to be used as auth layer for external entities (e.g polls)
+func IsMember(memberId string) bool {
+	return daoPrivate.Members.IsMember(memberId)
 }
 
 func Vote(proposalID uint64, vote daocond.Vote) {

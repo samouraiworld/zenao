@@ -159,8 +159,8 @@ func TestVote(t *testing.T) {
 
 	type testTable = map[string]test
 
-	pvFunc := func(addr std.Address) bool {
-		if addr == bob {
+	pvFunc := func(addr string) bool {
+		if addr == bob.String() {
 			return true
 		}
 		return false
