@@ -22,9 +22,12 @@ func NewPost(feedId string, post *feedsv1.Post) string {
 			panic("this is a private feed and you are not authorized to post on it")
 		}
 	}
-	localPostId := feedId + ":" + id.Next().String()
-	posts.Set(localPostId, post)
-	return localPostId
+
+	post.LocalPostId = id.Next().String()
+	feedKey := feedId + ":" + post.LocalPostId
+	posts.Set(post.LocalPostId, post)
+	postsByFeed.Set(feedKey, post)
+	return post.LocalPostId
 }
 
 func GetPost(localPostId string) *feedsv1.Post {
@@ -52,19 +55,24 @@ func DeletePost(localPostId string) {
 }
 
 func EditPost(localPostId string, newPost *feedsv1.Post) {
-	creator := std.PreviousRealm()
+	caller := std.PreviousRealm()
 	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
 	}
 	post := postRaw.(*feedsv1.Post)
-	if post.Author != creator.Address().String() {
+	if post.Author != caller.Address().String() {
 		panic("you are not the author of this post")
 	}
 	if post.DeletedAt != 0 {
 		panic("post is deleted")
 	}
-	posts.Set(localPostId, newPost)
+
+	//XXX: this is a hack to force the localPostId to be the same as the original post
+	newPost.LocalPostId = post.LocalPostId
+
+	*post = *newPost
+	post.UpdatedAt = time.Now().Unix()
 }
 
 func ReactPost(localPostId string, icon string) {

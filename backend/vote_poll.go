@@ -6,6 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -26,11 +27,27 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 		return nil, errors.New("user is banned")
 	}
 
-	//TODO: add is member check once we add auth layer in poll realm
-	//TODO: once polls are sync in db, ensure option & id exists
-
-	if err := s.Chain.VotePoll(userID, req.Msg); err != nil {
-		s.Logger.Error("vote-on-poll", zap.Error(err))
+	if err := s.DB.Tx(func(db zeni.DB) error {
+		evt, err := db.GetEventByPollID(req.Msg.PollId)
+		if err != nil {
+			return err
+		}
+		roles, err := db.UserRoles(userID, evt.ID)
+		if err != nil {
+			return err
+		}
+		if len(roles) == 0 {
+			return errors.New("user is not a member of the event")
+		}
+		if err = db.VotePoll(userID, req.Msg); err != nil {
+			return err
+		}
+		if err = s.Chain.VotePoll(userID, req.Msg); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.VotePollResponse{}), nil

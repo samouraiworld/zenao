@@ -180,6 +180,9 @@ func (a *AudioPost) FromJSON(node *json.Node) {
 func (v *VideoPost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if v.Title != "" {
+		fields["title"] = json.StringNode("", v.Title)
+	}
 	if v.Description != "" {
 		fields["description"] = json.StringNode("", v.Description)
 	}
@@ -197,6 +200,9 @@ func (v *VideoPost) FromJSON(node *json.Node) {
 	*v = VideoPost{}
 	fields := node.MustObject()
 
+	if val, ok := fields["title"]; ok {
+		v.Title = val.MustString()
+	}
 	if val, ok := fields["description"]; ok {
 		v.Description = val.MustString()
 	}
@@ -277,6 +283,9 @@ func (t *Tip) FromJSON(node *json.Node) {
 func (p *Post) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if p.LocalPostId != "" {
+		fields["localPostId"] = json.StringNode("", p.LocalPostId)
+	}
 	if p.Author != "" {
 		fields["author"] = json.StringNode("", p.Author)
 	}
@@ -327,6 +336,9 @@ func (p *Post) FromJSON(node *json.Node) {
 	*p = Post{}
 	fields := node.MustObject()
 
+	if val, ok := fields["localPostId"]; ok {
+		p.LocalPostId = val.MustString()
+	}
 	if val, ok := fields["author"]; ok {
 		p.Author = val.MustString()
 	}

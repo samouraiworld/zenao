@@ -121,7 +121,7 @@ message CreatePollRequest {
   polls.v1.PollKind kind = 5;
 }
 
-message CreatePollResponse {}
+message CreatePollResponse { string post_id = 1; }
 
 message VotePollRequest {
   string poll_id = 1;

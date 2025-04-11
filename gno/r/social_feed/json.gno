@@ -5,7 +5,7 @@ import (
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
-func PostViewsToJSON(posts []*feedsv1.PostView) string {
+func postViewsToJSON(posts []*feedsv1.PostView) string {
 	nodes := []*json.Node{}
 	for _, post := range posts {
 		nodes = append(nodes, post.ToJSON())
