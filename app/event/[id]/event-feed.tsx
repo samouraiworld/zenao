@@ -1,6 +1,12 @@
 "use client";
 
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -21,17 +27,18 @@ import { feedPosts } from "@/lib/queries/social-feed";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { PostsList } from "@/components/lists/posts-list";
 import { PollsList } from "@/components/lists/polls-list";
+import { mergeRefs } from "@/lib/utils";
 
 const eventTabs = ["global-feed", "polls-feed"] as const;
 export type EventTab = (typeof eventTabs)[number];
 
-export function EventFeedForm({
-  eventId,
-  isDescExpanded,
-}: {
-  eventId: string;
-  isDescExpanded: boolean;
-}) {
+const EventFeedForm = forwardRef<
+  HTMLDivElement,
+  {
+    eventId: string;
+    isDescExpanded: boolean;
+  }
+>(({ eventId, isDescExpanded }, ref) => {
   const { theme } = useTheme();
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
@@ -76,7 +83,7 @@ export function EventFeedForm({
 
   return (
     <div
-      ref={inputContainerRef}
+      ref={mergeRefs(ref, inputContainerRef)}
       className={cn(
         "flex justify-center w-full transition-all duration-300",
         isInputSticky &&
@@ -107,7 +114,9 @@ export function EventFeedForm({
       </div>
     </div>
   );
-}
+});
+
+EventFeedForm.displayName = "EventFeedForm";
 
 export function EventFeed({
   eventId,
@@ -123,7 +132,9 @@ export function EventFeed({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const [stickyBottomPadding, setStickyBottomPadding] = useState(0);
 
+  const feedFormRef = useRef<HTMLDivElement>(null);
   // Event's social feed posts
   const { data: posts } = useSuspenseQuery(
     // TODO: Handle offset and limit to make an infinite scroll
@@ -137,6 +148,20 @@ export function EventFeed({
 
   const t = useTranslations("event");
 
+  useEffect(() => {
+    if (!feedFormRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { height } = entry.contentRect;
+        setStickyBottomPadding(height);
+      }
+    });
+    observer.observe(feedFormRef.current);
+
+    return () => observer.disconnect();
+  }, [feedFormRef]);
+
   return (
     <div className="flex flex-col gap-4">
       <Tabs value={tab} onValueChange={(value) => setTab(value as EventTab)}>
@@ -149,8 +174,15 @@ export function EventFeed({
         </TabsList>
       </Tabs>
 
-      <div className="flex flex-col gap-12 min-h-0 pt-4 pb-12">
-        <EventFeedForm eventId={eventId} isDescExpanded={isDescExpanded} />
+      <div
+        className="flex flex-col gap-12 min-h-0 pt-4"
+        style={{ paddingBottom: stickyBottomPadding }}
+      >
+        <EventFeedForm
+          ref={feedFormRef}
+          eventId={eventId}
+          isDescExpanded={isDescExpanded}
+        />
         {tab === "global-feed" ? (
           <PostsList list={fakeStandardPosts} />
         ) : (
