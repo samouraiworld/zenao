@@ -18,10 +18,16 @@ import (
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/encoding/protojson"
+)
+
+const (
+	gnoEventPollCreate = "zenao-poll-create"
+	gnoEventPostCreate = "zenao-post-create"
 )
 
 func setupChain(adminMnemonic string, namespace string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
@@ -370,13 +376,98 @@ func (g *gnoZenaoChain) UserAddress(userID string) string {
 	return gnolang.DerivePkgAddr(g.userRealmPkgPath(userID)).String()
 }
 
+// CreatePost implements ZenaoChain
+func (g *gnoZenaoChain) CreatePost(userID string, req *zenaov1.CreatePostRequest) (postID string, err error) {
+	userRealmPkgPath := g.userRealmPkgPath(userID)
+	eventPkgPath := g.eventRealmPkgPath(req.EventId)
+	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+
+	post := &feedsv1.Post{
+		Loc:  nil,
+		Tags: req.Tags,
+		Post: &feedsv1.Post_Standard{
+			Standard: &feedsv1.StandardPost{
+				Content: req.Content,
+			},
+		},
+	}
+	postStr := post.GnoLiteral("zenaov1.", "\t\t")
+
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+import (
+	"std"
+
+	"gno.land/p/demo/ufmt"
+	"gno.land/p/zenao/daokit"
+	feedsv1 "gno.land/p/zenao/feeds/v1"
+	pollsv1 "gno.land/p/zenao/polls/v1"
+	"gno.land/r/zenao/polls"
+	"gno.land/r/zenao/social_feed"
+	user %q
+)
+
+func main() {
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: "Add new post",
+		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
+			Title: "Add new post",
+			Message: daokit.NewExecuteLambdaMsg(
+				NewPost,
+			),
+		}),
+	})
+}
+
+func NewPost() {
+	feedID := %q
+	post := %s
+
+	postID := social_feed.NewPost(feedID, post)
+	std.Emit(%q, "postID", postID)
+}
+`, userRealmPkgPath, feedID, postStr, gnoEventPostCreate),
+			}},
+		},
+	}))
+	if err != nil {
+		return "", err
+	}
+
+	for _, event := range broadcastRes.DeliverTx.Events {
+		if gnoEvent, ok := event.(std.GnoEvent); ok {
+			if gnoEvent.Type == gnoEventPostCreate {
+				postID, err = extractEventAttribute(gnoEvent, "postID")
+				if err != nil {
+					return "", err
+				}
+			}
+		} else {
+			g.logger.Info("unknown event type", zap.Any("event", event))
+		}
+	}
+
+	if postID == "" {
+		return "", errors.New("an empty string has been extracted for postID from tx events")
+	}
+
+	g.logger.Info("created standard post", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	return postID, nil
+}
+
 // CreatePoll implements ZenaoChain
 func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error) {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	eventPkgPath := g.eventRealmPkgPath(req.EventId)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
-	gnoEventPollCreate := "zenao-poll-create"
-	gnoEventPostCreate := "zenao-post-create"
 
 	options := ""
 	for _, option := range req.Options {

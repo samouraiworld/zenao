@@ -32,6 +32,12 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		return nil, errors.New("content of standard post cannot be empty")
 	}
 
+	for _, tag := range req.Msg.Tags {
+		if len(tag) == 0 {
+			return nil, errors.New("a tag value cannot be empty")
+		}
+	}
+
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		roles, err := db.UserRoles(userID, req.Msg.EventId)
 		if err != nil {
