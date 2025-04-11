@@ -450,6 +450,56 @@ func NewPost() {
 	return postID, nil
 }
 
+// ReactPost implements ZenaoChain
+func (g *gnoZenaoChain) ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error {
+	userRealmPkgPath := g.userRealmPkgPath(userID)
+
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+import (
+	"std"
+
+	"gno.land/p/zenao/daokit"
+	"gno.land/r/zenao/social_feed"
+	user %q
+)
+	
+func main() {
+	title := "User #%s reacts to post #%s in event #%s."
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: title,
+		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
+			Title: title,
+			Message: daokit.NewExecuteLambdaMsg(
+				NewReaction,
+			),
+		}),
+	})
+}
+
+func NewReaction() {
+	social_feed.ReactPost(%q, %q)
+}
+`, userRealmPkgPath, userID, req.PostId, eventID, req.PostId, req.Icon),
+			}},
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("reacted to a post", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	return nil
+}
+
 // CreatePoll implements ZenaoChain
 func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error) {
 	userRealmPkgPath := g.userRealmPkgPath(userID)

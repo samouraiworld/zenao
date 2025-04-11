@@ -48,6 +48,10 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 			return err
 		}
 
+		if err = s.Chain.ReactPost(userID, event.ID, req.Msg); err != nil {
+			return err
+		}
+
 		return nil
 
 	}); err != nil {
