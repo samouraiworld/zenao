@@ -1,5 +1,5 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
-import { feedPosts, fetchPoll } from "../queries/social-feed";
+import { feedPosts, pollInfo } from "../queries/social-feed";
 import {
   CreatePollRequestJson,
   VotePollRequestJson,
@@ -27,7 +27,6 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     onMutate: async (variables) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        0,
         100,
         "",
         variables.userAddress,
@@ -41,7 +40,6 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        0,
         100,
         "",
         variables.userAddress,
@@ -52,7 +50,6 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        0,
         100,
         "",
         variables.userAddress,
@@ -94,19 +91,19 @@ export const useVotePoll = (queryClient: QueryClient) => {
       );
     },
     onMutate: async (variables) => {
-      const fetchPollOpts = fetchPoll(variables.pollId, variables.userAddress);
-      const previousPollPost = queryClient.getQueryData(fetchPollOpts.queryKey);
+      const pollInfoOpts = pollInfo(variables.pollId, variables.userAddress);
+      const previousPollPost = queryClient.getQueryData(pollInfoOpts.queryKey);
 
       return { previousPollPost };
     },
     onSuccess: (_, variables) => {
-      const fetchPollOpts = fetchPoll(variables.pollId, variables.userAddress);
-      queryClient.invalidateQueries(fetchPollOpts);
+      const pollInfoOpts = pollInfo(variables.pollId, variables.userAddress);
+      queryClient.invalidateQueries(pollInfoOpts);
     },
     onError: (_, variables, context) => {
-      const fetchPollOpts = fetchPoll(variables.pollId, variables.userAddress);
+      const pollInfoOpts = pollInfo(variables.pollId, variables.userAddress);
       queryClient.setQueryData(
-        fetchPollOpts.queryKey,
+        pollInfoOpts.queryKey,
         context?.previousPollPost,
       );
     },

@@ -1,9 +1,13 @@
-import { LinkPost, Post, PostView } from "@/app/gen/feeds/v1/feeds_pb";
+import {
+  LinkPost,
+  Post,
+  PostView,
+  StandardPost,
+} from "@/app/gen/feeds/v1/feeds_pb";
 import { Poll, PollKind } from "@/app/gen/polls/v1/polls_pb";
 
 export type PollPostView = PostView & {
   post: Post & {
-    tags: (string | "poll")[]; // Ensures "poll" is included in tags
     post: {
       value: LinkPost;
       case: "link";
@@ -11,11 +15,24 @@ export type PollPostView = PostView & {
   };
 };
 
+export type StandardPostView = PostView & {
+  post: Post & {
+    post: {
+      value: StandardPost;
+      case: "standard";
+    };
+  };
+};
+
+export type OtherPostView = PostView & {
+  post: Post;
+};
+
 export type PollPostViewInfo = PollPostView & {
   poll: Poll;
 };
 
-export const fakeStandardPosts: PostView[] = [
+export const fakeStandardPosts: StandardPostView[] = [
   {
     reactions: [
       {
@@ -40,6 +57,7 @@ export const fakeStandardPosts: PostView[] = [
     post: {
       author: "alice",
       parentUri: "",
+      localPostId: "1",
       // @ts-expect-error Fake Type mock
       loc: { lat: 48.8566, lng: 2.3522 },
       createdAt: BigInt(1710432000),
@@ -80,6 +98,7 @@ export const fakeStandardPosts: PostView[] = [
     post: {
       author: "bob",
       parentUri: "",
+      localPostId: "2",
       // @ts-expect-error Fake Type mock
       loc: { lat: 40.7128, lng: -74.006 },
       createdAt: BigInt(1710432100),
@@ -120,6 +139,7 @@ export const fakeStandardPosts: PostView[] = [
     post: {
       author: "charlie",
       parentUri: "",
+      localPostId: "3",
       // @ts-expect-error Fake Type mock
       loc: { lat: 35.6895, lng: 139.6917 },
       createdAt: BigInt(1710432200),
@@ -166,6 +186,7 @@ export const fakeStandardPosts: PostView[] = [
     post: {
       author: "dave",
       parentUri: "",
+      localPostId: "4",
       // @ts-expect-error Fake Type mock
       loc: { lat: 51.5074, lng: -0.1278 },
       createdAt: BigInt(1710432300),
@@ -206,6 +227,7 @@ export const fakeStandardPosts: PostView[] = [
     post: {
       author: "eve",
       parentUri: "",
+      localPostId: "5",
       // @ts-expect-error Fake Type mock
       loc: { lat: 37.7749, lng: -122.4194 },
       createdAt: BigInt(1710432400),
@@ -246,6 +268,7 @@ export const fakeStandardPosts: PostView[] = [
     post: {
       author: "frank",
       parentUri: "",
+      localPostId: "6",
       // @ts-expect-error Fake Type mock
       loc: { lat: -33.8688, lng: 151.2093 },
       createdAt: BigInt(1710432500),

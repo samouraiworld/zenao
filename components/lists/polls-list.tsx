@@ -4,12 +4,12 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
 import Text from "../texts/text";
-import { PollPostCardSkeleton } from "../loader/social-feed/poll-post-card-skeleton";
+import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { userAddressOptions } from "@/lib/queries/user";
 import { PollPostCard } from "@/components/cards/social-feed/poll-post-card";
 import { PollPostView, PollPostViewInfo } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
-import { fetchPoll } from "@/lib/queries/social-feed";
+import { pollInfo } from "@/lib/queries/social-feed";
 
 function EmptyPollsList() {
   return (
@@ -32,7 +32,7 @@ export function PollsList({ list }: { list: PollPostView[] }) {
           const { pollId } = parsePollUri(pollPost.post.post.value.uri);
 
           return (
-            <Suspense fallback={<PollPostCardSkeleton />} key={pollId}>
+            <Suspense fallback={<PostCardSkeleton />} key={pollId}>
               <PollPost pollId={pollId} pollPost={pollPost} />
             </Suspense>
           );
@@ -53,7 +53,7 @@ function PollPost({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data } = useSuspenseQuery(fetchPoll(pollId, userAddress || ""));
+  const { data } = useSuspenseQuery(pollInfo(pollId, userAddress || ""));
 
   const combined: PollPostViewInfo = useMemo(() => {
     return {

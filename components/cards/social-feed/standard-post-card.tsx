@@ -1,16 +1,20 @@
 "use client";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
-import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 import Text from "@/components/texts/text";
+import { profileOptions } from "@/lib/queries/profile";
+import { StandardPostView } from "@/lib/social-feed";
 
-export function StandardPostCard({ post }: { post: PostView }) {
-  if (!post.post || post.post?.post.case !== "standard") {
-    return null;
-  }
+export function StandardPostCard({ post }: { post: StandardPostView }) {
+  const { data: createdBy } = useSuspenseQuery(
+    profileOptions(post.post.author),
+  );
+
   const standardPost = post.post.post.value;
+
   return (
-    <PostCardLayout post={post}>
+    <PostCardLayout post={post} createdBy={createdBy}>
       <div className="w-full flex flex-col gap-2">
         <Text>{standardPost.content}</Text>
       </div>

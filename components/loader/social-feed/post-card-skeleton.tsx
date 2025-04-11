@@ -2,7 +2,7 @@ import { Card } from "@/components/cards/Card";
 import { UserAvatarSkeleton } from "@/components/common/user";
 import { Skeleton } from "@/components/shadcn/skeleton";
 
-export function PollPostCardSkeleton() {
+export function PostCardSkeleton() {
   return (
     <Card className="w-full flex flex-col gap-2">
       <div className="flex flex-col sm:flex-row items-start gap-2">

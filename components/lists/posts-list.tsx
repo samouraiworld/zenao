@@ -1,8 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import Text from "../texts/text";
-import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
+import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
+import { StandardPostView } from "@/lib/social-feed";
 
 function EmptyPostsList() {
   return (
@@ -15,26 +17,17 @@ function EmptyPostsList() {
   );
 }
 
-export function PostsList({ list }: { list: PostView[] }) {
-  // We show posts "standard" only for now
-  const postsStandard = list.filter(
-    (post) => post.post?.post.case === "standard",
-  );
-
-  // TODO: PollPostView[] here ?
-  // We also show polls
-  // const polls = list.map(post =>
-  //   post.post.case = "link"
-  // );
-
+export function PostsList({ list }: { list: StandardPostView[] }) {
   return (
     <div className="space-y-4">
-      {!postsStandard.length ? (
+      {!list.length ? (
         <EmptyPostsList />
       ) : (
-        postsStandard.map((post, index) => (
-          <StandardPostCard key={index} post={post} />
-        )) //TODO: Better key?
+        list.map((post) => (
+          <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
+            <StandardPostCard post={post} />
+          </Suspense>
+        ))
       )}
     </div>
   );
