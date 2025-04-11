@@ -312,7 +312,7 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 	buf.WriteString(typePrefix)
 	buf.WriteString("BatchProfileRequest{\n")
 	if len(b.Fields) != 0 {
-		fmt.Fprintf(buf, "%s\tFields: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tFields: []*BatchProfileField{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range b.Fields {
 			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
@@ -321,7 +321,7 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	if len(b.Addresses) != 0 {
-		fmt.Fprintf(buf, "%s\tAddresses: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tAddresses: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range b.Addresses {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
@@ -345,7 +345,7 @@ func (c *CreatePollRequest) GnoLiteral(typePrefix string, linePrefix string) str
 		fmt.Fprintf(buf, "%s\tQuestion: %q,\n", linePrefix, c.Question)
 	}
 	if len(c.Options) != 0 {
-		fmt.Fprintf(buf, "%s\tOptions: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tOptions: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range c.Options {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
@@ -411,7 +411,7 @@ func (c *CreatePostRequest) GnoLiteral(typePrefix string, linePrefix string) str
 		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, c.Content)
 	}
 	if len(c.Tags) != 0 {
-		fmt.Fprintf(buf, "%s\tTags: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range c.Tags {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)

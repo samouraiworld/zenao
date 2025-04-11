@@ -381,7 +381,9 @@ func (g *gnoZenaoChain) CreatePost(userID string, eventID string, post *feedsv1.
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
-	postStr := post.GnoLiteral("zenaov1.", "\t\t")
+	postStr := "&" + post.GnoLiteral("feedsv1.", "\t\t")
+
+	g.logger.Info("test", zap.String("post", postStr))
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -396,11 +398,8 @@ func (g *gnoZenaoChain) CreatePost(userID string, eventID string, post *feedsv1.
 import (
 	"std"
 
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/zenao/daokit"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
-	pollsv1 "gno.land/p/zenao/polls/v1"
-	"gno.land/r/zenao/polls"
 	"gno.land/r/zenao/social_feed"
 	user %q
 )

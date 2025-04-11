@@ -62,7 +62,7 @@ func DetailSocialFeedPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 	i := 0
 	start := id + ":"
 	end := id + ";"
-	posts.Iterate(start, end, func(key string, postRaw interface{}) bool {
+	postsByFeed.Iterate(start, end, func(key string, postRaw interface{}) bool {
 		post := postRaw.(*feedsv1.Post)
 		res.Write(renderZenaoPost(post))
 		if i >= 20 {
