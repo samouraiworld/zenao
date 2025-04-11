@@ -1,17 +1,20 @@
 "use client";
 
 import { Suspense } from "react";
+import { useTranslations } from "next-intl";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
 import { StandardPostView } from "@/lib/social-feed";
 
 function EmptyPostsList() {
+  const t = useTranslations("event-feed");
+
   return (
     <div className="flex flex-col items-center gap-5 mt-10 text-center">
-      <Text className="font-bold">No post to show</Text>
+      <Text className="font-bold">{t("no-posts-title")}</Text>
       <Text size="sm" variant="secondary">
-        There is no post for this Event yet
+        {t("no-posts-description")}
       </Text>
     </div>
   );

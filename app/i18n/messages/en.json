@@ -67,9 +67,7 @@
     "toast-confirmation": "You take part in the event!",
     "toast-already-participant-error": "This email is already participant for this event!",
     "toast-default-error": "Error on participate!",
-    "participants-list": "Participants list",
-    "global-feed": "Global feed",
-    "polls-feed": "Polls"
+    "participants-list": "Participants list"
   },
   "manifesto": {
     "title": "MANIFESTO",
@@ -144,6 +142,14 @@
     "publishedAt": "Published at"
   },
   "event-feed": {
+    "global-feed": "Global feed",
+    "polls-feed": "Polls",
+    "load-more": "Load more",
+    "no-more-posts": "No more to show for now.",
+    "no-polls-title": "No polls to show.",
+    "no-polls-description": "You have no polls. Why not create one?",
+    "no-posts-title": "No posts to show.",
+    "no-posts-description": "You have no posts. Why not create one?",
     "poll-form": {
       "question-placeholder-sm": "Ask a question...",
       "question-placeholder-lg": "What do you wanna ask to the community ?",

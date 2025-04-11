@@ -138,6 +138,7 @@ export function EventFeed({
     data: postsPages,
     isFetchingNextPage,
     hasNextPage,
+    isFetching,
   } = useSuspenseInfiniteQuery(feedPosts(eventId, 100, "", userAddress || ""));
   const posts = useMemo(() => postsPages.pages.flat(), [postsPages]);
 
@@ -159,7 +160,7 @@ export function EventFeed({
     [posts],
   );
 
-  const t = useTranslations("event");
+  const t = useTranslations("event-feed");
 
   // Observer to make sure we can see the bottom of the feed
   useEffect(() => {
@@ -207,12 +208,16 @@ export function EventFeed({
         <div className="flex justify-center">
           {hasNextPage ? (
             <ButtonWithChildren loading={isFetchingNextPage}>
-              Load more...
+              {t("load-more")}
             </ButtonWithChildren>
           ) : (
-            <Text size="sm" variant="secondary">
-              That′s all for now!
-            </Text>
+            !isFetching &&
+            ((tab === "global-feed" && standardPosts.length > 0) ||
+              (tab === "polls-feed" && polls.length > 0)) && (
+              <Text size="sm" variant="secondary">
+                {t("no-more-posts")}
+              </Text>
+            )
           )}
         </div>
       </div>

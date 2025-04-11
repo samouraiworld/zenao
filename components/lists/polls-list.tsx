@@ -3,6 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -12,11 +13,12 @@ import { parsePollUri } from "@/lib/multiaddr";
 import { pollInfo } from "@/lib/queries/social-feed";
 
 function EmptyPollsList() {
+  const t = useTranslations("event-feed");
   return (
     <div className="flex flex-col items-center gap-5 mt-10 text-center">
-      <Text className="font-bold">No poll to show</Text>
+      <Text className="font-bold">{t("no-polls-title")}</Text>
       <Text size="sm" variant="secondary">
-        There is no poll for this Event yet
+        {t("no-polls-description")}
       </Text>
     </div>
   );
