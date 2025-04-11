@@ -399,3 +399,39 @@ func (v *VotePollResponse) GnoLiteral(typePrefix string, linePrefix string) stri
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (c *CreateStandardPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreateStandardPostRequest{\n")
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	}
+	if c.Content != "" {
+		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, c.Content)
+	}
+	if len(c.Tags) != 0 {
+		fmt.Fprintf(buf, "%s\tTags: {\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Tags {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreateStandardPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreateStandardPostResponse{\n")
+	if c.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}

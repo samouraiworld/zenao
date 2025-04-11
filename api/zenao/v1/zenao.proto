@@ -129,3 +129,11 @@ message VotePollRequest {
 }
 
 message VotePollResponse {}
+
+message CreateStandardPostRequest {
+  string event_id = 1;
+  string content = 2;
+  repeated string tags = 3;
+}
+
+message CreateStandardPostResponse { string post_id = 1; }
