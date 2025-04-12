@@ -34,7 +34,7 @@ func fieldToLit(prefix string, g *protogen.GeneratedFile, field *protogen.Field)
 	printFieldCustom := func(line func(valuePrefix string, receiver string) string, zeroValue string) {
 		if field.Desc.IsList() {
 			g.P(prefix, `if len(`, receiver, `) != 0 {`)
-			g.P(prefix, `	fmt.Fprintf(buf, "%s\t`, field.GoName, `: {\n", linePrefix)`)
+			g.P(prefix, `	fmt.Fprintf(buf, "%s\t`, field.GoName, `: `, fieldType, `{\n", linePrefix)`)
 			g.P(prefix, `	linePrefix += "\t"`)
 			g.P(prefix, `	for _, elem := range `, receiver, ` {`)
 			g.P(prefix, `		`, line("", "elem"))

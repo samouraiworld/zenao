@@ -18,6 +18,7 @@ service ZenaoService {
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
 }
 
 message EditUserRequest {
@@ -129,3 +130,11 @@ message VotePollRequest {
 }
 
 message VotePollResponse {}
+
+message CreatePostRequest {
+  string event_id = 1;
+  string content = 2;
+  repeated string tags = 3;
+}
+
+message CreatePostResponse { string post_id = 1; }
