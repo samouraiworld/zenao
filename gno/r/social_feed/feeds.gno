@@ -77,13 +77,9 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 			}
 		}
 		if i >= int(offset) {
-			localPostId, err := seqid.FromString(post.LocalPostId)
-			if err != nil {
-				panic(err)
-			}
 			postView := &feedsv1.PostView{
 				Post:      post,
-				Reactions: GetPostReactions(uint64(localPostId), user),
+				Reactions: GetPostReactions(post.LocalPostId, user),
 			}
 			res = append(res, postView)
 		}

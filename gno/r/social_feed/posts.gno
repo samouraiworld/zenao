@@ -9,7 +9,7 @@ import (
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
-func NewPost(feedId string, post *feedsv1.Post) string {
+func NewPost(feedId string, post *feedsv1.Post) uint64 {
 	creator := std.PreviousRealm().Address().String()
 	post.Author = creator
 	post.CreatedAt = time.Now().Unix()
@@ -24,9 +24,10 @@ func NewPost(feedId string, post *feedsv1.Post) string {
 		}
 	}
 
-	post.LocalPostId = id.Next().String()
-	feedKey := feedId + ":" + post.LocalPostId
-	posts.Set(post.LocalPostId, post)
+	localPostId := id.Next()
+	post.LocalPostId = uint64(localPostId)
+	feedKey := feedId + ":" + localPostId.String()
+	posts.Set(localPostId.String(), post)
 	postsByFeed.Set(feedKey, post)
 	return post.LocalPostId
 }

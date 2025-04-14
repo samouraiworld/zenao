@@ -397,6 +397,7 @@ import (
 	"std"
 
 	"gno.land/p/zenao/daokit"
+	"gno.land/p/demo/ufmt"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 	"gno.land/r/zenao/social_feed"
 	user %q
@@ -419,7 +420,7 @@ func NewPost() {
 	post := %s
 
 	postID := social_feed.NewPost(feedID, post)
-	std.Emit(%q, "postID", postID)
+	std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 }
 `, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate),
 			}},
@@ -567,7 +568,7 @@ func NewPoll() {
 	}
 
 	postID := social_feed.NewPost(feedID, post)
-	std.Emit(%q, "postID", postID)
+	std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 }
 `, eventPkgPath, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
 			}},
