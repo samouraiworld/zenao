@@ -1,15 +1,10 @@
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMediaQuery } from "react-responsive";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
 import {
@@ -24,23 +19,30 @@ import {
   FormMessage,
 } from "@/components/shadcn/form";
 import { Textarea } from "@/components/shadcn/textarea";
+import { getQueryClient } from "@/lib/get-query-client";
+import { useCreateStandardPost } from "@/lib/mutations/social-feed";
+import { userAddressOptions } from "@/lib/queries/user";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
 export function StandardPostForm({
+  eventId,
   feedInputMode,
   setFeedInputMode,
 }: {
+  eventId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
 }) {
+  const queryClient = getQueryClient();
+  const { createStandardPost, isPending } = useCreateStandardPost(queryClient);
   const t = useTranslations("event-feed.standard-post-form");
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
-
-  // TODO: Disable stuff if isLoading
-  const [_isLoading, setIsLoading] = useState(false);
 
   const standardPostForm = useForm<StandardPostFormSchemaType>({
     resolver: zodResolver(standardPostFormSchema),
@@ -70,14 +72,18 @@ export function StandardPostForm({
 
   const onSubmitStandardPost = async (values: StandardPostFormSchemaType) => {
     try {
-      setIsLoading(true);
       const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
       }
 
-      //TODO: Plug endpoint here
-      console.log(values);
+      await createStandardPost({
+        eventId,
+        content: values.content,
+        token,
+        userAddress: userAddress ?? "",
+        tags: [],
+      });
 
       standardPostForm.reset();
       toast({
@@ -90,7 +96,6 @@ export function StandardPostForm({
       });
       console.error("error", err);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -123,6 +128,7 @@ export function StandardPostForm({
             buttonSize={textareaMinHeight}
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
+            isLoading={isPending}
           />
         </div>
       </form>

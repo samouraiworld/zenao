@@ -9,7 +9,7 @@ import { zenaoClient } from "@/app/zenao-client";
 import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 
 interface CreatePollRequestMutation
-  extends Required<Omit<CreatePollRequest, "kind" | "duration">> {
+  extends Required<Omit<CreatePollRequest, "kind" | "duration" | "$typeName">> {
   kind: PollKind;
   duration: bigint;
   token: string | null;
@@ -69,7 +69,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
   };
 };
 
-interface VotePollRequestMutation extends Required<VotePollRequest> {
+interface VotePollRequestMutation extends Omit<VotePollRequest, "$typeName"> {
   token: string | null;
   userAddress: string;
 }
@@ -114,7 +114,8 @@ export const useVotePoll = (queryClient: QueryClient) => {
   };
 };
 
-interface CreateStandardPostRequestMutation extends CreatePostRequest {
+interface CreateStandardPostRequestMutation
+  extends Omit<CreatePostRequest, "$typeName"> {
   token: string | null;
   userAddress: string;
 }

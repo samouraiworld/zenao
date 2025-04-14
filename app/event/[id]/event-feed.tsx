@@ -106,6 +106,7 @@ const EventFeedForm = forwardRef<
           />
         ) : (
           <StandardPostForm
+            eventId={eventId}
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
           />
