@@ -104,7 +104,13 @@ export function PollPostForm({
         token: await getToken(),
         userAddress: userAddress || "",
       });
-      pollForm.reset();
+
+      pollForm.reset(
+        {},
+        {
+          keepValues: false,
+        },
+      );
 
       toast({
         title: t("toast-poll-creation-success"),
@@ -141,6 +147,7 @@ export function PollPostForm({
                     }}
                     placeholder={placeholder}
                     maxLength={textareaMaxLength}
+                    value={field.value}
                   />
                 </FormControl>
                 <FormMessage />

@@ -85,7 +85,7 @@ export function StandardPostForm({
         tags: [],
       });
 
-      standardPostForm.reset();
+      standardPostForm.reset({}, { keepValues: false });
       toast({
         title: t("toast-post-creation-success"),
       });
@@ -115,6 +115,7 @@ export function StandardPostForm({
                   <Textarea
                     ref={textareaRef}
                     onChange={(e) => field.onChange(e.target.value)}
+                    value={field.value}
                     className={`!min-h-[${textareaMinHeight}px] !max-h-[${textareaMaxHeight}px]`}
                     placeholder={placeholder}
                     maxLength={textareaMaxLength}

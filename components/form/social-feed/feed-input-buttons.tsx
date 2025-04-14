@@ -49,7 +49,7 @@ export function FeedInputButtons({
       </ButtonBase>
       <ButtonBase
         variant="link"
-        className="text-black flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-700 cursor-pointer"
+        className="dark:text-white text-black flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-700 cursor-pointer"
         style={{ height: buttonSize, width: buttonSize }}
         loading={isLoading}
         disabled={isLoading}
