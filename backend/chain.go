@@ -465,8 +465,6 @@ func (g *gnoZenaoChain) ReactPost(userID string, eventID string, req *zenaov1.Re
 				Name: "main.gno",
 				Body: fmt.Sprintf(`package main
 import (
-	"std"
-
 	"gno.land/p/zenao/daokit"
 	"gno.land/r/zenao/social_feed"
 	user %q

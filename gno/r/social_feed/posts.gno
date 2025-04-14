@@ -8,7 +8,6 @@ import (
 )
 
 func NewPost(feedId string, post *feedsv1.Post) string {
-
 	creator := std.PreviousRealm().Address().String()
 	post.Author = creator
 	post.CreatedAt = time.Now().Unix()
@@ -31,6 +30,7 @@ func NewPost(feedId string, post *feedsv1.Post) string {
 }
 
 func GetPost(localPostId string) *feedsv1.Post {
+	localPostId = padPostId(localPostId)
 	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
@@ -40,6 +40,7 @@ func GetPost(localPostId string) *feedsv1.Post {
 
 func DeletePost(localPostId string) {
 	creator := std.PreviousRealm()
+	localPostId = padPostId(localPostId)
 	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
@@ -56,6 +57,7 @@ func DeletePost(localPostId string) {
 
 func EditPost(localPostId string, newPost *feedsv1.Post) {
 	caller := std.PreviousRealm()
+	localPostId = padPostId(localPostId)
 	postRaw, ok := posts.Get(localPostId)
 	if !ok {
 		panic("post not found")
@@ -77,7 +79,7 @@ func EditPost(localPostId string, newPost *feedsv1.Post) {
 
 func ReactPost(localPostId string, icon string) {
 	caller := std.PreviousRealm().Address()
-
+	localPostId = padPostId(localPostId)
 	userReactId := localPostId + ":" + icon + ":" + caller.String()
 	reactId := localPostId + ":" + icon
 
@@ -107,6 +109,7 @@ func ReactPost(localPostId string, icon string) {
 }
 
 func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
+	localPostId = padPostId(localPostId)
 	var res []*feedsv1.ReactionView
 	start := localPostId + ":"
 	end := localPostId + ";"
@@ -127,4 +130,21 @@ func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
 	})
 	return res
 
+}
+
+// Pad with leading zeros to match the format from seqid.ID
+// The default format is 7 digits
+func padPostId(id string) string {
+	if len(id) >= 7 {
+		return id
+	}
+	padding := 7 - len(id)
+	result := make([]byte, 7)
+	for i := 0; i < padding; i++ {
+		result[i] = '0'
+	}
+	for i := 0; i < len(id); i++ {
+		result[padding+i] = id[i]
+	}
+	return string(result)
 }
