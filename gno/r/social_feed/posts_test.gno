@@ -24,7 +24,7 @@ func TestNewPost(t *testing.T) {
 	}
 
 	type output struct {
-		localPostId string
+		localPostId uint64
 		panic       bool
 	}
 
@@ -42,7 +42,7 @@ func TestNewPost(t *testing.T) {
 				post:   &feedsv1.Post{},
 			},
 			output: output{
-				localPostId: "0000001",
+				localPostId: 1,
 				panic:       false,
 			},
 		},
@@ -82,7 +82,7 @@ func TestGetPost(t *testing.T) {
 	setupTest()
 
 	type input struct {
-		localPostId string
+		localPostId uint64
 	}
 
 	type output struct {
@@ -106,7 +106,7 @@ func TestGetPost(t *testing.T) {
 	tests := testTable{
 		"valid post": {
 			input: input{
-				localPostId: "0000001",
+				localPostId: 1,
 			},
 			output: output{
 				post:  validPost,
@@ -115,7 +115,7 @@ func TestGetPost(t *testing.T) {
 		},
 		"invalid post": {
 			input: input{
-				localPostId: "0000002",
+				localPostId: 2,
 			},
 			output: output{
 				panic: true,
@@ -147,7 +147,7 @@ func TestDeletePost(t *testing.T) {
 	setupTest()
 
 	type input struct {
-		localPostId string
+		localPostId uint64
 		caller      std.Address
 	}
 
@@ -165,7 +165,7 @@ func TestDeletePost(t *testing.T) {
 	tests := testTable{
 		"valid post": {
 			input: input{
-				localPostId: "0000001",
+				localPostId: 1,
 				caller:      alice,
 			},
 			output: output{
@@ -174,7 +174,7 @@ func TestDeletePost(t *testing.T) {
 		},
 		"invalid post": {
 			input: input{
-				localPostId: "0000002",
+				localPostId: 2,
 				caller:      alice,
 			},
 			output: output{
@@ -183,7 +183,7 @@ func TestDeletePost(t *testing.T) {
 		},
 		"not the creator": {
 			input: input{
-				localPostId: "0000001",
+				localPostId: 1,
 				caller:      bob,
 			},
 			output: output{
@@ -192,7 +192,7 @@ func TestDeletePost(t *testing.T) {
 		},
 		"already deleted": {
 			input: input{
-				localPostId: "0000001",
+				localPostId: 1,
 				caller:      alice,
 			},
 			output: output{
@@ -233,7 +233,7 @@ func TestEditPost(t *testing.T) {
 	setupTest()
 
 	type input struct {
-		localPostId string
+		localPostId uint64
 		newPost     *feedsv1.Post
 	}
 
@@ -277,12 +277,12 @@ func TestEditPost(t *testing.T) {
 	std.TestSetOriginCaller(alice)
 	NewPost("public", post)
 	NewPost("public", deletedPost)
-	DeletePost("0000002")
+	DeletePost(2)
 
 	tests := testTable{
 		"valid post": {
 			input: input{
-				localPostId: "0000001",
+				localPostId: 1,
 				newPost:     newPost,
 			},
 			output: output{
@@ -293,7 +293,7 @@ func TestEditPost(t *testing.T) {
 		},
 		"invalid post": {
 			input: input{
-				localPostId: "0000003",
+				localPostId: 3,
 				newPost:     newPost,
 			},
 			output: output{
@@ -304,7 +304,7 @@ func TestEditPost(t *testing.T) {
 		},
 		"not the creator": {
 			input: input{
-				localPostId: "0000001",
+				localPostId: 1,
 				newPost:     newPost,
 			},
 			output: output{
@@ -315,7 +315,7 @@ func TestEditPost(t *testing.T) {
 		},
 		"already deleted": {
 			input: input{
-				localPostId: "0000002",
+				localPostId: 2,
 				newPost:     newPost,
 			},
 			output: output{
@@ -373,7 +373,7 @@ func TestReactPost(t *testing.T) {
 	setupTest()
 
 	type input struct {
-		localPostId string
+		localPostId uint64
 		user        string
 	}
 
@@ -410,16 +410,16 @@ func TestReactPost(t *testing.T) {
 	NewPost("public", post)
 	NewPost("public", post2)
 	NewPost("public", post3)
-	ReactPost("0000001", "like")
-	ReactPost("0000001", "dislike")
+	ReactPost(1, "like")
+	ReactPost(1, "dislike")
 	std.TestSetOriginCaller(bob)
-	ReactPost("0000001", "like")
-	ReactPost("0000002", "like")
+	ReactPost(1, "like")
+	ReactPost(2, "like")
 
 	tests := testTable{
 		"post without reaction": {
 			input: input{
-				localPostId: "0000003",
+				localPostId: 3,
 				user:        alice.String(),
 			},
 			output: output{
@@ -428,7 +428,7 @@ func TestReactPost(t *testing.T) {
 		},
 		"post with reaction": {
 			input: input{
-				localPostId: "0000001",
+				localPostId: 1,
 				user:        alice.String(),
 			},
 			output: output{
@@ -448,7 +448,7 @@ func TestReactPost(t *testing.T) {
 		},
 		"post with reaction from another user": {
 			input: input{
-				localPostId: "0000001",
+				localPostId: 1,
 				user:        bob.String(),
 			},
 			output: output{
@@ -468,7 +468,7 @@ func TestReactPost(t *testing.T) {
 		},
 		"post without reactions": {
 			input: input{
-				localPostId: "0000003",
+				localPostId: 3,
 				user:        alice.String(),
 			},
 			output: output{
