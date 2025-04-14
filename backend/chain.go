@@ -453,6 +453,10 @@ func NewPost() {
 // ReactPost implements ZenaoChain
 func (g *gnoZenaoChain) ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
+	postIDInt, err := strconv.ParseUint(req.PostId, 10, 64)
+	if err != nil {
+		return err
+	}
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -471,7 +475,7 @@ import (
 )
 	
 func main() {
-	title := "User #%s reacts to post #%s in event #%s."
+	title := "User #%s reacts to post #%d in event #%s."
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: title,
 		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
@@ -484,9 +488,9 @@ func main() {
 }
 
 func NewReaction() {
-	social_feed.ReactPost(%q, %q)
+	social_feed.ReactPost(%d, %q)
 }
-`, userRealmPkgPath, userID, req.PostId, eventID, req.PostId, req.Icon),
+`, userRealmPkgPath, userID, postIDInt, eventID, postIDInt, req.Icon),
 			}},
 		},
 	}))

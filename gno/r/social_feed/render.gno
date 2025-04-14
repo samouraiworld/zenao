@@ -2,6 +2,7 @@ package social_feed
 
 import (
 	"gno.land/p/demo/mux"
+	"gno.land/p/demo/seqid"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 
@@ -92,7 +93,11 @@ func renderZenaoPost(post *feedsv1.Post) string {
 		s = md.Paragraph("Unknown post type")
 	}
 
-	reactions := GetPostReactions(post.LocalPostId, "")
+	localPostId, err := seqid.FromString(post.LocalPostId)
+	if err != nil {
+		panic(err)
+	}
+	reactions := GetPostReactions(uint64(localPostId), "")
 	s += md.Paragraph("NUMBER OF REACTIONS: " + ufmt.Sprintf("%d", len(reactions)))
 	if len(reactions) > 0 {
 		s += md.Paragraph("Reactions:")

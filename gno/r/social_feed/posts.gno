@@ -4,6 +4,8 @@ import (
 	"std"
 	"time"
 
+	"gno.land/p/demo/seqid"
+
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
@@ -29,19 +31,19 @@ func NewPost(feedId string, post *feedsv1.Post) string {
 	return post.LocalPostId
 }
 
-func GetPost(localPostId string) *feedsv1.Post {
-	localPostId = padPostId(localPostId)
-	postRaw, ok := posts.Get(localPostId)
+func GetPost(localPostId uint64) *feedsv1.Post {
+	localPostIdStr := seqid.ID(localPostId).String()
+	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
 	return postRaw.(*feedsv1.Post)
 }
 
-func DeletePost(localPostId string) {
+func DeletePost(localPostId uint64) {
 	creator := std.PreviousRealm()
-	localPostId = padPostId(localPostId)
-	postRaw, ok := posts.Get(localPostId)
+	localPostIdStr := seqid.ID(localPostId).String()
+	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
@@ -55,10 +57,10 @@ func DeletePost(localPostId string) {
 	post.DeletedAt = time.Now().Unix()
 }
 
-func EditPost(localPostId string, newPost *feedsv1.Post) {
+func EditPost(localPostId uint64, newPost *feedsv1.Post) {
 	caller := std.PreviousRealm()
-	localPostId = padPostId(localPostId)
-	postRaw, ok := posts.Get(localPostId)
+	localPostIdStr := seqid.ID(localPostId).String()
+	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
@@ -77,11 +79,11 @@ func EditPost(localPostId string, newPost *feedsv1.Post) {
 	post.UpdatedAt = time.Now().Unix()
 }
 
-func ReactPost(localPostId string, icon string) {
+func ReactPost(localPostId uint64, icon string) {
 	caller := std.PreviousRealm().Address()
-	localPostId = padPostId(localPostId)
-	userReactId := localPostId + ":" + icon + ":" + caller.String()
-	reactId := localPostId + ":" + icon
+	localPostIdStr := seqid.ID(localPostId).String()
+	userReactId := localPostIdStr + ":" + icon + ":" + caller.String()
+	reactId := localPostIdStr + ":" + icon
 
 	if userReactions.Has(userReactId) {
 		userReactions.Remove(userReactId)
@@ -108,16 +110,16 @@ func ReactPost(localPostId string, icon string) {
 	}
 }
 
-func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
-	localPostId = padPostId(localPostId)
+func GetPostReactions(localPostId uint64, user string) []*feedsv1.ReactionView {
+	localPostIdStr := seqid.ID(localPostId).String()
 	var res []*feedsv1.ReactionView
-	start := localPostId + ":"
-	end := localPostId + ";"
+	start := localPostIdStr + ":"
+	end := localPostIdStr + ";"
 	reactions.Iterate(start, end, func(key string, value interface{}) bool {
-		icon := key[len(localPostId)+1:]
+		icon := key[len(localPostIdStr)+1:]
 		count := value.(uint32)
 
-		userReactKey := localPostId + ":" + icon + ":" + user
+		userReactKey := localPostIdStr + ":" + icon + ":" + user
 		userHasVoted := userReactions.Has(userReactKey)
 
 		react := &feedsv1.ReactionView{
@@ -130,21 +132,4 @@ func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
 	})
 	return res
 
-}
-
-// Pad with leading zeros to match the format from seqid.ID
-// The default format is 7 digits
-func padPostId(id string) string {
-	if len(id) >= 7 {
-		return id
-	}
-	padding := 7 - len(id)
-	result := make([]byte, 7)
-	for i := 0; i < padding; i++ {
-		result[i] = '0'
-	}
-	for i := 0; i < len(id); i++ {
-		result[padding+i] = id[i]
-	}
-	return string(result)
 }
