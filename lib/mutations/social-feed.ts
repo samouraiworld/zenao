@@ -1,14 +1,15 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { feedPosts, pollInfo } from "../queries/social-feed";
 import {
-  CreatePollRequestJson,
-  VotePollRequestJson,
+  CreatePollRequest,
+  CreatePostRequest,
+  VotePollRequest,
 } from "@/app/gen/zenao/v1/zenao_pb";
 import { zenaoClient } from "@/app/zenao-client";
 import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 
 interface CreatePollRequestMutation
-  extends Required<Omit<CreatePollRequestJson, "kind" | "duration">> {
+  extends Required<Omit<CreatePollRequest, "kind" | "duration">> {
   kind: PollKind;
   duration: bigint;
   token: string | null;
@@ -16,8 +17,6 @@ interface CreatePollRequestMutation
 }
 
 export const useCreatePoll = (queryClient: QueryClient) => {
-  void queryClient;
-
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ token, ...request }: CreatePollRequestMutation) => {
       await zenaoClient.createPoll(request, {
@@ -70,14 +69,12 @@ export const useCreatePoll = (queryClient: QueryClient) => {
   };
 };
 
-interface VotePollRequestMutation extends Required<VotePollRequestJson> {
+interface VotePollRequestMutation extends Required<VotePollRequest> {
   token: string | null;
   userAddress: string;
 }
 
 export const useVotePoll = (queryClient: QueryClient) => {
-  void queryClient;
-
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ token, ...request }: VotePollRequestMutation) => {
       await zenaoClient.votePoll(
@@ -111,6 +108,68 @@ export const useVotePoll = (queryClient: QueryClient) => {
 
   return {
     votePoll: mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
+};
+
+interface CreateStandardPostRequestMutation extends CreatePostRequest {
+  token: string | null;
+  userAddress: string;
+}
+
+export const useCreateStandardPost = (queryClient: QueryClient) => {
+  const { isPending, mutateAsync, isSuccess, isError } = useMutation({
+    mutationFn: async ({
+      token,
+      userAddress: _,
+      ...request
+    }: CreateStandardPostRequestMutation) => {
+      await zenaoClient.createPost(request, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+    onMutate: async (variables) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        100,
+        "",
+        variables.userAddress,
+      );
+      const previousFeedPosts = queryClient.getQueryData(
+        feedPostsOpts.queryKey,
+      );
+
+      return { previousFeedPosts };
+    },
+    onSuccess: (_, variables) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        100,
+        "",
+        variables.userAddress,
+      );
+
+      queryClient.invalidateQueries(feedPostsOpts);
+    },
+    onError: (_, variables, context) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        100,
+        "",
+        variables.userAddress,
+      );
+
+      queryClient.setQueryData(
+        feedPostsOpts.queryKey,
+        context?.previousFeedPosts,
+      );
+    },
+  });
+
+  return {
+    createStandardPost: mutateAsync,
     isPending,
     isSuccess,
     isError,
