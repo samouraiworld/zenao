@@ -178,3 +178,70 @@ export const useCreateStandardPost = (queryClient: QueryClient) => {
     isError,
   };
 };
+
+interface ReactPostRequestMutation {
+  // extends Omit<ReactPostRequest, "$typeName">
+  token: string | null;
+  userAddress: string;
+  postId: string;
+  icon: string;
+  eventId: string;
+}
+
+export const useReactPost = (queryClient: QueryClient) => {
+  const { isPending, mutateAsync, isSuccess, isError } = useMutation({
+    mutationFn: async ({
+      token: _token,
+      userAddress: _addr,
+      eventId: _eventId,
+      ..._request
+    }: ReactPostRequestMutation) => {
+      // await zenaoClient.reactPost(request, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+    },
+    onMutate: async (variables) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+      const previousFeedPosts = queryClient.getQueryData(
+        feedPostsOpts.queryKey,
+      );
+
+      return { previousFeedPosts };
+    },
+    onSuccess: (_, variables) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+
+      queryClient.invalidateQueries(feedPostsOpts);
+    },
+    onError: (_, variables, context) => {
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+
+      queryClient.setQueryData(
+        feedPostsOpts.queryKey,
+        context?.previousFeedPosts,
+      );
+    },
+  });
+
+  return {
+    reactPost: mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
+};
