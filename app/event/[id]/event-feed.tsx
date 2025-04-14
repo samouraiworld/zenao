@@ -76,7 +76,6 @@ const EventFeedForm = forwardRef<
 
   useEffect(() => {
     if (inputContainerRef.current) {
-      console.log(inputContainerRef.current.offsetTop);
       setInputOffsetTop(
         inputContainerRef.current.offsetTop +
           inputContainerRef.current.clientHeight,
@@ -177,7 +176,9 @@ export function EventFeed({
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { height } = entry.contentRect;
-        setStickyBottomPadding(height);
+        const isSticky =
+          window.scrollY > (feedFormRef.current?.offsetTop ?? 0) + height;
+        setStickyBottomPadding(isSticky ? height : 64);
       }
     });
     observer.observe(feedFormRef.current);

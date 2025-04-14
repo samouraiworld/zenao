@@ -10,11 +10,9 @@ import {
   VotePollRequest,
 } from "@/app/gen/zenao/v1/zenao_pb";
 import { zenaoClient } from "@/app/zenao-client";
-import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 
 interface CreatePollRequestMutation
-  extends Required<Omit<CreatePollRequest, "kind" | "duration" | "$typeName">> {
-  kind: PollKind;
+  extends Required<Omit<CreatePollRequest, "$typeName" | "$unknown">> {
   duration: bigint;
   token: string | null;
   userAddress: string;
