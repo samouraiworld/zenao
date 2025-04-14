@@ -31,7 +31,7 @@ import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
-  onSubmit: (values: EventFormSchemaType) => Promise<void>;
+  onSubmit: () => void;
   isLoaded: boolean;
   isEditing?: boolean;
   minDateRange?: Date;
@@ -71,7 +71,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        // onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full sm:flex-row items-center sm:h-full"
       >
         <div className="flex flex-col sm:flex-row w-full gap-10">
@@ -275,7 +275,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               label={
                 isEditing ? t("edit-event-button") : t("create-event-button")
               }
-              type="submit"
+              onClick={onSubmit}
             />
           </div>
         </div>
