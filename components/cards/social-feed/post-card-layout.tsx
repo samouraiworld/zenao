@@ -1,8 +1,9 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { Hash, MapPin } from "lucide-react";
+import { Hash, MapPin, Plus } from "lucide-react";
 import Link from "next/link";
+import { EmojiPicker } from "@ferrucc-io/emoji-picker";
 import { Card } from "@/components/cards/Card";
 import { UserAvatar } from "@/components/common/user";
 import { PostView, ReactionView } from "@/app/gen/feeds/v1/feeds_pb";
@@ -10,6 +11,11 @@ import { DateTimeText } from "@/components/common/date-time-text";
 import Text from "@/components/texts/text";
 import { cn } from "@/lib/tailwind";
 import { GnoProfile } from "@/lib/queries/profile";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/shadcn/popover";
 
 export function PostCardLayout({
   post,
@@ -86,15 +92,42 @@ export function PostCardLayout({
 }
 
 function Reactions({ reactions }: { reactions: ReactionView[] }) {
-  // TODO: Handle display if a lot of different icons
+  const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
+  const onReactionChange = async (icon: string) => {
+    console.log(icon);
+    // Call endpoint
+    // await zenaoClient.reactPost({ postId: post.post.id, icon });
+  };
 
+  // TODO: Handle display if a lot of different icons
   return (
     <div className="flex flex-row gap-0.5">
+      <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+        <PopoverTrigger asChild>
+          <div className="flex flex-row items-center py-0.5 border-[1px] border-neutral-700 px-1 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700">
+            <Plus size={16} color="hsl(var(--secondary-color))" />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-fit bg-transparent p-0 pl-2 border-none transition-all">
+          <EmojiPicker
+            onEmojiSelect={(icon) => {
+              onReactionChange(icon);
+              setEmojiPickerOpen(false);
+            }}
+          >
+            <EmojiPicker.Header>
+              <EmojiPicker.Input placeholder="Search emoji" />
+            </EmojiPicker.Header>
+            <EmojiPicker.Group>
+              <EmojiPicker.List />
+            </EmojiPicker.Group>
+          </EmojiPicker>
+        </PopoverContent>
+      </Popover>
+
       {reactions.map((reaction) => (
         <div
-          onClick={() => {
-            // TODO: Do react to post
-          }}
+          onClick={() => onReactionChange(reaction.icon)}
           className={cn(
             "flex flex-row items-center py-0.5 pl-1 pr-2 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700",
             reaction.userHasVoted && "border-[1px] border-neutral-700",
