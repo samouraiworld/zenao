@@ -1,5 +1,9 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
-import { feedPosts, pollInfo } from "../queries/social-feed";
+import {
+  DEFAULT_FEED_POSTS_LIMIT,
+  feedPosts,
+  pollInfo,
+} from "../queries/social-feed";
 import {
   CreatePollRequest,
   CreatePostRequest,
@@ -26,7 +30,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     onMutate: async (variables) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        100,
+        DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
@@ -39,7 +43,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        100,
+        DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
@@ -49,7 +53,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        100,
+        DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
@@ -134,7 +138,7 @@ export const useCreateStandardPost = (queryClient: QueryClient) => {
     onMutate: async (variables) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        100,
+        DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
@@ -147,7 +151,7 @@ export const useCreateStandardPost = (queryClient: QueryClient) => {
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        100,
+        DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
@@ -157,7 +161,7 @@ export const useCreateStandardPost = (queryClient: QueryClient) => {
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
         variables.eventId,
-        100,
+        DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );

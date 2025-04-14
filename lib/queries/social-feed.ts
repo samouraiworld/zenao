@@ -5,6 +5,8 @@ import { derivePkgAddr, extractGnoJSONResponse } from "@/lib/gno";
 import { PostViewJson, PostViewSchema } from "@/app/gen/feeds/v1/feeds_pb";
 import { PollJson, PollSchema } from "@/app/gen/polls/v1/polls_pb";
 
+export const DEFAULT_FEED_POSTS_LIMIT = 30;
+
 export const feedPosts = (
   eventId: string,
   limit: number,

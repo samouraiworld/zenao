@@ -20,7 +20,7 @@ import {
 import { PollPostView, StandardPostView } from "@/lib/social-feed";
 import { PollPostForm } from "@/components/form/social-feed/poll-post-form";
 import { userAddressOptions } from "@/lib/queries/user";
-import { feedPosts } from "@/lib/queries/social-feed";
+import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { PostsList } from "@/components/lists/posts-list";
 import { PollsList } from "@/components/lists/polls-list";
@@ -76,7 +76,11 @@ const EventFeedForm = forwardRef<
 
   useEffect(() => {
     if (inputContainerRef.current) {
-      setInputOffsetTop(inputContainerRef.current.offsetTop);
+      console.log(inputContainerRef.current.offsetTop);
+      setInputOffsetTop(
+        inputContainerRef.current.offsetTop +
+          inputContainerRef.current.clientHeight,
+      );
     }
   }, [isDescExpanded, inputContainerRef]);
 
@@ -139,8 +143,11 @@ export function EventFeed({
     data: postsPages,
     isFetchingNextPage,
     hasNextPage,
+    fetchNextPage,
     isFetching,
-  } = useSuspenseInfiniteQuery(feedPosts(eventId, 100, "", userAddress || ""));
+  } = useSuspenseInfiniteQuery(
+    feedPosts(eventId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
+  );
   const posts = useMemo(() => postsPages.pages.flat(), [postsPages]);
 
   const polls = useMemo(
@@ -208,7 +215,12 @@ export function EventFeed({
         {/* Infinite scroll button */}
         <div className="flex justify-center">
           {hasNextPage ? (
-            <ButtonWithChildren loading={isFetchingNextPage}>
+            <ButtonWithChildren
+              loading={isFetchingNextPage}
+              onClick={async () => {
+                await fetchNextPage();
+              }}
+            >
               {t("load-more")}
             </ButtonWithChildren>
           ) : (
