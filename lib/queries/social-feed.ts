@@ -22,7 +22,7 @@ export const feedPosts = (
 
       const res = await client.evaluateExpression(
         "gno.land/r/zenao/social_feed",
-        `PostViewsToJSON(GetFeedPosts("${feedId}", ${pageParam * limit}, ${limit}, "${tags}", "${userAddress}"))`,
+        `postViewsToJSON(GetFeedPosts("${feedId}", ${pageParam * limit}, ${limit}, "${tags}", "${userAddress}"))`,
       );
       const raw = extractGnoJSONResponse(res);
       return postViewsFromJson(raw);
