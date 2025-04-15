@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useMemo } from "react";
 import { Hash, MapPin, Plus } from "lucide-react";
 import Link from "next/link";
 import { EmojiPicker } from "@ferrucc-io/emoji-picker";
@@ -21,6 +21,7 @@ import {
 import { useReactPost } from "@/lib/mutations/social-feed";
 import { getQueryClient } from "@/lib/get-query-client";
 import { userAddressOptions } from "@/lib/queries/user";
+import { eventUserRoles } from "@/lib/queries/event-users";
 
 export function PostCardLayout({
   post,
@@ -116,6 +117,11 @@ function Reactions({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userAddress),
+  );
+  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
+  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
 
   const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
   const { reactPost } = useReactPost(queryClient);
@@ -141,7 +147,7 @@ function Reactions({
   // TODO: Handle display if a lot of different icons
   return (
     <div className="flex flex-row gap-0.5">
-      {userAddress && (
+      {(isOrganizer || isParticipant) && (
         <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
           <PopoverTrigger asChild>
             <div className="flex flex-row items-center py-0.5 border-[1px] border-neutral-700 px-1 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700">
