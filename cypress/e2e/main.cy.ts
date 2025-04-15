@@ -259,4 +259,11 @@ describe("main", () => {
     cy.visit("/tickets");
     cy.get('a[href^="/event/"]').contains(testEventName).should("be.visible");
   });
+
+  it("event not found", () => {
+    // Visit a non existing event page
+    cy.visit("/event/50", { failOnStatusCode: false });
+
+    cy.get("p").contains("Event doesn't exist").should("be.visible");
+  });
 });

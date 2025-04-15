@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { EventInfo } from "./event-info";
 import { imageHeight, imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
@@ -25,7 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
 
   const queryClient = getQueryClient();
-  const event = await queryClient.fetchQuery(eventOptions(id));
+  const event = await queryClient.fetchQuery(eventOptions(id)).catch((_) => {
+    notFound();
+  });
 
   return {
     title: event.title,
@@ -41,10 +44,16 @@ export default async function EventPage({ params }: Props) {
   const p = await params;
   const queryClient = getQueryClient();
 
-  const eventData = await queryClient.fetchQuery(eventOptions(p.id));
-  if (eventData) {
-    void queryClient.prefetchQuery(profileOptions(eventData.creator));
-  }
+  const eventData = await queryClient
+    .fetchQuery({
+      ...eventOptions(p.id),
+    })
+    .catch((err) => {
+      console.error("error", err);
+      notFound();
+    });
+
+  queryClient.prefetchQuery(profileOptions(eventData.creator));
 
   // Prefetch all participants profiles
   const addresses = await queryClient.fetchQuery(
