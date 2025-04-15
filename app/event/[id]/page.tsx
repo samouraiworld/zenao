@@ -26,14 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
 
   const queryClient = getQueryClient();
-  const event = await queryClient.fetchQuery({
-    ...eventOptions(id),
-    retry: (failureCount, _error) => {
-      // if (error === 404) return false; // don't retry if resource not found
-      console.log("Retrying...", failureCount);
-      return failureCount < 3;
-    },
-  });
+  const event = await queryClient.fetchQuery(eventOptions(id));
 
   return {
     title: event.title,
@@ -50,7 +43,14 @@ export default async function EventPage({ params }: Props) {
   const queryClient = getQueryClient();
 
   try {
-    const eventData = await queryClient.fetchQuery(eventOptions(p.id));
+    const eventData = await queryClient.fetchQuery({
+      ...eventOptions(p.id),
+      retry: (failureCount, _error) => {
+        // if (error === 404) return false; // don't retry if resource not found
+        console.log("Retrying...", failureCount);
+        return failureCount < 3;
+      },
+    });
 
     queryClient.prefetchQuery(profileOptions(eventData.creator));
 
