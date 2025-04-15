@@ -7,12 +7,7 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
-import { z } from "zod";
-import {
-  EditEventFormSchemaType,
-  eventFormSchema,
-  EventFormSchemaType,
-} from "@/components/form/types";
+import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
 import { EventForm } from "@/components/form/event-form";
@@ -22,48 +17,6 @@ import { currentTimezone } from "@/lib/time";
 import { userAddressOptions } from "@/lib/queries/user";
 import Text from "@/components/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogTitle,
-} from "@/components/shadcn/alert-dialog";
-
-function UpdateNotificationDialog({
-  open,
-  onOpenChange,
-  onResponse,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onResponse: (shouldNotify: boolean) => void;
-}) {
-  return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogTitle>
-          The event has changed ! Would you like to notify participants about
-          the update of the event ?
-        </AlertDialogTitle>
-        <AlertDialogDescription>
-          An email will be sent to all participants to inform them of the
-          changes made to the event.
-        </AlertDialogDescription>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => onResponse(false)}>
-            No
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={() => onResponse(true)}>
-            Yes
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -77,31 +30,33 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
 
   // Correctly reconstruct location object
   const location = makeLocationFromEvent(data.location);
-  const defaultValues: EditEventFormSchemaType = {
-    ...data,
+  const defaultValues: EventFormSchemaType = {
+    capacity: data.capacity,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    imageUri: data.imageUri,
+    title: data.title,
+    description: data.description,
     location,
-    shouldNotify: false,
   };
 
-  const form = useForm<EditEventFormSchemaType>({
+  const form = useForm<EventFormSchemaType>({
     mode: "all",
-    resolver: zodResolver(
-      eventFormSchema.extend({
-        shouldNotify: z.boolean(),
-      }),
-    ),
+    resolver: zodResolver(eventFormSchema),
     defaultValues,
   });
 
   // EditEvent call loaded value
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  const [open, setOpen] = useState(true);
   const queryClient = useQueryClient();
 
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async (values: EditEventFormSchemaType) => {
+  const onSubmit = async (
+    values: EventFormSchemaType,
+    _shouldNotify = false,
+  ) => {
     try {
       setIsLoaded(true);
       const token = await getToken();
@@ -134,6 +89,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       await zenaoClient.editEvent(
         {
           ...values,
+          // shouldNotify,
           eventId: id,
           location: { address: { case: values.location.kind, value } },
         },
@@ -165,23 +121,13 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   }
   return (
     <>
-      <UpdateNotificationDialog
-        open={open}
-        onOpenChange={setOpen}
-        onResponse={(shouldNotify) => {
-          setOpen(false);
-          form.setValue("shouldNotify", shouldNotify);
-          form.handleSubmit(onSubmit)();
-        }}
-      />
       <EventForm
         form={form}
-        onSubmit={() => {
-          setOpen(true);
-        }}
+        onSubmit={onSubmit}
         isLoaded={isLoaded}
+        defaultValues={defaultValues}
         isEditing
-        maxDateRange={new Date()}
+        minDateRange={new Date()}
       />
     </>
   );

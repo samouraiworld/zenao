@@ -11,23 +11,25 @@ import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/event-form";
 import { useToast } from "@/app/hooks/use-toast";
 
+const defaultValues: Partial<EventFormSchemaType> = {
+  imageUri: "",
+  description: "",
+  title: "",
+  capacity: 1,
+  location: {
+    kind: "custom",
+    address: "",
+    timeZone: "",
+  },
+};
+
 export const CreateEventForm: React.FC = () => {
   const { getToken } = useAuth();
   const router = useRouter();
   const form = useForm<EventFormSchemaType>({
     mode: "all",
     resolver: zodResolver(eventFormSchema),
-    defaultValues: {
-      imageUri: "",
-      description: "",
-      title: "",
-      capacity: 1,
-      location: {
-        kind: "custom",
-        address: "",
-        timeZone: "",
-      },
-    },
+    defaultValues,
   });
 
   // CreateEvent call loaded value
@@ -92,6 +94,7 @@ export const CreateEventForm: React.FC = () => {
     <EventForm
       form={form}
       onSubmit={onSubmit}
+      defaultValues={defaultValues}
       isLoaded={isLoaded}
       minDateRange={new Date()}
     />

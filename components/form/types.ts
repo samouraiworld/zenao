@@ -87,15 +87,7 @@ export const eventFormSchema = z.object({
   capacity: z.coerce.number().min(1),
 });
 
-export const editEventFormSchema = eventFormSchema.extend({
-  shouldNotify: z.boolean(),
-});
-
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
-
-export interface EditEventFormSchemaType extends EventFormSchemaType {
-  shouldNotify: boolean;
-}
 
 export const userFormSchema = z.object({
   bio: z.string().trim().min(2).max(1000),

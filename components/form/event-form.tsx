@@ -1,3 +1,4 @@
+import assert from "assert";
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
@@ -28,31 +29,77 @@ import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 import { cn } from "@/lib/tailwind";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from "@/components/shadcn/alert-dialog";
+
+function UpdateNotificationDialog({
+  open,
+  onOpenChange,
+  onResponse,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onResponse: (shouldNotify: boolean) => void;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogTitle>
+          The event has changed ! Would you like to notify participants about
+          the update of the event ?
+        </AlertDialogTitle>
+        <AlertDialogDescription>
+          An email will be sent to all participants to inform them of the
+          changes made to the event.
+        </AlertDialogDescription>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => onResponse(false)}>
+            No
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={() => onResponse(true)}>
+            Yes
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
-  onSubmit: () => void;
+  onSubmit: (
+    data: EventFormSchemaType,
+    shouldNotify?: boolean,
+  ) => Promise<void>;
   isLoaded: boolean;
+  defaultValues: Partial<EventFormSchemaType>;
   isEditing?: boolean;
   minDateRange?: Date;
   maxDateRange?: Date;
 }
 
-export const EventForm: React.FC<EventFormProps> = ({
+export const EventForm = ({
   form,
   onSubmit,
   isLoaded,
+  defaultValues,
   minDateRange,
   maxDateRange,
   isEditing = false,
-}) => {
+}: EventFormProps) => {
   const description = form.watch("description");
   const location = form.watch("location");
   const startDate = form.watch("startDate");
   const endDate = form.watch("endDate");
   const imageUri = form.watch("imageUri");
   const t = useTranslations("eventForm");
-
   const [isVirtual, setIsVirtual] = useState<boolean>(
     location.kind === "virtual" || false,
   );
@@ -62,16 +109,42 @@ export const EventForm: React.FC<EventFormProps> = ({
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
   const timeZone = useLocationTimezone(location);
 
+  const [savedSubmittedData, setSavedSubmittedData] =
+    useState<EventFormSchemaType>();
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+
   useEffect(() => {
     if (location.kind === "geo") {
       setMarker({ lat: location.lat, lng: location.lng });
     }
   }, [location]);
 
+  const onFormSubmit = (data: EventFormSchemaType) => {
+    if (!isEditing) {
+      onSubmit(data);
+      return;
+    }
+    try {
+      // Check if user made modifications
+      assert.deepStrictEqual(data, defaultValues);
+    } catch (_) {
+      setSavedSubmittedData(data);
+      setNotificationDialogOpen(true);
+    }
+  };
+
   return (
     <Form {...form}>
+      <UpdateNotificationDialog
+        open={notificationDialogOpen}
+        onOpenChange={setNotificationDialogOpen}
+        onResponse={(shouldNotify) => {
+          if (!savedSubmittedData) return;
+          onSubmit(savedSubmittedData, shouldNotify);
+        }}
+      />
       <form
-        // onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onFormSubmit)}
         className="flex w-full sm:flex-row items-center sm:h-full"
       >
         <div className="flex flex-col sm:flex-row w-full gap-10">
@@ -275,7 +348,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               label={
                 isEditing ? t("edit-event-button") : t("create-event-button")
               }
-              onClick={onSubmit}
+              type="submit"
             />
           </div>
         </div>
