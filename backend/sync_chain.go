@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"slices"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/samouraiworld/zenao/backend/gzdb"
@@ -97,6 +98,43 @@ func execSyncChain() error {
 		for _, p := range participants {
 			if err := chain.Participate(event.ID, event.CreatorID, p.ID); err != nil {
 				logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
+			}
+		}
+	}
+
+	posts, err := db.GetAllPosts()
+	if err != nil {
+		return err
+	}
+
+	for _, post := range posts {
+		feed, err := db.GetFeedByID(post.FeedID)
+		if err != nil {
+			logger.Error("failed to retrieve feed for post", zap.String("post-id", post.ID), zap.Error(err))
+		}
+
+		if slices.Contains(post.Post.Tags, "poll") {
+			poll, err := db.GetPollByID(post.ID)
+			if err != nil {
+				logger.Error("failed to retrieve poll for post", zap.String("post-id", post.ID), zap.Error(err))
+			}
+			var options []string
+			for _, res := range poll.Results {
+				options = append(options, res.Option)
+			}
+
+			if _, _, err = chain.CreatePoll(post.UserID, &zenaov1.CreatePollRequest{
+				EventId:  feed.EventID,
+				Question: poll.Question,
+				Options:  options,
+				Duration: poll.Duration,
+				Kind:     poll.Kind,
+			}); err != nil {
+				logger.Error("failed to create poll", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.Error(err))
+			}
+		} else {
+			if _, err = chain.CreatePost(post.UserID, feed.EventID, post.Post); err != nil {
+				logger.Error("failed to create post", zap.String("post-id", post.ID), zap.Error(err))
 			}
 		}
 	}

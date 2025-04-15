@@ -54,7 +54,7 @@ type Post struct {
 type Poll struct {
 	ID       string
 	Question string
-	Kind     *pollsv1.PollKind
+	Kind     pollsv1.PollKind
 	Duration int64
 	Results  []*pollsv1.PollResult
 	PostID   string
@@ -109,9 +109,12 @@ type DB interface {
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
+	GetFeedByID(feedID string) (*Feed, error)
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	GetAllPosts() ([]*Post, error)
 	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+	GetPollByID(pollID string) (*Poll, error)
 }
 
 type Chain interface {

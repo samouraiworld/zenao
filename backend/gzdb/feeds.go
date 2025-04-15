@@ -171,7 +171,7 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 	zpoll := &zeni.Poll{
 		ID:       strconv.FormatUint(uint64(poll.ID), 10),
 		Question: poll.Question,
-		Kind:     &kind,
+		Kind:     kind,
 		Duration: poll.Duration,
 		Results:  []*pollsv1.PollResult{},
 	}
