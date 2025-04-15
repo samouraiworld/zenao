@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const queryClient = getQueryClient();
   const event = await queryClient.fetchQuery({
     ...eventOptions(id),
-    retry: (failureCount, error) => {
+    retry: (failureCount, _error) => {
       // if (error === 404) return false; // don't retry if resource not found
       console.log("Retrying...", failureCount);
       return failureCount < 3;
