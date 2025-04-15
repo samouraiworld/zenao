@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { EventInfo } from "./event-info";
 import { imageHeight, imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
@@ -41,30 +42,34 @@ export default async function EventPage({ params }: Props) {
   const p = await params;
   const queryClient = getQueryClient();
 
-  const eventData = await queryClient.fetchQuery(eventOptions(p.id));
-  if (eventData) {
-    void queryClient.prefetchQuery(profileOptions(eventData.creator));
+  try {
+    const eventData = await queryClient.fetchQuery(eventOptions(p.id));
+
+    queryClient.prefetchQuery(profileOptions(eventData.creator));
+
+    // Prefetch all participants profiles
+    const addresses = await queryClient.fetchQuery(
+      eventUsersWithRole(p.id, "participant"),
+    );
+    addresses.forEach(
+      (address) => void queryClient.prefetchQuery(profileOptions(address)),
+    );
+
+    return (
+      <ScreenContainer
+        background={{
+          src: eventData.imageUri,
+          width: imageWidth,
+          height: imageHeight,
+        }}
+      >
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <EventInfo id={p.id} />
+        </HydrationBoundary>
+      </ScreenContainer>
+    );
+  } catch (err) {
+    console.error("error", err);
+    notFound();
   }
-
-  // Prefetch all participants profiles
-  const addresses = await queryClient.fetchQuery(
-    eventUsersWithRole(p.id, "participant"),
-  );
-  addresses.forEach(
-    (address) => void queryClient.prefetchQuery(profileOptions(address)),
-  );
-
-  return (
-    <ScreenContainer
-      background={{
-        src: eventData.imageUri,
-        width: imageWidth,
-        height: imageHeight,
-      }}
-    >
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventInfo id={p.id} />
-      </HydrationBoundary>
-    </ScreenContainer>
-  );
 }
