@@ -11,6 +11,7 @@ export const eventOptions = (id: string) =>
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
+      console.log("Running");
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/events/e${id}`,
         `event.GetInfoJSON()`,
