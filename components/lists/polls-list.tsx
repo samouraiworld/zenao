@@ -24,7 +24,13 @@ function EmptyPollsList() {
   );
 }
 
-export function PollsList({ list }: { list: PollPostView[] }) {
+export function PollsList({
+  eventId,
+  list,
+}: {
+  eventId: string;
+  list: PollPostView[];
+}) {
   return (
     <div className="space-y-4">
       {!list.length ? (
@@ -35,7 +41,7 @@ export function PollsList({ list }: { list: PollPostView[] }) {
 
           return (
             <Suspense fallback={<PostCardSkeleton />} key={pollId}>
-              <PollPost pollId={pollId} pollPost={pollPost} />
+              <PollPost eventId={eventId} pollId={pollId} pollPost={pollPost} />
             </Suspense>
           );
         })
@@ -46,9 +52,11 @@ export function PollsList({ list }: { list: PollPostView[] }) {
 
 function PollPost({
   pollId,
+  eventId,
   pollPost,
 }: {
   pollId: string;
+  eventId: string;
   pollPost: PollPostView;
 }) {
   const { getToken, userId } = useAuth();
@@ -67,6 +75,7 @@ function PollPost({
   return (
     <PollPostCard
       pollId={pollId}
+      eventId={eventId}
       pollPost={combined}
       userAddress={userAddress || ""}
     />

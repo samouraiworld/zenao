@@ -19,10 +19,12 @@ import { profileOptions } from "@/lib/queries/profile";
 
 export function PollPostCard({
   pollId,
+  eventId,
   pollPost,
   userAddress,
 }: {
   pollId: string;
+  eventId: string;
   pollPost: PollPostViewInfo;
   userAddress: string;
 }) {
@@ -76,7 +78,7 @@ export function PollPostCard({
   };
 
   return (
-    <PostCardLayout post={pollPost} createdBy={createdBy}>
+    <PostCardLayout eventId={eventId} post={pollPost} createdBy={createdBy}>
       <div className="w-full flex flex-col gap-2">
         <div className="flex flex-row items-center gap-2">
           <Text className="text-sm">{`${totalVotesCount} votes`}</Text>

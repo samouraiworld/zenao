@@ -20,7 +20,13 @@ function EmptyPostsList() {
   );
 }
 
-export function PostsList({ list }: { list: StandardPostView[] }) {
+export function PostsList({
+  eventId,
+  list,
+}: {
+  eventId: string;
+  list: StandardPostView[];
+}) {
   return (
     <div className="space-y-4">
       {!list.length ? (
@@ -28,7 +34,7 @@ export function PostsList({ list }: { list: StandardPostView[] }) {
       ) : (
         list.map((post) => (
           <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
-            <StandardPostCard post={post} />
+            <StandardPostCard eventId={eventId} post={post} />
           </Suspense>
         ))
       )}

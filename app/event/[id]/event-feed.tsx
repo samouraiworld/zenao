@@ -208,9 +208,9 @@ export function EventFeed({
           isDescExpanded={isDescExpanded}
         />
         {tab === "global-feed" ? (
-          <PostsList list={standardPosts} />
+          <PostsList eventId={eventId} list={standardPosts} />
         ) : (
-          <PollsList list={polls} />
+          <PollsList eventId={eventId} list={polls} />
         )}
 
         {/* Infinite scroll button */}

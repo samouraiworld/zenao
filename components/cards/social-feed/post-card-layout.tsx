@@ -4,6 +4,8 @@ import React, { ReactNode } from "react";
 import { Hash, MapPin, Plus } from "lucide-react";
 import Link from "next/link";
 import { EmojiPicker } from "@ferrucc-io/emoji-picker";
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Card } from "@/components/cards/Card";
 import { UserAvatar } from "@/components/common/user";
 import { PostView, ReactionView } from "@/app/gen/feeds/v1/feeds_pb";
@@ -16,13 +18,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/shadcn/popover";
+import { useReactPost } from "@/lib/mutations/social-feed";
+import { getQueryClient } from "@/lib/get-query-client";
+import { userAddressOptions } from "@/lib/queries/user";
 
 export function PostCardLayout({
   post,
+  eventId,
   createdBy,
   children,
 }: {
   post: PostView;
+  eventId: string;
   createdBy: GnoProfile | null;
   children: ReactNode;
 }) {
@@ -85,45 +92,79 @@ export function PostCardLayout({
       <div className="my-1">{children}</div>
 
       <div className="flex flex-col justify-between sm:flex-row sm:items-center gap-2">
-        <Reactions reactions={post.reactions} />
+        <Reactions
+          postId={post.post.localPostId}
+          eventId={eventId}
+          reactions={post.reactions}
+        />
       </div>
     </Card>
   );
 }
 
-function Reactions({ reactions }: { reactions: ReactionView[] }) {
+function Reactions({
+  postId,
+  eventId,
+  reactions,
+}: {
+  postId: string;
+  eventId: string;
+  reactions: ReactionView[];
+}) {
+  const queryClient = getQueryClient();
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+
   const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
+  const { reactPost } = useReactPost(queryClient);
   const onReactionChange = async (icon: string) => {
-    console.log(icon);
-    // Call endpoint
-    // await zenaoClient.reactPost({ postId: post.post.id, icon });
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("Missing token");
+      }
+      await reactPost({
+        token,
+        userAddress: userAddress || "",
+        postId,
+        icon,
+        eventId,
+      });
+    } catch (error) {
+      console.error("error", error);
+    }
   };
 
   // TODO: Handle display if a lot of different icons
   return (
     <div className="flex flex-row gap-0.5">
-      <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
-        <PopoverTrigger asChild>
-          <div className="flex flex-row items-center py-0.5 border-[1px] border-neutral-700 px-1 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700">
-            <Plus size={16} color="hsl(var(--secondary-color))" />
-          </div>
-        </PopoverTrigger>
-        <PopoverContent className="w-fit bg-transparent p-0 pl-2 border-none transition-all">
-          <EmojiPicker
-            onEmojiSelect={(icon) => {
-              onReactionChange(icon);
-              setEmojiPickerOpen(false);
-            }}
-          >
-            <EmojiPicker.Header>
-              <EmojiPicker.Input placeholder="Search emoji" />
-            </EmojiPicker.Header>
-            <EmojiPicker.Group>
-              <EmojiPicker.List />
-            </EmojiPicker.Group>
-          </EmojiPicker>
-        </PopoverContent>
-      </Popover>
+      {userAddress && (
+        <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
+          <PopoverTrigger asChild>
+            <div className="flex flex-row items-center py-0.5 border-[1px] border-neutral-700 px-1 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700">
+              <Plus size={16} color="hsl(var(--secondary-color))" />
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className="w-fit bg-transparent p-0 pl-2 border-none transition-all">
+            <EmojiPicker
+              onEmojiSelect={(icon) => {
+                onReactionChange(icon);
+                setEmojiPickerOpen(false);
+              }}
+            >
+              <EmojiPicker.Header>
+                <EmojiPicker.Input placeholder="Search emoji" />
+              </EmojiPicker.Header>
+              <EmojiPicker.Group>
+                <EmojiPicker.List />
+              </EmojiPicker.Group>
+            </EmojiPicker>
+          </PopoverContent>
+        </Popover>
+      )}
 
       {reactions.map((reaction) => (
         <div

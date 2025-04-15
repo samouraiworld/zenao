@@ -191,14 +191,14 @@ interface ReactPostRequestMutation {
 export const useReactPost = (queryClient: QueryClient) => {
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
-      token: _token,
+      token: token,
       userAddress: _addr,
       eventId: _eventId,
-      ..._request
+      ...request
     }: ReactPostRequestMutation) => {
-      // await zenaoClient.reactPost(request, {
-      //   headers: { Authorization: `Bearer ${token}` },
-      // });
+      await zenaoClient.reactPost(request, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
     },
     onMutate: async (variables) => {
       const feedPostsOpts = feedPosts(

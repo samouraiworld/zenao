@@ -6,7 +6,13 @@ import Text from "@/components/texts/text";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
 
-export function StandardPostCard({ post }: { post: StandardPostView }) {
+export function StandardPostCard({
+  eventId,
+  post,
+}: {
+  eventId: string;
+  post: StandardPostView;
+}) {
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
   );
@@ -14,7 +20,7 @@ export function StandardPostCard({ post }: { post: StandardPostView }) {
   const standardPost = post.post.post.value;
 
   return (
-    <PostCardLayout post={post} createdBy={createdBy}>
+    <PostCardLayout eventId={eventId} post={post} createdBy={createdBy}>
       <div className="w-full flex flex-col gap-2">
         <Text>{standardPost.content}</Text>
       </div>
