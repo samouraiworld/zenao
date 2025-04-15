@@ -245,7 +245,11 @@ export function EventInfo({ id }: { id: string }) {
       </div>
 
       {/* Social Feed */}
-      <EventFeed eventId={id} isDescExpanded={isDescExpanded} />
+      <EventFeed
+        eventId={id}
+        isDescExpanded={isDescExpanded}
+        isMember={isParticipant || isOrganizer}
+      />
     </div>
   );
 }

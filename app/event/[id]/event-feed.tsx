@@ -123,9 +123,11 @@ EventFeedForm.displayName = "EventFeedForm";
 
 export function EventFeed({
   eventId,
+  isMember,
   isDescExpanded,
 }: {
   eventId: string;
+  isMember: boolean;
   isDescExpanded: boolean;
 }) {
   const [tab, setTab] = useState<EventTab>("global-feed");
@@ -202,11 +204,13 @@ export function EventFeed({
         className="flex flex-col gap-12 min-h-0 pt-4"
         style={{ paddingBottom: stickyBottomPadding }}
       >
-        <EventFeedForm
-          ref={feedFormRef}
-          eventId={eventId}
-          isDescExpanded={isDescExpanded}
-        />
+        {isMember && (
+          <EventFeedForm
+            ref={feedFormRef}
+            eventId={eventId}
+            isDescExpanded={isDescExpanded}
+          />
+        )}
         {tab === "global-feed" ? (
           <PostsList eventId={eventId} list={standardPosts} />
         ) : (
