@@ -137,6 +137,15 @@ func execSyncChain() error {
 				logger.Error("failed to create post", zap.String("post-id", post.ID), zap.Error(err))
 			}
 		}
+
+		for _, reaction := range post.Reactions {
+			if err := chain.ReactPost(reaction.UserID, feed.EventID, &zenaov1.ReactPostRequest{
+				PostId: post.ID,
+				Icon:   reaction.Icon,
+			}); err != nil {
+				logger.Error("failed to react to post", zap.String("post-id", post.ID), zap.Error(err))
+			}
+		}
 	}
 
 	return nil

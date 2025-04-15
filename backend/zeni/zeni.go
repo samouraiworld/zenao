@@ -45,10 +45,11 @@ type Feed struct {
 }
 
 type Post struct {
-	ID     string
-	Post   *feedsv1.Post
-	UserID string
-	FeedID string
+	ID        string
+	Post      *feedsv1.Post
+	UserID    string
+	FeedID    string
+	Reactions []*Reaction
 }
 
 type Poll struct {
@@ -58,6 +59,13 @@ type Poll struct {
 	Duration int64
 	Results  []*pollsv1.PollResult
 	PostID   string
+}
+
+type Reaction struct {
+	ID     string
+	PostID string
+	UserID string
+	Icon   string
 }
 
 var tzFinder tzf.F

@@ -476,7 +476,7 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 // GetAllPosts implements zeni.DB.
 func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
 	var posts []*Post
-	if err := g.db.Find(&posts).Error; err != nil {
+	if err := g.db.Preload("Reactions").Preload("Tags").Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	res := make([]*zeni.Post, 0, len(posts))

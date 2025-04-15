@@ -106,6 +106,16 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 		tags = append(tags, tag.Name)
 	}
 
+	var reactions []*zeni.Reaction
+	for _, reaction := range post.Reactions {
+		reactions = append(reactions, &zeni.Reaction{
+			ID:     strconv.FormatUint(uint64(reaction.ID), 10),
+			PostID: strconv.FormatUint(uint64(post.ID), 10),
+			UserID: strconv.FormatUint(uint64(reaction.UserID), 10),
+			Icon:   reaction.Icon,
+		})
+	}
+
 	zpost := &zeni.Post{
 		ID: strconv.FormatUint(uint64(post.ID), 10),
 		Post: &feedsv1.Post{
@@ -123,6 +133,7 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 			},
 			Tags: tags,
 		},
+		Reactions: reactions,
 	}
 
 	switch post.Kind {
