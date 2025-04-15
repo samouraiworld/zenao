@@ -26,7 +26,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
 
   const queryClient = getQueryClient();
-  const event = await queryClient.fetchQuery(eventOptions(id));
+  const event = await queryClient.fetchQuery({
+    ...eventOptions(id),
+    retry: (failureCount, error) => {
+      // if (error === 404) return false; // don't retry if resource not found
+      console.log("Retrying...", failureCount);
+      return failureCount < 3;
+    },
+  });
 
   return {
     title: event.title,
