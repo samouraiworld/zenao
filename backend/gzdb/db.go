@@ -168,6 +168,20 @@ func (g *gormZenaoDB) GetEventByPollID(pollID string) (*zeni.Event, error) {
 	return dbEventToZeniEvent(&poll.Post.Feed.Event)
 }
 
+func (g *gormZenaoDB) GetEventByPostID(postID string) (*zeni.Event, error) {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var post Post
+	if err := g.db.Where("id = ?", postIDInt).Preload("Feed").Preload("Feed.Event").First(&post).Error; err != nil {
+		return nil, err
+	}
+
+	return dbEventToZeniEvent(&post.Feed.Event)
+}
+
 // GetEvent implements zeni.DB.
 func (g *gormZenaoDB) getDBEvent(id string) (*Event, error) {
 	evtIDInt, err := strconv.ParseUint(id, 10, 64)
@@ -474,6 +488,49 @@ func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
 		res = append(res, zpost)
 	}
 	return res, nil
+}
+
+// ReactPost implements zeni.DB.
+func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) error {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	postIDInt, err := strconv.ParseUint(req.PostId, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	var postExists bool
+	if err := g.db.Model(&Post{}).Select("1").Where("id = ?", postIDInt).Scan(&postExists).Error; err != nil {
+		return err
+	}
+	if !postExists {
+		return errors.New("post not found")
+	}
+
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		var reaction Reaction
+		if err := tx.Where("post_id = ? AND icon = ? AND user_id = ?", postIDInt, req.Icon, userIDInt).First(&reaction).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				reaction = Reaction{
+					PostID: uint(postIDInt),
+					Icon:   req.Icon,
+					UserID: uint(userIDInt),
+				}
+				if err := tx.Create(&reaction).Error; err != nil {
+					return err
+				}
+				return nil
+			}
+			return err
+		}
+		if err := tx.Delete(&reaction).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 // CreatePoll implements zeni.DB.

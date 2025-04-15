@@ -2,6 +2,7 @@ package social_feed
 
 import (
 	"gno.land/p/demo/mux"
+	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 
 	feedsv1 "gno.land/p/zenao/feeds/v1"
@@ -75,20 +76,31 @@ func DetailSocialFeedPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 }
 
 func renderZenaoPost(post *feedsv1.Post) string {
+	var s string
 	switch ext := post.Post.(type) {
 	case *feedsv1.StandardPost:
-		return renderStandardPost(post, ext)
+		s = renderStandardPost(post, ext)
 	case *feedsv1.ArticlePost:
-		return renderArticlePost(post, ext)
+		s = renderArticlePost(post, ext)
 	case *feedsv1.LinkPost:
-		return renderLinkPost(post, ext)
+		s = renderLinkPost(post, ext)
 	case *feedsv1.ImagePost:
-		return renderImagePost(post, ext)
+		s = renderImagePost(post, ext)
 	case *feedsv1.VideoPost:
-		return renderVideoPost(post, ext)
+		s = renderVideoPost(post, ext)
 	default:
-		return md.Paragraph("Unknown post type")
+		s = md.Paragraph("Unknown post type")
 	}
+	reactions := GetPostReactions(post.LocalPostId, "")
+	s += md.Paragraph("NUMBER OF REACTIONS: " + ufmt.Sprintf("%d", len(reactions)))
+	if len(reactions) > 0 {
+		s += md.Paragraph("Reactions:")
+		for _, reaction := range reactions {
+			s += md.BulletItem(reaction.Icon + ": " + md.Bold(ufmt.Sprintf("%d", reaction.Count)))
+		}
+	}
+
+	return s
 }
 
 func renderStandardPost(post *feedsv1.Post, ext *feedsv1.StandardPost) string {
