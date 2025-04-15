@@ -124,7 +124,7 @@ function Reactions({
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
 
   const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
-  const { reactPost } = useReactPost(queryClient);
+  const { reactPost: _ } = useReactPost(queryClient);
   const onReactionChange = async (icon: string) => {
     try {
       const token = await getToken();
@@ -132,13 +132,14 @@ function Reactions({
       if (!token) {
         throw new Error("Missing token");
       }
-      await reactPost({
-        token,
-        userAddress: userAddress || "",
-        postId,
-        icon,
-        eventId,
-      });
+      console.log(icon);
+      // await reactPost({
+      //   token,
+      //   userAddress: userAddress || "",
+      //   postId,
+      //   icon,
+      //   eventId,
+      // });
     } catch (error) {
       console.error("error", error);
     }
