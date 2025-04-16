@@ -1,35 +1,33 @@
 "use client";
 
-import { PollKind } from "@/app/gen/polls/v1/polls_pb";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { zenaoClient } from "@/app/zenao-client";
-import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { Card } from "@/components/cards/Card";
-import MapCaller from "@/components/common/map/map-lazy-components";
-import { MarkdownPreview } from "@/components/common/MarkdownPreview";
-import { UserAvatarWithName } from "@/components/common/user";
-import { Web3Image } from "@/components/images/web3-image";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Separator } from "@/components/shadcn/separator";
-import Heading from "@/components/texts/heading";
-import Text from "@/components/texts/text";
-import { makeLocationFromEvent } from "@/lib/location";
-import { eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
-import { web2URL } from "@/lib/uris";
-import { useAuth } from "@clerk/nextjs";
+import React, { useMemo } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
+import { format, fromUnixTime } from "date-fns";
 import { Calendar, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import React, { useMemo } from "react";
-import { TZDate } from "react-day-picker";
 import { Event, WithContext } from "schema-dts";
-import { ParticipantsSection } from "./participants-section";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { TZDate } from "react-day-picker";
 import { ParticipateForm } from "./participate-form";
+import { ParticipantsSection } from "./participants-section";
+import { eventOptions } from "@/lib/queries/event";
+import { Card } from "@/components/cards/Card";
+import { MarkdownPreview } from "@/components/common/MarkdownPreview";
+import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { Separator } from "@/components/shadcn/separator";
+import MapCaller from "@/components/common/map/map-lazy-components";
+import { userAddressOptions } from "@/lib/queries/user";
+import { web2URL } from "@/lib/uris";
+import { UserAvatarWithName } from "@/components/common/user";
+import Text from "@/components/texts/text";
+import Heading from "@/components/texts/heading";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { makeLocationFromEvent } from "@/lib/location";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Web3Image } from "@/components/images/web3-image";
 
 interface EventSectionProps {
   title: string;
@@ -83,156 +81,11 @@ export function EventInfo({ id }: { id: string }) {
 
   const iconSize = 22;
 
-  const onSubmitSignedOut = async () => {
-    const token = await getToken();
-    zenaoClient.createPoll({
-      eventId: id,
-      question: "What is the best way to do this?",
-      options: ["Option 1", "Option 2", "Option 3"],
-      duration: BigInt(60 * 60 * 24), // 1 day
-      kind: PollKind.MULTIPLE_CHOICE,
-    },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
-  const onVotingPoll = async () => {
-    const token = await getToken();
-    zenaoClient.votePoll({
-      pollId: "1",
-      option: "Option 1",
-    }, { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
-  const UnknowPollOption = async () => {
-    const token = await getToken();
-    zenaoClient.votePoll({
-      pollId: "1",
-      option: "Option 4",
-    }, { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
-  const WrongPollId = async () => {
-    const token = await getToken();
-    zenaoClient.votePoll({
-      pollId: "22",
-      option: "Option 1",
-    }, { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
-  const onCreateStandardPost = async () => {
-    const token = await getToken();
-    zenaoClient.createPost({
-      eventId: id,
-      content: "This is a standard post",
-    }, { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
-  const onCreateWrongEventId = async () => {
-    const token = await getToken();
-    zenaoClient.createPost({
-      eventId: "wrong-event-id",
-      content: "This is a standard post",
-    }, { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
-  const onReactMoneyIcon = async () => {
-    const token = await getToken();
-    zenaoClient.reactPost({
-      postId: "2",
-      icon: "💰",
-    }, { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
-  const onReactHeartPost3 = async () => {
-    const token = await getToken();
-    zenaoClient.reactPost({
-      postId: "3",
-      icon: "💖",
-    }, { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
-  const onReactMoneyIconPost3 = async () => {
-    const token = await getToken();
-    zenaoClient.reactPost({
-      postId: "3",
-      icon: "💰",
-    }, { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
   if (!data) {
     return <p>{`Event doesn't exist`}</p>;
   }
   return (
     <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
-      <button
-        style={{ backgroundColor: "red" }}
-        onClick={onSubmitSignedOut}
-      >
-        Create Poll
-      </button>
-      <button
-        style={{ backgroundColor: "blue" }}
-        onClick={onVotingPoll}
-      >
-        Vote Poll
-      </button>
-      <button
-        style={{ backgroundColor: "green" }}
-        onClick={UnknowPollOption}
-      >
-        Unknown Poll Option
-      </button>
-      <button
-        style={{ backgroundColor: "yellow" }}
-        onClick={WrongPollId}
-      >
-        Wrong Poll ID
-      </button>
-
-      <button
-        style={{ backgroundColor: "red" }}
-        onClick={onCreateStandardPost}
-      >
-        Create Standard Post
-      </button>
-
-      <button
-        style={{ backgroundColor: "blue" }}
-        onClick={onCreateWrongEventId}
-      >
-        Create Standard Post Wrong Event ID
-      </button>
-
-      <button
-        style={{ backgroundColor: "green" }}
-        onClick={onReactMoneyIcon}
-      >
-        React Money Icon Post 2
-      </button>
-
-      <button
-        style={{ backgroundColor: "yellow" }}
-        onClick={onReactHeartPost3}
-      >
-        React Heart Post 3
-      </button>
-
-      <button
-        style={{ backgroundColor: "red" }}
-        onClick={onReactMoneyIconPost3}
-      >
-        React Money Icon Post 3
-      </button>
-
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
