@@ -132,6 +132,15 @@ func execSyncChain() error {
 			}); err != nil {
 				logger.Error("failed to create poll", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.Error(err))
 			}
+
+			for _, vote := range poll.Votes {
+				if err := chain.VotePoll(vote.UserID, &zenaov1.VotePollRequest{
+					PollId: poll.ID,
+					Option: vote.Option,
+				}); err != nil {
+					logger.Error("failed to vote poll", zap.String("poll-id", poll.ID), zap.String("user-id", vote.UserID), zap.Error(err))
+				}
+			}
 		} else {
 			if _, err = chain.CreatePost(post.UserID, feed.EventID, post.Post); err != nil {
 				logger.Error("failed to create post", zap.String("post-id", post.ID), zap.Error(err))

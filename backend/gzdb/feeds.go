@@ -117,7 +117,9 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 	}
 
 	zpost := &zeni.Post{
-		ID: strconv.FormatUint(uint64(post.ID), 10),
+		ID:     strconv.FormatUint(uint64(post.ID), 10),
+		UserID: strconv.FormatUint(uint64(post.UserID), 10),
+		FeedID: strconv.FormatUint(uint64(post.FeedID), 10),
 		Post: &feedsv1.Post{
 			// Need to convert this to chain address later.
 			// Using two-step process: first store the ID here,
@@ -127,11 +129,8 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 			CreatedAt: post.CreatedAt.Unix(),
 			UpdatedAt: post.UpdatedAt.Unix(),
 			DeletedAt: post.DeletedAt.Time.Unix(),
-			Loc: &feedsv1.PostGeoLoc{
-				Lat: post.Latitude,
-				Lng: post.Longitude,
-			},
-			Tags: tags,
+			Loc:       nil,
+			Tags:      tags,
 		},
 		Reactions: reactions,
 	}
@@ -198,13 +197,21 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 		Results:  []*pollsv1.PollResult{},
 	}
 
+	var votes []*zeni.Vote
 	for _, result := range poll.Results {
 		zpoll.Results = append(zpoll.Results, &pollsv1.PollResult{
 			Option:       result.Option,
 			Count:        uint32(len(result.Users)),
 			HasUserVoted: false, // TODO: check if user has voted
 		})
+		for _, user := range result.Users {
+			votes = append(votes, &zeni.Vote{
+				UserID: strconv.FormatUint(uint64(user.ID), 10),
+				Option: result.Option,
+			})
+		}
 	}
+	zpoll.Votes = votes
 
 	return zpoll, nil
 }

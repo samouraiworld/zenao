@@ -59,6 +59,13 @@ type Poll struct {
 	Duration int64
 	Results  []*pollsv1.PollResult
 	PostID   string
+	Votes    []*Vote
+}
+
+type Vote struct {
+	ID     string
+	UserID string
+	Option string
 }
 
 type Reaction struct {
