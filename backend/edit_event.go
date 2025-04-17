@@ -59,6 +59,13 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
+	if s.MailClient != nil && req.Msg.NotifyParticipants {
+		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets will be sent in a few weeks!")
+		if err != nil {
+			s.Logger.Error("generate-participate-email-content", zap.Error(err))
+		}
+	}
+
 	return connect.NewResponse(&zenaov1.EditEventResponse{
 		Id: req.Msg.EventId,
 	}), nil
