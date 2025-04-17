@@ -9,11 +9,12 @@ import (
 )
 
 type ZenaoServer struct {
-	Logger       *zap.Logger
-	GetUser      func(ctx context.Context) *zeni.AuthUser
-	CreateUser   func(ctx context.Context, email string) (*zeni.AuthUser, error)
-	Chain        zeni.Chain
-	DB           zeni.DB
-	MailClient   *resend.Client
-	DiscordToken string
+	Logger             *zap.Logger
+	GetUser            func(ctx context.Context) *zeni.AuthUser
+	GetUserFromClerkID func(ctx context.Context, id string) (*zeni.AuthUser, error)
+	CreateUser         func(ctx context.Context, email string) (*zeni.AuthUser, error)
+	Chain              zeni.Chain
+	DB                 zeni.DB
+	MailClient         *resend.Client
+	DiscordToken       string
 }

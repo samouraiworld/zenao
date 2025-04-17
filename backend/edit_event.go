@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"connectrpc.com/connect"
+	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -37,7 +38,17 @@ func (s *ZenaoServer) EditEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
+	evt := (*zeni.Event)(nil)
+	participants := []*zeni.User{}
 	if err := s.DB.Tx(func(db zeni.DB) error {
+		evt, err = db.GetEvent(req.Msg.EventId)
+		if err != nil {
+			return err
+		}
+		participants, err = db.GetAllParticipants(req.Msg.EventId)
+		if err != nil {
+			return err
+		}
 		roles, err := db.UserRoles(userID, req.Msg.EventId)
 		if err != nil {
 			return err
@@ -60,9 +71,29 @@ func (s *ZenaoServer) EditEvent(
 	}
 
 	if s.MailClient != nil && req.Msg.NotifyParticipants {
-		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets will be sent in a few weeks!")
-		if err != nil {
-			s.Logger.Error("generate-participate-email-content", zap.Error(err))
+		for _, participant := range participants {
+			displayName := "Anon"
+			if participant.DisplayName != "" {
+				displayName = participant.DisplayName
+			}
+			htmlStr, text, err := notifyParticipantsEventEditedMailContent(evt, displayName)
+			if err != nil {
+				s.Logger.Error("generate-notify-participants-event-edited-email-content", zap.Error(err))
+			} else {
+				target, err := s.GetUserFromClerkID(ctx, participant.ClerkID)
+				if err != nil {
+					s.Logger.Error("get-user-from-clerk-id", zap.Error(err))
+				}
+				if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+					From:    "Zenao <ticket@mail.zenao.io>",
+					To:      []string{target.Email},
+					Subject: fmt.Sprintf("%s - Event updated", evt.Title),
+					Html:    htmlStr,
+					Text:    text,
+				}); err != nil {
+					s.Logger.Error("send-notify-participants-event-edited-email", zap.Error(err), zap.String("user-email", user.Email))
+				}
+			}
 		}
 	}
 

@@ -534,5 +534,6 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		DisplayName: dbuser.DisplayName,
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
+		ClerkID:     dbuser.ClerkID,
 	}
 }

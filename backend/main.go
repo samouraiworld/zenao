@@ -144,13 +144,14 @@ func execStart() error {
 	}
 
 	zenao := &ZenaoServer{
-		Logger:       logger,
-		GetUser:      getUserFromClerk,
-		CreateUser:   createClerkUser,
-		Chain:        chain,
-		DB:           db,
-		MailClient:   mailClient,
-		DiscordToken: conf.discordtoken,
+		Logger:             logger,
+		GetUser:            getUserFromClerk,
+		GetUserFromClerkID: getUserFromClerkID,
+		CreateUser:         createClerkUser,
+		Chain:              chain,
+		DB:                 db,
+		MailClient:         mailClient,
+		DiscordToken:       conf.discordtoken,
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
@@ -183,6 +184,18 @@ func getUserFromClerk(ctx context.Context) *zeni.AuthUser {
 		email = clerkUser.EmailAddresses[0].EmailAddress
 	}
 	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+}
+
+func getUserFromClerkID(ctx context.Context, id string) (*zeni.AuthUser, error) {
+	clerkUser, err := user.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	email := ""
+	if len(clerkUser.EmailAddresses) != 0 {
+		email = clerkUser.EmailAddresses[0].EmailAddress
+	}
+	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 }
 
 func createClerkUser(ctx context.Context, email string) (*zeni.AuthUser, error) {

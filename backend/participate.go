@@ -50,7 +50,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		var err error
 		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
