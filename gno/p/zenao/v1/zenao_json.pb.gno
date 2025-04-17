@@ -209,6 +209,9 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Location != nil {
 		fields["location"] = e.Location.ToJSON()
 	}
+	if e.NotifyParticipants != false {
+		fields["notifyParticipants"] = json.BoolNode("", e.NotifyParticipants)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -253,6 +256,9 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 		fv := &EventLocation{}
 		fv.FromJSON(val)
 		e.Location = fv
+	}
+	if val, ok := fields["notifyParticipants"]; ok {
+		e.NotifyParticipants = val.MustBool()
 	}
 }
 
