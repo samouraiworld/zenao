@@ -31,7 +31,12 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   // Correctly reconstruct location object
   const location = makeLocationFromEvent(data.location);
   const defaultValues: EventFormSchemaType = {
-    ...data,
+    capacity: data.capacity,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    imageUri: data.imageUri,
+    title: data.title,
+    description: data.description,
     location,
   };
 
@@ -48,7 +53,10 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async (values: EventFormSchemaType) => {
+  const onSubmit = async (
+    values: EventFormSchemaType,
+    shouldNotify = false,
+  ) => {
     try {
       setIsLoaded(true);
       const token = await getToken();
@@ -83,6 +91,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
           ...values,
           eventId: id,
           location: { address: { case: values.location.kind, value } },
+          notify_participants: shouldNotify,
         },
         {
           headers: { Authorization: "Bearer " + token },
@@ -111,12 +120,15 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     );
   }
   return (
-    <EventForm
-      form={form}
-      onSubmit={onSubmit}
-      isLoaded={isLoaded}
-      isEditing
-      maxDateRange={new Date()}
-    />
+    <>
+      <EventForm
+        form={form}
+        onSubmit={onSubmit}
+        isLoaded={isLoaded}
+        defaultValues={defaultValues}
+        isEditing
+        minDateRange={new Date()}
+      />
+    </>
   );
 }

@@ -86,6 +86,7 @@ export const eventFormSchema = z.object({
   // ticketPrice: z.coerce.number(),
   capacity: z.coerce.number().min(1),
 });
+
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
 export const userFormSchema = z.object({
