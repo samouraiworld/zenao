@@ -3,7 +3,7 @@
 import { FieldValues, useController } from "react-hook-form";
 import React, { useMemo, useState } from "react";
 import { CalendarIcon } from "lucide-react";
-import { format, fromUnixTime, getUnixTime } from "date-fns";
+import { format, fromUnixTime, getUnixTime, minutesToSeconds } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { DateInterval, DateRange, Matcher } from "react-day-picker";
 import { FormFieldProps } from "../types";
@@ -84,16 +84,27 @@ export function FormFieldDatePicker<T extends FieldValues>(
   const [isOpen, setIsOpen] = useState(false);
 
   const defaultTime = useMemo(() => {
+    let formattedValue: Date;
+
     if (field.value) {
-      const formattedValue = fromUnixTime(Number(field.value));
+      formattedValue = fromUnixTime(Number(field.value));
 
       const hours = formattedValue.getHours().toString().padStart(2, "0");
       const minutes = formattedValue.getMinutes().toString().padStart(2, "0");
 
       return `${hours}:${minutes}`;
     }
+    // Default time
+    formattedValue = fromUnixTime(Date.now() / 1000 + minutesToSeconds(15));
+    const { hour, minute } = roundToNearestQuarter(
+      formattedValue.getHours(),
+      formattedValue.getMinutes(),
+    );
 
-    return "09:00";
+    const hours = hour.toString().padStart(2, "0");
+    const minutes = minute.toString().padStart(2, "0");
+
+    return `${hours}:${minutes}`;
   }, [field.value]);
 
   const isTimeDisabled = React.useCallback(
@@ -260,4 +271,18 @@ export function FormFieldDatePicker<T extends FieldValues>(
       }}
     />
   );
+}
+
+function roundToNearestQuarter(
+  hour: number,
+  minute: number,
+): { hour: number; minute: number } {
+  let roundedMinutes = Math.round(minute / 15) * 15;
+
+  if (roundedMinutes === 60) {
+    hour = (hour + 1) % 24; // Handle 24-hour wraparound
+    roundedMinutes = 0;
+  }
+
+  return { hour, minute: roundedMinutes };
 }
