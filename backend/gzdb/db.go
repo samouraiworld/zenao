@@ -384,6 +384,20 @@ func (g *gormZenaoDB) GetFeed(eventID string, slug string) (*zeni.Feed, error) {
 	return zfeed, nil
 }
 
+// GetFeedByID implements zeni.DB.
+func (g *gormZenaoDB) GetFeedByID(feedID string) (*zeni.Feed, error) {
+	var feed Feed
+	if err := g.db.Where("id = ?", feedID).First(&feed).Error; err != nil {
+		return nil, err
+	}
+
+	zfeed, err := dbFeedToZeniFeed(&feed)
+	if err != nil {
+		return nil, err
+	}
+	return zfeed, nil
+}
+
 // CreatePost implements zeni.DB.
 func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*zeni.Post, error) {
 	postIDInt, err := strconv.ParseUint(postID, 10, 64)
@@ -459,7 +473,24 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 	return zpost, nil
 }
 
-// ReactPost implements zeni.DB
+// GetAllPosts implements zeni.DB.
+func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
+	var posts []*Post
+	if err := g.db.Preload("Reactions").Preload("Tags").Find(&posts).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*zeni.Post, 0, len(posts))
+	for _, p := range posts {
+		zpost, err := dbPostToZeniPost(p)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, zpost)
+	}
+	return res, nil
+}
+
+// ReactPost implements zeni.DB.
 func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) error {
 	userIDInt, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
@@ -583,6 +614,20 @@ func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) erro
 
 		return nil
 	})
+}
+
+func (g *gormZenaoDB) GetPollByID(pollID string) (*zeni.Poll, error) {
+	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var poll Poll
+	if err := g.db.Where("id = ?", pollIDint).Preload("Results").Preload("Results.Users").First(&poll).Error; err != nil {
+		return nil, err
+	}
+
+	return dbPollToZeniPoll(&poll)
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {

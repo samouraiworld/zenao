@@ -45,19 +45,34 @@ type Feed struct {
 }
 
 type Post struct {
-	ID     string
-	Post   *feedsv1.Post
-	UserID string
-	FeedID string
+	ID        string
+	Post      *feedsv1.Post
+	UserID    string
+	FeedID    string
+	Reactions []*Reaction
 }
 
 type Poll struct {
 	ID       string
 	Question string
-	Kind     *pollsv1.PollKind
+	Kind     pollsv1.PollKind
 	Duration int64
 	Results  []*pollsv1.PollResult
 	PostID   string
+	Votes    []*Vote
+}
+
+type Vote struct {
+	ID     string
+	UserID string
+	Option string
+}
+
+type Reaction struct {
+	ID     string
+	PostID string
+	UserID string
+	Icon   string
 }
 
 var tzFinder tzf.F
@@ -110,10 +125,13 @@ type DB interface {
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
+	GetFeedByID(feedID string) (*Feed, error)
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	GetAllPosts() ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+	GetPollByID(pollID string) (*Poll, error)
 }
 
 type Chain interface {
