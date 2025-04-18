@@ -220,7 +220,6 @@ export const useReactPost = (queryClient: QueryClient) => {
         "",
         variables.userAddress,
       );
-
       queryClient.invalidateQueries(feedPostsOpts);
     },
     onError: (_, variables, context) => {

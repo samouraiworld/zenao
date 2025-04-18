@@ -3,9 +3,9 @@
 import React, { ReactNode, useMemo } from "react";
 import { Hash, MapPin, Plus } from "lucide-react";
 import Link from "next/link";
-import { EmojiPicker } from "@ferrucc-io/emoji-picker";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import EmojiPicker, { Theme } from "emoji-picker-react";
 import { Card } from "@/components/cards/Card";
 import { UserAvatar } from "@/components/common/user";
 import { PostView, ReactionView } from "@/app/gen/feeds/v1/feeds_pb";
@@ -104,11 +104,11 @@ export function PostCardLayout({
 }
 
 function Reactions({
-  postId: _postId,
+  postId,
   eventId,
   reactions,
 }: {
-  postId: string;
+  postId: bigint;
   eventId: string;
   reactions: ReactionView[];
 }) {
@@ -124,7 +124,7 @@ function Reactions({
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
 
   const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
-  const { reactPost: _ } = useReactPost(queryClient);
+  const { reactPost } = useReactPost(queryClient);
   const onReactionChange = async (icon: string) => {
     try {
       const token = await getToken();
@@ -132,15 +132,14 @@ function Reactions({
       if (!token) {
         throw new Error("Missing token");
       }
-      // TODO uncomment call
-      console.log(icon);
-      // await reactPost({
-      //   token,
-      //   userAddress: userAddress || "",
-      //   postId,
-      //   icon,
-      //   eventId,
-      // });
+
+      await reactPost({
+        token,
+        userAddress: userAddress || "",
+        postId: postId.toString(),
+        icon,
+        eventId,
+      });
     } catch (error) {
       console.error("error", error);
     }
@@ -158,18 +157,12 @@ function Reactions({
           </PopoverTrigger>
           <PopoverContent className="w-fit bg-transparent p-0 pl-2 border-none transition-all">
             <EmojiPicker
-              onEmojiSelect={(icon) => {
-                onReactionChange(icon);
+              theme={Theme.DARK}
+              onEmojiClick={(choice) => {
+                onReactionChange(choice.emoji);
                 setEmojiPickerOpen(false);
               }}
-            >
-              <EmojiPicker.Header>
-                <EmojiPicker.Input placeholder="Search emoji" />
-              </EmojiPicker.Header>
-              <EmojiPicker.Group>
-                <EmojiPicker.List />
-              </EmojiPicker.Group>
-            </EmojiPicker>
+            />
           </PopoverContent>
         </Popover>
       )}
