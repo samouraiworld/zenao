@@ -784,3 +784,38 @@ func (c *CreatePostResponse) FromJSON(node *json.Node) {
 		c.PostId = val.MustString()
 	}
 }
+
+func (r *ReactPostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if r.PostId != "" {
+		fields["postId"] = json.StringNode("", r.PostId)
+	}
+	if r.Icon != "" {
+		fields["icon"] = json.StringNode("", r.Icon)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactPostRequest) FromJSON(node *json.Node) {
+	*r = ReactPostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		r.PostId = val.MustString()
+	}
+	if val, ok := fields["icon"]; ok {
+		r.Icon = val.MustString()
+	}
+}
+
+func (r *ReactPostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactPostResponse) FromJSON(node *json.Node) {
+	*r = ReactPostResponse{}
+}

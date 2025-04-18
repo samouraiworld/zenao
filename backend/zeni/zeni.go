@@ -105,11 +105,13 @@ type DB interface {
 	Participate(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventByPollID(pollID string) (*Event, error)
+	GetEventByPostID(postID string) (*Event, error)
 	GetAllParticipants(eventID string) ([]*User, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }
@@ -125,6 +127,7 @@ type Chain interface {
 	Participate(eventID string, callerID string, participantID string) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
+	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }

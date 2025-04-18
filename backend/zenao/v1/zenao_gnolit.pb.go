@@ -435,3 +435,27 @@ func (c *CreatePostResponse) GnoLiteral(typePrefix string, linePrefix string) st
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (r *ReactPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ReactPostRequest{\n")
+	if r.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, r.PostId)
+	}
+	if r.Icon != "" {
+		fmt.Fprintf(buf, "%s\tIcon: %q,\n", linePrefix, r.Icon)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (r *ReactPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ReactPostResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
