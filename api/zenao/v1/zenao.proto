@@ -14,6 +14,7 @@ service ZenaoService {
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+  rpc EventBroadcastMsg(BroadcastEventRequest) returns (BroadcastEventResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
@@ -67,6 +68,13 @@ message ParticipateRequest {
 }
 
 message ParticipateResponse { string ticket_secret = 1; }
+
+message BroadcastEventRequest {
+  string event_id = 1;
+  string message = 2;
+}
+
+message BroadcastEventResponse {}
 
 message EventLocation {
   string venue_name = 1;

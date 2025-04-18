@@ -183,6 +183,30 @@ func (p *ParticipateResponse) GnoLiteral(typePrefix string, linePrefix string) s
 	return buf.String()
 }
 
+func (b *BroadcastEventRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("BroadcastEventRequest{\n")
+	if b.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, b.EventId)
+	}
+	if b.Message != "" {
+		fmt.Fprintf(buf, "%s\tMessage: %q,\n", linePrefix, b.Message)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (b *BroadcastEventResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("BroadcastEventResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (e *EventLocation) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
