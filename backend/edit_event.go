@@ -70,12 +70,15 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
+	// XXX: use custom email instead of massive BCC to avoid being marked as spam & better tracking & personalization & privacy
+	var requests []*resend.SendEmailRequest
 	if s.MailClient != nil && req.Msg.NotifyParticipants {
 		for _, participant := range participants {
 			displayName := "Anon"
 			if participant.DisplayName != "" {
 				displayName = participant.DisplayName
 			}
+			s.Logger.Info("participant", zap.Any("participant", participant))
 			htmlStr, text, err := notifyParticipantsEventEditedMailContent(evt, displayName)
 			if err != nil {
 				s.Logger.Error("generate-notify-participants-event-edited-email-content", zap.Error(err))
@@ -84,15 +87,18 @@ func (s *ZenaoServer) EditEvent(
 				if err != nil {
 					s.Logger.Error("get-user-from-clerk-id", zap.Error(err))
 				}
-				if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+				requests = append(requests, &resend.SendEmailRequest{
 					From:    "Zenao <ticket@mail.zenao.io>",
 					To:      []string{target.Email},
 					Subject: fmt.Sprintf("%s - Event updated", evt.Title),
 					Html:    htmlStr,
 					Text:    text,
-				}); err != nil {
-					s.Logger.Error("send-notify-participants-event-edited-email", zap.Error(err), zap.String("user-email", user.Email))
-				}
+				})
+			}
+		}
+		if len(requests) > 0 {
+			if _, err := s.MailClient.Batch.SendWithContext(ctx, requests); err != nil {
+				s.Logger.Error("send-notify-participants-event-edited-email", zap.Error(err))
 			}
 		}
 	}

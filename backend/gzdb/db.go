@@ -30,8 +30,10 @@ type UserRole struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	UserID  uint   `gorm:"primaryKey;autoIncrement:false"`
-	EventID uint   `gorm:"primaryKey;autoIncrement:false"`
+	UserID  uint `gorm:"primaryKey;autoIncrement:false"`
+	User    User
+	EventID uint `gorm:"primaryKey;autoIncrement:false"`
+	Event   Event
 	Role    string `gorm:"primaryKey"`
 }
 
@@ -303,13 +305,13 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 
 // GetAllParticipants implements zeni.DB.
 func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
-	var tickets []*SoldTicket
-	if err := g.db.Find(&tickets, "event_id = ?", eventID).Error; err != nil {
+	var participants []*UserRole
+	if err := g.db.Find(&participants, "event_id = ? AND role = ?", eventID, "participant").Preload("User").Error; err != nil {
 		return nil, err
 	}
-	res := make([]*zeni.User, 0, len(tickets))
-	for _, e := range tickets {
-		res = append(res, &zeni.User{ID: e.UserID})
+	res := make([]*zeni.User, 0, len(participants))
+	for _, p := range participants {
+		res = append(res, dbUserToZeniDBUser(&p.User))
 	}
 	return res, nil
 }

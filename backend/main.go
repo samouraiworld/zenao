@@ -140,6 +140,7 @@ func execStart() error {
 
 	mailClient := (*resend.Client)(nil)
 	if conf.resendSecretKey != "" {
+		logger.Info("Using Resend", zap.String("secret-key", conf.resendSecretKey))
 		mailClient = resend.NewClient(conf.resendSecretKey)
 	}
 

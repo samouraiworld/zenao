@@ -98,14 +98,15 @@ func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string) (stri
 }
 
 type notifyParticipantsEventEdited struct {
-	ImageURL        string
-	EventName       string
-	TimeText        string
-	LocationText    string
-	EventURL        string
-	CalendarIconURL string
-	PinIconURL      string
-	UserName        string
+	ImageURL         string
+	EventName        string
+	EventDescription string
+	TimeText         string
+	LocationText     string
+	EventURL         string
+	CalendarIconURL  string
+	PinIconURL       string
+	UserName         string
 }
 
 func notifyParticipantsEventEditedMailContent(event *zeni.Event, userName string) (string, string, error) {
@@ -118,14 +119,15 @@ func notifyParticipantsEventEditedMailContent(event *zeni.Event, userName string
 		return "", "", err
 	}
 	data := notifyParticipantsEventEdited{
-		ImageURL:        web2URL(event.ImageURI) + "?img-width=600&img-height=400&img-fit=cover&dpr=2",
-		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
-		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
-		EventName:       event.Title,
-		TimeText:        event.StartDate.In(tz).Format(time.ANSIC) + " - " + event.EndDate.In(tz).Format(time.ANSIC),
-		LocationText:    locStr,
-		EventURL:        eventPublicURL(event.ID),
-		UserName:        userName,
+		ImageURL:         web2URL(event.ImageURI) + "?img-width=600&img-height=400&img-fit=cover&dpr=2",
+		CalendarIconURL:  web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
+		PinIconURL:       web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
+		EventName:        event.Title,
+		TimeText:         event.StartDate.In(tz).Format(time.ANSIC) + " - " + event.EndDate.In(tz).Format(time.ANSIC),
+		LocationText:     locStr,
+		EventURL:         eventPublicURL(event.ID),
+		UserName:         userName,
+		EventDescription: event.Description,
 	}
 
 	buf := &strings.Builder{}
