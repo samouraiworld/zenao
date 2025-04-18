@@ -19,6 +19,7 @@ service ZenaoService {
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
 }
 
 message EditUserRequest {
@@ -138,3 +139,10 @@ message CreatePostRequest {
 }
 
 message CreatePostResponse { string post_id = 1; }
+
+message ReactPostRequest {
+  string post_id = 1;
+  string icon = 2;
+}
+
+message ReactPostResponse {}

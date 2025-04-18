@@ -55,7 +55,7 @@ type Tip struct {
 }
 
 type Post struct {
-	LocalPostId string
+	LocalPostId uint64
 	Author      string
 	ParentUri   string
 	Loc         *PostGeoLoc
