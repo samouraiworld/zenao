@@ -55,7 +55,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
 
   const onSubmit = async (
     values: EventFormSchemaType,
-    _shouldNotify = false,
+    shouldNotify = false,
   ) => {
     try {
       setIsLoaded(true);
@@ -89,9 +89,9 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       await zenaoClient.editEvent(
         {
           ...values,
-          // shouldNotify,
           eventId: id,
           location: { address: { case: values.location.kind, value } },
+          notify_participants: shouldNotify,
         },
         {
           headers: { Authorization: "Bearer " + token },
