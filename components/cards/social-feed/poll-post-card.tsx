@@ -4,6 +4,7 @@ import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
 import { useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import Text from "@/components/texts/text";
@@ -28,6 +29,7 @@ export function PollPostCard({
   pollPost: PollPostViewInfo;
   userAddress: string;
 }) {
+  const t = useTranslations("event-feed");
   const queryClient = getQueryClient();
   const { getToken } = useAuth();
   const { toast } = useToast();
@@ -64,14 +66,12 @@ export function PollPostCard({
         userAddress,
       });
       toast({
-        // title: t("toast-creation-success"),
-        title: "TODO: trad (Poll vote success)",
+        title: t("vote.toast-vote-success"),
       });
     } catch (err) {
       toast({
         variant: "destructive",
-        // title: t("toast-vote-error"),
-        title: "TODO: trad (Poll vote error)",
+        title: t("vote.toast-vote-error"),
       });
       console.error("error", err);
     }

@@ -36,6 +36,7 @@ export function FeedInputButtons({
             feedInputMode === "STANDARD_POST" ? "POLL" : "STANDARD_POST",
           )
         }
+        aria-label="set type post"
         disabled={isLoading}
       >
         <VoteIcon
@@ -50,6 +51,7 @@ export function FeedInputButtons({
       <ButtonBase
         variant="link"
         className="dark:text-white text-black flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-700 cursor-pointer"
+        aria-label="submit post"
         style={{ height: buttonSize, width: buttonSize }}
         loading={isLoading}
         disabled={isLoading}
