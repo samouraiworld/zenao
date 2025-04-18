@@ -104,7 +104,7 @@ export function PostCardLayout({
 }
 
 function Reactions({
-  postId,
+  postId: _postId,
   eventId,
   reactions,
 }: {
