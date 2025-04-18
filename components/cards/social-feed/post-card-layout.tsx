@@ -132,6 +132,7 @@ function Reactions({
       if (!token) {
         throw new Error("Missing token");
       }
+      // TODO uncomment call
       console.log(icon);
       // await reactPost({
       //   token,
