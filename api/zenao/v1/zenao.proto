@@ -13,8 +13,8 @@ service ZenaoService {
   // EVENT
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
+  rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
-  rpc EventBroadcastMsg(BroadcastEventRequest) returns (BroadcastEventResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);

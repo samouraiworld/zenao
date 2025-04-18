@@ -41,13 +41,8 @@ export const EventBroadcastMessageEmail = () => (
                     <Row>
                         <Column>
                             <Section style={messageBox}>
-                                <Text style={messageText}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed arcu nibh, eleifend in interdum vel, mollis quis magna. Morbi at iaculis risus, at lobortis mi. Nunc in sapien quam. Suspendisse accumsan ex eu augue pellentesque pretium. Maecenas sed justo aliquam, eleifend nunc euismod, volutpat eros. Fusce euismod finibus lorem a pulvinar. </Text>
+                                <Text style={messageText}>{"{{.Message }}"}</Text>
                             </Section>
-                        </Column>
-                    </Row>
-                    <Row>
-                        <Column>
-                            <Text style={descriptionText}>Event details: {"{{.EventDescription }}"}</Text>
                         </Column>
                     </Row>
                     <Row>

@@ -17,13 +17,13 @@ var ticketsConfirmationTmplHTML *template.Template
 var ticketsConfirmationTmplTextSrc string
 var ticketsConfirmationTmplText *template.Template
 
-//go:embed mails/html/notify-participants-event-edited.tmpl.html
-var notifyParticipantsEventEditedTmplHTMLSrc string
-var notifyParticipantsEventEditedTmplHTML *template.Template
+//go:embed mails/html/event-broadcast-message.tmpl.html
+var eventBroadcastMessageTmplHTMLSrc string
+var eventBroadcastMessageTmplHTML *template.Template
 
-//go:embed mails/text/notify-participants-event-edited.tmpl.txt
-var notifyParticipantsEventEditedTmplTextSrc string
-var notifyParticipantsEventEditedTmplText *template.Template
+//go:embed mails/text/event-broadcast-message.tmpl.txt
+var eventBroadcastMessageTmplTextSrc string
+var eventBroadcastMessageTmplText *template.Template
 
 func init() {
 	tmpl, err := template.New("ticketsConfirmationHTML").Parse(ticketsConfirmationTmplHTMLSrc)
@@ -38,17 +38,17 @@ func init() {
 	}
 	ticketsConfirmationTmplText = tmpl
 
-	tmpl, err = template.New("notifyParticipantsEventEditedHTML").Parse(notifyParticipantsEventEditedTmplHTMLSrc)
+	tmpl, err = template.New("eventBroadcastMessageHTML").Parse(eventBroadcastMessageTmplHTMLSrc)
 	if err != nil {
 		panic(err)
 	}
-	notifyParticipantsEventEditedTmplHTML = tmpl
+	eventBroadcastMessageTmplHTML = tmpl
 
-	tmpl, err = template.New("notifyParticipantsEventEditedText").Parse(notifyParticipantsEventEditedTmplTextSrc)
+	tmpl, err = template.New("eventBroadcastMessageText").Parse(eventBroadcastMessageTmplTextSrc)
 	if err != nil {
 		panic(err)
 	}
-	notifyParticipantsEventEditedTmplText = tmpl
+	eventBroadcastMessageTmplText = tmpl
 }
 
 type ticketsConfirmation struct {
@@ -97,47 +97,31 @@ func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string) (stri
 	return htmlContent, textContent, nil
 }
 
-type notifyParticipantsEventEdited struct {
-	ImageURL         string
-	EventName        string
-	EventDescription string
-	TimeText         string
-	LocationText     string
-	EventURL         string
-	CalendarIconURL  string
-	PinIconURL       string
-	UserName         string
+type eventBroadcast struct {
+	EventName string
+	ImageURL  string
+	UserName  string
+	Message   string
+	EventURL  string
 }
 
-func notifyParticipantsEventEditedMailContent(event *zeni.Event, userName string) (string, string, error) {
-	locStr, err := zeni.LocationToString(event.Location)
-	if err != nil {
-		return "", "", err
-	}
-	tz, err := event.Timezone()
-	if err != nil {
-		return "", "", err
-	}
-	data := notifyParticipantsEventEdited{
-		ImageURL:         web2URL(event.ImageURI) + "?img-width=600&img-height=400&img-fit=cover&dpr=2",
-		CalendarIconURL:  web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
-		PinIconURL:       web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
-		EventName:        event.Title,
-		TimeText:         event.StartDate.In(tz).Format(time.ANSIC) + " - " + event.EndDate.In(tz).Format(time.ANSIC),
-		LocationText:     locStr,
-		EventURL:         eventPublicURL(event.ID),
-		UserName:         userName,
-		EventDescription: event.Description,
+func eventBroadcastMailContent(event *zeni.Event, userName string, message string) (string, string, error) {
+	data := eventBroadcast{
+		ImageURL:  web2URL(event.ImageURI) + "?img-width=600&img-height=400&img-fit=cover&dpr=2",
+		EventName: event.Title,
+		UserName:  userName,
+		Message:   message,
+		EventURL:  eventPublicURL(event.ID),
 	}
 
 	buf := &strings.Builder{}
-	if err := notifyParticipantsEventEditedTmplHTML.Execute(buf, data); err != nil {
+	if err := eventBroadcastMessageTmplHTML.Execute(buf, data); err != nil {
 		return "", "", err
 	}
 	htmlContent := buf.String()
 
 	buf = &strings.Builder{}
-	if err := notifyParticipantsEventEditedTmplText.Execute(buf, data); err != nil {
+	if err := eventBroadcastMessageTmplText.Execute(buf, data); err != nil {
 		return "", "", err
 	}
 	textContent := buf.String()
