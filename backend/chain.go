@@ -384,7 +384,6 @@ func (g *gnoZenaoChain) CreatePost(userID string, eventID string, post *feedsv1.
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
 	gnoLitPost := "&" + post.GnoLiteral("feedsv1.", "\t\t")
-	g.logger.Info("gnoLitPost", zap.String("gnoLitPost", gnoLitPost))
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
