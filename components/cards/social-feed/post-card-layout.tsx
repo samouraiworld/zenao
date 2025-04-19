@@ -151,7 +151,7 @@ function Reactions({
       {(isOrganizer || isParticipant) && (
         <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
           <PopoverTrigger asChild>
-            <div className="flex flex-row items-center py-0.5 border-[1px] border-neutral-700 px-1 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700">
+            <div className="reaction-btn flex flex-row items-center py-0.5 border-[1px] border-neutral-700 px-1 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700">
               <Plus size={16} color="hsl(var(--secondary-color))" />
             </div>
           </PopoverTrigger>
