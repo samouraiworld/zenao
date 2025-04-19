@@ -1,3 +1,5 @@
+"use client";
+
 import remarkGfm from "remark-gfm";
 import remarkYoutube from "remark-youtube";
 import ReactMarkdown from "react-markdown";
@@ -5,13 +7,17 @@ import supersub from "remark-supersub";
 import remarkHtml from "remark-html";
 import { cn } from "@/lib/tailwind";
 
-export const MarkdownPreview: React.FC<{ markdownString: string }> = ({
+export function MarkdownPreview({
   markdownString,
-}) => {
+  className,
+}: {
+  markdownString: string;
+  className?: string;
+}) {
   return (
     <ReactMarkdown
       // `prose` className came from @tailwindcss/typography (a plugin that add beautiful typographic defaults to any vanilla HTML you don’t control, like HTML rendered from Markdown)
-      className="prose dark:prose-invert"
+      className={cn("prose dark:prose-invert", className)}
       remarkPlugins={[
         // superscript and subscript support
         supersub,
@@ -36,4 +42,4 @@ export const MarkdownPreview: React.FC<{ markdownString: string }> = ({
       {markdownString}
     </ReactMarkdown>
   );
-};
+}
