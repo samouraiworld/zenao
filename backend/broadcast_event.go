@@ -27,7 +27,7 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, err
 	}
 
-	s.Logger.Info("edit-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("broadcast-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -83,7 +83,7 @@ func (s *ZenaoServer) BroadcastEvent(
 			continue
 		}
 		requests = append(requests, &resend.SendEmailRequest{
-			From:    "Zenao <broadcast@zenao.io>",
+			From:    "Zenao <broadcast@mail.zenao.io>",
 			To:      []string{clerkParticipant.Email},
 			Subject: fmt.Sprintf("Message from %s's organizer", evt.Title),
 			Html:    htmlStr,
