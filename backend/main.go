@@ -140,19 +140,19 @@ func execStart() error {
 
 	mailClient := (*resend.Client)(nil)
 	if conf.resendSecretKey != "" {
-		logger.Info("Using Resend", zap.String("secret-key", conf.resendSecretKey))
+		logger.Info("resend mail client initialized")
 		mailClient = resend.NewClient(conf.resendSecretKey)
 	}
 
 	zenao := &ZenaoServer{
-		Logger:             logger,
-		GetUser:            getUserFromClerk,
-		GetUserFromClerkID: getUserFromClerkID,
-		CreateUser:         createClerkUser,
-		Chain:              chain,
-		DB:                 db,
-		MailClient:         mailClient,
-		DiscordToken:       conf.discordtoken,
+		Logger:              logger,
+		GetUser:             getUserFromClerk,
+		GetUserFromClerkIDs: getUserFromClerkIDs,
+		CreateUser:          createClerkUser,
+		Chain:               chain,
+		DB:                  db,
+		MailClient:          mailClient,
+		DiscordToken:        conf.discordtoken,
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
@@ -187,16 +187,20 @@ func getUserFromClerk(ctx context.Context) *zeni.AuthUser {
 	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 }
 
-func getUserFromClerkID(ctx context.Context, id string) (*zeni.AuthUser, error) {
-	clerkUser, err := user.Get(ctx, id)
+func getUserFromClerkIDs(ctx context.Context, ids []string) ([]*zeni.AuthUser, error) {
+	userList, err := user.List(ctx, &user.ListParams{UserIDs: ids})
 	if err != nil {
 		return nil, err
 	}
-	email := ""
-	if len(clerkUser.EmailAddresses) != 0 {
-		email = clerkUser.EmailAddresses[0].EmailAddress
+	users := make([]*zeni.AuthUser, len(userList.Users))
+	for i, clerkUser := range userList.Users {
+		email := ""
+		if len(clerkUser.EmailAddresses) != 0 {
+			email = clerkUser.EmailAddresses[0].EmailAddress
+		}
+		users[i] = &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 	}
-	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
+	return users, nil
 }
 
 func createClerkUser(ctx context.Context, email string) (*zeni.AuthUser, error) {

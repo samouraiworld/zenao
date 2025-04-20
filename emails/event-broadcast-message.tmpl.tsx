@@ -19,7 +19,7 @@ export const EventBroadcastMessageEmail = () => (
     <Html>
         <Head />
         <Body style={main}>
-            <Preview>Message from organizer: {"{{.EventName}}"}</Preview>
+            <Preview>Message from organizer of {"{{.EventName}}"}</Preview>
             <Container style={container}>
                 <Img
                     alt="Event image"
@@ -29,14 +29,9 @@ export const EventBroadcastMessageEmail = () => (
                     style={eventImage}
                 />
                 <Section style={welcome.section}>
-                    <Text style={welcome.text}>Hi, {"{{.UserName}}"}</Text>
+                    <Text style={welcome.text}>Message from {"{{.EventName}}"}</Text>
                 </Section>
                 <Section style={details.section}>
-                    <Row>
-                        <Column>
-                            <Text style={details.headingText}>Message from the organizer of {"{{.EventName}}"}</Text>
-                        </Column>
-                    </Row>
                     <Row>
                         <Column>
                             <Section style={messageBox}>
@@ -100,14 +95,6 @@ const welcome = {
 const details = {
     section: {
         padding: "48px 20px",
-    },
-    headingText: {
-        fontSize: 22,
-        lineHeight: 1.3,
-        fontWeight: 500,
-        letterSpacing: -0.6,
-        margin: 0,
-        marginBottom: 8,
     },
     seeEventButton: {
         backgroundColor: "#000000",

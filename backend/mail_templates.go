@@ -100,16 +100,14 @@ func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string) (stri
 type eventBroadcast struct {
 	EventName string
 	ImageURL  string
-	UserName  string
 	Message   string
 	EventURL  string
 }
 
-func eventBroadcastMailContent(event *zeni.Event, userName string, message string) (string, string, error) {
+func eventBroadcastMailContent(event *zeni.Event, message string) (string, string, error) {
 	data := eventBroadcast{
 		ImageURL:  web2URL(event.ImageURI) + "?img-width=600&img-height=400&img-fit=cover&dpr=2",
 		EventName: event.Title,
-		UserName:  userName,
 		Message:   message,
 		EventURL:  eventPublicURL(event.ID),
 	}

@@ -38,7 +38,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	}
 
 	if s.MailClient == nil {
-		return nil, errors.New("the zenao mail client is not initialized")
+		return nil, errors.New("zenao mail client is not initialized")
 	}
 
 	evt := (*zeni.Event)(nil)
@@ -64,26 +64,28 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, err
 	}
 
+	idsList := make([]string, len(participants))
+	for i, participant := range participants {
+		idsList[i] = participant.ClerkID
+	}
+	clerkParticipants, err := s.GetUserFromClerkIDs(ctx, idsList)
+	if err != nil {
+		return nil, err
+	}
 	var requests []*resend.SendEmailRequest
-	for _, participant := range participants {
-		displayName := "Anon"
-		if participant.DisplayName != "" {
-			displayName = participant.DisplayName
-		}
-		s.Logger.Info("participant", zap.Any("participant", participant))
-		htmlStr, text, err := eventBroadcastMailContent(evt, displayName, req.Msg.Message)
+	for _, clerkParticipant := range clerkParticipants {
+		htmlStr, text, err := eventBroadcastMailContent(evt, req.Msg.Message)
 		if err != nil {
 			s.Logger.Error("event-broadcast-email-content", zap.Error(err))
 			continue
 		}
-		target, err := s.GetUserFromClerkID(ctx, participant.ClerkID)
-		if err != nil {
-			s.Logger.Error("get-user-from-clerk-id", zap.Error(err))
+		if clerkParticipant.Email == "" {
+			s.Logger.Error("event-broadcast-email-content", zap.String("clerk-id", clerkParticipant.ID), zap.String("email", clerkParticipant.Email))
 			continue
 		}
 		requests = append(requests, &resend.SendEmailRequest{
-			From:    "Zenao <broadcast@resend.zenao.vallenet.me>",
-			To:      []string{target.Email},
+			From:    "Zenao <broadcast@zenao.io>",
+			To:      []string{clerkParticipant.Email},
 			Subject: fmt.Sprintf("Message from %s's organizer", evt.Title),
 			Html:    htmlStr,
 			Text:    text,

@@ -57,7 +57,6 @@ message EditEventRequest {
   double ticket_price = 7; // XXX: use fixed point?
   uint32 capacity = 8;
   EventLocation location = 9;
-  bool notify_participants = 10;
 }
 
 message EditEventResponse { string id = 1; }
