@@ -68,7 +68,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	for i, participant := range participants {
 		idsList[i] = participant.ClerkID
 	}
-	clerkParticipants, err := s.GetUserFromClerkIDs(ctx, idsList)
+	clerkParticipants, err := s.GetUsersFromClerkIDs(ctx, idsList)
 	if err != nil {
 		return nil, err
 	}
