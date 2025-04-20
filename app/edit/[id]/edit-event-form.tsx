@@ -1,22 +1,22 @@
 "use client";
 
-import { useToast } from "@/app/hooks/use-toast";
+import React, { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useAuth } from "@clerk/nextjs";
+import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
+import { eventOptions } from "@/lib/queries/event";
 import { zenaoClient } from "@/app/zenao-client";
 import { EventForm } from "@/components/form/event-form";
-import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
+import { useToast } from "@/app/hooks/use-toast";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { currentTimezone } from "@/lib/time";
+import { userAddressOptions } from "@/lib/queries/user";
 import Text from "@/components/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
-import { eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
-import { currentTimezone } from "@/lib/time";
-import { useAuth } from "@clerk/nextjs";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -83,7 +83,6 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
           ...values,
           eventId: id,
           location: { address: { case: values.location.kind, value } },
-          notifyParticipants: true,
         },
         {
           headers: { Authorization: "Bearer " + token },
