@@ -72,13 +72,12 @@ func (s *ZenaoServer) BroadcastEvent(
 	if err != nil {
 		return nil, err
 	}
+	htmlStr, text, err := eventBroadcastMailContent(evt, req.Msg.Message)
+	if err != nil {
+		return nil, err
+	}
 	var requests []*resend.SendEmailRequest
 	for _, clerkParticipant := range clerkParticipants {
-		htmlStr, text, err := eventBroadcastMailContent(evt, req.Msg.Message)
-		if err != nil {
-			s.Logger.Error("event-broadcast-email-content", zap.Error(err))
-			continue
-		}
 		if clerkParticipant.Email == "" {
 			s.Logger.Error("event-broadcast-email-content", zap.String("clerk-id", clerkParticipant.ID), zap.String("email", clerkParticipant.Email))
 			continue
