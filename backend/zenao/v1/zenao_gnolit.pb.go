@@ -136,9 +136,6 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 	if e.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, e.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
-	if e.NotifyParticipants != false {
-		fmt.Fprintf(buf, "%s\tNotifyParticipants: %t,\n", linePrefix, e.NotifyParticipants)
-	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

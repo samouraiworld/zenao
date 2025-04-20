@@ -39,16 +39,15 @@ type CreateEventResponse struct {
 }
 
 type EditEventRequest struct {
-	EventId            string
-	Title              string
-	Description        string
-	ImageUri           string
-	StartDate          uint64
-	EndDate            uint64
-	TicketPrice        float64
-	Capacity           uint32
-	Location           *EventLocation
-	NotifyParticipants bool
+	EventId     string
+	Title       string
+	Description string
+	ImageUri    string
+	StartDate   uint64
+	EndDate     uint64
+	TicketPrice float64
+	Capacity    uint32
+	Location    *EventLocation
 }
 
 type EditEventResponse struct {
