@@ -306,7 +306,7 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 // GetAllParticipants implements zeni.DB.
 func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
 	var participants []*UserRole
-	if err := g.db.Find(&participants, "event_id = ? AND role = ?", eventID, "participant").Preload("User").Error; err != nil {
+	if err := g.db.Preload("User").Find(&participants, "event_id = ? AND role = ?", eventID, "participant").Error; err != nil {
 		return nil, err
 	}
 	res := make([]*zeni.User, 0, len(participants))

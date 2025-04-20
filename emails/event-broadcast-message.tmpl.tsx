@@ -4,13 +4,12 @@ import {
     Column,
     Container,
     Head,
-    Heading,
     Html,
     Img,
     Preview,
     Row,
     Section,
-    Text,
+    Text
 } from "@react-email/components";
 import React from "react";
 
@@ -20,7 +19,7 @@ export const EventBroadcastMessageEmail = () => (
     <Html>
         <Head />
         <Body style={main}>
-            <Preview>Message from organizer: {"{{.EventName }}"}</Preview>
+            <Preview>Message from organizer: {"{{.EventName}}"}</Preview>
             <Container style={container}>
                 <Img
                     alt="Event image"
@@ -30,18 +29,18 @@ export const EventBroadcastMessageEmail = () => (
                     style={eventImage}
                 />
                 <Section style={welcome.section}>
-                    <Text style={welcome.text}>Hi, {"{{.UserName }}"}</Text>
+                    <Text style={welcome.text}>Hi, {"{{.UserName}}"}</Text>
                 </Section>
                 <Section style={details.section}>
                     <Row>
                         <Column>
-                            <Heading style={details.headingText}>Message from the organizer of {"{{.EventName }}"}</Heading>
+                            <Text style={details.headingText}>Message from the organizer of {"{{.EventName}}"}</Text>
                         </Column>
                     </Row>
                     <Row>
                         <Column>
                             <Section style={messageBox}>
-                                <Text style={messageText}>{"{{.Message }}"}</Text>
+                                <Text style={messageText}>{"{{.Message}}"}</Text>
                             </Section>
                         </Column>
                     </Row>
@@ -55,7 +54,7 @@ export const EventBroadcastMessageEmail = () => (
                 </Section>
                 <Section style={footer}>
                     <Text style={footerText}>
-                        You're receiving this email because you're a participant of {"{{.EventName }}"}.
+                        You're receiving this email because you're a participant of {"{{.EventName}}"}.
                     </Text>
                 </Section>
             </Container>
@@ -98,14 +97,6 @@ const welcome = {
     },
 } as const;
 
-const descriptionText = {
-    fontSize: 16,
-    lineHeight: 1.5,
-    marginBottom: 20,
-    marginTop: 8,
-    color: "#444444",
-};
-
 const details = {
     section: {
         padding: "48px 20px",
@@ -143,7 +134,7 @@ const eventImage = {
 const messageBox = {
     backgroundColor: '#F5F5F5',
     borderRadius: 8,
-    padding: '0px 20px 20px 20px',
+    padding: '20px 20px 20px 20px',
     marginBottom: 24,
     borderLeft: '4px solid #000000',
 } as const;

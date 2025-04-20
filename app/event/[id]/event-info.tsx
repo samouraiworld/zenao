@@ -1,33 +1,34 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { format as formatTZ } from "date-fns-tz";
-import { format, fromUnixTime } from "date-fns";
-import { Calendar, MapPin } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Event, WithContext } from "schema-dts";
-import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import { TZDate } from "react-day-picker";
-import { ParticipateForm } from "./participate-form";
-import { ParticipantsSection } from "./participants-section";
-import { eventOptions } from "@/lib/queries/event";
-import { Card } from "@/components/cards/Card";
-import { MarkdownPreview } from "@/components/common/MarkdownPreview";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { zenaoClient } from "@/app/zenao-client";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { Separator } from "@/components/shadcn/separator";
+import { Card } from "@/components/cards/Card";
 import MapCaller from "@/components/common/map/map-lazy-components";
+import { MarkdownPreview } from "@/components/common/MarkdownPreview";
+import { UserAvatarWithName } from "@/components/common/user";
+import { Web3Image } from "@/components/images/web3-image";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Separator } from "@/components/shadcn/separator";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
+import { makeLocationFromEvent } from "@/lib/location";
+import { eventOptions } from "@/lib/queries/event";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
-import { UserAvatarWithName } from "@/components/common/user";
-import Text from "@/components/texts/text";
-import Heading from "@/components/texts/heading";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { makeLocationFromEvent } from "@/lib/location";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Web3Image } from "@/components/images/web3-image";
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { format, fromUnixTime } from "date-fns";
+import { format as formatTZ } from "date-fns-tz";
+import { Calendar, MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import React, { useMemo } from "react";
+import { TZDate } from "react-day-picker";
+import { Event, WithContext } from "schema-dts";
+import { ParticipantsSection } from "./participants-section";
+import { ParticipateForm } from "./participate-form";
 
 interface EventSectionProps {
   title: string;
@@ -81,11 +82,28 @@ export function EventInfo({ id }: { id: string }) {
 
   const iconSize = 22;
 
+  const onBroadcast = async () => {
+    const token = await getToken();
+    zenaoClient.broadcastEvent({
+      eventId: id,
+      message: "Samourai World is coming to Zenao! 🚀",
+    },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+  };
+
   if (!data) {
     return <p>{`Event doesn't exist`}</p>;
   }
   return (
     <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
+      <button
+        style={{ backgroundColor: "red" }}
+        onClick={onBroadcast}
+      >
+        Create Poll
+      </button>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
