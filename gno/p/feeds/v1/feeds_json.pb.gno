@@ -283,8 +283,8 @@ func (t *Tip) FromJSON(node *json.Node) {
 func (p *Post) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if p.LocalPostId != "" {
-		fields["localPostId"] = json.StringNode("", p.LocalPostId)
+	if p.LocalPostId != 0 {
+		fields["localPostId"] = json.StringNode("", strconv.FormatUint(p.LocalPostId, 10))
 	}
 	if p.Author != "" {
 		fields["author"] = json.StringNode("", p.Author)
@@ -337,7 +337,11 @@ func (p *Post) FromJSON(node *json.Node) {
 	fields := node.MustObject()
 
 	if val, ok := fields["localPostId"]; ok {
-		p.LocalPostId = val.MustString()
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		p.LocalPostId = fv
 	}
 	if val, ok := fields["author"]; ok {
 		p.Author = val.MustString()

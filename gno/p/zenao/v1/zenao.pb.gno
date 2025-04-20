@@ -145,3 +145,11 @@ type CreatePostRequest struct {
 type CreatePostResponse struct {
 	PostId string
 }
+
+type ReactPostRequest struct {
+	PostId string
+	Icon   string
+}
+
+type ReactPostResponse struct {
+}

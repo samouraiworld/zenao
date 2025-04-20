@@ -393,6 +393,7 @@ import (
 	"std"
 
 	"gno.land/p/zenao/daokit"
+	"gno.land/p/demo/ufmt"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 	"gno.land/r/zenao/social_feed"
 	user %q
@@ -415,7 +416,7 @@ func NewPost() {
 	post := %s
 
 	postID := social_feed.NewPost(feedID, post)
-	std.Emit(%q, "postID", postID)
+	std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 }
 `, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate),
 			}},
@@ -444,6 +445,58 @@ func NewPost() {
 
 	g.logger.Info("created standard post", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	return postID, nil
+}
+
+// ReactPost implements ZenaoChain
+func (g *gnoZenaoChain) ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error {
+	userRealmPkgPath := g.userRealmPkgPath(userID)
+	postIDInt, err := strconv.ParseUint(req.PostId, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+import (
+	"gno.land/p/zenao/daokit"
+	"gno.land/r/zenao/social_feed"
+	user %q
+)
+	
+func main() {
+	title := "User #%s reacts to post #%d in event #%s."
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: title,
+		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
+			Title: title,
+			Message: daokit.NewExecuteLambdaMsg(
+				NewReaction,
+			),
+		}),
+	})
+}
+
+func NewReaction() {
+	social_feed.ReactPost(%d, %q)
+}
+`, userRealmPkgPath, userID, postIDInt, eventID, postIDInt, req.Icon),
+			}},
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("reacted to a post", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	return nil
 }
 
 // CreatePoll implements ZenaoChain
@@ -511,7 +564,7 @@ func NewPoll() {
 	}
 
 	postID := social_feed.NewPost(feedID, post)
-	std.Emit(%q, "postID", postID)
+	std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 }
 `, eventPkgPath, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
 			}},
