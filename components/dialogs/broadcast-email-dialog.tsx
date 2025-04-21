@@ -3,6 +3,7 @@
 import { useForm, UseFormReturn } from "react-hook-form";
 import { Send } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useAuth } from "@clerk/clerk-react";
 import {
   Dialog,
   DialogClose,
@@ -25,6 +26,8 @@ import {
 } from "../shadcn/drawer";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
+import { useEventBroadcastEmail } from "@/lib/mutations/event-managment";
+import { useToast } from "@/app/hooks/use-toast";
 
 type BroadcastEmailDialogProps = {
   eventId: string;
@@ -37,6 +40,9 @@ export function BroadcastEmailDialog({
   open,
   onOpenChange,
 }: BroadcastEmailDialogProps) {
+  const { toast } = useToast();
+  const { getToken } = useAuth();
+  const { broadcastEmail, isPending } = useEventBroadcastEmail();
   const t = useTranslations("broadcast-email-form");
 
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -47,8 +53,30 @@ export function BroadcastEmailDialog({
   });
 
   const onSubmit = async (data: { message: string }) => {
-    console.log(eventId, data);
-    form.reset();
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("token missing");
+      }
+
+      broadcastEmail({
+        token,
+        eventId,
+        ...data,
+      });
+      form.reset();
+      onOpenChange(false);
+
+      toast({
+        title: t("toast-email-sent-success"),
+      });
+    } catch (err) {
+      console.error("error", err);
+      toast({
+        title: t("toast-email-sent-error"),
+      });
+    }
   };
 
   if (isDesktop) {
@@ -66,6 +94,7 @@ export function BroadcastEmailDialog({
               <BroadcastEmailForm
                 form={form}
                 onSubmit={form.handleSubmit(onSubmit)}
+                isLoading={isPending}
               />
             </Form>
           </div>
@@ -104,8 +133,10 @@ function BroadcastEmailForm({
   className,
   form,
   onSubmit,
+  isLoading,
 }: {
   form: UseFormReturn<{ message: string }>;
+  isLoading: boolean;
 } & React.ComponentProps<"form">) {
   const t = useTranslations("broadcast-email-form");
 
@@ -121,7 +152,7 @@ function BroadcastEmailForm({
         wordCounter
       />
       <div className="flex justify-end">
-        <ButtonWithChildren>
+        <ButtonWithChildren loading={isLoading}>
           <div className="flex gap-2 items-center">
             <Send />
             {t("send")}

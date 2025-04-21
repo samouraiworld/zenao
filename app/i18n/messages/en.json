@@ -149,6 +149,8 @@
     "message-input-placeholder": "What's new ?",
     "message-input-label": "Enter your message",
     "cancel": "Cancel",
-    "send": "Send email"
+    "send": "Send email",
+    "toast-email-sent-success": "Email sent !",
+    "toast-email-sent-error": "Error while trying to send the email"
   }
 }
