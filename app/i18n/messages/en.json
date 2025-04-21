@@ -142,5 +142,13 @@
     "pageTitle": "Blog",
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
     "publishedAt": "Published at"
+  },
+  "broadcast-email-form": {
+    "title": "Send an email to all participants",
+    "desc": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change.",
+    "message-input-placeholder": "What's new ?",
+    "message-input-label": "Enter your message",
+    "cancel": "Cancel",
+    "send": "Send email"
   }
 }

@@ -2,6 +2,7 @@
 
 import { useForm, UseFormReturn } from "react-hook-form";
 import { Send } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogClose,
@@ -36,7 +37,8 @@ export function BroadcastEmailDialog({
   open,
   onOpenChange,
 }: BroadcastEmailDialogProps) {
-  // TODO Schema
+  const t = useTranslations("broadcast-email-form");
+
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const form = useForm<{ message: string }>({
     defaultValues: {
@@ -55,12 +57,8 @@ export function BroadcastEmailDialog({
         <DialogContent className="md:max-w-2xl lg:max-w-3xl">
           <DialogHeader>
             <DialogClose />
-            <DialogTitle>Send an email to all participants</DialogTitle>
-            <DialogDescription>
-              Broadcasts are a great way to share more information about your
-              event, such as announcing a special guest, an event update, or a
-              logistical change.
-            </DialogDescription>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription>{t("desc")}</DialogDescription>
           </DialogHeader>
 
           <div className="w-full">
@@ -80,12 +78,8 @@ export function BroadcastEmailDialog({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle>Send an email to all participants</DrawerTitle>
-          <DrawerDescription>
-            Broadcasts are a great way to share more information about your
-            event, such as announcing a special guest, an event update, or a
-            logistical change.
-          </DrawerDescription>
+          <DrawerTitle>{t("title")}</DrawerTitle>
+          <DrawerDescription>{t("desc")}</DrawerDescription>
         </DrawerHeader>
         <Form {...form}>
           <BroadcastEmailForm
@@ -96,7 +90,9 @@ export function BroadcastEmailDialog({
         </Form>
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
-            <ButtonWithChildren variant="outline">Cancel</ButtonWithChildren>
+            <ButtonWithChildren variant="outline">
+              {t("cancel")}
+            </ButtonWithChildren>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
@@ -111,13 +107,15 @@ function BroadcastEmailForm({
 }: {
   form: UseFormReturn<{ message: string }>;
 } & React.ComponentProps<"form">) {
+  const t = useTranslations("broadcast-email-form");
+
   return (
     <form onSubmit={onSubmit} className={cn("flex flex-col gap-2", className)}>
       <FormFieldTextArea
         control={form.control}
         name="message"
-        placeholder="What's new ?"
-        label="Enter your message"
+        placeholder={t("message-input-placeholder")}
+        label={t("message-input-label")}
         className="min-h-[100px] max-h-[500px]"
         maxLength={5000}
         wordCounter
@@ -126,7 +124,7 @@ function BroadcastEmailForm({
         <ButtonWithChildren>
           <div className="flex gap-2 items-center">
             <Send />
-            Send
+            {t("send")}
           </div>
         </ButtonWithChildren>
       </div>
