@@ -115,6 +115,7 @@ export function BroadcastEmailDialog({
             form={form}
             onSubmit={form.handleSubmit(onSubmit)}
             className="px-4"
+            isLoading={isPending}
           />
         </Form>
         <DrawerFooter className="pt-2">
