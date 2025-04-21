@@ -39,6 +39,10 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 	g.P()
 	g.P("package ", file.GoPackageName)
 
+	g.P("import (")
+	genImportStmts(gen, g, file)
+	g.P(")")
+
 	for _, en := range file.Enums {
 		g.P()
 
@@ -111,6 +115,7 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 	g.P(`	"errors"`)
 	g.P(`	"strconv"`)
 	g.P(`	"gno.land/p/demo/json"`)
+	genImportStmts(gen, g, file)
 	g.P(")")
 
 	for _, m := range file.Messages {
@@ -154,5 +159,21 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 			oneOfFromJSON("fields", "	", g, f)
 		}
 		g.P("}")
+	}
+}
+
+// TODO: fork proto gen go into a clean proto gen gno instead of this
+func genImportStmts(gen *protogen.Plugin, g *protogen.GeneratedFile, file *protogen.File) {
+	for i, imps := 0, file.Desc.Imports(); i < imps.Len(); i++ {
+		imp := imps.Get(i)
+		impFile, ok := gen.FilesByPath[imp.Path()]
+		if !ok {
+			continue
+		}
+
+		alias := g.QualifiedGoIdent(impFile.GoImportPath.Ident(""))
+		alias = strings.TrimSuffix(alias, ".")
+		prefix := filepath.ToSlash(filepath.Dir(impFile.GeneratedFilenamePrefix))
+		g.P("	", alias, " ", `"gno.land/p/zenao/`, prefix, `"`)
 	}
 }

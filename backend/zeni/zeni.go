@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/ringsaturn/tzf"
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
@@ -34,6 +36,43 @@ type Event struct {
 	Capacity    uint32
 	CreatorID   string
 	Location    *zenaov1.EventLocation
+}
+
+type Feed struct {
+	ID      string
+	Slug    string
+	EventID string
+}
+
+type Post struct {
+	ID        string
+	Post      *feedsv1.Post
+	UserID    string
+	FeedID    string
+	Reactions []*Reaction
+}
+
+type Poll struct {
+	ID       string
+	Question string
+	Kind     pollsv1.PollKind
+	Duration int64
+	Results  []*pollsv1.PollResult
+	PostID   string
+	Votes    []*Vote
+}
+
+type Vote struct {
+	ID     string
+	UserID string
+	Option string
+}
+
+type Reaction struct {
+	ID     string
+	PostID string
+	UserID string
+	Icon   string
 }
 
 var tzFinder tzf.F
@@ -80,7 +119,19 @@ type DB interface {
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
+	GetEventByPollID(pollID string) (*Event, error)
+	GetEventByPostID(postID string) (*Event, error)
 	GetAllParticipants(eventID string) ([]*User, error)
+
+	CreateFeed(eventID string, slug string) (*Feed, error)
+	GetFeed(eventID string, slug string) (*Feed, error)
+	GetFeedByID(feedID string) (*Feed, error)
+	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	GetAllPosts() ([]*Post, error)
+	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
+	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
+	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+	GetPollByID(pollID string) (*Poll, error)
 }
 
 type Chain interface {
@@ -92,6 +143,11 @@ type Chain interface {
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
 	Participate(eventID string, callerID string, participantID string) error
+
+	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
+	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
+	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
+	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }
 
 func LocationToString(location *zenaov1.EventLocation) (string, error) {

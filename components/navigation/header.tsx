@@ -2,16 +2,9 @@
 
 import { UrlObject } from "url";
 import React, { useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import {
-  BookOpenText,
-  CalendarDays,
-  CompassIcon,
-  LucideProps,
-  Tickets,
-} from "lucide-react";
+import { BookOpenText, CompassIcon, LucideProps, Tickets } from "lucide-react";
 import {
   ClerkLoading,
   SignedIn,
@@ -21,8 +14,9 @@ import {
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import Text from "../texts/text";
+import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import { Web3Image } from "../images/web3-image";
 import { ToggleThemeButton } from "@/components/buttons/ToggleThemeButton";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -58,13 +52,6 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
         icon: CompassIcon,
         needsAuth: false,
         children: t("discover"),
-      },
-      {
-        key: "your-events",
-        to: "/created",
-        icon: CalendarDays,
-        needsAuth: true,
-        children: t("your-events"),
       },
       {
         key: "tickets",
@@ -106,7 +93,7 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
               <Text
                 size="sm"
                 variant={isActive ? "primary" : "secondary"}
-                className="text-inherit max-[550px]:hidden"
+                className="text-inherit max-[624px]:hidden"
               >
                 {item.children}
               </Text>
@@ -134,7 +121,7 @@ export function Header() {
       {/* Desktop */}
       <div className="flex max-[450px]:gap-4 gap-6 items-center">
         <Link href="/" className="flex gap-2 items-center">
-          <Image
+          <Web3Image
             src="/zenao-logo.png"
             alt="zenao logo"
             width={28}
@@ -151,10 +138,18 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center">
+        <Link passHref href="/create">
+          <ButtonWithChildren
+            variant="outline"
+            size="sm"
+            className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
+          >
+            {t("create-event")}
+          </ButtonWithChildren>
+        </Link>
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
-
         <Auth userAddress={address} className="h-fit" />
       </div>
     </div>
@@ -169,7 +164,6 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
 }) => {
   const t = useTranslations("navigation");
   const { signOut } = useAuth();
-  const router = useRouter();
 
   return (
     <div className={className}>
@@ -193,18 +187,31 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
             </ClerkLoading>
             {/* Signed in state */}
             <SignedIn>
-              <div className={avatarClassName}>
+              <div
+                className={cn(
+                  avatarClassName,
+                  "cursor-pointer hover:scale-110 transition-transform ease-out",
+                )}
+              >
                 <UserAvatar address={userAddress} className={avatarClassName} />
               </div>
             </SignedIn>
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <DropdownMenuItem onClick={() => router.push("/settings")}>
-            {t("settings")}
-          </DropdownMenuItem>
+          <Link href={`/profile/${userAddress}`}>
+            <DropdownMenuItem className="cursor-pointer">
+              {t("view-profile")}
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/settings">
+            <DropdownMenuItem className="cursor-pointer">
+              {t("settings")}
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            className="cursor-pointer"
             onClick={() => {
               signOut();
             }}

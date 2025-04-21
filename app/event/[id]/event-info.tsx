@@ -1,31 +1,33 @@
 "use client";
 
-import React, { useCallback } from "react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import Image from "next/image";
+import React, { useMemo } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
 import { Calendar, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { ParticipateForm } from "./ParticipateForm";
-import { imageHeight, imageWidth } from "./constants";
+import { TZDate } from "react-day-picker";
+import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { web3ImgLoader } from "@/lib/web3-img-loader";
-import { EventFormSchemaType } from "@/components/form/types";
 import { Separator } from "@/components/shadcn/separator";
-import MapCaller from "@/components/common/map/MapLazyComponents";
+import MapCaller from "@/components/common/map/map-lazy-components";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { makeLocationFromEvent } from "@/lib/location";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Web3Image } from "@/components/images/web3-image";
 import { cn } from "@/lib/tailwind";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
 
@@ -52,40 +54,13 @@ export function EventInfo({ id }: { id: string }) {
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
 
-  const isOrganizer = roles.includes("organizer");
-  const isParticipate = roles.includes("participant");
+  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
+  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
-  const queryClient = useQueryClient();
 
   // Correctly reconstruct location object
-  let location: EventFormSchemaType["location"] = {
-    kind: "custom",
-    address: "",
-    timeZone: "",
-  };
-  switch (data.location?.address.case) {
-    case "custom":
-      location = {
-        kind: "custom",
-        address: data.location?.address.value.address,
-        timeZone: data.location?.address.value.timezone,
-      };
-      break;
-    case "geo":
-      location = {
-        kind: "geo",
-        address: data.location?.address.value.address,
-        lat: data.location?.address.value.lat,
-        lng: data.location?.address.value.lng,
-        size: data.location?.address.value.size,
-      };
-      break;
-    case "virtual":
-      location = {
-        kind: "virtual",
-        location: data.location?.address.value.uri,
-      };
-  }
+  const location = makeLocationFromEvent(data.location);
+  const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -95,27 +70,16 @@ export function EventInfo({ id }: { id: string }) {
   const descContainerRef = React.useRef<HTMLDivElement>(null);
   const isDescTruncated = useIsLinesTruncated(descContainerRef, descLineClamp);
 
-  const handleParticipateSuccess = useCallback(async () => {
-    const opts = eventUserRoles(id, address);
-    await queryClient.cancelQueries(opts);
-    queryClient.setQueryData(opts.queryKey, (roles) => {
-      if (!roles) {
-        return ["participant" as const];
-      }
-      if (!roles.includes("participant")) {
-        return [...roles, "participant" as const];
-      }
-      return roles;
-    });
-  }, [queryClient, id, address]);
-
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
     "@type": "Event",
     name: data.title,
     description: data.description,
-    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
-    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
+    startDate: new TZDate(
+      Number(data.startDate) * 1000,
+      timezone,
+    ).toISOString(),
+    endDate: new TZDate(Number(data.endDate) * 1000, timezone).toISOString(),
     location:
       location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
@@ -136,15 +100,18 @@ export function EventInfo({ id }: { id: string }) {
 
       {/* Left Section */}
       <div className="flex flex-col gap-4 w-full sm:w-2/5">
-        <Image
-          src={data.imageUri}
-          width={imageWidth}
-          height={imageHeight}
-          alt="Event"
-          priority
-          className="flex w-full rounded-xl self-center"
-          loader={web3ImgLoader}
-        />
+        <AspectRatio ratio={1 / 1}>
+          <Web3Image
+            src={data.imageUri}
+            sizes="(max-width: 768px) 100vw,
+            (max-width: 1200px) 50vw,
+            33vw"
+            fill
+            alt="Event"
+            priority
+            className="flex w-full rounded-xl self-center object-cover"
+          />
+        </AspectRatio>
         {/* If the user is organizer, link to /edit page */}
         {isOrganizer && (
           <Card className="flex flex-row items-center">
@@ -191,7 +158,9 @@ export function EventInfo({ id }: { id: string }) {
                 -
               </Text>
               <Text variant="secondary" size="sm">
-                {format(fromUnixTime(Number(data.endDate)), "PPp")}
+                {formatTZ(fromUnixTime(Number(data.endDate)), "PPp O", {
+                  timeZone: timezone,
+                })}
               </Text>
             </div>
           </div>
@@ -224,7 +193,7 @@ export function EventInfo({ id }: { id: string }) {
 
         {/* Participate Card */}
         <Card className="mt-2">
-          {isParticipate ? (
+          {isParticipant ? (
             <div>
               <div className="flex flex-row justify-between">
                 <Heading level={2} size="xl">
@@ -251,8 +220,9 @@ export function EventInfo({ id }: { id: string }) {
               </Heading>
               <Text className="my-4">{t("join-desc")}</Text>
               <ParticipateForm
-                onSuccess={handleParticipateSuccess}
                 eventId={id}
+                userId={userId}
+                userAddress={address}
               />
             </div>
           )}

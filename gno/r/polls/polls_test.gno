@@ -42,7 +42,7 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green"},
-				duration: int64(time.Minute) * 30,
+				duration: int64(time.Minute) * 30 / int64(time.Second),
 			},
 			output: output{
 				panic: false,
@@ -52,7 +52,7 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red"},
-				duration: int64(time.Minute) * 30,
+				duration: int64(time.Minute) * 30 / int64(time.Second),
 			},
 			output: output{
 				panic: true,
@@ -62,7 +62,7 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black"},
-				duration: int64(time.Minute) * 30,
+				duration: int64(time.Minute) * 30 / int64(time.Second),
 			},
 			output: output{
 				panic: true,
@@ -72,7 +72,7 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "", "green"},
-				duration: int64(time.Minute) * 30,
+				duration: int64(time.Minute) * 30 / int64(time.Second),
 			},
 			output: output{
 				panic: true,
@@ -82,7 +82,7 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "yellow", "orange", "purple", "pink", "brown", "black", "this option is too too too too too too long"},
-				duration: int64(time.Minute) * 30,
+				duration: int64(time.Minute) * 30 / int64(time.Second),
 			},
 			output: output{
 				panic: true,
@@ -92,7 +92,7 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green", "blue"},
-				duration: int64(time.Minute) * 30,
+				duration: int64(time.Minute) * 30 / int64(time.Second),
 			},
 			output: output{
 				panic: true,
@@ -102,7 +102,7 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green"},
-				duration: int64(time.Minute) * 10,
+				duration: int64(time.Minute) * 10 / int64(time.Second),
 			},
 			output: output{
 				panic: true,
@@ -112,7 +112,7 @@ func TestNewPoll(t *testing.T) {
 			input: input{
 				question: "What is your favorite color?",
 				options:  []string{"red", "blue", "green"},
-				duration: int64(time.Hour) * 24 * 30 * 2,
+				duration: int64(time.Hour) * 24 * 30 * 2 / int64(time.Second),
 			},
 			output: output{
 				panic: true,
@@ -159,16 +159,16 @@ func TestVote(t *testing.T) {
 
 	type testTable = map[string]test
 
-	pvFunc := func(addr std.Address) bool {
-		if addr == bob {
+	pvFunc := func(addr string) bool {
+		if addr == bob.String() {
 			return true
 		}
 		return false
 
 	}
-	poll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, nil)
-	pollPv := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, pvFunc)
-	pollSingle := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_SINGLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, nil)
+	poll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour)/int64(time.Second), []string{"red", "blue", "green"}, nil)
+	pollPv := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour)/int64(time.Second), []string{"red", "blue", "green"}, pvFunc)
+	pollSingle := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_SINGLE_CHOICE, int64(time.Hour)/int64(time.Second), []string{"red", "blue", "green"}, nil)
 
 	tests := testTable{
 		"valid vote": {
@@ -330,8 +330,8 @@ func TestGetInfo(t *testing.T) {
 
 	type testTable = map[string]test
 
-	poll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, nil)
-	emptyPoll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour), []string{"red", "blue", "green"}, nil)
+	poll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour)/int64(time.Second), []string{"red", "blue", "green"}, nil)
+	emptyPoll := NewPoll("What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour)/int64(time.Second), []string{"red", "blue", "green"}, nil)
 	std.TestSetOriginCaller(alice)
 	Vote(1, "blue")
 	std.TestSetOriginCaller(bob)
@@ -354,7 +354,7 @@ func TestGetInfo(t *testing.T) {
 						{Option: "red", Count: 1, HasUserVoted: false},
 					},
 					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
-					Duration:  int64(time.Hour),
+					Duration:  int64(time.Hour) / int64(time.Second),
 					CreatedAt: poll.CreatedAt,
 					CreatedBy: poll.CreatedBy.String(),
 				},
@@ -374,7 +374,7 @@ func TestGetInfo(t *testing.T) {
 						{Option: "red", Count: 1, HasUserVoted: true},
 					},
 					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
-					Duration:  int64(time.Hour),
+					Duration:  int64(time.Hour) / int64(time.Second),
 					CreatedAt: poll.CreatedAt,
 					CreatedBy: poll.CreatedBy.String(),
 				},
@@ -394,7 +394,7 @@ func TestGetInfo(t *testing.T) {
 						{Option: "red", Count: 0, HasUserVoted: false},
 					},
 					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
-					Duration:  int64(time.Hour),
+					Duration:  int64(time.Hour) / int64(time.Second),
 					CreatedAt: emptyPoll.CreatedAt,
 					CreatedBy: emptyPoll.CreatedBy.String(),
 				},

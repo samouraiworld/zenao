@@ -33,7 +33,7 @@ func (p *Poll) GnoLiteral(typePrefix string, linePrefix string) string {
 		fmt.Fprintf(buf, "%s\tQuestion: %q,\n", linePrefix, p.Question)
 	}
 	if len(p.Results) != 0 {
-		fmt.Fprintf(buf, "%s\tResults: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tResults: []*PollResult{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range p.Results {
 			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))

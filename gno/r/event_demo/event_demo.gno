@@ -9,6 +9,7 @@ import (
 	"gno.land/p/zenao/events"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/r/demo/profile"
+	"gno.land/r/zenao/social_feed"
 )
 
 var DAO daokit.DAO
@@ -34,6 +35,12 @@ func init() {
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
+	social_feed.NewFeed("main", false, IsMember)
+}
+
+// Set public to be used as auth layer for external entities (e.g polls)
+func IsMember(memberId string) bool {
+	return daoPrivate.Members.IsMember(memberId)
 }
 
 func Vote(proposalID uint64, vote daocond.Vote) {

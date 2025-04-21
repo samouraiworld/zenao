@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"gno.land/p/demo/json"
+	v1 "gno.land/p/zenao/polls/v1"
 )
 
 func (e *EditUserRequest) ToJSON() *json.Node {
@@ -613,4 +614,208 @@ func (b *BatchProfileRequest) FromJSON(node *json.Node) {
 		}
 		b.Addresses = arr
 	}
+}
+
+func (c *CreatePollRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
+	if c.Question != "" {
+		fields["question"] = json.StringNode("", c.Question)
+	}
+	if len(c.Options) != 0 {
+		arr := make([]*json.Node, len(c.Options))
+		for i, val := range c.Options {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["options"] = json.ArrayNode("", arr)
+	}
+	if c.Duration != 0 {
+		fields["duration"] = json.StringNode("", strconv.FormatInt(c.Duration, 10))
+	}
+	if c.Kind != 0 {
+		fields["kind"] = json.StringNode("", c.Kind.ToString())
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePollRequest) FromJSON(node *json.Node) {
+	*c = CreatePollRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
+	}
+	if val, ok := fields["question"]; ok {
+		c.Question = val.MustString()
+	}
+	if val, ok := fields["options"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Options = arr
+	}
+	if val, ok := fields["duration"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		c.Duration = fv
+	}
+	if val, ok := fields["kind"]; ok {
+		c.Kind = v1.PollKindFromString(val.MustString())
+	}
+}
+
+func (c *CreatePollResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.PostId != "" {
+		fields["postId"] = json.StringNode("", c.PostId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePollResponse) FromJSON(node *json.Node) {
+	*c = CreatePollResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		c.PostId = val.MustString()
+	}
+}
+
+func (v *VotePollRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if v.PollId != "" {
+		fields["pollId"] = json.StringNode("", v.PollId)
+	}
+	if v.Option != "" {
+		fields["option"] = json.StringNode("", v.Option)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (v *VotePollRequest) FromJSON(node *json.Node) {
+	*v = VotePollRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["pollId"]; ok {
+		v.PollId = val.MustString()
+	}
+	if val, ok := fields["option"]; ok {
+		v.Option = val.MustString()
+	}
+}
+
+func (v *VotePollResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (v *VotePollResponse) FromJSON(node *json.Node) {
+	*v = VotePollResponse{}
+}
+
+func (c *CreatePostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
+	if c.Content != "" {
+		fields["content"] = json.StringNode("", c.Content)
+	}
+	if len(c.Tags) != 0 {
+		arr := make([]*json.Node, len(c.Tags))
+		for i, val := range c.Tags {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["tags"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePostRequest) FromJSON(node *json.Node) {
+	*c = CreatePostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
+	}
+	if val, ok := fields["content"]; ok {
+		c.Content = val.MustString()
+	}
+	if val, ok := fields["tags"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Tags = arr
+	}
+}
+
+func (c *CreatePostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.PostId != "" {
+		fields["postId"] = json.StringNode("", c.PostId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePostResponse) FromJSON(node *json.Node) {
+	*c = CreatePostResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		c.PostId = val.MustString()
+	}
+}
+
+func (r *ReactPostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if r.PostId != "" {
+		fields["postId"] = json.StringNode("", r.PostId)
+	}
+	if r.Icon != "" {
+		fields["icon"] = json.StringNode("", r.Icon)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactPostRequest) FromJSON(node *json.Node) {
+	*r = ReactPostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		r.PostId = val.MustString()
+	}
+	if val, ok := fields["icon"]; ok {
+		r.Icon = val.MustString()
+	}
+}
+
+func (r *ReactPostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactPostResponse) FromJSON(node *json.Node) {
+	*r = ReactPostResponse{}
 }

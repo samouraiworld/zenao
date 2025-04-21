@@ -33,9 +33,10 @@ message AudioPost {
 }
 
 message VideoPost {
-  string description = 1;
-  string video_uri = 2;
-  string thumbnail_image_uri = 3;
+  string title = 1;
+  string description = 2;
+  string video_uri = 3;
+  string thumbnail_image_uri = 4;
 }
 
 // XXX: not used yet in contracts
@@ -53,24 +54,25 @@ message Tip {
 }
 
 message Post {
-  string author = 1;
-  string parent_uri = 2;
-  PostGeoLoc loc = 3;
+  uint64 local_post_id = 1;
+  string author = 2;
+  string parent_uri = 3;
+  PostGeoLoc loc = 4;
   // XXX: map any extentions = 10;
 
-  int64 created_at = 4;
-  int64 updated_at = 5;
-  int64 deleted_at = 6; // if != 0 -> deleted
+  int64 created_at = 5;
+  int64 updated_at = 6;
+  int64 deleted_at = 7; // if != 0 -> deleted
 
-  repeated string tags = 7;
+  repeated string tags = 8;
 
   oneof post {
-    StandardPost standard = 8;
-    ArticlePost article = 9;
-    LinkPost link = 10;
-    ImagePost image = 11;
-    VideoPost video = 12;
-    AudioPost audio = 13;
+    StandardPost standard = 9;
+    ArticlePost article = 10;
+    LinkPost link = 11;
+    ImagePost image = 12;
+    VideoPost video = 13;
+    AudioPost audio = 14;
   }
 }
 

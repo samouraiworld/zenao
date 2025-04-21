@@ -1,0 +1,33 @@
+name: Go Format
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+
+jobs:
+  check-go-fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
+        with:
+          go-version-file: go.mod
+          cache-key-suffix: go-fmt
+
+      - name: Run go fmt
+        run: go fmt ./...
+
+      - name: Check that there is no diff
+        run: |
+          mrdiff=$(git status --porcelain)
+          if [[ $mrdiff ]]; then
+              echo 'ERROR: Diff found!'
+              echo $mrdiff
+              git diff
+              exit 1
+          fi 

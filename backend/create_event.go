@@ -10,6 +10,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/webhook"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -43,8 +44,11 @@ func (s *ZenaoServer) CreateEvent(
 	evt := (*zeni.Event)(nil)
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		var err error
 		if evt, err = db.CreateEvent(userID, req.Msg); err != nil {
+			return err
+		}
+
+		if _, err = db.CreateFeed(evt.ID, "main"); err != nil {
 			return err
 		}
 
@@ -53,12 +57,17 @@ func (s *ZenaoServer) CreateEvent(
 			return err
 		}
 
-		if s.MailClient != nil {
-			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
-			if err != nil {
-				return err
-			}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
 
+	if s.MailClient != nil {
+		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
+		if err != nil {
+			s.Logger.Error("generate-event-email-content", zap.Error(err), zap.String("event-id", evt.ID))
+		} else {
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:    "Zenao <noreply@mail.zenao.io>",
@@ -67,13 +76,9 @@ func (s *ZenaoServer) CreateEvent(
 				Html:    htmlStr,
 				Text:    text,
 			}); err != nil {
-				return err
+				s.Logger.Error("send-event-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID))
 			}
 		}
-
-		return nil
-	}); err != nil {
-		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{

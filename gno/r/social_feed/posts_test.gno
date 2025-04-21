@@ -3,7 +3,9 @@ package social_feed
 import (
 	"std"
 	"testing"
+	"time"
 
+	"gno.land/p/demo/avl"
 	"gno.land/p/demo/seqid"
 	"gno.land/p/demo/testutils"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
@@ -22,7 +24,7 @@ func TestNewPost(t *testing.T) {
 	}
 
 	type output struct {
-		localPostId string
+		localPostId uint64
 		panic       bool
 	}
 
@@ -40,7 +42,7 @@ func TestNewPost(t *testing.T) {
 				post:   &feedsv1.Post{},
 			},
 			output: output{
-				localPostId: "public:0000001",
+				localPostId: 1,
 				panic:       false,
 			},
 		},
@@ -56,7 +58,8 @@ func TestNewPost(t *testing.T) {
 	}
 
 	std.TestSetOriginCaller(alice)
-	NewFeed("private", false, func(string) bool { return false })
+	pvFunc := func(string) bool { return false }
+	NewFeed("private", false, pvFunc)
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -79,7 +82,7 @@ func TestGetPost(t *testing.T) {
 	setupTest()
 
 	type input struct {
-		localPostId string
+		localPostId uint64
 	}
 
 	type output struct {
@@ -94,12 +97,16 @@ func TestGetPost(t *testing.T) {
 
 	type testTable = map[string]test
 
-	validPost := &feedsv1.Post{}
+	validPost := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 0,
+		Post:      &feedsv1.StandardPost{},
+	}
 
 	tests := testTable{
 		"valid post": {
 			input: input{
-				localPostId: "public:0000001",
+				localPostId: 1,
 			},
 			output: output{
 				post:  validPost,
@@ -108,7 +115,7 @@ func TestGetPost(t *testing.T) {
 		},
 		"invalid post": {
 			input: input{
-				localPostId: "public:0000002",
+				localPostId: 2,
 			},
 			output: output{
 				panic: true,
@@ -140,7 +147,7 @@ func TestDeletePost(t *testing.T) {
 	setupTest()
 
 	type input struct {
-		localPostId string
+		localPostId uint64
 		caller      std.Address
 	}
 
@@ -158,7 +165,7 @@ func TestDeletePost(t *testing.T) {
 	tests := testTable{
 		"valid post": {
 			input: input{
-				localPostId: "public:0000001",
+				localPostId: 1,
 				caller:      alice,
 			},
 			output: output{
@@ -167,7 +174,7 @@ func TestDeletePost(t *testing.T) {
 		},
 		"invalid post": {
 			input: input{
-				localPostId: "public:0000002",
+				localPostId: 2,
 				caller:      alice,
 			},
 			output: output{
@@ -176,7 +183,7 @@ func TestDeletePost(t *testing.T) {
 		},
 		"not the creator": {
 			input: input{
-				localPostId: "public:0000001",
+				localPostId: 1,
 				caller:      bob,
 			},
 			output: output{
@@ -185,7 +192,7 @@ func TestDeletePost(t *testing.T) {
 		},
 		"already deleted": {
 			input: input{
-				localPostId: "public:0000001",
+				localPostId: 1,
 				caller:      alice,
 			},
 			output: output{
@@ -214,6 +221,10 @@ func TestDeletePost(t *testing.T) {
 			}
 			std.TestSetOriginCaller(tc.input.caller)
 			DeletePost(tc.input.localPostId)
+			got := GetPost(tc.input.localPostId)
+			if !tc.output.panic && got.DeletedAt == 0 {
+				t.Errorf("expected deleted at %d, got %d", time.Now().Unix(), got.DeletedAt)
+			}
 		})
 	}
 }
@@ -222,12 +233,14 @@ func TestEditPost(t *testing.T) {
 	setupTest()
 
 	type input struct {
-		localPostId string
+		localPostId uint64
 		newPost     *feedsv1.Post
 	}
 
 	type output struct {
-		panic bool
+		post    *feedsv1.Post
+		panic   bool
+		updated bool
 	}
 
 	type test struct {
@@ -240,60 +253,75 @@ func TestEditPost(t *testing.T) {
 	post := &feedsv1.Post{
 		Author:    alice.String(),
 		DeletedAt: 0,
-		Post:      &feedsv1.StandardPost{},
+		UpdatedAt: 0,
+		Tags:      []string{"tag1", "tag2"},
+		Post:      &feedsv1.StandardPost{Content: "original content"},
 	}
 
 	deletedPost := &feedsv1.Post{
 		Author:    alice.String(),
 		DeletedAt: 1,
-		Post:      &feedsv1.StandardPost{},
+		UpdatedAt: 0,
+		Tags:      []string{"tag1", "tag2"},
+		Post:      &feedsv1.StandardPost{Content: "original content"},
 	}
 
 	newPost := &feedsv1.Post{
 		Author:    bob.String(),
 		DeletedAt: 0,
-		Post:      &feedsv1.StandardPost{},
+		UpdatedAt: 0,
+		Tags:      []string{"tag1", "tag3"},
+		Post:      &feedsv1.StandardPost{Content: "new content"},
 	}
 
 	std.TestSetOriginCaller(alice)
 	NewPost("public", post)
 	NewPost("public", deletedPost)
+	DeletePost(2)
 
 	tests := testTable{
 		"valid post": {
 			input: input{
-				localPostId: "public:0000001",
+				localPostId: 1,
 				newPost:     newPost,
 			},
 			output: output{
-				panic: false,
+				post:    newPost,
+				panic:   false,
+				updated: true,
 			},
 		},
 		"invalid post": {
 			input: input{
-				localPostId: "public:0000003",
+				localPostId: 3,
 				newPost:     newPost,
 			},
 			output: output{
-				panic: true,
+				post:    nil,
+				panic:   true,
+				updated: false,
 			},
 		},
 		"not the creator": {
 			input: input{
-				localPostId: "public:0000001",
+				localPostId: 1,
 				newPost:     newPost,
 			},
 			output: output{
-				panic: true,
+				post:    nil,
+				panic:   true,
+				updated: false,
 			},
 		},
 		"already deleted": {
 			input: input{
-				localPostId: "public:0000002",
+				localPostId: 2,
 				newPost:     newPost,
 			},
 			output: output{
-				panic: true,
+				post:    nil,
+				panic:   true,
+				updated: false,
 			},
 		},
 	}
@@ -308,19 +336,44 @@ func TestEditPost(t *testing.T) {
 				}()
 			}
 			EditPost(tc.input.localPostId, tc.input.newPost)
+			got := GetPost(tc.input.localPostId)
+			if tc.output.updated && got.UpdatedAt == 0 {
+				t.Errorf("expected updated post")
+			}
+			if !tc.output.updated && got.UpdatedAt != 0 {
+				t.Errorf("expected unchanged post")
+			}
+
+			if tc.output.post != nil {
+				if got.Author != tc.output.post.Author {
+					t.Errorf("expected author %q, got %q", tc.output.post.Author, got.Author)
+				}
+				if got.DeletedAt != tc.output.post.DeletedAt {
+					t.Errorf("expected deleted at %d, got %d", tc.output.post.DeletedAt, got.DeletedAt)
+				}
+				if len(got.Tags) != len(tc.output.post.Tags) {
+					t.Errorf("expected %d tags, got %d", len(tc.output.post.Tags), len(got.Tags))
+				}
+				for i, tag := range got.Tags {
+					if tag != tc.output.post.Tags[i] {
+						t.Errorf("expected tag %q, got %q", tc.output.post.Tags[i], tag)
+					}
+				}
+				stdExpected := tc.output.post.Post.(*feedsv1.StandardPost)
+				stdGot := got.Post.(*feedsv1.StandardPost)
+				if stdExpected.Content != stdGot.Content {
+					t.Errorf("expected content %q, got %q", stdExpected.Content, stdGot.Content)
+				}
+			}
 		})
 	}
-}
-
-func setupTest() {
-	id = seqid.ID(0)
 }
 
 func TestReactPost(t *testing.T) {
 	setupTest()
 
 	type input struct {
-		localPostId string
+		localPostId uint64
 		user        string
 	}
 
@@ -357,16 +410,16 @@ func TestReactPost(t *testing.T) {
 	NewPost("public", post)
 	NewPost("public", post2)
 	NewPost("public", post3)
-	ReactPost("public:0000001", "like")
-	ReactPost("public:0000001", "dislike")
+	ReactPost(1, "like")
+	ReactPost(1, "dislike")
 	std.TestSetOriginCaller(bob)
-	ReactPost("public:0000001", "like")
-	ReactPost("public:0000002", "like")
+	ReactPost(1, "like")
+	ReactPost(2, "like")
 
 	tests := testTable{
 		"post without reaction": {
 			input: input{
-				localPostId: "public:0000003",
+				localPostId: 3,
 				user:        alice.String(),
 			},
 			output: output{
@@ -375,7 +428,7 @@ func TestReactPost(t *testing.T) {
 		},
 		"post with reaction": {
 			input: input{
-				localPostId: "public:0000001",
+				localPostId: 1,
 				user:        alice.String(),
 			},
 			output: output{
@@ -395,7 +448,7 @@ func TestReactPost(t *testing.T) {
 		},
 		"post with reaction from another user": {
 			input: input{
-				localPostId: "public:0000001",
+				localPostId: 1,
 				user:        bob.String(),
 			},
 			output: output{
@@ -415,7 +468,7 @@ func TestReactPost(t *testing.T) {
 		},
 		"post without reactions": {
 			input: input{
-				localPostId: "public:0000003",
+				localPostId: 3,
 				user:        alice.String(),
 			},
 			output: output{
@@ -444,4 +497,15 @@ func TestReactPost(t *testing.T) {
 		})
 	}
 
+}
+
+func setupTest() {
+	id = seqid.ID(0)
+
+	reactions = avl.NewTree()
+
+	posts = avl.NewTree()
+	postsByFeed = avl.NewTree()
+
+	feeds = avl.NewTree()
 }

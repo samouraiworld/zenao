@@ -29,20 +29,22 @@ type Poll struct {
 	CreatedAt int64
 	CreatedBy std.Address
 
-	authFunc func(std.Address) bool
+	authFunc func(string) bool
 }
 
-func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []string, authFunc func(std.Address) bool) *Poll {
+func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []string, authFunc func(string) bool) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
 	if len(options) > 8 {
 		panic("poll must have at most 8 options")
 	}
-	if duration < int64(time.Minute)*15 {
+	minDuration := int64(time.Minute) * 15 / int64(time.Second)
+	maxDuration := int64(time.Hour) * 24 * 30 / int64(time.Second)
+	if duration < minDuration {
 		panic("duration must be at least 15 minutes")
 	}
-	if duration > int64(time.Hour)*24*30 {
+	if duration > maxDuration {
 		panic("duration must be at most 1 month")
 	}
 	poll := &Poll{
@@ -96,7 +98,7 @@ func GetInfo(pollID uint64, user string) *pollsv1.Poll {
 
 func (p *Poll) Vote(option string) {
 	addr := std.PreviousRealm().Address()
-	if p.authFunc != nil && !p.authFunc(addr) {
+	if p.authFunc != nil && !p.authFunc(addr.String()) {
 		panic("the user is not allowed to interact with this poll")
 	}
 	optionRaw, ok := p.Results.Get(option)

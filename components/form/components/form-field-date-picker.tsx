@@ -1,18 +1,17 @@
 "use client";
 
 import { FieldValues, useController } from "react-hook-form";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { DateInterval, DateRange, Matcher } from "react-day-picker";
-import { useEffect } from "react";
-import { useRef } from "react";
 import { FormFieldProps } from "../types";
 import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/shadcn/form";
 import {
@@ -75,6 +74,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
     disabledDates?: Matcher | Matcher[];
     disabledHours?: Matcher | Matcher[];
     onChange?: (date: Date) => void;
+    label?: string;
   },
 ) {
   const { field } = useController({
@@ -82,21 +82,19 @@ export function FormFieldDatePicker<T extends FieldValues>(
     control: props.control,
   });
   const [isOpen, setIsOpen] = useState(false);
-  const firstCheck = useRef(0);
-  const [time, setTime] = useState<string>("09:00");
 
-  useEffect(() => {
-    firstCheck.current += 1;
-
+  const defaultTime = useMemo(() => {
     if (field.value) {
       const formattedValue = fromUnixTime(Number(field.value));
 
       const hours = formattedValue.getHours().toString().padStart(2, "0");
       const minutes = formattedValue.getMinutes().toString().padStart(2, "0");
 
-      setTime(`${hours}:${minutes}`);
+      return `${hours}:${minutes}`;
     }
-  }, [props.name, field.value, firstCheck]);
+
+    return "09:00";
+  }, [field.value]);
 
   const isTimeDisabled = React.useCallback(
     (date: Date, hours: number, minutes: number) => {
@@ -126,147 +124,140 @@ export function FormFieldDatePicker<T extends FieldValues>(
   );
 
   return (
-    <div className="flex w-full gap-4">
-      <FormField
-        control={props.control}
-        name={props.name}
-        render={({ field }) => {
-          const formattedValue = fromUnixTime(Number(field.value));
-          return (
-            <FormItem className="flex flex-col w-full">
-              <Popover open={isOpen} onOpenChange={setIsOpen}>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      aria-label="Pick date"
-                      disabled={props.disabled}
-                      className={cn(
-                        "w-full font-normal",
-                        !field.value && "text-muted-foreground",
-                      )}
-                    >
-                      {field.value ? (
-                        props.timeZone.length ? (
-                          formatTZ(formattedValue, "MM/dd/yyyy", {
-                            timeZone: props.timeZone,
-                          })
+    <FormField
+      control={props.control}
+      name={props.name}
+      render={({ field }) => {
+        const formattedValue = fromUnixTime(Number(field.value));
+
+        return (
+          <div className="flex flex-col w-full gap-2">
+            {props.label && <FormLabel>{props.label}</FormLabel>}
+            <div className="flex w-full gap-4">
+              <FormItem className="flex w-full">
+                <Popover open={isOpen} onOpenChange={setIsOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="input"
+                        aria-label="Pick date"
+                        disabled={props.disabled}
+                        className={cn(
+                          "w-full",
+                          !field.value && "text-muted-foreground",
+                        )}
+                      >
+                        {field.value ? (
+                          props.timeZone.length ? (
+                            formatTZ(formattedValue, "MM/dd/yyyy", {
+                              timeZone: props.timeZone,
+                            })
+                          ) : (
+                            format(formattedValue, "MM/dd/yyyy")
+                          )
                         ) : (
-                          format(formattedValue, "MM/dd/yyyy")
-                        )
-                      ) : (
-                        <Text variant="secondary" size="sm">
-                          {props.placeholder}
-                        </Text>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto max-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    captionLayout="dropdown"
-                    selected={
-                      !Number.isNaN(formattedValue.getTime())
-                        ? formattedValue
-                        : undefined
-                    }
-                    onSelect={(selectedDate) => {
-                      const [hours, minutes] = time.split(":")!;
-                      selectedDate?.setHours(
-                        parseInt(hours),
-                        parseInt(minutes),
-                      );
-                      if (selectedDate) {
-                        const value = BigInt(getUnixTime(selectedDate));
-                        field.onChange(value);
+                          <Text variant="secondary">{props.placeholder}</Text>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto max-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      captionLayout="dropdown"
+                      selected={
+                        !Number.isNaN(formattedValue.getTime())
+                          ? formattedValue
+                          : undefined
+                      }
+                      onSelect={(selectedDate) => {
+                        const [hours, minutes] = defaultTime.split(":")!;
+                        selectedDate?.setHours(
+                          parseInt(hours),
+                          parseInt(minutes),
+                        );
+                        if (selectedDate) {
+                          const value = BigInt(getUnixTime(selectedDate));
+                          field.onChange(value);
+                          if (props.onChange) {
+                            props.onChange(selectedDate);
+                          }
+                        }
+                      }}
+                      fromYear={new Date().getFullYear()}
+                      toYear={new Date().getFullYear() + 10}
+                      onDayClick={() => setIsOpen(false)}
+                      disabled={props.disabledDates}
+                      defaultMonth={
+                        !Number.isNaN(formattedValue.getTime())
+                          ? formattedValue
+                          : undefined
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </FormItem>
+
+              <FormItem className="flex flex-col">
+                <FormControl>
+                  <Select
+                    disabled={props.disabled || !field.value}
+                    defaultValue={defaultTime}
+                    value={defaultTime}
+                    onValueChange={(e) => {
+                      if (field.value) {
+                        const [hours, minutes] = e.split(":");
+                        const newDate = new Date(formattedValue);
+                        newDate.setHours(parseInt(hours), parseInt(minutes));
+                        field.onChange(BigInt(getUnixTime(newDate)));
                         if (props.onChange) {
-                          props.onChange(selectedDate);
+                          props.onChange(newDate);
                         }
                       }
                     }}
-                    fromYear={new Date().getFullYear()}
-                    toYear={new Date().getFullYear() + 10}
-                    onDayClick={() => setIsOpen(false)}
-                    disabled={props.disabledDates}
-                    defaultMonth={
-                      !Number.isNaN(formattedValue.getTime())
-                        ? formattedValue
-                        : undefined
-                    }
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          );
-        }}
-      />
-      <FormField
-        control={props.control}
-        name={props.name}
-        render={({ field }) => {
-          const formattedValue = fromUnixTime(Number(field.value));
-          return (
-            <FormItem className="flex flex-col">
-              <FormControl>
-                <Select
-                  disabled={props.disabled || !field.value}
-                  defaultValue={time}
-                  value={time}
-                  onValueChange={(e) => {
-                    setTime(e);
-                    if (field.value) {
-                      const [hours, minutes] = e.split(":");
-                      const newDate = new Date(formattedValue);
-                      newDate.setHours(parseInt(hours), parseInt(minutes));
-                      field.onChange(BigInt(getUnixTime(newDate)));
-                      if (props.onChange) {
-                        props.onChange(newDate);
-                      }
-                    }
-                  }}
-                >
-                  <SelectTrigger className="font-normal focus:ring-0 w-[120px] focus:ring-offset-0">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <ScrollArea className="h-[15rem]">
-                      {Array.from({ length: 96 }).map((_, i) => {
-                        const hour = Math.floor(i / 4)
-                          .toString()
-                          .padStart(2, "0");
-                        const minute = ((i % 4) * 15)
-                          .toString()
-                          .padStart(2, "0");
+                  >
+                    <SelectTrigger className="font-normal focus:ring-0 w-[120px] focus:ring-offset-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <ScrollArea className="h-[15rem]">
+                        {Array.from({ length: 96 }).map((_, i) => {
+                          const hour = Math.floor(i / 4)
+                            .toString()
+                            .padStart(2, "0");
+                          const minute = ((i % 4) * 15)
+                            .toString()
+                            .padStart(2, "0");
 
-                        return (
-                          <SelectItem
-                            key={i}
-                            value={`${hour}:${minute}`}
-                            disabled={
-                              props.disabledHours
-                                ? isTimeDisabled(
-                                    formattedValue,
-                                    parseInt(hour),
-                                    parseInt(minute),
-                                  )
-                                : undefined
-                            }
-                          >
-                            {hour}:{minute}
-                          </SelectItem>
-                        );
-                      })}
-                    </ScrollArea>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
-          );
-        }}
-      />
-    </div>
+                          return (
+                            <SelectItem
+                              key={i}
+                              value={`${hour}:${minute}`}
+                              disabled={
+                                props.disabledHours
+                                  ? isTimeDisabled(
+                                      formattedValue,
+                                      parseInt(hour),
+                                      parseInt(minute),
+                                    )
+                                  : undefined
+                              }
+                            >
+                              {hour}:{minute}
+                            </SelectItem>
+                          );
+                        })}
+                      </ScrollArea>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            </div>
+            <FormMessage />
+          </div>
+        );
+      }}
+    />
   );
 }

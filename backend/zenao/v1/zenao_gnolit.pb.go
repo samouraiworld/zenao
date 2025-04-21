@@ -5,6 +5,7 @@ package zenaov1
 import (
 	errors "errors"
 	fmt "fmt"
+	v1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	strings "strings"
 )
 
@@ -311,7 +312,7 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 	buf.WriteString(typePrefix)
 	buf.WriteString("BatchProfileRequest{\n")
 	if len(b.Fields) != 0 {
-		fmt.Fprintf(buf, "%s\tFields: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tFields: []*BatchProfileField{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range b.Fields {
 			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
@@ -320,7 +321,7 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	if len(b.Addresses) != 0 {
-		fmt.Fprintf(buf, "%s\tAddresses: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tAddresses: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range b.Addresses {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
@@ -328,6 +329,132 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePollRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePollRequest{\n")
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	}
+	if c.Question != "" {
+		fmt.Fprintf(buf, "%s\tQuestion: %q,\n", linePrefix, c.Question)
+	}
+	if len(c.Options) != 0 {
+		fmt.Fprintf(buf, "%s\tOptions: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Options {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if c.Duration != 0 {
+		fmt.Fprintf(buf, "%s\tDuration: %d,\n", linePrefix, c.Duration)
+	}
+	if c.Kind != v1.PollKind(0) {
+		fmt.Fprintf(buf, "%s\tKind: %d,\n", linePrefix, c.Kind)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePollResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePollResponse{\n")
+	if c.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (v *VotePollRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("VotePollRequest{\n")
+	if v.PollId != "" {
+		fmt.Fprintf(buf, "%s\tPollId: %q,\n", linePrefix, v.PollId)
+	}
+	if v.Option != "" {
+		fmt.Fprintf(buf, "%s\tOption: %q,\n", linePrefix, v.Option)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (v *VotePollResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("VotePollResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePostRequest{\n")
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	}
+	if c.Content != "" {
+		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, c.Content)
+	}
+	if len(c.Tags) != 0 {
+		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Tags {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePostResponse{\n")
+	if c.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (r *ReactPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ReactPostRequest{\n")
+	if r.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, r.PostId)
+	}
+	if r.Icon != "" {
+		fmt.Fprintf(buf, "%s\tIcon: %q,\n", linePrefix, r.Icon)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (r *ReactPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ReactPostResponse{\n")
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

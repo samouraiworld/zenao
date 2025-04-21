@@ -111,6 +111,9 @@ func (v *VideoPost) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("VideoPost{\n")
+	if v.Title != "" {
+		fmt.Fprintf(buf, "%s\tTitle: %q,\n", linePrefix, v.Title)
+	}
 	if v.Description != "" {
 		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, v.Description)
 	}
@@ -165,6 +168,9 @@ func (p *Post) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("Post{\n")
+	if p.LocalPostId != 0 {
+		fmt.Fprintf(buf, "%s\tLocalPostId: %d,\n", linePrefix, p.LocalPostId)
+	}
 	if p.Author != "" {
 		fmt.Fprintf(buf, "%s\tAuthor: %q,\n", linePrefix, p.Author)
 	}
@@ -184,7 +190,7 @@ func (p *Post) GnoLiteral(typePrefix string, linePrefix string) string {
 		fmt.Fprintf(buf, "%s\tDeletedAt: %d,\n", linePrefix, p.DeletedAt)
 	}
 	if len(p.Tags) != 0 {
-		fmt.Fprintf(buf, "%s\tTags: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range p.Tags {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
@@ -221,7 +227,7 @@ func (p *PostView) GnoLiteral(typePrefix string, linePrefix string) string {
 		fmt.Fprintf(buf, "%s\tPost: &%s%s,\n", linePrefix, typePrefix, p.Post.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	if len(p.Reactions) != 0 {
-		fmt.Fprintf(buf, "%s\tReactions: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tReactions: []*ReactionView{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range p.Reactions {
 			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
