@@ -55,7 +55,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
                 "resize-none break-words min-h-[52px] max-h-[400px]",
                 className,
               )}
-              placeholder={placeholder || "placeholder..."}
+              placeholder={placeholder}
               {...otherProps}
               {...field}
               onChange={(e) => {

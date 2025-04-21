@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
@@ -27,6 +27,7 @@ import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
+import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 
 interface EventSectionProps {
   title: string;
@@ -50,6 +51,9 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+
+  const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
+    useState(false);
 
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
@@ -87,6 +91,12 @@ export function EventInfo({ id }: { id: string }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <BroadcastEmailDialog
+        eventId={id}
+        open={broadcastEmailDialogOpen}
+        onOpenChange={setBroadcastEmailDialogOpen}
       />
 
       {/* Left Section */}
@@ -129,9 +139,12 @@ export function EventInfo({ id }: { id: string }) {
               <Link href={`/edit/${id}`} className="text-main underline">
                 {t("edit-button")}
               </Link>
-              <Link href={`/edit/${id}`} className="text-main underline">
+              <p
+                className="text-main underline cursor-pointer"
+                onClick={() => setBroadcastEmailDialogOpen(true)}
+              >
                 {t("send-global-message")}
-              </Link>
+              </p>
             </div>
           </Card>
         )}
