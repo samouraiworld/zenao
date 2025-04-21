@@ -15,7 +15,6 @@ import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
-import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { Separator } from "@/components/shadcn/separator";
 import MapCaller from "@/components/common/map/map-lazy-components";
@@ -61,7 +60,6 @@ export function EventInfo({ id }: { id: string }) {
   const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
-  const [loading, setLoading] = React.useState<boolean>(false);
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -105,24 +103,15 @@ export function EventInfo({ id }: { id: string }) {
             className="flex w-full rounded-xl self-center object-cover"
           />
         </AspectRatio>
-        {/* If the user is organizer, link to /edit page */}
-        {isOrganizer && (
-          <Card className="flex flex-row items-center">
-            <Text className="w-3/5">{t("is-organisator-role")}</Text>
-            <div className="w-2/5 flex justify-end">
-              <Link href={`/edit/${id}`}>
-                <ButtonWithLabel
-                  label={t("edit-button")}
-                  onClick={() => setLoading(true)}
-                  loading={loading}
-                />
-              </Link>
-            </div>
-          </Card>
-        )}
 
         {/* Participants preview and dialog section */}
-        <EventSection title={t("going", { count: data.participants })}>
+        <EventSection
+          title={
+            data.participants === 0
+              ? t("nobody-going-yet")
+              : t("going", { count: data.participants })
+          }
+        >
           <ParticipantsSection id={id} />
         </EventSection>
 
@@ -130,6 +119,22 @@ export function EventInfo({ id }: { id: string }) {
         <EventSection title={t("hosted-by")}>
           <UserAvatarWithName linkToProfile address={data.creator} />
         </EventSection>
+
+        {/* If the user is organizer, link to /edit page */}
+        {isOrganizer && (
+          <Card className="flex flex-col gap-2">
+            <Text>{t("is-organisator-role")}</Text>
+
+            <div className="flex flex-col">
+              <Link href={`/edit/${id}`} className="text-main underline">
+                {t("edit-button")}
+              </Link>
+              <Link href={`/edit/${id}`} className="text-main underline">
+                {t("send-global-message")}
+              </Link>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Right Section */}
