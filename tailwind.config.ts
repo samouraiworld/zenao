@@ -18,8 +18,7 @@ export default {
         },
       },
       animation: {
-        "gotop-appear":
-          "appear-from-bottom 500ms ease-in-out forwards, bounce 2s 500ms infinite",
+        "gotop-appear": "appear-from-bottom 500ms ease-in-out forwards",
         "gotop-disappear":
           "appear-from-bottom 500ms ease-in-out reverse forwards",
       },
