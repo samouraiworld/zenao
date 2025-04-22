@@ -304,6 +304,13 @@ describe("main", () => {
     // Select emoji
     cy.get('img[alt="grinning"]').first().click();
   });
+
+  it("event not found", () => {
+    // Visit a non existing event page
+    cy.visit("/event/50", { failOnStatusCode: false });
+
+    cy.get("p").contains("Event doesn't exist").should("be.visible");
+  });
 });
 
 Cypress.Commands.add("createEvent", () => {

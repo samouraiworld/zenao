@@ -75,10 +75,6 @@ export function EventInfo({ id }: { id: string }) {
   const isDescTruncated = useIsLinesTruncated(descContainerRef, descLineClamp);
   const iconSize = 22;
 
-  if (!data) {
-    return <p>{`Event doesn't exist`}</p>;
-  }
-
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
       <script
