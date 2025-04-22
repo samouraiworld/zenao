@@ -33,8 +33,8 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	if len(req.Msg.Message) < 30 {
-		return nil, errors.New("a broadcast message must contains at least 30 characters")
+	if len(req.Msg.Message) < 30 || len(req.Msg.Message) > 1000 {
+		return nil, errors.New("a broadcast message must contains between 30 and 1000 characters")
 	}
 
 	if s.MailClient == nil {
