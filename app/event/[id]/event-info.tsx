@@ -142,9 +142,6 @@ export function EventInfo({ id }: { id: string }) {
 
       {/* Right Section */}
       <div className="flex flex-col gap-4 w-full sm:w-3/5">
-        {/* Go-top button top identifier  */}
-        <a id="top"></a>
-
         <Heading level={1} size="4xl" className="mb-7">
           {data.title}
         </Heading>
