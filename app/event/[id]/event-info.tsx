@@ -30,6 +30,7 @@ import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
 import { cn } from "@/lib/tailwind";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
+import { GoTopButton } from "@/components/buttons/go-top-button";
 
 interface EventSectionProps {
   title: string;
@@ -253,6 +254,8 @@ export function EventInfo({ id }: { id: string }) {
           )}
         </EventSection>
       </div>
+
+      <GoTopButton />
     </div>
   );
 }
