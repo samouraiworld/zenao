@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ArrowUp } from "lucide-react";
 import { Button } from "../shadcn/button";
 import { debounce } from "@/lib/debounce";
-import { ArrowUp } from "lucide-react";
 
 const HEIGHT_THRESHOLD = 0.3;
 
