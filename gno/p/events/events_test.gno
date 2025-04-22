@@ -165,7 +165,7 @@ func testReq(msg daokit.ExecutableMessage) daokit.ProposalRequest {
 
 func testTicket(t *testing.T) string {
 	t.Helper()
-	var res []byte
+	res := make([]byte, 32)
 	for i := 0; i < len(res); i++ {
 		res[i] = byte(rand.UintN(2 ^ 8))
 	}
