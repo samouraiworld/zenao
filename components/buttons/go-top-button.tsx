@@ -43,7 +43,6 @@ export function GoTopButton() {
       }
     }, 100);
 
-    window.removeEventListener("scroll", onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [containerRef, showedOnce]);
@@ -57,7 +56,7 @@ export function GoTopButton() {
         className="rounded-full w-12 h-12 shadow-custom-input-border"
         onClick={() =>
           window.scrollTo({
-            top: document.getElementById("top")?.clientHeight,
+            top: 0,
             behavior: "smooth",
           })
         }

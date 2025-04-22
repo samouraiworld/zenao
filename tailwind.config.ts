@@ -18,9 +18,9 @@ export default {
         },
       },
       animation: {
-        "gotop-appear": "appear-from-bottom 500ms ease-in-out forwards",
+        "gotop-appear": "appear-from-bottom 200ms ease-in-out forwards",
         "gotop-disappear":
-          "appear-from-bottom 500ms ease-in-out reverse forwards",
+          "appear-from-bottom 200ms ease-in-out reverse forwards",
       },
       colors: {
         background: "hsl(var(--background))",
