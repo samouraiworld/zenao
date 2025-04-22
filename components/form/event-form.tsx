@@ -24,6 +24,7 @@ import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/FormFieldTextArea";
 import { FormFieldLocation } from "./components/form-field-location";
 import { FormFieldDatePicker } from "./components/form-field-date-picker";
+import { FormFieldSwitch } from "./components/form-field-switch";
 import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 import { cn } from "@/lib/tailwind";
@@ -269,6 +270,13 @@ export const EventForm: React.FC<EventFormProps> = ({
             <FormDescription>
               Displayed time corresponds to {timeZone}
             </FormDescription>
+
+            {/* Private option */}
+            <FormFieldSwitch
+              control={form.control}
+              name="private"
+              label={"This event is private"}
+            />
 
             <ButtonWithLabel
               loading={isLoaded}

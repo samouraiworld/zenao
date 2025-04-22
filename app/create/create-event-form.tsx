@@ -27,6 +27,7 @@ export const CreateEventForm: React.FC = () => {
         address: "",
         timeZone: "",
       },
+      private: false,
     },
   });
 

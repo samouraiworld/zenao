@@ -33,6 +33,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const defaultValues: EventFormSchemaType = {
     ...data,
     location,
+    private: false, // TODO use data `private` field
   };
 
   const form = useForm<EventFormSchemaType>({
