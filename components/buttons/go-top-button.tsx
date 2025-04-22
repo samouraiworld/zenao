@@ -57,7 +57,7 @@ export function GoTopButton() {
         className="rounded-full w-12 h-12 shadow-custom-input-border"
         onClick={() =>
           window.scrollTo({
-            top: document.getElementById("top")?.clientHeight,
+            top: 0,
             behavior: "smooth",
           })
         }
