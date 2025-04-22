@@ -258,12 +258,10 @@ const MsgUseTicketKind = "gno.land/p/zenao/events.UseTicket"
 
 func (e *Event) useTicketHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgUseTicketKind, func(i interface{}) {
-		ticketSecret, ok := i.(string)
+		ticketAddress, ok := i.(string)
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-
-		ticketAddress := std.DerivePkgAddr(ticketSecret).String()
 
 		val, ok := e.tickets.Get(ticketAddress)
 		if !ok {
@@ -279,8 +277,8 @@ func (e *Event) useTicketHandler() daokit.MessageHandler {
 	})
 }
 
-func NewUseTicketMsg(ticketSecret string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgUseTicketKind, ticketSecret)
+func NewUseTicketMsg(ticketAddress string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgUseTicketKind, ticketAddress)
 }
 
 func (e *Event) CountParticipants() uint32 {
