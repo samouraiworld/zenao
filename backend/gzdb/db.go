@@ -18,7 +18,7 @@ import (
 
 type User struct {
 	gorm.Model         // this ID should be used for any database related logic (like querying)
-	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation
+	AuthID      string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -201,7 +201,7 @@ func (g *gormZenaoDB) getDBEvent(id string) (*Event, error) {
 // CreateUser implements zeni.DB.
 func (g *gormZenaoDB) CreateUser(authID string) (string, error) {
 	user := &User{
-		ClerkID: authID,
+		AuthID: authID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
 		return "", err
@@ -278,7 +278,7 @@ func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) erro
 // UserExists implements zeni.DB.
 func (g *gormZenaoDB) UserExists(authID string) (string, error) {
 	var user User
-	if err := g.db.Where("clerk_id = ?", authID).First(&user).Error; err != nil {
+	if err := g.db.Where("auth_id = ?", authID).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", nil
 		}
@@ -638,6 +638,6 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		DisplayName: dbuser.DisplayName,
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
-		ClerkID:     dbuser.ClerkID,
+		AuthID:      dbuser.AuthID,
 	}
 }

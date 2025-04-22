@@ -33,7 +33,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, errors.New("user is banned")
 	}
 
-	// retrieve auto-incremented user ID from database, do not use clerk's user ID directly for realms
+	// retrieve auto-incremented user ID from database, do not use auth provider's user ID directly for realms
 	userID, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err

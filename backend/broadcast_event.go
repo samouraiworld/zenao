@@ -66,9 +66,9 @@ func (s *ZenaoServer) BroadcastEvent(
 
 	idsList := make([]string, len(participants))
 	for i, participant := range participants {
-		idsList[i] = participant.ClerkID
+		idsList[i] = participant.AuthID
 	}
-	clerkParticipants, err := s.GetUsersFromClerkIDs(ctx, idsList)
+	authParticipants, err := s.GetUsersFromClerkIDs(ctx, idsList)
 	if err != nil {
 		return nil, err
 	}
@@ -77,14 +77,14 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, err
 	}
 	var requests []*resend.SendEmailRequest
-	for _, clerkParticipant := range clerkParticipants {
-		if clerkParticipant.Email == "" {
-			s.Logger.Error("event-broadcast-email-content", zap.String("clerk-id", clerkParticipant.ID), zap.String("email", clerkParticipant.Email))
+	for _, authParticipant := range authParticipants {
+		if authParticipant.Email == "" {
+			s.Logger.Error("event-broadcast-email-content", zap.String("auth-id", authParticipant.ID), zap.String("email", authParticipant.Email))
 			continue
 		}
 		requests = append(requests, &resend.SendEmailRequest{
 			From:    "Zenao <broadcast@mail.zenao.io>",
-			To:      []string{clerkParticipant.Email},
+			To:      []string{authParticipant.Email},
 			Subject: fmt.Sprintf("Message from %s's organizer", evt.Title),
 			Html:    htmlStr,
 			Text:    text,

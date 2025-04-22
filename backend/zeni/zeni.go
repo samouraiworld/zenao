@@ -20,7 +20,7 @@ type AuthUser struct {
 
 type User struct {
 	ID          string
-	ClerkID     string
+	AuthID      string
 	DisplayName string
 	Bio         string
 	AvatarURI   string
