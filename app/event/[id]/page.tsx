@@ -25,7 +25,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
 
   const queryClient = getQueryClient();
-  const event = await queryClient.fetchQuery(eventOptions(id));
+  let event;
+
+  try {
+    event = await queryClient.fetchQuery(eventOptions(id));
+  } catch (_) {
+    return {};
+  }
 
   return {
     title: event.title,
