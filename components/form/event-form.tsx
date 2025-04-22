@@ -210,6 +210,15 @@ export const EventForm: React.FC<EventFormProps> = ({
                     ]
                   : []),
               ]}
+              disabledHours={[
+                ...(minDateRange
+                  ? [
+                      {
+                        before: minDateRange,
+                      },
+                    ]
+                  : []),
+              ]}
             />
             <FormFieldDatePicker
               name="endDate"

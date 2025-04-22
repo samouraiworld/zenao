@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
@@ -28,6 +28,8 @@ import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
+import { cn } from "@/lib/tailwind";
+import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
 
 interface EventSectionProps {
   title: string;
@@ -64,6 +66,11 @@ export function EventInfo({ id }: { id: string }) {
   const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
+  const [isDescExpanded, setDescExpanded] = React.useState(false);
+  const descLineClamp = 10;
+  const descExpandedCn = "line-clamp-[10]";
+  const descContainerRef = React.useRef<HTMLDivElement>(null);
+  const isDescTruncated = useIsLinesTruncated(descContainerRef, descLineClamp);
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -241,7 +248,27 @@ export function EventInfo({ id }: { id: string }) {
 
         {/* Markdown Description */}
         <EventSection title={t("about-event")}>
-          <MarkdownPreview markdownString={data.description} />
+          <div ref={descContainerRef}>
+            <MarkdownPreview
+              className={cn(
+                "overflow-hidden text-ellipsis",
+                !isDescExpanded && descExpandedCn,
+              )}
+              markdownString={data.description}
+            />
+          </div>
+
+          {/* See More button */}
+          {isDescTruncated && (
+            <div
+              className="w-full flex justify-center cursor-pointer "
+              onClick={() =>
+                setDescExpanded((isDescExpanded) => !isDescExpanded)
+              }
+            >
+              {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          )}
         </EventSection>
       </div>
     </div>
