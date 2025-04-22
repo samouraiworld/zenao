@@ -149,7 +149,7 @@ function BroadcastEmailForm({
         placeholder={t("message-input-placeholder")}
         label={t("message-input-label")}
         className="min-h-[100px] max-h-[500px]"
-        maxLength={5000}
+        maxLength={1000}
         wordCounter
       />
       <div className="flex justify-end">
