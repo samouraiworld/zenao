@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
-import { Calendar, ChevronDownIcon, ChevronUpIcon, MapPin } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
@@ -237,7 +237,7 @@ export function EventInfo({ id }: { id: string }) {
                   setDescExpanded((isDescExpanded) => !isDescExpanded)
                 }
               >
-                {isDescExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
               </div>
             )}
           </EventSection>
