@@ -37,7 +37,7 @@ export const CreateEventForm: React.FC = () => {
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async (values: EventFormSchemaType) => {
+  const onSubmit = async ({ private: _, ...values }: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
       const token = await getToken();
