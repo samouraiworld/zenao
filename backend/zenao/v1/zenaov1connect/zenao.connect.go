@@ -43,6 +43,9 @@ const (
 	ZenaoServiceCreateEventProcedure = "/zenao.v1.ZenaoService/CreateEvent"
 	// ZenaoServiceEditEventProcedure is the fully-qualified name of the ZenaoService's EditEvent RPC.
 	ZenaoServiceEditEventProcedure = "/zenao.v1.ZenaoService/EditEvent"
+	// ZenaoServiceBroadcastEventProcedure is the fully-qualified name of the ZenaoService's
+	// BroadcastEvent RPC.
+	ZenaoServiceBroadcastEventProcedure = "/zenao.v1.ZenaoService/BroadcastEvent"
 	// ZenaoServiceParticipateProcedure is the fully-qualified name of the ZenaoService's Participate
 	// RPC.
 	ZenaoServiceParticipateProcedure = "/zenao.v1.ZenaoService/Participate"
@@ -64,6 +67,7 @@ type ZenaoServiceClient interface {
 	// EVENT
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
 	EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error)
+	BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
@@ -107,6 +111,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("EditEvent")),
 			connect.WithClientOptions(opts...),
 		),
+		broadcastEvent: connect.NewClient[v1.BroadcastEventRequest, v1.BroadcastEventResponse](
+			httpClient,
+			baseURL+ZenaoServiceBroadcastEventProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("BroadcastEvent")),
+			connect.WithClientOptions(opts...),
+		),
 		participate: connect.NewClient[v1.ParticipateRequest, v1.ParticipateResponse](
 			httpClient,
 			baseURL+ZenaoServiceParticipateProcedure,
@@ -146,6 +156,7 @@ type zenaoServiceClient struct {
 	getUserAddress *connect.Client[v1.GetUserAddressRequest, v1.GetUserAddressResponse]
 	createEvent    *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
 	editEvent      *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
+	broadcastEvent *connect.Client[v1.BroadcastEventRequest, v1.BroadcastEventResponse]
 	participate    *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
 	createPoll     *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll       *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
@@ -171,6 +182,11 @@ func (c *zenaoServiceClient) CreateEvent(ctx context.Context, req *connect.Reque
 // EditEvent calls zenao.v1.ZenaoService.EditEvent.
 func (c *zenaoServiceClient) EditEvent(ctx context.Context, req *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error) {
 	return c.editEvent.CallUnary(ctx, req)
+}
+
+// BroadcastEvent calls zenao.v1.ZenaoService.BroadcastEvent.
+func (c *zenaoServiceClient) BroadcastEvent(ctx context.Context, req *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error) {
+	return c.broadcastEvent.CallUnary(ctx, req)
 }
 
 // Participate calls zenao.v1.ZenaoService.Participate.
@@ -206,6 +222,7 @@ type ZenaoServiceHandler interface {
 	// EVENT
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
 	EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error)
+	BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
@@ -243,6 +260,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceEditEventProcedure,
 		svc.EditEvent,
 		connect.WithSchema(zenaoServiceMethods.ByName("EditEvent")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceBroadcastEventHandler := connect.NewUnaryHandler(
+		ZenaoServiceBroadcastEventProcedure,
+		svc.BroadcastEvent,
+		connect.WithSchema(zenaoServiceMethods.ByName("BroadcastEvent")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceParticipateHandler := connect.NewUnaryHandler(
@@ -285,6 +308,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceCreateEventHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditEventProcedure:
 			zenaoServiceEditEventHandler.ServeHTTP(w, r)
+		case ZenaoServiceBroadcastEventProcedure:
+			zenaoServiceBroadcastEventHandler.ServeHTTP(w, r)
 		case ZenaoServiceParticipateProcedure:
 			zenaoServiceParticipateHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
@@ -318,6 +343,10 @@ func (UnimplementedZenaoServiceHandler) CreateEvent(context.Context, *connect.Re
 
 func (UnimplementedZenaoServiceHandler) EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EditEvent is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.BroadcastEvent is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error) {
