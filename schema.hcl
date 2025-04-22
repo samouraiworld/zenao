@@ -17,7 +17,7 @@ table "users" {
     null = true
     type = datetime
   }
-  column "clerk_id" {
+  column "auth_id" {
     null = true
     type = text
   }
@@ -36,12 +36,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
-  index "idx_users_clerk_id" {
-    unique  = true
-    columns = [column.clerk_id]
-  }
   index "idx_users_deleted_at" {
     columns = [column.deleted_at]
+  }
+  index "idx_users_auth_id" {
+    unique  = true
+    columns = [column.auth_id]
   }
 }
 table "events" {
