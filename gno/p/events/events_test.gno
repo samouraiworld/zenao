@@ -1,6 +1,7 @@
 package events
 
 import (
+	"math/rand"
 	"std"
 	"testing"
 
@@ -54,7 +55,7 @@ func TestAddParticipant(t *testing.T) {
 	if !event.DAOPrivate.Members.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String(), testTicket(t))))
 	if event.DAOPrivate.Members.GetMembers()[2] != bob.String() {
 		t.Fatalf("expected %s, got %s", bob.String(), event.DAOPrivate.Members.GetMembers()[2])
 	}
@@ -63,7 +64,7 @@ func TestAddParticipant(t *testing.T) {
 	}
 
 	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperMsg(dave.String())))
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String(), testTicket(t))))
 	if len(event.DAOPrivate.Members.GetMembers()) != 4 {
 		t.Fatalf("expected 4, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
@@ -81,7 +82,7 @@ func TestAddParticipant(t *testing.T) {
 	}()
 
 	std.TestSetOriginCaller(bob)
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(carol.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(carol.String(), testTicket(t))))
 }
 
 func TestRemoveParticipant(t *testing.T) {
@@ -102,7 +103,7 @@ func TestRemoveParticipant(t *testing.T) {
 	if !event.DAOPrivate.Members.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String(), testTicket(t))))
 	if event.DAOPrivate.Members.GetMembers()[2] != bob.String() {
 		t.Fatalf("expected %s, got %s", bob.String(), event.DAOPrivate.Members.GetMembers()[2])
 	}
@@ -117,7 +118,7 @@ func TestRemoveParticipant(t *testing.T) {
 		t.Fatalf("expected bob to not have participant role")
 	}
 	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperMsg(dave.String())))
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String(), testTicket(t))))
 	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(dave.String())))
 	if len(event.DAOPrivate.Members.GetMembers()) != 3 {
 		t.Fatalf("expected 3 member, got %d", len(event.DAOPrivate.Members.GetMembers()))
@@ -160,4 +161,13 @@ func testReq(msg daokit.ExecutableMessage) daokit.ProposalRequest {
 	return daokit.ProposalRequest{
 		Message: msg,
 	}
+}
+
+func testTicket(t *testing.T) string {
+	t.Helper()
+	var res []byte
+	for i := 0; i < len(res); i++ {
+		res[i] = byte(rand.UintN(2 ^ 8))
+	}
+	return std.DerivePkgAddr(string(res)).String()
 }
