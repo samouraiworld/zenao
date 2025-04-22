@@ -14,14 +14,14 @@ import (
 
 // Participate implements zenaov1connect.ZenaoServiceHandler.
 func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zenaov1.ParticipateRequest]) (*connect.Response[zenaov1.ParticipateResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 
 	if user == nil {
 		if req.Msg.Email == "" {
 			return nil, errors.New("no user and no email")
 		}
 		var err error
-		user, err = s.CreateUser(ctx, req.Msg.Email)
+		user, err = s.Auth.CreateUser(ctx, req.Msg.Email)
 		if err != nil {
 			return nil, err
 		}
