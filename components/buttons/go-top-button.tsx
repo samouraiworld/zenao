@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../shadcn/button";
 import { debounce } from "@/lib/debounce";
 
-const HEIGHT_THRESHOLD = 0.25;
+const HEIGHT_THRESHOLD = 0.3;
 
 export function GoTopButton() {
   const [showedOnce, setShowedOnce] = useState(false);
@@ -50,9 +50,18 @@ export function GoTopButton() {
   return (
     <div
       ref={containerRef}
-      className="fixed right-4 bottom-16 translate-y-32 transition-all"
+      className="fixed z-50 right-4 bottom-16 translate-y-32 transition-all"
     >
-      <Button>Go to top</Button>
+      <Button
+        onClick={() =>
+          window.scrollTo({
+            top: document.getElementById("top")?.clientHeight,
+            behavior: "smooth",
+          })
+        }
+      >
+        Go to top
+      </Button>
     </div>
   );
 }
