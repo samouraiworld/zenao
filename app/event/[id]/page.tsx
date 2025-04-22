@@ -1,6 +1,5 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { EventInfo } from "./event-info";
 import { imageHeight, imageWidth } from "./constants";
 import { eventOptions } from "@/lib/queries/event";
@@ -26,18 +25,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
 
   const queryClient = getQueryClient();
-  let event;
-  try {
-    event = await queryClient.fetchQuery(eventOptions(id));
-    return {
-      title: event.title,
-      openGraph: {
-        images: [{ url: web2URL(event.imageUri) }],
-      },
-    };
-  } catch (_) {
-    notFound();
-  }
+  const event = await queryClient.fetchQuery(eventOptions(id));
+
+  return {
+    title: event.title,
+    openGraph: {
+      images: [{ url: web2URL(event.imageUri) }],
+    },
+  };
 }
 
 export default async function EventPage({ params }: Props) {
@@ -46,15 +41,9 @@ export default async function EventPage({ params }: Props) {
   const p = await params;
   const queryClient = getQueryClient();
 
-  let eventData;
-  try {
-    eventData = await queryClient.fetchQuery({
-      ...eventOptions(p.id),
-    });
-  } catch (err) {
-    console.error("error", err);
-    notFound();
-  }
+  const eventData = await queryClient.fetchQuery({
+    ...eventOptions(p.id),
+  });
 
   queryClient.prefetchQuery(profileOptions(eventData.creator));
 
