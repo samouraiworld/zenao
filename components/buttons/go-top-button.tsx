@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../shadcn/button";
 import { debounce } from "@/lib/debounce";
+import { ArrowUp } from "lucide-react";
 
 const HEIGHT_THRESHOLD = 0.3;
 
@@ -53,6 +54,7 @@ export function GoTopButton() {
       className="fixed z-50 right-4 bottom-16 translate-y-32 transition-all"
     >
       <Button
+        className="rounded-full w-12 h-12 shadow-custom-input-border"
         onClick={() =>
           window.scrollTo({
             top: document.getElementById("top")?.clientHeight,
@@ -60,7 +62,7 @@ export function GoTopButton() {
           })
         }
       >
-        Go to top
+        <ArrowUp />
       </Button>
     </div>
   );
