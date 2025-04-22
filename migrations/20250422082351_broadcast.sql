@@ -3,7 +3,7 @@ PRAGMA foreign_keys = off;
 -- Create "new_users" table
 CREATE TABLE `new_users` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `auth_id` text NULL, `display_name` text NULL, `bio` text NULL, `avatar_uri` text NULL);
 -- Copy rows from old table "users" to new temporary table "new_users"
-INSERT INTO `new_users` (`id`, `created_at`, `updated_at`, `deleted_at`, `display_name`, `bio`, `avatar_uri`) SELECT `id`, `created_at`, `updated_at`, `deleted_at`, `display_name`, `bio`, `avatar_uri` FROM `users`;
+INSERT INTO `new_users` (`id`, `created_at`, `updated_at`, `deleted_at`, `auth_id`, `display_name`, `bio`, `avatar_uri`) SELECT `id`, `created_at`, `updated_at`, `deleted_at`, `clerk_id`, `display_name`, `bio`, `avatar_uri` FROM `users`;
 -- Drop "users" table after copying rows
 DROP TABLE `users`;
 -- Rename temporary table "new_users" to "users"
