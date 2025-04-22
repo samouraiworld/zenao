@@ -67,11 +67,13 @@ const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowq
 
 // FillAdminProfile implements zeni.Chain.
 func (g *gnoZenaoChain) FillAdminProfile() {
+	var minFee int64 = 20 * 1_000_000
 	if broadcastRes, err := checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
 		GasWanted: 10000000,
 	}, vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
+		Send:    std.CompactCoins([]string{"ugnot"}, []int64{minFee}),
 		PkgPath: "gno.land/r/demo/users",
 		Func:    "Register",
 		Args: []string{
