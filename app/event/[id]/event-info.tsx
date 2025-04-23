@@ -99,6 +99,7 @@ export function EventInfo({ id }: { id: string }) {
 
       <BroadcastEmailDialog
         eventId={id}
+        nbParticipants={data.participants}
         open={broadcastEmailDialogOpen}
         onOpenChange={setBroadcastEmailDialogOpen}
       />
