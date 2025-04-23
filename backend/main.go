@@ -144,12 +144,23 @@ func execStart() error {
 	}
 
 	zenao := &ZenaoServer{
+<<<<<<< HEAD
 		Logger:       logger,
 		Auth:         auth,
 		Chain:        chain,
 		DB:           db,
 		MailClient:   mailClient,
 		DiscordToken: conf.discordtoken,
+=======
+		Logger:               logger,
+		GetUser:              getUserFromClerk,
+		GetUsersFromClerkIDs: getUsersFromClerkIDs,
+		CreateUser:           createClerkUser,
+		Chain:                chain,
+		DB:                   db,
+		MailClient:           mailClient,
+		DiscordToken:         conf.discordtoken,
+>>>>>>> main
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")

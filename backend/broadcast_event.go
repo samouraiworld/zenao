@@ -17,7 +17,11 @@ func (s *ZenaoServer) BroadcastEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.BroadcastEventRequest],
 ) (*connect.Response[zenaov1.BroadcastEventResponse], error) {
+<<<<<<< HEAD
 	user := s.Auth.GetUser(ctx)
+=======
+	user := s.GetUser(ctx)
+>>>>>>> main
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
@@ -68,7 +72,11 @@ func (s *ZenaoServer) BroadcastEvent(
 	for i, participant := range participants {
 		idsList[i] = participant.AuthID
 	}
+<<<<<<< HEAD
 	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
+=======
+	authParticipants, err := s.GetUsersFromClerkIDs(ctx, idsList)
+>>>>>>> main
 	if err != nil {
 		return nil, err
 	}
