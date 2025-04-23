@@ -1,6 +1,8 @@
 package events
 
 import (
+	"crypto/ed25519"
+	"encoding/base64"
 	"errors"
 	"std"
 	"strconv"
@@ -26,7 +28,7 @@ type Event struct {
 	startDate        int64
 	endDate          int64
 	capacity         uint32
-	tickets          *avl.Tree // ticketHash -> *Ticket
+	tickets          avl.Tree // ticketHash -> *Ticket
 	location         *zenaov1.EventLocation
 	getProfileString basedao.ProfileStringGetter
 	setProfileString basedao.ProfileStringSetter
@@ -123,7 +125,7 @@ func NewEvent(conf *Config) *Event {
 			event.editEventHandler(),
 		},
 		"gatekeeper": {
-			event.useTicketHandler(),
+			event.checkinHandler(),
 		},
 	}
 	for role, actions := range actionsByRole {
@@ -145,8 +147,8 @@ const MsgAddParticipantKind = "gno.land/p/zenao/events.AddParticipant"
 // ticket that can't be linked to a particular ticket. We should ensure that there is only one valid proof for each ticket
 
 type MsgAddParticipant struct {
-	Participant   string
-	TicketAddress string // pkg address derivation of ticket secret, this hides the ticket secret and should be efficient for verification
+	Participant  string
+	TicketPubkey string // ed25519 public key derived from the private key in the ticket secret
 }
 
 func (msg *MsgAddParticipant) String() string {
@@ -164,15 +166,11 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 			panic(errors.New("invalid payload type"))
 		}
 
-		if !std.Address(msg.TicketAddress).IsValid() {
-			panic(errors.New("ticket address is not a valid address"))
-		}
-
-		if e.tickets.Has(msg.TicketAddress) {
+		if e.tickets.Has(msg.TicketPubkey) {
 			panic(errors.New("ticket already added"))
 		}
 
-		_ = e.tickets.Set(msg.TicketAddress, &Ticket{
+		_ = e.tickets.Set(msg.TicketPubkey, &Ticket{
 			Participant: msg.Participant,
 			UsedAt:      nil,
 		})
@@ -190,8 +188,8 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 	})
 }
 
-func NewAddParticipantMsg(participant string, ticketAddress string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketAddress: ticketAddress})
+func NewAddParticipantMsg(participant string, ticketPubkey string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey})
 }
 
 const MsgRemoveParticipantKind = "gno.land/p/zenao/events.RemoveParticipant"
@@ -254,22 +252,44 @@ func NewRemoveGatekeeperMsg(gatekeeper string) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgRemoveGatekeeperKind, gatekeeper)
 }
 
-const MsgUseTicketKind = "gno.land/p/zenao/events.UseTicket"
+const MsgCheckinKind = "gno.land/p/zenao/events.Checkin"
 
-func (e *Event) useTicketHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgUseTicketKind, func(i interface{}) {
-		ticketAddress, ok := i.(string)
+type MsgCheckin struct {
+	TicketPubkey     string
+	CheckinSignature string // ed25519 signature by ticket secret of gatekeeper's bech32 address
+	// XXX: add timestamp in payload to limit signature replay?
+}
+
+func (e *Event) checkinHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgCheckinKind, func(i interface{}) {
+		msg, ok := i.(*MsgCheckin)
 		if !ok {
-			panic(errors.New("invalid payload type"))
+			panic("invalid payload type")
 		}
 
-		val, ok := e.tickets.Get(ticketAddress)
+		pubkeyBz, err := base64.RawURLEncoding.DecodeString(msg.TicketPubkey)
+		if err != nil {
+			panic(err)
+		}
+
+		payloadBz := []byte(std.PreviousRealm().Address())
+
+		signatureBz, err := base64.RawURLEncoding.DecodeString(msg.CheckinSignature)
+		if err != nil {
+			panic(err)
+		}
+
+		if !ed25519.Verify(pubkeyBz, payloadBz, signatureBz) {
+			panic("invalid signature")
+		}
+
+		val, ok := e.tickets.Get(msg.TicketPubkey)
 		if !ok {
-			panic(errors.New("no such ticket"))
+			panic("no such ticket")
 		}
 		ticket := val.(*Ticket)
 		if ticket.Used() {
-			panic(ufmt.Errorf("ticket already used at %s", ticket.UsedAt.Format(time.RFC3339)))
+			panic(ufmt.Sprintf("ticket already used at %s", ticket.UsedAt.Format(time.RFC3339)))
 		}
 
 		now := time.Now()
@@ -277,8 +297,11 @@ func (e *Event) useTicketHandler() daokit.MessageHandler {
 	})
 }
 
-func NewUseTicketMsg(ticketAddress string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgUseTicketKind, ticketAddress)
+func NewCheckinMsg(ticketPubkey string, checkinSignature string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgCheckinKind, &MsgCheckin{
+		TicketPubkey:     ticketPubkey,
+		CheckinSignature: checkinSignature,
+	})
 }
 
 func (e *Event) CountParticipants() uint32 {
