@@ -78,7 +78,7 @@ type Poll struct {
 	Kind     int
 	Duration int64
 
-	PostID uint
+	PostID uint //XXX: should make it unique
 	Post   Post
 
 	Results []PollResult
