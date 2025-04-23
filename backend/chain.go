@@ -22,7 +22,6 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -167,13 +166,9 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 
 // EditEvent implements ZenaoChain.
 func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.EditEventRequest) error {
-	loc, err := protojson.Marshal(req.Location)
-	if err != nil {
-		return err
-	}
-
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
+	loc := "&" + req.Location.GnoLiteral("zenaov1.", "\t\t")
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -188,6 +183,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.Ed
 import (
 	user %q
 	event %q
+	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/p/zenao/daokit"
 	"gno.land/p/zenao/events"
 )
@@ -204,7 +200,7 @@ func main() {
 				%d,
 				%d,
 				%d,
-				%q,
+				%s,
 			),
 		}),
 	})

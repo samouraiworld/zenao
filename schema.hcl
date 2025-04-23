@@ -17,7 +17,7 @@ table "users" {
     null = true
     type = datetime
   }
-  column "clerk_id" {
+  column "auth_id" {
     null = true
     type = text
   }
@@ -36,12 +36,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
-  index "idx_users_clerk_id" {
-    unique  = true
-    columns = [column.clerk_id]
-  }
   index "idx_users_deleted_at" {
     columns = [column.deleted_at]
+  }
+  index "idx_users_auth_id" {
+    unique  = true
+    columns = [column.auth_id]
   }
 }
 table "events" {
@@ -528,6 +528,18 @@ table "user_roles" {
   }
   primary_key {
     columns = [column.user_id, column.event_id, column.role]
+  }
+  foreign_key "fk_user_roles_event" {
+    columns     = [column.event_id]
+    ref_columns = [table.events.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_user_roles_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
   }
   index "idx_user_roles_deleted_at" {
     columns = [column.deleted_at]
