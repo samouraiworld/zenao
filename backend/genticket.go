@@ -42,21 +42,51 @@ func execGenticket(genticketConf *genticketConfig) error {
 		return err
 	}
 
-	sk := ed25519.NewKeyFromSeed(secret)
-	fmt.Printf("🌱 Seed:\n%s\n", base64.RawURLEncoding.EncodeToString(sk.Seed()))
+	ticket, err := NewTicket()
+	if err != nil {
+		return err
+	}
 
-	pk := sk.Public().(ed25519.PublicKey)
-	fmt.Printf("🎫 Ticket pubkey:\n%s\n", base64.RawURLEncoding.EncodeToString(pk))
+	fmt.Printf("🌱 Seed:\n%s\n", ticket.Secret())
+
+	fmt.Printf("🎫 Ticket pubkey:\n%s\n", ticket.Pubkey())
 
 	if genticketConf.gatekeeper != "" {
-		signature, err := sk.Sign(srand.Reader, []byte(genticketConf.gatekeeper), crypto.Hash(0))
+		signature, err := ticket.Signature(genticketConf.gatekeeper)
 		if err != nil {
 			return err
 		}
-		b64Sig := base64.RawURLEncoding.EncodeToString(signature)
-
-		fmt.Printf("🚪 Checkin signature for gatekeeper %q:\n%s\n", genticketConf.gatekeeper, b64Sig)
+		fmt.Printf("🚪 Checkin signature for gatekeeper %q:\n%s\n", genticketConf.gatekeeper, signature)
 	}
 
 	return nil
+}
+
+type Ticket struct {
+	sk ed25519.PrivateKey
+}
+
+func (t *Ticket) Secret() string {
+	return base64.RawURLEncoding.EncodeToString(t.sk.Seed())
+}
+
+func (t *Ticket) Pubkey() string {
+	pk := t.sk.Public().(ed25519.PublicKey)
+	return base64.RawURLEncoding.EncodeToString(pk)
+}
+
+func (t *Ticket) Signature(gatekeeper string) (string, error) {
+	signature, err := t.sk.Sign(srand.Reader, []byte(gatekeeper), crypto.Hash(0))
+	if err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(signature), nil
+}
+
+func NewTicket() (*Ticket, error) {
+	secret := make([]byte, ed25519.SeedSize)
+	if _, err := srand.Read(secret); err != nil {
+		return nil, err
+	}
+	return &Ticket{sk: ed25519.NewKeyFromSeed(secret)}, nil
 }
