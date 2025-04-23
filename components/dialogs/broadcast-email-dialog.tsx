@@ -116,7 +116,7 @@ export function BroadcastEmailDialog({
                 form={form}
                 onSubmit={form.handleSubmit(onSubmit)}
                 isLoading={isPending}
-                isDisabled={false}
+                isDisabled={noParticipant}
               />
             </Form>
           </div>
