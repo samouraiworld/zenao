@@ -20,6 +20,7 @@ type AuthUser struct {
 
 type User struct {
 	ID          string
+	AuthID      string
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -131,7 +132,7 @@ type DB interface {
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
-	GetPollByID(pollID string) (*Poll, error)
+	GetPollByPostID(postID string) (*Poll, error)
 }
 
 type Chain interface {

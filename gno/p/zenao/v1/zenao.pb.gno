@@ -63,6 +63,14 @@ type ParticipateResponse struct {
 	TicketSecret string
 }
 
+type BroadcastEventRequest struct {
+	EventId string
+	Message string
+}
+
+type BroadcastEventResponse struct {
+}
+
 type EventLocation struct {
 	VenueName    string
 	Instructions string

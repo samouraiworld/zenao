@@ -18,7 +18,7 @@ import (
 
 type User struct {
 	gorm.Model         // this ID should be used for any database related logic (like querying)
-	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation
+	AuthID      string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -30,8 +30,10 @@ type UserRole struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	UserID  uint   `gorm:"primaryKey;autoIncrement:false"`
-	EventID uint   `gorm:"primaryKey;autoIncrement:false"`
+	UserID  uint `gorm:"primaryKey;autoIncrement:false"`
+	User    User
+	EventID uint `gorm:"primaryKey;autoIncrement:false"`
+	Event   Event
 	Role    string `gorm:"primaryKey"`
 }
 
@@ -199,7 +201,7 @@ func (g *gormZenaoDB) getDBEvent(id string) (*Event, error) {
 // CreateUser implements zeni.DB.
 func (g *gormZenaoDB) CreateUser(authID string) (string, error) {
 	user := &User{
-		ClerkID: authID,
+		AuthID: authID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
 		return "", err
@@ -276,7 +278,7 @@ func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) erro
 // UserExists implements zeni.DB.
 func (g *gormZenaoDB) UserExists(authID string) (string, error) {
 	var user User
-	if err := g.db.Where("clerk_id = ?", authID).First(&user).Error; err != nil {
+	if err := g.db.Where("auth_id = ?", authID).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", nil
 		}
@@ -317,13 +319,13 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 
 // GetAllParticipants implements zeni.DB.
 func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
-	var tickets []*SoldTicket
-	if err := g.db.Find(&tickets, "event_id = ?", eventID).Error; err != nil {
+	var participants []*UserRole
+	if err := g.db.Preload("User").Find(&participants, "event_id = ? AND role = ?", eventID, "participant").Error; err != nil {
 		return nil, err
 	}
-	res := make([]*zeni.User, 0, len(tickets))
-	for _, e := range tickets {
-		res = append(res, &zeni.User{ID: e.UserID})
+	res := make([]*zeni.User, 0, len(participants))
+	for _, p := range participants {
+		res = append(res, dbUserToZeniDBUser(&p.User))
 	}
 	return res, nil
 }
@@ -616,14 +618,14 @@ func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) erro
 	})
 }
 
-func (g *gormZenaoDB) GetPollByID(pollID string) (*zeni.Poll, error) {
-	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
+func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
+	postIDint, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
 	var poll Poll
-	if err := g.db.Where("id = ?", pollIDint).Preload("Results").Preload("Results.Users").First(&poll).Error; err != nil {
+	if err := g.db.Where("post_id = ?", postIDint).Preload("Results").Preload("Results.Users").First(&poll).Error; err != nil {
 		return nil, err
 	}
 
@@ -636,5 +638,6 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		DisplayName: dbuser.DisplayName,
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
+		AuthID:      dbuser.AuthID,
 	}
 }
