@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"gno.land/p/demo/json"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	"gno.land/p/zenao/basedao"
@@ -274,13 +273,7 @@ func (msg *msgEditEvent) String() string {
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) daokit.ExecutableMessage {
-	loc := &zenaov1.EventLocation{}
-	j, err := json.UnmarshalSafe([]byte(locationJSON))
-	if err != nil {
-		panic(err)
-	}
-	loc.FromJSON(j)
+func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
 		title:       title,
 		description: description,

@@ -319,6 +319,41 @@ func (p *ParticipateResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (b *BroadcastEventRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if b.EventId != "" {
+		fields["eventId"] = json.StringNode("", b.EventId)
+	}
+	if b.Message != "" {
+		fields["message"] = json.StringNode("", b.Message)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (b *BroadcastEventRequest) FromJSON(node *json.Node) {
+	*b = BroadcastEventRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		b.EventId = val.MustString()
+	}
+	if val, ok := fields["message"]; ok {
+		b.Message = val.MustString()
+	}
+}
+
+func (b *BroadcastEventResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (b *BroadcastEventResponse) FromJSON(node *json.Node) {
+	*b = BroadcastEventResponse{}
+}
+
 func (e *EventLocation) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
