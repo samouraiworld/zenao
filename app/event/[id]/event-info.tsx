@@ -177,41 +177,43 @@ export function EventInfo({ id }: { id: string }) {
           </div>
 
           {/* Participate Card */}
-          <Card className="mt-2">
-            {isParticipant ? (
-              <div>
-                <div className="flex flex-row justify-between">
-                  <Heading level={2} size="xl">
-                    {t("in")}
-                  </Heading>
-                  {/* TODO: create a clean decount timer */}
-                  {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
-                </div>
-                {/* add back when we can cancel
+          {!isOrganizer && (
+            <Card className="mt-2">
+              {isParticipant ? (
+                <div>
+                  <div className="flex flex-row justify-between">
+                    <Heading level={2} size="xl">
+                      {t("in")}
+                    </Heading>
+                    {/* TODO: create a clean decount timer */}
+                    {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
+                  </div>
+                  {/* add back when we can cancel
                 <Text className="my-4">{t("cancel-desc")}</Text>
               */}
-              </div>
-            ) : isStarted ? (
-              <div>
-                <Heading level={2} size="xl">
-                  {t("already-begun")}
-                </Heading>
-                <Text className="my-4">{t("too-late")}</Text>
-              </div>
-            ) : (
-              <div>
-                <Heading level={2} size="xl">
-                  {t("registration")}
-                </Heading>
-                <Text className="my-4">{t("join-desc")}</Text>
-                <ParticipateForm
-                  eventId={id}
-                  userId={userId}
-                  userAddress={address}
-                />
-              </div>
-            )}
-          </Card>
+                </div>
+              ) : isStarted ? (
+                <div>
+                  <Heading level={2} size="xl">
+                    {t("already-begun")}
+                  </Heading>
+                  <Text className="my-4">{t("too-late")}</Text>
+                </div>
+              ) : (
+                <div>
+                  <Heading level={2} size="xl">
+                    {t("registration")}
+                  </Heading>
+                  <Text className="my-4">{t("join-desc")}</Text>
+                  <ParticipateForm
+                    eventId={id}
+                    userId={userId}
+                    userAddress={address}
+                  />
+                </div>
+              )}
+            </Card>
+          )}
 
           {/* Markdown Description */}
           <EventSection title={t("about-event")}>
