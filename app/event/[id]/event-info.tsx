@@ -9,7 +9,6 @@ import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { TZDate } from "react-day-picker";
 import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
@@ -78,11 +77,8 @@ export function EventInfo({ id }: { id: string }) {
     "@type": "Event",
     name: data.title,
     description: data.description,
-    startDate: new TZDate(
-      Number(data.startDate) * 1000,
-      timezone,
-    ).toISOString(),
-    endDate: new TZDate(Number(data.endDate) * 1000, timezone).toISOString(),
+    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
+    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
     location:
       location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
