@@ -54,6 +54,7 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        main: "var(--main)",
         // Custom
         "custom-input-bg": "rgba(var(--input-bg))",
         "custom-input-border": "var(--input-border)",
