@@ -140,17 +140,19 @@ func execStart() error {
 
 	mailClient := (*resend.Client)(nil)
 	if conf.resendSecretKey != "" {
+		logger.Info("resend mail client initialized")
 		mailClient = resend.NewClient(conf.resendSecretKey)
 	}
 
 	zenao := &ZenaoServer{
-		Logger:       logger,
-		GetUser:      getUserFromClerk,
-		CreateUser:   createClerkUser,
-		Chain:        chain,
-		DB:           db,
-		MailClient:   mailClient,
-		DiscordToken: conf.discordtoken,
+		Logger:               logger,
+		GetUser:              getUserFromClerk,
+		GetUsersFromClerkIDs: getUsersFromClerkIDs,
+		CreateUser:           createClerkUser,
+		Chain:                chain,
+		DB:                   db,
+		MailClient:           mailClient,
+		DiscordToken:         conf.discordtoken,
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
@@ -183,6 +185,22 @@ func getUserFromClerk(ctx context.Context) *zeni.AuthUser {
 		email = clerkUser.EmailAddresses[0].EmailAddress
 	}
 	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+}
+
+func getUsersFromClerkIDs(ctx context.Context, ids []string) ([]*zeni.AuthUser, error) {
+	userList, err := user.List(ctx, &user.ListParams{UserIDs: ids})
+	if err != nil {
+		return nil, err
+	}
+	users := make([]*zeni.AuthUser, len(userList.Users))
+	for i, clerkUser := range userList.Users {
+		email := ""
+		if len(clerkUser.EmailAddresses) != 0 {
+			email = clerkUser.EmailAddresses[0].EmailAddress
+		}
+		users[i] = &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+	}
+	return users, nil
 }
 
 func createClerkUser(ctx context.Context, email string) (*zeni.AuthUser, error) {
