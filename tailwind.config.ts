@@ -11,6 +11,17 @@ export default {
   ],
   theme: {
     extend: {
+      keyframes: {
+        "appear-from-bottom": {
+          from: { transform: "translateY(128px)" },
+          to: { transform: "translateY(0px)" },
+        },
+      },
+      animation: {
+        "gotop-appear": "appear-from-bottom 200ms ease-in-out forwards",
+        "gotop-disappear":
+          "appear-from-bottom 200ms ease-in-out reverse forwards",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

@@ -36,12 +36,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
-  }
   index "idx_users_auth_id" {
     unique  = true
     columns = [column.auth_id]
+  }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
   }
 }
 table "events" {
@@ -529,15 +529,15 @@ table "user_roles" {
   primary_key {
     columns = [column.user_id, column.event_id, column.role]
   }
-  foreign_key "fk_user_roles_event" {
-    columns     = [column.event_id]
-    ref_columns = [table.events.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_user_roles_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_user_roles_event" {
+    columns     = [column.event_id]
+    ref_columns = [table.events.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
