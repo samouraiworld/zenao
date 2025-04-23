@@ -169,10 +169,14 @@ function Reactions({
 
       {reactions.map((reaction) => (
         <div
-          onClick={() => onReactionChange(reaction.icon)}
+          onClick={() => {
+            if (reaction.userHasVoted) onReactionChange(reaction.icon);
+          }}
           className={cn(
-            "flex flex-row items-center py-0.5 pl-1 pr-2 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700",
-            reaction.userHasVoted && "border-[1px] border-neutral-700",
+            "flex flex-row items-center py-0.5 pl-1 pr-2 rounded-full gap-0.5 cursor-default",
+            reaction.userHasVoted &&
+              "border-[1px] border-neutral-700 hover:bg-neutral-700 cursor-pointer",
+            !reaction.userHasVoted && "bg-neutral-800",
           )}
           key={reaction.icon}
         >
