@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { zenaoClient } from "@/app/zenao-client";
 
 type EventBroadcastEmailRequest = {
   eventId: string;
@@ -13,8 +14,13 @@ export const useEventBroadcastEmail = () => {
       token,
       message,
     }: EventBroadcastEmailRequest) => {
-      // TODO use endpoint
-      console.log(eventId, token, message);
+      await zenaoClient.broadcastEvent(
+        {
+          eventId,
+          message,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
     },
   });
 

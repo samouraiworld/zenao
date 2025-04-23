@@ -60,7 +60,7 @@ export function BroadcastEmailDialog({
         throw new Error("token missing");
       }
 
-      broadcastEmail({
+      await broadcastEmail({
         token,
         eventId,
         ...data,
