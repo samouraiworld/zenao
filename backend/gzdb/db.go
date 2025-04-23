@@ -618,14 +618,14 @@ func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) erro
 	})
 }
 
-func (g *gormZenaoDB) GetPollByID(pollID string) (*zeni.Poll, error) {
-	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
+func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
+	postIDint, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
 	var poll Poll
-	if err := g.db.Where("id = ?", pollIDint).Preload("Results").Preload("Results.Users").First(&poll).Error; err != nil {
+	if err := g.db.Where("post_id = ?", postIDint).Preload("Results").Preload("Results.Users").First(&poll).Error; err != nil {
 		return nil, err
 	}
 
