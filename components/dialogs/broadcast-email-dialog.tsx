@@ -29,7 +29,7 @@ import {
 import Text from "../texts/text";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
-import { useEventBroadcastEmail } from "@/lib/mutations/event-managment";
+import { useEventBroadcastEmail } from "@/lib/mutations/event-management";
 import { useToast } from "@/app/hooks/use-toast";
 
 type BroadcastEmailDialogProps = {
