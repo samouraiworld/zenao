@@ -145,8 +145,8 @@ export function EventInfo({ id }: { id: string }) {
                 {t("edit-button")}
               </Link>
               <p
-                className="text-main underline cursor-pointer"
-                onClick={() => setBroadcastEmailDialogOpen(true)}
+                className="text-neutral-600 underline cursor-pointer"
+                // onClick={() => setBroadcastEmailDialogOpen(true)}
               >
                 {t("send-global-message")}
               </p>
