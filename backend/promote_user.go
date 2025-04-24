@@ -12,6 +12,7 @@ import (
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.uber.org/zap"
 )
 
 func newPromoteUserCmd() *commands.Command {
@@ -69,12 +70,19 @@ func promoteUser() error {
 		}
 	}
 
-	db, err := gzdb.SetupDB(promoteUserConf.dbPath)
+	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
 	}
 
+	db, err := gzdb.SetupDB(promoteUserConf.dbPath)
+	if err != nil {
+		return err
+	}
+	logger.Info("database initialized successfully")
+
 	if promoteUserConf.email != "" {
+		logger.Info("fetching clerk user id from email", zap.String("email", promoteUserConf.email))
 		if promoteUserConf.clerkSecretKey == "" {
 			return fmt.Errorf("-clerk-secret-key is required when using -email")
 		}
@@ -88,9 +96,11 @@ func promoteUser() error {
 			return fmt.Errorf("user with email %s not found", promoteUserConf.email)
 		}
 		promoteUserConf.clerkID = list.Users[0].ID
+		logger.Info("clerk user id fetched", zap.String("clerk-id", promoteUserConf.clerkID))
 	}
 
 	if err := db.Tx(func(txdb zeni.DB) error {
+		logger.Info("fetching user from database", zap.String("clerk-id", promoteUserConf.clerkID))
 		user, err := txdb.GetUser(promoteUserConf.clerkID)
 		if err != nil {
 			return err
@@ -99,6 +109,7 @@ func promoteUser() error {
 			return errors.New("the user does not exist in database")
 		}
 
+		logger.Info("promoting user", zap.String("user-id", user.ID), zap.String("plan", string(promoteUserConf.plan)))
 		if err = txdb.PromoteUser(user.ID, promoteUserConf.plan); err != nil {
 			return err
 		}
@@ -107,5 +118,6 @@ func promoteUser() error {
 		return err
 	}
 
+	logger.Info("user promoted", zap.String("clerk-id", promoteUserConf.clerkID), zap.String("plan", string(promoteUserConf.plan)))
 	return nil
 }
