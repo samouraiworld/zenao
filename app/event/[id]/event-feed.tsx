@@ -7,7 +7,6 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useTheme } from "next-themes";
 import { cn } from "@/lib/tailwind";
 import {
   screenContainerMarginHorizontal,
@@ -38,26 +37,11 @@ const EventFeedForm = forwardRef<
     isDescExpanded: boolean;
   }
 >(({ eventId, isDescExpanded }, ref) => {
-  const { theme } = useTheme();
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
   const [isInputSticky, setInputSticky] = useState(false);
   const [inputOffsetTop, setInputOffsetTop] = useState(0);
-
-  const [bgColor, setBgColor] = useState<string>("");
-  useEffect(() => {
-    /* Avoid reading CSS variables too early */
-    const timeoutId = setTimeout(() => {
-      const root = document.documentElement;
-      const computedStyle = getComputedStyle(root);
-      const cssVar = computedStyle.getPropertyValue("--background").trim();
-
-      setBgColor(`hsl(${cssVar} / .9)`);
-    }, 0);
-
-    return () => clearTimeout(timeoutId);
-  }, [theme]);
 
   const feedMaxWidth =
     screenContainerMaxWidth - screenContainerMarginHorizontal * 2;
@@ -90,10 +74,8 @@ const EventFeedForm = forwardRef<
         "flex justify-center w-full transition-all duration-300",
         isInputSticky &&
           `fixed bottom-0 py-4 px-5 left-0 z-50 backdrop-blur-sm`,
+        isInputSticky ? "bg-event-post-form-bg" : "bg-transparent",
       )}
-      style={{
-        backgroundColor: isInputSticky ? bgColor : "transparent",
-      }}
     >
       <div
         className="w-full"
@@ -121,6 +103,8 @@ const EventFeedForm = forwardRef<
 
 EventFeedForm.displayName = "EventFeedForm";
 
+const DEFAULT_EVENT_FEED_PADDING_BOTTOM = 64;
+
 export function EventFeed({
   eventId,
   isMember,
@@ -135,7 +119,9 @@ export function EventFeed({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const [stickyBottomPadding, setStickyBottomPadding] = useState(0);
+  const [stickyBottomPadding, setStickyBottomPadding] = useState(
+    DEFAULT_EVENT_FEED_PADDING_BOTTOM,
+  );
 
   const feedFormRef = useRef<HTMLDivElement>(null);
 
@@ -180,7 +166,9 @@ export function EventFeed({
         const { height } = entry.contentRect;
         const isSticky =
           window.scrollY > (feedFormRef.current?.offsetTop ?? 0) + height;
-        setStickyBottomPadding(isSticky ? height : 64);
+        setStickyBottomPadding(
+          isSticky ? height : DEFAULT_EVENT_FEED_PADDING_BOTTOM,
+        );
       }
     });
     observer.observe(feedFormRef.current);

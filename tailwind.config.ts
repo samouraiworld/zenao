@@ -70,6 +70,8 @@ export default {
         // Custom
         "custom-input-bg": "rgba(var(--input-bg))",
         "custom-input-border": "var(--input-border)",
+        // Feed sticky input
+        "event-post-form-bg": "hsl(var(--background) / .8)",
       },
       borderRadius: {
         lg: "var(--radius)",
