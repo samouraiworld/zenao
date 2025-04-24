@@ -62,7 +62,7 @@ export function TicketInfo({ id }: TicketInfoProps) {
               fill
               alt="Event"
               priority
-              className="flex w-full rounded-xl self-center object-cover"
+              className="flex w-full rounded-xl self-center object-cover pointer-events-none"
             />
           </AspectRatio>
         </div>
