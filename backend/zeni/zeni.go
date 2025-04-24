@@ -156,7 +156,7 @@ type Chain interface {
 type Auth interface {
 	GetUser(ctx context.Context) *AuthUser
 	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)
-	CreateUser(ctx context.Context, email string) (*AuthUser, error)
+	EnsureUserExists(ctx context.Context, email string) (*AuthUser, error)
 
 	WithAuth() func(http.Handler) http.Handler
 }

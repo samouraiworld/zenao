@@ -55,7 +55,7 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 }
 
 // CreateUser implements zeni.Auth.
-func (c *clerkZenaoAuth) CreateUser(ctx context.Context, email string) (*zeni.AuthUser, error) {
+func (c *clerkZenaoAuth) EnsureUserExists(ctx context.Context, email string) (*zeni.AuthUser, error) {
 	existing, err := user.List(ctx, &user.ListParams{EmailAddressQuery: &email})
 	if err != nil {
 		return nil, err

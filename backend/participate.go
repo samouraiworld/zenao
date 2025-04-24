@@ -21,7 +21,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return nil, errors.New("no user and no email")
 		}
 		var err error
-		user, err = s.Auth.CreateUser(ctx, req.Msg.Email)
+		user, err = s.Auth.EnsureUserExists(ctx, req.Msg.Email)
 		if err != nil {
 			return nil, err
 		}
