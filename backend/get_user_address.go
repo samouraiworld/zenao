@@ -13,7 +13,7 @@ func (s *ZenaoServer) GetUserAddress(
 	ctx context.Context,
 	req *connect.Request[zenaov1.GetUserAddressRequest],
 ) (*connect.Response[zenaov1.GetUserAddressResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}

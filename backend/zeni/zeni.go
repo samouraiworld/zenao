@@ -1,8 +1,10 @@
 package zeni
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -179,6 +181,14 @@ type Chain interface {
 	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+}
+
+type Auth interface {
+	GetUser(ctx context.Context) *AuthUser
+	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)
+	EnsureUserExists(ctx context.Context, email string) (*AuthUser, error)
+
+	WithAuth() func(http.Handler) http.Handler
 }
 
 func LocationToString(location *zenaov1.EventLocation) (string, error) {
