@@ -10,6 +10,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/gzdb"
+	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -32,14 +33,14 @@ func newFakegenCmd() *commands.Command {
 var fakegenConf fakegenConfig
 
 type fakegenConfig struct {
-	adminMnemonic        string
-	gnoNamespace         string
-	chainEndpoint        string
-	chainID              string
-	dbPath               string
-	eventsCount          uint
-	postsCount           uint
-	eventsWithPostsCount uint
+	adminMnemonic string
+	gnoNamespace  string
+	chainEndpoint string
+	chainID       string
+	dbPath        string
+	eventsCount   uint
+	postsCount    uint
+	pollsCount    uint
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -50,14 +51,14 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 35, "number of fake posts to generate")
-	flset.UintVar(&fakegenConf.eventsWithPostsCount, "events-with-posts", 2, "number of events to generate posts for")
+	flset.UintVar(&fakegenConf.pollsCount, "polls", 10, "number of fake polls to generate")
 }
 
 type fakeEvent struct {
 	Title            string  `faker:"sentence"`
 	Description      string  `faker:"paragraph"`
 	TicketPrice      float64 `faker:"amount"`
-	Capacity         float64 `faker:"boundary_start=10, boundary_end=5000"`
+	Capacity         int     `faker:"boundary_start=10, boundary_end=5000"`
 	StartOffsetHours int     `faker:"oneof: 24, 48, 72, 96"`
 	DurationHours    int     `faker:"oneof: 1, 6, 12"`
 	Location         string  `faker:"sentence"`
@@ -65,6 +66,13 @@ type fakeEvent struct {
 
 type fakePost struct {
 	Content string `faker:"paragraph"`
+}
+
+type fakePoll struct {
+	Question     string           `faker:"sentence"`
+	OptionsCount int              `faker:"boundary_start=2, boundary_end=8"`
+	DaysDuration int              `faker:"boundary_start=1, boundary_end=60"`
+	Kind         pollsv1.PollKind `faker:"oneof: POLL_KIND_MULTIPLE_CHOICE, POLL_KIND_SINGLE_CHOICE"`
 }
 
 func execFakegen() error {
@@ -83,6 +91,7 @@ func execFakegen() error {
 		return err
 	}
 
+	// Create user
 	zUser, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
 	if err != nil {
 		return err
@@ -92,8 +101,8 @@ func execFakegen() error {
 		return err
 	}
 
-	evtWithPostsIdx := 0
 	for i := range fakegenConf.eventsCount {
+		// Create Event
 		a := fakeEvent{}
 		err := faker.FakeData(&a)
 		if err != nil {
@@ -129,27 +138,28 @@ func execFakegen() error {
 			return err
 		}
 
-		// XXXXXXX This dosen't work because the event is not yet in the db
-		zfeed, err := db.GetFeed(zevt.ID, "main")
+		// Create Feed
+		zfeed, err := db.CreateFeed(zevt.ID, "main")
 		if err != nil {
 			return err
 		}
 
-		// Create posts for the eventsWithPostsCount most recent events to avoid flooding the chain and db
-		if evtWithPostsIdx >= int(fakegenConf.eventsCount-fakegenConf.eventsWithPostsCount) {
-			for j := uint(0); j < fakegenConf.postsCount; j++ {
-				b := fakePost{}
-				err := faker.FakeData(&b)
+		// Create posts/polls for only one event to avoid flooding the chain and db
+		if i == fakegenConf.eventsCount-1 {
+			// Create StandardPosts
+			for j := range int(fakegenConf.postsCount) {
+				p := fakePost{}
+				err := faker.FakeData(&p)
 				if err != nil {
 					return err
 				}
 
 				post := &feedsv1.Post{
 					Author:    creatorID,
-					CreatedAt: int64(time.Now().Unix()),
+					CreatedAt: startDate.Add(-time.Duration(j) * time.Hour).Unix(), //One post per hour
 					Post: &feedsv1.Post_Standard{
 						Standard: &feedsv1.StandardPost{
-							Content: b.Content,
+							Content: p.Content,
 						},
 					},
 				}
@@ -163,8 +173,44 @@ func execFakegen() error {
 					return err
 				}
 			}
+
+			// Create Polls
+			for range int(fakegenConf.pollsCount) {
+				p := fakePoll{}
+				err := faker.FakeData(&p)
+				if err != nil {
+					return err
+				}
+
+				// Make random words options
+				options := make([]string, p.OptionsCount)
+				for i := range p.OptionsCount {
+					var word string
+					err := faker.FakeData(&word)
+					if err != nil {
+						return err
+					}
+					options[i] = word
+				}
+
+				pollReq := &zenaov1.CreatePollRequest{
+					EventId:  zevt.ID,
+					Question: p.Question,
+					Options:  options,
+					Duration: int64(p.DaysDuration * 24 * 60 * 60),
+					Kind:     p.Kind,
+				}
+
+				pollID, postID, err := chain.CreatePoll(creatorID, pollReq)
+				if err != nil {
+					return err
+				}
+
+				if _, err := db.CreatePoll(pollID, postID, pollReq); err != nil {
+					return err
+				}
+			}
 		}
-		evtWithPostsIdx++
 	}
 
 	return nil
