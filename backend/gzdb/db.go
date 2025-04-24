@@ -38,6 +38,7 @@ type SoldTicket struct {
 	EventID uint
 	UserID  string // XXX: should be uint
 	Price   float64
+	Secret  string
 }
 
 func SetupDB(dsn string) (zeni.DB, error) {

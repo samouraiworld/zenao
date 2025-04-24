@@ -167,6 +167,10 @@ table "sold_tickets" {
     null = true
     type = real
   }
+  column "secret" {
+    null = true
+    type = text
+  }
   primary_key {
     columns = [column.id]
   }
