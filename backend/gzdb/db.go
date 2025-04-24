@@ -234,7 +234,7 @@ func (g *gormZenaoDB) Participate(eventID string, userID string, ticketSecret st
 	}
 
 	var count int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userID).Count(&count).Error; err != nil {
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND buyer_id = ?", evt.ID, userID).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
