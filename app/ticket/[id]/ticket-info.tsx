@@ -1,0 +1,116 @@
+"use client";
+
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQRCode } from "next-qrcode";
+import { format, fromUnixTime } from "date-fns";
+import { format as formatTZ } from "date-fns-tz";
+import { useMotionValue, useTransform, motion } from "framer-motion";
+import Link from "next/link";
+import { getQueryClient } from "@/lib/get-query-client";
+import { eventOptions } from "@/lib/queries/event";
+import { userAddressOptions } from "@/lib/queries/user";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Web3Image } from "@/components/images/web3-image";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
+import { makeLocationFromEvent } from "@/lib/location";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { cn } from "@/lib/tailwind";
+
+type TicketInfoProps = {
+  id: string;
+};
+
+export function TicketInfo({ id }: TicketInfoProps) {
+  const _queryClient = getQueryClient();
+  const { getToken, userId } = useAuth();
+  const { data: eventInfo } = useSuspenseQuery(eventOptions(id));
+  const { data: _address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  // TODO add fetch ticket info
+
+  const location = makeLocationFromEvent(eventInfo.location);
+  const timezone = useLocationTimezone(location);
+
+  const { Canvas: QRCode } = useQRCode();
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useTransform(x, [-100, 100], [25, -25]);
+  const rotateY = useTransform(y, [-100, 100], [25, -25]);
+
+  return (
+    <div className="card-3d">
+      <motion.div
+        style={{ x, y, rotateX, rotateY, z: 100 }}
+        drag
+        dragElastic={0.18}
+        dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
+        className={cn(
+          "max-w-[450px] md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded-xl shadow-lg",
+        )}
+      >
+        <div className="w-full md:max-w-[350px]">
+          <AspectRatio ratio={1 / 1}>
+            <Web3Image
+              src={eventInfo.imageUri}
+              sizes="(max-width: 768px) 100vw,
+            (max-width: 1200px) 50vw,
+            33vw"
+              fill
+              alt="Event"
+              priority
+              className="flex w-full rounded-xl self-center object-cover"
+            />
+          </AspectRatio>
+        </div>
+        <div className="flex grow flex-col gap-4 px-4 py-4">
+          <Heading level={2} size="xl" className="text-black">
+            {eventInfo.title}
+          </Heading>
+          <div className="flex flex-row gap-2 items-center">
+            <div className="flex flex-col">
+              <Heading level={3} size="sm" variant="secondary">
+                {format(fromUnixTime(Number(eventInfo.startDate)), "PPP")}
+              </Heading>
+              <div className="flex flex-row text-sm gap-1">
+                <Text variant="secondary" size="sm">
+                  {format(fromUnixTime(Number(eventInfo.startDate)), "p")}
+                </Text>
+                <Text variant="secondary" size="sm">
+                  -
+                </Text>
+                <Text variant="secondary" size="sm">
+                  {formatTZ(fromUnixTime(Number(eventInfo.endDate)), "PPp O", {
+                    timeZone: timezone,
+                  })}
+                </Text>
+              </div>
+            </div>
+          </div>
+          <Link href={`/event/${id}`} className="text-main underline">
+            See event
+          </Link>
+
+          <div className="flex flex-col grow items-center justify-center">
+            <QRCode
+              text="https://github.com/Bunlong/next-qrcode"
+              options={{
+                errorCorrectionLevel: "M",
+                margin: 2,
+                scale: 5,
+                width: 150,
+                color: {
+                  dark: "#000005",
+                  light: "#ffffff",
+                },
+              }}
+            />
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

@@ -31,7 +31,7 @@ export function TicketsEventsList({
           <EventCard
             key={evt.pkgPath}
             evt={evt}
-            href={`/tickets/${idFromPkgPath(evt.pkgPath)}`}
+            href={`/ticket/${idFromPkgPath(evt.pkgPath)}`}
           />
         ))
       )}
