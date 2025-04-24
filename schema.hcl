@@ -33,15 +33,20 @@ table "users" {
     null = true
     type = text
   }
+  column "plan" {
+    null    = true
+    type    = text
+    default = "free"
+  }
   primary_key {
     columns = [column.id]
-  }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
   }
   index "idx_users_auth_id" {
     unique  = true
     columns = [column.auth_id]
+  }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
   }
 }
 table "events" {
