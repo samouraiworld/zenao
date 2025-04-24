@@ -483,3 +483,33 @@ func (r *ReactPostResponse) GnoLiteral(typePrefix string, linePrefix string) str
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (g *GetEventTicketsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetEventTicketsRequest{\n")
+	if g.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, g.EventId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetEventTicketsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetEventTicketsResponse{\n")
+	if len(g.TicketsSecrets) != 0 {
+		fmt.Fprintf(buf, "%s\tTicketsSecrets: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range g.TicketsSecrets {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
