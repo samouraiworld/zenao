@@ -14,7 +14,7 @@ func (s *ZenaoServer) EditUser(
 	ctx context.Context,
 	req *connect.Request[zenaov1.EditUserRequest],
 ) (*connect.Response[zenaov1.EditUserResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
