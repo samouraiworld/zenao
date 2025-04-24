@@ -64,6 +64,10 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, err
 	}
 
+	if len(participants) == 0 {
+		return nil, errors.New("a broadcast message cannot be sent to an event without any participants")
+	}
+
 	idsList := make([]string, len(participants))
 	for i, participant := range participants {
 		idsList[i] = participant.AuthID

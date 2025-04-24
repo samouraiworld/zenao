@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
@@ -9,13 +9,11 @@ import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { TZDate } from "react-day-picker";
 import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
-import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { Separator } from "@/components/shadcn/separator";
 import MapCaller from "@/components/common/map/map-lazy-components";
@@ -28,8 +26,10 @@ import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
+import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { cn } from "@/lib/tailwind";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
+import { GoTopButton } from "@/components/buttons/go-top-button";
 
 interface EventSectionProps {
   title: string;
@@ -54,6 +54,9 @@ export function EventInfo({ id }: { id: string }) {
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
 
+  const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
+    useState(false);
+
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
@@ -63,7 +66,6 @@ export function EventInfo({ id }: { id: string }) {
   const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
-  const [loading, setLoading] = React.useState<boolean>(false);
   const [isDescExpanded, setDescExpanded] = React.useState(false);
   const descLineClamp = 10;
   const descExpandedCn = "line-clamp-[10]";
@@ -75,11 +77,8 @@ export function EventInfo({ id }: { id: string }) {
     "@type": "Event",
     name: data.title,
     description: data.description,
-    startDate: new TZDate(
-      Number(data.startDate) * 1000,
-      timezone,
-    ).toISOString(),
-    endDate: new TZDate(Number(data.endDate) * 1000, timezone).toISOString(),
+    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
+    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
     location:
       location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
@@ -93,6 +92,13 @@ export function EventInfo({ id }: { id: string }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <BroadcastEmailDialog
+        eventId={id}
+        nbParticipants={data.participants}
+        open={broadcastEmailDialogOpen}
+        onOpenChange={setBroadcastEmailDialogOpen}
       />
 
       {/* Left Section */}
@@ -109,24 +115,15 @@ export function EventInfo({ id }: { id: string }) {
             className="flex w-full rounded-xl self-center object-cover"
           />
         </AspectRatio>
-        {/* If the user is organizer, link to /edit page */}
-        {isOrganizer && (
-          <Card className="flex flex-row items-center">
-            <Text className="w-3/5">{t("is-organisator-role")}</Text>
-            <div className="w-2/5 flex justify-end">
-              <Link href={`/edit/${id}`}>
-                <ButtonWithLabel
-                  label={t("edit-button")}
-                  onClick={() => setLoading(true)}
-                  loading={loading}
-                />
-              </Link>
-            </div>
-          </Card>
-        )}
 
         {/* Participants preview and dialog section */}
-        <EventSection title={t("going", { count: data.participants })}>
+        <EventSection
+          title={
+            data.participants === 0
+              ? t("nobody-going-yet")
+              : t("going", { count: data.participants })
+          }
+        >
           <ParticipantsSection id={id} />
         </EventSection>
 
@@ -134,6 +131,25 @@ export function EventInfo({ id }: { id: string }) {
         <EventSection title={t("hosted-by")}>
           <UserAvatarWithName linkToProfile address={data.creator} />
         </EventSection>
+
+        {/* If the user is organizer, link to /edit page */}
+        {isOrganizer && (
+          <Card className="flex flex-col gap-2">
+            <Text>{t("is-organisator-role")}</Text>
+
+            <div className="flex flex-col">
+              <Link href={`/edit/${id}`} className="text-main underline">
+                {t("edit-button")}
+              </Link>
+              <p
+                className="text-main underline cursor-pointer"
+                onClick={() => setBroadcastEmailDialogOpen(true)}
+              >
+                {t("send-global-message")}
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Right Section */}
@@ -250,6 +266,8 @@ export function EventInfo({ id }: { id: string }) {
           )}
         </EventSection>
       </div>
+
+      <GoTopButton />
     </div>
   );
 }
