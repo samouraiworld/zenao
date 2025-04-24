@@ -63,6 +63,14 @@ type ParticipateResponse struct {
 	TicketSecret string
 }
 
+type BroadcastEventRequest struct {
+	EventId string
+	Message string
+}
+
+type BroadcastEventResponse struct {
+}
+
 type EventLocation struct {
 	VenueName    string
 	Instructions string
@@ -117,6 +125,7 @@ type CreatePollRequest struct {
 }
 
 type CreatePollResponse struct {
+	PostId string
 }
 
 type VotePollRequest struct {
@@ -125,4 +134,22 @@ type VotePollRequest struct {
 }
 
 type VotePollResponse struct {
+}
+
+type CreatePostRequest struct {
+	EventId string
+	Content string
+	Tags    []string
+}
+
+type CreatePostResponse struct {
+	PostId string
+}
+
+type ReactPostRequest struct {
+	PostId string
+	Icon   string
+}
+
+type ReactPostResponse struct {
 }

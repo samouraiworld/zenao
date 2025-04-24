@@ -13,11 +13,14 @@ service ZenaoService {
   // EVENT
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
+  rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
 }
 
 message EditUserRequest {
@@ -54,7 +57,7 @@ message EditEventRequest {
   uint64 end_date = 6;     // unix seconds
   double ticket_price = 7; // XXX: use fixed point?
   uint32 capacity = 8;
-  EventLocation location = 10;
+  EventLocation location = 9;
 }
 
 message EditEventResponse { string id = 1; }
@@ -65,6 +68,13 @@ message ParticipateRequest {
 }
 
 message ParticipateResponse { string ticket_secret = 1; }
+
+message BroadcastEventRequest {
+  string event_id = 1;
+  string message = 2;
+}
+
+message BroadcastEventResponse {}
 
 message EventLocation {
   string venue_name = 1;
@@ -121,7 +131,7 @@ message CreatePollRequest {
   polls.v1.PollKind kind = 5;
 }
 
-message CreatePollResponse {}
+message CreatePollResponse { string post_id = 1; }
 
 message VotePollRequest {
   string poll_id = 1;
@@ -129,3 +139,18 @@ message VotePollRequest {
 }
 
 message VotePollResponse {}
+
+message CreatePostRequest {
+  string event_id = 1;
+  string content = 2;
+  repeated string tags = 3;
+}
+
+message CreatePostResponse { string post_id = 1; }
+
+message ReactPostRequest {
+  string post_id = 1;
+  string icon = 2;
+}
+
+message ReactPostResponse {}

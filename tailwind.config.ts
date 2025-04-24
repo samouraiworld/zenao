@@ -11,6 +11,17 @@ export default {
   ],
   theme: {
     extend: {
+      keyframes: {
+        "appear-from-bottom": {
+          from: { transform: "translateY(128px)" },
+          to: { transform: "translateY(0px)" },
+        },
+      },
+      animation: {
+        "gotop-appear": "appear-from-bottom 200ms ease-in-out forwards",
+        "gotop-disappear":
+          "appear-from-bottom 200ms ease-in-out reverse forwards",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -54,6 +65,7 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        main: "var(--main)",
         // Custom
         "custom-input-bg": "rgba(var(--input-bg))",
         "custom-input-border": "var(--input-border)",

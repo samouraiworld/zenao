@@ -39,6 +39,8 @@ body {
     /* Custom input variables */
     --input-bg: 255, 255, 255, 1;
     --input-border: #EC7E17;
+    
+    --main: #EC7E17;
   }
   .dark {
     --background: 240 10% 3.9%;

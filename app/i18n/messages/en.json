@@ -50,8 +50,10 @@
   },
   "event": {
     "is-organisator-role": "You have organizer role for this event.",
-    "edit-button": "Edit",
+    "edit-button": "Edit event",
+    "send-global-message": "Send a message to all participants",
     "going": "{count} going",
+    "nobody-going-yet": "Nobody's going yet",
     "hosted-by": "Hosted by:",
     "register-address": "Register to see address",
     "in": "You're in!",
@@ -140,5 +142,16 @@
     "pageTitle": "Blog",
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
     "publishedAt": "Published at"
+  },
+  "broadcast-email-form": {
+    "title": "Send an email to all participants",
+    "desc": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change.",
+    "message-input-placeholder": "What's new ?",
+    "message-input-label": "Enter your message",
+    "cancel": "Cancel",
+    "send": "Send email",
+    "toast-email-sent-success": "Email sent !",
+    "toast-email-sent-error": "Error while trying to send the email",
+    "no-participant-error": "You can't send any message because nobody is going to your event yet"
   }
 }

@@ -17,6 +17,14 @@ var ticketsConfirmationTmplHTML *template.Template
 var ticketsConfirmationTmplTextSrc string
 var ticketsConfirmationTmplText *template.Template
 
+//go:embed mails/html/event-broadcast-message.tmpl.html
+var eventBroadcastMessageTmplHTMLSrc string
+var eventBroadcastMessageTmplHTML *template.Template
+
+//go:embed mails/text/event-broadcast-message.tmpl.txt
+var eventBroadcastMessageTmplTextSrc string
+var eventBroadcastMessageTmplText *template.Template
+
 func init() {
 	tmpl, err := template.New("ticketsConfirmationHTML").Parse(ticketsConfirmationTmplHTMLSrc)
 	if err != nil {
@@ -29,6 +37,18 @@ func init() {
 		panic(err)
 	}
 	ticketsConfirmationTmplText = tmpl
+
+	tmpl, err = template.New("eventBroadcastMessageHTML").Parse(eventBroadcastMessageTmplHTMLSrc)
+	if err != nil {
+		panic(err)
+	}
+	eventBroadcastMessageTmplHTML = tmpl
+
+	tmpl, err = template.New("eventBroadcastMessageText").Parse(eventBroadcastMessageTmplTextSrc)
+	if err != nil {
+		panic(err)
+	}
+	eventBroadcastMessageTmplText = tmpl
 }
 
 type ticketsConfirmation struct {
@@ -70,6 +90,36 @@ func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string) (stri
 
 	buf = &strings.Builder{}
 	if err := ticketsConfirmationTmplText.Execute(buf, data); err != nil {
+		return "", "", err
+	}
+	textContent := buf.String()
+
+	return htmlContent, textContent, nil
+}
+
+type eventBroadcast struct {
+	EventName string
+	ImageURL  string
+	Message   string
+	EventURL  string
+}
+
+func eventBroadcastMailContent(event *zeni.Event, message string) (string, string, error) {
+	data := eventBroadcast{
+		ImageURL:  web2URL(event.ImageURI) + "?img-width=600&img-height=400&img-fit=cover&dpr=2",
+		EventName: event.Title,
+		Message:   message,
+		EventURL:  eventPublicURL(event.ID),
+	}
+
+	buf := &strings.Builder{}
+	if err := eventBroadcastMessageTmplHTML.Execute(buf, data); err != nil {
+		return "", "", err
+	}
+	htmlContent := buf.String()
+
+	buf = &strings.Builder{}
+	if err := eventBroadcastMessageTmplText.Execute(buf, data); err != nil {
 		return "", "", err
 	}
 	textContent := buf.String()

@@ -36,6 +36,7 @@ type AudioPost struct {
 }
 
 type VideoPost struct {
+	Title             string
 	Description       string
 	VideoUri          string
 	ThumbnailImageUri string
@@ -54,14 +55,15 @@ type Tip struct {
 }
 
 type Post struct {
-	Author    string
-	ParentUri string
-	Loc       *PostGeoLoc
-	CreatedAt int64
-	UpdatedAt int64
-	DeletedAt int64
-	Tags      []string
-	Post      interface{}
+	LocalPostId uint64
+	Author      string
+	ParentUri   string
+	Loc         *PostGeoLoc
+	CreatedAt   int64
+	UpdatedAt   int64
+	DeletedAt   int64
+	Tags        []string
+	Post        interface{}
 }
 
 type PostView struct {

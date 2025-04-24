@@ -319,6 +319,41 @@ func (p *ParticipateResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (b *BroadcastEventRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if b.EventId != "" {
+		fields["eventId"] = json.StringNode("", b.EventId)
+	}
+	if b.Message != "" {
+		fields["message"] = json.StringNode("", b.Message)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (b *BroadcastEventRequest) FromJSON(node *json.Node) {
+	*b = BroadcastEventRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		b.EventId = val.MustString()
+	}
+	if val, ok := fields["message"]; ok {
+		b.Message = val.MustString()
+	}
+}
+
+func (b *BroadcastEventResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (b *BroadcastEventResponse) FromJSON(node *json.Node) {
+	*b = BroadcastEventResponse{}
+}
+
 func (e *EventLocation) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -675,11 +710,20 @@ func (c *CreatePollRequest) FromJSON(node *json.Node) {
 func (c *CreatePollResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if c.PostId != "" {
+		fields["postId"] = json.StringNode("", c.PostId)
+	}
+
 	return json.ObjectNode("", fields)
 }
 
 func (c *CreatePollResponse) FromJSON(node *json.Node) {
 	*c = CreatePollResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		c.PostId = val.MustString()
+	}
 }
 
 func (v *VotePollRequest) ToJSON() *json.Node {
@@ -715,4 +759,98 @@ func (v *VotePollResponse) ToJSON() *json.Node {
 
 func (v *VotePollResponse) FromJSON(node *json.Node) {
 	*v = VotePollResponse{}
+}
+
+func (c *CreatePostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
+	if c.Content != "" {
+		fields["content"] = json.StringNode("", c.Content)
+	}
+	if len(c.Tags) != 0 {
+		arr := make([]*json.Node, len(c.Tags))
+		for i, val := range c.Tags {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["tags"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePostRequest) FromJSON(node *json.Node) {
+	*c = CreatePostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
+	}
+	if val, ok := fields["content"]; ok {
+		c.Content = val.MustString()
+	}
+	if val, ok := fields["tags"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Tags = arr
+	}
+}
+
+func (c *CreatePostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.PostId != "" {
+		fields["postId"] = json.StringNode("", c.PostId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePostResponse) FromJSON(node *json.Node) {
+	*c = CreatePostResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		c.PostId = val.MustString()
+	}
+}
+
+func (r *ReactPostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if r.PostId != "" {
+		fields["postId"] = json.StringNode("", r.PostId)
+	}
+	if r.Icon != "" {
+		fields["icon"] = json.StringNode("", r.Icon)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactPostRequest) FromJSON(node *json.Node) {
+	*r = ReactPostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		r.PostId = val.MustString()
+	}
+	if val, ok := fields["icon"]; ok {
+		r.Icon = val.MustString()
+	}
+}
+
+func (r *ReactPostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactPostResponse) FromJSON(node *json.Node) {
+	*r = ReactPostResponse{}
 }

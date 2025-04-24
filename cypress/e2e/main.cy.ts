@@ -247,7 +247,7 @@ describe("main", () => {
     cy.get("p")
       .contains("You have organizer role for this event")
       .should("be.visible");
-    cy.get("button").contains("Edit").should("be.visible");
+    cy.get("a").contains("Edit event").should("be.visible");
 
     // participate
     cy.get("button").contains("Participate").click();
@@ -258,5 +258,12 @@ describe("main", () => {
     // check that we have a ticket with the event name visible
     cy.visit("/tickets");
     cy.get('a[href^="/event/"]').contains(testEventName).should("be.visible");
+  });
+
+  it("event not found", () => {
+    // Visit a non existing event page
+    cy.visit("/event/50", { failOnStatusCode: false });
+
+    cy.get("p").contains("Event doesn't exist").should("be.visible");
   });
 });

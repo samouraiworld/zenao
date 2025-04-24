@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
@@ -16,10 +18,11 @@ import (
 
 type User struct {
 	gorm.Model         // this ID should be used for any database related logic (like querying)
-	ClerkID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation
+	AuthID      string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
 	DisplayName string
 	Bio         string
 	AvatarURI   string
+	Plan        string `gorm:"default:'free'"`
 }
 
 type UserRole struct {
@@ -28,8 +31,10 @@ type UserRole struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	UserID  uint   `gorm:"primaryKey;autoIncrement:false"`
-	EventID uint   `gorm:"primaryKey;autoIncrement:false"`
+	UserID  uint `gorm:"primaryKey;autoIncrement:false"`
+	User    User
+	EventID uint `gorm:"primaryKey;autoIncrement:false"`
+	Event   Event
 	Role    string `gorm:"primaryKey"`
 }
 
@@ -153,6 +158,34 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 	return dbEventToZeniEvent(evt)
 }
 
+func (g *gormZenaoDB) GetEventByPollID(pollID string) (*zeni.Event, error) {
+	pollIDInt, err := strconv.ParseUint(pollID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var poll Poll
+	if err := g.db.Where("id = ?", pollIDInt).Preload("Post").Preload("Post.Feed").Preload("Post.Feed.Event").First(&poll).Error; err != nil {
+		return nil, err
+	}
+
+	return dbEventToZeniEvent(&poll.Post.Feed.Event)
+}
+
+func (g *gormZenaoDB) GetEventByPostID(postID string) (*zeni.Event, error) {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var post Post
+	if err := g.db.Where("id = ?", postIDInt).Preload("Feed").Preload("Feed.Event").First(&post).Error; err != nil {
+		return nil, err
+	}
+
+	return dbEventToZeniEvent(&post.Feed.Event)
+}
+
 // GetEvent implements zeni.DB.
 func (g *gormZenaoDB) getDBEvent(id string) (*Event, error) {
 	evtIDInt, err := strconv.ParseUint(id, 10, 64)
@@ -168,14 +201,14 @@ func (g *gormZenaoDB) getDBEvent(id string) (*Event, error) {
 }
 
 // CreateUser implements zeni.DB.
-func (g *gormZenaoDB) CreateUser(authID string) (string, error) {
+func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 	user := &User{
-		ClerkID: authID,
+		AuthID: authID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("%d", user.ID), nil
+	return dbUserToZeniDBUser(user), nil
 }
 
 // Participate implements zeni.DB.
@@ -244,16 +277,30 @@ func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) erro
 	return nil
 }
 
-// UserExists implements zeni.DB.
-func (g *gormZenaoDB) UserExists(authID string) (string, error) {
-	var user User
-	if err := g.db.Where("clerk_id = ?", authID).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", nil
-		}
-		return "", err
+// PromoteUser implements zeni.DB.
+func (g *gormZenaoDB) PromoteUser(userID string, plan zeni.Plan) error {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
 	}
-	return fmt.Sprintf("%d", user.ID), nil
+
+	if !plan.IsValid() {
+		return fmt.Errorf("invalid plan: %s", plan)
+	}
+
+	return g.db.Model(&User{}).Where("id = ?", userIDInt).Update("plan", string(plan)).Error
+}
+
+// UserExists implements zeni.DB.
+func (g *gormZenaoDB) GetUser(authID string) (*zeni.User, error) {
+	var user User
+	if err := g.db.Where("auth_id = ?", authID).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return dbUserToZeniDBUser(&user), nil
 }
 
 // GetAllUsers implements zeni.DB.
@@ -288,13 +335,13 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 
 // GetAllParticipants implements zeni.DB.
 func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
-	var tickets []*SoldTicket
-	if err := g.db.Find(&tickets, "event_id = ?", eventID).Error; err != nil {
+	var participants []*UserRole
+	if err := g.db.Preload("User").Find(&participants, "event_id = ? AND role = ?", eventID, "participant").Error; err != nil {
 		return nil, err
 	}
-	res := make([]*zeni.User, 0, len(tickets))
-	for _, e := range tickets {
-		res = append(res, &zeni.User{ID: e.UserID})
+	res := make([]*zeni.User, 0, len(participants))
+	for _, p := range participants {
+		res = append(res, dbUserToZeniDBUser(&p.User))
 	}
 	return res, nil
 }
@@ -312,11 +359,302 @@ func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error)
 	return res, nil
 }
 
+// CreateFeed implements zeni.DB.
+func (g *gormZenaoDB) CreateFeed(eventID string, slug string) (*zeni.Feed, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	feed := &Feed{
+		Slug:    slug,
+		EventID: uint(evtIDInt),
+	}
+
+	if err := g.db.Create(feed).Error; err != nil {
+		return nil, err
+	}
+
+	zfeed, err := dbFeedToZeniFeed(feed)
+	if err != nil {
+		return nil, err
+	}
+
+	return zfeed, nil
+}
+
+// GetFeed implements zeni.DB.
+func (g *gormZenaoDB) GetFeed(eventID string, slug string) (*zeni.Feed, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var feed Feed
+	if err := g.db.Where("event_id = ? AND slug = ?", evtIDInt, slug).First(&feed).Error; err != nil {
+		return nil, err
+	}
+
+	zfeed, err := dbFeedToZeniFeed(&feed)
+	if err != nil {
+		return nil, err
+	}
+	return zfeed, nil
+}
+
+// GetFeedByID implements zeni.DB.
+func (g *gormZenaoDB) GetFeedByID(feedID string) (*zeni.Feed, error) {
+	var feed Feed
+	if err := g.db.Where("id = ?", feedID).First(&feed).Error; err != nil {
+		return nil, err
+	}
+
+	zfeed, err := dbFeedToZeniFeed(&feed)
+	if err != nil {
+		return nil, err
+	}
+	return zfeed, nil
+}
+
+// CreatePost implements zeni.DB.
+func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*zeni.Post, error) {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var tags []Tag
+	for _, tagName := range post.Tags {
+		tags = append(tags, Tag{
+			PostID: uint(postIDInt),
+			Name:   tagName,
+		})
+	}
+
+	dbPost := &Post{
+		Model:     gorm.Model{ID: uint(postIDInt)},
+		ParentURI: post.ParentUri,
+		UserID:    uint(userIDInt),
+		FeedID:    uint(feedIDInt),
+		Tags:      tags,
+	}
+
+	switch v := post.Post.(type) {
+	case *feedsv1.Post_Standard:
+		dbPost.Kind = PostTypeStandard
+		dbPost.Content = v.Standard.Content
+	case *feedsv1.Post_Article:
+		dbPost.Kind = PostTypeArticle
+		dbPost.Title = v.Article.Title
+		dbPost.Content = v.Article.Content
+	case *feedsv1.Post_Link:
+		dbPost.Kind = PostTypeLink
+		dbPost.URI = v.Link.Uri
+	case *feedsv1.Post_Image:
+		dbPost.Kind = PostTypeImage
+		dbPost.Title = v.Image.Title
+		dbPost.Description = v.Image.Description
+		dbPost.ImageURI = v.Image.ImageUri
+	case *feedsv1.Post_Video:
+		dbPost.Kind = PostTypeVideo
+		dbPost.Title = v.Video.Title
+		dbPost.Description = v.Video.Description
+		dbPost.VideoURI = v.Video.VideoUri
+		dbPost.ThumbnailImageURI = v.Video.ThumbnailImageUri
+	case *feedsv1.Post_Audio:
+		dbPost.Kind = PostTypeAudio
+		dbPost.Title = v.Audio.Title
+		dbPost.Description = v.Audio.Description
+		dbPost.AudioURI = v.Audio.AudioUri
+		dbPost.ThumbnailImageURI = v.Audio.ImageUri
+	default:
+		return nil, fmt.Errorf("unknown post kind: %T", post.Post)
+	}
+
+	if err := g.db.Create(dbPost).Error; err != nil {
+		return nil, err
+	}
+
+	zpost, err := dbPostToZeniPost(dbPost)
+	if err != nil {
+		return nil, err
+	}
+	return zpost, nil
+}
+
+// GetAllPosts implements zeni.DB.
+func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
+	var posts []*Post
+	if err := g.db.Preload("Reactions").Preload("Tags").Find(&posts).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*zeni.Post, 0, len(posts))
+	for _, p := range posts {
+		zpost, err := dbPostToZeniPost(p)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, zpost)
+	}
+	return res, nil
+}
+
+// ReactPost implements zeni.DB.
+func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) error {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	postIDInt, err := strconv.ParseUint(req.PostId, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	var postExists bool
+	if err := g.db.Model(&Post{}).Select("1").Where("id = ?", postIDInt).Scan(&postExists).Error; err != nil {
+		return err
+	}
+	if !postExists {
+		return errors.New("post not found")
+	}
+
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		var reaction Reaction
+		if err := tx.Where("post_id = ? AND icon = ? AND user_id = ?", postIDInt, req.Icon, userIDInt).First(&reaction).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				reaction = Reaction{
+					PostID: uint(postIDInt),
+					Icon:   req.Icon,
+					UserID: uint(userIDInt),
+				}
+				if err := tx.Create(&reaction).Error; err != nil {
+					return err
+				}
+				return nil
+			}
+			return err
+		}
+		if err := tx.Delete(&reaction).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+// CreatePoll implements zeni.DB.
+func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
+	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	dbPoll := &Poll{
+		Model:    gorm.Model{ID: uint(pollIDint)},
+		Question: req.Question,
+		Kind:     int(req.Kind),
+		Duration: req.Duration,
+		Results:  []PollResult{},
+		PostID:   uint(postIDInt),
+	}
+
+	for _, option := range req.Options {
+		dbPoll.Results = append(dbPoll.Results, PollResult{
+			Option: option,
+		})
+	}
+
+	if err := g.db.Create(dbPoll).Error; err != nil {
+		return nil, err
+	}
+
+	return dbPollToZeniPoll(dbPoll)
+}
+
+// VotePoll implements zeni.DB.
+func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) error {
+	pollIDint, err := strconv.ParseUint(req.PollId, 10, 64)
+	if err != nil {
+		return nil
+	}
+	userIDint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		var poll Poll
+		if err := tx.Where("id = ?", pollIDint).Preload("Results").First(&poll).Error; err != nil {
+			return err
+		}
+
+		var selectedResult PollResult
+		if err := tx.Where("poll_id = ? AND option = ?", pollIDint, req.Option).First(&selectedResult).Error; err != nil {
+			return err
+		}
+
+		// usage of table since i did not create a custom model for many2many relation
+		var userVoteCount int64
+		if err := tx.Table("poll_votes").Where("poll_result_id = ? AND user_id = ?", selectedResult.ID, userIDint).Count(&userVoteCount).Error; err != nil {
+			return err
+		}
+
+		if userVoteCount > 0 {
+			if err := tx.Table("poll_votes").Where("poll_result_id = ? AND user_id = ?", selectedResult.ID, userIDint).Delete(nil).Error; err != nil {
+				return err
+			}
+		} else {
+			if poll.Kind == int(pollsv1.PollKind_POLL_KIND_SINGLE_CHOICE) {
+				if err := tx.Table("poll_votes").Where("user_id = ? AND poll_result_id IN (SELECT id FROM poll_results WHERE poll_id = ?)", userIDint, pollIDint).Delete(nil).Error; err != nil {
+					return err
+				}
+			}
+			if err := tx.Table("poll_votes").Create(map[string]interface{}{
+				"poll_result_id": selectedResult.ID,
+				"user_id":        userIDint,
+			}).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
+func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
+	postIDint, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var poll Poll
+	if err := g.db.Where("post_id = ?", postIDint).Preload("Results").Preload("Results.Users").First(&poll).Error; err != nil {
+		return nil, err
+	}
+
+	return dbPollToZeniPoll(&poll)
+}
+
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	return &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),
 		DisplayName: dbuser.DisplayName,
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
+		AuthID:      dbuser.AuthID,
+		Plan:        zeni.Plan(dbuser.Plan),
 	}
 }

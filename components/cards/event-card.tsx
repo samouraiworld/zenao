@@ -65,8 +65,8 @@ export function EventCard({ evt }: { evt: EventInfo }) {
               <div className="min-w-[80px] min-h-[80px] w-[80px] h-[80px] md:w-[120px] md:h-[120px] relative">
                 <Web3Image
                   src={evt.imageUri}
-                  width={80}
-                  height={80}
+                  width={200}
+                  height={200}
                   alt="Event presentation"
                   className="object-cover rounded-xl w-full h-full"
                 />

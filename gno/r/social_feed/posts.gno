@@ -4,11 +4,12 @@ import (
 	"std"
 	"time"
 
+	"gno.land/p/demo/seqid"
+
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
-func NewPost(feedId string, post *feedsv1.Post) string {
-
+func NewPost(feedId string, post *feedsv1.Post) uint64 {
 	creator := std.PreviousRealm().Address().String()
 	post.Author = creator
 	post.CreatedAt = time.Now().Unix()
@@ -22,22 +23,28 @@ func NewPost(feedId string, post *feedsv1.Post) string {
 			panic("this is a private feed and you are not authorized to post on it")
 		}
 	}
-	localPostId := feedId + ":" + id.Next().String()
-	posts.Set(localPostId, post)
-	return localPostId
+
+	localPostId := id.Next()
+	post.LocalPostId = uint64(localPostId)
+	feedKey := feedId + ":" + localPostId.String()
+	posts.Set(localPostId.String(), post)
+	postsByFeed.Set(feedKey, post)
+	return post.LocalPostId
 }
 
-func GetPost(localPostId string) *feedsv1.Post {
-	postRaw, ok := posts.Get(localPostId)
+func GetPost(localPostId uint64) *feedsv1.Post {
+	localPostIdStr := seqid.ID(localPostId).String()
+	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
 	return postRaw.(*feedsv1.Post)
 }
 
-func DeletePost(localPostId string) {
+func DeletePost(localPostId uint64) {
 	creator := std.PreviousRealm()
-	postRaw, ok := posts.Get(localPostId)
+	localPostIdStr := seqid.ID(localPostId).String()
+	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
@@ -51,27 +58,33 @@ func DeletePost(localPostId string) {
 	post.DeletedAt = time.Now().Unix()
 }
 
-func EditPost(localPostId string, newPost *feedsv1.Post) {
-	creator := std.PreviousRealm()
-	postRaw, ok := posts.Get(localPostId)
+func EditPost(localPostId uint64, newPost *feedsv1.Post) {
+	caller := std.PreviousRealm()
+	localPostIdStr := seqid.ID(localPostId).String()
+	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
 	post := postRaw.(*feedsv1.Post)
-	if post.Author != creator.Address().String() {
+	if post.Author != caller.Address().String() {
 		panic("you are not the author of this post")
 	}
 	if post.DeletedAt != 0 {
 		panic("post is deleted")
 	}
-	posts.Set(localPostId, newPost)
+
+	//XXX: this is a hack to force the localPostId to be the same as the original post
+	newPost.LocalPostId = post.LocalPostId
+
+	*post = *newPost
+	post.UpdatedAt = time.Now().Unix()
 }
 
-func ReactPost(localPostId string, icon string) {
+func ReactPost(localPostId uint64, icon string) {
 	caller := std.PreviousRealm().Address()
-
-	userReactId := localPostId + ":" + icon + ":" + caller.String()
-	reactId := localPostId + ":" + icon
+	localPostIdStr := seqid.ID(localPostId).String()
+	userReactId := localPostIdStr + ":" + icon + ":" + caller.String()
+	reactId := localPostIdStr + ":" + icon
 
 	if userReactions.Has(userReactId) {
 		userReactions.Remove(userReactId)
@@ -98,15 +111,16 @@ func ReactPost(localPostId string, icon string) {
 	}
 }
 
-func GetPostReactions(localPostId string, user string) []*feedsv1.ReactionView {
+func GetPostReactions(localPostId uint64, user string) []*feedsv1.ReactionView {
+	localPostIdStr := seqid.ID(localPostId).String()
 	var res []*feedsv1.ReactionView
-	start := localPostId + ":"
-	end := localPostId + ";"
+	start := localPostIdStr + ":"
+	end := localPostIdStr + ";"
 	reactions.Iterate(start, end, func(key string, value interface{}) bool {
-		icon := key[len(localPostId)+1:]
+		icon := key[len(localPostIdStr)+1:]
 		count := value.(uint32)
 
-		userReactKey := localPostId + ":" + icon + ":" + user
+		userReactKey := localPostIdStr + ":" + icon + ":" + user
 		userHasVoted := userReactions.Has(userReactKey)
 
 		react := &feedsv1.ReactionView{
