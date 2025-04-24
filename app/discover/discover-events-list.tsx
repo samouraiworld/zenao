@@ -1,8 +1,10 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { EventsList } from "@/components/lists/events-list";
 import { eventsList } from "@/lib/queries/events-list";
+import EmptyEventsList from "@/components/widgets/empty-events-list";
+import { EventCard } from "@/components/cards/event-card";
+import { idFromPkgPath } from "@/lib/queries/event";
 
 export function DiscoverEventsList({
   from,
@@ -19,5 +21,19 @@ export function DiscoverEventsList({
         }),
   );
 
-  return <EventsList list={events} />;
+  return (
+    <div className="my-5">
+      {!events.length ? (
+        <EmptyEventsList />
+      ) : (
+        events.map((evt) => (
+          <EventCard
+            key={evt.pkgPath}
+            evt={evt}
+            href={`/ticket/${idFromPkgPath(evt.pkgPath)}`}
+          />
+        ))
+      )}
+    </div>
+  );
 }

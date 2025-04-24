@@ -13,7 +13,7 @@ import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { makeLocationFromEvent } from "@/lib/location";
 import { determineTimezone } from "@/lib/determine-timezone";
 
-export function EventCard({ evt }: { evt: EventInfo }) {
+export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
 
   const location = makeLocationFromEvent(evt.location);
@@ -39,10 +39,7 @@ export function EventCard({ evt }: { evt: EventInfo }) {
           <div className="h-[10px] w-[10px] rounded-xl relative right-[4px] bg-secondary-color" />
           <div className="h-full border-l-2 border-dashed border-secondary-color opacity-30" />
         </div>
-        <Link
-          className="w-full flex"
-          href={`/event/${idFromPkgPath(evt.pkgPath)}`}
-        >
+        <Link className="w-full flex" href={href}>
           <Card className="md:h-[185px] w-full min-w-full max-w-full flex flex-row justify-between mb-3 hover:bg-secondary/100">
             <div className="flex flex-col gap-2">
               <EventDateTime startDate={evt.startDate} timezone={timezone} />
@@ -77,9 +74,4 @@ export function EventCard({ evt }: { evt: EventInfo }) {
       </div>
     </div>
   );
-}
-
-function idFromPkgPath(pkgPath: string): string {
-  const res = /(e\d+)$/.exec(pkgPath);
-  return res?.[1].substring(1) || "";
 }
