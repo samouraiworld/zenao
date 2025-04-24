@@ -40,9 +40,9 @@ type UserRole struct {
 type SoldTicket struct {
 	gorm.Model
 	EventID uint
-	UserID  string // XXX: should be uint
+	BuyerID uint
 	Price   float64
-	Secret  string `gorm:"uniqueIndex"`
+	Secret  string
 }
 
 func SetupDB(dsn string) (zeni.DB, error) {
@@ -212,6 +212,11 @@ func (g *gormZenaoDB) CreateUser(authID string) (string, error) {
 
 // Participate implements zeni.DB.
 func (g *gormZenaoDB) Participate(eventID string, userID string, ticketSecret string) error {
+	userIDint, err := strconv.ParseUint(userID, 10, 32)
+	if err != nil {
+		return err
+	}
+
 	evt, err := g.getDBEvent(eventID)
 	if err != nil {
 		return err
@@ -237,7 +242,7 @@ func (g *gormZenaoDB) Participate(eventID string, userID string, ticketSecret st
 
 	if err := g.db.Create(&SoldTicket{
 		EventID: evt.ID,
-		UserID:  userID,
+		BuyerID: uint(userIDint),
 		Secret:  ticketSecret,
 	}).Error; err != nil {
 		return err
@@ -250,10 +255,6 @@ func (g *gormZenaoDB) Participate(eventID string, userID string, ticketSecret st
 		return errors.New("user is already participant for this event")
 	}
 
-	userIDint, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return err
-	}
 	participant := &UserRole{
 		UserID:  uint(userIDint),
 		EventID: evt.ID,
