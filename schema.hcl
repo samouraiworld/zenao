@@ -168,11 +168,15 @@ table "sold_tickets" {
     type = real
   }
   column "secret" {
-    null = true
+    null = false
     type = text
   }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_sold_tickets_secret" {
+    unique  = true
+    columns = [column.secret]
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]

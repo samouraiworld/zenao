@@ -1,5 +1,6 @@
-h1:ww0zCB4wJCK/TWvgwL4ftZpBi9ij20q7DOiIqkay4/k=
+h1:Dz/Qz1yPkeOvRmlDKtWQqJK1svKRY40iRZn7TPwQFw0=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
 20250424201139_ticket-secret.sql h1:FHkzWWIiHW1h/AStpjUW6fngPcjgTYXkFDWL6qk2atA=
+20250424210118_unique-ticket-secret.sql h1:zuCKlpN4150tGiPoVLEDvX7qoHRLnoDZUrORz9N9M2c=
