@@ -74,12 +74,12 @@ func execFakegen() error {
 		return err
 	}
 
-	userId, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
+	zUser, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
 	if err != nil {
 		return err
 	}
 
-	if err := chain.CreateUser(&zeni.User{ID: userId}); err != nil {
+	if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
 		return err
 	}
 
@@ -108,7 +108,7 @@ func execFakegen() error {
 				}},
 			},
 		}
-		creatorID := userId
+		creatorID := zUser.ID
 
 		evt, err := db.CreateEvent(creatorID, req)
 		if err != nil {

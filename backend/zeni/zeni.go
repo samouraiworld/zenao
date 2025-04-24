@@ -14,6 +14,34 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
+type Plan string
+
+const (
+	FreePlan Plan = "free"
+	ProPlan  Plan = "pro"
+)
+
+// Implements the flag.Value interface (for CLI)
+func (p *Plan) String() string {
+	return string(*p)
+}
+
+// Implements the flag.Value interface (for CLI & enforcing the plan value)
+func (p *Plan) Set(value string) error {
+	value = strings.ToLower(value)
+	switch value {
+	case string(FreePlan), string(ProPlan):
+		*p = Plan(value)
+		return nil
+	default:
+		return fmt.Errorf("invalid plan: %s (must be free or pro)", value)
+	}
+}
+
+func (p Plan) IsValid() bool {
+	return p == FreePlan || p == ProPlan
+}
+
 type AuthUser struct {
 	ID     string
 	Email  string
@@ -26,6 +54,7 @@ type User struct {
 	DisplayName string
 	Bio         string
 	AvatarURI   string
+	Plan        Plan
 }
 
 type Event struct {
@@ -110,10 +139,11 @@ func (e *Event) Timezone() (*time.Location, error) {
 type DB interface {
 	Tx(func(db DB) error) error
 
-	CreateUser(authID string) (string, error)
-	UserExists(authID string) (string, error)
+	CreateUser(authID string) (*User, error)
+	GetUser(authID string) (*User, error)
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	PromoteUser(userID string, plan Plan) error
 	UserRoles(userID string, eventID string) ([]string, error)
 	GetAllUsers() ([]*User, error)
 

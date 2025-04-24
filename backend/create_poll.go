@@ -21,12 +21,12 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, errors.New("unauthorized")
 	}
 
-	userID, err := s.EnsureUserExists(ctx, user)
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -38,7 +38,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 
 	zpost := (*zeni.Post)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.UserRoles(userID, req.Msg.EventId)
+		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -46,7 +46,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 			return errors.New("user is not a member of the event")
 		}
 
-		pollID, postID, err := s.Chain.CreatePoll(userID, req.Msg)
+		pollID, postID, err := s.Chain.CreatePoll(zUser.ID, req.Msg)
 		if err != nil {
 			return err
 		}
@@ -70,7 +70,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
-		if zpost, err = db.CreatePost(postID, feed.ID, userID, post); err != nil {
+		if zpost, err = db.CreatePost(postID, feed.ID, zUser.ID, post); err != nil {
 			return err
 		}
 
