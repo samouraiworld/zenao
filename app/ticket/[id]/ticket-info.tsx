@@ -66,23 +66,21 @@ export function TicketInfo({ id }: TicketInfoProps) {
             />
           </AspectRatio>
         </div>
-        <div className="flex grow flex-col gap-4 px-4 py-4">
+        <div className="flex grow flex-col gap-4 px-4 py-4 max-sm:items-center">
           <Heading level={2} size="xl" className="text-black">
             {eventInfo.title}
           </Heading>
-          <div className="flex flex-row gap-2 items-center">
-            <div className="flex flex-col">
-              <Heading level={3} size="sm" variant="secondary">
+          <div className="flex flex-row gap-2 max-sm:items-center">
+            <div className="flex flex-col max-sm:items-center">
+              <Heading level={3} variant="secondary">
                 {format(fromUnixTime(Number(eventInfo.startDate)), "PPP")}
               </Heading>
               <div className="flex flex-row text-sm gap-1">
-                <Text variant="secondary" size="sm">
+                <Text variant="secondary">
                   {format(fromUnixTime(Number(eventInfo.startDate)), "p")}
                 </Text>
-                <Text variant="secondary" size="sm">
-                  -
-                </Text>
-                <Text variant="secondary" size="sm">
+                <Text variant="secondary">-</Text>
+                <Text variant="secondary">
                   {formatTZ(fromUnixTime(Number(eventInfo.endDate)), "PPp O", {
                     timeZone: timezone,
                   })}
@@ -91,7 +89,7 @@ export function TicketInfo({ id }: TicketInfoProps) {
             </div>
           </div>
           <Link href={`/event/${id}`} className="text-main underline">
-            See event
+            See event details
           </Link>
 
           <div className="flex flex-col grow items-center justify-center">
