@@ -8,6 +8,7 @@ import (
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -31,12 +32,14 @@ func newFakegenCmd() *commands.Command {
 var fakegenConf fakegenConfig
 
 type fakegenConfig struct {
-	adminMnemonic string
-	gnoNamespace  string
-	chainEndpoint string
-	chainID       string
-	dbPath        string
-	eventsCount   uint
+	adminMnemonic        string
+	gnoNamespace         string
+	chainEndpoint        string
+	chainID              string
+	dbPath               string
+	eventsCount          uint
+	postsCount           uint
+	eventsWithPostsCount uint
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -46,6 +49,8 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
+	flset.UintVar(&fakegenConf.postsCount, "posts", 35, "number of fake posts to generate")
+	flset.UintVar(&fakegenConf.eventsWithPostsCount, "events-with-posts", 2, "number of events to generate posts for")
 }
 
 type fakeEvent struct {
@@ -56,6 +61,10 @@ type fakeEvent struct {
 	StartOffsetHours int     `faker:"oneof: 24, 48, 72, 96"`
 	DurationHours    int     `faker:"oneof: 1, 6, 12"`
 	Location         string  `faker:"sentence"`
+}
+
+type fakePost struct {
+	Content string `faker:"paragraph"`
 }
 
 func execFakegen() error {
@@ -83,6 +92,7 @@ func execFakegen() error {
 		return err
 	}
 
+	evtWithPostsIdx := 0
 	for i := range fakegenConf.eventsCount {
 		a := fakeEvent{}
 		err := faker.FakeData(&a)
@@ -94,7 +104,7 @@ func execFakegen() error {
 			a.StartOffsetHours = -a.StartOffsetHours
 		}
 		startDate := time.Now().Add(time.Duration(a.StartOffsetHours) * time.Hour)
-		req := &zenaov1.CreateEventRequest{
+		evtReq := &zenaov1.CreateEventRequest{
 			Title:       a.Title,
 			Description: a.Description,
 			ImageUri:    randomPick(eventImages),
@@ -110,14 +120,51 @@ func execFakegen() error {
 		}
 		creatorID := zUser.ID
 
-		evt, err := db.CreateEvent(creatorID, req)
+		zevt, err := db.CreateEvent(creatorID, evtReq)
 		if err != nil {
 			return err
 		}
 
-		if err := chain.CreateEvent(evt.ID, creatorID, req); err != nil {
+		if err := chain.CreateEvent(zevt.ID, creatorID, evtReq); err != nil {
 			return err
 		}
+
+		// XXXXXXX This dosen't work because the event is not yet in the db
+		zfeed, err := db.GetFeed(zevt.ID, "main")
+		if err != nil {
+			return err
+		}
+
+		// Create posts for the eventsWithPostsCount most recent events to avoid flooding the chain and db
+		if evtWithPostsIdx >= int(fakegenConf.eventsCount-fakegenConf.eventsWithPostsCount) {
+			for j := uint(0); j < fakegenConf.postsCount; j++ {
+				b := fakePost{}
+				err := faker.FakeData(&b)
+				if err != nil {
+					return err
+				}
+
+				post := &feedsv1.Post{
+					Author:    creatorID,
+					CreatedAt: int64(time.Now().Unix()),
+					Post: &feedsv1.Post_Standard{
+						Standard: &feedsv1.StandardPost{
+							Content: b.Content,
+						},
+					},
+				}
+
+				postID, err := chain.CreatePost(creatorID, zevt.ID, post)
+				if err != nil {
+					return err
+				}
+
+				if _, err := db.CreatePost(postID, zfeed.ID, userId, post); err != nil {
+					return err
+				}
+			}
+		}
+		evtWithPostsIdx++
 	}
 
 	return nil
