@@ -9,14 +9,11 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { Event, WithContext } from "schema-dts";
-import { TZDate } from "react-day-picker";
 import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
-import { EventSection } from "./event-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { MarkdownPreview } from "@/components/common/MarkdownPreview";
-import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import MapCaller from "@/components/common/map/map-lazy-components";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -31,6 +28,24 @@ import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
+import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
+import { GoTopButton } from "@/components/buttons/go-top-button";
+import { Separator } from "@/components/shadcn/separator";
+
+interface EventSectionProps {
+  title: string;
+  children?: React.ReactNode;
+}
+
+const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
+  return (
+    <div className="flex flex-col">
+      <Text className="font-semibold">{title}</Text>
+      <Separator className="mt-2 mb-3" />
+      {children && children}
+    </div>
+  );
+};
 
 export function EventInfo({ id }: { id: string }) {
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -39,6 +54,9 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+
+  const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
+    useState(false);
 
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
@@ -49,8 +67,6 @@ export function EventInfo({ id }: { id: string }) {
 
   const t = useTranslations("event");
 
-  // TODO REMOVE DYNAMIC CODE FROM EVENT_INFO
-  const [loading, setLoading] = useState<boolean>(false);
   const [isDescExpanded, setDescExpanded] = useState(false);
 
   const jsonLd: WithContext<Event> = {
@@ -58,11 +74,8 @@ export function EventInfo({ id }: { id: string }) {
     "@type": "Event",
     name: data.title,
     description: data.description,
-    startDate: new TZDate(
-      Number(data.startDate) * 1000,
-      timezone,
-    ).toISOString(),
-    endDate: new TZDate(Number(data.endDate) * 1000, timezone).toISOString(),
+    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
+    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
     location:
       location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
@@ -82,6 +95,13 @@ export function EventInfo({ id }: { id: string }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
+        <BroadcastEmailDialog
+          eventId={id}
+          nbParticipants={data.participants}
+          open={broadcastEmailDialogOpen}
+          onOpenChange={setBroadcastEmailDialogOpen}
+        />
+
         {/* Left Section */}
         <div className="flex flex-col gap-4 w-full sm:w-2/5">
           <AspectRatio ratio={1 / 1}>
@@ -96,31 +116,41 @@ export function EventInfo({ id }: { id: string }) {
               className="flex w-full rounded-xl self-center object-cover"
             />
           </AspectRatio>
-          {/* If the user is organizer, link to /edit page */}
-          {isOrganizer && (
-            <Card className="flex flex-row items-center">
-              <Text className="w-3/5">{t("is-organisator-role")}</Text>
-              <div className="w-2/5 flex justify-end">
-                <Link href={`/edit/${id}`}>
-                  <ButtonWithLabel
-                    label={t("edit-button")}
-                    onClick={() => setLoading(true)}
-                    loading={loading}
-                  />
-                </Link>
-              </div>
-            </Card>
-          )}
 
-          {/* ---- Participants preview and dialog section */}
-          <EventSection title={t("going", { count: data.participants })}>
+          {/* Participants preview and dialog section */}
+          <EventSection
+            title={
+              data.participants === 0
+                ? t("nobody-going-yet")
+                : t("going", { count: data.participants })
+            }
+          >
             <ParticipantsSection id={id} />
           </EventSection>
 
-          {/* ---- Host section */}
+          {/* Host section */}
           <EventSection title={t("hosted-by")}>
             <UserAvatarWithName linkToProfile address={data.creator} />
           </EventSection>
+
+          {/* If the user is organizer, link to /edit page */}
+          {isOrganizer && (
+            <Card className="flex flex-col gap-2">
+              <Text>{t("is-organisator-role")}</Text>
+
+              <div className="flex flex-col">
+                <Link href={`/edit/${id}`} className="text-main underline">
+                  {t("edit-button")}
+                </Link>
+                <p
+                  className="text-main underline cursor-pointer"
+                  onClick={() => setBroadcastEmailDialogOpen(true)}
+                >
+                  {t("send-global-message")}
+                </p>
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Right Section */}
@@ -246,6 +276,7 @@ export function EventInfo({ id }: { id: string }) {
         isDescExpanded={isDescExpanded}
         isMember={isParticipant || isOrganizer}
       />
+      <GoTopButton />
     </div>
   );
 }
