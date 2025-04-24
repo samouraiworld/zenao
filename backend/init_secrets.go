@@ -8,6 +8,7 @@ import (
 	_ "embed"
 	"encoding/base64"
 	"flag"
+	"fmt"
 	"strings"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
@@ -60,7 +61,7 @@ func execInitSecrets(conf *initSecretsConfig) error {
 
 	for {
 		var tickets []*gzdb.SoldTicket
-		if err := db.Model(&gzdb.SoldTicket{}).Where("secret = ?", nil).Limit(1).Find(&tickets).Error; err != nil {
+		if err := db.Model(&gzdb.SoldTicket{}).Where("secret IS NULL").Limit(1).Find(&tickets).Error; err != nil {
 			return err
 		}
 		if len(tickets) == 0 {
@@ -71,6 +72,7 @@ func execInitSecrets(conf *initSecretsConfig) error {
 		if err != nil {
 			continue
 		}
+		fmt.Println("generated ticket with pubkey", ticket.Pubkey())
 		dbTicket.Secret = ticket.Secret()
 		if err := db.Save(dbTicket).Error; err != nil {
 			continue
