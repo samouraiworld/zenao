@@ -155,6 +155,7 @@ type DB interface {
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
 	GetAllParticipants(eventID string) ([]*User, error)
+	GetEventBuyerTickets(eventID string, buyerID string) ([]*Ticket, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)

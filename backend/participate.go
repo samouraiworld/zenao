@@ -41,7 +41,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
-	ticket, err := NewTicket()
+	ticket, err := zeni.NewTicket()
 	if err != nil {
 		return nil, err
 	}

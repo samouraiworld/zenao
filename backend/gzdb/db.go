@@ -351,6 +351,32 @@ func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
 	return res, nil
 }
 
+// GetEventBuyerTickets implements zeni.DB.
+func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*zeni.Ticket, error) {
+	buyerIDint, err := strconv.ParseUint(buyerID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse creator id: %w", err)
+	}
+
+	tickets := []*SoldTicket{}
+	g.db.Find(&tickets).Where("event_id = ? AND buyer_id = ?", eventID, buyerIDint)
+
+	res := make([]*zeni.Ticket, len(tickets))
+	for i, ticket := range tickets {
+		if ticket.Secret == "" {
+			// events created before this have no ticket secret
+			res[i] = nil
+			continue
+		}
+		res[i], err = zeni.NewTicketFromSecret(ticket.Secret)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return res, nil
+}
+
 // UserRoles implements zeni.DB.
 func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error) {
 	var roles []UserRole
