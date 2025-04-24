@@ -22,6 +22,7 @@ type User struct {
 	DisplayName string
 	Bio         string
 	AvatarURI   string
+	Plan        string `gorm:"default:'free'"`
 }
 
 type UserRole struct {
@@ -200,14 +201,14 @@ func (g *gormZenaoDB) getDBEvent(id string) (*Event, error) {
 }
 
 // CreateUser implements zeni.DB.
-func (g *gormZenaoDB) CreateUser(authID string) (string, error) {
+func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 	user := &User{
 		AuthID: authID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("%d", user.ID), nil
+	return dbUserToZeniDBUser(user), nil
 }
 
 // Participate implements zeni.DB.
@@ -281,16 +282,30 @@ func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) erro
 	return nil
 }
 
+// PromoteUser implements zeni.DB.
+func (g *gormZenaoDB) PromoteUser(userID string, plan zeni.Plan) error {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	if !plan.IsValid() {
+		return fmt.Errorf("invalid plan: %s", plan)
+	}
+
+	return g.db.Model(&User{}).Where("id = ?", userIDInt).Update("plan", string(plan)).Error
+}
+
 // UserExists implements zeni.DB.
-func (g *gormZenaoDB) UserExists(authID string) (string, error) {
+func (g *gormZenaoDB) GetUser(authID string) (*zeni.User, error) {
 	var user User
 	if err := g.db.Where("auth_id = ?", authID).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", nil
+			return nil, nil
 		}
-		return "", err
+		return nil, err
 	}
-	return fmt.Sprintf("%d", user.ID), nil
+	return dbUserToZeniDBUser(&user), nil
 }
 
 // GetAllUsers implements zeni.DB.
@@ -645,5 +660,6 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
 		AuthID:      dbuser.AuthID,
+		Plan:        zeni.Plan(dbuser.Plan),
 	}
 }

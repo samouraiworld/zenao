@@ -12,17 +12,17 @@ import (
 )
 
 func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenaov1.CreatePostRequest]) (*connect.Response[zenaov1.CreatePostResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
 
-	userID, err := s.EnsureUserExists(ctx, user)
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-standard-post", zap.String("event-id", req.Msg.EventId), zap.String("content", req.Msg.Content), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("create-standard-post", zap.String("event-id", req.Msg.EventId), zap.String("content", req.Msg.Content), zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -41,7 +41,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 
 	zpost := (*zeni.Post)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.UserRoles(userID, req.Msg.EventId)
+		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 			},
 		}
 
-		postID, err := s.Chain.CreatePost(userID, req.Msg.EventId, post)
+		postID, err := s.Chain.CreatePost(zUser.ID, req.Msg.EventId, post)
 		if err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
-		if zpost, err = db.CreatePost(postID, feed.ID, userID, post); err != nil {
+		if zpost, err = db.CreatePost(postID, feed.ID, zUser.ID, post); err != nil {
 			return err
 		}
 

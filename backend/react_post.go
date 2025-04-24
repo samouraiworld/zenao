@@ -11,17 +11,17 @@ import (
 )
 
 func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov1.ReactPostRequest]) (*connect.Response[zenaov1.ReactPostResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
 
-	userID, err := s.EnsureUserExists(ctx, user)
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("react-post", zap.String("post-id", req.Msg.PostId), zap.String("icon", req.Msg.Icon), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("react-post", zap.String("post-id", req.Msg.PostId), zap.String("icon", req.Msg.Icon), zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -36,7 +36,7 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		if err != nil {
 			return err
 		}
-		roles, err := db.UserRoles(userID, event.ID)
+		roles, err := db.UserRoles(zUser.ID, event.ID)
 		if err != nil {
 			return err
 		}
@@ -44,11 +44,11 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 			return errors.New("user is not a member of the event")
 		}
 
-		if err = db.ReactPost(userID, req.Msg); err != nil {
+		if err = db.ReactPost(zUser.ID, req.Msg); err != nil {
 			return err
 		}
 
-		if err = s.Chain.ReactPost(userID, event.ID, req.Msg); err != nil {
+		if err = s.Chain.ReactPost(zUser.ID, event.ID, req.Msg); err != nil {
 			return err
 		}
 

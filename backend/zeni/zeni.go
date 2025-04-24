@@ -1,8 +1,10 @@
 package zeni
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -11,6 +13,34 @@ import (
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
+
+type Plan string
+
+const (
+	FreePlan Plan = "free"
+	ProPlan  Plan = "pro"
+)
+
+// Implements the flag.Value interface (for CLI)
+func (p *Plan) String() string {
+	return string(*p)
+}
+
+// Implements the flag.Value interface (for CLI & enforcing the plan value)
+func (p *Plan) Set(value string) error {
+	value = strings.ToLower(value)
+	switch value {
+	case string(FreePlan), string(ProPlan):
+		*p = Plan(value)
+		return nil
+	default:
+		return fmt.Errorf("invalid plan: %s (must be free or pro)", value)
+	}
+}
+
+func (p Plan) IsValid() bool {
+	return p == FreePlan || p == ProPlan
+}
 
 type AuthUser struct {
 	ID     string
@@ -24,6 +54,7 @@ type User struct {
 	DisplayName string
 	Bio         string
 	AvatarURI   string
+	Plan        Plan
 }
 
 type Event struct {
@@ -108,10 +139,11 @@ func (e *Event) Timezone() (*time.Location, error) {
 type DB interface {
 	Tx(func(db DB) error) error
 
-	CreateUser(authID string) (string, error)
-	UserExists(authID string) (string, error)
+	CreateUser(authID string) (*User, error)
+	GetUser(authID string) (*User, error)
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	PromoteUser(userID string, plan Plan) error
 	UserRoles(userID string, eventID string) ([]string, error)
 	GetAllUsers() ([]*User, error)
 
@@ -149,6 +181,14 @@ type Chain interface {
 	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+}
+
+type Auth interface {
+	GetUser(ctx context.Context) *AuthUser
+	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)
+	EnsureUserExists(ctx context.Context, email string) (*AuthUser, error)
+
+	WithAuth() func(http.Handler) http.Handler
 }
 
 func LocationToString(location *zenaov1.EventLocation) (string, error) {

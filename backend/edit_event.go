@@ -16,18 +16,18 @@ func (s *ZenaoServer) EditEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.EditEventRequest],
 ) (*connect.Response[zenaov1.EditEventResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
 
 	// retrieve auto-incremented user ID from database, do not use auth provider's user ID directly for realms
-	userID, err := s.EnsureUserExists(ctx, user)
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("edit-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("edit-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -38,7 +38,7 @@ func (s *ZenaoServer) EditEvent(
 	}
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.UserRoles(userID, req.Msg.EventId)
+		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func (s *ZenaoServer) EditEvent(
 			return err
 		}
 
-		if err := s.Chain.EditEvent(req.Msg.EventId, userID, req.Msg); err != nil {
+		if err := s.Chain.EditEvent(req.Msg.EventId, zUser.ID, req.Msg); err != nil {
 			return err
 		}
 

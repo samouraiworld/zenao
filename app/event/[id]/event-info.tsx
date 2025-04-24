@@ -29,6 +29,7 @@ import { Web3Image } from "@/components/images/web3-image";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { cn } from "@/lib/tailwind";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
+import { GoTopButton } from "@/components/buttons/go-top-button";
 
 interface EventSectionProps {
   title: string;
@@ -265,6 +266,8 @@ export function EventInfo({ id }: { id: string }) {
           )}
         </EventSection>
       </div>
+
+      <GoTopButton />
     </div>
   );
 }
