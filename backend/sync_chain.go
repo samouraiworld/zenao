@@ -105,13 +105,7 @@ func execSyncChain() error {
 			}
 			ticket := tickets[0]
 
-			// events created before introduction of ticket secret have a nil ticket
-			pk := ""
-			if ticket != nil {
-				pk = ticket.Pubkey()
-			}
-
-			if err := chain.Participate(event.ID, event.CreatorID, p.ID, pk); err != nil {
+			if err := chain.Participate(event.ID, event.CreatorID, p.ID, ticket.Pubkey()); err != nil {
 				logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
 			}
 		}

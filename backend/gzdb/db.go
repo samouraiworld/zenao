@@ -363,11 +363,6 @@ func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*z
 
 	res := make([]*zeni.Ticket, len(tickets))
 	for i, ticket := range tickets {
-		if ticket.Secret == "" {
-			// events created before this have no ticket secret
-			res[i] = nil
-			continue
-		}
 		res[i], err = zeni.NewTicketFromSecret(ticket.Secret)
 		if err != nil {
 			return nil, err
