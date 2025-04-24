@@ -8,7 +8,8 @@ const HeaderEventsList: React.FC<{
   from: FromFilter;
   title: string;
   description?: string;
-}> = ({ from, title, description }) => {
+  tabLinks: { upcoming: string; past: string };
+}> = ({ from, title, description, tabLinks }) => {
   return (
     <div className="flex flex-col gap-2 mb-3">
       <div className="flex flex-col gap-2 md:gap-0 md:flex-row md:justify-between md:items-center">
@@ -21,7 +22,7 @@ const HeaderEventsList: React.FC<{
           />
         </div>
         <div>
-          <FromFilterTab from={from} />
+          <FromFilterTab from={from} tabLinks={tabLinks} />
         </div>
       </div>
 
