@@ -355,7 +355,7 @@ func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
 func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*zeni.Ticket, error) {
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("parse creator id: %w", err)
+		return nil, fmt.Errorf("parse buyer id: %w", err)
 	}
 
 	tickets := []*SoldTicket{}
