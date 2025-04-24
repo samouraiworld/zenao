@@ -51,7 +51,7 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 35, "number of fake posts to generate")
-	flset.UintVar(&fakegenConf.pollsCount, "polls", 10, "number of fake polls to generate")
+	flset.UintVar(&fakegenConf.pollsCount, "polls", 9, "number of fake polls to generate")
 }
 
 type fakeEvent struct {
@@ -69,10 +69,10 @@ type fakePost struct {
 }
 
 type fakePoll struct {
-	Question     string           `faker:"sentence"`
-	OptionsCount int              `faker:"boundary_start=2, boundary_end=8"`
-	DaysDuration int              `faker:"boundary_start=1, boundary_end=60"`
-	Kind         pollsv1.PollKind `faker:"oneof: POLL_KIND_MULTIPLE_CHOICE, POLL_KIND_SINGLE_CHOICE"`
+	Question     string `faker:"sentence"`
+	OptionsCount int    `faker:"boundary_start=2, boundary_end=8"`
+	DaysDuration int    `faker:"boundary_start=1, boundary_end=30"`
+	KindRaw      int32  `faker:"oneof: 0, 1"`
 }
 
 func execFakegen() error {
@@ -101,14 +101,14 @@ func execFakegen() error {
 		return err
 	}
 
-	for i := range fakegenConf.eventsCount {
+	for eC := range fakegenConf.eventsCount {
 		// Create Event
 		a := fakeEvent{}
 		err := faker.FakeData(&a)
 		if err != nil {
 			return err
 		}
-		before := i <= (fakegenConf.eventsCount / 2)
+		before := eC <= (fakegenConf.eventsCount / 2)
 		if before {
 			a.StartOffsetHours = -a.StartOffsetHours
 		}
@@ -145,7 +145,7 @@ func execFakegen() error {
 		}
 
 		// Create posts/polls for only one event to avoid flooding the chain and db
-		if i == fakegenConf.eventsCount-1 {
+		if eC == fakegenConf.eventsCount+(fakegenConf.eventsCount-1) {
 			// Create StandardPosts
 			for j := range int(fakegenConf.postsCount) {
 				p := fakePost{}
@@ -175,22 +175,16 @@ func execFakegen() error {
 			}
 
 			// Create Polls
-			for range int(fakegenConf.pollsCount) {
+			for range fakegenConf.pollsCount {
 				p := fakePoll{}
 				err := faker.FakeData(&p)
 				if err != nil {
 					return err
 				}
 
-				// Make random words options
 				options := make([]string, p.OptionsCount)
-				for i := range p.OptionsCount {
-					var word string
-					err := faker.FakeData(&word)
-					if err != nil {
-						return err
-					}
-					options[i] = word
+				for oC := range p.OptionsCount {
+					options[oC] = faker.UUIDDigit()
 				}
 
 				pollReq := &zenaov1.CreatePollRequest{
@@ -198,7 +192,7 @@ func execFakegen() error {
 					Question: p.Question,
 					Options:  options,
 					Duration: int64(p.DaysDuration * 24 * 60 * 60),
-					Kind:     p.Kind,
+					Kind:     pollsv1.PollKind(p.KindRaw),
 				}
 
 				pollID, postID, err := chain.CreatePoll(creatorID, pollReq)
