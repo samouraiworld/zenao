@@ -479,7 +479,7 @@ table "sold_tickets" {
     type = real
   }
   column "secret" {
-    null = true
+    null = false
     type = text
   }
   primary_key {
