@@ -43,7 +43,7 @@ type SoldTicket struct {
 	EventID uint
 	BuyerID uint
 	Price   float64
-	Secret  string
+	Secret  string `gorm:"uniqueIndex"`
 }
 
 func SetupDB(dsn string) (zeni.DB, error) {
