@@ -23,7 +23,7 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, err
 	}
 
-	s.Logger.Info("get-user-address", zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("get-event-tickets", zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
