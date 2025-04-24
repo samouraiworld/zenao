@@ -9,7 +9,6 @@ import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { TZDate } from "react-day-picker";
 import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
@@ -30,6 +29,7 @@ import { Web3Image } from "@/components/images/web3-image";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { cn } from "@/lib/tailwind";
 import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
+import { GoTopButton } from "@/components/buttons/go-top-button";
 
 interface EventSectionProps {
   title: string;
@@ -77,11 +77,8 @@ export function EventInfo({ id }: { id: string }) {
     "@type": "Event",
     name: data.title,
     description: data.description,
-    startDate: new TZDate(
-      Number(data.startDate) * 1000,
-      timezone,
-    ).toISOString(),
-    endDate: new TZDate(Number(data.endDate) * 1000, timezone).toISOString(),
+    startDate: new Date(Number(data.startDate) * 1000).toISOString(),
+    endDate: new Date(Number(data.endDate) * 1000).toISOString(),
     location:
       location.kind === "virtual" ? location.location : location.address,
     maximumAttendeeCapacity: data.capacity,
@@ -269,6 +266,8 @@ export function EventInfo({ id }: { id: string }) {
           )}
         </EventSection>
       </div>
+
+      <GoTopButton />
     </div>
   );
 }
