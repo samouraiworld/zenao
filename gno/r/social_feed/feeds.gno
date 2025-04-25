@@ -69,7 +69,7 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 	if tags != "" {
 		tagsSplit = strings.Split(tags, ",")
 	}
-	postsByFeed.Iterate(start, end, func(key string, value interface{}) bool {
+	postsByFeed.ReverseIterate(start, end, func(key string, value interface{}) bool {
 		post := value.(*feedsv1.Post)
 		for _, tag := range tagsSplit {
 			if !hasTag(post.Tags, tag) {
