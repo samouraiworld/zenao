@@ -1,11 +1,8 @@
 "use client";
 
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import {
-  useSuspenseInfiniteQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/tailwind";
 import {
@@ -16,16 +13,12 @@ import {
   StandardPostForm,
   FeedInputMode,
 } from "@/components/form/social-feed/standard-post-form";
-import { PollPostView, StandardPostView } from "@/lib/social-feed";
 import { PollPostForm } from "@/components/form/social-feed/poll-post-form";
 import { userAddressOptions } from "@/lib/queries/user";
-import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { PostsList } from "@/components/lists/posts-list";
 import { PollsList } from "@/components/lists/polls-list";
 import { mergeRefs } from "@/lib/utils";
-import Text from "@/components/texts/text";
-import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 
 const eventTabs = ["global-feed", "polls-feed"] as const;
 export type EventTab = (typeof eventTabs)[number];
@@ -125,36 +118,6 @@ export function EventFeed({
 
   const feedFormRef = useRef<HTMLDivElement>(null);
 
-  // Event's social feed posts
-  const {
-    data: postsPages,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    isFetching,
-  } = useSuspenseInfiniteQuery(
-    feedPosts(eventId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
-  );
-  const posts = useMemo(() => postsPages.pages.flat(), [postsPages]);
-
-  const polls = useMemo(
-    () =>
-      posts.filter((post): post is PollPostView => {
-        return (
-          post.post?.post.case === "link" && post.post?.tags?.includes("poll")
-        );
-      }, []),
-    [posts],
-  );
-
-  const standardPosts = useMemo(
-    () =>
-      posts.filter((post): post is StandardPostView => {
-        return post.post?.post.case === "standard";
-      }),
-    [posts],
-  );
-
   const t = useTranslations("event-feed");
 
   // Observer to make sure we can see the bottom of the feed
@@ -200,32 +163,10 @@ export function EventFeed({
           />
         )}
         {tab === "global-feed" ? (
-          <PostsList eventId={eventId} list={standardPosts} />
+          <PostsList eventId={eventId} userAddress={userAddress} />
         ) : (
-          <PollsList eventId={eventId} list={polls} />
+          <PollsList eventId={eventId} userAddress={userAddress} />
         )}
-
-        {/* Infinite scroll button */}
-        <div className="flex justify-center">
-          {hasNextPage ? (
-            <ButtonWithChildren
-              loading={isFetchingNextPage}
-              onClick={async () => {
-                await fetchNextPage();
-              }}
-            >
-              {t("load-more")}
-            </ButtonWithChildren>
-          ) : (
-            !isFetching &&
-            ((tab === "global-feed" && standardPosts.length > 0) ||
-              (tab === "polls-feed" && polls.length > 0)) && (
-              <Text size="sm" variant="secondary">
-                {t("no-more-posts")}
-              </Text>
-            )
-          )}
-        </div>
       </div>
     </div>
   );

@@ -1,11 +1,16 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
+import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import { PollPost } from "../widgets/poll-post";
 import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
-import { StandardPostView } from "@/lib/social-feed";
+import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
+import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
+import { parsePollUri } from "@/lib/multiaddr";
 
 function EmptyPostsList() {
   const t = useTranslations("event-feed");
@@ -22,22 +27,100 @@ function EmptyPostsList() {
 
 export function PostsList({
   eventId,
-  list,
+  userAddress,
 }: {
   eventId: string;
-  list: StandardPostView[];
+  userAddress: string | null;
 }) {
+  const t = useTranslations("event-feed");
+
+  // Event's social feed posts
+  const {
+    data: postsPages,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetching,
+  } = useSuspenseInfiniteQuery(
+    feedPosts(eventId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
+  );
+  const posts = useMemo(
+    () =>
+      postsPages.pages.flat().map<SocialFeedPost>((post) => {
+        if (isPollPost(post)) {
+          return {
+            postType: "poll",
+            data: post,
+          };
+        } else if (isStandardPost(post)) {
+          return {
+            postType: "standard",
+            data: post,
+          };
+        }
+        return {
+          postType: "unknown",
+          data: post,
+        };
+      }),
+    [postsPages],
+  );
+
   return (
-    <div className="space-y-4">
-      {!list.length ? (
-        <EmptyPostsList />
-      ) : (
-        list.map((post) => (
-          <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
-            <StandardPostCard eventId={eventId} post={post} />
-          </Suspense>
-        ))
-      )}
-    </div>
+    <>
+      <div className="space-y-4">
+        {!posts.length ? (
+          <EmptyPostsList />
+        ) : (
+          posts.map((post) => {
+            switch (post.postType) {
+              case "standard":
+                return (
+                  <Suspense
+                    key={post.data.post.localPostId}
+                    fallback={<PostCardSkeleton />}
+                  >
+                    <StandardPostCard eventId={eventId} post={post.data} />
+                  </Suspense>
+                );
+              case "poll":
+                const { pollId } = parsePollUri(post.data.post.post.value.uri);
+
+                return (
+                  <Suspense fallback={<PostCardSkeleton />} key={pollId}>
+                    <PollPost
+                      eventId={eventId}
+                      pollId={pollId}
+                      pollPost={post.data}
+                    />
+                  </Suspense>
+                );
+
+              case "unknown":
+                return null;
+            }
+          })
+        )}
+      </div>
+      <div className="flex justify-center">
+        {hasNextPage ? (
+          <ButtonWithChildren
+            loading={isFetchingNextPage}
+            onClick={async () => {
+              await fetchNextPage();
+            }}
+          >
+            {t("load-more")}
+          </ButtonWithChildren>
+        ) : (
+          !isFetching &&
+          posts.length > 0 && (
+            <Text size="sm" variant="secondary">
+              {t("no-more-posts")}
+            </Text>
+          )
+        )}
+      </div>
+    </>
   );
 }
