@@ -18,18 +18,18 @@ func (s *ZenaoServer) GetUserAddress(
 		return nil, errors.New("unauthorized")
 	}
 
-	userID, err := s.EnsureUserExists(ctx, user)
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("get-user-address", zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("get-user-address", zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
 	}
 
-	userAddr := s.Chain.UserAddress(userID)
+	userAddr := s.Chain.UserAddress(zUser.ID)
 
 	return connect.NewResponse(&zenaov1.GetUserAddressResponse{
 		Address: userAddr,
