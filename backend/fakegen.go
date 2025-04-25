@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
@@ -33,14 +34,15 @@ func newFakegenCmd() *commands.Command {
 var fakegenConf fakegenConfig
 
 type fakegenConfig struct {
-	adminMnemonic string
-	gnoNamespace  string
-	chainEndpoint string
-	chainID       string
-	dbPath        string
-	eventsCount   uint
-	postsCount    uint
-	pollsCount    uint
+	adminMnemonic  string
+	gnoNamespace   string
+	chainEndpoint  string
+	chainID        string
+	dbPath         string
+	eventsCount    uint
+	postsCount     uint
+	pollsCount     uint
+	reactionsCount uint
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -50,8 +52,9 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
-	flset.UintVar(&fakegenConf.postsCount, "posts", 35, "number of fake posts to generate")
+	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
 	flset.UintVar(&fakegenConf.pollsCount, "polls", 9, "number of fake polls to generate")
+	flset.UintVar(&fakegenConf.reactionsCount, "reactions", 20, "number of fake reactions to generate")
 }
 
 type fakeEvent struct {
@@ -73,6 +76,10 @@ type fakePoll struct {
 	OptionsCount int    `faker:"boundary_start=2, boundary_end=8"`
 	DaysDuration int    `faker:"boundary_start=1, boundary_end=30"`
 	KindRaw      int32  `faker:"oneof: 0, 1"`
+}
+
+type fakeReaction struct {
+	Icon string `faker:"oneof: 😀, 🎉, 🔥, 💡, 🍕, 🌟, 🤖, 😎, 💀, 🚀, 🧠, 🛠️, 🎶, 🍀, 🎨, 🧸, 📚, 🕹️, 🏆, 🧬, 🧘, 🍩, 🥑, 📸, 🧃, 🎧, 🪐, 💬"`
 }
 
 func execFakegen() error {
@@ -144,10 +151,10 @@ func execFakegen() error {
 			return err
 		}
 
-		// Create posts/polls for only one event to avoid flooding the chain and db
-		if eC == fakegenConf.eventsCount+(fakegenConf.eventsCount-1) {
+		// Create posts/polls only for the last event (to avoid flooding the chain and db)
+		if eC == fakegenConf.eventsCount-1 {
 			// Create StandardPosts
-			for j := range int(fakegenConf.postsCount) {
+			for pC := range fakegenConf.postsCount {
 				p := fakePost{}
 				err := faker.FakeData(&p)
 				if err != nil {
@@ -156,7 +163,7 @@ func execFakegen() error {
 
 				post := &feedsv1.Post{
 					Author:    creatorID,
-					CreatedAt: startDate.Add(-time.Duration(j) * time.Hour).Unix(), //One post per hour
+					CreatedAt: startDate.Add(-time.Duration(pC) * time.Hour).Unix(), //One post per hour (FIXME: Doesn't work),
 					Post: &feedsv1.Post_Standard{
 						Standard: &feedsv1.StandardPost{
 							Content: p.Content,
@@ -171,6 +178,31 @@ func execFakegen() error {
 
 				if _, err := db.CreatePost(postID, zfeed.ID, userId, post); err != nil {
 					return err
+				}
+
+				// Create reactions only for the first post (to avoid flooding the chain and db)
+				if pC == 0 {
+					for range fakegenConf.reactionsCount {
+						fmt.Println("postIDpostIDpostIDpostIDpostIDpostID", postID)
+						// React to Posts
+						r := fakeReaction{}
+						err := faker.FakeData(&r)
+						if err != nil {
+							return err
+						}
+						reactReq := &zenaov1.ReactPostRequest{
+							PostId: postID,
+							Icon:   r.Icon,
+						}
+
+						if err = db.ReactPost(creatorID, reactReq); err != nil {
+							return err
+						}
+
+						if err = chain.ReactPost(creatorID, zevt.ID, reactReq); err != nil {
+							return err
+						}
+					}
 				}
 			}
 
@@ -201,6 +233,18 @@ func execFakegen() error {
 				}
 
 				if _, err := db.CreatePoll(pollID, postID, pollReq); err != nil {
+					return err
+				}
+
+				//Vote on Polls
+				voteReq := &zenaov1.VotePollRequest{
+					PollId: pollID,
+					Option: options[0],
+				}
+				if err = db.VotePoll(creatorID, voteReq); err != nil {
+					return err
+				}
+				if err = chain.VotePoll(creatorID, voteReq); err != nil {
 					return err
 				}
 			}
