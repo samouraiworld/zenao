@@ -5,8 +5,8 @@ import { Suspense, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
-import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
 import { PollPost } from "../widgets/poll-post";
+import { LoaderMore } from "../layout/load-more";
 import { PollPostView } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
@@ -72,26 +72,14 @@ export function PollsList({
           })
         )}
       </div>
-      {/* Infinite scroll button */}
-      <div className="flex justify-center">
-        {hasNextPage ? (
-          <ButtonWithChildren
-            loading={isFetchingNextPage}
-            onClick={async () => {
-              await fetchNextPage();
-            }}
-          >
-            {t("load-more")}
-          </ButtonWithChildren>
-        ) : (
-          !isFetching &&
-          polls.length > 0 && (
-            <Text size="sm" variant="secondary">
-              {t("no-more-posts")}
-            </Text>
-          )
-        )}
-      </div>
+      <LoaderMore
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        isFetching={isFetching}
+        isFetchingNextPage={isFetchingNextPage}
+        page={polls}
+        noMoreLabel={t("no-more-posts")}
+      />
     </>
   );
 }

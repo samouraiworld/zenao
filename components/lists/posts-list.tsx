@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
-import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
 import { PollPost } from "../widgets/poll-post";
+import { LoaderMore } from "../layout/load-more";
 import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
@@ -102,25 +102,14 @@ export function PostsList({
           })
         )}
       </div>
-      <div className="flex justify-center">
-        {hasNextPage ? (
-          <ButtonWithChildren
-            loading={isFetchingNextPage}
-            onClick={async () => {
-              await fetchNextPage();
-            }}
-          >
-            {t("load-more")}
-          </ButtonWithChildren>
-        ) : (
-          !isFetching &&
-          posts.length > 0 && (
-            <Text size="sm" variant="secondary">
-              {t("no-more-posts")}
-            </Text>
-          )
-        )}
-      </div>
+      <LoaderMore
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        isFetching={isFetching}
+        isFetchingNextPage={isFetchingNextPage}
+        page={posts}
+        noMoreLabel={t("no-more-posts")}
+      />
     </>
   );
 }
