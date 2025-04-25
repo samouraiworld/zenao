@@ -267,8 +267,9 @@ func TestGetFeedPosts(t *testing.T) {
 	}
 
 	std.TestSetOriginCaller(alice)
-	for _, post := range posts {
-		NewPost(alice.String()+":public", post.Post)
+	//XXX post in reverse order so that the newest post is first
+	for i := len(posts) - 1; i >= 0; i-- {
+		NewPost(alice.String()+":public", posts[i].Post)
 	}
 
 	for name, test := range tests {
