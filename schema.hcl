@@ -33,6 +33,11 @@ table "users" {
     null = true
     type = text
   }
+  column "plan" {
+    null    = true
+    type    = text
+    default = "free"
+  }
   primary_key {
     columns = [column.id]
   }
@@ -262,15 +267,15 @@ table "posts" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_feed" {
-    columns     = [column.feed_id]
-    ref_columns = [table.feeds.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_feed" {
+    columns     = [column.feed_id]
+    ref_columns = [table.feeds.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -473,8 +478,16 @@ table "sold_tickets" {
     null = true
     type = real
   }
+  column "secret" {
+    null = false
+    type = text
+  }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_sold_tickets_secret" {
+    unique  = true
+    columns = [column.secret]
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]
@@ -529,15 +542,15 @@ table "user_roles" {
   primary_key {
     columns = [column.user_id, column.event_id, column.role]
   }
-  foreign_key "fk_user_roles_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_user_roles_event" {
     columns     = [column.event_id]
     ref_columns = [table.events.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_user_roles_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
