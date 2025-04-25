@@ -15,6 +15,7 @@ service ZenaoService {
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
   rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+  rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
@@ -154,3 +155,11 @@ message ReactPostRequest {
 }
 
 message ReactPostResponse {}
+
+message GetEventTicketsRequest {
+  string event_id = 1;
+}
+
+message GetEventTicketsResponse {
+  repeated string tickets_secrets = 1;
+}

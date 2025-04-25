@@ -153,3 +153,11 @@ type ReactPostRequest struct {
 
 type ReactPostResponse struct {
 }
+
+type GetEventTicketsRequest struct {
+	EventId string
+}
+
+type GetEventTicketsResponse struct {
+	TicketsSecrets []string
+}
