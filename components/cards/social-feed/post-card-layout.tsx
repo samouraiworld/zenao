@@ -124,7 +124,7 @@ function Reactions({
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
 
   const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
-  const { reactPost } = useReactPost(queryClient);
+  const { reactPost, isPending } = useReactPost(queryClient);
   const onReactionChange = async (icon: string) => {
     try {
       const token = await getToken();
@@ -159,6 +159,7 @@ function Reactions({
             <EmojiPicker
               theme={Theme.DARK}
               onEmojiClick={(choice) => {
+                if (isPending) return;
                 onReactionChange(choice.emoji);
                 setEmojiPickerOpen(false);
               }}
@@ -173,6 +174,7 @@ function Reactions({
           .map((reaction) => (
             <div
               onClick={() => {
+                if (isPending) return;
                 if (reaction.userHasVoted) onReactionChange(reaction.icon);
               }}
               className={cn(
