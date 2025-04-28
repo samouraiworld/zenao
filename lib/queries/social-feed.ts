@@ -53,7 +53,7 @@ export const pollInfo = (pollId: string, userAddress: string) =>
 
       const res = await client.evaluateExpression(
         "gno.land/r/zenao/polls",
-        `pollToJSON(GetInfo(${parseInt(pollId)}, "${userAddress}"))`,
+        `pollToJSON(GetInfo(${parseInt(pollId, 10)}, "${userAddress}"))`,
       );
 
       const raw = extractGnoJSONResponse(res) as PollJson;
