@@ -31,7 +31,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")

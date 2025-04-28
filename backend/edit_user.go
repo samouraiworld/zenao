@@ -25,7 +25,7 @@ func (s *ZenaoServer) EditUser(
 		return nil, err
 	}
 
-	s.Logger.Info("edit-user", zap.String("user-id", string(zUser.ID)))
+	s.Logger.Info("edit-user", zap.String("user-id", zUser.ID))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")

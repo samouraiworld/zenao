@@ -41,12 +41,17 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
+	ticket, err := zeni.NewTicket()
+	if err != nil {
+		return nil, err
+	}
+
 	evt := (*zeni.Event)(nil)
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
 
-		if err := db.Participate(req.Msg.EventId, zUser.ID); err != nil {
+		if err := db.Participate(req.Msg.EventId, zUser.ID, ticket.Secret()); err != nil {
 			return err
 		}
 
@@ -55,7 +60,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, zUser.ID); err != nil {
+		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Pubkey()); err != nil {
 			// XXX: handle case where tx is broadcasted but we have an error afterwards, eg: chain has been updated but db rollbacked
 			return err
 		}

@@ -265,7 +265,7 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 }
 
 // Participate implements ZenaoChain.
-func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string) error {
+func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string) error {
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
@@ -293,11 +293,11 @@ func main() {
 		Title: %q,
 		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
 			Title: "Add participant",
-			Message: events.NewAddParticipantMsg(%q),
+			Message: events.NewAddParticipantMsg(%q, %q),
 		}),
 	})
 }
-`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr)}},
+`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey)}},
 		},
 	}))
 	if err != nil {
