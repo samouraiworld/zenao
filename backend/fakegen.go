@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
@@ -34,15 +33,14 @@ func newFakegenCmd() *commands.Command {
 var fakegenConf fakegenConfig
 
 type fakegenConfig struct {
-	adminMnemonic  string
-	gnoNamespace   string
-	chainEndpoint  string
-	chainID        string
-	dbPath         string
-	eventsCount    uint
-	postsCount     uint
-	pollsCount     uint
-	reactionsCount uint
+	adminMnemonic string
+	gnoNamespace  string
+	chainEndpoint string
+	chainID       string
+	dbPath        string
+	eventsCount   uint
+	postsCount    uint
+	pollsCount    uint
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -53,8 +51,7 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
-	flset.UintVar(&fakegenConf.pollsCount, "polls", 9, "number of fake polls to generate") // FIXME: Error on creating 10th poll
-	flset.UintVar(&fakegenConf.reactionsCount, "reactions", 20, "number of fake reactions to generate")
+	flset.UintVar(&fakegenConf.pollsCount, "polls", 13, "number of fake polls to generate")
 }
 
 type fakeEvent struct {
@@ -76,10 +73,6 @@ type fakePoll struct {
 	OptionsCount int    `faker:"boundary_start=2, boundary_end=8"`
 	DaysDuration int    `faker:"boundary_start=1, boundary_end=30"`
 	KindRaw      int32  `faker:"oneof: 0, 1"`
-}
-
-type fakeReaction struct {
-	Icon string `faker:"oneof: 😀, 🎉, 🔥, 💡, 🍕, 🌟, 🤖, 😎, 💀, 🚀, 🧠, 🛠️, 🎶, 🍀, 🎨, 🧸, 📚, 🕹️, 🏆, 🧬, 🧘, 🍩, 🥑, 📸, 🧃, 🎧, 🪐, 💬"`
 }
 
 func execFakegen() error {
@@ -182,20 +175,14 @@ func execFakegen() error {
 
 				// Create reactions only for the first post (to avoid flooding the chain and db)
 				if pC == 0 {
-					for range fakegenConf.reactionsCount {
-						fmt.Println("postIDpostIDpostIDpostIDpostIDpostID", postID)
+					icons := []string{"😀", "🎉", "🔥", "💡", "🍕", "🌟", "🤖", "😎", "💀", "🚀", "🧠", "🛠️", "🎶", "🍀", "🎨", "🧸", "📚", "🕹️", "🏆", "🧬", "🧘", "🍩", "🥑", "📸", "🧃", "🎧", "🪐", "💬"}
+					for rC := range len(icons) {
 						// React to Posts
-						r := fakeReaction{}
-						err := faker.FakeData(&r)
-						if err != nil {
-							return err
-						}
 						reactReq := &zenaov1.ReactPostRequest{
 							PostId: postID,
-							Icon:   r.Icon,
+							Icon:   icons[rC],
 						}
 
-						// FIXME: Error on reacting post
 						if err = db.ReactPost(creatorID, reactReq); err != nil {
 							return err
 						}
@@ -208,7 +195,7 @@ func execFakegen() error {
 			}
 
 			// Create Polls
-			for pC := range fakegenConf.pollsCount {
+			for range fakegenConf.pollsCount {
 				p := fakePoll{}
 				err := faker.FakeData(&p)
 				if err != nil {
@@ -237,19 +224,16 @@ func execFakegen() error {
 					return err
 				}
 
-				// FIXME: Error on voting 8th time
-				if pC < 7 {
-					//Vote on Polls
-					voteReq := &zenaov1.VotePollRequest{
-						PollId: pollID,
-						Option: options[0],
-					}
-					if err = db.VotePoll(creatorID, voteReq); err != nil {
-						return err
-					}
-					if err = chain.VotePoll(creatorID, voteReq); err != nil {
-						return err
-					}
+				//Vote on Polls
+				voteReq := &zenaov1.VotePollRequest{
+					PollId: pollID,
+					Option: options[0],
+				}
+				if err = db.VotePoll(creatorID, voteReq); err != nil {
+					return err
+				}
+				if err = chain.VotePoll(creatorID, voteReq); err != nil {
+					return err
 				}
 			}
 		}
