@@ -6,7 +6,7 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { PollPost } from "../widgets/poll-post";
-import { LoaderMoreButton } from "../layout/load-more-button";
+import { LoaderMoreButton } from "../buttons/load-more-button";
 import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
