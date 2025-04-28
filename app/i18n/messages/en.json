@@ -143,10 +143,10 @@
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
     "publishedAt": "Published at"
   },
+  "load-more": "Load more",
   "event-feed": {
     "global-feed": "Global feed",
     "polls-feed": "Polls",
-    "load-more": "Load more",
     "no-more-posts": "No more to show for now.",
     "no-polls-title": "No polls to show.",
     "no-polls-description": "You have no polls. Why not create one?",

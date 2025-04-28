@@ -1,16 +1,15 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
-import { userAddressOptions } from "@/lib/queries/user";
-import { PollPostCard } from "@/components/cards/social-feed/poll-post-card";
-import { PollPostView, PollPostViewInfo } from "@/lib/social-feed";
+import { PollPost } from "../widgets/poll-post";
+import { LoaderMoreButton } from "../buttons/load-more-button";
+import { PollPostView } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
-import { pollInfo } from "@/lib/queries/social-feed";
+import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 
 function EmptyPollsList() {
   const t = useTranslations("event-feed");
@@ -26,58 +25,61 @@ function EmptyPollsList() {
 
 export function PollsList({
   eventId,
-  list,
+  userAddress,
 }: {
   eventId: string;
-  list: PollPostView[];
+  userAddress: string | null;
 }) {
-  return (
-    <div className="space-y-4">
-      {!list.length ? (
-        <EmptyPollsList />
-      ) : (
-        list.map((pollPost) => {
-          const { pollId } = parsePollUri(pollPost.post.post.value.uri);
-
-          return (
-            <Suspense fallback={<PostCardSkeleton />} key={pollId}>
-              <PollPost eventId={eventId} pollId={pollId} pollPost={pollPost} />
-            </Suspense>
-          );
-        })
-      )}
-    </div>
+  const {
+    data: pollsPages,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetching,
+  } = useSuspenseInfiniteQuery(
+    feedPosts(eventId, DEFAULT_FEED_POSTS_LIMIT, "poll", userAddress || ""),
   );
-}
+  const t = useTranslations("event-feed");
 
-function PollPost({
-  pollId,
-  eventId,
-  pollPost,
-}: {
-  pollId: string;
-  eventId: string;
-  pollPost: PollPostView;
-}) {
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const polls = useMemo(
+    () =>
+      pollsPages.pages.flat().filter((post): post is PollPostView => {
+        return (
+          post.post?.post.case === "link" && post.post?.tags?.includes("poll")
+        );
+      }),
+    [pollsPages],
   );
-  const { data } = useSuspenseQuery(pollInfo(pollId, userAddress || ""));
-
-  const combined: PollPostViewInfo = useMemo(() => {
-    return {
-      ...pollPost,
-      poll: data,
-    };
-  }, [pollPost, data]);
 
   return (
-    <PollPostCard
-      pollId={pollId}
-      eventId={eventId}
-      pollPost={combined}
-      userAddress={userAddress || ""}
-    />
+    <>
+      <div className="space-y-4">
+        {!polls.length ? (
+          <EmptyPollsList />
+        ) : (
+          polls.map((pollPost) => {
+            const { pollId } = parsePollUri(pollPost.post.post.value.uri);
+
+            return (
+              <Suspense fallback={<PostCardSkeleton />} key={pollId}>
+                <PollPost
+                  eventId={eventId}
+                  pollId={pollId}
+                  pollPost={pollPost}
+                />
+              </Suspense>
+            );
+          })
+        )}
+      </div>
+      <LoaderMoreButton
+        fetchNextPage={fetchNextPage}
+        hasNextPage={hasNextPage}
+        isFetching={isFetching}
+        isFetchingNextPage={isFetchingNextPage}
+        page={polls}
+        noMoreLabel={t("no-more-posts")}
+      />
+    </>
   );
 }
