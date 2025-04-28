@@ -87,7 +87,10 @@ export function PostsList({
                 const { pollId } = parsePollUri(post.data.post.post.value.uri);
 
                 return (
-                  <Suspense fallback={<PostCardSkeleton />} key={pollId}>
+                  <Suspense
+                    fallback={<PostCardSkeleton />}
+                    key={post.data.post.localPostId}
+                  >
                     <PollPost
                       eventId={eventId}
                       pollId={pollId}
