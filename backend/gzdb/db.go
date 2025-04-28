@@ -578,7 +578,7 @@ func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) er
 }
 
 // CreatePoll implements zeni.DB.
-func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
+func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
 	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -586,6 +586,31 @@ func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.Crea
 	postIDInt, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return nil, err
+	}
+	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	linkPost, ok := post.Post.(*feedsv1.Post_Link)
+	if !ok {
+		return nil, errors.New("trying to insert a poll in database with a post that is not a link type")
+	}
+
+	dbPost := &Post{
+		Model:     gorm.Model{ID: uint(postIDInt)},
+		ParentURI: post.ParentUri,
+		UserID:    uint(userIDInt),
+		FeedID:    uint(feedIDInt),
+		URI:       linkPost.Link.Uri,
+		Tags: []Tag{{
+			PostID: uint(postIDInt),
+			Name:   "poll",
+		}},
 	}
 
 	dbPoll := &Poll{
@@ -603,7 +628,15 @@ func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.Crea
 		})
 	}
 
-	if err := g.db.Create(dbPoll).Error; err != nil {
+	if err := g.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(dbPost).Error; err != nil {
+			return err
+		}
+		if err := tx.Create(dbPoll).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
