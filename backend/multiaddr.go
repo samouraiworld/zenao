@@ -13,14 +13,14 @@ var ZenaoProtocols []*ma.Protocol = []*ma.Protocol{
 		Name:       "gno",
 		Code:       0x300,
 		VCode:      ma.CodeToVarint(0x300),
-		Path:       true, // this means we have to put it at the end
+		Path:       true, // XXX: use URL encoding to avoid to have to put it at the end
 		Size:       ma.LengthPrefixedVarSize,
 		Transcoder: generalTranscoder,
 	}, {
 		Name:       "poll",
 		Code:       0x301,
 		VCode:      ma.CodeToVarint(0x301),
-		Size:       56, // Fixed size of exactly 7 bytes -> size of a seqid in gno
+		Size:       ma.LengthPrefixedVarSize,
 		Transcoder: generalTranscoder,
 	},
 }
