@@ -554,7 +554,7 @@ func NewPoll() {
 	kind := pollsv1.PollKind(%d)
 	p := polls.NewPoll(question, kind, %d, options, event.IsMember)
 	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
-	std.Emit(%q, "pollID", p.ID.String())
+	std.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
 
 	feedID := %q
 	post := &feedsv1.Post{
