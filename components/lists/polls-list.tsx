@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { PollPost } from "../widgets/poll-post";
-import { LoaderMore } from "../layout/load-more";
+import { LoaderMoreButton } from "../layout/load-more-button";
 import { PollPostView } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
@@ -72,7 +72,7 @@ export function PollsList({
           })
         )}
       </div>
-      <LoaderMore
+      <LoaderMoreButton
         fetchNextPage={fetchNextPage}
         hasNextPage={hasNextPage}
         isFetching={isFetching}

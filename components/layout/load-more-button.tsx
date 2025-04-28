@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
 import Text from "../texts/text";
 
-export function LoaderMore<TData = unknown[]>({
+export function LoaderMoreButton<TData = unknown[]>({
   fetchNextPage,
   isFetching,
   isFetchingNextPage,
