@@ -53,7 +53,7 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
-	flset.UintVar(&fakegenConf.pollsCount, "polls", 9, "number of fake polls to generate")
+	flset.UintVar(&fakegenConf.pollsCount, "polls", 9, "number of fake polls to generate") // FIXME: Error on creating 10th poll
 	flset.UintVar(&fakegenConf.reactionsCount, "reactions", 20, "number of fake reactions to generate")
 }
 
@@ -195,6 +195,7 @@ func execFakegen() error {
 							Icon:   r.Icon,
 						}
 
+						// FIXME: Error on reacting post
 						if err = db.ReactPost(creatorID, reactReq); err != nil {
 							return err
 						}
@@ -207,7 +208,7 @@ func execFakegen() error {
 			}
 
 			// Create Polls
-			for range fakegenConf.pollsCount {
+			for pC := range fakegenConf.pollsCount {
 				p := fakePoll{}
 				err := faker.FakeData(&p)
 				if err != nil {
@@ -236,16 +237,19 @@ func execFakegen() error {
 					return err
 				}
 
-				//Vote on Polls
-				voteReq := &zenaov1.VotePollRequest{
-					PollId: pollID,
-					Option: options[0],
-				}
-				if err = db.VotePoll(creatorID, voteReq); err != nil {
-					return err
-				}
-				if err = chain.VotePoll(creatorID, voteReq); err != nil {
-					return err
+				// FIXME: Error on voting 8th time
+				if pC < 7 {
+					//Vote on Polls
+					voteReq := &zenaov1.VotePollRequest{
+						PollId: pollID,
+						Option: options[0],
+					}
+					if err = db.VotePoll(creatorID, voteReq); err != nil {
+						return err
+					}
+					if err = chain.VotePoll(creatorID, voteReq); err != nil {
+						return err
+					}
 				}
 			}
 		}
