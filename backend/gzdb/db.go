@@ -546,33 +546,33 @@ func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) er
 		return err
 	}
 
-	var postExists bool
-	if err := g.db.Model(&Post{}).Select("1").Where("id = ?", postIDInt).Scan(&postExists).Error; err != nil {
-		return err
-	}
-	if !postExists {
-		return errors.New("post not found")
-	}
-
 	return g.db.Transaction(func(tx *gorm.DB) error {
-		var reaction Reaction
-		if err := tx.Where("post_id = ? AND icon = ? AND user_id = ?", postIDInt, req.Icon, userIDInt).First(&reaction).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				reaction = Reaction{
-					PostID: uint(postIDInt),
-					Icon:   req.Icon,
-					UserID: uint(userIDInt),
-				}
-				if err := tx.Create(&reaction).Error; err != nil {
-					return err
-				}
-				return nil
+		var postExists bool
+		if err := g.db.Model(&Post{}).Select("1").Where("id = ?", postIDInt).Scan(&postExists).Error; err != nil {
+			return err
+		}
+		if !postExists {
+			return errors.New("post not found")
+		}
+
+		var reactionExists bool
+		if err := tx.Model(&Reaction{}).Select("1").Where("post_id = ? AND icon = ? AND user_id = ?", postIDInt, req.Icon, userIDInt).Scan(&reactionExists).Error; err != nil {
+			return err
+		}
+		if reactionExists {
+			if err := tx.Where("post_id = ? AND icon = ? AND user_id = ?", postIDInt, req.Icon, userIDInt).Delete(&Reaction{}).Error; err != nil {
+				return err
 			}
+			return nil
+		}
+		if err := tx.Create(&Reaction{
+			PostID: uint(postIDInt),
+			Icon:   req.Icon,
+			UserID: uint(userIDInt),
+		}).Error; err != nil {
 			return err
 		}
-		if err := tx.Delete(&reaction).Error; err != nil {
-			return err
-		}
+
 		return nil
 	})
 }
