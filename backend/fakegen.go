@@ -169,7 +169,7 @@ func execFakegen() error {
 					return err
 				}
 
-				if _, err := db.CreatePost(postID, zfeed.ID, userId, post); err != nil {
+				if _, err := db.CreatePost(postID, zfeed.ID, zUser.ID, post); err != nil {
 					return err
 				}
 
