@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
+	ma "github.com/multiformats/go-multiaddr"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -87,6 +89,11 @@ func execFakegen() error {
 	}
 
 	db, err := gzdb.SetupDB(fakegenConf.dbPath)
+	if err != nil {
+		return err
+	}
+
+	err = RegisterMultiAddrProtocols()
 	if err != nil {
 		return err
 	}
@@ -220,7 +227,20 @@ func execFakegen() error {
 					return err
 				}
 
-				if _, err := db.CreatePoll(pollID, postID, pollReq); err != nil {
+				postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
+				if err != nil {
+					return err
+				}
+
+				pollPost := &feedsv1.Post{
+					Post: &feedsv1.Post_Link{
+						Link: &feedsv1.LinkPost{
+							Uri: postURI.String(),
+						},
+					},
+				}
+
+				if _, err := db.CreatePoll(creatorID, pollID, postID, zfeed.ID, pollPost, pollReq); err != nil {
 					return err
 				}
 
