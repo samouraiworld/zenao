@@ -175,12 +175,14 @@ function Reactions({
             <div
               onClick={() => {
                 if (isPending) return;
-                if (reaction.userHasVoted) onReactionChange(reaction.icon);
+                if (isOrganizer || isParticipant)
+                  onReactionChange(reaction.icon);
               }}
               className={cn(
                 "flex flex-row items-center py-0.5 pl-1 pr-2 rounded-full gap-0.5 cursor-default",
-                reaction.userHasVoted &&
-                  "border-[1px] border-neutral-700 hover:bg-neutral-700 cursor-pointer",
+                reaction.userHasVoted && "border-[1px] border-neutral-700",
+                (isOrganizer || isParticipant) &&
+                  "hover:bg-neutral-700 cursor-pointer",
                 !reaction.userHasVoted && "bg-neutral-800",
               )}
               key={reaction.icon}

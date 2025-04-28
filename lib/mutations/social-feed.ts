@@ -32,11 +32,21 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         "",
         variables.userAddress,
       );
+      const feedPollsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "poll",
+        variables.userAddress,
+      );
+
       const previousFeedPosts = queryClient.getQueryData(
         feedPostsOpts.queryKey,
       );
+      const previousFeedPolls = queryClient.getQueryData(
+        feedPollsOpts.queryKey,
+      );
 
-      return { previousFeedPosts };
+      return { previousFeedPosts, previousFeedPolls };
     },
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
@@ -45,8 +55,15 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         "",
         variables.userAddress,
       );
+      const feedPollsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "poll",
+        variables.userAddress,
+      );
 
       queryClient.invalidateQueries(feedPostsOpts);
+      queryClient.invalidateQueries(feedPollsOpts);
     },
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
@@ -56,9 +73,20 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         variables.userAddress,
       );
 
+      const feedPollsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "poll",
+        variables.userAddress,
+      );
+
       queryClient.setQueryData(
         feedPostsOpts.queryKey,
         context?.previousFeedPosts,
+      );
+      queryClient.setQueryData(
+        feedPollsOpts.queryKey,
+        context?.previousFeedPolls,
       );
     },
   });
