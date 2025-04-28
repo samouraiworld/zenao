@@ -163,7 +163,7 @@ type DB interface {
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
 	GetAllPosts() ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
+	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
 }
