@@ -548,7 +548,7 @@ func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) er
 
 	return g.db.Transaction(func(tx *gorm.DB) error {
 		var postExists bool
-		if err := g.db.Model(&Post{}).Select("1").Where("id = ?", postIDInt).Scan(&postExists).Error; err != nil {
+		if err := tx.Model(&Post{}).Select("1").Where("id = ?", postIDInt).Scan(&postExists).Error; err != nil {
 			return err
 		}
 		if !postExists {
