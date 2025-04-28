@@ -6,8 +6,8 @@ import {
   InfiniteQueryObserverResult,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { ButtonWithChildren } from "./ButtonWithChildren";
 import Text from "../texts/text";
+import { ButtonWithChildren } from "./ButtonWithChildren";
 
 export function LoaderMoreButton<TData = unknown[]>({
   fetchNextPage,
