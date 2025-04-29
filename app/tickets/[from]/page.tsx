@@ -14,10 +14,6 @@ import { EventsListLayout } from "@/components/layout/events-list-layout";
 
 export const revalidate = 60;
 
-export async function generateStaticParams() {
-  return [];
-}
-
 type PageProps = {
   params: Promise<{ from: string }>;
 };
