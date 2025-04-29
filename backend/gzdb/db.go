@@ -41,7 +41,7 @@ type UserRole struct {
 type SoldTicket struct {
 	gorm.Model
 	EventID uint
-	UserID  string // XXX: should be uint
+	BuyerID uint
 	Price   float64
 	Secret  string `gorm:"uniqueIndex;not null"`
 }
@@ -212,7 +212,12 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventID string, userID string) error {
+func (g *gormZenaoDB) Participate(eventID string, userID string, ticketSecret string) error {
+	userIDint, err := strconv.ParseUint(userID, 10, 32)
+	if err != nil {
+		return err
+	}
+
 	evt, err := g.getDBEvent(eventID)
 	if err != nil {
 		return err
@@ -229,14 +234,18 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 	}
 
 	var count int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userID).Count(&count).Error; err != nil {
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND buyer_id = ?", evt.ID, userIDint).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
 		return errors.New("user is already participant for this event")
 	}
 
-	if err := g.db.Create(&SoldTicket{EventID: evt.ID, UserID: userID}).Error; err != nil {
+	if err := g.db.Create(&SoldTicket{
+		EventID: evt.ID,
+		BuyerID: uint(userIDint),
+		Secret:  ticketSecret,
+	}).Error; err != nil {
 		return err
 	}
 
@@ -247,10 +256,6 @@ func (g *gormZenaoDB) Participate(eventID string, userID string) error {
 		return errors.New("user is already participant for this event")
 	}
 
-	userIDint, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return err
-	}
 	participant := &UserRole{
 		UserID:  uint(userIDint),
 		EventID: evt.ID,
@@ -343,6 +348,27 @@ func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
 	for _, p := range participants {
 		res = append(res, dbUserToZeniDBUser(&p.User))
 	}
+	return res, nil
+}
+
+// GetEventBuyerTickets implements zeni.DB.
+func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*zeni.Ticket, error) {
+	buyerIDint, err := strconv.ParseUint(buyerID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse buyer id: %w", err)
+	}
+
+	tickets := []*SoldTicket{}
+	g.db.Find(&tickets).Where("event_id = ? AND buyer_id = ?", eventID, buyerIDint)
+
+	res := make([]*zeni.Ticket, len(tickets))
+	for i, ticket := range tickets {
+		res[i], err = zeni.NewTicketFromSecret(ticket.Secret)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return res, nil
 }
 
@@ -520,39 +546,39 @@ func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) er
 		return err
 	}
 
-	var postExists bool
-	if err := g.db.Model(&Post{}).Select("1").Where("id = ?", postIDInt).Scan(&postExists).Error; err != nil {
-		return err
-	}
-	if !postExists {
-		return errors.New("post not found")
-	}
-
 	return g.db.Transaction(func(tx *gorm.DB) error {
-		var reaction Reaction
-		if err := tx.Where("post_id = ? AND icon = ? AND user_id = ?", postIDInt, req.Icon, userIDInt).First(&reaction).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				reaction = Reaction{
-					PostID: uint(postIDInt),
-					Icon:   req.Icon,
-					UserID: uint(userIDInt),
-				}
-				if err := tx.Create(&reaction).Error; err != nil {
-					return err
-				}
-				return nil
+		var postExists bool
+		if err := tx.Model(&Post{}).Select("1").Where("id = ?", postIDInt).Scan(&postExists).Error; err != nil {
+			return err
+		}
+		if !postExists {
+			return errors.New("post not found")
+		}
+
+		var reactionExists bool
+		if err := tx.Model(&Reaction{}).Select("1").Where("post_id = ? AND icon = ? AND user_id = ?", postIDInt, req.Icon, userIDInt).Scan(&reactionExists).Error; err != nil {
+			return err
+		}
+		if reactionExists {
+			if err := tx.Where("post_id = ? AND icon = ? AND user_id = ?", postIDInt, req.Icon, userIDInt).Delete(&Reaction{}).Error; err != nil {
+				return err
 			}
+			return nil
+		}
+		if err := tx.Create(&Reaction{
+			PostID: uint(postIDInt),
+			Icon:   req.Icon,
+			UserID: uint(userIDInt),
+		}).Error; err != nil {
 			return err
 		}
-		if err := tx.Delete(&reaction).Error; err != nil {
-			return err
-		}
+
 		return nil
 	})
 }
 
 // CreatePoll implements zeni.DB.
-func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
+func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
 	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -560,6 +586,31 @@ func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.Crea
 	postIDInt, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return nil, err
+	}
+	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	linkPost, ok := post.Post.(*feedsv1.Post_Link)
+	if !ok {
+		return nil, errors.New("trying to insert a poll in database with a post that is not a link type")
+	}
+
+	dbPost := &Post{
+		Model:     gorm.Model{ID: uint(postIDInt)},
+		ParentURI: post.ParentUri,
+		UserID:    uint(userIDInt),
+		FeedID:    uint(feedIDInt),
+		URI:       linkPost.Link.Uri,
+		Tags: []Tag{{
+			PostID: uint(postIDInt),
+			Name:   "poll",
+		}},
 	}
 
 	dbPoll := &Poll{
@@ -577,7 +628,15 @@ func (g *gormZenaoDB) CreatePoll(pollID string, postID string, req *zenaov1.Crea
 		})
 	}
 
-	if err := g.db.Create(dbPoll).Error; err != nil {
+	if err := g.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(dbPost).Error; err != nil {
+			return err
+		}
+		if err := tx.Create(dbPoll).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 

@@ -150,11 +150,12 @@ type DB interface {
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) error
 	GetEvent(eventID string) (*Event, error)
-	Participate(eventID string, userID string) error
+	Participate(eventID string, userID string, ticketSecret string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
 	GetAllParticipants(eventID string) ([]*User, error)
+	GetEventBuyerTickets(eventID string, buyerID string) ([]*Ticket, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
@@ -162,7 +163,7 @@ type DB interface {
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
 	GetAllPosts() ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
+	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
 }
@@ -175,7 +176,7 @@ type Chain interface {
 
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
-	Participate(eventID string, callerID string, participantID string) error
+	Participate(eventID string, callerID string, participantID string, ticketPubkey string) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
 	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error

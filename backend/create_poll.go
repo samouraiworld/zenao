@@ -26,7 +26,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, err
 	}
 
-	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -36,7 +36,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	zpost := (*zeni.Post)(nil)
+	zpoll := (*zeni.Poll)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
 		if err != nil {
@@ -57,7 +57,6 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		}
 
 		post := &feedsv1.Post{
-			Tags: []string{"poll"},
 			Post: &feedsv1.Post_Link{
 				Link: &feedsv1.LinkPost{
 					Uri: postURI.String(),
@@ -70,11 +69,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
-		if zpost, err = db.CreatePost(postID, feed.ID, zUser.ID, post); err != nil {
-			return err
-		}
-
-		if _, err := db.CreatePoll(pollID, postID, req.Msg); err != nil {
+		if zpoll, err = db.CreatePoll(user.ID, pollID, postID, feed.ID, post, req.Msg); err != nil {
 			return err
 		}
 		return nil
@@ -82,7 +77,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, err
 	}
 
-	return connect.NewResponse(&zenaov1.CreatePollResponse{PostId: zpost.ID}), nil
+	return connect.NewResponse(&zenaov1.CreatePollResponse{PostId: zpoll.PostID}), nil
 
 }
 

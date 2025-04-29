@@ -44,10 +44,6 @@ describe("main", () => {
     });
   });
 
-  /*
-
-  XXX: participate tests are disabled until we merge the ticket logic
-
   it("participate without login", () => {
     // start from the index page
     cy.visit("/");
@@ -101,8 +97,6 @@ describe("main", () => {
     cy.visit("/tickets");
     cy.get('a[href^="/event/"]').should("be.visible");
   });
-
-  */
 
   it("navigate to manifesto from home", () => {
     // start from the index page

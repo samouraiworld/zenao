@@ -1,4 +1,4 @@
-h1:ELzsIQqq5cyEnbAkMk4A3kpi4lrxIoltt/AT6K0Rv24=
+h1:M46kNVgEgzYbTQnS+hBoJVqaWNp8YnoG6QbVEZiwbIM=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
@@ -8,3 +8,4 @@ h1:ELzsIQqq5cyEnbAkMk4A3kpi4lrxIoltt/AT6K0Rv24=
 20250424210120_reactions.sql h1:UrXu/A0VUaoj8oRBnb7KyosDhgHhlmvcLDFj+nFlafI=
 20250424210121_broadcast.sql h1:mSLDk72DTBrtvr6upGgu1j8rpoMhSKqzxseE7Cj41BM=
 20250424210122_freemium.sql h1:5C0HNZQtc7y/lqzhrWnkTxyZQXPYE+SmABPTnmsCnFc=
+20250424214412_buyer-id.sql h1:25cF1dh93b21heH4RqR5GLg45nJ4DW9tZjUVY3djgaM=

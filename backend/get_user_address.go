@@ -23,7 +23,7 @@ func (s *ZenaoServer) GetUserAddress(
 		return nil, err
 	}
 
-	s.Logger.Info("get-user-address", zap.String("user-id", string(zUser.ID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("get-user-address", zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")

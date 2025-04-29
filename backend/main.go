@@ -40,6 +40,7 @@ func main() {
 		newPromoteUserCmd(),
 		newRealmsrcCmd(),
 		newE2EInfraCmd(),
+		newGenticketCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])

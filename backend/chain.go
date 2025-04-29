@@ -265,7 +265,7 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 }
 
 // Participate implements ZenaoChain.
-func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string) error {
+func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string) error {
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
@@ -293,11 +293,11 @@ func main() {
 		Title: %q,
 		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
 			Title: "Add participant",
-			Message: events.NewAddParticipantMsg(%q),
+			Message: events.NewAddParticipantMsg(%q, %q),
 		}),
 	})
 }
-`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr)}},
+`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey)}},
 		},
 	}))
 	if err != nil {
@@ -553,8 +553,8 @@ func NewPoll() {
 	options := []string{%s}
 	kind := pollsv1.PollKind(%d)
 	p := polls.NewPoll(question, kind, %d, options, event.IsMember)
-	uri := ufmt.Sprintf("/poll/%%s/gno/gno.land/r/zenao/polls", p.ID.String())
-	std.Emit(%q, "pollID", p.ID.String())
+	uri := ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID))
+	std.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
 
 	feedID := %q
 	post := &feedsv1.Post{
