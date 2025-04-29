@@ -8,7 +8,7 @@ import { Calendar, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Event, WithContext } from "schema-dts";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { SignedIn, useAuth } from "@clerk/nextjs";
 import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
@@ -212,6 +212,11 @@ export function EventInfo({ id }: { id: string }) {
                 <Heading level={2} size="xl">
                   {t("in")}
                 </Heading>
+                <SignedIn>
+                  <Link href={`/ticket/${id}`} className="text-main underline">
+                    {t("see-ticket")}
+                  </Link>
+                </SignedIn>
                 {/* TODO: create a clean decount timer */}
                 {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>

@@ -5,6 +5,7 @@ import { useQRCode } from "next-qrcode";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AspectRatio } from "../shadcn/aspect-ratio";
 import { Web3Image } from "../images/web3-image";
 import Heading from "../texts/heading";
@@ -25,6 +26,7 @@ export function TicketCard({
   timezone,
   ticketSecret,
 }: TicketCardProps) {
+  const t = useTranslations("tickets");
   const { Canvas: QRCode } = useQRCode();
 
   const x = useMotionValue(0);
@@ -80,7 +82,7 @@ export function TicketCard({
             </div>
           </div>
           <Link href={`/event/${eventId}`} className="text-main underline">
-            See event details
+            {t("see-event-details")}
           </Link>
 
           <div className="flex flex-col grow items-center justify-center">
