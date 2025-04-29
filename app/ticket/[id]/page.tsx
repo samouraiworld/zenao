@@ -8,9 +8,9 @@ import {
 import { getQueryClient } from "@/lib/get-query-client";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
-import { profileOptions } from "@/lib/queries/profile";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { imageWidth, imageHeight } from "@/app/event/[id]/constants";
+import { eventTickets } from "@/lib/queries/ticket";
 
 export async function generateStaticParams() {
   return [];
@@ -48,8 +48,6 @@ export default async function TicketsPage({ params }: PageProps) {
     notFound();
   }
 
-  queryClient.prefetchQuery(profileOptions(eventData.creator));
-
   // Check if user is a participant
   const roles = await queryClient.fetchQuery(eventUserRoles(id, address));
 
@@ -58,7 +56,7 @@ export default async function TicketsPage({ params }: PageProps) {
     notFound();
   }
 
-  // TODO prefetch ticket info
+  queryClient.prefetchQuery(eventTickets(id, getToken));
 
   return (
     <ScreenContainer
