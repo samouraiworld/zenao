@@ -8,6 +8,7 @@ import Heading from "@/components/texts/heading";
 import { eventsByCreatorList } from "@/lib/queries/events-list";
 import { EventCard } from "@/components/cards/event-card";
 import { Separator } from "@/components/shadcn/separator";
+import { idFromPkgPath } from "@/lib/queries/event";
 
 export function ProfileInfo({
   address,
@@ -61,7 +62,11 @@ export function ProfileInfo({
 
       <div className="flex flex-col gap-0">
         {upcomingEvents.map((evt) => (
-          <EventCard key={evt.pkgPath} evt={evt} />
+          <EventCard
+            href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+            key={evt.pkgPath}
+            evt={evt}
+          />
         ))}
       </div>
 
@@ -71,7 +76,11 @@ export function ProfileInfo({
 
       <div className="flex flex-col gap-0">
         {pastEvents.map((evt) => (
-          <EventCard key={evt.pkgPath} evt={evt} />
+          <EventCard
+            href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+            key={evt.pkgPath}
+            evt={evt}
+          />
         ))}
       </div>
     </div>
