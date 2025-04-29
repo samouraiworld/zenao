@@ -33,6 +33,12 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
   const location = makeLocationFromEvent(event.location);
   const timezone = useLocationTimezone(location);
 
+  if (tickets.ticketsSecrets.length === 0) {
+    <div>
+      <p>No tickets available for this event</p>
+    </div>;
+  }
+
   if (isDesktop) {
     return (
       <div className="max-md:hidden flex flex-col gap-6 pb-12">
