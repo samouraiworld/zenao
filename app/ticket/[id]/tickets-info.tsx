@@ -2,7 +2,6 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { eventOptions } from "@/lib/queries/event";
 import { userAddressOptions } from "@/lib/queries/user";
 import { makeLocationFromEvent } from "@/lib/location";
@@ -30,10 +29,6 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
   );
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data: tickets } = useSuspenseQuery(eventTickets(id, getToken));
-
-  useEffect(() => {
-    tickets.ticketsSecrets.push("Another one");
-  }, [tickets]);
 
   const location = makeLocationFromEvent(event.location);
   const timezone = useLocationTimezone(location);
