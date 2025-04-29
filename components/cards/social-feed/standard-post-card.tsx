@@ -2,9 +2,9 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
-import Text from "@/components/texts/text";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
+import { MarkdownPreview } from "@/components/common/markdown-preview/markdown-preview";
 
 export function StandardPostCard({
   eventId,
@@ -21,9 +21,7 @@ export function StandardPostCard({
 
   return (
     <PostCardLayout eventId={eventId} post={post} createdBy={createdBy}>
-      <div className="w-full flex flex-col gap-2">
-        <Text>{standardPost.content}</Text>
-      </div>
+      <MarkdownPreview markdownString={standardPost.content} />
     </PostCardLayout>
   );
 }
