@@ -30,7 +30,7 @@ export function DiscoverEventsList({
           <EventCard
             key={evt.pkgPath}
             evt={evt}
-            href={`/ticket/${idFromPkgPath(evt.pkgPath)}`}
+            href={`/event/${idFromPkgPath(evt.pkgPath)}`}
           />
         ))
       )}

@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
-import { TicketInfo } from "./ticket-info";
+import { TicketsInfo } from "./tickets-info";
 import {
   ScreenContainer,
   ScreenContainerCentered,
@@ -68,7 +68,7 @@ export default async function TicketsPage({ params }: PageProps) {
         height: imageHeight,
       }}
     >
-      <TicketInfo id={id} />
+      <TicketsInfo id={id} />
     </ScreenContainer>
   );
 }

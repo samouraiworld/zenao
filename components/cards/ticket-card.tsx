@@ -1,39 +1,30 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import { useQRCode } from "next-qrcode";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
-import { useMotionValue, useTransform, motion } from "framer-motion";
 import Link from "next/link";
-import { getQueryClient } from "@/lib/get-query-client";
-import { eventOptions } from "@/lib/queries/event";
-import { userAddressOptions } from "@/lib/queries/user";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Web3Image } from "@/components/images/web3-image";
-import Heading from "@/components/texts/heading";
-import Text from "@/components/texts/text";
-import { makeLocationFromEvent } from "@/lib/location";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { AspectRatio } from "../shadcn/aspect-ratio";
+import { Web3Image } from "../images/web3-image";
+import Heading from "../texts/heading";
+import Text from "../texts/text";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { cn } from "@/lib/tailwind";
 
-type TicketInfoProps = {
-  id: string;
+type TicketCardProps = {
+  eventId: string;
+  event: EventInfo;
+  timezone: string;
+  ticketSecret: string;
 };
 
-export function TicketInfo({ id }: TicketInfoProps) {
-  const _queryClient = getQueryClient();
-  const { getToken, userId } = useAuth();
-  const { data: eventInfo } = useSuspenseQuery(eventOptions(id));
-  const { data: _address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
-  // TODO add fetch ticket info
-
-  const location = makeLocationFromEvent(eventInfo.location);
-  const timezone = useLocationTimezone(location);
-
+export function TicketCard({
+  eventId,
+  event,
+  timezone,
+  ticketSecret,
+}: TicketCardProps) {
   const { Canvas: QRCode } = useQRCode();
 
   const x = useMotionValue(0);
@@ -49,13 +40,13 @@ export function TicketInfo({ id }: TicketInfoProps) {
         dragElastic={0.18}
         dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
         className={cn(
-          "max-w-[450px] md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded-xl shadow-lg",
+          "md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded-xl shadow-lg",
         )}
       >
         <div className="w-full md:max-w-[350px]">
           <AspectRatio ratio={1 / 1}>
             <Web3Image
-              src={eventInfo.imageUri}
+              src={event.imageUri}
               sizes="(max-width: 768px) 100vw,
             (max-width: 1200px) 50vw,
             33vw"
@@ -68,38 +59,38 @@ export function TicketInfo({ id }: TicketInfoProps) {
         </div>
         <div className="flex grow flex-col gap-4 px-4 py-4 max-sm:items-center">
           <Heading level={2} size="xl" className="text-black">
-            {eventInfo.title}
+            {event.title}
           </Heading>
           <div className="flex flex-row gap-2 max-sm:items-center">
             <div className="flex flex-col max-sm:items-center">
               <Heading level={3} variant="secondary">
-                {format(fromUnixTime(Number(eventInfo.startDate)), "PPP")}
+                {format(fromUnixTime(Number(event.startDate)), "PPP")}
               </Heading>
               <div className="flex flex-row text-sm gap-1">
                 <Text variant="secondary">
-                  {format(fromUnixTime(Number(eventInfo.startDate)), "p")}
+                  {format(fromUnixTime(Number(event.startDate)), "p")}
                 </Text>
                 <Text variant="secondary">-</Text>
                 <Text variant="secondary">
-                  {formatTZ(fromUnixTime(Number(eventInfo.endDate)), "PPp O", {
+                  {formatTZ(fromUnixTime(Number(event.endDate)), "PPp O", {
                     timeZone: timezone,
                   })}
                 </Text>
               </div>
             </div>
           </div>
-          <Link href={`/event/${id}`} className="text-main underline">
+          <Link href={`/event/${eventId}`} className="text-main underline">
             See event details
           </Link>
 
           <div className="flex flex-col grow items-center justify-center">
             <QRCode
-              text="https://github.com/Bunlong/next-qrcode"
+              text={ticketSecret}
               options={{
                 errorCorrectionLevel: "M",
                 margin: 2,
                 scale: 5,
-                width: 150,
+                width: 125,
                 color: {
                   dark: "#000005",
                   light: "#ffffff",
