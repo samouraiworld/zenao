@@ -5,7 +5,7 @@ import { ArrowUp } from "lucide-react";
 import { Button } from "../shadcn/button";
 import { debounce } from "@/lib/debounce";
 
-const HEIGHT_THRESHOLD = 0.3;
+const HEIGHT_THRESHOLD = 0.15;
 
 export function GoTopButton() {
   const [showedOnce, setShowedOnce] = useState(false);
