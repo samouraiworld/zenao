@@ -359,7 +359,10 @@ func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*z
 	}
 
 	tickets := []*SoldTicket{}
-	g.db.Find(&tickets).Where("event_id = ? AND buyer_id = ?", eventID, buyerIDint)
+	err = g.db.Find(&tickets, "event_id = ? AND buyer_id = ?", eventID, buyerIDint).Error
+	if err != nil {
+		return nil, err
+	}
 
 	res := make([]*zeni.Ticket, len(tickets))
 	for i, ticket := range tickets {

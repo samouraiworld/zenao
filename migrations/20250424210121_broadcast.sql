@@ -1,4 +1,5 @@
 -- Disable the enforcement of foreign-keys constraints
+PRAGMA defer_foreign_keys = on;
 PRAGMA foreign_keys = off;
 -- Create "new_users" table
 CREATE TABLE `new_users` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `auth_id` text NULL, `display_name` text NULL, `bio` text NULL, `avatar_uri` text NULL);
@@ -24,3 +25,4 @@ ALTER TABLE `new_user_roles` RENAME TO `user_roles`;
 CREATE INDEX `idx_user_roles_deleted_at` ON `user_roles` (`deleted_at`);
 -- Enable back the enforcement of foreign-keys constraints
 PRAGMA foreign_keys = on;
+PRAGMA defer_foreign_keys=off;
