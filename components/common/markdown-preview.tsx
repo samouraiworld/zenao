@@ -17,7 +17,10 @@ export function MarkdownPreview({
   return (
     <ReactMarkdown
       // `prose` className came from @tailwindcss/typography (a plugin that add beautiful typographic defaults to any vanilla HTML you don’t control, like HTML rendered from Markdown)
-      className={cn("prose dark:prose-invert", className)}
+      className={cn(
+        "[&_*]:my-0 flex flex-col gap-2 prose dark:prose-invert",
+        className,
+      )}
       remarkPlugins={[
         // superscript and subscript support
         supersub,
