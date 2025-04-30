@@ -101,7 +101,11 @@ export const standardPostFormSchema = z.object({
 export type StandardPostFormSchemaType = z.infer<typeof standardPostFormSchema>;
 
 const pollOptionFormSchema = z.object({
-  text: z.string().trim().min(1, "Required").max(55),
+  text: z
+    .string()
+    .trim()
+    .min(1, "Required")
+    .max(32, "Option must be at most 32 characters long"),
 });
 
 const pollDurationFormSchema = z.object({
