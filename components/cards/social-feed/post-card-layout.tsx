@@ -36,7 +36,7 @@ export function PostCardLayout({
   eventId: string;
   createdBy: GnoProfile | null;
   children: ReactNode;
-  gnowebHref: Url;
+  gnowebHref?: Url;
 }) {
   if (!post.post) {
     return null;
@@ -91,7 +91,7 @@ export function PostCardLayout({
               </Text>
             </div>
           )}
-          <PostMenu gnowebHref={gnowebHref} />
+          {gnowebHref && <PostMenu gnowebHref={gnowebHref} />}
         </div>
       </div>
 
