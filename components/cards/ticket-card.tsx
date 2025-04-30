@@ -56,7 +56,7 @@ export function TicketCard({
               fill
               alt="Event"
               priority
-              className="flex w-full rounded-xl self-center object-cover pointer-events-none"
+              className="flex w-full max-sm:rounded-tl rounded-tl max-sm:rounded-tr rounded-bl self-center object-cover pointer-events-none"
             />
           </AspectRatio>
         </div>
