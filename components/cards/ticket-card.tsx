@@ -42,7 +42,9 @@ export function TicketCard({
         dragElastic={0.08}
         dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
         className={cn(
-          "max-w-96 md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded-xl shadow-lg",
+          "max-w-96 md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded shadow-lg",
+          "max-sm:rounded-tl rounded-tl max-sm:rounded-tr rounded-tr",
+          "cursor-grab",
         )}
         whileHover={{ rotateX: -5, rotateY: 5 }}
       >
@@ -56,7 +58,7 @@ export function TicketCard({
               fill
               alt="Event"
               priority
-              className="flex w-full max-sm:rounded-tl rounded-tl max-sm:rounded-tr rounded-bl self-center object-cover pointer-events-none"
+              className="flex w-full max-sm:rounded-tl rounded-tl max-md:rounded-tr md:rounded-bl self-center object-cover pointer-events-none"
             />
           </AspectRatio>
         </div>
