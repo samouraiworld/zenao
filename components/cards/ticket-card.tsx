@@ -44,6 +44,7 @@ export function TicketCard({
         className={cn(
           "md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded-xl shadow-lg",
         )}
+        whileHover={{ rotateX: -2, rotateY: 2 }}
       >
         <div className="w-full md:max-w-[350px]">
           <AspectRatio ratio={1 / 1}>
