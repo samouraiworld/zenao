@@ -42,7 +42,7 @@ export function TicketCard({
         dragElastic={0.18}
         dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
         className={cn(
-          "md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded-xl shadow-lg",
+          "max-w-96 md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded-xl shadow-lg",
         )}
         whileHover={{ rotateX: -5, rotateY: 5 }}
       >
