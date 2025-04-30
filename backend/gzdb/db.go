@@ -609,6 +609,7 @@ func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, fe
 		ParentURI: post.ParentUri,
 		UserID:    uint(userIDInt),
 		FeedID:    uint(feedIDInt),
+		Kind:      PostTypeLink,
 		URI:       linkPost.Link.Uri,
 		Tags: []Tag{{
 			PostID: uint(postIDInt),
