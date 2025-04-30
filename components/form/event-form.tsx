@@ -10,7 +10,7 @@ import {
 } from "date-fns";
 import { Card } from "../cards/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
-import { MarkdownPreview } from "../common/MarkdownPreview";
+import { MarkdownPreview } from "../common/markdown-preview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";

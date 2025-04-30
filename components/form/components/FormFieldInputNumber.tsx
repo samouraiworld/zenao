@@ -18,18 +18,25 @@ export const FormFieldInputNumber = <T extends FieldValues>({
   className,
   placeholder,
   label,
-}: FormFieldProps<T, number> & { label?: string }) => {
+  min,
+  max,
+}: FormFieldProps<T, number> & {
+  label?: string;
+  min?: number;
+  max?: number;
+}) => {
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem>
+        <FormItem className="w-full">
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <Input
               type="number"
-              min={0}
+              min={min}
+              max={max}
               className={cn("peer", className)}
               placeholder={placeholder}
               {...field}

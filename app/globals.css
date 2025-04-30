@@ -73,6 +73,7 @@ body {
 
     /* Custom input variables */
     --input-bg: 41, 35, 35, 1;
+    --epr-emoji-gap: 1px;
   }
 }
 
