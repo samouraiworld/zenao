@@ -33,7 +33,6 @@ export function PostsList({
   userAddress: string | null;
 }) {
   const t = useTranslations("event-feed");
-
   // Event's social feed posts
   const {
     data: postsPages,
