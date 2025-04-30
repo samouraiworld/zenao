@@ -30,48 +30,49 @@ func init() {
 		{Name: "Accountability", Description: "Handles company finances and payrolls. Has treasury access and proposes payments, which must be validated by team leaders. Ensures accurate year-end revenue reports and distribution planning."},
 	}
 
+	// replaces by addr
 	initialMembers := []basedao.Member{
 		// Zooma
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"CEO", "Stakeholder", "Tech Team Leader"}},
+		{Address: "Zooma", Roles: []string{"CEO", "Stakeholder", "Tech Team Leader"}},
 		// Yohann
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Stakeholder", "Media Team Leader"}},
+		{Address: "Yohann", Roles: []string{"Stakeholder", "Media Team Leader"}},
 		// Fanny
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Stakeholder", "Media Team Member"}},
+		{Address: "Fanny", Roles: []string{"Stakeholder", "Media Team Member"}},
 		// Menard
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Stakeholder", "Media Team Member"}},
+		{Address: "Menard", Roles: []string{"Stakeholder", "Media Team Member"}},
 		// Norman
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Core Tech Infra", "Tech Team Member"}},
+		{Address: "Norman", Roles: []string{"Freelance", "Core Tech Infra", "Tech Team Member"}},
 		// Ghost
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Core Tech Infra", "Tech Team Member"}},
+		{Address: "Ghost", Roles: []string{"Freelance", "Core Tech Infra", "Tech Team Member"}},
 		// Mikecito
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Core Tech Infra", "Tech Team Member"}},
+		{Address: "Mikecito", Roles: []string{"Freelance", "Core Tech Infra", "Tech Team Member"}},
 		// Mikael
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Core Tech Infra", "Tech Team Member"}},
+		{Address: "Mikael", Roles: []string{"Freelance", "Core Tech Infra", "Tech Team Member"}},
 		// Dadidou
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Tech Team Member"}},
+		{Address: "Dadidou", Roles: []string{"Freelance", "Tech Team Member"}},
 		// Yo1110
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Tech Team Member"}},
+		{Address: "Yo1110", Roles: []string{"Freelance", "Tech Team Member"}},
 		// Sakul
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Tech Team Member"}},
+		{Address: "Sakul", Roles: []string{"Freelance", "Tech Team Member"}},
 		// Yang
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Accountability"}},
+		{Address: "Yang", Roles: []string{"Freelance", "Accountability"}},
 		// Oriane
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Media Team Member"}},
+		{Address: "Oriane", Roles: []string{"Freelance", "Media Team Member"}},
 		// Felix
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Media Team Member"}},
+		{Address: "Felix", Roles: []string{"Freelance", "Media Team Member"}},
 		// Thomas
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Media Team Member"}},
+		{Address: "Thomas", Roles: []string{"Freelance", "Media Team Member"}},
 		// Mathias
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Freelance", "Media Team Member"}},
+		{Address: "Mathias", Roles: []string{"Freelance", "Media Team Member"}},
 		// Mio-san
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Newcomer Freelance", "Tech Team Member"}},
+		{Address: "Mio-san", Roles: []string{"Newcomer Freelance", "Tech Team Member"}},
 		// L'ours
-		{Address: "g126gx6p6d3da4ymef35ury6874j6kys044r7zlg", Roles: []string{"Newcomer Freelance", "Tech Team Member"}},
+		{Address: "L'ours", Roles: []string{"Newcomer Freelance", "Tech Team Member"}},
 	}
 
 	DAO, daoPrivate = basedao.New(&basedao.Config{
-		Name:             "Demo DAO",
-		Description:      "This is a demo DAO",
+		Name:             "Samouraï Coop",
+		Description:      "This is the DAO of Samouraï Coop",
 		Members:          basedao.NewMembersStore(initialRoles, initialMembers),
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
