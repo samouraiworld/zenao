@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 import supersub from "remark-supersub";
 import remarkHtml from "remark-html";
 import { cn } from "@/lib/tailwind";
-import "./style.css";
+// import "./style.css";
 
 export function MarkdownPreview({
   markdownString,
@@ -19,7 +19,7 @@ export function MarkdownPreview({
     <ReactMarkdown
       // `prose` className came from @tailwindcss/typography (a plugin that add beautiful typographic defaults to any vanilla HTML you don’t control, like HTML rendered from Markdown)
       className={cn(
-        "markdown-preview prose dark:prose-invert flex flex-col gap-2",
+        "[&_*]:my-0 flex flex-col gap-2 prose dark:prose-invert",
         className,
       )}
       remarkPlugins={[

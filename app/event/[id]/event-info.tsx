@@ -13,7 +13,7 @@ import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
-import { MarkdownPreview } from "@/components/common/markdown-preview/markdown-preview";
+import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import MapCaller from "@/components/common/map/map-lazy-components";
 import { userAddressOptions } from "@/lib/queries/user";

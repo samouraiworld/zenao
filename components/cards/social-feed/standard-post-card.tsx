@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
-import { MarkdownPreview } from "@/components/common/markdown-preview/markdown-preview";
+import { MarkdownPreview } from "@/components/common/markdown-preview";
 
 export function StandardPostCard({
   eventId,
