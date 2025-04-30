@@ -42,7 +42,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function EventPage({ params }: Props) {
   // NOTE: we don't prefetch everything because using `auth()` breaks static generation
-
   const p = await params;
   const queryClient = getQueryClient();
 

@@ -19,6 +19,8 @@ Don’t miss out—RSVP now and bring your testing A-game! 🐞🎉`;
 const testEventLocation = "123 Test Lane, Suite 404, Bugville, QA 98765";
 const testEventCapacity = "42";
 
+const testStandardPost = "Post to test";
+
 const login = () => {
   cy.clerkSignIn({ strategy: "email_code", identifier: testEmail });
   cy.wait(1000);
@@ -176,61 +178,7 @@ describe("main", () => {
   });
 
   it("create an event", () => {
-    // start from the home
-    cy.visit("/");
-
-    // click on home create button
-    cy.get("button").contains("Create").click();
-
-    login();
-
-    // fill event info
-    cy.get("input[type=file]").selectFile(
-      "cypress/fixtures/bug-bash-bonanza.webp",
-      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
-    );
-    cy.get('textarea[placeholder="Event name..."]').type(testEventName);
-    cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
-      delay: 1,
-    });
-
-    // custom location
-    cy.get("button").contains("Add an address...").click();
-    cy.get('input[placeholder="Location..."]').type(testEventLocation);
-    cy.get("p").contains(`Use ${testEventLocation}`).trigger("click");
-
-    cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
-
-    // choose dates in the start of next month
-    cy.get("button").contains("Pick a start date...").click();
-    cy.get('button[aria-label="Choose the Month"').click();
-
-    cy.get('div[role="option"]').contains("April").click();
-
-    const year = new Date().getFullYear() + 1;
-
-    cy.get('button[aria-label="Choose the Year"').click();
-    cy.get('div[role="option"]').contains(`${year}`).click();
-    cy.get('table[role="grid"]').find("button").contains("13").click();
-
-    cy.wait(1000);
-
-    cy.get('button[aria-label="Pick date"]').eq(1).click();
-    cy.get('button[aria-label="Choose the Month"').click();
-    cy.get('div[role="option"]').contains("April").click();
-
-    cy.get('button[aria-label="Choose the Year"').click();
-    cy.get('div[role="option"]').contains(`${year}`).click();
-    cy.wait(500); // wait for start date calendar to disapear so there is only one "Choose the Month" button present
-
-    cy.get('table[role="grid"]').find("button").contains("14").click();
-
-    cy.get("button").contains("Create event").click();
-
-    cy.url().should("include", "/event/");
-    cy.url().should("not.include", "/create");
-
-    toastShouldContain("Event created!");
+    cy.createEvent();
 
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
@@ -260,10 +208,165 @@ describe("main", () => {
     cy.get('a[href^="/event/"]').contains(testEventName).should("be.visible");
   });
 
+  it("send feed standard post", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    // EventFeedForm should not exist
+    cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
+      "not.exist",
+    );
+
+    cy.createEvent();
+
+    // Participate to an event
+    cy.get("button").contains("Participate").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
+
+    // EventFeedForm should exist
+    cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
+      .should("exist")
+      .type(testStandardPost, { delay: 1 });
+
+    // Submit post
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Check post exists
+    cy.get("p").contains(testStandardPost).should("be.visible");
+  });
+
+  it("send feed poll post", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    // EventFeedForm should not exist
+    cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
+      "not.exist",
+    );
+
+    cy.createEvent();
+
+    // Participate to an event
+    cy.get("button").contains("Participate").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
+
+    // Channge type of post
+    cy.get('button[aria-label="set type post"]').click();
+
+    // Enter question
+    cy.get(
+      `textarea[placeholder="What do you wanna ask to the community ?"]`,
+    ).type(testStandardPost, { delay: 1 });
+
+    // Enter answers
+    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
+    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 1 });
+
+    // Add another answer
+    cy.get("p").contains("Add another answer").click();
+
+    // Check if delete answer button is displayed
+    cy.get(".lucide-trash2").should("have.length", 3);
+
+    // Add last answer
+    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 1 });
+
+    // Submit poll
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Views polls
+    cy.get("button").contains("Polls").click();
+
+    cy.get("p").contains(testStandardPost).should("be.visible");
+    cy.get("p").contains("Answer 1").should("be.visible");
+    cy.get("p").contains("Answer 2").should("be.visible");
+    cy.get("p").contains("Answer 3").should("be.visible");
+
+    // Select one answer
+    cy.get("p").contains("Answer 3").click();
+
+    toastShouldContain("Vote submitted !");
+
+    // Add reaction to post
+    cy.get(".reaction-btn").click();
+    // Select emoji
+    cy.get('img[alt="grinning"]').first().click();
+  });
+
   it("event not found", () => {
     // Visit a non existing event page
     cy.visit("/event/50", { failOnStatusCode: false });
 
     cy.get("p").contains("Event doesn't exist").should("be.visible");
   });
+});
+
+Cypress.Commands.add("createEvent", () => {
+  // start from the home
+  cy.visit("/");
+
+  // click on home create button
+  cy.get("button").contains("Create").click();
+
+  login();
+
+  // fill event info
+  cy.get("input[type=file]").selectFile(
+    "cypress/fixtures/bug-bash-bonanza.webp",
+    { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
+  );
+  cy.get('textarea[placeholder="Event name..."]').type(testEventName);
+  cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
+    delay: 1,
+  });
+
+  // custom location
+  cy.get("button").contains("Add an address...").click();
+  cy.get('input[placeholder="Location..."]').type(testEventLocation);
+  cy.get("p").contains(`Use ${testEventLocation}`).trigger("click");
+
+  cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
+
+  // choose dates in the start of next month
+  cy.get("button").contains("Pick a start date...").click();
+  cy.get('button[aria-label="Choose the Month"').click();
+
+  cy.get('div[role="option"]').contains("April").click();
+
+  const year = new Date().getFullYear() + 1;
+
+  cy.get('button[aria-label="Choose the Year"').click();
+  cy.get('div[role="option"]').contains(`${year}`).click();
+  cy.get('table[role="grid"]').find("button").contains("13").click();
+
+  cy.wait(1000);
+
+  cy.get('button[aria-label="Pick date"]').eq(1).click();
+  cy.get('button[aria-label="Choose the Month"').click();
+  cy.get('div[role="option"]').contains("April").click();
+
+  cy.get('button[aria-label="Choose the Year"').click();
+  cy.get('div[role="option"]').contains(`${year}`).click();
+  cy.wait(500); // wait for start date calendar to disapear so there is only one "Choose the Month" button present
+
+  cy.get('table[role="grid"]').find("button").contains("14").click();
+
+  cy.get("button").contains("Create event").click();
+
+  cy.url().should("include", "/event/");
+  cy.url().should("not.include", "/create");
+
+  toastShouldContain("Event created!");
 });
