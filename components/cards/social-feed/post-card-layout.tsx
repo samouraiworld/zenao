@@ -152,11 +152,11 @@ function Reactions({
 
   // TODO: Handle display if a lot of different icons
   return (
-    <div className="flex flex-row gap-0.5 w-full">
+    <div className="flex flex-row gap-1 w-full">
       {(isOrganizer || isParticipant) && (
         <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
           <PopoverTrigger asChild>
-            <div className="reaction-btn flex flex-row items-center py-0.5 border-[1px] border-neutral-700 px-1 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700">
+            <div className="reaction-btn flex flex-row items-center justify-center border-[1px] border-neutral-700 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700 h-8 w-8">
               <Plus size={16} color="hsl(var(--secondary-color))" />
             </div>
           </PopoverTrigger>
@@ -173,7 +173,7 @@ function Reactions({
         </Popover>
       )}
 
-      <div className="flex flex-row gap-0.5 grow overflow-auto">
+      <div className="flex flex-row gap-1 grow overflow-auto">
         {reactions
           .sort((a, b) => b.count - a.count)
           .map((reaction) => (
@@ -184,7 +184,7 @@ function Reactions({
                   onReactionChange(reaction.icon);
               }}
               className={cn(
-                "flex flex-row items-center py-0.5 pl-1 pr-2 rounded-full gap-0.5 cursor-default",
+                "flex flex-row items-center h-8 px-2 rounded-full gap-1 cursor-default",
                 reaction.userHasVoted && "border-[1px] border-neutral-700",
                 (isOrganizer || isParticipant) &&
                   "hover:bg-neutral-700 cursor-pointer",
