@@ -39,31 +39,31 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		}
 	}
 
+	roles, err := s.DB.UserRoles(zUser.ID, req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return nil, errors.New("user is not a member of the event")
+	}
+
+	post := &feedsv1.Post{
+		Loc:  nil,
+		Tags: req.Msg.Tags,
+		Post: &feedsv1.Post_Standard{
+			Standard: &feedsv1.StandardPost{
+				Content: req.Msg.Content,
+			},
+		},
+	}
+
+	postID, err := s.Chain.CreatePost(zUser.ID, req.Msg.EventId, post)
+	if err != nil {
+		return nil, err
+	}
+
 	zpost := (*zeni.Post)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if len(roles) == 0 {
-			return errors.New("user is not a member of the event")
-		}
-
-		post := &feedsv1.Post{
-			Loc:  nil,
-			Tags: req.Msg.Tags,
-			Post: &feedsv1.Post_Standard{
-				Standard: &feedsv1.StandardPost{
-					Content: req.Msg.Content,
-				},
-			},
-		}
-
-		postID, err := s.Chain.CreatePost(zUser.ID, req.Msg.EventId, post)
-		if err != nil {
-			return err
-		}
-
 		feed, err := db.GetFeed(req.Msg.EventId, "main")
 		if err != nil {
 			return err
