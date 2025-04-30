@@ -13,10 +13,6 @@ import { eventUserRoles } from "@/lib/queries/event-users";
 import { imageWidth, imageHeight } from "@/app/event/[id]/constants";
 import { eventTickets } from "@/lib/queries/ticket";
 
-export async function generateStaticParams() {
-  return [];
-}
-
 type PageProps = {
   params: Promise<{ id: string }>;
 };
