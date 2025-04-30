@@ -271,11 +271,7 @@ export function EventInfo({ id }: { id: string }) {
       </div>
 
       {/* Social Feed */}
-      <EventFeed
-        eventId={id}
-        isDescExpanded={isDescExpanded}
-        isMember={isParticipant || isOrganizer}
-      />
+      <EventFeed eventId={id} isMember={isParticipant || isOrganizer} />
       <GoTopButton />
     </div>
   );
