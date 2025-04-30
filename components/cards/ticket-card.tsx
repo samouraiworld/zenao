@@ -39,7 +39,7 @@ export function TicketCard({
       <motion.div
         style={{ x, y, rotateX, rotateY }}
         drag
-        dragElastic={0.18}
+        dragElastic={0.08}
         dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
         className={cn(
           "max-w-96 md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded-xl shadow-lg",
