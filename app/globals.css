@@ -85,3 +85,7 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.card-3d {
+  transform: perspective(1000px);
+}

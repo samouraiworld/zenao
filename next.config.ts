@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
         source: "/discover",
         destination: "/discover/upcoming",
       },
+      {
+        source: "/tickets",
+        destination: "/tickets/upcoming",
+      },
     ];
   },
 };

@@ -42,6 +42,7 @@ export default async function DiscoverPage({ params }: PageProps) {
           from={from}
           title={t("title")}
           description={t("description")}
+          tabLinks={{ upcoming: "/discover", past: "/discover/past" }}
         >
           <DiscoverEventsList from={from} now={now} />
         </EventsListLayout>
