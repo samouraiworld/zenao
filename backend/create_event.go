@@ -51,16 +51,16 @@ func (s *ZenaoServer) CreateEvent(
 		if _, err = db.CreateFeed(evt.ID, "main"); err != nil {
 			return err
 		}
-
-		if err := s.Chain.CreateEvent(evt.ID, zUser.ID, req.Msg); err != nil {
-			s.Logger.Error("create-event", zap.Error(err))
-			return err
-		}
-
 		return nil
 	}); err != nil {
 		return nil, err
 	}
+
+	if err := s.Chain.CreateEvent(evt.ID, zUser.ID, req.Msg); err != nil {
+		s.Logger.Error("create-event", zap.Error(err))
+		return nil, err
+	}
+
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
 
 	if s.MailClient != nil {

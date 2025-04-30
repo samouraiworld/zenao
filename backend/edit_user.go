@@ -35,12 +35,12 @@ func (s *ZenaoServer) EditUser(
 		if err := db.EditUser(zUser.ID, req.Msg); err != nil {
 			return err
 		}
-
-		if err := s.Chain.EditUser(zUser.ID, req.Msg); err != nil {
-			return err
-		}
 		return nil
 	}); err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.EditUser(zUser.ID, req.Msg); err != nil {
 		return nil, err
 	}
 

@@ -36,34 +36,33 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
+	roles, err := s.DB.UserRoles(zUser.ID, req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return nil, errors.New("user is not a member of the event")
+	}
+	pollID, postID, err := s.Chain.CreatePoll(zUser.ID, req.Msg)
+	if err != nil {
+		return nil, err
+	}
+
+	postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
+	if err != nil {
+		return nil, err
+	}
+
+	post := &feedsv1.Post{
+		Post: &feedsv1.Post_Link{
+			Link: &feedsv1.LinkPost{
+				Uri: postURI.String(),
+			},
+		},
+	}
+
 	zpoll := (*zeni.Poll)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if len(roles) == 0 {
-			return errors.New("user is not a member of the event")
-		}
-
-		pollID, postID, err := s.Chain.CreatePoll(zUser.ID, req.Msg)
-		if err != nil {
-			return err
-		}
-
-		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
-		if err != nil {
-			return err
-		}
-
-		post := &feedsv1.Post{
-			Post: &feedsv1.Post_Link{
-				Link: &feedsv1.LinkPost{
-					Uri: postURI.String(),
-				},
-			},
-		}
-
 		feed, err := db.GetFeed(req.Msg.EventId, "main")
 		if err != nil {
 			return err

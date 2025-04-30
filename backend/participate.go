@@ -60,13 +60,13 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Pubkey()); err != nil {
-			// XXX: handle case where tx is broadcasted but we have an error afterwards, eg: chain has been updated but db rollbacked
-			return err
-		}
-
 		return nil
 	}); err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Pubkey()); err != nil {
+		// XXX: handle case where db tx pass but chain fail
 		return nil, err
 	}
 
