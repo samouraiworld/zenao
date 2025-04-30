@@ -7,12 +7,8 @@ import { format, fromUnixTime } from "date-fns";
 import { Calendar, ChevronDown, ChevronUp, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-<<<<<<< HEAD
 import { SignedIn, useAuth } from "@clerk/nextjs";
-=======
-import { useAuth } from "@clerk/nextjs";
 import { Event, WithContext } from "schema-dts";
->>>>>>> origin/main
 import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
@@ -210,25 +206,6 @@ export function EventInfo({ id }: { id: string }) {
             )}
           </div>
 
-<<<<<<< HEAD
-        {/* Participate Card */}
-        <Card className="mt-2">
-          {isParticipant ? (
-            <div>
-              <div className="flex flex-row justify-between">
-                <Heading level={2} size="xl">
-                  {t("in")}
-                </Heading>
-                <SignedIn>
-                  <Link href={`/ticket/${id}`} className="text-main underline">
-                    {t("see-ticket")}
-                  </Link>
-                </SignedIn>
-                {/* TODO: create a clean decount timer */}
-                {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
-              </div>
-              {/* add back when we can cancel
-=======
           {/* Participate Card */}
           <Card className="mt-2">
             {isParticipant ? (
@@ -237,11 +214,18 @@ export function EventInfo({ id }: { id: string }) {
                   <Heading level={2} size="xl">
                     {t("in")}
                   </Heading>
+                  <SignedIn>
+                    <Link
+                      href={`/ticket/${id}`}
+                      className="text-main underline"
+                    >
+                      {t("see-ticket")}
+                    </Link>
+                  </SignedIn>
                   {/* TODO: create a clean decount timer */}
                   {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
                 </div>
                 {/* add back when we can cancel
->>>>>>> origin/main
                 <Text className="my-4">{t("cancel-desc")}</Text>
               */}
               </div>
