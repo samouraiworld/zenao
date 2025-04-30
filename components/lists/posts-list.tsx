@@ -33,7 +33,6 @@ export function PostsList({
   userAddress: string | null;
 }) {
   const t = useTranslations("event-feed");
-
   // Event's social feed posts
   const {
     data: postsPages,
@@ -44,6 +43,7 @@ export function PostsList({
   } = useSuspenseInfiniteQuery(
     feedPosts(eventId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
   );
+
   const posts = useMemo(
     () =>
       postsPages.pages.flat().map<SocialFeedPost>((post) => {

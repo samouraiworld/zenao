@@ -20,7 +20,12 @@ export function StandardPostCard({
   const standardPost = post.post.post.value;
 
   return (
-    <PostCardLayout eventId={eventId} post={post} createdBy={createdBy}>
+    <PostCardLayout
+      eventId={eventId}
+      post={post}
+      createdBy={createdBy}
+      gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}`}
+    >
       <MarkdownPreview markdownString={standardPost.content} />
     </PostCardLayout>
   );

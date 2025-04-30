@@ -7,7 +7,7 @@ import {
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { GnowebButton } from "@/components/buttons/GnowebButton";
+import { GnowebButton } from "@/components/buttons/gnoweb-button";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import {
   Dialog,

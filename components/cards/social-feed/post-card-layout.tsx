@@ -1,11 +1,13 @@
 "use client";
 
+import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode, useMemo } from "react";
 import { Hash, MapPin, Plus } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import EmojiPicker, { Theme } from "emoji-picker-react";
+import { PostMenu } from "../menu/post-menu";
 import { Card } from "@/components/cards/Card";
 import { UserAvatar } from "@/components/common/user";
 import { PostView, ReactionView } from "@/app/gen/feeds/v1/feeds_pb";
@@ -27,12 +29,14 @@ export function PostCardLayout({
   post,
   eventId,
   createdBy,
+  gnowebHref,
   children,
 }: {
   post: PostView;
   eventId: string;
   createdBy: GnoProfile | null;
   children: ReactNode;
+  gnowebHref: Url;
 }) {
   if (!post.post) {
     return null;
@@ -87,6 +91,7 @@ export function PostCardLayout({
               </Text>
             </div>
           )}
+          <PostMenu gnowebHref={gnowebHref} />
         </div>
       </div>
 
