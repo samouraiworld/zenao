@@ -6,7 +6,6 @@ import ReactMarkdown from "react-markdown";
 import supersub from "remark-supersub";
 import remarkHtml from "remark-html";
 import { cn } from "@/lib/tailwind";
-// import "./style.css";
 
 export function MarkdownPreview({
   markdownString,
