@@ -33,7 +33,7 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 
 	evt := (*zeni.Event)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		evt, err := db.GetEventByPostID(req.Msg.PostId)
+		evt, err = db.GetEventByPostID(req.Msg.PostId)
 		if err != nil {
 			return err
 		}
