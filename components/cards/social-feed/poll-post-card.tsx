@@ -107,7 +107,7 @@ export function PollPostCard({
               pollResult={pollResult}
               totalVotesCount={totalVotesCount}
               disabled={
-                isPollEnded || isPending || !isOrganizer || !isParticipant
+                isPollEnded || isPending || (!isOrganizer && !isParticipant)
               }
               onCheckedChange={() => {
                 onVote(pollResult.option);
