@@ -31,8 +31,8 @@ export function TicketCard({
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-80, 80], [80, -80])
-  const rotateY = useTransform(x, [-80, 80], [-80, 80])
+  const rotateX = useTransform(y, [-80, 80], [25, -25]);
+  const rotateY = useTransform(x, [-80, 80], [-25, 25]);
 
   return (
     <div className="card-3d">
