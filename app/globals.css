@@ -86,5 +86,5 @@ body {
 }
 
 .card-3d {
-  perspective: 1000px;
+  transform: perspective(1000px);
 }
