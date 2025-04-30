@@ -78,7 +78,12 @@ export function PollPostCard({
   };
 
   return (
-    <PostCardLayout eventId={eventId} post={pollPost} createdBy={createdBy}>
+    <PostCardLayout
+      eventId={eventId}
+      post={pollPost}
+      createdBy={createdBy}
+      gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
+    >
       <div className="w-full flex flex-col gap-2">
         <div className="flex flex-row items-center gap-2">
           <Text className="text-sm">{`${totalVotesCount} votes`}</Text>
