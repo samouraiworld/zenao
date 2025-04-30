@@ -10,7 +10,7 @@ import {
 } from "date-fns";
 import { Card } from "../cards/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
-import { MarkdownPreview } from "../common/MarkdownPreview";
+import { MarkdownPreview } from "../common/markdown-preview";
 import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
@@ -21,7 +21,7 @@ import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { TimeZonesPopover } from "./components/TimeZonesPopover";
 import { FormFieldImage } from "./components/form-field-image";
 import { EventFormSchemaType } from "./types";
-import { FormFieldTextArea } from "./components/FormFieldTextArea";
+import { FormFieldTextArea } from "./components/form-field-textarea";
 import { FormFieldLocation } from "./components/form-field-location";
 import { FormFieldDatePicker } from "./components/form-field-date-picker";
 import { FormFieldSwitch } from "./components/form-field-switch";

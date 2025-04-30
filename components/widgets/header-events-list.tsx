@@ -1,5 +1,5 @@
 import Heading from "../texts/heading";
-import { GnowebButton } from "../buttons/GnowebButton";
+import { GnowebButton } from "../buttons/gnoweb-button";
 import Text from "../texts/text";
 import FromFilterTab from "./from-filter-tab";
 import { FromFilter } from "@/lib/searchParams";

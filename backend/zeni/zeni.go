@@ -1,8 +1,10 @@
 package zeni
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -11,6 +13,34 @@ import (
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
+
+type Plan string
+
+const (
+	FreePlan Plan = "free"
+	ProPlan  Plan = "pro"
+)
+
+// Implements the flag.Value interface (for CLI)
+func (p *Plan) String() string {
+	return string(*p)
+}
+
+// Implements the flag.Value interface (for CLI & enforcing the plan value)
+func (p *Plan) Set(value string) error {
+	value = strings.ToLower(value)
+	switch value {
+	case string(FreePlan), string(ProPlan):
+		*p = Plan(value)
+		return nil
+	default:
+		return fmt.Errorf("invalid plan: %s (must be free or pro)", value)
+	}
+}
+
+func (p Plan) IsValid() bool {
+	return p == FreePlan || p == ProPlan
+}
 
 type AuthUser struct {
 	ID     string
@@ -24,6 +54,7 @@ type User struct {
 	DisplayName string
 	Bio         string
 	AvatarURI   string
+	Plan        Plan
 }
 
 type Event struct {
@@ -108,21 +139,23 @@ func (e *Event) Timezone() (*time.Location, error) {
 type DB interface {
 	Tx(func(db DB) error) error
 
-	CreateUser(authID string) (string, error)
-	UserExists(authID string) (string, error)
+	CreateUser(authID string) (*User, error)
+	GetUser(authID string) (*User, error)
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	PromoteUser(userID string, plan Plan) error
 	UserRoles(userID string, eventID string) ([]string, error)
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) error
 	GetEvent(eventID string) (*Event, error)
-	Participate(eventID string, userID string) error
+	Participate(eventID string, userID string, ticketSecret string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
 	GetAllParticipants(eventID string) ([]*User, error)
+	GetEventBuyerTickets(eventID string, buyerID string) ([]*Ticket, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
@@ -130,7 +163,7 @@ type DB interface {
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
 	GetAllPosts() ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(pollID, postID string, req *zenaov1.CreatePollRequest) (*Poll, error)
+	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
 }
@@ -143,12 +176,20 @@ type Chain interface {
 
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
-	Participate(eventID string, callerID string, participantID string) error
+	Participate(eventID string, callerID string, participantID string, ticketPubkey string) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
 	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+}
+
+type Auth interface {
+	GetUser(ctx context.Context) *AuthUser
+	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)
+	EnsureUserExists(ctx context.Context, email string) (*AuthUser, error)
+
+	WithAuth() func(http.Handler) http.Handler
 }
 
 func LocationToString(location *zenaov1.EventLocation) (string, error) {

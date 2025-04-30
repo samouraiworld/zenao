@@ -16,17 +16,17 @@ import (
 )
 
 func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenaov1.CreatePollRequest]) (*connect.Response[zenaov1.CreatePollResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
 
-	userID, err := s.EnsureUserExists(ctx, user)
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -36,45 +36,39 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	zpost := (*zeni.Post)(nil)
-	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.UserRoles(userID, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if len(roles) == 0 {
-			return errors.New("user is not a member of the event")
-		}
+	roles, err := s.DB.UserRoles(zUser.ID, req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return nil, errors.New("user is not a member of the event")
+	}
+	pollID, postID, err := s.Chain.CreatePoll(zUser.ID, req.Msg)
+	if err != nil {
+		return nil, err
+	}
 
-		pollID, postID, err := s.Chain.CreatePoll(userID, req.Msg)
-		if err != nil {
-			return err
-		}
+	postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
+	if err != nil {
+		return nil, err
+	}
 
-		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
-		if err != nil {
-			return err
-		}
-
-		post := &feedsv1.Post{
-			Tags: []string{"poll"},
-			Post: &feedsv1.Post_Link{
-				Link: &feedsv1.LinkPost{
-					Uri: postURI.String(),
-				},
+	post := &feedsv1.Post{
+		Post: &feedsv1.Post_Link{
+			Link: &feedsv1.LinkPost{
+				Uri: postURI.String(),
 			},
-		}
+		},
+	}
 
+	zpoll := (*zeni.Poll)(nil)
+	if err := s.DB.Tx(func(db zeni.DB) error {
 		feed, err := db.GetFeed(req.Msg.EventId, "main")
 		if err != nil {
 			return err
 		}
 
-		if zpost, err = db.CreatePost(postID, feed.ID, userID, post); err != nil {
-			return err
-		}
-
-		if _, err := db.CreatePoll(pollID, postID, req.Msg); err != nil {
+		if zpoll, err = db.CreatePoll(zUser.ID, pollID, postID, feed.ID, post, req.Msg); err != nil {
 			return err
 		}
 		return nil
@@ -82,7 +76,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, err
 	}
 
-	return connect.NewResponse(&zenaov1.CreatePollResponse{PostId: zpost.ID}), nil
+	return connect.NewResponse(&zenaov1.CreatePollResponse{PostId: zpoll.PostID}), nil
 
 }
 

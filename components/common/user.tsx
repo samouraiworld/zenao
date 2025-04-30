@@ -23,12 +23,15 @@ const avatarClassName = "w-6 h-6 rounded-full overflow-hidden inline-block";
 
 export function UserAvatar({ address, className }: UserComponentProps) {
   const { data: profile } = useSuspenseQuery(profileOptions(address));
-
   return (
     <Avatar className={cn(avatarClassName, className)}>
       <AvatarFallback>
         <Web3Image
-          src={profile?.avatarUri ?? "/zenao-logo.png"}
+          src={
+            (profile?.avatarUri && profile.avatarUri !== ""
+              ? profile.avatarUri
+              : undefined) ?? "/zenao-logo.png"
+          }
           width={45}
           height={45}
           alt="Avatar"

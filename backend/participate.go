@@ -14,14 +14,14 @@ import (
 
 // Participate implements zenaov1connect.ZenaoServiceHandler.
 func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zenaov1.ParticipateRequest]) (*connect.Response[zenaov1.ParticipateResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 
 	if user == nil {
 		if req.Msg.Email == "" {
 			return nil, errors.New("no user and no email")
 		}
 		var err error
-		user, err = s.CreateUser(ctx, req.Msg.Email)
+		user, err = s.Auth.EnsureUserExists(ctx, req.Msg.Email)
 		if err != nil {
 			return nil, err
 		}
@@ -34,19 +34,24 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	// retrieve auto-incremented user ID from database, do not use auth provider's user ID directly for realms
-	userID, err := s.EnsureUserExists(ctx, user)
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", userID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+
+	ticket, err := zeni.NewTicket()
+	if err != nil {
+		return nil, err
+	}
 
 	evt := (*zeni.Event)(nil)
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
 
-		if err := db.Participate(req.Msg.EventId, userID); err != nil {
+		if err := db.Participate(req.Msg.EventId, zUser.ID, ticket.Secret()); err != nil {
 			return err
 		}
 
@@ -55,13 +60,13 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
-		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, userID); err != nil {
-			// XXX: handle case where tx is broadcasted but we have an error afterwards, eg: chain has been updated but db rollbacked
-			return err
-		}
-
 		return nil
 	}); err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Pubkey()); err != nil {
+		// XXX: handle case where db tx pass but chain fail
 		return nil, err
 	}
 

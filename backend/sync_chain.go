@@ -96,7 +96,16 @@ func execSyncChain() error {
 			continue
 		}
 		for _, p := range participants {
-			if err := chain.Participate(event.ID, event.CreatorID, p.ID); err != nil {
+			// get first ticket of participant
+			// XXX: when we support multiple ticket for one buyer this should be revisited
+			tickets, err := db.GetEventBuyerTickets(event.ID, p.ID)
+			if err != nil || len(tickets) < 1 {
+				logger.Error("failed to get participant ticket", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err), zap.Int("num-tickets", len(tickets)))
+				continue
+			}
+			ticket := tickets[0]
+
+			if err := chain.Participate(event.ID, event.CreatorID, p.ID, ticket.Pubkey()); err != nil {
 				logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
 			}
 		}

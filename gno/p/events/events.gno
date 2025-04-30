@@ -1,12 +1,15 @@
 package events
 
 import (
+	"crypto/ed25519"
+	"encoding/base64"
 	"errors"
 	"std"
 	"strconv"
 	"strings"
 	"time"
 
+	"gno.land/p/demo/avl"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	"gno.land/p/zenao/basedao"
@@ -25,6 +28,7 @@ type Event struct {
 	startDate        int64
 	endDate          int64
 	capacity         uint32
+	tickets          avl.Tree // ticketHash -> *Ticket
 	location         *zenaov1.EventLocation
 	getProfileString basedao.ProfileStringGetter
 	setProfileString basedao.ProfileStringSetter
@@ -45,6 +49,15 @@ type Config struct {
 	SetProfileString basedao.ProfileStringSetter
 	ZenaoAdminAddr   string
 	Location         *zenaov1.EventLocation
+}
+
+type Ticket struct {
+	Participant string
+	UsedAt      *time.Time
+}
+
+func (t *Ticket) Used() bool {
+	return t.UsedAt != nil
 }
 
 func NewEvent(conf *Config) *Event {
@@ -79,7 +92,6 @@ func NewEvent(conf *Config) *Event {
 
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
-	organizerCond := daocond.RoleCount(1, "organizer", memberStore.HasRole)
 
 	pubdao, privdao := basedao.New(&basedao.Config{
 		Name:             conf.Title,
@@ -104,14 +116,23 @@ func NewEvent(conf *Config) *Event {
 		// XXX: set PkgPath?
 	}
 
-	for _, res := range []daokit.MessageHandler{
-		event.addParticipantHandler(),
-		event.removeParticipantHandler(),
-		event.addGatekeeperHandler(),
-		event.removeGatekeeperHandler(),
-		event.editEventHandler(),
-	} {
-		event.DAOPrivate.Core.Resources.Set(&daokit.Resource{Handler: res, Condition: organizerCond})
+	actionsByRole := map[string][]daokit.MessageHandler{
+		"organizer": {
+			event.addParticipantHandler(),
+			event.removeParticipantHandler(),
+			event.addGatekeeperHandler(),
+			event.removeGatekeeperHandler(),
+			event.editEventHandler(),
+		},
+		"gatekeeper": {
+			event.checkinHandler(),
+		},
+	}
+	for role, actions := range actionsByRole {
+		roleCond := daocond.RoleCount(1, role, memberStore.HasRole)
+		for _, res := range actions {
+			event.DAOPrivate.Core.Resources.Set(&daokit.Resource{Handler: res, Condition: roleCond})
+		}
 	}
 
 	return event
@@ -119,22 +140,56 @@ func NewEvent(conf *Config) *Event {
 
 const MsgAddParticipantKind = "gno.land/p/zenao/events.AddParticipant"
 
+// NOTE: We are adding the participant and ticket at the same time, the ticket is linked to the participant and
+// thus will leak the participant arrival time when validated at the event entrance.
+// As a "low tech" measure, we could add the tickets at a later time in batches to scramble a bit the links between tickets and participants.
+// Or better: use a ZK scheme so that the gatekeeper only reveals a proof representing a valid
+// ticket that can't be linked to a particular ticket. We should ensure that there is only one valid proof for each ticket
+
+type MsgAddParticipant struct {
+	Participant  string
+	TicketPubkey string // ed25519 public key derived from the private key in the ticket secret
+}
+
+func (msg *MsgAddParticipant) String() string {
+	name := msg.Participant
+	if name == "" {
+		name = "anon"
+	}
+	return ufmt.Sprintf("Add %s as participant")
+}
+
 func (e *Event) addParticipantHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgAddParticipantKind, func(i interface{}) {
-		participant, ok := i.(string)
+		msg, ok := i.(*MsgAddParticipant)
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-		if e.DAOPrivate.Members.CountMemberRoles(participant) > 0 {
-			e.DAOPrivate.Members.AddRoleToMember(participant, "participant")
+
+		if e.tickets.Has(msg.TicketPubkey) {
+			panic(errors.New("ticket already added"))
+		}
+
+		_ = e.tickets.Set(msg.TicketPubkey, &Ticket{
+			Participant: msg.Participant,
+			UsedAt:      nil,
+		})
+
+		if msg.Participant == "" {
+			// anonymous ticket, don't add member or role to the org
+			return
+		}
+
+		if e.DAOPrivate.Members.CountMemberRoles(msg.Participant) > 0 {
+			e.DAOPrivate.Members.AddRoleToMember(msg.Participant, "participant")
 		} else {
-			e.DAOPrivate.Members.AddMember(participant, []string{"participant"})
+			e.DAOPrivate.Members.AddMember(msg.Participant, []string{"participant"})
 		}
 	})
 }
 
-func NewAddParticipantMsg(participant string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddParticipantKind, participant)
+func NewAddParticipantMsg(participant string, ticketPubkey string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey})
 }
 
 const MsgRemoveParticipantKind = "gno.land/p/zenao/events.RemoveParticipant"
@@ -195,6 +250,58 @@ func (e *Event) removeGatekeeperHandler() daokit.MessageHandler {
 
 func NewRemoveGatekeeperMsg(gatekeeper string) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgRemoveGatekeeperKind, gatekeeper)
+}
+
+const MsgCheckinKind = "gno.land/p/zenao/events.Checkin"
+
+type MsgCheckin struct {
+	TicketPubkey     string
+	CheckinSignature string // ed25519 signature by ticket secret of gatekeeper's bech32 address
+	// XXX: add timestamp in payload to limit signature replay?
+}
+
+func (e *Event) checkinHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgCheckinKind, func(i interface{}) {
+		msg, ok := i.(*MsgCheckin)
+		if !ok {
+			panic("invalid payload type")
+		}
+
+		pubkeyBz, err := base64.RawURLEncoding.DecodeString(msg.TicketPubkey)
+		if err != nil {
+			panic(err)
+		}
+
+		payloadBz := []byte(std.PreviousRealm().Address())
+
+		signatureBz, err := base64.RawURLEncoding.DecodeString(msg.CheckinSignature)
+		if err != nil {
+			panic(err)
+		}
+
+		if !ed25519.Verify(pubkeyBz, payloadBz, signatureBz) {
+			panic("invalid signature")
+		}
+
+		val, ok := e.tickets.Get(msg.TicketPubkey)
+		if !ok {
+			panic("no such ticket")
+		}
+		ticket := val.(*Ticket)
+		if ticket.Used() {
+			panic(ufmt.Sprintf("ticket already used at %s", ticket.UsedAt.Format(time.RFC3339)))
+		}
+
+		now := time.Now()
+		ticket.UsedAt = &now
+	})
+}
+
+func NewCheckinMsg(ticketPubkey string, checkinSignature string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgCheckinKind, &MsgCheckin{
+		TicketPubkey:     ticketPubkey,
+		CheckinSignature: checkinSignature,
+	})
 }
 
 func (e *Event) CountParticipants() uint32 {

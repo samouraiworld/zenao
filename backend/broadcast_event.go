@@ -17,20 +17,24 @@ func (s *ZenaoServer) BroadcastEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.BroadcastEventRequest],
 ) (*connect.Response[zenaov1.BroadcastEventResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
 
-	userID, err := s.EnsureUserExists(ctx, user)
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("broadcast-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("broadcast-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
+	}
+
+	if zUser.Plan != zeni.ProPlan {
+		return nil, errors.New("broadcast feature is only available for pro users")
 	}
 
 	if len(req.Msg.Message) < 30 || len(req.Msg.Message) > 1000 {
@@ -52,7 +56,7 @@ func (s *ZenaoServer) BroadcastEvent(
 		if err != nil {
 			return err
 		}
-		roles, err := db.UserRoles(userID, req.Msg.EventId)
+		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -72,7 +76,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	for i, participant := range participants {
 		idsList[i] = participant.AuthID
 	}
-	authParticipants, err := s.GetUsersFromClerkIDs(ctx, idsList)
+	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
 	if err != nil {
 		return nil, err
 	}

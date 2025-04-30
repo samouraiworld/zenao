@@ -1,4 +1,4 @@
-import { GnowebButton } from "@/components/buttons/GnowebButton";
+import { GnowebButton } from "@/components/buttons/gnoweb-button";
 import { Card } from "@/components/cards/Card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Skeleton } from "@/components/shadcn/skeleton";

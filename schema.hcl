@@ -33,15 +33,20 @@ table "users" {
     null = true
     type = text
   }
+  column "plan" {
+    null    = true
+    type    = text
+    default = "free"
+  }
   primary_key {
     columns = [column.id]
-  }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
   }
   index "idx_users_auth_id" {
     unique  = true
     columns = [column.auth_id]
+  }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
   }
 }
 table "events" {
@@ -465,16 +470,24 @@ table "sold_tickets" {
     null = true
     type = integer
   }
-  column "user_id" {
+  column "buyer_id" {
     null = true
-    type = text
+    type = integer
   }
   column "price" {
     null = true
     type = real
   }
+  column "secret" {
+    null = false
+    type = text
+  }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_sold_tickets_secret" {
+    unique  = true
+    columns = [column.secret]
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]

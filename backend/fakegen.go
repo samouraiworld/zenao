@@ -4,11 +4,15 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
+	ma "github.com/multiformats/go-multiaddr"
+	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/gzdb"
+	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -37,6 +41,8 @@ type fakegenConfig struct {
 	chainID       string
 	dbPath        string
 	eventsCount   uint
+	postsCount    uint
+	pollsCount    uint
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -46,16 +52,29 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
+	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
+	flset.UintVar(&fakegenConf.pollsCount, "polls", 13, "number of fake polls to generate")
 }
 
 type fakeEvent struct {
 	Title            string  `faker:"sentence"`
 	Description      string  `faker:"paragraph"`
 	TicketPrice      float64 `faker:"amount"`
-	Capacity         float64 `faker:"boundary_start=10, boundary_end=5000"`
+	Capacity         int     `faker:"boundary_start=10, boundary_end=5000"`
 	StartOffsetHours int     `faker:"oneof: 24, 48, 72, 96"`
 	DurationHours    int     `faker:"oneof: 1, 6, 12"`
 	Location         string  `faker:"sentence"`
+}
+
+type fakePost struct {
+	Content string `faker:"paragraph"`
+}
+
+type fakePoll struct {
+	Question     string `faker:"sentence"`
+	OptionsCount int    `faker:"boundary_start=2, boundary_end=8"`
+	DaysDuration int    `faker:"boundary_start=1, boundary_end=30"`
+	KindRaw      int32  `faker:"oneof: 0, 1"`
 }
 
 func execFakegen() error {
@@ -74,27 +93,34 @@ func execFakegen() error {
 		return err
 	}
 
-	userId, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
+	err = RegisterMultiAddrProtocols()
 	if err != nil {
 		return err
 	}
 
-	if err := chain.CreateUser(&zeni.User{ID: userId}); err != nil {
+	// Create user
+	zUser, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
+	if err != nil {
 		return err
 	}
 
-	for i := range fakegenConf.eventsCount {
+	if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
+		return err
+	}
+
+	for eC := range fakegenConf.eventsCount {
+		// Create Event
 		a := fakeEvent{}
 		err := faker.FakeData(&a)
 		if err != nil {
 			return err
 		}
-		before := i <= (fakegenConf.eventsCount / 2)
+		before := eC <= (fakegenConf.eventsCount / 2)
 		if before {
 			a.StartOffsetHours = -a.StartOffsetHours
 		}
 		startDate := time.Now().Add(time.Duration(a.StartOffsetHours) * time.Hour)
-		req := &zenaov1.CreateEventRequest{
+		evtReq := &zenaov1.CreateEventRequest{
 			Title:       a.Title,
 			Description: a.Description,
 			ImageUri:    randomPick(eventImages),
@@ -108,15 +134,128 @@ func execFakegen() error {
 				}},
 			},
 		}
-		creatorID := userId
+		creatorID := zUser.ID
 
-		evt, err := db.CreateEvent(creatorID, req)
+		zevt, err := db.CreateEvent(creatorID, evtReq)
 		if err != nil {
 			return err
 		}
 
-		if err := chain.CreateEvent(evt.ID, creatorID, req); err != nil {
+		if err := chain.CreateEvent(zevt.ID, creatorID, evtReq); err != nil {
 			return err
+		}
+
+		// Create Feed
+		zfeed, err := db.CreateFeed(zevt.ID, "main")
+		if err != nil {
+			return err
+		}
+
+		// Create posts/polls only for the last event (to avoid flooding the chain and db)
+		if eC == fakegenConf.eventsCount-1 {
+			// Create StandardPosts
+			for pC := range fakegenConf.postsCount {
+				p := fakePost{}
+				err := faker.FakeData(&p)
+				if err != nil {
+					return err
+				}
+
+				post := &feedsv1.Post{
+					Author:    creatorID,
+					CreatedAt: startDate.Add(-time.Duration(pC) * time.Hour).Unix(), //One post per hour (FIXME: Doesn't work),
+					Post: &feedsv1.Post_Standard{
+						Standard: &feedsv1.StandardPost{
+							Content: p.Content,
+						},
+					},
+				}
+
+				postID, err := chain.CreatePost(creatorID, zevt.ID, post)
+				if err != nil {
+					return err
+				}
+
+				if _, err := db.CreatePost(postID, zfeed.ID, zUser.ID, post); err != nil {
+					return err
+				}
+
+				// Create reactions only for the first post (to avoid flooding the chain and db)
+				if pC == 0 {
+					icons := []string{"😀", "🎉", "🔥", "💡", "🍕", "🌟", "🤖", "😎", "💀", "🚀", "🧠", "🛠️", "🎶", "🍀", "🎨", "🧸", "📚", "🕹️", "🏆", "🧬", "🧘", "🍩", "🥑", "📸", "🧃", "🎧", "🪐", "💬"}
+					for rC := range len(icons) {
+						// React to Posts
+						reactReq := &zenaov1.ReactPostRequest{
+							PostId: postID,
+							Icon:   icons[rC],
+						}
+
+						if err = db.ReactPost(creatorID, reactReq); err != nil {
+							return err
+						}
+
+						if err = chain.ReactPost(creatorID, zevt.ID, reactReq); err != nil {
+							return err
+						}
+					}
+				}
+			}
+
+			// Create Polls
+			for range fakegenConf.pollsCount {
+				p := fakePoll{}
+				err := faker.FakeData(&p)
+				if err != nil {
+					return err
+				}
+
+				options := make([]string, p.OptionsCount)
+				for oC := range p.OptionsCount {
+					options[oC] = faker.UUIDDigit()
+				}
+
+				pollReq := &zenaov1.CreatePollRequest{
+					EventId:  zevt.ID,
+					Question: p.Question,
+					Options:  options,
+					Duration: int64(p.DaysDuration * 24 * 60 * 60),
+					Kind:     pollsv1.PollKind(p.KindRaw),
+				}
+
+				pollID, postID, err := chain.CreatePoll(creatorID, pollReq)
+				if err != nil {
+					return err
+				}
+
+				postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
+				if err != nil {
+					return err
+				}
+
+				pollPost := &feedsv1.Post{
+					Post: &feedsv1.Post_Link{
+						Link: &feedsv1.LinkPost{
+							Uri: postURI.String(),
+						},
+					},
+				}
+
+				if _, err := db.CreatePoll(creatorID, pollID, postID, zfeed.ID, pollPost, pollReq); err != nil {
+					return err
+				}
+
+				//Vote on Polls
+				voteReq := &zenaov1.VotePollRequest{
+					PollId: pollID,
+					Option: options[0],
+				}
+				if err = db.VotePoll(creatorID, voteReq); err != nil {
+					return err
+				}
+				if err = chain.VotePoll(creatorID, voteReq); err != nil {
+					return err
+				}
+			}
 		}
 	}
 
