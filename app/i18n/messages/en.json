@@ -147,6 +147,39 @@
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
     "publishedAt": "Published at"
   },
+  "load-more": "Load more",
+  "event-feed": {
+    "global-feed": "Global feed",
+    "polls-feed": "Polls",
+    "no-more-posts": "No more to show for now.",
+    "no-polls-title": "No polls to show.",
+    "no-polls-description": "You have no polls. Why not create one?",
+    "no-posts-title": "No posts to show.",
+    "no-posts-description": "You have no posts. Why not create one?",
+    "poll-form": {
+      "question-placeholder-sm": "Ask a question...",
+      "question-placeholder-lg": "What do you wanna ask to the community ?",
+      "toast-poll-creation-success": "Poll created !",
+      "toast-poll-creation-error": "Error on creating poll !",
+      "label-allow-multiple-answers": "Allow multiple answers",
+      "option-input-placeholder": "Enter an answer",
+      "add-other-answer": "Add another answer",
+      "poll-duration-label": "Duration of the poll",
+      "days": "Days",
+      "minutes": "Minutes",
+      "hours": "Hours"
+    },
+    "standard-post-form": {
+      "message-placeholder-sm": "Say something...",
+      "message-placeholder-lg": "Don't be shy, say something!",
+      "toast-post-creation-success": "Post created !",
+      "toast-post-creation-error": "Error on creating post !"
+    },
+    "vote": {
+      "toast-vote-success": "Vote submitted !",
+      "toast-vote-error": "Error while voting !"
+    }
+  },
   "broadcast-email-form": {
     "title": "Send an email to all participants",
     "desc": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change.",

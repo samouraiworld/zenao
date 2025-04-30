@@ -8,6 +8,7 @@ export default {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/@ferrucc-io/emoji-picker/dist/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
@@ -69,6 +70,8 @@ export default {
         // Custom
         "custom-input-bg": "rgba(var(--input-bg))",
         "custom-input-border": "var(--input-border)",
+        // Feed sticky input
+        "event-post-form-bg": "hsl(var(--background) / .8)",
       },
       borderRadius: {
         lg: "var(--radius)",

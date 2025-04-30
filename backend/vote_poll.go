@@ -42,11 +42,12 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 		if err = db.VotePoll(zUser.ID, req.Msg); err != nil {
 			return err
 		}
-		if err = s.Chain.VotePoll(zUser.ID, req.Msg); err != nil {
-			return err
-		}
 		return nil
 	}); err != nil {
+		return nil, err
+	}
+
+	if err = s.Chain.VotePoll(zUser.ID, req.Msg); err != nil {
 		return nil, err
 	}
 
