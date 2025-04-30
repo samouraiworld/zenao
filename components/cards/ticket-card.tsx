@@ -37,7 +37,7 @@ export function TicketCard({
   return (
     <div className="card-3d">
       <motion.div
-        style={{ x, y, rotateX, rotateY, z: 100 }}
+        style={{ x, y, rotateX, rotateY }}
         drag
         dragElastic={0.18}
         dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
