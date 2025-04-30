@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { TicketsInfo } from "./tickets-info";
 import {
   ScreenContainer,
@@ -23,6 +24,7 @@ type PageProps = {
 export default async function TicketsPage({ params }: PageProps) {
   const { id } = await params;
   const queryClient = getQueryClient();
+  const t = await getTranslations("tickets");
 
   const { getToken, userId } = await auth();
   const token = await getToken();
@@ -33,7 +35,7 @@ export default async function TicketsPage({ params }: PageProps) {
   if (!token || !address) {
     return (
       <ScreenContainerCentered isSignedOutModal>
-        Log in to see your tickets
+        {t("log-in")}
       </ScreenContainerCentered>
     );
   }

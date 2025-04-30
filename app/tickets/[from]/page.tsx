@@ -20,6 +20,7 @@ type PageProps = {
 
 export default async function TicketsPage({ params }: PageProps) {
   const { from } = await params;
+  const t = await getTranslations("tickets");
 
   const queryClient = getQueryClient();
   const now = Date.now() / 1000;
@@ -37,7 +38,7 @@ export default async function TicketsPage({ params }: PageProps) {
   if (!token || !address) {
     return (
       <ScreenContainerCentered isSignedOutModal>
-        Log in to see your tickets
+        {t("log-in")}
       </ScreenContainerCentered>
     );
   }
@@ -47,8 +48,6 @@ export default async function TicketsPage({ params }: PageProps) {
       ? eventsByParticipantList(address, now, Number.MAX_SAFE_INTEGER, 20)
       : eventsByParticipantList(address, now - 1, 0, 20),
   );
-
-  const t = await getTranslations("tickets");
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

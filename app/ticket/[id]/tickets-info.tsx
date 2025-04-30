@@ -2,8 +2,8 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { eventOptions } from "@/lib/queries/event";
-import { userAddressOptions } from "@/lib/queries/user";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { eventTickets } from "@/lib/queries/ticket";
@@ -22,20 +22,19 @@ type TicketsInfoProps = {
 };
 
 export function TicketsInfo({ id }: TicketsInfoProps) {
-  const { getToken, userId } = useAuth();
+  const { getToken } = useAuth();
   const { data: event } = useSuspenseQuery(eventOptions(id));
-  const { data: _address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data: tickets } = useSuspenseQuery(eventTickets(id, getToken));
 
   const location = makeLocationFromEvent(event.location);
   const timezone = useLocationTimezone(location);
 
+  const t = useTranslations("tickets");
+
   if (tickets.ticketsSecrets.length === 0) {
     <div>
-      <p>No tickets available for this event</p>
+      <p>{t("no-tickets-event")}</p>
     </div>;
   }
 

@@ -109,6 +109,8 @@
   },
   "tickets": {
     "title": "Your tickets",
+    "log-in": " Log in to see your tickets",
+    "no-tickets-event": "No tickets available for this event",
     "description": "Events you are attending.",
     "see-event-details": "See event details"
   },
