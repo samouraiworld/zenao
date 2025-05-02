@@ -134,6 +134,7 @@ function PollResultItem({
   onCheckedChange: (checked: boolean) => void;
   pollKind: PollKind;
 }) {
+  const t = useTranslations("event-feed");
   const percent =
     totalVotesCount > 0
       ? Math.round((pollResult.count * 100) / totalVotesCount)
@@ -171,7 +172,9 @@ function PollResultItem({
 
         <div className="flex flex-row items-center gap-3">
           <div className="flex flex-row items-center gap-2">
-            <Text className="text-xs">{`${pollResult.count} votes`}</Text>
+            <Text className="text-xs">
+              {t("poll.result-count", { count: pollResult.count })}
+            </Text>
             <Text className="text-sm">{`${percent}%`}</Text>
           </div>
           <Checkbox
