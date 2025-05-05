@@ -191,5 +191,6 @@
     "toast-email-sent-success": "Email sent !",
     "toast-email-sent-error": "Error while trying to send the email",
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
-  }
+  },
+  "check-in-confirmation-dialog": {}
 }
