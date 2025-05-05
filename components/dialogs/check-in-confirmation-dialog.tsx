@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -23,29 +23,40 @@ import { cn } from "@/lib/tailwind";
 type CheckinConfirmationDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  loading?: boolean;
   error?: boolean;
 };
 
 function CheckinConfirmationDialogContent({
+  loading,
   error,
-}: Pick<CheckinConfirmationDialogProps, "error">) {
+}: Pick<CheckinConfirmationDialogProps, "error" | "loading">) {
   const t = useTranslations("check-in-confirmation-dialog");
 
   return (
     <div className="flex flex-col py-8 gap-2 items-center text-white">
-      <div className="flex justify-center items-center p-6">
-        {error ? <XCircle size={128} /> : <CheckCircle2 size={128} />}
-      </div>
-      <DialogTitle>{t(`title-${error ? "error" : "success"}`)}</DialogTitle>
-      <DialogDescription className="text-white">
-        {t(`description-${error ? "error" : "success"}`)}
-      </DialogDescription>
+      {loading ? (
+        <div className="flex justify-center items-center p-6">
+          <Loader2 className="animate-spin" />
+        </div>
+      ) : (
+        <>
+          <div className="flex justify-center items-center p-6">
+            {error ? <XCircle size={128} /> : <CheckCircle2 size={128} />}
+          </div>
+          <DialogTitle>{t(`title-${error ? "error" : "success"}`)}</DialogTitle>
+          <DialogDescription className="text-white">
+            {t(`description-${error ? "error" : "success"}`)}
+          </DialogDescription>
+        </>
+      )}
     </div>
   );
 }
 
 export function CheckinConfirmationDialog({
   open,
+  loading,
   error,
   onOpenChange,
 }: CheckinConfirmationDialogProps) {
@@ -56,18 +67,24 @@ export function CheckinConfirmationDialog({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
-          className={cn("lg:max-w-2xl", error ? "bg-red-500" : "bg-green-400")}
+          className={cn(
+            "lg:max-w-2xl",
+            error ? "bg-red-500" : "bg-green-400",
+            loading && "bg-main",
+          )}
         >
           <DialogHeader>
             <DialogClose />
           </DialogHeader>
-          <CheckinConfirmationDialogContent error={error} />
+          <CheckinConfirmationDialogContent loading={loading} error={error} />
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline" className="w-full">
-                {t("close")}
-              </Button>
-            </DialogClose>
+            {!loading && (
+              <DialogClose asChild>
+                <Button variant="outline" className="w-full">
+                  {t("close")}
+                </Button>
+              </DialogClose>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -79,11 +96,13 @@ export function CheckinConfirmationDialog({
       <DrawerContent className={error ? "bg-red-500" : "bg-green-400"}>
         <CheckinConfirmationDialogContent error={error} />
         <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <ButtonWithChildren variant="outline">
-              {t("close")}
-            </ButtonWithChildren>
-          </DrawerClose>
+          {!loading || (
+            <DrawerClose asChild>
+              <ButtonWithChildren variant="outline">
+                {t("close")}
+              </ButtonWithChildren>
+            </DrawerClose>
+          )}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

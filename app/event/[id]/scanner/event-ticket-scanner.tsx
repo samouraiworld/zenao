@@ -4,6 +4,7 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 import { useState } from "react";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
+import { useEventCheckIn } from "@/lib/mutations/event-management";
 
 type EventTicketScannerProps = {
   eventId: string;
@@ -14,9 +15,19 @@ export function EventTicketScanner({
   eventId,
   eventData,
 }: EventTicketScannerProps) {
+  const { checkIn, isPending, isError } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
-  const handleQRCodeValue = (value: string) => {
+  const handleQRCodeValue = async (value: string) => {
     console.log(value);
+
+    try {
+      // Call mutation
+      await checkIn({
+        ticketSecret: value,
+      });
+    } catch (err) {
+      console.error("Error", err);
+    }
     setConfirmationDialogOpen(true);
   };
 
@@ -25,7 +36,8 @@ export function EventTicketScanner({
       <CheckinConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmationDialogOpen}
-        error
+        loading={isPending}
+        error={isError}
       />
       <Scanner
         onScan={(result) => handleQRCodeValue(result[0].rawValue)}
