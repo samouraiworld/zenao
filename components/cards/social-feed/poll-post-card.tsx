@@ -149,7 +149,7 @@ function PollResultItem({
         "flex items-center justify-between gap-2 px-4 w-full h-10 relative rounded-lg hover:bg-transparent bg-transparent",
         !disabled && !pollResult.hasUserVoted && "hover:border-neutral-500",
         !disabled && "cursor-pointer",
-        pollResult.hasUserVoted && "border border-[#EC7E17]",
+        pollResult.hasUserVoted && "border border-custom-input-border",
       )}
       onClick={() => {
         if (!disabled) {
