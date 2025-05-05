@@ -49,7 +49,7 @@
     "toast-edit-error": "Error on editing event!"
   },
   "event": {
-    "is-organisator-role": "You have organizer role for this event.",
+    "manage-event": "Manage event :",
     "edit-button": "Edit event",
     "send-global-message": "Send a message to all participants",
     "going": "{count} going",
@@ -70,7 +70,8 @@
     "toast-already-participant-error": "This email is already participant for this event!",
     "toast-default-error": "Error on participate!",
     "participants-list": "Participants list",
-    "see-ticket": "See ticket"
+    "see-ticket": "See ticket",
+    "gatekeeper-button": "Open ticket scanner"
   },
   "manifesto": {
     "title": "MANIFESTO",

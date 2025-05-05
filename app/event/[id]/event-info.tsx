@@ -11,6 +11,7 @@ import { SignedIn, useAuth } from "@clerk/nextjs";
 import { Event, WithContext } from "schema-dts";
 import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
+import { EventManagementMenu } from "./event-management-menu";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
@@ -28,7 +29,6 @@ import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
-import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { GoTopButton } from "@/components/buttons/go-top-button";
 import { Separator } from "@/components/shadcn/separator";
 
@@ -54,9 +54,6 @@ export function EventInfo({ id }: { id: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
-
-  const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
-    useState(false);
 
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
@@ -95,13 +92,6 @@ export function EventInfo({ id }: { id: string }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
-        <BroadcastEmailDialog
-          eventId={id}
-          nbParticipants={data.participants}
-          open={broadcastEmailDialogOpen}
-          onOpenChange={setBroadcastEmailDialogOpen}
-        />
-
         {/* Left Section */}
         <div className="flex flex-col gap-4 w-full sm:w-2/5">
           <AspectRatio ratio={1 / 1}>
@@ -133,24 +123,11 @@ export function EventInfo({ id }: { id: string }) {
             <UserAvatarWithName linkToProfile address={data.creator} />
           </EventSection>
 
-          {/* If the user is organizer, link to /edit page */}
-          {isOrganizer && (
-            <Card className="flex flex-col gap-2">
-              <Text>{t("is-organisator-role")}</Text>
-
-              <div className="flex flex-col">
-                <Link href={`/edit/${id}`} className="text-main underline">
-                  {t("edit-button")}
-                </Link>
-                <p
-                  className="text-main underline cursor-pointer"
-                  onClick={() => setBroadcastEmailDialogOpen(true)}
-                >
-                  {t("send-global-message")}
-                </p>
-              </div>
-            </Card>
-          )}
+          <EventManagementMenu
+            eventId={id}
+            roles={roles}
+            nbParticipants={data.participants}
+          />
         </div>
 
         {/* Right Section */}

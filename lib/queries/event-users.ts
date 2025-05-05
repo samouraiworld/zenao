@@ -5,7 +5,7 @@ import { extractGnoJSONResponse } from "../gno";
 
 const userRolesEnum = z.enum(["organizer", "participant", "gatekeeper"]);
 
-type EventUserRole = z.infer<typeof userRolesEnum>;
+export type EventUserRole = z.infer<typeof userRolesEnum>;
 
 export const eventGetUserRolesSchema = z.array(userRolesEnum);
 
