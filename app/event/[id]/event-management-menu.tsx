@@ -52,7 +52,7 @@ export function EventManagementMenu({
 
             {/* {isGatekeeper && ( */}
             <Link
-              href={`/gatekeeper/${eventId}`}
+              href={`/event/${eventId}/scanner`}
               className="text-main underline"
             >
               {t("gatekeeper-button")}
