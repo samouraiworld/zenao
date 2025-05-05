@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { imageHeight, imageWidth } from "../constants";
+import { EventTicketScanner } from "./event-ticket-scanner";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { EventTicketScanner } from "./event-ticket-scanner";
 
 type Props = {
   params: Promise<{ id: string }>;

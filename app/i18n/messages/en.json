@@ -192,5 +192,11 @@
     "toast-email-sent-error": "Error while trying to send the email",
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
   },
-  "check-in-confirmation-dialog": {}
+  "check-in-confirmation-dialog": {
+    "title-success": "Ticke verified",
+    "description-error": "Error while trying to validate your ticket",
+    "title-error": "Invalid ticket",
+    "description-success": "You can enter the venue",
+    "close": "Close"
+  }
 }

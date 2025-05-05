@@ -14,9 +14,10 @@ export function EventTicketScanner({
   eventId,
   eventData,
 }: EventTicketScannerProps) {
-  const [confirmDialogOpen, setConfirmationDialogOpen] = useState(true);
+  const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
   const handleQRCodeValue = (value: string) => {
     console.log(value);
+    setConfirmationDialogOpen(true);
   };
 
   return (
@@ -24,8 +25,12 @@ export function EventTicketScanner({
       <CheckinConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmationDialogOpen}
+        error
       />
-      <Scanner onScan={(result) => handleQRCodeValue(result[0].rawValue)} />
+      <Scanner
+        onScan={(result) => handleQRCodeValue(result[0].rawValue)}
+        allowMultiple
+      />
     </div>
   );
 }

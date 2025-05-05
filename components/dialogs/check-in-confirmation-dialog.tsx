@@ -13,21 +13,40 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
-  DrawerTitle,
 } from "../shadcn/drawer";
 import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
 import { Button } from "../shadcn/button";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
+import { cn } from "@/lib/tailwind";
 
 type CheckinConfirmationDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  error?: boolean;
 };
+
+function CheckinConfirmationDialogContent({
+  error,
+}: Pick<CheckinConfirmationDialogProps, "error">) {
+  const t = useTranslations("check-in-confirmation-dialog");
+
+  return (
+    <div className="flex flex-col py-8 gap-2 items-center text-white">
+      <div className="flex justify-center items-center p-6">
+        {error ? <XCircle size={128} /> : <CheckCircle2 size={128} />}
+      </div>
+      <DialogTitle>{t(`title-${error ? "error" : "success"}`)}</DialogTitle>
+      <DialogDescription className="text-white">
+        {t(`description-${error ? "error" : "success"}`)}
+      </DialogDescription>
+    </div>
+  );
+}
 
 export function CheckinConfirmationDialog({
   open,
+  error,
   onOpenChange,
 }: CheckinConfirmationDialogProps) {
   const t = useTranslations("check-in-confirmation-dialog");
@@ -36,69 +55,34 @@ export function CheckinConfirmationDialog({
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="lg:max-w-2xl bg-green-400">
+        <DialogContent
+          className={cn("lg:max-w-2xl", error ? "bg-red-500" : "bg-green-400")}
+        >
           <DialogHeader>
             <DialogClose />
           </DialogHeader>
-
-          <div className="flex flex-col py-8 gap-2 items-center">
-            <div className="flex justify-center items-center p-6">
-              <CheckCircle2 size={128} />
-            </div>
-            <DialogTitle>Ticket verified</DialogTitle>
-            <DialogDescription className="text-white">
-              You can enter the venue
-            </DialogDescription>
-          </div>
-
+          <CheckinConfirmationDialogContent error={error} />
           <DialogFooter>
-            <Button variant="outline" className="w-full">
-              Close
-            </Button>
+            <DialogClose asChild>
+              <Button variant="outline" className="w-full">
+                {t("close")}
+              </Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     );
   }
 
-  // Success
-  // return (
-  //   <Drawer open={open} onOpenChange={onOpenChange}>
-  //     <DrawerContent className="bg-green-400">
-  //       <div className="flex flex-col py-8 gap-2 items-center">
-  //         <div className="flex justify-center items-center p-6">
-  //           <CheckCircle2 size={128} />
-  //         </div>
-  //         <DialogTitle>Ticket verified</DialogTitle>
-  //         <DialogDescription className="text-white">
-  //           You can enter the venue
-  //         </DialogDescription>
-  //       </div>
-  //       <DrawerFooter className="pt-2">
-  //         <DrawerClose asChild>
-  //           <ButtonWithChildren variant="outline">Close</ButtonWithChildren>
-  //         </DrawerClose>
-  //       </DrawerFooter>
-  //     </DrawerContent>
-  //   </Drawer>
-  // );
-
-  // Failure
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="bg-red-500">
-        <div className="flex flex-col py-8 gap-2 items-center">
-          <div className="flex justify-center items-center p-6">
-            <XCircle size={128} />
-          </div>
-          <DrawerTitle>Invalid Ticket</DrawerTitle>
-          <DrawerDescription className="text-white">
-            Error while trying to check in
-          </DrawerDescription>
-        </div>
+      <DrawerContent className={error ? "bg-red-500" : "bg-green-400"}>
+        <CheckinConfirmationDialogContent error={error} />
         <DrawerFooter className="pt-2">
           <DrawerClose asChild>
-            <ButtonWithChildren variant="outline">Close</ButtonWithChildren>
+            <ButtonWithChildren variant="outline">
+              {t("close")}
+            </ButtonWithChildren>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
