@@ -41,7 +41,6 @@ func main() {
 		newRealmsrcCmd(),
 		newE2EInfraCmd(),
 		newGenticketCmd(),
-		newPoppubsCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
