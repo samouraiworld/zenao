@@ -68,9 +68,13 @@
     "email-placeholder": "Email...",
     "toast-confirmation": "You take part in the event!",
     "toast-already-participant-error": "This email is already participant for this event!",
-    "toast-default-error": "Error on registration! Some guest might not have been invited",
+    "toast-default-error": "Error on registration! Some guests might not have been registered",
     "participants-list": "Participants list",
-    "see-ticket": "See ticket"
+    "see-ticket": "See ticket",
+    "invitee-form": {
+      "add-a-friend": "Add a friend",
+      "email-placeholder": "Email of your friend..."
+    }
   },
   "manifesto": {
     "title": "MANIFESTO",

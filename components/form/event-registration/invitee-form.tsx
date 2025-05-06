@@ -8,6 +8,7 @@ import {
   Trash2Icon,
   XCircle,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { FormFieldInputString } from "../components/FormFieldInputString";
 import { EventRegistrationFormSchemaType, SubmitStatusInvitee } from ".";
 import { cn } from "@/lib/tailwind";
@@ -84,14 +85,14 @@ function InviteeFormItem({
   success?: boolean;
   error?: boolean;
 }) {
-  // const t = useTranslations("event-feed.poll-form");
+  const t = useTranslations("event.invitee-form");
 
   return (
     <div className="flex flex-row items-baseline gap-2 w-full">
       <FormFieldInputString
         control={control}
         name={name}
-        placeholder="E-mail"
+        placeholder={t("email-placeholder")}
         className="w-full"
         disabled={loading}
       />
@@ -124,7 +125,7 @@ function AddOptionButton({
   onClick: () => void;
   loading?: boolean;
 }) {
-  // const t = useTranslations("event-feed.poll-form");
+  const t = useTranslations("event.invitee-form");
 
   return (
     <div onClick={onClick}>
@@ -136,7 +137,7 @@ function AddOptionButton({
       >
         <div className="flex flex-row justify-start items-center w-full">
           <PlusIcon className="size-4 dark:text-white text-black" />
-          <Text className="text-sm ml-2">Register for a friend</Text>
+          <Text className="text-sm ml-2">{t("add-a-friend")}</Text>
         </div>
       </ButtonWithChildren>
     </div>
