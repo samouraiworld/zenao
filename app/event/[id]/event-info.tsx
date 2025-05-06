@@ -9,7 +9,6 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { SignedIn, useAuth } from "@clerk/nextjs";
 import { Event, WithContext } from "schema-dts";
-import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
@@ -30,6 +29,7 @@ import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialo
 import { GoTopButton } from "@/components/buttons/go-top-button";
 import { Separator } from "@/components/shadcn/separator";
 import { useEventInfo } from "@/components/providers/event-provider";
+import { EventRegistrationForm } from "@/components/form/event-registration";
 
 interface EventSectionProps {
   title: string;
@@ -240,11 +240,7 @@ export function EventInfo() {
                   {t("registration")}
                 </Heading>
                 <Text className="my-4">{t("join-desc")}</Text>
-                <ParticipateForm
-                  eventId={id}
-                  userId={userId}
-                  userAddress={address}
-                />
+                <EventRegistrationForm userId={userId} />
               </div>
             )}
           </Card>

@@ -10,11 +10,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Form } from "@/components/shadcn/form";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { useToast } from "@/app/hooks/use-toast";
-import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
 import {
   useEventParticipateGuest,
   useEventParticipateLoggedIn,
 } from "@/lib/mutations/event-participate";
+import { useEventInfo } from "@/components/providers/event-provider";
 
 const participateFormSchema = z.object({
   emails: z.array(z.string().email()),
@@ -23,7 +23,6 @@ type ParticipateFormSchemaType = z.infer<typeof participateFormSchema>;
 
 export function ParticipateForm({
   onSuccess: _,
-  eventId,
   userId,
   userAddress,
 }: {
@@ -32,6 +31,8 @@ export function ParticipateForm({
   userAddress: string | null;
   onSuccess?: () => void;
 }) {
+  const { id: eventId, capacity, participants } = useEventInfo();
+
   const { getToken } = useAuth();
   const t = useTranslations("event");
   const queryClient = useQueryClient();
@@ -44,7 +45,10 @@ export function ParticipateForm({
     mode: "all",
     resolver: zodResolver(
       participateFormSchema.extend({
-        emails: z.array(z.string().email()), // TODO add max
+        emails: z
+          .array(z.string().email())
+          .min(1)
+          .max(capacity - participants),
       }),
     ),
     defaultValues: {
