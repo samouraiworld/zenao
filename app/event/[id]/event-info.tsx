@@ -240,7 +240,7 @@ export function EventInfo() {
                   {t("registration")}
                 </Heading>
                 <Text className="my-4">{t("join-desc")}</Text>
-                <EventRegistrationForm userId={userId} />
+                <EventRegistrationForm userAddress={address} />
               </div>
             )}
           </Card>

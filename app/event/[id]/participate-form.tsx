@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { Form } from "@/components/shadcn/form";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { useToast } from "@/app/hooks/use-toast";
@@ -35,11 +34,10 @@ export function ParticipateForm({
 
   const { getToken } = useAuth();
   const t = useTranslations("event");
-  const queryClient = useQueryClient();
   const { participate: participateLoggedIn, isPending: isPendingLoggedIn } =
-    useEventParticipateLoggedIn(queryClient);
+    useEventParticipateLoggedIn();
   const { participate: participateGuest, isPending: isPendingGuest } =
-    useEventParticipateGuest(queryClient);
+    useEventParticipateGuest();
 
   const form = useForm<ParticipateFormSchemaType>({
     mode: "all",

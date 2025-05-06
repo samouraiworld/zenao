@@ -68,7 +68,7 @@
     "email-placeholder": "Email...",
     "toast-confirmation": "You take part in the event!",
     "toast-already-participant-error": "This email is already participant for this event!",
-    "toast-default-error": "Error on registration!",
+    "toast-default-error": "Error on registration! Some guest might not have been invited",
     "participants-list": "Participants list",
     "see-ticket": "See ticket"
   },
