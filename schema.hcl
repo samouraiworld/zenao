@@ -41,12 +41,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
+  }
   index "idx_users_auth_id" {
     unique  = true
     columns = [column.auth_id]
-  }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
   }
 }
 table "events" {
@@ -482,8 +482,16 @@ table "sold_tickets" {
     null = false
     type = text
   }
+  column "pubkey" {
+    null = true
+    type = text
+  }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_sold_tickets_pubkey" {
+    unique  = true
+    columns = [column.pubkey]
   }
   index "idx_sold_tickets_secret" {
     unique  = true
