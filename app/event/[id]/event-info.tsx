@@ -24,13 +24,12 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { GoTopButton } from "@/components/buttons/go-top-button";
 import { Separator } from "@/components/shadcn/separator";
+import { useEventInfo } from "@/components/providers/event-provider";
 
 interface EventSectionProps {
   title: string;
@@ -47,7 +46,9 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
   );
 };
 
-export function EventInfo({ id }: { id: string }) {
+export function EventInfo() {
+  const { id, location, timezone } = useEventInfo();
+
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: address } = useSuspenseQuery(
@@ -61,9 +62,6 @@ export function EventInfo({ id }: { id: string }) {
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
-
-  const location = makeLocationFromEvent(data.location);
-  const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
 

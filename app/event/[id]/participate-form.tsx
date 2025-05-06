@@ -17,7 +17,7 @@ import {
 } from "@/lib/mutations/event-participate";
 
 const participateFormSchema = z.object({
-  email: z.string().email(),
+  emails: z.array(z.string().email()),
 });
 type ParticipateFormSchemaType = z.infer<typeof participateFormSchema>;
 
@@ -42,9 +42,13 @@ export function ParticipateForm({
 
   const form = useForm<ParticipateFormSchemaType>({
     mode: "all",
-    resolver: zodResolver(participateFormSchema),
+    resolver: zodResolver(
+      participateFormSchema.extend({
+        emails: z.array(z.string().email()), // TODO add max
+      }),
+    ),
     defaultValues: {
-      email: "",
+      emails: [""],
     },
   });
   const { toast } = useToast();
@@ -54,7 +58,7 @@ export function ParticipateForm({
     try {
       await participateGuest({
         eventId,
-        email: values.email,
+        email: values.emails[0], // ! FIX
         userAddress: userAddress,
       });
       toast({ title: t("toast-confirmation") });
@@ -105,14 +109,14 @@ export function ParticipateForm({
         <div>
           <SignedOut>
             <div className="flex flex-col gap-2">
-              <FormFieldInputString
+              {/* <FormFieldInputString
                 control={form.control}
                 name="email"
                 placeholder={t("email-placeholder")}
-              />
+              /> */}
               <ButtonWithLabel
                 loading={isPendingGuest}
-                label={t("participate-button")}
+                label={t("register-button")}
                 type="submit"
               />
             </div>
@@ -121,7 +125,7 @@ export function ParticipateForm({
             <ButtonWithLabel
               onClick={onSubmitSignedIn}
               loading={isPendingLoggedIn}
-              label={t("participate-button")}
+              label={t("register-button")}
             />
           </SignedIn>
         </div>
