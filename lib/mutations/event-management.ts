@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { zenaoClient } from "@/app/zenao-client";
 
 type EventBroadcastEmailRequest = {
@@ -34,19 +33,16 @@ export const useEventBroadcastEmail = () => {
 };
 
 type EventCheckInRequest = {
-  ticketSecret: string;
+  signature: string;
+  pubKey: string;
 };
 
 export const useEventCheckIn = () => {
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
-    mutationFn: async ({ ticketSecret }: EventCheckInRequest) => {
-      console.log(ticketSecret);
-
-      const _client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
-
-      // TODO
+    mutationFn: async ({ signature, pubKey }: EventCheckInRequest) => {
+      void signature;
+      void pubKey;
+      // TODO add call endpoint
     },
   });
 
