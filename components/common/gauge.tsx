@@ -10,9 +10,9 @@ export function Gauge({
   className?: string;
 }) {
   return (
-    <div className={cn("flex w-full h-10 rounded-lg bg-muted", className)}>
+    <div className={cn("flex w-full h-10 rounded-lg", className)}>
       <div
-        className="rounded-lg h-full bg-gray-700"
+        className="rounded-lg h-full bg-[#EC7E17]/30"
         style={{ width: `${percent}%` }}
       />
     </div>
