@@ -718,6 +718,33 @@ func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
 	return dbPollToZeniPoll(&poll)
 }
 
+// GetTicket implements zeni.DB.
+func (g *gormZenaoDB) GetTicket(pubkey string) (*zeni.Ticket, *zeni.Event, error) {
+	tickets := []*SoldTicket{}
+	if err := g.db.Model(&SoldTicket{}).Limit(1).Find(&tickets, "pubkey = ?", pubkey).Error; err != nil {
+		return nil, nil, err
+	}
+	if len(tickets) == 0 {
+		return nil, nil, errors.New("ticket pubkey not found")
+	}
+	dbTicket := tickets[0]
+
+	evt := Event{}
+	if err := g.db.First(&evt, "id = ?", dbTicket.EventID).Error; err != nil {
+		return nil, nil, err
+	}
+
+	ticket, err := zeni.NewTicketFromSecret(dbTicket.Secret)
+	if err != nil {
+		return nil, nil, err
+	}
+	zEvt, err := dbEventToZeniEvent(&evt)
+	if err != nil {
+		return nil, nil, err
+	}
+	return ticket, zEvt, nil
+}
+
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	return &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),

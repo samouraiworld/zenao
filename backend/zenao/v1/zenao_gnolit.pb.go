@@ -513,3 +513,27 @@ func (g *GetEventTicketsResponse) GnoLiteral(typePrefix string, linePrefix strin
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (c *CheckinRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CheckinRequest{\n")
+	if c.TicketPubkey != "" {
+		fmt.Fprintf(buf, "%s\tTicketPubkey: %q,\n", linePrefix, c.TicketPubkey)
+	}
+	if c.Signature != "" {
+		fmt.Fprintf(buf, "%s\tSignature: %q,\n", linePrefix, c.Signature)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CheckinResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CheckinResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}

@@ -161,3 +161,11 @@ type GetEventTicketsRequest struct {
 type GetEventTicketsResponse struct {
 	TicketsSecrets []string
 }
+
+type CheckinRequest struct {
+	TicketPubkey string
+	Signature    string
+}
+
+type CheckinResponse struct {
+}

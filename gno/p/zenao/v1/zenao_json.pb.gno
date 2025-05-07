@@ -901,3 +901,38 @@ func (g *GetEventTicketsResponse) FromJSON(node *json.Node) {
 		g.TicketsSecrets = arr
 	}
 }
+
+func (c *CheckinRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.TicketPubkey != "" {
+		fields["ticketPubkey"] = json.StringNode("", c.TicketPubkey)
+	}
+	if c.Signature != "" {
+		fields["signature"] = json.StringNode("", c.Signature)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CheckinRequest) FromJSON(node *json.Node) {
+	*c = CheckinRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["ticketPubkey"]; ok {
+		c.TicketPubkey = val.MustString()
+	}
+	if val, ok := fields["signature"]; ok {
+		c.Signature = val.MustString()
+	}
+}
+
+func (c *CheckinResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CheckinResponse) FromJSON(node *json.Node) {
+	*c = CheckinResponse{}
+}
