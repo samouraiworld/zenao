@@ -56,5 +56,7 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 		return nil, err
 	}
 
+	// XXX: mark checkin in db?
+
 	return connect.NewResponse(&zenaov1.CheckinResponse{}), nil
 }
