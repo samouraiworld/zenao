@@ -2,11 +2,12 @@
 
 import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode, useMemo } from "react";
-import { Hash, MapPin, Plus } from "lucide-react";
+import { Hash, MapPin, Smile } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import EmojiPicker, { Theme } from "emoji-picker-react";
+import { useTheme } from "next-themes";
 import { PostMenu } from "../menu/post-menu";
 import { Card } from "@/components/cards/Card";
 import { UserAvatar } from "@/components/common/user";
@@ -24,6 +25,7 @@ import { useReactPost } from "@/lib/mutations/social-feed";
 import { getQueryClient } from "@/lib/get-query-client";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
+import { Button } from "@/components/shadcn/button";
 
 export function PostCardLayout({
   post,
@@ -117,6 +119,7 @@ function Reactions({
   eventId: string;
   reactions: ReactionView[];
 }) {
+  const { theme } = useTheme();
   const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -150,19 +153,21 @@ function Reactions({
     }
   };
 
-  // TODO: Handle display if a lot of different icons
   return (
-    <div className="flex flex-row gap-0.5 w-full">
+    <div className="flex flex-row gap-1 w-full">
       {(isOrganizer || isParticipant) && (
         <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
           <PopoverTrigger asChild>
-            <div className="reaction-btn flex flex-row items-center py-0.5 border-[1px] border-neutral-700 px-1 rounded-full gap-0.5 cursor-pointer hover:bg-neutral-700">
-              <Plus size={16} color="hsl(var(--secondary-color))" />
-            </div>
+            <Button
+              variant="outline"
+              className="reaction-btn rounded-full cursor-pointer size-8 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+            >
+              <Smile size={16} color="hsl(var(--secondary-color))" />
+            </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-fit bg-transparent p-0 pl-2 border-none transition-all">
+          <PopoverContent className="w-fit bg-transparent p-0 border-none transition-all">
             <EmojiPicker
-              theme={Theme.DARK}
+              theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
               onEmojiClick={(choice) => {
                 if (isPending) return;
                 onReactionChange(choice.emoji);
@@ -173,22 +178,20 @@ function Reactions({
         </Popover>
       )}
 
-      <div className="flex flex-row gap-0.5 grow overflow-auto">
+      <div className="flex flex-row gap-1 grow overflow-auto">
         {reactions
           .sort((a, b) => b.count - a.count)
           .map((reaction) => (
-            <div
+            <Button
+              variant="outline"
               onClick={() => {
                 if (isPending) return;
                 if (isOrganizer || isParticipant)
                   onReactionChange(reaction.icon);
               }}
               className={cn(
-                "flex flex-row items-center py-0.5 pl-1 pr-2 rounded-full gap-0.5 cursor-default",
-                reaction.userHasVoted && "border-[1px] border-neutral-700",
-                (isOrganizer || isParticipant) &&
-                  "hover:bg-neutral-700 cursor-pointer",
-                !reaction.userHasVoted && "bg-neutral-800",
+                "flex flex-row items-center h-8 px-2 rounded-full gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800",
+                reaction.userHasVoted && "border-[#EC7E17]",
               )}
               key={reaction.icon}
             >
@@ -196,7 +199,7 @@ function Reactions({
               <Text variant="secondary" className="text-sm">
                 {reaction.count}
               </Text>
-            </div>
+            </Button>
           ))}
       </div>
     </div>

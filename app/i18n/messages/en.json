@@ -69,7 +69,8 @@
     "toast-confirmation": "You take part in the event!",
     "toast-already-participant-error": "This email is already participant for this event!",
     "toast-default-error": "Error on participate!",
-    "participants-list": "Participants list"
+    "participants-list": "Participants list",
+    "see-ticket": "See ticket"
   },
   "manifesto": {
     "title": "MANIFESTO",
@@ -108,7 +109,10 @@
   },
   "tickets": {
     "title": "Your tickets",
-    "description": "Events you are attending."
+    "log-in": " Log in to see your tickets",
+    "no-tickets-event": "No tickets available for this event",
+    "description": "Events you are attending.",
+    "see-event-details": "See event details"
   },
   "events-list": {
     "no-events": "No events to show.",
@@ -174,6 +178,9 @@
     "vote": {
       "toast-vote-success": "Vote submitted !",
       "toast-vote-error": "Error while voting !"
+    },
+    "poll": {
+      "result-count": "{count, plural, one {# vote} other {# votes}}"
     }
   },
   "broadcast-email-form": {

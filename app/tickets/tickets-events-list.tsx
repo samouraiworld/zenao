@@ -1,9 +1,11 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { EventsList } from "@/components/lists/events-list";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { FromFilter } from "@/lib/searchParams";
+import EmptyEventsList from "@/components/widgets/empty-events-list";
+import { EventCard } from "@/components/cards/event-card";
+import { idFromPkgPath } from "@/lib/queries/event";
 
 export function TicketsEventsList({
   now,
@@ -20,5 +22,19 @@ export function TicketsEventsList({
       : eventsByParticipantList(address, now - 1, 0, 20),
   );
 
-  return <EventsList list={events} />;
+  return (
+    <div className="my-5">
+      {!events.length ? (
+        <EmptyEventsList />
+      ) : (
+        events.map((evt) => (
+          <EventCard
+            key={evt.pkgPath}
+            evt={evt}
+            href={`/ticket/${idFromPkgPath(evt.pkgPath)}`}
+          />
+        ))
+      )}
+    </div>
+  );
 }

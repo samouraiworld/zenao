@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -17,6 +17,7 @@ import { useToast } from "@/app/hooks/use-toast";
 import { useVotePoll } from "@/lib/mutations/social-feed";
 import { Button } from "@/components/shadcn/button";
 import { profileOptions } from "@/lib/queries/profile";
+import { eventUserRoles } from "@/lib/queries/event-users";
 
 export function PollPostCard({
   pollId,
@@ -39,6 +40,13 @@ export function PollPostCard({
   );
 
   const { votePoll, isPending } = useVotePoll(queryClient);
+
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userAddress),
+  );
+
+  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
+  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
 
   const now = new Date();
   const endTime =
@@ -98,7 +106,9 @@ export function PollPostCard({
               key={index}
               pollResult={pollResult}
               totalVotesCount={totalVotesCount}
-              disabled={isPollEnded || isPending}
+              disabled={
+                isPollEnded || isPending || (!isOrganizer && !isParticipant)
+              }
               onCheckedChange={() => {
                 onVote(pollResult.option);
               }}
@@ -124,6 +134,7 @@ function PollResultItem({
   onCheckedChange: (checked: boolean) => void;
   pollKind: PollKind;
 }) {
+  const t = useTranslations("event-feed");
   const percent =
     totalVotesCount > 0
       ? Math.round((pollResult.count * 100) / totalVotesCount)
@@ -138,7 +149,7 @@ function PollResultItem({
       className={cn(
         "flex items-center justify-between gap-2 px-4 w-full h-10 relative rounded-lg bg-transparent",
         !disabled && "hover:opacity-50 cursor-pointer",
-        disabled && "hover:bg-transparent",
+        disabled && "hover:bg-transparent cursor-not-allowed",
         pollResult.hasUserVoted && "border border-gray-600",
       )}
       onClick={() => {
@@ -161,7 +172,9 @@ function PollResultItem({
 
         <div className="flex flex-row items-center gap-3">
           <div className="flex flex-row items-center gap-2">
-            <Text className="text-xs">{`${pollResult.count} votes`}</Text>
+            <Text className="text-xs">
+              {t("poll.result-count", { count: pollResult.count })}
+            </Text>
             <Text className="text-sm">{`${percent}%`}</Text>
           </div>
           <Checkbox

@@ -97,7 +97,7 @@ describe("main", () => {
 
     // check that we have a ticket
     cy.visit("/tickets");
-    cy.get('a[href^="/event/"]').should("be.visible");
+    cy.get('a[href^="/ticket/"]').should("be.visible");
   });
 
   it("navigate to manifesto from home", () => {
@@ -205,7 +205,7 @@ describe("main", () => {
 
     // check that we have a ticket with the event name visible
     cy.visit("/tickets");
-    cy.get('a[href^="/event/"]').contains(testEventName).should("be.visible");
+    cy.get('a[href^="/ticket/"]').contains(testEventName).should("be.visible");
   });
 
   it("send feed standard post", () => {

@@ -16,8 +16,8 @@ import {
 import { PollPostForm } from "@/components/form/social-feed/poll-post-form";
 import { userAddressOptions } from "@/lib/queries/user";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
-import { PostsList } from "@/components/lists/posts-list";
-import { PollsList } from "@/components/lists/polls-list";
+import { PostsList } from "@/components/widgets/posts-list";
+import { PollsList } from "@/components/widgets/polls-list";
 import { mergeRefs } from "@/lib/utils";
 import { derivePkgAddr } from "@/lib/gno";
 import { GnowebButton } from "@/components/buttons/gnoweb-button";
