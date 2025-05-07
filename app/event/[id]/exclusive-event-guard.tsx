@@ -14,6 +14,8 @@ import {
   eventProtectionFormSchema,
   EventProtectionFormSchemaType,
 } from "@/components/form/types";
+import { useAccessExclusiveEvent } from "@/lib/mutations/event-management";
+import { useToast } from "@/app/hooks/use-toast";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
@@ -26,6 +28,7 @@ export function ExclusiveEventGuard({
   exclusive = false,
   children,
 }: ExclusiveEventGuardProps) {
+  const { accessExclusiveEvent, isPending } = useAccessExclusiveEvent();
   const [canAccess, setCanAccess] = useState<boolean>(!exclusive);
   const t = useTranslations("event-protection-guard");
   const form = useForm<EventProtectionFormSchemaType>({
@@ -35,14 +38,30 @@ export function ExclusiveEventGuard({
       password: "",
     },
   });
+  const { toast } = useToast();
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
     console.log(eventId, data);
 
     // Call the API to check if the password is correct
-    // Display error message if incorrect
-    // For now, we will just simulate a successful password check
-    setCanAccess(true);
+    try {
+      const res = await accessExclusiveEvent({
+        eventId,
+        password: data.password,
+      });
+
+      if (!res.access) {
+        throw new Error("Invalid password");
+      }
+
+      setCanAccess(true);
+    } catch (error) {
+      console.error("Error accessing exclusive event:", error);
+      toast({
+        variant: "destructive",
+        title: t("toast-access-error"),
+      });
+    }
   };
 
   if (canAccess) {
@@ -67,7 +86,11 @@ export function ExclusiveEventGuard({
             placeholder={t("password-placeholder")}
             inputType="password"
           />
-          <ButtonWithChildren type="submit" className="w-full rounded">
+          <ButtonWithChildren
+            type="submit"
+            className="w-full rounded"
+            loading={isPending}
+          >
             <div className="flex items-center">
               <Lock className="mr-2" />
               {t("access-button")}
