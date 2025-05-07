@@ -107,17 +107,17 @@ type Reaction struct {
 	Icon   string
 }
 
-type Checkin struct {
-	At           time.Time
-	GatekeeperID string
-	Signature    string
-}
-
 type SoldTicket struct {
 	Ticket  *Ticket
 	BuyerID string
 	UserID  string
 	Checkin *Checkin
+}
+
+type Checkin struct {
+	At           time.Time
+	GatekeeperID string
+	Signature    string
 }
 
 var tzFinder tzf.F
