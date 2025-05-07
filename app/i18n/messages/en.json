@@ -117,6 +117,9 @@
     "description": "Events you are attending.",
     "see-event-details": "See event details"
   },
+  "event-card": {
+    "exclusive-event": "Exclusive event"
+  },
   "events-list": {
     "no-events": "No events to show.",
     "no-events-desc": "You have no events. Why not create one?",
