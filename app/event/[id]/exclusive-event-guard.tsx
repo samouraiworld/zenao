@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Lock } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 import { Form } from "@/components/shadcn/form";
@@ -26,6 +27,7 @@ export function ExclusiveEventGuard({
   children,
 }: ExclusiveEventGuardProps) {
   const [canAccess, setCanAccess] = useState<boolean>(!exclusive);
+  const t = useTranslations("event-protection-guard");
   const form = useForm<EventProtectionFormSchemaType>({
     mode: "all",
     resolver: zodResolver(eventProtectionFormSchema),
@@ -50,12 +52,9 @@ export function ExclusiveEventGuard({
   return (
     <div className="flex flex-col gap-4 items-center justify-center w-full h-full">
       <Heading level={2} size="2xl">
-        Exclusive Event
+        {t("title")}
       </Heading>
-      <Text>
-        This event is exclusive to certain participants. You need a password to
-        access information.
-      </Text>
+      <Text>{t("description")}</Text>
 
       <Form {...form}>
         <form
@@ -65,13 +64,13 @@ export function ExclusiveEventGuard({
           <FormFieldInputString
             control={form.control}
             name="password"
-            placeholder="Enter password"
+            placeholder={t("password-placeholder")}
             inputType="password"
           />
           <ButtonWithChildren type="submit" className="w-full rounded">
             <div className="flex items-center">
               <Lock className="mr-2" />
-              Access event
+              {t("access-button")}
             </div>
           </ButtonWithChildren>
         </form>

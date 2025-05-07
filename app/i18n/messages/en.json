@@ -120,6 +120,12 @@
   "event-card": {
     "exclusive-event": "Exclusive event"
   },
+  "event-protection-guard": {
+    "title": "Exclusive event",
+    "description": "This event is exclusive to certain participants. You need a password to access information.",
+    "password-placeholder": "Enter the password...",
+    "access-button": "Access event"
+  },
   "events-list": {
     "no-events": "No events to show.",
     "no-events-desc": "You have no events. Why not create one?",
