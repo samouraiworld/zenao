@@ -3,6 +3,7 @@ package gzdb
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -42,9 +43,22 @@ type SoldTicket struct {
 	gorm.Model
 	EventID uint
 	BuyerID uint
+	UserID  uint
 	Price   float64
 	Secret  string `gorm:"uniqueIndex;not null"`
 	Pubkey  string `gorm:"uniqueIndex;not null"`
+	Checkin *Checkin
+}
+
+type Checkin struct {
+	// gorm.Model without ID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	SoldTicketID uint `gorm:"primaryKey;not null"`
+	GatekeeperID uint
+	Signature    string
 }
 
 func SetupDB(dsn string) (zeni.DB, error) {
@@ -213,7 +227,12 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventID string, userID string, ticketSecret string) error {
+func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string) error {
+	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
+	if err != nil {
+		return err
+	}
+
 	userIDint, err := strconv.ParseUint(userID, 10, 32)
 	if err != nil {
 		return err
@@ -249,7 +268,8 @@ func (g *gormZenaoDB) Participate(eventID string, userID string, ticketSecret st
 
 	if err := g.db.Create(&SoldTicket{
 		EventID: evt.ID,
-		BuyerID: uint(userIDint),
+		BuyerID: uint(buyerIDint),
+		UserID:  uint(userIDint),
 		Secret:  ticket.Secret(),
 		Pubkey:  ticket.Pubkey(),
 	}).Error; err != nil {
@@ -359,21 +379,21 @@ func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
 }
 
 // GetEventBuyerTickets implements zeni.DB.
-func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*zeni.Ticket, error) {
+func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*zeni.SoldTicket, error) {
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parse buyer id: %w", err)
 	}
 
 	tickets := []*SoldTicket{}
-	err = g.db.Find(&tickets, "event_id = ? AND buyer_id = ?", eventID, buyerIDint).Error
+	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Find(&tickets, "event_id = ? AND buyer_id = ?", eventID, buyerIDint).Error
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]*zeni.Ticket, len(tickets))
+	res := make([]*zeni.SoldTicket, len(tickets))
 	for i, ticket := range tickets {
-		res[i], err = zeni.NewTicketFromSecret(ticket.Secret)
+		res[i], err = dbSoldTicketToZeniSoldTicket(ticket)
 		if err != nil {
 			return nil, err
 		}
@@ -718,31 +738,44 @@ func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
 	return dbPollToZeniPoll(&poll)
 }
 
-// GetTicket implements zeni.DB.
-func (g *gormZenaoDB) GetTicket(pubkey string) (*zeni.Ticket, *zeni.Event, error) {
+// Checkin implements zeni.DB.
+func (g *gormZenaoDB) Checkin(pubkey string, gatekeeperID string, signature string) (*zeni.Event, error) {
+	gatekeeperIDint, err := strconv.ParseUint(gatekeeperID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
 	tickets := []*SoldTicket{}
-	if err := g.db.Model(&SoldTicket{}).Limit(1).Find(&tickets, "pubkey = ?", pubkey).Error; err != nil {
-		return nil, nil, err
+	if err := g.db.Model(&SoldTicket{}).Preload("Checkin").Limit(1).Find(&tickets, "pubkey = ?", pubkey).Error; err != nil {
+		return nil, err
 	}
 	if len(tickets) == 0 {
-		return nil, nil, errors.New("ticket pubkey not found")
+		return nil, errors.New("ticket pubkey not found")
 	}
 	dbTicket := tickets[0]
 
-	evt := Event{}
-	if err := g.db.First(&evt, "id = ?", dbTicket.EventID).Error; err != nil {
-		return nil, nil, err
+	if dbTicket.Checkin != nil {
+		return nil, errors.New("ticket already checked-in")
 	}
 
-	ticket, err := zeni.NewTicketFromSecret(dbTicket.Secret)
+	roles, err := g.UserRoles(gatekeeperID, fmt.Sprint(dbTicket.EventID))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	zEvt, err := dbEventToZeniEvent(&evt)
-	if err != nil {
-		return nil, nil, err
+	if !slices.Contains(roles, "gatekeeper") {
+		return nil, errors.New("user is not gatekeeper for this event")
 	}
-	return ticket, zEvt, nil
+
+	dbTicket.Checkin = &Checkin{
+		GatekeeperID: uint(gatekeeperIDint),
+		Signature:    signature,
+	}
+
+	if err := g.db.Save(dbTicket).Error; err != nil {
+		return nil, err
+	}
+
+	return g.GetEvent(fmt.Sprint(dbTicket.EventID))
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
@@ -754,4 +787,25 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		AuthID:      dbuser.AuthID,
 		Plan:        zeni.Plan(dbuser.Plan),
 	}
+}
+
+func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) {
+	tickobj, err := zeni.NewTicketFromSecret(dbtick.Secret)
+	if err != nil {
+		return nil, err
+	}
+	var checkin *zeni.Checkin
+	if dbtick.Checkin != nil {
+		checkin = &zeni.Checkin{
+			At:           dbtick.Checkin.CreatedAt,
+			GatekeeperID: fmt.Sprint(dbtick.Checkin.GatekeeperID),
+			Signature:    dbtick.Checkin.Signature,
+		}
+	}
+	return &zeni.SoldTicket{
+		Ticket:  tickobj,
+		BuyerID: fmt.Sprint(dbtick.BuyerID),
+		UserID:  fmt.Sprint(dbtick.UserID),
+		Checkin: checkin,
+	}, nil
 }

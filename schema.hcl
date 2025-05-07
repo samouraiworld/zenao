@@ -1,3 +1,43 @@
+table "checkins" {
+  schema = schema.main
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "sold_ticket_id" {
+    null           = false
+    type           = integer
+    auto_increment = true
+  }
+  column "gatekeeper_id" {
+    null = true
+    type = integer
+  }
+  column "signature" {
+    null = true
+    type = text
+  }
+  primary_key {
+    columns = [column.sold_ticket_id]
+  }
+  foreign_key "fk_sold_tickets_checkin" {
+    columns     = [column.sold_ticket_id]
+    ref_columns = [table.sold_tickets.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_checkins_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
 table "users" {
   schema = schema.main
   column "id" {
@@ -471,6 +511,10 @@ table "sold_tickets" {
     type = integer
   }
   column "buyer_id" {
+    null = true
+    type = integer
+  }
+  column "user_id" {
     null = true
     type = integer
   }

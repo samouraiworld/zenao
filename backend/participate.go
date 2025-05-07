@@ -51,7 +51,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
 
-		if err := db.Participate(req.Msg.EventId, zUser.ID, ticket.Secret()); err != nil {
+		if err := db.Participate(req.Msg.EventId, zUser.ID, zUser.ID, ticket.Secret()); err != nil {
 			return err
 		}
 

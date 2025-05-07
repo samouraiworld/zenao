@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"slices"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -32,31 +31,17 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 	var evt *zeni.Event
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		_, evt, err = db.GetTicket(req.Msg.TicketPubkey)
-		if err != nil {
-			return err
-		}
-		roles, err := db.UserRoles(zUser.ID, evt.ID)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, "gatekeeper") {
-			return errors.New("user is not gatekeeper for this event")
-		}
-		return nil
+		evt, err = db.Checkin(req.Msg.TicketPubkey, zUser.ID, req.Msg.Signature)
+		return err
 	}); err != nil {
 		return nil, err
 	}
 
-	if evt == nil {
-		return nil, errors.New("internal error: event is nil after db tx")
+	if evt != nil {
+		if err := s.Chain.Checkin(evt.ID, zUser.ID, req.Msg); err != nil {
+			s.Logger.Error("failed to checkin on-chain, ignoring to prevent entrance brick")
+		}
 	}
-
-	if err := s.Chain.Checkin(evt.ID, zUser.ID, req.Msg); err != nil {
-		return nil, err
-	}
-
-	// XXX: mark checkin in db?
 
 	return connect.NewResponse(&zenaov1.CheckinResponse{}), nil
 }
