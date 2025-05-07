@@ -327,6 +327,50 @@ func main() {
 	return nil
 }
 
+func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error {
+	eventPkgPath := g.eventRealmPkgPath(eventID)
+	gatekeeperPkgPath := g.userRealmPkgPath(gatekeeperID)
+
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+				
+import (
+	event %q
+	gatekeeper %q
+	
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/events"
+)
+
+func main() {
+	daokit.InstantExecute(gatekeeper.DAO, daokit.ProposalRequest{
+		Title: "Checkin",
+		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Title: "Checkin",
+			Message: events.NewCheckinMsg(%q, %q),
+		}),
+	})
+}
+`, eventPkgPath, gatekeeperPkgPath, req.TicketPubkey, req.Signature),
+			}},
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("checked in participant", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	return nil
+}
+
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
@@ -631,50 +675,6 @@ func voteOnPoll() {
 	}
 
 	g.logger.Info("voted on poll", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
-	return nil
-}
-
-func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error {
-	eventPkgPath := g.eventRealmPkgPath(eventID)
-	gatekeeperPkgPath := g.userRealmPkgPath(gatekeeperID)
-
-	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: 100000000,
-	}, vm.MsgRun{
-		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
-			Name: "main",
-			Files: []*gnovm.MemFile{{
-				Name: "main.gno",
-				Body: fmt.Sprintf(`package main
-				
-import (
-	event %q
-	gatekeeper %q
-	
-	"gno.land/p/zenao/daokit"
-	"gno.land/p/zenao/events"
-)
-
-func main() {
-	daokit.InstantExecute(gatekeeper.DAO, daokit.ProposalRequest{
-		Title: "Checkin",
-		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
-			Title: "Checkin",
-			Message: events.NewCheckinMsg(%q, %q),
-		}),
-	})
-}
-`, eventPkgPath, gatekeeperPkgPath, req.TicketPubkey, req.Signature),
-			}},
-		},
-	}))
-	if err != nil {
-		return err
-	}
-
-	g.logger.Info("checked in participant", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	return nil
 }
 
