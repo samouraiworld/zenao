@@ -1,6 +1,7 @@
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventOptions } from "../queries/event";
+import { getQueryClient } from "../get-query-client";
 import { zenaoClient } from "@/app/zenao-client";
 
 type EventParticipateLoggedInRequest = {
@@ -10,7 +11,7 @@ type EventParticipateLoggedInRequest = {
   userAddress: string;
 };
 
-const getRelatedQueriesOptions = (variables: {
+export const getRelatedQueriesOptions = (variables: {
   eventId: string;
   userAddress: string | null;
 }) => {
@@ -31,7 +32,8 @@ const getRelatedQueriesOptions = (variables: {
   };
 };
 
-export const useEventParticipateLoggedIn = (queryClient: QueryClient) => {
+export const useEventParticipateLoggedIn = () => {
+  const queryClient = getQueryClient();
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ eventId, token }: EventParticipateLoggedInRequest) => {
       await zenaoClient.participate(
@@ -65,15 +67,15 @@ export const useEventParticipateLoggedIn = (queryClient: QueryClient) => {
         previousUsersWithRoles,
       };
     },
-    onSuccess: (_, variables) => {
-      const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
-        getRelatedQueriesOptions(variables);
+    // onSuccess: (_, variables) => {
+    //   const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
+    //     getRelatedQueriesOptions(variables);
 
-      // Invalidate queries
-      queryClient.invalidateQueries(eventUserRolesOpts);
-      queryClient.invalidateQueries(eventOptionsOpts);
-      queryClient.invalidateQueries(eventUsersWithRoleOpts);
-    },
+    //   // Invalidate queries
+    //   queryClient.invalidateQueries(eventUserRolesOpts);
+    //   queryClient.invalidateQueries(eventOptionsOpts);
+    //   queryClient.invalidateQueries(eventUsersWithRoleOpts);
+    // },
     onError: (_, variables, context) => {
       const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
         getRelatedQueriesOptions(variables);
@@ -109,25 +111,10 @@ type EventParticipateGuestRequest = {
   userAddress: string | null;
 };
 
-export const useEventParticipateGuest = (queryClient: QueryClient) => {
+export const useEventParticipateGuest = () => {
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ eventId, email }: EventParticipateGuestRequest) => {
       await zenaoClient.participate({ eventId, email });
-    },
-    onSuccess: (_, variables) => {
-      const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
-        getRelatedQueriesOptions(variables);
-
-      // Invalidate queries
-      queryClient.invalidateQueries(eventUsersWithRoleOpts);
-      queryClient.invalidateQueries(eventOptionsOpts);
-
-      // User role optimistic update
-      queryClient.cancelQueries(eventUserRolesOpts);
-      queryClient.setQueryData(eventUserRolesOpts.queryKey, (old) => [
-        ...(old ?? []),
-        "participant" as const,
-      ]);
     },
   });
 
