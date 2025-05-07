@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Lock } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 import { Form } from "@/components/shadcn/form";
@@ -16,6 +18,8 @@ import {
 } from "@/components/form/types";
 import { useAccessExclusiveEvent } from "@/lib/mutations/event-management";
 import { useToast } from "@/app/hooks/use-toast";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { userAddressOptions } from "@/lib/queries/user";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
@@ -28,8 +32,18 @@ export function ExclusiveEventGuard({
   exclusive = false,
   children,
 }: ExclusiveEventGuardProps) {
+  const { getToken, userId } = useAuth();
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
+  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
+  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
+
   const { accessExclusiveEvent, isPending } = useAccessExclusiveEvent();
-  const [canAccess, setCanAccess] = useState<boolean>(!exclusive);
+  const [canAccess, setCanAccess] = useState<boolean>(
+    !exclusive || isOrganizer || (exclusive && isParticipant),
+  );
   const t = useTranslations("event-protection-guard");
   const form = useForm<EventProtectionFormSchemaType>({
     mode: "all",
