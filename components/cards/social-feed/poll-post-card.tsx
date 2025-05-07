@@ -147,10 +147,10 @@ function PollResultItem({
       variant="outline"
       disabled={disabled}
       className={cn(
-        "flex items-center justify-between gap-2 px-4 w-full h-10 relative rounded-lg bg-transparent",
-        !disabled && "hover:opacity-50 cursor-pointer",
-        disabled && "hover:bg-transparent cursor-not-allowed",
-        pollResult.hasUserVoted && "border border-gray-600",
+        "flex items-center justify-between gap-2 px-4 w-full h-10 relative rounded-lg hover:bg-transparent bg-transparent",
+        !disabled && !pollResult.hasUserVoted && "hover:border-neutral-500",
+        !disabled && "cursor-pointer",
+        pollResult.hasUserVoted && "border border-custom-input-border",
       )}
       onClick={() => {
         if (!disabled) {
@@ -159,16 +159,12 @@ function PollResultItem({
       }}
     >
       <div>
-        <Gauge percent={percent} className="absolute -z-10 left-0" />
+        <Gauge
+          percent={percent}
+          className="absolute -z-10 left-0 bg-neutral-200/50 dark:bg-neutral-800/50"
+        />
 
-        <Text
-          className={cn(
-            "text-sm line-clamp-2",
-            pollResult.hasUserVoted && "text-white",
-          )}
-        >
-          {pollResult.option}
-        </Text>
+        <Text className="text-sm line-clamp-2">{pollResult.option}</Text>
 
         <div className="flex flex-row items-center gap-3">
           <div className="flex flex-row items-center gap-2">
@@ -179,10 +175,11 @@ function PollResultItem({
           </div>
           <Checkbox
             ref={checkboxRef}
+            disabled={disabled}
             checked={pollResult.hasUserVoted}
             onCheckedChange={onCheckedChange}
             className={cn(
-              disabled ? "cursor-default" : "cursor-pointer",
+              "cursor-pointer disabled:opacity-100 disabled:cursor-default",
               pollKind === PollKind.SINGLE_CHOICE && "rounded-lg",
             )}
           />
