@@ -404,16 +404,11 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "Add new post",
-		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
-			Title: "Add new post",
-			Message: daokit.NewExecuteLambdaMsg(
-				NewPost,
-			),
-		}),
+		Message: daokit.NewExecuteLambdaMsg(newPost),
 	})
 }
 
-func NewPost() {
+func newPost() {
 	feedID := %q
 	post := %s
 
@@ -474,19 +469,13 @@ import (
 )
 	
 func main() {
-	title := "User #%s reacts to post #%d in event #%s."
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-		Title: title,
-		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
-			Title: title,
-			Message: daokit.NewExecuteLambdaMsg(
-				NewReaction,
-			),
-		}),
+		Title: "User #%s reacts to post #%d in event #%s.",
+		Message: daokit.NewExecuteLambdaMsg(newReaction),
 	})
 }
 
-func NewReaction() {
+func newReaction() {
 	social_feed.ReactPost(%d, %q)
 }
 `, userRealmPkgPath, userID, postIDInt, eventID, postIDInt, req.Icon),
@@ -539,16 +528,11 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "Add new poll",
-		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
-			Title: "Add new poll",
-			Message: daokit.NewExecuteLambdaMsg(
-				NewPoll,
-			),
-		}),
+		Message: daokit.NewExecuteLambdaMsg(newPoll),
 	})
 }
 
-func NewPoll() {
+func newPoll() {
 	question := %q
 	options := []string{%s}
 	kind := pollsv1.PollKind(%d)
@@ -629,16 +613,11 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "Vote on poll",
-		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
-			Title: "Vote on poll",
-			Message: daokit.NewExecuteLambdaMsg(
-				VoteOnPoll,
-			),
-		}),
+		Message: daokit.NewExecuteLambdaMsg(voteOnPoll),
 	})
 }
 
-func VoteOnPoll() {
+func voteOnPoll() {
 	pollID := %s
 	option := %q
 	polls.Vote(uint64(pollID), option)
@@ -671,8 +650,8 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 				Body: fmt.Sprintf(`package main
 				
 import (
-    event %q
-    gatekeeper %q
+	event %q
+	gatekeeper %q
 	
 	"gno.land/p/zenao/daokit"
 	"gno.land/p/zenao/events"
