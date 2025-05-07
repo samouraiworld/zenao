@@ -3,12 +3,16 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Lock } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
-import { Button } from "@/components/shadcn/button";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import {
+  eventProtectionFormSchema,
+  EventProtectionFormSchemaType,
+} from "@/components/form/types";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
@@ -22,14 +26,22 @@ export function ExclusiveEventGuard({
   children,
 }: ExclusiveEventGuardProps) {
   const [canAccess, setCanAccess] = useState<boolean>(!exclusive);
-  const form = useForm<{ password: string }>({
+  const form = useForm<EventProtectionFormSchemaType>({
     mode: "all",
+    resolver: zodResolver(eventProtectionFormSchema),
     defaultValues: {
       password: "",
     },
   });
 
-  const onSubmit = async (data: { password: string }) => {};
+  const onSubmit = async (data: EventProtectionFormSchemaType) => {
+    console.log(eventId, data);
+
+    // Call the API to check if the password is correct
+    // Display error message if incorrect
+    // For now, we will just simulate a successful password check
+    setCanAccess(true);
+  };
 
   if (canAccess) {
     return children;

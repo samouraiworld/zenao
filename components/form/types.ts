@@ -123,3 +123,10 @@ export const pollFormSchema = z.object({
   duration: pollDurationFormSchema,
 });
 export type PollFormSchemaType = z.infer<typeof pollFormSchema>;
+
+export const eventProtectionFormSchema = z.object({
+  password: z.string().min(1, "Required"),
+});
+export type EventProtectionFormSchemaType = z.infer<
+  typeof eventProtectionFormSchema
+>;
