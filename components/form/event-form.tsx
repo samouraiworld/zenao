@@ -34,6 +34,7 @@ interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
   onSubmit: (values: EventFormSchemaType) => Promise<void>;
   isLoaded: boolean;
+  defaultExclusive?: boolean;
   isEditing?: boolean;
   minDateRange?: Date;
   maxDateRange?: Date;
@@ -43,6 +44,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   form,
   onSubmit,
   isLoaded,
+  defaultExclusive,
   minDateRange,
   maxDateRange,
   isEditing = false,
@@ -52,6 +54,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   const startDate = form.watch("startDate");
   const endDate = form.watch("endDate");
   const imageUri = form.watch("imageUri");
+  const exclusive = form.watch("exclusive");
   const t = useTranslations("eventForm");
 
   const [isVirtual, setIsVirtual] = useState<boolean>(
@@ -68,6 +71,14 @@ export const EventForm: React.FC<EventFormProps> = ({
       setMarker({ lat: location.lat, lng: location.lng });
     }
   }, [location]);
+
+  useEffect(() => {
+    if (!exclusive) {
+      form.setValue("password", "");
+    } else {
+      form.setValue("password", undefined);
+    }
+  }, [exclusive, form]);
 
   return (
     <Form {...form}>
@@ -283,9 +294,23 @@ export const EventForm: React.FC<EventFormProps> = ({
             {/* Private option */}
             <FormFieldSwitch
               control={form.control}
-              name="private"
-              label={"This event is private"}
+              name="exclusive"
+              label={"Protect access with password"}
             />
+
+            {exclusive && (
+              <FormFieldInputString
+                control={form.control}
+                name="password"
+                inputType="password"
+                placeholder={
+                  isEditing && defaultExclusive
+                    ? t("no-changes-password-placeholder")
+                    : t("password-placeholder")
+                }
+                label={t("password-label")}
+              />
+            )}
 
             <ButtonWithLabel
               loading={isLoaded}

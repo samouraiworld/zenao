@@ -33,12 +33,26 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const defaultValues: EventFormSchemaType = {
     ...data,
     location,
-    private: false, // TODO use data `private` field
+    exclusive: false, // TODO add data exclusive
+    password: "",
   };
 
   const form = useForm<EventFormSchemaType>({
     mode: "all",
-    resolver: zodResolver(eventFormSchema),
+    resolver: zodResolver(
+      eventFormSchema.refine(
+        (data) => {
+          if (data.exclusive && !defaultValues.exclusive) {
+            return data.password && data.password.length > 0;
+          }
+          return true;
+        },
+        {
+          message: "Password is required when event is exclusive",
+          path: ["password"],
+        },
+      ),
+    ),
     defaultValues,
   });
 
@@ -49,7 +63,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async (values: EventFormSchemaType) => {
+  const onSubmit = async ({ password: _, ...values }: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
       const token = await getToken();
@@ -79,11 +93,13 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
         default:
           value = {};
       }
+
       await zenaoClient.editEvent(
         {
           ...values,
           eventId: id,
           location: { address: { case: values.location.kind, value } },
+          // password: password === "" ? null : password, // TODO add password
         },
         {
           headers: { Authorization: "Bearer " + token },
@@ -116,6 +132,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       form={form}
       onSubmit={onSubmit}
       isLoaded={isLoaded}
+      defaultExclusive={defaultValues.exclusive}
       isEditing
       maxDateRange={new Date()}
     />
