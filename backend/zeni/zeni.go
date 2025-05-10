@@ -107,6 +107,19 @@ type Reaction struct {
 	Icon   string
 }
 
+type SoldTicket struct {
+	Ticket  *Ticket
+	BuyerID string
+	UserID  string
+	Checkin *Checkin
+}
+
+type Checkin struct {
+	At           time.Time
+	GatekeeperID string
+	Signature    string
+}
+
 var tzFinder tzf.F
 
 func init() {
@@ -150,12 +163,13 @@ type DB interface {
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) error
 	GetEvent(eventID string) (*Event, error)
-	Participate(eventID string, userID string, ticketSecret string) error
+	Participate(eventID string, buyerID string, userID string, ticketSecret string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
 	GetAllParticipants(eventID string) ([]*User, error)
-	GetEventBuyerTickets(eventID string, buyerID string) ([]*Ticket, error)
+	GetEventBuyerTickets(eventID string, buyerID string) ([]*SoldTicket, error)
+	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
@@ -177,6 +191,7 @@ type Chain interface {
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
 	Participate(eventID string, callerID string, participantID string, ticketPubkey string) error
+	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
 	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error

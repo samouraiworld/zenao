@@ -327,6 +327,50 @@ func main() {
 	return nil
 }
 
+func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error {
+	eventPkgPath := g.eventRealmPkgPath(eventID)
+	gatekeeperPkgPath := g.userRealmPkgPath(gatekeeperID)
+
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 100000000,
+	}, vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+				
+import (
+	event %q
+	gatekeeper %q
+	
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/events"
+)
+
+func main() {
+	daokit.InstantExecute(gatekeeper.DAO, daokit.ProposalRequest{
+		Title: "Checkin",
+		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Title: "Checkin",
+			Message: events.NewCheckinMsg(%q, %q),
+		}),
+	})
+}
+`, eventPkgPath, gatekeeperPkgPath, req.TicketPubkey, req.Signature),
+			}},
+		},
+	}))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("checked in participant", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	return nil
+}
+
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
@@ -404,16 +448,11 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "Add new post",
-		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
-			Title: "Add new post",
-			Message: daokit.NewExecuteLambdaMsg(
-				NewPost,
-			),
-		}),
+		Message: daokit.NewExecuteLambdaMsg(newPost),
 	})
 }
 
-func NewPost() {
+func newPost() {
 	feedID := %q
 	post := %s
 
@@ -474,19 +513,13 @@ import (
 )
 	
 func main() {
-	title := "User #%s reacts to post #%d in event #%s."
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-		Title: title,
-		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
-			Title: title,
-			Message: daokit.NewExecuteLambdaMsg(
-				NewReaction,
-			),
-		}),
+		Title: "User #%s reacts to post #%d in event #%s.",
+		Message: daokit.NewExecuteLambdaMsg(newReaction),
 	})
 }
 
-func NewReaction() {
+func newReaction() {
 	social_feed.ReactPost(%d, %q)
 }
 `, userRealmPkgPath, userID, postIDInt, eventID, postIDInt, req.Icon),
@@ -539,16 +572,11 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "Add new poll",
-		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
-			Title: "Add new poll",
-			Message: daokit.NewExecuteLambdaMsg(
-				NewPoll,
-			),
-		}),
+		Message: daokit.NewExecuteLambdaMsg(newPoll),
 	})
 }
 
-func NewPoll() {
+func newPoll() {
 	question := %q
 	options := []string{%s}
 	kind := pollsv1.PollKind(%d)
@@ -629,16 +657,11 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "Vote on poll",
-		Message: daokit.NewInstantExecuteMsg(user.DAO, daokit.ProposalRequest{
-			Title: "Vote on poll",
-			Message: daokit.NewExecuteLambdaMsg(
-				VoteOnPoll,
-			),
-		}),
+		Message: daokit.NewExecuteLambdaMsg(voteOnPoll),
 	})
 }
 
-func VoteOnPoll() {
+func voteOnPoll() {
 	pollID := %s
 	option := %q
 	polls.Vote(uint64(pollID), option)

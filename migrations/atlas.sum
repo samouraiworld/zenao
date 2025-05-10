@@ -1,4 +1,4 @@
-h1:T0dEjdr3LPlmtkt5DWeNt2h2zr+deiA+WEwhUxEc5Tg=
+h1:imP9yffzb8iynBaZdnIPHZlDHOSSdvfu+l3pgr4E/VA=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
@@ -10,3 +10,6 @@ h1:T0dEjdr3LPlmtkt5DWeNt2h2zr+deiA+WEwhUxEc5Tg=
 20250424210122_freemium.sql h1:gtk2oA1RmbmQUTguk2r0yOHY5xc8kcPBaNq48lqMNKA=
 20250424214412_buyer-id.sql h1:CjhntqqnjdVR2oDMVR4n77Jn2VL2OJGVTjo0OmG+OoY=
 20250424214413_copy-feed.sql h1:HGhtz/MjzFMgPyz5UMm8sN4iy0JZckDlKH86y7g/a8M=
+20250506094413_ticket-pubkey.sql h1:PFUQh5XWujNLCKJ/IHFy1JvPHiruYxi78D/h5XF6mMA=
+20250506100445_not-nil-pubkey.sql h1:/gQGFMxIwTrWa9cf3ixlygEyq9BMqGF/FCA8JZy9g3M=
+20250507115126_checkin.sql h1:LaqA4SbVU6ecJiA8OH2W6+uQSLciwSw1e4t+4WUoow0=
