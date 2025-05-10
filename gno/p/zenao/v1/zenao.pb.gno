@@ -57,6 +57,7 @@ type EditEventResponse struct {
 type ParticipateRequest struct {
 	EventId string
 	Email   string
+	Guests  []string
 }
 
 type ParticipateResponse struct {

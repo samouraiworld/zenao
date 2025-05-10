@@ -163,6 +163,15 @@ func (p *ParticipateRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if p.Email != "" {
 		fmt.Fprintf(buf, "%s\tEmail: %q,\n", linePrefix, p.Email)
 	}
+	if len(p.Guests) != 0 {
+		fmt.Fprintf(buf, "%s\tGuests: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range p.Guests {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

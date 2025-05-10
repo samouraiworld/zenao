@@ -284,6 +284,13 @@ func (p *ParticipateRequest) ToJSON() *json.Node {
 	if p.Email != "" {
 		fields["email"] = json.StringNode("", p.Email)
 	}
+	if len(p.Guests) != 0 {
+		arr := make([]*json.Node, len(p.Guests))
+		for i, val := range p.Guests {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["guests"] = json.ArrayNode("", arr)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -297,6 +304,14 @@ func (p *ParticipateRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["email"]; ok {
 		p.Email = val.MustString()
+	}
+	if val, ok := fields["guests"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		p.Guests = arr
 	}
 }
 
