@@ -49,6 +49,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return nil, errors.New("guest has same email as buyer")
 		}
 
+		// XXX: support batch
 		authGuest, err := s.Auth.EnsureUserExists(ctx, guestEmail)
 		if err != nil {
 			return nil, err
@@ -58,6 +59,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return nil, errors.New("duplicate guest")
 		}
 
+		// XXX: support batch
 		guest, err := s.EnsureUserExists(ctx, authGuest)
 		if err != nil {
 			return nil, err
@@ -80,6 +82,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		// XXX: can't create event with price for now but later we need to check that the event is free
 
 		for i, ticket := range tickets {
+			// XXX: support batch
 			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret()); err != nil {
 				return err
 			}
@@ -96,6 +99,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	for i, ticket := range tickets {
+		// XXX: support batch, this might be very very slow
 		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey()); err != nil {
 			// XXX: handle case where db tx pass but chain fail
 			return nil, err
