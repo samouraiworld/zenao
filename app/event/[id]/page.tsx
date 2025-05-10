@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EventInfo } from "./event-info";
 import { imageHeight, imageWidth } from "./constants";
+import { ExclusiveEventGuard } from "./exclusive-event-guard";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
@@ -66,16 +67,18 @@ export default async function EventPage({ params }: Props) {
   );
 
   return (
-    <ScreenContainer
-      background={{
-        src: eventData.imageUri,
-        width: imageWidth,
-        height: imageHeight,
-      }}
-    >
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventInfo id={p.id} />
-      </HydrationBoundary>
-    </ScreenContainer>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ExclusiveEventGuard eventId={p.id} exclusive>
+        <ScreenContainer
+          background={{
+            src: eventData.imageUri,
+            width: imageWidth,
+            height: imageHeight,
+          }}
+        >
+          <EventInfo id={p.id} />
+        </ScreenContainer>
+      </ExclusiveEventGuard>
+    </HydrationBoundary>
   );
 }
