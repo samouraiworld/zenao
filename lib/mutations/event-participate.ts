@@ -7,6 +7,7 @@ import { zenaoClient } from "@/app/zenao-client";
 type EventParticipateLoggedInRequest = {
   eventId: string;
   token: string;
+  guests: string[];
   userId: string;
   userAddress: string;
 };
@@ -35,9 +36,13 @@ export const getRelatedQueriesOptions = (variables: {
 export const useEventParticipateLoggedIn = () => {
   const queryClient = getQueryClient();
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
-    mutationFn: async ({ eventId, token }: EventParticipateLoggedInRequest) => {
+    mutationFn: async ({
+      eventId,
+      guests,
+      token,
+    }: EventParticipateLoggedInRequest) => {
       await zenaoClient.participate(
-        { eventId },
+        { eventId, guests },
         { headers: { Authorization: `Bearer ${token}` } },
       );
     },
@@ -108,13 +113,18 @@ export const useEventParticipateLoggedIn = () => {
 type EventParticipateGuestRequest = {
   eventId: string;
   email: string;
+  guests: string[];
   userAddress: string | null;
 };
 
 export const useEventParticipateGuest = () => {
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
-    mutationFn: async ({ eventId, email }: EventParticipateGuestRequest) => {
-      await zenaoClient.participate({ eventId, email });
+    mutationFn: async ({
+      eventId,
+      email,
+      guests,
+    }: EventParticipateGuestRequest) => {
+      await zenaoClient.participate({ eventId, email, guests });
     },
   });
 

@@ -19,7 +19,7 @@ export const FormFieldInputString = <T extends FieldValues>({
   label,
   placeholder,
   disabled,
-}: FormFieldProps<T, string> & {
+}: FormFieldProps<T, string | undefined> & {
   label?: React.ReactNode;
   disabled?: boolean;
 }) => {

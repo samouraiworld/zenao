@@ -4,18 +4,17 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useState } from "react";
+import { SignedOut, useAuth } from "@clerk/nextjs";
+import { FormFieldInputString } from "../components/FormFieldInputString";
 import { InviteeForm } from "./invitee-form";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
 import { useEventInfo } from "@/components/providers/event-provider";
 import { Form } from "@/components/shadcn/form";
 import {
-  getRelatedQueriesOptions,
   useEventParticipateGuest,
   useEventParticipateLoggedIn,
 } from "@/lib/mutations/event-participate";
-import { getQueryClient } from "@/lib/get-query-client";
 import { useToast } from "@/app/hooks/use-toast";
 
 const emailListSchema = z.object({
@@ -23,7 +22,8 @@ const emailListSchema = z.object({
 });
 
 const eventRegistrationFormSchema = z.object({
-  emails: z.array(emailListSchema),
+  email: z.string().email().optional(),
+  guests: z.array(emailListSchema),
 });
 
 export type EventRegistrationFormSchemaType = z.infer<
@@ -42,11 +42,8 @@ export type SubmitStatusInvitee = Record<
 export function EventRegistrationForm({
   userAddress,
 }: EventRegistrationFormProps) {
-  const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
   const { id: eventId, capacity, participants } = useEventInfo();
-  const [submitStatusInvitees, setSubmitStatusInvitees] =
-    useState<SubmitStatusInvitee>({});
   const { toast } = useToast();
 
   const [isPending, setIsPending] = useState(false);
@@ -57,56 +54,29 @@ export function EventRegistrationForm({
   const form = useForm<EventRegistrationFormSchemaType>({
     resolver: zodResolver(
       eventRegistrationFormSchema.extend({
-        emails: z
+        guests: z
           .array(emailListSchema)
           .min(userId ? 0 : 1)
-          .max(capacity - participants - (userId ? 1 : 0)),
+          .max(capacity - participants - 1),
       }),
     ),
     defaultValues: {
-      emails: userId ? [] : [{ email: "" }],
+      email: userId ? undefined : "",
+      guests: [],
     },
   });
 
-  useEffect(() => {
-    const { unsubscribe } = form.watch(() => {
-      setSubmitStatusInvitees({});
-    });
-    return () => unsubscribe();
-  }, [form]);
-
   const onSubmit = async (data: EventRegistrationFormSchemaType) => {
+    const guests = data.guests.reduce<string[]>((acc, e) => {
+      acc.push(e.email);
+      return acc;
+    }, []);
+
     setIsPending(true);
+
     try {
-      // Register additional invitees
-      const status = data.emails.reduce<SubmitStatusInvitee>(
-        (acc, _, index) => {
-          acc[`emails.${index}.email`] = "loading";
-          return acc;
-        },
-        {},
-      );
-
-      setSubmitStatusInvitees(status);
-
-      for (let i = 0; i < data.emails.length; i++) {
-        const id: `emails.${number}.email` = `emails.${i}.email`;
-        try {
-          await participateGuest({
-            eventId,
-            email: data.emails[i].email,
-            userAddress: userAddress,
-          });
-          status[id] = "success";
-        } catch (err) {
-          console.error(err);
-          status[id] = "error";
-        }
-
-        setSubmitStatusInvitees(status);
-      }
-
       if (userId) {
+        // Authenticated
         const token = await getToken();
         if (!token) {
           throw new Error("invalid clerk token");
@@ -120,34 +90,40 @@ export function EventRegistrationForm({
           token,
           userId: userId,
           userAddress: userAddress,
+          guests,
         });
-      }
+      } else {
+        // Guest
+        await participateGuest({
+          eventId,
+          email: data.email!,
+          guests,
+          userAddress,
+        });
 
-      if (Object.values(status).every((v) => v === "success")) {
         // User role optimistic update only if all users have been registered
-        const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
-          getRelatedQueriesOptions({
-            eventId,
-            userAddress,
-          });
+        //   const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
+        //     getRelatedQueriesOptions({
+        //       eventId,
+        //       userAddress,
+        //     });
 
         // Invalidate queries
-        queryClient.invalidateQueries(eventOptionsOpts);
-        queryClient.invalidateQueries(eventUsersWithRoleOpts);
+        //   queryClient.invalidateQueries(eventOptionsOpts);
+        //   queryClient.invalidateQueries(eventUsersWithRoleOpts);
 
-        queryClient.cancelQueries(eventUserRolesOpts);
-        queryClient.setQueryData(eventUserRolesOpts.queryKey, (old) => [
-          ...(old ?? []),
-          "participant" as const,
-        ]);
-
-        toast({ title: t("toast-confirmation") });
-        form.reset();
-      } else {
-        toast({ variant: "destructive", title: t("toast-default-error") });
+        //   queryClient.cancelQueries(eventUserRolesOpts);
+        //   queryClient.setQueryData(eventUserRolesOpts.queryKey, (old) => [
+        //     ...(old ?? []),
+        //     "participant" as const,
+        //   ]);
       }
+      setIsPending(false);
+      toast({ title: t("toast-confirmation") });
+      form.reset();
     } catch (err) {
       console.error(err);
+      toast({ variant: "destructive", title: t("toast-default-error") });
     }
     setIsPending(false);
   };
@@ -156,7 +132,16 @@ export function EventRegistrationForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-4">
-          <InviteeForm userId={userId} status={submitStatusInvitees} />
+          <SignedOut>
+            <FormFieldInputString
+              control={form.control}
+              disabled={isPending}
+              name="email"
+              label={t("your-email")}
+              placeholder={t("email-placeholder")}
+            />
+          </SignedOut>
+          <InviteeForm userId={userId} loading={isPending} />
           <ButtonWithLabel
             type="submit"
             loading={isPending}
