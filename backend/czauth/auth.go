@@ -62,6 +62,7 @@ func (c *clerkZenaoAuth) EnsureUserExists(ctx context.Context, email string) (*z
 	}
 	if len(existing.Users) != 0 {
 		clerkUser := existing.Users[0]
+		// XXX: should probably return primary email once we support changing email
 		return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 	}
 
@@ -78,6 +79,8 @@ func (c *clerkZenaoAuth) EnsureUserExists(ctx context.Context, email string) (*z
 	if err != nil {
 		return nil, err
 	}
+
+	// XXX: should probably return primary email once we support changing email
 	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 }
 

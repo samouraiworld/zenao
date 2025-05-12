@@ -57,6 +57,7 @@ type EditEventResponse struct {
 type ParticipateRequest struct {
 	EventId string
 	Email   string
+	Guests  []string
 }
 
 type ParticipateResponse struct {
@@ -160,4 +161,12 @@ type GetEventTicketsRequest struct {
 
 type GetEventTicketsResponse struct {
 	TicketsSecrets []string
+}
+
+type CheckinRequest struct {
+	TicketPubkey string
+	Signature    string
+}
+
+type CheckinResponse struct {
 }
