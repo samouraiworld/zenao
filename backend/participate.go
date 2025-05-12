@@ -42,9 +42,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", buyer.ID), zap.Bool("user-banned", authUser.Banned))
 
-	participants := make([]*zeni.User, len(req.Msg.Guests)+1)
-	participants[0] = buyer
-	for i, guestEmail := range req.Msg.Guests {
+	participants := make([]*zeni.User, 0, len(req.Msg.Guests)+1)
+	participants = append(participants, buyer)
+	for _, guestEmail := range req.Msg.Guests {
 		if guestEmail == authUser.Email {
 			return nil, errors.New("guest has same email as buyer")
 		}
@@ -64,7 +64,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		if err != nil {
 			return nil, err
 		}
-		participants[i+1] = guest
+		participants = append(participants, guest)
 	}
 
 	tickets := make([]*zeni.Ticket, len(participants))
