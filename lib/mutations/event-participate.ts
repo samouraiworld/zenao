@@ -72,15 +72,15 @@ export const useEventParticipateLoggedIn = () => {
         previousUsersWithRoles,
       };
     },
-    // onSuccess: (_, variables) => {
-    //   const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
-    //     getRelatedQueriesOptions(variables);
+    onSuccess: (_, variables) => {
+      const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
+        getRelatedQueriesOptions(variables);
 
-    //   // Invalidate queries
-    //   queryClient.invalidateQueries(eventUserRolesOpts);
-    //   queryClient.invalidateQueries(eventOptionsOpts);
-    //   queryClient.invalidateQueries(eventUsersWithRoleOpts);
-    // },
+      // Invalidate queries
+      queryClient.invalidateQueries(eventUserRolesOpts);
+      queryClient.invalidateQueries(eventOptionsOpts);
+      queryClient.invalidateQueries(eventUsersWithRoleOpts);
+    },
     onError: (_, variables, context) => {
       const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
         getRelatedQueriesOptions(variables);
@@ -118,6 +118,7 @@ type EventParticipateGuestRequest = {
 };
 
 export const useEventParticipateGuest = () => {
+  const queryClient = getQueryClient();
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       eventId,
@@ -125,6 +126,22 @@ export const useEventParticipateGuest = () => {
       guests,
     }: EventParticipateGuestRequest) => {
       await zenaoClient.participate({ eventId, email, guests });
+    },
+    onSuccess: (_d, variables, _c) => {
+      const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
+        getRelatedQueriesOptions({
+          eventId: variables.eventId,
+          userAddress: variables.userAddress,
+        });
+
+      // Invalidate queries
+      queryClient.invalidateQueries(eventOptionsOpts);
+      queryClient.invalidateQueries(eventUsersWithRoleOpts);
+      queryClient.cancelQueries(eventUserRolesOpts);
+      queryClient.setQueryData(eventUserRolesOpts.queryKey, (old) => [
+        ...(old ?? []),
+        "participant" as const,
+      ]);
     },
   });
 

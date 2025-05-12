@@ -54,10 +54,7 @@ export function EventRegistrationForm({
   const form = useForm<EventRegistrationFormSchemaType>({
     resolver: zodResolver(
       eventRegistrationFormSchema.extend({
-        guests: z
-          .array(emailListSchema)
-          .min(userId ? 0 : 1)
-          .max(capacity - participants - 1),
+        guests: z.array(emailListSchema).max(capacity - participants - 1),
       }),
     ),
     defaultValues: {
@@ -100,23 +97,6 @@ export function EventRegistrationForm({
           guests,
           userAddress,
         });
-
-        // User role optimistic update only if all users have been registered
-        //   const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
-        //     getRelatedQueriesOptions({
-        //       eventId,
-        //       userAddress,
-        //     });
-
-        // Invalidate queries
-        //   queryClient.invalidateQueries(eventOptionsOpts);
-        //   queryClient.invalidateQueries(eventUsersWithRoleOpts);
-
-        //   queryClient.cancelQueries(eventUserRolesOpts);
-        //   queryClient.setQueryData(eventUserRolesOpts.queryKey, (old) => [
-        //     ...(old ?? []),
-        //     "participant" as const,
-        //   ]);
       }
       setIsPending(false);
       toast({ title: t("toast-confirmation") });
