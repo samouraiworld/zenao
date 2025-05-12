@@ -179,6 +179,9 @@
     "vote": {
       "toast-vote-success": "Vote submitted !",
       "toast-vote-error": "Error while voting !"
+    },
+    "poll": {
+      "result-count": "{count, plural, one {# vote} other {# votes}}"
     }
   },
   "broadcast-email-form": {
