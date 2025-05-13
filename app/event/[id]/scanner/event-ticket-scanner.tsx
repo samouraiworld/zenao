@@ -11,6 +11,8 @@ import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
 import { userAddressOptions } from "@/lib/queries/user";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
 
 type EventTicketScannerProps = {
   eventId: string;
@@ -25,8 +27,7 @@ const ticketSecretSchema = z
   .transform((value) => Buffer.from(value, "base64"));
 
 export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
-  void eventData; // TODO use to display metadata
-  const t = useTranslations("check-in-confirmation-dialog");
+  const t = useTranslations("event-scanner");
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -34,7 +35,16 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const { checkIn, isPending } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
 
+  const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const updateHistory = (newSig: string) => {
+    setHistory((old) => {
+      const upToDate = [newSig, ...old];
+
+      return upToDate;
+    });
+  };
 
   const handleQRCodeValue = async (value: string) => {
     setError(null);
@@ -67,32 +77,57 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
         ticketPubkey,
         token,
       });
+
+      updateHistory(signature);
     } catch (err) {
       console.error("Error", err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError(t("description-error"));
+        setError(t("check-in-confirmation-dialog.description-error"));
       }
     }
     setConfirmationDialogOpen(true);
   };
 
   return (
-    <div className="max-w-[650px] mx-auto">
+    <div className="mx-auto">
       <CheckinConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmationDialogOpen}
         loading={isPending}
         error={error}
       />
-      <Scanner
-        onScan={(result) => handleQRCodeValue(result[0].rawValue)}
-        allowMultiple
-        scanDelay={2000}
-      />
 
-      {/* TODO Historique local  ? */}
+      <div className="w-full grid grid-cols-2 gap-8">
+        <Scanner
+          onScan={(result) => handleQRCodeValue(result[0].rawValue)}
+          allowMultiple
+          scanDelay={2000}
+          classNames={{
+            container: "md:max-w-[650px] max-md:col-span-2 self-center",
+          }}
+        />
+
+        <div className="flex flex-col h-full max-md:col-span-2 gap-6">
+          <Heading level={2}>
+            {t("history-title")}: {eventData.title}
+          </Heading>
+
+          <div className="flex flex-col bg-secondary">
+            {history.length === 0 && (
+              <div className="p-4">
+                <Text>{t("no-tickets-scanned")}</Text>
+              </div>
+            )}
+            {history.map((sig) => (
+              <div key={sig} className="p-4 hover:bg-accent">
+                <Text>{t("signature")}: Test</Text>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

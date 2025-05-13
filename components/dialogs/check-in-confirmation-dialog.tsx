@@ -31,7 +31,7 @@ function CheckinConfirmationDialogContent({
   loading,
   error,
 }: Pick<CheckinConfirmationDialogProps, "error" | "loading">) {
-  const t = useTranslations("check-in-confirmation-dialog");
+  const t = useTranslations("event-scanner.check-in-confirmation-dialog");
 
   return (
     <div className="flex flex-col py-8 gap-2 items-center text-white">
@@ -58,7 +58,7 @@ export function CheckinConfirmationDialog({
   error,
   onOpenChange,
 }: CheckinConfirmationDialogProps) {
-  const t = useTranslations("check-in-confirmation-dialog");
+  const t = useTranslations("event-scanner.check-in-confirmation-dialog");
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   if (isDesktop) {
