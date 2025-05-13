@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
+import { useTranslations } from "next-intl";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
@@ -18,7 +19,6 @@ type EventTicketScannerProps = {
 
 const ticketSecretSchema = z
   .string()
-  // .base64()
   .refine((value) => Buffer.from(value, "base64").length === 32, {
     message: "Invalid secret length",
   })
@@ -26,6 +26,7 @@ const ticketSecretSchema = z
 
 export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   void eventData; // TODO use to display metadata
+  const t = useTranslations("check-in-confirmation-dialog");
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -33,13 +34,16 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const { checkIn, isPending } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleQRCodeValue = async (value: string) => {
-    setError(false);
+    setError(null);
 
     try {
-      if (!userAddress) return;
+      const token = await getToken();
+      if (!userAddress || !token) {
+        throw new Error("not authenticated !");
+      }
 
       const b64 = value.replaceAll("_", "/").replaceAll("-", "+");
       const ticket = ticketSecretSchema.parse(b64);
@@ -51,16 +55,25 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
         .replaceAll("/", "_")
         .replaceAll("+", "-");
 
-      const pubKey = await ed.getPublicKeyAsync(ticket);
+      const ticketPubkey = Buffer.from(await ed.getPublicKeyAsync(ticket))
+        .toString("base64")
+        .replaceAll("=", "")
+        .replaceAll("/", "_")
+        .replaceAll("+", "-");
 
       // Call mutation
       await checkIn({
         signature,
-        pubKey: pubKey.toString(),
+        ticketPubkey,
+        token,
       });
     } catch (err) {
-      setError(true);
       console.error("Error", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(t("description-error"));
+      }
     }
     setConfirmationDialogOpen(true);
   };
@@ -76,6 +89,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
       <Scanner
         onScan={(result) => handleQRCodeValue(result[0].rawValue)}
         allowMultiple
+        scanDelay={2000}
       />
 
       {/* TODO Historique local  ? */}

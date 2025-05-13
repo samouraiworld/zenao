@@ -1,10 +1,13 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect, RedirectType } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { auth } from "@clerk/nextjs/server";
 import { imageHeight, imageWidth } from "../constants";
 import { EventTicketScanner } from "./event-ticket-scanner";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { userAddressOptions } from "@/lib/queries/user";
+import { eventUserRoles } from "@/lib/queries/event-users";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -13,6 +16,10 @@ type Props = {
 export default async function ScannerPage({ params }: Props) {
   const p = await params;
   const queryClient = getQueryClient();
+
+  const { getToken, userId } = await auth();
+  const userAddrOpts = userAddressOptions(getToken, userId);
+  const address = await queryClient.fetchQuery(userAddrOpts);
 
   let eventData;
   try {
@@ -24,8 +31,11 @@ export default async function ScannerPage({ params }: Props) {
     notFound();
   }
 
-  // TODO Verify role
-  console.log(eventData);
+  const roles = await queryClient.fetchQuery(eventUserRoles(p.id, address));
+
+  if (!roles.includes("gatekeeper") && !roles.includes("organizer")) {
+    redirect(`/event/${p.id}`, RedirectType.replace);
+  }
 
   return (
     <ScreenContainer

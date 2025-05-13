@@ -24,7 +24,7 @@ type CheckinConfirmationDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   loading?: boolean;
-  error?: boolean;
+  error: string | null;
 };
 
 function CheckinConfirmationDialogContent({
@@ -45,9 +45,7 @@ function CheckinConfirmationDialogContent({
             {error ? <XCircle size={128} /> : <CheckCircle2 size={128} />}
           </div>
           <DialogTitle>{t(`title-${error ? "error" : "success"}`)}</DialogTitle>
-          <DialogDescription className="text-white">
-            {t(`description-${error ? "error" : "success"}`)}
-          </DialogDescription>
+          <DialogDescription className="text-white">{error}</DialogDescription>
         </>
       )}
     </div>

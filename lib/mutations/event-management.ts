@@ -34,15 +34,24 @@ export const useEventBroadcastEmail = () => {
 
 type EventCheckInRequest = {
   signature: string;
-  pubKey: string;
+  ticketPubkey: string;
+  token: string;
 };
 
 export const useEventCheckIn = () => {
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
-    mutationFn: async ({ signature, pubKey }: EventCheckInRequest) => {
-      void signature;
-      void pubKey;
-      // TODO add call endpoint
+    mutationFn: async ({
+      signature,
+      ticketPubkey,
+      token,
+    }: EventCheckInRequest) => {
+      await zenaoClient.checkin(
+        {
+          signature,
+          ticketPubkey,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
     },
   });
 
