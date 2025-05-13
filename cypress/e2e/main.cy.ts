@@ -192,9 +192,7 @@ describe("main", () => {
 
     cy.get("button").contains("Participate").should("be.visible");
 
-    cy.get("p")
-      .contains("You have organizer role for this event")
-      .should("be.visible");
+    cy.get("p").contains("Manage event").should("be.visible");
     cy.get("a").contains("Edit event").should("be.visible");
 
     // participate
