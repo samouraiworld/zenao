@@ -31,3 +31,29 @@ export const useEventBroadcastEmail = () => {
     isError,
   };
 };
+
+type AccessExclusiveEventRequest = {
+  eventId: string;
+  password: string;
+};
+
+export const useAccessExclusiveEvent = () => {
+  const { mutateAsync, isPending, isSuccess, isError } = useMutation({
+    mutationFn: async ({ eventId, password }: AccessExclusiveEventRequest) => {
+      // TODO: uncomment when the API is ready
+      // await zenaoClient.accessExclusiveEvent(eventId, password);
+      return {
+        eventId,
+        password,
+        access: false,
+      };
+    },
+  });
+
+  return {
+    accessExclusiveEvent: mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
+};

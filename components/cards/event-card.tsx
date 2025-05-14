@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { MapPin, Users } from "lucide-react";
+import { Lock, MapPin, Users } from "lucide-react";
 import { format, fromUnixTime } from "date-fns";
+import { useTranslations } from "next-intl";
 import { UserAvatarWithName } from "../common/user";
 import Text from "../texts/text";
 import Heading from "../texts/heading";
@@ -15,7 +16,9 @@ import { determineTimezone } from "@/lib/determine-timezone";
 
 export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
+  const isPrivate = true; // TODO use evt.exclusive
 
+  const t = useTranslations("event-card");
   const location = makeLocationFromEvent(evt.location);
   const timezone = determineTimezone(location);
 
@@ -43,9 +46,17 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
           <Card className="md:h-[185px] w-full min-w-full max-w-full flex flex-row justify-between mb-3 hover:bg-secondary/100">
             <div className="flex flex-col gap-2">
               <EventDateTime startDate={evt.startDate} timezone={timezone} />
-              <Heading level={1} size="xl" className="mb-1 line-clamp-3">
-                {evt.title}
-              </Heading>
+              {isPrivate && (
+                <div className="flex flex-row gap-2 items-baseline">
+                  <Heading level={1} size="xl" className="mb-1 line-clamp-3">
+                    {evt.title}
+                  </Heading>
+                  <div className="flex flex-row gap-1 items-center">
+                    <Lock size={16} className="text-secondary-color" />
+                    <Text variant="secondary">{t("exclusive-event")}</Text>
+                  </div>
+                </div>
+              )}
               <div className="flex flex-row gap-2 items-center">
                 <MapPin width={iconSize} height={iconSize} />
                 <Text className="line-clamp-1">{locationString} </Text>

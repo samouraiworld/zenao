@@ -14,11 +14,15 @@ import { Input } from "@/components/shadcn/input";
 
 export const FormFieldInputString = <T extends FieldValues>({
   control,
+  inputType = "text",
   name,
   className,
   label,
   placeholder,
-}: FormFieldProps<T, string> & { label?: React.ReactNode }) => {
+}: FormFieldProps<T, string | undefined> & {
+  label?: React.ReactNode;
+  inputType?: "password" | "text";
+}) => {
   return (
     <FormField
       rules={{ required: true }}
@@ -28,7 +32,11 @@ export const FormFieldInputString = <T extends FieldValues>({
         <FormItem className={className}>
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
-            <Input placeholder={placeholder || "placeholder..."} {...field} />
+            <Input
+              placeholder={placeholder || "placeholder..."}
+              type={inputType}
+              {...field}
+            />
           </FormControl>
           <FormMessage />
         </FormItem>
