@@ -62,7 +62,7 @@ describe("main", () => {
     cy.get('input[placeholder="Email..."]').type(testEmail2);
 
     // submit participate form
-    cy.get("button").contains("Participate").click();
+    cy.get("button").contains("Register").click();
 
     // check the participation confirmation
     cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
@@ -88,7 +88,7 @@ describe("main", () => {
     cy.get('input[placeholder="Email..."]').should("not.exist");
 
     // submit participate form
-    cy.get("button").contains("Participate").click();
+    cy.get("button").contains("Register").click();
 
     // check the participation confirmation
     cy.get("h2")
@@ -190,7 +190,7 @@ describe("main", () => {
     cy.get("h2").contains(" 13th, ").should("be.visible"); // start date
     cy.get("p").contains(" 14, ").should("be.visible"); // end date
 
-    cy.get("button").contains("Participate").should("be.visible");
+    cy.get("button").contains("Register").should("be.visible");
 
     cy.get("p")
       .contains("You have organizer role for this event")
@@ -198,7 +198,7 @@ describe("main", () => {
     cy.get("a").contains("Edit event").should("be.visible");
 
     // participate
-    cy.get("button").contains("Participate").click();
+    cy.get("button").contains("Register").click();
 
     // wait for participation confirmation
     cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
@@ -224,7 +224,7 @@ describe("main", () => {
     cy.createEvent();
 
     // Participate to an event
-    cy.get("button").contains("Participate").click();
+    cy.get("button").contains("Register").click();
     cy.get("h2")
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
@@ -257,7 +257,7 @@ describe("main", () => {
     cy.createEvent();
 
     // Participate to an event
-    cy.get("button").contains("Participate").click();
+    cy.get("button").contains("Register").click();
     cy.get("h2")
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
