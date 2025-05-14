@@ -6,16 +6,17 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { SignedOut, useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { FormFieldInputString } from "../components/FormFieldInputString";
 import { InviteeForm } from "./invitee-form";
 import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
-import { useEventInfo } from "@/components/providers/event-provider";
 import { Form } from "@/components/shadcn/form";
 import {
   useEventParticipateGuest,
   useEventParticipateLoggedIn,
 } from "@/lib/mutations/event-participate";
 import { useToast } from "@/app/hooks/use-toast";
+import { eventOptions } from "@/lib/queries/event";
 
 const emailListSchema = z.object({
   email: z.string().email(),
@@ -31,6 +32,7 @@ export type EventRegistrationFormSchemaType = z.infer<
 >;
 
 type EventRegistrationFormProps = {
+  eventId: string;
   userAddress: string | null;
 };
 
@@ -40,10 +42,11 @@ export type SubmitStatusInvitee = Record<
 >;
 
 export function EventRegistrationForm({
+  eventId,
   userAddress,
 }: EventRegistrationFormProps) {
   const { getToken, userId } = useAuth();
-  const { id: eventId, capacity, participants } = useEventInfo();
+  const { data } = useSuspenseQuery(eventOptions(eventId));
   const { toast } = useToast();
 
   const [isPending, setIsPending] = useState(false);
@@ -54,7 +57,9 @@ export function EventRegistrationForm({
   const form = useForm<EventRegistrationFormSchemaType>({
     resolver: zodResolver(
       eventRegistrationFormSchema.extend({
-        guests: z.array(emailListSchema).max(capacity - participants - 1),
+        guests: z
+          .array(emailListSchema)
+          .max(data.capacity - data.participants - 1),
       }),
     ),
     defaultValues: {

@@ -28,8 +28,9 @@ import { Web3Image } from "@/components/images/web3-image";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { GoTopButton } from "@/components/buttons/go-top-button";
 import { Separator } from "@/components/shadcn/separator";
-import { useEventInfo } from "@/components/providers/event-provider";
 import { EventRegistrationForm } from "@/components/form/event-registration";
+import { makeLocationFromEvent } from "@/lib/location";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 
 interface EventSectionProps {
   title: string;
@@ -46,15 +47,18 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
   );
 };
 
-export function EventInfo() {
-  const { id, location, timezone } = useEventInfo();
+export function EventInfo({ eventId }: { eventId: string }) {
+  // const { id, location, timezone } = useEventInfo();
 
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
-  const { data } = useSuspenseQuery(eventOptions(id));
+  const { data } = useSuspenseQuery(eventOptions(eventId));
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
+
+  const location = makeLocationFromEvent(data.location);
+  const timezone = useLocationTimezone(location);
 
   const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
     useState(false);
@@ -94,7 +98,7 @@ export function EventInfo() {
       />
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
         <BroadcastEmailDialog
-          eventId={id}
+          eventId={eventId}
           nbParticipants={data.participants}
           open={broadcastEmailDialogOpen}
           onOpenChange={setBroadcastEmailDialogOpen}
@@ -123,7 +127,7 @@ export function EventInfo() {
                 : t("going", { count: data.participants })
             }
           >
-            <ParticipantsSection id={id} />
+            <ParticipantsSection id={eventId} />
           </EventSection>
 
           {/* Host section */}
@@ -137,7 +141,7 @@ export function EventInfo() {
               <Text>{t("is-organisator-role")}</Text>
 
               <div className="flex flex-col">
-                <Link href={`/edit/${id}`} className="text-main underline">
+                <Link href={`/edit/${eventId}`} className="text-main underline">
                   {t("edit-button")}
                 </Link>
                 <p
@@ -214,7 +218,7 @@ export function EventInfo() {
                   </Heading>
                   <SignedIn>
                     <Link
-                      href={`/ticket/${id}`}
+                      href={`/ticket/${eventId}`}
                       className="text-main underline"
                     >
                       {t("see-ticket")}
@@ -240,7 +244,10 @@ export function EventInfo() {
                   {t("registration")}
                 </Heading>
                 <Text className="my-4">{t("join-desc")}</Text>
-                <EventRegistrationForm userAddress={address} />
+                <EventRegistrationForm
+                  eventId={eventId}
+                  userAddress={address}
+                />
               </div>
             )}
           </Card>
@@ -273,7 +280,7 @@ export function EventInfo() {
       </div>
 
       {/* Social Feed */}
-      <EventFeed eventId={id} isMember={isParticipant || isOrganizer} />
+      <EventFeed eventId={eventId} isMember={isParticipant || isOrganizer} />
       <GoTopButton />
     </div>
   );

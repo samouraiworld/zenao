@@ -9,7 +9,6 @@ import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
 import { web2URL } from "@/lib/uris";
 import { profileOptions } from "@/lib/queries/profile";
-import { EventProvider } from "@/components/providers/event-provider";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -75,9 +74,7 @@ export default async function EventPage({ params }: Props) {
       }}
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventProvider id={p.id}>
-          <EventInfo />
-        </EventProvider>
+        <EventInfo eventId={p.id} />
       </HydrationBoundary>
     </ScreenContainer>
   );
