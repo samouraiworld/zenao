@@ -163,6 +163,15 @@ func (p *ParticipateRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if p.Email != "" {
 		fmt.Fprintf(buf, "%s\tEmail: %q,\n", linePrefix, p.Email)
 	}
+	if len(p.Guests) != 0 {
+		fmt.Fprintf(buf, "%s\tGuests: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range p.Guests {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -509,6 +518,30 @@ func (g *GetEventTicketsResponse) GnoLiteral(typePrefix string, linePrefix strin
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CheckinRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CheckinRequest{\n")
+	if c.TicketPubkey != "" {
+		fmt.Fprintf(buf, "%s\tTicketPubkey: %q,\n", linePrefix, c.TicketPubkey)
+	}
+	if c.Signature != "" {
+		fmt.Fprintf(buf, "%s\tSignature: %q,\n", linePrefix, c.Signature)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CheckinResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CheckinResponse{\n")
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

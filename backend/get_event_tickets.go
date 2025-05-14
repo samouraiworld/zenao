@@ -36,7 +36,7 @@ func (s *ZenaoServer) GetEventTickets(
 
 	secrets := make([]string, len(tickets))
 	for i, tk := range tickets {
-		secrets[i] = tk.Secret()
+		secrets[i] = tk.Ticket.Secret()
 	}
 
 	return connect.NewResponse(&zenaov1.GetEventTicketsResponse{

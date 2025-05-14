@@ -45,7 +45,7 @@ export function PostCardLayout({
   }
   return (
     <Card className="w-full flex flex-col gap-2">
-      <div className="flex flex-col sm:flex-row items-start gap-2">
+      <div className="flex flex-col sm:flex-row items-start gap-2 relative">
         <div className="w-full flex flex-row items-center gap-3">
           <Link href={`/profile/${post.post.author}`}>
             <UserAvatar
@@ -93,7 +93,11 @@ export function PostCardLayout({
               </Text>
             </div>
           )}
-          {gnowebHref && <PostMenu gnowebHref={gnowebHref} />}
+          {gnowebHref && (
+            <div className="max-sm:absolute max-sm:right-0 max-sm:top-0">
+              <PostMenu gnowebHref={gnowebHref} />
+            </div>
+          )}
         </div>
       </div>
 

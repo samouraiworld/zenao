@@ -52,6 +52,8 @@ const (
 	// ZenaoServiceGetEventTicketsProcedure is the fully-qualified name of the ZenaoService's
 	// GetEventTickets RPC.
 	ZenaoServiceGetEventTicketsProcedure = "/zenao.v1.ZenaoService/GetEventTickets"
+	// ZenaoServiceCheckinProcedure is the fully-qualified name of the ZenaoService's Checkin RPC.
+	ZenaoServiceCheckinProcedure = "/zenao.v1.ZenaoService/Checkin"
 	// ZenaoServiceCreatePollProcedure is the fully-qualified name of the ZenaoService's CreatePoll RPC.
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
 	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
@@ -73,6 +75,7 @@ type ZenaoServiceClient interface {
 	BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
+	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -133,6 +136,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("GetEventTickets")),
 			connect.WithClientOptions(opts...),
 		),
+		checkin: connect.NewClient[v1.CheckinRequest, v1.CheckinResponse](
+			httpClient,
+			baseURL+ZenaoServiceCheckinProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("Checkin")),
+			connect.WithClientOptions(opts...),
+		),
 		createPoll: connect.NewClient[v1.CreatePollRequest, v1.CreatePollResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreatePollProcedure,
@@ -169,6 +178,7 @@ type zenaoServiceClient struct {
 	broadcastEvent  *connect.Client[v1.BroadcastEventRequest, v1.BroadcastEventResponse]
 	participate     *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
 	getEventTickets *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
+	checkin         *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
 	createPoll      *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll        *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 	createPost      *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
@@ -210,6 +220,11 @@ func (c *zenaoServiceClient) GetEventTickets(ctx context.Context, req *connect.R
 	return c.getEventTickets.CallUnary(ctx, req)
 }
 
+// Checkin calls zenao.v1.ZenaoService.Checkin.
+func (c *zenaoServiceClient) Checkin(ctx context.Context, req *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error) {
+	return c.checkin.CallUnary(ctx, req)
+}
+
 // CreatePoll calls zenao.v1.ZenaoService.CreatePoll.
 func (c *zenaoServiceClient) CreatePoll(ctx context.Context, req *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return c.createPoll.CallUnary(ctx, req)
@@ -241,6 +256,7 @@ type ZenaoServiceHandler interface {
 	BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
+	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -297,6 +313,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("GetEventTickets")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceCheckinHandler := connect.NewUnaryHandler(
+		ZenaoServiceCheckinProcedure,
+		svc.Checkin,
+		connect.WithSchema(zenaoServiceMethods.ByName("Checkin")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCreatePollHandler := connect.NewUnaryHandler(
 		ZenaoServiceCreatePollProcedure,
 		svc.CreatePoll,
@@ -337,6 +359,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceParticipateHandler.ServeHTTP(w, r)
 		case ZenaoServiceGetEventTicketsProcedure:
 			zenaoServiceGetEventTicketsHandler.ServeHTTP(w, r)
+		case ZenaoServiceCheckinProcedure:
+			zenaoServiceCheckinHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
 		case ZenaoServiceVotePollProcedure:
@@ -380,6 +404,10 @@ func (UnimplementedZenaoServiceHandler) Participate(context.Context, *connect.Re
 
 func (UnimplementedZenaoServiceHandler) GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetEventTickets is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.Checkin is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {

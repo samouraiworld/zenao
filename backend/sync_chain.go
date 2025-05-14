@@ -96,17 +96,25 @@ func execSyncChain() error {
 			continue
 		}
 		for _, p := range participants {
-			// get first ticket of participant
-			// XXX: when we support multiple ticket for one buyer this should be revisited
 			tickets, err := db.GetEventBuyerTickets(event.ID, p.ID)
 			if err != nil || len(tickets) < 1 {
 				logger.Error("failed to get participant ticket", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err), zap.Int("num-tickets", len(tickets)))
 				continue
 			}
-			ticket := tickets[0]
 
-			if err := chain.Participate(event.ID, event.CreatorID, p.ID, ticket.Pubkey()); err != nil {
-				logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
+			for _, ticket := range tickets {
+				if err := chain.Participate(event.ID, event.CreatorID, ticket.UserID, ticket.Ticket.Pubkey()); err != nil {
+					logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
+				}
+
+				if ticket.Checkin != nil {
+					if err := chain.Checkin(event.ID, ticket.Checkin.GatekeeperID, &zenaov1.CheckinRequest{
+						TicketPubkey: ticket.Ticket.Pubkey(),
+						Signature:    ticket.Checkin.Signature,
+					}); err != nil {
+						logger.Error("failed to add checkin", zap.String("event-id", event.ID), zap.Error(err))
+					}
+				}
 			}
 		}
 	}
