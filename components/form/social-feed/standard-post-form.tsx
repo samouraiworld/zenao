@@ -22,6 +22,14 @@ import { Textarea } from "@/components/shadcn/textarea";
 import { getQueryClient } from "@/lib/get-query-client";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn/tabs";
+import Text from "@/components/texts/text";
+import { MarkdownPreview } from "@/components/common/markdown-preview";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -63,6 +71,7 @@ export function StandardPostForm({
   const placeholder = isSmallScreen
     ? t("message-placeholder-sm")
     : t("message-placeholder-lg");
+
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
@@ -102,35 +111,62 @@ export function StandardPostForm({
     <Form {...standardPostForm}>
       <form
         onSubmit={standardPostForm.handleSubmit(onSubmitStandardPost)}
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-4 bg-accent p-4 rounded"
       >
         <div className="flex flex-row gap-4">
-          <FormField
-            rules={{ required: true }}
-            control={standardPostForm.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem className="relative w-full">
-                <FormControl>
-                  <Textarea
-                    ref={textareaRef}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    value={field.value}
-                    className={`!min-h-[${textareaMinHeight}px] !max-h-[${textareaMaxHeight}px]`}
-                    placeholder={placeholder}
-                    maxLength={textareaMaxLength}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FeedInputButtons
-            buttonSize={textareaMinHeight}
-            feedInputMode={feedInputMode}
-            setFeedInputMode={setFeedInputMode}
-            isLoading={isPending}
-          />
+          <Tabs defaultValue="form" className="w-full">
+            <div className="w-full flex justify-between">
+              <TabsList className="p-0 h-fit">
+                <TabsTrigger value="form">
+                  <Text size="sm">Write</Text>
+                </TabsTrigger>
+                <TabsTrigger value="preview">
+                  <Text size="sm">Preview</Text>
+                </TabsTrigger>
+              </TabsList>
+
+              <div className="flex flex-row gap-2">
+                <FeedInputButtons
+                  buttonSize={textareaMinHeight}
+                  feedInputMode={feedInputMode}
+                  setFeedInputMode={setFeedInputMode}
+                  isLoading={isPending}
+                />
+              </div>
+            </div>
+            <TabsContent value="form">
+              <FormField
+                rules={{ required: true }}
+                control={standardPostForm.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem className="relative w-full">
+                    <FormControl>
+                      <Textarea
+                        ref={textareaRef}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value}
+                        style={{
+                          minHeight: textareaMinHeight,
+                          maxHeight: textareaMaxHeight,
+                        }}
+                        placeholder={placeholder}
+                        maxLength={textareaMaxLength}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </TabsContent>
+            <TabsContent value="preview" className={`!min-h-[70px]`}>
+              {content.trim().length === 0 ? (
+                <Text>Nothing to preview</Text>
+              ) : (
+                <MarkdownPreview markdownString={content} />
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </form>
     </Form>
