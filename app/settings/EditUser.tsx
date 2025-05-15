@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { zenaoClient } from "../zenao-client";
@@ -18,8 +18,13 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/texts/text";
 
-export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
+type EditUserFormProps = {
+  userId: string;
+};
+
+export const EditUserForm = ({ userId }: EditUserFormProps) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+  const { isLoaded, user: clerkUser } = useUser();
 
   const queryClient = useQueryClient();
 
@@ -40,7 +45,10 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const form = useForm<UserFormSchemaType>({
     mode: "all",
     resolver: zodResolver(userFormSchema),
-    defaultValues,
+    defaultValues: {
+      email: "",
+      ...defaultValues,
+    },
   });
   const { toast } = useToast();
   const t = useTranslations("settings");
@@ -72,6 +80,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (isLoaded) {
+      form.setValue("email", clerkUser?.emailAddresses[0].emailAddress || "");
+    }
+  }, [isLoaded, clerkUser, form]);
+
   return (
     <Form {...form}>
       <form
@@ -93,6 +107,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               name="displayName"
               label={t("name-label")}
               placeholder={t("name-placeholder")}
+            />
+            <FormFieldInputString
+              control={form.control}
+              name="email"
+              label={t("email-label")}
+              placeholder={t("email-placeholder")}
             />
             <FormFieldTextArea
               control={form.control}
