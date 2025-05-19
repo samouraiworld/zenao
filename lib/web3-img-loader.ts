@@ -7,10 +7,8 @@ export function web3ImgLoader({ src, width, quality }: ImageLoaderProps) {
   if (!src.startsWith("ipfs://")) {
     return src;
   }
-
-  let url = `${web2URL(src)}?img-width=${width}&img-format=webp`;
-  if (quality !== undefined) {
-    url += `&img-quality=${quality}`;
+  if (quality === undefined) {
+    quality = 75;
   }
-  return url;
+  return `${web2URL(src)}?img-width=${width}&img-format=webp&img-quality=${quality}`;
 }
