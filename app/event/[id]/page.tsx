@@ -58,15 +58,12 @@ export default async function EventPage({ params }: Props) {
   queryClient.prefetchQuery(profileOptions(eventData.creator));
 
   // Prefetch all participants profiles
-  const prefetchProfiles = async (): Promise<void> => {
-    const addresses = await queryClient.fetchQuery(
-      eventUsersWithRole(p.id, "participant"),
-    );
-    addresses.forEach(
-      (address) => void queryClient.prefetchQuery(profileOptions(address)),
-    );
-  };
-  prefetchProfiles();
+  const addresses = await queryClient.fetchQuery(
+    eventUsersWithRole(p.id, "participant"),
+  );
+  addresses.forEach(
+    (address) => void queryClient.prefetchQuery(profileOptions(address)),
+  );
 
   return (
     <ScreenContainer
