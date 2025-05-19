@@ -7,7 +7,6 @@ import supersub from "remark-supersub";
 import remarkHtml from "remark-html";
 import { Web3Image } from "../images/web3-image";
 import { cn } from "@/lib/tailwind";
-import { web2URL } from "@/lib/uris";
 
 export function MarkdownPreview({
   markdownString,
@@ -43,7 +42,6 @@ export function MarkdownPreview({
           <iframe className={cn(props.className, "w-full")} {...props}></iframe>
         ),
         img: (props) => {
-          console.log("WENT HERE", props.src);
           return (
             <Web3Image
               {...props}
@@ -58,9 +56,7 @@ export function MarkdownPreview({
       urlTransform={(options) => {
         const isWeb3 = options.startsWith("ipfs://");
 
-        return isWeb3
-          ? options
-          : defaultUrlTransform(options);
+        return isWeb3 ? options : defaultUrlTransform(options);
       }}
     >
       {markdownString}
