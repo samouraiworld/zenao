@@ -19,9 +19,11 @@ export const FormFieldInputString = <T extends FieldValues>({
   className,
   label,
   placeholder,
+  disabled,
 }: FormFieldProps<T, string | undefined> & {
-  label?: React.ReactNode;
   inputType?: "password" | "text";
+  label?: React.ReactNode;
+  disabled?: boolean;
 }) => {
   return (
     <FormField
@@ -35,6 +37,7 @@ export const FormFieldInputString = <T extends FieldValues>({
             <Input
               placeholder={placeholder || "placeholder..."}
               type={inputType}
+              disabled={disabled}
               {...field}
             />
           </FormControl>

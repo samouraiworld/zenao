@@ -77,7 +77,7 @@ function PollOptionItem({
   const t = useTranslations("event-feed.poll-form");
 
   return (
-    <div className="flex flex-row items-center gap-2 w-full">
+    <div className="flex flex-row items-baseline gap-2 w-full">
       <FormFieldInputString
         control={control}
         name={name}

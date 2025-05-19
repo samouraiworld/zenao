@@ -76,7 +76,7 @@ export default async function EventPage({ params }: Props) {
             height: imageHeight,
           }}
         >
-          <EventInfo id={p.id} />
+          <EventInfo eventId={p.id} />
         </ScreenContainer>
       </ExclusiveEventGuard>
     </HydrationBoundary>
