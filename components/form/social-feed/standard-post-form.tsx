@@ -40,7 +40,6 @@ import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { ButtonBase } from "@/components/buttons/ButtonBases";
 import { cn } from "@/lib/tailwind";
 import { uploadFile } from "@/lib/files";
-import { web2URL } from "@/lib/uris";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -116,7 +115,7 @@ export function StandardPostForm({
       const uri = await uploadFile(file);
 
       if (textarea) {
-        const text = `![${file.name}](${web2URL(uri)}?img-width=512)`;
+        const text = `![${file.name}](${uri})`;
         const start = textarea.value.indexOf(loadingText);
 
         if (start < 0) {
