@@ -49,7 +49,7 @@
     "toast-edit-error": "Error on editing event!"
   },
   "event": {
-    "is-organisator-role": "You have organizer role for this event.",
+    "manage-event": "Manage event :",
     "edit-button": "Edit event",
     "send-global-message": "Send a message to all participants",
     "going": "{count} going",
@@ -76,7 +76,8 @@
     "invitee-form": {
       "add-a-friend": "Add a friend",
       "email-placeholder": "Email..."
-    }
+    },
+    "gatekeeper-button": "Open ticket scanner"
   },
   "manifesto": {
     "title": "MANIFESTO",
@@ -199,5 +200,17 @@
     "toast-email-sent-success": "Email sent !",
     "toast-email-sent-error": "Error while trying to send the email",
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
+  },
+  "event-scanner": {
+    "check-in-confirmation-dialog": {
+      "title-success": "Ticke verified",
+      "description-error": "Error while trying to validate your ticket",
+      "title-error": "Invalid ticket",
+      "description-success": "You can enter the venue",
+      "close": "Close"
+    },
+    "history-title": "Scanned tickets for event",
+    "no-tickets-scanned": "No tickets scanned yet",
+    "signature": "Signature"
   }
 }
