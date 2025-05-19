@@ -9,7 +9,6 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { SignedIn, useAuth } from "@clerk/nextjs";
 import { Event, WithContext } from "schema-dts";
-import { ParticipateForm } from "./participate-form";
 import { ParticipantsSection } from "./participants-section";
 import { EventManagementMenu } from "./event-management-menu";
 import { eventOptions } from "@/lib/queries/event";
@@ -25,12 +24,13 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { makeLocationFromEvent } from "@/lib/location";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
 import { GoTopButton } from "@/components/buttons/go-top-button";
 import { Separator } from "@/components/shadcn/separator";
+import { EventRegistrationForm } from "@/components/form/event-registration";
+import { makeLocationFromEvent } from "@/lib/location";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 
 interface EventSectionProps {
   title: string;
@@ -47,20 +47,22 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
   );
 };
 
-export function EventInfo({ id }: { id: string }) {
+export function EventInfo({ eventId }: { eventId: string }) {
+  // const { id, location, timezone } = useEventInfo();
+
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
-  const { data } = useSuspenseQuery(eventOptions(id));
+  const { data } = useSuspenseQuery(eventOptions(eventId));
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
+
+  const location = makeLocationFromEvent(data.location);
+  const timezone = useLocationTimezone(location);
 
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
-
-  const location = makeLocationFromEvent(data.location);
-  const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
 
@@ -115,7 +117,7 @@ export function EventInfo({ id }: { id: string }) {
                 : t("going", { count: data.participants })
             }
           >
-            <ParticipantsSection id={id} />
+            <ParticipantsSection id={eventId} />
           </EventSection>
 
           {/* Host section */}
@@ -124,7 +126,7 @@ export function EventInfo({ id }: { id: string }) {
           </EventSection>
 
           <EventManagementMenu
-            eventId={id}
+            eventId={eventId}
             roles={roles}
             nbParticipants={data.participants}
           />
@@ -193,7 +195,7 @@ export function EventInfo({ id }: { id: string }) {
                   </Heading>
                   <SignedIn>
                     <Link
-                      href={`/ticket/${id}`}
+                      href={`/ticket/${eventId}`}
                       className="text-main underline"
                     >
                       {t("see-ticket")}
@@ -219,9 +221,8 @@ export function EventInfo({ id }: { id: string }) {
                   {t("registration")}
                 </Heading>
                 <Text className="my-4">{t("join-desc")}</Text>
-                <ParticipateForm
-                  eventId={id}
-                  userId={userId}
+                <EventRegistrationForm
+                  eventId={eventId}
                   userAddress={address}
                 />
               </div>
@@ -256,7 +257,7 @@ export function EventInfo({ id }: { id: string }) {
       </div>
 
       {/* Social Feed */}
-      <EventFeed eventId={id} isMember={isParticipant || isOrganizer} />
+      <EventFeed eventId={eventId} isMember={isParticipant || isOrganizer} />
       <GoTopButton />
     </div>
   );
