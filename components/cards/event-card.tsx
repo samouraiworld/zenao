@@ -66,6 +66,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
                   height={200}
                   alt="Event presentation"
                   className="object-cover rounded-xl w-full h-full"
+                  quality={50}
                 />
               </div>
             </div>
