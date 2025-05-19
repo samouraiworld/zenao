@@ -1,10 +1,10 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Image from "next/image";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
-import { Web3Image } from "@/components/images/web3-image";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <ScreenContainerCentered>
       <div className="flex flex-col items-center">
-        <Web3Image
+        <Image
           src="/zenao-logo.png"
           alt="zeano logo"
           width={200}
