@@ -5,7 +5,7 @@ import { web2URL } from "./uris";
 // this should only be used in web3 images
 export function web3ImgLoader({ src, width, quality }: ImageLoaderProps) {
   if (src.startsWith("ipfs://")) {
-    return `${web2URL(src)}?img-width=${width}&img-quality=${quality}&format=webp`;
+    return `${web2URL(src)}?img-width=${width}&img-quality=${quality}&img-format=webp`;
   }
   return src;
 }
