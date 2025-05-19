@@ -34,6 +34,7 @@ export function UserAvatar({ address, className }: UserComponentProps) {
           }
           width={45}
           height={45}
+          quality={60}
           alt="Avatar"
           className="w-full h-full object-cover"
         />
