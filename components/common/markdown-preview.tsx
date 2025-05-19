@@ -59,7 +59,7 @@ export function MarkdownPreview({
         const isWeb3 = options.startsWith("ipfs://");
 
         return isWeb3
-          ? `${web2URL(options)}?width=512`
+          ? options
           : defaultUrlTransform(options);
       }}
     >
