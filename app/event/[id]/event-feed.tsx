@@ -1,14 +1,9 @@
 "use client";
 
-import React, { forwardRef, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/tailwind";
-import {
-  screenContainerMarginHorizontal,
-  screenContainerMaxWidth,
-} from "@/components/layout/ScreenContainer";
 import {
   StandardPostForm,
   FeedInputMode,
@@ -18,38 +13,19 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { PostsList } from "@/components/widgets/posts-list";
 import { PollsList } from "@/components/widgets/polls-list";
-import { mergeRefs } from "@/lib/utils";
 import { derivePkgAddr } from "@/lib/gno";
 import { GnowebButton } from "@/components/buttons/gnoweb-button";
 
 const eventTabs = ["global-feed", "polls-feed"] as const;
 export type EventTab = (typeof eventTabs)[number];
 
-const EventFeedForm = forwardRef<
-  HTMLDivElement,
-  {
-    eventId: string;
-  }
->(({ eventId }, ref) => {
-  const inputContainerRef = useRef<HTMLDivElement>(null);
+const EventFeedForm = ({ eventId }: { eventId: string }) => {
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
-  const feedMaxWidth =
-    screenContainerMaxWidth - screenContainerMarginHorizontal * 2;
 
   return (
-    <div
-      ref={mergeRefs(ref, inputContainerRef)}
-      className={cn(
-        "flex justify-center w-full transition-all duration-300 bg-transparent",
-      )}
-    >
-      <div
-        className="w-full"
-        style={{
-          maxWidth: feedMaxWidth,
-        }}
-      >
+    <div className="flex justify-center w-full transition-all duration-300 bg-transparent">
+      <div className="w-full">
         {feedInputMode === "POLL" ? (
           <PollPostForm
             eventId={eventId}
@@ -66,9 +42,7 @@ const EventFeedForm = forwardRef<
       </div>
     </div>
   );
-});
-
-EventFeedForm.displayName = "EventFeedForm";
+};
 
 export function EventFeed({
   eventId,
@@ -82,8 +56,6 @@ export function EventFeed({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-
-  const feedFormRef = useRef<HTMLDivElement>(null);
 
   const t = useTranslations("event-feed");
   const feedSlug = `${derivePkgAddr(`gno.land/r/zenao/events/e${eventId}`)}:main`;
@@ -105,7 +77,7 @@ export function EventFeed({
       />
 
       <div className="flex flex-col gap-6 min-h-0 pt-4">
-        {isMember && <EventFeedForm ref={feedFormRef} eventId={eventId} />}
+        {isMember && <EventFeedForm eventId={eventId} />}
         {tab === "global-feed" ? (
           <PostsList eventId={eventId} userAddress={userAddress} />
         ) : (

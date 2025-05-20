@@ -48,15 +48,12 @@ export function EventManagementMenu({
             >
               {t("send-global-message")}
             </p>
-
-            {/* {isGatekeeper && ( */}
             <Link
               href={`/event/${eventId}/scanner`}
               className="text-main underline"
             >
               {t("gatekeeper-button")}
             </Link>
-            {/* )} */}
           </div>
         </Card>
       </>

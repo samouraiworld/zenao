@@ -98,8 +98,8 @@ export function EventInfo({ eventId }: { eventId: string }) {
             <Web3Image
               src={data.imageUri}
               sizes="(max-width: 768px) 100vw,
-            (max-width: 1200px) 50vw,
-            33vw"
+              (max-width: 1200px) 50vw,
+              33vw"
               fill
               alt="Event"
               priority
@@ -199,12 +199,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
                       {t("see-ticket")}
                     </Link>
                   </SignedIn>
-                  {/* TODO: create a clean decount timer */}
-                  {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
                 </div>
-                {/* add back when we can cancel
-                <Text className="my-4">{t("cancel-desc")}</Text>
-              */}
               </div>
             ) : isStarted ? (
               <div>

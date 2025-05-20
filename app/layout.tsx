@@ -53,7 +53,7 @@ export default async function RootLayout({
                   <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
                     <Header />
                     {children}
-                    <Footer />
+                    {/* <Footer /> */}
                   </div>
                 </NextIntlClientProvider>
               </ThemeProvider>
