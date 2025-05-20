@@ -30,7 +30,7 @@ export function UserAvatar({ address, className }: UserComponentProps) {
           src={
             (profile?.avatarUri && profile.avatarUri !== ""
               ? profile.avatarUri
-              : undefined) ?? "/zenao-logo.png"
+              : undefined) ?? "/zenao-profile.png"
           }
           width={45}
           height={45}
