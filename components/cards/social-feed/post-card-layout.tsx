@@ -2,7 +2,7 @@
 
 import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode, useMemo } from "react";
-import { Hash, MapPin, Smile } from "lucide-react";
+import { Hash, MapPin, MessageCircle, Reply, Smile } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -104,6 +104,16 @@ export function PostCardLayout({
       <div className="my-1">{children}</div>
 
       <div className="flex flex-col justify-between sm:flex-row sm:items-center gap-2">
+        <Link href={`event/${eventId}/feed/${post.post?.localPostId}`}>
+          <Button
+            variant="outline"
+            className="reaction-btn rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+            title="Reply"
+          >
+            <MessageCircle size={16} color="hsl(var(--secondary-color))" />
+            <span className="text-xs">14</span>
+          </Button>
+        </Link>
         <Reactions
           postId={post.post.localPostId}
           eventId={eventId}
