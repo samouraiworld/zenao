@@ -116,22 +116,30 @@ func NewEvent(conf *Config) *Event {
 		// XXX: set PkgPath?
 	}
 
-	actionsByRole := map[string][]daokit.MessageHandler{
-		"organizer": {
+	oneOrganizer := daocond.RoleCount(1, "organizer", memberStore.HasRole)
+	oneGatekeeper := daocond.RoleCount(1, "gatekeeper", memberStore.HasRole)
+
+	resources := []struct {
+		cond     daocond.Condition
+		handlers []daokit.MessageHandler
+	}{{
+		cond: oneOrganizer,
+		handlers: []daokit.MessageHandler{
 			event.addParticipantHandler(),
 			event.removeParticipantHandler(),
 			event.addGatekeeperHandler(),
 			event.removeGatekeeperHandler(),
 			event.editEventHandler(),
 		},
-		"gatekeeper": {
+	}, {
+		cond: daocond.Or(oneOrganizer, oneGatekeeper),
+		handlers: []daokit.MessageHandler{
 			event.checkinHandler(),
 		},
-	}
-	for role, actions := range actionsByRole {
-		roleCond := daocond.RoleCount(1, role, memberStore.HasRole)
-		for _, res := range actions {
-			event.DAOPrivate.Core.Resources.Set(&daokit.Resource{Handler: res, Condition: roleCond})
+	}}
+	for _, res := range resources {
+		for _, handler := range res.handlers {
+			event.DAOPrivate.Core.Resources.Set(&daokit.Resource{Handler: handler, Condition: res.cond})
 		}
 	}
 

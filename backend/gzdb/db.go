@@ -762,8 +762,8 @@ func (g *gormZenaoDB) Checkin(pubkey string, gatekeeperID string, signature stri
 	if err != nil {
 		return nil, err
 	}
-	if !slices.Contains(roles, "gatekeeper") {
-		return nil, errors.New("user is not gatekeeper for this event")
+	if !slices.Contains(roles, "gatekeeper") && !slices.Contains(roles, "organizer") {
+		return nil, errors.New("user is not gatekeeper or organizer for this event")
 	}
 
 	dbTicket.Checkin = &Checkin{
