@@ -17,7 +17,7 @@ import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/map-lazy-components";
 import Text from "../texts/text";
-import { ButtonBase } from "../buttons/ButtonBases";
+import { Button } from "../shadcn/button";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { TimeZonesPopover } from "./components/TimeZonesPopover";
@@ -87,6 +87,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       }
       setUploading(true);
       const textarea = descriptionRef.current;
+      console.log(cursor);
       const loadingText = `${cursor > 0 ? "\n" : ""}[Uploading ${file.name}...]\n`;
 
       if (textarea) {
@@ -104,7 +105,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       const uri = await uploadFile(file);
 
       if (textarea) {
-        const text = `![${file.name}](${uri})`;
+        const text = `${cursor > 0 ? "\n" : ""}![${file.name}](${uri})\n`;
         const start = textarea.value.indexOf(loadingText);
 
         if (start < 0) {
@@ -158,7 +159,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             className="sm:w-2/5"
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
           />
-          <div className="flex flex-col gap-4 w-full sm:w-3/5">
+          <div className="flex flex-col gap-6 w-full sm:w-3/5">
             <FormFieldTextArea
               control={form.control}
               name="title"
@@ -183,50 +184,53 @@ export const EventForm: React.FC<EventFormProps> = ({
                   <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="write" tabIndex={-1}>
-                  <FormFieldTextArea
-                    ref={descriptionRef}
-                    control={form.control}
-                    name="description"
-                    placeholder={t("description-placeholder")}
-                    className={cn(
-                      "bg-transparent",
-                      "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
-                    )}
-                    maxLength={10000}
-                    wordCounter
-                  />
-                  {/* Upload image buttons */}
-                  <div className="flex flex-row gap-2">
-                    <ButtonBase
-                      variant="link"
+                  <div className="flex flex-col gap-2 w-full">
+                    <FormFieldTextArea
+                      ref={descriptionRef}
+                      control={form.control}
+                      name="description"
+                      placeholder={t("description-placeholder")}
                       className={cn(
-                        "flex items-center justify-center rounded-full aspect-square cursor-pointer w-4 h-4",
-                        "hover:bg-neutral-700",
+                        "bg-transparent",
+                        "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
                       )}
-                      title="Upload image"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (uploading) return;
-
-                        setCursor(
-                          descriptionRef.current?.selectionStart ??
-                            descriptionRef.current?.textLength ??
-                            0,
-                        );
-                        console.log(cursor);
-                        hiddenInputRef.current?.click();
-                      }}
-                      aria-label="upload image"
-                    >
-                      <Paperclip className="!h-6 !w-6" />
-                    </ButtonBase>
-                    <input
-                      type="file"
-                      onChange={handleChange}
-                      ref={hiddenInputRef}
-                      className="hidden"
-                      disabled={uploading}
+                      maxLength={10000}
+                      wordCounter
                     />
+                    {/* Upload image buttons */}
+                    <div className="flex flex-row gap-2 self-end">
+                      <Button
+                        variant="input"
+                        className={cn(
+                          "w-fit flex items-center justify-center cursor-pointer",
+                          "hover:bg-neutral-700",
+                        )}
+                        title="Add image"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (uploading) return;
+
+                          setCursor(
+                            descriptionRef.current?.selectionStart ??
+                              descriptionRef.current?.textLength ??
+                              0,
+                          );
+                          console.log(cursor);
+                          hiddenInputRef.current?.click();
+                        }}
+                        aria-label="Add image"
+                      >
+                        <Paperclip className="!h-4 !w-4" />
+                        <Text className="text-sm">Add image</Text>
+                      </Button>
+                      <input
+                        type="file"
+                        onChange={handleChange}
+                        ref={hiddenInputRef}
+                        className="hidden"
+                        disabled={uploading}
+                      />
+                    </div>
                   </div>
                 </TabsContent>
                 <TabsContent value="preview">

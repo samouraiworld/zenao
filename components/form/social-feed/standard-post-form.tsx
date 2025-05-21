@@ -115,7 +115,7 @@ export function StandardPostForm({
       const uri = await uploadFile(file);
 
       if (textarea) {
-        const text = `![${file.name}](${uri})`;
+        const text = `${cursor > 0 ? "\n" : ""}![${file.name}](${uri})\n`;
         const start = textarea.value.indexOf(loadingText);
 
         if (start < 0) {
