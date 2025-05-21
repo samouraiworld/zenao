@@ -1,7 +1,7 @@
 "use client";
 
 import { UrlObject } from "url";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { BookOpenText, CompassIcon, LucideProps, Tickets } from "lucide-react";
@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 
-type NavItem = {
+export type NavItem = {
   key: string;
   to: string | UrlObject;
   icon: React.ForwardRefExoticComponent<
@@ -40,10 +40,12 @@ type NavItem = {
   children: React.ReactNode;
 };
 
-const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
+// XXX: there is an hydration error on header links and the top-right avatar
+// but only when you hard-refresh the discover page, must investigate.
+// Since it does not seem to affect functionality, we can ignore it for now
+const HeaderLinks = () => {
   const t = useTranslations("navigation");
   const pathname = usePathname();
-
   const navItems: NavItem[] = useMemo(
     () => [
       {
@@ -71,43 +73,58 @@ const HeaderLinks: React.FC<{ isLogged: boolean }> = ({ isLogged }) => {
     [t],
   );
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <>
       {navItems.map((item) => {
-        if (item.needsAuth && !isLogged) {
-          return null;
+        // Instead of conditionally returning null, we'll use a SignedIn component
+        // to ensure consistent cxlient/server rendering
+        if (item.needsAuth) {
+          return (
+            isMounted && (
+              <SignedIn key={item.key}>
+                <NavLink item={item} pathname={pathname} />
+              </SignedIn>
+            )
+          );
         }
 
-        const isActive = pathname === item.to;
-
-        return (
-          <Link key={item.key} href={item.to}>
-            <div
-              className={cn(
-                "flex gap-1 items-center",
-                isActive ? "text-primary-color" : "text-secondary-color",
-                "hover:text-primary-color",
-              )}
-            >
-              <item.icon className="w-5 h-5 text-inherit" />
-              <Text
-                size="sm"
-                variant={isActive ? "primary" : "secondary"}
-                className="text-inherit max-[624px]:hidden"
-              >
-                {item.children}
-              </Text>
-            </div>
-          </Link>
-        );
+        return <NavLink key={item.key} item={item} pathname={pathname} />;
       })}
     </>
   );
 };
 
-// XXX: there is an hydration error on header links and the top-right avatar
-// but only when you hard-refresh the discover page, must investigate.
-// Since it does not seem to affect functionality, we can ignore it for now
+// Extract the NavLink rendering to a separate component
+const NavLink = ({ item, pathname }: { item: NavItem; pathname: string }) => {
+  const isActive = pathname === item.to;
+
+  return (
+    <Link href={item.to}>
+      <div
+        className={cn(
+          "flex gap-1 items-center",
+          isActive ? "text-primary-color" : "text-secondary-color",
+          "hover:text-primary-color",
+        )}
+      >
+        <item.icon className="w-5 h-5 text-inherit" />
+        <Text
+          size="sm"
+          variant={isActive ? "primary" : "secondary"}
+          className="text-inherit max-[624px]:hidden"
+        >
+          {item.children}
+        </Text>
+      </div>
+    </Link>
+  );
+};
 
 export function Header() {
   const { getToken, userId } = useAuth();
@@ -115,6 +132,12 @@ export function Header() {
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <div className="flex justify-between p-4 w-full items-center">
@@ -133,7 +156,7 @@ export function Header() {
         </Link>
 
         <div className="flex flex-row gap-4">
-          <HeaderLinks isLogged={!!userId} />
+          <HeaderLinks />
         </div>
       </div>
 
@@ -150,7 +173,7 @@ export function Header() {
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
-        <Auth userAddress={address} className="h-fit" />
+        <Auth userAddress={address} className="h-fit" isMounted={isMounted} />
       </div>
     </div>
   );
@@ -158,9 +181,14 @@ export function Header() {
 
 const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
-const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
+const Auth = ({
   className,
   userAddress,
+  isMounted,
+}: {
+  userAddress: string | null;
+  className?: string;
+  isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
   const { signOut } = useAuth();
@@ -179,24 +207,29 @@ const Auth: React.FC<{ userAddress: string | null; className?: string }> = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {/* Loading state */}
-          <div>
-            <ClerkLoading>
-              <div className={avatarClassName}>
-                <UserAvatarSkeleton className={avatarClassName} />
-              </div>
-            </ClerkLoading>
-            {/* Signed in state */}
-            <SignedIn>
-              <div
-                className={cn(
-                  avatarClassName,
-                  "cursor-pointer hover:scale-110 transition-transform ease-out",
-                )}
-              >
-                <UserAvatar address={userAddress} className={avatarClassName} />
-              </div>
-            </SignedIn>
-          </div>
+          {isMounted && (
+            <div>
+              <ClerkLoading>
+                <div className={avatarClassName}>
+                  <UserAvatarSkeleton className={avatarClassName} />
+                </div>
+              </ClerkLoading>
+              {/* Signed in state */}
+              <SignedIn>
+                <div
+                  className={cn(
+                    avatarClassName,
+                    "cursor-pointer hover:scale-110 transition-transform ease-out",
+                  )}
+                >
+                  <UserAvatar
+                    address={userAddress}
+                    className={avatarClassName}
+                  />
+                </div>
+              </SignedIn>
+            </div>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
           <Link href={`/profile/${userAddress}`}>
