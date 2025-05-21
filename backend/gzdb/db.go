@@ -175,13 +175,9 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (
 	}
 
 	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs
-	// we should rewrite this func if db become bottleneck
+	// we should rewrite this if db become bottleneck
 	if req.Password == "" {
-		updates := map[string]any{
-			"password_hash": "",
-			"password_salt": "",
-		}
-		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(updates).Error; err != nil {
+		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("password_hash", "").Error; err != nil {
 			return nil, err
 		}
 	}

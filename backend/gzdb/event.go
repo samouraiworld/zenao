@@ -9,6 +9,7 @@ import (
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"golang.org/x/crypto/sha3"
 	"gorm.io/gorm"
 )
 
@@ -127,17 +128,10 @@ func eventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, e
 	if passwordHash == "" {
 		privacy.EventPrivacy = &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}
 	} else {
-		passwordHashBz, err := base64.RawURLEncoding.DecodeString(passwordHash)
-		if err != nil {
-			return nil, fmt.Errorf("failed to decode password hash: %w", err)
-		}
-		if len(passwordHashBz) != 32 {
-			return nil, fmt.Errorf("unexpected password hash length")
-		}
+		skBz := sha3.Sum256([]byte(passwordHash))
+		// XXX: use pbkdf instead of sha3 on password hash?
+		sk := ed25519.NewKeyFromSeed(skBz[:])
 
-		// XXX: use pbkdf on password hash?
-
-		sk := ed25519.NewKeyFromSeed(passwordHashBz)
 		pkBz := []byte(sk.Public().(ed25519.PublicKey))
 		pk := base64.RawURLEncoding.EncodeToString(pkBz)
 
