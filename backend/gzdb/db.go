@@ -849,11 +849,6 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	}, nil
 }
 
-func hashPass(password string, salt []byte) string {
-	passHashBz := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
-	return base64.RawURLEncoding.EncodeToString(passHashBz)
-}
-
 func newPasswordHash(password string) (string, string, error) {
 	passwordHash := ""
 	passwordSalt := ""
@@ -885,4 +880,9 @@ func validatePassword(password string, hash string, salt string) error {
 	}
 
 	return nil
+}
+
+func hashPass(password string, salt []byte) string {
+	passHashBz := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+	return base64.RawURLEncoding.EncodeToString(passHashBz)
 }

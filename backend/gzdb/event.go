@@ -24,6 +24,7 @@ type Event struct {
 	CreatorID   uint
 	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
 
+	// XXX: consider storing the hash params
 	PasswordHash string // event is guarded if set
 	PasswordSalt string // must be set with password hash
 
