@@ -13,10 +13,12 @@ import (
 )
 
 type genticketConfig struct {
+	eventID    string
 	gatekeeper string
 }
 
 func (conf *genticketConfig) RegisterFlags(flset *flag.FlagSet) {
+	flset.StringVar(&conf.gatekeeper, "event", "", "Event id used to pregenerate a signature")
 	flset.StringVar(&conf.gatekeeper, "gatekeeper", "", "Gatekeeper address used to pregenerate a signature")
 }
 
@@ -50,12 +52,12 @@ func execGenticket(genticketConf *genticketConfig) error {
 
 	fmt.Printf("🎫 Ticket pubkey:\n%s\n", ticket.Pubkey())
 
-	if genticketConf.gatekeeper != "" {
-		signature, err := ticket.Signature(genticketConf.gatekeeper)
+	if genticketConf.eventID != "" && genticketConf.gatekeeper != "" {
+		signature, err := ticket.Signature(genticketConf.eventID, genticketConf.gatekeeper)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("🚪 Checkin signature for gatekeeper %q:\n%s\n", genticketConf.gatekeeper, signature)
+		fmt.Printf("🚪 Checkin signature for event %q and gatekeeper %q:\n%s\n", genticketConf.eventID, genticketConf.gatekeeper, signature)
 	}
 
 	return nil
