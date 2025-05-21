@@ -165,19 +165,7 @@ func validateEvent(startDate, endDate uint64, title, description string, locatio
 		return errors.New("unknown location kind")
 	}
 
-	/*
-		switch val := privacy.GetEventPrivacy().(type) {
-		case *zenaov1.EventPrivacy_Public:
-			// valid
-		case *zenaov1.EventPrivacy_Guarded:
-			_, err := base64.RawURLEncoding.DecodeString(val.Guarded.GetParticipationPubkey())
-			if err != nil {
-				return fmt.Errorf("invalid guard pubkey: %w", err)
-			}
-		default:
-			return errors.New("uknown privacy model")
-		}
-	*/
+	// password can be anything
 
 	return nil
 }
