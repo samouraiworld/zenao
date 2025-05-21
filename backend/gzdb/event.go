@@ -1,6 +1,8 @@
 package gzdb
 
 import (
+	"crypto/ed25519"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
@@ -12,16 +14,18 @@ import (
 
 type Event struct {
 	gorm.Model
-	Title               string
-	Description         string
-	StartDate           time.Time
-	EndDate             time.Time
-	ImageURI            string
-	TicketPrice         float64
-	Capacity            uint32
-	CreatorID           uint
-	Creator             User   `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
-	ParticipationPubkey string // pubkey of secret key derived from event password
+	Title       string
+	Description string
+	StartDate   time.Time
+	EndDate     time.Time
+	ImageURI    string
+	TicketPrice float64
+	Capacity    uint32
+	CreatorID   uint
+	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
+
+	PasswordHash string // event is guarded if set
+	PasswordSalt string // must be set with password hash
 
 	LocVenueName    string
 	LocKind         string // one of: geo, virtual or custom
@@ -73,18 +77,6 @@ func (e *Event) SetLocation(loc *zenaov1.EventLocation) error {
 	return nil
 }
 
-func (e *Event) SetPrivacy(prvc *zenaov1.EventPrivacy) error {
-	switch evtpvc := prvc.EventPrivacy.(type) {
-	case *zenaov1.EventPrivacy_Public:
-		e.ParticipationPubkey = ""
-	case *zenaov1.EventPrivacy_Guarded:
-		e.ParticipationPubkey = evtpvc.Guarded.ParticipationPubkey
-	default:
-		return errors.New("unknown privacy model")
-	}
-	return nil
-}
-
 func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 	loc := &zenaov1.EventLocation{
 		VenueName:    dbevt.LocVenueName,
@@ -111,13 +103,9 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		return nil, fmt.Errorf("unknown address kind %q", dbevt.LocKind)
 	}
 
-	privacy := &zenaov1.EventPrivacy{}
-	if dbevt.ParticipationPubkey == "" {
-		privacy.EventPrivacy = &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}
-	} else {
-		privacy.EventPrivacy = &zenaov1.EventPrivacy_Guarded{Guarded: &zenaov1.EventPrivacyGuarded{
-			ParticipationPubkey: dbevt.ParticipationPubkey,
-		}}
+	privacy, err := eventPrivacyFromPasswordHash(dbevt.PasswordHash)
+	if err != nil {
+		return nil, errors.New("failed to derive privacy from password hash")
 	}
 
 	return &zeni.Event{
@@ -133,4 +121,30 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		Location:    loc,
 		Privacy:     privacy,
 	}, nil
+}
+
+func eventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, error) {
+	privacy := &zenaov1.EventPrivacy{}
+	if passwordHash == "" {
+		privacy.EventPrivacy = &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}
+	} else {
+		passwordHashBz, err := base64.RawURLEncoding.DecodeString(passwordHash)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode password hash: %w", err)
+		}
+		if len(passwordHashBz) != 32 {
+			return nil, fmt.Errorf("unexpected password hash length")
+		}
+
+		// XXX: use pbkdf on password hash?
+
+		sk := ed25519.NewKeyFromSeed(passwordHashBz)
+		pkBz := []byte(sk.Public().(ed25519.PublicKey))
+		pk := base64.RawURLEncoding.EncodeToString(pkBz)
+
+		privacy.EventPrivacy = &zenaov1.EventPrivacy_Guarded{Guarded: &zenaov1.EventPrivacyGuarded{
+			ParticipationPubkey: pk,
+		}}
+	}
+	return privacy, nil
 }

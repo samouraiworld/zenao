@@ -33,9 +33,11 @@ func (s *ZenaoServer) EditEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Privacy); err != nil {
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
+
+	var privacy *zenaov1.EventPrivacy
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
@@ -46,7 +48,7 @@ func (s *ZenaoServer) EditEvent(
 			return errors.New("user is not organizer of the event")
 		}
 
-		if err := db.EditEvent(req.Msg.EventId, req.Msg); err != nil {
+		if privacy, err = db.EditEvent(req.Msg.EventId, req.Msg); err != nil {
 			return err
 		}
 
@@ -55,7 +57,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.EditEvent(req.Msg.EventId, zUser.ID, req.Msg); err != nil {
+	if err := s.Chain.EditEvent(req.Msg.EventId, zUser.ID, req.Msg, privacy); err != nil {
 		return nil, err
 	}
 

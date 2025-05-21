@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/url"
@@ -38,7 +37,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Privacy); err != nil {
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
@@ -57,7 +56,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.CreateEvent(evt.ID, zUser.ID, req.Msg); err != nil {
+	if err := s.Chain.CreateEvent(evt.ID, zUser.ID, req.Msg, evt.Privacy); err != nil {
 		s.Logger.Error("create-event", zap.Error(err))
 		return nil, err
 	}
@@ -87,7 +86,7 @@ func (s *ZenaoServer) CreateEvent(
 	}), nil
 }
 
-func validateEvent(startDate, endDate uint64, title, description string, location *zenaov1.EventLocation, imageURI string, capacity uint32, ticketPrice float64, privacy *zenaov1.EventPrivacy) error {
+func validateEvent(startDate, endDate uint64, title, description string, location *zenaov1.EventLocation, imageURI string, capacity uint32, ticketPrice float64) error {
 	if startDate >= endDate {
 		return errors.New("end date must be after start date")
 	}
@@ -166,17 +165,19 @@ func validateEvent(startDate, endDate uint64, title, description string, locatio
 		return errors.New("unknown location kind")
 	}
 
-	switch val := privacy.GetEventPrivacy().(type) {
-	case *zenaov1.EventPrivacy_Public:
-		// valid
-	case *zenaov1.EventPrivacy_Guarded:
-		_, err := base64.RawURLEncoding.DecodeString(val.Guarded.GetParticipationPubkey())
-		if err != nil {
-			return fmt.Errorf("invalid guard pubkey: %w", err)
+	/*
+		switch val := privacy.GetEventPrivacy().(type) {
+		case *zenaov1.EventPrivacy_Public:
+			// valid
+		case *zenaov1.EventPrivacy_Guarded:
+			_, err := base64.RawURLEncoding.DecodeString(val.Guarded.GetParticipationPubkey())
+			if err != nil {
+				return fmt.Errorf("invalid guard pubkey: %w", err)
+			}
+		default:
+			return errors.New("uknown privacy model")
 		}
-	default:
-		return errors.New("uknown privacy model")
-	}
+	*/
 
 	return nil
 }

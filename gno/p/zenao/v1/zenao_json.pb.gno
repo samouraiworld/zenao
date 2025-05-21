@@ -116,8 +116,8 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	if c.Location != nil {
 		fields["location"] = c.Location.ToJSON()
 	}
-	if c.Privacy != nil {
-		fields["privacy"] = c.Privacy.ToJSON()
+	if c.Password != "" {
+		fields["password"] = json.StringNode("", c.Password)
 	}
 
 	return json.ObjectNode("", fields)
@@ -161,10 +161,8 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 		fv.FromJSON(val)
 		c.Location = fv
 	}
-	if val, ok := fields["privacy"]; ok {
-		fv := &EventPrivacy{}
-		fv.FromJSON(val)
-		c.Privacy = fv
+	if val, ok := fields["password"]; ok {
+		c.Password = val.MustString()
 	}
 }
 
@@ -217,8 +215,8 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Location != nil {
 		fields["location"] = e.Location.ToJSON()
 	}
-	if e.Privacy != nil {
-		fields["privacy"] = e.Privacy.ToJSON()
+	if e.Password != "" {
+		fields["password"] = json.StringNode("", e.Password)
 	}
 
 	return json.ObjectNode("", fields)
@@ -265,10 +263,8 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 		fv.FromJSON(val)
 		e.Location = fv
 	}
-	if val, ok := fields["privacy"]; ok {
-		fv := &EventPrivacy{}
-		fv.FromJSON(val)
-		e.Privacy = fv
+	if val, ok := fields["password"]; ok {
+		e.Password = val.MustString()
 	}
 }
 
@@ -307,8 +303,8 @@ func (p *ParticipateRequest) ToJSON() *json.Node {
 		}
 		fields["guests"] = json.ArrayNode("", arr)
 	}
-	if p.ParticipationSignature != "" {
-		fields["participationSignature"] = json.StringNode("", p.ParticipationSignature)
+	if p.Password != "" {
+		fields["password"] = json.StringNode("", p.Password)
 	}
 
 	return json.ObjectNode("", fields)
@@ -332,8 +328,8 @@ func (p *ParticipateRequest) FromJSON(node *json.Node) {
 		}
 		p.Guests = arr
 	}
-	if val, ok := fields["participationSignature"]; ok {
-		p.ParticipationSignature = val.MustString()
+	if val, ok := fields["password"]; ok {
+		p.Password = val.MustString()
 	}
 }
 

@@ -83,7 +83,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 		for i, ticket := range tickets {
 			// XXX: support batch
-			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret()); err != nil {
+			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password); err != nil {
 				return err
 			}
 		}

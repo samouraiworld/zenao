@@ -88,8 +88,8 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if c.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, c.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
-	if c.Privacy != nil {
-		fmt.Fprintf(buf, "%s\tPrivacy: &%s%s,\n", linePrefix, typePrefix, c.Privacy.GnoLiteral(typePrefix, linePrefix+"\t"))
+	if c.Password != "" {
+		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, c.Password)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -139,8 +139,8 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 	if e.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, e.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
-	if e.Privacy != nil {
-		fmt.Fprintf(buf, "%s\tPrivacy: &%s%s,\n", linePrefix, typePrefix, e.Privacy.GnoLiteral(typePrefix, linePrefix+"\t"))
+	if e.Password != "" {
+		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, e.Password)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -178,8 +178,8 @@ func (p *ParticipateRequest) GnoLiteral(typePrefix string, linePrefix string) st
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
-	if p.ParticipationSignature != "" {
-		fmt.Fprintf(buf, "%s\tParticipationSignature: %q,\n", linePrefix, p.ParticipationSignature)
+	if p.Password != "" {
+		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, p.Password)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")

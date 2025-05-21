@@ -113,10 +113,10 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 }
 
 // CreateEvent implements ZenaoChain.
-func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
+func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
 	creatorAddr := g.UserAddress(creatorID)
 
-	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
+	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
 	if err != nil {
 		return err
 	}
@@ -165,11 +165,11 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 }
 
 // EditEvent implements ZenaoChain.
-func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.EditEventRequest) error {
+func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
 	loc := "&" + req.Location.GnoLiteral("zenaov1.", "\t\t")
-	privacy := "&" + req.Privacy.GnoLiteral("zenaov1.", "\t\t")
+	privacyStr := "&" + privacy.GnoLiteral("zenaov1.", "\t\t")
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -207,7 +207,7 @@ func main() {
 		}),
 	})
 }
-`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacy),
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacyStr),
 			}},
 		},
 	}))
@@ -703,7 +703,7 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest) (string, error) {
+func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
 	m := map[string]interface{}{
 		"creatorAddr":    creatorAddr,
 		"req":            req,
@@ -713,7 +713,7 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 	}
 
 	participationPubkey := ""
-	if guarded := req.Privacy.GetGuarded(); guarded != nil {
+	if guarded := privacy.GetGuarded(); guarded != nil {
 		participationPubkey = guarded.GetParticipationPubkey()
 	}
 

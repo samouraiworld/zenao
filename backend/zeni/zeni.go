@@ -162,9 +162,9 @@ type DB interface {
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
-	EditEvent(eventID string, req *zenaov1.EditEventRequest) error
+	EditEvent(eventID string, req *zenaov1.EditEventRequest) (*zenaov1.EventPrivacy, error)
 	GetEvent(eventID string) (*Event, error)
-	Participate(eventID string, buyerID string, userID string, ticketSecret string) error
+	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
@@ -189,8 +189,8 @@ type Chain interface {
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserAddress(userID string) string
 
-	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
-	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
+	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
+	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
 	Participate(eventID string, callerID string, participantID string, ticketPubkey string, signature string) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 

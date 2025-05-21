@@ -32,7 +32,7 @@ type CreateEventRequest struct {
 	TicketPrice float64
 	Capacity    uint32
 	Location    *EventLocation
-	Privacy     *EventPrivacy
+	Password    string
 }
 
 type CreateEventResponse struct {
@@ -49,7 +49,7 @@ type EditEventRequest struct {
 	TicketPrice float64
 	Capacity    uint32
 	Location    *EventLocation
-	Privacy     *EventPrivacy
+	Password    string
 }
 
 type EditEventResponse struct {
@@ -57,10 +57,10 @@ type EditEventResponse struct {
 }
 
 type ParticipateRequest struct {
-	EventId                string
-	Email                  string
-	Guests                 []string
-	ParticipationSignature string
+	EventId  string
+	Email    string
+	Guests   []string
+	Password string
 }
 
 type ParticipateResponse struct {

@@ -1,6 +1,8 @@
 package gzdb
 
 import (
+	srand "crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"slices"
@@ -13,6 +15,7 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	"golang.org/x/crypto/argon2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -101,20 +104,24 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		return nil, fmt.Errorf("parse creator id: %w", err)
 	}
 
+	passwordHash, passwordSalt, err := newPasswordHash(req.Password)
+	if err != nil {
+		return nil, errors.New("failed to hash password")
+	}
+
 	evt := &Event{
-		Title:       req.Title,
-		Description: req.Description,
-		ImageURI:    req.ImageUri,
-		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
-		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
-		CreatorID:   uint(creatorIDInt),
-		TicketPrice: req.TicketPrice,
-		Capacity:    req.Capacity,
+		Title:        req.Title,
+		Description:  req.Description,
+		ImageURI:     req.ImageUri,
+		StartDate:    time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:      time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
+		CreatorID:    uint(creatorIDInt),
+		TicketPrice:  req.TicketPrice,
+		Capacity:     req.Capacity,
+		PasswordHash: passwordHash,
+		PasswordSalt: passwordSalt,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
-		return nil, fmt.Errorf("convert location: %w", err)
-	}
-	if err := evt.SetPrivacy(req.Privacy); err != nil {
 		return nil, fmt.Errorf("convert location: %w", err)
 	}
 
@@ -141,41 +148,55 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 }
 
 // EditEvent implements zeni.DB.
-func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) error {
+func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (*zenaov1.EventPrivacy, error) {
 	// XXX: validate?
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	passwordHash, passwordSalt, err := newPasswordHash(req.Password)
+	if err != nil {
+		return nil, errors.New("failed to hash password")
 	}
 
 	evt := Event{
-		Title:       req.Title,
-		Description: req.Description,
-		ImageURI:    req.ImageUri,
-		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
-		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
-		TicketPrice: req.TicketPrice,
-		Capacity:    req.Capacity,
+		Title:        req.Title,
+		Description:  req.Description,
+		ImageURI:     req.ImageUri,
+		StartDate:    time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:      time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
+		TicketPrice:  req.TicketPrice,
+		Capacity:     req.Capacity,
+		PasswordHash: passwordHash,
+		PasswordSalt: passwordSalt,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
-		return err
-	}
-	if err := evt.SetPrivacy(req.Privacy); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(evt).Error; err != nil {
-		return err
+		return nil, err
 	}
 
-	// XXX: this is a hack to allow to disable the privacy, since empty values are ignored by db.Updates
-	if req.Privacy.GetPublic() != nil {
-		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("participation_pubkey", "").Error; err != nil {
-			return err
+	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs
+	// we should rewrite this func if db become bottleneck
+	if req.Password == "" {
+		updates := map[string]any{
+			"password_hash": "",
+			"password_salt": "",
+		}
+		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(updates).Error; err != nil {
+			return nil, err
 		}
 	}
 
-	return nil
+	privacy, err := eventPrivacyFromPasswordHash(passwordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	return privacy, nil
 }
 
 // GetEvent implements zeni.DB.
@@ -241,7 +262,7 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string) error {
+func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string) error {
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
 	if err != nil {
 		return err
@@ -259,6 +280,10 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 
 	evt, err := g.getDBEvent(eventID)
 	if err != nil {
+		return err
+	}
+
+	if err := validatePassword(password, evt.PasswordHash, evt.PasswordSalt); err != nil {
 		return err
 	}
 
@@ -822,4 +847,42 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		UserID:  fmt.Sprint(dbtick.UserID),
 		Checkin: checkin,
 	}, nil
+}
+
+func hashPass(password string, salt []byte) string {
+	passHashBz := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
+	return base64.RawURLEncoding.EncodeToString(passHashBz)
+}
+
+func newPasswordHash(password string) (string, string, error) {
+	passwordHash := ""
+	passwordSalt := ""
+	if password != "" {
+		saltBz := make([]byte, 32)
+		_, err := srand.Read(saltBz)
+		if err != nil {
+			return "", "", errors.New("failed to generate salt")
+		}
+
+		passwordHash = hashPass(password, saltBz)
+		passwordSalt = base64.RawURLEncoding.EncodeToString(saltBz)
+	}
+	return passwordHash, passwordSalt, nil
+}
+
+func validatePassword(password string, hash string, salt string) error {
+	if hash == "" {
+		return nil
+	}
+
+	saltBz, err := base64.RawURLEncoding.DecodeString(salt)
+	if err != nil {
+		return errors.New("failed to decode salt")
+	}
+
+	if hashPass(password, saltBz) != hash {
+		return errors.New("invalid password")
+	}
+
+	return nil
 }
