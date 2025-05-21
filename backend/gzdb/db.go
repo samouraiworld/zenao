@@ -1,8 +1,6 @@
 package gzdb
 
 import (
-	srand "crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"slices"
@@ -15,7 +13,6 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
-	"golang.org/x/crypto/argon2"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -104,7 +101,7 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		return nil, fmt.Errorf("parse creator id: %w", err)
 	}
 
-	passwordHash, passwordSalt, err := newPasswordHash(req.Password)
+	passwordHash, err := newPasswordHash(req.Password)
 	if err != nil {
 		return nil, errors.New("failed to hash password")
 	}
@@ -119,7 +116,6 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		TicketPrice:  req.TicketPrice,
 		Capacity:     req.Capacity,
 		PasswordHash: passwordHash,
-		PasswordSalt: passwordSalt,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
 		return nil, fmt.Errorf("convert location: %w", err)
@@ -155,7 +151,7 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (
 		return nil, err
 	}
 
-	passwordHash, passwordSalt, err := newPasswordHash(req.Password)
+	passwordHash, err := newPasswordHash(req.Password)
 	if err != nil {
 		return nil, errors.New("failed to hash password")
 	}
@@ -169,7 +165,6 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (
 		TicketPrice:  req.TicketPrice,
 		Capacity:     req.Capacity,
 		PasswordHash: passwordHash,
-		PasswordSalt: passwordSalt,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
 		return nil, err
@@ -283,7 +278,7 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return err
 	}
 
-	if err := validatePassword(password, evt.PasswordHash, evt.PasswordSalt); err != nil {
+	if err := validatePassword(password, evt.PasswordHash); err != nil {
 		return err
 	}
 
@@ -847,42 +842,4 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		UserID:  fmt.Sprint(dbtick.UserID),
 		Checkin: checkin,
 	}, nil
-}
-
-func newPasswordHash(password string) (string, string, error) {
-	passwordHash := ""
-	passwordSalt := ""
-	if password != "" {
-		saltBz := make([]byte, 32)
-		_, err := srand.Read(saltBz)
-		if err != nil {
-			return "", "", errors.New("failed to generate salt")
-		}
-
-		passwordHash = hashPass(password, saltBz)
-		passwordSalt = base64.RawURLEncoding.EncodeToString(saltBz)
-	}
-	return passwordHash, passwordSalt, nil
-}
-
-func validatePassword(password string, hash string, salt string) error {
-	if hash == "" {
-		return nil
-	}
-
-	saltBz, err := base64.RawURLEncoding.DecodeString(salt)
-	if err != nil {
-		return errors.New("failed to decode salt")
-	}
-
-	if hashPass(password, saltBz) != hash {
-		return errors.New("invalid password")
-	}
-
-	return nil
-}
-
-func hashPass(password string, salt []byte) string {
-	passHashBz := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
-	return base64.RawURLEncoding.EncodeToString(passHashBz)
 }
