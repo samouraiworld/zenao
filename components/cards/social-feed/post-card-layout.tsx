@@ -2,7 +2,7 @@
 
 import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode, useMemo } from "react";
-import { Hash, MapPin, MessageCircle, Reply, Smile } from "lucide-react";
+import { Hash, MapPin, MessageCircle, Smile } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -103,8 +103,8 @@ export function PostCardLayout({
 
       <div className="my-1">{children}</div>
 
-      <div className="flex flex-col justify-between sm:flex-row sm:items-center gap-2">
-        <Link href={`event/${eventId}/feed/${post.post?.localPostId}`}>
+      <div className="flex sm:flex-row sm:items-center gap-2">
+        <Link href={`/event/${eventId}/feed/${post.post?.localPostId}`}>
           <Button
             variant="outline"
             className="reaction-btn rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
@@ -133,7 +133,7 @@ function Reactions({
   eventId: string;
   reactions: ReactionView[];
 }) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -168,7 +168,7 @@ function Reactions({
   };
 
   return (
-    <div className="flex flex-row gap-1 w-full">
+    <div className="flex flex-row gap-2 overflow-auto">
       {(isOrganizer || isParticipant) && (
         <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
           <PopoverTrigger asChild>
@@ -181,7 +181,7 @@ function Reactions({
           </PopoverTrigger>
           <PopoverContent className="w-fit bg-transparent p-0 border-none transition-all">
             <EmojiPicker
-              theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
+              theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
               onEmojiClick={(choice) => {
                 if (isPending) return;
                 onReactionChange(choice.emoji);

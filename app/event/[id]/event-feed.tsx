@@ -24,7 +24,7 @@ const EventFeedForm = ({ eventId }: { eventId: string }) => {
     useState<FeedInputMode>("STANDARD_POST");
 
   return (
-    <div className="flex justify-center w-full transition-all duration-300 bg-transparent">
+    <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
       <div className="w-full">
         {feedInputMode === "POLL" ? (
           <PollPostForm

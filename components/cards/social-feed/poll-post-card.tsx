@@ -86,38 +86,40 @@ export function PollPostCard({
   };
 
   return (
-    <PostCardLayout
-      eventId={eventId}
-      post={pollPost}
-      createdBy={createdBy}
-      gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
-    >
-      <div className="w-full flex flex-col gap-2">
-        <div className="flex flex-row items-center gap-2">
-          <Text className="text-sm">{`${totalVotesCount} votes`}</Text>
-          <Text className="text-sm">•</Text>
-          <Text className="text-sm">{remainingTimeText}</Text>
-        </div>
-        <Text className="line-clamp-3">{pollPost.poll.question}</Text>
+    <>
+      <PostCardLayout
+        eventId={eventId}
+        post={pollPost}
+        createdBy={createdBy}
+        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
+      >
+        <div className="w-full flex flex-col gap-2">
+          <div className="flex flex-row items-center gap-2">
+            <Text className="text-sm">{`${totalVotesCount} votes`}</Text>
+            <Text className="text-sm">•</Text>
+            <Text className="text-sm">{remainingTimeText}</Text>
+          </div>
+          <Text className="line-clamp-3">{pollPost.poll.question}</Text>
 
-        <div className="flex flex-col items-center gap-2">
-          {pollPost.poll.results.map((pollResult, index) => (
-            <PollResultItem
-              key={index}
-              pollResult={pollResult}
-              totalVotesCount={totalVotesCount}
-              disabled={
-                isPollEnded || isPending || (!isOrganizer && !isParticipant)
-              }
-              onCheckedChange={() => {
-                onVote(pollResult.option);
-              }}
-              pollKind={pollPost.poll.kind}
-            />
-          ))}
+          <div className="flex flex-col items-center gap-2">
+            {pollPost.poll.results.map((pollResult, index) => (
+              <PollResultItem
+                key={index}
+                pollResult={pollResult}
+                totalVotesCount={totalVotesCount}
+                disabled={
+                  isPollEnded || isPending || (!isOrganizer && !isParticipant)
+                }
+                onCheckedChange={() => {
+                  onVote(pollResult.option);
+                }}
+                pollKind={pollPost.poll.kind}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </PostCardLayout>
+      </PostCardLayout>
+    </>
   );
 }
 

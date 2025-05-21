@@ -190,7 +190,7 @@ export function StandardPostForm({
     <Form {...standardPostForm}>
       <form
         onSubmit={standardPostForm.handleSubmit(onSubmitStandardPost)}
-        className="flex flex-col gap-4 bg-accent p-4 rounded"
+        className="flex flex-col gap-4 p-4 rounded"
       >
         <div className="flex flex-row gap-4">
           <Tabs defaultValue="form" className="w-full">
