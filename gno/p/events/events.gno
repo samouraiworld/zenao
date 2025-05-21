@@ -374,29 +374,32 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 		if msg.location != nil {
 			e.location = msg.location
 		}
-		if msg.participationPubkey != nil {
-			if *msg.participationPubkey == "" {
+		if msg.privacy != nil {
+			switch val := msg.privacy.EventPrivacy.(type) {
+			case *zenaov1.EventPrivacyPublic:
 				e.participationPubkey = nil
-			} else {
-				participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(*msg.participationPubkey)
+			case *zenaov1.EventPrivacyGuarded:
+				participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
 				if err != nil {
 					panic(err)
 				}
 				e.participationPubkey = participationPubkeyBz
+			default:
+				panic("unknown privacy model")
 			}
 		}
 	})
 }
 
 type msgEditEvent struct {
-	title               string
-	description         string
-	imageURI            string
-	startDate           int64
-	endDate             int64
-	capacity            uint32
-	location            *zenaov1.EventLocation
-	participationPubkey *string
+	title       string
+	description string
+	imageURI    string
+	startDate   int64
+	endDate     int64
+	capacity    uint32
+	location    *zenaov1.EventLocation
+	privacy     *zenaov1.EventPrivacy
 }
 
 func (msg *msgEditEvent) String() string {
@@ -429,7 +432,7 @@ func (msg *msgEditEvent) String() string {
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation) daokit.ExecutableMessage {
+func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
 		title:       title,
 		description: description,
@@ -438,6 +441,7 @@ func NewEditEventMsg(title, description, imageURI string, startDate, endDate int
 		endDate:     endDate,
 		capacity:    capacity,
 		location:    loc,
+		privacy:     privacy,
 	})
 }
 

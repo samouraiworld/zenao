@@ -191,7 +191,7 @@ type Chain interface {
 
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest) error
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest) error
-	Participate(eventID string, callerID string, participantID string, ticketPubkey string) error
+	Participate(eventID string, callerID string, participantID string, ticketPubkey string, signature string) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)

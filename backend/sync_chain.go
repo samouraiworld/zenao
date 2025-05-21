@@ -103,7 +103,7 @@ func execSyncChain() error {
 			}
 
 			for _, ticket := range tickets {
-				if err := chain.Participate(event.ID, event.CreatorID, ticket.UserID, ticket.Ticket.Pubkey()); err != nil {
+				if err := chain.Participate(event.ID, event.CreatorID, ticket.UserID, ticket.Ticket.Pubkey(), todo); err != nil {
 					logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
 				}
 

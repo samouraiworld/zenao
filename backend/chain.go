@@ -169,6 +169,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.Ed
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
 	loc := "&" + req.Location.GnoLiteral("zenaov1.", "\t\t")
+	privacy := "&" + req.Privacy.GnoLiteral("zenaov1.", "\t\t")
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -201,11 +202,12 @@ func main() {
 				%d,
 				%d,
 				%s,
+				%s,
 			),
 		}),
 	})
 }
-`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc),
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacy),
 			}},
 		},
 	}))
@@ -265,7 +267,7 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 }
 
 // Participate implements ZenaoChain.
-func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string) error {
+func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string, signature string) error {
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
@@ -293,11 +295,11 @@ func main() {
 		Title: %q,
 		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
 			Title: "Add participant",
-			Message: events.NewAddParticipantMsg(%q, %q),
+			Message: events.NewAddParticipantMsg(%q, %q, %q),
 		}),
 	})
 }
-`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey)}},
+`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey, signature)}},
 		},
 	}))
 	if err != nil {
@@ -710,10 +712,16 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 		"location":       "&" + req.Location.GnoLiteral("zenaov1.", "\t\t"),
 	}
 
+	participationPubkey := ""
+	if guarded := req.Privacy.GetGuarded(); guarded != nil {
+		participationPubkey = guarded.GetParticipationPubkey()
+	}
+
 	toMarshal := map[string]interface{}{
-		"title":       req.Title,
-		"description": req.Description,
-		"imageURI":    req.ImageUri,
+		"title":               req.Title,
+		"description":         req.Description,
+		"imageURI":            req.ImageUri,
+		"participationPubkey": participationPubkey,
 	}
 	for key, val := range toMarshal {
 		bz, err := json.Marshal(val)
@@ -762,6 +770,7 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
 		Location: {{.location}},
+		ParticipationPubkey: {{.participationPubkey}},
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
