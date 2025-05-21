@@ -116,6 +116,7 @@ export const FormFieldImage = <T extends FieldValues>(
           <div className="bottom-8 right-2">
             <input
               type="file"
+              name={props.name}
               onChange={handleChange}
               ref={hiddenInputRef}
               className="hidden"
