@@ -24,15 +24,15 @@ type GetUserAddressResponse struct {
 }
 
 type CreateEventRequest struct {
-	Title               string
-	Description         string
-	ImageUri            string
-	StartDate           uint64
-	EndDate             uint64
-	TicketPrice         float64
-	Capacity            uint32
-	Location            *EventLocation
-	ParticipationPubkey string
+	Title       string
+	Description string
+	ImageUri    string
+	StartDate   uint64
+	EndDate     uint64
+	TicketPrice float64
+	Capacity    uint32
+	Location    *EventLocation
+	Privacy     *EventPrivacy
 }
 
 type CreateEventResponse struct {
@@ -40,17 +40,16 @@ type CreateEventResponse struct {
 }
 
 type EditEventRequest struct {
-	EventId                   string
-	Title                     string
-	Description               string
-	ImageUri                  string
-	StartDate                 uint64
-	EndDate                   uint64
-	TicketPrice               float64
-	Capacity                  uint32
-	Location                  *EventLocation
-	UpdateParticipationPubkey bool
-	ParticipationPubkey       string
+	EventId     string
+	Title       string
+	Description string
+	ImageUri    string
+	StartDate   uint64
+	EndDate     uint64
+	TicketPrice float64
+	Capacity    uint32
+	Location    *EventLocation
+	Privacy     *EventPrivacy
 }
 
 type EditEventResponse struct {
@@ -96,6 +95,17 @@ type AddressGeo struct {
 type AddressCustom struct {
 	Address  string
 	Timezone string
+}
+
+type EventPrivacy struct {
+	EventPrivacy interface{}
+}
+
+type EventPrivacyPublic struct {
+}
+
+type EventPrivacyGuarded struct {
+	ParticipationPubkey string
 }
 
 type EventInfo struct {

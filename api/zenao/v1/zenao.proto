@@ -46,7 +46,7 @@ message CreateEventRequest {
   double ticket_price = 6; // XXX: use fixed point?
   uint32 capacity = 7;
   EventLocation location = 9;
-  string participation_pubkey = 10; // private event if set
+  EventPrivacy privacy = 10;
 }
 
 message CreateEventResponse { string id = 1; }
@@ -61,8 +61,7 @@ message EditEventRequest {
   double ticket_price = 7; // XXX: use fixed point?
   uint32 capacity = 8;
   EventLocation location = 9;
-  bool update_participation_pubkey = 10;
-  string participation_pubkey = 11; // private event if set
+  EventPrivacy privacy = 10;
 }
 
 message EditEventResponse { string id = 1; }
@@ -105,6 +104,21 @@ message AddressGeo {
 message AddressCustom {
   string address = 1;
   string timezone = 2; // IANA name
+}
+
+message EventPrivacy {
+  oneof event_privacy {
+    EventPrivacyPublic public = 1;
+    EventPrivacyGuarded guarded = 2;
+  }
+}
+
+message EventPrivacyPublic {
+
+}
+
+message EventPrivacyGuarded {
+  string participation_pubkey = 1;
 }
 
 message EventInfo {

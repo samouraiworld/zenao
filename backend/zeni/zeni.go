@@ -68,6 +68,7 @@ type Event struct {
 	Capacity    uint32
 	CreatorID   string
 	Location    *zenaov1.EventLocation
+	Privacy     *zenaov1.EventPrivacy
 }
 
 type Feed struct {

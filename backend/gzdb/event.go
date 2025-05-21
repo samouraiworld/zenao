@@ -12,16 +12,16 @@ import (
 
 type Event struct {
 	gorm.Model
-	Title        string
-	Description  string
-	StartDate    time.Time
-	EndDate      time.Time
-	ImageURI     string
-	TicketPrice  float64
-	Capacity     uint32
-	CreatorID    uint
-	Creator      User   `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
-	PasswordHash string // argon2id
+	Title               string
+	Description         string
+	StartDate           time.Time
+	EndDate             time.Time
+	ImageURI            string
+	TicketPrice         float64
+	Capacity            uint32
+	CreatorID           uint
+	Creator             User   `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
+	ParticipationPubkey string // pubkey of secret key derived from event password
 
 	LocVenueName    string
 	LocKind         string // one of: geo, virtual or custom
@@ -73,6 +73,18 @@ func (e *Event) SetLocation(loc *zenaov1.EventLocation) error {
 	return nil
 }
 
+func (e *Event) SetPrivacy(prvc *zenaov1.EventPrivacy) error {
+	switch evtpvc := prvc.EventPrivacy.(type) {
+	case *zenaov1.EventPrivacy_Public:
+		e.ParticipationPubkey = ""
+	case *zenaov1.EventPrivacy_Guarded:
+		e.ParticipationPubkey = evtpvc.Guarded.ParticipationPubkey
+	default:
+		return errors.New("unknown privacy model")
+	}
+	return nil
+}
+
 func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 	loc := &zenaov1.EventLocation{
 		VenueName:    dbevt.LocVenueName,
@@ -99,6 +111,15 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		return nil, fmt.Errorf("unknown address kind %q", dbevt.LocKind)
 	}
 
+	privacy := &zenaov1.EventPrivacy{}
+	if dbevt.ParticipationPubkey == "" {
+		privacy.EventPrivacy = &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}
+	} else {
+		privacy.EventPrivacy = &zenaov1.EventPrivacy_Guarded{Guarded: &zenaov1.EventPrivacyGuarded{
+			ParticipationPubkey: dbevt.ParticipationPubkey,
+		}}
+	}
+
 	return &zeni.Event{
 		ID:          fmt.Sprintf("%d", dbevt.ID),
 		Title:       dbevt.Title,
@@ -110,5 +131,6 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		Capacity:    dbevt.Capacity,
 		CreatorID:   fmt.Sprintf("%d", dbevt.CreatorID),
 		Location:    loc,
+		Privacy:     privacy,
 	}, nil
 }

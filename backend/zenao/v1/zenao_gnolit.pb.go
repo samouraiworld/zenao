@@ -88,8 +88,8 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if c.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, c.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
-	if c.ParticipationPubkey != "" {
-		fmt.Fprintf(buf, "%s\tParticipationPubkey: %q,\n", linePrefix, c.ParticipationPubkey)
+	if c.Privacy != nil {
+		fmt.Fprintf(buf, "%s\tPrivacy: &%s%s,\n", linePrefix, typePrefix, c.Privacy.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -139,11 +139,8 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 	if e.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, e.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
-	if e.UpdateParticipationPubkey != false {
-		fmt.Fprintf(buf, "%s\tUpdateParticipationPubkey: %t,\n", linePrefix, e.UpdateParticipationPubkey)
-	}
-	if e.ParticipationPubkey != "" {
-		fmt.Fprintf(buf, "%s\tParticipationPubkey: %q,\n", linePrefix, e.ParticipationPubkey)
+	if e.Privacy != nil {
+		fmt.Fprintf(buf, "%s\tPrivacy: &%s%s,\n", linePrefix, typePrefix, e.Privacy.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -292,6 +289,44 @@ func (a *AddressCustom) GnoLiteral(typePrefix string, linePrefix string) string 
 	}
 	if a.Timezone != "" {
 		fmt.Fprintf(buf, "%s\tTimezone: %q,\n", linePrefix, a.Timezone)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *EventPrivacy) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EventPrivacy{\n")
+	switch val := e.EventPrivacy.(type) {
+	case *EventPrivacy_Public:
+		fmt.Fprintf(buf, "%s\tEventPrivacy: &%s,\n", linePrefix, val.Public.GnoLiteral(typePrefix, linePrefix+"\t"))
+	case *EventPrivacy_Guarded:
+		fmt.Fprintf(buf, "%s\tEventPrivacy: &%s,\n", linePrefix, val.Guarded.GnoLiteral(typePrefix, linePrefix+"\t"))
+	default:
+		panic(errors.New("unknown eventPrivacy variant"))
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *EventPrivacyPublic) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EventPrivacyPublic{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *EventPrivacyGuarded) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EventPrivacyGuarded{\n")
+	if e.ParticipationPubkey != "" {
+		fmt.Fprintf(buf, "%s\tParticipationPubkey: %q,\n", linePrefix, e.ParticipationPubkey)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")

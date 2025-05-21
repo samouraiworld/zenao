@@ -102,17 +102,19 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 	}
 
 	evt := &Event{
-		Title:        req.Title,
-		Description:  req.Description,
-		ImageURI:     req.ImageUri,
-		StartDate:    time.Unix(int64(req.StartDate), 0), // XXX: overflow?
-		EndDate:      time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
-		CreatorID:    uint(creatorIDInt),
-		TicketPrice:  req.TicketPrice,
-		Capacity:     req.Capacity,
-		PasswordHash: req.PasswordHash,
+		Title:       req.Title,
+		Description: req.Description,
+		ImageURI:    req.ImageUri,
+		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
+		CreatorID:   uint(creatorIDInt),
+		TicketPrice: req.TicketPrice,
+		Capacity:    req.Capacity,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
+		return nil, fmt.Errorf("convert location: %w", err)
+	}
+	if err := evt.SetPrivacy(req.Privacy); err != nil {
 		return nil, fmt.Errorf("convert location: %w", err)
 	}
 
@@ -158,10 +160,21 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) e
 	if err := evt.SetLocation(req.Location); err != nil {
 		return err
 	}
+	if err := evt.SetPrivacy(req.Privacy); err != nil {
+		return err
+	}
 
 	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(evt).Error; err != nil {
 		return err
 	}
+
+	// XXX: this is a hack to allow to disable the privacy, since empty values are ignored by db.Updates
+	if req.Privacy.GetPublic() != nil {
+		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("participation_pubkey", "").Error; err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
