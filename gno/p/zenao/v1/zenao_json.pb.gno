@@ -116,6 +116,9 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	if c.Location != nil {
 		fields["location"] = c.Location.ToJSON()
 	}
+	if c.ParticipationPubkey != "" {
+		fields["participationPubkey"] = json.StringNode("", c.ParticipationPubkey)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -157,6 +160,9 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 		fv := &EventLocation{}
 		fv.FromJSON(val)
 		c.Location = fv
+	}
+	if val, ok := fields["participationPubkey"]; ok {
+		c.ParticipationPubkey = val.MustString()
 	}
 }
 
@@ -209,6 +215,12 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Location != nil {
 		fields["location"] = e.Location.ToJSON()
 	}
+	if e.UpdateParticipationPubkey != false {
+		fields["updateParticipationPubkey"] = json.BoolNode("", e.UpdateParticipationPubkey)
+	}
+	if e.ParticipationPubkey != "" {
+		fields["participationPubkey"] = json.StringNode("", e.ParticipationPubkey)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -254,6 +266,12 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 		fv.FromJSON(val)
 		e.Location = fv
 	}
+	if val, ok := fields["updateParticipationPubkey"]; ok {
+		e.UpdateParticipationPubkey = val.MustBool()
+	}
+	if val, ok := fields["participationPubkey"]; ok {
+		e.ParticipationPubkey = val.MustString()
+	}
 }
 
 func (e *EditEventResponse) ToJSON() *json.Node {
@@ -291,6 +309,9 @@ func (p *ParticipateRequest) ToJSON() *json.Node {
 		}
 		fields["guests"] = json.ArrayNode("", arr)
 	}
+	if p.ParticipationSignature != "" {
+		fields["participationSignature"] = json.StringNode("", p.ParticipationSignature)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -312,6 +333,9 @@ func (p *ParticipateRequest) FromJSON(node *json.Node) {
 			arr[i] = val.MustString()
 		}
 		p.Guests = arr
+	}
+	if val, ok := fields["participationSignature"]; ok {
+		p.ParticipationSignature = val.MustString()
 	}
 }
 

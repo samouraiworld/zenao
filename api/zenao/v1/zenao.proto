@@ -46,6 +46,7 @@ message CreateEventRequest {
   double ticket_price = 6; // XXX: use fixed point?
   uint32 capacity = 7;
   EventLocation location = 9;
+  string participation_pubkey = 10; // private event if set
 }
 
 message CreateEventResponse { string id = 1; }
@@ -60,6 +61,8 @@ message EditEventRequest {
   double ticket_price = 7; // XXX: use fixed point?
   uint32 capacity = 8;
   EventLocation location = 9;
+  bool update_participation_pubkey = 10;
+  string participation_pubkey = 11; // private event if set
 }
 
 message EditEventResponse { string id = 1; }
@@ -68,6 +71,7 @@ message ParticipateRequest {
   string event_id = 1;
   string email = 2;
   repeated string guests = 3;
+  string participation_signature = 4;
 }
 
 message ParticipateResponse { string ticket_secret = 1; }

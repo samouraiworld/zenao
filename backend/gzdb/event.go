@@ -12,15 +12,16 @@ import (
 
 type Event struct {
 	gorm.Model
-	Title       string
-	Description string
-	StartDate   time.Time
-	EndDate     time.Time
-	ImageURI    string
-	TicketPrice float64
-	Capacity    uint32
-	CreatorID   uint
-	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
+	Title        string
+	Description  string
+	StartDate    time.Time
+	EndDate      time.Time
+	ImageURI     string
+	TicketPrice  float64
+	Capacity     uint32
+	CreatorID    uint
+	Creator      User   `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
+	PasswordHash string // argon2id
 
 	LocVenueName    string
 	LocKind         string // one of: geo, virtual or custom

@@ -102,14 +102,15 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 	}
 
 	evt := &Event{
-		Title:       req.Title,
-		Description: req.Description,
-		ImageURI:    req.ImageUri,
-		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
-		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
-		CreatorID:   uint(creatorIDInt),
-		TicketPrice: req.TicketPrice,
-		Capacity:    req.Capacity,
+		Title:        req.Title,
+		Description:  req.Description,
+		ImageURI:     req.ImageUri,
+		StartDate:    time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:      time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
+		CreatorID:    uint(creatorIDInt),
+		TicketPrice:  req.TicketPrice,
+		Capacity:     req.Capacity,
+		PasswordHash: req.PasswordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
 		return nil, fmt.Errorf("convert location: %w", err)

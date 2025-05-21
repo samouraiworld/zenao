@@ -88,6 +88,9 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if c.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, c.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
+	if c.ParticipationPubkey != "" {
+		fmt.Fprintf(buf, "%s\tParticipationPubkey: %q,\n", linePrefix, c.ParticipationPubkey)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -136,6 +139,12 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 	if e.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, e.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
+	if e.UpdateParticipationPubkey != false {
+		fmt.Fprintf(buf, "%s\tUpdateParticipationPubkey: %t,\n", linePrefix, e.UpdateParticipationPubkey)
+	}
+	if e.ParticipationPubkey != "" {
+		fmt.Fprintf(buf, "%s\tParticipationPubkey: %q,\n", linePrefix, e.ParticipationPubkey)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -171,6 +180,9 @@ func (p *ParticipateRequest) GnoLiteral(typePrefix string, linePrefix string) st
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if p.ParticipationSignature != "" {
+		fmt.Fprintf(buf, "%s\tParticipationSignature: %q,\n", linePrefix, p.ParticipationSignature)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
