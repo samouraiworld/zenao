@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   fromUnixTime,
   getUnixTime,
@@ -8,6 +8,7 @@ import {
   isSameDay,
   minutesToSeconds,
 } from "date-fns";
+import { Paperclip } from "lucide-react";
 import { Card } from "../cards/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/markdown-preview";
@@ -16,6 +17,7 @@ import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/map-lazy-components";
 import Text from "../texts/text";
+import { ButtonBase } from "../buttons/ButtonBases";
 import { FormFieldInputString } from "./components/FormFieldInputString";
 import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
 import { TimeZonesPopover } from "./components/TimeZonesPopover";
@@ -28,6 +30,8 @@ import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 import { cn } from "@/lib/tailwind";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { useToast } from "@/app/hooks/use-toast";
+import { uploadFile } from "@/lib/files";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -46,6 +50,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   maxDateRange,
   isEditing = false,
 }) => {
+  const { toast } = useToast();
   const description = form.watch("description");
   const location = form.watch("location");
   const startDate = form.watch("startDate");
@@ -61,6 +66,76 @@ export const EventForm: React.FC<EventFormProps> = ({
   );
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
   const timeZone = useLocationTimezone(location);
+
+  // Upload
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
+
+  // Textarea last cursor before upload
+  const [cursor, setCursor] = useState(0);
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target?.files?.[0];
+    try {
+      if (!file) {
+        toast({
+          variant: "destructive",
+          title: "No file selected.",
+        });
+        return;
+      }
+      setUploading(true);
+      const textarea = descriptionRef.current;
+      const loadingText = `${cursor > 0 ? "\n" : ""}[Uploading ${file.name}...]\n`;
+
+      if (textarea) {
+        const before = textarea.value.substring(0, cursor);
+        const after = textarea.value.substring(cursor);
+
+        // Insert the text at cursor position
+        form.setValue("description", before + loadingText + after);
+
+        // Move cursor after the inserted text
+        const newCursorPos = cursor + loadingText.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+      }
+
+      const uri = await uploadFile(file);
+
+      if (textarea) {
+        const text = `![${file.name}](${uri})`;
+        const start = textarea.value.indexOf(loadingText);
+
+        if (start < 0) {
+          // If loading text not found, insert at cursor
+          const before = textarea.value.substring(0, cursor);
+          const after = textarea.value.substring(cursor);
+
+          // Insert the text at cursor position
+          form.setValue("description", before + text + after);
+        } else {
+          const before = textarea.value.substring(0, cursor);
+          const after = textarea.value.substring(start + loadingText.length);
+
+          form.setValue("description", before + text + after);
+
+          const newCursor = start + loadingText.length;
+          textarea.setSelectionRange(newCursor, newCursor);
+
+          textarea.focus();
+        }
+      }
+      setUploading(false);
+    } catch (e) {
+      console.error(e);
+      toast({
+        variant: "destructive",
+        title: "Trouble uploading file!",
+      });
+    }
+    setUploading(false);
+  };
 
   useEffect(() => {
     if (location.kind === "geo") {
@@ -109,6 +184,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                 </TabsList>
                 <TabsContent value="write" tabIndex={-1}>
                   <FormFieldTextArea
+                    ref={descriptionRef}
                     control={form.control}
                     name="description"
                     placeholder={t("description-placeholder")}
@@ -119,6 +195,39 @@ export const EventForm: React.FC<EventFormProps> = ({
                     maxLength={10000}
                     wordCounter
                   />
+                  {/* Upload image buttons */}
+                  <div className="flex flex-row gap-2">
+                    <ButtonBase
+                      variant="link"
+                      className={cn(
+                        "flex items-center justify-center rounded-full aspect-square cursor-pointer w-4 h-4",
+                        "hover:bg-neutral-700",
+                      )}
+                      title="Upload image"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (uploading) return;
+
+                        setCursor(
+                          descriptionRef.current?.selectionStart ??
+                            descriptionRef.current?.textLength ??
+                            0,
+                        );
+                        console.log(cursor);
+                        hiddenInputRef.current?.click();
+                      }}
+                      aria-label="upload image"
+                    >
+                      <Paperclip className="!h-6 !w-6" />
+                    </ButtonBase>
+                    <input
+                      type="file"
+                      onChange={handleChange}
+                      ref={hiddenInputRef}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </div>
                 </TabsContent>
                 <TabsContent value="preview">
                   <MarkdownPreview markdownString={description} />
