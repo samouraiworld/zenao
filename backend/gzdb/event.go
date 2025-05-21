@@ -1,15 +1,12 @@
 package gzdb
 
 import (
-	"crypto/ed25519"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"time"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
-	"golang.org/x/crypto/sha3"
 	"gorm.io/gorm"
 )
 
@@ -103,41 +100,17 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		return nil, fmt.Errorf("unknown address kind %q", dbevt.LocKind)
 	}
 
-	privacy, err := eventPrivacyFromPasswordHash(dbevt.PasswordHash)
-	if err != nil {
-		return nil, errors.New("failed to derive privacy from password hash")
-	}
-
 	return &zeni.Event{
-		ID:          fmt.Sprintf("%d", dbevt.ID),
-		Title:       dbevt.Title,
-		Description: dbevt.Description,
-		StartDate:   dbevt.StartDate,
-		EndDate:     dbevt.EndDate,
-		ImageURI:    dbevt.ImageURI,
-		TicketPrice: dbevt.TicketPrice,
-		Capacity:    dbevt.Capacity,
-		CreatorID:   fmt.Sprintf("%d", dbevt.CreatorID),
-		Location:    loc,
-		Privacy:     privacy,
+		ID:           fmt.Sprintf("%d", dbevt.ID),
+		Title:        dbevt.Title,
+		Description:  dbevt.Description,
+		StartDate:    dbevt.StartDate,
+		EndDate:      dbevt.EndDate,
+		ImageURI:     dbevt.ImageURI,
+		TicketPrice:  dbevt.TicketPrice,
+		Capacity:     dbevt.Capacity,
+		CreatorID:    fmt.Sprintf("%d", dbevt.CreatorID),
+		Location:     loc,
+		PasswordHash: dbevt.PasswordHash,
 	}, nil
-}
-
-func eventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, error) {
-	privacy := &zenaov1.EventPrivacy{}
-	if passwordHash == "" {
-		privacy.EventPrivacy = &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}
-	} else {
-		skBz := sha3.Sum256([]byte(passwordHash))
-		// XXX: use pbkdf instead of sha3 on password hash?
-		sk := ed25519.NewKeyFromSeed(skBz[:])
-
-		pkBz := []byte(sk.Public().(ed25519.PublicKey))
-		pk := base64.RawURLEncoding.EncodeToString(pkBz)
-
-		privacy.EventPrivacy = &zenaov1.EventPrivacy_Guarded{Guarded: &zenaov1.EventPrivacyGuarded{
-			ParticipationPubkey: pk,
-		}}
-	}
-	return privacy, nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -76,6 +77,18 @@ func execSyncChain() error {
 		return err
 	}
 	for _, event := range events {
+		sk, err := zeni.EventSKFromPasswordHash(event.PasswordHash)
+		if err != nil {
+			logger.Error("can't derive event sk", zap.String("event-id", event.ID), zap.Error(err))
+			continue
+		}
+
+		privacy, err := zeni.EventPrivacyFromSK(sk)
+		if err != nil {
+			logger.Error("can't derive event privacy", zap.String("event-id", event.ID), zap.Error(err))
+			continue
+		}
+
 		if err := chain.CreateEvent(event.ID, event.CreatorID, &zenaov1.CreateEventRequest{
 			Title:       event.Title,
 			Description: event.Description,
@@ -85,7 +98,7 @@ func execSyncChain() error {
 			TicketPrice: event.TicketPrice,
 			Capacity:    event.Capacity,
 			Location:    event.Location,
-		}); err != nil {
+		}, privacy); err != nil {
 			logger.Error("failed to create event", zap.String("event-id", event.ID), zap.Error(err))
 			continue
 		}
@@ -105,7 +118,7 @@ func execSyncChain() error {
 			for _, ticket := range tickets {
 				// we have a problem here, because an event password can change, signatures can become invalid during this phase
 				// while we have both the db and the chain, we need to store the event password in db and regenerate participation signatures here
-				if err := chain.Participate(event.ID, event.CreatorID, ticket.UserID, ticket.Ticket.Pubkey(), todo); err != nil {
+				if err := chain.Participate(event.ID, event.CreatorID, ticket.UserID, ticket.Ticket.Pubkey(), sk); err != nil {
 					logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
 				}
 

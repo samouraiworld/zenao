@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto"
+	"crypto/ed25519"
+	srand "crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -267,11 +270,21 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 }
 
 // Participate implements ZenaoChain.
-func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string, signature string) error {
+func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error {
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
 	participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+
+	signature := ""
+	if len(eventSK) != 0 {
+		msg := []byte(eventID + "," + ticketPubkey)
+		sigBz, err := eventSK.Sign(srand.Reader, msg, crypto.Hash(0))
+		if err != nil {
+			return err
+		}
+		signature = base64.RawURLEncoding.EncodeToString(sigBz)
+	}
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",

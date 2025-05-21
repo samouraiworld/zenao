@@ -2,6 +2,7 @@ package zeni
 
 import (
 	"context"
+	"crypto/ed25519"
 	"errors"
 	"fmt"
 	"net/http"
@@ -58,17 +59,17 @@ type User struct {
 }
 
 type Event struct {
-	ID          string
-	Title       string
-	Description string
-	StartDate   time.Time
-	EndDate     time.Time
-	ImageURI    string
-	TicketPrice float64
-	Capacity    uint32
-	CreatorID   string
-	Location    *zenaov1.EventLocation
-	Privacy     *zenaov1.EventPrivacy
+	ID           string
+	Title        string
+	Description  string
+	StartDate    time.Time
+	EndDate      time.Time
+	ImageURI     string
+	TicketPrice  float64
+	Capacity     uint32
+	CreatorID    string
+	Location     *zenaov1.EventLocation
+	PasswordHash string
 }
 
 type Feed struct {
@@ -162,7 +163,7 @@ type DB interface {
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
-	EditEvent(eventID string, req *zenaov1.EditEventRequest) (*zenaov1.EventPrivacy, error)
+	EditEvent(eventID string, req *zenaov1.EditEventRequest) (string, error) // return event password hash
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string) error
 	GetAllEvents() ([]*Event, error)
@@ -191,7 +192,7 @@ type Chain interface {
 
 	CreateEvent(eventID string, creatorID string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
 	EditEvent(eventID string, callerID string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
-	Participate(eventID string, callerID string, participantID string, ticketPubkey string, signature string) error
+	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)

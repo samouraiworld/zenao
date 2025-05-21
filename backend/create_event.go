@@ -56,7 +56,12 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.CreateEvent(evt.ID, zUser.ID, req.Msg, evt.Privacy); err != nil {
+	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.CreateEvent(evt.ID, zUser.ID, req.Msg, privacy); err != nil {
 		s.Logger.Error("create-event", zap.Error(err))
 		return nil, err
 	}

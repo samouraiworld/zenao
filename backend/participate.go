@@ -98,9 +98,16 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
+	// XXX: there could be race conditions if the db has changed password but the chain did not
+
+	eventSK, err := zeni.EventSKFromPasswordHash(evt.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
 	for i, ticket := range tickets {
 		// XXX: support batch, this might be very very slow
-		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), todo); err != nil {
+		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
 			// XXX: handle case where db tx pass but chain fail
 			return nil, err
 		}

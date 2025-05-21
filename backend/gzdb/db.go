@@ -144,16 +144,16 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 }
 
 // EditEvent implements zeni.DB.
-func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (*zenaov1.EventPrivacy, error) {
+func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (string, error) {
 	// XXX: validate?
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	passwordHash, err := newPasswordHash(req.Password)
 	if err != nil {
-		return nil, errors.New("failed to hash password")
+		return "", errors.New("failed to hash password")
 	}
 
 	evt := Event{
@@ -167,27 +167,22 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (
 		PasswordHash: passwordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(evt).Error; err != nil {
-		return nil, err
+		return "", err
 	}
 
 	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs
 	// we should rewrite this if db become bottleneck
 	if req.Password == "" {
 		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("password_hash", "").Error; err != nil {
-			return nil, err
+			return "", err
 		}
 	}
 
-	privacy, err := eventPrivacyFromPasswordHash(passwordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	return privacy, nil
+	return passwordHash, nil
 }
 
 // GetEvent implements zeni.DB.
