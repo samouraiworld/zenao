@@ -321,7 +321,7 @@ Cypress.Commands.add("createEvent", () => {
   login();
 
   // fill event info
-  cy.get("input[type=file]").selectFile(
+  cy.get("input[name=imageUri]").selectFile(
     "cypress/fixtures/bug-bash-bonanza.webp",
     { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
   );
