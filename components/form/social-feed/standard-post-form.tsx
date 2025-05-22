@@ -209,7 +209,7 @@ export function StandardPostForm({
                   variant="link"
                   className={cn(
                     "flex items-center justify-center rounded-full aspect-square cursor-pointer",
-                    "hover:bg-neutral-700",
+                    "hover:bg-neutral-500/20",
                   )}
                   title="Upload image"
                   onClick={(e) => {

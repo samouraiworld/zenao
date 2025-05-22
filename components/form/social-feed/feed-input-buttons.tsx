@@ -25,7 +25,7 @@ export function FeedInputButtons({
           "flex items-center justify-center rounded-full aspect-square cursor-pointer",
           feedInputMode === "POLL"
             ? "dark:bg-white bg-black"
-            : "hover:bg-neutral-700",
+            : "hover:bg-neutral-500/20",
         )}
         style={{
           height: buttonSize,
@@ -50,7 +50,7 @@ export function FeedInputButtons({
       </ButtonBase>
       <ButtonBase
         variant="link"
-        className="dark:text-white text-black flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-700 cursor-pointer"
+        className="dark:text-white text-black flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-500/20 cursor-pointer"
         aria-label="submit post"
         style={{ height: buttonSize, width: buttonSize }}
         loading={isLoading}
