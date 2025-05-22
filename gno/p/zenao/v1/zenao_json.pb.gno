@@ -218,6 +218,9 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Password != "" {
 		fields["password"] = json.StringNode("", e.Password)
 	}
+	if e.UpdatePassword != false {
+		fields["updatePassword"] = json.BoolNode("", e.UpdatePassword)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -266,6 +269,9 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 	if val, ok := fields["password"]; ok {
 		e.Password = val.MustString()
 	}
+	if val, ok := fields["updatePassword"]; ok {
+		e.UpdatePassword = val.MustBool()
+	}
 }
 
 func (e *EditEventResponse) ToJSON() *json.Node {
@@ -284,6 +290,50 @@ func (e *EditEventResponse) FromJSON(node *json.Node) {
 
 	if val, ok := fields["id"]; ok {
 		e.Id = val.MustString()
+	}
+}
+
+func (v *ValidatePasswordRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if v.EventId != "" {
+		fields["eventId"] = json.StringNode("", v.EventId)
+	}
+	if v.Password != "" {
+		fields["password"] = json.StringNode("", v.Password)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (v *ValidatePasswordRequest) FromJSON(node *json.Node) {
+	*v = ValidatePasswordRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		v.EventId = val.MustString()
+	}
+	if val, ok := fields["password"]; ok {
+		v.Password = val.MustString()
+	}
+}
+
+func (v *ValidatePasswordResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if v.Valid != false {
+		fields["valid"] = json.BoolNode("", v.Valid)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (v *ValidatePasswordResponse) FromJSON(node *json.Node) {
+	*v = ValidatePasswordResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["valid"]; ok {
+		v.Valid = val.MustBool()
 	}
 }
 
@@ -636,6 +686,9 @@ func (e *EventInfo) ToJSON() *json.Node {
 	if e.PkgPath != "" {
 		fields["pkgPath"] = json.StringNode("", e.PkgPath)
 	}
+	if e.Privacy != nil {
+		fields["privacy"] = e.Privacy.ToJSON()
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -683,6 +736,11 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["pkgPath"]; ok {
 		e.PkgPath = val.MustString()
+	}
+	if val, ok := fields["privacy"]; ok {
+		fv := &EventPrivacy{}
+		fv.FromJSON(val)
+		e.Privacy = fv
 	}
 }
 

@@ -144,16 +144,19 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 }
 
 // EditEvent implements zeni.DB.
-func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (string, error) {
+func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (*zeni.Event, error) {
 	// XXX: validate?
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	passwordHash, err := newPasswordHash(req.Password)
-	if err != nil {
-		return "", errors.New("failed to hash password")
+	passwordHash := ""
+	if req.UpdatePassword {
+		passwordHash, err = newPasswordHash(req.Password)
+		if err != nil {
+			return nil, errors.New("failed to hash password")
+		}
 	}
 
 	evt := Event{
@@ -167,22 +170,37 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (
 		PasswordHash: passwordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(evt).Error; err != nil {
-		return "", err
+		return nil, err
 	}
 
 	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs
 	// we should rewrite this if db become bottleneck
-	if req.Password == "" {
+	if req.UpdatePassword && req.Password == "" {
 		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("password_hash", "").Error; err != nil {
-			return "", err
+			return nil, err
 		}
 	}
 
-	return passwordHash, nil
+	dbevt, err := g.getDBEvent(eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	return dbEventToZeniEvent(dbevt)
+}
+
+// ValidatePassword implements zeni.DB.
+func (g *gormZenaoDB) ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error) {
+	evt, err := g.getDBEvent(req.EventId)
+	if err != nil {
+		return false, err
+	}
+
+	return validatePassword(req.Password, evt.PasswordHash)
 }
 
 // GetEvent implements zeni.DB.
@@ -269,8 +287,12 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return err
 	}
 
-	if err := validatePassword(password, evt.PasswordHash); err != nil {
+	validPass, err := validatePassword(password, evt.PasswordHash)
+	if err != nil {
 		return err
+	}
+	if !validPass {
+		return errors.New("invalid password")
 	}
 
 	var participantsCount int64
