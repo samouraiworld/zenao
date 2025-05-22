@@ -278,7 +278,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 
 	signature := ""
 	if len(eventSK) != 0 {
-		msg := []byte(eventID + "," + ticketPubkey)
+		msg := []byte(ticketPubkey)
 		sigBz, err := eventSK.Sign(srand.Reader, msg, crypto.Hash(0))
 		if err != nil {
 			return err

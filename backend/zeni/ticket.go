@@ -20,8 +20,8 @@ func (t *Ticket) Pubkey() string {
 	return base64.RawURLEncoding.EncodeToString(pk)
 }
 
-func (t *Ticket) Signature(eventID string, gatekeeper string) (string, error) {
-	signature, err := t.sk.Sign(srand.Reader, []byte(eventID+","+gatekeeper), crypto.Hash(0))
+func (t *Ticket) Signature(gatekeeper string) (string, error) {
+	signature, err := t.sk.Sign(srand.Reader, []byte(gatekeeper), crypto.Hash(0))
 	if err != nil {
 		return "", err
 	}

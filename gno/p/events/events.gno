@@ -23,7 +23,6 @@ const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 
 // Event cannot be exposed
 type Event struct {
-	id                  string
 	creator             string
 	startDate           int64
 	endDate             int64
@@ -35,7 +34,6 @@ type Event struct {
 	DAOPrivate          *basedao.DAOPrivate
 	DAO                 daokit.DAO
 	participationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
-	pkgPath             string
 }
 
 type Config struct {
@@ -200,7 +198,7 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 				panic(err)
 			}
 
-			payloadBz := []byte(e.id + "," + msg.TicketPubkey)
+			payloadBz := []byte(msg.TicketPubkey)
 
 			if !ed25519.Verify(e.participationPubkey, payloadBz, signatureBz) {
 				panic("invalid participation signature")
@@ -309,7 +307,7 @@ func (e *Event) checkinHandler() daokit.MessageHandler {
 			panic(err)
 		}
 
-		payloadBz := []byte(e.id + "," + std.PreviousRealm().Address().String())
+		payloadBz := []byte(std.PreviousRealm().Address().String())
 
 		signatureBz, err := base64.RawURLEncoding.DecodeString(msg.CheckinSignature)
 		if err != nil {
