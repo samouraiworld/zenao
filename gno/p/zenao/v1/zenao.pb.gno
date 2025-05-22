@@ -40,20 +40,30 @@ type CreateEventResponse struct {
 }
 
 type EditEventRequest struct {
-	EventId     string
-	Title       string
-	Description string
-	ImageUri    string
-	StartDate   uint64
-	EndDate     uint64
-	TicketPrice float64
-	Capacity    uint32
-	Location    *EventLocation
-	Password    string
+	EventId        string
+	Title          string
+	Description    string
+	ImageUri       string
+	StartDate      uint64
+	EndDate        uint64
+	TicketPrice    float64
+	Capacity       uint32
+	Location       *EventLocation
+	Password       string
+	UpdatePassword bool
 }
 
 type EditEventResponse struct {
 	Id string
+}
+
+type ValidatePasswordRequest struct {
+	EventId  string
+	Password string
+}
+
+type ValidatePasswordResponse struct {
+	Valid bool
 }
 
 type ParticipateRequest struct {
@@ -119,6 +129,7 @@ type EventInfo struct {
 	Location     *EventLocation
 	Participants uint32
 	PkgPath      string
+	Privacy      *EventPrivacy
 }
 
 type BatchProfileField struct {

@@ -13,6 +13,7 @@ service ZenaoService {
   // EVENT
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
+  rpc ValidatePassword(ValidatePasswordRequest) returns (ValidatePasswordResponse);
   rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
@@ -62,9 +63,19 @@ message EditEventRequest {
   uint32 capacity = 8;
   EventLocation location = 9;
   string password = 10;
+  bool update_password = 11;
 }
 
 message EditEventResponse { string id = 1; }
+
+message ValidatePasswordRequest {
+  string event_id = 1;
+  string password = 2;
+}
+
+message ValidatePasswordResponse {
+  bool valid = 1;
+}
 
 message ParticipateRequest {
   string event_id = 1;
@@ -132,6 +143,7 @@ message EventInfo {
   EventLocation location = 8;
   uint32 participants = 9;
   string pkg_path = 10;
+  EventPrivacy privacy = 11;
 }
 
 message BatchProfileField {
