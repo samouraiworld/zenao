@@ -15,6 +15,8 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
+const MaxPasswordLen = 128
+
 type Plan string
 
 const (

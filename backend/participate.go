@@ -42,6 +42,10 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", buyer.ID), zap.Bool("user-banned", authUser.Banned))
 
+	if len(req.Msg.Password) > zeni.MaxPasswordLen {
+		return nil, errors.New("password too long")
+	}
+
 	participants := make([]*zeni.User, 0, len(req.Msg.Guests)+1)
 	participants = append(participants, buyer)
 	for _, guestEmail := range req.Msg.Guests {
