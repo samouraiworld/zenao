@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { RefObject } from "react";
 import { FieldValues } from "react-hook-form";
 import { FormFieldProps } from "../types";
 import {
@@ -13,6 +13,7 @@ import {
 import { Textarea } from "@/components/shadcn/textarea";
 import { cn } from "@/lib/tailwind";
 import Text from "@/components/texts/text";
+import { mergeRefs } from "@/lib/utils";
 
 type FormFieldTextAreaProps<T extends FieldValues> = FormFieldProps<T, string> &
   React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
@@ -26,8 +27,12 @@ export const FormFieldTextArea = <T extends FieldValues>({
   placeholder,
   wordCounter,
   label,
+  ref,
   ...otherProps
-}: FormFieldTextAreaProps<T> & { label?: string }) => {
+}: FormFieldTextAreaProps<T> & {
+  label?: string;
+  ref?: RefObject<HTMLTextAreaElement | null>;
+}) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = () => {
@@ -62,7 +67,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
                 field.onChange(e.target.value);
                 adjustHeight();
               }}
-              ref={textAreaRef}
+              ref={mergeRefs(ref, textAreaRef)}
             />
           </FormControl>
           <div

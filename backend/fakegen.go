@@ -141,7 +141,8 @@ func execFakegen() error {
 			return err
 		}
 
-		if err := chain.CreateEvent(zevt.ID, creatorID, evtReq); err != nil {
+		// XXX: generate events with password
+		if err := chain.CreateEvent(zevt.ID, creatorID, evtReq, nil); err != nil {
 			return err
 		}
 

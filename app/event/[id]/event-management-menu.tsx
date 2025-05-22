@@ -21,7 +21,6 @@ export function EventManagementMenu({
 }: EventManagementMenuProps) {
   const t = useTranslations("event");
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
-  // const isGatekeeper = useMemo(() => roles.includes("gatekeeper"), [roles]);
 
   const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
     useState(false);

@@ -1,10 +1,10 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { FileText } from "lucide-react";
+import Image from "next/image";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { Card } from "@/components/cards/Card";
 import Text from "@/components/texts/text";
-import { Web3Image } from "@/components/images/web3-image";
 
 export default function Manifesto() {
   const t = useTranslations("manifesto");
@@ -15,7 +15,7 @@ export default function Manifesto() {
         <div className="w-full flex justify-center my-10 lg:my-0 lg:w-1/3 lg:self-center lg:justify-evenly">
           <div />
           <div />
-          <Web3Image
+          <Image
             src="/zenao-logo.png"
             alt="zeano logo"
             width={200}

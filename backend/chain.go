@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto"
+	"crypto/ed25519"
+	srand "crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -113,10 +116,10 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 }
 
 // CreateEvent implements ZenaoChain.
-func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest) error {
+func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
 	creatorAddr := g.UserAddress(creatorID)
 
-	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
+	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
 	if err != nil {
 		return err
 	}
@@ -165,10 +168,11 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 }
 
 // EditEvent implements ZenaoChain.
-func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.EditEventRequest) error {
+func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
 	loc := "&" + req.Location.GnoLiteral("zenaov1.", "\t\t")
+	privacyStr := "&" + privacy.GnoLiteral("zenaov1.", "\t\t")
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -201,11 +205,12 @@ func main() {
 				%d,
 				%d,
 				%s,
+				%s,
 			),
 		}),
 	})
 }
-`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc),
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacyStr),
 			}},
 		},
 	}))
@@ -265,11 +270,21 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 }
 
 // Participate implements ZenaoChain.
-func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string) error {
+func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error {
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
 	participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+
+	signature := ""
+	if len(eventSK) != 0 {
+		msg := []byte(ticketPubkey)
+		sigBz, err := eventSK.Sign(srand.Reader, msg, crypto.Hash(0))
+		if err != nil {
+			return err
+		}
+		signature = base64.RawURLEncoding.EncodeToString(sigBz)
+	}
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -293,11 +308,11 @@ func main() {
 		Title: %q,
 		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
 			Title: "Add participant",
-			Message: events.NewAddParticipantMsg(%q, %q),
+			Message: events.NewAddParticipantMsg(%q, %q, %q),
 		}),
 	})
 }
-`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey)}},
+`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey, signature)}},
 		},
 	}))
 	if err != nil {
@@ -701,7 +716,7 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest) (string, error) {
+func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
 	m := map[string]interface{}{
 		"creatorAddr":    creatorAddr,
 		"req":            req,
@@ -710,10 +725,16 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 		"location":       "&" + req.Location.GnoLiteral("zenaov1.", "\t\t"),
 	}
 
+	participationPubkey := ""
+	if guarded := privacy.GetGuarded(); guarded != nil {
+		participationPubkey = guarded.GetParticipationPubkey()
+	}
+
 	toMarshal := map[string]interface{}{
-		"title":       req.Title,
-		"description": req.Description,
-		"imageURI":    req.ImageUri,
+		"title":               req.Title,
+		"description":         req.Description,
+		"imageURI":            req.ImageUri,
+		"participationPubkey": participationPubkey,
 	}
 	for key, val := range toMarshal {
 		bz, err := json.Marshal(val)
@@ -762,6 +783,7 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
 		Location: {{.location}},
+		ParticipationPubkey: {{.participationPubkey}},
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate

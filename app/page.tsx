@@ -1,10 +1,11 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import Image from "next/image";
 import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
-import { Web3Image } from "@/components/images/web3-image";
+import InstallButton from "@/components/buttons/pwa-install-button";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -12,7 +13,7 @@ export default function Home() {
   return (
     <ScreenContainerCentered>
       <div className="flex flex-col items-center">
-        <Web3Image
+        <Image
           src="/zenao-logo.png"
           alt="zeano logo"
           width={200}
@@ -30,13 +31,17 @@ export default function Home() {
         >
           {t("secondary-text")}
         </Text>
-        <Link href="/create">
-          <ButtonWithChildren className="w-full flex rounded-3xl py-5">
-            <Text variant="invert" className="text-sm">
-              {t("button")}
-            </Text>
-          </ButtonWithChildren>
-        </Link>
+        <div className="flex flex-col gap-2 items-center">
+          <Link href="/create">
+            <ButtonWithChildren className="w-full flex rounded-3xl py-5">
+              <Text variant="invert" className="text-sm">
+                {t("button")}
+              </Text>
+            </ButtonWithChildren>
+          </Link>
+
+          <InstallButton />
+        </div>
       </div>
     </ScreenContainerCentered>
   );
