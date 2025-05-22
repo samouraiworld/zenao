@@ -28,6 +28,7 @@ export default function ProfileHeader({
               src={avatarUri}
               alt="Event"
               priority
+              fetchPriority="high"
               fill
               sizes="(max-width: 768px) 100vw,
               (max-width: 1200px) 50vw,

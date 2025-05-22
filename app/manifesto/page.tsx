@@ -20,6 +20,7 @@ export default function Manifesto() {
             alt="zeano logo"
             width={200}
             height={200}
+            fetchPriority="high"
           />
         </div>
         <div className="w-full lg:w-1/3">
