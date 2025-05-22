@@ -33,6 +33,7 @@ export type EventRegistrationFormSchemaType = z.infer<
 
 type EventRegistrationFormProps = {
   eventId: string;
+  eventPassword: string;
   userAddress: string | null;
 };
 
@@ -43,6 +44,7 @@ export type SubmitStatusInvitee = Record<
 
 export function EventRegistrationForm({
   eventId,
+  eventPassword,
   userAddress,
 }: EventRegistrationFormProps) {
   const { getToken, userId } = useAuth();
@@ -93,6 +95,7 @@ export function EventRegistrationForm({
           userId: userId,
           userAddress: userAddress,
           guests,
+          password: eventPassword,
         });
       } else {
         // Guest
@@ -101,6 +104,7 @@ export function EventRegistrationForm({
           email: data.email!,
           guests,
           userAddress,
+          password: eventPassword,
         });
       }
       setIsPending(false);

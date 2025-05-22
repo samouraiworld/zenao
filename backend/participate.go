@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
 	"errors"
 	"fmt"
 	"slices"
@@ -82,12 +83,21 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	evt := (*zeni.Event)(nil)
 
+	needPasswordIfGuarded := true
+
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
+		buyerRoles, err := db.UserRoles(req.Msg.EventId, buyer.ID)
+		if err != nil {
+			return err
+		}
+		if slices.Contains(buyerRoles, "organizer") {
+			needPasswordIfGuarded = false
+		}
 
 		for i, ticket := range tickets {
 			// XXX: support batch
-			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password); err != nil {
+			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
 				return err
 			}
 		}
@@ -104,13 +114,18 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	// XXX: there could be race conditions if the db has changed password but the chain did not
 
-	eventSK, err := zeni.EventSKFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
+	var eventSK ed25519.PrivateKey
+	if needPasswordIfGuarded {
+		if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
+			return nil, err
+		}
 	}
 
 	for i, ticket := range tickets {
 		// XXX: support batch, this might be very very slow
+		// XXX: callerID should be the current user and not creator,
+		//      this could break if the initial creator has the organizer role removed
+		//      also this bypasses password protection on-chain
 		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
 			// XXX: handle case where db tx pass but chain fail
 			return nil, err

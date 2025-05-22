@@ -34,6 +34,9 @@
     "change-image": "Change image",
     "description-placeholder": "Description...",
     "location-placeholder": "Location...",
+    "password-placeholder": "Password...",
+    "password-label": "Password",
+    "no-changes-password-placeholder": "No changes if empty",
     "capacity-label": "Event capacity limit",
     "capacity-placeholder": "Capacity...",
     "pick-a-start-date-placeholder": "Pick a start date...",
@@ -120,6 +123,16 @@
     "no-tickets-event": "No tickets available for this event",
     "description": "Events you are attending.",
     "see-event-details": "See event details"
+  },
+  "event-card": {
+    "exclusive-event": "Exclusive event"
+  },
+  "event-protection-guard": {
+    "description": "This event is exclusive to certain participants. You need a password to access information.",
+    "password-placeholder": "Enter the password...",
+    "access-button": "Access event",
+    "toast-access-invalid-password": "Invalid password !",
+    "toast-access-error": "Could not grant access to event information!"
   },
   "events-list": {
     "no-events": "No events to show.",
