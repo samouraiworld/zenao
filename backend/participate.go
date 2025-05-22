@@ -82,12 +82,21 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	evt := (*zeni.Event)(nil)
 
+	needPassword := true
+
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
+		buyerRoles, err := db.UserRoles(req.Msg.EventId, buyer.ID)
+		if err != nil {
+			return err
+		}
+		if slices.Contains(buyerRoles, "organizer") {
+			needPassword = false
+		}
 
 		for i, ticket := range tickets {
 			// XXX: support batch
-			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password); err != nil {
+			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPassword); err != nil {
 				return err
 			}
 		}
