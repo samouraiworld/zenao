@@ -37,7 +37,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	var passwordHash string
+	var evt *zeni.Event
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
@@ -48,7 +48,7 @@ func (s *ZenaoServer) EditEvent(
 			return errors.New("user is not organizer of the event")
 		}
 
-		if passwordHash, err = db.EditEvent(req.Msg.EventId, req.Msg); err != nil {
+		if evt, err = db.EditEvent(req.Msg.EventId, req.Msg); err != nil {
 			return err
 		}
 
@@ -57,7 +57,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	privacy, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
+	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
