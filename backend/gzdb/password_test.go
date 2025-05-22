@@ -39,6 +39,10 @@ func TestPassword(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, valid)
 
+	valid, err = validatePassword("", encodedHash)
+	require.NoError(t, err)
+	require.False(t, valid)
+
 	valid, err = validatePassword("nimda", encodedHash)
 	require.NoError(t, err)
 	require.False(t, valid)
