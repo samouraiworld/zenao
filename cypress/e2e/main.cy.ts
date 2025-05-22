@@ -47,262 +47,262 @@ describe("main", () => {
     });
   });
 
-  // it("participate without login", () => {
-  //   // start from the index page
-  //   cy.visit("/");
+  it("participate without login", () => {
+    // start from the index page
+    cy.visit("/");
 
-  //   logout();
+    logout();
 
-  //   // go to discover page
-  //   cy.get("a").contains("Discover").click();
+    // go to discover page
+    cy.get("a").contains("Discover").click();
 
-  //   // click on first event
-  //   cy.get('a[href^="/event/"]').first().click();
+    // click on first event
+    cy.get('a[href^="/event/"]').first().click();
 
-  //   // type email in participate form
-  //   cy.get('input[placeholder="Email..."]').type(testEmail2);
+    // type email in participate form
+    cy.get('input[placeholder="Email..."]').type(testEmail2);
 
-  //   // submit participate form
-  //   cy.get("button").contains("Register").click();
+    // submit participate form
+    cy.get("button").contains("Register").click();
 
-  //   // check the participation confirmation
-  //   cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
-  // });
+    // check the participation confirmation
+    cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
+  });
 
-  // it("participate while signed in", () => {
-  //   // check that we have no tickets
-  //   cy.visit("/tickets");
-  //   cy.get('a[href^="/event/"]').should("not.exist");
+  it("participate while signed in", () => {
+    // check that we have no tickets
+    cy.visit("/tickets");
+    cy.get('a[href^="/event/"]').should("not.exist");
 
-  //   // start from the index page
-  //   cy.visit("/");
+    // start from the index page
+    cy.visit("/");
 
-  //   login();
+    login();
 
-  //   // go to discover page
-  //   cy.get("a").contains("Discover").click();
+    // go to discover page
+    cy.get("a").contains("Discover").click();
 
-  //   // click on last event since we already participate in first
-  //   cy.get('a[href^="/event/"]').first().click();
+    // click on last event since we already participate in first
+    cy.get('a[href^="/event/"]').first().click();
 
-  //   // make sure there is no email field
-  //   cy.get('input[placeholder="Email..."]').should("not.exist");
+    // make sure there is no email field
+    cy.get('input[placeholder="Email..."]').should("not.exist");
 
-  //   // submit participate form
-  //   cy.get("button").contains("Register").click();
-
-  //   // check the participation confirmation
-  //   cy.get("h2")
-  //     .contains("You're in!", { timeout: 16000 })
-  //     .should("be.visible");
+    // submit participate form
+    cy.get("button").contains("Register").click();
+
+    // check the participation confirmation
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
 
-  //   // check that we have a ticket
-  //   cy.visit("/tickets");
-  //   cy.get('a[href^="/ticket/"]').should("be.visible");
-  // });
+    // check that we have a ticket
+    cy.visit("/tickets");
+    cy.get('a[href^="/ticket/"]').should("be.visible");
+  });
 
-  // it("navigate to manifesto from home", () => {
-  //   // start from the index page
-  //   cy.visit("/");
+  it("navigate to manifesto from home", () => {
+    // start from the index page
+    cy.visit("/");
 
-  //   logout();
+    logout();
 
-  //   // go to manifesto page
-  //   cy.get("a").contains("Manifesto").click();
+    // go to manifesto page
+    cy.get("a").contains("Manifesto").click();
 
-  //   // check that manifesto text is present
-  //   cy.get("p")
-  //     .contains(
-  //       "commit ourself to build sustainable tools which are made to help people",
-  //     )
-  //     .should("be.visible");
-  // });
+    // check that manifesto text is present
+    cy.get("p")
+      .contains(
+        "commit ourself to build sustainable tools which are made to help people",
+      )
+      .should("be.visible");
+  });
 
-  // it("navigate to home from manifesto", () => {
-  //   // start from the index page
-  //   cy.visit("/manifesto");
+  it("navigate to home from manifesto", () => {
+    // start from the index page
+    cy.visit("/manifesto");
 
-  //   logout();
+    logout();
 
-  //   // go to home page
-  //   cy.get("a").contains("ZENAO").click();
+    // go to home page
+    cy.get("a").contains("ZENAO").click();
 
-  //   // check that home text is present
-  //   cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
-  // });
+    // check that home text is present
+    cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
+  });
 
-  // it("edit it's profile", () => {
-  //   // start from the home
-  //   cy.visit("/");
+  it("edit it's profile", () => {
+    // start from the home
+    cy.visit("/");
 
-  //   login();
+    login();
 
-  //   // navigate to settings
-  //   cy.visit("/settings");
+    // navigate to settings
+    cy.visit("/settings");
 
-  //   // check initial values
-  //   cy.get('input[placeholder="Name..."]').should(
-  //     "have.value",
-  //     "Zenao user #1",
-  //   );
-  //   cy.get('textarea[placeholder="Bio..."]').should(
-  //     "have.value",
-  //     "Zenao managed user",
-  //   );
-
-  //   // change values
-  //   cy.get("input[type=file]").selectFile(
-  //     "cypress/fixtures/alice-tester.webp",
-  //     { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
-  //   );
-  //   cy.get('input[placeholder="Name..."]').clear().type(testName);
-  //   cy.get('textarea[placeholder="Bio..."]')
-  //     .clear()
-  //     .type(testBio, { delay: 1 });
-
-  //   // save changes
-  //   cy.get("button").contains("Save changes").click();
-
-  //   // check that the toast did show up
-  //   toastShouldContain("User correctly edited!");
-
-  //   // check that the values are still correct
-  //   cy.get('input[placeholder="Name..."]').should("have.value", testName);
-  //   cy.get('textarea[placeholder="Bio..."]').should("have.value", testBio);
-
-  //   // refresh
-  //   cy.reload();
-
-  //   // check that the values are still correct
-  //   cy.get('input[placeholder="Name..."]').should("have.value", testName);
-  //   cy.get('textarea[placeholder="Bio..."]').should("have.value", testBio);
-  // });
-
-  // it("create an event", () => {
-  //   cy.createEvent({ exclusive: false });
-
-  //   cy.get("h1").contains(testEventName).should("be.visible");
-  //   cy.get("h2").contains(testEventLocation).should("be.visible");
-  //   cy.get("p")
-  //     .contains(
-  //       "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
-  //     )
-  //     .should("be.visible"); // desc
-  //   cy.get("h2").contains(" 13th, ").should("be.visible"); // start date
-  //   cy.get("p").contains(" 14, ").should("be.visible"); // end date
-
-  //   cy.get("button").contains("Register").should("be.visible");
-
-  //   cy.get("p").contains("Manage event").should("be.visible");
-  //   cy.get("a").contains("Edit event").should("be.visible");
-
-  //   // participate
-  //   cy.get("button").contains("Register").click();
+    // check initial values
+    cy.get('input[placeholder="Name..."]').should(
+      "have.value",
+      "Zenao user #1",
+    );
+    cy.get('textarea[placeholder="Bio..."]').should(
+      "have.value",
+      "Zenao managed user",
+    );
+
+    // change values
+    cy.get("input[type=file]").selectFile(
+      "cypress/fixtures/alice-tester.webp",
+      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
+    );
+    cy.get('input[placeholder="Name..."]').clear().type(testName);
+    cy.get('textarea[placeholder="Bio..."]')
+      .clear()
+      .type(testBio, { delay: 1 });
+
+    // save changes
+    cy.get("button").contains("Save changes").click();
+
+    // check that the toast did show up
+    toastShouldContain("User correctly edited!");
+
+    // check that the values are still correct
+    cy.get('input[placeholder="Name..."]').should("have.value", testName);
+    cy.get('textarea[placeholder="Bio..."]').should("have.value", testBio);
+
+    // refresh
+    cy.reload();
+
+    // check that the values are still correct
+    cy.get('input[placeholder="Name..."]').should("have.value", testName);
+    cy.get('textarea[placeholder="Bio..."]').should("have.value", testBio);
+  });
+
+  it("create an event", () => {
+    cy.createEvent({ exclusive: false });
+
+    cy.get("h1").contains(testEventName).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
+    cy.get("p")
+      .contains(
+        "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
+      )
+      .should("be.visible"); // desc
+    cy.get("h2").contains(" 13th, ").should("be.visible"); // start date
+    cy.get("p").contains(" 14, ").should("be.visible"); // end date
+
+    cy.get("button").contains("Register").should("be.visible");
+
+    cy.get("p").contains("Manage event").should("be.visible");
+    cy.get("a").contains("Edit event").should("be.visible");
+
+    // participate
+    cy.get("button").contains("Register").click();
 
-  //   // wait for participation confirmation
-  //   cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
-
-  //   // check that we have a ticket with the event name visible
-  //   cy.visit("/tickets");
-  //   cy.get('a[href^="/ticket/"]').contains(testEventName).should("be.visible");
-  // });
-
-  // it("send feed standard post", () => {
-  //   // start from the home
-  //   cy.visit("/");
-
-  //   // Explore an event
-  //   cy.get("a").contains("Discover").click();
-  //   cy.get('a[href^="/event/"]').last().click();
-
-  //   // EventFeedForm should not exist
-  //   cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
-  //     "not.exist",
-  //   );
-
-  //   cy.createEvent();
-
-  //   // Participate to an event
-  //   cy.get("button").contains("Register").click();
-  //   cy.get("h2")
-  //     .contains("You're in!", { timeout: 16000 })
-  //     .should("be.visible");
-
-  //   // EventFeedForm should exist
-  //   cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
-  //     .should("exist")
-  //     .type(testStandardPost, { delay: 1 });
-
-  //   // Submit post
-  //   cy.get('button[aria-label="submit post"]').click();
-
-  //   // Check post exists
-  //   cy.get("p").contains(testStandardPost).should("be.visible");
-  // });
-
-  // it("send feed poll post", () => {
-  //   // start from the home
-  //   cy.visit("/");
-
-  //   // Explore an event
-  //   cy.get("a").contains("Discover").click();
-  //   cy.get('a[href^="/event/"]').last().click();
-
-  //   // EventFeedForm should not exist
-  //   cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
-  //     "not.exist",
-  //   );
-
-  //   cy.createEvent();
-
-  //   // Participate to an event
-  //   cy.get("button").contains("Register").click();
-  //   cy.get("h2")
-  //     .contains("You're in!", { timeout: 16000 })
-  //     .should("be.visible");
-
-  //   // Channge type of post
-  //   cy.get('button[aria-label="set type post"]').click();
-
-  //   // Enter question
-  //   cy.get(
-  //     `textarea[placeholder="What do you wanna ask to the community ?"]`,
-  //   ).type(testStandardPost, { delay: 1 });
-
-  //   // Enter answers
-  //   cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
-  //   cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 1 });
-
-  //   // Add another answer
-  //   cy.get("p").contains("Add another answer").click();
-
-  //   // Check if delete answer button is displayed
-  //   cy.get(".lucide-trash2").should("have.length", 3);
-
-  //   // Add last answer
-  //   cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 1 });
-
-  //   // Submit poll
-  //   cy.get('button[aria-label="submit post"]').click();
-
-  //   // Views polls
-  //   cy.get("button").contains("Polls").click();
-
-  //   cy.get("p").contains(testStandardPost).should("be.visible");
-  //   cy.get("p").contains("Answer 1").should("be.visible");
-  //   cy.get("p").contains("Answer 2").should("be.visible");
-  //   cy.get("p").contains("Answer 3").should("be.visible");
-
-  //   // Select one answer
-  //   cy.get("p").contains("Answer 3").click();
-
-  //   toastShouldContain("Vote submitted !");
-
-  //   // Add reaction to post
-  //   cy.get(".reaction-btn").click();
-  //   // Select emoji
-  //   cy.get('img[alt="grinning"]').first().click();
-  // });
+    // wait for participation confirmation
+    cy.get("h2").contains("You're in!", { timeout: 8000 }).should("be.visible");
+
+    // check that we have a ticket with the event name visible
+    cy.visit("/tickets");
+    cy.get('a[href^="/ticket/"]').contains(testEventName).should("be.visible");
+  });
+
+  it("send feed standard post", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    // EventFeedForm should not exist
+    cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
+      "not.exist",
+    );
+
+    cy.createEvent({ exclusive: false });
+
+    // Participate to an event
+    cy.get("button").contains("Register").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
+
+    // EventFeedForm should exist
+    cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
+      .should("exist")
+      .type(testStandardPost, { delay: 1 });
+
+    // Submit post
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Check post exists
+    cy.get("p").contains(testStandardPost).should("be.visible");
+  });
+
+  it("send feed poll post", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    // EventFeedForm should not exist
+    cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
+      "not.exist",
+    );
+
+    cy.createEvent({ exclusive: false });
+
+    // Participate to an event
+    cy.get("button").contains("Register").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
+
+    // Channge type of post
+    cy.get('button[aria-label="set type post"]').click();
+
+    // Enter question
+    cy.get(
+      `textarea[placeholder="What do you wanna ask to the community ?"]`,
+    ).type(testStandardPost, { delay: 1 });
+
+    // Enter answers
+    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
+    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 1 });
+
+    // Add another answer
+    cy.get("p").contains("Add another answer").click();
+
+    // Check if delete answer button is displayed
+    cy.get(".lucide-trash2").should("have.length", 3);
+
+    // Add last answer
+    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 1 });
+
+    // Submit poll
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Views polls
+    cy.get("button").contains("Polls").click();
+
+    cy.get("p").contains(testStandardPost).should("be.visible");
+    cy.get("p").contains("Answer 1").should("be.visible");
+    cy.get("p").contains("Answer 2").should("be.visible");
+    cy.get("p").contains("Answer 3").should("be.visible");
+
+    // Select one answer
+    cy.get("p").contains("Answer 3").click();
+
+    toastShouldContain("Vote submitted !");
+
+    // Add reaction to post
+    cy.get(".reaction-btn").click();
+    // Select emoji
+    cy.get('img[alt="grinning"]').first().click();
+  });
 
   it("access an exclusive event", () => {
     cy.createEvent({ exclusive: true });
@@ -321,12 +321,12 @@ describe("main", () => {
     cy.get("h2").contains(testEventLocation).should("be.visible");
   });
 
-  // it("event not found", () => {
-  //   // Visit a non existing event page
-  //   cy.visit("/event/50", { failOnStatusCode: false });
+  it("event not found", () => {
+    // Visit a non existing event page
+    cy.visit("/event/50", { failOnStatusCode: false });
 
-  //   cy.get("p").contains("Event doesn't exist").should("be.visible");
-  // });
+    cy.get("p").contains("Event doesn't exist").should("be.visible");
+  });
 });
 
 Cypress.Commands.add(
