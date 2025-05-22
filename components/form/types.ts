@@ -96,6 +96,7 @@ export const userFormSchema = z.object({
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
 export const standardPostFormSchema = z.object({
+  kind: z.literal("STANDARD_POST"),
   content: z.string().trim().min(1, "Required").max(5000),
 });
 export type StandardPostFormSchemaType = z.infer<typeof standardPostFormSchema>;
@@ -114,10 +115,35 @@ const pollDurationFormSchema = z.object({
   hours: z.coerce.number().min(0).max(23),
 });
 
+const parentPostSchema = z.object({
+  kind: z.union([z.literal("POLL"), z.literal("STANDARD_POST")]),
+  author: z.string(),
+  postId: z.bigint(),
+});
+
 export const pollFormSchema = z.object({
+  parentPost: parentPostSchema.optional(),
+  kind: z.literal("POLL"),
   question: z.string().trim().min(1, "Required").max(300),
   options: z.array(pollOptionFormSchema).min(2).max(8),
   allowMultipleOptions: z.boolean(),
   duration: pollDurationFormSchema,
 });
 export type PollFormSchemaType = z.infer<typeof pollFormSchema>;
+
+export const feedPostFormSchema = z
+  .union([standardPostFormSchema, pollFormSchema])
+  .refine(
+    (data) => {
+      if (
+        (data.kind === "POLL" && !pollFormSchema.safeParse(data).success) ||
+        (data.kind === "STANDARD_POST" &&
+          !standardPostFormSchema.safeParse(data).success)
+      ) {
+        return false;
+      }
+      return true;
+    },
+    { params: [] },
+  );
+export type FeedPostFormSchemaType = z.infer<typeof feedPostFormSchema>;

@@ -2,7 +2,7 @@
 
 import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode, useMemo } from "react";
-import { Hash, MapPin, MessageCircle, Smile } from "lucide-react";
+import { Hash, MapPin, MessageCircle, Reply, Smile } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -33,12 +33,14 @@ export function PostCardLayout({
   createdBy,
   gnowebHref,
   children,
+  onReply,
 }: {
   post: PostView;
   eventId: string;
   createdBy: GnoProfile | null;
   children: ReactNode;
   gnowebHref?: Url;
+  onReply?: () => void;
 }) {
   if (!post.post) {
     return null;
@@ -90,6 +92,17 @@ export function PostCardLayout({
               <MapPin size={14} color="hsl(var(--secondary-color))" />
               <Text className="text-sm" variant="secondary">
                 Location
+              </Text>
+            </div>
+          )}
+          {onReply && (
+            <div
+              className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50"
+              onClick={onReply}
+            >
+              <Reply size={14} color="hsl(var(--secondary-color))" />
+              <Text className="text-sm" variant="secondary">
+                Reply
               </Text>
             </div>
           )}

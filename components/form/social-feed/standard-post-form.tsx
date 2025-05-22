@@ -7,16 +7,15 @@ import React, {
 } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMediaQuery } from "react-responsive";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Paperclip } from "lucide-react";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
 import {
+  FeedPostFormSchemaType,
   standardPostFormSchema,
-  StandardPostFormSchemaType,
 } from "@/components/form/types";
 import {
   Form,
@@ -47,10 +46,12 @@ export function StandardPostForm({
   eventId,
   feedInputMode,
   setFeedInputMode,
+  form,
 }: {
   eventId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
+  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const queryClient = getQueryClient();
   const { createStandardPost, isPending } = useCreateStandardPost(queryClient);
@@ -61,14 +62,7 @@ export function StandardPostForm({
   );
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
-
-  const standardPostForm = useForm<StandardPostFormSchemaType>({
-    resolver: zodResolver(standardPostFormSchema),
-    defaultValues: {
-      content: "",
-    },
-  });
-  const content = standardPostForm.watch("content");
+  const content = form.watch("content");
 
   const textareaMaxLength =
     standardPostFormSchema.shape.content._def.checks.find(
@@ -105,7 +99,7 @@ export function StandardPostForm({
         const after = textarea.value.substring(cursor);
 
         // Insert the text at cursor position
-        standardPostForm.setValue("content", before + loadingText + after);
+        form.setValue("content", before + loadingText + after);
 
         // Move cursor after the inserted text
         const newCursorPos = cursor + loadingText.length;
@@ -124,12 +118,12 @@ export function StandardPostForm({
           const after = textarea.value.substring(cursor);
 
           // Insert the text at cursor position
-          standardPostForm.setValue("content", before + text + after);
+          form.setValue("content", before + text + after);
         } else {
           const before = textarea.value.substring(0, cursor);
           const after = textarea.value.substring(start + loadingText.length);
 
-          standardPostForm.setValue("content", before + text + after);
+          form.setValue("content", before + text + after);
 
           const newCursor = start + loadingText.length;
           textarea.setSelectionRange(newCursor, newCursor);
@@ -158,8 +152,12 @@ export function StandardPostForm({
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [content]);
 
-  const onSubmitStandardPost = async (values: StandardPostFormSchemaType) => {
+  const onSubmitStandardPost = async (values: FeedPostFormSchemaType) => {
     try {
+      if (values.kind !== "STANDARD_POST") {
+        throw new Error("invalid form");
+      }
+
       const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
@@ -173,7 +171,7 @@ export function StandardPostForm({
         tags: [],
       });
 
-      standardPostForm.reset({}, { keepValues: false });
+      form.reset({}, { keepValues: false });
       toast({
         title: t("toast-post-creation-success"),
       });
@@ -187,9 +185,9 @@ export function StandardPostForm({
   };
 
   return (
-    <Form {...standardPostForm}>
+    <Form {...form}>
       <form
-        onSubmit={standardPostForm.handleSubmit(onSubmitStandardPost)}
+        onSubmit={form.handleSubmit(onSubmitStandardPost)}
         className="flex flex-col gap-4 p-4 rounded"
       >
         <div className="flex flex-row gap-4">
@@ -249,7 +247,7 @@ export function StandardPostForm({
             <TabsContent value="form">
               <FormField
                 rules={{ required: true }}
-                control={standardPostForm.control}
+                control={form.control}
                 name="content"
                 render={({ field }) => (
                   <FormItem className="relative w-full">

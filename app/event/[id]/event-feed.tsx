@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useForm, UseFormReturn } from "react-hook-form";
 import {
   StandardPostForm,
   FeedInputMode,
@@ -15,13 +16,28 @@ import { PostsList } from "@/components/widgets/posts-list";
 import { PollsList } from "@/components/widgets/polls-list";
 import { derivePkgAddr } from "@/lib/gno";
 import { GnowebButton } from "@/components/buttons/gnoweb-button";
+import { FeedPostFormSchemaType } from "@/components/form/types";
 
 const eventTabs = ["global-feed", "polls-feed"] as const;
 export type EventTab = (typeof eventTabs)[number];
 
-const EventFeedForm = ({ eventId }: { eventId: string }) => {
+const EventFeedForm = ({
+  eventId,
+  form,
+}: {
+  eventId: string;
+  form: UseFormReturn<FeedPostFormSchemaType>;
+}) => {
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
+
+  useEffect(() => {
+    if (feedInputMode === "POLL") {
+      form.setValue("kind", "POLL");
+    } else {
+      form.setValue("kind", "STANDARD_POST");
+    }
+  }, [feedInputMode, form]);
 
   return (
     <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
@@ -31,12 +47,14 @@ const EventFeedForm = ({ eventId }: { eventId: string }) => {
             eventId={eventId}
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
+            form={form}
           />
         ) : (
           <StandardPostForm
             eventId={eventId}
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
+            form={form}
           />
         )}
       </div>
@@ -60,6 +78,14 @@ export function EventFeed({
   const t = useTranslations("event-feed");
   const feedSlug = `${derivePkgAddr(`gno.land/r/zenao/events/e${eventId}`)}:main`;
 
+  const form = useForm<FeedPostFormSchemaType>({
+    mode: "all",
+    defaultValues: {
+      kind: "STANDARD_POST",
+      content: "",
+    },
+  });
+
   return (
     <div className="flex flex-col gap-4">
       <Tabs value={tab} onValueChange={(value) => setTab(value as EventTab)}>
@@ -77,11 +103,11 @@ export function EventFeed({
       />
 
       <div className="flex flex-col gap-6 min-h-0 pt-4">
-        {isMember && <EventFeedForm eventId={eventId} />}
+        {isMember && <EventFeedForm eventId={eventId} form={form} />}
         {tab === "global-feed" ? (
-          <PostsList eventId={eventId} userAddress={userAddress} />
+          <PostsList eventId={eventId} userAddress={userAddress} form={form} />
         ) : (
-          <PollsList eventId={eventId} userAddress={userAddress} />
+          <PollsList eventId={eventId} userAddress={userAddress} form={form} />
         )}
       </div>
     </div>
