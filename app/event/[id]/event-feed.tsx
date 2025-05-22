@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -28,6 +28,7 @@ const EventFeedForm = ({
   eventId: string;
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) => {
+  const formContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
   const parentPost = form.watch("parentPost");
@@ -43,11 +44,19 @@ const EventFeedForm = ({
   useEffect(() => {
     if (parentPost) {
       setFeedInputMode("STANDARD_POST");
+      if (formContainerRef.current) {
+        window.scrollTo({
+          top: formContainerRef.current.offsetTop,
+        });
+      }
     }
-  }, [parentPost, setFeedInputMode]);
+  }, [parentPost, formContainerRef, setFeedInputMode]);
 
   return (
-    <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
+    <div
+      ref={formContainerRef}
+      className="flex justify-center w-full transition-all duration-300 bg-secondary/80"
+    >
       <div className="w-full">
         {feedInputMode === "POLL" ? (
           <PollPostForm
