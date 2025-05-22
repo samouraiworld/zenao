@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/ed25519"
 	"errors"
 	"fmt"
 	"slices"
@@ -82,7 +83,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	evt := (*zeni.Event)(nil)
 
-	needPassword := true
+	needPasswordIfGuarded := true
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
@@ -91,12 +92,12 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 		if slices.Contains(buyerRoles, "organizer") {
-			needPassword = false
+			needPasswordIfGuarded = false
 		}
 
 		for i, ticket := range tickets {
 			// XXX: support batch
-			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPassword); err != nil {
+			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
 				return err
 			}
 		}
@@ -113,9 +114,11 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	// XXX: there could be race conditions if the db has changed password but the chain did not
 
-	eventSK, err := zeni.EventSKFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
+	var eventSK ed25519.PrivateKey
+	if needPasswordIfGuarded {
+		if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
+			return nil, err
+		}
 	}
 
 	for i, ticket := range tickets {
