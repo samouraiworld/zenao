@@ -18,6 +18,7 @@ Whether you're a seasoned tester or just curious about QA, this event is for you
 Don’t miss out—RSVP now and bring your testing A-game! 🐞🎉`;
 const testEventLocation = "123 Test Lane, Suite 404, Bugville, QA 98765";
 const testEventCapacity = "42";
+const testEventPassword = "zenao_everyday";
 
 const testStandardPost = "Post to test";
 
@@ -178,7 +179,7 @@ describe("main", () => {
   });
 
   it("create an event", () => {
-    cy.createEvent();
+    cy.createEvent({ exclusive: false });
 
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
@@ -219,7 +220,7 @@ describe("main", () => {
       "not.exist",
     );
 
-    cy.createEvent();
+    cy.createEvent({ exclusive: false });
 
     // Participate to an event
     cy.get("button").contains("Register").click();
@@ -252,7 +253,7 @@ describe("main", () => {
       "not.exist",
     );
 
-    cy.createEvent();
+    cy.createEvent({ exclusive: false });
 
     // Participate to an event
     cy.get("button").contains("Register").click();
@@ -303,6 +304,23 @@ describe("main", () => {
     cy.get('img[alt="grinning"]').first().click();
   });
 
+  it("access an exclusive event", () => {
+    cy.createEvent({ exclusive: true });
+    cy.url().then((url) => {
+      console.log(url);
+      logout();
+      cy.visit(url);
+    });
+
+    // Guard
+    cy.get("input[type=password]").type(testEventPassword);
+    cy.get("button").contains("Access event").click();
+
+    // Assertions
+    cy.get("h1").contains(testEventName).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
+  });
+
   it("event not found", () => {
     // Visit a non existing event page
     cy.visit("/event/50", { failOnStatusCode: false });
@@ -311,60 +329,67 @@ describe("main", () => {
   });
 });
 
-Cypress.Commands.add("createEvent", () => {
-  // start from the home
-  cy.visit("/");
+Cypress.Commands.add(
+  "createEvent",
+  ({ exclusive = false }: { exclusive: boolean }) => {
+    // start from the home
+    cy.visit("/");
 
-  // click on home create button
-  cy.get("button").contains("Create").click();
+    // click on home create button
+    cy.get("button").contains("Create").click();
 
-  login();
+    login();
 
-  // fill event info
-  cy.get("input[name=imageUri]").selectFile(
-    "cypress/fixtures/bug-bash-bonanza.webp",
-    { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
-  );
-  cy.get('textarea[placeholder="Event name..."]').type(testEventName);
-  cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
-    delay: 1,
-  });
+    // fill event info
+    cy.get("input[name=imageUri]").selectFile(
+      "cypress/fixtures/bug-bash-bonanza.webp",
+      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
+    );
+    cy.get('textarea[placeholder="Event name..."]').type(testEventName);
+    cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
+      delay: 1,
+    });
 
-  // custom location
-  cy.get("button").contains("Add an address...").click();
-  cy.get('input[placeholder="Location..."]').type(testEventLocation);
-  cy.get("p").contains(`Use ${testEventLocation}`).trigger("click");
+    // custom location
+    cy.get("button").contains("Add an address...").click();
+    cy.get('input[placeholder="Location..."]').type(testEventLocation);
+    cy.get("p").contains(`Use ${testEventLocation}`).trigger("click");
 
-  cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
+    cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
 
-  // choose dates in the start of next month
-  cy.get("button").contains("Pick a start date...").click();
-  cy.get('button[aria-label="Choose the Month"').click();
+    // choose dates in the start of next month
+    cy.get("button").contains("Pick a start date...").click();
+    cy.get('button[aria-label="Choose the Month"').click();
 
-  cy.get('div[role="option"]').contains("April").click();
+    cy.get('div[role="option"]').contains("April").click();
 
-  const year = new Date().getFullYear() + 1;
+    const year = new Date().getFullYear() + 1;
 
-  cy.get('button[aria-label="Choose the Year"').click();
-  cy.get('div[role="option"]').contains(`${year}`).click();
-  cy.get('table[role="grid"]').find("button").contains("13").click();
+    cy.get('button[aria-label="Choose the Year"').click();
+    cy.get('div[role="option"]').contains(`${year}`).click();
+    cy.get('table[role="grid"]').find("button").contains("13").click();
 
-  cy.wait(1000);
+    cy.wait(1000);
 
-  cy.get('button[aria-label="Pick date"]').eq(1).click();
-  cy.get('button[aria-label="Choose the Month"').click();
-  cy.get('div[role="option"]').contains("April").click();
+    cy.get('button[aria-label="Pick date"]').eq(1).click();
+    cy.get('button[aria-label="Choose the Month"').click();
+    cy.get('div[role="option"]').contains("April").click();
 
-  cy.get('button[aria-label="Choose the Year"').click();
-  cy.get('div[role="option"]').contains(`${year}`).click();
-  cy.wait(500); // wait for start date calendar to disapear so there is only one "Choose the Month" button present
+    cy.get('button[aria-label="Choose the Year"').click();
+    cy.get('div[role="option"]').contains(`${year}`).click();
+    cy.wait(500); // wait for start date calendar to disapear so there is only one "Choose the Month" button present
+    cy.get('table[role="grid"]').find("button").contains("14").click();
 
-  cy.get('table[role="grid"]').find("button").contains("14").click();
+    if (exclusive) {
+      cy.get("button[data-name=exclusive]").click();
+      cy.get("input[name=password]").type(testEventPassword);
+    }
 
-  cy.get("button").contains("Create event").click();
+    cy.get("button").contains("Create event").click();
 
-  cy.url().should("include", "/event/");
-  cy.url().should("not.include", "/create");
+    cy.url().should("include", "/event/");
+    cy.url().should("not.include", "/create");
 
-  toastShouldContain("Event created!");
-});
+    toastShouldContain("Event created!");
+  },
+);

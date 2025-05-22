@@ -30,6 +30,8 @@ export function FormFieldSwitch<T extends FieldValues>({
             <FormControl>
               <Switch
                 className={className}
+                name={name}
+                data-name={name}
                 checked={field.value}
                 onCheckedChange={(checked: boolean) => {
                   field.onChange(checked);

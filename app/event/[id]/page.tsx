@@ -70,6 +70,8 @@ export default async function EventPage({ params }: Props) {
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ExclusiveEventGuard
         eventId={p.id}
+        title={eventData.title}
+        imageUri={eventData.imageUri}
         exclusive={eventData.privacy?.eventPrivacy.case === "guarded"}
       >
         <ScreenContainer
