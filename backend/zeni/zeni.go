@@ -165,7 +165,8 @@ type DB interface {
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*Event, error)
-	EditEvent(eventID string, req *zenaov1.EditEventRequest) (string, error) // return event password hash
+	EditEvent(eventID string, req *zenaov1.EditEventRequest) (*Event, error)
+	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string) error
 	GetAllEvents() ([]*Event, error)

@@ -1,6 +1,7 @@
 package events
 
 import (
+	"encoding/base64"
 	"std"
 
 	zenaov1 "gno.land/p/zenao/zenao/v1"
@@ -9,6 +10,15 @@ import (
 type InfoGetter func() *zenaov1.EventInfo
 
 func (e *Event) Info() *zenaov1.EventInfo {
+	privacy := &zenaov1.EventPrivacy{}
+	if len(e.participationPubkey) == 0 {
+		privacy.EventPrivacy = &zenaov1.EventPrivacyPublic{}
+	} else {
+		privacy.EventPrivacy = &zenaov1.EventPrivacyGuarded{
+			ParticipationPubkey: base64.RawURLEncoding.EncodeToString(e.participationPubkey),
+		}
+	}
+
 	return &zenaov1.EventInfo{
 		Title:        e.getProfileString(std.CurrentRealm().Address(), "DisplayName", ""),
 		Description:  e.getProfileString(std.CurrentRealm().Address(), "Bio", ""),
@@ -19,5 +29,6 @@ func (e *Event) Info() *zenaov1.EventInfo {
 		Creator:      e.creator,
 		Location:     e.location,
 		Participants: e.CountParticipants(),
+		Privacy:      privacy,
 	}
 }
