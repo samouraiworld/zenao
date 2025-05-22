@@ -105,7 +105,7 @@ const pollOptionFormSchema = z.object({
     .string()
     .trim()
     .min(1, "Required")
-    .max(32, "Option must be at most 32 characters long"),
+    .max(128, "Option must be at most 128 characters long"),
 });
 
 const pollDurationFormSchema = z.object({
