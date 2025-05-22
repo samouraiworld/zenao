@@ -87,6 +87,12 @@ func validatePoll(req *zenaov1.CreatePollRequest) error {
 	if len(req.Options) > 8 {
 		return errors.New("poll must have at most 8 options")
 	}
+	for _, option := range req.Options {
+		if len(option) > 128 {
+			return errors.New("option cannot be longer than 128 characters")
+		}
+	}
+
 	minDuration := int64(time.Minute) * 15 / int64(time.Second)
 	maxDuration := int64(time.Hour) * 24 * 30 / int64(time.Second)
 	if req.Duration < minDuration {
