@@ -118,17 +118,31 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	if s.MailClient != nil && evt != nil {
-		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets will be sent in a few weeks!")
+		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
 		if err != nil {
 			s.Logger.Error("generate-participate-email-content", zap.Error(err))
 		} else {
-			// XXX: Replace sender name with organizer name
+			attachments := make([]*resend.Attachment, 0, len(tickets))
+			for _, ticket := range tickets {
+				pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), s.Logger)
+				if err != nil {
+					s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
+					continue
+				}
+				attachments = append(attachments, &resend.Attachment{
+					Content:     pdfData,
+					Filename:    fmt.Sprintf("ticket_%s_%s.pdf", buyer.ID, evt.ID),
+					ContentType: "application/pdf",
+				})
+			}
+
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
-				From:    "Zenao <ticket@mail.zenao.io>",
-				To:      append(req.Msg.Guests, authUser.Email),
-				Subject: fmt.Sprintf("%s - Confirmation", evt.Title),
-				Html:    htmlStr,
-				Text:    text,
+				From:        "Zenao <ticket@mail.zenao.io>>",
+				To:          append(req.Msg.Guests, authUser.Email),
+				Subject:     fmt.Sprintf("%s - Confirmation", evt.Title),
+				Html:        htmlStr,
+				Text:        text,
+				Attachments: attachments,
 			}); err != nil {
 				s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
 			}
