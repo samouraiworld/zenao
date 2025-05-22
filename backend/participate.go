@@ -123,6 +123,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	for i, ticket := range tickets {
 		// XXX: support batch, this might be very very slow
+		// XXX: callerID should be the current user and not creator,
+		//      this could break if the initial creator has the organizer role removed
+		//      also this bypasses password protection on-chain
 		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
 			// XXX: handle case where db tx pass but chain fail
 			return nil, err
