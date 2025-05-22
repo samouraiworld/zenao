@@ -21,6 +21,8 @@ import (
 
 const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 
+// XXX: consider including a nonce unique to event in signed messages (checkin and participate)
+
 // Event cannot be exposed
 type Event struct {
 	creator             string
