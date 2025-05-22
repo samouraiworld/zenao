@@ -139,11 +139,13 @@ func decodeHash(hash string) ([]byte, []byte, *argon2Params, error) {
 	if err != nil {
 		return nil, nil, nil, errors.New("invalid hash")
 	}
+	params.KeyLength = uint32(len(hashBz))
 
 	saltBz, err := base64.RawStdEncoding.DecodeString(parts[5])
 	if err != nil {
 		return nil, nil, nil, errors.New("invalid salt")
 	}
+	params.SaltLength = uint32(len(saltBz))
 
 	return hashBz, saltBz, &params, nil
 }
