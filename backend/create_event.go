@@ -170,11 +170,9 @@ func validateEvent(startDate, endDate uint64, title, description string, locatio
 		return errors.New("unknown location kind")
 	}
 
-	if password != "" {
-		// a long password could be a DoS vector
-		if len(password) > zeni.MaxPasswordLen {
-			return errors.New("password too long")
-		}
+	// allowing any password length is a DoS vector
+	if len(password) > zeni.MaxPasswordLen {
+		return errors.New("password too long")
 	}
 
 	return nil
