@@ -85,6 +85,8 @@ export const eventFormSchema = z.object({
   // TODO: re-enable it after mvp
   // ticketPrice: z.coerce.number(),
   capacity: z.coerce.number().min(1),
+  exclusive: z.boolean(),
+  password: z.string().optional(),
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
@@ -121,3 +123,13 @@ export const pollFormSchema = z.object({
   duration: pollDurationFormSchema,
 });
 export type PollFormSchemaType = z.infer<typeof pollFormSchema>;
+
+export const eventProtectionFormSchema = z.object({
+  password: z
+    .string()
+    .min(1, "Required")
+    .max(128, "Password must be at most 128 characters"),
+});
+export type EventProtectionFormSchemaType = z.infer<
+  typeof eventProtectionFormSchema
+>;

@@ -6,6 +6,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
+import { z } from "zod";
 import { zenaoClient } from "@/app/zenao-client";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/event-form";
@@ -16,7 +17,27 @@ export const CreateEventForm: React.FC = () => {
   const router = useRouter();
   const form = useForm<EventFormSchemaType>({
     mode: "all",
-    resolver: zodResolver(eventFormSchema),
+    resolver: zodResolver(
+      eventFormSchema
+        .extend({
+          password: z.string().optional(),
+        })
+        .refine(
+          (data) => {
+            if (
+              data.exclusive &&
+              (!data.password || data.password.length < 1)
+            ) {
+              return false;
+            }
+            return true;
+          },
+          {
+            message: "Password is required when event is exclusive",
+            path: ["password"],
+          },
+        ),
+    ),
     defaultValues: {
       imageUri: "",
       description: "",
@@ -27,6 +48,8 @@ export const CreateEventForm: React.FC = () => {
         address: "",
         timeZone: "",
       },
+      exclusive: false,
+      password: "",
     },
   });
 
@@ -36,7 +59,11 @@ export const CreateEventForm: React.FC = () => {
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async (values: EventFormSchemaType) => {
+  const onSubmit = async ({
+    password,
+    exclusive,
+    ...values
+  }: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
       const token = await getToken();
@@ -66,10 +93,12 @@ export const CreateEventForm: React.FC = () => {
         default:
           value = {};
       }
+
       const { id } = await zenaoClient.createEvent(
         {
           ...values,
           location: { address: { case: values.location.kind, value } },
+          password: exclusive && password ? password : "",
         },
         { headers: { Authorization: "Bearer " + token } },
       );
