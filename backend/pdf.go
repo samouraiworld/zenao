@@ -68,7 +68,10 @@ func execGenPdfTicket(genPdfTicketConf *genPdfTicketConfig) error {
 		return err
 	}
 
-	os.WriteFile(fmt.Sprintf("%s.pdf", event.Title), pdf, 0644)
+	err = os.WriteFile(fmt.Sprintf("%s.pdf", event.Title), pdf, 0644)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -120,7 +123,7 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, logger *zap.Logge
 	pdf.SetFont("Helvetica", "B", 10)
 	pdf.SetTextColor(40, 40, 40)
 	pdf.SetXY(textX, currentY)
-	pdf.Cell(textWidth, 8, fmt.Sprintf("%s", event.StartDate.Format("January 2, 2006")))
+	pdf.Cell(textWidth, 8, event.StartDate.Format("January 2, 2006"))
 	pdf.SetFont("Helvetica", "", 10)
 	pdf.SetTextColor(80, 80, 80)
 	pdf.SetXY(textX, currentY+5)
@@ -212,7 +215,7 @@ func embedImageURI(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64)
 		return fmt.Errorf("failed to read image data: %w", err)
 	}
 
-	fileExt := ".png"
+	var fileExt string
 	contentType := http.DetectContentType(bodyStart)
 	switch contentType {
 	case "image/jpeg":
