@@ -2,8 +2,9 @@ package zeni
 
 import (
 	"crypto/ed25519"
-	"crypto/sha3"
 	"encoding/base64"
+
+	"golang.org/x/crypto/sha3"
 
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
