@@ -125,7 +125,10 @@ export const pollFormSchema = z.object({
 export type PollFormSchemaType = z.infer<typeof pollFormSchema>;
 
 export const eventProtectionFormSchema = z.object({
-  password: z.string().min(1, "Required"),
+  password: z
+    .string()
+    .min(1, "Required")
+    .max(128, "Password must be at most 128 characters"),
 });
 export type EventProtectionFormSchemaType = z.infer<
   typeof eventProtectionFormSchema

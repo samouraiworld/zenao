@@ -63,7 +63,11 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async ({ password: _, ...values }: EventFormSchemaType) => {
+  const onSubmit = async ({
+    password,
+    exclusive,
+    ...values
+  }: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
       const token = await getToken();
@@ -99,7 +103,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
           ...values,
           eventId: id,
           location: { address: { case: values.location.kind, value } },
-          // password: password === "" ? null : password, // TODO add password
+          password: exclusive && password ? password : "",
         },
         {
           headers: { Authorization: "Bearer " + token },

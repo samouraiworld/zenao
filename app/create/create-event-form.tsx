@@ -59,7 +59,11 @@ export const CreateEventForm: React.FC = () => {
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async ({ ...values }: EventFormSchemaType) => {
+  const onSubmit = async ({
+    password,
+    exclusive,
+    ...values
+  }: EventFormSchemaType) => {
     try {
       setIsLoaded(true);
       const token = await getToken();
@@ -94,7 +98,7 @@ export const CreateEventForm: React.FC = () => {
         {
           ...values,
           location: { address: { case: values.location.kind, value } },
-          // password: values.password === "" ? null : values.password,
+          password: exclusive && password ? password : "",
         },
         { headers: { Authorization: "Bearer " + token } },
       );
