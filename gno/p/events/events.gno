@@ -21,34 +21,36 @@ import (
 
 const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 
-// Event can be exposed
+// XXX: consider including a nonce unique to event in signed messages (checkin and participate)
+
+// Event cannot be exposed
 type Event struct {
-	id               string
-	creator          string
-	startDate        int64
-	endDate          int64
-	capacity         uint32
-	tickets          avl.Tree // ticketHash -> *Ticket
-	location         *zenaov1.EventLocation
-	getProfileString basedao.ProfileStringGetter
-	setProfileString basedao.ProfileStringSetter
-	DAOPrivate       *basedao.DAOPrivate
-	DAO              daokit.DAO
-	pkgPath          string
+	creator             string
+	startDate           int64
+	endDate             int64
+	capacity            uint32
+	tickets             avl.Tree // ticketHash -> *Ticket
+	location            *zenaov1.EventLocation
+	getProfileString    basedao.ProfileStringGetter
+	setProfileString    basedao.ProfileStringSetter
+	DAOPrivate          *basedao.DAOPrivate
+	DAO                 daokit.DAO
+	participationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
 }
 
 type Config struct {
-	Creator          string
-	Title            string
-	Description      string
-	ImageURI         string
-	StartDate        int64 // unix seconds
-	EndDate          int64 // unix seconds
-	Capacity         uint32
-	GetProfileString basedao.ProfileStringGetter
-	SetProfileString basedao.ProfileStringSetter
-	ZenaoAdminAddr   string
-	Location         *zenaov1.EventLocation
+	Creator             string
+	Title               string
+	Description         string
+	ImageURI            string
+	StartDate           int64 // unix seconds
+	EndDate             int64 // unix seconds
+	Capacity            uint32
+	GetProfileString    basedao.ProfileStringGetter
+	SetProfileString    basedao.ProfileStringSetter
+	ZenaoAdminAddr      string
+	Location            *zenaov1.EventLocation
+	ParticipationPubkey string // ed25519 pubkey of secret key derived from event password, event is private if set
 }
 
 type Ticket struct {
@@ -61,6 +63,15 @@ func (t *Ticket) Used() bool {
 }
 
 func NewEvent(conf *Config) *Event {
+	var participationPubkey []byte
+	if conf.ParticipationPubkey != "" {
+		participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(conf.ParticipationPubkey)
+		if err != nil {
+			panic(err)
+		}
+		participationPubkey = participationPubkeyBz
+	}
+
 	roles := []role_manager.RoleInfo{
 		{
 			Name:        "zenao-admin",
@@ -104,15 +115,16 @@ func NewEvent(conf *Config) *Event {
 	})
 
 	event := &Event{
-		creator:          conf.Creator,
-		startDate:        conf.StartDate,
-		endDate:          conf.EndDate,
-		capacity:         conf.Capacity,
-		getProfileString: conf.GetProfileString,
-		setProfileString: conf.SetProfileString,
-		DAOPrivate:       privdao,
-		DAO:              pubdao,
-		location:         conf.Location,
+		creator:             conf.Creator,
+		startDate:           conf.StartDate,
+		endDate:             conf.EndDate,
+		capacity:            conf.Capacity,
+		getProfileString:    conf.GetProfileString,
+		setProfileString:    conf.SetProfileString,
+		DAOPrivate:          privdao,
+		DAO:                 pubdao,
+		location:            conf.Location,
+		participationPubkey: participationPubkey,
 		// XXX: set PkgPath?
 	}
 
@@ -125,7 +137,7 @@ func NewEvent(conf *Config) *Event {
 	}{{
 		cond: oneOrganizer,
 		handlers: []daokit.MessageHandler{
-			event.addParticipantHandler(),
+			event.addParticipantHandler(), // XXX: remove
 			event.removeParticipantHandler(),
 			event.addGatekeeperHandler(),
 			event.removeGatekeeperHandler(),
@@ -155,8 +167,9 @@ const MsgAddParticipantKind = "gno.land/p/zenao/events.AddParticipant"
 // ticket that can't be linked to a particular ticket. We should ensure that there is only one valid proof for each ticket
 
 type MsgAddParticipant struct {
-	Participant  string
-	TicketPubkey string // ed25519 public key derived from the private key in the ticket secret
+	Participant            string
+	TicketPubkey           string // ed25519 public key derived from the private key in the ticket secret
+	ParticipationSignature string // ed25519 signature of ticket's pubkey with secret key derived from event password
 }
 
 func (msg *MsgAddParticipant) String() string {
@@ -167,6 +180,7 @@ func (msg *MsgAddParticipant) String() string {
 	return ufmt.Sprintf("Add %s as participant")
 }
 
+// XXX: move to Participate(), allow anyone to use this
 func (e *Event) addParticipantHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgAddParticipantKind, func(i interface{}) {
 		msg, ok := i.(*MsgAddParticipant)
@@ -176,6 +190,21 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 
 		if e.tickets.Has(msg.TicketPubkey) {
 			panic(errors.New("ticket already added"))
+		}
+
+		// XXX: this dance is not very useful for now since only organizers can add participants
+		// but we add this logic as PoC of on-chain password-guarded events
+		if len(e.participationPubkey) != 0 {
+			signatureBz, err := base64.RawURLEncoding.DecodeString(msg.ParticipationSignature)
+			if err != nil {
+				panic(err)
+			}
+
+			payloadBz := []byte(msg.TicketPubkey)
+
+			if !ed25519.Verify(e.participationPubkey, payloadBz, signatureBz) {
+				panic("invalid participation signature")
+			}
 		}
 
 		_ = e.tickets.Set(msg.TicketPubkey, &Ticket{
@@ -196,8 +225,8 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 	})
 }
 
-func NewAddParticipantMsg(participant string, ticketPubkey string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey})
+func NewAddParticipantMsg(participant string, ticketPubkey string, signature string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey, ParticipationSignature: signature})
 }
 
 const MsgRemoveParticipantKind = "gno.land/p/zenao/events.RemoveParticipant"
@@ -280,7 +309,7 @@ func (e *Event) checkinHandler() daokit.MessageHandler {
 			panic(err)
 		}
 
-		payloadBz := []byte(std.PreviousRealm().Address())
+		payloadBz := []byte(std.PreviousRealm().Address().String())
 
 		signatureBz, err := base64.RawURLEncoding.DecodeString(msg.CheckinSignature)
 		if err != nil {
@@ -345,6 +374,20 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 		if msg.location != nil {
 			e.location = msg.location
 		}
+		if msg.privacy != nil {
+			switch val := msg.privacy.EventPrivacy.(type) {
+			case *zenaov1.EventPrivacyPublic:
+				e.participationPubkey = nil
+			case *zenaov1.EventPrivacyGuarded:
+				participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
+				if err != nil {
+					panic(err)
+				}
+				e.participationPubkey = participationPubkeyBz
+			default:
+				panic("unknown privacy model")
+			}
+		}
 	})
 }
 
@@ -356,6 +399,7 @@ type msgEditEvent struct {
 	endDate     int64
 	capacity    uint32
 	location    *zenaov1.EventLocation
+	privacy     *zenaov1.EventPrivacy
 }
 
 func (msg *msgEditEvent) String() string {
@@ -388,7 +432,7 @@ func (msg *msgEditEvent) String() string {
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation) daokit.ExecutableMessage {
+func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
 		title:       title,
 		description: description,
@@ -397,6 +441,7 @@ func NewEditEventMsg(title, description, imageURI string, startDate, endDate int
 		endDate:     endDate,
 		capacity:    capacity,
 		location:    loc,
+		privacy:     privacy,
 	})
 }
 

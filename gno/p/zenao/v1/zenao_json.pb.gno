@@ -116,6 +116,9 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	if c.Location != nil {
 		fields["location"] = c.Location.ToJSON()
 	}
+	if c.Password != "" {
+		fields["password"] = json.StringNode("", c.Password)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -157,6 +160,9 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 		fv := &EventLocation{}
 		fv.FromJSON(val)
 		c.Location = fv
+	}
+	if val, ok := fields["password"]; ok {
+		c.Password = val.MustString()
 	}
 }
 
@@ -209,6 +215,9 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Location != nil {
 		fields["location"] = e.Location.ToJSON()
 	}
+	if e.Password != "" {
+		fields["password"] = json.StringNode("", e.Password)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -254,6 +263,9 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 		fv.FromJSON(val)
 		e.Location = fv
 	}
+	if val, ok := fields["password"]; ok {
+		e.Password = val.MustString()
+	}
 }
 
 func (e *EditEventResponse) ToJSON() *json.Node {
@@ -291,6 +303,9 @@ func (p *ParticipateRequest) ToJSON() *json.Node {
 		}
 		fields["guests"] = json.ArrayNode("", arr)
 	}
+	if p.Password != "" {
+		fields["password"] = json.StringNode("", p.Password)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -312,6 +327,9 @@ func (p *ParticipateRequest) FromJSON(node *json.Node) {
 			arr[i] = val.MustString()
 		}
 		p.Guests = arr
+	}
+	if val, ok := fields["password"]; ok {
+		p.Password = val.MustString()
 	}
 }
 
@@ -510,6 +528,78 @@ func (a *AddressCustom) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["timezone"]; ok {
 		a.Timezone = val.MustString()
+	}
+}
+
+func (e *EventPrivacy) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	switch val := e.EventPrivacy.(type) {
+	case *EventPrivacyPublic:
+		fields["public"] = val.ToJSON()
+	case *EventPrivacyGuarded:
+		fields["guarded"] = val.ToJSON()
+	default:
+		panic(errors.New("unknown eventPrivacy variant"))
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EventPrivacy) FromJSON(node *json.Node) {
+	*e = EventPrivacy{}
+	fields := node.MustObject()
+
+	variantFieldNames := []string{"public", "guarded"}
+	var selectedVariant *json.Node
+	var selectedVariantName string
+	for _, variantName := range variantFieldNames {
+		if variant, ok := fields[variantName]; ok {
+			selectedVariantName = variantName
+			selectedVariant = variant
+		}
+		break
+	}
+	switch selectedVariantName {
+	case "public":
+		n := &EventPrivacyPublic{}
+		n.FromJSON(selectedVariant)
+		e.EventPrivacy = n
+	case "guarded":
+		n := &EventPrivacyGuarded{}
+		n.FromJSON(selectedVariant)
+		e.EventPrivacy = n
+	default:
+		panic(errors.New("eventPrivacy variant not found"))
+	}
+}
+
+func (e *EventPrivacyPublic) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EventPrivacyPublic) FromJSON(node *json.Node) {
+	*e = EventPrivacyPublic{}
+}
+
+func (e *EventPrivacyGuarded) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.ParticipationPubkey != "" {
+		fields["participationPubkey"] = json.StringNode("", e.ParticipationPubkey)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EventPrivacyGuarded) FromJSON(node *json.Node) {
+	*e = EventPrivacyGuarded{}
+	fields := node.MustObject()
+
+	if val, ok := fields["participationPubkey"]; ok {
+		e.ParticipationPubkey = val.MustString()
 	}
 }
 
