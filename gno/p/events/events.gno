@@ -225,8 +225,8 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 	})
 }
 
-func NewAddParticipantMsg(participant string, ticketPubkey string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey})
+func NewAddParticipantMsg(participant string, ticketPubkey string, signature string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey, ParticipationSignature: signature})
 }
 
 const MsgRemoveParticipantKind = "gno.land/p/zenao/events.RemoveParticipant"
