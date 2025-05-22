@@ -192,9 +192,11 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 			panic(errors.New("ticket already added"))
 		}
 
-		// XXX: this dance is not very useful for now since only organizers can add participants
+		callerIsOrganizer := e.DAOPrivate.Members.HasRole(std.PreviousRealm().Address().String(), "organizer")
+
+		// XXX: this dance is not very useful for now since all accounts are managed
 		// but we add this logic as PoC of on-chain password-guarded events
-		if len(e.participationPubkey) != 0 {
+		if !callerIsOrganizer && len(e.participationPubkey) != 0 {
 			signatureBz, err := base64.RawURLEncoding.DecodeString(msg.ParticipationSignature)
 			if err != nil {
 				panic(err)

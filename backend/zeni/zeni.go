@@ -168,7 +168,7 @@ type DB interface {
 	EditEvent(eventID string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
-	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string) error
+	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
 	GetAllEvents() ([]*Event, error)
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
