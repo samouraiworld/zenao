@@ -28,6 +28,7 @@ import { Web3Image } from "@/components/images/web3-image";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
+  title: string;
   imageUri: string;
   exclusive?: boolean;
   children?: React.ReactNode;
@@ -35,6 +36,7 @@ type ExclusiveEventGuardProps = {
 
 export function ExclusiveEventGuard({
   eventId,
+  title,
   imageUri,
   exclusive = false,
   children,
@@ -124,9 +126,9 @@ export function ExclusiveEventGuard({
           </AspectRatio>
         </div>
         <Heading level={2} size="2xl">
-          {t("title")}
+          {title}
         </Heading>
-        <Text>{t("description")}</Text>
+        <Text className="text-center">{t("description")}</Text>
 
         <Form {...form}>
           <form
