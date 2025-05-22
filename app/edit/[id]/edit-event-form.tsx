@@ -33,7 +33,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const defaultValues: EventFormSchemaType = {
     ...data,
     location,
-    exclusive: false, // TODO add data exclusive
+    exclusive: data.privacy?.eventPrivacy.case === "guarded",
     password: "",
   };
 
@@ -103,6 +103,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
           ...values,
           eventId: id,
           location: { address: { case: values.location.kind, value } },
+          updatePassword: !exclusive || (!!password && password.length > 0),
           password: exclusive && password ? password : "",
         },
         {
