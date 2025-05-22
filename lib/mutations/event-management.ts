@@ -32,26 +32,22 @@ export const useEventBroadcastEmail = () => {
   };
 };
 
-type AccessExclusiveEventRequest = {
+type ValidateEventPasswordRequest = {
   eventId: string;
   password: string;
 };
 
-export const useAccessExclusiveEvent = () => {
+export const useValidateEventPassword = () => {
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
-    mutationFn: async ({ eventId, password }: AccessExclusiveEventRequest) => {
-      // TODO: uncomment when the API is ready
-      // await zenaoClient.accessExclusiveEvent(eventId, password);
-      return {
-        eventId,
-        password,
-        access: false,
-      };
+    mutationFn: async ({ eventId, password }: ValidateEventPasswordRequest) => {
+      const res = await zenaoClient.validatePassword({ eventId, password });
+
+      return res;
     },
   });
 
   return {
-    accessExclusiveEvent: mutateAsync,
+    validateEventPassword: mutateAsync,
     isPending,
     isSuccess,
     isError,

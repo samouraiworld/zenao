@@ -66,9 +66,14 @@ export default async function EventPage({ params }: Props) {
     (address) => void queryClient.prefetchQuery(profileOptions(address)),
   );
 
+  console.log("exclusive", eventData.privacy?.eventPrivacy.case === "guarded");
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ExclusiveEventGuard eventId={p.id} exclusive>
+      <ExclusiveEventGuard
+        eventId={p.id}
+        exclusive={eventData.privacy?.eventPrivacy.case === "guarded"}
+      >
         <ScreenContainer
           background={{
             src: eventData.imageUri,

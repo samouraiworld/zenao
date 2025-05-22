@@ -31,6 +31,7 @@ import { Separator } from "@/components/shadcn/separator";
 import { EventRegistrationForm } from "@/components/form/event-registration";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { useEventPassword } from "@/components/providers/event-password-provider";
 
 interface EventSectionProps {
   title: string;
@@ -50,6 +51,7 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 export function EventInfo({ eventId }: { eventId: string }) {
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(eventId));
+  const { password } = useEventPassword();
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
@@ -222,6 +224,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
                 <EventRegistrationForm
                   eventId={eventId}
                   userAddress={address}
+                  eventPassword={password}
                 />
               </div>
             )}

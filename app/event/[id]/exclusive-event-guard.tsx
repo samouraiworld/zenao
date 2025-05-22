@@ -16,10 +16,11 @@ import {
   eventProtectionFormSchema,
   EventProtectionFormSchemaType,
 } from "@/components/form/types";
-import { useAccessExclusiveEvent } from "@/lib/mutations/event-management";
+import { useValidateEventPassword } from "@/lib/mutations/event-management";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
+import { EventPasswordProvider } from "@/components/providers/event-password-provider";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
@@ -40,7 +41,7 @@ export function ExclusiveEventGuard({
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
 
-  const { accessExclusiveEvent, isPending } = useAccessExclusiveEvent();
+  const { validateEventPassword, isPending } = useValidateEventPassword();
   const [canAccess, setCanAccess] = useState<boolean>(
     !exclusive || isOrganizer || (exclusive && isParticipant),
   );
@@ -52,6 +53,7 @@ export function ExclusiveEventGuard({
       password: "",
     },
   });
+  const password = form.watch("password");
   const { toast } = useToast();
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
@@ -59,12 +61,12 @@ export function ExclusiveEventGuard({
 
     // Call the API to check if the password is correct
     try {
-      const res = await accessExclusiveEvent({
+      const res = await validateEventPassword({
         eventId,
         password: data.password,
       });
 
-      if (!res.access) {
+      if (!res.valid) {
         throw new Error("Invalid password");
       }
 
@@ -79,7 +81,11 @@ export function ExclusiveEventGuard({
   };
 
   if (canAccess) {
-    return children;
+    return (
+      <EventPasswordProvider password={password}>
+        {children}
+      </EventPasswordProvider>
+    );
   }
 
   return (

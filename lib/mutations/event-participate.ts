@@ -10,6 +10,7 @@ type EventParticipateLoggedInRequest = {
   guests: string[];
   userId: string;
   userAddress: string;
+  password: string;
 };
 
 export const getRelatedQueriesOptions = (variables: {
@@ -40,9 +41,10 @@ export const useEventParticipateLoggedIn = () => {
       eventId,
       guests,
       token,
+      password,
     }: EventParticipateLoggedInRequest) => {
       await zenaoClient.participate(
-        { eventId, guests },
+        { eventId, guests, password },
         { headers: { Authorization: `Bearer ${token}` } },
       );
     },
@@ -115,6 +117,7 @@ type EventParticipateGuestRequest = {
   email: string;
   guests: string[];
   userAddress: string | null;
+  password: string;
 };
 
 export const useEventParticipateGuest = () => {
@@ -124,8 +127,9 @@ export const useEventParticipateGuest = () => {
       eventId,
       email,
       guests,
+      password,
     }: EventParticipateGuestRequest) => {
-      await zenaoClient.participate({ eventId, email, guests });
+      await zenaoClient.participate({ eventId, email, guests, password });
     },
     onSuccess: (_d, variables, _c) => {
       const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
