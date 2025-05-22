@@ -41,8 +41,6 @@ export function ExclusiveEventGuard({
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
 
-  console.log(isOrganizer);
-
   const { validateEventPassword, isPending } = useValidateEventPassword();
   const [canAccess, setCanAccess] = useState<boolean>(
     !exclusive || isOrganizer || (exclusive && isParticipant),
@@ -63,8 +61,6 @@ export function ExclusiveEventGuard({
   }, [exclusive, isOrganizer, isParticipant]);
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
-    console.log(eventId, data);
-
     // Call the API to check if the password is correct
     try {
       const res = await validateEventPassword({
@@ -80,6 +76,7 @@ export function ExclusiveEventGuard({
     } catch (error: unknown) {
       console.error("Error accessing exclusive event:", error);
       toast({
+        duration: 3000,
         variant: "destructive",
         title:
           error instanceof Error && error.message === "Invalid password"
