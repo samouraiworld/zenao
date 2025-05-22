@@ -28,7 +28,7 @@ function EventLocationSection({
           </Link>
         ) : location.kind === "geo" ? (
           <Link
-            href={`https://www.google.com/maps/search/?api=1&query=&${location.lat},${location.lng}`}
+            href={`https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}#map=17/${location.lat}/${location.lng}`}
             target="_blank"
           >
             <div className="flex flex-row gap-2 group">
