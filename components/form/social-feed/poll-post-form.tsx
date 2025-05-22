@@ -47,6 +47,7 @@ export function PollPostForm({
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const { createPoll, isPending } = useCreatePoll(queryClient);
 
+  const parentPost = form.watch("parentPost");
   const question = form.watch("question");
   const textareaMaxLength = pollFormSchema.shape.question._def.checks.find(
     (check) => check.kind === "max",
@@ -98,7 +99,9 @@ export function PollPostForm({
       });
 
       form.reset(
-        {},
+        {
+          kind: "POLL",
+        },
         {
           keepValues: false,
         },
@@ -149,6 +152,7 @@ export function PollPostForm({
           <FeedInputButtons
             buttonSize={textareaMinHeight}
             feedInputMode={feedInputMode}
+            isReplying={!!parentPost}
             setFeedInputMode={setFeedInputMode}
             isLoading={isPending}
           />

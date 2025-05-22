@@ -39,6 +39,7 @@ import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { ButtonBase } from "@/components/buttons/ButtonBases";
 import { cn } from "@/lib/tailwind";
 import { uploadFile } from "@/lib/files";
+import { ReplyAlert } from "@/components/widgets/reply-alert";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -63,6 +64,7 @@ export function StandardPostForm({
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const content = form.watch("content");
+  const parentPost = form.watch("parentPost");
 
   const textareaMaxLength =
     standardPostFormSchema.shape.content._def.checks.find(
@@ -171,7 +173,7 @@ export function StandardPostForm({
         tags: [],
       });
 
-      form.reset({}, { keepValues: false });
+      form.reset({ kind: "STANDARD_POST" }, { keepValues: false });
       toast({
         title: t("toast-post-creation-success"),
       });
@@ -190,6 +192,7 @@ export function StandardPostForm({
         onSubmit={form.handleSubmit(onSubmitStandardPost)}
         className="flex flex-col gap-4 p-4 rounded"
       >
+        <ReplyAlert parentPost={parentPost} form={form} />
         <div className="flex flex-row gap-4">
           <Tabs defaultValue="form" className="w-full">
             <div className="w-full flex justify-between">
@@ -202,7 +205,7 @@ export function StandardPostForm({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="flex flex-row gap-2">
+              <div className="flex flex-row gap-2 items-center">
                 <ButtonBase
                   variant="link"
                   className={cn(
@@ -232,6 +235,7 @@ export function StandardPostForm({
                 <FeedInputButtons
                   buttonSize={textareaMinHeight}
                   feedInputMode={feedInputMode}
+                  isReplying={!!parentPost}
                   setFeedInputMode={setFeedInputMode}
                   isLoading={isPending}
                 />

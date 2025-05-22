@@ -30,6 +30,7 @@ const EventFeedForm = ({
 }) => {
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
+  const parentPost = form.watch("parentPost");
 
   useEffect(() => {
     if (feedInputMode === "POLL") {
@@ -38,6 +39,12 @@ const EventFeedForm = ({
       form.setValue("kind", "STANDARD_POST");
     }
   }, [feedInputMode, form]);
+
+  useEffect(() => {
+    if (parentPost) {
+      setFeedInputMode("STANDARD_POST");
+    }
+  }, [parentPost, setFeedInputMode]);
 
   return (
     <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
@@ -81,8 +88,15 @@ export function EventFeed({
   const form = useForm<FeedPostFormSchemaType>({
     mode: "all",
     defaultValues: {
-      kind: "STANDARD_POST",
       content: "",
+      question: "",
+      options: [{ text: "" }, { text: "" }],
+      allowMultipleOptions: false,
+      duration: {
+        days: 1,
+        hours: 0,
+        minutes: 0,
+      },
     },
   });
 

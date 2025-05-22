@@ -120,6 +120,7 @@ const parentPostSchema = z.object({
   author: z.string(),
   postId: z.bigint(),
 });
+export type ParentPostSchemaType = z.infer<typeof parentPostSchema>;
 
 export const pollFormSchema = z.object({
   parentPost: parentPostSchema.optional(),
