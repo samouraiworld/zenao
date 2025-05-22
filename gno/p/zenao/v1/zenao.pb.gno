@@ -32,6 +32,7 @@ type CreateEventRequest struct {
 	TicketPrice float64
 	Capacity    uint32
 	Location    *EventLocation
+	Password    string
 }
 
 type CreateEventResponse struct {
@@ -48,6 +49,7 @@ type EditEventRequest struct {
 	TicketPrice float64
 	Capacity    uint32
 	Location    *EventLocation
+	Password    string
 }
 
 type EditEventResponse struct {
@@ -55,9 +57,10 @@ type EditEventResponse struct {
 }
 
 type ParticipateRequest struct {
-	EventId string
-	Email   string
-	Guests  []string
+	EventId  string
+	Email    string
+	Guests   []string
+	Password string
 }
 
 type ParticipateResponse struct {
@@ -92,6 +95,17 @@ type AddressGeo struct {
 type AddressCustom struct {
 	Address  string
 	Timezone string
+}
+
+type EventPrivacy struct {
+	EventPrivacy interface{}
+}
+
+type EventPrivacyPublic struct {
+}
+
+type EventPrivacyGuarded struct {
+	ParticipationPubkey string
 }
 
 type EventInfo struct {

@@ -101,15 +101,21 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		return nil, fmt.Errorf("parse creator id: %w", err)
 	}
 
+	passwordHash, err := newPasswordHash(req.Password)
+	if err != nil {
+		return nil, errors.New("failed to hash password")
+	}
+
 	evt := &Event{
-		Title:       req.Title,
-		Description: req.Description,
-		ImageURI:    req.ImageUri,
-		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
-		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
-		CreatorID:   uint(creatorIDInt),
-		TicketPrice: req.TicketPrice,
-		Capacity:    req.Capacity,
+		Title:        req.Title,
+		Description:  req.Description,
+		ImageURI:     req.ImageUri,
+		StartDate:    time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:      time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
+		CreatorID:    uint(creatorIDInt),
+		TicketPrice:  req.TicketPrice,
+		Capacity:     req.Capacity,
+		PasswordHash: passwordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
 		return nil, fmt.Errorf("convert location: %w", err)
@@ -138,30 +144,45 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 }
 
 // EditEvent implements zeni.DB.
-func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) error {
+func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (string, error) {
 	// XXX: validate?
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
 	if err != nil {
-		return err
+		return "", err
+	}
+
+	passwordHash, err := newPasswordHash(req.Password)
+	if err != nil {
+		return "", errors.New("failed to hash password")
 	}
 
 	evt := Event{
-		Title:       req.Title,
-		Description: req.Description,
-		ImageURI:    req.ImageUri,
-		StartDate:   time.Unix(int64(req.StartDate), 0), // XXX: overflow?
-		EndDate:     time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
-		TicketPrice: req.TicketPrice,
-		Capacity:    req.Capacity,
+		Title:        req.Title,
+		Description:  req.Description,
+		ImageURI:     req.ImageUri,
+		StartDate:    time.Unix(int64(req.StartDate), 0), // XXX: overflow?
+		EndDate:      time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
+		TicketPrice:  req.TicketPrice,
+		Capacity:     req.Capacity,
+		PasswordHash: passwordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
-		return err
+		return "", err
 	}
 
 	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(evt).Error; err != nil {
-		return err
+		return "", err
 	}
-	return nil
+
+	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs
+	// we should rewrite this if db become bottleneck
+	if req.Password == "" {
+		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("password_hash", "").Error; err != nil {
+			return "", err
+		}
+	}
+
+	return passwordHash, nil
 }
 
 // GetEvent implements zeni.DB.
@@ -227,7 +248,7 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string) error {
+func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string) error {
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
 	if err != nil {
 		return err
@@ -245,6 +266,10 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 
 	evt, err := g.getDBEvent(eventID)
 	if err != nil {
+		return err
+	}
+
+	if err := validatePassword(password, evt.PasswordHash); err != nil {
 		return err
 	}
 
@@ -762,8 +787,8 @@ func (g *gormZenaoDB) Checkin(pubkey string, gatekeeperID string, signature stri
 	if err != nil {
 		return nil, err
 	}
-	if !slices.Contains(roles, "gatekeeper") {
-		return nil, errors.New("user is not gatekeeper for this event")
+	if !slices.Contains(roles, "gatekeeper") && !slices.Contains(roles, "organizer") {
+		return nil, errors.New("user is not gatekeeper or organizer for this event")
 	}
 
 	dbTicket.Checkin = &Checkin{

@@ -52,6 +52,7 @@ export function MarkdownPreview({
             />
           );
         },
+        a: (props) => <a {...props} target="_blank" />,
       }}
       urlTransform={(options) => {
         const isWeb3 = options.startsWith("ipfs://");

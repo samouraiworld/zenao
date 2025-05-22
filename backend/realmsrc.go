@@ -34,7 +34,7 @@ func execRealmsrc() error {
 			Address:  "Ground Control",
 			Timezone: "Europe/Paris",
 		}}},
-	})
+	}, &zenaov1.EventPrivacy{EventPrivacy: &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}})
 
 	fmt.Println(str)
 
