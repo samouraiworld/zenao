@@ -61,8 +61,8 @@ func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []s
 		if option == "" {
 			panic("option cannot be empty")
 		}
-		if len(option) > 32 {
-			panic("option cannot be longer than 32 characters")
+		if len(option) > 128 {
+			panic("option cannot be longer than 128 characters")
 		}
 		if poll.Results.Has(option) {
 			panic("duplicate option")

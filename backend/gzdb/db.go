@@ -266,7 +266,7 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string) error {
+func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error {
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
 	if err != nil {
 		return err
@@ -287,12 +287,14 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return err
 	}
 
-	validPass, err := validatePassword(password, evt.PasswordHash)
-	if err != nil {
-		return err
-	}
-	if !validPass {
-		return errors.New("invalid password")
+	if needPassword {
+		validPass, err := validatePassword(password, evt.PasswordHash)
+		if err != nil {
+			return err
+		}
+		if !validPass {
+			return errors.New("invalid password")
+		}
 	}
 
 	var participantsCount int64
