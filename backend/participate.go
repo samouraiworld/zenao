@@ -151,6 +151,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				})
 			}
 
+			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:        "Zenao <ticket@mail.zenao.io>>",
 				To:          append(req.Msg.Guests, authUser.Email),
