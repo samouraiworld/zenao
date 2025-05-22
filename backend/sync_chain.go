@@ -116,8 +116,6 @@ func execSyncChain() error {
 			}
 
 			for _, ticket := range tickets {
-				// we have a problem here, because an event password can change, signatures can become invalid during this phase
-				// while we have both the db and the chain, we need to store the event password in db and regenerate participation signatures here
 				if err := chain.Participate(event.ID, event.CreatorID, ticket.UserID, ticket.Ticket.Pubkey(), sk); err != nil {
 					logger.Error("failed to add participation", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err))
 				}
