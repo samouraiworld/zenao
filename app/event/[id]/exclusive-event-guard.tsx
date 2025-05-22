@@ -38,13 +38,10 @@ export function ExclusiveEventGuard({
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
-  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
-  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
+  const isMember = useMemo(() => roles.length > 0, [roles]);
 
   const { validateEventPassword, isPending } = useValidateEventPassword();
-  const [canAccess, setCanAccess] = useState<boolean>(
-    !exclusive || isOrganizer || (exclusive && isParticipant),
-  );
+  const [canAccess, setCanAccess] = useState<boolean>(!exclusive || isMember);
   const t = useTranslations("event-protection-guard");
   const form = useForm<EventProtectionFormSchemaType>({
     mode: "all",
@@ -57,8 +54,8 @@ export function ExclusiveEventGuard({
   const { toast } = useToast();
 
   useEffect(() => {
-    setCanAccess(!exclusive || isOrganizer || (exclusive && isParticipant));
-  }, [exclusive, isOrganizer, isParticipant]);
+    setCanAccess(!exclusive || isMember);
+  }, [exclusive, isMember]);
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
     // Call the API to check if the password is correct
