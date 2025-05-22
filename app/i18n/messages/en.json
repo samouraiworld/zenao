@@ -132,6 +132,7 @@
     "description": "This event is exclusive to certain participants. You need a password to access information.",
     "password-placeholder": "Enter the password...",
     "access-button": "Access event",
+    "toast-access-invalid-password": "Invalid password !",
     "toast-access-error": "Could not grant access to event information!"
   },
   "events-list": {

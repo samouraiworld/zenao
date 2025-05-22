@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Lock } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,6 +41,8 @@ export function ExclusiveEventGuard({
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
 
+  console.log(isOrganizer);
+
   const { validateEventPassword, isPending } = useValidateEventPassword();
   const [canAccess, setCanAccess] = useState<boolean>(
     !exclusive || isOrganizer || (exclusive && isParticipant),
@@ -55,6 +57,10 @@ export function ExclusiveEventGuard({
   });
   const password = form.watch("password");
   const { toast } = useToast();
+
+  useEffect(() => {
+    setCanAccess(!exclusive || isOrganizer || (exclusive && isParticipant));
+  }, [exclusive, isOrganizer, isParticipant]);
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
     console.log(eventId, data);
@@ -71,11 +77,14 @@ export function ExclusiveEventGuard({
       }
 
       setCanAccess(true);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error accessing exclusive event:", error);
       toast({
         variant: "destructive",
-        title: t("toast-access-error"),
+        title:
+          error instanceof Error && error.message === "Invalid password"
+            ? t("toast-access-invalid-password")
+            : t("toast-access-error"),
       });
     }
   };
