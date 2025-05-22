@@ -19,6 +19,7 @@ export default function Home() {
           width={200}
           height={200}
           priority
+          fetchPriority="high"
           className="mb-5 mt-5"
         />
         <Heading level={1} size="4xl" className="w-[200px] text-center">

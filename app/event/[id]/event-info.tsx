@@ -105,6 +105,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
               fill
               alt="Event"
               priority
+              fetchPriority="high"
               className="flex w-full rounded-xl self-center object-cover"
             />
           </AspectRatio>
