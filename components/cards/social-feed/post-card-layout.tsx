@@ -34,6 +34,7 @@ export function PostCardLayout({
   gnowebHref,
   children,
   onReply,
+  onDisplayReplies,
 }: {
   post: PostView;
   eventId: string;
@@ -41,6 +42,7 @@ export function PostCardLayout({
   children: ReactNode;
   gnowebHref?: Url;
   onReply?: () => void;
+  onDisplayReplies?: () => void;
 }) {
   if (!post.post) {
     return null;
@@ -95,38 +97,39 @@ export function PostCardLayout({
               </Text>
             </div>
           )}
-          {onReply && (
-            <div
-              className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50"
-              onClick={onReply}
-            >
-              <Reply size={14} color="hsl(var(--secondary-color))" />
-              <Text className="text-sm" variant="secondary">
-                Reply
-              </Text>
-            </div>
-          )}
-          {gnowebHref && (
-            <div className="max-sm:absolute max-sm:right-0 max-sm:top-0">
-              <PostMenu gnowebHref={gnowebHref} />
-            </div>
-          )}
+          <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
+            {onReply && (
+              <div
+                className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50"
+                onClick={onReply}
+              >
+                <Reply size={14} color="hsl(var(--secondary-color))" />
+                <Text className="text-sm" variant="secondary">
+                  Reply
+                </Text>
+              </div>
+            )}
+            {gnowebHref && <PostMenu gnowebHref={gnowebHref} />}
+          </div>
         </div>
       </div>
 
       <div className="my-1">{children}</div>
 
       <div className="flex sm:flex-row sm:items-center gap-2">
-        <Link href={`/event/${eventId}/feed/${post.post?.localPostId}`}>
+        {onReply && (
           <Button
             variant="outline"
-            className="reaction-btn rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
-            title="Reply"
+            className={
+              "reaction-btn rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+            }
+            title="Show replies"
+            onClick={onDisplayReplies}
           >
             <MessageCircle size={16} color="hsl(var(--secondary-color))" />
             <span className="text-xs">14</span>
           </Button>
-        </Link>
+        )}
         <Reactions
           postId={post.post.localPostId}
           eventId={eventId}

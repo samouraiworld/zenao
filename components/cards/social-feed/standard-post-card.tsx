@@ -2,6 +2,7 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { UseFormReturn } from "react-hook-form";
+import { useState } from "react";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
@@ -17,6 +18,7 @@ export function StandardPostCard({
   post: StandardPostView;
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
+  const [showReplies, setShowReplies] = useState(false);
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
   );
@@ -24,19 +26,32 @@ export function StandardPostCard({
   const standardPost = post.post.post.value;
 
   return (
-    <PostCardLayout
-      eventId={eventId}
-      post={post}
-      createdBy={createdBy}
-      onReply={() => {
-        form.setValue("parentPost", {
-          kind: "POLL",
-          postId: post.post.localPostId,
-          author: post.post.author,
-        });
-      }}
-    >
-      <MarkdownPreview markdownString={standardPost.content} />
-    </PostCardLayout>
+    <div className="flex flex-col gap-1">
+      <PostCardLayout
+        eventId={eventId}
+        post={post}
+        createdBy={createdBy}
+        onReply={() => {
+          form.setValue("parentPost", {
+            kind: "POLL",
+            postId: post.post.localPostId,
+            author: post.post.author,
+          });
+        }}
+        onDisplayReplies={() => {
+          setShowReplies((prev) => !prev);
+        }}
+      >
+        <MarkdownPreview markdownString={standardPost.content} />
+      </PostCardLayout>
+      {showReplies && (
+        <div className="pl-6">
+          <PostCardLayout eventId={eventId} post={post} createdBy={createdBy}>
+            {/* TODO Replace by real replies */}
+            <MarkdownPreview markdownString={standardPost.content} />
+          </PostCardLayout>
+        </div>
+      )}
+    </div>
   );
 }
