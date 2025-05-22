@@ -16,11 +16,11 @@ import {
   eventProtectionFormSchema,
   EventProtectionFormSchemaType,
 } from "@/components/form/types";
-import { useValidateEventPassword } from "@/lib/mutations/event-management";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { EventPasswordProvider } from "@/components/providers/event-password-provider";
+import { zenaoClient } from "@/app/zenao-client";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
@@ -40,7 +40,7 @@ export function ExclusiveEventGuard({
   const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
   const isMember = useMemo(() => roles.length > 0, [roles]);
 
-  const { validateEventPassword, isPending } = useValidateEventPassword();
+  const [isPending, setIsPending] = useState(false);
   const [canAccess, setCanAccess] = useState<boolean>(!exclusive || isMember);
   const t = useTranslations("event-protection-guard");
   const form = useForm<EventProtectionFormSchemaType>({
@@ -60,17 +60,19 @@ export function ExclusiveEventGuard({
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
     // Call the API to check if the password is correct
     try {
-      const res = await validateEventPassword({
+      setIsPending(true);
+      const res = await zenaoClient.validatePassword({
         eventId,
         password: data.password,
       });
-
+      setIsPending(false);
       if (!res.valid) {
         throw new Error("Invalid password");
       }
 
       setCanAccess(true);
     } catch (error: unknown) {
+      setIsPending(false);
       console.error("Error accessing exclusive event:", error);
       toast({
         duration: 3000,

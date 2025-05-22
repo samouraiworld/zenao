@@ -32,28 +32,6 @@ export const useEventBroadcastEmail = () => {
   };
 };
 
-type ValidateEventPasswordRequest = {
-  eventId: string;
-  password: string;
-};
-
-export const useValidateEventPassword = () => {
-  const { mutateAsync, isPending, isSuccess, isError } = useMutation({
-    mutationFn: async ({ eventId, password }: ValidateEventPasswordRequest) => {
-      const res = await zenaoClient.validatePassword({ eventId, password });
-
-      return res;
-    },
-  });
-
-  return {
-    validateEventPassword: mutateAsync,
-    isPending,
-    isSuccess,
-    isError,
-  };
-};
-
 type EventCheckInRequest = {
   signature: string;
   ticketPubkey: string;
