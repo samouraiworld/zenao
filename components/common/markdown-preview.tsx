@@ -47,8 +47,8 @@ export function MarkdownPreview({
               {...props}
               src={props.src ?? ""}
               alt={props.alt ?? ""}
-              width={650}
-              height={650}
+              width={960}
+              height={960}
             />
           );
         },
