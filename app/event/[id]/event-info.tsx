@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
@@ -66,8 +66,6 @@ export function EventInfo({ eventId }: { eventId: string }) {
 
   const t = useTranslations("event");
 
-  const [isDescExpanded, setDescExpanded] = useState(false);
-
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -82,10 +80,25 @@ export function EventInfo({ eventId }: { eventId: string }) {
   };
 
   const descLineClamp = 8;
-  const descLineClampClassName = "line-clamp-[8]"; // Dynamic "8" value doesn't work here and inline style with WebkitLineClamp neither
+  const [isDescExpanded, setDescExpanded] = useState(false);
+  const [descMinHeight, setDescMinHeight] = useState(0);
+  const [descMaxHeight, setDescMaxHeight] = useState(0);
   const descContainerRef = useRef<HTMLDivElement>(null);
-  const isDescTruncated = useIsLinesTruncated(descContainerRef, descLineClamp);
+  const descMaskRef = useRef<HTMLDivElement>(null);
+  const { isDescTruncated, truncatedMaxHeight } = useIsLinesTruncated(
+    descContainerRef,
+    descLineClamp,
+  );
   const iconSize = 22;
+
+  useEffect(() => {
+    const desc = descMaskRef.current;
+
+    if (desc) {
+      setDescMinHeight(truncatedMaxHeight);
+      setDescMaxHeight(desc.clientHeight);
+    }
+  }, [descMaskRef, truncatedMaxHeight]);
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
@@ -125,12 +138,6 @@ export function EventInfo({ eventId }: { eventId: string }) {
           <EventSection title={t("hosted-by")}>
             <UserAvatarWithName linkToProfile address={data.creator} />
           </EventSection>
-
-          <EventManagementMenu
-            eventId={eventId}
-            roles={roles}
-            nbParticipants={data.participants}
-          />
         </div>
 
         {/* Right Section */}
@@ -208,32 +215,52 @@ export function EventInfo({ eventId }: { eventId: string }) {
             )}
           </Card>
 
-          {/* Markdown Description */}
-          <EventSection title={t("about-event")}>
-            <div ref={descContainerRef}>
-              <MarkdownPreview
-                className={cn(
-                  "overflow-hidden text-ellipsis",
-                  !isDescExpanded && descLineClampClassName,
-                )}
-                markdownString={data.description}
-              />
-            </div>
-
-            {/* See More button */}
-            {isDescTruncated && (
-              <div
-                className="w-full flex justify-center cursor-pointer "
-                onClick={() =>
-                  setDescExpanded((isDescExpanded) => !isDescExpanded)
-                }
-              >
-                {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
-              </div>
-            )}
-          </EventSection>
+          <EventManagementMenu
+            eventId={eventId}
+            roles={roles}
+            nbParticipants={data.participants}
+          />
         </div>
       </div>
+
+      {/* Markdown Description */}
+      <EventSection title={t("about-event")}>
+        <div ref={descContainerRef} className="relative">
+          {/* Need to get expanded height */}
+          <div
+            ref={descMaskRef}
+            className={cn("pointer-events-none invisible absolute")}
+            style={{
+              maskImage: "linear-gradient(to top, black, transparent)",
+            }}
+          >
+            <MarkdownPreview markdownString={data.description} />
+          </div>
+          <div
+            className={cn(
+              "overflow-hidden text-ellipsis transition-all ease-in",
+              isDescTruncated && !isDescExpanded && "fading-opacity",
+            )}
+            style={{
+              height: `${isDescExpanded ? descMaxHeight : descMinHeight}px`,
+            }}
+          >
+            <MarkdownPreview markdownString={data.description} />
+          </div>
+        </div>
+
+        {/* See More button */}
+        {isDescTruncated && (
+          <div
+            className="w-full flex justify-center cursor-pointer"
+            onClick={() => {
+              setDescExpanded((isDescExpanded) => !isDescExpanded);
+            }}
+          >
+            {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
+          </div>
+        )}
+      </EventSection>
 
       {/* Social Feed */}
       <EventFeed eventId={eventId} isMember={isParticipant || isOrganizer} />
