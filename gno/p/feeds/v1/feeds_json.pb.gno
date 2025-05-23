@@ -430,6 +430,9 @@ func (p *PostView) ToJSON() *json.Node {
 	if p.Post != nil {
 		fields["post"] = p.Post.ToJSON()
 	}
+	if p.ChildrenCount != 0 {
+		fields["childrenCount"] = json.StringNode("", strconv.FormatUint(p.ChildrenCount, 10))
+	}
 	if len(p.Reactions) != 0 {
 		arr := make([]*json.Node, len(p.Reactions))
 		for i, val := range p.Reactions {
@@ -449,6 +452,13 @@ func (p *PostView) FromJSON(node *json.Node) {
 		fv := &Post{}
 		fv.FromJSON(val)
 		p.Post = fv
+	}
+	if val, ok := fields["childrenCount"]; ok {
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		p.ChildrenCount = fv
 	}
 	if val, ok := fields["reactions"]; ok {
 		jarr := val.MustArray()

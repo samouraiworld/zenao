@@ -80,10 +80,14 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 				return false
 			}
 		}
+		if post.ParentUri == "" {
+			return false
+		}
 		if i >= int(offset) {
 			postView := &feedsv1.PostView{
-				Post:      post,
-				Reactions: GetPostReactions(post.LocalPostId, user),
+				Post:          post,
+				ChildrenCount: CountChildren(post.LocalPostId),
+				Reactions:     GetPostReactions(post.LocalPostId, user),
 			}
 			res = append(res, postView)
 		}
@@ -118,8 +122,9 @@ func GetChildrenPosts(parentId string, offset uint32, limit uint32, tags string,
 		}
 		if i >= int(offset) {
 			postView := &feedsv1.PostView{
-				Post:      post,
-				Reactions: GetPostReactions(post.LocalPostId, user),
+				Post:          post,
+				ChildrenCount: CountChildren(post.LocalPostId),
+				Reactions:     GetPostReactions(post.LocalPostId, user),
 			}
 			res = append(res, postView)
 		}
@@ -130,6 +135,16 @@ func GetChildrenPosts(parentId string, offset uint32, limit uint32, tags string,
 		return false
 	})
 	return res
+}
+
+func CountChildren(parentId uint64) uint64 {
+	count := uint64(0)
+	parentIdStr := seqid.ID(parentId).String()
+	postsByParent.ReverseIterate(parentIdStr+":", parentIdStr+";", func(key string, value interface{}) bool {
+		count++
+		return false
+	})
+	return count
 }
 
 func hasTag(tags []string, tag string) bool {

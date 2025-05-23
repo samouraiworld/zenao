@@ -78,7 +78,8 @@ message Post {
 
 message PostView {
   Post post = 1;
-  repeated ReactionView reactions = 2;
+  uint64 children_count = 2;
+  repeated ReactionView reactions = 3;
 }
 
 message ReactionView {

@@ -1,37 +1,38 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import { EventFeed } from "@/app/event/[id]/event-feed";
+import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { zenaoClient } from "@/app/zenao-client";
+import { GoTopButton } from "@/components/buttons/go-top-button";
+import { Card } from "@/components/cards/Card";
+import { MarkdownPreview } from "@/components/common/markdown-preview";
+import { UserAvatarWithName } from "@/components/common/user";
+import { EventRegistrationForm } from "@/components/form/event-registration";
+import { Web3Image } from "@/components/images/web3-image";
+import { useEventPassword } from "@/components/providers/event-password-provider";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Separator } from "@/components/shadcn/separator";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
+import EventLocationSection from "@/components/widgets/event-location-section";
+import { makeLocationFromEvent } from "@/lib/location";
+import { eventOptions } from "@/lib/queries/event";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { userAddressOptions } from "@/lib/queries/user";
+import { cn } from "@/lib/tailwind";
+import { web2URL } from "@/lib/uris";
+import { SignedIn, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
+import { format as formatTZ } from "date-fns-tz";
 import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { SignedIn, useAuth } from "@clerk/nextjs";
+import React, { useMemo, useRef, useState } from "react";
 import { Event, WithContext } from "schema-dts";
-import { ParticipantsSection } from "./participants-section";
 import { EventManagementMenu } from "./event-management-menu";
-import { eventOptions } from "@/lib/queries/event";
-import { Card } from "@/components/cards/Card";
-import { MarkdownPreview } from "@/components/common/markdown-preview";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
-import { EventFeed } from "@/app/event/[id]/event-feed";
-import { cn } from "@/lib/tailwind";
-import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
-import { web2URL } from "@/lib/uris";
-import { UserAvatarWithName } from "@/components/common/user";
-import Text from "@/components/texts/text";
-import Heading from "@/components/texts/heading";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Web3Image } from "@/components/images/web3-image";
-import { GoTopButton } from "@/components/buttons/go-top-button";
-import { Separator } from "@/components/shadcn/separator";
-import { EventRegistrationForm } from "@/components/form/event-registration";
-import { makeLocationFromEvent } from "@/lib/location";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { useEventPassword } from "@/components/providers/event-password-provider";
-import EventLocationSection from "@/components/widgets/event-location-section";
+import { ParticipantsSection } from "./participants-section";
 
 interface EventSectionProps {
   title: string;
@@ -87,12 +88,26 @@ export function EventInfo({ eventId }: { eventId: string }) {
   const isDescTruncated = useIsLinesTruncated(descContainerRef, descLineClamp);
   const iconSize = 22;
 
+  const onSubmitSignedOut = async () => {
+    const token = await getToken();
+    zenaoClient.createPost({
+      eventId: eventId,
+      content: "Salut this is the first comment",
+      parentId: "1",
+      tags: []
+    },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+  };
+
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <button style={{ color: "blue" }} onClick={onSubmitSignedOut}>Reply to first post
+      </button>
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
         {/* Left Section */}
         <div className="flex flex-col gap-4 w-full sm:w-2/5">
@@ -238,6 +253,6 @@ export function EventInfo({ eventId }: { eventId: string }) {
       {/* Social Feed */}
       <EventFeed eventId={eventId} isMember={isParticipant || isOrganizer} />
       <GoTopButton />
-    </div>
+    </div >
   );
 }
