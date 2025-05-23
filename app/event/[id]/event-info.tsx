@@ -91,20 +91,14 @@ export function EventInfo({ eventId }: { eventId: string }) {
   );
   const iconSize = 22;
 
-  console.log(isDescTruncated);
   useEffect(() => {
     const desc = descMaskRef.current;
 
     if (desc) {
       setDescMinHeight(truncatedMaxHeight);
-      setDescMaxHeight(desc.scrollHeight + truncatedMaxHeight);
-      console.log("Desc size", desc.scrollHeight);
+      setDescMaxHeight(desc.scrollHeight);
     }
   }, [descMaskRef, truncatedMaxHeight]);
-
-  useEffect(() => {
-    navigator.clipboard.writeText(data.description);
-  }, [data]);
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
@@ -235,7 +229,9 @@ export function EventInfo({ eventId }: { eventId: string }) {
           {/* Need to get expanded height */}
           <div
             ref={descMaskRef}
-            className={cn("pointer-events-none invisible absolute")}
+            className={cn(
+              "pointer-events-none invisible absolute text-ellipsis",
+            )}
             style={{
               maskImage: "linear-gradient(to top, black, transparent)",
             }}
