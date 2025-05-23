@@ -179,8 +179,15 @@ export function EventInfo({ eventId }: { eventId: string }) {
       </div>
 
       <div className="grid grid-cols-5 gap-10">
-        {/* Participants preview and dialog section */}
+        {/* Host section */}
         <div className="col-span-5 sm:col-span-2">
+          <EventSection title={t("hosted-by")}>
+            <UserAvatarWithName linkToProfile address={data.creator} />
+          </EventSection>
+        </div>
+
+        {/* Participants preview and dialog section */}
+        <div className="col-span-5 sm:col-span-3">
           <EventSection
             title={
               data.participants === 0
@@ -189,13 +196,6 @@ export function EventInfo({ eventId }: { eventId: string }) {
             }
           >
             <ParticipantsSection id={eventId} />
-          </EventSection>
-        </div>
-
-        {/* Host section */}
-        <div className="col-span-5 sm:col-span-3">
-          <EventSection title={t("hosted-by")}>
-            <UserAvatarWithName linkToProfile address={data.creator} />
           </EventSection>
         </div>
       </div>
