@@ -79,7 +79,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
     image: web2URL(data.imageUri),
   };
 
-  const descLineClamp = 8;
+  const descLineClamp = 13;
   const [isDescExpanded, setDescExpanded] = useState(false);
   const [descMinHeight, setDescMinHeight] = useState(0);
   const [descMaxHeight, setDescMaxHeight] = useState(0);
@@ -96,7 +96,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
 
     if (desc) {
       setDescMinHeight(truncatedMaxHeight);
-      setDescMaxHeight(desc.scrollHeight);
+      setDescMaxHeight(desc.clientHeight);
     }
   }, [descMaskRef, truncatedMaxHeight]);
 
@@ -133,11 +133,6 @@ export function EventInfo({ eventId }: { eventId: string }) {
           >
             <ParticipantsSection id={eventId} />
           </EventSection>
-
-          {/* Host section */}
-          <EventSection title={t("hosted-by")}>
-            <UserAvatarWithName linkToProfile address={data.creator} />
-          </EventSection>
         </div>
 
         {/* Right Section */}
@@ -169,6 +164,11 @@ export function EventInfo({ eventId }: { eventId: string }) {
 
           {/* Location */}
           <EventLocationSection location={location} />
+
+          {/* Host section */}
+          <EventSection title={t("hosted-by")}>
+            <UserAvatarWithName linkToProfile address={data.creator} />
+          </EventSection>
 
           {/* Participate Card */}
           <Card className="mt-2">
@@ -232,16 +232,13 @@ export function EventInfo({ eventId }: { eventId: string }) {
             className={cn(
               "pointer-events-none invisible absolute text-ellipsis",
             )}
-            style={{
-              maskImage: "linear-gradient(to top, black, transparent)",
-            }}
           >
             <MarkdownPreview markdownString={data.description} />
           </div>
           <div
             className={cn(
               "overflow-hidden text-ellipsis transition-all ease-in",
-              isDescTruncated && !isDescExpanded && "fading-opacity",
+              // isDescTruncated && !isDescExpanded && "fading-opacity",
             )}
             style={{
               height: `${isDescExpanded ? descMaxHeight : descMinHeight}px`,
@@ -254,11 +251,14 @@ export function EventInfo({ eventId }: { eventId: string }) {
         {/* See More button */}
         {isDescTruncated && (
           <div
-            className="w-full flex justify-center cursor-pointer"
+            className="w-full flex justify-center items-center cursor-pointer gap-1 "
             onClick={() => {
               setDescExpanded((isDescExpanded) => !isDescExpanded);
             }}
           >
+            <Text size="sm" className="font-medium">
+              {t("view-more")}
+            </Text>
             {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
           </div>
         )}

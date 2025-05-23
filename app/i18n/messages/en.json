@@ -80,7 +80,8 @@
       "add-a-friend": "Add a friend",
       "email-placeholder": "Email..."
     },
-    "gatekeeper-button": "Open ticket scanner"
+    "gatekeeper-button": "Open ticket scanner",
+    "view-more": "View more"
   },
   "manifesto": {
     "title": "MANIFESTO",
