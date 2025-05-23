@@ -89,7 +89,3 @@ body {
 .card-3d {
   transform: perspective(1000px);
 }
-
-.fading-opacity {
-  mask-image: linear-gradient(hsl(var(--background)) 0%, hsl(var(--background)) 70%, transparent);
-}

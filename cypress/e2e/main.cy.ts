@@ -183,13 +183,11 @@ describe("main", () => {
 
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
-    cy.get(".fading-opacity").within(() => {
-      cy.get("p")
-        .contains(
-          "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
-        )
-        .should("be.visible"); // desc
-    });
+    cy.get("p")
+      .contains(
+        "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
+      )
+      .should("be.visible"); // desc
     cy.get("h2").contains(" 13th, ").should("be.visible"); // start date
     cy.get("p").contains(" 14, ").should("be.visible"); // end date
 

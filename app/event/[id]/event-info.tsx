@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
@@ -82,24 +82,35 @@ export function EventInfo({ eventId }: { eventId: string }) {
 
   const descLineClamp = 13;
   const [isDescExpanded, setDescExpanded] = useState(false);
-  const [descMinHeight, setDescMinHeight] = useState(0);
-  const [descMaxHeight, setDescMaxHeight] = useState(0);
   const descContainerRef = useRef<HTMLDivElement>(null);
-  const descMaskRef = useRef<HTMLDivElement>(null);
   const { isDescTruncated, truncatedMaxHeight } = useIsLinesTruncated(
     descContainerRef,
     descLineClamp,
   );
   const iconSize = 22;
 
-  useEffect(() => {
-    const desc = descMaskRef.current;
+  const scrollToTop = (top = 0, duration = 6000) => {
+    const startY = window.scrollY;
+    const startTime = performance.now();
+    const distance = top - startY;
 
-    if (desc) {
-      setDescMinHeight(truncatedMaxHeight);
-      setDescMaxHeight(desc.clientHeight);
-    }
-  }, [descMaskRef, truncatedMaxHeight]);
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeInOutQuad =
+        progress < 0.5
+          ? 2 * progress * progress
+          : -1 + (4 - 2 * progress) * progress;
+
+      window.scrollTo(0, startY + distance * easeInOutQuad);
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+
+    requestAnimationFrame(animateScroll);
+  };
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
@@ -236,24 +247,16 @@ export function EventInfo({ eventId }: { eventId: string }) {
 
       {/* Markdown Description */}
       <EventSection title={t("about-event")}>
-        <div ref={descContainerRef} className="relative overflow-hidden">
-          {/* Need to get expanded height */}
-          <div
-            ref={descMaskRef}
-            className={cn(
-              "pointer-events-none invisible absolute text-ellipsis",
-            )}
-          >
-            <MarkdownPreview markdownString={data.description} />
-          </div>
+        <div ref={descContainerRef} className="relative">
           <div
             className={cn(
-              "overflow-hidden text-ellipsis transition-all ease-in",
+              "overflow-hidden text-ellipsis transition-all ease-in-out duration-500",
             )}
             style={{
-              height: isDescTruncated
-                ? `${isDescExpanded ? descMaxHeight : descMinHeight}px`
-                : "fit-content",
+              height:
+                isDescTruncated && !isDescExpanded
+                  ? `${truncatedMaxHeight}px`
+                  : `calc-size(auto, size)`,
             }}
           >
             <MarkdownPreview markdownString={data.description} />
@@ -266,10 +269,13 @@ export function EventInfo({ eventId }: { eventId: string }) {
             className="w-full flex justify-center items-center cursor-pointer gap-1 "
             onClick={() => {
               setDescExpanded((isDescExpanded) => !isDescExpanded);
+              if (descContainerRef.current) {
+                scrollToTop(descContainerRef.current.offsetTop, 500);
+              }
             }}
           >
             <Text size="sm" className="font-medium">
-              {t("view-more")}
+              {t(isDescExpanded ? "view-less" : "view-more")}
             </Text>
             {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
           </div>

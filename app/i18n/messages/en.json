@@ -81,7 +81,8 @@
       "email-placeholder": "Email..."
     },
     "gatekeeper-button": "Open ticket scanner",
-    "view-more": "View more"
+    "view-more": "View more",
+    "view-less": "View less"
   },
   "manifesto": {
     "title": "MANIFESTO",
