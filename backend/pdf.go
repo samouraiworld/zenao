@@ -97,15 +97,9 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, logger *zap.Logge
 	pdf.SetFillColor(255, 255, 255)
 	pdf.Rect(0, whiteY, pageWidth, whiteHeight, "F")
 
-	// if ipfs, convert to https://ipfs.io/ipfs/ to be able to download the image with http
 	if event.ImageURI != "" {
-		imageURL := event.ImageURI
-		if len(imageURL) > 7 && imageURL[:7] == "ipfs://" {
-			cid := imageURL[7:]
-			imageURL = fmt.Sprintf("https://ipfs.io/ipfs/%s", cid)
-		}
-
-		if err := embedImageURI(pdf, imageURL, 0, imgY, imgWidth, whiteHeight); err != nil {
+		imageURL := web2URL(event.ImageURI)
+		if err := embedImageURL(pdf, imageURL, 0, imgY, imgWidth, whiteHeight); err != nil {
 			logger.Error("failed to embed image", zap.Error(err))
 			drawImagePlaceholder(pdf, 0, imgY, imgWidth)
 		}
@@ -200,7 +194,7 @@ func drawImagePlaceholder(pdf *fpdf.Fpdf, x, y, size float64) {
 	pdf.Cell(size, 10, "Event Image")
 }
 
-func embedImageURI(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64) error {
+func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64) error {
 	resp, err := http.Get(imageURI)
 	if err != nil {
 		return fmt.Errorf("failed to download image: %w", err)
