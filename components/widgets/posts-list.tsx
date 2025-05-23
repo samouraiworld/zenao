@@ -1,16 +1,16 @@
 "use client";
 
-import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
-import { parsePollUri } from "@/lib/multiaddr";
-import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
-import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
 import { Suspense, useMemo } from "react";
-import { LoaderMoreButton } from "../buttons/load-more-button";
-import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
+import { useTranslations } from "next-intl";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import Text from "../texts/text";
+import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { PollPost } from "../widgets/poll-post";
+import { LoaderMoreButton } from "../buttons/load-more-button";
+import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
+import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
+import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
+import { parsePollUri } from "@/lib/multiaddr";
 
 function EmptyPostsList() {
   const t = useTranslations("event-feed");
@@ -43,9 +43,6 @@ export function PostsList({
   } = useSuspenseInfiniteQuery(
     feedPosts(eventId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
   );
-
-  console.log(postsPages)
-
   const posts = useMemo(
     () =>
       postsPages.pages.flat().map<SocialFeedPost>((post) => {
