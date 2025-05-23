@@ -96,7 +96,9 @@ export function EventInfo({ eventId }: { eventId: string }) {
 
     if (desc) {
       setDescMinHeight(truncatedMaxHeight);
-      setDescMaxHeight(desc.clientHeight);
+      setDescMaxHeight(desc.scrollHeight);
+      // set to display to avoid bottom whitespace
+      // desc.classList.add("hidden");
     }
   }, [descMaskRef, truncatedMaxHeight]);
 
