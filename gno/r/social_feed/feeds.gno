@@ -6,7 +6,7 @@ import (
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/seqid"
-
+	"gno.land/p/demo/ufmt"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
@@ -80,7 +80,7 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 				return false
 			}
 		}
-		if post.ParentUri == "" {
+		if post.ParentUri != "" {
 			return false
 		}
 		if i >= int(offset) {
@@ -139,7 +139,7 @@ func GetChildrenPosts(parentId string, offset uint32, limit uint32, tags string,
 
 func CountChildren(parentId uint64) uint64 {
 	count := uint64(0)
-	parentIdStr := seqid.ID(parentId).String()
+	parentIdStr := ufmt.Sprintf("%d", parentId)
 	postsByParent.ReverseIterate(parentIdStr+":", parentIdStr+";", func(key string, value interface{}) bool {
 		count++
 		return false
