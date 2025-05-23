@@ -142,6 +142,9 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 	if e.Password != "" {
 		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, e.Password)
 	}
+	if e.UpdatePassword != false {
+		fmt.Fprintf(buf, "%s\tUpdatePassword: %t,\n", linePrefix, e.UpdatePassword)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -153,6 +156,33 @@ func (e *EditEventResponse) GnoLiteral(typePrefix string, linePrefix string) str
 	buf.WriteString("EditEventResponse{\n")
 	if e.Id != "" {
 		fmt.Fprintf(buf, "%s\tId: %q,\n", linePrefix, e.Id)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (v *ValidatePasswordRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ValidatePasswordRequest{\n")
+	if v.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, v.EventId)
+	}
+	if v.Password != "" {
+		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, v.Password)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (v *ValidatePasswordResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ValidatePasswordResponse{\n")
+	if v.Valid != false {
+		fmt.Fprintf(buf, "%s\tValid: %t,\n", linePrefix, v.Valid)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -366,6 +396,9 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	}
 	if e.PkgPath != "" {
 		fmt.Fprintf(buf, "%s\tPkgPath: %q,\n", linePrefix, e.PkgPath)
+	}
+	if e.Privacy != nil {
+		fmt.Fprintf(buf, "%s\tPrivacy: &%s%s,\n", linePrefix, typePrefix, e.Privacy.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")

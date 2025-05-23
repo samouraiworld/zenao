@@ -17,7 +17,6 @@ type argon2Params struct {
 	MemoryCost uint32
 	Threads    uint8
 	KeyLength  uint32
-	SaltLength uint32
 }
 
 func newPasswordHash(password string) (string, error) {
@@ -31,10 +30,9 @@ func newPasswordHash(password string) (string, error) {
 		MemoryCost: 19456,
 		Threads:    1,
 		KeyLength:  32,
-		SaltLength: 32,
 	}
 
-	saltBz := make([]byte, hashParams.SaltLength)
+	saltBz := make([]byte, 32)
 	_, err := srand.Read(saltBz)
 	if err != nil {
 		return "", errors.New("failed to generate salt")
@@ -45,21 +43,21 @@ func newPasswordHash(password string) (string, error) {
 	return encodeHash(hashBz, saltBz, hashParams), nil
 }
 
-func validatePassword(password string, hash string) error {
-	if hash == "" {
-		return nil
+func validatePassword(password string, hash string) (bool, error) {
+	if hash == "" && password == "" {
+		return true, nil
+	}
+	if hash == "" && password != "" {
+		return false, errors.New("event is not guarded")
 	}
 
 	hashBz, saltBz, params, err := decodeHash(hash)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	if !bytes.Equal(hashPass(password, saltBz, params), hashBz) {
-		return errors.New("invalid password")
-	}
-
-	return nil
+	valid := bytes.Equal(hashPass(password, saltBz, params), hashBz)
+	return valid, nil
 }
 
 func hashPass(password string, salt []byte, params *argon2Params) []byte {
@@ -135,15 +133,16 @@ func decodeHash(hash string) ([]byte, []byte, *argon2Params, error) {
 		return nil, nil, nil, errors.New("missing param")
 	}
 
-	hashBz, err := base64.RawStdEncoding.DecodeString(parts[4])
+	saltBz, err := base64.RawStdEncoding.DecodeString(parts[4])
+	if err != nil {
+		return nil, nil, nil, errors.New("invalid salt")
+	}
+
+	hashBz, err := base64.RawStdEncoding.DecodeString(parts[5])
 	if err != nil {
 		return nil, nil, nil, errors.New("invalid hash")
 	}
-
-	saltBz, err := base64.RawStdEncoding.DecodeString(parts[5])
-	if err != nil {
-		return nil, nil, nil, errors.New("invalid salth")
-	}
+	params.KeyLength = uint32(len(hashBz))
 
 	return hashBz, saltBz, &params, nil
 }

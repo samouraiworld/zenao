@@ -26,6 +26,7 @@ import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/form-field-textarea";
 import { FormFieldLocation } from "./components/form-field-location";
 import { FormFieldDatePicker } from "./components/form-field-date-picker";
+import { FormFieldSwitch } from "./components/form-field-switch";
 import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 import { cn } from "@/lib/tailwind";
@@ -37,6 +38,7 @@ interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
   onSubmit: (values: EventFormSchemaType) => Promise<void>;
   isLoaded: boolean;
+  defaultExclusive?: boolean;
   isEditing?: boolean;
   minDateRange?: Date;
   maxDateRange?: Date;
@@ -46,6 +48,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   form,
   onSubmit,
   isLoaded,
+  defaultExclusive,
   minDateRange,
   maxDateRange,
   isEditing = false,
@@ -56,6 +59,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   const startDate = form.watch("startDate");
   const endDate = form.watch("endDate");
   const imageUri = form.watch("imageUri");
+  const exclusive = form.watch("exclusive");
   const t = useTranslations("eventForm");
 
   const [isVirtual, setIsVirtual] = useState<boolean>(
@@ -143,6 +147,14 @@ export const EventForm: React.FC<EventFormProps> = ({
       setMarker({ lat: location.lat, lng: location.lng });
     }
   }, [location]);
+
+  useEffect(() => {
+    if (!exclusive) {
+      form.setValue("password", "");
+    } else {
+      form.setValue("password", undefined);
+    }
+  }, [exclusive, form]);
 
   return (
     <Form {...form}>
@@ -391,6 +403,27 @@ export const EventForm: React.FC<EventFormProps> = ({
             <FormDescription>
               Displayed time corresponds to {timeZone}
             </FormDescription>
+
+            {/* Private option */}
+            <FormFieldSwitch
+              control={form.control}
+              name="exclusive"
+              label={"Protect access with password"}
+            />
+
+            {exclusive && (
+              <FormFieldInputString
+                control={form.control}
+                name="password"
+                inputType="password"
+                placeholder={
+                  isEditing && defaultExclusive
+                    ? t("no-changes-password-placeholder")
+                    : t("password-placeholder")
+                }
+                label={t("password-label")}
+              />
+            )}
 
             <ButtonWithLabel
               loading={isLoaded}

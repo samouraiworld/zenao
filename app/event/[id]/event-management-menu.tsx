@@ -21,6 +21,7 @@ export function EventManagementMenu({
 }: EventManagementMenuProps) {
   const t = useTranslations("event");
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
+  const isGatekeeper = useMemo(() => roles.includes("gatekeeper"), [roles]);
 
   const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
     useState(false);
@@ -39,21 +40,28 @@ export function EventManagementMenu({
           <Text>{t("manage-event")}</Text>
 
           <div className="flex flex-col">
-            <Link href={`/edit/${eventId}`} className="text-main underline">
-              {t("edit-button")}
-            </Link>
-            <p
-              className="text-main underline cursor-pointer"
-              onClick={() => setBroadcastEmailDialogOpen(true)}
-            >
-              {t("send-global-message")}
-            </p>
-            <Link
-              href={`/event/${eventId}/scanner`}
-              className="text-main underline"
-            >
-              {t("gatekeeper-button")}
-            </Link>
+            {isOrganizer && (
+              <>
+                <Link href={`/edit/${eventId}`} className="text-main underline">
+                  {t("edit-button")}
+                </Link>
+                <p
+                  className="text-main underline cursor-pointer"
+                  onClick={() => setBroadcastEmailDialogOpen(true)}
+                >
+                  {t("send-global-message")}
+                </p>
+              </>
+            )}
+
+            {(isOrganizer || isGatekeeper) && (
+              <Link
+                href={`/event/${eventId}/scanner`}
+                className="text-main underline"
+              >
+                {t("gatekeeper-button")}
+              </Link>
+            )}
           </div>
         </Card>
       </>

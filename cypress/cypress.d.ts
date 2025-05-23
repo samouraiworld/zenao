@@ -1,5 +1,5 @@
 declare namespace Cypress {
   interface Chainable {
-    createEvent(): Chainable<void>; // or whatever type it returns
+    createEvent(params: { exclusive: boolean }): Chainable<void>; // or whatever type it returns
   }
 }

@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
-import { Calendar, ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { SignedIn, useAuth } from "@clerk/nextjs";
@@ -15,7 +15,6 @@ import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import MapCaller from "@/components/common/map/map-lazy-components";
 import { userAddressOptions } from "@/lib/queries/user";
 import { EventFeed } from "@/app/event/[id]/event-feed";
 import { cn } from "@/lib/tailwind";
@@ -31,6 +30,8 @@ import { Separator } from "@/components/shadcn/separator";
 import { EventRegistrationForm } from "@/components/form/event-registration";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { useEventPassword } from "@/components/providers/event-password-provider";
+import EventLocationSection from "@/components/widgets/event-location-section";
 
 interface EventSectionProps {
   title: string;
@@ -50,6 +51,7 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 export function EventInfo({ eventId }: { eventId: string }) {
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(eventId));
+  const { password } = useEventPassword();
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
@@ -103,6 +105,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
               fill
               alt="Event"
               priority
+              fetchPriority="high"
               className="flex w-full rounded-xl self-center object-cover"
             />
           </AspectRatio>
@@ -157,31 +160,8 @@ export function EventInfo({ eventId }: { eventId: string }) {
             </div>
           </div>
 
-          <div className="flex flex-col">
-            <div className="flex flex-row gap-4 items-center mb-2">
-              <div className="w-[22px] h-[22px]">
-                <MapPin width={iconSize} height={iconSize} />
-              </div>
-              {location.kind === "virtual" ? (
-                <Link href={location.location} target="_blank">
-                  <Heading
-                    level={2}
-                    size="xl"
-                    className="hover:underline hover:underline-offset-1"
-                  >
-                    {location.location}
-                  </Heading>
-                </Link>
-              ) : (
-                <Heading level={2} size="xl">
-                  {location.address}
-                </Heading>
-              )}
-            </div>
-            {location.kind === "geo" && (
-              <MapCaller lat={location.lat} lng={location.lng} />
-            )}
-          </div>
+          {/* Location */}
+          <EventLocationSection location={location} />
 
           {/* Participate Card */}
           <Card className="mt-2">
@@ -217,6 +197,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
                 <EventRegistrationForm
                   eventId={eventId}
                   userAddress={address}
+                  eventPassword={password}
                 />
               </div>
             )}
