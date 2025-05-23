@@ -23,7 +23,10 @@ var (
 
 	posts       *avl.Tree // local_post_id -> *Post // for search with specific id (get/delete)
 	postsByFeed *avl.Tree // feed_id:local_post_id -> *Post // for search with feed id (iterate)
-	feeds       *avl.Tree // slug -> Feed
+
+	// XXX: add feed index into the composite key to ensure reply are in the same feed ?
+	postsByParent *avl.Tree // parent_id:local_post_id -> *Post // for search with parent_id
+	feeds         *avl.Tree // slug -> Feed
 )
 
 func init() {
@@ -32,6 +35,7 @@ func init() {
 
 	posts = avl.NewTree()
 	postsByFeed = avl.NewTree()
+	postsByParent = avl.NewTree()
 	feeds = avl.NewTree()
 }
 
@@ -53,7 +57,7 @@ func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string 
 	return feedId
 }
 
-// XXX: do a registry by user & one by parentID ?
+// XXX: do a registry by user ?
 // XXX: handle flagged posts
 // XXX: handle tags with an array of string
 // XXX: optimize research by tags with a new tree ?
@@ -70,6 +74,42 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 		tagsSplit = strings.Split(tags, ",")
 	}
 	postsByFeed.ReverseIterate(start, end, func(key string, value interface{}) bool {
+		post := value.(*feedsv1.Post)
+		for _, tag := range tagsSplit {
+			if !hasTag(post.Tags, tag) {
+				return false
+			}
+		}
+		if i >= int(offset) {
+			postView := &feedsv1.PostView{
+				Post:      post,
+				Reactions: GetPostReactions(post.LocalPostId, user),
+			}
+			res = append(res, postView)
+		}
+		i++
+		if i >= int(offset+limit) {
+			return true
+		}
+		return false
+	})
+	return res
+}
+
+// XXX: merge with above function (deduct from param the tree to use) ?
+func GetChildrenPosts(parentId string, offset uint32, limit uint32, tags string, user string) []*feedsv1.PostView {
+	if parentId == "" {
+		panic("parentId is empty")
+	}
+	var res []*feedsv1.PostView
+	i := 0
+	start := parentId + ":"
+	end := parentId + ";"
+	tagsSplit := []string{}
+	if tags != "" {
+		tagsSplit = strings.Split(tags, ",")
+	}
+	postsByParent.ReverseIterate(start, end, func(key string, value interface{}) bool {
 		post := value.(*feedsv1.Post)
 		for _, tag := range tagsSplit {
 			if !hasTag(post.Tags, tag) {

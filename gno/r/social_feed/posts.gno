@@ -29,6 +29,9 @@ func NewPost(feedId string, post *feedsv1.Post) uint64 {
 	feedKey := feedId + ":" + localPostId.String()
 	posts.Set(localPostId.String(), post)
 	postsByFeed.Set(feedKey, post)
+	if post.ParentUri != "" {
+		postsByParent.Set(feedId+":"+post.ParentUri+":"+localPostId.String(), post)
+	}
 	return post.LocalPostId
 }
 
