@@ -91,14 +91,13 @@ export function EventInfo({ eventId }: { eventId: string }) {
   );
   const iconSize = 22;
 
+  console.log(isDescTruncated);
   useEffect(() => {
     const desc = descMaskRef.current;
 
     if (desc) {
       setDescMinHeight(truncatedMaxHeight);
       setDescMaxHeight(desc.scrollHeight);
-      // set to display to avoid bottom whitespace
-      // desc.classList.add("hidden");
     }
   }, [descMaskRef, truncatedMaxHeight]);
 
@@ -227,7 +226,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
 
       {/* Markdown Description */}
       <EventSection title={t("about-event")}>
-        <div ref={descContainerRef} className="relative">
+        <div ref={descContainerRef} className="relative overflow-hidden">
           {/* Need to get expanded height */}
           <div
             ref={descMaskRef}

@@ -15,6 +15,7 @@ export const useIsLinesTruncated = (
         10,
       );
       const mHeight = lineClamp * lineHeight;
+      console.log(mHeight, containerHeight);
       setTruncatedMinHeight(mHeight);
       setDescTruncated(containerHeight > mHeight);
     }
