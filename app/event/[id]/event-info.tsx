@@ -102,6 +102,10 @@ export function EventInfo({ eventId }: { eventId: string }) {
     }
   }, [descMaskRef, truncatedMaxHeight]);
 
+  useEffect(() => {
+    navigator.clipboard.writeText(data.description);
+  }, [data]);
+
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
       <script
