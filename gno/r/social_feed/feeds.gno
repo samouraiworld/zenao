@@ -2,11 +2,11 @@ package social_feed
 
 import (
 	"std"
+	"strconv"
 	"strings"
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/seqid"
-	"gno.land/p/demo/ufmt"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
@@ -105,10 +105,14 @@ func GetChildrenPosts(parentId string, offset uint32, limit uint32, tags string,
 	if parentId == "" {
 		panic("parentId is empty")
 	}
+	parentIdInt, err := strconv.ParseUint(parentId, 10, 64)
+	if err != nil {
+		panic("parentId is not a valid uint64")
+	}
 	var res []*feedsv1.PostView
 	i := 0
-	start := parentId + ":"
-	end := parentId + ";"
+	start := seqid.ID(parentIdInt).String() + ":"
+	end := seqid.ID(parentIdInt).String() + ";"
 	tagsSplit := []string{}
 	if tags != "" {
 		tagsSplit = strings.Split(tags, ",")
@@ -139,7 +143,7 @@ func GetChildrenPosts(parentId string, offset uint32, limit uint32, tags string,
 
 func CountChildren(parentId uint64) uint64 {
 	count := uint64(0)
-	parentIdStr := ufmt.Sprintf("%d", parentId)
+	parentIdStr := seqid.ID(parentId).String()
 	postsByParent.ReverseIterate(parentIdStr+":", parentIdStr+";", func(key string, value interface{}) bool {
 		count++
 		return false
