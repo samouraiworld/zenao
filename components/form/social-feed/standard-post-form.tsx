@@ -1,3 +1,18 @@
+import { useAuth } from "@clerk/nextjs";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { Paperclip } from "lucide-react";
+import { useTranslations } from "next-intl";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useForm } from "react-hook-form";
+import { useMediaQuery } from "react-responsive";
+import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
 import { ButtonBase } from "@/components/buttons/ButtonBases";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
@@ -25,21 +40,6 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
-import { useAuth } from "@clerk/nextjs";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Paperclip } from "lucide-react";
-import { useTranslations } from "next-intl";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { useForm } from "react-hook-form";
-import { useMediaQuery } from "react-responsive";
-import { FeedInputButtons } from "./feed-input-buttons";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -219,8 +219,8 @@ export function StandardPostForm({
 
                     setCursor(
                       textareaRef.current?.selectionStart ??
-                      textareaRef.current?.textLength ??
-                      0,
+                        textareaRef.current?.textLength ??
+                        0,
                     );
                     hiddenInputRef.current?.click();
                   }}
