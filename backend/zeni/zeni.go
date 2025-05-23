@@ -179,9 +179,12 @@ type DB interface {
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
+
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	GetPostByID(postID string) (*Post, error)
 	GetAllPosts() ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
+
 	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
