@@ -98,6 +98,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
     if (desc) {
       setDescMinHeight(truncatedMaxHeight);
       setDescMaxHeight(desc.scrollHeight);
+      console.log("Desc size", desc.scrollHeight);
     }
   }, [descMaskRef, truncatedMaxHeight]);
 
