@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	ariga.io/atlas-provider-gorm v0.5.0
+	codeberg.org/go-pdf/fpdf v0.11.1
 	connectrpc.com/authn v0.2.0
 	connectrpc.com/connect v1.18.1
 	connectrpc.com/cors v0.1.0
@@ -19,6 +20,7 @@ require (
 	github.com/resend/resend-go/v2 v2.14.0
 	github.com/ringsaturn/tzf v0.16.1
 	github.com/rs/cors v1.11.1
+	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.10.0
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
 	go.uber.org/zap v1.27.0
