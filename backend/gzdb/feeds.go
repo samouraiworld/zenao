@@ -124,7 +124,8 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 			// Need to convert this to chain address later.
 			// Using two-step process: first store the ID here,
 			// then in the controller retrieve and set the actual address.
-			Author: fmt.Sprintf("%d", post.UserID),
+			Author:    fmt.Sprintf("%d", post.UserID),
+			ParentUri: post.ParentURI,
 
 			CreatedAt: post.CreatedAt.Unix(),
 			UpdatedAt: post.UpdatedAt.Unix(),

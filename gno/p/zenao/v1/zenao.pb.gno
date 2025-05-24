@@ -163,9 +163,10 @@ type VotePollResponse struct {
 }
 
 type CreatePostRequest struct {
-	EventId string
-	Content string
-	Tags    []string
+	EventId  string
+	Content  string
+	ParentId string
+	Tags     []string
 }
 
 type CreatePostResponse struct {
