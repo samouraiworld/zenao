@@ -253,10 +253,10 @@ export function EventInfo({ eventId }: { eventId: string }) {
               "overflow-hidden text-ellipsis transition-all ease-in-out duration-500",
             )}
             style={{
-              height:
+              maxHeight:
                 isDescTruncated && !isDescExpanded
                   ? `${truncatedMaxHeight}px`
-                  : `calc-size(auto, size)`,
+                  : `9999px`,
             }}
           >
             <MarkdownPreview markdownString={data.description} />
