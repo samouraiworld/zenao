@@ -20,7 +20,7 @@ function EventLocationSection({
           <Link href={location.location} target="_blank">
             <Heading
               level={2}
-              size="xl"
+              size="lg"
               className="hover:underline hover:underline-offset-1"
             >
               {location.location}
@@ -32,14 +32,14 @@ function EventLocationSection({
             target="_blank"
           >
             <div className="flex flex-row gap-2 group">
-              <Heading level={2} size="xl" className="group-hover:underline">
+              <Heading level={2} size="lg" className="group-hover:underline">
                 {location.address}{" "}
                 {location.kind === "geo" && <ExternalLink className="inline" />}
               </Heading>
             </div>
           </Link>
         ) : (
-          <Heading level={2} size="xl">
+          <Heading level={2} size="lg">
             {location.address}
           </Heading>
         )}

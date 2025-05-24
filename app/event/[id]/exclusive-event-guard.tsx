@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Lock } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -46,10 +46,12 @@ export function ExclusiveEventGuard({
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
-  const isMember = useMemo(() => roles.length > 0, [roles]);
 
   const [isPending, setIsPending] = useState(false);
+  const [isCheckingAccess, setIsCheckingAccess] = useState<boolean>(true);
+  const isMember = useMemo(() => roles.length > 0, [roles]);
   const [canAccess, setCanAccess] = useState<boolean>(!exclusive || isMember);
+
   const t = useTranslations("event-protection-guard");
   const form = useForm<EventProtectionFormSchemaType>({
     mode: "all",
@@ -63,6 +65,9 @@ export function ExclusiveEventGuard({
 
   useEffect(() => {
     setCanAccess(!exclusive || isMember);
+    const timeout = setTimeout(() => setIsCheckingAccess(false), 1000);
+
+    return () => clearTimeout(timeout);
   }, [exclusive, isMember]);
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
@@ -130,29 +135,35 @@ export function ExclusiveEventGuard({
         </Heading>
         <Text className="text-center">{t("description")}</Text>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full flex flex-col max-w-sm mt-6 gap-4"
-          >
-            <FormFieldInputString
-              control={form.control}
-              name="password"
-              placeholder={t("password-placeholder")}
-              inputType="password"
-            />
-            <ButtonWithChildren
-              type="submit"
-              className="w-full rounded"
-              loading={isPending}
+        {isCheckingAccess ? (
+          <div className="w-full flex justify-center items-center">
+            <Loader2 size={24} className="animate-spin" />
+          </div>
+        ) : (
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="w-full flex flex-col max-w-sm mt-6 gap-4"
             >
-              <div className="flex items-center">
-                <Lock className="mr-2" />
-                {t("access-button")}
-              </div>
-            </ButtonWithChildren>
-          </form>
-        </Form>
+              <FormFieldInputString
+                control={form.control}
+                name="password"
+                placeholder={t("password-placeholder")}
+                inputType="password"
+              />
+              <ButtonWithChildren
+                type="submit"
+                className="w-full rounded"
+                loading={isPending}
+              >
+                <div className="flex items-center">
+                  <Lock className="mr-2" />
+                  {t("access-button")}
+                </div>
+              </ButtonWithChildren>
+            </form>
+          </Form>
+        )}
       </div>
     </ScreenContainer>
   );

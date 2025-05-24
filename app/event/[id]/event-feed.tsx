@@ -19,8 +19,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { PostsList } from "@/components/widgets/posts-list";
 import { PollsList } from "@/components/widgets/polls-list";
 import { mergeRefs } from "@/lib/utils";
-import { derivePkgAddr } from "@/lib/gno";
-import { GnowebButton } from "@/components/buttons/gnoweb-button";
 
 const eventTabs = ["global-feed", "polls-feed"] as const;
 export type EventTab = (typeof eventTabs)[number];
@@ -86,7 +84,6 @@ export function EventFeed({
   const feedFormRef = useRef<HTMLDivElement>(null);
 
   const t = useTranslations("event-feed");
-  const feedSlug = `${derivePkgAddr(`gno.land/r/zenao/events/e${eventId}`)}:main`;
 
   return (
     <div className="flex flex-col gap-4">
@@ -99,10 +96,6 @@ export function EventFeed({
           ))}
         </TabsList>
       </Tabs>
-
-      <GnowebButton
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:${feedSlug}`}
-      />
 
       <div className="flex flex-col gap-6 min-h-0 pt-4">
         {isMember && <EventFeedForm ref={feedFormRef} eventId={eventId} />}

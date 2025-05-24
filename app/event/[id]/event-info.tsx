@@ -32,6 +32,7 @@ import { makeLocationFromEvent } from "@/lib/location";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { useEventPassword } from "@/components/providers/event-password-provider";
 import EventLocationSection from "@/components/widgets/event-location-section";
+import { GnowebButton } from "@/components/buttons/gnoweb-button";
 
 interface EventSectionProps {
   title: string;
@@ -66,8 +67,6 @@ export function EventInfo({ eventId }: { eventId: string }) {
 
   const t = useTranslations("event");
 
-  const [isDescExpanded, setDescExpanded] = useState(false);
-
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -81,11 +80,37 @@ export function EventInfo({ eventId }: { eventId: string }) {
     image: web2URL(data.imageUri),
   };
 
-  const descLineClamp = 8;
-  const descLineClampClassName = "line-clamp-[8]"; // Dynamic "8" value doesn't work here and inline style with WebkitLineClamp neither
+  const descLineClamp = 13;
+  const [isDescExpanded, setDescExpanded] = useState(false);
   const descContainerRef = useRef<HTMLDivElement>(null);
-  const isDescTruncated = useIsLinesTruncated(descContainerRef, descLineClamp);
+  const { isDescTruncated, truncatedMaxHeight } = useIsLinesTruncated(
+    descContainerRef,
+    descLineClamp,
+  );
   const iconSize = 22;
+
+  const scrollToTop = (top = 0, duration = 6000) => {
+    const startY = window.scrollY;
+    const startTime = performance.now();
+    const distance = top - startY;
+
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeInOutQuad =
+        progress < 0.5
+          ? 2 * progress * progress
+          : -1 + (4 - 2 * progress) * progress;
+
+      window.scrollTo(0, startY + distance * easeInOutQuad);
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+
+    requestAnimationFrame(animateScroll);
+  };
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
@@ -109,28 +134,6 @@ export function EventInfo({ eventId }: { eventId: string }) {
               className="flex w-full rounded-xl self-center object-cover"
             />
           </AspectRatio>
-
-          {/* Participants preview and dialog section */}
-          <EventSection
-            title={
-              data.participants === 0
-                ? t("nobody-going-yet")
-                : t("going", { count: data.participants })
-            }
-          >
-            <ParticipantsSection id={eventId} />
-          </EventSection>
-
-          {/* Host section */}
-          <EventSection title={t("hosted-by")}>
-            <UserAvatarWithName linkToProfile address={data.creator} />
-          </EventSection>
-
-          <EventManagementMenu
-            eventId={eventId}
-            roles={roles}
-            nbParticipants={data.participants}
-          />
         </div>
 
         {/* Right Section */}
@@ -163,77 +166,121 @@ export function EventInfo({ eventId }: { eventId: string }) {
           {/* Location */}
           <EventLocationSection location={location} />
 
-          {/* Participate Card */}
-          <Card className="mt-2">
-            {isParticipant ? (
-              <div>
-                <div className="flex flex-row justify-between">
-                  <Heading level={2} size="xl">
-                    {t("in")}
-                  </Heading>
-                  <SignedIn>
-                    <Link
-                      href={`/ticket/${eventId}`}
-                      className="text-main underline"
-                    >
-                      {t("see-ticket")}
-                    </Link>
-                  </SignedIn>
-                  {/* TODO: create a clean decount timer */}
-                  {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
-                </div>
-                {/* add back when we can cancel
-                <Text className="my-4">{t("cancel-desc")}</Text>
-              */}
-              </div>
-            ) : isStarted ? (
-              <div>
-                <Heading level={2} size="xl">
-                  {t("already-begun")}
-                </Heading>
-                <Text className="my-4">{t("too-late")}</Text>
-              </div>
-            ) : (
-              <div>
-                <Heading level={2} size="xl">
-                  {t("registration")}
-                </Heading>
-                <Text className="my-4">{t("join-desc")}</Text>
-                <EventRegistrationForm
-                  eventId={eventId}
-                  userAddress={address}
-                  eventPassword={password}
-                />
-              </div>
-            )}
-          </Card>
+          <GnowebButton
+            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
+          />
 
-          {/* Markdown Description */}
-          <EventSection title={t("about-event")}>
-            <div ref={descContainerRef}>
-              <MarkdownPreview
-                className={cn(
-                  "overflow-hidden text-ellipsis",
-                  !isDescExpanded && descLineClampClassName,
-                )}
-                markdownString={data.description}
-              />
-            </div>
+          <EventManagementMenu
+            eventId={eventId}
+            roles={roles}
+            nbParticipants={data.participants}
+          />
+        </div>
+      </div>
 
-            {/* See More button */}
-            {isDescTruncated && (
-              <div
-                className="w-full flex justify-center cursor-pointer "
-                onClick={() =>
-                  setDescExpanded((isDescExpanded) => !isDescExpanded)
-                }
-              >
-                {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
-              </div>
-            )}
+      <div className="grid grid-cols-5 gap-10">
+        {/* Host section */}
+        <div className="col-span-5 sm:col-span-2">
+          <EventSection title={t("hosted-by")}>
+            <UserAvatarWithName linkToProfile address={data.creator} />
+          </EventSection>
+        </div>
+
+        {/* Participants preview and dialog section */}
+        <div className="col-span-5 sm:col-span-3">
+          <EventSection
+            title={
+              data.participants === 0
+                ? t("nobody-going-yet")
+                : t("going", { count: data.participants })
+            }
+          >
+            <ParticipantsSection id={eventId} />
           </EventSection>
         </div>
       </div>
+
+      {/* Participate Card */}
+      <Card className="mt-2">
+        {isParticipant ? (
+          <div>
+            <div className="flex flex-row justify-between">
+              <Heading level={2} size="xl">
+                {t("in")}
+              </Heading>
+              <SignedIn>
+                <Link
+                  href={`/ticket/${eventId}`}
+                  className="text-main underline"
+                >
+                  {t("see-ticket")}
+                </Link>
+              </SignedIn>
+              {/* TODO: create a clean decount timer */}
+              {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
+            </div>
+            {/* add back when we can cancel
+                <Text className="my-4">{t("cancel-desc")}</Text>
+              */}
+          </div>
+        ) : isStarted ? (
+          <div>
+            <Heading level={2} size="xl">
+              {t("already-begun")}
+            </Heading>
+            <Text className="my-4">{t("too-late")}</Text>
+          </div>
+        ) : (
+          <div>
+            <Heading level={2} size="xl">
+              {t("registration")}
+            </Heading>
+            <Text className="my-4">{t("join-desc")}</Text>
+            <EventRegistrationForm
+              eventId={eventId}
+              userAddress={address}
+              eventPassword={password}
+            />
+          </div>
+        )}
+      </Card>
+
+      {/* Markdown Description */}
+      <EventSection title={t("about-event")}>
+        <div ref={descContainerRef} className="relative">
+          <div
+            className={cn(
+              "overflow-hidden text-ellipsis transition-all ease-in-out duration-500",
+            )}
+            style={{
+              maxHeight:
+                isDescTruncated && !isDescExpanded
+                  ? `${truncatedMaxHeight}px`
+                  : `9999px`,
+            }}
+          >
+            <MarkdownPreview markdownString={data.description} />
+          </div>
+        </div>
+
+        {/* See More button */}
+        {isDescTruncated && (
+          <div
+            className="w-full flex justify-center items-center cursor-pointer gap-1 "
+            onClick={() => {
+              setDescExpanded((isDescExpanded) => !isDescExpanded);
+              if (descContainerRef.current) {
+                scrollToTop(descContainerRef.current.offsetTop, 500);
+              }
+            }}
+          >
+            <Text size="sm" className="font-medium">
+              {t(isDescExpanded ? "view-less" : "view-more")}
+            </Text>
+            {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
+          </div>
+        )}
+      </EventSection>
 
       {/* Social Feed */}
       <EventFeed eventId={eventId} isMember={isParticipant || isOrganizer} />
