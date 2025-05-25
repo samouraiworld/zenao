@@ -1,24 +1,21 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format as formatTZ } from "date-fns-tz";
 import { format, fromUnixTime } from "date-fns";
-import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { SignedIn, useAuth } from "@clerk/nextjs";
 import { Event, WithContext } from "schema-dts";
 import { ParticipantsSection } from "./participants-section";
 import { EventManagementMenu } from "./event-management-menu";
+import { EventSectionTab } from "./event-section-tab";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
-import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
-import { EventFeed } from "@/app/event/[id]/event-feed";
-import { cn } from "@/lib/tailwind";
-import { useIsLinesTruncated } from "@/app/hooks/use-is-lines-truncated";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/common/user";
 import Text from "@/components/texts/text";
@@ -80,37 +77,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
     image: web2URL(data.imageUri),
   };
 
-  const descLineClamp = 13;
-  const [isDescExpanded, setDescExpanded] = useState(false);
-  const descContainerRef = useRef<HTMLDivElement>(null);
-  const { isDescTruncated, truncatedMaxHeight } = useIsLinesTruncated(
-    descContainerRef,
-    descLineClamp,
-  );
   const iconSize = 22;
-
-  const scrollToTop = (top = 0, duration = 6000) => {
-    const startY = window.scrollY;
-    const startTime = performance.now();
-    const distance = top - startY;
-
-    const animateScroll = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeInOutQuad =
-        progress < 0.5
-          ? 2 * progress * progress
-          : -1 + (4 - 2 * progress) * progress;
-
-      window.scrollTo(0, startY + distance * easeInOutQuad);
-
-      if (progress < 1) {
-        requestAnimationFrame(animateScroll);
-      }
-    };
-
-    requestAnimationFrame(animateScroll);
-  };
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-10">
@@ -245,45 +212,12 @@ export function EventInfo({ eventId }: { eventId: string }) {
         )}
       </Card>
 
-      {/* Markdown Description */}
-      <EventSection title={t("about-event")}>
-        <div ref={descContainerRef} className="relative">
-          <div
-            className={cn(
-              "overflow-hidden text-ellipsis transition-all ease-in-out duration-500",
-            )}
-            style={{
-              maxHeight:
-                isDescTruncated && !isDescExpanded
-                  ? `${truncatedMaxHeight}px`
-                  : `9999px`,
-            }}
-          >
-            <MarkdownPreview markdownString={data.description} />
-          </div>
-        </div>
+      <EventSectionTab
+        eventId={eventId}
+        description={data.description}
+        isMember={isParticipant || isOrganizer}
+      />
 
-        {/* See More button */}
-        {isDescTruncated && (
-          <div
-            className="w-full flex justify-center items-center cursor-pointer gap-1 "
-            onClick={() => {
-              setDescExpanded((isDescExpanded) => !isDescExpanded);
-              if (descContainerRef.current) {
-                scrollToTop(descContainerRef.current.offsetTop, 500);
-              }
-            }}
-          >
-            <Text size="sm" className="font-medium">
-              {t(isDescExpanded ? "view-less" : "view-more")}
-            </Text>
-            {isDescExpanded ? <ChevronUp /> : <ChevronDown />}
-          </div>
-        )}
-      </EventSection>
-
-      {/* Social Feed */}
-      <EventFeed eventId={eventId} isMember={isParticipant || isOrganizer} />
       <GoTopButton />
     </div>
   );
