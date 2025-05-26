@@ -67,8 +67,9 @@ type Post struct {
 }
 
 type PostView struct {
-	Post      *Post
-	Reactions []*ReactionView
+	Post          *Post
+	ChildrenCount uint64
+	Reactions     []*ReactionView
 }
 
 type ReactionView struct {

@@ -523,6 +523,9 @@ func (c *CreatePostRequest) GnoLiteral(typePrefix string, linePrefix string) str
 	if c.Content != "" {
 		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, c.Content)
 	}
+	if c.ParentId != "" {
+		fmt.Fprintf(buf, "%s\tParentId: %q,\n", linePrefix, c.ParentId)
+	}
 	if len(c.Tags) != 0 {
 		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
 		linePrefix += "\t"
