@@ -230,7 +230,7 @@ func drawImagePlaceholder(pdf *fpdf.Fpdf, x, y, width, height float64) {
 }
 
 func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64) error {
-	optimizedURL := fmt.Sprintf("%s?img-width=1240&img-height=698&img-quality=75&img-fit=crop", imageURI)
+	optimizedURL := fmt.Sprintf("%s?img-width=1280&img-height=720&img-quality=75&img-fit=cover", imageURI)
 	resp, err := http.Get(optimizedURL)
 	if err != nil {
 		return fmt.Errorf("failed to download image: %w", err)
