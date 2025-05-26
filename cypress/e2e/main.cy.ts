@@ -339,7 +339,8 @@ describe("main", () => {
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
 
-    // TODO: update with new tab sections
+    // Go Description tab
+    cy.get("button").contains("Discussions").click();
 
     // EventFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
