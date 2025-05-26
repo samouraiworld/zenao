@@ -317,3 +317,200 @@ func TestGetFeedPosts(t *testing.T) {
 		})
 	}
 }
+
+func TestGetChildrenPosts(t *testing.T) {
+	setupTest()
+
+	type input struct {
+		parentId string
+		offset   uint32
+		limit    uint32
+		tags     string
+		user     string
+	}
+
+	type output struct {
+		posts []*feedsv1.PostView
+		panic bool
+	}
+
+	type test struct {
+		input  input
+		output output
+	}
+
+	type testTable = map[string]test
+
+	posts := []*feedsv1.Post{
+		{
+			Author:    alice.String(),
+			DeletedAt: 0,
+			ParentUri: "3",
+			Post: &feedsv1.StandardPost{
+				Content: "hello",
+			},
+		},
+		{
+			Author:    alice.String(),
+			DeletedAt: 0,
+			ParentUri: "1",
+			Post: &feedsv1.StandardPost{
+				Content: "hello 2",
+			},
+		},
+		{
+			Author:    alice.String(),
+			DeletedAt: 0,
+			ParentUri: "1",
+			Post: &feedsv1.StandardPost{
+				Content: "hello 5",
+			},
+			Tags: []string{"tag1"},
+		},
+		{
+			Author:    alice.String(),
+			DeletedAt: 0,
+			ParentUri: "1",
+			Post: &feedsv1.StandardPost{
+				Content: "hello 3",
+			},
+		},
+		{
+			Author:    alice.String(),
+			DeletedAt: 0,
+			Post: &feedsv1.StandardPost{
+				Content: "hello 4",
+			},
+		},
+	}
+
+	std.TestSetOriginCaller(alice)
+	//XXX post in reverse order so that the newest post is first
+	for i := len(posts) - 1; i >= 0; i-- {
+		NewPost(alice.String()+":public", posts[i])
+	}
+
+	expectedViews := []*feedsv1.PostView{
+		{
+			Post:          posts[0],
+			ChildrenCount: 0,
+		},
+		{
+			Post:          posts[1],
+			ChildrenCount: 0,
+		},
+		{
+			Post:          posts[2],
+			ChildrenCount: 1,
+		},
+		{
+			Post:          posts[3],
+			ChildrenCount: 0,
+		},
+	}
+
+	tests := testTable{
+		"valid parentId": {
+			input: input{
+				parentId: "1",
+				offset:   0,
+				limit:    10,
+				tags:     "",
+				user:     "",
+			},
+			output: output{
+				posts: expectedViews[1:],
+				panic: false,
+			},
+		},
+		"limit 1": {
+			input: input{
+				parentId: "1",
+				offset:   0,
+				limit:    1,
+				tags:     "",
+				user:     "",
+			},
+			output: output{
+				posts: expectedViews[1:2],
+				panic: false,
+			},
+		},
+		"tag filter": {
+			input: input{
+				parentId: "1",
+				offset:   0,
+				limit:    10,
+				tags:     "tag1",
+				user:     "",
+			},
+			output: output{
+				posts: expectedViews[2:3],
+				panic: false,
+			},
+		},
+		"nested parentId": {
+			input: input{
+				parentId: "3",
+				offset:   0,
+				limit:    10,
+				tags:     "",
+				user:     "",
+			},
+			output: output{
+				posts: expectedViews[0:1],
+				panic: false,
+			},
+		},
+		"empty parentId": {
+			input: input{
+				parentId: "",
+				offset:   0,
+				limit:    10,
+				tags:     "",
+				user:     "",
+			},
+			output: output{
+				panic: true,
+			},
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			if test.output.panic {
+				defer func() {
+					if r := recover(); r != nil {
+						return
+					}
+					t.Fatalf("expected panic, got none")
+				}()
+			}
+
+			res := GetChildrenPosts(test.input.parentId, test.input.offset, test.input.limit, test.input.tags, test.input.user)
+			if len(res) != len(test.output.posts) {
+				t.Fatalf("expected %d posts, got %d", len(test.output.posts), len(res))
+			}
+			for i, postView := range res {
+				post := postView.Post
+				if post.Author != test.output.posts[i].Post.Author {
+					t.Errorf("expected author %q, got %q", test.output.posts[i].Post.Author, post.Author)
+				}
+				if post.DeletedAt != test.output.posts[i].Post.DeletedAt {
+					t.Errorf("expected deletedAt %d, got %d", test.output.posts[i].Post.DeletedAt, post.DeletedAt)
+				}
+				switch v := post.Post.(type) {
+				case *feedsv1.StandardPost:
+					if v.Content != test.output.posts[i].Post.Post.(*feedsv1.StandardPost).Content {
+						t.Errorf("expected content %q, got %q", test.output.posts[i].Post.Post.(*feedsv1.StandardPost).Content, v.Content)
+					}
+				default:
+					t.Errorf("expected standard post, got %T", v)
+				}
+				if postView.ChildrenCount != test.output.posts[i].ChildrenCount {
+					t.Errorf("expected childrenCount %d, got %d on post id %d for parent id %s", test.output.posts[i].ChildrenCount, postView.ChildrenCount, post.LocalPostId, test.input.parentId)
+				}
+			}
+		})
+	}
+}

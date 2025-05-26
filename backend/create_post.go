@@ -47,9 +47,17 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		return nil, errors.New("user is not a member of the event")
 	}
 
+	if req.Msg.ParentId != "" {
+		_, err := s.DB.GetPostByID(req.Msg.ParentId)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	post := &feedsv1.Post{
-		Loc:  nil,
-		Tags: req.Msg.Tags,
+		Loc:       nil,
+		Tags:      req.Msg.Tags,
+		ParentUri: req.Msg.ParentId,
 		Post: &feedsv1.Post_Standard{
 			Standard: &feedsv1.StandardPost{
 				Content: req.Msg.Content,

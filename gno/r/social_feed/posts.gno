@@ -2,6 +2,7 @@ package social_feed
 
 import (
 	"std"
+	"strconv"
 	"time"
 
 	"gno.land/p/demo/seqid"
@@ -29,6 +30,13 @@ func NewPost(feedId string, post *feedsv1.Post) uint64 {
 	feedKey := feedId + ":" + localPostId.String()
 	posts.Set(localPostId.String(), post)
 	postsByFeed.Set(feedKey, post)
+	if post.ParentUri != "" {
+		parentIdInt, err := strconv.ParseUint(post.ParentUri, 10, 64)
+		if err != nil {
+			panic("parentId is not a valid uint64")
+		}
+		postsByParent.Set(seqid.ID(parentIdInt).String()+":"+localPostId.String(), post)
+	}
 	return post.LocalPostId
 }
 

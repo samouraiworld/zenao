@@ -226,6 +226,9 @@ func (p *PostView) GnoLiteral(typePrefix string, linePrefix string) string {
 	if p.Post != nil {
 		fmt.Fprintf(buf, "%s\tPost: &%s%s,\n", linePrefix, typePrefix, p.Post.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
+	if p.ChildrenCount != 0 {
+		fmt.Fprintf(buf, "%s\tChildrenCount: %d,\n", linePrefix, p.ChildrenCount)
+	}
 	if len(p.Reactions) != 0 {
 		fmt.Fprintf(buf, "%s\tReactions: []*ReactionView{\n", linePrefix)
 		linePrefix += "\t"
