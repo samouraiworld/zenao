@@ -24,12 +24,14 @@ type genPdfTicketConfig struct {
 	eventID      string
 	ticketSecret string
 	dbPath       string
+	output       string
 }
 
 func (conf *genPdfTicketConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.eventID, "event-id", "", "Event ID")
 	flset.StringVar(&conf.ticketSecret, "ticket-secret", "", "Ticket secret")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
+	flset.StringVar(&conf.output, "output", "", "Output path")
 }
 
 func newGenPdfTicketCmd() *commands.Command {
@@ -68,7 +70,11 @@ func execGenPdfTicket(genPdfTicketConf *genPdfTicketConfig) error {
 		return err
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s.pdf", event.Title), pdf, 0644)
+	outputPath := genPdfTicketConf.output
+	if outputPath == "" {
+		outputPath = fmt.Sprintf("%s.pdf", event.Title)
+	}
+	err = os.WriteFile(outputPath, pdf, 0644)
 	if err != nil {
 		return err
 	}
