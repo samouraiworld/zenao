@@ -68,6 +68,8 @@
     "join-desc": "Welcome! To join the event, please register below.",
     "register-button": "Register",
     "about-event": "About event",
+    "discussion": "Discussions",
+    "votes": "Votes",
     "your-email": "Your email",
     "guests": "Guests",
     "email-placeholder": "Email...",
@@ -80,7 +82,9 @@
       "add-a-friend": "Add a friend",
       "email-placeholder": "Email..."
     },
-    "gatekeeper-button": "Open ticket scanner"
+    "gatekeeper-button": "Open ticket scanner",
+    "view-more": "View more",
+    "view-less": "View less"
   },
   "manifesto": {
     "title": "MANIFESTO",
