@@ -2,10 +2,11 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { EventFeedForm } from "./event-feed-form";
+import { useForm } from "react-hook-form";
+import EventFeedForm from "./event-feed-form";
 import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
 import { TabsContent } from "@/components/shadcn/tabs";
@@ -13,6 +14,7 @@ import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { PollsList } from "@/components/widgets/polls-list";
 import { PostsList } from "@/components/widgets/posts-list";
 import { userAddressOptions } from "@/lib/queries/user";
+import { FeedPostFormSchemaType } from "@/components/form/types";
 
 export function MainEventSections({
   className,
@@ -35,7 +37,20 @@ export function MainEventSections({
     userAddressOptions(getToken, userId),
   );
 
-  const feedFormRef = useRef<HTMLDivElement>(null);
+  const form = useForm<FeedPostFormSchemaType>({
+    mode: "all",
+    defaultValues: {
+      content: "",
+      question: "",
+      options: [{ text: "" }, { text: "" }],
+      allowMultipleOptions: false,
+      duration: {
+        days: 1,
+        hours: 0,
+        minutes: 0,
+      },
+    },
+  });
 
   useEffect(() => {
     setTab(isMember ? "feed" : "description");
@@ -77,15 +92,23 @@ export function MainEventSections({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 min-h-0 pt-4">
           {tab !== "description" && isMember && (
-            <EventFeedForm ref={feedFormRef} eventId={eventId} />
+            <EventFeedForm eventId={eventId} form={form} />
           )}
           {/* Social Feed (Discussions) */}
           <TabsContent value="feed">
-            <PostsList eventId={eventId} userAddress={userAddress} />
+            <PostsList
+              eventId={eventId}
+              userAddress={userAddress}
+              form={form}
+            />
           </TabsContent>
           {/* Social Feed (Votes) */}
           <TabsContent value="votes">
-            <PollsList eventId={eventId} userAddress={userAddress} />
+            <PollsList
+              eventId={eventId}
+              userAddress={userAddress}
+              form={form}
+            />
           </TabsContent>
         </div>
       </div>

@@ -1,10 +1,11 @@
 "use client";
 
 import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
-import { useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { UseFormReturn } from "react-hook-form";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import Text from "@/components/texts/text";
@@ -18,23 +19,29 @@ import { useVotePoll } from "@/lib/mutations/social-feed";
 import { Button } from "@/components/shadcn/button";
 import { profileOptions } from "@/lib/queries/profile";
 import { eventUserRoles } from "@/lib/queries/event-users";
+import { FeedPostFormSchemaType } from "@/components/form/types";
+import { PostComments } from "@/components/form/social-feed/post-comments";
+import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
 
 export function PollPostCard({
   pollId,
   eventId,
   pollPost,
   userAddress,
+  form,
 }: {
   pollId: string;
   eventId: string;
   pollPost: PollPostViewInfo;
   userAddress: string;
+  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const t = useTranslations("event-feed");
   const queryClient = getQueryClient();
   const { getToken } = useAuth();
   const { toast } = useToast();
 
+  const [showReplies, setShowReplies] = useState(false);
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(pollPost.post.author),
   );
@@ -86,38 +93,60 @@ export function PollPostCard({
   };
 
   return (
-    <PostCardLayout
-      eventId={eventId}
-      post={pollPost}
-      createdBy={createdBy}
-      gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
-    >
-      <div className="w-full flex flex-col gap-2">
-        <div className="flex flex-row items-center gap-2">
-          <Text className="text-sm">{`${totalVotesCount} votes`}</Text>
-          <Text className="text-sm">•</Text>
-          <Text className="text-sm">{remainingTimeText}</Text>
-        </div>
-        <Text className="line-clamp-3">{pollPost.poll.question}</Text>
+    <div className="flex flex-col gap-1">
+      <PostCardLayout
+        eventId={eventId}
+        post={pollPost}
+        createdBy={createdBy}
+        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
+        onReply={() => {
+          form.setValue("parentPost", {
+            kind: "POLL",
+            postId: pollPost.post.localPostId,
+            author: pollPost.post.author,
+          });
+        }}
+        onDisplayReplies={() => {
+          setShowReplies((prev) => !prev);
+        }}
+      >
+        <div className="w-full flex flex-col gap-2">
+          <div className="flex flex-row items-center gap-2">
+            <Text className="text-sm">{`${totalVotesCount} votes`}</Text>
+            <Text className="text-sm">•</Text>
+            <Text className="text-sm">{remainingTimeText}</Text>
+          </div>
+          <Text className="line-clamp-3">{pollPost.poll.question}</Text>
 
-        <div className="flex flex-col items-center gap-2">
-          {pollPost.poll.results.map((pollResult, index) => (
-            <PollResultItem
-              key={index}
-              pollResult={pollResult}
-              totalVotesCount={totalVotesCount}
-              disabled={
-                isPollEnded || isPending || (!isOrganizer && !isParticipant)
-              }
-              onCheckedChange={() => {
-                onVote(pollResult.option);
-              }}
-              pollKind={pollPost.poll.kind}
-            />
-          ))}
+          <div className="flex flex-col items-center gap-2">
+            {pollPost.poll.results.map((pollResult, index) => (
+              <PollResultItem
+                key={index}
+                pollResult={pollResult}
+                totalVotesCount={totalVotesCount}
+                disabled={
+                  isPollEnded || isPending || (!isOrganizer && !isParticipant)
+                }
+                onCheckedChange={() => {
+                  onVote(pollResult.option);
+                }}
+                pollKind={pollPost.poll.kind}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </PostCardLayout>
+      </PostCardLayout>
+      {showReplies && (
+        <div className="pl-6">
+          <Suspense fallback={<PostCardSkeleton />}>
+            <PostComments
+              eventId={eventId}
+              parentId={pollPost.post.localPostId.toString()}
+            />
+          </Suspense>
+        </div>
+      )}
+    </div>
   );
 }
 

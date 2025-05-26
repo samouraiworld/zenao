@@ -3,12 +3,11 @@
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useMediaQuery } from "react-responsive";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 import { hoursToSeconds, minutesToSeconds } from "date-fns";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { pollFormSchema, PollFormSchemaType } from "../types";
+import { FeedPostFormSchemaType, pollFormSchema } from "../types";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
 import { PollFields } from "@/components/form/social-feed/poll-fields";
@@ -31,10 +30,12 @@ export function PollPostForm({
   eventId,
   feedInputMode,
   setFeedInputMode,
+  form,
 }: {
   eventId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
+  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
@@ -46,20 +47,8 @@ export function PollPostForm({
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const { createPoll, isPending } = useCreatePoll(queryClient);
 
-  const pollForm = useForm<PollFormSchemaType>({
-    resolver: zodResolver(pollFormSchema),
-    defaultValues: {
-      question: "",
-      options: [{ text: "" }, { text: "" }],
-      allowMultipleOptions: false,
-      duration: {
-        days: 1,
-        hours: 0,
-        minutes: 0,
-      },
-    },
-  });
-  const question = pollForm.watch("question");
+  const parentPost = form.watch("parentPost");
+  const question = form.watch("question");
   const textareaMaxLength = pollFormSchema.shape.question._def.checks.find(
     (check) => check.kind === "max",
   )?.value;
@@ -79,8 +68,12 @@ export function PollPostForm({
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [question]);
 
-  const onSubmitPoll = async (values: PollFormSchemaType) => {
+  const onSubmitPoll = async (values: FeedPostFormSchemaType) => {
     try {
+      if (values.kind !== "POLL") {
+        throw new Error("invalid form type");
+      }
+
       const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
@@ -105,8 +98,10 @@ export function PollPostForm({
         userAddress: userAddress || "",
       });
 
-      pollForm.reset(
-        {},
+      form.reset(
+        {
+          kind: "POLL",
+        },
         {
           keepValues: false,
         },
@@ -125,15 +120,15 @@ export function PollPostForm({
   };
 
   return (
-    <Form {...pollForm}>
+    <Form {...form}>
       <form
-        onSubmit={pollForm.handleSubmit(onSubmitPoll)}
-        className="flex flex-col gap-4 bg-accent p-4 rounded"
+        onSubmit={form.handleSubmit(onSubmitPoll)}
+        className="flex flex-col gap-4 p-4 rounded"
       >
         <div className="flex flex-row gap-4">
           <FormField
             rules={{ required: true }}
-            control={pollForm.control}
+            control={form.control}
             name="question"
             render={({ field }) => (
               <FormItem className="relative w-full">
@@ -157,12 +152,13 @@ export function PollPostForm({
           <FeedInputButtons
             buttonSize={textareaMinHeight}
             feedInputMode={feedInputMode}
+            isReplying={!!parentPost}
             setFeedInputMode={setFeedInputMode}
             isLoading={isPending}
           />
         </div>
 
-        <PollFields form={pollForm} />
+        <PollFields form={form} />
       </form>
     </Form>
   );
