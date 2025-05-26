@@ -11,7 +11,7 @@ import { SignedIn, useAuth } from "@clerk/nextjs";
 import { Event, WithContext } from "schema-dts";
 import { ParticipantsSection } from "./participants-section";
 import { EventManagementMenu } from "./event-management-menu";
-import { EventSectionTab } from "./event-section-tab";
+import { MainEventSections } from "./main-event-sections";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -212,7 +212,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
         )}
       </Card>
 
-      <EventSectionTab
+      <MainEventSections
         eventId={eventId}
         description={data.description}
         isMember={isParticipant || isOrganizer}
