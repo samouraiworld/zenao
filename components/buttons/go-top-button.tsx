@@ -50,7 +50,7 @@ export function GoTopButton() {
   return (
     <div
       ref={containerRef}
-      className="fixed z-50 right-4 bottom-16 translate-y-32 transition-all"
+      className="hidden sm:block fixed z-50 right-4 bottom-16 translate-y-32 transition-all"
     >
       <Button
         className="rounded-full w-12 h-12 shadow-custom-input-border"
