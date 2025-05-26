@@ -124,14 +124,10 @@ export function PollPostForm({
     }
   };
 
-  const onError = (errors: any) => {
-    console.error("Form submission error:", errors);
-  };
-
   return (
     <Form {...pollForm}>
       <form
-        onSubmit={pollForm.handleSubmit(onSubmitPoll, onError)}
+        onSubmit={pollForm.handleSubmit(onSubmitPoll)}
         className="flex flex-col gap-4 bg-accent p-4 rounded"
       >
         <div className="flex flex-row gap-4">
