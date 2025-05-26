@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
@@ -138,15 +139,15 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			s.Logger.Error("generate-participate-email-content", zap.Error(err))
 		} else {
 			attachments := make([]*resend.Attachment, 0, len(tickets))
-			for _, ticket := range tickets {
-				pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), s.Logger)
+			for i, ticket := range tickets {
+				pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
 				if err != nil {
 					s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
 					continue
 				}
 				attachments = append(attachments, &resend.Attachment{
 					Content:     pdfData,
-					Filename:    fmt.Sprintf("ticket_%s_%s.pdf", buyer.ID, evt.ID),
+					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
 					ContentType: "application/pdf",
 				})
 			}

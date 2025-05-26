@@ -63,7 +63,7 @@ func execGenPdfTicket(genPdfTicketConf *genPdfTicketConfig) error {
 		return err
 	}
 
-	pdf, err := GeneratePDFTicket(event, genPdfTicketConf.ticketSecret, logger)
+	pdf, err := GeneratePDFTicket(event, genPdfTicketConf.ticketSecret, "John Doe", "john.doe@example.com", time.Now(), logger)
 	if err != nil {
 		return err
 	}
@@ -76,62 +76,70 @@ func execGenPdfTicket(genPdfTicketConf *genPdfTicketConfig) error {
 	return nil
 }
 
-func GeneratePDFTicket(event *zeni.Event, ticketSecret string, logger *zap.Logger) ([]byte, error) {
-	pdf := fpdf.New("L", "mm", "A5", "")
+func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName string, email string, purchaseDate time.Time, logger *zap.Logger) ([]byte, error) {
+	pdf := fpdf.New("P", "mm", "A4", "")
+	tr := pdf.UnicodeTranslatorFromDescriptor("cp1252")
 
-	pdf.SetTitle(fmt.Sprintf("Ticket - %s", event.Title), true)
+	pdf.SetTitle(fmt.Sprintf("Ticket - %s", event.ID), true)
 	pdf.SetAuthor("Zenao", true)
 	pdf.SetCreationDate(time.Now())
-
 	pdf.AddPage()
-	pdf.SetFillColor(0, 0, 0)
-	pdf.Rect(0, 0, 210, 148, "F")
 
+	// A4 size (210x297mm)
 	pageWidth := 210.0
-	pageHeight := 148.0
-	whiteHeight := pageHeight * 2 / 4
-	whiteY := pageHeight / 4
-	imgWidth := pageWidth * 0.4
-	imgY := whiteY
+	pageHeight := 297.0
+	maxTextWidth := (pageWidth - 40) / 2
+	widthMargin := 10.0
 
-	pdf.SetFillColor(255, 255, 255)
-	pdf.Rect(0, whiteY, pageWidth, whiteHeight, "F")
+	pdf.SetFont("Helvetica", "B", 24)
+	pdf.SetTextColor(0, 0, 0)
+	pdf.SetXY(widthMargin, 10.0)
+	pdf.MultiCell(pageWidth-widthMargin*2, 12, tr(event.Title), "", "", false)
+
+	imgWidth := pageWidth - 20
+	imgHeight := (imgWidth * 9) / 16
+	imgX := 10.0
+	imgY := pageHeight/2 - imgHeight/2
 
 	if event.ImageURI != "" {
 		imageURL := web2URL(event.ImageURI)
-		if err := embedImageURL(pdf, imageURL, 0, imgY, imgWidth, whiteHeight); err != nil {
+		if err := embedImageURL(pdf, imageURL, imgX, imgY, imgWidth, imgHeight); err != nil {
 			logger.Error("failed to embed image", zap.Error(err))
-			drawImagePlaceholder(pdf, 0, imgY, imgWidth)
+			drawImagePlaceholder(pdf, imgX, imgY, imgWidth, imgHeight)
 		}
+	} else {
+		drawImagePlaceholder(pdf, imgX, imgY, imgWidth, imgHeight)
 	}
 
-	textX := imgWidth + 5
-	textWidth := pageWidth - textX - 10
+	infoY := imgY - 50.0
 
 	pdf.SetFont("Helvetica", "B", 12)
 	pdf.SetTextColor(0, 0, 0)
-	pdf.SetXY(textX, whiteY+5)
-	pdf.MultiCell(textWidth, 6, event.Title, "", "", false)
-
-	currentY := pdf.GetY() + 2
+	pdf.SetXY(widthMargin, infoY)
+	pdf.Cell(maxTextWidth, 6, tr("Date & Time"))
 	pdf.SetFont("Helvetica", "B", 10)
-	pdf.SetTextColor(40, 40, 40)
-	pdf.SetXY(textX, currentY)
-	pdf.Cell(textWidth, 8, event.StartDate.Format("January 2, 2006"))
-	pdf.SetFont("Helvetica", "", 10)
-	pdf.SetTextColor(80, 80, 80)
-	pdf.SetXY(textX, currentY+5)
-	pdf.Cell(textWidth, 8, fmt.Sprintf("%s - %s",
-		event.StartDate.Format("3:04 PM"),
-		event.EndDate.Format("3:04 PM"),
-	))
+	pdf.SetTextColor(51, 51, 51)
+	pdf.SetXY(widthMargin, infoY+8)
+	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("From: %s", event.StartDate.Format("Monday, January 2, 2006 15:04"))))
+	pdf.SetXY(widthMargin, infoY+15)
+	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("To: %s", event.EndDate.Format("Monday, January 2, 2006 15:04"))))
 
-	pdf.SetFont("Helvetica", "U", 10)
-	pdf.SetTextColor(255, 128, 0)
-	pdf.SetXY(textX, currentY+13)
-	linkText := "See event details"
-	linkURI := fmt.Sprintf("https://zenao.io/event/%s", event.ID) // TODO: make the domain a variable
-	pdf.CellFormat(textWidth, 8, linkText, "", 0, "U", false, 0, linkURI)
+	pdf.SetFont("Helvetica", "B", 12)
+	pdf.SetTextColor(0, 0, 0)
+	pdf.SetXY(widthMargin, infoY+25)
+	pdf.Cell(maxTextWidth, 6, tr("Location"))
+	locStr, err := zeni.LocationToString(event.Location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert location to string: %w", err)
+	}
+	pdf.SetFont("Helvetica", "B", 10)
+	pdf.SetTextColor(51, 51, 51)
+	pdf.SetXY(widthMargin, infoY+33)
+	pdf.MultiCell(maxTextWidth, 5, tr(locStr), "", "", false)
+
+	qrSize := 40.0
+	qrX := pageWidth - qrSize - widthMargin
+	qrY := infoY
 
 	qrCode, err := qrcode.New(ticketSecret, qrcode.Medium)
 	if err != nil {
@@ -147,17 +155,43 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, logger *zap.Logge
 	if err := qrCode.WriteFile(125, tmpFile.Name()); err != nil {
 		return nil, fmt.Errorf("failed to write QR code to file: %w", err)
 	}
-	qrSize := 25.0
-	qrX := ((pageWidth-imgWidth)/2 + imgWidth) - qrSize/2
-	qrY := whiteY + whiteHeight - qrSize - 15
+
 	pdf.ImageOptions(tmpFile.Name(), qrX, qrY, qrSize, qrSize, false, fpdf.ImageOptions{
 		ReadDpi:               true,
 		AllowNegativePosition: false,
 	}, 0, "")
 
-	logoSize := 10.0
-	logoX := pageWidth - logoSize - 3
-	logoY := pageHeight - imgY - logoSize - 3
+	ticketInfoY := imgY + imgHeight + 10
+	pdf.SetFont("Helvetica", "B", 12)
+	pdf.SetTextColor(0, 0, 0)
+	pdf.SetXY(widthMargin, ticketInfoY)
+	pdf.Cell(maxTextWidth, 6, "Ticket Information")
+
+	pdf.SetFont("Helvetica", "B", 10)
+	pdf.SetTextColor(51, 51, 51)
+	pdf.SetXY(widthMargin, ticketInfoY+8)
+	pdf.Cell(maxTextWidth, 5, fmt.Sprintf("Customer: %s - %s", DisplayName, email))
+	pdf.SetXY(widthMargin, ticketInfoY+15)
+	pdf.Cell(maxTextWidth, 5, fmt.Sprintf("Purchase date: %s", purchaseDate.Format("January 2, 2006 15:04")))
+
+	pdf.SetAutoPageBreak(false, 0)
+
+	bottomY := pageHeight - 15
+	footerTextHeight := 5.0
+
+	pdf.SetFont("Helvetica", "B", 8)
+	pdf.SetTextColor(128, 128, 128)
+	pdf.SetXY(10, bottomY)
+	footerText := "Delivered by ZENAO - contact@zenao.io"
+	pdf.Cell(float64(len(footerText)*2), footerTextHeight, footerText)
+
+	logoSize := 12.0
+	zenaoTextWidth := 20.0
+	totalRightWidth := logoSize + zenaoTextWidth
+
+	logoX := pageWidth - totalRightWidth - 10
+	logoY := bottomY - (logoSize-footerTextHeight)/2
+
 	if _, err := os.Stat(ZenaoLogoPath); os.IsNotExist(err) {
 		logger.Error("logo file not found in ticket pdf generation", zap.String("path", ZenaoLogoPath))
 	} else {
@@ -165,14 +199,15 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, logger *zap.Logge
 			ReadDpi:               true,
 			AllowNegativePosition: false,
 		}, 0, "")
+
+		pdf.SetFont("Helvetica", "B", 14)
+		pdf.SetTextColor(0, 0, 0)
+		textY := logoY + (logoSize / 2) - 3
+		pdf.SetXY(logoX+logoSize+2, textY)
+		pdf.Cell(zenaoTextWidth, 6, "ZENAO")
 	}
 
-	pdf.SetFont("Helvetica", "U", 8)
-	pdf.SetTextColor(255, 128, 0)
-	pdf.SetXY(imgWidth+5, pageHeight-imgY-9.5)
-	promoText := "Organize your event & tribe for free on zenao.io"
-	promoLink := "https://zenao.io/" // TODO: Make this variable
-	pdf.CellFormat(pageWidth/2, 5, promoText, "", 0, "", false, 0, promoLink)
+	pdf.SetAutoPageBreak(true, 0)
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
@@ -183,19 +218,20 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, logger *zap.Logge
 	return buf.Bytes(), nil
 }
 
-func drawImagePlaceholder(pdf *fpdf.Fpdf, x, y, size float64) {
+func drawImagePlaceholder(pdf *fpdf.Fpdf, x, y, width, height float64) {
 	pdf.SetDrawColor(180, 180, 180)
 	pdf.SetFillColor(240, 240, 240)
-	pdf.Rect(x, y, size, size, "FD")
+	pdf.Rect(x, y, width, height, "FD")
 
 	pdf.SetFont("Helvetica", "I", 12)
 	pdf.SetTextColor(120, 120, 120)
-	pdf.SetXY(x, y+size/2-5)
-	pdf.Cell(size, 10, "Event Image")
+	pdf.SetXY(width/2-5, y+height/2-5)
+	pdf.Cell(0, 10, "Event Image")
 }
 
 func embedImageURL(pdf *fpdf.Fpdf, imageURI string, x, y, width, height float64) error {
-	resp, err := http.Get(imageURI)
+	optimizedURL := fmt.Sprintf("%s?img-width=1240&img-height=698&img-quality=75&img-fit=crop", imageURI)
+	resp, err := http.Get(optimizedURL)
 	if err != nil {
 		return fmt.Errorf("failed to download image: %w", err)
 	}
