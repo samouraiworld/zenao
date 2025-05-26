@@ -13,7 +13,8 @@ service ZenaoService {
   // EVENT
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
-  rpc ValidatePassword(ValidatePasswordRequest) returns (ValidatePasswordResponse);
+  rpc ValidatePassword(ValidatePasswordRequest)
+      returns (ValidatePasswordResponse);
   rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
@@ -73,9 +74,7 @@ message ValidatePasswordRequest {
   string password = 2;
 }
 
-message ValidatePasswordResponse {
-  bool valid = 1;
-}
+message ValidatePasswordResponse { bool valid = 1; }
 
 message ParticipateRequest {
   string event_id = 1;
@@ -124,13 +123,9 @@ message EventPrivacy {
   }
 }
 
-message EventPrivacyPublic {
+message EventPrivacyPublic {}
 
-}
-
-message EventPrivacyGuarded {
-  string participation_pubkey = 1;
-}
+message EventPrivacyGuarded { string participation_pubkey = 1; }
 
 message EventInfo {
   string title = 1;
@@ -176,7 +171,8 @@ message VotePollResponse {}
 message CreatePostRequest {
   string event_id = 1;
   string content = 2;
-  repeated string tags = 3;
+  string parent_id = 3;
+  repeated string tags = 4;
 }
 
 message CreatePostResponse { string post_id = 1; }
@@ -188,13 +184,9 @@ message ReactPostRequest {
 
 message ReactPostResponse {}
 
-message GetEventTicketsRequest {
-  string event_id = 1;
-}
+message GetEventTicketsRequest { string event_id = 1; }
 
-message GetEventTicketsResponse {
-  repeated string tickets_secrets = 1;
-}
+message GetEventTicketsResponse { repeated string tickets_secrets = 1; }
 
 message CheckinRequest {
   string ticket_pubkey = 1;

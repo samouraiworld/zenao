@@ -127,7 +127,7 @@ export function PostCardLayout({
             onClick={onDisplayReplies}
           >
             <MessageCircle size={16} color="hsl(var(--secondary-color))" />
-            <span className="text-xs">14</span>
+            <span className="text-xs">{post.childrenCount}</span>
           </Button>
         )}
         <Reactions

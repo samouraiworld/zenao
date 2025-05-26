@@ -97,12 +97,6 @@ export const userFormSchema = z.object({
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
-export const standardPostFormSchema = z.object({
-  kind: z.literal("STANDARD_POST"),
-  content: z.string().trim().min(1, "Required").max(5000),
-});
-export type StandardPostFormSchemaType = z.infer<typeof standardPostFormSchema>;
-
 const pollOptionFormSchema = z.object({
   text: z
     .string()
@@ -123,6 +117,13 @@ const parentPostSchema = z.object({
   postId: z.bigint(),
 });
 export type ParentPostSchemaType = z.infer<typeof parentPostSchema>;
+
+export const standardPostFormSchema = z.object({
+  kind: z.literal("STANDARD_POST"),
+  parentPost: parentPostSchema.optional(),
+  content: z.string().trim().min(1, "Required").max(5000),
+});
+export type StandardPostFormSchemaType = z.infer<typeof standardPostFormSchema>;
 
 export const pollFormSchema = z.object({
   parentPost: parentPostSchema.optional(),

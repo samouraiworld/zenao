@@ -4,6 +4,7 @@ import {
   feedPosts,
   pollInfo,
 } from "../queries/social-feed";
+import { getQueryClient } from "../get-query-client";
 import {
   CreatePollRequest,
   CreatePostRequest,
@@ -150,7 +151,8 @@ interface CreateStandardPostRequestMutation
   userAddress: string;
 }
 
-export const useCreateStandardPost = (queryClient: QueryClient) => {
+export const useCreateStandardPost = () => {
+  const queryClient = getQueryClient();
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token,

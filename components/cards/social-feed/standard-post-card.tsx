@@ -2,12 +2,17 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { UseFormReturn } from "react-hook-form";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { FeedPostFormSchemaType } from "@/components/form/types";
+import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
+
+function PostComments({ parentId }: { parentId: string }) {
+  return <p>{parentId}</p>;
+}
 
 export function StandardPostCard({
   eventId,
@@ -33,7 +38,7 @@ export function StandardPostCard({
         createdBy={createdBy}
         onReply={() => {
           form.setValue("parentPost", {
-            kind: "POLL",
+            kind: "STANDARD_POST",
             postId: post.post.localPostId,
             author: post.post.author,
           });
@@ -46,10 +51,13 @@ export function StandardPostCard({
       </PostCardLayout>
       {showReplies && (
         <div className="pl-6">
-          <PostCardLayout eventId={eventId} post={post} createdBy={createdBy}>
-            {/* TODO Replace by real replies */}
-            <MarkdownPreview markdownString={standardPost.content} />
-          </PostCardLayout>
+          <Suspense fallback={<PostCardSkeleton />}>
+            <PostComments parentId={post.post.localPostId.toString()} />
+            <PostCardLayout eventId={eventId} post={post} createdBy={createdBy}>
+              {/* TODO Replace by real replies */}
+              <MarkdownPreview markdownString={standardPost.content} />
+            </PostCardLayout>
+          </Suspense>
         </div>
       )}
     </div>
