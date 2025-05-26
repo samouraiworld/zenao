@@ -104,6 +104,7 @@ export function PostCardLayout({
               <div
                 className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50"
                 onClick={onReply}
+                aria-label="reply to post"
               >
                 <Reply size={14} color="hsl(var(--secondary-color))" />
                 <Text className="text-sm" variant="secondary">
@@ -123,7 +124,7 @@ export function PostCardLayout({
           <Button
             variant="outline"
             className={
-              "reaction-btn rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+              "rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
             }
             title="Show replies"
             onClick={onDisplayReplies}
