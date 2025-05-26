@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
-import { useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -20,6 +20,8 @@ import { Button } from "@/components/shadcn/button";
 import { profileOptions } from "@/lib/queries/profile";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { FeedPostFormSchemaType } from "@/components/form/types";
+import { PostComments } from "@/components/form/social-feed/post-comments";
+import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
 
 export function PollPostCard({
   pollId,
@@ -39,6 +41,7 @@ export function PollPostCard({
   const { getToken } = useAuth();
   const { toast } = useToast();
 
+  const [showReplies, setShowReplies] = useState(false);
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(pollPost.post.author),
   );
@@ -90,7 +93,7 @@ export function PollPostCard({
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-1">
       <PostCardLayout
         eventId={eventId}
         post={pollPost}
@@ -103,7 +106,9 @@ export function PollPostCard({
             author: pollPost.post.author,
           });
         }}
-        parentId={pollPost.post.localPostId.toString()}
+        onDisplayReplies={() => {
+          setShowReplies((prev) => !prev);
+        }}
       >
         <div className="w-full flex flex-col gap-2">
           <div className="flex flex-row items-center gap-2">
@@ -131,7 +136,17 @@ export function PollPostCard({
           </div>
         </div>
       </PostCardLayout>
-    </>
+      {showReplies && (
+        <div className="pl-6">
+          <Suspense fallback={<PostCardSkeleton />}>
+            <PostComments
+              eventId={eventId}
+              parentId={pollPost.post.localPostId.toString()}
+            />
+          </Suspense>
+        </div>
+      )}
+    </div>
   );
 }
 

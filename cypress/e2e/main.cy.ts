@@ -307,7 +307,6 @@ describe("main", () => {
   it("access an exclusive event", () => {
     cy.createEvent({ exclusive: true });
     cy.url().then((url) => {
-      console.log(url);
       logout();
       cy.visit(url);
     });

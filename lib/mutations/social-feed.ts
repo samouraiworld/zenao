@@ -276,7 +276,6 @@ export const useReactPost = (queryClient: QueryClient) => {
         "",
         variables.userAddress,
       );
-
       const feedPollsOpts = feedPosts(
         variables.eventId,
         DEFAULT_FEED_POSTS_LIMIT,
@@ -309,22 +308,22 @@ export const useReactPost = (queryClient: QueryClient) => {
         "",
         variables.userAddress,
       );
-      const feedPollsOpts = feedPosts(
-        variables.eventId,
-        DEFAULT_FEED_POSTS_LIMIT,
-        "poll",
-        variables.userAddress,
-      );
       const feedPostsChildrenOpts = feedPostsChildren(
         variables.parentId,
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
         "",
         variables.userAddress,
       );
+      const feedPollsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "poll",
+        variables.userAddress,
+      );
 
+      queryClient.invalidateQueries(feedPostsChildrenOpts);
       queryClient.invalidateQueries(feedPostsOpts);
       queryClient.invalidateQueries(feedPollsOpts);
-      queryClient.invalidateQueries(feedPostsChildrenOpts);
     },
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(

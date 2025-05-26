@@ -91,7 +91,6 @@ export const EventForm: React.FC<EventFormProps> = ({
       }
       setUploading(true);
       const textarea = descriptionRef.current;
-      console.log(cursor);
       const loadingText = `${cursor > 0 ? "\n" : ""}[Uploading ${file.name}...]\n`;
 
       if (textarea) {
@@ -227,7 +226,6 @@ export const EventForm: React.FC<EventFormProps> = ({
                               descriptionRef.current?.textLength ??
                               0,
                           );
-                          console.log(cursor);
                           hiddenInputRef.current?.click();
                         }}
                         aria-label="Add image"

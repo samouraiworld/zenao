@@ -36,7 +36,6 @@ export function PostCardLayout({
   onReply,
   onDisplayReplies,
   parentId = "",
-  reactions = true,
 }: {
   post: PostView;
   eventId: string;
@@ -46,7 +45,6 @@ export function PostCardLayout({
   parentId?: string;
   onReply?: () => void;
   onDisplayReplies?: () => void;
-  reactions?: boolean;
 }) {
   if (!post.post) {
     return null;
@@ -134,14 +132,12 @@ export function PostCardLayout({
             <span className="text-xs">{post.childrenCount}</span>
           </Button>
         )}
-        {reactions && (
-          <Reactions
-            postId={post.post.localPostId}
-            eventId={eventId}
-            reactions={post.reactions}
-            parentId={parentId}
-          />
-        )}
+        <Reactions
+          postId={post.post.localPostId}
+          eventId={eventId}
+          reactions={post.reactions}
+          parentId={parentId}
+        />
       </div>
     </Card>
   );
@@ -169,7 +165,6 @@ function Reactions({
   );
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
-
   const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
   const { reactPost, isPending } = useReactPost(queryClient);
   const onReactionChange = async (icon: string) => {
@@ -179,7 +174,6 @@ function Reactions({
       if (!token) {
         throw new Error("Missing token");
       }
-
       await reactPost({
         token,
         userAddress: userAddress || "",

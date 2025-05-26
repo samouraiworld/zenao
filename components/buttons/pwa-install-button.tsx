@@ -22,7 +22,6 @@ export default function InstallButton() {
   useEffect(() => {
     const handler = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
-      console.log("HERE");
       setDeferredPrompt(e);
       setIsVisible(true);
     };
