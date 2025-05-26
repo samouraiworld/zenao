@@ -7,7 +7,6 @@ import {
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { GnowebButton } from "@/components/buttons/gnoweb-button";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import {
   Dialog,
@@ -113,9 +112,6 @@ export function ParticipantsSection({ id }: { id: string }) {
           </div>
         </DialogContent>
       </Dialog>
-      <GnowebButton
-        href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${id}`}
-      />
     </div>
   );
 }

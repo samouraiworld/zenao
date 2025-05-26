@@ -19,7 +19,7 @@ export function MarkdownPreview({
     <ReactMarkdown
       // `prose` className came from @tailwindcss/typography (a plugin that add beautiful typographic defaults to any vanilla HTML you don’t control, like HTML rendered from Markdown)
       className={cn(
-        "[&_*]:my-0 flex flex-col gap-2 prose dark:prose-invert",
+        "[&_*]:my-0 flex flex-col gap-2 prose dark:prose-invert max-w-full",
         className,
       )}
       remarkPlugins={[
@@ -47,8 +47,8 @@ export function MarkdownPreview({
               {...props}
               src={props.src ?? ""}
               alt={props.alt ?? ""}
-              width={650}
-              height={650}
+              width={960}
+              height={960}
             />
           );
         },
