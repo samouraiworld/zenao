@@ -596,6 +596,24 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 	return zpost, nil
 }
 
+// GetPostByID implements zeni.DB
+func (g *gormZenaoDB) GetPostByID(postID string) (*zeni.Post, error) {
+	postIDUint, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse post id: %w", err)
+	}
+
+	var post Post
+	if err := g.db.Preload("Reactions").Preload("Tags").First(&post, postIDUint).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("post not found: %s", postID)
+		}
+		return nil, err
+	}
+
+	return dbPostToZeniPost(&post)
+}
+
 // GetAllPosts implements zeni.DB.
 func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
 	var posts []*Post

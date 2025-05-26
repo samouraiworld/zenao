@@ -933,6 +933,9 @@ func (c *CreatePostRequest) ToJSON() *json.Node {
 	if c.Content != "" {
 		fields["content"] = json.StringNode("", c.Content)
 	}
+	if c.ParentId != "" {
+		fields["parentId"] = json.StringNode("", c.ParentId)
+	}
 	if len(c.Tags) != 0 {
 		arr := make([]*json.Node, len(c.Tags))
 		for i, val := range c.Tags {
@@ -953,6 +956,9 @@ func (c *CreatePostRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["content"]; ok {
 		c.Content = val.MustString()
+	}
+	if val, ok := fields["parentId"]; ok {
+		c.ParentId = val.MustString()
 	}
 	if val, ok := fields["tags"]; ok {
 		jarr := val.MustArray()

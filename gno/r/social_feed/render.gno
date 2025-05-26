@@ -1,7 +1,11 @@
 package social_feed
 
 import (
+	"std"
+	"strings"
+
 	"gno.land/p/demo/mux"
+	"gno.land/p/demo/seqid"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 
@@ -12,11 +16,13 @@ var router *mux.Router
 
 const SocialFeedPagePath = ""
 const DetailSocialFeedPagePath = "{id}"
+const DetailPostPagePath = "post/{postId}"
 
 func init() {
 	router = mux.NewRouter()
 	router.HandleFunc(SocialFeedPagePath, SocialFeedPageHandler)
 	router.HandleFunc(DetailSocialFeedPagePath, DetailSocialFeedPageHandler)
+	router.HandleFunc(DetailPostPagePath, DetailPostPageHandler)
 }
 
 func Render(path string) string {
@@ -65,6 +71,9 @@ func DetailSocialFeedPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 	end := id + ";"
 	postsByFeed.ReverseIterate(start, end, func(key string, postRaw interface{}) bool {
 		post := postRaw.(*feedsv1.Post)
+		if post.ParentUri != "" {
+			return false
+		}
 		res.Write(renderZenaoPost(post))
 		if i >= 20 {
 			return true
@@ -75,22 +84,47 @@ func DetailSocialFeedPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 	})
 }
 
+func DetailPostPageHandler(res *mux.ResponseWriter, req *mux.Request) {
+	postId := req.GetVar("postId")
+	postRaw, ok := posts.Get(postId)
+	if !ok {
+		res.Write(md.H1("Post not found"))
+		return
+	}
+	post := postRaw.(*feedsv1.Post)
+	res.Write(md.H1(ufmt.Sprintf("Post #%d", post.LocalPostId)))
+	res.Write(renderZenaoPost(post))
+	res.Write(md.H2("Comments:"))
+	res.Write(md.HorizontalRule())
+	comments := GetChildrenPosts(ufmt.Sprintf("%d", post.LocalPostId), 0, 20, "", "")
+	for _, comment := range comments {
+		res.Write(renderZenaoPost(comment.Post))
+		res.Write(md.HorizontalRule())
+	}
+}
+
 func renderZenaoPost(post *feedsv1.Post) string {
+	pkgPath := std.CurrentRealm().PkgPath()
+	linkPath := getLinkPath(pkgPath)
 	var s string
 	switch ext := post.Post.(type) {
 	case *feedsv1.StandardPost:
-		s = renderStandardPost(post, ext)
+		s = renderStandardPost(ext)
 	case *feedsv1.ArticlePost:
-		s = renderArticlePost(post, ext)
+		s = renderArticlePost(ext)
 	case *feedsv1.LinkPost:
-		s = renderLinkPost(post, ext)
+		s = renderLinkPost(ext)
 	case *feedsv1.ImagePost:
-		s = renderImagePost(post, ext)
+		s = renderImagePost(ext)
 	case *feedsv1.VideoPost:
-		s = renderVideoPost(post, ext)
+		s = renderVideoPost(ext)
 	default:
 		s = md.Paragraph("Unknown post type")
 	}
+	s += md.Paragraph(md.Blockquote("Author: " + post.Author))
+	s += md.Link("See details", linkPath+":post/"+seqid.ID(post.LocalPostId).String())
+	commentCount := CountChildren(post.LocalPostId)
+	s += md.Paragraph("NUMBER OF COMMENTS: " + ufmt.Sprintf("%d", commentCount) + " " + md.Link("see comments", linkPath+":post/"+seqid.ID(post.LocalPostId).String()))
 	reactions := GetPostReactions(post.LocalPostId, "")
 	s += md.Paragraph("NUMBER OF REACTIONS: " + ufmt.Sprintf("%d", len(reactions)))
 	if len(reactions) > 0 {
@@ -103,22 +137,30 @@ func renderZenaoPost(post *feedsv1.Post) string {
 	return s
 }
 
-func renderStandardPost(post *feedsv1.Post, ext *feedsv1.StandardPost) string {
-	return md.H3("POST KIND: STANDARD") + md.Paragraph(ext.Content) + md.Paragraph(md.Blockquote("Author: "+post.Author))
+func renderStandardPost(ext *feedsv1.StandardPost) string {
+	return md.H3("POST KIND: STANDARD") + md.Paragraph(ext.Content)
 }
 
-func renderArticlePost(post *feedsv1.Post, ext *feedsv1.ArticlePost) string {
-	return md.H3("POST KIND: ARTICLE") + md.H3(ext.Title) + md.Paragraph(ext.PreviewText) + md.Image("article preview", ext.PreviewImageUri) + md.Paragraph(ext.Content) + md.Paragraph(md.Blockquote("Author: "+post.Author))
+func renderArticlePost(ext *feedsv1.ArticlePost) string {
+	return md.H3("POST KIND: ARTICLE") + md.H3(ext.Title) + md.Paragraph(ext.PreviewText) + md.Image("article preview", ext.PreviewImageUri) + md.Paragraph(ext.Content)
 }
 
-func renderLinkPost(post *feedsv1.Post, ext *feedsv1.LinkPost) string {
-	return md.H3("POST KIND: LINK") + md.Link(ext.Uri, ext.Uri) + md.Paragraph(md.Blockquote("Author: "+post.Author))
+func renderLinkPost(ext *feedsv1.LinkPost) string {
+	return md.H3("POST KIND: LINK") + md.Link(ext.Uri, ext.Uri)
 }
 
-func renderImagePost(post *feedsv1.Post, ext *feedsv1.ImagePost) string {
-	return md.H3("POST KIND: IMAGE") + md.Image("image", ext.ImageUri) + md.Paragraph(ext.Description) + md.Paragraph(md.Blockquote("Author: "+post.Author))
+func renderImagePost(ext *feedsv1.ImagePost) string {
+	return md.H3("POST KIND: IMAGE") + md.Image("image", ext.ImageUri) + md.Paragraph(ext.Description)
 }
 
-func renderVideoPost(post *feedsv1.Post, ext *feedsv1.VideoPost) string {
-	return md.H3("POST KIND: VIDEO") + md.Link(ext.VideoUri, ext.VideoUri) + md.Image("video thumbnail", ext.ThumbnailImageUri) + md.Paragraph(ext.Description) + md.Paragraph(md.Blockquote("Author: "+post.Author))
+func renderVideoPost(ext *feedsv1.VideoPost) string {
+	return md.H3("POST KIND: VIDEO") + md.Link(ext.VideoUri, ext.VideoUri) + md.Image("video thumbnail", ext.ThumbnailImageUri) + md.Paragraph(ext.Description)
+}
+
+func getLinkPath(pkgPath string) string {
+	slashIdx := strings.IndexRune(pkgPath, '/')
+	if slashIdx != 1 {
+		return pkgPath[slashIdx:]
+	}
+	return ""
 }
