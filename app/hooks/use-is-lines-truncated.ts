@@ -5,6 +5,8 @@ export const useIsLinesTruncated = (
   lineClamp: number,
 ) => {
   const [isDescTruncated, setDescTruncated] = useState(false);
+  const [truncatedMaxHeight, setTruncatedMinHeight] = useState(0);
+
   useEffect(() => {
     if (containerRef.current) {
       const containerHeight = containerRef.current.scrollHeight;
@@ -12,9 +14,10 @@ export const useIsLinesTruncated = (
         window.getComputedStyle(containerRef.current).lineHeight,
         10,
       );
-      const maxHeight = lineClamp * lineHeight;
-      setDescTruncated(containerHeight > maxHeight);
+      const mHeight = lineClamp * lineHeight;
+      setTruncatedMinHeight(mHeight);
+      setDescTruncated(containerHeight > mHeight);
     }
   }, [containerRef, lineClamp]);
-  return isDescTruncated;
+  return { truncatedMaxHeight, isDescTruncated };
 };

@@ -44,7 +44,7 @@ export function InviteeForm({
               name={`guests.${index}.email`}
               control={control}
               onClickRemove={() => removeOption(index)}
-              canRemove={!userId ? optionFields.length > 1 : true}
+              canRemove={!userId ? optionFields.length > 0 : true}
               loading={loading}
             />
           ))}
