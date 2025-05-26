@@ -21,6 +21,7 @@ const testEventCapacity = "42";
 const testEventPassword = "zenao_everyday";
 
 const testStandardPost = "Post to test";
+const testComment = "A comment to test";
 
 const login = () => {
   cy.clerkSignIn({ strategy: "email_code", identifier: testEmail });
@@ -327,6 +328,53 @@ describe("main", () => {
     // Assertions
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
+  });
+
+  it("send a comment on a post", () => {
+    cy.createEvent({ exclusive: false });
+
+    // Participate to an event
+    cy.get("button").contains("Register").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
+
+    // Go Description tab
+    cy.get("button").contains("Discussions").click();
+
+    // EventFeedForm should exist
+    cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
+      .should("exist")
+      .type(testStandardPost, { delay: 1 });
+
+    // Submit post
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Check post exists
+    cy.get("p").contains(testStandardPost).should("be.visible");
+
+    // check that no comment exists
+    cy.get('button[title="Show replies"]').contains("0").should("be.visible");
+
+    // Click on reply button
+    cy.get('div[aria-label="reply to post"]').click();
+
+    // Type comment
+    cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
+      .should("exist")
+      .type(testComment, { delay: 1 });
+
+    // Submit comment
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Assert comment exists
+    cy.get('button[title="Show replies"]').contains("1").should("be.visible");
+
+    // Assert comment text is visible
+
+    // Click on comment button
+    cy.get('button[title="Show replies"]').click();
+    cy.get("p").contains(testComment).should("be.visible");
   });
 
   it("event not found", () => {

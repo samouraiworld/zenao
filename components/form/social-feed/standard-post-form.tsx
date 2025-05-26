@@ -1,5 +1,4 @@
 import { useAuth } from "@clerk/nextjs";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Paperclip } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -10,15 +9,15 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useForm } from "react-hook-form";
 import { useMediaQuery } from "react-responsive";
+import { UseFormReturn } from "react-hook-form";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
 import { ButtonBase } from "@/components/buttons/ButtonBases";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
 import {
+  FeedPostFormSchemaType,
   standardPostFormSchema,
-  StandardPostFormSchemaType,
 } from "@/components/form/types";
 import {
   Form,
@@ -36,7 +35,7 @@ import {
 import { Textarea } from "@/components/shadcn/textarea";
 import Text from "@/components/texts/text";
 import { uploadFile } from "@/lib/files";
-import { getQueryClient } from "@/lib/get-query-client";
+import { ReplyAlert } from "@/components/widgets/reply-alert";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
@@ -47,13 +46,14 @@ export function StandardPostForm({
   eventId,
   feedInputMode,
   setFeedInputMode,
+  form,
 }: {
   eventId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
+  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
-  const queryClient = getQueryClient();
-  const { createStandardPost, isPending } = useCreateStandardPost(queryClient);
+  const { createStandardPost, isPending } = useCreateStandardPost();
   const t = useTranslations("event-feed.standard-post-form");
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -61,14 +61,8 @@ export function StandardPostForm({
   );
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
-
-  const standardPostForm = useForm<StandardPostFormSchemaType>({
-    resolver: zodResolver(standardPostFormSchema),
-    defaultValues: {
-      content: "",
-    },
-  });
-  const content = standardPostForm.watch("content");
+  const content = form.watch("content");
+  const parentPost = form.watch("parentPost");
 
   const textareaMaxLength =
     standardPostFormSchema.shape.content._def.checks.find(
@@ -105,7 +99,7 @@ export function StandardPostForm({
         const after = textarea.value.substring(cursor);
 
         // Insert the text at cursor position
-        standardPostForm.setValue("content", before + loadingText + after);
+        form.setValue("content", before + loadingText + after);
 
         // Move cursor after the inserted text
         const newCursorPos = cursor + loadingText.length;
@@ -124,12 +118,12 @@ export function StandardPostForm({
           const after = textarea.value.substring(cursor);
 
           // Insert the text at cursor position
-          standardPostForm.setValue("content", before + text + after);
+          form.setValue("content", before + text + after);
         } else {
           const before = textarea.value.substring(0, cursor);
           const after = textarea.value.substring(start + loadingText.length);
 
-          standardPostForm.setValue("content", before + text + after);
+          form.setValue("content", before + text + after);
 
           const newCursor = start + loadingText.length;
           textarea.setSelectionRange(newCursor, newCursor);
@@ -158,8 +152,12 @@ export function StandardPostForm({
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [content]);
 
-  const onSubmitStandardPost = async (values: StandardPostFormSchemaType) => {
+  const onSubmitStandardPost = async (values: FeedPostFormSchemaType) => {
     try {
+      if (values.kind !== "STANDARD_POST") {
+        throw new Error("invalid form");
+      }
+
       const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
@@ -168,13 +166,13 @@ export function StandardPostForm({
       await createStandardPost({
         eventId,
         content: values.content,
-        parentId: "",
+        parentId: values.parentPost?.postId.toString() ?? "",
         token,
         userAddress: userAddress ?? "",
         tags: [],
       });
 
-      standardPostForm.reset({}, { keepValues: false });
+      form.reset({ kind: "STANDARD_POST", content: "" }, { keepValues: false });
       toast({
         title: t("toast-post-creation-success"),
       });
@@ -188,11 +186,12 @@ export function StandardPostForm({
   };
 
   return (
-    <Form {...standardPostForm}>
+    <Form {...form}>
       <form
-        onSubmit={standardPostForm.handleSubmit(onSubmitStandardPost)}
-        className="flex flex-col gap-4 bg-accent p-4 rounded"
+        onSubmit={form.handleSubmit(onSubmitStandardPost)}
+        className="flex flex-col gap-4 p-4 rounded"
       >
+        <ReplyAlert parentPost={parentPost} form={form} />
         <div className="flex flex-row gap-4">
           <Tabs defaultValue="form" className="w-full">
             <div className="w-full flex justify-between">
@@ -205,12 +204,12 @@ export function StandardPostForm({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="flex flex-row gap-2">
+              <div className="flex flex-row gap-2 items-center">
                 <ButtonBase
                   variant="link"
                   className={cn(
                     "flex items-center justify-center rounded-full aspect-square cursor-pointer",
-                    "hover:bg-neutral-700",
+                    "hover:bg-neutral-500/20",
                   )}
                   title="Upload image"
                   onClick={(e) => {
@@ -235,6 +234,7 @@ export function StandardPostForm({
                 <FeedInputButtons
                   buttonSize={textareaMinHeight}
                   feedInputMode={feedInputMode}
+                  isReplying={!!parentPost}
                   setFeedInputMode={setFeedInputMode}
                   isLoading={isPending}
                 />
@@ -250,7 +250,7 @@ export function StandardPostForm({
             <TabsContent value="form">
               <FormField
                 rules={{ required: true }}
-                control={standardPostForm.control}
+                control={form.control}
                 name="content"
                 render={({ field }) => (
                   <FormItem className="relative w-full">

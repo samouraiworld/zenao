@@ -3,10 +3,12 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { UseFormReturn } from "react-hook-form";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { PollPost } from "../widgets/poll-post";
 import { LoaderMoreButton } from "../buttons/load-more-button";
+import { FeedPostFormSchemaType } from "../form/types";
 import { PollPostView } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
@@ -26,9 +28,11 @@ function EmptyPollsList() {
 export function PollsList({
   eventId,
   userAddress,
+  form,
 }: {
   eventId: string;
   userAddress: string | null;
+  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const {
     data: pollsPages,
@@ -66,6 +70,7 @@ export function PollsList({
                   eventId={eventId}
                   pollId={pollId}
                   pollPost={pollPost}
+                  form={form}
                 />
               </Suspense>
             );

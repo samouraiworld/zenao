@@ -4,7 +4,7 @@ import { Control, useFieldArray, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 import { FormFieldInputString } from "../components/FormFieldInputString";
-import { pollFormSchema, PollFormSchemaType } from "../types";
+import { FeedPostFormSchemaType, pollFormSchema } from "../types";
 import { FormFieldInputNumber } from "../components/FormFieldInputNumber";
 import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import { cn } from "@/lib/tailwind";
@@ -14,7 +14,7 @@ import Text from "@/components/texts/text";
 export function PollFields({
   form,
 }: {
-  form: UseFormReturn<PollFormSchemaType>;
+  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const t = useTranslations("event-feed.poll-form");
   const {
@@ -70,7 +70,7 @@ function PollOptionItem({
   canRemove,
 }: {
   name: `options.${number}.text`;
-  control: Control<PollFormSchemaType>;
+  control: Control<FeedPostFormSchemaType>;
   onClickRemove: () => void;
   canRemove: boolean;
 }) {
@@ -131,7 +131,7 @@ function RemoveOptionButton({
 function PollFormDuration({
   form,
 }: {
-  form: UseFormReturn<PollFormSchemaType>;
+  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const t = useTranslations("event-feed.poll-form");
 

@@ -2,7 +2,7 @@
 
 import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode, useMemo } from "react";
-import { Hash, MapPin, Smile } from "lucide-react";
+import { Hash, MapPin, MessageCircle, Reply, Smile } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -33,12 +33,18 @@ export function PostCardLayout({
   createdBy,
   gnowebHref,
   children,
+  onReply,
+  onDisplayReplies,
+  parentId = "",
 }: {
   post: PostView;
   eventId: string;
   createdBy: GnoProfile | null;
   children: ReactNode;
   gnowebHref?: Url;
+  parentId?: string;
+  onReply?: () => void;
+  onDisplayReplies?: () => void;
 }) {
   if (!post.post) {
     return null;
@@ -93,21 +99,45 @@ export function PostCardLayout({
               </Text>
             </div>
           )}
-          {gnowebHref && (
-            <div className="max-sm:absolute max-sm:right-0 max-sm:top-0">
-              <PostMenu gnowebHref={gnowebHref} />
-            </div>
-          )}
+          <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
+            {onReply && (
+              <div
+                className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50"
+                onClick={onReply}
+                aria-label="reply to post"
+              >
+                <Reply size={14} color="hsl(var(--secondary-color))" />
+                <Text className="text-sm" variant="secondary">
+                  Reply
+                </Text>
+              </div>
+            )}
+            {gnowebHref && <PostMenu gnowebHref={gnowebHref} />}
+          </div>
         </div>
       </div>
 
       <div className="my-1">{children}</div>
 
-      <div className="flex flex-col justify-between sm:flex-row sm:items-center gap-2">
+      <div className="flex sm:flex-row sm:items-center gap-2">
+        {onReply && (
+          <Button
+            variant="outline"
+            className={
+              "rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+            }
+            title="Show replies"
+            onClick={onDisplayReplies}
+          >
+            <MessageCircle size={16} color="hsl(var(--secondary-color))" />
+            <span className="text-xs">{post.childrenCount}</span>
+          </Button>
+        )}
         <Reactions
           postId={post.post.localPostId}
           eventId={eventId}
           reactions={post.reactions}
+          parentId={parentId}
         />
       </div>
     </Card>
@@ -118,12 +148,14 @@ function Reactions({
   postId,
   eventId,
   reactions,
+  parentId,
 }: {
   postId: bigint;
   eventId: string;
   reactions: ReactionView[];
+  parentId: string;
 }) {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -134,7 +166,6 @@ function Reactions({
   );
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
-
   const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
   const { reactPost, isPending } = useReactPost(queryClient);
   const onReactionChange = async (icon: string) => {
@@ -144,13 +175,13 @@ function Reactions({
       if (!token) {
         throw new Error("Missing token");
       }
-
       await reactPost({
         token,
         userAddress: userAddress || "",
         postId: postId.toString(),
         icon,
         eventId,
+        parentId,
       });
     } catch (error) {
       console.error("error", error);
@@ -158,7 +189,7 @@ function Reactions({
   };
 
   return (
-    <div className="flex flex-row gap-1 w-full">
+    <div className="flex flex-row gap-2 overflow-auto">
       {(isOrganizer || isParticipant) && (
         <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
           <PopoverTrigger asChild>
@@ -171,7 +202,7 @@ function Reactions({
           </PopoverTrigger>
           <PopoverContent className="w-fit bg-transparent p-0 border-none transition-all">
             <EmojiPicker
-              theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
+              theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
               onEmojiClick={(choice) => {
                 if (isPending) return;
                 onReactionChange(choice.emoji);

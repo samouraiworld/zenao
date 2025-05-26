@@ -92,8 +92,8 @@ export function EventInfo({ eventId }: { eventId: string }) {
             <Web3Image
               src={data.imageUri}
               sizes="(max-width: 768px) 100vw,
-            (max-width: 1200px) 50vw,
-            33vw"
+              (max-width: 1200px) 50vw,
+              33vw"
               fill
               alt="Event"
               priority
