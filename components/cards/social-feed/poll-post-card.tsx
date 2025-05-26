@@ -103,6 +103,7 @@ export function PollPostCard({
             author: pollPost.post.author,
           });
         }}
+        parentId={pollPost.post.localPostId.toString()}
       >
         <div className="w-full flex flex-col gap-2">
           <div className="flex flex-row items-center gap-2">

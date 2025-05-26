@@ -35,14 +35,18 @@ export function PostCardLayout({
   children,
   onReply,
   onDisplayReplies,
+  parentId = "",
+  reactions = true,
 }: {
   post: PostView;
   eventId: string;
   createdBy: GnoProfile | null;
   children: ReactNode;
   gnowebHref?: Url;
+  parentId?: string;
   onReply?: () => void;
   onDisplayReplies?: () => void;
+  reactions?: boolean;
 }) {
   if (!post.post) {
     return null;
@@ -130,11 +134,14 @@ export function PostCardLayout({
             <span className="text-xs">{post.childrenCount}</span>
           </Button>
         )}
-        <Reactions
-          postId={post.post.localPostId}
-          eventId={eventId}
-          reactions={post.reactions}
-        />
+        {reactions && (
+          <Reactions
+            postId={post.post.localPostId}
+            eventId={eventId}
+            reactions={post.reactions}
+            parentId={parentId}
+          />
+        )}
       </div>
     </Card>
   );
@@ -144,10 +151,12 @@ function Reactions({
   postId,
   eventId,
   reactions,
+  parentId,
 }: {
   postId: bigint;
   eventId: string;
   reactions: ReactionView[];
+  parentId: string;
 }) {
   const { resolvedTheme } = useTheme();
   const queryClient = getQueryClient();
@@ -177,6 +186,7 @@ function Reactions({
         postId: postId.toString(),
         icon,
         eventId,
+        parentId,
       });
     } catch (error) {
       console.error("error", error);

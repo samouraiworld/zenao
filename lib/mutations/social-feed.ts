@@ -1,7 +1,9 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import {
+  DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
   DEFAULT_FEED_POSTS_LIMIT,
   feedPosts,
+  feedPostsChildren,
   pollInfo,
 } from "../queries/social-feed";
 import { getQueryClient } from "../get-query-client";
@@ -170,11 +172,22 @@ export const useCreateStandardPost = () => {
         "",
         variables.userAddress,
       );
+      const feedPostsChildrenOpts = feedPostsChildren(
+        variables.parentId,
+        DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+
       const previousFeedPosts = queryClient.getQueryData(
         feedPostsOpts.queryKey,
       );
 
-      return { previousFeedPosts };
+      const previousFeedPostsChildren = queryClient.getQueryData(
+        feedPostsChildrenOpts.queryKey,
+      );
+
+      return { previousFeedPosts, previousFeedPostsChildren };
     },
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
@@ -184,7 +197,15 @@ export const useCreateStandardPost = () => {
         variables.userAddress,
       );
 
+      const feedPostsChildrenOpts = feedPostsChildren(
+        variables.parentId,
+        DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+
       queryClient.invalidateQueries(feedPostsOpts);
+      queryClient.invalidateQueries(feedPostsChildrenOpts);
     },
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
@@ -194,9 +215,21 @@ export const useCreateStandardPost = () => {
         variables.userAddress,
       );
 
+      const feedPostsChildrenOpts = feedPostsChildren(
+        variables.parentId,
+        DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+
       queryClient.setQueryData(
         feedPostsOpts.queryKey,
         context?.previousFeedPosts,
+      );
+
+      queryClient.setQueryData(
+        feedPostsChildrenOpts.queryKey,
+        context?.previousFeedPostsChildren,
       );
     },
   });
@@ -210,8 +243,8 @@ export const useCreateStandardPost = () => {
 };
 
 interface ReactPostRequestMutation {
-  // extends Omit<ReactPostRequest, "$typeName">
   token: string | null;
+  parentId: string; // Required for reloading comments
   userAddress: string;
   postId: string;
   icon: string;
@@ -237,6 +270,13 @@ export const useReactPost = (queryClient: QueryClient) => {
         "",
         variables.userAddress,
       );
+      const feedPostsChildrenOpts = feedPostsChildren(
+        variables.parentId,
+        DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+
       const feedPollsOpts = feedPosts(
         variables.eventId,
         DEFAULT_FEED_POSTS_LIMIT,
@@ -252,7 +292,15 @@ export const useReactPost = (queryClient: QueryClient) => {
         feedPollsOpts.queryKey,
       );
 
-      return { previousFeedPosts, previousFeedPolls };
+      const previousFeedPostsChildren = queryClient.getQueryData(
+        feedPostsChildrenOpts.queryKey,
+      );
+
+      return {
+        previousFeedPosts,
+        previousFeedPolls,
+        previousFeedPostsChildren,
+      };
     },
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
@@ -267,9 +315,16 @@ export const useReactPost = (queryClient: QueryClient) => {
         "poll",
         variables.userAddress,
       );
+      const feedPostsChildrenOpts = feedPostsChildren(
+        variables.parentId,
+        DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
 
       queryClient.invalidateQueries(feedPostsOpts);
       queryClient.invalidateQueries(feedPollsOpts);
+      queryClient.invalidateQueries(feedPostsChildrenOpts);
     },
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
@@ -284,6 +339,12 @@ export const useReactPost = (queryClient: QueryClient) => {
         "poll",
         variables.userAddress,
       );
+      const feedPostsChildrenOpts = feedPostsChildren(
+        variables.parentId,
+        DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
 
       queryClient.setQueryData(
         feedPostsOpts.queryKey,
@@ -292,6 +353,10 @@ export const useReactPost = (queryClient: QueryClient) => {
       queryClient.setQueryData(
         feedPollsOpts.queryKey,
         context?.previousFeedPolls,
+      );
+      queryClient.setQueryData(
+        feedPostsChildrenOpts.queryKey,
+        context?.previousFeedPostsChildren,
       );
     },
   });
