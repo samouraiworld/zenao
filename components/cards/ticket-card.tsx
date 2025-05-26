@@ -38,29 +38,27 @@ export function TicketCard({
     <div className="card-3d">
       <motion.div
         style={{ x, y, rotateX, rotateY }}
-        drag
-        dragElastic={0.08}
-        dragConstraints={{ top: 0, left: 0, right: 0, bottom: 0 }}
         className={cn(
           "max-w-96 md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded shadow-lg",
           "max-sm:rounded-tl rounded-tl max-sm:rounded-tr rounded-tr",
-          "cursor-grab",
         )}
         whileHover={{ rotateX: -5, rotateY: 5 }}
       >
-        <div className="w-full md:max-w-[350px]">
-          <AspectRatio ratio={1 / 1}>
-            <Web3Image
-              src={event.imageUri}
-              sizes="(max-width: 768px) 100vw,
+        <div className="w-full md:max-w-[350px] max-md:flex justify-center p-4 md:p-0">
+          <div className="w-full max-w-[120px] md:max-w-[350px]">
+            <AspectRatio ratio={1 / 1}>
+              <Web3Image
+                src={event.imageUri}
+                sizes="(max-width: 768px) 100vw,
             (max-width: 1200px) 50vw,
             33vw"
-              fill
-              alt="Event"
-              priority
-              className="flex w-full max-sm:rounded-tl rounded-tl max-md:rounded-tr md:rounded-bl self-center object-cover pointer-events-none"
-            />
-          </AspectRatio>
+                fill
+                alt="Event"
+                priority
+                className="flex w-full max-sm:rounded-tl rounded-tl max-md:rounded-tr md:rounded-bl self-center object-cover pointer-events-none"
+              />
+            </AspectRatio>
+          </div>
         </div>
         <div className="flex grow flex-col gap-4 px-4 py-4 max-sm:items-center">
           <Heading level={2} size="xl" className="text-black">

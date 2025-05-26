@@ -25,7 +25,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
 
   return (
     <div className="flex flex-col md:flex-row md:justify-between">
-      <div className="min-w-32 left-6 relative md:left-0 md:flex">
+      <div className="min-w-32 sm:left-6 relative md:left-0 md:flex">
         <div className="flex flex-row items-center gap-[6px] mb-3 md:items-start md:mb-0 md:gap-0 md:flex-col">
           <Text>{format(fromUnixTime(Number(evt.startDate)), "MMM d")}</Text>
           <Text variant="secondary" size="sm">
@@ -34,7 +34,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
         </div>
       </div>
       <div className="flex flex-row w-full justify-between">
-        <div className="mr-5">
+        <div className="max-sm:hidden mr-5">
           <div className="h-[10px] w-[10px] rounded-xl relative right-[4px] bg-secondary-color" />
           <div className="h-full border-l-2 border-dashed border-secondary-color opacity-30" />
         </div>
@@ -47,7 +47,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
                   {evt.title}
                 </Heading>
               </div>
-              <div className="flex flex-row gap-2 items-center">
+              <div className="hidden md:flex flex-row gap-2 items-center">
                 <MapPin width={iconSize} height={iconSize} />
                 <Text className="line-clamp-1">{locationString} </Text>
               </div>
