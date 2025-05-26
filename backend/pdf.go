@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"embed"
 	"flag"
 	"fmt"
 	"io"
@@ -18,7 +19,8 @@ import (
 	"go.uber.org/zap"
 )
 
-const ZenaoLogoPath = "backend/images/logo.png" // used for the ticket, if not found will not display the logo
+//go:embed images/logo.png
+var logoFile embed.FS
 
 type genPdfTicketConfig struct {
 	eventID      string
@@ -198,19 +200,30 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 	logoX := pageWidth - totalRightWidth - 10
 	logoY := bottomY - (logoSize-footerTextHeight)/2
 
-	if _, err := os.Stat(ZenaoLogoPath); os.IsNotExist(err) {
-		logger.Error("logo file not found in ticket pdf generation", zap.String("path", ZenaoLogoPath))
+	logoBytes, err := logoFile.ReadFile("images/logo.png")
+	if err != nil {
+		logger.Error("failed to read embedded logo", zap.Error(err))
 	} else {
-		pdf.ImageOptions(ZenaoLogoPath, logoX, logoY, logoSize, 0, false, fpdf.ImageOptions{
-			ReadDpi:               true,
-			AllowNegativePosition: false,
-		}, 0, "")
+		tmpFile, err := os.CreateTemp("", "zenao-logo-*.png")
+		if err != nil {
+			logger.Error("failed to create temporary file for logo", zap.Error(err))
+		} else {
+			defer os.Remove(tmpFile.Name())
+			if _, err := tmpFile.Write(logoBytes); err != nil {
+				logger.Error("failed to write logo to temporary file", zap.Error(err))
+			} else {
+				pdf.ImageOptions(tmpFile.Name(), logoX, logoY, logoSize, 0, false, fpdf.ImageOptions{
+					ReadDpi:               true,
+					AllowNegativePosition: false,
+				}, 0, "")
 
-		pdf.SetFont("Helvetica", "B", 14)
-		pdf.SetTextColor(0, 0, 0)
-		textY := logoY + (logoSize / 2) - 3
-		pdf.SetXY(logoX+logoSize+2, textY)
-		pdf.Cell(zenaoTextWidth, 6, "ZENAO")
+				pdf.SetFont("Helvetica", "B", 14)
+				pdf.SetTextColor(0, 0, 0)
+				textY := logoY + (logoSize / 2) - 3
+				pdf.SetXY(logoX+logoSize+2, textY)
+				pdf.Cell(zenaoTextWidth, 6, "ZENAO")
+			}
+		}
 	}
 
 	pdf.SetAutoPageBreak(true, 0)
