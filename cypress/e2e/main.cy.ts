@@ -183,6 +183,9 @@ describe("main", () => {
 
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
+
+    // Go Description tab
+    cy.get("button").contains("About event").click();
     cy.get("p")
       .contains(
         "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
@@ -214,6 +217,9 @@ describe("main", () => {
     // Explore an event
     cy.get("a").contains("Discover").click();
     cy.get('a[href^="/event/"]').last().click();
+
+    // Go Description tab
+    cy.get("button").contains("Discussions").click();
 
     // EventFeedForm should not exist
     cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
@@ -261,6 +267,9 @@ describe("main", () => {
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
 
+    // Go Description tab
+    cy.get("button").contains("Discussions").click();
+
     // Channge type of post
     cy.get('button[aria-label="set type post"]').click();
 
@@ -286,7 +295,7 @@ describe("main", () => {
     cy.get('button[aria-label="submit post"]').click();
 
     // Views polls
-    cy.get("button").contains("Polls").click();
+    cy.get("button").contains("Votes").click();
 
     cy.get("p").contains(testStandardPost).should("be.visible");
     cy.get("p").contains("Answer 1").should("be.visible");
@@ -307,7 +316,6 @@ describe("main", () => {
   it("access an exclusive event", () => {
     cy.createEvent({ exclusive: true });
     cy.url().then((url) => {
-      console.log(url);
       logout();
       cy.visit(url);
     });
