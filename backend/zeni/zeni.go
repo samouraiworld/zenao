@@ -115,6 +115,7 @@ type SoldTicket struct {
 	Ticket  *Ticket
 	BuyerID string
 	UserID  string
+	User    *User
 	Checkin *Checkin
 }
 
@@ -209,6 +210,7 @@ type Chain interface {
 
 type Auth interface {
 	GetUser(ctx context.Context) *AuthUser
+	GetUserFromID(ctx context.Context, id string) (*AuthUser, error)
 	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)
 	EnsureUserExists(ctx context.Context, email string) (*AuthUser, error)
 

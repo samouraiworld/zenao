@@ -34,12 +34,19 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, err
 	}
 
-	secrets := make([]string, len(tickets))
+	ticketsInfo := make([]*zenaov1.TicketInfo, len(tickets))
 	for i, tk := range tickets {
-		secrets[i] = tk.Ticket.Secret()
+		userEmail, err := s.Auth.GetUserFromID(ctx, tk.UserID)
+		if err != nil {
+			return nil, err
+		}
+		ticketsInfo[i] = &zenaov1.TicketInfo{
+			TicketSecret: tk.Ticket.Secret(),
+			UserEmail:    userEmail.Email,
+		}
 	}
 
 	return connect.NewResponse(&zenaov1.GetEventTicketsResponse{
-		TicketsSecrets: secrets,
+		Tickets: ticketsInfo,
 	}), nil
 }

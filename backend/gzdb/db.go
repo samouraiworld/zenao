@@ -44,6 +44,7 @@ type SoldTicket struct {
 	EventID uint
 	BuyerID uint
 	UserID  uint
+	User    *User
 	Price   float64
 	Secret  string `gorm:"uniqueIndex;not null"`
 	Pubkey  string `gorm:"uniqueIndex;not null"`
@@ -435,7 +436,7 @@ func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*z
 	}
 
 	tickets := []*SoldTicket{}
-	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Find(&tickets, "event_id = ? AND buyer_id = ?", eventID, buyerIDint).Error
+	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_id = ? AND buyer_id = ?", eventID, buyerIDint).Error
 	if err != nil {
 		return nil, err
 	}
@@ -869,10 +870,15 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 			Signature:    dbtick.Checkin.Signature,
 		}
 	}
+	var user *zeni.User
+	if dbtick.User != nil {
+		user = dbUserToZeniDBUser(dbtick.User)
+	}
 	return &zeni.SoldTicket{
 		Ticket:  tickobj,
 		BuyerID: fmt.Sprint(dbtick.BuyerID),
 		UserID:  fmt.Sprint(dbtick.UserID),
 		Checkin: checkin,
+		User:    user,
 	}, nil
 }

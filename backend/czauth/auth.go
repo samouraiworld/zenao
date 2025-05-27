@@ -37,6 +37,19 @@ func (c *clerkZenaoAuth) GetUser(ctx context.Context) *zeni.AuthUser {
 	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 }
 
+// GetUserFromID implements zeni.Auth.
+func (c *clerkZenaoAuth) GetUserFromID(ctx context.Context, id string) (*zeni.AuthUser, error) {
+	clerkUser, err := user.Get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	email := ""
+	if len(clerkUser.EmailAddresses) != 0 {
+		email = clerkUser.EmailAddresses[0].EmailAddress
+	}
+	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
+}
+
 // GetUsersFromIDs implements zeni.Auth.
 func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*zeni.AuthUser, error) {
 	userList, err := user.List(ctx, &user.ListParams{UserIDs: ids})
