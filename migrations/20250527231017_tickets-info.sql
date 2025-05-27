@@ -12,6 +12,8 @@ ALTER TABLE `new_sold_tickets` RENAME TO `sold_tickets`;
 CREATE UNIQUE INDEX `idx_sold_tickets_pubkey` ON `sold_tickets` (`pubkey`);
 -- Create index "idx_sold_tickets_secret" to table: "sold_tickets"
 CREATE UNIQUE INDEX `idx_sold_tickets_secret` ON `sold_tickets` (`secret`);
+-- Create index "idx_sold_tickets_event_id" to table: "sold_tickets"
+CREATE INDEX `idx_sold_tickets_event_id` ON `sold_tickets` (`event_id`);
 -- Create index "idx_sold_tickets_deleted_at" to table: "sold_tickets"
 CREATE INDEX `idx_sold_tickets_deleted_at` ON `sold_tickets` (`deleted_at`);
 -- Enable back the enforcement of foreign-keys constraints

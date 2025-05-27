@@ -41,7 +41,7 @@ type UserRole struct {
 
 type SoldTicket struct {
 	gorm.Model
-	EventID uint
+	EventID uint `gorm:"index"`
 	BuyerID uint
 	UserID  uint
 	User    *User

@@ -475,15 +475,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_reactions_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_reactions" {
     columns     = [column.post_id]
     ref_columns = [table.posts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_reactions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -550,6 +550,9 @@ table "sold_tickets" {
   index "idx_sold_tickets_secret" {
     unique  = true
     columns = [column.secret]
+  }
+  index "idx_sold_tickets_event_id" {
+    columns = [column.event_id]
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]
