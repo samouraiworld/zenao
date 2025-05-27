@@ -537,6 +537,12 @@ table "sold_tickets" {
   primary_key {
     columns = [column.id]
   }
+  foreign_key "fk_sold_tickets_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
   index "idx_sold_tickets_pubkey" {
     unique  = true
     columns = [column.pubkey]
@@ -544,6 +550,9 @@ table "sold_tickets" {
   index "idx_sold_tickets_secret" {
     unique  = true
     columns = [column.secret]
+  }
+  index "idx_sold_tickets_event_id" {
+    columns = [column.event_id]
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]

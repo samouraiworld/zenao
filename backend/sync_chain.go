@@ -119,7 +119,7 @@ func execSyncChain() error {
 			continue
 		}
 		for _, p := range participants {
-			tickets, err := db.GetEventBuyerTickets(event.ID, p.ID)
+			tickets, err := db.GetEventUserTickets(event.ID, p.ID)
 			if err != nil || len(tickets) < 1 {
 				logger.Error("failed to get participant ticket", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err), zap.Int("num-tickets", len(tickets)))
 				continue
