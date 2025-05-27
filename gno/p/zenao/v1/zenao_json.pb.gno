@@ -1046,12 +1046,12 @@ func (g *GetEventTicketsRequest) FromJSON(node *json.Node) {
 func (g *GetEventTicketsResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if len(g.TicketsSecrets) != 0 {
-		arr := make([]*json.Node, len(g.TicketsSecrets))
-		for i, val := range g.TicketsSecrets {
-			arr[i] = json.StringNode("", val)
+	if len(g.TicketsInfo) != 0 {
+		arr := make([]*json.Node, len(g.TicketsInfo))
+		for i, val := range g.TicketsInfo {
+			arr[i] = val.ToJSON()
 		}
-		fields["ticketsSecrets"] = json.ArrayNode("", arr)
+		fields["ticketsInfo"] = json.ArrayNode("", arr)
 	}
 
 	return json.ObjectNode("", fields)
@@ -1061,13 +1061,40 @@ func (g *GetEventTicketsResponse) FromJSON(node *json.Node) {
 	*g = GetEventTicketsResponse{}
 	fields := node.MustObject()
 
-	if val, ok := fields["ticketsSecrets"]; ok {
+	if val, ok := fields["ticketsInfo"]; ok {
 		jarr := val.MustArray()
-		arr := make([]string, len(jarr))
+		arr := make([]*TicketInfo, len(jarr))
 		for i, val := range jarr {
-			arr[i] = val.MustString()
+			fv := &TicketInfo{}
+			fv.FromJSON(val)
+			arr[i] = fv
 		}
-		g.TicketsSecrets = arr
+		g.TicketsInfo = arr
+	}
+}
+
+func (t *TicketInfo) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if t.TicketSecret != "" {
+		fields["ticketSecret"] = json.StringNode("", t.TicketSecret)
+	}
+	if t.UserEmail != "" {
+		fields["userEmail"] = json.StringNode("", t.UserEmail)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (t *TicketInfo) FromJSON(node *json.Node) {
+	*t = TicketInfo{}
+	fields := node.MustObject()
+
+	if val, ok := fields["ticketSecret"]; ok {
+		t.TicketSecret = val.MustString()
+	}
+	if val, ok := fields["userEmail"]; ok {
+		t.UserEmail = val.MustString()
 	}
 }
 

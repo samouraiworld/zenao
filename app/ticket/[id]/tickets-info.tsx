@@ -3,19 +3,19 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { eventOptions } from "@/lib/queries/event";
-import { makeLocationFromEvent } from "@/lib/location";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { eventTickets } from "@/lib/queries/ticket";
+import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { TicketCard } from "@/components/cards/ticket-card";
-import Heading from "@/components/texts/heading";
 import {
   Carousel,
   CarouselContent,
   CarouselDot,
   CarouselItem,
 } from "@/components/shadcn/carousel";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
+import Heading from "@/components/texts/heading";
+import { makeLocationFromEvent } from "@/lib/location";
+import { eventOptions } from "@/lib/queries/event";
+import { eventTickets } from "@/lib/queries/ticket";
 
 type TicketsInfoProps = {
   id: string;
@@ -32,7 +32,7 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
 
   const t = useTranslations("tickets");
 
-  if (tickets.ticketsSecrets.length === 0) {
+  if (tickets.ticketsInfo.length === 0) {
     <div>
       <p>{t("no-tickets-event")}</p>
     </div>;
@@ -41,14 +41,14 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
   if (isDesktop) {
     return (
       <div className="max-md:hidden flex flex-col gap-6 pb-12">
-        {tickets.ticketsSecrets.map((ticketSecret, index) => (
+        {tickets.ticketsInfo.map((ticketInfo, index) => (
           <div key={index} className="flex flex-col gap-2">
             <Heading level={2}>Ticket #{index + 1}</Heading>
             <TicketCard
               eventId={id}
               event={event}
               timezone={timezone}
-              ticketSecret={ticketSecret}
+              ticketSecret={ticketInfo.ticketSecret}
             />
           </div>
         ))}
@@ -60,7 +60,7 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
     <div className="md:hidden">
       <Carousel>
         <CarouselContent>
-          {tickets.ticketsSecrets.map((ticketSecret, index) => (
+          {tickets.ticketsInfo.map((ticketInfo, index) => (
             <CarouselItem key={index}>
               <div className="flex flex-col gap-2">
                 <Heading level={2}>Ticket #{index + 1}</Heading>
@@ -68,7 +68,7 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
                   eventId={id}
                   event={event}
                   timezone={timezone}
-                  ticketSecret={ticketSecret}
+                  ticketSecret={ticketInfo.ticketSecret}
                 />
               </div>
             </CarouselItem>
