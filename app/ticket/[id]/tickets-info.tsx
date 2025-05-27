@@ -1,5 +1,8 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { TicketCard } from "@/components/cards/ticket-card";
@@ -13,9 +16,6 @@ import Heading from "@/components/texts/heading";
 import { makeLocationFromEvent } from "@/lib/location";
 import { eventOptions } from "@/lib/queries/event";
 import { eventTickets } from "@/lib/queries/ticket";
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
 
 type TicketsInfoProps = {
   id: string;
