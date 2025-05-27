@@ -96,7 +96,7 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 	// A4 size (210x297mm)
 	pageWidth := 210.0
 	pageHeight := 297.0
-	maxTextWidth := (pageWidth - 40) / 2
+	maxTextWidth := pageWidth / 2
 	widthMargin := 10.0
 
 	pdf.SetFont("Helvetica", "B", 24)
@@ -119,8 +119,12 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 		drawImagePlaceholder(pdf, imgX, imgY, imgWidth, imgHeight)
 	}
 
-	infoY := imgY - 50.0
+	infoY := imgY - 58.0
 
+	tz, err := event.Timezone()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get timezone: %w", err)
+	}
 	pdf.SetFont("Helvetica", "B", 12)
 	pdf.SetTextColor(0, 0, 0)
 	pdf.SetXY(widthMargin, infoY)
@@ -128,9 +132,9 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 	pdf.SetFont("Helvetica", "B", 10)
 	pdf.SetTextColor(51, 51, 51)
 	pdf.SetXY(widthMargin, infoY+8)
-	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("From: %s", event.StartDate.Format("Monday, January 2, 2006 15:04"))))
+	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("From: %s", event.StartDate.In(tz).Format("Monday, January 2, 2006 15:04"))))
 	pdf.SetXY(widthMargin, infoY+15)
-	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("To: %s", event.EndDate.Format("Monday, January 2, 2006 15:04"))))
+	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("To: %s", event.EndDate.In(tz).Format("Monday, January 2, 2006 15:04"))))
 
 	pdf.SetFont("Helvetica", "B", 12)
 	pdf.SetTextColor(0, 0, 0)
@@ -147,7 +151,7 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 
 	qrSize := 40.0
 	qrX := pageWidth - qrSize - widthMargin
-	qrY := infoY
+	qrY := infoY + 10
 
 	qrCode, err := qrcode.New(ticketSecret, qrcode.Medium)
 	if err != nil {
@@ -178,9 +182,9 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 	pdf.SetFont("Helvetica", "B", 10)
 	pdf.SetTextColor(51, 51, 51)
 	pdf.SetXY(widthMargin, ticketInfoY+8)
-	pdf.Cell(maxTextWidth, 5, fmt.Sprintf("Customer: %s - %s", DisplayName, email))
+	pdf.Cell(pageWidth-20, 5, tr(fmt.Sprintf("Customer: %s - %s", DisplayName, email)))
 	pdf.SetXY(widthMargin, ticketInfoY+15)
-	pdf.Cell(maxTextWidth, 5, fmt.Sprintf("Purchase date: %s", purchaseDate.Format("January 2, 2006 15:04")))
+	pdf.Cell(pageWidth-20, 5, tr(fmt.Sprintf("Purchase date: %s", purchaseDate.Format("January 2, 2006 15:04"))))
 
 	pdf.SetAutoPageBreak(false, 0)
 
