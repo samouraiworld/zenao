@@ -1,10 +1,10 @@
 "use client";
 
-import { EventCard } from "@/components/cards/event-card";
-import EmptyEventsList from "@/components/widgets/empty-events-list";
-import { idFromPkgPath } from "@/lib/queries/event";
-import { eventsList } from "@/lib/queries/events-list";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { eventsList } from "@/lib/queries/events-list";
+import EmptyEventsList from "@/components/widgets/empty-events-list";
+import { EventCard } from "@/components/cards/event-card";
+import { idFromPkgPath } from "@/lib/queries/event";
 
 export function DiscoverEventsList({
   from,
@@ -17,8 +17,8 @@ export function DiscoverEventsList({
     from === "upcoming"
       ? eventsList(now, Number.MAX_SAFE_INTEGER, 20)
       : eventsList(now - 1, 0, 20, {
-        staleTime: 60000,
-      }),
+          staleTime: 60000,
+        }),
   );
 
   return (

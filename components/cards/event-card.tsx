@@ -17,16 +17,12 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
   const location = makeLocationFromEvent(evt.location);
   const timezone = determineTimezone(location);
+  const t = useTranslations("event");
 
   const locationString =
     location.kind === "geo" || location.kind === "custom"
       ? location.address
       : location.location;
-
-
-  console.log(evt.organizers);
-
-  const t = useTranslations("event");
 
   return (
     <div className="flex flex-col md:flex-row md:justify-between">

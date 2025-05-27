@@ -1,16 +1,16 @@
 "use client";
 
-import { useToast } from "@/app/hooks/use-toast";
-import { zenaoClient } from "@/app/zenao-client";
-import { EventForm } from "@/components/form/event-form";
-import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
-import { useAuth } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import React from "react";
 import { useForm } from "react-hook-form";
+import React from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useAuth } from "@clerk/nextjs";
 import { z } from "zod";
+import { zenaoClient } from "@/app/zenao-client";
+import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
+import { EventForm } from "@/components/form/event-form";
+import { useToast } from "@/app/hooks/use-toast";
 
 export const CreateEventForm: React.FC = () => {
   const { getToken } = useAuth();
@@ -97,7 +97,6 @@ export const CreateEventForm: React.FC = () => {
       const { id } = await zenaoClient.createEvent(
         {
           ...values,
-          organizers: ["lucie.vallenetpro@gmail.com", "nicolas.vallenetpro@gmail.com"],
           location: { address: { case: values.location.kind, value } },
           password: exclusive && password ? password : "",
         },
