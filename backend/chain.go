@@ -176,7 +176,7 @@ func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs [
 	for _, org := range organizersIDs {
 		organizersAddr = append(organizersAddr, g.UserAddress(org))
 	}
-	orgsAddrLit := fmt.Sprintf("[]string{%s}", strings.Join(organizersAddr, `", "`))
+	orgsAddrLit := fmt.Sprintf(`[]string{"%s"}`, strings.Join(organizersAddr, `", "`))
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
 	loc := "&" + req.Location.GnoLiteral("zenaov1.", "\t\t")
@@ -206,7 +206,7 @@ func main() {
 		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
 			Title: "Edit event",
 			Message: events.NewEditEventMsg(
-				%s
+				%s,
 				%q,
 				%q,
 				%q,
@@ -726,7 +726,7 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 }
 
 func generateEventRealmSource(organizersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
-	orgsAddrLit := fmt.Sprintf("[]string{%s}", strings.Join(organizersAddr, `", "`))
+	orgsAddrLit := fmt.Sprintf(`[]string{"%s"}`, strings.Join(organizersAddr, `", "`))
 	m := map[string]interface{}{
 		"organizersAddr": orgsAddrLit,
 		"req":            req,

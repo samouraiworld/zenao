@@ -1,18 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { MapPin, Users } from "lucide-react";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { determineTimezone } from "@/lib/determine-timezone";
+import { makeLocationFromEvent } from "@/lib/location";
 import { format, fromUnixTime } from "date-fns";
+import { MapPin, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { UserAvatarWithName } from "../common/user";
-import Text from "../texts/text";
-import Heading from "../texts/heading";
 import { Web3Image } from "../images/web3-image";
+import Heading from "../texts/heading";
+import Text from "../texts/text";
 import { Card } from "./Card";
 import EventDateTime from "./event-date-time";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { makeLocationFromEvent } from "@/lib/location";
-import { determineTimezone } from "@/lib/determine-timezone";
-
 export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
   const location = makeLocationFromEvent(evt.location);
@@ -22,6 +22,11 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
     location.kind === "geo" || location.kind === "custom"
       ? location.address
       : location.location;
+
+
+  console.log(evt.organizers);
+
+  const t = useTranslations("event");
 
   return (
     <div className="flex flex-col md:flex-row md:justify-between">
@@ -56,7 +61,8 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
                 <Text className="truncate">{evt.participants} going</Text>
               </div>
               <div className="flex flex-row gap-2 items-center">
-                Hosted by <UserAvatarWithName address={evt.creator} />
+                {/* XXX: Display all organizers & use the i18n traduction */}
+                {t("hosted-by")} <UserAvatarWithName address={evt.organizers[0]} />
               </div>
             </div>
             <div>

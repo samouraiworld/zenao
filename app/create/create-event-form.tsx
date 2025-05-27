@@ -97,7 +97,7 @@ export const CreateEventForm: React.FC = () => {
       const { id } = await zenaoClient.createEvent(
         {
           ...values,
-          organizers: ["lucien.vallenetpro@gmail.com", "nicolas.vallenetpro@gmail.com"],
+          organizers: ["lucie.vallenetpro@gmail.com", "nicolas.vallenetpro@gmail.com"],
           location: { address: { case: values.location.kind, value } },
           password: exclusive && password ? password : "",
         },

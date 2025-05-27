@@ -366,7 +366,11 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 			}
 			for _, org := range msg.organizers {
 				if !sliceContains(currentOrgs, org) {
-					e.DAOPrivate.Members.AddRoleToMember(org, "organizer")
+					if e.DAOPrivate.Members.IsMember(org) {
+						e.DAOPrivate.Members.AddRoleToMember(org, "organizer")
+					} else {
+						e.DAOPrivate.Members.AddMember(org, []string{"organizer"})
+					}
 				}
 			}
 		}
@@ -491,9 +495,9 @@ func (e *Event) Render(path string) string {
 			ufmt.Sprintf("📍 Location: %s", locStr),
 			ufmt.Sprintf("🕓 Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
 			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.capacity),
-			"👤 Organizer:",
-			md.BulletList(orgaRenderList),
+			"👤 Organizers: ",
 		}) + "\n"
+		s += md.Nested(md.BulletList(orgaRenderList), "\t")
 		s += md.HorizontalRule()
 		path = "noprofile"
 	}

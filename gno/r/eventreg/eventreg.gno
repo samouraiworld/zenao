@@ -20,7 +20,7 @@ var (
 	eventsByPkgPath     avl.Tree // <eventPkgPath> -> events.Info
 	eventsByEndDate     avl.Tree // <endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
-	eventsByCreator     avl.Tree // <creatorID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
+	eventsByOrganizer   avl.Tree // <organizerID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	participantsByEvent avl.Tree // <eventPkgPath>/<participantID> -> participantID
 )
 
@@ -72,8 +72,10 @@ func IndexEvent(pkgPath string) {
 	key = unixTimeKey(info.EndDate) + "/" + pkgPath
 	eventsByEndDate.Set(key, pkgPath)
 
-	key = info.Creator + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
-	eventsByCreator.Set(key, pkgPath)
+	for _, organizer := range info.Organizers {
+		key = organizer + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
+		eventsByOrganizer.Set(key, pkgPath)
+	}
 }
 
 func UpdateIndex(pkgPath string) {
@@ -91,11 +93,15 @@ func UpdateIndex(pkgPath string) {
 		newKey := unixTimeKey(info.EndDate) + "/" + pkgPath
 		eventsByEndDate.Set(newKey, pkgPath)
 
-		key = prevInfo.Creator + "/" + unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
-		eventsByCreator.Remove(key)
+		for _, organizer := range prevInfo.Organizers {
+			key = organizer + "/" + unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
+			eventsByOrganizer.Remove(key)
+		}
 
-		newKey = info.Creator + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
-		eventsByCreator.Set(newKey, pkgPath)
+		for _, organizer := range info.Organizers {
+			key = organizer + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
+			eventsByOrganizer.Set(key, pkgPath)
+		}
 
 		startKey := pkgPath + "/"
 		endKey := startKey[:len(startKey)-1] + string('/'+1)
@@ -110,12 +116,15 @@ func UpdateIndex(pkgPath string) {
 
 			return false
 		})
-	} else if prevInfo.Creator != info.Creator {
-		key := prevInfo.Creator + "/" + unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
-		eventsByCreator.Remove(key)
-
-		newKey := info.Creator + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
-		eventsByCreator.Set(newKey, pkgPath)
+	} else if !sliceIsEqual(prevInfo.Organizers, info.Organizers) {
+		for _, organizer := range prevInfo.Organizers {
+			key := organizer + "/" + unixTimeKey(prevInfo.EndDate) + "/" + pkgPath
+			eventsByOrganizer.Remove(key)
+		}
+		for _, organizer := range info.Organizers {
+			key := organizer + "/" + unixTimeKey(info.EndDate) + "/" + pkgPath
+			eventsByOrganizer.Set(key, pkgPath)
+		}
 	}
 }
 
@@ -175,11 +184,11 @@ func listEvents(from, to int64, limit uint32) []*zenaov1.EventInfo {
 	return listEventsInternal(&eventsByEndDate, fromKey, toKey, from > to, limit)
 }
 
-func listEventsByCreator(creatorID string, from, to int64, limit uint32) []*zenaov1.EventInfo {
-	fromKey := creatorID + "/" + unixTimeKey(from) + "/"
-	toKey := creatorID + "/" + unixTimeKey(to) + "/"
+func listEventsByOrganizer(organizerID string, from, to int64, limit uint32) []*zenaov1.EventInfo {
+	fromKey := organizerID + "/" + unixTimeKey(from) + "/"
+	toKey := organizerID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByCreator, fromKey, toKey, from > to, limit)
+	return listEventsInternal(&eventsByOrganizer, fromKey, toKey, from > to, limit)
 }
 
 func listEventsByParticipant(participantID string, from, to int64, limit uint32) []*zenaov1.EventInfo {
@@ -217,4 +226,16 @@ func unixTimeKey(t int64) string {
 		panic("negative unix time")
 	}
 	return seqid.ID(t).Binary()
+}
+
+func sliceIsEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
 }

@@ -20,7 +20,7 @@ func init() {
 	zenaoAdmin := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94"
 	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
 	conf := events.Config{
-		Creator:          creator,
+		Organizers:       []string{creator},
 		Title:            "Demo",
 		Description:      "This is a demo zenao event",
 		ImageURI:         "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Wiki-IMG_20200904_200004436.jpg/640px-Wiki-IMG_20200904_200004436.jpg",

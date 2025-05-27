@@ -1,14 +1,14 @@
 "use client";
 
+import { EventCard } from "@/components/cards/event-card";
+import { Separator } from "@/components/shadcn/separator";
+import Heading from "@/components/texts/heading";
+import { idFromPkgPath } from "@/lib/queries/event";
+import { eventsByOrganizerList } from "@/lib/queries/events-list";
+import { profileOptions } from "@/lib/queries/profile";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Person, WithContext } from "schema-dts";
 import ProfileHeader from "./profile-header";
-import { profileOptions } from "@/lib/queries/profile";
-import Heading from "@/components/texts/heading";
-import { eventsByCreatorList } from "@/lib/queries/events-list";
-import { EventCard } from "@/components/cards/event-card";
-import { Separator } from "@/components/shadcn/separator";
-import { idFromPkgPath } from "@/lib/queries/event";
 
 export function ProfileInfo({
   address,
@@ -19,10 +19,10 @@ export function ProfileInfo({
 }) {
   const { data: profile } = useSuspenseQuery(profileOptions(address));
   const { data: upcomingEvents } = useSuspenseQuery(
-    eventsByCreatorList(address, now, Number.MAX_SAFE_INTEGER, 20),
+    eventsByOrganizerList(address, now, Number.MAX_SAFE_INTEGER, 20),
   );
   const { data: pastEvents } = useSuspenseQuery(
-    eventsByCreatorList(address, now - 1, 0, 20),
+    eventsByOrganizerList(address, now - 1, 0, 20),
   );
 
   // profileOptions can return array of object with empty string (except address)

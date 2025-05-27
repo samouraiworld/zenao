@@ -180,11 +180,36 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, req *zen
 		return nil, err
 	}
 
-	if err := g.db.Where("event_id = ? AND role = ?", evtIDInt, "organizer").Delete(&UserRole{}).Error; err != nil {
-		return nil, fmt.Errorf("delete existing organizer roles before adding the new ones: %w", err)
+	var currentOrgsIDs []string
+	currentOrgs, err := g.GetEventUsersWithRole(eventID, "organizer")
+	if err != nil {
+		return nil, fmt.Errorf("get current organizers: %w", err)
+	}
+	for _, org := range currentOrgs {
+		currentOrgsIDs = append(currentOrgsIDs, org.ID)
 	}
 
-	for _, organizerID := range organizersIDs {
+	orgsToRemove := make([]string, 0, len(currentOrgs))
+	for _, orgID := range currentOrgsIDs {
+		if !slices.Contains(organizersIDs, orgID) {
+			orgsToRemove = append(orgsToRemove, orgID)
+		}
+	}
+
+	if len(orgsToRemove) > 0 {
+		if err := g.db.Where("event_id = ? AND role = ? AND user_id IN (?)", evtIDInt, "organizer", orgsToRemove).Delete(&UserRole{}).Error; err != nil {
+			return nil, fmt.Errorf("delete existing organizer roles before adding the new ones: %w", err)
+		}
+	}
+
+	orgsToAdd := make([]string, 0, len(organizersIDs))
+	for _, orgID := range organizersIDs {
+		if !slices.Contains(currentOrgsIDs, orgID) {
+			orgsToAdd = append(orgsToAdd, orgID)
+		}
+	}
+
+	for _, organizerID := range orgsToAdd {
 		organizerIDInt, err := strconv.ParseUint(organizerID, 10, 64)
 		if err != nil {
 			return nil, fmt.Errorf("parse organizer id: %w", err)

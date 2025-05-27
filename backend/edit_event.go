@@ -47,6 +47,7 @@ func (s *ZenaoServer) EditEvent(
 		if slices.Contains(organizersIDs, zOrg.ID) {
 			return nil, fmt.Errorf("duplicate organizer: %s", zOrg.ID)
 		}
+		s.Logger.Info("edit-event", zap.String("organizer-id", zOrg.ID))
 		organizersIDs = append(organizersIDs, zOrg.ID)
 	}
 
