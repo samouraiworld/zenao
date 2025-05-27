@@ -20,12 +20,13 @@ var (
 	dave  = testutils.TestAddress("dave")
 )
 
+// XXX: Add tests for multiple organizers
 func TestNewEvent(t *testing.T) {
 	var profile mockProfile
 	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
-		Creator:          alice.String(),
+		Organizers:       []string{alice.String()},
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
@@ -45,7 +46,7 @@ func TestAddParticipant(t *testing.T) {
 	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
-		Creator:          alice.String(),
+		Organizers:       []string{alice.String()},
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
@@ -93,7 +94,7 @@ func TestRemoveParticipant(t *testing.T) {
 	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
-		Creator:          alice.String(),
+		Organizers:       []string{alice.String()},
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
@@ -149,7 +150,7 @@ func TestTicket(t *testing.T) {
 	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
-		Creator:          alice.String(),
+		Organizers:       []string{alice.String()},
 		Title:            "event",
 		Description:      "this is an event",
 		SetProfileString: profile.SetStringField,
