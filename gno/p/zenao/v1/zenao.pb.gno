@@ -186,7 +186,12 @@ type GetEventTicketsRequest struct {
 }
 
 type GetEventTicketsResponse struct {
-	TicketsSecrets []string
+	Tickets []*TicketInfo
+}
+
+type TicketInfo struct {
+	TicketSecret string
+	UserEmail    string
 }
 
 type CheckinRequest struct {

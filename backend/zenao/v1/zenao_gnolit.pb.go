@@ -592,14 +592,29 @@ func (g *GetEventTicketsResponse) GnoLiteral(typePrefix string, linePrefix strin
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("GetEventTicketsResponse{\n")
-	if len(g.TicketsSecrets) != 0 {
-		fmt.Fprintf(buf, "%s\tTicketsSecrets: []string{\n", linePrefix)
+	if len(g.Tickets) != 0 {
+		fmt.Fprintf(buf, "%s\tTickets: []*TicketInfo{\n", linePrefix)
 		linePrefix += "\t"
-		for _, elem := range g.TicketsSecrets {
-			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		for _, elem := range g.Tickets {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (t *TicketInfo) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("TicketInfo{\n")
+	if t.TicketSecret != "" {
+		fmt.Fprintf(buf, "%s\tTicketSecret: %q,\n", linePrefix, t.TicketSecret)
+	}
+	if t.UserEmail != "" {
+		fmt.Fprintf(buf, "%s\tUserEmail: %q,\n", linePrefix, t.UserEmail)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
