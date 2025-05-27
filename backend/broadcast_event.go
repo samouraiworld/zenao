@@ -52,7 +52,7 @@ func (s *ZenaoServer) BroadcastEvent(
 		if err != nil {
 			return err
 		}
-		participants, err = db.GetAllParticipants(req.Msg.EventId)
+		participants, err = db.GetEventUsersWithRole(req.Msg.EventId, "participant")
 		if err != nil {
 			return err
 		}

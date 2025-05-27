@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"time"
 	_ "time/tzdata"
 
@@ -41,10 +42,26 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	evt := (*zeni.Event)(nil)
+	var organizersIDs []string
+	organizersIDs = append(organizersIDs, zUser.ID)
+	for _, organizer := range req.Msg.Organizers {
+		authOrg, err := s.Auth.EnsureUserExists(ctx, organizer)
+		if err != nil {
+			return nil, err
+		}
+		zOrg, err := s.EnsureUserExists(ctx, authOrg)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Contains(organizersIDs, zOrg.ID) {
+			return nil, fmt.Errorf("duplicate organizer: %s", zOrg.ID)
+		}
+		organizersIDs = append(organizersIDs, zOrg.ID)
+	}
 
+	evt := (*zeni.Event)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		if evt, err = db.CreateEvent(zUser.ID, req.Msg); err != nil {
+		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, req.Msg); err != nil {
 			return err
 		}
 
@@ -61,7 +78,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.CreateEvent(evt.ID, zUser.ID, req.Msg, privacy); err != nil {
+	if err := s.Chain.CreateEvent(evt.ID, organizersIDs, req.Msg, privacy); err != nil {
 		s.Logger.Error("create-event", zap.Error(err))
 		return nil, err
 	}

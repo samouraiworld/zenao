@@ -26,7 +26,7 @@ func (e *Event) Info() *zenaov1.EventInfo {
 		StartDate:    e.startDate,
 		EndDate:      e.endDate,
 		Capacity:     e.capacity,
-		Creator:      e.creator,
+		Organizers:   e.organizers,
 		Location:     e.location,
 		Participants: e.CountParticipants(),
 		Privacy:      privacy,

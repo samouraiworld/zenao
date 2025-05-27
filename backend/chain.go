@@ -116,10 +116,13 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 }
 
 // CreateEvent implements ZenaoChain.
-func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
-	creatorAddr := g.UserAddress(creatorID)
+func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
+	var organizersAddr []string
+	for _, org := range organizersIDs {
+		organizersAddr = append(organizersAddr, g.UserAddress(org))
+	}
 
-	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
+	eventRealmSrc, err := generateEventRealmSource(organizersAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
 	if err != nil {
 		return err
 	}
@@ -168,7 +171,12 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 }
 
 // EditEvent implements ZenaoChain.
-func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
+func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
+	var organizersAddr []string
+	for _, org := range organizersIDs {
+		organizersAddr = append(organizersAddr, g.UserAddress(org))
+	}
+	orgsAddrLit := fmt.Sprintf("[]string{%s}", strings.Join(organizersAddr, `", "`))
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
 	loc := "&" + req.Location.GnoLiteral("zenaov1.", "\t\t")
@@ -198,6 +206,7 @@ func main() {
 		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
 			Title: "Edit event",
 			Message: events.NewEditEventMsg(
+				%s
 				%q,
 				%q,
 				%q,
@@ -210,7 +219,7 @@ func main() {
 		}),
 	})
 }
-`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacyStr),
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, orgsAddrLit, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacyStr),
 			}},
 		},
 	}))
@@ -716,9 +725,10 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
+func generateEventRealmSource(organizersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
+	orgsAddrLit := fmt.Sprintf("[]string{%s}", strings.Join(organizersAddr, `", "`))
 	m := map[string]interface{}{
-		"creatorAddr":    creatorAddr,
+		"organizersAddr": orgsAddrLit,
 		"req":            req,
 		"zenaoAdminAddr": zenaoAdminAddr,
 		"namespace":      gnoNamespace,
@@ -772,7 +782,7 @@ var (
 
 func init() {
 	conf := events.Config{
-		Creator: "{{.creatorAddr}}",
+		Organizers: {{.organizersAddr}},
 		Title: {{.title}},
 		Description: {{.description}},
 		ImageURI: {{.imageURI}},

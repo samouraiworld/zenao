@@ -33,6 +33,23 @@ func (s *ZenaoServer) EditEvent(
 		return nil, errors.New("user is banned")
 	}
 
+	var organizersIDs []string
+	organizersIDs = append(organizersIDs, zUser.ID)
+	for _, organizer := range req.Msg.Organizers {
+		authOrg, err := s.Auth.EnsureUserExists(ctx, organizer)
+		if err != nil {
+			return nil, err
+		}
+		zOrg, err := s.EnsureUserExists(ctx, authOrg)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Contains(organizersIDs, zOrg.ID) {
+			return nil, fmt.Errorf("duplicate organizer: %s", zOrg.ID)
+		}
+		organizersIDs = append(organizersIDs, zOrg.ID)
+	}
+
 	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
@@ -48,7 +65,7 @@ func (s *ZenaoServer) EditEvent(
 			return errors.New("user is not organizer of the event")
 		}
 
-		if evt, err = db.EditEvent(req.Msg.EventId, req.Msg); err != nil {
+		if evt, err = db.EditEvent(req.Msg.EventId, organizersIDs, req.Msg); err != nil {
 			return err
 		}
 
@@ -62,7 +79,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.EditEvent(req.Msg.EventId, zUser.ID, req.Msg, privacy); err != nil {
+	if err := s.Chain.EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, req.Msg, privacy); err != nil {
 		return nil, err
 	}
 

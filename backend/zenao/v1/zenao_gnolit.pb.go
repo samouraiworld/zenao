@@ -91,6 +91,15 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if c.Password != "" {
 		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, c.Password)
 	}
+	if len(c.Organizers) != 0 {
+		fmt.Fprintf(buf, "%s\tOrganizers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Organizers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -144,6 +153,15 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 	}
 	if e.UpdatePassword != false {
 		fmt.Fprintf(buf, "%s\tUpdatePassword: %t,\n", linePrefix, e.UpdatePassword)
+	}
+	if len(e.Organizers) != 0 {
+		fmt.Fprintf(buf, "%s\tOrganizers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Organizers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -376,8 +394,14 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	if e.ImageUri != "" {
 		fmt.Fprintf(buf, "%s\tImageUri: %q,\n", linePrefix, e.ImageUri)
 	}
-	if e.Creator != "" {
-		fmt.Fprintf(buf, "%s\tCreator: %q,\n", linePrefix, e.Creator)
+	if len(e.Organizers) != 0 {
+		fmt.Fprintf(buf, "%s\tOrganizers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Organizers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	if e.StartDate != 0 {
 		fmt.Fprintf(buf, "%s\tStartDate: %d,\n", linePrefix, e.StartDate)
