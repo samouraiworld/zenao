@@ -1,4 +1,4 @@
-h1:qlB4K24wsKkMiWf+uqx6LnlXuHhptFS00k7YLR6H0B4=
+h1:5xneqBLLenh95MoxUr8wVAFc92Olbtn/5QE/x11KOjk=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
@@ -14,3 +14,4 @@ h1:qlB4K24wsKkMiWf+uqx6LnlXuHhptFS00k7YLR6H0B4=
 20250506100445_not-nil-pubkey.sql h1:/gQGFMxIwTrWa9cf3ixlygEyq9BMqGF/FCA8JZy9g3M=
 20250507115126_checkin.sql h1:T11RdziA3eCa4cfjECA1p1WU3nn+f9SIn30RTYZleUc=
 20250521235327_event-password.sql h1:Mcs7KcrGv6y0qlcRUFRmJhihmEYckgtd5xddYTyMZsI=
+20250527170327_ticketsinfo.sql h1:U4GeWbxdB8uu4n4iQ8RqNJBS153w9eBJkGDDs42xKTc=
