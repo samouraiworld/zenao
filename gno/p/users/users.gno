@@ -9,7 +9,6 @@ import (
 	"gno.land/p/zenao/basedao"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
-	"gno.land/p/zenao/role_manager"
 )
 
 type User struct {
@@ -27,7 +26,7 @@ type Config struct {
 }
 
 func NewUser(conf *Config) *User {
-	roles := []role_manager.RoleInfo{
+	roles := []basedao.RoleInfo{
 		{
 			Name:        "zenao-admin",
 			Description: "Admin responsible for managing the account until it becomes self-custodial",
@@ -43,7 +42,7 @@ func NewUser(conf *Config) *User {
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminVetoCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
 
-	// Don't pass the message handlers, since they are by default in the user privdao
+	// Don't pass the action handlers, since they are by default in the user privdao
 	pubdao, privdao := basedao.New(&basedao.Config{
 		Name:             conf.Name,
 		Description:      conf.Bio,

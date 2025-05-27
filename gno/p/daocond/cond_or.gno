@@ -2,72 +2,55 @@ package daocond
 
 import (
 	"math"
-
-	"gno.land/p/demo/json"
+	"strings"
 )
 
-func Or(left Condition, right Condition) Condition {
-	if left == nil || right == nil {
-		panic("left or right is nil")
-	}
-	return &orCond{left: left, right: right}
-}
-
 type orCond struct {
-	// XXX: use a slice instead of only two children?
-	left  Condition
-	right Condition
+	conditions []Condition
 }
 
-// NewState implements Condition.
-func (a *orCond) NewState() State {
-	return &orState{left: a.left.NewState(), right: a.right.NewState()}
+func Or(conditions ...Condition) Condition {
+	if len(conditions) < 2 {
+		panic("at least two conditions are required")
+	}
+	return &orCond{conditions: conditions}
+}
+
+// Eval implements Condition.
+func (c *orCond) Eval(ballot Ballot) bool {
+	for _, condition := range c.conditions {
+		if condition.Eval(ballot) {
+			return true
+		}
+	}
+	return false
+}
+
+// Signal implements Condition.
+func (c *orCond) Signal(ballot Ballot) float64 {
+	maxSignal := 0.0
+	for _, condition := range c.conditions {
+		maxSignal = math.Max(maxSignal, condition.Signal(ballot))
+	}
+	return maxSignal
 }
 
 // Render implements Condition.
-func (a *orCond) Render() string {
-	return "[" + a.left.Render() + " OR " + a.right.Render() + "]"
+func (c *orCond) Render() string {
+	renders := []string{}
+	for _, condition := range c.conditions {
+		renders = append(renders, condition.Render())
+	}
+	return "[" + strings.Join(renders, " OR ") + "]"
 }
 
-// RenderJSON implements Condition.
-func (a *orCond) RenderJSON() *json.Node {
-	return json.ObjectNode("", map[string]*json.Node{
-		"type":  json.StringNode("", "or"),
-		"left":  a.left.RenderJSON(),
-		"right": a.right.RenderJSON(),
-	})
+// RenderWithVotes implements Condition.
+func (c *orCond) RenderWithVotes(ballot Ballot) string {
+	renders := []string{}
+	for _, condition := range c.conditions {
+		renders = append(renders, condition.RenderWithVotes(ballot))
+	}
+	return "[" + strings.Join(renders, " OR ") + "]"
 }
 
-var _ Condition = (*andCond)(nil)
-
-type orState struct {
-	left  State
-	right State
-}
-
-// Signal implements State.
-func (a *orState) Signal(votes map[string]Vote) float64 {
-	return math.Max(a.left.Signal(votes), a.right.Signal(votes))
-}
-
-// Eval implements State.
-func (a *orState) Eval(votes map[string]Vote) bool {
-	return a.left.Eval(votes) || a.right.Eval(votes)
-}
-
-// HandleEvent implements State.
-func (a *orState) HandleEvent(evt Event, votes map[string]Vote) {
-	a.left.HandleEvent(evt, votes)
-	a.right.HandleEvent(evt, votes)
-}
-
-// RenderJSON implements State.
-func (a *orState) RenderJSON(votes map[string]Vote) *json.Node {
-	return json.ObjectNode("", map[string]*json.Node{
-		"type":  json.StringNode("", "and"),
-		"left":  a.left.RenderJSON(votes),
-		"right": a.right.RenderJSON(votes),
-	})
-}
-
-var _ State = (*orState)(nil)
+var _ Condition = (*orCond)(nil)
