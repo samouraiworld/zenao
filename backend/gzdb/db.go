@@ -428,15 +428,15 @@ func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
 	return res, nil
 }
 
-// GetEventBuyerTickets implements zeni.DB.
-func (g *gormZenaoDB) GetEventBuyerTickets(eventID string, buyerID string) ([]*zeni.SoldTicket, error) {
-	buyerIDint, err := strconv.ParseUint(buyerID, 10, 64)
+// GetEventUserTickets implements zeni.DB.
+func (g *gormZenaoDB) GetEventUserTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
+	userIDint, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parse buyer id: %w", err)
 	}
 
 	tickets := []*SoldTicket{}
-	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_id = ? AND buyer_id = ?", eventID, buyerIDint).Error
+	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_id = ? AND (buyer_id = ? OR user_id = ?)", eventID, userIDint, userIDint).Error
 	if err != nil {
 		return nil, err
 	}
