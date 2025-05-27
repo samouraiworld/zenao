@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
         source: "/tickets",
         destination: "/tickets/upcoming",
       },
+      {
+        source: "/event/:id",
+        destination: "/event/:id/description",
+      },
     ];
   },
   async headers() {
