@@ -5,7 +5,9 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -34,17 +36,19 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, err
 	}
 
-	ticketsInfo := make([]*zenaov1.TicketInfo, len(tickets))
-	for i, tk := range tickets {
-		userEmail, err := s.Auth.GetUserFromID(ctx, tk.User.AuthID)
-		if err != nil {
-			return nil, err
-		}
-		ticketsInfo[i] = &zenaov1.TicketInfo{
-			TicketSecret: tk.Ticket.Secret(),
-			UserEmail:    userEmail.Email,
-		}
+	// map userids to do a single auth service roundtrip
+	userIds := mapsl.Map(tickets, func(_ int, tk *zeni.SoldTicket) string { return tk.User.AuthID })
+	users, err := s.Auth.GetUsersFromIDs(ctx, userIds)
+	if err != nil {
+		return nil, err
 	}
+
+	ticketsInfo := mapsl.Map(tickets, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
+		return &zenaov1.TicketInfo{
+			TicketSecret: tk.Ticket.Secret(),
+			UserEmail:    users[i].Email,
+		}
+	})
 
 	return connect.NewResponse(&zenaov1.GetEventTicketsResponse{
 		TicketsInfo: ticketsInfo,
