@@ -66,7 +66,7 @@ export function MainEventSections({
   return (
     <Tabs value={section} className={cn("w-full", className)}>
       <TabsList className="flex w-full bg-transparent p-0 m-0 overflow-auto">
-        <Link href={`/event/${eventId}/description`}>
+        <Link href={`/event/${eventId}`}>
           <TabsTrigger
             value="description"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
