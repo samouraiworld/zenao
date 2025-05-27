@@ -186,7 +186,7 @@ type GetEventTicketsRequest struct {
 }
 
 type GetEventTicketsResponse struct {
-	Tickets []*TicketInfo
+	TicketsInfo []*TicketInfo
 }
 
 type TicketInfo struct {

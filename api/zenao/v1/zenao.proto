@@ -186,7 +186,7 @@ message ReactPostResponse {}
 
 message GetEventTicketsRequest { string event_id = 1; }
 
-message GetEventTicketsResponse { repeated TicketInfo tickets = 1; }
+message GetEventTicketsResponse { repeated TicketInfo ticketsInfo = 1; }
 
 message TicketInfo {
   string ticket_secret = 1;

@@ -1046,12 +1046,12 @@ func (g *GetEventTicketsRequest) FromJSON(node *json.Node) {
 func (g *GetEventTicketsResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if len(g.Tickets) != 0 {
-		arr := make([]*json.Node, len(g.Tickets))
-		for i, val := range g.Tickets {
+	if len(g.TicketsInfo) != 0 {
+		arr := make([]*json.Node, len(g.TicketsInfo))
+		for i, val := range g.TicketsInfo {
 			arr[i] = val.ToJSON()
 		}
-		fields["tickets"] = json.ArrayNode("", arr)
+		fields["ticketsInfo"] = json.ArrayNode("", arr)
 	}
 
 	return json.ObjectNode("", fields)
@@ -1061,7 +1061,7 @@ func (g *GetEventTicketsResponse) FromJSON(node *json.Node) {
 	*g = GetEventTicketsResponse{}
 	fields := node.MustObject()
 
-	if val, ok := fields["tickets"]; ok {
+	if val, ok := fields["ticketsInfo"]; ok {
 		jarr := val.MustArray()
 		arr := make([]*TicketInfo, len(jarr))
 		for i, val := range jarr {
@@ -1069,7 +1069,7 @@ func (g *GetEventTicketsResponse) FromJSON(node *json.Node) {
 			fv.FromJSON(val)
 			arr[i] = fv
 		}
-		g.Tickets = arr
+		g.TicketsInfo = arr
 	}
 }
 

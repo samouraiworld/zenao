@@ -592,10 +592,10 @@ func (g *GetEventTicketsResponse) GnoLiteral(typePrefix string, linePrefix strin
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("GetEventTicketsResponse{\n")
-	if len(g.Tickets) != 0 {
-		fmt.Fprintf(buf, "%s\tTickets: []*TicketInfo{\n", linePrefix)
+	if len(g.TicketsInfo) != 0 {
+		fmt.Fprintf(buf, "%s\tTicketsInfo: []*TicketInfo{\n", linePrefix)
 		linePrefix += "\t"
-		for _, elem := range g.Tickets {
+		for _, elem := range g.TicketsInfo {
 			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]
