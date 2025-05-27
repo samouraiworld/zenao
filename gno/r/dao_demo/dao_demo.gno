@@ -4,7 +4,6 @@ import (
 	"gno.land/p/zenao/basedao"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
-	"gno.land/p/zenao/role_manager"
 	"gno.land/r/demo/profile"
 )
 
@@ -14,7 +13,7 @@ var (
 )
 
 func init() {
-	initialRoles := []role_manager.RoleInfo{
+	initialRoles := []basedao.RoleInfo{
 		{Name: "admin", Description: "Admin is the superuser"},
 		{Name: "public-relationships", Description: "Responsible of communication with the public"},
 		{Name: "finance-officer", Description: "Responsible of funds management"},

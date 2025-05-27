@@ -29,7 +29,7 @@ T2 200 members --> 200 VP, 1 votes per member *
 T3 1000 members --> 100 VP, 0.1 votes per member
 */
 func TestComputeVotingPowers(t *testing.T) {
-	type govDaoComposition struct {
+	type gnoloveDaoComposition struct {
 		t1s                int
 		t2s                int
 		t3s                int
@@ -37,7 +37,7 @@ func TestComputeVotingPowers(t *testing.T) {
 		expectedTotalPower float64
 		expectedPowers     map[string]float64
 	}
-	tests := map[string]govDaoComposition{
+	tests := map[string]gnoloveDaoComposition{
 		"example 1": {
 			t1s:                100,
 			t2s:                100,
@@ -141,15 +141,13 @@ func TestComputeVotingPowers(t *testing.T) {
 				roles = append(roles, "T3")
 			}
 
-			state := &govDaoCondThresholdState{
-				cond: &govDaoCondThreshold{
-					threshold:            0.6,
-					hasRoleFn:            dao.hasRole,
-					roles:                roles,
-					usersWithRoleCountFn: dao.usersWithRoleCount,
-				},
+			cond := &gnolovDaoCondThreshold{
+				threshold:            0.6,
+				hasRoleFn:            dao.hasRole,
+				roles:                roles,
+				usersWithRoleCountFn: dao.usersWithRoleCount,
 			}
-			votingPowers, totalPower := state.computeVotingPowers()
+			votingPowers, totalPower := cond.computeVotingPowers()
 			for tier, expectedPower := range composition.expectedPowers {
 				if votingPowers[tier] != expectedPower {
 					t.Fail()
@@ -164,7 +162,7 @@ func TestComputeVotingPowers(t *testing.T) {
 }
 
 func TestEval(t *testing.T) {
-	type govDaoVotes struct {
+	type gnoloveDaoVotes struct {
 		votesT1      []Vote
 		votesT2      []Vote
 		votesT3      []Vote
@@ -174,7 +172,7 @@ func TestEval(t *testing.T) {
 		abstainT3    bool
 		panic        bool
 	}
-	tests := map[string]govDaoVotes{
+	tests := map[string]gnoloveDaoVotes{
 		"2/6% Yes": { //0.3333
 			votesT1:      []Vote{VoteNo},                             // 3 voting power
 			votesT2:      []Vote{VoteYes, VoteYes, VoteYes, VoteYes}, // 2 voting power combined
@@ -284,20 +282,17 @@ func TestEval(t *testing.T) {
 				dao.addUser(userID, []string{"T3"})
 				votes[userID] = vote
 			}
+			ballot := NewBallot()
+			for userId, vote := range votes {
+				ballot.Vote(userId, vote)
+			}
 			roles := []string{"T1", "T2"}
 			if !tdata.abstainT3 {
 				roles = append(roles, "T3")
 			}
-			cond := GovDaoCondThreshold(tdata.threshold, roles, dao.hasRole, dao.usersWithRoleCount)
-			state := cond.NewState()
-
+			cond := GnoloveDAOCondThreshold(tdata.threshold, roles, dao.hasRole, dao.usersWithRoleCount)
 			// Get percent of total yes
-			renderData := state.RenderJSON(votes)
-			totalYesNode, err := renderData.GetKey("totalYes")
-			urequire.NoError(t, err)
-			urequire.Equal(t, tdata.expectedEval, state.Eval(votes))
-			// require totalYes to be equal to expected
-			urequire.Equal(t, tdata.expectedYes, totalYesNode.MustNumeric())
+			urequire.Equal(t, tdata.expectedEval, cond.Eval(ballot))
 		})
 	}
 }

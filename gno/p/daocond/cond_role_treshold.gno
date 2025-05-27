@@ -4,9 +4,15 @@ import (
 	"errors"
 	"math"
 
-	"gno.land/p/demo/json"
 	"gno.land/p/demo/ufmt"
 )
+
+type roleThresholdCond struct {
+	hasRoleFn        func(memberId string, role string) bool
+	usersRoleCountFn func(role string) uint32
+	threshold        float64
+	role             string
+}
 
 func RoleThreshold(threshold float64, role string, hasRoleFn func(memberId string, role string) bool, usersRoleCountFn func(role string) uint32) Condition {
 	if threshold <= 0 || threshold > 1 {
@@ -26,104 +32,42 @@ func RoleThreshold(threshold float64, role string, hasRoleFn func(memberId strin
 	}
 }
 
-type roleThresholdCond struct {
-	hasRoleFn        func(memberId string, role string) bool
-	usersRoleCountFn func(role string) uint32
-	threshold        float64
-	role             string
+// Eval implements Condition.
+func (c *roleThresholdCond) Eval(ballot Ballot) bool {
+	return c.yesRatio(ballot) >= c.threshold
 }
 
-// NewState implements Condition.
-func (m *roleThresholdCond) NewState() State {
-	return &roleThresholdState{
-		cond: m,
-	}
+// Signal implements Condition.
+func (c *roleThresholdCond) Signal(ballot Ballot) float64 {
+	return math.Min(c.yesRatio(ballot)/c.threshold, 1)
 }
 
 // Render implements Condition.
-func (m *roleThresholdCond) Render() string {
-	return ufmt.Sprintf("%g%% of %s members", m.threshold*100, m.role)
+func (c *roleThresholdCond) Render() string {
+	return ufmt.Sprintf("%g%% of %s members", c.threshold*100, c.role)
 }
 
-// RenderJSON implements Condition.
-func (m *roleThresholdCond) RenderJSON() *json.Node {
-	return json.ObjectNode("", map[string]*json.Node{
-		"type":      json.StringNode("", "role-threshold"),
-		"role":      json.StringNode("", m.role),
-		"threshold": json.NumberNode("", m.threshold),
-	})
+// RenderWithVotes implements Condition.
+func (c *roleThresholdCond) RenderWithVotes(ballot Ballot) string {
+	s := ""
+	s += ufmt.Sprintf("To meet the condition, %g%% of %s members with role %s must vote yes\n\n", c.threshold*100, c.role)
+	s += ufmt.Sprintf("Yes: %d/%d = %g%%\n\n", c.totalYes(ballot), c.usersRoleCountFn(c.role), c.yesRatio(ballot)*100)
+	return s
 }
 
 var _ Condition = (*roleThresholdCond)(nil)
 
-type roleThresholdState struct {
-	cond     *roleThresholdCond
-	totalYes uint64
+func (c *roleThresholdCond) yesRatio(ballot Ballot) float64 {
+	return float64(c.totalYes(ballot)) / float64(c.usersRoleCountFn(c.role))
 }
 
-// Signal implements State.
-func (m *roleThresholdState) Signal(votes map[string]Vote) float64 {
-	return math.Min(m.yesRatio()/m.cond.threshold, 1)
-}
-
-func (m *roleThresholdState) yesRatio() float64 {
-	return float64(m.totalYes) / float64(m.cond.usersRoleCountFn(m.cond.role))
-}
-
-// Eval implements State.
-func (m *roleThresholdState) Eval(_ map[string]Vote) bool {
-	return m.yesRatio() >= m.cond.threshold
-}
-
-// HandleEvent implements State.
-func (m *roleThresholdState) HandleEvent(evt Event, votes map[string]Vote) {
-	switch evt := evt.(type) {
-	case *EventVote:
-		if !m.cond.hasRoleFn(evt.VoterID, m.cond.role) {
-			return
+func (c *roleThresholdCond) totalYes(ballot Ballot) uint32 {
+	totalYes := uint32(0)
+	ballot.Iterate(func(voter string, vote Vote) bool {
+		if vote == VoteYes && c.hasRoleFn(voter, c.role) {
+			totalYes += 1
 		}
-		previousVote := votes[evt.VoterID]
-		if previousVote == VoteYes && evt.Vote != VoteYes {
-			m.totalYes -= 1
-		} else if previousVote != VoteYes && evt.Vote == VoteYes {
-			m.totalYes += 1
-		}
-
-	case *EventRoleAssigned:
-		if evt.Role != m.cond.role {
-			return
-		}
-		vote := votes[evt.UserID]
-		if vote == VoteYes {
-			m.totalYes += 1
-		}
-
-	case *EventRoleUnassigned:
-		if evt.Role != m.cond.role {
-			return
-		}
-		vote := votes[evt.UserID]
-		if vote == VoteYes {
-			m.totalYes -= 1
-		}
-
-	case *EventRoleRemoved:
-		if evt.Role != m.cond.role {
-			return
-		}
-		m.totalYes -= 1
-	}
-}
-
-// RenderJSON implements State.
-func (m *roleThresholdState) RenderJSON(_ map[string]Vote) *json.Node {
-	return json.ObjectNode("", map[string]*json.Node{
-		"type":      json.StringNode("", "role-threshold"),
-		"role":      json.StringNode("", m.cond.role),
-		"threshold": json.NumberNode("", m.cond.threshold),
-		"yes":       json.NumberNode("", float64(m.totalYes)),
-		"total":     json.NumberNode("", float64(m.cond.usersRoleCountFn(m.cond.role))),
+		return false
 	})
+	return totalYes
 }
-
-var _ State = (*roleThresholdState)(nil)
