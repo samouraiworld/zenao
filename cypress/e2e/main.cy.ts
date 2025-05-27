@@ -235,6 +235,9 @@ describe("main", () => {
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
 
+    // Go to feed tab
+    cy.get("button").contains("Discussions").click();
+
     // EventFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
@@ -268,7 +271,7 @@ describe("main", () => {
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
 
-    // Go Description tab
+    // Go to feed tab
     cy.get("button").contains("Discussions").click();
 
     // Channge type of post
@@ -381,7 +384,7 @@ describe("main", () => {
     // Visit a non existing event page
     cy.visit("/event/50", { failOnStatusCode: false });
 
-    cy.get("p").contains("Event doesn't exist").should("be.visible");
+    cy.get("p").contains("Page not found.").should("be.visible");
   });
 });
 

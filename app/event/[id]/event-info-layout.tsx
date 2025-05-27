@@ -11,7 +11,6 @@ import { SignedIn, useAuth } from "@clerk/nextjs";
 import { Event, WithContext } from "schema-dts";
 import { ParticipantsSection } from "./participants-section";
 import { EventManagementMenu } from "./event-management-menu";
-import { MainEventSections } from "./main-event-sections";
 import { eventOptions } from "@/lib/queries/event";
 import { Card } from "@/components/cards/Card";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -46,10 +45,16 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
   );
 };
 
-export function EventInfo({ eventId }: { eventId: string }) {
+export function EventInfoLayout({
+  eventId,
+  children,
+}: {
+  eventId: string;
+  children: React.ReactNode;
+}) {
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
-  const { data } = useSuspenseQuery(eventOptions(eventId));
   const { password } = useEventPassword();
+  const { data } = useSuspenseQuery(eventOptions(eventId));
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
@@ -58,7 +63,6 @@ export function EventInfo({ eventId }: { eventId: string }) {
   const location = makeLocationFromEvent(data.location);
   const timezone = useLocationTimezone(location);
 
-  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
 
@@ -212,11 +216,7 @@ export function EventInfo({ eventId }: { eventId: string }) {
         )}
       </Card>
 
-      <MainEventSections
-        eventId={eventId}
-        description={data.description}
-        isMember={isParticipant || isOrganizer}
-      />
+      {children}
 
       <GoTopButton />
     </div>

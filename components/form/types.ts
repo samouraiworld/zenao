@@ -161,3 +161,8 @@ export const eventProtectionFormSchema = z.object({
 export type EventProtectionFormSchemaType = z.infer<
   typeof eventProtectionFormSchema
 >;
+
+export const eventInfoTabsSchema = z
+  .union([z.literal("description"), z.literal("feed"), z.literal("votes")])
+  .default("description");
+export type EventInfoTabsSchemaType = z.infer<typeof eventInfoTabsSchema>;

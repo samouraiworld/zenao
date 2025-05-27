@@ -1,9 +1,9 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EventInfo } from "./event-info";
 import { imageHeight, imageWidth } from "./constants";
 import { ExclusiveEventGuard } from "./exclusive-event-guard";
+import { EventInfoLayout } from "./event-info-layout";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
@@ -13,6 +13,7 @@ import { profileOptions } from "@/lib/queries/profile";
 
 type Props = {
   params: Promise<{ id: string }>;
+  children?: React.ReactNode;
 };
 
 // enable ssg for all events
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function EventPage({ params }: Props) {
+export default async function EventLayout({ params, children }: Props) {
   // NOTE: we don't prefetch everything because using `auth()` breaks static generation
   const p = await params;
   const queryClient = getQueryClient();
@@ -81,7 +82,7 @@ export default async function EventPage({ params }: Props) {
             height: imageHeight,
           }}
         >
-          <EventInfo eventId={p.id} />
+          <EventInfoLayout eventId={p.id}>{children}</EventInfoLayout>
         </ScreenContainer>
       </ExclusiveEventGuard>
     </HydrationBoundary>
