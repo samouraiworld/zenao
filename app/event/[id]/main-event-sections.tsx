@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -46,7 +46,6 @@ export function MainEventSections({
     () => isOrganizer || isParticipant,
     [isOrganizer, isParticipant],
   );
-  const [tab, setTab] = useState<EventInfoTabsSchemaType>("description");
   const t = useTranslations("event");
 
   const form = useForm<FeedPostFormSchemaType>({
@@ -63,10 +62,6 @@ export function MainEventSections({
       },
     },
   });
-
-  useEffect(() => {
-    setTab(isMember ? "feed" : "description");
-  }, [isMember]);
 
   return (
     <Tabs value={section} className={cn("w-full", className)}>
@@ -104,7 +99,7 @@ export function MainEventSections({
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 min-h-0 pt-4">
-          {tab !== "description" && isMember && (
+          {section !== "description" && isMember && (
             <EventFeedForm eventId={eventId} form={form} />
           )}
           {/* Social Feed (Discussions) */}

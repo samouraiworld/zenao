@@ -20,7 +20,5 @@ export default async function EventSectionsPage({ params }: PageProps) {
     redirect(`/event/${id}`, RedirectType.replace);
   }
 
-  console.log(tab, safeTab.data);
-
   return <MainEventSections eventId={id} section={safeTab.data} />;
 }
