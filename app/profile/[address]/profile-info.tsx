@@ -1,14 +1,14 @@
 "use client";
 
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { Person, WithContext } from "schema-dts";
+import ProfileHeader from "./profile-header";
 import { EventCard } from "@/components/cards/event-card";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/texts/heading";
 import { idFromPkgPath } from "@/lib/queries/event";
 import { eventsByOrganizerList } from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Person, WithContext } from "schema-dts";
-import ProfileHeader from "./profile-header";
 
 export function ProfileInfo({
   address,

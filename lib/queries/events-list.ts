@@ -1,12 +1,12 @@
+import { fromJson } from "@bufbuild/protobuf";
+import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
+import { queryOptions, UseQueryOptions } from "@tanstack/react-query";
+import { extractGnoJSONResponse } from "@/lib/gno";
 import {
   EventInfo,
   EventInfoJson,
   EventInfoSchema,
 } from "@/app/gen/zenao/v1/zenao_pb";
-import { extractGnoJSONResponse } from "@/lib/gno";
-import { fromJson } from "@bufbuild/protobuf";
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
-import { queryOptions, UseQueryOptions } from "@tanstack/react-query";
 
 export const eventsList = (
   fromUnixSec: number,

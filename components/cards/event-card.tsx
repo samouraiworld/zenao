@@ -1,8 +1,5 @@
 "use client";
 
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { determineTimezone } from "@/lib/determine-timezone";
-import { makeLocationFromEvent } from "@/lib/location";
 import { format, fromUnixTime } from "date-fns";
 import { MapPin, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -13,6 +10,9 @@ import Heading from "../texts/heading";
 import Text from "../texts/text";
 import { Card } from "./Card";
 import EventDateTime from "./event-date-time";
+import { makeLocationFromEvent } from "@/lib/location";
+import { determineTimezone } from "@/lib/determine-timezone";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
   const location = makeLocationFromEvent(evt.location);
@@ -58,7 +58,8 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
               </div>
               <div className="flex flex-row gap-2 items-center">
                 {/* XXX: Display all organizers & use the i18n traduction */}
-                {t("hosted-by")} <UserAvatarWithName address={evt.organizers[0]} />
+                {t("hosted-by")}{" "}
+                <UserAvatarWithName address={evt.organizers[0]} />
               </div>
             </div>
             <div>

@@ -1,9 +1,9 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { ProfileInfo } from "./profile-info";
 import { ScreenContainer } from "@/components/layout/ScreenContainer";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventsByOrganizerList } from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { ProfileInfo } from "./profile-info";
 
 type Props = {
   params: Promise<{ address: string }>;

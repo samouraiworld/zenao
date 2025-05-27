@@ -1,5 +1,16 @@
 "use client";
 
+import { SignedIn, useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { format, fromUnixTime } from "date-fns";
+import { format as formatTZ } from "date-fns-tz";
+import { Calendar } from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import React, { useMemo } from "react";
+import { Event, WithContext } from "schema-dts";
+import { EventManagementMenu } from "./event-management-menu";
+import { ParticipantsSection } from "./participants-section";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/buttons/go-top-button";
@@ -18,17 +29,6 @@ import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
-import { SignedIn, useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { format, fromUnixTime } from "date-fns";
-import { format as formatTZ } from "date-fns-tz";
-import { Calendar } from "lucide-react";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
-import React, { useMemo } from "react";
-import { Event, WithContext } from "schema-dts";
-import { EventManagementMenu } from "./event-management-menu";
-import { ParticipantsSection } from "./participants-section";
 
 interface EventSectionProps {
   title: string;
