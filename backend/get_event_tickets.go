@@ -36,19 +36,30 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, err
 	}
 
-	// map userids to do a single auth service roundtrip
-	userIds := mapsl.Map(tickets, func(_ int, tk *zeni.SoldTicket) string { return tk.User.AuthID })
-	users, err := s.Auth.GetUsersFromIDs(ctx, userIds)
+	userIDs := []string{}
+	ticketsWithUser := []*zeni.SoldTicket{}
+	ticketsWithoutUser := []*zeni.SoldTicket{}
+
+	for _, tk := range tickets {
+		if tk.User == nil {
+			ticketsWithoutUser = append(ticketsWithoutUser, tk)
+			continue
+		}
+		userIDs = append(userIDs, tk.User.AuthID)
+		ticketsWithUser = append(ticketsWithUser, tk)
+	}
+
+	users, err := s.Auth.GetUsersFromIDs(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	ticketsInfo := mapsl.Map(tickets, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
-		return &zenaov1.TicketInfo{
-			TicketSecret: tk.Ticket.Secret(),
-			UserEmail:    users[i].Email,
-		}
+	ticketsInfo := mapsl.Map(ticketsWithUser, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
+		return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret(), UserEmail: users[i].Email}
 	})
+	ticketsInfo = append(ticketsInfo, mapsl.Map(ticketsWithoutUser, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
+		return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret()}
+	})...)
 
 	return connect.NewResponse(&zenaov1.GetEventTicketsResponse{
 		TicketsInfo: ticketsInfo,
