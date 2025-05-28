@@ -17,14 +17,17 @@ type TicketCardProps = {
   eventId: string;
   event: EventInfo;
   timezone: string;
-  ticketSecret: string;
+  ticketInfo: {
+    ticketSecret: string;
+    userEmail: string;
+  };
 };
 
 export function TicketCard({
   eventId,
   event,
   timezone,
-  ticketSecret,
+  ticketInfo,
 }: TicketCardProps) {
   const t = useTranslations("tickets");
   const { Canvas: QRCode } = useQRCode();
@@ -64,6 +67,9 @@ export function TicketCard({
           <Heading level={2} size="xl" className="text-black">
             {event.title}
           </Heading>
+          <Text className="text-black font-semibold">
+            {ticketInfo.userEmail}
+          </Text>
           <div className="flex flex-row gap-2 max-sm:items-center">
             <div className="flex flex-col max-sm:items-center">
               <Heading level={3} variant="secondary">
@@ -88,7 +94,7 @@ export function TicketCard({
 
           <div className="flex flex-col grow items-center justify-center">
             <QRCode
-              text={ticketSecret}
+              text={ticketInfo.ticketSecret}
               options={{
                 errorCorrectionLevel: "M",
                 margin: 2,
