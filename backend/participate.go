@@ -10,6 +10,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -48,17 +49,15 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, errors.New("password too long")
 	}
 
-	participants := make([]*zeni.User, 0, len(req.Msg.Guests)+1)
-	participants = append(participants, buyer)
-	for _, guestEmail := range req.Msg.Guests {
-		if guestEmail == authUser.Email {
-			return nil, errors.New("guest has same email as buyer")
-		}
+	authGuests, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Guests)
+	if err != nil {
+		return nil, err
+	}
 
-		// XXX: support batch
-		authGuest, err := s.Auth.EnsureUserExists(ctx, guestEmail)
-		if err != nil {
-			return nil, err
+	participants := []*zeni.User{buyer}
+	for _, authGuest := range authGuests {
+		if authGuest.ID == authUser.ID {
+			return nil, errors.New("guest is buyer")
 		}
 
 		if slices.ContainsFunc(participants, func(added *zeni.User) bool { return authGuest.ID == added.AuthID }) {
@@ -73,13 +72,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		participants = append(participants, guest)
 	}
 
-	tickets := make([]*zeni.Ticket, len(participants))
-	for i := range len(tickets) {
-		ticket, err := zeni.NewTicket()
-		if err != nil {
-			return nil, err
-		}
-		tickets[i] = ticket
+	tickets, err := mapsl.MapRangeErr(len(participants), zeni.NewTicket)
+	if err != nil {
+		return nil, err
 	}
 
 	evt := (*zeni.Event)(nil)

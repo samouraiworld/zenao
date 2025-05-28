@@ -89,7 +89,17 @@ func execSyncChain() error {
 			continue
 		}
 
-		if err := chain.CreateEvent(event.ID, event.CreatorID, &zenaov1.CreateEventRequest{
+		organizers, err := db.GetEventUsersWithRole(event.ID, "organizer")
+		if err != nil {
+			logger.Error("failed to get organizers of event", zap.String("event-id", event.ID), zap.Error(err))
+			continue
+		}
+		var organizersIDs []string
+		for _, org := range organizers {
+			organizersIDs = append(organizersIDs, org.ID)
+		}
+
+		if err := chain.CreateEvent(event.ID, organizersIDs, &zenaov1.CreateEventRequest{
 			Title:       event.Title,
 			Description: event.Description,
 			ImageUri:    event.ImageURI,
@@ -103,7 +113,7 @@ func execSyncChain() error {
 			continue
 		}
 
-		participants, err := db.GetAllParticipants(event.ID)
+		participants, err := db.GetEventUsersWithRole(event.ID, "participant")
 		if err != nil {
 			logger.Error("failed to get participants of event", zap.String("event-id", event.ID), zap.Error(err))
 			continue

@@ -94,7 +94,7 @@ func (g *gormZenaoDB) Tx(cb func(db zeni.DB) error) error {
 }
 
 // CreateEvent implements zeni.DB.
-func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequest) (*zeni.Event, error) {
+func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, req *zenaov1.CreateEventRequest) (*zeni.Event, error) {
 	// NOTE: request should be validated by caller
 
 	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
@@ -126,14 +126,21 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 		return nil, fmt.Errorf("create event in db: %w", err)
 	}
 
-	userRole := &UserRole{
-		UserID:  uint(creatorIDInt),
-		EventID: evt.ID,
-		Role:    "organizer",
-	}
+	for _, organizerID := range organizersIDs {
+		organizerIDInt, err := strconv.ParseUint(organizerID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse organizer id: %w", err)
+		}
 
-	if err := g.db.Create(userRole).Error; err != nil {
-		return nil, fmt.Errorf("create organizer role assignment in db: %w", err)
+		userRole := &UserRole{
+			UserID:  uint(organizerIDInt),
+			EventID: evt.ID,
+			Role:    "organizer",
+		}
+
+		if err := g.db.Create(userRole).Error; err != nil {
+			return nil, fmt.Errorf("create organizer role assignment in db: %w", err)
+		}
 	}
 
 	zevt, err := dbEventToZeniEvent(evt)
@@ -145,7 +152,7 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, req *zenaov1.CreateEventRequ
 }
 
 // EditEvent implements zeni.DB.
-func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (*zeni.Event, error) {
+func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, req *zenaov1.EditEventRequest) (*zeni.Event, error) {
 	// XXX: validate?
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
 	if err != nil {
@@ -172,6 +179,52 @@ func (g *gormZenaoDB) EditEvent(eventID string, req *zenaov1.EditEventRequest) (
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
 		return nil, err
+	}
+
+	var currentOrgsIDs []string
+	currentOrgs, err := g.GetEventUsersWithRole(eventID, "organizer")
+	if err != nil {
+		return nil, fmt.Errorf("get current organizers: %w", err)
+	}
+	for _, org := range currentOrgs {
+		currentOrgsIDs = append(currentOrgsIDs, org.ID)
+	}
+
+	orgsToRemove := make([]string, 0, len(currentOrgs))
+	for _, orgID := range currentOrgsIDs {
+		if !slices.Contains(organizersIDs, orgID) {
+			orgsToRemove = append(orgsToRemove, orgID)
+		}
+	}
+
+	if len(orgsToRemove) > 0 {
+		if err := g.db.Where("event_id = ? AND role = ? AND user_id IN (?)", evtIDInt, "organizer", orgsToRemove).Delete(&UserRole{}).Error; err != nil {
+			return nil, fmt.Errorf("delete existing organizer roles before adding the new ones: %w", err)
+		}
+	}
+
+	orgsToAdd := make([]string, 0, len(organizersIDs))
+	for _, orgID := range organizersIDs {
+		if !slices.Contains(currentOrgsIDs, orgID) {
+			orgsToAdd = append(orgsToAdd, orgID)
+		}
+	}
+
+	for _, organizerID := range orgsToAdd {
+		organizerIDInt, err := strconv.ParseUint(organizerID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse organizer id: %w", err)
+		}
+
+		userRole := &UserRole{
+			UserID:  uint(organizerIDInt),
+			EventID: uint(evtIDInt),
+			Role:    "organizer",
+		}
+
+		if err := g.db.Create(userRole).Error; err != nil {
+			return nil, fmt.Errorf("create organizer role assignment in db: %w", err)
+		}
 	}
 
 	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(evt).Error; err != nil {
@@ -415,10 +468,10 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 	return res, nil
 }
 
-// GetAllParticipants implements zeni.DB.
-func (g *gormZenaoDB) GetAllParticipants(eventID string) ([]*zeni.User, error) {
+// GetEventUsersWithRole implements zeni.DB.
+func (g *gormZenaoDB) GetEventUsersWithRole(eventID string, role string) ([]*zeni.User, error) {
 	var participants []*UserRole
-	if err := g.db.Preload("User").Find(&participants, "event_id = ? AND role = ?", eventID, "participant").Error; err != nil {
+	if err := g.db.Preload("User").Find(&participants, "event_id = ? AND role = ?", eventID, role).Error; err != nil {
 		return nil, err
 	}
 	res := make([]*zeni.User, 0, len(participants))

@@ -25,7 +25,7 @@ const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 
 // Event cannot be exposed
 type Event struct {
-	creator             string
+	organizers          []string
 	startDate           int64
 	endDate             int64
 	capacity            uint32
@@ -39,7 +39,7 @@ type Event struct {
 }
 
 type Config struct {
-	Creator             string
+	Organizers          []string
 	Title               string
 	Description         string
 	ImageURI            string
@@ -90,16 +90,17 @@ func NewEvent(conf *Config) *Event {
 			Description: "Person attending the event",
 		},
 	}
-	members := []basedao.Member{
-		{
-			Address: conf.Creator,
+	var members []basedao.Member
+	for _, organizer := range conf.Organizers {
+		members = append(members, basedao.Member{
+			Address: organizer,
 			Roles:   []string{"organizer"},
-		},
-		{
-			Address: conf.ZenaoAdminAddr,
-			Roles:   []string{"zenao-admin"},
-		},
+		})
 	}
+	members = append(members, basedao.Member{
+		Address: conf.ZenaoAdminAddr,
+		Roles:   []string{"zenao-admin"},
+	})
 
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
@@ -115,7 +116,7 @@ func NewEvent(conf *Config) *Event {
 	})
 
 	event := &Event{
-		creator:             conf.Creator,
+		organizers:          conf.Organizers,
 		startDate:           conf.StartDate,
 		endDate:             conf.EndDate,
 		capacity:            conf.Capacity,
@@ -355,6 +356,24 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
+		if len(msg.organizers) != 0 {
+			e.organizers = msg.organizers
+			currentOrgs := e.DAOPrivate.Members.GetMembersWithRole("organizer")
+			for _, org := range currentOrgs {
+				if !sliceContains(msg.organizers, org) {
+					e.DAOPrivate.Members.RemoveRoleFromMember(org, "organizer")
+				}
+			}
+			for _, org := range msg.organizers {
+				if !sliceContains(currentOrgs, org) {
+					if e.DAOPrivate.Members.IsMember(org) {
+						e.DAOPrivate.Members.AddRoleToMember(org, "organizer")
+					} else {
+						e.DAOPrivate.Members.AddMember(org, []string{"organizer"})
+					}
+				}
+			}
+		}
 		if msg.title != "" {
 			e.setProfileString("DisplayName", msg.title)
 		}
@@ -394,6 +413,7 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 }
 
 type msgEditEvent struct {
+	organizers  []string
 	title       string
 	description string
 	imageURI    string
@@ -434,8 +454,9 @@ func (msg *msgEditEvent) String() string {
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
+func NewEditEventMsg(organizers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
+		organizers:  organizers,
 		title:       title,
 		description: description,
 		imageURI:    imageURI,
@@ -457,9 +478,14 @@ func (e *Event) Render(path string) string {
 			locStr = "Error: " + err.Error()
 		}
 
-		orga := e.getProfileString(std.Address(info.Creator), "DisplayName", "")
-		if orga == "" {
-			orga = info.Creator
+		var orgaRenderList []string
+		for _, org := range e.organizers {
+			orga := e.getProfileString(std.Address(org), "DisplayName", "")
+			if orga == "" {
+				orga = org
+			}
+			tmp := md.Link(orga, "/r/zenao/cockpit:u/"+org)
+			orgaRenderList = append(orgaRenderList, tmp)
 		}
 
 		s += md.H1(info.Title)
@@ -469,8 +495,9 @@ func (e *Event) Render(path string) string {
 			ufmt.Sprintf("📍 Location: %s", locStr),
 			ufmt.Sprintf("🕓 Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
 			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.capacity),
-			ufmt.Sprintf("👤 Organizer: %s", md.Link(orga, "/r/zenao/cockpit:u/"+info.Creator)),
+			"👤 Organizers: ",
 		}) + "\n"
+		s += md.Nested(md.BulletList(orgaRenderList), "\t")
 		s += md.HorizontalRule()
 		path = "noprofile"
 	}
@@ -512,4 +539,13 @@ func LocationString(location *zenaov1.EventLocation) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+func sliceContains(slice []string, elem string) bool {
+	for _, e := range slice {
+		if e == elem {
+			return true
+		}
+	}
+	return false
 }

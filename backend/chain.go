@@ -22,6 +22,7 @@ import (
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -116,10 +117,10 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 }
 
 // CreateEvent implements ZenaoChain.
-func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
-	creatorAddr := g.UserAddress(creatorID)
+func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
+	organizersAddr := mapsl.Map(organizersIDs, g.UserAddress)
 
-	eventRealmSrc, err := generateEventRealmSource(creatorAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
+	eventRealmSrc, err := generateEventRealmSource(organizersAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
 	if err != nil {
 		return err
 	}
@@ -168,7 +169,8 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, creatorID string, req *zenaov1
 }
 
 // EditEvent implements ZenaoChain.
-func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
+func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
+	orgsAddrLit := stringSliceLit(mapsl.Map(organizersIDs, g.UserAddress))
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
 	loc := "&" + req.Location.GnoLiteral("zenaov1.", "\t\t")
@@ -198,6 +200,7 @@ func main() {
 		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
 			Title: "Edit event",
 			Message: events.NewEditEventMsg(
+				%s,
 				%q,
 				%q,
 				%q,
@@ -210,7 +213,7 @@ func main() {
 		}),
 	})
 }
-`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacyStr),
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, orgsAddrLit, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacyStr),
 			}},
 		},
 	}))
@@ -554,11 +557,7 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	eventPkgPath := g.eventRealmPkgPath(req.EventId)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
-
-	options := ""
-	for _, option := range req.Options {
-		options += fmt.Sprintf(`%q, `, option)
-	}
+	optionsLit := stringSliceLit(req.Options)
 
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
@@ -593,7 +592,7 @@ func main() {
 
 func newPoll() {
 	question := %q
-	options := []string{%s}
+	options := %s
 	kind := pollsv1.PollKind(%d)
 	p := polls.NewPoll(question, kind, %d, options, event.IsMember)
 	uri := ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID))
@@ -611,7 +610,7 @@ func newPoll() {
 	postID := social_feed.NewPost(feedID, post)
 	std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 }
-`, eventPkgPath, userRealmPkgPath, req.Question, options, req.Kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
+`, eventPkgPath, userRealmPkgPath, req.Question, optionsLit, req.Kind, req.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate),
 			}},
 		},
 	}))
@@ -716,9 +715,9 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
-	m := map[string]interface{}{
-		"creatorAddr":    creatorAddr,
+func generateEventRealmSource(organizersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
+	m := map[string]any{
+		"organizersAddr": stringSliceLit(organizersAddr),
 		"req":            req,
 		"zenaoAdminAddr": zenaoAdminAddr,
 		"namespace":      gnoNamespace,
@@ -730,7 +729,7 @@ func generateEventRealmSource(creatorAddr string, zenaoAdminAddr string, gnoName
 		participationPubkey = guarded.GetParticipationPubkey()
 	}
 
-	toMarshal := map[string]interface{}{
+	toMarshal := map[string]any{
 		"title":               req.Title,
 		"description":         req.Description,
 		"imageURI":            req.ImageUri,
@@ -772,7 +771,7 @@ var (
 
 func init() {
 	conf := events.Config{
-		Creator: "{{.creatorAddr}}",
+		Organizers: {{.organizersAddr}},
 		Title: {{.title}},
 		Description: {{.description}},
 		ImageURI: {{.imageURI}},
@@ -891,4 +890,9 @@ func extractEventAttribute(event std.GnoEvent, key string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("event %s attribute %s not found", event.Type, key)
+}
+
+func stringSliceLit(s []string) string {
+	quoted := mapsl.Map(s, strconv.Quote)
+	return fmt.Sprintf(`[]string{%s}`, strings.Join(quoted, `, `))
 }

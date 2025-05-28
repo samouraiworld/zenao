@@ -20,7 +20,7 @@ func Render(path string) string {
 	case strings.HasPrefix(path, "created/"):
 		title = "My Zenao Events"
 		listFn = func(from int64, to int64, limit uint32) []*zenaov1.EventInfo {
-			return listEventsByCreator(strings.TrimPrefix(path, "created/"), from, to, limit)
+			return listEventsByOrganizer(strings.TrimPrefix(path, "created/"), from, to, limit)
 		}
 	case strings.HasPrefix(path, "tickets/"):
 		title = "My Zenao Tickets"
@@ -57,15 +57,20 @@ func renderEvent(buf *strings.Builder, evt *zenaov1.EventInfo) {
 		locStr = "Error: " + err.Error()
 	}
 
-	orga := profile.GetStringField(std.Address(evt.Creator), "DisplayName", "")
-	if orga == "" {
-		orga = evt.Creator
+	var orgaRendered []string
+	for _, organizer := range evt.Organizers {
+		orga := profile.GetStringField(std.Address(organizer), "DisplayName", "")
+		if orga == "" {
+			orga = organizer
+		}
+		orgaRendered = append(orgaRendered, orga)
 	}
 
 	buf.WriteString(md.H3(evt.Title + " | 📍 " + locStr))
 	timeStr := ufmt.Sprintf("⏱️ %s to %s", time.Unix(evt.StartDate, 0).Format(time.DateTime), time.Unix(evt.EndDate, 0).Format(time.DateTime))
 	buf.WriteString(md.Paragraph(timeStr + " | " + md.Link("🔗 Details", trimDomain(evt.PkgPath))))
-	buf.WriteString(md.Paragraph("Organized by " + orga))
+	buf.WriteString(md.Paragraph("Organized by: "))
+	buf.WriteString(md.BulletList(orgaRendered))
 }
 
 func trimDomain(pkgPath string) string {

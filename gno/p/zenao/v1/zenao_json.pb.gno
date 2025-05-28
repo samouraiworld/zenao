@@ -119,6 +119,13 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	if c.Password != "" {
 		fields["password"] = json.StringNode("", c.Password)
 	}
+	if len(c.Organizers) != 0 {
+		arr := make([]*json.Node, len(c.Organizers))
+		for i, val := range c.Organizers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["organizers"] = json.ArrayNode("", arr)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -163,6 +170,14 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["password"]; ok {
 		c.Password = val.MustString()
+	}
+	if val, ok := fields["organizers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Organizers = arr
 	}
 }
 
@@ -221,6 +236,13 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.UpdatePassword != false {
 		fields["updatePassword"] = json.BoolNode("", e.UpdatePassword)
 	}
+	if len(e.Organizers) != 0 {
+		arr := make([]*json.Node, len(e.Organizers))
+		for i, val := range e.Organizers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["organizers"] = json.ArrayNode("", arr)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -271,6 +293,14 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["updatePassword"]; ok {
 		e.UpdatePassword = val.MustBool()
+	}
+	if val, ok := fields["organizers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Organizers = arr
 	}
 }
 
@@ -665,8 +695,12 @@ func (e *EventInfo) ToJSON() *json.Node {
 	if e.ImageUri != "" {
 		fields["imageUri"] = json.StringNode("", e.ImageUri)
 	}
-	if e.Creator != "" {
-		fields["creator"] = json.StringNode("", e.Creator)
+	if len(e.Organizers) != 0 {
+		arr := make([]*json.Node, len(e.Organizers))
+		for i, val := range e.Organizers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["organizers"] = json.ArrayNode("", arr)
 	}
 	if e.StartDate != 0 {
 		fields["startDate"] = json.StringNode("", strconv.FormatInt(e.StartDate, 10))
@@ -706,8 +740,13 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 	if val, ok := fields["imageUri"]; ok {
 		e.ImageUri = val.MustString()
 	}
-	if val, ok := fields["creator"]; ok {
-		e.Creator = val.MustString()
+	if val, ok := fields["organizers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Organizers = arr
 	}
 	if val, ok := fields["startDate"]; ok {
 		fv, err := strconv.ParseInt(val.MustString(), 10, 64)

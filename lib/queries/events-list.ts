@@ -1,6 +1,6 @@
-import { queryOptions, UseQueryOptions } from "@tanstack/react-query";
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
+import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
+import { queryOptions, UseQueryOptions } from "@tanstack/react-query";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import {
   EventInfo,
@@ -37,8 +37,8 @@ export const eventsList = (
   });
 };
 
-export const eventsByCreatorList = (
-  creator: string,
+export const eventsByOrganizerList = (
+  organizer: string,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
@@ -47,14 +47,14 @@ export const eventsByCreatorList = (
   const toInt = Math.floor(toUnixSec);
   const limitInt = Math.floor(limit);
   return queryOptions({
-    queryKey: ["eventsByCreator", creator, fromInt, toInt, limitInt],
+    queryKey: ["eventsByOrganizer", organizer, fromInt, toInt, limitInt],
     queryFn: async () => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByCreator(${JSON.stringify(creator)}, ${fromInt}, ${toInt}, ${limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${fromInt}, ${toInt}, ${limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);

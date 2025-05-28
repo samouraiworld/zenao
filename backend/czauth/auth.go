@@ -5,12 +5,14 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"net/http"
+	"slices"
 	"strings"
 
 	"connectrpc.com/authn"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/clerk/clerk-sdk-go/v2/user"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
@@ -30,11 +32,7 @@ func (c *clerkZenaoAuth) GetUser(ctx context.Context) *zeni.AuthUser {
 		return nil
 	}
 	clerkUser := iUser.(*clerk.User)
-	email := ""
-	if len(clerkUser.EmailAddresses) != 0 {
-		email = clerkUser.EmailAddresses[0].EmailAddress
-	}
-	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+	return toAuthUser(clerkUser)
 }
 
 // GetUsersFromIDs implements zeni.Auth.
@@ -43,45 +41,51 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 	if err != nil {
 		return nil, err
 	}
-	users := make([]*zeni.AuthUser, len(userList.Users))
-	for i, clerkUser := range userList.Users {
-		email := ""
-		if len(clerkUser.EmailAddresses) != 0 {
-			email = clerkUser.EmailAddresses[0].EmailAddress
-		}
-		users[i] = &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
-	}
-	return users, nil
+	return mapsl.Map(userList.Users, toAuthUser), nil
 }
 
 // EnsureUserExists implements zeni.Auth.
 func (c *clerkZenaoAuth) EnsureUserExists(ctx context.Context, email string) (*zeni.AuthUser, error) {
-	existing, err := user.List(ctx, &user.ListParams{EmailAddressQuery: &email})
+	users, err := c.EnsureUsersExists(ctx, []string{email})
 	if err != nil {
 		return nil, err
 	}
-	if len(existing.Users) != 0 {
-		clerkUser := existing.Users[0]
-		// XXX: should probably return primary email once we support changing email
-		return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
-	}
+	return users[0], nil
+}
 
-	passwordBz := make([]byte, 32)
-	if _, err := rand.Read(passwordBz); err != nil {
+// EnsureUserExists implements zeni.Auth.
+func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string) ([]*zeni.AuthUser, error) {
+	existing, err := user.List(ctx, &user.ListParams{EmailAddresses: emails})
+	if err != nil {
 		return nil, err
 	}
-	password := base64.RawURLEncoding.EncodeToString(passwordBz)
 
-	clerkUser, err := user.Create(ctx, &user.CreateParams{
-		EmailAddresses: &[]string{email},
-		Password:       &password,
+	return mapsl.MapErr(emails, func(email string) (*zeni.AuthUser, error) {
+		idx := slices.IndexFunc(existing.Users, func(u *clerk.User) bool {
+			return slices.ContainsFunc(u.EmailAddresses, func(cm *clerk.EmailAddress) bool {
+				return cm.EmailAddress == email
+			})
+		})
+		if idx != -1 {
+			return toAuthUser(existing.Users[idx]), nil
+		}
+
+		passwordBz := make([]byte, 32)
+		if _, err := rand.Read(passwordBz); err != nil {
+			return nil, err
+		}
+		password := base64.RawURLEncoding.EncodeToString(passwordBz)
+
+		clerkUser, err := user.Create(ctx, &user.CreateParams{
+			EmailAddresses: &[]string{email},
+			Password:       &password,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return toAuthUser(clerkUser), nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	// XXX: should probably return primary email once we support changing email
-	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 }
 
 // WithAuth implements zeni.Auth.
@@ -107,4 +111,18 @@ func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 		}
 		return usr, nil
 	}).Wrap
+}
+
+func toAuthUser(clerkUser *clerk.User) *zeni.AuthUser {
+	email := ""
+	if clerkUser.PrimaryEmailAddressID != nil {
+		emailIdx := slices.IndexFunc(clerkUser.EmailAddresses, func(cm *clerk.EmailAddress) bool {
+			return cm.ID == *clerkUser.PrimaryEmailAddressID
+		})
+		if emailIdx != -1 {
+			email = clerkUser.EmailAddresses[emailIdx].EmailAddress
+		}
+	}
+
+	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
 }

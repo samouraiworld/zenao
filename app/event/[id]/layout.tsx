@@ -57,7 +57,7 @@ export default async function EventLayout({ params, children }: Props) {
     notFound();
   }
 
-  queryClient.prefetchQuery(profileOptions(eventData.creator));
+  queryClient.prefetchQuery(profileOptions(eventData.organizers[0]));
 
   // Prefetch all participants profiles
   const addresses = await queryClient.fetchQuery(

@@ -54,10 +54,10 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, err
 	}
 
-	ticketsInfo := mapsl.Map(ticketsWithUser, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
+	ticketsInfo := mapsl.MapIndex(ticketsWithUser, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
 		return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret(), UserEmail: users[i].Email}
 	})
-	ticketsInfo = append(ticketsInfo, mapsl.Map(ticketsWithoutUser, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
+	ticketsInfo = append(ticketsInfo, mapsl.Map(ticketsWithoutUser, func(tk *zeni.SoldTicket) *zenaov1.TicketInfo {
 		return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret()}
 	})...)
 

@@ -33,6 +33,7 @@ type CreateEventRequest struct {
 	Capacity    uint32
 	Location    *EventLocation
 	Password    string
+	Organizers  []string
 }
 
 type CreateEventResponse struct {
@@ -51,6 +52,7 @@ type EditEventRequest struct {
 	Location       *EventLocation
 	Password       string
 	UpdatePassword bool
+	Organizers     []string
 }
 
 type EditEventResponse struct {
@@ -122,7 +124,7 @@ type EventInfo struct {
 	Title        string
 	Description  string
 	ImageUri     string
-	Creator      string
+	Organizers   []string
 	StartDate    int64
 	EndDate      int64
 	Capacity     uint32
