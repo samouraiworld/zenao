@@ -13,7 +13,7 @@ import {
 } from "react";
 import { XIcon } from "lucide-react";
 import { z } from "zod";
-import { OpenStreetMapProvider } from "leaflet-geosearch";
+import OpenStreetMapProvider from "leaflet-geosearch/lib/providers/openStreetMapProvider.js";
 import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
 import { addressLocationSchema, EventFormSchemaType } from "../types";
 import { Button } from "@/components/shadcn/button";
