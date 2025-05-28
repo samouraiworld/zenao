@@ -33,13 +33,14 @@ func (s *ZenaoServer) EditEvent(
 		return nil, errors.New("user is banned")
 	}
 
+	authOrgas, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Organizers)
+	if err != nil {
+		return nil, err
+	}
+
 	var organizersIDs []string
 	organizersIDs = append(organizersIDs, zUser.ID)
-	for _, organizer := range req.Msg.Organizers {
-		authOrg, err := s.Auth.EnsureUserExists(ctx, organizer)
-		if err != nil {
-			return nil, err
-		}
+	for _, authOrg := range authOrgas {
 		zOrg, err := s.EnsureUserExists(ctx, authOrg)
 		if err != nil {
 			return nil, err
@@ -47,7 +48,6 @@ func (s *ZenaoServer) EditEvent(
 		if slices.Contains(organizersIDs, zOrg.ID) {
 			return nil, fmt.Errorf("duplicate organizer: %s", zOrg.ID)
 		}
-		s.Logger.Info("edit-event", zap.String("organizer-id", zOrg.ID))
 		organizersIDs = append(organizersIDs, zOrg.ID)
 	}
 

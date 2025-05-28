@@ -159,6 +159,7 @@ type DB interface {
 
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
+	// XXX: add EnsureUsersExist
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
@@ -211,7 +212,9 @@ type Chain interface {
 type Auth interface {
 	GetUser(ctx context.Context) *AuthUser
 	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)
+
 	EnsureUserExists(ctx context.Context, email string) (*AuthUser, error)
+	EnsureUsersExists(ctx context.Context, emails []string) ([]*AuthUser, error)
 
 	WithAuth() func(http.Handler) http.Handler
 }

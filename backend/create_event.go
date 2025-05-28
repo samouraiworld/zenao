@@ -42,13 +42,14 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
+	authOrgas, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Organizers)
+	if err != nil {
+		return nil, err
+	}
+
 	var organizersIDs []string
 	organizersIDs = append(organizersIDs, zUser.ID)
-	for _, organizer := range req.Msg.Organizers {
-		authOrg, err := s.Auth.EnsureUserExists(ctx, organizer)
-		if err != nil {
-			return nil, err
-		}
+	for _, authOrg := range authOrgas {
 		zOrg, err := s.EnsureUserExists(ctx, authOrg)
 		if err != nil {
 			return nil, err
