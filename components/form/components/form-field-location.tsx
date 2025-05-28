@@ -2,29 +2,25 @@
 
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { Command as CommandPrimitive } from "cmdk";
+import {
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { XIcon } from "lucide-react";
 import { z } from "zod";
 import { OpenStreetMapProvider } from "leaflet-geosearch";
 import { SearchResult } from "leaflet-geosearch/dist/providers/provider.js";
 import { addressLocationSchema, EventFormSchemaType } from "../types";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/shadcn/popover";
 import { Button } from "@/components/shadcn/button";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/shadcn/form";
+import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/dist/geosearch.css";
 import {
-  Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
@@ -199,7 +195,7 @@ export const useSearchField = (value: string) => {
         },
       });
       setLoading(true);
-      // const pro
+
       const results = await provider.search({
         query: value,
       });
@@ -213,15 +209,97 @@ export const useSearchField = (value: string) => {
   return { loading, results };
 };
 
+type LocationOption = {
+  id: number;
+  label: string;
+  value: SearchResult;
+};
+
 export const FormFieldLocation: React.FC<{
   form: UseFormReturn<EventFormSchemaType>;
   onSelect?: (marker: { lat: number; lng: number }) => Promise<void>;
   onRemove: () => void;
 }> = ({ form, onSelect, onRemove }) => {
   const t = useTranslations("eventForm");
-  const [search, setSearch] = useState<string>("");
-  const [open, setOpen] = useState<boolean>(false);
-  const { results } = useSearchField(search);
+  const [search, setSearch] = useState<string>(() => {
+    const loc = form.getValues().location;
+    switch (loc.kind) {
+      case "custom":
+      case "geo":
+        return loc.address;
+      default:
+        return "";
+    }
+  });
+  const { results, loading } = useSearchField(search);
+
+  const options = useMemo(() => {
+    if (loading) return [];
+
+    return results.map((result) => ({
+      id: (result.raw as NominatimSearchResult).place_id,
+      label: result.label,
+      value: result,
+    }));
+  }, [results, loading]);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isOpen, setOpen] = useState(false);
+  const [selected, setSelected] = useState<{
+    value: SearchResult;
+    label: string;
+  }>();
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const input = inputRef.current;
+      if (!input) {
+        return;
+      }
+
+      if (!isOpen) {
+        setOpen(true);
+      }
+
+      if (event.key === "Escape") {
+        input.blur();
+      }
+    },
+    [isOpen],
+  );
+
+  const handleBlur = useCallback(() => {
+    setOpen(false);
+    if (form.getValues().location.kind !== "custom") {
+      setSearch(selected?.label ?? "");
+    }
+  }, [selected, form]);
+
+  const handleSelectOption = useCallback(
+    async (selectedOption: LocationOption) => {
+      setSearch(selectedOption.label);
+      setSelected(selectedOption);
+
+      const lat = Number(selectedOption.value.y);
+      const lng = Number(selectedOption.value.x);
+      form.setValue("location", {
+        kind: "geo",
+        address: formatAddress(selectedOption.value.raw),
+        lat,
+        lng,
+        size: 0,
+      });
+      form.trigger("location");
+      if (onSelect) await onSelect({ lat, lng });
+
+      // This is a hack to prevent the input from being focused after the user selects an option
+      // We can call this hack: "The next tick"
+      setTimeout(() => {
+        inputRef?.current?.blur();
+      }, 0);
+    },
+    [onSelect, form],
+  );
 
   return (
     <FormField
@@ -231,32 +309,25 @@ export const FormFieldLocation: React.FC<{
         const object = field.value as z.infer<typeof addressLocationSchema>;
         return (
           <FormItem className="flex flex-col w-full gap-0">
-            <Popover open={open} onOpenChange={setOpen}>
-              <div className="flex flex-row w-full relative">
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="input"
-                      role="combobox"
-                      className="w-full flex justify-start px-4 py-3 h-auto backdrop-blur-sm"
-                    >
-                      <Text
-                        className={cn(
-                          "text-base truncate",
-                          !object.address && "text-secondary-color",
-                        )}
-                      >
-                        {object.address || "Add an address..."}
-                      </Text>
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
+            <CommandPrimitive onKeyDown={handleKeyDown} shouldFilter={false}>
+              <div className="relative">
+                <CommandInput
+                  ref={inputRef}
+                  value={search}
+                  typeof="search"
+                  onValueChange={setSearch}
+                  onBlur={handleBlur}
+                  onFocus={() => setOpen(true)}
+                  placeholder={t("location-placeholder")}
+                  className="!h-12 px-4 text-base rounded bg-custom-input-bg border border-custom-input-border"
+                  containerClassName="border-none p-0"
+                />
                 {object.address && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="backdrop-blur-sm self-center absolute right-1"
+                    className="backdrop-blur-sm self-center absolute top-1/2 -translate-y-1/2 right-1"
                     onClick={() => {
                       setSearch("");
                       form.setValue("location", {
@@ -273,82 +344,67 @@ export const FormFieldLocation: React.FC<{
                   </Button>
                 )}
               </div>
-              <PopoverContent className="max-w-full relative p-0">
-                <Command>
-                  <CommandInput
-                    placeholder={t("location-placeholder")}
-                    className="h-10"
-                    onValueChange={setSearch}
-                    value={search}
-                    typeof="search"
-                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        form.setValue("location", {
-                          ...object,
-                          address: search,
-                        });
-                        form.trigger("location");
-                        setOpen(false);
-                      }
-                    }}
-                  />
-                  <CommandList>
-                    <CommandEmpty>No address found.</CommandEmpty>
+              <div className={cn("relative", isOpen && "mt-1")}>
+                <div
+                  className={cn(
+                    "animate-in fade-in-0 zoom-in-95 absolute top-0 z-50 w-full rounded-md bg-popover border text-popover-foreground outline-none",
+                    isOpen ? "block" : "hidden",
+                  )}
+                >
+                  <CommandList className="rounded-lg">
                     <CommandGroup>
-                      {results.map((result, index) => {
-                        const address = formatAddress(
-                          result.raw as NominatimSearchResult,
-                        );
+                      {options.map((option) => {
                         return (
                           <CommandItem
-                            className="text-primary"
-                            value={result.label}
-                            key={result.label + index}
-                            onSelect={async () => {
-                              const lat = Number(result.raw.lat);
-                              const lng = Number(result.raw.lon);
-                              form.setValue("location", {
-                                kind: "geo",
-                                address,
-                                lat,
-                                lng,
-                                size: 0,
-                              });
-                              form.trigger("location");
-                              if (onSelect) await onSelect({ lat, lng });
-                              setOpen(false);
+                            key={option.id}
+                            value={option.label}
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
                             }}
+                            onSelect={async () =>
+                              await handleSelectOption(option)
+                            }
+                            className={cn("flex w-full items-center gap-2")}
                           >
-                            <Text className="md:text-sm">{address}</Text>
+                            {option.label}
                           </CommandItem>
                         );
                       })}
+                      {!loading ? (
+                        <CommandPrimitive.Empty className="select-none rounded-sm px-2 py-3 text-center text-sm">
+                          {t("no-address-found")}
+                        </CommandPrimitive.Empty>
+                      ) : null}
                     </CommandGroup>
-                    {/* Use custom location */}
-                    {search && (
-                      <CommandItem
-                        className="text-primary p-2 m-1"
-                        value={search}
-                        key={search}
-                        onSelect={async () => {
-                          onRemove();
-                          form.setValue("location", {
-                            kind: "custom",
-                            address: search,
-                            timeZone: currentTimezone(),
-                          });
-                          form.trigger("location");
-                          setOpen(false);
-                        }}
-                      >
-                        <Text className="md:text-sm">{`Use ${search}`}</Text>
-                      </CommandItem>
-                    )}
+                    <CommandGroup>
+                      {search && (
+                        <CommandItem
+                          className="text-primary"
+                          value={search}
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                          }}
+                          onSelect={async () => {
+                            onRemove();
+                            form.setValue("location", {
+                              kind: "custom",
+                              address: search,
+                              timeZone: currentTimezone(),
+                            });
+                            form.trigger("location");
+                            setOpen(false);
+                          }}
+                        >
+                          <Text className="md:text-sm">{`Use ${search}`}</Text>
+                        </CommandItem>
+                      )}
+                    </CommandGroup>
                   </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+                </div>
+              </div>
+            </CommandPrimitive>
             <FormMessage />
           </FormItem>
         );
