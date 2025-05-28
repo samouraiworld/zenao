@@ -12,10 +12,18 @@ func MapErr[E any, R any](slice []E, transform func(idx int, elem E) (R, error))
 	return res, nil
 }
 
-func Map[E any, R any](slice []E, transform func(idx int, elem E) R) []R {
+func MapIndex[E any, R any](slice []E, transform func(idx int, elem E) R) []R {
 	res := make([]R, len(slice))
 	for i, e := range slice {
 		res[i] = transform(i, e)
+	}
+	return res
+}
+
+func Map[E any, R any](slice []E, transform func(elem E) R) []R {
+	res := make([]R, len(slice))
+	for i, e := range slice {
+		res[i] = transform(e)
 	}
 	return res
 }

@@ -22,6 +22,7 @@ import (
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -117,10 +118,7 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
-	var organizersAddr []string
-	for _, org := range organizersIDs {
-		organizersAddr = append(organizersAddr, g.UserAddress(org))
-	}
+	organizersAddr := mapsl.Map(organizersIDs, g.UserAddress)
 
 	eventRealmSrc, err := generateEventRealmSource(organizersAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
 	if err != nil {
@@ -172,10 +170,7 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, req *z
 
 // EditEvent implements ZenaoChain.
 func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
-	var organizersAddr []string
-	for _, org := range organizersIDs {
-		organizersAddr = append(organizersAddr, g.UserAddress(org))
-	}
+	organizersAddr := mapsl.Map(organizersIDs, g.UserAddress)
 	orgsAddrLit := fmt.Sprintf(`[]string{"%s"}`, strings.Join(organizersAddr, `", "`))
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
