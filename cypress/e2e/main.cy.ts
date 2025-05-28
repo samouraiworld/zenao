@@ -410,8 +410,7 @@ Cypress.Commands.add(
     });
 
     // custom location
-    cy.get("button").contains("Add an address...").click();
-    cy.get('input[placeholder="Location..."]').type(testEventLocation);
+    cy.get('input[placeholder="Add an address..."]').type(testEventLocation);
     cy.get("p").contains(`Use ${testEventLocation}`).trigger("click");
 
     cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
