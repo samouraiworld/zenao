@@ -119,12 +119,14 @@ func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 }
 
 func toAuthUser(clerkUser *clerk.User) *zeni.AuthUser {
-	emailIdx := slices.IndexFunc(clerkUser.EmailAddresses, func(cm *clerk.EmailAddress) bool {
-		return cm.ID == *clerkUser.PrimaryEmailAddressID
-	})
 	email := ""
-	if emailIdx != -1 {
-		email = clerkUser.EmailAddresses[emailIdx].EmailAddress
+	if clerkUser.PrimaryEmailAddressID != nil {
+		emailIdx := slices.IndexFunc(clerkUser.EmailAddresses, func(cm *clerk.EmailAddress) bool {
+			return cm.ID == *clerkUser.PrimaryEmailAddressID
+		})
+		if emailIdx != -1 {
+			email = clerkUser.EmailAddresses[emailIdx].EmailAddress
+		}
 	}
 
 	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
