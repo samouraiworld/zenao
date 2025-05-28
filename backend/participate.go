@@ -49,18 +49,17 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, errors.New("password too long")
 	}
 
-	if slices.Contains(req.Msg.Guests, authUser.Email) {
-		return nil, errors.New("guest has same email as buyer")
-	}
-
 	authGuests, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Guests)
 	if err != nil {
 		return nil, err
 	}
 
 	participants := []*zeni.User{buyer}
-
 	for _, authGuest := range authGuests {
+		if authGuest.ID == authUser.ID {
+			return nil, errors.New("guest is buyer")
+		}
+
 		if slices.ContainsFunc(participants, func(added *zeni.User) bool { return authGuest.ID == added.AuthID }) {
 			return nil, errors.New("duplicate guest")
 		}
