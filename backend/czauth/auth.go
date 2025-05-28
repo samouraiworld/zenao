@@ -60,17 +60,14 @@ func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string)
 		return nil, err
 	}
 
-	clerkUsers := make([]*clerk.User, len(emails))
-
-	for i, email := range emails {
+	return mapsl.MapErr(emails, func(email string) (*zeni.AuthUser, error) {
 		idx := slices.IndexFunc(existing.Users, func(u *clerk.User) bool {
 			return slices.ContainsFunc(u.EmailAddresses, func(cm *clerk.EmailAddress) bool {
 				return cm.EmailAddress == email
 			})
 		})
 		if idx != -1 {
-			clerkUsers[i] = existing.Users[idx]
-			continue
+			return toAuthUser(existing.Users[idx]), nil
 		}
 
 		passwordBz := make([]byte, 32)
@@ -87,10 +84,8 @@ func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string)
 			return nil, err
 		}
 
-		clerkUsers[i] = clerkUser
-	}
-
-	return mapsl.Map(clerkUsers, toAuthUser), nil
+		return toAuthUser(clerkUser), nil
+	})
 }
 
 // WithAuth implements zeni.Auth.
