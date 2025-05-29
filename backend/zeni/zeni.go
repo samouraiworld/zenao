@@ -119,11 +119,12 @@ type Reaction struct {
 }
 
 type SoldTicket struct {
-	Ticket  *Ticket
-	BuyerID string
-	UserID  string
-	User    *User
-	Checkin *Checkin
+	CreatedAt time.Time
+	Ticket    *Ticket
+	BuyerID   string
+	UserID    string
+	User      *User
+	Checkin   *Checkin
 }
 
 type Checkin struct {

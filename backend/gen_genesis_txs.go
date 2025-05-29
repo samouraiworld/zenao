@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto"
+	srand "crypto/rand"
+	"encoding/base64"
 	"errors"
 	"flag"
 	"fmt"
@@ -15,7 +18,7 @@ import (
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/tm2/pkg/amino"
 	"github.com/gnolang/gno/tm2/pkg/commands"
-	"github.com/gnolang/gno/tm2/pkg/crypto"
+	cryptoGno "github.com/gnolang/gno/tm2/pkg/crypto"
 	"github.com/gnolang/gno/tm2/pkg/std"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/mapsl"
@@ -106,7 +109,7 @@ func execGenGenesisTxs() error {
 		if err != nil {
 			return err
 		}
-		userPkgPath := fmt.Sprintf("gno.land/r/zenao/u%s", user.ID)
+		userPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", user.ID)
 		userTx := std.Tx{
 			Msgs: []std.Msg{
 				vm.MsgAddPackage{
@@ -127,7 +130,7 @@ func execGenGenesisTxs() error {
 		txs = append(txs, gnoland.TxWithMetadata{
 			Tx: userTx,
 			Metadata: &gnoland.GnoTxMetadata{
-				Timestamp: time.Now().Unix(),
+				Timestamp: user.CreatedAt.Unix(),
 			},
 		})
 	}
@@ -155,7 +158,7 @@ func execGenGenesisTxs() error {
 		}
 
 		organizersAddr := mapsl.Map(organizersIDs, func(id string) string {
-			return gnolang.DerivePkgAddr(fmt.Sprintf("gno.land/r/zenao/u%s", id)).String()
+			return gnolang.DerivePkgAddr(fmt.Sprintf("gno.land/r/zenao/users/u%s", id)).String()
 		})
 
 		eRealm, err := generateEventRealmSource(organizersAddr, signerInfo.GetAddress().String(), "zenao", &zenaov1.CreateEventRequest{
@@ -167,7 +170,7 @@ func execGenGenesisTxs() error {
 		if err != nil {
 			return err
 		}
-		eventPkgPath := fmt.Sprintf("gno.land/r/zenao/e%s", event.ID)
+		eventPkgPath := fmt.Sprintf("gno.land/r/zenao/events/e%s", event.ID)
 		eventTx := std.Tx{
 			Msgs: []std.Msg{
 				vm.MsgAddPackage{
@@ -192,6 +195,77 @@ func execGenGenesisTxs() error {
 				Timestamp: event.CreatedAt.Unix(),
 			},
 		})
+
+		participants, err := db.GetEventUsersWithRole(event.ID, "participant")
+		if err != nil {
+			return err
+		}
+		for _, p := range participants {
+			tickets, err := db.GetEventUserTickets(event.ID, p.ID)
+			if err != nil || len(tickets) < 1 {
+				logger.Error("failed to get participant ticket", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err), zap.Int("num-tickets", len(tickets)))
+				continue
+			}
+
+			for _, ticket := range tickets {
+				callerPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", event.CreatorID)
+				participantPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", p.ID)
+				participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+
+				signature := ""
+				if len(sk) != 0 {
+					msg := []byte(ticket.Ticket.Pubkey())
+					sigBz, err := sk.Sign(srand.Reader, msg, crypto.Hash(0))
+					if err != nil {
+						return err
+					}
+					signature = base64.RawURLEncoding.EncodeToString(sigBz)
+				}
+
+				body := fmt.Sprintf(`package main
+				import (
+					user %q
+					event %q
+					"gno.land/p/zenao/daokit"
+					"gno.land/p/zenao/events"
+				)
+				
+				func main() {
+					daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+						Title: %q,
+						Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+							Title: "Add participant",
+							Message: events.NewAddParticipantMsg(%q, %q, %q),
+						}),
+					})
+				}
+				`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticket.Ticket.Pubkey(), signature)
+
+				tx := std.Tx{
+					Msgs: []std.Msg{
+						vm.MsgRun{
+							Caller: signerInfo.GetAddress(),
+							Send:   []std.Coin{},
+							Package: &gnovm.MemPackage{
+								Name:  "main",
+								Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+							},
+						},
+					},
+					Fee: std.Fee{
+						GasWanted: 10000000,
+						GasFee:    std.NewCoin("ugnot", 1000000),
+					},
+				}
+
+				txs = append(txs, gnoland.TxWithMetadata{
+					Tx: tx,
+					Metadata: &gnoland.GnoTxMetadata{
+						Timestamp: ticket.CreatedAt.Unix(),
+					},
+				})
+			}
+		}
 	}
 	if err := gnoland.SignGenesisTxs(txs, privKey, genGenesisTxsConf.chainId); err != nil {
 		return err
@@ -216,7 +290,7 @@ func execGenGenesisTxs() error {
 	return nil
 }
 
-func createAdminProfileGenesisTx(logger *zap.Logger, addr crypto.Address, genesisTime time.Time) ([]gnoland.TxWithMetadata, error) {
+func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, genesisTime time.Time) ([]gnoland.TxWithMetadata, error) {
 	txs := make([]gnoland.TxWithMetadata, 0)
 	registerTx := std.Tx{
 		Msgs: []std.Msg{

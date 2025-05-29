@@ -929,10 +929,11 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		user = dbUserToZeniDBUser(dbtick.User)
 	}
 	return &zeni.SoldTicket{
-		Ticket:  tickobj,
-		BuyerID: fmt.Sprint(dbtick.BuyerID),
-		UserID:  fmt.Sprint(dbtick.UserID),
-		Checkin: checkin,
-		User:    user,
+		Ticket:    tickobj,
+		BuyerID:   fmt.Sprint(dbtick.BuyerID),
+		UserID:    fmt.Sprint(dbtick.UserID),
+		Checkin:   checkin,
+		User:      user,
+		CreatedAt: dbtick.CreatedAt,
 	}, nil
 }
