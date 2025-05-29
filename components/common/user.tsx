@@ -65,7 +65,7 @@ export function UserAvatarWithName({
     return (
       <Link
         href={`/profile/${profile?.address}`}
-        className={cn("inline-flex w-max", className)}
+        className={cn("flex w-max", className)}
       >
         {content}
       </Link>
