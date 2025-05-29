@@ -4,13 +4,14 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { TicketCard } from "@/components/cards/ticket-card";
 import {
   Carousel,
   CarouselContent,
   CarouselDot,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/shadcn/carousel";
 import Heading from "@/components/texts/heading";
 import { makeLocationFromEvent } from "@/lib/location";
@@ -24,7 +25,6 @@ type TicketsInfoProps = {
 export function TicketsInfo({ id }: TicketsInfoProps) {
   const { getToken } = useAuth();
   const { data: event } = useSuspenseQuery(eventOptions(id));
-  const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data: tickets } = useSuspenseQuery(eventTickets(id, getToken));
 
   const location = makeLocationFromEvent(event.location);
@@ -38,26 +38,8 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
     </div>;
   }
 
-  if (isDesktop) {
-    return (
-      <div className="max-md:hidden flex flex-col gap-6 pb-12">
-        {tickets.ticketsInfo.map((ticketInfo, index) => (
-          <div key={index} className="flex flex-col gap-2">
-            <Heading level={2}>Ticket #{index + 1}</Heading>
-            <TicketCard
-              eventId={id}
-              event={event}
-              timezone={timezone}
-              ticketInfo={ticketInfo}
-            />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div className="md:hidden">
+    <div>
       <Carousel>
         <CarouselContent>
           {tickets.ticketsInfo.map((ticketInfo, index) => (
@@ -74,6 +56,8 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
+        <CarouselPrevious className="max-md:hidden" />
+        <CarouselNext className="max-md:hidden" />
         <CarouselDot />
       </Carousel>
     </div>
