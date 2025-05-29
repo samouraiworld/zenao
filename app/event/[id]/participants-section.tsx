@@ -86,6 +86,7 @@ export function ParticipantsSection({ id }: { id: string }) {
   );
   const t = useTranslations("event");
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isStandalone = useMediaQuery("(display-mode: standalone)");
 
   const onOpenChange = (state: boolean) => {
     setOpen(state);
@@ -131,7 +132,7 @@ export function ParticipantsSection({ id }: { id: string }) {
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={onOpenChange} modal={!isStandalone}>
       <DrawerTrigger asChild>
         <div className="flex flex-col gap-2">
           {/* 6 because we decide to show the first 6 participants avatars as preview */}
