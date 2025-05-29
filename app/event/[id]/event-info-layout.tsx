@@ -89,29 +89,26 @@ export function EventInfoLayout({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
-        {/* Left Section */}
-        <div className="flex flex-col gap-4 w-full sm:w-2/5">
-          <AspectRatio ratio={1 / 1}>
-            <Web3Image
-              src={data.imageUri}
-              sizes="(max-width: 768px) 100vw,
+      <AspectRatio ratio={16 / 9}>
+        <Web3Image
+          src={data.imageUri}
+          sizes="(max-width: 768px) 100vw,
               (max-width: 1200px) 50vw,
               33vw"
-              fill
-              alt="Event"
-              priority
-              fetchPriority="high"
-              className="flex w-full rounded-xl self-center object-cover"
-            />
-          </AspectRatio>
-        </div>
+          fill
+          alt="Event"
+          priority
+          fetchPriority="high"
+          className="flex w-full rounded-xl self-center object-cover"
+        />
+      </AspectRatio>
 
+      <Heading level={1} size="4xl" className="mb-7">
+        {data.title}
+      </Heading>
+      <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
         {/* Right Section */}
         <div className="flex flex-col gap-4 w-full sm:w-3/5">
-          <Heading level={1} size="4xl" className="mb-7">
-            {data.title}
-          </Heading>
           <div className="flex flex-row gap-4 items-center">
             <Calendar width={iconSize} height={iconSize} />
             <div className="flex flex-col">
@@ -140,7 +137,8 @@ export function EventInfoLayout({
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
           />
-
+        </div>
+        <div className="flex flex-col gap-4 w-full sm:w-2/5">
           <EventManagementMenu
             eventId={eventId}
             roles={roles}
