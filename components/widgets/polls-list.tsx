@@ -77,14 +77,16 @@ export function PollsList({
           })
         )}
       </div>
-      <LoaderMoreButton
-        fetchNextPage={fetchNextPage}
-        hasNextPage={hasNextPage}
-        isFetching={isFetching}
-        isFetchingNextPage={isFetchingNextPage}
-        page={polls}
-        noMoreLabel={t("no-more-posts")}
-      />
+      <div className="py-4">
+        <LoaderMoreButton
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetching={isFetching}
+          isFetchingNextPage={isFetchingNextPage}
+          page={polls}
+          noMoreLabel={t("no-more-posts")}
+        />
+      </div>
     </>
   );
 }
