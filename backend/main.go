@@ -42,6 +42,7 @@ func main() {
 		newE2EInfraCmd(),
 		newGenticketCmd(),
 		newGenPdfTicketCmd(),
+		newGenGenesisTxsCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
