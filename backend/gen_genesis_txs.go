@@ -11,10 +11,16 @@ import (
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/gnoland"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
+	"github.com/gnolang/gno/gnovm"
+	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/tm2/pkg/amino"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/gnolang/gno/tm2/pkg/crypto"
 	"github.com/gnolang/gno/tm2/pkg/std"
+	"github.com/samouraiworld/zenao/backend/gzdb"
+	"github.com/samouraiworld/zenao/backend/mapsl"
+	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -77,10 +83,10 @@ func execGenGenesisTxs() error {
 		return err
 	}
 
-	// db, err := gzdb.SetupDB(genGenesisTxsConf.dbPath)
-	// if err != nil {
-	// 	return err
-	// }
+	db, err := gzdb.SetupDB(genGenesisTxsConf.dbPath)
+	if err != nil {
+		return err
+	}
 
 	// first commit on zenao was on 15th of January 2025
 	// TODO: make it a cli arg later
@@ -90,6 +96,103 @@ func execGenGenesisTxs() error {
 		return err
 	}
 
+	users, err := db.GetAllUsers()
+	if err != nil {
+		return err
+	}
+
+	for _, user := range users {
+		uRealm, err := generateUserRealmSource(user, "zenao", signerInfo.GetAddress().String())
+		if err != nil {
+			return err
+		}
+		userPkgPath := fmt.Sprintf("gno.land/r/zenao/u%s", user.ID)
+		userTx := std.Tx{
+			Msgs: []std.Msg{
+				vm.MsgAddPackage{
+					Creator: signerInfo.GetAddress(),
+					Deposit: []std.Coin{},
+					Package: &gnovm.MemPackage{
+						Name:  "user",
+						Path:  userPkgPath,
+						Files: []*gnovm.MemFile{{Name: "user.gno", Body: uRealm}},
+					},
+				},
+			},
+			Fee: std.Fee{
+				GasWanted: 10000000,
+				GasFee:    std.NewCoin("ugnot", 1000000),
+			},
+		}
+		txs = append(txs, gnoland.TxWithMetadata{
+			Tx: userTx,
+			Metadata: &gnoland.GnoTxMetadata{
+				Timestamp: time.Now().Unix(),
+			},
+		})
+	}
+
+	events, err := db.GetAllEvents()
+	if err != nil {
+		return err
+	}
+	for _, event := range events {
+		sk, err := zeni.EventSKFromPasswordHash(event.PasswordHash)
+		if err != nil {
+			return err
+		}
+		privacy, err := zeni.EventPrivacyFromSK(sk)
+		if err != nil {
+			return err
+		}
+		organizers, err := db.GetEventUsersWithRole(event.ID, "organizer")
+		if err != nil {
+			return err
+		}
+		var organizersIDs []string
+		for _, org := range organizers {
+			organizersIDs = append(organizersIDs, org.ID)
+		}
+
+		organizersAddr := mapsl.Map(organizersIDs, func(id string) string {
+			return gnolang.DerivePkgAddr(fmt.Sprintf("gno.land/r/zenao/u%s", id)).String()
+		})
+
+		eRealm, err := generateEventRealmSource(organizersAddr, signerInfo.GetAddress().String(), "zenao", &zenaov1.CreateEventRequest{
+			Title:       event.Title,
+			Description: event.Description,
+			ImageUri:    event.ImageURI,
+			Location:    event.Location,
+		}, privacy)
+		if err != nil {
+			return err
+		}
+		eventPkgPath := fmt.Sprintf("gno.land/r/zenao/e%s", event.ID)
+		eventTx := std.Tx{
+			Msgs: []std.Msg{
+				vm.MsgAddPackage{
+					Creator: signerInfo.GetAddress(),
+					Deposit: []std.Coin{},
+					Package: &gnovm.MemPackage{
+						Name:  "event",
+						Path:  eventPkgPath,
+						Files: []*gnovm.MemFile{{Name: "event.gno", Body: eRealm}},
+					},
+				},
+			},
+			Fee: std.Fee{
+				GasWanted: 10000000,
+				GasFee:    std.NewCoin("ugnot", 1000000),
+			},
+		}
+
+		txs = append(txs, gnoland.TxWithMetadata{
+			Tx: eventTx,
+			Metadata: &gnoland.GnoTxMetadata{
+				Timestamp: event.CreatedAt.Unix(),
+			},
+		})
+	}
 	if err := gnoland.SignGenesisTxs(txs, privKey, genGenesisTxsConf.chainId); err != nil {
 		return err
 	}

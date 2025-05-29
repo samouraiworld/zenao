@@ -902,6 +902,7 @@ func (g *gormZenaoDB) Checkin(pubkey string, gatekeeperID string, signature stri
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	return &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),
+		CreatedAt:   dbuser.CreatedAt,
 		DisplayName: dbuser.DisplayName,
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
