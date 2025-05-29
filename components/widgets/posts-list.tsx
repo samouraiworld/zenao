@@ -113,14 +113,16 @@ export function PostsList({
           })
         )}
       </div>
-      <LoaderMoreButton
-        fetchNextPage={fetchNextPage}
-        hasNextPage={hasNextPage}
-        isFetching={isFetching}
-        isFetchingNextPage={isFetchingNextPage}
-        page={posts}
-        noMoreLabel={t("no-more-posts")}
-      />
+      <div className="py-4">
+        <LoaderMoreButton
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetching={isFetching}
+          isFetchingNextPage={isFetchingNextPage}
+          page={posts}
+          noMoreLabel={t("no-more-posts")}
+        />
+      </div>
     </>
   );
 }
