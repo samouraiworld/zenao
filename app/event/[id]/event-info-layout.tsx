@@ -108,7 +108,7 @@ export function EventInfoLayout({
       </Heading>
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
         {/* Right Section */}
-        <div className="flex flex-col gap-4 w-full sm:w-3/5">
+        <div className="flex flex-col gap-4 w-full sm:w-5/5">
           <div className="flex flex-row gap-4 items-center">
             <Calendar width={iconSize} height={iconSize} />
             <div className="flex flex-col">
