@@ -1,4 +1,4 @@
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { ScreenContainer } from "@/components/layout/screen-container";
 
 export default function NotFound() {
   return (

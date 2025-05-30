@@ -6,7 +6,7 @@ import { ExclusiveEventGuard } from "./exclusive-event-guard";
 import { EventInfoLayout } from "./event-info-layout";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { ScreenContainer } from "@/components/layout/screen-container";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
 import { web2URL } from "@/lib/uris";
 import { profileOptions } from "@/lib/queries/profile";
@@ -76,6 +76,7 @@ export default async function EventLayout({ params, children }: Props) {
         exclusive={eventData.privacy?.eventPrivacy.case === "guarded"}
       >
         <ScreenContainer
+          screenContainerMaxWidth={960}
           background={{
             src: eventData.imageUri,
             width: imageWidth,

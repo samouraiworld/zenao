@@ -9,7 +9,7 @@ export const EventsListLayout: React.FC<{
   tabLinks: { upcoming: string; past: string };
 }> = ({ from, title, description, tabLinks, children }) => {
   return (
-    <div>
+    <div className="flex flex-col gap-8">
       <HeaderEventsList
         from={from}
         description={description}

@@ -5,7 +5,7 @@ import { TicketsInfo } from "./tickets-info";
 import {
   ScreenContainer,
   ScreenContainerCentered,
-} from "@/components/layout/ScreenContainer";
+} from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";

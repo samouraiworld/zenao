@@ -161,16 +161,16 @@ export const EventForm: React.FC<EventFormProps> = ({
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full sm:flex-row items-center sm:h-full"
       >
-        <div className="flex flex-col sm:flex-row w-full gap-10">
+        <div className="flex flex-col w-full gap-10">
           <FormFieldImage
             name="imageUri"
             control={form.control}
             placeholder={t("image-uri-placeholder")}
-            aspectRatio={1 / 1}
-            className="sm:w-2/5"
+            aspectRatio={16 / 9}
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
           />
-          <div className="flex flex-col gap-6 w-full sm:w-3/5">
+
+          <div className="flex flex-col gap-6 w-full">
             <FormFieldTextArea
               control={form.control}
               name="title"
