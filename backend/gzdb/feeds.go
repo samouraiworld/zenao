@@ -94,9 +94,10 @@ type PollResult struct {
 
 func dbFeedToZeniFeed(feed *Feed) (*zeni.Feed, error) {
 	return &zeni.Feed{
-		ID:      strconv.FormatUint(uint64(feed.ID), 10),
-		Slug:    feed.Slug,
-		EventID: strconv.FormatUint(uint64(feed.EventID), 10),
+		ID:        strconv.FormatUint(uint64(feed.ID), 10),
+		CreatedAt: feed.CreatedAt,
+		Slug:      feed.Slug,
+		EventID:   strconv.FormatUint(uint64(feed.EventID), 10),
 	}, nil
 }
 
@@ -109,17 +110,19 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 	var reactions []*zeni.Reaction
 	for _, reaction := range post.Reactions {
 		reactions = append(reactions, &zeni.Reaction{
-			ID:     strconv.FormatUint(uint64(reaction.ID), 10),
-			PostID: strconv.FormatUint(uint64(post.ID), 10),
-			UserID: strconv.FormatUint(uint64(reaction.UserID), 10),
-			Icon:   reaction.Icon,
+			ID:        strconv.FormatUint(uint64(reaction.ID), 10),
+			CreatedAt: reaction.CreatedAt,
+			PostID:    strconv.FormatUint(uint64(post.ID), 10),
+			UserID:    strconv.FormatUint(uint64(reaction.UserID), 10),
+			Icon:      reaction.Icon,
 		})
 	}
 
 	zpost := &zeni.Post{
-		ID:     strconv.FormatUint(uint64(post.ID), 10),
-		UserID: strconv.FormatUint(uint64(post.UserID), 10),
-		FeedID: strconv.FormatUint(uint64(post.FeedID), 10),
+		ID:        strconv.FormatUint(uint64(post.ID), 10),
+		CreatedAt: post.CreatedAt,
+		UserID:    strconv.FormatUint(uint64(post.UserID), 10),
+		FeedID:    strconv.FormatUint(uint64(post.FeedID), 10),
 		Post: &feedsv1.Post{
 			// Need to convert this to chain address later.
 			// Using two-step process: first store the ID here,
@@ -191,11 +194,12 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 	kind := pollsv1.PollKind(poll.Kind)
 	zpoll := &zeni.Poll{
-		ID:       strconv.FormatUint(uint64(poll.ID), 10),
-		Question: poll.Question,
-		Kind:     kind,
-		Duration: poll.Duration,
-		Results:  []*pollsv1.PollResult{},
+		ID:        strconv.FormatUint(uint64(poll.ID), 10),
+		CreatedAt: poll.CreatedAt,
+		Question:  poll.Question,
+		Kind:      kind,
+		Duration:  poll.Duration,
+		Results:   []*pollsv1.PollResult{},
 	}
 
 	var votes []*zeni.Vote
@@ -207,8 +211,9 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 		})
 		for _, user := range result.Users {
 			votes = append(votes, &zeni.Vote{
-				UserID: strconv.FormatUint(uint64(user.ID), 10),
-				Option: result.Option,
+				CreatedAt: user.CreatedAt,
+				UserID:    strconv.FormatUint(uint64(user.ID), 10),
+				Option:    result.Option,
 			})
 		}
 	}

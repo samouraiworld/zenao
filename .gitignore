@@ -45,6 +45,7 @@ next-env.d.ts
 
 # gno
 gnobuild/
+genesis_txs.jsonl
 
 # db
 /*.db
