@@ -68,6 +68,8 @@ func execGenGenesisTxs() error {
 		return err
 	}
 
+	logger.Info("generating genesis txs with args: ", zap.Any("chain-id", genGenesisTxsConf.chainId), zap.Any("db-path", genGenesisTxsConf.dbPath), zap.Any("output-file", genGenesisTxsConf.outputFile), zap.Any("genesis-time", genGenesisTxsConf.genesisTime))
+
 	signer, err := gnoclient.SignerFromBip39(genGenesisTxsConf.adminMnemonic, "dev", "", 0, 0)
 	if err != nil {
 		return err
@@ -92,20 +94,24 @@ func execGenGenesisTxs() error {
 		namespace:          "zenao",
 	}
 
+	logger.Info("Signer initialized", zap.String("address", signerInfo.GetAddress().String()))
+
 	db, err := gzdb.SetupDB(genGenesisTxsConf.dbPath)
 	if err != nil {
 		return err
 	}
 
+	logger.Info("database initialized")
+
 	genesisTime, err := time.Parse(time.RFC3339, genGenesisTxsConf.genesisTime)
 	if err != nil {
 		return err
 	}
-
 	txs, err := createAdminProfileGenesisTx(logger, signerInfo.GetAddress(), genesisTime)
 	if err != nil {
 		return err
 	}
+	logger.Info("admin profile registered")
 
 	users, err := db.GetAllUsers()
 	if err != nil {
@@ -118,6 +124,7 @@ func execGenGenesisTxs() error {
 			return err
 		}
 		txs = append(txs, tx)
+		logger.Info("user realm registered", zap.String("user-id", user.ID))
 	}
 
 	events, err := db.GetAllEvents()
@@ -149,7 +156,7 @@ func execGenGenesisTxs() error {
 			return err
 		}
 		txs = append(txs, tx)
-
+		logger.Info("event realm registered", zap.String("event-id", event.ID))
 		participants, err := db.GetEventUsersWithRole(event.ID, "participant")
 		if err != nil {
 			return err
@@ -167,6 +174,7 @@ func execGenGenesisTxs() error {
 					return err
 				}
 				txs = append(txs, tx)
+				logger.Info("participation tx created", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 
 				if ticket.Checkin != nil {
 					tx, err := createCheckinTx(chain, signerInfo.GetAddress(), event, ticket, sk)
@@ -174,6 +182,7 @@ func execGenGenesisTxs() error {
 						return err
 					}
 					txs = append(txs, tx)
+					logger.Info("checkin tx created", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 				}
 			}
 		}
@@ -205,13 +214,14 @@ func execGenGenesisTxs() error {
 				return err
 			}
 			txs = append(txs, tx)
-
+			logger.Info("poll tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("event-id", feed.EventID))
 			for _, vote := range poll.Votes {
 				tx, err := createVoteTx(chain, vote.UserID, signerInfo.GetAddress(), poll.ID, vote)
 				if err != nil {
 					return err
 				}
 				txs = append(txs, tx)
+				logger.Info("vote tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("event-id", feed.EventID), zap.String("user-id", vote.UserID))
 			}
 		} else {
 			tx, err := createPostTx(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, post)
@@ -219,6 +229,7 @@ func execGenGenesisTxs() error {
 				return err
 			}
 			txs = append(txs, tx)
+			logger.Info("post tx created", zap.String("post-id", post.ID), zap.String("event-id", feed.EventID))
 		}
 
 		for _, reaction := range post.Reactions {
@@ -227,6 +238,7 @@ func execGenGenesisTxs() error {
 				return err
 			}
 			txs = append(txs, tx)
+			logger.Info("reaction tx created", zap.String("post-id", post.ID), zap.String("event-id", feed.EventID), zap.String("user-id", reaction.UserID), zap.String("reaction-id", reaction.ID), zap.String("reaction-icon", reaction.Icon))
 		}
 	}
 
