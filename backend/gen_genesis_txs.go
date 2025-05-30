@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"crypto"
+	"crypto/ed25519"
 	srand "crypto/rand"
 	"encoding/base64"
 	"errors"
 	"flag"
 	"fmt"
 	"os"
+	"path"
 	"slices"
 	"time"
 
@@ -28,18 +30,12 @@ import (
 	"go.uber.org/zap"
 )
 
-// FORMAT OF THE FILE IS:
-
-// {"tx": {"msg":[{"@type":"/vm.m_call","caller":"g1us8428u2a5satrlxzagqqa5m6vmuze025anjlj","send":"1000000ugnot","pkg_path":"gno.land/r/gnoland/users/v1","func":"Register","args":["administrator123"]}],"fee":{"gas_wanted":"2000000","gas_fee":"1000000ugnot"},"signatures":[{"pub_key":{"@type":"/tm.PubKeySecp256k1","value":"AmG6kzznyo1uNqWPAYU6wDpsmzQKDaEOrVRaZ08vOyX0"},"signature":""}],"memo":""}}
-// {"tx": {"msg":[{"@type":"/vm.m_call","caller":"g1us8428u2a5satrlxzagqqa5m6vmuze025anjlj","send":"1000000ugnot","pkg_path":"gno.land/r/gnoland/users/v1","func":"Register","args":["administrator123"]}],"fee":{"gas_wanted":"2000000","gas_fee":"1000000ugnot"},"signatures":[{"pub_key":{"@type":"/tm.PubKeySecp256k1","value":"AmG6kzznyo1uNqWPAYU6wDpsmzQKDaEOrVRaZ08vOyX0"},"signature":""}],"memo":""}}
-// ...
-
 func newGenGenesisTxsCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
-			Name:       "gen-genesis-txs",
-			ShortUsage: "gen-genesis-txs",
-			ShortHelp:  "generate genesis transactions",
+			Name:       "gentxs",
+			ShortUsage: "gentxs",
+			ShortHelp:  "generate genesis transactions file",
 		},
 		&genGenesisTxsConf,
 		func(ctx context.Context, args []string) error {
@@ -53,8 +49,9 @@ var genGenesisTxsConf genGenesisTxsConfig
 type genGenesisTxsConfig struct {
 	adminMnemonic string
 	chainId       string
-	outputFile    string
 	dbPath        string
+	genesisTime   string
+	outputFile    string
 }
 
 func (conf *genGenesisTxsConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -62,6 +59,7 @@ func (conf *genGenesisTxsConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&genGenesisTxsConf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
 	flset.StringVar(&genGenesisTxsConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&genGenesisTxsConf.outputFile, "output", "genesis_txs.jsonl", "Output file")
+	flset.StringVar(&genGenesisTxsConf.genesisTime, "genesis-time", "2025-01-15T00:00:00Z", "genesis time formatted as RFC3339: 2006-01-02T15:04:05Z")
 }
 
 func execGenGenesisTxs() error {
@@ -87,14 +85,23 @@ func execGenGenesisTxs() error {
 		return err
 	}
 
+	chain := &gnoZenaoChain{
+		eventsIndexPkgPath: path.Join("gno.land/r", "zenao", "eventreg"),
+		signerInfo:         signerInfo,
+		logger:             logger,
+		namespace:          "zenao",
+	}
+
 	db, err := gzdb.SetupDB(genGenesisTxsConf.dbPath)
 	if err != nil {
 		return err
 	}
 
-	// first commit on zenao was on 15th of January 2025
-	// TODO: make it a cli arg later
-	genesisTime := time.Date(2025, 1, 15, 0, 0, 0, 0, time.UTC)
+	genesisTime, err := time.Parse(time.RFC3339, genGenesisTxsConf.genesisTime)
+	if err != nil {
+		return err
+	}
+
 	txs, err := createAdminProfileGenesisTx(logger, signerInfo.GetAddress(), genesisTime)
 	if err != nil {
 		return err
@@ -106,34 +113,11 @@ func execGenGenesisTxs() error {
 	}
 
 	for _, user := range users {
-		uRealm, err := generateUserRealmSource(user, "zenao", signerInfo.GetAddress().String())
+		tx, err := createUserRealmTx(chain, user, signerInfo.GetAddress())
 		if err != nil {
 			return err
 		}
-		userPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", user.ID)
-		userTx := std.Tx{
-			Msgs: []std.Msg{
-				vm.MsgAddPackage{
-					Creator: signerInfo.GetAddress(),
-					Deposit: []std.Coin{},
-					Package: &gnovm.MemPackage{
-						Name:  "user",
-						Path:  userPkgPath,
-						Files: []*gnovm.MemFile{{Name: "user.gno", Body: uRealm}},
-					},
-				},
-			},
-			Fee: std.Fee{
-				GasWanted: 10000000,
-				GasFee:    std.NewCoin("ugnot", 1000000),
-			},
-		}
-		txs = append(txs, gnoland.TxWithMetadata{
-			Tx: userTx,
-			Metadata: &gnoland.GnoTxMetadata{
-				Timestamp: user.CreatedAt.Unix(),
-			},
-		})
+		txs = append(txs, tx)
 	}
 
 	events, err := db.GetAllEvents()
@@ -145,57 +129,26 @@ func execGenGenesisTxs() error {
 		if err != nil {
 			return err
 		}
+
 		privacy, err := zeni.EventPrivacyFromSK(sk)
 		if err != nil {
 			return err
 		}
+
 		organizers, err := db.GetEventUsersWithRole(event.ID, "organizer")
 		if err != nil {
 			return err
 		}
+
 		var organizersIDs []string
 		for _, org := range organizers {
 			organizersIDs = append(organizersIDs, org.ID)
 		}
-
-		organizersAddr := mapsl.Map(organizersIDs, func(id string) string {
-			return gnolang.DerivePkgAddr(fmt.Sprintf("gno.land/r/zenao/users/u%s", id)).String()
-		})
-
-		eRealm, err := generateEventRealmSource(organizersAddr, signerInfo.GetAddress().String(), "zenao", &zenaov1.CreateEventRequest{
-			Title:       event.Title,
-			Description: event.Description,
-			ImageUri:    event.ImageURI,
-			Location:    event.Location,
-		}, privacy)
+		tx, err := createEventRealmTx(db, chain, event, signerInfo.GetAddress(), organizersIDs, privacy)
 		if err != nil {
 			return err
 		}
-		eventPkgPath := fmt.Sprintf("gno.land/r/zenao/events/e%s", event.ID)
-		eventTx := std.Tx{
-			Msgs: []std.Msg{
-				vm.MsgAddPackage{
-					Creator: signerInfo.GetAddress(),
-					Deposit: []std.Coin{},
-					Package: &gnovm.MemPackage{
-						Name:  "event",
-						Path:  eventPkgPath,
-						Files: []*gnovm.MemFile{{Name: "event.gno", Body: eRealm}},
-					},
-				},
-			},
-			Fee: std.Fee{
-				GasWanted: 10000000,
-				GasFee:    std.NewCoin("ugnot", 1000000),
-			},
-		}
-
-		txs = append(txs, gnoland.TxWithMetadata{
-			Tx: eventTx,
-			Metadata: &gnoland.GnoTxMetadata{
-				Timestamp: event.CreatedAt.Unix(),
-			},
-		})
+		txs = append(txs, tx)
 
 		participants, err := db.GetEventUsersWithRole(event.ID, "participant")
 		if err != nil {
@@ -209,109 +162,18 @@ func execGenGenesisTxs() error {
 			}
 
 			for _, ticket := range tickets {
-				callerPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", event.CreatorID)
-				participantPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", p.ID)
-				participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+				tx, err := createParticipationTx(chain, signerInfo.GetAddress(), event, ticket, sk)
+				if err != nil {
+					return err
+				}
+				txs = append(txs, tx)
 
-				signature := ""
-				if len(sk) != 0 {
-					msg := []byte(ticket.Ticket.Pubkey())
-					sigBz, err := sk.Sign(srand.Reader, msg, crypto.Hash(0))
+				if ticket.Checkin != nil {
+					tx, err := createCheckinTx(chain, signerInfo.GetAddress(), event, ticket, sk)
 					if err != nil {
 						return err
 					}
-					signature = base64.RawURLEncoding.EncodeToString(sigBz)
-				}
-
-				body := fmt.Sprintf(`package main
-				import (
-					user %q
-					event %q
-					"gno.land/p/zenao/daokit"
-					"gno.land/p/zenao/events"
-				)
-				
-				func main() {
-					daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-						Title: %q,
-						Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
-							Title: "Add participant",
-							Message: events.NewAddParticipantMsg(%q, %q, %q),
-						}),
-					})
-				}
-				`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticket.Ticket.Pubkey(), signature)
-
-				tx := std.Tx{
-					Msgs: []std.Msg{
-						vm.MsgRun{
-							Caller: signerInfo.GetAddress(),
-							Send:   []std.Coin{},
-							Package: &gnovm.MemPackage{
-								Name:  "main",
-								Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
-							},
-						},
-					},
-					Fee: std.Fee{
-						GasWanted: 10000000,
-						GasFee:    std.NewCoin("ugnot", 1000000),
-					},
-				}
-
-				txs = append(txs, gnoland.TxWithMetadata{
-					Tx: tx,
-					Metadata: &gnoland.GnoTxMetadata{
-						Timestamp: ticket.CreatedAt.Unix(),
-					},
-				})
-
-				if ticket.Checkin != nil {
-					gatekeeperPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", ticket.Checkin.GatekeeperID)
-					body = fmt.Sprintf(`package main
-				
-					import (
-						event %q
-						gatekeeper %q
-						
-						"gno.land/p/zenao/daokit"
-						"gno.land/p/zenao/events"
-					)
-					
-					func main() {
-						daokit.InstantExecute(gatekeeper.DAO, daokit.ProposalRequest{
-							Title: "Checkin",
-							Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
-								Title: "Checkin",
-								Message: events.NewCheckinMsg(%q, %q),
-							}),
-						})
-					}
-					`, eventPkgPath, gatekeeperPkgPath, ticket.Ticket.Pubkey(), ticket.Checkin.Signature)
-
-					tx := std.Tx{
-						Msgs: []std.Msg{
-							vm.MsgRun{
-								Caller: signerInfo.GetAddress(),
-								Send:   []std.Coin{},
-								Package: &gnovm.MemPackage{
-									Name:  "main",
-									Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
-								},
-							},
-						},
-						Fee: std.Fee{
-							GasWanted: 10000000,
-							GasFee:    std.NewCoin("ugnot", 1000000),
-						},
-					}
-
-					txs = append(txs, gnoland.TxWithMetadata{
-						Tx: tx,
-						Metadata: &gnoland.GnoTxMetadata{
-							Timestamp: ticket.Checkin.At.Unix(),
-						},
-					})
+					txs = append(txs, tx)
 				}
 			}
 		}
@@ -321,15 +183,11 @@ func execGenGenesisTxs() error {
 	if err != nil {
 		return err
 	}
-
 	for _, post := range posts {
 		feed, err := db.GetFeedByID(post.FeedID)
 		if err != nil {
 			logger.Error("failed to retrieve feed for post", zap.String("post-id", post.ID), zap.Error(err))
 		}
-		eventPkgPath := fmt.Sprintf("gno.land/r/zenao/events/e%s", feed.EventID)
-		userPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", post.UserID)
-		feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
 
 		if slices.Contains(post.Post.Tags, "poll") {
 			poll, err := db.GetPollByPostID(post.ID)
@@ -342,226 +200,39 @@ func execGenGenesisTxs() error {
 				options = append(options, res.Option)
 			}
 
-			body := fmt.Sprintf(`package main
-
-			import (
-				"std"
-			
-				"gno.land/p/demo/ufmt"
-				"gno.land/p/zenao/daokit"
-				feedsv1 "gno.land/p/zenao/feeds/v1"
-				pollsv1 "gno.land/p/zenao/polls/v1"
-				event %q
-				"gno.land/r/zenao/polls"
-				"gno.land/r/zenao/social_feed"
-				user %q
-			)
-			
-			func main() {
-				daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-					Title: "Add new poll",
-					Message: daokit.NewExecuteLambdaMsg(newPoll),
-				})
+			tx, err := createPollTx(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, poll, options)
+			if err != nil {
+				return err
 			}
-			
-			func newPoll() {
-				question := %q
-				options := %s
-				kind := pollsv1.PollKind(%d)
-				p := polls.NewPoll(question, kind, %d, options, event.IsMember)
-				uri := ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID))
-				std.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
-			
-				feedID := %q
-				post := &feedsv1.Post{
-					Loc:  nil,
-					Tags: []string{"poll"},
-					Post: &feedsv1.LinkPost{
-						Uri: uri,
-					},
-				}
-			
-				postID := social_feed.NewPost(feedID, post)
-				std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
-			}
-			`, eventPkgPath, userPkgPath, poll.Question, stringSliceLit(options), poll.Kind, poll.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
-
-			tx := std.Tx{
-				Msgs: []std.Msg{
-					vm.MsgRun{
-						Caller: signerInfo.GetAddress(),
-						Send:   []std.Coin{},
-						Package: &gnovm.MemPackage{
-							Name:  "main",
-							Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
-						},
-					},
-				},
-				Fee: std.Fee{
-					GasWanted: 10000000,
-					GasFee:    std.NewCoin("ugnot", 1000000),
-				},
-			}
-
-			txs = append(txs, gnoland.TxWithMetadata{
-				Tx: tx,
-				Metadata: &gnoland.GnoTxMetadata{
-					Timestamp: post.CreatedAt.Unix(),
-				},
-			})
+			txs = append(txs, tx)
 
 			for _, vote := range poll.Votes {
-				body := fmt.Sprintf(`package main
-				
-				import (
-					"gno.land/p/zenao/daokit"
-					"gno.land/r/zenao/polls"
-					user %q
-				)
-				
-				func main() {
-					daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-						Title: "Vote on poll",
-						Message: daokit.NewExecuteLambdaMsg(voteOnPoll),
-					})
+				tx, err := createVoteTx(chain, vote.UserID, signerInfo.GetAddress(), poll.ID, vote)
+				if err != nil {
+					return err
 				}
-				
-				func voteOnPoll() {
-					pollID := %s
-					option := %q
-					polls.Vote(uint64(pollID), option)
-				}
-				`, userPkgPath, poll.ID, vote.Option)
-
-				tx := std.Tx{
-					Msgs: []std.Msg{
-						vm.MsgRun{
-							Caller: signerInfo.GetAddress(),
-							Send:   []std.Coin{},
-							Package: &gnovm.MemPackage{
-								Name:  "main",
-								Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
-							},
-						},
-					},
-					Fee: std.Fee{
-						GasWanted: 10000000,
-						GasFee:    std.NewCoin("ugnot", 1000000),
-					},
-				}
-
-				txs = append(txs, gnoland.TxWithMetadata{
-					Tx: tx,
-					Metadata: &gnoland.GnoTxMetadata{
-						Timestamp: vote.CreatedAt.Unix(),
-					},
-				})
+				txs = append(txs, tx)
 			}
 		} else {
-			gnoLitPost := "&" + post.Post.GnoLiteral("feedsv1.", "\t\t")
-			body := fmt.Sprintf(`package main
-			import (
-				"std"
-			
-				"gno.land/p/zenao/daokit"
-				"gno.land/p/demo/ufmt"
-				feedsv1 "gno.land/p/zenao/feeds/v1"
-				"gno.land/r/zenao/social_feed"
-				user %q
-			)
-			
-			func main() {
-				daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-					Title: "Add new post",
-					Message: daokit.NewExecuteLambdaMsg(newPost),
-				})
+			tx, err := createPostTx(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, post)
+			if err != nil {
+				return err
 			}
-			
-			func newPost() {
-				feedID := %q
-				post := %s
-			
-				postID := social_feed.NewPost(feedID, post)
-				std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
-			}
-			`, userPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
-
-			tx := std.Tx{
-				Msgs: []std.Msg{
-					vm.MsgRun{
-						Caller: signerInfo.GetAddress(),
-						Send:   []std.Coin{},
-						Package: &gnovm.MemPackage{
-							Name:  "main",
-							Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
-						},
-					},
-				},
-				Fee: std.Fee{
-					GasWanted: 10000000,
-					GasFee:    std.NewCoin("ugnot", 1000000),
-				},
-			}
-
-			txs = append(txs, gnoland.TxWithMetadata{
-				Tx: tx,
-				Metadata: &gnoland.GnoTxMetadata{
-					Timestamp: post.CreatedAt.Unix(),
-				},
-			})
+			txs = append(txs, tx)
 		}
 
 		for _, reaction := range post.Reactions {
-			userRealmPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", reaction.UserID)
-			body := fmt.Sprintf(`package main
-			import (
-				"gno.land/p/zenao/daokit"
-				"gno.land/r/zenao/social_feed"
-				user %q
-			)
-				
-			func main() {
-				daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-					Title: "User #%s reacts to post #%s in event #%s.",
-					Message: daokit.NewExecuteLambdaMsg(newReaction),
-				})
+			tx, err := createReactionTx(chain, reaction.UserID, signerInfo.GetAddress(), feed.EventID, reaction)
+			if err != nil {
+				return err
 			}
-			
-			func newReaction() {
-				social_feed.ReactPost(%s, %q)
-			}
-			`, userRealmPkgPath, reaction.UserID, reaction.PostID, feed.EventID, reaction.PostID, reaction.Icon)
-
-			tx := std.Tx{
-				Msgs: []std.Msg{
-					vm.MsgRun{
-						Caller: signerInfo.GetAddress(),
-						Send:   []std.Coin{},
-						Package: &gnovm.MemPackage{
-							Name:  "main",
-							Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
-						},
-					},
-				},
-				Fee: std.Fee{
-					GasWanted: 10000000,
-					GasFee:    std.NewCoin("ugnot", 1000000),
-				},
-			}
-
-			txs = append(txs, gnoland.TxWithMetadata{
-				Tx: tx,
-				Metadata: &gnoland.GnoTxMetadata{
-					Timestamp: reaction.CreatedAt.Unix(),
-				},
-			})
+			txs = append(txs, tx)
 		}
 	}
 
 	if err := gnoland.SignGenesisTxs(txs, privKey, genGenesisTxsConf.chainId); err != nil {
 		return err
 	}
-
 	file, err := os.Create(genGenesisTxsConf.outputFile)
 	if err != nil {
 		return err
@@ -571,7 +242,6 @@ func execGenGenesisTxs() error {
 		if err != nil {
 			return err
 		}
-
 		_, err = file.WriteString(fmt.Sprintf("%s\n", encodedTx))
 		if err != nil {
 			return err
@@ -579,6 +249,269 @@ func execGenGenesisTxs() error {
 	}
 
 	return nil
+}
+
+func createPostTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, post *zeni.Post) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(eventID)
+	userPkgPath := chain.userRealmPkgPath(authorID)
+	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+	gnoLitPost := "&" + post.Post.GnoLiteral("feedsv1.", "\t\t")
+	body := genCreatePostMsgRunBody(userPkgPath, feedID, gnoLitPost)
+
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: post.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
+	userPkgPath := chain.userRealmPkgPath(authorID)
+	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, eventID, reaction.Icon)
+
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: reaction.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createVoteTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, pollID string, vote *zeni.Vote) (gnoland.TxWithMetadata, error) {
+	userPkgPath := chain.userRealmPkgPath(authorID)
+	body := genVotePollMsgRunBody(userPkgPath, pollID, vote.Option)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: vote.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
+	userPkgPath := chain.userRealmPkgPath(authorID)
+	eventPkgPath := chain.eventRealmPkgPath(eventID)
+	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+	body := genCreatePollMsgRunBody(eventPkgPath, userPkgPath, feedID, poll.Question, options, poll.Kind, poll.Duration)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: poll.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createEventRealmTx(db zeni.DB, chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, organizersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
+	organizersAddr := mapsl.Map(organizersIDs, chain.UserAddress)
+	eRealm, err := genEventRealmSource(organizersAddr, creator.String(), "zenao", &zenaov1.CreateEventRequest{
+		Title:       event.Title,
+		Description: event.Description,
+		ImageUri:    event.ImageURI,
+		Location:    event.Location,
+	}, privacy)
+	if err != nil {
+		return gnoland.TxWithMetadata{}, err
+	}
+
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	eventTx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgAddPackage{
+				Creator: creator,
+				Deposit: []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "event",
+					Path:  eventPkgPath,
+					Files: []*gnovm.MemFile{{Name: "event.gno", Body: eRealm}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: eventTx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: event.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createParticipationTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zeni.Event, ticket *zeni.SoldTicket, sk ed25519.PrivateKey) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	callerPkgPath := chain.userRealmPkgPath(event.CreatorID)
+	participantAddr := chain.UserAddress(ticket.UserID)
+
+	signature := ""
+	if len(sk) != 0 {
+		msg := []byte(ticket.Ticket.Pubkey())
+		sigBz, err := sk.Sign(srand.Reader, msg, crypto.Hash(0))
+		if err != nil {
+			return gnoland.TxWithMetadata{}, err
+		}
+		signature = base64.RawURLEncoding.EncodeToString(sigBz)
+	}
+
+	body := genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticket.Ticket.Pubkey(), signature)
+
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: ticket.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createCheckinTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zeni.Event, ticket *zeni.SoldTicket, sk ed25519.PrivateKey) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	gatekeeperPkgPath := chain.userRealmPkgPath(ticket.Checkin.GatekeeperID)
+	body := genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, ticket.Ticket.Pubkey(), ticket.Checkin.Signature)
+
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: ticket.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, creator cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	uRealm, err := genUserRealmSource(user, "zenao", creator.String())
+	if err != nil {
+		return gnoland.TxWithMetadata{}, err
+	}
+
+	userPkgPath := chain.userRealmPkgPath(user.ID)
+	userTx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgAddPackage{
+				Creator: creator,
+				Deposit: []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "user",
+					Path:  userPkgPath,
+					Files: []*gnovm.MemFile{{Name: "user.gno", Body: uRealm}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: userTx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: user.CreatedAt.Unix(),
+		},
+	}, nil
 }
 
 func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, genesisTime time.Time) ([]gnoland.TxWithMetadata, error) {
