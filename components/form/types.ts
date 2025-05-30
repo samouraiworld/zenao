@@ -111,22 +111,15 @@ const pollDurationFormSchema = z.object({
   hours: z.coerce.number().min(0).max(23),
 });
 
-const parentPostSchema = z.object({
-  kind: z.union([z.literal("POLL"), z.literal("STANDARD_POST")]),
-  author: z.string(),
-  postId: z.bigint(),
-});
-export type ParentPostSchemaType = z.infer<typeof parentPostSchema>;
-
 export const standardPostFormSchema = z.object({
   kind: z.literal("STANDARD_POST"),
-  parentPost: parentPostSchema.optional(),
+  parentPostId: z.bigint().optional(),
   content: z.string().trim().min(1, "Required").max(5000),
 });
 export type StandardPostFormSchemaType = z.infer<typeof standardPostFormSchema>;
 
 export const pollFormSchema = z.object({
-  parentPost: parentPostSchema.optional(),
+  parentPostId: z.bigint().optional(),
   kind: z.literal("POLL"),
   question: z.string().trim().min(1, "Required").max(300),
   options: z.array(pollOptionFormSchema).min(2).max(8),

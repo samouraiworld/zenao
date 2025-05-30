@@ -1,21 +1,33 @@
 "use client";
 
 import { Suspense } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
 import { FeedPostFormSchemaType } from "@/components/form/types";
+import { StandardPostForm } from "@/components/form/social-feed/standard-post-form";
 
 function PostCommentForm({
+  eventId,
   postId,
-  onSubmit,
+  form,
 }: {
-  postId: string;
-  onSubmit: (values: FeedPostFormSchemaType) => Promise<void>;
+  eventId: string;
+  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
-  void postId;
-  void onSubmit;
-  // return <PollPostForm />;
-
-  return <div>Comment Form</div>;
+  return (
+    <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
+      <div className="w-full">
+        <StandardPostForm
+          eventId={eventId}
+          form={form}
+          feedInputMode={"STANDARD_POST"}
+          setFeedInputMode={() => {
+            console.log("not available");
+          }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export default function PostInfo({
@@ -28,9 +40,21 @@ export default function PostInfo({
   void eventId;
   void postId;
 
-  const onSubmit = async (values: FeedPostFormSchemaType) => {
-    console.log(values);
-  };
+  const form = useForm<FeedPostFormSchemaType>({
+    mode: "all",
+    defaultValues: {
+      content: "",
+      parentPostId: BigInt(0), // post.post.localPostId
+      question: "",
+      options: [{ text: "" }, { text: "" }],
+      allowMultipleOptions: false,
+      duration: {
+        days: 1,
+        hours: 0,
+        minutes: 0,
+      },
+    },
+  });
 
   return (
     <div className="w-full flex flex-col gap-12">
@@ -71,9 +95,9 @@ export default function PostInfo({
 
       {/* TODO Form standard post commment */}
       <PostCommentForm
+        eventId={eventId}
         // postId={post.post.localPostId.toString()}
-        postId=""
-        onSubmit={onSubmit}
+        form={form}
       />
 
       {/* TODO Display comment */}

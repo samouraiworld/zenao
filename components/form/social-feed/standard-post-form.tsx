@@ -35,7 +35,6 @@ import {
 import { Textarea } from "@/components/shadcn/textarea";
 import Text from "@/components/texts/text";
 import { uploadFile } from "@/lib/files";
-import { ReplyAlert } from "@/components/widgets/reply-alert";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
@@ -62,7 +61,7 @@ export function StandardPostForm({
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const content = form.watch("content");
-  const parentPost = form.watch("parentPost");
+  const parentPostId = form.watch("parentPostId");
 
   const textareaMaxLength =
     standardPostFormSchema.shape.content._def.checks.find(
@@ -166,7 +165,7 @@ export function StandardPostForm({
       await createStandardPost({
         eventId,
         content: values.content,
-        parentId: values.parentPost?.postId.toString() ?? "",
+        parentId: values.parentPostId?.toString() ?? "",
         token,
         userAddress: userAddress ?? "",
         tags: [],
@@ -191,7 +190,6 @@ export function StandardPostForm({
         onSubmit={form.handleSubmit(onSubmitStandardPost)}
         className="flex flex-col gap-4 p-4 rounded"
       >
-        <ReplyAlert parentPost={parentPost} form={form} />
         <div className="flex flex-row gap-4">
           <Tabs defaultValue="form" className="w-full">
             <div className="w-full flex justify-between">
@@ -234,7 +232,7 @@ export function StandardPostForm({
                 <FeedInputButtons
                   buttonSize={textareaMinHeight}
                   feedInputMode={feedInputMode}
-                  isReplying={!!parentPost}
+                  isReplying={!!parentPostId}
                   setFeedInputMode={setFeedInputMode}
                   isLoading={isPending}
                 />
