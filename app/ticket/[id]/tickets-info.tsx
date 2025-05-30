@@ -48,7 +48,7 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
               eventId={id}
               event={event}
               timezone={timezone}
-              ticketSecret={ticketInfo.ticketSecret}
+              ticketInfo={ticketInfo}
             />
           </div>
         ))}
@@ -68,7 +68,7 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
                   eventId={id}
                   event={event}
                   timezone={timezone}
-                  ticketSecret={ticketInfo.ticketSecret}
+                  ticketInfo={ticketInfo}
                 />
               </div>
             </CarouselItem>
