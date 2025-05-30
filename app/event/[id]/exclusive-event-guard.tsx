@@ -115,8 +115,8 @@ export function ExclusiveEventGuard({
       }}
     >
       <div className="flex flex-col gap-8 items-center justify-center w-full h-full">
-        <div className="w-full max-w-[256px]">
-          <AspectRatio ratio={1 / 1}>
+        <div className="w-full max-w-[512px]">
+          <AspectRatio ratio={16 / 9}>
             <Web3Image
               src={imageUri}
               sizes="(max-width: 768px) 100vw,
