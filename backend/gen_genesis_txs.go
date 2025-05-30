@@ -73,7 +73,6 @@ func execGenGenesisTxs() error {
 			return err
 		}
 	}
-
 	logger.Info("generating genesis txs with args: ", zap.Any("chain-id", genGenesisTxsConf.chainId), zap.Any("db-path", genGenesisTxsConf.dbPath), zap.Any("output-file", genGenesisTxsConf.outputFile), zap.Any("genesis-time", genGenesisTxsConf.genesisTime))
 
 	signer, err := gnoclient.SignerFromBip39(genGenesisTxsConf.adminMnemonic, "dev", "", 0, 0)
@@ -99,14 +98,12 @@ func execGenGenesisTxs() error {
 		logger:             logger,
 		namespace:          "zenao",
 	}
-
 	logger.Info("Signer initialized", zap.String("address", signerInfo.GetAddress().String()))
 
 	db, err := gzdb.SetupDB(genGenesisTxsConf.dbPath)
 	if err != nil {
 		return err
 	}
-
 	logger.Info("database initialized")
 
 	genesisTime, err := time.Parse(time.RFC3339, genGenesisTxsConf.genesisTime)
@@ -117,7 +114,7 @@ func execGenGenesisTxs() error {
 	if err != nil {
 		return err
 	}
-	logger.Info("admin profile registered")
+	logger.Info("admin profile tx created")
 
 	users, err := db.GetAllUsers()
 	if err != nil {
@@ -130,7 +127,7 @@ func execGenGenesisTxs() error {
 			return err
 		}
 		txs = append(txs, tx)
-		logger.Info("user realm registered", zap.String("user-id", user.ID))
+		logger.Info("user realm tx created", zap.String("user-id", user.ID))
 	}
 
 	events, err := db.GetAllEvents()
@@ -162,7 +159,7 @@ func execGenGenesisTxs() error {
 			return err
 		}
 		txs = append(txs, tx)
-		logger.Info("event realm registered", zap.String("event-id", event.ID))
+		logger.Info("event realm tx created", zap.String("event-id", event.ID))
 		participants, err := db.GetEventUsersWithRole(event.ID, "participant")
 		if err != nil {
 			return err
