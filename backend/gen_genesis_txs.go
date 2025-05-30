@@ -329,6 +329,7 @@ func execGenGenesisTxs() error {
 		}
 		eventPkgPath := fmt.Sprintf("gno.land/r/zenao/events/e%s", feed.EventID)
 		userPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", post.UserID)
+		feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
 
 		if slices.Contains(post.Post.Tags, "poll") {
 			poll, err := db.GetPollByPostID(post.ID)
@@ -383,7 +384,7 @@ func execGenGenesisTxs() error {
 				postID := social_feed.NewPost(feedID, post)
 				std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 			}
-			`, eventPkgPath, userPkgPath, poll.Question, stringSliceLit(options), poll.Kind, poll.Duration, gnoEventPollCreate, post.FeedID, gnoEventPostCreate)
+			`, eventPkgPath, userPkgPath, poll.Question, stringSliceLit(options), poll.Kind, poll.Duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
 
 			tx := std.Tx{
 				Msgs: []std.Msg{
@@ -483,7 +484,7 @@ func execGenGenesisTxs() error {
 				postID := social_feed.NewPost(feedID, post)
 				std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 			}
-			`, userPkgPath, feed.ID, gnoLitPost, gnoEventPostCreate)
+			`, userPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
 
 			tx := std.Tx{
 				Msgs: []std.Msg{
