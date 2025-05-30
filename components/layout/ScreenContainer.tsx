@@ -8,7 +8,7 @@ interface ScreenContainerProps {
   children: React.ReactNode;
   isSignedOutModal?: boolean;
   background?: BackgroundProps;
-  screenContainerMaxWidth: number;
+  screenContainerMaxWidth?: number;
 }
 
 export const defaultScreenContainerMaxWidth = 1280;
