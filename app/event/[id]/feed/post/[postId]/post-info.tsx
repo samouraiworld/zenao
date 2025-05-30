@@ -8,7 +8,6 @@ import { StandardPostForm } from "@/components/form/social-feed/standard-post-fo
 
 function PostCommentForm({
   eventId,
-  postId,
   form,
 }: {
   eventId: string;
