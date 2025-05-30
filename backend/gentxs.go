@@ -30,23 +30,23 @@ import (
 	"go.uber.org/zap"
 )
 
-func newGenGenesisTxsCmd() *commands.Command {
+func newGenTxsCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
 			Name:       "gentxs",
 			ShortUsage: "gentxs",
-			ShortHelp:  "generate genesis transactions file",
+			ShortHelp:  "generate transactions file",
 		},
-		&genGenesisTxsConf,
+		&genTxsConf,
 		func(ctx context.Context, args []string) error {
-			return execGenGenesisTxs()
+			return execGenTxs()
 		},
 	)
 }
 
-var genGenesisTxsConf genGenesisTxsConfig
+var genTxsConf genTxsConfig
 
-type genGenesisTxsConfig struct {
+type genTxsConfig struct {
 	adminMnemonic string
 	chainId       string
 	dbPath        string
@@ -55,27 +55,27 @@ type genGenesisTxsConfig struct {
 	verbose       bool
 }
 
-func (conf *genGenesisTxsConfig) RegisterFlags(flset *flag.FlagSet) {
-	flset.StringVar(&genGenesisTxsConf.chainId, "chain-id", "dev", "Chain ID")
-	flset.StringVar(&genGenesisTxsConf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
-	flset.StringVar(&genGenesisTxsConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
-	flset.StringVar(&genGenesisTxsConf.outputFile, "output", "genesis_txs.jsonl", "Output file")
-	flset.StringVar(&genGenesisTxsConf.genesisTime, "genesis-time", "2025-01-15T00:00:00Z", "genesis time formatted as RFC3339: 2006-01-02T15:04:05Z")
-	flset.BoolVar(&genGenesisTxsConf.verbose, "v", false, "Enable verbose logging")
+func (conf *genTxsConfig) RegisterFlags(flset *flag.FlagSet) {
+	flset.StringVar(&genTxsConf.chainId, "chain-id", "dev", "Chain ID")
+	flset.StringVar(&genTxsConf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
+	flset.StringVar(&genTxsConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
+	flset.StringVar(&genTxsConf.outputFile, "output", "genesis_txs.jsonl", "Output file")
+	flset.StringVar(&genTxsConf.genesisTime, "genesis-time", "2025-01-15T00:00:00Z", "genesis time formatted as RFC3339: 2006-01-02T15:04:05Z")
+	flset.BoolVar(&genTxsConf.verbose, "v", false, "Enable verbose logging")
 }
 
-func execGenGenesisTxs() error {
+func execGenTxs() error {
 	logger := zap.NewNop()
-	if genGenesisTxsConf.verbose {
+	if genTxsConf.verbose {
 		var err error
 		logger, err = zap.NewDevelopment()
 		if err != nil {
 			return err
 		}
 	}
-	logger.Info("generating genesis txs with args: ", zap.Any("chain-id", genGenesisTxsConf.chainId), zap.Any("db-path", genGenesisTxsConf.dbPath), zap.Any("output-file", genGenesisTxsConf.outputFile), zap.Any("genesis-time", genGenesisTxsConf.genesisTime))
+	logger.Info("generating genesis txs with args: ", zap.Any("chain-id", genTxsConf.chainId), zap.Any("db-path", genTxsConf.dbPath), zap.Any("output-file", genTxsConf.outputFile), zap.Any("genesis-time", genTxsConf.genesisTime))
 
-	signer, err := gnoclient.SignerFromBip39(genGenesisTxsConf.adminMnemonic, "dev", "", 0, 0)
+	signer, err := gnoclient.SignerFromBip39(genTxsConf.adminMnemonic, "dev", "", 0, 0)
 	if err != nil {
 		return err
 	}
@@ -100,13 +100,13 @@ func execGenGenesisTxs() error {
 	}
 	logger.Info("Signer initialized", zap.String("address", signerInfo.GetAddress().String()))
 
-	db, err := gzdb.SetupDB(genGenesisTxsConf.dbPath)
+	db, err := gzdb.SetupDB(genTxsConf.dbPath)
 	if err != nil {
 		return err
 	}
 	logger.Info("database initialized")
 
-	genesisTime, err := time.Parse(time.RFC3339, genGenesisTxsConf.genesisTime)
+	genesisTime, err := time.Parse(time.RFC3339, genTxsConf.genesisTime)
 	if err != nil {
 		return err
 	}
@@ -245,10 +245,10 @@ func execGenGenesisTxs() error {
 		}
 	}
 
-	if err := gnoland.SignGenesisTxs(txs, privKey, genGenesisTxsConf.chainId); err != nil {
+	if err := gnoland.SignGenesisTxs(txs, privKey, genTxsConf.chainId); err != nil {
 		return err
 	}
-	file, err := os.Create(genGenesisTxsConf.outputFile)
+	file, err := os.Create(genTxsConf.outputFile)
 	if err != nil {
 		return err
 	}
