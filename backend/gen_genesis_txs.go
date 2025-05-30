@@ -52,6 +52,7 @@ type genGenesisTxsConfig struct {
 	dbPath        string
 	genesisTime   string
 	outputFile    string
+	verbose       bool
 }
 
 func (conf *genGenesisTxsConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -60,12 +61,17 @@ func (conf *genGenesisTxsConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&genGenesisTxsConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&genGenesisTxsConf.outputFile, "output", "genesis_txs.jsonl", "Output file")
 	flset.StringVar(&genGenesisTxsConf.genesisTime, "genesis-time", "2025-01-15T00:00:00Z", "genesis time formatted as RFC3339: 2006-01-02T15:04:05Z")
+	flset.BoolVar(&genGenesisTxsConf.verbose, "v", false, "Enable verbose logging")
 }
 
 func execGenGenesisTxs() error {
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		return err
+	logger := zap.NewNop()
+	if genGenesisTxsConf.verbose {
+		var err error
+		logger, err = zap.NewDevelopment()
+		if err != nil {
+			return err
+		}
 	}
 
 	logger.Info("generating genesis txs with args: ", zap.Any("chain-id", genGenesisTxsConf.chainId), zap.Any("db-path", genGenesisTxsConf.dbPath), zap.Any("output-file", genGenesisTxsConf.outputFile), zap.Any("genesis-time", genGenesisTxsConf.genesisTime))
