@@ -29,7 +29,6 @@ export function DiscoverEventsList({
   const eventsByDay = useMemo(() => {
     return events.reduce(
       (acc, event) => {
-        // Format the date to YYYY-MM-DD (or any format you prefer)
         const dateKey = fromUnixTime(Number(event.startDate))
           .toISOString()
           .split("T")[0];
