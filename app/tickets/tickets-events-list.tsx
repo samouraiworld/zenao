@@ -56,7 +56,9 @@ export function TicketsEventsList({
   return Object.entries(eventsByDay).map(([startOfDay, eventsOfTheDay]) => {
     return (
       <div key={startOfDay} className="flex flex-col gap-4">
-        <Text>{format(startOfDay, "iiii d  MMM")}</Text>
+        <Text size="lg" className="font-semibold">
+          {format(startOfDay, "iiii d  MMM")}
+        </Text>
 
         <EventCardListLayout>
           {eventsOfTheDay.map((evt) => (
