@@ -242,7 +242,7 @@ func execGenGenesisTxs() error {
 		if err != nil {
 			return err
 		}
-		_, err = file.WriteString(fmt.Sprintf("%s\n", encodedTx))
+		_, err = fmt.Fprintf(file, "%s\n", encodedTx)
 		if err != nil {
 			return err
 		}
