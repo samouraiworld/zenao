@@ -17,3 +17,12 @@ func postViewsToJSON(posts []*feedsv1.PostView) string {
 	}
 	return string(bz)
 }
+
+func postViewToJSON(post *feedsv1.PostView) string {
+	node := post.ToJSON()
+	bz, err := json.Marshal(node)
+	if err != nil {
+		panic(err)
+	}
+	return string(bz)
+}

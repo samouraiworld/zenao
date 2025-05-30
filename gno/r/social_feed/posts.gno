@@ -142,3 +142,11 @@ func GetPostReactions(localPostId uint64, user string) []*feedsv1.ReactionView {
 	return res
 
 }
+
+func GetPostView(localPostId uint64, user string) *feedsv1.PostView {
+	return &feedsv1.PostView{
+		Post:          GetPost(localPostId),
+		Reactions:     GetPostReactions(localPostId, user),
+		ChildrenCount: CountChildren(localPostId),
+	}
+}
