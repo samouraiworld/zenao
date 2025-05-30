@@ -1,26 +1,20 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { UseFormReturn } from "react-hook-form";
-import { Suspense, useState } from "react";
 import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
-import { FeedPostFormSchemaType } from "@/components/form/types";
-import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
-import { PostComments } from "@/components/form/social-feed/post-comments";
 
 export function StandardPostCard({
   eventId,
   post,
-  form,
+  canReply,
 }: {
   eventId: string;
   post: StandardPostView;
-  form: UseFormReturn<FeedPostFormSchemaType>;
+  canReply?: boolean;
 }) {
-  const [showReplies, setShowReplies] = useState(false);
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
   );
@@ -33,20 +27,11 @@ export function StandardPostCard({
         eventId={eventId}
         post={post}
         createdBy={createdBy}
-        onReply={() => {
-          form.setValue("parentPost", {
-            kind: "STANDARD_POST",
-            postId: post.post.localPostId,
-            author: post.post.author,
-          });
-        }}
-        onDisplayReplies={() => {
-          setShowReplies((prev) => !prev);
-        }}
+        canReply={canReply}
       >
         <MarkdownPreview markdownString={standardPost.content} />
       </PostCardLayout>
-      {showReplies && (
+      {/* {showReplies && (
         <div className="pl-6">
           <Suspense fallback={<PostCardSkeleton />}>
             <PostComments
@@ -55,7 +40,7 @@ export function StandardPostCard({
             />
           </Suspense>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

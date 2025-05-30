@@ -3,12 +3,10 @@
 import { Suspense, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { UseFormReturn } from "react-hook-form";
 import Text from "../texts/text";
 import { PostCardSkeleton } from "../loader/social-feed/post-card-skeleton";
 import { PollPost } from "../widgets/poll-post";
 import { LoaderMoreButton } from "../buttons/load-more-button";
-import { FeedPostFormSchemaType } from "../form/types";
 import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
@@ -30,11 +28,9 @@ function EmptyPostsList() {
 export function PostsList({
   eventId,
   userAddress,
-  form,
 }: {
   eventId: string;
   userAddress: string | null;
-  form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const t = useTranslations("event-feed");
   // Event's social feed posts
@@ -86,7 +82,7 @@ export function PostsList({
                     <StandardPostCard
                       eventId={eventId}
                       post={post.data}
-                      form={form}
+                      canReply
                     />
                   </Suspense>
                 );
@@ -102,7 +98,6 @@ export function PostsList({
                       eventId={eventId}
                       pollId={pollId}
                       pollPost={post.data}
-                      form={form}
                     />
                   </Suspense>
                 );

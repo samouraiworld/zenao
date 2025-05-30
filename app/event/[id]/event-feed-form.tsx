@@ -22,7 +22,6 @@ const EventFeedForm = ({
   const formContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
-  const parentPost = form.watch("parentPost");
 
   useEffect(() => {
     if (feedInputMode === "POLL") {
@@ -31,17 +30,6 @@ const EventFeedForm = ({
       form.setValue("kind", "STANDARD_POST");
     }
   }, [feedInputMode, form]);
-
-  useEffect(() => {
-    if (parentPost) {
-      setFeedInputMode("STANDARD_POST");
-      if (formContainerRef.current) {
-        window.scrollTo({
-          top: formContainerRef.current.offsetTop,
-        });
-      }
-    }
-  }, [parentPost, formContainerRef, setFeedInputMode]);
 
   return (
     <div
@@ -70,48 +58,3 @@ const EventFeedForm = ({
 };
 
 export default EventFeedForm;
-
-// export const EventFeedForm = forwardRef<
-//   HTMLDivElement,
-//   {
-//     eventId: string;
-//   }
-// >(({ eventId }, ref) => {
-//   const inputContainerRef = useRef<HTMLDivElement>(null);
-//   const [feedInputMode, setFeedInputMode] =
-//     useState<FeedInputMode>("STANDARD_POST");
-//   const feedMaxWidth =
-//     screenContainerMaxWidth - screenContainerMarginHorizontal * 2;
-
-//   return (
-//     <div
-//       ref={mergeRefs(ref, inputContainerRef)}
-//       className={cn(
-//         "flex justify-center w-full transition-all duration-300 bg-transparent",
-//       )}
-//     >
-//       <div
-//         className="w-full"
-//         style={{
-//           maxWidth: feedMaxWidth,
-//         }}
-//       >
-//         {feedInputMode === "POLL" ? (
-//           <PollPostForm
-//             eventId={eventId}
-//             feedInputMode={feedInputMode}
-//             setFeedInputMode={setFeedInputMode}
-//           />
-//         ) : (
-//           <StandardPostForm
-//             eventId={eventId}
-//             feedInputMode={feedInputMode}
-//             setFeedInputMode={setFeedInputMode}
-//           />
-//         )}
-//       </div>
-//     </div>
-//   );
-// });
-
-// EventFeedForm.displayName = "EventFeedForm";
