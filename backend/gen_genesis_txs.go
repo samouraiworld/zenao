@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"time"
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
@@ -264,9 +265,298 @@ func execGenGenesisTxs() error {
 						Timestamp: ticket.CreatedAt.Unix(),
 					},
 				})
+
+				if ticket.Checkin != nil {
+					gatekeeperPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", ticket.Checkin.GatekeeperID)
+					body = fmt.Sprintf(`package main
+				
+					import (
+						event %q
+						gatekeeper %q
+						
+						"gno.land/p/zenao/daokit"
+						"gno.land/p/zenao/events"
+					)
+					
+					func main() {
+						daokit.InstantExecute(gatekeeper.DAO, daokit.ProposalRequest{
+							Title: "Checkin",
+							Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+								Title: "Checkin",
+								Message: events.NewCheckinMsg(%q, %q),
+							}),
+						})
+					}
+					`, eventPkgPath, gatekeeperPkgPath, ticket.Ticket.Pubkey(), ticket.Checkin.Signature)
+
+					tx := std.Tx{
+						Msgs: []std.Msg{
+							vm.MsgRun{
+								Caller: signerInfo.GetAddress(),
+								Send:   []std.Coin{},
+								Package: &gnovm.MemPackage{
+									Name:  "main",
+									Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+								},
+							},
+						},
+						Fee: std.Fee{
+							GasWanted: 10000000,
+							GasFee:    std.NewCoin("ugnot", 1000000),
+						},
+					}
+
+					txs = append(txs, gnoland.TxWithMetadata{
+						Tx: tx,
+						Metadata: &gnoland.GnoTxMetadata{
+							Timestamp: ticket.Checkin.At.Unix(),
+						},
+					})
+				}
 			}
 		}
 	}
+
+	posts, err := db.GetAllPosts()
+	if err != nil {
+		return err
+	}
+
+	for _, post := range posts {
+		feed, err := db.GetFeedByID(post.FeedID)
+		if err != nil {
+			logger.Error("failed to retrieve feed for post", zap.String("post-id", post.ID), zap.Error(err))
+		}
+		eventPkgPath := fmt.Sprintf("gno.land/r/zenao/events/e%s", feed.EventID)
+		userPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", post.UserID)
+
+		if slices.Contains(post.Post.Tags, "poll") {
+			poll, err := db.GetPollByPostID(post.ID)
+			if err != nil {
+				logger.Error("failed to retrieve poll for post", zap.String("post-id", post.ID), zap.Error(err))
+			}
+
+			var options []string
+			for _, res := range poll.Results {
+				options = append(options, res.Option)
+			}
+
+			body := fmt.Sprintf(`package main
+
+			import (
+				"std"
+			
+				"gno.land/p/demo/ufmt"
+				"gno.land/p/zenao/daokit"
+				feedsv1 "gno.land/p/zenao/feeds/v1"
+				pollsv1 "gno.land/p/zenao/polls/v1"
+				event %q
+				"gno.land/r/zenao/polls"
+				"gno.land/r/zenao/social_feed"
+				user %q
+			)
+			
+			func main() {
+				daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+					Title: "Add new poll",
+					Message: daokit.NewExecuteLambdaMsg(newPoll),
+				})
+			}
+			
+			func newPoll() {
+				question := %q
+				options := %s
+				kind := pollsv1.PollKind(%d)
+				p := polls.NewPoll(question, kind, %d, options, event.IsMember)
+				uri := ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID))
+				std.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
+			
+				feedID := %q
+				post := &feedsv1.Post{
+					Loc:  nil,
+					Tags: []string{"poll"},
+					Post: &feedsv1.LinkPost{
+						Uri: uri,
+					},
+				}
+			
+				postID := social_feed.NewPost(feedID, post)
+				std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
+			}
+			`, eventPkgPath, userPkgPath, poll.Question, stringSliceLit(options), poll.Kind, poll.Duration, gnoEventPollCreate, post.FeedID, gnoEventPostCreate)
+
+			tx := std.Tx{
+				Msgs: []std.Msg{
+					vm.MsgRun{
+						Caller: signerInfo.GetAddress(),
+						Send:   []std.Coin{},
+						Package: &gnovm.MemPackage{
+							Name:  "main",
+							Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+						},
+					},
+				},
+				Fee: std.Fee{
+					GasWanted: 10000000,
+					GasFee:    std.NewCoin("ugnot", 1000000),
+				},
+			}
+
+			txs = append(txs, gnoland.TxWithMetadata{
+				Tx: tx,
+				Metadata: &gnoland.GnoTxMetadata{
+					Timestamp: post.CreatedAt.Unix(),
+				},
+			})
+
+			for _, vote := range poll.Votes {
+				body := fmt.Sprintf(`package main
+				
+				import (
+					"gno.land/p/zenao/daokit"
+					"gno.land/r/zenao/polls"
+					user %q
+				)
+				
+				func main() {
+					daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+						Title: "Vote on poll",
+						Message: daokit.NewExecuteLambdaMsg(voteOnPoll),
+					})
+				}
+				
+				func voteOnPoll() {
+					pollID := %s
+					option := %q
+					polls.Vote(uint64(pollID), option)
+				}
+				`, userPkgPath, poll.ID, vote.Option)
+
+				tx := std.Tx{
+					Msgs: []std.Msg{
+						vm.MsgRun{
+							Caller: signerInfo.GetAddress(),
+							Send:   []std.Coin{},
+							Package: &gnovm.MemPackage{
+								Name:  "main",
+								Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+							},
+						},
+					},
+					Fee: std.Fee{
+						GasWanted: 10000000,
+						GasFee:    std.NewCoin("ugnot", 1000000),
+					},
+				}
+
+				txs = append(txs, gnoland.TxWithMetadata{
+					Tx: tx,
+					Metadata: &gnoland.GnoTxMetadata{
+						Timestamp: vote.CreatedAt.Unix(),
+					},
+				})
+			}
+		} else {
+			gnoLitPost := "&" + post.Post.GnoLiteral("feedsv1.", "\t\t")
+			body := fmt.Sprintf(`package main
+			import (
+				"std"
+			
+				"gno.land/p/zenao/daokit"
+				"gno.land/p/demo/ufmt"
+				feedsv1 "gno.land/p/zenao/feeds/v1"
+				"gno.land/r/zenao/social_feed"
+				user %q
+			)
+			
+			func main() {
+				daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+					Title: "Add new post",
+					Message: daokit.NewExecuteLambdaMsg(newPost),
+				})
+			}
+			
+			func newPost() {
+				feedID := %q
+				post := %s
+			
+				postID := social_feed.NewPost(feedID, post)
+				std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
+			}
+			`, userPkgPath, feed.ID, gnoLitPost, gnoEventPostCreate)
+
+			tx := std.Tx{
+				Msgs: []std.Msg{
+					vm.MsgRun{
+						Caller: signerInfo.GetAddress(),
+						Send:   []std.Coin{},
+						Package: &gnovm.MemPackage{
+							Name:  "main",
+							Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+						},
+					},
+				},
+				Fee: std.Fee{
+					GasWanted: 10000000,
+					GasFee:    std.NewCoin("ugnot", 1000000),
+				},
+			}
+
+			txs = append(txs, gnoland.TxWithMetadata{
+				Tx: tx,
+				Metadata: &gnoland.GnoTxMetadata{
+					Timestamp: post.CreatedAt.Unix(),
+				},
+			})
+		}
+
+		for _, reaction := range post.Reactions {
+			userRealmPkgPath := fmt.Sprintf("gno.land/r/zenao/users/u%s", reaction.UserID)
+			body := fmt.Sprintf(`package main
+			import (
+				"gno.land/p/zenao/daokit"
+				"gno.land/r/zenao/social_feed"
+				user %q
+			)
+				
+			func main() {
+				daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+					Title: "User #%s reacts to post #%s in event #%s.",
+					Message: daokit.NewExecuteLambdaMsg(newReaction),
+				})
+			}
+			
+			func newReaction() {
+				social_feed.ReactPost(%s, %q)
+			}
+			`, userRealmPkgPath, reaction.UserID, reaction.PostID, feed.EventID, reaction.PostID, reaction.Icon)
+
+			tx := std.Tx{
+				Msgs: []std.Msg{
+					vm.MsgRun{
+						Caller: signerInfo.GetAddress(),
+						Send:   []std.Coin{},
+						Package: &gnovm.MemPackage{
+							Name:  "main",
+							Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+						},
+					},
+				},
+				Fee: std.Fee{
+					GasWanted: 10000000,
+					GasFee:    std.NewCoin("ugnot", 1000000),
+				},
+			}
+
+			txs = append(txs, gnoland.TxWithMetadata{
+				Tx: tx,
+				Metadata: &gnoland.GnoTxMetadata{
+					Timestamp: reaction.CreatedAt.Unix(),
+				},
+			})
+		}
+	}
+
 	if err := gnoland.SignGenesisTxs(txs, privKey, genGenesisTxsConf.chainId); err != nil {
 		return err
 	}
