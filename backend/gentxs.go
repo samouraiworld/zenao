@@ -162,6 +162,12 @@ func execGenTxs() error {
 		}
 		txs = append(txs, tx)
 		logger.Info("event realm tx created", zap.String("event-id", event.ID))
+		tx, err = createEventRegTx(chain, event, signerInfo.GetAddress())
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("event indexed into event registry tx created", zap.String("event-id", event.ID))
 		participants, err := db.GetEventUsersWithRole(event.ID, "participant")
 		if err != nil {
 			return err
@@ -180,6 +186,12 @@ func execGenTxs() error {
 				}
 				txs = append(txs, tx)
 				logger.Info("participation tx created", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
+				tx, err = createParticipationRegTx(chain, event, signerInfo.GetAddress(), chain.UserAddress(p.ID))
+				if err != nil {
+					return err
+				}
+				txs = append(txs, tx)
+				logger.Info("participation indexed into event registry tx created", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 
 				if ticket.Checkin != nil {
 					tx, err := createCheckinTx(chain, signerInfo.GetAddress(), event, ticket, sk)
@@ -387,6 +399,32 @@ func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addre
 	}, nil
 }
 
+func createEventRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.eventsIndexPkgPath,
+				Func:    "IndexEvent",
+				Args:    []string{eventPkgPath},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: event.CreatedAt.Unix() + 1, // +1 to avoid collision with event creation
+		},
+	}, nil
+}
+
 func createEventRealmTx(db zeni.DB, chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, organizersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
 	organizersAddr := mapsl.Map(organizersIDs, chain.UserAddress)
 	eRealm, err := genEventRealmSource(organizersAddr, creator.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
@@ -420,6 +458,32 @@ func createEventRealmTx(db zeni.DB, chain *gnoZenaoChain, event *zeni.Event, cre
 
 	return gnoland.TxWithMetadata{
 		Tx: eventTx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: event.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, participantAddr string) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.eventsIndexPkgPath,
+				Func:    "AddParticipant",
+				Args:    []string{eventPkgPath, participantAddr},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
 		Metadata: &gnoland.GnoTxMetadata{
 			Timestamp: event.CreatedAt.Unix(),
 		},
