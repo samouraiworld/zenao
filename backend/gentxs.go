@@ -35,7 +35,7 @@ func newGenTxsCmd() *commands.Command {
 		commands.Metadata{
 			Name:       "gentxs",
 			ShortUsage: "gentxs",
-			ShortHelp:  "generate transactions file",
+			ShortHelp:  "generate genesis transactions file",
 		},
 		&genTxsConf,
 		func(ctx context.Context, args []string) error {
@@ -52,6 +52,7 @@ type genTxsConfig struct {
 	dbPath        string
 	genesisTime   string
 	outputFile    string
+	name          string
 	verbose       bool
 }
 
@@ -61,6 +62,7 @@ func (conf *genTxsConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&genTxsConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&genTxsConf.outputFile, "output", "genesis_txs.jsonl", "Output file")
 	flset.StringVar(&genTxsConf.genesisTime, "genesis-time", "2025-01-15T00:00:00Z", "genesis time formatted as RFC3339: 2006-01-02T15:04:05Z")
+	flset.StringVar(&genTxsConf.name, "name", "zenao", "Namespace")
 	flset.BoolVar(&genTxsConf.verbose, "v", false, "Enable verbose logging")
 }
 
@@ -93,10 +95,10 @@ func execGenTxs() error {
 	}
 
 	chain := &gnoZenaoChain{
-		eventsIndexPkgPath: path.Join("gno.land/r", "zenao", "eventreg"),
+		eventsIndexPkgPath: path.Join("gno.land/r", genTxsConf.name, "eventreg"),
 		signerInfo:         signerInfo,
 		logger:             logger,
-		namespace:          "zenao",
+		namespace:          genTxsConf.name,
 	}
 	logger.Info("Signer initialized", zap.String("address", signerInfo.GetAddress().String()))
 
@@ -387,7 +389,7 @@ func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addre
 
 func createEventRealmTx(db zeni.DB, chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, organizersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
 	organizersAddr := mapsl.Map(organizersIDs, chain.UserAddress)
-	eRealm, err := genEventRealmSource(organizersAddr, creator.String(), "zenao", &zenaov1.CreateEventRequest{
+	eRealm, err := genEventRealmSource(organizersAddr, creator.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
 		Title:       event.Title,
 		Description: event.Description,
 		ImageUri:    event.ImageURI,
@@ -497,7 +499,7 @@ func createCheckinTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zen
 }
 
 func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, creator cryptoGno.Address) (gnoland.TxWithMetadata, error) {
-	uRealm, err := genUserRealmSource(user, "zenao", creator.String())
+	uRealm, err := genUserRealmSource(user, genTxsConf.name, creator.String())
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
 	}
