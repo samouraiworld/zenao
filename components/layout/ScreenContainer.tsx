@@ -8,15 +8,17 @@ interface ScreenContainerProps {
   children: React.ReactNode;
   isSignedOutModal?: boolean;
   background?: BackgroundProps;
+  screenContainerMaxWidth: number;
 }
 
-export const screenContainerMaxWidth = 960;
+export const defaultScreenContainerMaxWidth = 1280;
 export const screenContainerMarginHorizontal = 20;
 
 export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   children,
   isSignedOutModal,
   background,
+  screenContainerMaxWidth = defaultScreenContainerMaxWidth,
 }) => {
   return (
     <div className="flex flex-col flex-1 items-center">

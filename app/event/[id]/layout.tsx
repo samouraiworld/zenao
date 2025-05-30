@@ -76,6 +76,7 @@ export default async function EventLayout({ params, children }: Props) {
         exclusive={eventData.privacy?.eventPrivacy.case === "guarded"}
       >
         <ScreenContainer
+          screenContainerMaxWidth={960}
           background={{
             src: eventData.imageUri,
             width: imageWidth,
