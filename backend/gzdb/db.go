@@ -902,6 +902,7 @@ func (g *gormZenaoDB) Checkin(pubkey string, gatekeeperID string, signature stri
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	return &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),
+		CreatedAt:   dbuser.CreatedAt,
 		DisplayName: dbuser.DisplayName,
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
@@ -928,10 +929,11 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		user = dbUserToZeniDBUser(dbtick.User)
 	}
 	return &zeni.SoldTicket{
-		Ticket:  tickobj,
-		BuyerID: fmt.Sprint(dbtick.BuyerID),
-		UserID:  fmt.Sprint(dbtick.UserID),
-		Checkin: checkin,
-		User:    user,
+		Ticket:    tickobj,
+		BuyerID:   fmt.Sprint(dbtick.BuyerID),
+		UserID:    fmt.Sprint(dbtick.UserID),
+		Checkin:   checkin,
+		User:      user,
+		CreatedAt: dbtick.CreatedAt,
 	}, nil
 }
