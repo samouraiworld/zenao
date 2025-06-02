@@ -35,7 +35,6 @@ import {
 import { Textarea } from "@/components/shadcn/textarea";
 import Text from "@/components/texts/text";
 import { uploadFile } from "@/lib/files";
-import { ReplyAlert } from "@/components/widgets/reply-alert";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
@@ -191,7 +190,6 @@ export function StandardPostForm({
         onSubmit={form.handleSubmit(onSubmitStandardPost)}
         className="flex flex-col gap-4 p-4 rounded"
       >
-        <ReplyAlert parentPost={parentPost} form={form} />
         <div className="flex flex-row gap-4">
           <Tabs defaultValue="form" className="w-full">
             <div className="w-full flex justify-between">
