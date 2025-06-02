@@ -18,6 +18,10 @@ export function BackgroundImage(props: BackgroundProps) {
       priority
       fetchPriority="high"
       className="absolute pointer-events-none w-full h-full top-0 blur-[8rem] opacity-25 sm:opacity-15"
+      style={{
+        WebkitFilter:
+          "var(8rem) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)",
+      }}
     />
   );
 }
