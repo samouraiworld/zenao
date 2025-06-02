@@ -102,6 +102,7 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 
 	return &zeni.Event{
 		ID:           fmt.Sprintf("%d", dbevt.ID),
+		CreatedAt:    dbevt.CreatedAt,
 		Title:        dbevt.Title,
 		Description:  dbevt.Description,
 		StartDate:    dbevt.StartDate,
