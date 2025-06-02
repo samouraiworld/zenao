@@ -228,6 +228,9 @@ export default async function RootLayout({
   if (health.maintenance) {
     return (
       <html suppressHydrationWarning lang={locale}>
+        <head>
+          <meta name="robots" content="noindex" />
+        </head>
         <body className={`${albertSans.variable} antialiased`}>
           <MaintenanceScreen />
         </body>
