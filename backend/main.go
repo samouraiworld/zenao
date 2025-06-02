@@ -58,6 +58,7 @@ type config struct {
 	dbPath          string
 	resendSecretKey string
 	discordtoken    string
+	maintenance     bool
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
@@ -71,7 +72,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
 	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
-
+	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
 }
 
 var conf config
@@ -153,6 +154,7 @@ func execStart() error {
 		DB:           db,
 		MailClient:   mailClient,
 		DiscordToken: conf.discordtoken,
+		Maintenance:  conf.maintenance,
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
