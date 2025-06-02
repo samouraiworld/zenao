@@ -6,6 +6,13 @@ import (
 	v1 "gno.land/p/zenao/polls/v1"
 )
 
+type HealthRequest struct {
+}
+
+type HealthResponse struct {
+	Maintenance bool
+}
+
 type EditUserRequest struct {
 	DisplayName string
 	Bio         string
