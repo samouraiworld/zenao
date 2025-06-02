@@ -2,15 +2,27 @@
 
 import { Suspense } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
 import { FeedPostFormSchemaType } from "@/components/form/types";
 import { StandardPostForm } from "@/components/form/social-feed/standard-post-form";
+import { userAddressOptions } from "@/lib/queries/user";
+import { feedPost } from "@/lib/queries/social-feed";
+import { isPollPost, isStandardPost } from "@/lib/social-feed";
+import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
+import { parsePollUri } from "@/lib/multiaddr";
+import { PollPost } from "@/components/widgets/poll-post";
+import Heading from "@/components/texts/heading";
+import { PostComments } from "@/components/form/social-feed/post-comments";
 
 function PostCommentForm({
   eventId,
+  parentId,
   form,
 }: {
   eventId: string;
+  parentId: bigint;
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   return (
@@ -22,6 +34,12 @@ function PostCommentForm({
           feedInputMode={"STANDARD_POST"}
           setFeedInputMode={() => {
             console.log("not available");
+          }}
+          onSuccess={() => {
+            form.reset(
+              { kind: "STANDARD_POST", parentPostId: parentId, content: "" },
+              { keepValues: false },
+            );
           }}
         />
       </div>
@@ -39,74 +57,59 @@ export default function PostInfo({
   void eventId;
   void postId;
 
+  const { userId, getToken } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+
+  const { data: post } = useSuspenseQuery(feedPost(postId, userAddress || ""));
+
   const form = useForm<FeedPostFormSchemaType>({
     mode: "all",
     defaultValues: {
+      kind: "STANDARD_POST",
       content: "",
-      parentPostId: BigInt(0), // post.post.localPostId
-      question: "",
-      options: [{ text: "" }, { text: "" }],
-      allowMultipleOptions: false,
-      duration: {
-        days: 1,
-        hours: 0,
-        minutes: 0,
-      },
+      parentPostId: post.post?.localPostId,
     },
   });
 
+  if (!isStandardPost(post) && !isPollPost(post)) {
+    return null;
+  }
+
   return (
     <div className="w-full flex flex-col gap-12">
-      {/* {switch (post.postType) {
-          case "standard":
-            return (
-              <Suspense
-                key={post.data.post.localPostId}
-                fallback={<PostCardSkeleton />}
-              >
-                <StandardPostCard
-                  eventId={eventId}
-                  post={post.data}
-                  form={form}
-                />
-              </Suspense>
-            );
-          case "poll":
-            const { pollId } = parsePollUri(post.data.post.post.value.uri);
+      {isStandardPost(post) && (
+        <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
+          <StandardPostCard eventId={eventId} post={post} />
+        </Suspense>
+      )}
+      {isPollPost(post) && (
+        <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
+          <PollPost
+            eventId={eventId}
+            pollId={parsePollUri(post.post.post.value.uri).pollId}
+            pollPost={post}
+          />
+        </Suspense>
+      )}
 
-            return (
-              <Suspense
-                fallback={<PostCardSkeleton />}
-                key={post.data.post.localPostId}
-              >
-                <PollPost
-                  eventId={eventId}
-                  pollId={pollId}
-                  pollPost={post.data}
-                  form={form}
-                />
-              </Suspense>
-            );
+      <div className="flex flex-col gap-4">
+        <Heading level={2}>Comments ({post.childrenCount})</Heading>
+        <PostCommentForm
+          eventId={eventId}
+          parentId={post.post.localPostId}
+          form={form}
+        />
 
-          case "unknown":
-            return null;
-        }} */}
-
-      {/* TODO Form standard post commment */}
-      <PostCommentForm
-        eventId={eventId}
-        // postId={post.post.localPostId.toString()}
-        form={form}
-      />
-
-      {/* TODO Display comment */}
-      <div className="pl-6">
-        <Suspense fallback={<PostCardSkeleton />}>
-          {/* <PostComments
+        <div className="pl-6">
+          <Suspense fallback={<PostCardSkeleton />}>
+            <PostComments
               eventId={eventId}
               parentId={post.post.localPostId.toString()}
-            /> */}
-        </Suspense>
+            />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

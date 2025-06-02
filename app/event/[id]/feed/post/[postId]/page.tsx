@@ -1,6 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import PostInfo from "./post-info";
 import { getQueryClient } from "@/lib/get-query-client";
+import { feedPost } from "@/lib/queries/social-feed";
 
 type PageProps = {
   params: Promise<{ id: string; postId: string }>;
@@ -11,7 +12,7 @@ export default async function PostDetailsPage({ params }: PageProps) {
   const { id: eventId, postId } = await params;
 
   // TODO Prefetch GetFeedPost
-  // queryClient.fetchQuery(feedPost(eventId, postId, userAddress || ""));
+  queryClient.fetchQuery(feedPost(postId, ""));
   // TODO Prefetch profile post creator
   // queryClient.prefetchQuery(profileOptions, userAddress || "");
   // TODO Prefetch GetFeedPostChildren

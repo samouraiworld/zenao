@@ -50,6 +50,12 @@ const EventFeedForm = ({
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
             form={form}
+            onSuccess={() => {
+              form.reset(
+                { kind: "STANDARD_POST", content: "" },
+                { keepValues: false },
+              );
+            }}
           />
         )}
       </div>

@@ -46,11 +46,13 @@ export function StandardPostForm({
   feedInputMode,
   setFeedInputMode,
   form,
+  onSuccess,
 }: {
   eventId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
   form: UseFormReturn<FeedPostFormSchemaType>;
+  onSuccess?: () => void;
 }) {
   const { createStandardPost, isPending } = useCreateStandardPost();
   const t = useTranslations("event-feed.standard-post-form");
@@ -171,7 +173,8 @@ export function StandardPostForm({
         tags: [],
       });
 
-      form.reset({ kind: "STANDARD_POST", content: "" }, { keepValues: false });
+      onSuccess?.();
+
       toast({
         title: t("toast-post-creation-success"),
       });
