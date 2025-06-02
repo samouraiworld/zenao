@@ -211,7 +211,7 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 		})
 		for _, user := range result.Users {
 			votes = append(votes, &zeni.Vote{
-				CreatedAt: user.CreatedAt,
+				CreatedAt: result.CreatedAt,
 				UserID:    strconv.FormatUint(uint64(user.ID), 10),
 				Option:    result.Option,
 			})
