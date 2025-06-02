@@ -208,8 +208,8 @@ func NewMaintenanceInterceptor(maintenance bool) connect.UnaryInterceptorFunc {
 			ctx context.Context,
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
-			if maintenance && req.Spec().Procedure != "zenao.v1.ZenaoService/Health" {
-				return nil, connect.NewError(connect.CodeUnavailable, errors.New("service is under maintenance"))
+			if maintenance && req.Spec().Procedure != "/zenao.v1.ZenaoService/Health" {
+				return nil, connect.NewError(connect.CodeUnavailable, errors.New("service is under maintenance, try again in few minutes..."))
 			}
 			return next(ctx, req)
 		})
