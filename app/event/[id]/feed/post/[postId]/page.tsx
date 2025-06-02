@@ -1,7 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import PostInfo from "./post-info";
 import { getQueryClient } from "@/lib/get-query-client";
-import { feedPost } from "@/lib/queries/social-feed";
 
 type PageProps = {
   params: Promise<{ id: string; postId: string }>;
@@ -10,18 +9,6 @@ type PageProps = {
 export default async function PostDetailsPage({ params }: PageProps) {
   const queryClient = getQueryClient();
   const { id: eventId, postId } = await params;
-
-  // TODO Prefetch GetFeedPost
-  queryClient.fetchQuery(feedPost(postId, ""));
-  // TODO Prefetch profile post creator
-  // queryClient.prefetchQuery(profileOptions, userAddress || "");
-  // TODO Prefetch GetFeedPostChildren
-  // queryClient.prefetchQuery(feedPostsChildren(
-  //     postId,
-  //     DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
-  //     "",
-  //     userAddress || "",
-  //   ));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

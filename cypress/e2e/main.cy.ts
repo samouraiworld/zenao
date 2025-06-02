@@ -317,21 +317,21 @@ describe("main", () => {
     cy.get('img[alt="grinning"]').first().click();
   });
 
-  // it("access an exclusive event", () => {
-  //   cy.createEvent({ exclusive: true });
-  //   cy.url().then((url) => {
-  //     logout();
-  //     cy.visit(url);
-  //   });
+  it("access an exclusive event", () => {
+    cy.createEvent({ exclusive: true });
+    cy.url().then((url) => {
+      logout();
+      cy.visit(url);
+    });
 
-  //   // Guard
-  //   cy.get("input[type=password]").type(testEventPassword);
-  //   cy.get("button").contains("Access event").click();
+    // Guard
+    cy.get("input[type=password]").type(testEventPassword);
+    cy.get("button").contains("Access event").click();
 
-  //   // Assertions
-  //   cy.get("h1").contains(testEventName).should("be.visible");
-  //   cy.get("h2").contains(testEventLocation).should("be.visible");
-  // });
+    // Assertions
+    cy.get("h1").contains(testEventName).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
+  });
 
   it("send a comment on a post", () => {
     cy.createEvent({ exclusive: false });
