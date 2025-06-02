@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"net/http"
 	"os"
@@ -160,7 +161,10 @@ func execStart() error {
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
 
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao,
-		connect.WithInterceptors(NewLoggingInterceptor(logger)),
+		connect.WithInterceptors(
+			NewLoggingInterceptor(logger),
+			NewMaintenanceInterceptor(conf.maintenance),
+		),
 	)
 	mux.Handle(path, middlewares(handler,
 		withConnectCORS(allowedOrigins...),
@@ -196,6 +200,21 @@ func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
 		})
 		return middleware.Handler(next)
 	}
+}
+
+func NewMaintenanceInterceptor(maintenance bool) connect.UnaryInterceptorFunc {
+	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
+		return connect.UnaryFunc(func(
+			ctx context.Context,
+			req connect.AnyRequest,
+		) (connect.AnyResponse, error) {
+			if maintenance && req.Spec().Procedure != "zenao.v1.ZenaoService/Health" {
+				return nil, connect.NewError(connect.CodeUnavailable, errors.New("service is under maintenance"))
+			}
+			return next(ctx, req)
+		})
+	}
+	return connect.UnaryInterceptorFunc(interceptor)
 }
 
 func NewLoggingInterceptor(logger *zap.Logger) connect.UnaryInterceptorFunc {
