@@ -186,7 +186,7 @@ func execGenTxs() error {
 				}
 				txs = append(txs, tx)
 				logger.Info("participation tx created", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
-				tx, err = createParticipationRegTx(chain, event, signerInfo.GetAddress(), chain.UserAddress(p.ID))
+				tx, err = createParticipationRegTx(chain, event, signerInfo.GetAddress(), ticket, chain.UserAddress(p.ID))
 				if err != nil {
 					return err
 				}
@@ -464,7 +464,7 @@ func createEventRealmTx(db zeni.DB, chain *gnoZenaoChain, event *zeni.Event, cre
 	}, nil
 }
 
-func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, participantAddr string) (gnoland.TxWithMetadata, error) {
+func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, ticket *zeni.SoldTicket, participantAddr string) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
 	tx := std.Tx{
 		Msgs: []std.Msg{
@@ -485,7 +485,7 @@ func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cr
 	return gnoland.TxWithMetadata{
 		Tx: tx,
 		Metadata: &gnoland.GnoTxMetadata{
-			Timestamp: event.CreatedAt.Unix(),
+			Timestamp: ticket.CreatedAt.Unix(),
 		},
 	}, nil
 }
@@ -557,7 +557,7 @@ func createCheckinTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zen
 	return gnoland.TxWithMetadata{
 		Tx: tx,
 		Metadata: &gnoland.GnoTxMetadata{
-			Timestamp: ticket.CreatedAt.Unix(),
+			Timestamp: ticket.Checkin.At.Unix(),
 		},
 	}, nil
 }
