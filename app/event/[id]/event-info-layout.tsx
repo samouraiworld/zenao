@@ -85,15 +85,15 @@ export function EventInfoLayout({
   const iconSize = 22;
 
   return (
-    <div className="flex flex-col w-full sm:h-full gap-10">
+    <div className="flex flex-col w-full sm:h-full gap-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
-        {/* Left Section */}
-        <div className="flex flex-col gap-4 w-full sm:w-2/5">
-          <AspectRatio ratio={1 / 1}>
+        <div className="flex flex-col w-full sm:w-3/6">
+          <AspectRatio ratio={16 / 9}>
             <Web3Image
               src={data.imageUri}
               sizes="(max-width: 768px) 100vw,
@@ -103,13 +103,12 @@ export function EventInfoLayout({
               alt="Event"
               priority
               fetchPriority="high"
-              className="flex w-full rounded-xl self-center object-cover"
+              className="flex w-full rounded self-center object-cover"
             />
           </AspectRatio>
         </div>
-
         {/* Right Section */}
-        <div className="flex flex-col gap-4 w-full sm:w-3/5">
+        <div className="flex flex-col gap-4 w-full sm:w-3/6">
           <Heading level={1} size="4xl" className="mb-7">
             {data.title}
           </Heading>
@@ -141,7 +140,6 @@ export function EventInfoLayout({
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
           />
-
           <EventManagementMenu
             eventId={eventId}
             roles={roles}
@@ -150,16 +148,16 @@ export function EventInfoLayout({
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-10">
+      <div className="grid grid-cols-6 gap-10">
         {/* Host section */}
-        <div className="col-span-5 sm:col-span-2">
+        <div className="col-span-6 sm:col-span-3">
           <EventSection title={t("hosted-by")}>
             <UserAvatarWithName linkToProfile address={data.organizers[0]} />
           </EventSection>
         </div>
 
         {/* Participants preview and dialog section */}
-        <div className="col-span-5 sm:col-span-3">
+        <div className="col-span-6 sm:col-span-3">
           <EventSection
             title={
               data.participants === 0

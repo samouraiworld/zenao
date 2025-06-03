@@ -5,7 +5,7 @@ import { imageHeight, imageWidth } from "../constants";
 import { EventTicketScanner } from "./event-ticket-scanner";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { ScreenContainer } from "@/components/layout/screen-container";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
 

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import BlogPostCard from "./blog-post-card";
 import BlogHeader from "./blog-header";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { ScreenContainer } from "@/components/layout/screen-container";
 import { getPostsMetadata } from "@/lib/blog";
 
 export const metadata: Metadata = {
