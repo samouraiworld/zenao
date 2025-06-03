@@ -1,13 +1,15 @@
 package events
 
 import (
+	"crypto/ed25519"
+	"encoding/base64"
 	"errors"
 	"std"
 	"strconv"
 	"strings"
 	"time"
 
-	"gno.land/p/demo/json"
+	"gno.land/p/demo/avl"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	"gno.land/p/zenao/basedao"
@@ -19,36 +21,57 @@ import (
 
 const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 
-// Event can be exposed
+// XXX: consider including a nonce unique to event in signed messages (checkin and participate)
+
+// Event cannot be exposed
 type Event struct {
-	id               string
-	creator          string
-	startDate        int64
-	endDate          int64
-	capacity         uint32
-	location         *zenaov1.EventLocation
-	getProfileString basedao.ProfileStringGetter
-	setProfileString basedao.ProfileStringSetter
-	DAOPrivate       *basedao.DAOPrivate
-	DAO              daokit.DAO
-	pkgPath          string
+	organizers          []string
+	startDate           int64
+	endDate             int64
+	capacity            uint32
+	tickets             avl.Tree // ticketHash -> *Ticket
+	location            *zenaov1.EventLocation
+	getProfileString    basedao.ProfileStringGetter
+	setProfileString    basedao.ProfileStringSetter
+	DAOPrivate          *basedao.DAOPrivate
+	DAO                 daokit.DAO
+	participationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
 }
 
 type Config struct {
-	Creator          string
-	Title            string
-	Description      string
-	ImageURI         string
-	StartDate        int64 // unix seconds
-	EndDate          int64 // unix seconds
-	Capacity         uint32
-	GetProfileString basedao.ProfileStringGetter
-	SetProfileString basedao.ProfileStringSetter
-	ZenaoAdminAddr   string
-	Location         *zenaov1.EventLocation
+	Organizers          []string
+	Title               string
+	Description         string
+	ImageURI            string
+	StartDate           int64 // unix seconds
+	EndDate             int64 // unix seconds
+	Capacity            uint32
+	GetProfileString    basedao.ProfileStringGetter
+	SetProfileString    basedao.ProfileStringSetter
+	ZenaoAdminAddr      string
+	Location            *zenaov1.EventLocation
+	ParticipationPubkey string // ed25519 pubkey of secret key derived from event password, event is private if set
+}
+
+type Ticket struct {
+	Participant string
+	UsedAt      *time.Time
+}
+
+func (t *Ticket) Used() bool {
+	return t.UsedAt != nil
 }
 
 func NewEvent(conf *Config) *Event {
+	var participationPubkey []byte
+	if conf.ParticipationPubkey != "" {
+		participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(conf.ParticipationPubkey)
+		if err != nil {
+			panic(err)
+		}
+		participationPubkey = participationPubkeyBz
+	}
+
 	roles := []role_manager.RoleInfo{
 		{
 			Name:        "zenao-admin",
@@ -67,20 +90,20 @@ func NewEvent(conf *Config) *Event {
 			Description: "Person attending the event",
 		},
 	}
-	members := []basedao.Member{
-		{
-			Address: conf.Creator,
+	var members []basedao.Member
+	for _, organizer := range conf.Organizers {
+		members = append(members, basedao.Member{
+			Address: organizer,
 			Roles:   []string{"organizer"},
-		},
-		{
-			Address: conf.ZenaoAdminAddr,
-			Roles:   []string{"zenao-admin"},
-		},
+		})
 	}
+	members = append(members, basedao.Member{
+		Address: conf.ZenaoAdminAddr,
+		Roles:   []string{"zenao-admin"},
+	})
 
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
-	organizerCond := daocond.RoleCount(1, "organizer", memberStore.HasRole)
 
 	pubdao, privdao := basedao.New(&basedao.Config{
 		Name:             conf.Title,
@@ -93,26 +116,44 @@ func NewEvent(conf *Config) *Event {
 	})
 
 	event := &Event{
-		creator:          conf.Creator,
-		startDate:        conf.StartDate,
-		endDate:          conf.EndDate,
-		capacity:         conf.Capacity,
-		getProfileString: conf.GetProfileString,
-		setProfileString: conf.SetProfileString,
-		DAOPrivate:       privdao,
-		DAO:              pubdao,
-		location:         conf.Location,
+		organizers:          conf.Organizers,
+		startDate:           conf.StartDate,
+		endDate:             conf.EndDate,
+		capacity:            conf.Capacity,
+		getProfileString:    conf.GetProfileString,
+		setProfileString:    conf.SetProfileString,
+		DAOPrivate:          privdao,
+		DAO:                 pubdao,
+		location:            conf.Location,
+		participationPubkey: participationPubkey,
 		// XXX: set PkgPath?
 	}
 
-	for _, res := range []daokit.MessageHandler{
-		event.addParticipantHandler(),
-		event.removeParticipantHandler(),
-		event.addGatekeeperHandler(),
-		event.removeGatekeeperHandler(),
-		event.editEventHandler(),
-	} {
-		event.DAOPrivate.Core.Resources.Set(&daokit.Resource{Handler: res, Condition: organizerCond})
+	oneOrganizer := daocond.RoleCount(1, "organizer", memberStore.HasRole)
+	oneGatekeeper := daocond.RoleCount(1, "gatekeeper", memberStore.HasRole)
+
+	resources := []struct {
+		cond     daocond.Condition
+		handlers []daokit.MessageHandler
+	}{{
+		cond: oneOrganizer,
+		handlers: []daokit.MessageHandler{
+			event.addParticipantHandler(), // XXX: remove
+			event.removeParticipantHandler(),
+			event.addGatekeeperHandler(),
+			event.removeGatekeeperHandler(),
+			event.editEventHandler(),
+		},
+	}, {
+		cond: daocond.Or(oneOrganizer, oneGatekeeper),
+		handlers: []daokit.MessageHandler{
+			event.checkinHandler(),
+		},
+	}}
+	for _, res := range resources {
+		for _, handler := range res.handlers {
+			event.DAOPrivate.Core.Resources.Set(&daokit.Resource{Handler: handler, Condition: res.cond})
+		}
 	}
 
 	return event
@@ -120,22 +161,75 @@ func NewEvent(conf *Config) *Event {
 
 const MsgAddParticipantKind = "gno.land/p/zenao/events.AddParticipant"
 
+// NOTE: We are adding the participant and ticket at the same time, the ticket is linked to the participant and
+// thus will leak the participant arrival time when validated at the event entrance.
+// As a "low tech" measure, we could add the tickets at a later time in batches to scramble a bit the links between tickets and participants.
+// Or better: use a ZK scheme so that the gatekeeper only reveals a proof representing a valid
+// ticket that can't be linked to a particular ticket. We should ensure that there is only one valid proof for each ticket
+
+type MsgAddParticipant struct {
+	Participant            string
+	TicketPubkey           string // ed25519 public key derived from the private key in the ticket secret
+	ParticipationSignature string // ed25519 signature of ticket's pubkey with secret key derived from event password
+}
+
+func (msg *MsgAddParticipant) String() string {
+	name := msg.Participant
+	if name == "" {
+		name = "anon"
+	}
+	return ufmt.Sprintf("Add %s as participant")
+}
+
+// XXX: move to Participate(), allow anyone to use this
 func (e *Event) addParticipantHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgAddParticipantKind, func(i interface{}) {
-		participant, ok := i.(string)
+		msg, ok := i.(*MsgAddParticipant)
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-		if e.DAOPrivate.Members.CountMemberRoles(participant) > 0 {
-			e.DAOPrivate.Members.AddRoleToMember(participant, "participant")
+
+		if e.tickets.Has(msg.TicketPubkey) {
+			panic(errors.New("ticket already added"))
+		}
+
+		callerIsOrganizer := e.DAOPrivate.Members.HasRole(std.PreviousRealm().Address().String(), "organizer")
+
+		// XXX: this dance is not very useful for now since all accounts are managed
+		// but we add this logic as PoC of on-chain password-guarded events
+		if !callerIsOrganizer && len(e.participationPubkey) != 0 {
+			signatureBz, err := base64.RawURLEncoding.DecodeString(msg.ParticipationSignature)
+			if err != nil {
+				panic(err)
+			}
+
+			payloadBz := []byte(msg.TicketPubkey)
+
+			if !ed25519.Verify(e.participationPubkey, payloadBz, signatureBz) {
+				panic("invalid participation signature")
+			}
+		}
+
+		_ = e.tickets.Set(msg.TicketPubkey, &Ticket{
+			Participant: msg.Participant,
+			UsedAt:      nil,
+		})
+
+		if msg.Participant == "" {
+			// anonymous ticket, don't add member or role to the org
+			return
+		}
+
+		if e.DAOPrivate.Members.CountMemberRoles(msg.Participant) > 0 {
+			e.DAOPrivate.Members.AddRoleToMember(msg.Participant, "participant")
 		} else {
-			e.DAOPrivate.Members.AddMember(participant, []string{"participant"})
+			e.DAOPrivate.Members.AddMember(msg.Participant, []string{"participant"})
 		}
 	})
 }
 
-func NewAddParticipantMsg(participant string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddParticipantKind, participant)
+func NewAddParticipantMsg(participant string, ticketPubkey string, signature string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey, ParticipationSignature: signature})
 }
 
 const MsgRemoveParticipantKind = "gno.land/p/zenao/events.RemoveParticipant"
@@ -198,6 +292,58 @@ func NewRemoveGatekeeperMsg(gatekeeper string) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgRemoveGatekeeperKind, gatekeeper)
 }
 
+const MsgCheckinKind = "gno.land/p/zenao/events.Checkin"
+
+type MsgCheckin struct {
+	TicketPubkey     string
+	CheckinSignature string // ed25519 signature by ticket secret of gatekeeper's bech32 address
+	// XXX: add timestamp in payload to limit signature replay?
+}
+
+func (e *Event) checkinHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgCheckinKind, func(i interface{}) {
+		msg, ok := i.(*MsgCheckin)
+		if !ok {
+			panic("invalid payload type")
+		}
+
+		pubkeyBz, err := base64.RawURLEncoding.DecodeString(msg.TicketPubkey)
+		if err != nil {
+			panic(err)
+		}
+
+		payloadBz := []byte(std.PreviousRealm().Address().String())
+
+		signatureBz, err := base64.RawURLEncoding.DecodeString(msg.CheckinSignature)
+		if err != nil {
+			panic(err)
+		}
+
+		if !ed25519.Verify(pubkeyBz, payloadBz, signatureBz) {
+			panic("invalid signature")
+		}
+
+		val, ok := e.tickets.Get(msg.TicketPubkey)
+		if !ok {
+			panic("no such ticket")
+		}
+		ticket := val.(*Ticket)
+		if ticket.Used() {
+			panic(ufmt.Sprintf("ticket already used at %s", ticket.UsedAt.Format(time.RFC3339)))
+		}
+
+		now := time.Now()
+		ticket.UsedAt = &now
+	})
+}
+
+func NewCheckinMsg(ticketPubkey string, checkinSignature string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgCheckinKind, &MsgCheckin{
+		TicketPubkey:     ticketPubkey,
+		CheckinSignature: checkinSignature,
+	})
+}
+
 func (e *Event) CountParticipants() uint32 {
 	return uint32(len(e.DAOPrivate.Members.GetMembersWithRole("participant")))
 }
@@ -209,6 +355,24 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 		msg, ok := i.(*msgEditEvent)
 		if !ok {
 			panic(errors.New("invalid payload type"))
+		}
+		if len(msg.organizers) != 0 {
+			e.organizers = msg.organizers
+			currentOrgs := e.DAOPrivate.Members.GetMembersWithRole("organizer")
+			for _, org := range currentOrgs {
+				if !sliceContains(msg.organizers, org) {
+					e.DAOPrivate.Members.RemoveRoleFromMember(org, "organizer")
+				}
+			}
+			for _, org := range msg.organizers {
+				if !sliceContains(currentOrgs, org) {
+					if e.DAOPrivate.Members.IsMember(org) {
+						e.DAOPrivate.Members.AddRoleToMember(org, "organizer")
+					} else {
+						e.DAOPrivate.Members.AddMember(org, []string{"organizer"})
+					}
+				}
+			}
 		}
 		if msg.title != "" {
 			e.setProfileString("DisplayName", msg.title)
@@ -231,10 +395,25 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 		if msg.location != nil {
 			e.location = msg.location
 		}
+		if msg.privacy != nil {
+			switch val := msg.privacy.EventPrivacy.(type) {
+			case *zenaov1.EventPrivacyPublic:
+				e.participationPubkey = nil
+			case *zenaov1.EventPrivacyGuarded:
+				participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
+				if err != nil {
+					panic(err)
+				}
+				e.participationPubkey = participationPubkeyBz
+			default:
+				panic("unknown privacy model")
+			}
+		}
 	})
 }
 
 type msgEditEvent struct {
+	organizers  []string
 	title       string
 	description string
 	imageURI    string
@@ -242,6 +421,7 @@ type msgEditEvent struct {
 	endDate     int64
 	capacity    uint32
 	location    *zenaov1.EventLocation
+	privacy     *zenaov1.EventPrivacy
 }
 
 func (msg *msgEditEvent) String() string {
@@ -274,14 +454,9 @@ func (msg *msgEditEvent) String() string {
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(title, description, imageURI string, startDate, endDate int64, capacity uint32, locationJSON string) daokit.ExecutableMessage {
-	loc := &zenaov1.EventLocation{}
-	j, err := json.UnmarshalSafe([]byte(locationJSON))
-	if err != nil {
-		panic(err)
-	}
-	loc.FromJSON(j)
+func NewEditEventMsg(organizers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
+		organizers:  organizers,
 		title:       title,
 		description: description,
 		imageURI:    imageURI,
@@ -289,6 +464,7 @@ func NewEditEventMsg(title, description, imageURI string, startDate, endDate int
 		endDate:     endDate,
 		capacity:    capacity,
 		location:    loc,
+		privacy:     privacy,
 	})
 }
 
@@ -302,9 +478,14 @@ func (e *Event) Render(path string) string {
 			locStr = "Error: " + err.Error()
 		}
 
-		orga := e.getProfileString(std.Address(info.Creator), "DisplayName", "")
-		if orga == "" {
-			orga = info.Creator
+		var orgaRenderList []string
+		for _, org := range e.organizers {
+			orga := e.getProfileString(std.Address(org), "DisplayName", "")
+			if orga == "" {
+				orga = org
+			}
+			tmp := md.Link(orga, "/r/zenao/cockpit:u/"+org)
+			orgaRenderList = append(orgaRenderList, tmp)
 		}
 
 		s += md.H1(info.Title)
@@ -314,8 +495,9 @@ func (e *Event) Render(path string) string {
 			ufmt.Sprintf("📍 Location: %s", locStr),
 			ufmt.Sprintf("🕓 Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
 			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.capacity),
-			ufmt.Sprintf("👤 Organizer: %s", md.Link(orga, "/r/zenao/cockpit:u/"+info.Creator)),
+			"👤 Organizers: ",
 		}) + "\n"
+		s += md.Nested(md.BulletList(orgaRenderList), "\t")
 		s += md.HorizontalRule()
 		path = "noprofile"
 	}
@@ -357,4 +539,13 @@ func LocationString(location *zenaov1.EventLocation) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+func sliceContains(slice []string, elem string) bool {
+	for _, e := range slice {
+		if e == elem {
+			return true
+		}
+	}
+	return false
 }

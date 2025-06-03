@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { getPostContent, getPostsMetadata } from "@/lib/blog";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
-import { MarkdownPreview } from "@/components/common/MarkdownPreview";
+import { ScreenContainer } from "@/components/layout/screen-container";
+import { MarkdownPreview } from "@/components/common/markdown-preview";
 import Text from "@/components/texts/text";
 
 type Props = {

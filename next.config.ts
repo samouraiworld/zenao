@@ -22,6 +22,35 @@ const nextConfig: NextConfig = {
         source: "/discover",
         destination: "/discover/upcoming",
       },
+      {
+        source: "/tickets",
+        destination: "/tickets/upcoming",
+      },
+      {
+        source: "/event/:id",
+        destination: "/event/:id/description",
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+        ],
+      },
     ];
   },
 };

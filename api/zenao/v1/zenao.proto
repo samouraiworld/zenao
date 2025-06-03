@@ -13,11 +13,18 @@ service ZenaoService {
   // EVENT
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
+  rpc ValidatePassword(ValidatePasswordRequest)
+      returns (ValidatePasswordResponse);
+  rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+  rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
+  rpc Checkin(CheckinRequest) returns (CheckinResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
 }
 
 message EditUserRequest {
@@ -41,6 +48,8 @@ message CreateEventRequest {
   double ticket_price = 6; // XXX: use fixed point?
   uint32 capacity = 7;
   EventLocation location = 9;
+  string password = 10;
+  repeated string organizers = 11;
 }
 
 message CreateEventResponse { string id = 1; }
@@ -54,17 +63,36 @@ message EditEventRequest {
   uint64 end_date = 6;     // unix seconds
   double ticket_price = 7; // XXX: use fixed point?
   uint32 capacity = 8;
-  EventLocation location = 10;
+  EventLocation location = 9;
+  string password = 10;
+  bool update_password = 11;
+  repeated string organizers = 12;
 }
 
 message EditEventResponse { string id = 1; }
 
+message ValidatePasswordRequest {
+  string event_id = 1;
+  string password = 2;
+}
+
+message ValidatePasswordResponse { bool valid = 1; }
+
 message ParticipateRequest {
   string event_id = 1;
   string email = 2;
+  repeated string guests = 3;
+  string password = 4;
 }
 
 message ParticipateResponse { string ticket_secret = 1; }
+
+message BroadcastEventRequest {
+  string event_id = 1;
+  string message = 2;
+}
+
+message BroadcastEventResponse {}
 
 message EventLocation {
   string venue_name = 1;
@@ -90,17 +118,29 @@ message AddressCustom {
   string timezone = 2; // IANA name
 }
 
+message EventPrivacy {
+  oneof event_privacy {
+    EventPrivacyPublic public = 1;
+    EventPrivacyGuarded guarded = 2;
+  }
+}
+
+message EventPrivacyPublic {}
+
+message EventPrivacyGuarded { string participation_pubkey = 1; }
+
 message EventInfo {
   string title = 1;
   string description = 2;
   string image_uri = 3;
-  string creator = 4;
+  repeated string organizers = 4;
   int64 start_date = 5; // unix seconds
   int64 end_date = 6;   // unix seconds
   uint32 capacity = 7;
   EventLocation location = 8;
   uint32 participants = 9;
   string pkg_path = 10;
+  EventPrivacy privacy = 11;
 }
 
 message BatchProfileField {
@@ -121,7 +161,7 @@ message CreatePollRequest {
   polls.v1.PollKind kind = 5;
 }
 
-message CreatePollResponse {}
+message CreatePollResponse { string post_id = 1; }
 
 message VotePollRequest {
   string poll_id = 1;
@@ -129,3 +169,35 @@ message VotePollRequest {
 }
 
 message VotePollResponse {}
+
+message CreatePostRequest {
+  string event_id = 1;
+  string content = 2;
+  string parent_id = 3;
+  repeated string tags = 4;
+}
+
+message CreatePostResponse { string post_id = 1; }
+
+message ReactPostRequest {
+  string post_id = 1;
+  string icon = 2;
+}
+
+message ReactPostResponse {}
+
+message GetEventTicketsRequest { string event_id = 1; }
+
+message GetEventTicketsResponse { repeated TicketInfo tickets_info = 1; }
+
+message TicketInfo {
+  string ticket_secret = 1;
+  string user_email = 2;
+}
+
+message CheckinRequest {
+  string ticket_pubkey = 1;
+  string signature = 2;
+}
+
+message CheckinResponse {}

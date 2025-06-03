@@ -180,6 +180,9 @@ func (a *AudioPost) FromJSON(node *json.Node) {
 func (v *VideoPost) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if v.Title != "" {
+		fields["title"] = json.StringNode("", v.Title)
+	}
 	if v.Description != "" {
 		fields["description"] = json.StringNode("", v.Description)
 	}
@@ -197,6 +200,9 @@ func (v *VideoPost) FromJSON(node *json.Node) {
 	*v = VideoPost{}
 	fields := node.MustObject()
 
+	if val, ok := fields["title"]; ok {
+		v.Title = val.MustString()
+	}
 	if val, ok := fields["description"]; ok {
 		v.Description = val.MustString()
 	}
@@ -277,6 +283,9 @@ func (t *Tip) FromJSON(node *json.Node) {
 func (p *Post) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if p.LocalPostId != 0 {
+		fields["localPostId"] = json.StringNode("", strconv.FormatUint(p.LocalPostId, 10))
+	}
 	if p.Author != "" {
 		fields["author"] = json.StringNode("", p.Author)
 	}
@@ -327,6 +336,13 @@ func (p *Post) FromJSON(node *json.Node) {
 	*p = Post{}
 	fields := node.MustObject()
 
+	if val, ok := fields["localPostId"]; ok {
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		p.LocalPostId = fv
+	}
 	if val, ok := fields["author"]; ok {
 		p.Author = val.MustString()
 	}
@@ -414,6 +430,9 @@ func (p *PostView) ToJSON() *json.Node {
 	if p.Post != nil {
 		fields["post"] = p.Post.ToJSON()
 	}
+	if p.ChildrenCount != 0 {
+		fields["childrenCount"] = json.StringNode("", strconv.FormatUint(p.ChildrenCount, 10))
+	}
 	if len(p.Reactions) != 0 {
 		arr := make([]*json.Node, len(p.Reactions))
 		for i, val := range p.Reactions {
@@ -433,6 +452,13 @@ func (p *PostView) FromJSON(node *json.Node) {
 		fv := &Post{}
 		fv.FromJSON(val)
 		p.Post = fv
+	}
+	if val, ok := fields["childrenCount"]; ok {
+		fv, err := strconv.ParseUint(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		p.ChildrenCount = fv
 	}
 	if val, ok := fields["reactions"]; ok {
 		jarr := val.MustArray()

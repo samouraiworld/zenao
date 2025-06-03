@@ -32,6 +32,8 @@ type CreateEventRequest struct {
 	TicketPrice float64
 	Capacity    uint32
 	Location    *EventLocation
+	Password    string
+	Organizers  []string
 }
 
 type CreateEventResponse struct {
@@ -39,28 +41,50 @@ type CreateEventResponse struct {
 }
 
 type EditEventRequest struct {
-	EventId     string
-	Title       string
-	Description string
-	ImageUri    string
-	StartDate   uint64
-	EndDate     uint64
-	TicketPrice float64
-	Capacity    uint32
-	Location    *EventLocation
+	EventId        string
+	Title          string
+	Description    string
+	ImageUri       string
+	StartDate      uint64
+	EndDate        uint64
+	TicketPrice    float64
+	Capacity       uint32
+	Location       *EventLocation
+	Password       string
+	UpdatePassword bool
+	Organizers     []string
 }
 
 type EditEventResponse struct {
 	Id string
 }
 
+type ValidatePasswordRequest struct {
+	EventId  string
+	Password string
+}
+
+type ValidatePasswordResponse struct {
+	Valid bool
+}
+
 type ParticipateRequest struct {
-	EventId string
-	Email   string
+	EventId  string
+	Email    string
+	Guests   []string
+	Password string
 }
 
 type ParticipateResponse struct {
 	TicketSecret string
+}
+
+type BroadcastEventRequest struct {
+	EventId string
+	Message string
+}
+
+type BroadcastEventResponse struct {
 }
 
 type EventLocation struct {
@@ -85,17 +109,29 @@ type AddressCustom struct {
 	Timezone string
 }
 
+type EventPrivacy struct {
+	EventPrivacy interface{}
+}
+
+type EventPrivacyPublic struct {
+}
+
+type EventPrivacyGuarded struct {
+	ParticipationPubkey string
+}
+
 type EventInfo struct {
 	Title        string
 	Description  string
 	ImageUri     string
-	Creator      string
+	Organizers   []string
 	StartDate    int64
 	EndDate      int64
 	Capacity     uint32
 	Location     *EventLocation
 	Participants uint32
 	PkgPath      string
+	Privacy      *EventPrivacy
 }
 
 type BatchProfileField struct {
@@ -117,6 +153,7 @@ type CreatePollRequest struct {
 }
 
 type CreatePollResponse struct {
+	PostId string
 }
 
 type VotePollRequest struct {
@@ -125,4 +162,44 @@ type VotePollRequest struct {
 }
 
 type VotePollResponse struct {
+}
+
+type CreatePostRequest struct {
+	EventId  string
+	Content  string
+	ParentId string
+	Tags     []string
+}
+
+type CreatePostResponse struct {
+	PostId string
+}
+
+type ReactPostRequest struct {
+	PostId string
+	Icon   string
+}
+
+type ReactPostResponse struct {
+}
+
+type GetEventTicketsRequest struct {
+	EventId string
+}
+
+type GetEventTicketsResponse struct {
+	TicketsInfo []*TicketInfo
+}
+
+type TicketInfo struct {
+	TicketSecret string
+	UserEmail    string
+}
+
+type CheckinRequest struct {
+	TicketPubkey string
+	Signature    string
+}
+
+type CheckinResponse struct {
 }

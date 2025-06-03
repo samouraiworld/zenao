@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"slices"
 	"time"
 	_ "time/tzdata"
 
@@ -20,44 +21,69 @@ func (s *ZenaoServer) CreateEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.CreateEventRequest],
 ) (*connect.Response[zenaov1.CreateEventResponse], error) {
-	user := s.GetUser(ctx)
+	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
 	}
 
-	// retrieve auto-incremented user ID from database, do not use clerk's user ID directly for realms
-	userID, err := s.EnsureUserExists(ctx, user)
+	// retrieve auto-incremented user ID from database, do not use auth provider's user ID directly for realms
+	zUser, err := s.EnsureUserExists(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", string(userID)), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
 	}
 
-	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice); err != nil {
+	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
+	authOrgas, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Organizers)
+	if err != nil {
+		return nil, err
+	}
+
+	var organizersIDs []string
+	organizersIDs = append(organizersIDs, zUser.ID)
+	for _, authOrg := range authOrgas {
+		zOrg, err := s.EnsureUserExists(ctx, authOrg)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Contains(organizersIDs, zOrg.ID) {
+			return nil, fmt.Errorf("duplicate organizer: %s", zOrg.ID)
+		}
+		organizersIDs = append(organizersIDs, zOrg.ID)
+	}
+
 	evt := (*zeni.Event)(nil)
-
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		var err error
-		if evt, err = db.CreateEvent(userID, req.Msg); err != nil {
+		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, req.Msg); err != nil {
 			return err
 		}
 
-		if err := s.Chain.CreateEvent(evt.ID, userID, req.Msg); err != nil {
-			s.Logger.Error("create-event", zap.Error(err))
+		if _, err = db.CreateFeed(evt.ID, "main"); err != nil {
 			return err
 		}
-
 		return nil
 	}); err != nil {
 		return nil, err
 	}
+
+	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.CreateEvent(evt.ID, organizersIDs, req.Msg, privacy); err != nil {
+		s.Logger.Error("create-event", zap.Error(err))
+		return nil, err
+	}
+
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
 
 	if s.MailClient != nil {
@@ -83,7 +109,7 @@ func (s *ZenaoServer) CreateEvent(
 	}), nil
 }
 
-func validateEvent(startDate, endDate uint64, title, description string, location *zenaov1.EventLocation, imageURI string, capacity uint32, ticketPrice float64) error {
+func validateEvent(startDate, endDate uint64, title, description string, location *zenaov1.EventLocation, imageURI string, capacity uint32, ticketPrice float64, password string) error {
 	if startDate >= endDate {
 		return errors.New("end date must be after start date")
 	}
@@ -160,6 +186,11 @@ func validateEvent(startDate, endDate uint64, title, description string, locatio
 
 	default:
 		return errors.New("unknown location kind")
+	}
+
+	// allowing any password length is a DoS vector
+	if len(password) > zeni.MaxPasswordLen {
+		return errors.New("password too long")
 	}
 
 	return nil

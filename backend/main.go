@@ -2,20 +2,14 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"flag"
 	"net/http"
 	"os"
 	"slices"
 	"strings"
 
-	"connectrpc.com/authn"
 	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
-	"github.com/clerk/clerk-sdk-go/v2"
-	"github.com/clerk/clerk-sdk-go/v2/jwt"
-	"github.com/clerk/clerk-sdk-go/v2/user"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/resend/resend-go/v2"
 	"github.com/rs/cors"
@@ -23,9 +17,9 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
+	"github.com/samouraiworld/zenao/backend/czauth"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
-	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
 func main() {
@@ -43,8 +37,12 @@ func main() {
 		newFakegenCmd(),
 		newMailCmd(),
 		newSyncChainCmd(),
+		newPromoteUserCmd(),
 		newRealmsrcCmd(),
 		newE2EInfraCmd(),
+		newGenticketCmd(),
+		newGenPdfTicketCmd(),
+		newGenTxsCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
@@ -121,6 +119,11 @@ func execStart() error {
 
 	injectStartEnv()
 
+	auth, err := czauth.SetupAuth(conf.clerkSecretKey)
+	if err != nil {
+		return err
+	}
+
 	chain, err := setupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, logger)
 	if err != nil {
 		return err
@@ -140,13 +143,13 @@ func execStart() error {
 
 	mailClient := (*resend.Client)(nil)
 	if conf.resendSecretKey != "" {
+		logger.Info("resend mail client initialized")
 		mailClient = resend.NewClient(conf.resendSecretKey)
 	}
 
 	zenao := &ZenaoServer{
 		Logger:       logger,
-		GetUser:      getUserFromClerk,
-		CreateUser:   createClerkUser,
+		Auth:         auth,
 		Chain:        chain,
 		DB:           db,
 		MailClient:   mailClient,
@@ -160,7 +163,7 @@ func execStart() error {
 	)
 	mux.Handle(path, middlewares(handler,
 		withConnectCORS(allowedOrigins...),
-		withClerkAuth(conf.clerkSecretKey),
+		auth.WithAuth(),
 	))
 
 	logger.Info("Starting server", zap.String("addr", conf.bindAddr))
@@ -170,45 +173,6 @@ func execStart() error {
 		// Use h2c so we can serve HTTP/2 without TLS.
 		h2c.NewHandler(mux, &http2.Server{}),
 	)
-}
-
-func getUserFromClerk(ctx context.Context) *zeni.AuthUser {
-	iUser := authn.GetInfo(ctx)
-	if iUser == nil {
-		return nil
-	}
-	clerkUser := iUser.(*clerk.User)
-	email := ""
-	if len(clerkUser.EmailAddresses) != 0 {
-		email = clerkUser.EmailAddresses[0].EmailAddress
-	}
-	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
-}
-
-func createClerkUser(ctx context.Context, email string) (*zeni.AuthUser, error) {
-	existing, err := user.List(ctx, &user.ListParams{EmailAddressQuery: &email})
-	if err != nil {
-		return nil, err
-	}
-	if len(existing.Users) != 0 {
-		clerkUser := existing.Users[0]
-		return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
-	}
-
-	passwordBz := make([]byte, 32)
-	if _, err := rand.Read(passwordBz); err != nil {
-		return nil, err
-	}
-	password := base64.RawURLEncoding.EncodeToString(passwordBz)
-
-	clerkUser, err := user.Create(ctx, &user.CreateParams{
-		EmailAddresses: &[]string{email},
-		Password:       &password,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}, nil
 }
 
 func middlewares(base http.Handler, ms ...func(http.Handler) http.Handler) http.Handler {
@@ -231,31 +195,6 @@ func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
 		})
 		return middleware.Handler(next)
 	}
-}
-
-func withClerkAuth(secretKey string) func(http.Handler) http.Handler {
-	clerk.SetKey(secretKey)
-	return authn.NewMiddleware(func(_ context.Context, req *http.Request) (any, error) {
-		authHeader := req.Header.Get("Authorization")
-		if authHeader == "" {
-			return nil, nil
-		}
-
-		sessionToken := strings.TrimPrefix(authHeader, "Bearer ")
-
-		claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
-			Token: sessionToken,
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		usr, err := user.Get(req.Context(), claims.Subject)
-		if err != nil {
-			return nil, err
-		}
-		return usr, nil
-	}).Wrap
 }
 
 func NewLoggingInterceptor(logger *zap.Logger) connect.UnaryInterceptorFunc {

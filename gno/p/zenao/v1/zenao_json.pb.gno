@@ -116,6 +116,16 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	if c.Location != nil {
 		fields["location"] = c.Location.ToJSON()
 	}
+	if c.Password != "" {
+		fields["password"] = json.StringNode("", c.Password)
+	}
+	if len(c.Organizers) != 0 {
+		arr := make([]*json.Node, len(c.Organizers))
+		for i, val := range c.Organizers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["organizers"] = json.ArrayNode("", arr)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -157,6 +167,17 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 		fv := &EventLocation{}
 		fv.FromJSON(val)
 		c.Location = fv
+	}
+	if val, ok := fields["password"]; ok {
+		c.Password = val.MustString()
+	}
+	if val, ok := fields["organizers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Organizers = arr
 	}
 }
 
@@ -209,6 +230,19 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Location != nil {
 		fields["location"] = e.Location.ToJSON()
 	}
+	if e.Password != "" {
+		fields["password"] = json.StringNode("", e.Password)
+	}
+	if e.UpdatePassword != false {
+		fields["updatePassword"] = json.BoolNode("", e.UpdatePassword)
+	}
+	if len(e.Organizers) != 0 {
+		arr := make([]*json.Node, len(e.Organizers))
+		for i, val := range e.Organizers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["organizers"] = json.ArrayNode("", arr)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -254,6 +288,20 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 		fv.FromJSON(val)
 		e.Location = fv
 	}
+	if val, ok := fields["password"]; ok {
+		e.Password = val.MustString()
+	}
+	if val, ok := fields["updatePassword"]; ok {
+		e.UpdatePassword = val.MustBool()
+	}
+	if val, ok := fields["organizers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Organizers = arr
+	}
 }
 
 func (e *EditEventResponse) ToJSON() *json.Node {
@@ -275,6 +323,50 @@ func (e *EditEventResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (v *ValidatePasswordRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if v.EventId != "" {
+		fields["eventId"] = json.StringNode("", v.EventId)
+	}
+	if v.Password != "" {
+		fields["password"] = json.StringNode("", v.Password)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (v *ValidatePasswordRequest) FromJSON(node *json.Node) {
+	*v = ValidatePasswordRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		v.EventId = val.MustString()
+	}
+	if val, ok := fields["password"]; ok {
+		v.Password = val.MustString()
+	}
+}
+
+func (v *ValidatePasswordResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if v.Valid != false {
+		fields["valid"] = json.BoolNode("", v.Valid)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (v *ValidatePasswordResponse) FromJSON(node *json.Node) {
+	*v = ValidatePasswordResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["valid"]; ok {
+		v.Valid = val.MustBool()
+	}
+}
+
 func (p *ParticipateRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -283,6 +375,16 @@ func (p *ParticipateRequest) ToJSON() *json.Node {
 	}
 	if p.Email != "" {
 		fields["email"] = json.StringNode("", p.Email)
+	}
+	if len(p.Guests) != 0 {
+		arr := make([]*json.Node, len(p.Guests))
+		for i, val := range p.Guests {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["guests"] = json.ArrayNode("", arr)
+	}
+	if p.Password != "" {
+		fields["password"] = json.StringNode("", p.Password)
 	}
 
 	return json.ObjectNode("", fields)
@@ -297,6 +399,17 @@ func (p *ParticipateRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["email"]; ok {
 		p.Email = val.MustString()
+	}
+	if val, ok := fields["guests"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		p.Guests = arr
+	}
+	if val, ok := fields["password"]; ok {
+		p.Password = val.MustString()
 	}
 }
 
@@ -317,6 +430,41 @@ func (p *ParticipateResponse) FromJSON(node *json.Node) {
 	if val, ok := fields["ticketSecret"]; ok {
 		p.TicketSecret = val.MustString()
 	}
+}
+
+func (b *BroadcastEventRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if b.EventId != "" {
+		fields["eventId"] = json.StringNode("", b.EventId)
+	}
+	if b.Message != "" {
+		fields["message"] = json.StringNode("", b.Message)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (b *BroadcastEventRequest) FromJSON(node *json.Node) {
+	*b = BroadcastEventRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		b.EventId = val.MustString()
+	}
+	if val, ok := fields["message"]; ok {
+		b.Message = val.MustString()
+	}
+}
+
+func (b *BroadcastEventResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (b *BroadcastEventResponse) FromJSON(node *json.Node) {
+	*b = BroadcastEventResponse{}
 }
 
 func (e *EventLocation) ToJSON() *json.Node {
@@ -463,6 +611,78 @@ func (a *AddressCustom) FromJSON(node *json.Node) {
 	}
 }
 
+func (e *EventPrivacy) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	switch val := e.EventPrivacy.(type) {
+	case *EventPrivacyPublic:
+		fields["public"] = val.ToJSON()
+	case *EventPrivacyGuarded:
+		fields["guarded"] = val.ToJSON()
+	default:
+		panic(errors.New("unknown eventPrivacy variant"))
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EventPrivacy) FromJSON(node *json.Node) {
+	*e = EventPrivacy{}
+	fields := node.MustObject()
+
+	variantFieldNames := []string{"public", "guarded"}
+	var selectedVariant *json.Node
+	var selectedVariantName string
+	for _, variantName := range variantFieldNames {
+		if variant, ok := fields[variantName]; ok {
+			selectedVariantName = variantName
+			selectedVariant = variant
+		}
+		break
+	}
+	switch selectedVariantName {
+	case "public":
+		n := &EventPrivacyPublic{}
+		n.FromJSON(selectedVariant)
+		e.EventPrivacy = n
+	case "guarded":
+		n := &EventPrivacyGuarded{}
+		n.FromJSON(selectedVariant)
+		e.EventPrivacy = n
+	default:
+		panic(errors.New("eventPrivacy variant not found"))
+	}
+}
+
+func (e *EventPrivacyPublic) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EventPrivacyPublic) FromJSON(node *json.Node) {
+	*e = EventPrivacyPublic{}
+}
+
+func (e *EventPrivacyGuarded) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.ParticipationPubkey != "" {
+		fields["participationPubkey"] = json.StringNode("", e.ParticipationPubkey)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EventPrivacyGuarded) FromJSON(node *json.Node) {
+	*e = EventPrivacyGuarded{}
+	fields := node.MustObject()
+
+	if val, ok := fields["participationPubkey"]; ok {
+		e.ParticipationPubkey = val.MustString()
+	}
+}
+
 func (e *EventInfo) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -475,8 +695,12 @@ func (e *EventInfo) ToJSON() *json.Node {
 	if e.ImageUri != "" {
 		fields["imageUri"] = json.StringNode("", e.ImageUri)
 	}
-	if e.Creator != "" {
-		fields["creator"] = json.StringNode("", e.Creator)
+	if len(e.Organizers) != 0 {
+		arr := make([]*json.Node, len(e.Organizers))
+		for i, val := range e.Organizers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["organizers"] = json.ArrayNode("", arr)
 	}
 	if e.StartDate != 0 {
 		fields["startDate"] = json.StringNode("", strconv.FormatInt(e.StartDate, 10))
@@ -496,6 +720,9 @@ func (e *EventInfo) ToJSON() *json.Node {
 	if e.PkgPath != "" {
 		fields["pkgPath"] = json.StringNode("", e.PkgPath)
 	}
+	if e.Privacy != nil {
+		fields["privacy"] = e.Privacy.ToJSON()
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -513,8 +740,13 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 	if val, ok := fields["imageUri"]; ok {
 		e.ImageUri = val.MustString()
 	}
-	if val, ok := fields["creator"]; ok {
-		e.Creator = val.MustString()
+	if val, ok := fields["organizers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Organizers = arr
 	}
 	if val, ok := fields["startDate"]; ok {
 		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
@@ -543,6 +775,11 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["pkgPath"]; ok {
 		e.PkgPath = val.MustString()
+	}
+	if val, ok := fields["privacy"]; ok {
+		fv := &EventPrivacy{}
+		fv.FromJSON(val)
+		e.Privacy = fv
 	}
 }
 
@@ -675,11 +912,20 @@ func (c *CreatePollRequest) FromJSON(node *json.Node) {
 func (c *CreatePollResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
+	if c.PostId != "" {
+		fields["postId"] = json.StringNode("", c.PostId)
+	}
+
 	return json.ObjectNode("", fields)
 }
 
 func (c *CreatePollResponse) FromJSON(node *json.Node) {
 	*c = CreatePollResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		c.PostId = val.MustString()
+	}
 }
 
 func (v *VotePollRequest) ToJSON() *json.Node {
@@ -715,4 +961,213 @@ func (v *VotePollResponse) ToJSON() *json.Node {
 
 func (v *VotePollResponse) FromJSON(node *json.Node) {
 	*v = VotePollResponse{}
+}
+
+func (c *CreatePostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
+	if c.Content != "" {
+		fields["content"] = json.StringNode("", c.Content)
+	}
+	if c.ParentId != "" {
+		fields["parentId"] = json.StringNode("", c.ParentId)
+	}
+	if len(c.Tags) != 0 {
+		arr := make([]*json.Node, len(c.Tags))
+		for i, val := range c.Tags {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["tags"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePostRequest) FromJSON(node *json.Node) {
+	*c = CreatePostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
+	}
+	if val, ok := fields["content"]; ok {
+		c.Content = val.MustString()
+	}
+	if val, ok := fields["parentId"]; ok {
+		c.ParentId = val.MustString()
+	}
+	if val, ok := fields["tags"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Tags = arr
+	}
+}
+
+func (c *CreatePostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.PostId != "" {
+		fields["postId"] = json.StringNode("", c.PostId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreatePostResponse) FromJSON(node *json.Node) {
+	*c = CreatePostResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		c.PostId = val.MustString()
+	}
+}
+
+func (r *ReactPostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if r.PostId != "" {
+		fields["postId"] = json.StringNode("", r.PostId)
+	}
+	if r.Icon != "" {
+		fields["icon"] = json.StringNode("", r.Icon)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactPostRequest) FromJSON(node *json.Node) {
+	*r = ReactPostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		r.PostId = val.MustString()
+	}
+	if val, ok := fields["icon"]; ok {
+		r.Icon = val.MustString()
+	}
+}
+
+func (r *ReactPostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *ReactPostResponse) FromJSON(node *json.Node) {
+	*r = ReactPostResponse{}
+}
+
+func (g *GetEventTicketsRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.EventId != "" {
+		fields["eventId"] = json.StringNode("", g.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (g *GetEventTicketsRequest) FromJSON(node *json.Node) {
+	*g = GetEventTicketsRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		g.EventId = val.MustString()
+	}
+}
+
+func (g *GetEventTicketsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(g.TicketsInfo) != 0 {
+		arr := make([]*json.Node, len(g.TicketsInfo))
+		for i, val := range g.TicketsInfo {
+			arr[i] = val.ToJSON()
+		}
+		fields["ticketsInfo"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (g *GetEventTicketsResponse) FromJSON(node *json.Node) {
+	*g = GetEventTicketsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["ticketsInfo"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*TicketInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &TicketInfo{}
+			fv.FromJSON(val)
+			arr[i] = fv
+		}
+		g.TicketsInfo = arr
+	}
+}
+
+func (t *TicketInfo) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if t.TicketSecret != "" {
+		fields["ticketSecret"] = json.StringNode("", t.TicketSecret)
+	}
+	if t.UserEmail != "" {
+		fields["userEmail"] = json.StringNode("", t.UserEmail)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (t *TicketInfo) FromJSON(node *json.Node) {
+	*t = TicketInfo{}
+	fields := node.MustObject()
+
+	if val, ok := fields["ticketSecret"]; ok {
+		t.TicketSecret = val.MustString()
+	}
+	if val, ok := fields["userEmail"]; ok {
+		t.UserEmail = val.MustString()
+	}
+}
+
+func (c *CheckinRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.TicketPubkey != "" {
+		fields["ticketPubkey"] = json.StringNode("", c.TicketPubkey)
+	}
+	if c.Signature != "" {
+		fields["signature"] = json.StringNode("", c.Signature)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CheckinRequest) FromJSON(node *json.Node) {
+	*c = CheckinRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["ticketPubkey"]; ok {
+		c.TicketPubkey = val.MustString()
+	}
+	if val, ok := fields["signature"]; ok {
+		c.Signature = val.MustString()
+	}
+}
+
+func (c *CheckinResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CheckinResponse) FromJSON(node *json.Node) {
+	*c = CheckinResponse{}
 }

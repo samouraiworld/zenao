@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 import tailwindTypography from "@tailwindcss/typography";
+import tailwindDisplayModes from "tailwindcss-displaymodes";
 
 export default {
   darkMode: ["class"],
@@ -8,9 +9,21 @@ export default {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/@ferrucc-io/emoji-picker/dist/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
+      keyframes: {
+        "appear-from-bottom": {
+          from: { transform: "translateY(128px)" },
+          to: { transform: "translateY(0px)" },
+        },
+      },
+      animation: {
+        "gotop-appear": "appear-from-bottom 200ms ease-in-out forwards",
+        "gotop-disappear":
+          "appear-from-bottom 200ms ease-in-out reverse forwards",
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
@@ -54,9 +67,12 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        main: "var(--main)",
         // Custom
         "custom-input-bg": "rgba(var(--input-bg))",
         "custom-input-border": "var(--input-border)",
+        // Feed sticky input
+        "event-post-form-bg": "hsl(var(--background) / .8)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,5 +81,5 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate, tailwindTypography],
+  plugins: [tailwindcssAnimate, tailwindTypography, tailwindDisplayModes],
 } satisfies Config;

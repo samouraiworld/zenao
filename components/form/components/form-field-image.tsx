@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
 import { FormFieldProps, urlPattern } from "../types";
 import { useToast } from "@/app/hooks/use-toast";
-import { filesPostResponseSchema } from "@/lib/files";
+import { uploadFile } from "@/lib/files";
 import { isValidURL, web2URL } from "@/lib/uris";
 import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
@@ -45,15 +45,8 @@ export const FormFieldImage = <T extends FieldValues>(
         return;
       }
       setUploading(true);
-      const data = new FormData();
-      data.set("file", file);
-      const uploadRequest = await fetch("/api/files", {
-        method: "POST",
-        body: data,
-      });
-      const resRaw = await uploadRequest.json();
-      const res = filesPostResponseSchema.parse(resRaw);
-      field.onChange(res.uri);
+      const uri = await uploadFile(file);
+      field.onChange(uri);
     } catch (e) {
       console.error(e);
       toast({
@@ -123,6 +116,7 @@ export const FormFieldImage = <T extends FieldValues>(
           <div className="bottom-8 right-2">
             <input
               type="file"
+              name={props.name}
               onChange={handleChange}
               ref={hiddenInputRef}
               className="hidden"

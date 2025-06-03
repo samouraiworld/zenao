@@ -19,3 +19,8 @@ export const eventOptions = (id: string) =>
       return fromJson(EventInfoSchema, event);
     },
   });
+
+export function idFromPkgPath(pkgPath: string): string {
+  const res = /(e\d+)$/.exec(pkgPath);
+  return res?.[1].substring(1) || "";
+}

@@ -1,4 +1,4 @@
-import { GnowebButton } from "@/components/buttons/GnowebButton";
+import { GnowebButton } from "@/components/buttons/gnoweb-button";
 import { Card } from "@/components/cards/Card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Skeleton } from "@/components/shadcn/skeleton";
@@ -28,6 +28,7 @@ export default function ProfileHeader({
               src={avatarUri}
               alt="Event"
               priority
+              fetchPriority="high"
               fill
               sizes="(max-width: 768px) 100vw,
               (max-width: 1200px) 50vw,

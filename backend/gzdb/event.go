@@ -22,6 +22,8 @@ type Event struct {
 	CreatorID   uint
 	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
 
+	PasswordHash string // event is guarded if set
+
 	LocVenueName    string
 	LocKind         string // one of: geo, virtual or custom
 	LocAddress      string // uri in virtual
@@ -99,15 +101,17 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 	}
 
 	return &zeni.Event{
-		ID:          fmt.Sprintf("%d", dbevt.ID),
-		Title:       dbevt.Title,
-		Description: dbevt.Description,
-		StartDate:   dbevt.StartDate,
-		EndDate:     dbevt.EndDate,
-		ImageURI:    dbevt.ImageURI,
-		TicketPrice: dbevt.TicketPrice,
-		Capacity:    dbevt.Capacity,
-		CreatorID:   fmt.Sprintf("%d", dbevt.CreatorID),
-		Location:    loc,
+		ID:           fmt.Sprintf("%d", dbevt.ID),
+		CreatedAt:    dbevt.CreatedAt,
+		Title:        dbevt.Title,
+		Description:  dbevt.Description,
+		StartDate:    dbevt.StartDate,
+		EndDate:      dbevt.EndDate,
+		ImageURI:     dbevt.ImageURI,
+		TicketPrice:  dbevt.TicketPrice,
+		Capacity:     dbevt.Capacity,
+		CreatorID:    fmt.Sprintf("%d", dbevt.CreatorID),
+		Location:     loc,
+		PasswordHash: dbevt.PasswordHash,
 	}, nil
 }

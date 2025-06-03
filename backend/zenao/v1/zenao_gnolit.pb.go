@@ -88,6 +88,18 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if c.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, c.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
+	if c.Password != "" {
+		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, c.Password)
+	}
+	if len(c.Organizers) != 0 {
+		fmt.Fprintf(buf, "%s\tOrganizers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Organizers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -136,6 +148,21 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 	if e.Location != nil {
 		fmt.Fprintf(buf, "%s\tLocation: &%s%s,\n", linePrefix, typePrefix, e.Location.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
+	if e.Password != "" {
+		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, e.Password)
+	}
+	if e.UpdatePassword != false {
+		fmt.Fprintf(buf, "%s\tUpdatePassword: %t,\n", linePrefix, e.UpdatePassword)
+	}
+	if len(e.Organizers) != 0 {
+		fmt.Fprintf(buf, "%s\tOrganizers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Organizers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -153,6 +180,33 @@ func (e *EditEventResponse) GnoLiteral(typePrefix string, linePrefix string) str
 	return buf.String()
 }
 
+func (v *ValidatePasswordRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ValidatePasswordRequest{\n")
+	if v.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, v.EventId)
+	}
+	if v.Password != "" {
+		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, v.Password)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (v *ValidatePasswordResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ValidatePasswordResponse{\n")
+	if v.Valid != false {
+		fmt.Fprintf(buf, "%s\tValid: %t,\n", linePrefix, v.Valid)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (p *ParticipateRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -162,6 +216,18 @@ func (p *ParticipateRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	}
 	if p.Email != "" {
 		fmt.Fprintf(buf, "%s\tEmail: %q,\n", linePrefix, p.Email)
+	}
+	if len(p.Guests) != 0 {
+		fmt.Fprintf(buf, "%s\tGuests: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range p.Guests {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if p.Password != "" {
+		fmt.Fprintf(buf, "%s\tPassword: %q,\n", linePrefix, p.Password)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -175,6 +241,30 @@ func (p *ParticipateResponse) GnoLiteral(typePrefix string, linePrefix string) s
 	if p.TicketSecret != "" {
 		fmt.Fprintf(buf, "%s\tTicketSecret: %q,\n", linePrefix, p.TicketSecret)
 	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (b *BroadcastEventRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("BroadcastEventRequest{\n")
+	if b.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, b.EventId)
+	}
+	if b.Message != "" {
+		fmt.Fprintf(buf, "%s\tMessage: %q,\n", linePrefix, b.Message)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (b *BroadcastEventResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("BroadcastEventResponse{\n")
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -253,6 +343,44 @@ func (a *AddressCustom) GnoLiteral(typePrefix string, linePrefix string) string 
 	return buf.String()
 }
 
+func (e *EventPrivacy) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EventPrivacy{\n")
+	switch val := e.EventPrivacy.(type) {
+	case *EventPrivacy_Public:
+		fmt.Fprintf(buf, "%s\tEventPrivacy: &%s,\n", linePrefix, val.Public.GnoLiteral(typePrefix, linePrefix+"\t"))
+	case *EventPrivacy_Guarded:
+		fmt.Fprintf(buf, "%s\tEventPrivacy: &%s,\n", linePrefix, val.Guarded.GnoLiteral(typePrefix, linePrefix+"\t"))
+	default:
+		panic(errors.New("unknown eventPrivacy variant"))
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *EventPrivacyPublic) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EventPrivacyPublic{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *EventPrivacyGuarded) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EventPrivacyGuarded{\n")
+	if e.ParticipationPubkey != "" {
+		fmt.Fprintf(buf, "%s\tParticipationPubkey: %q,\n", linePrefix, e.ParticipationPubkey)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -266,8 +394,14 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	if e.ImageUri != "" {
 		fmt.Fprintf(buf, "%s\tImageUri: %q,\n", linePrefix, e.ImageUri)
 	}
-	if e.Creator != "" {
-		fmt.Fprintf(buf, "%s\tCreator: %q,\n", linePrefix, e.Creator)
+	if len(e.Organizers) != 0 {
+		fmt.Fprintf(buf, "%s\tOrganizers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Organizers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	if e.StartDate != 0 {
 		fmt.Fprintf(buf, "%s\tStartDate: %d,\n", linePrefix, e.StartDate)
@@ -286,6 +420,9 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	}
 	if e.PkgPath != "" {
 		fmt.Fprintf(buf, "%s\tPkgPath: %q,\n", linePrefix, e.PkgPath)
+	}
+	if e.Privacy != nil {
+		fmt.Fprintf(buf, "%s\tPrivacy: &%s%s,\n", linePrefix, typePrefix, e.Privacy.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -312,7 +449,7 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 	buf.WriteString(typePrefix)
 	buf.WriteString("BatchProfileRequest{\n")
 	if len(b.Fields) != 0 {
-		fmt.Fprintf(buf, "%s\tFields: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tFields: []*BatchProfileField{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range b.Fields {
 			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
@@ -321,7 +458,7 @@ func (b *BatchProfileRequest) GnoLiteral(typePrefix string, linePrefix string) s
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	if len(b.Addresses) != 0 {
-		fmt.Fprintf(buf, "%s\tAddresses: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tAddresses: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range b.Addresses {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
@@ -345,7 +482,7 @@ func (c *CreatePollRequest) GnoLiteral(typePrefix string, linePrefix string) str
 		fmt.Fprintf(buf, "%s\tQuestion: %q,\n", linePrefix, c.Question)
 	}
 	if len(c.Options) != 0 {
-		fmt.Fprintf(buf, "%s\tOptions: {\n", linePrefix)
+		fmt.Fprintf(buf, "%s\tOptions: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range c.Options {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
@@ -368,6 +505,9 @@ func (c *CreatePollResponse) GnoLiteral(typePrefix string, linePrefix string) st
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("CreatePollResponse{\n")
+	if c.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -392,6 +532,138 @@ func (v *VotePollResponse) GnoLiteral(typePrefix string, linePrefix string) stri
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("VotePollResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePostRequest{\n")
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	}
+	if c.Content != "" {
+		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, c.Content)
+	}
+	if c.ParentId != "" {
+		fmt.Fprintf(buf, "%s\tParentId: %q,\n", linePrefix, c.ParentId)
+	}
+	if len(c.Tags) != 0 {
+		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Tags {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreatePostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreatePostResponse{\n")
+	if c.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, c.PostId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (r *ReactPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ReactPostRequest{\n")
+	if r.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, r.PostId)
+	}
+	if r.Icon != "" {
+		fmt.Fprintf(buf, "%s\tIcon: %q,\n", linePrefix, r.Icon)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (r *ReactPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ReactPostResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetEventTicketsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetEventTicketsRequest{\n")
+	if g.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, g.EventId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetEventTicketsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetEventTicketsResponse{\n")
+	if len(g.TicketsInfo) != 0 {
+		fmt.Fprintf(buf, "%s\tTicketsInfo: []*TicketInfo{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range g.TicketsInfo {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (t *TicketInfo) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("TicketInfo{\n")
+	if t.TicketSecret != "" {
+		fmt.Fprintf(buf, "%s\tTicketSecret: %q,\n", linePrefix, t.TicketSecret)
+	}
+	if t.UserEmail != "" {
+		fmt.Fprintf(buf, "%s\tUserEmail: %q,\n", linePrefix, t.UserEmail)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CheckinRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CheckinRequest{\n")
+	if c.TicketPubkey != "" {
+		fmt.Fprintf(buf, "%s\tTicketPubkey: %q,\n", linePrefix, c.TicketPubkey)
+	}
+	if c.Signature != "" {
+		fmt.Fprintf(buf, "%s\tSignature: %q,\n", linePrefix, c.Signature)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CheckinResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CheckinResponse{\n")
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

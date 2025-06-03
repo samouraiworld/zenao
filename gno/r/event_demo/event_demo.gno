@@ -20,7 +20,7 @@ func init() {
 	zenaoAdmin := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94"
 	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
 	conf := events.Config{
-		Creator:          creator,
+		Organizers:       []string{creator},
 		Title:            "Demo",
 		Description:      "This is a demo zenao event",
 		ImageURI:         "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Wiki-IMG_20200904_200004436.jpg/640px-Wiki-IMG_20200904_200004436.jpg",
@@ -35,9 +35,12 @@ func init() {
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
-	social_feed.NewFeed("main", false, func(memberId string) bool {
-		return daoPrivate.Members.IsMember(memberId)
-	})
+	social_feed.NewFeed("main", false, IsMember)
+}
+
+// Set public to be used as auth layer for external entities (e.g polls)
+func IsMember(memberId string) bool {
+	return daoPrivate.Members.IsMember(memberId)
 }
 
 func Vote(proposalID uint64, vote daocond.Vote) {
