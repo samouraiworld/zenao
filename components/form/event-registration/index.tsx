@@ -112,7 +112,14 @@ export function EventRegistrationForm({
       form.reset();
     } catch (err) {
       console.error(err);
-      toast({ variant: "destructive", title: t("toast-default-error") });
+      toast({
+        variant: "destructive",
+        title:
+          err instanceof Error &&
+          err.message === "[unknown] user is already participant for this event"
+            ? t("toast-already-registered-error")
+            : t("toast-default-error"),
+      });
     }
     setIsPending(false);
   };
