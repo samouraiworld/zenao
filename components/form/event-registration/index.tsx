@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { ClerkLoaded, SignedOut, useAuth } from "@clerk/nextjs";
+import { SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { FormFieldInputString } from "../components/FormFieldInputString";
 import { InviteeForm } from "./invitee-form";
@@ -131,13 +131,11 @@ export function EventRegistrationForm({
             />
           </SignedOut>
           <InviteeForm userId={userId} loading={isPending} />
-          <ClerkLoaded>
-            <ButtonWithLabel
-              type="submit"
-              loading={isPending}
-              label={t("register-button")}
-            />
-          </ClerkLoaded>
+          <ButtonWithLabel
+            type="submit"
+            loading={isPending}
+            label={t("register-button")}
+          />
         </div>
       </form>
     </Form>
