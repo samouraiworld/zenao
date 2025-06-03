@@ -62,13 +62,15 @@ export function ProfileInfo({
       </Heading>
 
       <div className="flex flex-col gap-0">
-        {upcomingEvents.map((evt) => (
-          <EventCard
-            href={`/event/${idFromPkgPath(evt.pkgPath)}`}
-            key={evt.pkgPath}
-            evt={evt}
-          />
-        ))}
+        <EventCardListLayout>
+          {upcomingEvents.map((evt) => (
+            <EventCard
+              href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+              key={evt.pkgPath}
+              evt={evt}
+            />
+          ))}
+        </EventCardListLayout>
       </div>
 
       <Heading level={2} size="lg">
