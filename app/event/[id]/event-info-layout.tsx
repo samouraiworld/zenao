@@ -1,6 +1,6 @@
 "use client";
 
-import { SignedIn, useAuth } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading, SignedIn, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
@@ -29,6 +29,7 @@ import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
+import { Skeleton } from "@/components/shadcn/skeleton";
 
 interface EventSectionProps {
   title: string;
@@ -172,49 +173,54 @@ export function EventInfoLayout({
       </div>
 
       {/* Participate Card */}
-      <Card className="mt-2">
-        {isParticipant ? (
-          <div>
-            <div className="flex flex-row justify-between">
-              <Heading level={2} size="xl">
-                {t("in")}
-              </Heading>
-              <SignedIn>
-                <Link
-                  href={`/ticket/${eventId}`}
-                  className="text-main underline"
-                >
-                  {t("see-ticket")}
-                </Link>
-              </SignedIn>
-              {/* TODO: create a clean decount timer */}
-              {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
-            </div>
-            {/* add back when we can cancel
+      <ClerkLoading>
+        <Skeleton className="w-full h-28" />
+      </ClerkLoading>
+      <ClerkLoaded>
+        <Card className="mt-2">
+          {isParticipant ? (
+            <div>
+              <div className="flex flex-row justify-between">
+                <Heading level={2} size="xl">
+                  {t("in")}
+                </Heading>
+                <SignedIn>
+                  <Link
+                    href={`/ticket/${eventId}`}
+                    className="text-main underline"
+                  >
+                    {t("see-ticket")}
+                  </Link>
+                </SignedIn>
+                {/* TODO: create a clean decount timer */}
+                {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
+              </div>
+              {/* add back when we can cancel
                 <Text className="my-4">{t("cancel-desc")}</Text>
               */}
-          </div>
-        ) : isStarted ? (
-          <div>
-            <Heading level={2} size="xl">
-              {t("already-begun")}
-            </Heading>
-            <Text className="my-4">{t("too-late")}</Text>
-          </div>
-        ) : (
-          <div>
-            <Heading level={2} size="xl">
-              {t("registration")}
-            </Heading>
-            <Text className="my-4">{t("join-desc")}</Text>
-            <EventRegistrationForm
-              eventId={eventId}
-              userAddress={address}
-              eventPassword={password}
-            />
-          </div>
-        )}
-      </Card>
+            </div>
+          ) : isStarted ? (
+            <div>
+              <Heading level={2} size="xl">
+                {t("already-begun")}
+              </Heading>
+              <Text className="my-4">{t("too-late")}</Text>
+            </div>
+          ) : (
+            <div>
+              <Heading level={2} size="xl">
+                {t("registration")}
+              </Heading>
+              <Text className="my-4">{t("join-desc")}</Text>
+              <EventRegistrationForm
+                eventId={eventId}
+                userAddress={address}
+                eventPassword={password}
+              />
+            </div>
+          )}
+        </Card>
+      </ClerkLoaded>
 
       {children}
 
