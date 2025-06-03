@@ -42,19 +42,19 @@ export function TicketCard({
       <motion.div
         style={{ x, y, rotateX, rotateY }}
         className={cn(
-          "max-w-96 md:max-w-full flex flex-col gap-4 w-full mx-auto md:flex-row bg-white rounded shadow-lg",
+          "max-w-[550px] flex flex-col gap-4 w-full mx-auto bg-white rounded shadow-lg",
           "max-sm:rounded-tl rounded-tl max-sm:rounded-tr rounded-tr",
         )}
         whileHover={{ rotateX: -5, rotateY: 5 }}
       >
-        <div className="w-full md:max-w-[350px] max-md:flex justify-center p-4 md:p-0">
-          <div className="w-full max-w-[120px] md:max-w-[350px]">
-            <AspectRatio ratio={1 / 1}>
+        <div className="w-full max-md:flex justify-center">
+          <div className="w-full">
+            <AspectRatio ratio={16 / 9}>
               <Web3Image
                 src={event.imageUri}
                 sizes="(max-width: 768px) 100vw,
-            (max-width: 1200px) 50vw,
-            33vw"
+                (max-width: 1200px) 50vw,
+                33vw"
                 fill
                 alt="Event"
                 priority

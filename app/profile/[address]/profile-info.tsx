@@ -9,6 +9,7 @@ import Heading from "@/components/texts/heading";
 import { idFromPkgPath } from "@/lib/queries/event";
 import { eventsByOrganizerList } from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";
+import EventCardListLayout from "@/components/layout/event-card-list-layout";
 
 export function ProfileInfo({
   address,
@@ -61,13 +62,15 @@ export function ProfileInfo({
       </Heading>
 
       <div className="flex flex-col gap-0">
-        {upcomingEvents.map((evt) => (
-          <EventCard
-            href={`/event/${idFromPkgPath(evt.pkgPath)}`}
-            key={evt.pkgPath}
-            evt={evt}
-          />
-        ))}
+        <EventCardListLayout>
+          {upcomingEvents.map((evt) => (
+            <EventCard
+              href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+              key={evt.pkgPath}
+              evt={evt}
+            />
+          ))}
+        </EventCardListLayout>
       </div>
 
       <Heading level={2} size="lg">
@@ -75,13 +78,15 @@ export function ProfileInfo({
       </Heading>
 
       <div className="flex flex-col gap-0">
-        {pastEvents.map((evt) => (
-          <EventCard
-            href={`/event/${idFromPkgPath(evt.pkgPath)}`}
-            key={evt.pkgPath}
-            evt={evt}
-          />
-        ))}
+        <EventCardListLayout>
+          {pastEvents.map((evt) => (
+            <EventCard
+              href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+              key={evt.pkgPath}
+              evt={evt}
+            />
+          ))}
+        </EventCardListLayout>
       </div>
     </div>
   );

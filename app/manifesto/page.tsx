@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslations } from "next-intl";
 import { FileText } from "lucide-react";
 import Image from "next/image";
-import { ScreenContainerCentered } from "@/components/layout/ScreenContainer";
+import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { Card } from "@/components/cards/Card";
 import Text from "@/components/texts/text";
 

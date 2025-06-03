@@ -3,7 +3,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect, RedirectType } from "next/navigation";
 import { DiscoverEventsList } from "../discover-events-list";
 import { getQueryClient } from "@/lib/get-query-client";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { ScreenContainer } from "@/components/layout/screen-container";
 import { eventsList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/layout/events-list-layout";
 
