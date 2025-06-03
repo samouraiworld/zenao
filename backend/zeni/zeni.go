@@ -52,6 +52,7 @@ type AuthUser struct {
 }
 
 type User struct {
+	CreatedAt   time.Time
 	ID          string
 	AuthID      string
 	DisplayName string
@@ -61,6 +62,7 @@ type User struct {
 }
 
 type Event struct {
+	CreatedAt    time.Time
 	ID           string
 	Title        string
 	Description  string
@@ -75,12 +77,14 @@ type Event struct {
 }
 
 type Feed struct {
-	ID      string
-	Slug    string
-	EventID string
+	CreatedAt time.Time
+	ID        string
+	Slug      string
+	EventID   string
 }
 
 type Post struct {
+	CreatedAt time.Time
 	ID        string
 	Post      *feedsv1.Post
 	UserID    string
@@ -89,34 +93,38 @@ type Post struct {
 }
 
 type Poll struct {
-	ID       string
-	Question string
-	Kind     pollsv1.PollKind
-	Duration int64
-	Results  []*pollsv1.PollResult
-	PostID   string
-	Votes    []*Vote
+	CreatedAt time.Time
+	ID        string
+	Question  string
+	Kind      pollsv1.PollKind
+	Duration  int64
+	Results   []*pollsv1.PollResult
+	PostID    string
+	Votes     []*Vote
 }
 
 type Vote struct {
-	ID     string
-	UserID string
-	Option string
+	CreatedAt time.Time
+	ID        string
+	UserID    string
+	Option    string
 }
 
 type Reaction struct {
-	ID     string
-	PostID string
-	UserID string
-	Icon   string
+	CreatedAt time.Time
+	ID        string
+	PostID    string
+	UserID    string
+	Icon      string
 }
 
 type SoldTicket struct {
-	Ticket  *Ticket
-	BuyerID string
-	UserID  string
-	User    *User
-	Checkin *Checkin
+	CreatedAt time.Time
+	Ticket    *Ticket
+	BuyerID   string
+	UserID    string
+	User      *User
+	Checkin   *Checkin
 }
 
 type Checkin struct {
