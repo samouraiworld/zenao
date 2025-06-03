@@ -1,7 +1,5 @@
 import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { Footer } from "@/components/navigation/footer";
-import { Header } from "@/components/navigation/header";
-import { Toaster } from "@/components/shadcn/toaster";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -13,6 +11,8 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 import QueryProviders from "./query-providers";
 import { zenaoClient } from "./zenao-client";
+import { Toaster } from "@/components/shadcn/toaster";
+import { Header } from "@/components/navigation/header";
 
 const albertSans = Albert_Sans({
   variable: "--font-albert-sans",
