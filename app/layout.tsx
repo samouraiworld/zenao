@@ -1,5 +1,3 @@
-import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
-import { Footer } from "@/components/navigation/footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -8,9 +6,11 @@ import { ThemeProvider } from "next-themes";
 import { Albert_Sans } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import "./globals.css";
 import QueryProviders from "./query-providers";
 import { zenaoClient } from "./zenao-client";
+import { Footer } from "@/components/navigation/footer";
+import "./globals.css";
+import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { Toaster } from "@/components/shadcn/toaster";
 import { Header } from "@/components/navigation/header";
 
