@@ -98,7 +98,7 @@ export function PollPostCard({
         eventId={eventId}
         post={pollPost}
         createdBy={createdBy}
-        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
+        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(32).padStart(7, "0")}`}
         onReply={() => {
           form.setValue("parentPost", {
             kind: "POLL",
