@@ -1,4 +1,6 @@
+import * as Sentry from "@sentry/nextjs";
 import {
+  MutationCache,
   QueryClient,
   defaultShouldDehydrateQuery,
   isServer,
@@ -17,6 +19,13 @@ function makeQueryClient() {
           query.state.status === "pending",
       },
     },
+    mutationCache: new MutationCache({
+      onError: (error) => {
+        if (process.env.NEXT_PUBLIC_ENV ?? "development" !== "development") {
+          Sentry.captureException(error);
+        }
+      },
+    }),
   });
 }
 
