@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as Sentry from "@sentry/nextjs";
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -77,9 +76,6 @@ export const CreateEventForm: React.FC = () => {
       });
       router.push(`/event/${id}`);
     } catch (err) {
-      if (process.env.NEXT_PUBLIC_ENV ?? "development" !== "development") {
-        Sentry.captureException(err);
-      }
       toast({
         variant: "destructive",
         title: t("toast-creation-error"),
