@@ -13,4 +13,5 @@ type ZenaoServer struct {
 	DB           zeni.DB
 	MailClient   *resend.Client
 	DiscordToken string
+	Maintenance  bool
 }

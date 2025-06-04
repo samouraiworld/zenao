@@ -9,6 +9,27 @@ import (
 	strings "strings"
 )
 
+func (h *HealthRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("HealthRequest{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (h *HealthResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("HealthResponse{\n")
+	if h.Maintenance != false {
+		fmt.Fprintf(buf, "%s\tMaintenance: %t,\n", linePrefix, h.Maintenance)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (e *EditUserRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
