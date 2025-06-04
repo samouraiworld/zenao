@@ -10,10 +10,9 @@ export default function GlobalError({
   error: Error & { digest?: string };
 }) {
   useEffect(() => {
-    Sentry.withScope((scope) => {
-      scope.setLevel(error.message.includes("Hydration") ? "warning" : "error");
+    if (process.env.NEXT_PUBLIC_ENV !== "development") {
       Sentry.captureException(error);
-    });
+    }
   }, [error]);
 
   return (
