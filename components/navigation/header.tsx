@@ -239,7 +239,7 @@ const Auth = ({
           </Link>
           <Link href="/settings">
             <DropdownMenuItem className="cursor-pointer">
-              {t("settings")}
+              {t("edit-profile")}
             </DropdownMenuItem>
           </Link>
           <DropdownMenuSeparator />
