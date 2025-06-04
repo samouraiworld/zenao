@@ -9,10 +9,10 @@ import (
 
 type ProtocolRegistry interface {
 	AddProtocol(p Protocol)
-	ProtocolWithName(s string) Protocol
-	ProtocolWithCode(c int) Protocol
-	ProtocolPtrWithCode(c int) *Protocol
-	ProtocolsWithString(s string) []Protocol
+	ProtocolWithName(s string) (Protocol, error)
+	ProtocolWithCode(c int) (Protocol, error)
+	ProtocolPtrWithCode(c int) (*Protocol, error)
+	ProtocolsWithString(s string) ([]Protocol, error)
 	Protocols() []Protocol
 }
 
@@ -56,46 +56,46 @@ func (r *ProtocolRegistryImpl) AddProtocol(p Protocol) {
 	r.protocolPtrByCode.Set(ufmt.Sprintf("%d", p.Code), &p)
 }
 
-func (r *ProtocolRegistryImpl) ProtocolWithName(s string) Protocol {
+func (r *ProtocolRegistryImpl) ProtocolWithName(s string) (Protocol, error) {
 	v, ok := r.protocolsByName.Get(s)
 	if !ok {
-		panic(ufmt.Errorf("protocol by the name %q not found", s))
+		return Protocol{}, ufmt.Errorf("protocol by the name %q not found", s)
 	}
-	return v.(Protocol)
+	return v.(Protocol), nil
 }
 
-func (r *ProtocolRegistryImpl) ProtocolWithCode(c int) Protocol {
+func (r *ProtocolRegistryImpl) ProtocolWithCode(c int) (Protocol, error) {
 	v, ok := r.protocolsByCode.Get(ufmt.Sprintf("%d", c))
 	if !ok {
-		panic(ufmt.Errorf("protocol code %d not found", c))
+		return Protocol{}, ufmt.Errorf("protocol code %d not found", c)
 	}
-	return v.(Protocol)
+	return v.(Protocol), nil
 }
 
-func (r *ProtocolRegistryImpl) ProtocolPtrWithCode(c int) *Protocol {
+func (r *ProtocolRegistryImpl) ProtocolPtrWithCode(c int) (*Protocol, error) {
 	v, ok := r.protocolPtrByCode.Get(ufmt.Sprintf("%d", c))
 	if !ok {
-		return nil
+		return nil, ufmt.Errorf("protocol code %d not found", c)
 	}
-	return v.(*Protocol)
+	return v.(*Protocol), nil
 }
 
-func (r *ProtocolRegistryImpl) ProtocolsWithString(s string) []Protocol {
+func (r *ProtocolRegistryImpl) ProtocolsWithString(s string) ([]Protocol, error) {
 	s = strings.Trim(s, "/")
 	sp := strings.Split(s, "/")
 	if len(sp) == 0 {
-		return nil
+		return nil, ufmt.Errorf("empty multiaddr")
 	}
 
 	t := make([]Protocol, len(sp))
 	for i, name := range sp {
-		p := r.ProtocolWithName(name)
-		if p.Code == 0 {
-			panic(ufmt.Sprintf("no protocol with name: %s", name))
+		p, err := r.ProtocolWithName(name)
+		if err != nil {
+			return nil, err
 		}
 		t[i] = p
 	}
-	return t
+	return t, nil
 }
 
 func (r *ProtocolRegistryImpl) Protocols() []Protocol {

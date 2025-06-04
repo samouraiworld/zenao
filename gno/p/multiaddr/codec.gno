@@ -27,7 +27,10 @@ func stringToBytes(r ProtocolRegistry, s string) ([]byte, error) {
 
 	for len(sp) > 0 {
 		name := sp[0]
-		p := r.ProtocolWithName(name)
+		p, err := r.ProtocolWithName(name)
+		if err != nil {
+			return nil, err
+		}
 		if p.Code == 0 {
 			return nil, ufmt.Errorf("failed to parse multiaddr %q: unknown protocol %s", s, sp[0])
 		}
@@ -73,13 +76,16 @@ func readComponent(r ProtocolRegistry, b []byte) (int, *Component, error) {
 	}
 	offset += n
 
-	p := r.ProtocolWithCode(code)
+	p, err := r.ProtocolWithCode(code)
+	if err != nil {
+		return 0, nil, err
+	}
 	if p.Code == 0 {
 		return 0, nil, ufmt.Errorf("no protocol with code %d", code)
 	}
-	pPtr := r.ProtocolPtrWithCode(code)
-	if pPtr == nil {
-		return 0, nil, ufmt.Errorf("no protocol with code %d", code)
+	pPtr, err := r.ProtocolPtrWithCode(code)
+	if err != nil {
+		return 0, nil, err
 	}
 
 	if p.Size == 0 {
