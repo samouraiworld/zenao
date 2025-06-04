@@ -677,7 +677,7 @@ func genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID string, ques
 		p := polls.NewPoll(question, kind, %d, options, event.IsMember)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
-			return
+			panic("multiaddr validation failed")
 		}
 		std.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
 	
