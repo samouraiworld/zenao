@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"net/http"
 	"os"
@@ -59,6 +60,7 @@ type config struct {
 	dbPath          string
 	resendSecretKey string
 	discordtoken    string
+	maintenance     bool
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
@@ -72,7 +74,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
 	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
-
+	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
 }
 
 var conf config
@@ -154,12 +156,16 @@ func execStart() error {
 		DB:           db,
 		MailClient:   mailClient,
 		DiscordToken: conf.discordtoken,
+		Maintenance:  conf.maintenance,
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
 
 	path, handler := zenaov1connect.NewZenaoServiceHandler(zenao,
-		connect.WithInterceptors(NewLoggingInterceptor(logger)),
+		connect.WithInterceptors(
+			NewLoggingInterceptor(logger),
+			NewMaintenanceInterceptor(conf.maintenance),
+		),
 	)
 	mux.Handle(path, middlewares(handler,
 		withConnectCORS(allowedOrigins...),
@@ -195,6 +201,21 @@ func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
 		})
 		return middleware.Handler(next)
 	}
+}
+
+func NewMaintenanceInterceptor(maintenance bool) connect.UnaryInterceptorFunc {
+	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
+		return connect.UnaryFunc(func(
+			ctx context.Context,
+			req connect.AnyRequest,
+		) (connect.AnyResponse, error) {
+			if maintenance && req.Spec().Procedure != "/zenao.v1.ZenaoService/Health" {
+				return nil, connect.NewError(connect.CodeUnavailable, errors.New("service is under maintenance, try again in few minutes..."))
+			}
+			return next(ctx, req)
+		})
+	}
+	return connect.UnaryInterceptorFunc(interceptor)
 }
 
 func NewLoggingInterceptor(logger *zap.Logger) connect.UnaryInterceptorFunc {
