@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	protocols         = ma.NewProtocolRegistry()
+	Protocols         = ma.NewProtocolRegistry()
 	generalTranscoder = ma.NewTranscoderFromFunctions(generalStB, generalBtS, nil)
 )
 
@@ -28,7 +28,7 @@ var SocialFeedProtocols []*ma.Protocol = []*ma.Protocol{
 
 func init() {
 	for _, p := range SocialFeedProtocols {
-		protocols.AddProtocol(*p)
+		Protocols.AddProtocol(*p)
 	}
 }
 

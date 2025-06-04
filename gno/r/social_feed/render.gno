@@ -162,11 +162,11 @@ func renderVideoPost(ext *feedsv1.VideoPost) string {
 
 // XXX: adapt it to many different protocols later (not fan on this could be rework when we defined final protocols)
 func handleMultiaddrLink(link string) string {
-	ma, err := ma.NewMultiaddr(protocols, link)
+	ma, err := ma.NewMultiaddr(Protocols, link)
 	if err != nil {
 		return ""
 	}
-	p, err := protocols.ProtocolWithName("gno")
+	p, err := Protocols.ProtocolWithName("gno")
 	if err != nil {
 		return ""
 	}
@@ -174,7 +174,7 @@ func handleMultiaddrLink(link string) string {
 	if err != nil {
 		return ""
 	}
-	poll, err := protocols.ProtocolWithName("poll")
+	poll, err := Protocols.ProtocolWithName("poll")
 	if err != nil {
 		return ""
 	}

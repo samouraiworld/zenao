@@ -660,6 +660,7 @@ func genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID string, ques
 		"gno.land/r/zenao/polls"
 		"gno.land/r/zenao/social_feed"
 		user %q
+		ma "gno.land/p/zenao/multiaddr"
 	)
 	
 	func main() {
@@ -674,7 +675,10 @@ func genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID string, ques
 		options := %s
 		kind := pollsv1.PollKind(%d)
 		p := polls.NewPoll(question, kind, %d, options, event.IsMember)
-		uri := ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID))
+		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
+		if err != nil {
+			return
+		}
 		std.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
 	
 		feedID := %q
@@ -682,7 +686,7 @@ func genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID string, ques
 			Loc:  nil,
 			Tags: []string{"poll"},
 			Post: &feedsv1.LinkPost{
-				Uri: uri,
+				Uri: ma.String(),
 			},
 		}
 	
