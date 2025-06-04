@@ -2,7 +2,7 @@
 
 import { ClerkLoaded, ClerkLoading, SignedIn, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { format, fromUnixTime } from "date-fns";
+import { fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -107,7 +107,6 @@ export function EventInfoLayout({
             />
           </AspectRatio>
         </div>
-        {/* Right Section */}
         <div className="flex flex-col gap-4 w-full sm:w-3/6">
           <Heading level={1} size="4xl" className="mb-7">
             {data.title}
@@ -116,11 +115,11 @@ export function EventInfoLayout({
             <Calendar width={iconSize} height={iconSize} />
             <div className="flex flex-col">
               <Heading level={2} size="xl">
-                {format(fromUnixTime(Number(data.startDate)), "PPP")}
+                {formatTZ(fromUnixTime(Number(data.startDate)), "PPP")}
               </Heading>
               <div className="flex flex-row text-sm gap-1">
                 <Text variant="secondary" size="sm">
-                  {format(fromUnixTime(Number(data.startDate)), "p")}
+                  {formatTZ(fromUnixTime(Number(data.startDate)), "p")}
                 </Text>
                 <Text variant="secondary" size="sm">
                   -
@@ -134,7 +133,6 @@ export function EventInfoLayout({
             </div>
           </div>
 
-          {/* Location */}
           <EventLocationSection location={location} />
 
           <GnowebButton
@@ -190,12 +188,7 @@ export function EventInfoLayout({
                     {t("see-ticket")}
                   </Link>
                 </SignedIn>
-                {/* TODO: create a clean decount timer */}
-                {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>
-              {/* add back when we can cancel
-                <Text className="my-4">{t("cancel-desc")}</Text>
-              */}
             </div>
           ) : isStarted ? (
             <div>

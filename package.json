@@ -110,5 +110,10 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
     "wait-on": "^8.0.2"
+  },
+  "overrides": {
+    "mdast-util-gfm": {
+      "mdast-util-gfm-autolink-literal": "2.0.0"
+    }
   }
 }
