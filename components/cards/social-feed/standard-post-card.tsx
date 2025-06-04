@@ -40,6 +40,7 @@ export function StandardPostCard({
             author: post.post.author,
           });
         }}
+        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${post.post.localPostId.toString(32).padStart(7, "0")}`}
         onDisplayReplies={() => {
           setShowReplies((prev) => !prev);
         }}
