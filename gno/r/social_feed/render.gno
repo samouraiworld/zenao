@@ -148,7 +148,6 @@ func renderArticlePost(ext *feedsv1.ArticlePost) string {
 }
 
 func renderLinkPost(ext *feedsv1.LinkPost) string {
-	// use %3A to encode the : and avoid to be interpreted as a protocol (mailto, tel, etc...)
 	return md.H3("POST KIND: LINK") + md.Link(ext.Uri, handleMultiaddrLink(ext.Uri))
 }
 
@@ -160,7 +159,7 @@ func renderVideoPost(ext *feedsv1.VideoPost) string {
 	return md.H3("POST KIND: VIDEO") + md.Link(ext.VideoUri, ext.VideoUri) + md.Image("video thumbnail", ext.ThumbnailImageUri) + md.Paragraph(ext.Description)
 }
 
-// XXX: adapt it to many different protocols later (not fan on this could be rework when we defined final protocols)
+// XXX: adapt it to many different protocols
 func handleMultiaddrLink(link string) string {
 	ma, err := ma.NewMultiaddr(Protocols, link)
 	if err != nil {
