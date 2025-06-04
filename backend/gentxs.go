@@ -156,7 +156,7 @@ func execGenTxs() error {
 		for _, org := range organizers {
 			organizersIDs = append(organizersIDs, org.ID)
 		}
-		tx, err := createEventRealmTx(db, chain, event, signerInfo.GetAddress(), organizersIDs, privacy)
+		tx, err := createEventRealmTx(chain, event, signerInfo.GetAddress(), organizersIDs, privacy)
 		if err != nil {
 			return err
 		}
@@ -425,13 +425,16 @@ func createEventRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.
 	}, nil
 }
 
-func createEventRealmTx(db zeni.DB, chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, organizersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
+func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, organizersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
 	organizersAddr := mapsl.Map(organizersIDs, chain.UserAddress)
 	eRealm, err := genEventRealmSource(organizersAddr, creator.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
 		Title:       event.Title,
 		Description: event.Description,
 		ImageUri:    event.ImageURI,
 		Location:    event.Location,
+		StartDate:   uint64(event.StartDate.Unix()),
+		EndDate:     uint64(event.EndDate.Unix()),
+		Capacity:    event.Capacity,
 	}, privacy)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
