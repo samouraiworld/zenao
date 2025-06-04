@@ -16,6 +16,16 @@ type Component struct {
 	valueStartIdx int // Index of the first byte of the Component's value in the bytes array
 }
 
+func (c *Component) Protocol() Protocol {
+	if c == nil {
+		return Protocol{}
+	}
+	if c.protocol == nil {
+		return Protocol{}
+	}
+	return *c.protocol
+}
+
 func (c *Component) Value() string {
 	if c == nil {
 		return ""

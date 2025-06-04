@@ -16,14 +16,14 @@ var ZenaoProtocols []*ma.Protocol = []*ma.Protocol{
 		Name:       "gno",
 		Code:       0x300,
 		VCode:      ma.CodeToVarint(0x300),
-		Path:       true, // this means we have to put it at the end
+		Path:       true, // XXX: use URL encoding to avoid to have to put it at the end
 		Size:       ma.LengthPrefixedVarSize,
 		Transcoder: generalTranscoder,
 	}, {
 		Name:       "poll",
 		Code:       0x301,
 		VCode:      ma.CodeToVarint(0x301),
-		Size:       64, // Fixed size of exactly 8 bytes
+		Size:       ma.LengthPrefixedVarSize,
 		Transcoder: generalTranscoder,
 	},
 }
@@ -54,19 +54,25 @@ func NewMultiaddr(s string) ma.Multiaddr {
 func Render(path string) string {
 	s := ""
 	protos := protocols.Protocols()
-	s += ufmt.Sprintf("Protocols:\n")
+	s += ufmt.Sprintf("# Protocols:\n\n")
 	for _, p := range protos {
-		s += ufmt.Sprintf("%s\n\n", p.Name)
-		s += ufmt.Sprintf("Code: %d\n", p.Code)
-		s += ufmt.Sprintf("VCode: %v\n", p.VCode)
-		s += ufmt.Sprintf("Size: %d\n", p.Size)
-		s += ufmt.Sprintf("Path: %t\n", p.Path)
-		s += ufmt.Sprintf("Transcoder: %v\n", p.Transcoder)
+		s += ufmt.Sprintf("### %s\n", p.Name)
+		s += ufmt.Sprintf("- Code: %d\n", p.Code)
+		s += ufmt.Sprintf("- VCode: %v\n", p.VCode)
+		s += ufmt.Sprintf("- Size: %d\n", p.Size)
+		s += ufmt.Sprintf("- Path: %t\n", p.Path)
+		s += ufmt.Sprintf("- Transcoder: %v\n", p.Transcoder)
 		s += ufmt.Sprintf("--------------------------------\n")
 	}
-	s += ufmt.Sprintf("Addresses:\n")
+	s += ufmt.Sprintf("# Addresses:\n\n")
 	for _, ma := range addresses {
-		s += ufmt.Sprintf("- %s\n\n", ma.String())
+		s += ufmt.Sprintf("### %s\n\n", ma.String())
+		for _, p := range ma.Protocols() {
+			s += ufmt.Sprintf("#### %s\n\n", p.Name)
+			value, _ := ma.ValueForProtocol(p.Code)
+			s += ufmt.Sprintf("- Value: %s\n\n", value)
+			s += ufmt.Sprintf("--------------------------------\n")
+		}
 	}
 	return s
 }

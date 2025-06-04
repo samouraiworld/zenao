@@ -46,3 +46,24 @@ func (a Multiaddr) String() string {
 	}
 	return buf.String()
 }
+
+// Protocols returns the list of protocols this Multiaddr has.
+// will panic in case we access bytes incorrectly.
+func (m Multiaddr) Protocols() []Protocol {
+	out := make([]Protocol, 0, len(m))
+	for _, c := range m {
+		out = append(out, c.Protocol())
+	}
+	return out
+}
+
+var ErrProtocolNotFound = ufmt.Errorf("protocol not found in multiaddr")
+
+func (m Multiaddr) ValueForProtocol(code int) (value string, err error) {
+	for _, c := range m {
+		if c.Protocol().Code == code {
+			return c.Value(), nil
+		}
+	}
+	return "", ErrProtocolNotFound
+}
