@@ -1,11 +1,15 @@
 package multiaddr_demo
 
 import (
+	"gno.land/p/demo/ufmt"
 	ma "gno.land/p/zenao/multiaddr"
 )
 
-// NOT USED FOR NOW SINCE I GENERATE THE LINK IN GNO CODE
-var generalTranscoder = ma.NewTranscoderFromFunctions(generalStB, generalBtS, nil)
+var (
+	protocols         = ma.NewProtocolRegistry()
+	addresses         = []ma.Multiaddr{}
+	generalTranscoder = ma.NewTranscoderFromFunctions(generalStB, generalBtS, nil)
+)
 
 var ZenaoProtocols []*ma.Protocol = []*ma.Protocol{
 	{
@@ -34,14 +38,35 @@ func generalBtS(b []byte) (string, error) {
 
 func RegisterMultiAddrProtocols() {
 	for _, p := range ZenaoProtocols {
-		ma.AddProtocol(*p)
+		protocols.AddProtocol(*p)
 	}
 }
 
 func NewMultiaddr(s string) ma.Multiaddr {
-	ma, err := ma.NewMultiaddr(s)
+	ma, err := ma.NewMultiaddr(protocols, s)
 	if err != nil {
 		panic(err)
 	}
+	addresses = append(addresses, ma)
 	return ma
+}
+
+func Render(path string) string {
+	s := ""
+	protos := protocols.Protocols()
+	s += ufmt.Sprintf("Protocols:\n")
+	for _, p := range protos {
+		s += ufmt.Sprintf("%s\n\n", p.Name)
+		s += ufmt.Sprintf("Code: %d\n", p.Code)
+		s += ufmt.Sprintf("VCode: %v\n", p.VCode)
+		s += ufmt.Sprintf("Size: %d\n", p.Size)
+		s += ufmt.Sprintf("Path: %t\n", p.Path)
+		s += ufmt.Sprintf("Transcoder: %v\n", p.Transcoder)
+		s += ufmt.Sprintf("--------------------------------\n")
+	}
+	s += ufmt.Sprintf("Addresses:\n")
+	for _, ma := range addresses {
+		s += ufmt.Sprintf("- %s\n\n", ma.String())
+	}
+	return s
 }

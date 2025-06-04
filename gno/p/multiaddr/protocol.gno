@@ -1,11 +1,5 @@
 package multiaddr
 
-import (
-	"strings"
-
-	"gno.land/p/demo/ufmt"
-)
-
 // These are special sizes
 const (
 	LengthPrefixedVarSize = -1
@@ -43,69 +37,4 @@ type Protocol struct {
 	//
 	// This should only be non-nil if Size != 0
 	Transcoder Transcoder
-}
-
-// TODO: replace map by avl.Tree ?
-var protocolsByName = map[string]Protocol{}
-var protocolsByCode = map[int]Protocol{}
-
-// Keep a map of pointers so that we can reuse the same pointer for the same protocol.
-var protocolPtrByCode = map[int]*Protocol{}
-
-// Protocols is the list of multiaddr protocols supported by this module.
-var Protocols = []Protocol{}
-
-func AddProtocol(p Protocol) {
-	if _, ok := protocolsByName[p.Name]; ok {
-		panic(ufmt.Sprintf("protocol by the name %q already exists", p.Name))
-	}
-
-	if _, ok := protocolsByCode[p.Code]; ok {
-		panic(ufmt.Sprintf("protocol code %d already taken by %q", p.Code, p.Code))
-	}
-
-	if p.Size != 0 && p.Transcoder == nil {
-		panic(ufmt.Sprintf("protocols with arguments must define transcoders"))
-	}
-	if p.Path && p.Size >= 0 {
-		panic(ufmt.Sprintf("path protocols must have variable-length sizes"))
-	}
-	if len(p.VCode) == 0 {
-		panic(ufmt.Sprintf("protocol code %d is missing its VCode field", p.Code))
-	}
-
-	Protocols = append(Protocols, p)
-	protocolsByName[p.Name] = p
-	protocolsByCode[p.Code] = p
-	protocolPtrByCode[p.Code] = &p
-	return
-}
-
-// ProtocolWithName returns the Protocol description with given string name.
-func ProtocolWithName(s string) Protocol {
-	return protocolsByName[s]
-}
-
-// ProtocolWithCode returns the Protocol description with given protocol code.
-func ProtocolWithCode(c int) Protocol {
-	return protocolsByCode[c]
-}
-
-// ProtocolsWithString returns a slice of protocols matching given string.
-func ProtocolsWithString(s string) []Protocol {
-	s = strings.Trim(s, "/")
-	sp := strings.Split(s, "/")
-	if len(sp) == 0 {
-		return nil
-	}
-
-	t := make([]Protocol, len(sp))
-	for i, name := range sp {
-		p := ProtocolWithName(name)
-		if p.Code == 0 {
-			panic(ufmt.Sprintf("no protocol with name: %s", name))
-		}
-		t[i] = p
-	}
-	return t
 }
