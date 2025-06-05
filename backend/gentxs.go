@@ -522,7 +522,7 @@ func createParticipationTx(chain *gnoZenaoChain, creator cryptoGno.Address, even
 			},
 		},
 		Fee: std.Fee{
-			GasWanted: 10000000,
+			GasWanted: 20000000,
 			GasFee:    std.NewCoin("ugnot", 1000000),
 		},
 	}
