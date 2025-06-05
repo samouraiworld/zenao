@@ -62,18 +62,6 @@ func execE2EInfra() error {
 		wg.Wait()
 	}()
 
-	// start gnodev in background
-	{
-		args := []string{"make", "start.gnodev-e2e"}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := runCommand(ctx, "gnodev", "#7D56F4", args); err != nil {
-				fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
-			}
-		}()
-	}
-
 	backendCtx, cancelBackendCtx := context.WithCancel(ctx)
 	defer cancelBackendCtx()
 	backendDone := make(chan struct{}, 1)
@@ -91,6 +79,36 @@ func execE2EInfra() error {
 			if err := runCommand(backendCtx, "db", "#317738", args); err != nil {
 				return err
 			}
+		}
+
+		// run fakegen with --skip-chain
+		{
+			args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--db", dbPath, "--skip-chain"}
+			if err := runCommand(backendCtx, "fakegen", "#317738", args); err != nil {
+				return err
+			}
+		}
+
+		// run gentxs
+		{
+			args := []string{"go", "run", "./backend", "gentxs"}
+			if err := runCommand(backendCtx, "gentxs", "#317738", args); err != nil {
+				return err
+			}
+		}
+
+		// start gnodev in background
+		{
+			args := []string{"make", "start.gnodev-e2e"}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				cmd := exec.CommandContext(backendCtx, args[0], args[1:]...)
+				cmd.Env = append(os.Environ(), "TXS_FILE=genesis_txs.jsonl")
+				if err := runCommandWithCmd(backendCtx, "gnodev", "#7D56F4", cmd); err != nil {
+					fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
+				}
+			}()
 		}
 
 		// start backend in background
@@ -115,15 +133,6 @@ func execE2EInfra() error {
 		// wait for backend to be ready
 		if err := waitHTTPStatus(ctx, 60*time.Second, "http://localhost:4242", 404); err != nil {
 			return err
-		}
-
-		// run fakegen
-		// XXX: replace with golden files
-		{
-			args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--db", dbPath}
-			if err := runCommand(backendCtx, "fakegen", "#317738", args); err != nil {
-				return err
-			}
 		}
 
 		return nil
@@ -216,6 +225,11 @@ func waitHTTPStatus(ctx context.Context, timeout time.Duration, url string, stat
 }
 
 func runCommand(ctx context.Context, name, color string, args []string) error {
+	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	return runCommandWithCmd(ctx, name, color, cmd)
+}
+
+func runCommandWithCmd(ctx context.Context, name, color string, cmd *exec.Cmd) error {
 	style := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("#FAFAFA")).
@@ -223,8 +237,7 @@ func runCommand(ctx context.Context, name, color string, args []string) error {
 	streamPrefix := style.Render(fmt.Sprintf("%-10s |", name)) + " "
 	wr := prefixStream(os.Stdout, streamPrefix)
 
-	fmt.Fprintln(wr, strings.Join(args, " "))
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+	fmt.Fprintln(wr, strings.Join(cmd.Args, " "))
 
 	// prefix log lines
 	cmd.Stdout = wr
