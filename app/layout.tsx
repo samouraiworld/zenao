@@ -1,16 +1,18 @@
-import NextTopLoader from "nextjs-toploader";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
-import { Albert_Sans } from "next/font/google";
-import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
+import { Albert_Sans } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import QueryProviders from "./query-providers";
-import { Header } from "@/components/navigation/header";
+import { zenaoClient } from "./zenao-client";
 import { Footer } from "@/components/navigation/footer";
+import "./globals.css";
+import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { Toaster } from "@/components/shadcn/toaster";
+import { Header } from "@/components/navigation/header";
 
 const albertSans = Albert_Sans({
   variable: "--font-albert-sans",
@@ -221,6 +223,17 @@ export default async function RootLayout({
   // Providing all messages to the client
   // side is the easiest way to get started
   const messages = await getMessages();
+
+  const health = await zenaoClient.health({});
+  if (health.maintenance) {
+    return (
+      <html suppressHydrationWarning lang={locale}>
+        <body className={`${albertSans.variable} antialiased`}>
+          <MaintenanceScreen />
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html suppressHydrationWarning lang={locale}>

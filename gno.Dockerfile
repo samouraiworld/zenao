@@ -49,8 +49,9 @@ COPY --from=builder /app/build/gnodev /bin/gnodev
 COPY --from=builder /app/gno /app/gno
 COPY --from=builder /app/packages /packages
 COPY --from=builder /app/genesis_balances.txt /genesis_balances.txt
+COPY genesis_txs.jsonl /genesis_txs.jsonl
 
 ENV HOME=/app
 WORKDIR $HOME
 
-ENTRYPOINT exec gnodev staging --node-rpc-listener 0.0.0.0:26657 --web-listener 0.0.0.0:8888 --chain-id zenao-dev --balance-file /genesis_balances.txt $(find /packages -name gno.mod -type f -exec dirname {} \;)
+ENTRYPOINT exec gnodev staging --node-rpc-listener 0.0.0.0:26657 --web-listener 0.0.0.0:8888 --chain-id zenao-dev --balance-file /genesis_balances.txt -txs-file /genesis_txs.jsonl $(find /packages -name gno.mod -type f -exec dirname {} \;)

@@ -12,7 +12,57 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiSAoPRWRpdFVzZXJSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRILCgNiaW8YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCSIeChBFZGl0VXNlclJlc3BvbnNlEgoKAmlkGAEgASgJIhcKFUdldFVzZXJBZGRyZXNzUmVxdWVzdCIpChZHZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEg8KB2FkZHJlc3MYASABKAki6gEKEkNyZWF0ZUV2ZW50UmVxdWVzdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKc3RhcnRfZGF0ZRgEIAEoBBIQCghlbmRfZGF0ZRgFIAEoBBIUCgx0aWNrZXRfcHJpY2UYBiABKAESEAoIY2FwYWNpdHkYByABKA0SKQoIbG9jYXRpb24YCSABKAsyFy56ZW5hby52MS5FdmVudExvY2F0aW9uEhAKCHBhc3N3b3JkGAogASgJEhIKCm9yZ2FuaXplcnMYCyADKAkiIQoTQ3JlYXRlRXZlbnRSZXNwb25zZRIKCgJpZBgBIAEoCSKTAgoQRWRpdEV2ZW50UmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRINCgV0aXRsZRgCIAEoCRITCgtkZXNjcmlwdGlvbhgDIAEoCRIRCglpbWFnZV91cmkYBCABKAkSEgoKc3RhcnRfZGF0ZRgFIAEoBBIQCghlbmRfZGF0ZRgGIAEoBBIUCgx0aWNrZXRfcHJpY2UYByABKAESEAoIY2FwYWNpdHkYCCABKA0SKQoIbG9jYXRpb24YCSABKAsyFy56ZW5hby52MS5FdmVudExvY2F0aW9uEhAKCHBhc3N3b3JkGAogASgJEhcKD3VwZGF0ZV9wYXNzd29yZBgLIAEoCBISCgpvcmdhbml6ZXJzGAwgAygJIh8KEUVkaXRFdmVudFJlc3BvbnNlEgoKAmlkGAEgASgJIj0KF1ZhbGlkYXRlUGFzc3dvcmRSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJIikKGFZhbGlkYXRlUGFzc3dvcmRSZXNwb25zZRINCgV2YWxpZBgBIAEoCCJXChJQYXJ0aWNpcGF0ZVJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFZW1haWwYAiABKAkSDgoGZ3Vlc3RzGAMgAygJEhAKCHBhc3N3b3JkGAQgASgJIiwKE1BhcnRpY2lwYXRlUmVzcG9uc2USFQoNdGlja2V0X3NlY3JldBgBIAEoCSI6ChVCcm9hZGNhc3RFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDwoHbWVzc2FnZRgCIAEoCSIYChZCcm9hZGNhc3RFdmVudFJlc3BvbnNlIsEBCg1FdmVudExvY2F0aW9uEhIKCnZlbnVlX25hbWUYASABKAkSFAoMaW5zdHJ1Y3Rpb25zGAIgASgJEiMKA2dlbxgDIAEoCzIULnplbmFvLnYxLkFkZHJlc3NHZW9IABIrCgd2aXJ0dWFsGAQgASgLMhguemVuYW8udjEuQWRkcmVzc1ZpcnR1YWxIABIpCgZjdXN0b20YBSABKAsyFy56ZW5hby52MS5BZGRyZXNzQ3VzdG9tSABCCQoHYWRkcmVzcyIdCg5BZGRyZXNzVmlydHVhbBILCgN1cmkYASABKAkiRQoKQWRkcmVzc0dlbxIPCgdhZGRyZXNzGAEgASgJEgsKA2xhdBgCIAEoAhILCgNsbmcYAyABKAISDAoEc2l6ZRgEIAEoAiIyCg1BZGRyZXNzQ3VzdG9tEg8KB2FkZHJlc3MYASABKAkSEAoIdGltZXpvbmUYAiABKAkigQEKDEV2ZW50UHJpdmFjeRIuCgZwdWJsaWMYASABKAsyHC56ZW5hby52MS5FdmVudFByaXZhY3lQdWJsaWNIABIwCgdndWFyZGVkGAIgASgLMh0uemVuYW8udjEuRXZlbnRQcml2YWN5R3VhcmRlZEgAQg8KDWV2ZW50X3ByaXZhY3kiFAoSRXZlbnRQcml2YWN5UHVibGljIjMKE0V2ZW50UHJpdmFjeUd1YXJkZWQSHAoUcGFydGljaXBhdGlvbl9wdWJrZXkYASABKAkiigIKCUV2ZW50SW5mbxINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKb3JnYW5pemVycxgEIAMoCRISCgpzdGFydF9kYXRlGAUgASgDEhAKCGVuZF9kYXRlGAYgASgDEhAKCGNhcGFjaXR5GAcgASgNEikKCGxvY2F0aW9uGAggASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbhIUCgxwYXJ0aWNpcGFudHMYCSABKA0SEAoIcGtnX3BhdGgYCiABKAkSJwoHcHJpdmFjeRgLIAEoCzIWLnplbmFvLnYxLkV2ZW50UHJpdmFjeSIuChFCYXRjaFByb2ZpbGVGaWVsZBIMCgR0eXBlGAEgASgJEgsKA2tleRgCIAEoCSJVChNCYXRjaFByb2ZpbGVSZXF1ZXN0EisKBmZpZWxkcxgBIAMoCzIbLnplbmFvLnYxLkJhdGNoUHJvZmlsZUZpZWxkEhEKCWFkZHJlc3NlcxgCIAMoCSJ8ChFDcmVhdGVQb2xsUmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRIQCghxdWVzdGlvbhgCIAEoCRIPCgdvcHRpb25zGAMgAygJEhAKCGR1cmF0aW9uGAQgASgDEiAKBGtpbmQYBSABKA4yEi5wb2xscy52MS5Qb2xsS2luZCIlChJDcmVhdGVQb2xsUmVzcG9uc2USDwoHcG9zdF9pZBgBIAEoCSIyCg9Wb3RlUG9sbFJlcXVlc3QSDwoHcG9sbF9pZBgBIAEoCRIOCgZvcHRpb24YAiABKAkiEgoQVm90ZVBvbGxSZXNwb25zZSJXChFDcmVhdGVQb3N0UmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRIPCgdjb250ZW50GAIgASgJEhEKCXBhcmVudF9pZBgDIAEoCRIMCgR0YWdzGAQgAygJIiUKEkNyZWF0ZVBvc3RSZXNwb25zZRIPCgdwb3N0X2lkGAEgASgJIjEKEFJlYWN0UG9zdFJlcXVlc3QSDwoHcG9zdF9pZBgBIAEoCRIMCgRpY29uGAIgASgJIhMKEVJlYWN0UG9zdFJlc3BvbnNlIioKFkdldEV2ZW50VGlja2V0c1JlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkiRQoXR2V0RXZlbnRUaWNrZXRzUmVzcG9uc2USKgoMdGlja2V0c19pbmZvGAEgAygLMhQuemVuYW8udjEuVGlja2V0SW5mbyI3CgpUaWNrZXRJbmZvEhUKDXRpY2tldF9zZWNyZXQYASABKAkSEgoKdXNlcl9lbWFpbBgCIAEoCSI6Cg5DaGVja2luUmVxdWVzdBIVCg10aWNrZXRfcHVia2V5GAEgASgJEhEKCXNpZ25hdHVyZRgCIAEoCSIRCg9DaGVja2luUmVzcG9uc2Uy5wcKDFplbmFvU2VydmljZRJBCghFZGl0VXNlchIZLnplbmFvLnYxLkVkaXRVc2VyUmVxdWVzdBoaLnplbmFvLnYxLkVkaXRVc2VyUmVzcG9uc2USUwoOR2V0VXNlckFkZHJlc3MSHy56ZW5hby52MS5HZXRVc2VyQWRkcmVzc1JlcXVlc3QaIC56ZW5hby52MS5HZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJECglFZGl0RXZlbnQSGi56ZW5hby52MS5FZGl0RXZlbnRSZXF1ZXN0GhsuemVuYW8udjEuRWRpdEV2ZW50UmVzcG9uc2USWQoQVmFsaWRhdGVQYXNzd29yZBIhLnplbmFvLnYxLlZhbGlkYXRlUGFzc3dvcmRSZXF1ZXN0GiIuemVuYW8udjEuVmFsaWRhdGVQYXNzd29yZFJlc3BvbnNlElMKDkJyb2FkY2FzdEV2ZW50Eh8uemVuYW8udjEuQnJvYWRjYXN0RXZlbnRSZXF1ZXN0GiAuemVuYW8udjEuQnJvYWRjYXN0RXZlbnRSZXNwb25zZRJKCgtQYXJ0aWNpcGF0ZRIcLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVxdWVzdBodLnplbmFvLnYxLlBhcnRpY2lwYXRlUmVzcG9uc2USVgoPR2V0RXZlbnRUaWNrZXRzEiAuemVuYW8udjEuR2V0RXZlbnRUaWNrZXRzUmVxdWVzdBohLnplbmFvLnYxLkdldEV2ZW50VGlja2V0c1Jlc3BvbnNlEj4KB0NoZWNraW4SGC56ZW5hby52MS5DaGVja2luUmVxdWVzdBoZLnplbmFvLnYxLkNoZWNraW5SZXNwb25zZRJHCgpDcmVhdGVQb2xsEhsuemVuYW8udjEuQ3JlYXRlUG9sbFJlcXVlc3QaHC56ZW5hby52MS5DcmVhdGVQb2xsUmVzcG9uc2USQQoIVm90ZVBvbGwSGS56ZW5hby52MS5Wb3RlUG9sbFJlcXVlc3QaGi56ZW5hby52MS5Wb3RlUG9sbFJlc3BvbnNlEkcKCkNyZWF0ZVBvc3QSGy56ZW5hby52MS5DcmVhdGVQb3N0UmVxdWVzdBocLnplbmFvLnYxLkNyZWF0ZVBvc3RSZXNwb25zZRJECglSZWFjdFBvc3QSGi56ZW5hby52MS5SZWFjdFBvc3RSZXF1ZXN0GhsuemVuYW8udjEuUmVhY3RQb3N0UmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z", [file_polls_v1_polls]);
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiDwoNSGVhbHRoUmVxdWVzdCIlCg5IZWFsdGhSZXNwb25zZRITCgttYWludGVuYW5jZRgBIAEoCCJICg9FZGl0VXNlclJlcXVlc3QSFAoMZGlzcGxheV9uYW1lGAEgASgJEgsKA2JpbxgCIAEoCRISCgphdmF0YXJfdXJpGAMgASgJIh4KEEVkaXRVc2VyUmVzcG9uc2USCgoCaWQYASABKAkiFwoVR2V0VXNlckFkZHJlc3NSZXF1ZXN0IikKFkdldFVzZXJBZGRyZXNzUmVzcG9uc2USDwoHYWRkcmVzcxgBIAEoCSLqAQoSQ3JlYXRlRXZlbnRSZXF1ZXN0Eg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhEKCWltYWdlX3VyaRgDIAEoCRISCgpzdGFydF9kYXRlGAQgASgEEhAKCGVuZF9kYXRlGAUgASgEEhQKDHRpY2tldF9wcmljZRgGIAEoARIQCghjYXBhY2l0eRgHIAEoDRIpCghsb2NhdGlvbhgJIAEoCzIXLnplbmFvLnYxLkV2ZW50TG9jYXRpb24SEAoIcGFzc3dvcmQYCiABKAkSEgoKb3JnYW5pemVycxgLIAMoCSIhChNDcmVhdGVFdmVudFJlc3BvbnNlEgoKAmlkGAEgASgJIpMCChBFZGl0RXZlbnRSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEg0KBXRpdGxlGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhEKCWltYWdlX3VyaRgEIAEoCRISCgpzdGFydF9kYXRlGAUgASgEEhAKCGVuZF9kYXRlGAYgASgEEhQKDHRpY2tldF9wcmljZRgHIAEoARIQCghjYXBhY2l0eRgIIAEoDRIpCghsb2NhdGlvbhgJIAEoCzIXLnplbmFvLnYxLkV2ZW50TG9jYXRpb24SEAoIcGFzc3dvcmQYCiABKAkSFwoPdXBkYXRlX3Bhc3N3b3JkGAsgASgIEhIKCm9yZ2FuaXplcnMYDCADKAkiHwoRRWRpdEV2ZW50UmVzcG9uc2USCgoCaWQYASABKAkiPQoXVmFsaWRhdGVQYXNzd29yZFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSEAoIcGFzc3dvcmQYAiABKAkiKQoYVmFsaWRhdGVQYXNzd29yZFJlc3BvbnNlEg0KBXZhbGlkGAEgASgIIlcKElBhcnRpY2lwYXRlUmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRINCgVlbWFpbBgCIAEoCRIOCgZndWVzdHMYAyADKAkSEAoIcGFzc3dvcmQYBCABKAkiLAoTUGFydGljaXBhdGVSZXNwb25zZRIVCg10aWNrZXRfc2VjcmV0GAEgASgJIjoKFUJyb2FkY2FzdEV2ZW50UmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRIPCgdtZXNzYWdlGAIgASgJIhgKFkJyb2FkY2FzdEV2ZW50UmVzcG9uc2UiwQEKDUV2ZW50TG9jYXRpb24SEgoKdmVudWVfbmFtZRgBIAEoCRIUCgxpbnN0cnVjdGlvbnMYAiABKAkSIwoDZ2VvGAMgASgLMhQuemVuYW8udjEuQWRkcmVzc0dlb0gAEisKB3ZpcnR1YWwYBCABKAsyGC56ZW5hby52MS5BZGRyZXNzVmlydHVhbEgAEikKBmN1c3RvbRgFIAEoCzIXLnplbmFvLnYxLkFkZHJlc3NDdXN0b21IAEIJCgdhZGRyZXNzIh0KDkFkZHJlc3NWaXJ0dWFsEgsKA3VyaRgBIAEoCSJFCgpBZGRyZXNzR2VvEg8KB2FkZHJlc3MYASABKAkSCwoDbGF0GAIgASgCEgsKA2xuZxgDIAEoAhIMCgRzaXplGAQgASgCIjIKDUFkZHJlc3NDdXN0b20SDwoHYWRkcmVzcxgBIAEoCRIQCgh0aW1lem9uZRgCIAEoCSKBAQoMRXZlbnRQcml2YWN5Ei4KBnB1YmxpYxgBIAEoCzIcLnplbmFvLnYxLkV2ZW50UHJpdmFjeVB1YmxpY0gAEjAKB2d1YXJkZWQYAiABKAsyHS56ZW5hby52MS5FdmVudFByaXZhY3lHdWFyZGVkSABCDwoNZXZlbnRfcHJpdmFjeSIUChJFdmVudFByaXZhY3lQdWJsaWMiMwoTRXZlbnRQcml2YWN5R3VhcmRlZBIcChRwYXJ0aWNpcGF0aW9uX3B1YmtleRgBIAEoCSKKAgoJRXZlbnRJbmZvEg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhEKCWltYWdlX3VyaRgDIAEoCRISCgpvcmdhbml6ZXJzGAQgAygJEhIKCnN0YXJ0X2RhdGUYBSABKAMSEAoIZW5kX2RhdGUYBiABKAMSEAoIY2FwYWNpdHkYByABKA0SKQoIbG9jYXRpb24YCCABKAsyFy56ZW5hby52MS5FdmVudExvY2F0aW9uEhQKDHBhcnRpY2lwYW50cxgJIAEoDRIQCghwa2dfcGF0aBgKIAEoCRInCgdwcml2YWN5GAsgASgLMhYuemVuYW8udjEuRXZlbnRQcml2YWN5Ii4KEUJhdGNoUHJvZmlsZUZpZWxkEgwKBHR5cGUYASABKAkSCwoDa2V5GAIgASgJIlUKE0JhdGNoUHJvZmlsZVJlcXVlc3QSKwoGZmllbGRzGAEgAygLMhsuemVuYW8udjEuQmF0Y2hQcm9maWxlRmllbGQSEQoJYWRkcmVzc2VzGAIgAygJInwKEUNyZWF0ZVBvbGxSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEhAKCHF1ZXN0aW9uGAIgASgJEg8KB29wdGlvbnMYAyADKAkSEAoIZHVyYXRpb24YBCABKAMSIAoEa2luZBgFIAEoDjISLnBvbGxzLnYxLlBvbGxLaW5kIiUKEkNyZWF0ZVBvbGxSZXNwb25zZRIPCgdwb3N0X2lkGAEgASgJIjIKD1ZvdGVQb2xsUmVxdWVzdBIPCgdwb2xsX2lkGAEgASgJEg4KBm9wdGlvbhgCIAEoCSISChBWb3RlUG9sbFJlc3BvbnNlIlcKEUNyZWF0ZVBvc3RSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEg8KB2NvbnRlbnQYAiABKAkSEQoJcGFyZW50X2lkGAMgASgJEgwKBHRhZ3MYBCADKAkiJQoSQ3JlYXRlUG9zdFJlc3BvbnNlEg8KB3Bvc3RfaWQYASABKAkiMQoQUmVhY3RQb3N0UmVxdWVzdBIPCgdwb3N0X2lkGAEgASgJEgwKBGljb24YAiABKAkiEwoRUmVhY3RQb3N0UmVzcG9uc2UiKgoWR2V0RXZlbnRUaWNrZXRzUmVxdWVzdBIQCghldmVudF9pZBgBIAEoCSJFChdHZXRFdmVudFRpY2tldHNSZXNwb25zZRIqCgx0aWNrZXRzX2luZm8YASADKAsyFC56ZW5hby52MS5UaWNrZXRJbmZvIjcKClRpY2tldEluZm8SFQoNdGlja2V0X3NlY3JldBgBIAEoCRISCgp1c2VyX2VtYWlsGAIgASgJIjoKDkNoZWNraW5SZXF1ZXN0EhUKDXRpY2tldF9wdWJrZXkYASABKAkSEQoJc2lnbmF0dXJlGAIgASgJIhEKD0NoZWNraW5SZXNwb25zZTKkCAoMWmVuYW9TZXJ2aWNlEkEKCEVkaXRVc2VyEhkuemVuYW8udjEuRWRpdFVzZXJSZXF1ZXN0GhouemVuYW8udjEuRWRpdFVzZXJSZXNwb25zZRJTCg5HZXRVc2VyQWRkcmVzcxIfLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVxdWVzdBogLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkQKCUVkaXRFdmVudBIaLnplbmFvLnYxLkVkaXRFdmVudFJlcXVlc3QaGy56ZW5hby52MS5FZGl0RXZlbnRSZXNwb25zZRJZChBWYWxpZGF0ZVBhc3N3b3JkEiEuemVuYW8udjEuVmFsaWRhdGVQYXNzd29yZFJlcXVlc3QaIi56ZW5hby52MS5WYWxpZGF0ZVBhc3N3b3JkUmVzcG9uc2USUwoOQnJvYWRjYXN0RXZlbnQSHy56ZW5hby52MS5Ccm9hZGNhc3RFdmVudFJlcXVlc3QaIC56ZW5hby52MS5Ccm9hZGNhc3RFdmVudFJlc3BvbnNlEkoKC1BhcnRpY2lwYXRlEhwuemVuYW8udjEuUGFydGljaXBhdGVSZXF1ZXN0Gh0uemVuYW8udjEuUGFydGljaXBhdGVSZXNwb25zZRJWCg9HZXRFdmVudFRpY2tldHMSIC56ZW5hby52MS5HZXRFdmVudFRpY2tldHNSZXF1ZXN0GiEuemVuYW8udjEuR2V0RXZlbnRUaWNrZXRzUmVzcG9uc2USPgoHQ2hlY2tpbhIYLnplbmFvLnYxLkNoZWNraW5SZXF1ZXN0GhkuemVuYW8udjEuQ2hlY2tpblJlc3BvbnNlEkcKCkNyZWF0ZVBvbGwSGy56ZW5hby52MS5DcmVhdGVQb2xsUmVxdWVzdBocLnplbmFvLnYxLkNyZWF0ZVBvbGxSZXNwb25zZRJBCghWb3RlUG9sbBIZLnplbmFvLnYxLlZvdGVQb2xsUmVxdWVzdBoaLnplbmFvLnYxLlZvdGVQb2xsUmVzcG9uc2USRwoKQ3JlYXRlUG9zdBIbLnplbmFvLnYxLkNyZWF0ZVBvc3RSZXF1ZXN0GhwuemVuYW8udjEuQ3JlYXRlUG9zdFJlc3BvbnNlEkQKCVJlYWN0UG9zdBIaLnplbmFvLnYxLlJlYWN0UG9zdFJlcXVlc3QaGy56ZW5hby52MS5SZWFjdFBvc3RSZXNwb25zZRI7CgZIZWFsdGgSFy56ZW5hby52MS5IZWFsdGhSZXF1ZXN0GhguemVuYW8udjEuSGVhbHRoUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z", [file_polls_v1_polls]);
+
+/**
+ * @generated from message zenao.v1.HealthRequest
+ */
+export type HealthRequest = Message<"zenao.v1.HealthRequest"> & {
+};
+
+/**
+ * @generated from message zenao.v1.HealthRequest
+ */
+export type HealthRequestJson = {
+};
+
+/**
+ * Describes the message zenao.v1.HealthRequest.
+ * Use `create(HealthRequestSchema)` to create a new message.
+ */
+export const HealthRequestSchema: GenMessage<HealthRequest, HealthRequestJson> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 0);
+
+/**
+ * XXX: add more fields (e.g. version, commit_hash, gno.land version, ...)
+ *
+ * @generated from message zenao.v1.HealthResponse
+ */
+export type HealthResponse = Message<"zenao.v1.HealthResponse"> & {
+  /**
+   * @generated from field: bool maintenance = 1;
+   */
+  maintenance: boolean;
+};
+
+/**
+ * XXX: add more fields (e.g. version, commit_hash, gno.land version, ...)
+ *
+ * @generated from message zenao.v1.HealthResponse
+ */
+export type HealthResponseJson = {
+  /**
+   * @generated from field: bool maintenance = 1;
+   */
+  maintenance?: boolean;
+};
+
+/**
+ * Describes the message zenao.v1.HealthResponse.
+ * Use `create(HealthResponseSchema)` to create a new message.
+ */
+export const HealthResponseSchema: GenMessage<HealthResponse, HealthResponseJson> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 1);
 
 /**
  * @generated from message zenao.v1.EditUserRequest
@@ -59,7 +109,7 @@ export type EditUserRequestJson = {
  * Use `create(EditUserRequestSchema)` to create a new message.
  */
 export const EditUserRequestSchema: GenMessage<EditUserRequest, EditUserRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 0);
+  messageDesc(file_zenao_v1_zenao, 2);
 
 /**
  * @generated from message zenao.v1.EditUserResponse
@@ -86,7 +136,7 @@ export type EditUserResponseJson = {
  * Use `create(EditUserResponseSchema)` to create a new message.
  */
 export const EditUserResponseSchema: GenMessage<EditUserResponse, EditUserResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 1);
+  messageDesc(file_zenao_v1_zenao, 3);
 
 /**
  * @generated from message zenao.v1.GetUserAddressRequest
@@ -105,7 +155,7 @@ export type GetUserAddressRequestJson = {
  * Use `create(GetUserAddressRequestSchema)` to create a new message.
  */
 export const GetUserAddressRequestSchema: GenMessage<GetUserAddressRequest, GetUserAddressRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 2);
+  messageDesc(file_zenao_v1_zenao, 4);
 
 /**
  * @generated from message zenao.v1.GetUserAddressResponse
@@ -132,7 +182,7 @@ export type GetUserAddressResponseJson = {
  * Use `create(GetUserAddressResponseSchema)` to create a new message.
  */
 export const GetUserAddressResponseSchema: GenMessage<GetUserAddressResponse, GetUserAddressResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 3);
+  messageDesc(file_zenao_v1_zenao, 5);
 
 /**
  * @generated from message zenao.v1.CreateEventRequest
@@ -265,7 +315,7 @@ export type CreateEventRequestJson = {
  * Use `create(CreateEventRequestSchema)` to create a new message.
  */
 export const CreateEventRequestSchema: GenMessage<CreateEventRequest, CreateEventRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 4);
+  messageDesc(file_zenao_v1_zenao, 6);
 
 /**
  * @generated from message zenao.v1.CreateEventResponse
@@ -292,7 +342,7 @@ export type CreateEventResponseJson = {
  * Use `create(CreateEventResponseSchema)` to create a new message.
  */
 export const CreateEventResponseSchema: GenMessage<CreateEventResponse, CreateEventResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 5);
+  messageDesc(file_zenao_v1_zenao, 7);
 
 /**
  * @generated from message zenao.v1.EditEventRequest
@@ -445,7 +495,7 @@ export type EditEventRequestJson = {
  * Use `create(EditEventRequestSchema)` to create a new message.
  */
 export const EditEventRequestSchema: GenMessage<EditEventRequest, EditEventRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 6);
+  messageDesc(file_zenao_v1_zenao, 8);
 
 /**
  * @generated from message zenao.v1.EditEventResponse
@@ -472,7 +522,7 @@ export type EditEventResponseJson = {
  * Use `create(EditEventResponseSchema)` to create a new message.
  */
 export const EditEventResponseSchema: GenMessage<EditEventResponse, EditEventResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 7);
+  messageDesc(file_zenao_v1_zenao, 9);
 
 /**
  * @generated from message zenao.v1.ValidatePasswordRequest
@@ -509,7 +559,7 @@ export type ValidatePasswordRequestJson = {
  * Use `create(ValidatePasswordRequestSchema)` to create a new message.
  */
 export const ValidatePasswordRequestSchema: GenMessage<ValidatePasswordRequest, ValidatePasswordRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 8);
+  messageDesc(file_zenao_v1_zenao, 10);
 
 /**
  * @generated from message zenao.v1.ValidatePasswordResponse
@@ -536,7 +586,7 @@ export type ValidatePasswordResponseJson = {
  * Use `create(ValidatePasswordResponseSchema)` to create a new message.
  */
 export const ValidatePasswordResponseSchema: GenMessage<ValidatePasswordResponse, ValidatePasswordResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 9);
+  messageDesc(file_zenao_v1_zenao, 11);
 
 /**
  * @generated from message zenao.v1.ParticipateRequest
@@ -593,7 +643,7 @@ export type ParticipateRequestJson = {
  * Use `create(ParticipateRequestSchema)` to create a new message.
  */
 export const ParticipateRequestSchema: GenMessage<ParticipateRequest, ParticipateRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 10);
+  messageDesc(file_zenao_v1_zenao, 12);
 
 /**
  * @generated from message zenao.v1.ParticipateResponse
@@ -620,7 +670,7 @@ export type ParticipateResponseJson = {
  * Use `create(ParticipateResponseSchema)` to create a new message.
  */
 export const ParticipateResponseSchema: GenMessage<ParticipateResponse, ParticipateResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 11);
+  messageDesc(file_zenao_v1_zenao, 13);
 
 /**
  * @generated from message zenao.v1.BroadcastEventRequest
@@ -657,7 +707,7 @@ export type BroadcastEventRequestJson = {
  * Use `create(BroadcastEventRequestSchema)` to create a new message.
  */
 export const BroadcastEventRequestSchema: GenMessage<BroadcastEventRequest, BroadcastEventRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 12);
+  messageDesc(file_zenao_v1_zenao, 14);
 
 /**
  * @generated from message zenao.v1.BroadcastEventResponse
@@ -676,7 +726,7 @@ export type BroadcastEventResponseJson = {
  * Use `create(BroadcastEventResponseSchema)` to create a new message.
  */
 export const BroadcastEventResponseSchema: GenMessage<BroadcastEventResponse, BroadcastEventResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 13);
+  messageDesc(file_zenao_v1_zenao, 15);
 
 /**
  * @generated from message zenao.v1.EventLocation
@@ -755,7 +805,7 @@ export type EventLocationJson = {
  * Use `create(EventLocationSchema)` to create a new message.
  */
 export const EventLocationSchema: GenMessage<EventLocation, EventLocationJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 14);
+  messageDesc(file_zenao_v1_zenao, 16);
 
 /**
  * @generated from message zenao.v1.AddressVirtual
@@ -782,7 +832,7 @@ export type AddressVirtualJson = {
  * Use `create(AddressVirtualSchema)` to create a new message.
  */
 export const AddressVirtualSchema: GenMessage<AddressVirtual, AddressVirtualJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 15);
+  messageDesc(file_zenao_v1_zenao, 17);
 
 /**
  * @generated from message zenao.v1.AddressGeo
@@ -839,7 +889,7 @@ export type AddressGeoJson = {
  * Use `create(AddressGeoSchema)` to create a new message.
  */
 export const AddressGeoSchema: GenMessage<AddressGeo, AddressGeoJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 16);
+  messageDesc(file_zenao_v1_zenao, 18);
 
 /**
  * @generated from message zenao.v1.AddressCustom
@@ -880,7 +930,7 @@ export type AddressCustomJson = {
  * Use `create(AddressCustomSchema)` to create a new message.
  */
 export const AddressCustomSchema: GenMessage<AddressCustom, AddressCustomJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 17);
+  messageDesc(file_zenao_v1_zenao, 19);
 
 /**
  * @generated from message zenao.v1.EventPrivacy
@@ -924,7 +974,7 @@ export type EventPrivacyJson = {
  * Use `create(EventPrivacySchema)` to create a new message.
  */
 export const EventPrivacySchema: GenMessage<EventPrivacy, EventPrivacyJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 18);
+  messageDesc(file_zenao_v1_zenao, 20);
 
 /**
  * @generated from message zenao.v1.EventPrivacyPublic
@@ -943,7 +993,7 @@ export type EventPrivacyPublicJson = {
  * Use `create(EventPrivacyPublicSchema)` to create a new message.
  */
 export const EventPrivacyPublicSchema: GenMessage<EventPrivacyPublic, EventPrivacyPublicJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 19);
+  messageDesc(file_zenao_v1_zenao, 21);
 
 /**
  * @generated from message zenao.v1.EventPrivacyGuarded
@@ -970,7 +1020,7 @@ export type EventPrivacyGuardedJson = {
  * Use `create(EventPrivacyGuardedSchema)` to create a new message.
  */
 export const EventPrivacyGuardedSchema: GenMessage<EventPrivacyGuarded, EventPrivacyGuardedJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 20);
+  messageDesc(file_zenao_v1_zenao, 22);
 
 /**
  * @generated from message zenao.v1.EventInfo
@@ -1105,7 +1155,7 @@ export type EventInfoJson = {
  * Use `create(EventInfoSchema)` to create a new message.
  */
 export const EventInfoSchema: GenMessage<EventInfo, EventInfoJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 21);
+  messageDesc(file_zenao_v1_zenao, 23);
 
 /**
  * @generated from message zenao.v1.BatchProfileField
@@ -1142,7 +1192,7 @@ export type BatchProfileFieldJson = {
  * Use `create(BatchProfileFieldSchema)` to create a new message.
  */
 export const BatchProfileFieldSchema: GenMessage<BatchProfileField, BatchProfileFieldJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 22);
+  messageDesc(file_zenao_v1_zenao, 24);
 
 /**
  * @generated from message zenao.v1.BatchProfileRequest
@@ -1179,7 +1229,7 @@ export type BatchProfileRequestJson = {
  * Use `create(BatchProfileRequestSchema)` to create a new message.
  */
 export const BatchProfileRequestSchema: GenMessage<BatchProfileRequest, BatchProfileRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 23);
+  messageDesc(file_zenao_v1_zenao, 25);
 
 /**
  * @generated from message zenao.v1.CreatePollRequest
@@ -1250,7 +1300,7 @@ export type CreatePollRequestJson = {
  * Use `create(CreatePollRequestSchema)` to create a new message.
  */
 export const CreatePollRequestSchema: GenMessage<CreatePollRequest, CreatePollRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 24);
+  messageDesc(file_zenao_v1_zenao, 26);
 
 /**
  * @generated from message zenao.v1.CreatePollResponse
@@ -1277,7 +1327,7 @@ export type CreatePollResponseJson = {
  * Use `create(CreatePollResponseSchema)` to create a new message.
  */
 export const CreatePollResponseSchema: GenMessage<CreatePollResponse, CreatePollResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 25);
+  messageDesc(file_zenao_v1_zenao, 27);
 
 /**
  * @generated from message zenao.v1.VotePollRequest
@@ -1314,7 +1364,7 @@ export type VotePollRequestJson = {
  * Use `create(VotePollRequestSchema)` to create a new message.
  */
 export const VotePollRequestSchema: GenMessage<VotePollRequest, VotePollRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 26);
+  messageDesc(file_zenao_v1_zenao, 28);
 
 /**
  * @generated from message zenao.v1.VotePollResponse
@@ -1333,7 +1383,7 @@ export type VotePollResponseJson = {
  * Use `create(VotePollResponseSchema)` to create a new message.
  */
 export const VotePollResponseSchema: GenMessage<VotePollResponse, VotePollResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 27);
+  messageDesc(file_zenao_v1_zenao, 29);
 
 /**
  * @generated from message zenao.v1.CreatePostRequest
@@ -1390,7 +1440,7 @@ export type CreatePostRequestJson = {
  * Use `create(CreatePostRequestSchema)` to create a new message.
  */
 export const CreatePostRequestSchema: GenMessage<CreatePostRequest, CreatePostRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 28);
+  messageDesc(file_zenao_v1_zenao, 30);
 
 /**
  * @generated from message zenao.v1.CreatePostResponse
@@ -1417,7 +1467,7 @@ export type CreatePostResponseJson = {
  * Use `create(CreatePostResponseSchema)` to create a new message.
  */
 export const CreatePostResponseSchema: GenMessage<CreatePostResponse, CreatePostResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 29);
+  messageDesc(file_zenao_v1_zenao, 31);
 
 /**
  * @generated from message zenao.v1.ReactPostRequest
@@ -1454,7 +1504,7 @@ export type ReactPostRequestJson = {
  * Use `create(ReactPostRequestSchema)` to create a new message.
  */
 export const ReactPostRequestSchema: GenMessage<ReactPostRequest, ReactPostRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 30);
+  messageDesc(file_zenao_v1_zenao, 32);
 
 /**
  * @generated from message zenao.v1.ReactPostResponse
@@ -1473,7 +1523,7 @@ export type ReactPostResponseJson = {
  * Use `create(ReactPostResponseSchema)` to create a new message.
  */
 export const ReactPostResponseSchema: GenMessage<ReactPostResponse, ReactPostResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 31);
+  messageDesc(file_zenao_v1_zenao, 33);
 
 /**
  * @generated from message zenao.v1.GetEventTicketsRequest
@@ -1500,7 +1550,7 @@ export type GetEventTicketsRequestJson = {
  * Use `create(GetEventTicketsRequestSchema)` to create a new message.
  */
 export const GetEventTicketsRequestSchema: GenMessage<GetEventTicketsRequest, GetEventTicketsRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 32);
+  messageDesc(file_zenao_v1_zenao, 34);
 
 /**
  * @generated from message zenao.v1.GetEventTicketsResponse
@@ -1527,7 +1577,7 @@ export type GetEventTicketsResponseJson = {
  * Use `create(GetEventTicketsResponseSchema)` to create a new message.
  */
 export const GetEventTicketsResponseSchema: GenMessage<GetEventTicketsResponse, GetEventTicketsResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 33);
+  messageDesc(file_zenao_v1_zenao, 35);
 
 /**
  * @generated from message zenao.v1.TicketInfo
@@ -1564,7 +1614,7 @@ export type TicketInfoJson = {
  * Use `create(TicketInfoSchema)` to create a new message.
  */
 export const TicketInfoSchema: GenMessage<TicketInfo, TicketInfoJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 34);
+  messageDesc(file_zenao_v1_zenao, 36);
 
 /**
  * @generated from message zenao.v1.CheckinRequest
@@ -1601,7 +1651,7 @@ export type CheckinRequestJson = {
  * Use `create(CheckinRequestSchema)` to create a new message.
  */
 export const CheckinRequestSchema: GenMessage<CheckinRequest, CheckinRequestJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 35);
+  messageDesc(file_zenao_v1_zenao, 37);
 
 /**
  * @generated from message zenao.v1.CheckinResponse
@@ -1620,7 +1670,7 @@ export type CheckinResponseJson = {
  * Use `create(CheckinResponseSchema)` to create a new message.
  */
 export const CheckinResponseSchema: GenMessage<CheckinResponse, CheckinResponseJson> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 36);
+  messageDesc(file_zenao_v1_zenao, 38);
 
 /**
  * @generated from service zenao.v1.ZenaoService
@@ -1735,6 +1785,16 @@ export const ZenaoService: GenService<{
     methodKind: "unary";
     input: typeof ReactPostRequestSchema;
     output: typeof ReactPostResponseSchema;
+  },
+  /**
+   * HEALTH
+   *
+   * @generated from rpc zenao.v1.ZenaoService.Health
+   */
+  health: {
+    methodKind: "unary";
+    input: typeof HealthRequestSchema;
+    output: typeof HealthResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_zenao_v1_zenao, 0);
