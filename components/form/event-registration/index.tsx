@@ -35,6 +35,7 @@ type EventRegistrationFormProps = {
   eventId: string;
   eventPassword: string;
   userAddress: string | null;
+  onGuestRegistrationSuccess?: (email: string) => void;
 };
 
 export type SubmitStatusInvitee = Record<
@@ -46,6 +47,7 @@ export function EventRegistrationForm({
   eventId,
   eventPassword,
   userAddress,
+  onGuestRegistrationSuccess,
 }: EventRegistrationFormProps) {
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(eventId));
@@ -106,6 +108,7 @@ export function EventRegistrationForm({
           userAddress,
           password: eventPassword,
         });
+        onGuestRegistrationSuccess?.(data.email!);
       }
       setIsPending(false);
       toast({ title: t("toast-confirmation") });

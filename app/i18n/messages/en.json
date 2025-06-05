@@ -91,6 +91,14 @@
     "view-more": "View more",
     "view-less": "View less"
   },
+  "guest-registration-success-dialog": {
+    "registration-title": "You're in !",
+    "thank-you": "Thank you for joining {title} !",
+    "tickets-explanation": "A confirmation and your ticket have been sent to:",
+    "view-on-account": "You can also view it by logging into your account.", 
+    "profile-completion-invitation": "Use the same email to log in and complete your profile—it’s quick and helps us tailor your event experience.",
+    "sign-in": "Sign in"
+  },
   "manifesto": {
     "title": "MANIFESTO",
     "means": "means",
