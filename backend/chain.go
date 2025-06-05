@@ -311,7 +311,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 
 	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
-		GasWanted: 10000000,
+		GasWanted: 20000000,
 	}, vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
 		PkgPath: g.eventsIndexPkgPath,
