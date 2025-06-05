@@ -1,6 +1,13 @@
 "use client";
 
-import { ClerkLoaded, ClerkLoading, SignedIn, useAuth } from "@clerk/nextjs";
+import {
+  ClerkLoaded,
+  ClerkLoading,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  useAuth,
+} from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
@@ -190,6 +197,13 @@ export function EventInfoLayout({
                     {t("see-ticket")}
                   </Link>
                 </SignedIn>
+                <SignedOut>
+                  <SignInButton>
+                    <Text className="text-main underline">
+                      {t("login-to-see-tickets")}
+                    </Text>
+                  </SignInButton>
+                </SignedOut>
                 {/* TODO: create a clean decount timer */}
                 {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>

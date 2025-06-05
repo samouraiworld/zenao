@@ -82,6 +82,7 @@
     "toast-default-error": "Error whille trying to register participants",
     "participants-list": "Participants list",
     "see-ticket": "See ticket",
+    "login-to-see-tickets": "Login to see ticket(s)",
     "invitee-form": {
       "add-a-friend": "Add a friend",
       "email-placeholder": "Email..."
