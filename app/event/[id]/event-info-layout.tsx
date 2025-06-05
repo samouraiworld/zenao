@@ -76,7 +76,7 @@ export function EventInfoLayout({
   const isStarted = Date.now() > Number(data.startDate) * 1000;
 
   const [guestEmail, setGuestEmail] = useState<string>("");
-  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
+  const [guestDialogOpen, setGuestDialogOpen] = useState(true);
 
   const t = useTranslations("event");
 
@@ -238,7 +238,10 @@ export function EventInfoLayout({
                 eventId={eventId}
                 userAddress={address}
                 eventPassword={password}
-                onGuestRegistrationSuccess={(email) => setGuestEmail(email)}
+                onGuestRegistrationSuccess={(email) => {
+                  setGuestEmail(email);
+                  setGuestDialogOpen(true);
+                }}
               />
             </div>
           )}
