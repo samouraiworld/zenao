@@ -103,12 +103,16 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return err
 		}
 
+		if evt == nil {
+			return errors.New("nil event after participate")
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	if s.MailClient != nil && evt != nil {
+	if s.MailClient != nil {
 		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
 		if err != nil {
 			s.Logger.Error("generate-participate-email-content", zap.Error(err))
