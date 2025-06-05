@@ -96,7 +96,8 @@
     "thank-you": "Thank you for joining {title} !",
     "tickets-explanation": "A confirmation and your ticket have been sent to:",
     "view-on-account": "You can also view it by logging into your account.", 
-    "profile-completion-invitation": "Use the same email to log in and complete your profile—it’s quick and helps us tailor your event experience.",
+    "profile-completion-invitation": "Use the same email to log in and complete your profile.",
+    "profile-completion-incentive": "It’s quick and will be useful to interact with community !",
     "sign-in": "Sign in"
   },
   "manifesto": {

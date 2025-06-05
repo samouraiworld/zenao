@@ -55,6 +55,7 @@ export function GuestRegistrationSuccessDialog({
             <Text>{t("tickets-explanation")} </Text>
             <Text className="font-semibold">{email}</Text>
             <Text>{t("profile-completion-invitation")}</Text>
+            <Text>{t("profile-completion-incentive")}</Text>
           </div>
           <SignInButton>
             <Button variant="outline">
@@ -84,6 +85,7 @@ export function GuestRegistrationSuccessDialog({
           <Text>{t("tickets-explanation")} </Text>
           <Text className="font-semibold">{email}</Text>
           <Text>{t("profile-completion-invitation")}</Text>
+          <Text>{t("profile-completion-incentive")}</Text>
         </div>
         <SignInButton>
           <Button variant="outline">
