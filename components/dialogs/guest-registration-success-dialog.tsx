@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { SignInButton } from "@clerk/nextjs";
+import { MailCheck } from "lucide-react";
 import { Button } from "../shadcn/button";
 import {
   Dialog,
@@ -32,6 +33,7 @@ export function GuestRegistrationSuccessDialog({
   onOpenChange,
 }: DialogProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isStandalone = useMediaQuery("(display-mode: standalone)");
   const t = useTranslations("guest-registration-success-dialog");
 
   if (isDesktop) {
@@ -46,6 +48,9 @@ export function GuestRegistrationSuccessDialog({
               {t("thank-you", { title })}
             </DialogDescription>
           </DialogHeader>
+
+          <MailCheck size={64} className="self-center" />
+
           <div className="flex flex-col gap-2">
             <Text>{t("tickets-explanation")} </Text>
             <Text className="font-semibold">{email}</Text>
@@ -62,12 +67,19 @@ export function GuestRegistrationSuccessDialog({
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={onOpenChange} modal={!isStandalone}>
       <DrawerContent className="flex flex-col gap-8 pb-8 px-4">
         <DrawerHeader>
-          <DrawerTitle>{t("registration-title")}</DrawerTitle>
-          <DrawerDescription>{t("thank-you", { title })}</DrawerDescription>
+          <DrawerTitle className="text-2xl">
+            {t("registration-title")}
+          </DrawerTitle>
+          <DrawerDescription className="text-base">
+            {t("thank-you", { title })}
+          </DrawerDescription>
         </DrawerHeader>
+
+        <MailCheck size={64} className="self-center" />
+
         <div className="flex flex-col gap-2">
           <Text>{t("tickets-explanation")} </Text>
           <Text className="font-semibold">{email}</Text>

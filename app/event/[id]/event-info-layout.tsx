@@ -76,7 +76,7 @@ export function EventInfoLayout({
   const isStarted = Date.now() > Number(data.startDate) * 1000;
 
   const [guestEmail, setGuestEmail] = useState<string>("");
-  const [guestDialogOpen, setGuestDialogOpen] = useState(true);
+  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
 
   const t = useTranslations("event");
 
