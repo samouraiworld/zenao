@@ -65,6 +65,8 @@ const (
 	ZenaoServiceCreatePostProcedure = "/zenao.v1.ZenaoService/CreatePost"
 	// ZenaoServiceReactPostProcedure is the fully-qualified name of the ZenaoService's ReactPost RPC.
 	ZenaoServiceReactPostProcedure = "/zenao.v1.ZenaoService/ReactPost"
+	// ZenaoServiceHealthProcedure is the fully-qualified name of the ZenaoService's Health RPC.
+	ZenaoServiceHealthProcedure = "/zenao.v1.ZenaoService/Health"
 )
 
 // ZenaoServiceClient is a client for the zenao.v1.ZenaoService service.
@@ -85,6 +87,8 @@ type ZenaoServiceClient interface {
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
 	CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error)
 	ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error)
+	// HEALTH
+	Health(context.Context, *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error)
 }
 
 // NewZenaoServiceClient constructs a client for the zenao.v1.ZenaoService service. By default, it
@@ -176,6 +180,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("ReactPost")),
 			connect.WithClientOptions(opts...),
 		),
+		health: connect.NewClient[v1.HealthRequest, v1.HealthResponse](
+			httpClient,
+			baseURL+ZenaoServiceHealthProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("Health")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -194,6 +204,7 @@ type zenaoServiceClient struct {
 	votePoll         *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 	createPost       *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
 	reactPost        *connect.Client[v1.ReactPostRequest, v1.ReactPostResponse]
+	health           *connect.Client[v1.HealthRequest, v1.HealthResponse]
 }
 
 // EditUser calls zenao.v1.ZenaoService.EditUser.
@@ -261,6 +272,11 @@ func (c *zenaoServiceClient) ReactPost(ctx context.Context, req *connect.Request
 	return c.reactPost.CallUnary(ctx, req)
 }
 
+// Health calls zenao.v1.ZenaoService.Health.
+func (c *zenaoServiceClient) Health(ctx context.Context, req *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error) {
+	return c.health.CallUnary(ctx, req)
+}
+
 // ZenaoServiceHandler is an implementation of the zenao.v1.ZenaoService service.
 type ZenaoServiceHandler interface {
 	// USER
@@ -279,6 +295,8 @@ type ZenaoServiceHandler interface {
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
 	CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error)
 	ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error)
+	// HEALTH
+	Health(context.Context, *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error)
 }
 
 // NewZenaoServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -366,6 +384,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("ReactPost")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceHealthHandler := connect.NewUnaryHandler(
+		ZenaoServiceHealthProcedure,
+		svc.Health,
+		connect.WithSchema(zenaoServiceMethods.ByName("Health")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/zenao.v1.ZenaoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case ZenaoServiceEditUserProcedure:
@@ -394,6 +418,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceCreatePostHandler.ServeHTTP(w, r)
 		case ZenaoServiceReactPostProcedure:
 			zenaoServiceReactPostHandler.ServeHTTP(w, r)
+		case ZenaoServiceHealthProcedure:
+			zenaoServiceHealthHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -453,4 +479,8 @@ func (UnimplementedZenaoServiceHandler) CreatePost(context.Context, *connect.Req
 
 func (UnimplementedZenaoServiceHandler) ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ReactPost is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) Health(context.Context, *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.Health is not implemented"))
 }

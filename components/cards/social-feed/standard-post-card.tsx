@@ -27,6 +27,7 @@ export function StandardPostCard({
         eventId={eventId}
         post={post}
         createdBy={createdBy}
+        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${post.post.localPostId.toString(32).padStart(7, "0")}`}
         canReply={canReply}
       >
         <MarkdownPreview markdownString={standardPost.content} />

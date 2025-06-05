@@ -5,7 +5,7 @@ import { imageHeight, imageWidth } from "./constants";
 import { ExclusiveEventGuard } from "./exclusive-event-guard";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
-import { ScreenContainer } from "@/components/layout/ScreenContainer";
+import { ScreenContainer } from "@/components/layout/screen-container";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
 import { web2URL } from "@/lib/uris";
 import { profileOptions } from "@/lib/queries/profile";

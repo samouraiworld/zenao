@@ -93,7 +93,7 @@ export function MainEventSections({
       </TabsList>
       <Separator className="mb-3" />
 
-      <TabsContent value="description">
+      <TabsContent value="description" className="overflow-hidden">
         <MarkdownPreview markdownString={data.description} />
       </TabsContent>
 

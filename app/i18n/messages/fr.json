@@ -1,4 +1,7 @@
 {
+  "common": {
+    "maintenance": "Zenao est en maintenance, réessayez dans quelques minutes..."
+  },
   "home": {
     "first-point": "Commencez en editant ",
     "second-point": "Sauvegardez et voyez vos changements instantanement."

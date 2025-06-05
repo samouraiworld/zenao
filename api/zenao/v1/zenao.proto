@@ -25,7 +25,15 @@ service ZenaoService {
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
   rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
+
+  // HEALTH
+  rpc Health(HealthRequest) returns (HealthResponse);
 }
+
+message HealthRequest {}
+
+// XXX: add more fields (e.g. version, commit_hash, gno.land version, ...)
+message HealthResponse { bool maintenance = 1; }
 
 message EditUserRequest {
   string display_name = 1;

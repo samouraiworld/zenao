@@ -7,7 +7,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import {
   ScreenContainer,
   ScreenContainerCentered,
-} from "@/components/layout/ScreenContainer";
+} from "@/components/layout/screen-container";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/layout/events-list-layout";

@@ -10,6 +10,35 @@ import (
 	v1 "gno.land/p/zenao/polls/v1"
 )
 
+func (h *HealthRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (h *HealthRequest) FromJSON(node *json.Node) {
+	*h = HealthRequest{}
+}
+
+func (h *HealthResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if h.Maintenance != false {
+		fields["maintenance"] = json.BoolNode("", h.Maintenance)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (h *HealthResponse) FromJSON(node *json.Node) {
+	*h = HealthResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["maintenance"]; ok {
+		h.Maintenance = val.MustBool()
+	}
+}
+
 func (e *EditUserRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
