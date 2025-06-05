@@ -1,4 +1,7 @@
 {
+  "common": {
+    "maintenance": "Zenao is under maintenance, try again in few minutes..."
+  },
   "navigation": {
     "zenao": "ZENAO",
     "your-events": "Your events",
