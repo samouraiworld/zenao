@@ -481,7 +481,7 @@ func (g *gormZenaoDB) GetEventUsersWithRole(eventID string, role string) ([]*zen
 	return res, nil
 }
 
-// GetEventUserTickets implements zeni.DB
+// GetEventUserTickets implements zeni.DB.
 func (g *gormZenaoDB) GetEventUserTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
