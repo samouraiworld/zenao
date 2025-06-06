@@ -90,6 +90,11 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // Tunnel
   tunnelRoute: "/monitoring-tunnel",
 
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+    assets: [".next"],
+  },
+
   bundleSizeOptimizations: {
     excludeReplayIframe: true,
     excludeReplayWorker: true,
