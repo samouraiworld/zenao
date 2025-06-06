@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"sync"
 	"syscall"
@@ -45,91 +46,93 @@ func (conf *e2eInfraConfig) RegisterFlags(flset *flag.FlagSet) {
 }
 
 func execE2EInfra() error {
-	const dbPath = "e2e.db"
+	tempDir, err := os.MkdirTemp("", "zenao-e2e-*")
+	if err != nil {
+		return fmt.Errorf("failed to create temp directory: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
+	// root ctx handle ctrl+c
 	ctx, cancelCtx := context.WithCancel(context.Background())
+	wg := &sync.WaitGroup{}
 	go func() {
 		<-sigs
 		cancelCtx()
 	}()
 
-	wg := &sync.WaitGroup{}
 	defer func() {
-		cancelCtx()
+		<-ctx.Done()
 		wg.Wait()
 	}()
 
+	dbPath := filepath.Join(tempDir, "e2e.db")
+	txsPath := filepath.Join(tempDir, "genesis_txs.jsonl")
+
+	// backend ctx handle backend & gnodev
 	backendCtx, cancelBackendCtx := context.WithCancel(ctx)
-	defer cancelBackendCtx()
 	backendDone := make(chan struct{}, 1)
 
-	// gnodev ctx to split from backend ctx to avoid having both wg.Done() executed at same time
-	gnodevCtx, cancelGnodevCtx := context.WithCancel(ctx)
-	defer cancelGnodevCtx()
-	gnodevDone := make(chan struct{}, 1)
-	gnodevDone <- struct{}{}
+	// prepare db
+	{
+		if err := os.RemoveAll(dbPath); err != nil {
+			return err
+		}
+
+		args := []string{"atlas", "migrate", "apply", "--dir", "file://migrations", "--url", "sqlite://" + dbPath}
+		if err := runCommand(ctx, "db", "#317738", args); err != nil {
+			fmt.Printf("%-10s | db: %v\n", "RUN_ERR", err)
+			return err
+		}
+	}
+
+	// run fakegen with --skip-chain
+	{
+		args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--db", dbPath, "--skip-chain"}
+		if err := runCommand(ctx, "fakegen", "#317738", args); err != nil {
+			return err
+		}
+	}
+
+	// run gentxs
+	{
+		args := []string{"go", "run", "./backend", "gentxs", "--db", dbPath, "--output", txsPath}
+		if err := runCommand(ctx, "gentxs", "#317738", args); err != nil {
+			return err
+		}
+	}
+
+	// start gnodev
+	{
+		args := []string{"make", "start.gnodev-e2e"}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+			cmd.Env = append(os.Environ(), "TXS_FILE="+txsPath)
+			if err := runCommandWithCmd(ctx, "gnodev", "#7D56F4", cmd); err != nil {
+				fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
+			}
+		}()
+	}
 
 	startBackend := func() error {
-		defer func() { backendDone <- struct{}{} }()
-
-		// prepare db
-		{
-			if err := os.RemoveAll(dbPath); err != nil {
-				return err
-			}
-
-			args := []string{"atlas", "migrate", "apply", "--dir", "file://migrations", "--env", "e2e"}
-			if err := runCommand(backendCtx, "db", "#317738", args); err != nil {
-				fmt.Printf("%-10s | db: %v\n", "RUN_ERR", err)
-				return err
-			}
-		}
-
-		// run fakegen with --skip-chain
-		{
-			args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--db", dbPath, "--skip-chain"}
-			if err := runCommand(backendCtx, "fakegen", "#317738", args); err != nil {
-				return err
-			}
-		}
-
-		// run gentxs
-		{
-			args := []string{"go", "run", "./backend", "gentxs", "--db", dbPath}
-			if err := runCommand(backendCtx, "gentxs", "#317738", args); err != nil {
-				return err
-			}
-		}
-
 		// start backend in background
 		{
-			args := []string{"go", "run", "./backend", "start", "--db", dbPath}
+			dbCopyPath := filepath.Join(tempDir, "e2e-copy.db")
+			if err := copyFile(dbPath, dbCopyPath); err != nil {
+				return err
+			}
+
+			args := []string{"go", "run", "./backend", "start", "--db", dbCopyPath}
 			wg.Add(1)
 			go func() {
-				defer wg.Done()
+				defer os.Remove(dbCopyPath)
+				defer func() { wg.Done(); backendDone <- struct{}{} }()
 				if err := runCommand(backendCtx, "backend", "#C2675E", args); err != nil {
 					fmt.Printf("%-10s | backend: %v\n", "RUN_ERR", err)
-				}
-			}()
-		}
-
-		// start gnodev in background using main context
-		{
-			cancelGnodevCtx()
-			<-gnodevDone
-			gnodevCtx, cancelGnodevCtx = context.WithCancel(ctx)
-			gnodevDone = make(chan struct{}, 1)
-			args := []string{"make", "start.gnodev-e2e"}
-			wg.Add(1)
-			go func() {
-				defer func() { wg.Done(); gnodevDone <- struct{}{} }()
-				cmd := exec.CommandContext(gnodevCtx, args[0], args[1:]...)
-				cmd.Env = append(os.Environ(), "TXS_FILE=genesis_txs.jsonl")
-				if err := runCommandWithCmd(gnodevCtx, "gnodev", "#7D56F4", cmd); err != nil {
-					fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
 				}
 			}()
 		}
@@ -153,6 +156,11 @@ func execE2EInfra() error {
 
 	resetReqJoiner := requestsJoiner{process: func() (int, []byte) {
 		fmt.Printf("%-10s | ----------------------------\n", "RESET")
+		// reset gnodev
+		if _, err := http.Get("http://localhost:8888/reset"); err != nil {
+			return http.StatusInternalServerError, []byte(err.Error())
+		}
+
 		// reset backend
 		cancelBackendCtx()
 		<-backendDone
@@ -184,7 +192,6 @@ func execE2EInfra() error {
 
 	if !e2eInfraConf.ci {
 		fmt.Printf("%-10s | ----------------------------\n", "READY")
-		wg.Wait()
 		return nil
 	}
 
@@ -200,7 +207,6 @@ func execE2EInfra() error {
 		}()
 	}()
 
-	wg.Wait()
 	return nil
 }
 
@@ -313,4 +319,21 @@ func (r *requestsJoiner) req(w http.ResponseWriter) chan struct{} {
 	}()
 
 	return doneCh
+}
+
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, sourceFile)
+	return err
 }
