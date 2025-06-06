@@ -92,9 +92,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
 
   sourcemaps: {
     deleteSourcemapsAfterUpload: true,
-    assets: [".next"],
   },
-
   bundleSizeOptimizations: {
     excludeReplayIframe: true,
     excludeReplayWorker: true,
