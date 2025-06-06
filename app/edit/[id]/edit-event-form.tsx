@@ -1,22 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventOptions } from "@/lib/queries/event";
-import { zenaoClient } from "@/app/zenao-client";
 import { EventForm } from "@/components/form/event-form";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { currentTimezone } from "@/lib/time";
 import { userAddressOptions } from "@/lib/queries/user";
 import Text from "@/components/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
+import { useEditEvent } from "@/lib/mutations/event-management";
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -57,60 +56,18 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   });
 
   // EditEvent call loaded value
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
-  const queryClient = useQueryClient();
-
+  const { editEvent, isPending } = useEditEvent();
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async ({
-    password,
-    exclusive,
-    ...values
-  }: EventFormSchemaType) => {
+  const onSubmit = async (values: EventFormSchemaType) => {
     try {
-      setIsLoaded(true);
       const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk authToken");
       }
-      // Construct location object for the call
-      let value = {};
-      switch (values.location.kind) {
-        case "custom":
-          value = {
-            address: values.location.address,
-            timezone: currentTimezone(),
-          };
-          break;
-        case "virtual":
-          value = { uri: values.location.location };
-          break;
-        case "geo":
-          value = {
-            address: values.location.address,
-            lat: values.location.lat,
-            lng: values.location.lng,
-            size: values.location.size,
-          };
-          break;
-        default:
-          value = {};
-      }
 
-      await zenaoClient.editEvent(
-        {
-          ...values,
-          eventId: id,
-          location: { address: { case: values.location.kind, value } },
-          updatePassword: !exclusive || (!!password && password.length > 0),
-          password: exclusive && password ? password : "",
-        },
-        {
-          headers: { Authorization: "Bearer " + token },
-        },
-      );
-      await queryClient.invalidateQueries(eventOptions(id));
+      await editEvent({ ...values, eventId: id, token });
       toast({
         title: t("toast-edit-success"),
       });
@@ -122,7 +79,6 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       });
       console.error("error", err);
     }
-    setIsLoaded(false);
   };
 
   if (!isOrganizer) {
@@ -136,7 +92,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     <EventForm
       form={form}
       onSubmit={onSubmit}
-      isLoaded={isLoaded}
+      isLoaded={isPending}
       defaultExclusive={defaultValues.exclusive}
       isEditing
       maxDateRange={new Date()}

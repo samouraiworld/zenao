@@ -37,7 +37,6 @@ func main() {
 		newStartCmd(),
 		newFakegenCmd(),
 		newMailCmd(),
-		newSyncChainCmd(),
 		newPromoteUserCmd(),
 		newRealmsrcCmd(),
 		newE2EInfraCmd(),
