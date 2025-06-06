@@ -63,11 +63,6 @@ func execE2EInfra() error {
 		cancelCtx()
 	}()
 
-	defer func() {
-		<-ctx.Done()
-		wg.Wait()
-	}()
-
 	dbPath := filepath.Join(tempDir, "e2e.db")
 	txsPath := filepath.Join(tempDir, "genesis_txs.jsonl")
 
@@ -75,6 +70,11 @@ func execE2EInfra() error {
 	backendCtx, cancelBackendCtx := context.WithCancel(ctx)
 	defer cancelBackendCtx()
 	backendDone := make(chan struct{}, 1)
+
+	defer func() {
+		<-ctx.Done()
+		wg.Wait()
+	}()
 
 	// prepare db
 	{
