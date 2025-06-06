@@ -1,3 +1,6 @@
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { GnowebButton } from "@/components/buttons/gnoweb-button";
 import { Card } from "@/components/cards/Card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
@@ -5,6 +8,8 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 import { Web3Image } from "@/components/images/web3-image";
+import { Button } from "@/components/shadcn/button";
+import { userAddressOptions } from "@/lib/queries/user";
 
 type ProfileHeaderProps = {
   address: string;
@@ -19,6 +24,11 @@ export default function ProfileHeader({
   avatarUri,
   bio,
 }: ProfileHeaderProps) {
+  const { userId, getToken } = useAuth();
+  const { data: userLoggedAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+
   return (
     <>
       <div className="flex flex-col gap-4 w-full sm:w-1/5">
@@ -43,6 +53,11 @@ export default function ProfileHeader({
           href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${address}`}
           className="w-full"
         />
+        {userLoggedAddress === address && (
+          <Link href="/settings">
+            <Button className="w-full">Edit my profile</Button>
+          </Link>
+        )}
       </div>
       <div className="flex flex-col gap-8 sm:gap-12 w-full sm:w-4/5">
         <Heading level={1} size="4xl">
