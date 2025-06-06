@@ -73,6 +73,7 @@ func execE2EInfra() error {
 
 	// backend ctx handle backend & gnodev
 	backendCtx, cancelBackendCtx := context.WithCancel(ctx)
+	defer cancelBackendCtx()
 	backendDone := make(chan struct{}, 1)
 
 	// prepare db
