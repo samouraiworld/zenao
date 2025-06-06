@@ -6,6 +6,7 @@ import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 import InstallButton from "@/components/buttons/pwa-install-button";
+import { Button } from "@/components/shadcn/button";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -40,6 +41,14 @@ export default function Home() {
               </Text>
             </ButtonWithChildren>
           </Link>
+
+          <Button
+            onClick={() => {
+              throw new Error("Fake error");
+            }}
+          >
+            Test
+          </Button>
 
           <InstallButton />
         </div>
