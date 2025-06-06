@@ -77,6 +77,7 @@ func execE2EInfra() error {
 
 			args := []string{"atlas", "migrate", "apply", "--dir", "file://migrations", "--env", "e2e"}
 			if err := runCommand(backendCtx, "db", "#317738", args); err != nil {
+				fmt.Printf("%-10s | db: %v\n", "RUN_ERR", err)
 				return err
 			}
 		}
@@ -91,21 +92,21 @@ func execE2EInfra() error {
 
 		// run gentxs
 		{
-			args := []string{"go", "run", "./backend", "gentxs"}
+			args := []string{"go", "run", "./backend", "gentxs", "--db", dbPath}
 			if err := runCommand(backendCtx, "gentxs", "#317738", args); err != nil {
 				return err
 			}
 		}
 
-		// start gnodev in background
+		// start gnodev in background using main context
 		{
 			args := []string{"make", "start.gnodev-e2e"}
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				cmd := exec.CommandContext(backendCtx, args[0], args[1:]...)
+				cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 				cmd.Env = append(os.Environ(), "TXS_FILE=genesis_txs.jsonl")
-				if err := runCommandWithCmd(backendCtx, "gnodev", "#7D56F4", cmd); err != nil {
+				if err := runCommandWithCmd(ctx, "gnodev", "#7D56F4", cmd); err != nil {
 					fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
 				}
 			}()
@@ -143,24 +144,32 @@ func execE2EInfra() error {
 	}
 
 	resetReqJoiner := requestsJoiner{process: func() (int, []byte) {
-		fmt.Printf("%-10s | ----------------------------\n", "RESET")
-
-		// reset gnodev
-		if _, err := http.Get("http://localhost:8888/reset"); err != nil {
-			return http.StatusInternalServerError, []byte(err.Error())
-		}
+		fmt.Printf("%-10s | Starting reset sequence\n", "DEBUG")
 
 		// reset backend
+		fmt.Printf("%-10s | Canceling backend context\n", "DEBUG")
 		cancelBackendCtx()
-		<-backendDone
+
+		fmt.Printf("%-10s | Waiting for backend to stop\n", "DEBUG")
+		select {
+		case <-backendDone:
+			fmt.Printf("%-10s | Backend stopped successfully\n", "DEBUG")
+		case <-time.After(5 * time.Second):
+			fmt.Printf("%-10s | Timeout waiting for backend to stop\n", "ERROR")
+			return http.StatusInternalServerError, []byte("timeout waiting for backend to stop")
+		}
+
+		fmt.Printf("%-10s | Creating new backend context\n", "DEBUG")
 		backendCtx, cancelBackendCtx = context.WithCancel(ctx)
 		backendDone = make(chan struct{}, 1)
+
+		fmt.Printf("%-10s | Starting backend services\n", "DEBUG")
 		if err := startBackend(); err != nil {
+			fmt.Printf("%-10s | Failed to start backend: %v\n", "ERROR", err)
 			return http.StatusInternalServerError, []byte(err.Error())
 		}
 
-		fmt.Printf("%-10s | ----------------------------\n", "READY")
-
+		fmt.Printf("%-10s | Reset sequence completed successfully\n", "DEBUG")
 		return http.StatusOK, nil
 	}}
 
@@ -237,7 +246,7 @@ func runCommandWithCmd(ctx context.Context, name, color string, cmd *exec.Cmd) e
 	streamPrefix := style.Render(fmt.Sprintf("%-10s |", name)) + " "
 	wr := prefixStream(os.Stdout, streamPrefix)
 
-	fmt.Fprintln(wr, strings.Join(cmd.Args, " "))
+	fmt.Fprintf(wr, "Starting command: %s\n", strings.Join(cmd.Args, " "))
 
 	// prefix log lines
 	cmd.Stdout = wr
@@ -251,12 +260,22 @@ func runCommandWithCmd(ctx context.Context, name, color string, cmd *exec.Cmd) e
 	cmd.Cancel = func() error {
 		pgid, err := syscall.Getpgid(cmd.Process.Pid)
 		if err != nil {
+			fmt.Fprintf(wr, "Failed to get process group ID: %v\n", err)
 			return err
 		}
+		fmt.Fprintf(wr, "Killing process group %d\n", pgid)
 		return syscall.Kill(-pgid, syscall.SIGKILL)
 	}
 
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		if ctx.Err() != nil {
+			fmt.Fprintf(wr, "Command terminated due to context cancellation: %v\n", ctx.Err())
+		} else {
+			fmt.Fprintf(wr, "Command failed: %v\n", err)
+		}
+	}
+	return err
 }
 
 func prefixStream(out io.Writer, prefix string) io.Writer {
