@@ -144,32 +144,18 @@ func execE2EInfra() error {
 	}
 
 	resetReqJoiner := requestsJoiner{process: func() (int, []byte) {
-		fmt.Printf("%-10s | Starting reset sequence\n", "DEBUG")
-
+		fmt.Printf("%-10s | ----------------------------\n", "RESET")
 		// reset backend
-		fmt.Printf("%-10s | Canceling backend context\n", "DEBUG")
 		cancelBackendCtx()
-
-		fmt.Printf("%-10s | Waiting for backend to stop\n", "DEBUG")
-		select {
-		case <-backendDone:
-			fmt.Printf("%-10s | Backend stopped successfully\n", "DEBUG")
-		case <-time.After(5 * time.Second):
-			fmt.Printf("%-10s | Timeout waiting for backend to stop\n", "ERROR")
-			return http.StatusInternalServerError, []byte("timeout waiting for backend to stop")
-		}
-
-		fmt.Printf("%-10s | Creating new backend context\n", "DEBUG")
+		<-backendDone
 		backendCtx, cancelBackendCtx = context.WithCancel(ctx)
 		backendDone = make(chan struct{}, 1)
 
-		fmt.Printf("%-10s | Starting backend services\n", "DEBUG")
 		if err := startBackend(); err != nil {
-			fmt.Printf("%-10s | Failed to start backend: %v\n", "ERROR", err)
 			return http.StatusInternalServerError, []byte(err.Error())
 		}
+		fmt.Printf("%-10s | ----------------------------\n", "READY")
 
-		fmt.Printf("%-10s | Reset sequence completed successfully\n", "DEBUG")
 		return http.StatusOK, nil
 	}}
 
@@ -246,7 +232,7 @@ func runCommandWithCmd(ctx context.Context, name, color string, cmd *exec.Cmd) e
 	streamPrefix := style.Render(fmt.Sprintf("%-10s |", name)) + " "
 	wr := prefixStream(os.Stdout, streamPrefix)
 
-	fmt.Fprintf(wr, "Starting command: %s\n", strings.Join(cmd.Args, " "))
+	fmt.Fprintln(wr, strings.Join(cmd.Args, " "))
 
 	// prefix log lines
 	cmd.Stdout = wr
@@ -260,22 +246,12 @@ func runCommandWithCmd(ctx context.Context, name, color string, cmd *exec.Cmd) e
 	cmd.Cancel = func() error {
 		pgid, err := syscall.Getpgid(cmd.Process.Pid)
 		if err != nil {
-			fmt.Fprintf(wr, "Failed to get process group ID: %v\n", err)
 			return err
 		}
-		fmt.Fprintf(wr, "Killing process group %d\n", pgid)
 		return syscall.Kill(-pgid, syscall.SIGKILL)
 	}
 
-	err := cmd.Run()
-	if err != nil {
-		if ctx.Err() != nil {
-			fmt.Fprintf(wr, "Command terminated due to context cancellation: %v\n", ctx.Err())
-		} else {
-			fmt.Fprintf(wr, "Command failed: %v\n", err)
-		}
-	}
-	return err
+	return cmd.Run()
 }
 
 func prefixStream(out io.Writer, prefix string) io.Writer {
