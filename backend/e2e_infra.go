@@ -66,6 +66,12 @@ func execE2EInfra() error {
 	defer cancelBackendCtx()
 	backendDone := make(chan struct{}, 1)
 
+	// gnodev ctx to split from backend ctx to avoid having both wg.Done() executed at same time
+	gnodevCtx, cancelGnodevCtx := context.WithCancel(ctx)
+	defer cancelGnodevCtx()
+	gnodevDone := make(chan struct{}, 1)
+	gnodevDone <- struct{}{}
+
 	startBackend := func() error {
 		defer func() { backendDone <- struct{}{} }()
 
@@ -98,31 +104,33 @@ func execE2EInfra() error {
 			}
 		}
 
-		// start gnodev in background using main context
-		{
-			args := []string{"make", "start.gnodev-e2e"}
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				cmd := exec.CommandContext(ctx, args[0], args[1:]...)
-				cmd.Env = append(os.Environ(), "TXS_FILE=genesis_txs.jsonl")
-				if err := runCommandWithCmd(ctx, "gnodev", "#7D56F4", cmd); err != nil {
-					fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
-				}
-			}()
-		}
-
 		// start backend in background
 		{
 			args := []string{"go", "run", "./backend", "start", "--db", dbPath}
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				go func() {
-					if err := runCommand(backendCtx, "backend", "#C2675E", args); err != nil {
-						fmt.Printf("%-10s | backend: %v\n", "RUN_ERR", err)
-					}
-				}()
+				if err := runCommand(backendCtx, "backend", "#C2675E", args); err != nil {
+					fmt.Printf("%-10s | backend: %v\n", "RUN_ERR", err)
+				}
+			}()
+		}
+
+		// start gnodev in background using main context
+		{
+			cancelGnodevCtx()
+			<-gnodevDone
+			gnodevCtx, cancelGnodevCtx = context.WithCancel(ctx)
+			gnodevDone = make(chan struct{}, 1)
+			args := []string{"make", "start.gnodev-e2e"}
+			wg.Add(1)
+			go func() {
+				defer func() { wg.Done(); gnodevDone <- struct{}{} }()
+				cmd := exec.CommandContext(gnodevCtx, args[0], args[1:]...)
+				cmd.Env = append(os.Environ(), "TXS_FILE=genesis_txs.jsonl")
+				if err := runCommandWithCmd(gnodevCtx, "gnodev", "#7D56F4", cmd); err != nil {
+					fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
+				}
 			}()
 		}
 
