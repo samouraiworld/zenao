@@ -52,13 +52,22 @@ export default function InstallButton() {
   if (!isVisible) return null;
 
   return (
-    <Button
-      variant="outline"
-      className="standalone:hidden w-fit flex rounded-3xl py-5"
-      onClick={installApp}
-    >
-      <Text className="text-sm">Install app</Text>
-      <Download size={14} />
-    </Button>
+    <>
+      <Button
+        onClick={() => {
+          throw new Error("Fake error");
+        }}
+      >
+        Test
+      </Button>
+      <Button
+        variant="outline"
+        className="standalone:hidden w-fit flex rounded-3xl py-5"
+        onClick={installApp}
+      >
+        <Text className="text-sm">Install app</Text>
+        <Download size={14} />
+      </Button>
+    </>
   );
 }
