@@ -2,7 +2,7 @@
 
 import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode, useMemo } from "react";
-import { Hash, MapPin, MessageCircle, Reply, Smile } from "lucide-react";
+import { Hash, MapPin, MessageCircle, Smile } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -33,18 +33,16 @@ export function PostCardLayout({
   createdBy,
   gnowebHref,
   children,
-  onReply,
-  onDisplayReplies,
+  canReply,
   parentId = "",
 }: {
   post: PostView;
   eventId: string;
   createdBy: GnoProfile | null;
   children: ReactNode;
+  canReply?: boolean;
   gnowebHref?: Url;
   parentId?: string;
-  onReply?: () => void;
-  onDisplayReplies?: () => void;
 }) {
   if (!post.post) {
     return null;
@@ -100,18 +98,6 @@ export function PostCardLayout({
             </div>
           )}
           <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
-            {onReply && (
-              <div
-                className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50"
-                onClick={onReply}
-                aria-label="reply to post"
-              >
-                <Reply size={14} color="hsl(var(--secondary-color))" />
-                <Text className="text-sm" variant="secondary">
-                  Reply
-                </Text>
-              </div>
-            )}
             {gnowebHref && <PostMenu gnowebHref={gnowebHref} />}
           </div>
         </div>
@@ -120,18 +106,19 @@ export function PostCardLayout({
       <div className="my-1">{children}</div>
 
       <div className="flex sm:flex-row sm:items-center gap-2">
-        {onReply && (
-          <Button
-            variant="outline"
-            className={
-              "rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
-            }
-            title="Show replies"
-            onClick={onDisplayReplies}
-          >
-            <MessageCircle size={16} color="hsl(var(--secondary-color))" />
-            <span className="text-xs">{post.childrenCount}</span>
-          </Button>
+        {canReply && (
+          <Link href={`/event/${eventId}/feed/post/${post.post.localPostId}`}>
+            <Button
+              variant="outline"
+              className={
+                "rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+              }
+              title="Show replies"
+            >
+              <MessageCircle size={16} color="hsl(var(--secondary-color))" />
+              <span className="text-xs">{post.childrenCount}</span>
+            </Button>
+          </Link>
         )}
         <Reactions
           postId={post.post.localPostId}
