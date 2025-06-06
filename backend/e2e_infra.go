@@ -158,10 +158,10 @@ func execE2EInfra() error {
 		<-backendDone
 		backendCtx, cancelBackendCtx = context.WithCancel(ctx)
 		backendDone = make(chan struct{}, 1)
-
 		if err := startBackend(); err != nil {
 			return http.StatusInternalServerError, []byte(err.Error())
 		}
+
 		fmt.Printf("%-10s | ----------------------------\n", "READY")
 
 		return http.StatusOK, nil
