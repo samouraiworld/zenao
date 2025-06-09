@@ -33,11 +33,12 @@ func (s *ZenaoServer) EnsureUserExists(
 		if zUser, err = db.CreateUser(user.ID); err != nil {
 			return err
 		}
-		if err = s.Chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
-			return err
-		}
 		return nil
 	}); err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
 		return nil, err
 	}
 
