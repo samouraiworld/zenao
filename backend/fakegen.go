@@ -43,6 +43,7 @@ type fakegenConfig struct {
 	eventsCount   uint
 	postsCount    uint
 	pollsCount    uint
+	skipChain     bool
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -54,6 +55,7 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
 	flset.UintVar(&fakegenConf.pollsCount, "polls", 13, "number of fake polls to generate")
+	flset.BoolVar(&fakegenConf.skipChain, "skip-chain", false, "skip chain")
 }
 
 type fakeEvent struct {
@@ -104,8 +106,10 @@ func execFakegen() error {
 		return err
 	}
 
-	if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
-		return err
+	if !fakegenConf.skipChain {
+		if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
+			return err
+		}
 	}
 
 	for eC := range fakegenConf.eventsCount {
@@ -141,9 +145,10 @@ func execFakegen() error {
 			return err
 		}
 
-		// XXX: generate events with password
-		if err := chain.CreateEvent(zevt.ID, []string{creatorID}, evtReq, nil); err != nil {
-			return err
+		if !fakegenConf.skipChain {
+			if err := chain.CreateEvent(zevt.ID, []string{creatorID}, evtReq, nil); err != nil {
+				return err
+			}
 		}
 
 		// Create Feed
@@ -155,6 +160,7 @@ func execFakegen() error {
 		// Create posts/polls only for the last event (to avoid flooding the chain and db)
 		if eC == fakegenConf.eventsCount-1 {
 			// Create StandardPosts
+			pID := 1 // used only when chain creation is skipped
 			for pC := range fakegenConf.postsCount {
 				p := fakePost{}
 				err := faker.FakeData(&p)
@@ -172,9 +178,12 @@ func execFakegen() error {
 					},
 				}
 
-				postID, err := chain.CreatePost(creatorID, zevt.ID, post)
-				if err != nil {
-					return err
+				postID := fmt.Sprintf("%d", pID)
+				if !fakegenConf.skipChain {
+					postID, err = chain.CreatePost(creatorID, zevt.ID, post)
+					if err != nil {
+						return err
+					}
 				}
 
 				if _, err := db.CreatePost(postID, zfeed.ID, zUser.ID, post); err != nil {
@@ -195,14 +204,18 @@ func execFakegen() error {
 							return err
 						}
 
-						if err = chain.ReactPost(creatorID, zevt.ID, reactReq); err != nil {
-							return err
+						if !fakegenConf.skipChain {
+							if err = chain.ReactPost(creatorID, zevt.ID, reactReq); err != nil {
+								return err
+							}
 						}
 					}
 				}
+				pID++
 			}
 
 			// Create Polls
+			poID := 1
 			for range fakegenConf.pollsCount {
 				p := fakePoll{}
 				err := faker.FakeData(&p)
@@ -223,9 +236,13 @@ func execFakegen() error {
 					Kind:     pollsv1.PollKind(p.KindRaw),
 				}
 
-				pollID, postID, err := chain.CreatePoll(creatorID, pollReq)
-				if err != nil {
-					return err
+				pollID := fmt.Sprintf("%d", poID)
+				postID := fmt.Sprintf("%d", pID)
+				if !fakegenConf.skipChain {
+					pollID, postID, err = chain.CreatePoll(creatorID, pollReq)
+					if err != nil {
+						return err
+					}
 				}
 
 				postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
@@ -253,9 +270,13 @@ func execFakegen() error {
 				if err = db.VotePoll(creatorID, voteReq); err != nil {
 					return err
 				}
-				if err = chain.VotePoll(creatorID, voteReq); err != nil {
-					return err
+				if !fakegenConf.skipChain {
+					if err = chain.VotePoll(creatorID, voteReq); err != nil {
+						return err
+					}
 				}
+				poID++
+				pID++
 			}
 		}
 	}

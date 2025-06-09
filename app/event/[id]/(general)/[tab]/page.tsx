@@ -1,5 +1,6 @@
 import { redirect, RedirectType } from "next/navigation";
-import { MainEventSections } from "../main-event-sections";
+import { MainEventSections } from "../../main-event-sections";
+import { EventInfoLayout } from "../../event-info-layout";
 import { eventInfoTabsSchema } from "@/components/form/types";
 
 export const revalidate = 60;
@@ -20,5 +21,9 @@ export default async function EventSectionsPage({ params }: PageProps) {
     redirect(`/event/${id}`, RedirectType.replace);
   }
 
-  return <MainEventSections eventId={id} section={safeTab.data} />;
+  return (
+    <EventInfoLayout eventId={id}>
+      <MainEventSections eventId={id} section={safeTab.data} />
+    </EventInfoLayout>
+  );
 }

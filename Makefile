@@ -1,5 +1,6 @@
 CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 GNODEV := gnodev staging --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
+TXS_FILE ?=
 
 .PHONY: generate
 generate:
@@ -18,7 +19,7 @@ start.gnodev:
 
 .PHONY: start.gnodev
 start.gnodev-e2e:
-	$(GNODEV) --unsafe-api
+	$(GNODEV) --unsafe-api --txs-file=$(TXS_FILE)
 
 .PHONY: clone-testing-gno
 clone-testing-gno:

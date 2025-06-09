@@ -107,19 +107,11 @@ export function MainEventSections({
           )}
           {/* Social Feed (Discussions) */}
           <TabsContent value="feed">
-            <PostsList
-              eventId={eventId}
-              userAddress={userAddress}
-              form={form}
-            />
+            <PostsList eventId={eventId} userAddress={userAddress} />
           </TabsContent>
           {/* Social Feed (Votes) */}
           <TabsContent value="votes">
-            <PollsList
-              eventId={eventId}
-              userAddress={userAddress}
-              form={form}
-            />
+            <PollsList eventId={eventId} userAddress={userAddress} />
           </TabsContent>
         </div>
       </div>

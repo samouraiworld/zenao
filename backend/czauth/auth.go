@@ -55,6 +55,8 @@ func (c *clerkZenaoAuth) EnsureUserExists(ctx context.Context, email string) (*z
 
 // EnsureUserExists implements zeni.Auth.
 func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string) ([]*zeni.AuthUser, error) {
+	emails = mapsl.Map(emails, strings.ToLower)
+
 	existing, err := user.List(ctx, &user.ListParams{EmailAddresses: emails})
 	if err != nil {
 		return nil, err

@@ -8,6 +8,24 @@ import { PollJson, PollSchema } from "@/app/gen/polls/v1/polls_pb";
 export const DEFAULT_FEED_POSTS_LIMIT = 30;
 export const DEFAULT_FEED_POSTS_COMMENTS_LIMIT = 10;
 
+export const feedPost = (postId: string, userAddress: string) =>
+  queryOptions({
+    queryKey: ["feedPost", postId, userAddress],
+    queryFn: async () => {
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+
+      const res = await client.evaluateExpression(
+        "gno.land/r/zenao/social_feed",
+        `postViewToJSON(GetPostView(${postId}, "${userAddress}"))`,
+      );
+      const raw = extractGnoJSONResponse(res);
+
+      return fromJson(PostViewSchema, raw as PostViewJson);
+    },
+  });
+
 export const feedPosts = (
   eventId: string,
   limit: number,
