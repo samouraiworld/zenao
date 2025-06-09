@@ -89,3 +89,7 @@ body {
 .card-3d {
   transform: perspective(1000px);
 }
+
+.h-bottom-bar {
+  height: calc(5em + env(safe-area-inset-bottom));
+}
