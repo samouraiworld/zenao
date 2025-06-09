@@ -30,6 +30,16 @@ function makeQueryClient() {
     mutationCache: new MutationCache({
       onError: (error) => {
         if (process.env.NEXT_PUBLIC_ENV ?? "development" !== "development") {
+          // Ignore specific errors
+          if (
+            error instanceof Error &&
+            (error.message === "Invalid password" ||
+              error.message ===
+                "[unknown] user is already participant for this event")
+          ) {
+            return;
+          }
+
           Sentry.captureException(error);
         }
       },
