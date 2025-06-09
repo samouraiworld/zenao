@@ -2,6 +2,7 @@ import { QueryClient, useMutation } from "@tanstack/react-query";
 import {
   DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
   DEFAULT_FEED_POSTS_LIMIT,
+  feedPost,
   feedPosts,
   feedPostsChildren,
   pollInfo,
@@ -172,6 +173,15 @@ export const useCreateStandardPost = () => {
         "",
         variables.userAddress,
       );
+
+      const parentPostOpts = feedPost(
+        variables.parentId,
+        variables.userAddress,
+      );
+      const previousParentPost = queryClient.getQueryData(
+        parentPostOpts.queryKey,
+      );
+
       const feedPostsChildrenOpts = feedPostsChildren(
         variables.parentId,
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
@@ -187,7 +197,11 @@ export const useCreateStandardPost = () => {
         feedPostsChildrenOpts.queryKey,
       );
 
-      return { previousFeedPosts, previousFeedPostsChildren };
+      return {
+        previousParentPost,
+        previousFeedPosts,
+        previousFeedPostsChildren,
+      };
     },
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
@@ -204,6 +218,12 @@ export const useCreateStandardPost = () => {
         variables.userAddress,
       );
 
+      const parentPostOpts = feedPost(
+        variables.parentId,
+        variables.userAddress,
+      );
+
+      queryClient.invalidateQueries(parentPostOpts);
       queryClient.invalidateQueries(feedPostsOpts);
       queryClient.invalidateQueries(feedPostsChildrenOpts);
     },
@@ -220,6 +240,16 @@ export const useCreateStandardPost = () => {
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
         "",
         variables.userAddress,
+      );
+
+      const parentPostOpts = feedPost(
+        variables.parentId,
+        variables.userAddress,
+      );
+
+      queryClient.setQueryData(
+        parentPostOpts.queryKey,
+        context?.previousParentPost,
       );
 
       queryClient.setQueryData(

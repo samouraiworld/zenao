@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2, Lock } from "lucide-react";
@@ -82,11 +83,12 @@ export function ExclusiveEventGuard({
       if (!res.valid) {
         throw new Error("Invalid password");
       }
-
       setCanAccess(true);
     } catch (error: unknown) {
-      setIsPending(false);
       console.error("Error accessing exclusive event:", error);
+      if (error instanceof Error && error.message !== "Invalid password") {
+        Sentry.captureException(error);
+      }
       toast({
         duration: 3000,
         variant: "destructive",
@@ -96,6 +98,7 @@ export function ExclusiveEventGuard({
             : t("toast-access-error"),
       });
     }
+    setIsPending(false);
   };
 
   if (canAccess) {

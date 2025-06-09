@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { z } from "zod";
-import { zenaoClient } from "@/app/zenao-client";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/event-form";
 import { useToast } from "@/app/hooks/use-toast";
+import { useCreateEvent } from "@/lib/mutations/event-management";
 
 export const CreateEventForm: React.FC = () => {
   const { getToken } = useAuth();
@@ -54,54 +54,22 @@ export const CreateEventForm: React.FC = () => {
   });
 
   // CreateEvent call loaded value
-  const [isLoaded, setIsLoaded] = React.useState<boolean>(false);
+  const { createEvent, isPending } = useCreateEvent();
 
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
-  const onSubmit = async ({
-    password,
-    exclusive,
-    ...values
-  }: EventFormSchemaType) => {
+  const onSubmit = async (values: EventFormSchemaType) => {
     try {
-      setIsLoaded(true);
       const token = await getToken();
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      // Construct location object for the call
-      let value = {};
-      switch (values.location.kind) {
-        case "custom":
-          value = {
-            address: values.location.address,
-            timezone: values.location.timeZone,
-          };
-          break;
-        case "virtual":
-          value = { uri: values.location.location };
-          break;
-        case "geo":
-          value = {
-            address: values.location.address,
-            lat: values.location.lat,
-            lng: values.location.lng,
-            size: values.location.size,
-          };
-          break;
-        default:
-          value = {};
-      }
 
-      const { id } = await zenaoClient.createEvent(
-        {
-          ...values,
-          location: { address: { case: values.location.kind, value } },
-          password: exclusive && password ? password : "",
-        },
-        { headers: { Authorization: "Bearer " + token } },
-      );
+      const { id } = await createEvent({
+        ...values,
+        token,
+      });
       form.reset();
       toast({
         title: t("toast-creation-success"),
@@ -114,14 +82,13 @@ export const CreateEventForm: React.FC = () => {
       });
       console.error("error", err);
     }
-    setIsLoaded(false);
   };
 
   return (
     <EventForm
       form={form}
       onSubmit={onSubmit}
-      isLoaded={isLoaded}
+      isLoaded={isPending}
       minDateRange={new Date()}
     />
   );
