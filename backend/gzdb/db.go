@@ -481,16 +481,15 @@ func (g *gormZenaoDB) GetEventUsersWithRole(eventID string, role string) ([]*zen
 	return res, nil
 }
 
-// GetEventUserTickets implements zeni.DB.
-func (g *gormZenaoDB) GetEventUserTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
-	userIDint, err := strconv.ParseUint(userID, 10, 64)
+// GetEventTickets implements zeni.DB.
+func (g *gormZenaoDB) GetEventTickets(eventID string) ([]*zeni.SoldTicket, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("parse user id: %w", err)
+		return nil, fmt.Errorf("parse event id: %w", err)
 	}
 
 	tickets := []*SoldTicket{}
-	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_id = ? AND user_id = ?", eventID, userIDint).Error
-	if err != nil {
+	if err := g.db.Preload("Checkin").Preload("User").Find(&tickets, "event_id = ?", evtIDInt).Error; err != nil {
 		return nil, err
 	}
 
@@ -505,8 +504,7 @@ func (g *gormZenaoDB) GetEventUserTickets(eventID string, userID string) ([]*zen
 	return res, nil
 }
 
-// GetEventUserOrBuyerTickets implements zeni.DB.
-func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
+func (g *gormZenaoDB) GetEventUserTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parse buyer or user id: %w", err)
