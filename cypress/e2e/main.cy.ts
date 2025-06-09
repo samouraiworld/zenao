@@ -357,10 +357,13 @@ describe("main", () => {
     cy.get("p").contains(testStandardPost).should("be.visible");
 
     // check that no comment exists
-    cy.get('button[title="Show replies"]').contains("0").should("be.visible");
+    cy.get('button[title="Show replies"]')
+      .contains("0")
+      .should("be.visible")
+      .parent()
+      .click();
 
-    // Click on reply button
-    cy.get('div[aria-label="reply to post"]').click();
+    cy.url().should("include", "/post/");
 
     // Type comment
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
@@ -371,12 +374,6 @@ describe("main", () => {
     cy.get('button[aria-label="submit post"]').click();
 
     // Assert comment exists
-    cy.get('button[title="Show replies"]').contains("1").should("be.visible");
-
-    // Assert comment text is visible
-
-    // Click on comment button
-    cy.get('button[title="Show replies"]').click();
     cy.get("p").contains(testComment).should("be.visible");
   });
 
