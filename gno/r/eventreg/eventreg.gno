@@ -25,7 +25,7 @@ var (
 )
 
 func init() {
-	Ownable = ownable.NewWithAddress(std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
+	Ownable = ownable.NewWithAddress(std.Address("g15d5fvmjhjgwy3anax8lqwkatgmlrdme0l2l9aw")) // zenao-dev-admin
 }
 
 // XXX: split this package into eventreg and eventsindex
@@ -139,8 +139,12 @@ func AddParticipant(eventPkgPath string, userID string) {
 	key = eventPkgPath + "/" + userID
 	participantsByEvent.Set(key, userID)
 
-	info := mustGetInfo(eventPkgPath)
-	eventsByPkgPath.Set(eventPkgPath, info)
+	infoRaw, ok := eventsByPkgPath.Get(eventPkgPath)
+	if !ok {
+		panic("event not found")
+	}
+	info := infoRaw.(*zenaov1.EventInfo)
+	info.Participants++
 }
 
 func RemoveParticipant(eventPkgPath string, userID string) {
