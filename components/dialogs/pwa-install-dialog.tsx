@@ -90,8 +90,6 @@ export function PwaInstallDialog({
 }: PwaInstallDialogProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  console.log(platform, "platform");
-
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
