@@ -52,3 +52,6 @@ genesis_txs.jsonl
 
 # cypress
 /cypress/screenshots
+
+# Sentry Config File
+.env.sentry-build-plugin

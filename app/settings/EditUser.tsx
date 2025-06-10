@@ -1,12 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { zenaoClient } from "../zenao-client";
 import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
 import { Form } from "@/components/shadcn/form";
@@ -17,18 +15,15 @@ import { FormFieldImage } from "@/components/form/components/form-field-image";
 import { userAddressOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/texts/text";
+import { useEditUserProfile } from "@/lib/mutations/profile";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
-
-  const queryClient = useQueryClient();
 
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
   const { data: user } = useSuspenseQuery(profileOptions(address));
-
-  const [loading, setLoading] = useState<boolean>(false);
 
   const defaultValues: GnoProfile = user || {
     address: address || "",
@@ -37,6 +32,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     avatarUri: "",
   };
 
+  const { editUser, isPending } = useEditUserProfile();
   const form = useForm<UserFormSchemaType>({
     mode: "all",
     resolver: zodResolver(userFormSchema),
@@ -47,7 +43,6 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
 
   const onSubmit = async (values: UserFormSchemaType) => {
     try {
-      setLoading(true);
       if (!user) {
         throw new Error("no user");
       }
@@ -55,10 +50,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      await zenaoClient.editUser(values, {
-        headers: { Authorization: "Bearer " + token },
+
+      await editUser({
+        ...values,
+        address: address || "",
+        token,
       });
-      await queryClient.invalidateQueries(profileOptions(user.address));
       toast({
         title: t("toast-success"),
       });
@@ -69,7 +66,6 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       });
       console.error("error", err);
     }
-    setLoading(false);
   };
 
   return (
@@ -104,7 +100,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             />
             <div>
               <ButtonWithLabel
-                loading={loading}
+                loading={isPending}
                 label={t("save-button")}
                 type="submit"
               />
