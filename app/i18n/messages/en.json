@@ -82,6 +82,7 @@
     "toast-default-error": "Error whille trying to register participants",
     "participants-list": "Participants list",
     "see-ticket": "See ticket",
+    "login-to-see-tickets": "Login to see ticket(s)",
     "invitee-form": {
       "add-a-friend": "Add a friend",
       "email-placeholder": "Email..."
@@ -89,6 +90,15 @@
     "gatekeeper-button": "Open ticket scanner",
     "view-more": "View more",
     "view-less": "View less"
+  },
+  "guest-registration-success-dialog": {
+    "registration-title": "You're in !",
+    "thank-you": "Thank you for joining {title} !",
+    "tickets-explanation": "A confirmation and your ticket have been sent to:",
+    "view-on-account": "You can also view it by logging into your account.", 
+    "profile-completion-invitation": "Use the same email to log in and complete your profile.",
+    "profile-completion-incentive": "It’s quick and will be useful to interact with community !",
+    "sign-in": "Sign in"
   },
   "manifesto": {
     "title": "MANIFESTO",
