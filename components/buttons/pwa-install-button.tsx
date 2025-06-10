@@ -2,10 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Button } from "../shadcn/button";
 import Text from "../texts/text";
 import { PwaInstallDialog } from "../dialogs/pwa-install-dialog";
 import useIsPWAInstalled from "@/app/hooks/use-is-pwa-installed";
+
+export const LazyInstallButton = dynamic(
+  () => import("@/components/buttons/pwa-install-button"),
+  { ssr: false },
+);
 
 export interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
