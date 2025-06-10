@@ -543,7 +543,11 @@ func (e *Event) updateEventUserRoles(role string, usersAddr []string) {
 	currentUsers := e.DAOPrivate.Members.GetMembersWithRole(role)
 	for _, user := range currentUsers {
 		if !sliceContains(usersAddr, user) {
-			e.DAOPrivate.Members.RemoveRoleFromMember(user, role)
+			if e.DAOPrivate.Members.CountMemberRoles(user) != 1 {
+				e.DAOPrivate.Members.RemoveRoleFromMember(user, role)
+			} else {
+				e.DAOPrivate.Members.RemoveMember(user)
+			}
 		}
 	}
 	for _, user := range usersAddr {
