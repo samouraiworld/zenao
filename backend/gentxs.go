@@ -168,39 +168,32 @@ func execGenTxs() error {
 		}
 		txs = append(txs, tx)
 		logger.Info("event indexed into event registry tx created", zap.String("event-id", event.ID))
-		participants, err := db.GetEventUsersWithRole(event.ID, "participant")
+		tickets, err := db.GetEventTickets(event.ID)
 		if err != nil {
 			return err
 		}
-		for _, p := range participants {
-			tickets, err := db.GetEventUserTickets(event.ID, p.ID)
-			if err != nil || len(tickets) < 1 {
-				logger.Error("failed to get participant ticket", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.Error(err), zap.Int("num-tickets", len(tickets)))
-				continue
+		for _, ticket := range tickets {
+			tx, err := createParticipationTx(chain, signerInfo.GetAddress(), event, ticket, sk)
+			if err != nil {
+				return err
 			}
-
-			for _, ticket := range tickets {
-				tx, err := createParticipationTx(chain, signerInfo.GetAddress(), event, ticket, sk)
+			txs = append(txs, tx)
+			logger.Info("participation tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
+			if ticket.UserID != "" {
+				tx, err = createParticipationRegTx(chain, event, signerInfo.GetAddress(), ticket, chain.UserAddress(ticket.UserID))
 				if err != nil {
 					return err
 				}
 				txs = append(txs, tx)
-				logger.Info("participation tx created", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
-				tx, err = createParticipationRegTx(chain, event, signerInfo.GetAddress(), ticket, chain.UserAddress(p.ID))
+				logger.Info("participation indexed into event registry tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
+			}
+			if ticket.Checkin != nil {
+				tx, err := createCheckinTx(chain, signerInfo.GetAddress(), event, ticket, sk)
 				if err != nil {
 					return err
 				}
 				txs = append(txs, tx)
-				logger.Info("participation indexed into event registry tx created", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
-
-				if ticket.Checkin != nil {
-					tx, err := createCheckinTx(chain, signerInfo.GetAddress(), event, ticket, sk)
-					if err != nil {
-						return err
-					}
-					txs = append(txs, tx)
-					logger.Info("checkin tx created", zap.String("event-id", event.ID), zap.String("user-id", p.ID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
-				}
+				logger.Info("checkin tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 			}
 		}
 	}
@@ -496,7 +489,10 @@ func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cr
 func createParticipationTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zeni.Event, ticket *zeni.SoldTicket, sk ed25519.PrivateKey) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
 	callerPkgPath := chain.userRealmPkgPath(event.CreatorID)
-	participantAddr := chain.UserAddress(ticket.UserID)
+	var participantAddr string
+	if ticket.UserID != "" {
+		participantAddr = chain.UserAddress(ticket.UserID)
+	}
 
 	signature := ""
 	if len(sk) != 0 {
