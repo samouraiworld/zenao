@@ -118,10 +118,11 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 }
 
 // CreateEvent implements ZenaoChain.
-func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
+func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
 	organizersAddr := mapsl.Map(organizersIDs, g.UserAddress)
+	gatekeepersAddr := mapsl.Map(gatekeepersIDs, g.UserAddress)
 
-	eventRealmSrc, err := genEventRealmSource(organizersAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
+	eventRealmSrc, err := genEventRealmSource(organizersAddr, gatekeepersAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
 	if err != nil {
 		return err
 	}
@@ -736,13 +737,14 @@ func genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, tick
 `, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey, signature)
 }
 
-func genEventRealmSource(organizersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
+func genEventRealmSource(organizersAddr []string, gatekeepersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
 	m := map[string]any{
-		"organizersAddr": stringSliceLit(organizersAddr),
-		"req":            req,
-		"zenaoAdminAddr": zenaoAdminAddr,
-		"namespace":      gnoNamespace,
-		"location":       "&" + req.Location.GnoLiteral("zenaov1.", "\t\t"),
+		"organizersAddr":  stringSliceLit(organizersAddr),
+		"gatekeepersAddr": stringSliceLit(gatekeepersAddr),
+		"req":             req,
+		"zenaoAdminAddr":  zenaoAdminAddr,
+		"namespace":       gnoNamespace,
+		"location":        "&" + req.Location.GnoLiteral("zenaov1.", "\t\t"),
 	}
 
 	participationPubkey := ""
@@ -793,6 +795,7 @@ var (
 func init() {
 	conf := events.Config{
 		Organizers: {{.organizersAddr}},
+		Gatekeepers: {{.gatekeepersAddr}},
 		Title: {{.title}},
 		Description: {{.description}},
 		ImageURI: {{.imageURI}},

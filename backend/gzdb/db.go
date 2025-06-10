@@ -94,7 +94,7 @@ func (g *gormZenaoDB) Tx(cb func(db zeni.DB) error) error {
 }
 
 // CreateEvent implements zeni.DB.
-func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, req *zenaov1.CreateEventRequest) (*zeni.Event, error) {
+func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*zeni.Event, error) {
 	// NOTE: request should be validated by caller
 
 	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
@@ -140,6 +140,23 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, req 
 
 		if err := g.db.Create(userRole).Error; err != nil {
 			return nil, fmt.Errorf("create organizer role assignment in db: %w", err)
+		}
+	}
+
+	for _, gatekeeperID := range gatekeepersIDs {
+		gatekeeperIDInt, err := strconv.ParseUint(gatekeeperID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse gatekeeper id: %w", err)
+		}
+
+		userRole := &UserRole{
+			UserID:  uint(gatekeeperIDInt),
+			EventID: evt.ID,
+			Role:    "gatekeeper",
+		}
+
+		if err := g.db.Create(userRole).Error; err != nil {
+			return nil, fmt.Errorf("create gatekeeper role assignment in db: %w", err)
 		}
 	}
 

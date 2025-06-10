@@ -442,6 +442,15 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
+	if len(e.Gatekeepers) != 0 {
+		fmt.Fprintf(buf, "%s\tGatekeepers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Gatekeepers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
 	if e.StartDate != 0 {
 		fmt.Fprintf(buf, "%s\tStartDate: %d,\n", linePrefix, e.StartDate)
 	}

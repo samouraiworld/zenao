@@ -761,6 +761,13 @@ func (e *EventInfo) ToJSON() *json.Node {
 		}
 		fields["organizers"] = json.ArrayNode("", arr)
 	}
+	if len(e.Gatekeepers) != 0 {
+		arr := make([]*json.Node, len(e.Gatekeepers))
+		for i, val := range e.Gatekeepers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["gatekeepers"] = json.ArrayNode("", arr)
+	}
 	if e.StartDate != 0 {
 		fields["startDate"] = json.StringNode("", strconv.FormatInt(e.StartDate, 10))
 	}
@@ -806,6 +813,14 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 			arr[i] = val.MustString()
 		}
 		e.Organizers = arr
+	}
+	if val, ok := fields["gatekeepers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Gatekeepers = arr
 	}
 	if val, ok := fields["startDate"]; ok {
 		fv, err := strconv.ParseInt(val.MustString(), 10, 64)

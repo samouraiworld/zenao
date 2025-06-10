@@ -134,6 +134,7 @@ type EventInfo struct {
 	Description  string
 	ImageUri     string
 	Organizers   []string
+	Gatekeepers  []string
 	StartDate    int64
 	EndDate      int64
 	Capacity     uint32

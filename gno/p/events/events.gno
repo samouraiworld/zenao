@@ -25,7 +25,6 @@ const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
 
 // Event cannot be exposed
 type Event struct {
-	organizers          []string
 	startDate           int64
 	endDate             int64
 	capacity            uint32
@@ -40,6 +39,7 @@ type Event struct {
 
 type Config struct {
 	Organizers          []string
+	Gatekeepers         []string
 	Title               string
 	Description         string
 	ImageURI            string
@@ -97,6 +97,12 @@ func NewEvent(conf *Config) *Event {
 			Roles:   []string{"organizer"},
 		})
 	}
+	for _, gatekeeper := range conf.Gatekeepers {
+		members = append(members, basedao.Member{
+			Address: gatekeeper,
+			Roles:   []string{"gatekeeper"},
+		})
+	}
 	members = append(members, basedao.Member{
 		Address: conf.ZenaoAdminAddr,
 		Roles:   []string{"zenao-admin"},
@@ -116,7 +122,6 @@ func NewEvent(conf *Config) *Event {
 	})
 
 	event := &Event{
-		organizers:          conf.Organizers,
 		startDate:           conf.StartDate,
 		endDate:             conf.EndDate,
 		capacity:            conf.Capacity,
@@ -280,6 +285,9 @@ func (e *Event) removeGatekeeperHandler() daokit.MessageHandler {
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
+		if !e.DAOPrivate.Members.HasRole(gatekeeper, "gatekeeper") {
+			panic(errors.New("gatekeeper not found"))
+		}
 		if e.DAOPrivate.Members.CountMemberRoles(gatekeeper) != 1 {
 			e.DAOPrivate.Members.RemoveRoleFromMember(gatekeeper, "gatekeeper")
 		} else {
@@ -357,7 +365,6 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 			panic(errors.New("invalid payload type"))
 		}
 		if len(msg.organizers) != 0 {
-			e.organizers = msg.organizers
 			currentOrgs := e.DAOPrivate.Members.GetMembersWithRole("organizer")
 			for _, org := range currentOrgs {
 				if !sliceContains(msg.organizers, org) {
@@ -479,7 +486,7 @@ func (e *Event) Render(path string) string {
 		}
 
 		var orgaRenderList []string
-		for _, org := range e.organizers {
+		for _, org := range e.DAOPrivate.Members.GetMembersWithRole("organizer") {
 			orga := e.getProfileString(std.Address(org), "DisplayName", "")
 			if orga == "" {
 				orga = org
