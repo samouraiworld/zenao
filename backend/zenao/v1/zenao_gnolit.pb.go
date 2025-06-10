@@ -121,6 +121,15 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
+	if len(c.Gatekeepers) != 0 {
+		fmt.Fprintf(buf, "%s\tGatekeepers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Gatekeepers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -179,6 +188,15 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 		fmt.Fprintf(buf, "%s\tOrganizers: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range e.Organizers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if len(e.Gatekeepers) != 0 {
+		fmt.Fprintf(buf, "%s\tGatekeepers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Gatekeepers {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]
@@ -419,6 +437,15 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 		fmt.Fprintf(buf, "%s\tOrganizers: []string{\n", linePrefix)
 		linePrefix += "\t"
 		for _, elem := range e.Organizers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if len(e.Gatekeepers) != 0 {
+		fmt.Fprintf(buf, "%s\tGatekeepers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Gatekeepers {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]

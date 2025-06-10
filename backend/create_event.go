@@ -42,6 +42,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
+	//XXX: refactor the logic to avoid duplicate w/ gkps ?
 	authOrgas, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Organizers)
 	if err != nil {
 		return nil, err
@@ -60,9 +61,26 @@ func (s *ZenaoServer) CreateEvent(
 		organizersIDs = append(organizersIDs, zOrg.ID)
 	}
 
+	authGkps, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Gatekeepers)
+	if err != nil {
+		return nil, err
+	}
+
+	var gatekeepersIDs []string
+	for _, authGkp := range authGkps {
+		zGkp, err := s.EnsureUserExists(ctx, authGkp)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Contains(gatekeepersIDs, zGkp.ID) {
+			return nil, fmt.Errorf("duplicate gatekeeper: %s", zGkp.ID)
+		}
+		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
+	}
+
 	evt := (*zeni.Event)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, req.Msg); err != nil {
+		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
 		}
 
@@ -71,16 +89,6 @@ func (s *ZenaoServer) CreateEvent(
 		}
 		return nil
 	}); err != nil {
-		return nil, err
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.CreateEvent(evt.ID, organizersIDs, req.Msg, privacy); err != nil {
-		s.Logger.Error("create-event", zap.Error(err))
 		return nil, err
 	}
 
@@ -102,6 +110,16 @@ func (s *ZenaoServer) CreateEvent(
 				s.Logger.Error("send-event-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID))
 			}
 		}
+	}
+
+	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+		s.Logger.Error("create-event", zap.Error(err))
+		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{

@@ -58,6 +58,7 @@ message CreateEventRequest {
   EventLocation location = 9;
   string password = 10;
   repeated string organizers = 11;
+  repeated string gatekeepers = 12;
 }
 
 message CreateEventResponse { string id = 1; }
@@ -75,6 +76,7 @@ message EditEventRequest {
   string password = 10;
   bool update_password = 11;
   repeated string organizers = 12;
+  repeated string gatekeepers = 13;
 }
 
 message EditEventResponse { string id = 1; }
@@ -142,13 +144,14 @@ message EventInfo {
   string description = 2;
   string image_uri = 3;
   repeated string organizers = 4;
-  int64 start_date = 5; // unix seconds
-  int64 end_date = 6;   // unix seconds
-  uint32 capacity = 7;
-  EventLocation location = 8;
-  uint32 participants = 9;
-  string pkg_path = 10;
-  EventPrivacy privacy = 11;
+  repeated string gatekeepers = 5;
+  int64 start_date = 6; // unix seconds
+  int64 end_date = 7;   // unix seconds
+  uint32 capacity = 8;
+  EventLocation location = 9;
+  uint32 participants = 10;
+  string pkg_path = 11;
+  EventPrivacy privacy = 12;
 }
 
 message BatchProfileField {
