@@ -57,7 +57,7 @@ export function GuestRegistrationSuccessDialog({
             <Text>{t("profile-completion-invitation")}</Text>
             <Text>{t("profile-completion-incentive")}</Text>
           </div>
-          <SignInButton>
+          <SignInButton forceRedirectUrl={"/settings"}>
             <Button variant="outline">
               <Text>{t("sign-in")}</Text>
             </Button>
@@ -87,7 +87,7 @@ export function GuestRegistrationSuccessDialog({
           <Text>{t("profile-completion-invitation")}</Text>
           <Text>{t("profile-completion-incentive")}</Text>
         </div>
-        <SignInButton>
+        <SignInButton forceRedirectUrl={"/settings"}>
           <Button variant="outline">
             <Text>{t("sign-in")}</Text>
           </Button>
