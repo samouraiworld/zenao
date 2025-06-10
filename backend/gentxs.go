@@ -156,7 +156,17 @@ func execGenTxs() error {
 		for _, org := range organizers {
 			organizersIDs = append(organizersIDs, org.ID)
 		}
-		tx, err := createEventRealmTx(chain, event, signerInfo.GetAddress(), organizersIDs, privacy)
+
+		gatekeepers, err := db.GetEventUsersWithRole(event.ID, "gatekeeper")
+		if err != nil {
+			return err
+		}
+
+		var gatekeepersIDs []string
+		for _, gkp := range gatekeepers {
+			gatekeepersIDs = append(gatekeepersIDs, gkp.ID)
+		}
+		tx, err := createEventRealmTx(chain, event, signerInfo.GetAddress(), organizersIDs, gatekeepersIDs, privacy)
 		if err != nil {
 			return err
 		}
@@ -418,9 +428,10 @@ func createEventRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.
 	}, nil
 }
 
-func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, organizersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
+func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, organizersIDs []string, gatekeepersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
 	organizersAddr := mapsl.Map(organizersIDs, chain.UserAddress)
-	eRealm, err := genEventRealmSource(organizersAddr, creator.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
+	gatekeepersAddr := mapsl.Map(gatekeepersIDs, chain.UserAddress)
+	eRealm, err := genEventRealmSource(organizersAddr, gatekeepersAddr, creator.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
 		Title:       event.Title,
 		Description: event.Description,
 		ImageUri:    event.ImageURI,
