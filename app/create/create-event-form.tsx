@@ -11,6 +11,7 @@ import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { EventForm } from "@/components/form/event-form";
 import { useToast } from "@/app/hooks/use-toast";
 import { useCreateEvent } from "@/lib/mutations/event-management";
+import { captureException } from "@/lib/report";
 
 export const CreateEventForm: React.FC = () => {
   const { getToken } = useAuth();
@@ -76,11 +77,11 @@ export const CreateEventForm: React.FC = () => {
       });
       router.push(`/event/${id}`);
     } catch (err) {
+      captureException(err);
       toast({
         variant: "destructive",
         title: t("toast-creation-error"),
       });
-      console.error("error", err);
     }
   };
 

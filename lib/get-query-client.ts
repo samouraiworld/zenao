@@ -1,11 +1,10 @@
-import * as Sentry from "@sentry/nextjs";
 import {
-  MutationCache,
   QueryCache,
   QueryClient,
   defaultShouldDehydrateQuery,
   isServer,
 } from "@tanstack/react-query";
+import { captureException } from "./report";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -22,16 +21,7 @@ function makeQueryClient() {
     },
     queryCache: new QueryCache({
       onError: (error) => {
-        if (process.env.NEXT_PUBLIC_ENV ?? "development" !== "development") {
-          Sentry.captureException(error);
-        }
-      },
-    }),
-    mutationCache: new MutationCache({
-      onError: (error) => {
-        if (process.env.NEXT_PUBLIC_ENV ?? "development" !== "development") {
-          Sentry.captureException(error);
-        }
+        captureException(error);
       },
     }),
   });

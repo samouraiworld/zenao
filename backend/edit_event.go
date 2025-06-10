@@ -38,6 +38,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
+	//XXX: refactor the logic to avoid duplicate w/ gkps ?
 	var organizersIDs []string
 	organizersIDs = append(organizersIDs, zUser.ID)
 	for _, authOrg := range authOrgas {
@@ -49,6 +50,23 @@ func (s *ZenaoServer) EditEvent(
 			return nil, fmt.Errorf("duplicate organizer: %s", zOrg.ID)
 		}
 		organizersIDs = append(organizersIDs, zOrg.ID)
+	}
+
+	authGkps, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Gatekeepers)
+	if err != nil {
+		return nil, err
+	}
+
+	var gatekeepersIDs []string
+	for _, authGkp := range authGkps {
+		zGkp, err := s.EnsureUserExists(ctx, authGkp)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Contains(gatekeepersIDs, zGkp.ID) {
+			return nil, fmt.Errorf("duplicate gatekeeper: %s", zGkp.ID)
+		}
+		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
 	}
 
 	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
@@ -66,7 +84,7 @@ func (s *ZenaoServer) EditEvent(
 			return errors.New("user is not organizer of the event")
 		}
 
-		if evt, err = db.EditEvent(req.Msg.EventId, organizersIDs, req.Msg); err != nil {
+		if evt, err = db.EditEvent(req.Msg.EventId, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
 		}
 
@@ -80,7 +98,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, req.Msg, privacy); err != nil {
+	if err := s.Chain.EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
 		return nil, err
 	}
 
