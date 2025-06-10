@@ -17,6 +17,7 @@ import {
 } from "@/lib/mutations/event-participate";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventOptions } from "@/lib/queries/event";
+import { captureException } from "@/lib/report";
 
 const emailListSchema = z.object({
   email: z.string().email(),
@@ -114,7 +115,12 @@ export function EventRegistrationForm({
       toast({ title: t("toast-confirmation") });
       form.reset();
     } catch (err) {
-      console.error(err);
+      if (
+        err instanceof Error &&
+        err.message !== "[unknown] user is already participant for this event"
+      ) {
+        captureException(err);
+      }
       toast({
         variant: "destructive",
         title:

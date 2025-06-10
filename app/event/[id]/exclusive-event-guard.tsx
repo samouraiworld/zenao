@@ -25,6 +25,7 @@ import { zenaoClient } from "@/app/zenao-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
+import { captureException } from "@/lib/report";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
@@ -84,7 +85,10 @@ export function ExclusiveEventGuard({
       }
       setCanAccess(true);
     } catch (error: unknown) {
-      console.error("Error accessing exclusive event:", error);
+      if (error instanceof Error && error.message !== "Invalid password") {
+        captureException(error);
+      }
+
       toast({
         duration: 3000,
         variant: "destructive",

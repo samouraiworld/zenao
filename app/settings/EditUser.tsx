@@ -16,6 +16,7 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/texts/text";
 import { useEditUserProfile } from "@/lib/mutations/profile";
+import { captureException } from "@/lib/report";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -60,11 +61,11 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         title: t("toast-success"),
       });
     } catch (err) {
+      captureException(err);
       toast({
         variant: "destructive",
         title: t("toast-error"),
       });
-      console.error("error", err);
     }
   };
 
