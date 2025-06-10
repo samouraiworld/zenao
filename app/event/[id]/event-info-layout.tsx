@@ -1,13 +1,20 @@
 "use client";
 
-import { ClerkLoaded, ClerkLoading, SignedIn, useAuth } from "@clerk/nextjs";
+import {
+  ClerkLoaded,
+  ClerkLoading,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  useAuth,
+} from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./participants-section";
@@ -30,6 +37,7 @@ import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
 
 interface EventSectionProps {
   title: string;
@@ -66,6 +74,9 @@ export function EventInfoLayout({
 
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
+
+  const [guestEmail, setGuestEmail] = useState<string>("");
+  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
 
   const t = useTranslations("event");
 
@@ -175,6 +186,12 @@ export function EventInfoLayout({
         <Skeleton className="w-full h-28" />
       </ClerkLoading>
       <ClerkLoaded>
+        <GuestRegistrationSuccessDialog
+          title={data.title}
+          email={guestEmail}
+          open={guestDialogOpen}
+          onOpenChange={(o) => setGuestDialogOpen(o)}
+        />
         <Card className="mt-2">
           {isParticipant ? (
             <div>
@@ -190,6 +207,13 @@ export function EventInfoLayout({
                     {t("see-ticket")}
                   </Link>
                 </SignedIn>
+                <SignedOut>
+                  <SignInButton>
+                    <Text className="text-main underline">
+                      {t("login-to-see-tickets")}
+                    </Text>
+                  </SignInButton>
+                </SignedOut>
                 {/* TODO: create a clean decount timer */}
                 {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
               </div>
@@ -214,6 +238,10 @@ export function EventInfoLayout({
                 eventId={eventId}
                 userAddress={address}
                 eventPassword={password}
+                onGuestRegistrationSuccess={(email) => {
+                  setGuestEmail(email);
+                  setGuestDialogOpen(true);
+                }}
               />
             </div>
           )}
