@@ -250,7 +250,7 @@ export default async function RootLayout({
               >
                 <NextIntlClientProvider messages={messages}>
                   <NextTopLoader showSpinner={false} color="#EC7E17" />
-                  <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
+                  <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
                     <Header />
                     {children}
                     <Footer />
