@@ -4,7 +4,13 @@ import { UrlObject } from "url";
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BookOpenText, CompassIcon, LucideProps, Tickets } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpenText,
+  CompassIcon,
+  LucideProps,
+  Tickets,
+} from "lucide-react";
 import {
   ClerkLoading,
   SignedIn,
@@ -29,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import useSmartBack from "@/app/hooks/use-smart-back";
 
 export type NavItem = {
   key: string;
@@ -126,6 +133,25 @@ const NavLink = ({ item, pathname }: { item: NavItem; pathname: string }) => {
   );
 };
 
+const GoBackButton = ({ className }: { className?: string }) => {
+  const { handleBack, canGoBack } = useSmartBack();
+
+  if (!canGoBack) {
+    return null; // Don't render the button if there's no history to go back to
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn("flex items-center justify-center", className)}
+      onClick={handleBack}
+    >
+      <ArrowLeft className="w-5 h-5 text-secondary-color hover:text-primary-color" />
+    </Button>
+  );
+};
+
 export function Header() {
   const { getToken, userId } = useAuth();
   const t = useTranslations("navigation");
@@ -143,18 +169,20 @@ export function Header() {
     <div className="flex justify-between p-4 w-full items-center">
       {/* Desktop */}
       <div className="flex max-[450px]:gap-4 gap-6 items-center">
-        <Link href="/" className="flex gap-2 items-center">
-          <Web3Image
-            src="/zenao-logo.png"
-            alt="zenao logo"
-            width={28}
-            height={28}
-            className="max-[450px]:w-6 max-[450px]:h-6"
-            priority
-          />
-          <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
-        </Link>
-
+        <div className="flex items-center gap-2">
+          <GoBackButton className="" />
+          <Link href="/" className="flex gap-2 items-center">
+            <Web3Image
+              src="/zenao-logo.png"
+              alt="zenao logo"
+              width={28}
+              height={28}
+              className="max-[450px]:w-6 max-[450px]:h-6"
+              priority
+            />
+            <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
+          </Link>
+        </div>
         <div className="standalone:hidden flex flex-row gap-4">
           <HeaderLinks />
         </div>
