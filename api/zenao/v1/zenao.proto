@@ -58,6 +58,7 @@ message CreateEventRequest {
   EventLocation location = 9;
   string password = 10;
   repeated string organizers = 11;
+  repeated string gatekeepers = 12;
 }
 
 message CreateEventResponse { string id = 1; }
@@ -75,6 +76,7 @@ message EditEventRequest {
   string password = 10;
   bool update_password = 11;
   repeated string organizers = 12;
+  repeated string gatekeepers = 13;
 }
 
 message EditEventResponse { string id = 1; }

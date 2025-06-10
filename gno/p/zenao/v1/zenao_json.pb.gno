@@ -155,6 +155,13 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 		}
 		fields["organizers"] = json.ArrayNode("", arr)
 	}
+	if len(c.Gatekeepers) != 0 {
+		arr := make([]*json.Node, len(c.Gatekeepers))
+		for i, val := range c.Gatekeepers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["gatekeepers"] = json.ArrayNode("", arr)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -207,6 +214,14 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 			arr[i] = val.MustString()
 		}
 		c.Organizers = arr
+	}
+	if val, ok := fields["gatekeepers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Gatekeepers = arr
 	}
 }
 
@@ -272,6 +287,13 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 		}
 		fields["organizers"] = json.ArrayNode("", arr)
 	}
+	if len(e.Gatekeepers) != 0 {
+		arr := make([]*json.Node, len(e.Gatekeepers))
+		for i, val := range e.Gatekeepers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["gatekeepers"] = json.ArrayNode("", arr)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -330,6 +352,14 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 			arr[i] = val.MustString()
 		}
 		e.Organizers = arr
+	}
+	if val, ok := fields["gatekeepers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Gatekeepers = arr
 	}
 }
 
