@@ -42,6 +42,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
+	//XXX: refactor the logic to avoid duplicate w/ gkps ?
 	authOrgas, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Organizers)
 	if err != nil {
 		return nil, err
@@ -91,16 +92,6 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		s.Logger.Error("create-event", zap.Error(err))
-		return nil, err
-	}
-
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
 
 	if s.MailClient != nil {
@@ -119,6 +110,16 @@ func (s *ZenaoServer) CreateEvent(
 				s.Logger.Error("send-event-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID))
 			}
 		}
+	}
+
+	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+		s.Logger.Error("create-event", zap.Error(err))
+		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{

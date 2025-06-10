@@ -365,21 +365,10 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 			panic(errors.New("invalid payload type"))
 		}
 		if len(msg.organizers) != 0 {
-			currentOrgs := e.DAOPrivate.Members.GetMembersWithRole("organizer")
-			for _, org := range currentOrgs {
-				if !sliceContains(msg.organizers, org) {
-					e.DAOPrivate.Members.RemoveRoleFromMember(org, "organizer")
-				}
-			}
-			for _, org := range msg.organizers {
-				if !sliceContains(currentOrgs, org) {
-					if e.DAOPrivate.Members.IsMember(org) {
-						e.DAOPrivate.Members.AddRoleToMember(org, "organizer")
-					} else {
-						e.DAOPrivate.Members.AddMember(org, []string{"organizer"})
-					}
-				}
-			}
+			e.updateEventUserRoles("organizer", msg.organizers)
+		}
+		if len(msg.gatekeepers) != 0 {
+			e.updateEventUserRoles("gatekeeper", msg.gatekeepers)
 		}
 		if msg.title != "" {
 			e.setProfileString("DisplayName", msg.title)
@@ -421,6 +410,7 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 
 type msgEditEvent struct {
 	organizers  []string
+	gatekeepers []string
 	title       string
 	description string
 	imageURI    string
@@ -461,9 +451,10 @@ func (msg *msgEditEvent) String() string {
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(organizers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
+func NewEditEventMsg(organizers []string, gatekeepers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
 		organizers:  organizers,
+		gatekeepers: gatekeepers,
 		title:       title,
 		description: description,
 		imageURI:    imageURI,
@@ -546,6 +537,24 @@ func LocationString(location *zenaov1.EventLocation) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+func (e *Event) updateEventUserRoles(role string, usersAddr []string) {
+	currentUsers := e.DAOPrivate.Members.GetMembersWithRole(role)
+	for _, user := range currentUsers {
+		if !sliceContains(usersAddr, user) {
+			e.DAOPrivate.Members.RemoveRoleFromMember(user, role)
+		}
+	}
+	for _, user := range usersAddr {
+		if !sliceContains(currentUsers, user) {
+			if e.DAOPrivate.Members.IsMember(user) {
+				e.DAOPrivate.Members.AddRoleToMember(user, role)
+			} else {
+				e.DAOPrivate.Members.AddMember(user, []string{role})
+			}
+		}
+	}
 }
 
 func sliceContains(slice []string, elem string) bool {
