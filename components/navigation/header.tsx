@@ -170,7 +170,7 @@ export function Header() {
       {/* Desktop */}
       <div className="flex max-[450px]:gap-4 gap-6 items-center">
         <div className="flex items-center gap-2">
-          <GoBackButton className="" />
+          <GoBackButton className="hidden standalone:flex" />
           <Link href="/" className="flex gap-2 items-center">
             <Web3Image
               src="/zenao-logo.png"
