@@ -75,7 +75,6 @@ export const EventForm: React.FC<EventFormProps> = ({
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const hiddenAudioInputRef = useRef<HTMLInputElement>(null);
   const hiddenImgInputRef = useRef<HTMLInputElement>(null);
-  // const [uploading, setUploading] = useState<boolean>(false);
 
   const { uploadMdFile, uploading, setCursor } =
     useMarkdownUpload(descriptionRef);
