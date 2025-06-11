@@ -27,6 +27,7 @@ function remarkAudioDirective() {
         data.hProperties = {
           src: (url?.length ?? 0 > 0) ? url : "#",
           controls: true,
+          controlsList: "nodownload",
         };
       }
     });
