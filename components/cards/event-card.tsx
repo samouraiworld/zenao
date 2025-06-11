@@ -13,6 +13,7 @@ import EventDateTime from "./event-date-time";
 import { makeLocationFromEvent } from "@/lib/location";
 import { determineTimezone } from "@/lib/determine-timezone";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+
 export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
   const location = makeLocationFromEvent(evt.location);
