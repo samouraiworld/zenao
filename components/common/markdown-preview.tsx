@@ -5,8 +5,10 @@ import remarkYoutube from "remark-youtube";
 import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import supersub from "remark-supersub";
 import remarkHtml from "remark-html";
+import remarkDirective from "remark-directive";
 import { Web3Image } from "../images/web3-image";
 import { cn } from "@/lib/tailwind";
+import remarkAudioDirective from "@/lib/remark-audio-directive.plugin";
 
 export function MarkdownPreview({
   markdownString,
@@ -32,6 +34,9 @@ export function MarkdownPreview({
         // gfm for GitHub Flavored Markdown, support autolink literals, footnotes, strikethrough, tables, tasklists
         [remarkGfm, { singleTilde: false }],
         // support embed player for youtube videos
+        // to support directives like `::audio`
+        remarkDirective,
+        remarkAudioDirective,
         remarkYoutube,
         // It’s a shortcut for .use(remarkRehype).use(rehypeSanitize).use(rehypeStringify) needed to compiles markdown to HTML
         remarkHtml,
@@ -55,6 +60,7 @@ export function MarkdownPreview({
             />
           );
         },
+        // audio:
         a: (props) => <a {...props} target="_blank" />,
       }}
       urlTransform={(options) => {
