@@ -8,7 +8,7 @@ import { Web3Image } from "../images/web3-image";
 import Heading from "../texts/heading";
 import Text from "../texts/text";
 import { AspectRatio } from "../shadcn/aspect-ratio";
-import { Card } from "./Card";
+import { Card } from "./card";
 import EventDateTime from "./event-date-time";
 import { makeLocationFromEvent } from "@/lib/location";
 import { determineTimezone } from "@/lib/determine-timezone";

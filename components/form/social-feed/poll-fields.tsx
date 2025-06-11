@@ -3,10 +3,10 @@
 import { Control, useFieldArray, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { PlusIcon, Trash2Icon } from "lucide-react";
-import { FormFieldInputString } from "../components/FormFieldInputString";
+import { FormFieldInputString } from "../components/form-field-input-string";
 import { FeedPostFormSchemaType, pollFormSchema } from "../types";
-import { FormFieldInputNumber } from "../components/FormFieldInputNumber";
-import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import { FormFieldInputNumber } from "../components/form-field-input-number";
+import { ButtonWithChildren } from "@/components/buttons/button-with-children";
 import { cn } from "@/lib/tailwind";
 import { FormFieldCheckbox } from "@/components/form/components/form-field-checkbox";
 import Text from "@/components/texts/text";

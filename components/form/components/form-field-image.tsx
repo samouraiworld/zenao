@@ -16,7 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
-import { Card } from "@/components/cards/Card";
+import { Card } from "@/components/cards/card";
 import { cn } from "@/lib/tailwind";
 import { Web3Image } from "@/components/images/web3-image";
 

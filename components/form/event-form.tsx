@@ -9,18 +9,18 @@ import {
   minutesToSeconds,
 } from "date-fns";
 import { Paperclip } from "lucide-react";
-import { Card } from "../cards/Card";
+import { Card } from "../cards/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/markdown-preview";
-import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
+import { ButtonWithLabel } from "../buttons/button-with-label";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/map-lazy-components";
 import Text from "../texts/text";
 import { Button } from "../shadcn/button";
-import { FormFieldInputString } from "./components/FormFieldInputString";
-import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
-import { TimeZonesPopover } from "./components/TimeZonesPopover";
+import { FormFieldInputString } from "./components/form-field-input-string";
+import { FormFieldInputNumber } from "./components/form-field-input-number";
+import { TimeZonesPopover } from "./components/time-zones-popover";
 import { FormFieldImage } from "./components/form-field-image";
 import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/form-field-textarea";
