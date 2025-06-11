@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Text from "../texts/text";
-import { ButtonWithChildren } from "./ButtonWithChildren";
+import { ButtonWithChildren } from "./button-with-children";
 
 export function LoaderMoreButton<TData = unknown[]>({
   fetchNextPage,

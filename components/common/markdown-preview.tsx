@@ -39,7 +39,10 @@ export function MarkdownPreview({
       // responsive style for embed youtube videos
       components={{
         iframe: (props) => (
-          <iframe className={cn(props.className, "w-full")} {...props}></iframe>
+          <iframe
+            className={cn(props.className, `w-full h-full aspect-video`)}
+            {...props}
+          ></iframe>
         ),
         img: (props) => {
           return (

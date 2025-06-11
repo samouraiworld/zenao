@@ -23,6 +23,7 @@ import { useCreatePoll } from "@/lib/mutations/social-feed";
 import { getQueryClient } from "@/lib/get-query-client";
 import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 import { userAddressOptions } from "@/lib/queries/user";
+import { captureException } from "@/lib/report";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -111,11 +112,11 @@ export function PollPostForm({
         title: t("toast-poll-creation-success"),
       });
     } catch (err) {
+      captureException(err);
       toast({
         variant: "destructive",
         title: t("toast-poll-creation-error"),
       });
-      console.error("error", err);
     }
   };
 

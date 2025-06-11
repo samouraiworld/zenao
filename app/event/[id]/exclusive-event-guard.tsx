@@ -1,6 +1,5 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2, Lock } from "lucide-react";
@@ -12,8 +11,8 @@ import { imageHeight, imageWidth } from "./constants";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 import { Form } from "@/components/shadcn/form";
-import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
-import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import { FormFieldInputString } from "@/components/form/components/form-field-input-string";
+import { ButtonWithChildren } from "@/components/buttons/button-with-children";
 import {
   eventProtectionFormSchema,
   EventProtectionFormSchemaType,
@@ -26,6 +25,7 @@ import { zenaoClient } from "@/app/zenao-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
+import { captureException } from "@/lib/report";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
@@ -85,10 +85,10 @@ export function ExclusiveEventGuard({
       }
       setCanAccess(true);
     } catch (error: unknown) {
-      console.error("Error accessing exclusive event:", error);
       if (error instanceof Error && error.message !== "Invalid password") {
-        Sentry.captureException(error);
+        captureException(error);
       }
+
       toast({
         duration: 3000,
         variant: "destructive",

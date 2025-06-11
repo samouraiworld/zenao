@@ -16,6 +16,7 @@ import { userAddressOptions } from "@/lib/queries/user";
 import Text from "@/components/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
+import { captureException } from "@/lib/report";
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -73,11 +74,11 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       });
       router.push(`/event/${id}`);
     } catch (err) {
+      captureException(err);
       toast({
         variant: "destructive",
         title: t("toast-edit-error"),
       });
-      console.error("error", err);
     }
   };
 

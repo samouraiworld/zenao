@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { FormFieldInputString } from "../components/FormFieldInputString";
+import { FormFieldInputString } from "../components/form-field-input-string";
 import { InviteeForm } from "./invitee-form";
-import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
+import { ButtonWithLabel } from "@/components/buttons/button-with-label";
 import { Form } from "@/components/shadcn/form";
 import {
   useEventParticipateGuest,
@@ -17,6 +17,7 @@ import {
 } from "@/lib/mutations/event-participate";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventOptions } from "@/lib/queries/event";
+import { captureException } from "@/lib/report";
 
 const emailListSchema = z.object({
   email: z.string().email(),
@@ -35,6 +36,7 @@ type EventRegistrationFormProps = {
   eventId: string;
   eventPassword: string;
   userAddress: string | null;
+  onGuestRegistrationSuccess?: (email: string) => void;
 };
 
 export type SubmitStatusInvitee = Record<
@@ -46,6 +48,7 @@ export function EventRegistrationForm({
   eventId,
   eventPassword,
   userAddress,
+  onGuestRegistrationSuccess,
 }: EventRegistrationFormProps) {
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(eventId));
@@ -106,12 +109,18 @@ export function EventRegistrationForm({
           userAddress,
           password: eventPassword,
         });
+        onGuestRegistrationSuccess?.(data.email!);
       }
       setIsPending(false);
       toast({ title: t("toast-confirmation") });
       form.reset();
     } catch (err) {
-      console.error(err);
+      if (
+        err instanceof Error &&
+        err.message !== "[unknown] user is already participant for this event"
+      ) {
+        captureException(err);
+      }
       toast({
         variant: "destructive",
         title:

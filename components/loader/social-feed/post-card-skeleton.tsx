@@ -1,4 +1,4 @@
-import { Card } from "@/components/cards/Card";
+import { Card } from "@/components/cards/card";
 import { UserAvatarSkeleton } from "@/components/common/user";
 import { Skeleton } from "@/components/shadcn/skeleton";
 

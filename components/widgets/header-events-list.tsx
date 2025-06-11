@@ -2,7 +2,7 @@ import Heading from "../texts/heading";
 import { GnowebButton } from "../buttons/gnoweb-button";
 import Text from "../texts/text";
 import FromFilterTab from "./from-filter-tab";
-import { FromFilter } from "@/lib/searchParams";
+import { FromFilter } from "@/lib/search-params";
 
 const HeaderEventsList: React.FC<{
   from: FromFilter;

@@ -13,7 +13,7 @@ import { useMediaQuery } from "react-responsive";
 import { UseFormReturn } from "react-hook-form";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
-import { ButtonBase } from "@/components/buttons/ButtonBases";
+import { ButtonBase } from "@/components/buttons/button-bases";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
 import {
   FeedPostFormSchemaType,
@@ -38,6 +38,7 @@ import { uploadFile } from "@/lib/files";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
+import { captureException } from "@/lib/report";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -179,11 +180,11 @@ export function StandardPostForm({
         title: t("toast-post-creation-success"),
       });
     } catch (err) {
+      captureException(err);
       toast({
         variant: "destructive",
         title: t("toast-post-creation-error"),
       });
-      console.error("error", err);
     }
   };
 

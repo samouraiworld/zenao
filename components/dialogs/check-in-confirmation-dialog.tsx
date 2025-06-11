@@ -15,7 +15,7 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "../shadcn/drawer";
-import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import { ButtonWithChildren } from "../buttons/button-with-children";
 import { Button } from "../shadcn/button";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";

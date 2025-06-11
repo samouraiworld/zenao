@@ -16,7 +16,7 @@ import {
 } from "../shadcn/dialog";
 import { Form } from "../shadcn/form";
 import { FormFieldTextArea } from "../form/components/form-field-textarea";
-import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import { ButtonWithChildren } from "../buttons/button-with-children";
 import {
   Drawer,
   DrawerClose,
@@ -31,6 +31,7 @@ import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
 import { useEventBroadcastEmail } from "@/lib/mutations/event-management";
 import { useToast } from "@/app/hooks/use-toast";
+import { captureException } from "@/lib/report";
 
 type BroadcastEmailDialogProps = {
   eventId: string;
@@ -88,7 +89,7 @@ export function BroadcastEmailDialog({
         title: t("toast-email-sent-success"),
       });
     } catch (err) {
-      console.error("error", err);
+      captureException(err);
       toast({
         title: t("toast-email-sent-error"),
       });

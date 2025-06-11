@@ -140,13 +140,13 @@ func execFakegen() error {
 		}
 		creatorID := zUser.ID
 
-		zevt, err := db.CreateEvent(creatorID, []string{creatorID}, evtReq)
+		zevt, err := db.CreateEvent(creatorID, []string{creatorID}, []string{}, evtReq)
 		if err != nil {
 			return err
 		}
 
 		if !fakegenConf.skipChain {
-			if err := chain.CreateEvent(zevt.ID, []string{creatorID}, evtReq, nil); err != nil {
+			if err := chain.CreateEvent(zevt.ID, []string{creatorID}, []string{}, evtReq, nil); err != nil {
 				return err
 			}
 		}

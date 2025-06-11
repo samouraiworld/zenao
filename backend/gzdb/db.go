@@ -94,7 +94,7 @@ func (g *gormZenaoDB) Tx(cb func(db zeni.DB) error) error {
 }
 
 // CreateEvent implements zeni.DB.
-func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, req *zenaov1.CreateEventRequest) (*zeni.Event, error) {
+func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*zeni.Event, error) {
 	// NOTE: request should be validated by caller
 
 	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
@@ -143,6 +143,23 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, req 
 		}
 	}
 
+	for _, gatekeeperID := range gatekeepersIDs {
+		gatekeeperIDInt, err := strconv.ParseUint(gatekeeperID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse gatekeeper id: %w", err)
+		}
+
+		userRole := &UserRole{
+			UserID:  uint(gatekeeperIDInt),
+			EventID: evt.ID,
+			Role:    "gatekeeper",
+		}
+
+		if err := g.db.Create(userRole).Error; err != nil {
+			return nil, fmt.Errorf("create gatekeeper role assignment in db: %w", err)
+		}
+	}
+
 	zevt, err := dbEventToZeniEvent(evt)
 	if err != nil {
 		return nil, fmt.Errorf("convert db event to zeni event: %w", err)
@@ -152,7 +169,7 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, req 
 }
 
 // EditEvent implements zeni.DB.
-func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, req *zenaov1.EditEventRequest) (*zeni.Event, error) {
+func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*zeni.Event, error) {
 	// XXX: validate?
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
 	if err != nil {
@@ -181,50 +198,12 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, req *zen
 		return nil, err
 	}
 
-	var currentOrgsIDs []string
-	currentOrgs, err := g.GetEventUsersWithRole(eventID, "organizer")
-	if err != nil {
-		return nil, fmt.Errorf("get current organizers: %w", err)
-	}
-	for _, org := range currentOrgs {
-		currentOrgsIDs = append(currentOrgsIDs, org.ID)
+	if err := g.updateEventUserRoles(eventID, "organizer", organizersIDs); err != nil {
+		return nil, err
 	}
 
-	orgsToRemove := make([]string, 0, len(currentOrgs))
-	for _, orgID := range currentOrgsIDs {
-		if !slices.Contains(organizersIDs, orgID) {
-			orgsToRemove = append(orgsToRemove, orgID)
-		}
-	}
-
-	if len(orgsToRemove) > 0 {
-		if err := g.db.Where("event_id = ? AND role = ? AND user_id IN (?)", evtIDInt, "organizer", orgsToRemove).Delete(&UserRole{}).Error; err != nil {
-			return nil, fmt.Errorf("delete existing organizer roles before adding the new ones: %w", err)
-		}
-	}
-
-	orgsToAdd := make([]string, 0, len(organizersIDs))
-	for _, orgID := range organizersIDs {
-		if !slices.Contains(currentOrgsIDs, orgID) {
-			orgsToAdd = append(orgsToAdd, orgID)
-		}
-	}
-
-	for _, organizerID := range orgsToAdd {
-		organizerIDInt, err := strconv.ParseUint(organizerID, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("parse organizer id: %w", err)
-		}
-
-		userRole := &UserRole{
-			UserID:  uint(organizerIDInt),
-			EventID: uint(evtIDInt),
-			Role:    "organizer",
-		}
-
-		if err := g.db.Create(userRole).Error; err != nil {
-			return nil, fmt.Errorf("create organizer role assignment in db: %w", err)
-		}
+	if err := g.updateEventUserRoles(eventID, "gatekeeper", gatekeepersIDs); err != nil {
+		return nil, err
 	}
 
 	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Updates(evt).Error; err != nil {
@@ -481,11 +460,34 @@ func (g *gormZenaoDB) GetEventUsersWithRole(eventID string, role string) ([]*zen
 	return res, nil
 }
 
+// GetEventTickets implements zeni.DB.
+func (g *gormZenaoDB) GetEventTickets(eventID string) ([]*zeni.SoldTicket, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse event id: %w", err)
+	}
+
+	tickets := []*SoldTicket{}
+	if err := g.db.Preload("Checkin").Preload("User").Find(&tickets, "event_id = ?", evtIDInt).Error; err != nil {
+		return nil, err
+	}
+
+	res := make([]*zeni.SoldTicket, len(tickets))
+	for i, ticket := range tickets {
+		res[i], err = dbSoldTicketToZeniSoldTicket(ticket)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return res, nil
+}
+
 // GetEventUserTickets implements zeni.DB.
 func (g *gormZenaoDB) GetEventUserTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
-		return nil, fmt.Errorf("parse buyer id: %w", err)
+		return nil, fmt.Errorf("parse buyer or user id: %w", err)
 	}
 
 	tickets := []*SoldTicket{}
@@ -936,4 +938,58 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		User:      user,
 		CreatedAt: dbtick.CreatedAt,
 	}, nil
+}
+
+func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs []string) error {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	var currentUsersIDs []string
+	currentUsers, err := g.GetEventUsersWithRole(eventID, role)
+	if err != nil {
+		return fmt.Errorf("get users with role %s: %w", role, err)
+	}
+	for _, usr := range currentUsers {
+		currentUsersIDs = append(currentUsersIDs, usr.ID)
+	}
+
+	usersToRemove := make([]string, 0, len(currentUsers))
+	for _, userID := range currentUsersIDs {
+		if !slices.Contains(userIDs, userID) {
+			usersToRemove = append(usersToRemove, userID)
+		}
+	}
+
+	if len(usersToRemove) > 0 {
+		if err := g.db.Where("event_id = ? AND role = ? AND user_id IN (?)", evtIDInt, role, usersToRemove).Delete(&UserRole{}).Error; err != nil {
+			return fmt.Errorf("delete existing %s roles before adding the new ones: %w", role, err)
+		}
+	}
+
+	usersToAdd := make([]string, 0, len(userIDs))
+	for _, userID := range userIDs {
+		if !slices.Contains(currentUsersIDs, userID) {
+			usersToAdd = append(usersToAdd, userID)
+		}
+	}
+
+	for _, userID := range usersToAdd {
+		userIDInt, err := strconv.ParseUint(userID, 10, 64)
+		if err != nil {
+			return fmt.Errorf("parse %s id: %w", role, err)
+		}
+
+		userRole := &UserRole{
+			UserID:  uint(userIDInt),
+			EventID: uint(evtIDInt),
+			Role:    role,
+		}
+
+		if err := g.db.Create(userRole).Error; err != nil {
+			return fmt.Errorf("create %s role assignment in db: %w", role, err)
+		}
+	}
+	return nil
 }

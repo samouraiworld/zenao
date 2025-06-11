@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { GnowebButton } from "@/components/buttons/gnoweb-button";
-import { Card } from "@/components/cards/Card";
+import { Card } from "@/components/cards/card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Heading from "@/components/texts/heading";
