@@ -8,11 +8,11 @@ import { Web3Image } from "../images/web3-image";
 import Heading from "../texts/heading";
 import Text from "../texts/text";
 import { AspectRatio } from "../shadcn/aspect-ratio";
-import { Card } from "./card";
 import EventDateTime from "./event-date-time";
 import { makeLocationFromEvent } from "@/lib/location";
 import { determineTimezone } from "@/lib/determine-timezone";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { Card } from "./card";
 
 export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
