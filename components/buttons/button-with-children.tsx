@@ -1,6 +1,6 @@
 "use client";
 
-import { ButtonBase } from "./ButtonBases";
+import { ButtonBase } from "./button-bases";
 import { ButtonProps } from "./types";
 
 export const ButtonWithChildren: React.FC<

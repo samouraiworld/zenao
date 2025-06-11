@@ -16,7 +16,7 @@ import {
 } from "../shadcn/dialog";
 import { Form } from "../shadcn/form";
 import { FormFieldTextArea } from "../form/components/form-field-textarea";
-import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import { ButtonWithChildren } from "../buttons/button-with-children";
 import {
   Drawer,
   DrawerClose,

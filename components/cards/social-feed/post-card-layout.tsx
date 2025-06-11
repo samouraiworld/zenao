@@ -9,7 +9,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import { PostMenu } from "../menu/post-menu";
-import { Card } from "@/components/cards/Card";
+import { Card } from "@/components/cards/card";
 import { UserAvatar } from "@/components/common/user";
 import { PostView, ReactionView } from "@/app/gen/feeds/v1/feeds_pb";
 import { DateTimeText } from "@/components/common/date-time-text";
