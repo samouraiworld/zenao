@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { FormFieldInputString } from "../components/FormFieldInputString";
+import { FormFieldInputString } from "../components/form-field-input-string";
 import { InviteeForm } from "./invitee-form";
-import { ButtonWithLabel } from "@/components/buttons/ButtonWithLabel";
+import { ButtonWithLabel } from "@/components/buttons/button-with-label";
 import { Form } from "@/components/shadcn/form";
 import {
   useEventParticipateGuest,

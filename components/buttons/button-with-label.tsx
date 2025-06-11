@@ -1,7 +1,7 @@
 "use client";
 
 import Text from "../texts/text";
-import { ButtonBase } from "./ButtonBases";
+import { ButtonBase } from "./button-bases";
 import { ButtonProps } from "./types";
 
 export const ButtonWithLabel: React.FC<ButtonProps & { label: string }> = ({

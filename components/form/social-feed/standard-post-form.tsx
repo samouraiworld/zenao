@@ -13,7 +13,7 @@ import { useMediaQuery } from "react-responsive";
 import { UseFormReturn } from "react-hook-form";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
-import { ButtonBase } from "@/components/buttons/ButtonBases";
+import { ButtonBase } from "@/components/buttons/button-bases";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
 import {
   FeedPostFormSchemaType,

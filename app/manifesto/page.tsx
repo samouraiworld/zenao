@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { FileText } from "lucide-react";
 import Image from "next/image";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
-import { Card } from "@/components/cards/Card";
+import { Card } from "@/components/cards/card";
 import Text from "@/components/texts/text";
 
 export default function Manifesto() {

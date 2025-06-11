@@ -1,6 +1,7 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
+import kebabCaseFilename from "./eslint-rules/kebab-case-filename.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,6 +11,19 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    files: ["**/*.{ts,tsx,js,jsx}"],
+    plugins: {
+      local: {
+        rules: {
+          "kebab-case-filename": kebabCaseFilename,
+        },
+      },
+    },
+    rules: {
+      "local/kebab-case-filename": 2,
+    },
+  },
   ...compat.config({
     ignorePatterns: ["app/gen/*"],
     extends: [

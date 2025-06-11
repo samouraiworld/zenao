@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Card } from "@/components/cards/Card";
+import { Card } from "@/components/cards/card";
 import Text from "@/components/texts/text";
 import { EventUserRole } from "@/lib/queries/event-users";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";

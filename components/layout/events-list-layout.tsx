@@ -1,5 +1,5 @@
 import HeaderEventsList from "../widgets/header-events-list";
-import { FromFilter } from "@/lib/searchParams";
+import { FromFilter } from "@/lib/search-params";
 
 export const EventsListLayout: React.FC<{
   from: FromFilter;

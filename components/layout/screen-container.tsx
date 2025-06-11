@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SignedOutModal } from "../modals/SignedOutModal";
+import { SignedOutModal } from "../modals/signed-out-modal";
 import { BackgroundImage, BackgroundProps } from "./background-image";
 
 interface ScreenContainerProps {
