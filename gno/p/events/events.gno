@@ -353,7 +353,7 @@ func NewCheckinMsg(ticketPubkey string, checkinSignature string) daokit.Executab
 }
 
 func (e *Event) CountParticipants() uint32 {
-	return uint32(len(e.DAOPrivate.Members.GetMembersWithRole("participant")))
+	return e.DAOPrivate.Members.CountMembersWithRole("participant")
 }
 
 const MsgEditEventKind = "gno.land/p/zenao/events.EditEvent"
