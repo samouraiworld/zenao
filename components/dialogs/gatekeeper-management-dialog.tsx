@@ -1,6 +1,7 @@
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   Drawer,
   DrawerContent,
@@ -41,6 +42,7 @@ function GatekeeperManagementForm({
     control: form.control,
     name: "gatekeepers",
   });
+  const t = useTranslations("gatekeeper-management-dialog");
   const internalForm = useForm<EmailSchemaType>({
     mode: "all",
     resolver: zodResolver(emailSchema),
@@ -64,7 +66,7 @@ function GatekeeperManagementForm({
               control={internalForm.control}
               name="email"
               className="w-full"
-              placeholder="Enter email"
+              placeholder={t("input-placeholder")}
             />
           </div>
           <div className="col-span-1">
@@ -85,7 +87,7 @@ function GatekeeperManagementForm({
 
       <ol className="w-full list-decimal">
         <li className="flex items-center text-sm text-muted-foreground mb-2">
-          <Text className="text-muted-foreground">Default (You)</Text>
+          <Text className="text-muted-foreground">{t("default")}</Text>
         </li>
         {optionFields.map((field, index) => (
           <li
@@ -119,17 +121,16 @@ export function GatekeeperManagementDialog({
 }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isStandalone = useMediaQuery("(display-mode: standalone)");
-  // const t = useTranslations("guest-registration-success-dialog");
+  const t = useTranslations("gatekeeper-management-dialog");
 
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="flex flex-col gap-8 max-h-screen overflow-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl">Manage gatekeepers</DialogTitle>
+            <DialogTitle className="text-xl">{t("title")}</DialogTitle>
             <DialogDescription className="text-base">
-              Assign and manage gatekeepers responsible for controlling access
-              to the event.
+              {t("description")}
             </DialogDescription>
           </DialogHeader>
           <GatekeeperManagementForm form={form} />
@@ -140,7 +141,7 @@ export function GatekeeperManagementDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Done
+              {t("done")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -152,10 +153,9 @@ export function GatekeeperManagementDialog({
     <Drawer open={open} onOpenChange={onOpenChange} modal={!isStandalone}>
       <DrawerContent className="flex flex-col gap-8 pb-8 px-4 max-h-full overflow-auto">
         <DrawerHeader>
-          <DrawerTitle className="text-xl">Manage gatekeepers</DrawerTitle>
+          <DrawerTitle className="text-xl">{t("title")}</DrawerTitle>
           <DrawerDescription className="text-base">
-            Assign and manage gatekeepers responsible for controlling access to
-            the event.
+            {t("description")}
           </DrawerDescription>
         </DrawerHeader>
         <GatekeeperManagementForm form={form} />
@@ -166,7 +166,7 @@ export function GatekeeperManagementDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            Done
+            {t("done")}
           </Button>
         </DrawerFooter>
       </DrawerContent>

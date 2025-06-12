@@ -100,6 +100,13 @@
     "profile-completion-incentive": "It’s quick and will be useful to interact with community !",
     "sign-in": "Sign in"
   },
+  "gatekeeper-management-dialog": {
+    "title": "Manage gatekeepers",
+    "description": "Assign and manage gatekeepers responsible for controlling access to the event.",
+    "input-placeholder": "Email...",
+    "default": "Default (You)",
+    "done": "Done"
+  },
   "manifesto": {
     "title": "MANIFESTO",
     "means": "means",
