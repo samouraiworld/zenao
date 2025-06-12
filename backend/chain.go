@@ -57,6 +57,7 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 		signerInfo:         signerInfo,
 		logger:             logger,
 		namespace:          namespace,
+		securityRate:       1.2,
 	}, nil
 }
 
@@ -66,6 +67,7 @@ type gnoZenaoChain struct {
 	signerInfo         keys.Info
 	logger             *zap.Logger
 	namespace          string
+	securityRate       float64
 }
 
 const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
@@ -133,34 +135,47 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 
-	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
+	cfg := gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
 		GasWanted: 100000000,
-	}, vm.MsgAddPackage{
+	}
+	msgPkg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
 		Package: &gnovm.MemPackage{
 			Name:  "event",
 			Path:  eventPkgPath,
 			Files: []*gnovm.MemFile{{Name: "event.gno", Body: eventRealmSrc}},
 		},
-	}))
+	}
+
+	gasEstimation, err := g.estimateAddPackageTxGas(cfg, msgPkg)
+	if err != nil {
+		return err
+	}
+	cfg.GasWanted = gasEstimation
+	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(cfg, msgPkg))
 	if err != nil {
 		return err
 	}
 
 	g.logger.Info("created event realm", zap.String("pkg-path", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
-	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: 10000000,
-	}, vm.MsgCall{
+	cfg.GasWanted = 10000000
+	msgCall := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
 		PkgPath: g.eventsIndexPkgPath,
 		Func:    "IndexEvent",
 		Args: []string{
 			eventPkgPath,
 		},
-	}))
+	}
+
+	gasEstimation, err = g.estimateCallTxGas(cfg, msgCall)
+	if err != nil {
+		return err
+	}
+	cfg.GasWanted = gasEstimation
+	broadcastRes, err = checkBroadcastErr(g.client.Call(cfg, msgCall))
 	if err != nil {
 		return err
 	}
@@ -572,6 +587,54 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 		return nil, fmt.Errorf("%w\n%s", broadcastRes.DeliverTx.Error, broadcastRes.DeliverTx.Log)
 	}
 	return broadcastRes, nil
+}
+
+func (g *gnoZenaoChain) estimateCallTxGas(cfg gnoclient.BaseTxCfg, msgs ...vm.MsgCall) (int64, error) {
+	tx, err := gnoclient.NewCallTx(cfg, msgs...)
+	if err != nil {
+		return 0, err
+	}
+	tx, err = g.client.SignTx(*tx, 0, 0)
+	if err != nil {
+		return 0, err
+	}
+	gasWanted, err := g.client.EstimateGas(tx)
+	if err != nil {
+		return 0, err
+	}
+	return int64(float64(gasWanted) * g.securityRate), nil
+}
+
+func (g *gnoZenaoChain) estimateRunTxGas(cfg gnoclient.BaseTxCfg, msgs ...vm.MsgRun) (int64, error) {
+	tx, err := gnoclient.NewRunTx(cfg, msgs...)
+	if err != nil {
+		return 0, err
+	}
+	tx, err = g.client.SignTx(*tx, 0, 0)
+	if err != nil {
+		return 0, err
+	}
+	gasWanted, err := g.client.EstimateGas(tx)
+	if err != nil {
+		return 0, err
+	}
+	return int64(float64(gasWanted) * g.securityRate), nil
+}
+
+func (g *gnoZenaoChain) estimateAddPackageTxGas(cfg gnoclient.BaseTxCfg, msgs ...vm.MsgAddPackage) (int64, error) {
+	tx, err := gnoclient.NewAddPackageTx(cfg, msgs...)
+	if err != nil {
+		return 0, err
+	}
+	tx, err = g.client.SignTx(*tx, 0, 0)
+	if err != nil {
+		return 0, err
+	}
+	gasWanted, err := g.client.EstimateGas(tx)
+	if err != nil {
+		return 0, err
+	}
+	return int64(float64(gasWanted) * g.securityRate), nil
 }
 
 func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string {
