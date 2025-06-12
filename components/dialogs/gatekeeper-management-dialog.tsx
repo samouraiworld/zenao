@@ -127,7 +127,10 @@ export function GatekeeperManagementDialog({
         <DialogContent className="flex flex-col gap-8 max-h-screen overflow-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">Manage gatekeepers</DialogTitle>
-            <DialogDescription className="text-base">Test</DialogDescription>
+            <DialogDescription className="text-base">
+              Assign and manage gatekeepers responsible for controlling access
+              to the event.
+            </DialogDescription>
           </DialogHeader>
           <GatekeeperManagementForm form={form} />
           <DialogFooter>
@@ -150,7 +153,10 @@ export function GatekeeperManagementDialog({
       <DrawerContent className="flex flex-col gap-8 pb-8 px-4 max-h-full overflow-auto">
         <DrawerHeader>
           <DrawerTitle className="text-xl">Manage gatekeepers</DrawerTitle>
-          <DrawerDescription className="text-base">Test</DrawerDescription>
+          <DrawerDescription className="text-base">
+            Assign and manage gatekeepers responsible for controlling access to
+            the event.
+          </DrawerDescription>
         </DrawerHeader>
         <GatekeeperManagementForm form={form} />
         <DrawerFooter>
