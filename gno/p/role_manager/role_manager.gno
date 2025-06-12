@@ -160,6 +160,11 @@ func (rm *RoleManager) CountUserRoles(user std.Address) int {
 	return userRoles.Size()
 }
 
+func (rm *RoleManager) CountRoleUsers(roleName string) int {
+	role := rm.mustGetRole(roleName)
+	return role.users.Size()
+}
+
 func (rm *RoleManager) GetRoles() []string {
 	i := 0
 	res := make([]string, rm.roles.Size())
