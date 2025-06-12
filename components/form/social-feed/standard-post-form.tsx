@@ -1,14 +1,8 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Paperclip } from "lucide-react";
+import { AudioWaveform, ImageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useMediaQuery } from "react-responsive";
 import { UseFormReturn } from "react-hook-form";
 import { FeedInputButtons } from "./feed-input-buttons";
@@ -34,11 +28,11 @@ import {
 } from "@/components/shadcn/tabs";
 import { Textarea } from "@/components/shadcn/textarea";
 import Text from "@/components/texts/text";
-import { uploadFile } from "@/lib/files";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
 import { captureException } from "@/lib/report";
+import useMarkdownUpload from "@/app/hooks/use-markdown-upload";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -79,73 +73,56 @@ export function StandardPostForm({
     ? t("message-placeholder-sm")
     : t("message-placeholder-lg");
 
-  const hiddenInputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState<boolean>(false);
+  const hiddenAudioInputRef = useRef<HTMLInputElement>(null);
+  const hiddenImgInputRef = useRef<HTMLInputElement>(null);
 
-  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { uploadMdFile, uploading, setCursor } = useMarkdownUpload(textareaRef);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target?.files?.[0];
-    try {
-      if (!file) {
-        toast({
-          variant: "destructive",
-          title: "No file selected.",
-        });
-        return;
-      }
-      setUploading(true);
-      const textarea = textareaRef.current;
-      const loadingText = `${cursor > 0 ? "\n" : ""}[Uploading ${file.name}...]\n`;
-
-      if (textarea) {
-        const before = textarea.value.substring(0, cursor);
-        const after = textarea.value.substring(cursor);
-
-        // Insert the text at cursor position
-        form.setValue("content", before + loadingText + after);
-
-        // Move cursor after the inserted text
-        const newCursorPos = cursor + loadingText.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-      }
-
-      const uri = await uploadFile(file);
-
-      if (textarea) {
-        const text = `${cursor > 0 ? "\n" : ""}![${file.name}](${uri})\n`;
-        const start = textarea.value.indexOf(loadingText);
-
-        if (start < 0) {
-          // If loading text not found, insert at cursor
-          const before = textarea.value.substring(0, cursor);
-          const after = textarea.value.substring(cursor);
-
-          // Insert the text at cursor position
-          form.setValue("content", before + text + after);
-        } else {
-          const before = textarea.value.substring(0, cursor);
-          const after = textarea.value.substring(start + loadingText.length);
-
-          form.setValue("content", before + text + after);
-
-          const newCursor = start + loadingText.length;
-          textarea.setSelectionRange(newCursor, newCursor);
-
-          textarea.focus();
-        }
-      }
-      setUploading(false);
-    } catch (e) {
-      console.error(e);
+    if (!file) {
       toast({
         variant: "destructive",
-        title: "Trouble uploading file!",
+        title: "No file selected.",
       });
+      return;
     }
-    setUploading(false);
+
+    await uploadMdFile(
+      file,
+      "image",
+      (text) => {
+        form.setValue("content", text);
+      },
+      (text) => {
+        form.setValue("content", text);
+        textareaRef.current?.focus();
+      },
+    );
   };
 
-  // Textarea last cursor before upload
-  const [cursor, setCursor] = useState(0);
+  const handleAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target?.files?.[0];
+    if (!file) {
+      toast({
+        variant: "destructive",
+        title: "No file selected.",
+      });
+      return;
+    }
+
+    await uploadMdFile(
+      file,
+      "audio",
+      (text) => {
+        form.setValue("content", text);
+      },
+      (text) => {
+        form.setValue("content", text);
+        textareaRef.current?.focus();
+      },
+    );
+  };
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -207,6 +184,7 @@ export function StandardPostForm({
               </TabsList>
 
               <div className="flex flex-row gap-2 items-center">
+                {/* Image upload button */}
                 <ButtonBase
                   variant="link"
                   className={cn(
@@ -223,7 +201,7 @@ export function StandardPostForm({
                         textareaRef.current?.textLength ??
                         0,
                     );
-                    hiddenInputRef.current?.click();
+                    hiddenImgInputRef.current?.click();
                   }}
                   aria-label="upload image"
                   style={{
@@ -231,21 +209,55 @@ export function StandardPostForm({
                     width: textareaMinHeight,
                   }}
                 >
-                  <Paperclip className="!h-6 !w-6" />
+                  <ImageIcon className="!h-6 !w-6" />
                 </ButtonBase>
+                <input
+                  type="file"
+                  onChange={handleImageChange}
+                  ref={hiddenImgInputRef}
+                  className="hidden"
+                  disabled={uploading}
+                />
+                {/* Audio */}
+                <ButtonBase
+                  variant="link"
+                  className={cn(
+                    "flex items-center justify-center rounded-full aspect-square cursor-pointer",
+                    "hover:bg-neutral-500/20",
+                  )}
+                  title="Upload audio"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (uploading) return;
+
+                    setCursor(
+                      textareaRef.current?.selectionStart ??
+                        textareaRef.current?.textLength ??
+                        0,
+                    );
+                    hiddenAudioInputRef.current?.click();
+                  }}
+                  aria-label="upload audio"
+                  style={{
+                    height: textareaMinHeight,
+                    width: textareaMinHeight,
+                  }}
+                >
+                  <AudioWaveform className="!h-6 !w-6" />
+                </ButtonBase>
+                <input
+                  type="file"
+                  onChange={handleAudioChange}
+                  ref={hiddenAudioInputRef}
+                  className="hidden"
+                  disabled={uploading}
+                />
                 <FeedInputButtons
                   buttonSize={textareaMinHeight}
                   feedInputMode={feedInputMode}
                   isReplying={!!parentPostId}
                   setFeedInputMode={setFeedInputMode}
                   isLoading={isPending}
-                />
-                <input
-                  type="file"
-                  onChange={handleChange}
-                  ref={hiddenInputRef}
-                  className="hidden"
-                  disabled={uploading}
                 />
               </div>
             </div>
