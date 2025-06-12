@@ -1,4 +1,3 @@
-import { title } from "process";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, X } from "lucide-react";
@@ -85,14 +84,15 @@ function GatekeeperManagementForm({
       </form>
 
       <ol className="w-full list-decimal">
+        <li className="flex items-center text-sm text-muted-foreground mb-2">
+          <Text className="text-muted-foreground">Default (You)</Text>
+        </li>
         {optionFields.map((field, index) => (
           <li
             key={field.id}
             className="flex items-center justify-between gap-2 mb-2"
           >
-            <Text>
-              <span className="text-muted-foreground">{field.email}</span>
-            </Text>
+            <Text>{field.email}</Text>
             <Button
               type="button"
               variant="ghost"
