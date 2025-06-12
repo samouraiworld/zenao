@@ -18,6 +18,7 @@ import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/map-lazy-components";
 import Text from "../texts/text";
 import { Button } from "../shadcn/button";
+import { GatekeeperManagementDialog } from "../dialogs/gatekeeper-management-dialog";
 import { FormFieldInputString } from "./components/form-field-input-string";
 import { FormFieldInputNumber } from "./components/form-field-input-number";
 import { TimeZonesPopover } from "./components/time-zones-popover";
@@ -62,6 +63,8 @@ export const EventForm: React.FC<EventFormProps> = ({
   const exclusive = form.watch("exclusive");
   const t = useTranslations("eventForm");
 
+  const [gatekeeperDialogOpen, setGatekeeperDialogOpen] =
+    useState<boolean>(true);
   const [isVirtual, setIsVirtual] = useState<boolean>(
     location.kind === "virtual" || false,
   );
@@ -141,6 +144,11 @@ export const EventForm: React.FC<EventFormProps> = ({
 
   return (
     <Form {...form}>
+      <GatekeeperManagementDialog
+        open={gatekeeperDialogOpen}
+        onOpenChange={setGatekeeperDialogOpen}
+        form={form}
+      />
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full flex-col sm:flex-row sm:h-full gap-10"
