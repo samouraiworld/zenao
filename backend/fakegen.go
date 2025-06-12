@@ -53,7 +53,7 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
 	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
-	flset.Float64Var(&fakegenConf.gasSecurityRate, "gas-security-rate", 0.2, "multiplier for estimated gas wanted")
+	flset.Float64Var(&fakegenConf.gasSecurityRate, "gas-security-rate", 0.2, "margin multiplier for estimated gas wanted to be safe")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
 	flset.UintVar(&fakegenConf.pollsCount, "polls", 13, "number of fake polls to generate")

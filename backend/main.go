@@ -74,7 +74,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
 	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
-	flset.Float64Var(&conf.gasSecurityRate, "gas-security-rate", 0.2, "multiplier for estimated gas wanted")
+	flset.Float64Var(&conf.gasSecurityRate, "gas-security-rate", 0.2, "margin multiplier for estimated gas wanted to be safe")
 	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
 }
 
