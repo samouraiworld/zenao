@@ -59,9 +59,7 @@ export function EventRegistrationForm({
   const form = useForm<EventRegistrationFormSchemaType>({
     resolver: zodResolver(
       eventRegistrationFormSchema.extend({
-        guests: z
-          .array(emailListSchema)
-          .max(data.capacity - data.participants - 1),
+        guests: z.array(emailSchema).max(data.capacity - data.participants - 1),
       }),
     ),
     defaultValues: {
