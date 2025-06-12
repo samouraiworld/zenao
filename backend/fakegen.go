@@ -35,15 +35,16 @@ func newFakegenCmd() *commands.Command {
 var fakegenConf fakegenConfig
 
 type fakegenConfig struct {
-	adminMnemonic string
-	gnoNamespace  string
-	chainEndpoint string
-	chainID       string
-	dbPath        string
-	eventsCount   uint
-	postsCount    uint
-	pollsCount    uint
-	skipChain     bool
+	adminMnemonic   string
+	gnoNamespace    string
+	chainEndpoint   string
+	chainID         string
+	dbPath          string
+	gasSecurityRate float64
+	eventsCount     uint
+	postsCount      uint
+	pollsCount      uint
+	skipChain       bool
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -52,6 +53,7 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
 	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
+	flset.Float64Var(&fakegenConf.gasSecurityRate, "gas-security-rate", 0.2, "multiplier for estimated gas wanted")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
 	flset.UintVar(&fakegenConf.pollsCount, "polls", 13, "number of fake polls to generate")
@@ -85,7 +87,7 @@ func execFakegen() error {
 		return err
 	}
 
-	chain, err := setupChain(fakegenConf.adminMnemonic, fakegenConf.gnoNamespace, fakegenConf.chainID, fakegenConf.chainEndpoint, logger)
+	chain, err := setupChain(fakegenConf.adminMnemonic, fakegenConf.gnoNamespace, fakegenConf.chainID, fakegenConf.chainEndpoint, fakegenConf.gasSecurityRate, logger)
 	if err != nil {
 		return err
 	}

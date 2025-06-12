@@ -34,7 +34,7 @@ const (
 	gnoEventPostCreate = "zenao-post-create"
 )
 
-func setupChain(adminMnemonic string, namespace string, chainID string, chainEndpoint string, logger *zap.Logger) (*gnoZenaoChain, error) {
+func setupChain(adminMnemonic string, namespace string, chainID string, chainEndpoint string, gasSecurityRate float64, logger *zap.Logger) (*gnoZenaoChain, error) {
 	signer, err := gnoclient.SignerFromBip39(adminMnemonic, chainID, "", 0, 0)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 		signerInfo:         signerInfo,
 		logger:             logger,
 		namespace:          namespace,
-		securityRate:       1.2,
+		gasSecurityRate:    gasSecurityRate,
 	}, nil
 }
 
@@ -67,7 +67,7 @@ type gnoZenaoChain struct {
 	signerInfo         keys.Info
 	logger             *zap.Logger
 	namespace          string
-	securityRate       float64
+	gasSecurityRate    float64
 }
 
 const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
@@ -670,7 +670,7 @@ func (g *gnoZenaoChain) estimateCallTxGas(msgs ...vm.MsgCall) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return int64(float64(gasWanted) * g.securityRate), nil
+	return int64(float64(gasWanted) + float64(gasWanted)*g.gasSecurityRate), nil
 }
 
 func (g *gnoZenaoChain) estimateRunTxGas(msgs ...vm.MsgRun) (int64, error) {
@@ -690,7 +690,7 @@ func (g *gnoZenaoChain) estimateRunTxGas(msgs ...vm.MsgRun) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return int64(float64(gasWanted) * g.securityRate), nil
+	return int64(float64(gasWanted) + float64(gasWanted)*g.gasSecurityRate), nil
 }
 
 func (g *gnoZenaoChain) estimateAddPackageTxGas(msgs ...vm.MsgAddPackage) (int64, error) {
@@ -710,7 +710,7 @@ func (g *gnoZenaoChain) estimateAddPackageTxGas(msgs ...vm.MsgAddPackage) (int64
 	if err != nil {
 		return 0, err
 	}
-	return int64(float64(gasWanted) * g.securityRate), nil
+	return int64(float64(gasWanted) + float64(gasWanted)*g.gasSecurityRate), nil
 }
 
 func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string {
