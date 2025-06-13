@@ -382,6 +382,53 @@ func (e *EditEventResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (g *GetEventGatekeepersRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.EventId != "" {
+		fields["eventId"] = json.StringNode("", g.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (g *GetEventGatekeepersRequest) FromJSON(node *json.Node) {
+	*g = GetEventGatekeepersRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		g.EventId = val.MustString()
+	}
+}
+
+func (g *GetEventGatekeepersResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(g.Gatekeepers) != 0 {
+		arr := make([]*json.Node, len(g.Gatekeepers))
+		for i, val := range g.Gatekeepers {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["gatekeepers"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (g *GetEventGatekeepersResponse) FromJSON(node *json.Node) {
+	*g = GetEventGatekeepersResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["gatekeepers"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		g.Gatekeepers = arr
+	}
+}
+
 func (v *ValidatePasswordRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
