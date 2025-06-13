@@ -179,6 +179,7 @@ type DB interface {
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
+	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)

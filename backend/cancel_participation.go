@@ -36,14 +36,17 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 		if time.Now().After(evt.StartDate) {
 			return errors.New("event already started")
 		}
-		tickets, err := db.GetEventUserOrBuyerTickets(req.Msg.EventId, zUser.ID)
+		ticket, err := db.GetEventUserTicket(req.Msg.EventId, zUser.ID)
 		if err != nil {
 			return err
 		}
-		if len(tickets) == 0 {
-			return errors.New("user is not a participant of the ")
+		if ticket.Checkin != nil {
+			return errors.New("user already checked-in")
 		}
-
+		err = db.CancelParticipation(evt.ID, zUser.ID)
+		if err != nil {
+			return err
+		}
 		return nil
 	}); err != nil {
 		return nil, err
