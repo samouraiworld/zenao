@@ -219,6 +219,36 @@ func (e *EditEventResponse) GnoLiteral(typePrefix string, linePrefix string) str
 	return buf.String()
 }
 
+func (g *GetEventGatekeepersRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetEventGatekeepersRequest{\n")
+	if g.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, g.EventId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetEventGatekeepersResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetEventGatekeepersResponse{\n")
+	if len(g.Gatekeepers) != 0 {
+		fmt.Fprintf(buf, "%s\tGatekeepers: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range g.Gatekeepers {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (v *ValidatePasswordRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)

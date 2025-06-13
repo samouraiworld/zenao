@@ -13,6 +13,8 @@ service ZenaoService {
   // EVENT
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
+  rpc GetEventGatekeepers(GetEventGatekeepersRequest)
+      returns (GetEventGatekeepersResponse);
   rpc ValidatePassword(ValidatePasswordRequest)
       returns (ValidatePasswordResponse);
   rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
@@ -80,6 +82,10 @@ message EditEventRequest {
 }
 
 message EditEventResponse { string id = 1; }
+
+message GetEventGatekeepersRequest { string event_id = 1; }
+
+message GetEventGatekeepersResponse { repeated string gatekeepers = 1; }
 
 message ValidatePasswordRequest {
   string event_id = 1;
