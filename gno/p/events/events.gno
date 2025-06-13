@@ -183,7 +183,7 @@ func (msg *MsgAddParticipant) String() string {
 	if name == "" {
 		name = "anon"
 	}
-	return ufmt.Sprintf("Add %s as participant")
+	return ufmt.Sprintf("Add %s as participant", name)
 }
 
 // XXX: move to Participate(), allow anyone to use this
@@ -239,16 +239,39 @@ func NewAddParticipantMsg(participant string, ticketPubkey string, signature str
 
 const MsgRemoveParticipantKind = "gno.land/p/zenao/events.RemoveParticipant"
 
+type MsgRemoveParticipant struct {
+	Participant  string
+	TicketPubkey string // ed25519 public key derived from the private key in the ticket secret
+}
+
+func (msg *MsgRemoveParticipant) String() string {
+	return ufmt.Sprintf("Remove %s as participant", msg.Participant)
+}
+
+// XXX: in future we should ensure that the participant voted yes
 func (e *Event) removeParticipantHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgRemoveParticipantKind, func(i interface{}) {
-		participant, ok := i.(string)
+		msg, ok := i.(MsgRemoveParticipant)
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-		if e.DAOPrivate.Members.CountMemberRoles(participant) > 1 {
-			e.DAOPrivate.Members.RemoveRoleFromMember(participant, "participant")
+
+		if !e.tickets.Has(msg.TicketPubkey) {
+			panic("ticket does not exists")
+		}
+
+		if !e.DAOPrivate.Members.HasRole(msg.Participant, "participant") {
+			panic("user does not have the role participant")
+		}
+
+		_, ok = e.tickets.Remove(msg.TicketPubkey)
+		if !ok {
+			panic("an error occured when removing ticket from avl.tree")
+		}
+		if e.DAOPrivate.Members.CountMemberRoles(msg.Participant) > 1 {
+			e.DAOPrivate.Members.RemoveRoleFromMember(msg.Participant, "participant")
 		} else {
-			e.DAOPrivate.Members.RemoveMember(participant)
+			e.DAOPrivate.Members.RemoveMember(msg.Participant)
 		}
 	})
 }
