@@ -273,6 +273,27 @@ func (p *ParticipateRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	return buf.String()
 }
 
+func (c *CancelParticipationRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CancelParticipationRequest{\n")
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CancelParticipationResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CancelParticipationResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (p *ParticipateResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
