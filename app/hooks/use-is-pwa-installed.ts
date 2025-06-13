@@ -16,7 +16,7 @@ const useIsPWAInstalled = (ua: string) => {
 
     // Log the platform and installed status for debugging
     const standalone = window.matchMedia("(display-mode: standalone)").matches;
-    setInstalled(!!(standalone || (IOS && !ua.match(/Safari/))));
+    setInstalled(!!standalone);
     setPlatform(PLATFORM);
   }, [ua]);
 
