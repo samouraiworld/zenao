@@ -42,6 +42,7 @@ export const useCreateEvent = () => {
       return await zenaoClient.createEvent(
         {
           ...data,
+          gatekeepers: data.gatekeepers.map((gatekeeper) => gatekeeper.email),
           location: { address: { case: data.location.kind, value } },
           password: exclusive && password ? password : "",
         },
@@ -101,6 +102,7 @@ export const useEditEvent = () => {
         {
           ...data,
           eventId,
+          gatekeepers: data.gatekeepers.map((gatekeeper) => gatekeeper.email),
           location: { address: { case: data.location.kind, value } },
           updatePassword: !exclusive || (!!password && password.length > 0),
           password: exclusive && password ? password : "",

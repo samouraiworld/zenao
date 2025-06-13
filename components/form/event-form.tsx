@@ -18,6 +18,7 @@ import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/map-lazy-components";
 import Text from "../texts/text";
 import { Button } from "../shadcn/button";
+import { GatekeeperManagementDialog } from "../dialogs/gatekeeper-management-dialog";
 import { FormFieldInputString } from "./components/form-field-input-string";
 import { FormFieldInputNumber } from "./components/form-field-input-number";
 import { TimeZonesPopover } from "./components/time-zones-popover";
@@ -33,6 +34,7 @@ import { cn } from "@/lib/tailwind";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { useToast } from "@/app/hooks/use-toast";
 import useMarkdownUpload from "@/app/hooks/use-markdown-upload";
+import { useMediaQuery } from "@/app/hooks/use-media-query";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -54,14 +56,18 @@ export const EventForm: React.FC<EventFormProps> = ({
   isEditing = false,
 }) => {
   const { toast } = useToast();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   const description = form.watch("description");
   const location = form.watch("location");
   const startDate = form.watch("startDate");
   const endDate = form.watch("endDate");
   const imageUri = form.watch("imageUri");
   const exclusive = form.watch("exclusive");
+  const gatekeepers = form.watch("gatekeepers");
   const t = useTranslations("eventForm");
 
+  const [gatekeeperDialogOpen, setGatekeeperDialogOpen] =
+    useState<boolean>(true);
   const [isVirtual, setIsVirtual] = useState<boolean>(
     location.kind === "virtual" || false,
   );
@@ -141,11 +147,16 @@ export const EventForm: React.FC<EventFormProps> = ({
 
   return (
     <Form {...form}>
+      <GatekeeperManagementDialog
+        open={gatekeeperDialogOpen}
+        onOpenChange={setGatekeeperDialogOpen}
+        form={form}
+      />
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex w-full flex-col sm:flex-row sm:h-full gap-10"
       >
-        <div className="flex flex-col w-full gap-10">
+        <div className="flex flex-col w-full gap-10 md:gap-4">
           <FormFieldImage
             name="imageUri"
             control={form.control}
@@ -153,6 +164,15 @@ export const EventForm: React.FC<EventFormProps> = ({
             aspectRatio={16 / 9}
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
           />
+          {isDesktop && (
+            <Button
+              variant="secondary"
+              className="w-fit"
+              onClick={() => setGatekeeperDialogOpen(true)}
+            >
+              Manage gatekeepers ({1 + gatekeepers.length})
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col gap-6 w-full">
@@ -435,6 +455,16 @@ export const EventForm: React.FC<EventFormProps> = ({
               }
               label={t("password-label")}
             />
+          )}
+
+          {!isDesktop && (
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => setGatekeeperDialogOpen(true)}
+            >
+              Manage gatekeepers ({1 + gatekeepers.length})
+            </Button>
           )}
 
           <ButtonWithLabel

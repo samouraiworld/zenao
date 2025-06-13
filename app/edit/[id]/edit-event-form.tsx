@@ -25,6 +25,12 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+
+  // TODO fetch email addresses of gatekeepers
+  // useSuspenseQueries({
+  //   queries: data.gatekeepers.map((addr) => profileOptions())
+  // })
+
   const isOrganizer = roles.includes("organizer");
   const router = useRouter();
 
@@ -33,6 +39,9 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const defaultValues: EventFormSchemaType = {
     ...data,
     location,
+    gatekeepers: data.gatekeepers.map((gatekeeperEmail) => ({
+      email: gatekeeperEmail,
+    })),
     exclusive: data.privacy?.eventPrivacy.case === "guarded",
     password: "",
   };
