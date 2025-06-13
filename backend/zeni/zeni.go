@@ -184,7 +184,8 @@ type DB interface {
 	GetEventByPostID(postID string) (*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
 	GetEventUsersWithRole(eventID string, role string) ([]*User, error)
-	GetEventUserTickets(eventID string, userID string) ([]*SoldTicket, error)
+	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
+	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
