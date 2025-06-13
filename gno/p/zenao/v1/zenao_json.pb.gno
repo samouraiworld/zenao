@@ -472,6 +472,35 @@ func (p *ParticipateRequest) FromJSON(node *json.Node) {
 	}
 }
 
+func (c *CancelParticipationRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CancelParticipationRequest) FromJSON(node *json.Node) {
+	*c = CancelParticipationRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
+	}
+}
+
+func (c *CancelParticipationResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CancelParticipationResponse) FromJSON(node *json.Node) {
+	*c = CancelParticipationResponse{}
+}
+
 func (p *ParticipateResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 

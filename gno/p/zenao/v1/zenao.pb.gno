@@ -84,6 +84,13 @@ type ParticipateRequest struct {
 	Password string
 }
 
+type CancelParticipationRequest struct {
+	EventId string
+}
+
+type CancelParticipationResponse struct {
+}
+
 type ParticipateResponse struct {
 	TicketSecret string
 }
