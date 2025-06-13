@@ -248,7 +248,7 @@ func (msg *MsgRemoveParticipant) String() string {
 	return ufmt.Sprintf("Remove %s as participant", msg.Participant)
 }
 
-// XXX: in future we should ensure that the participant voted yes
+// XXX: in future we should ensure that the participant voted yes, a condition that ensure the addr from the msg voted yes
 func (e *Event) removeParticipantHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgRemoveParticipantKind, func(i interface{}) {
 		msg, ok := i.(MsgRemoveParticipant)
@@ -276,8 +276,8 @@ func (e *Event) removeParticipantHandler() daokit.MessageHandler {
 	})
 }
 
-func NewRemoveParticipantMsg(participant string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgRemoveParticipantKind, participant)
+func NewRemoveParticipantMsg(participant string, ticketPubkey string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgRemoveParticipantKind, &MsgRemoveParticipant{Participant: participant, TicketPubkey: ticketPubkey})
 }
 
 const MsgAddGatekeeperKind = "gno.land/p/zenao/events.AddGatekeeper"

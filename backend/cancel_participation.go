@@ -28,15 +28,17 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 
 	s.Logger.Info("cancel-participation", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
 
+	evt := (*zeni.Event)(nil)
+	ticket := (*zeni.SoldTicket)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		evt, err := db.GetEvent(req.Msg.EventId)
+		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
 		}
 		if time.Now().After(evt.StartDate) {
 			return errors.New("event already started")
 		}
-		ticket, err := db.GetEventUserTicket(req.Msg.EventId, zUser.ID)
+		ticket, err = db.GetEventUserTicket(req.Msg.EventId, zUser.ID)
 		if err != nil {
 			return err
 		}
@@ -52,15 +54,9 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 		return nil, err
 	}
 
-	// Ensure user his participant
-	// Ensure event is not started yet
-	// Ensure ticket is not check-in already
-	// Then soft delete his role & his ticket
-	// Then on-chain:
-	// Ensure ticket is not used & he is member & role participant of the DAO
-	// Remove his role participant in the DAO
-	// Remove his ticket from the tree event.Ticket
-	// Remove from index of regevent
+	if err := s.Chain.CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
+		return nil, err
+	}
 
 	return connect.NewResponse(&zenaov1.CancelParticipationResponse{}), nil
 }

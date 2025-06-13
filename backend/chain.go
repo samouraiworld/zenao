@@ -333,6 +333,54 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 	return nil
 }
 
+// CancelParticipation implements ZenaoChain.
+func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ticketPubkey string) error {
+	eventPkgPath := g.eventRealmPkgPath(eventID)
+	callerPkgPath := g.userRealmPkgPath(callerID)
+	participantPkgPath := g.userRealmPkgPath(participantID)
+	participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey),
+			}},
+		},
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 200000000,
+	}, msgRun))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("removed participant", zap.String("user", participantPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.eventsIndexPkgPath,
+		Func:    "RemoveParticipant",
+		Args: []string{
+			eventPkgPath,
+			participantAddr,
+		},
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: 200000000,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("removed index participant", zap.String("user", participantPkgPath), zap.String("event", eventPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
 func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error {
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	gatekeeperPkgPath := g.userRealmPkgPath(gatekeeperID)
@@ -741,6 +789,28 @@ func genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, tick
 		})
 	}
 `, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey, signature)
+}
+
+func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		event %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/events"
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+				Title: "Remove participant",
+				Message: events.NewRemoveParticipantMsg(%q, %q, %q),
+			}),
+		})
+	}
+`, callerPkgPath, eventPkgPath, "Remove participant in "+eventPkgPath, participantAddr, ticketPubkey)
 }
 
 func genEventRealmSource(organizersAddr []string, gatekeepersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
