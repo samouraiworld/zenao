@@ -2,10 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
+import dynamic from "next/dynamic";
 import { Button } from "../shadcn/button";
 import Text from "../texts/text";
+import { PwaInstallDialog } from "../dialogs/pwa-install-dialog";
+import useIsPWAInstalled from "@/app/hooks/use-is-pwa-installed";
 
-interface BeforeInstallPromptEvent extends Event {
+export const LazyInstallButton = dynamic(
+  () => import("@/components/buttons/pwa-install-button"),
+  { ssr: false },
+);
+
+export interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
   readonly userChoice: Promise<{
     outcome: "accepted" | "dismissed";
@@ -17,13 +25,13 @@ interface BeforeInstallPromptEvent extends Event {
 export default function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [installDialogOpen, setInstallDialogOpen] = useState(false);
+  const { platform, installed } = useIsPWAInstalled(navigator.userAgent);
 
   useEffect(() => {
     const handler = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setIsVisible(true);
     };
 
     // `beforeinstallprompt`: This feature is non-standard
@@ -39,26 +47,36 @@ export default function InstallButton() {
   }, []);
 
   const installApp = async () => {
+    setInstallDialogOpen(true);
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      setDeferredPrompt(null);
       if (outcome === "accepted") {
-        setIsVisible(false);
+        setDeferredPrompt(null);
       }
     }
   };
 
-  if (!isVisible) return null;
+  if (installed) {
+    return null;
+  }
 
   return (
-    <Button
-      variant="outline"
-      className="standalone:hidden w-fit flex rounded-3xl py-5"
-      onClick={installApp}
-    >
-      <Text className="text-sm">Install app</Text>
-      <Download size={14} />
-    </Button>
+    <>
+      <PwaInstallDialog
+        open={installDialogOpen}
+        platform={platform}
+        deferredPrompt={deferredPrompt}
+        onOpenChange={setInstallDialogOpen}
+      />
+      <Button
+        variant="outline"
+        className="standalone:hidden w-fit flex rounded-3xl py-5"
+        onClick={installApp}
+      >
+        <Text className="text-sm">Install app</Text>
+        <Download size={14} />
+      </Button>
+    </>
   );
 }
