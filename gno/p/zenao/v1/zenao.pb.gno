@@ -68,6 +68,14 @@ type EditEventResponse struct {
 	Id string
 }
 
+type GetEventGatekeepersRequest struct {
+	EventId string
+}
+
+type GetEventGatekeepersResponse struct {
+	Gatekeepers []string
+}
+
 type ValidatePasswordRequest struct {
 	EventId  string
 	Password string
