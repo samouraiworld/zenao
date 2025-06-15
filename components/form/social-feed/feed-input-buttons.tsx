@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction } from "react";
 import { SendHorizonalIcon, VoteIcon } from "lucide-react";
 import { FeedInputMode } from "./standard-post-form";
 import { cn } from "@/lib/tailwind";
-import { ButtonBase } from "@/components/buttons/ButtonBases";
+import { ButtonBase } from "@/components/buttons/button-bases";
 
 export function FeedInputButtons({
   buttonSize,

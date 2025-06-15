@@ -11,8 +11,8 @@ import { imageHeight, imageWidth } from "./constants";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 import { Form } from "@/components/shadcn/form";
-import { FormFieldInputString } from "@/components/form/components/FormFieldInputString";
-import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import { FormFieldInputString } from "@/components/form/components/form-field-input-string";
+import { ButtonWithChildren } from "@/components/buttons/button-with-children";
 import {
   eventProtectionFormSchema,
   EventProtectionFormSchemaType,

@@ -21,7 +21,7 @@ import { ParticipantsSection } from "./participants-section";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/buttons/go-top-button";
-import { Card } from "@/components/cards/Card";
+import { Card } from "@/components/cards/card";
 import { UserAvatarWithName } from "@/components/common/user";
 import { EventRegistrationForm } from "@/components/form/event-registration";
 import { Web3Image } from "@/components/images/web3-image";

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
-import { ButtonWithChildren } from "@/components/buttons/ButtonWithChildren";
+import { ButtonWithChildren } from "@/components/buttons/button-with-children";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 

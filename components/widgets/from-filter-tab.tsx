@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
-import { FromFilter } from "@/lib/searchParams";
+import { FromFilter } from "@/lib/search-params";
 
 function FromFilterTab({
   from,

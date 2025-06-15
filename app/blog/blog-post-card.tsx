@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card } from "@/components/cards/Card";
+import { Card } from "@/components/cards/card";
 import Text from "@/components/texts/text";
 import Heading from "@/components/texts/heading";
 import { Web3Image } from "@/components/images/web3-image";

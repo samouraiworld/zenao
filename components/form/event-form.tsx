@@ -8,19 +8,19 @@ import {
   isSameDay,
   minutesToSeconds,
 } from "date-fns";
-import { Paperclip } from "lucide-react";
-import { Card } from "../cards/Card";
+import { AudioWaveformIcon, ImageIcon } from "lucide-react";
+import { Card } from "../cards/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/markdown-preview";
-import { ButtonWithLabel } from "../buttons/ButtonWithLabel";
+import { ButtonWithLabel } from "../buttons/button-with-label";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/map-lazy-components";
 import Text from "../texts/text";
 import { Button } from "../shadcn/button";
-import { FormFieldInputString } from "./components/FormFieldInputString";
-import { FormFieldInputNumber } from "./components/FormFieldInputNumber";
-import { TimeZonesPopover } from "./components/TimeZonesPopover";
+import { FormFieldInputString } from "./components/form-field-input-string";
+import { FormFieldInputNumber } from "./components/form-field-input-number";
+import { TimeZonesPopover } from "./components/time-zones-popover";
 import { FormFieldImage } from "./components/form-field-image";
 import { EventFormSchemaType } from "./types";
 import { FormFieldTextArea } from "./components/form-field-textarea";
@@ -32,7 +32,7 @@ import { currentTimezone } from "@/lib/time";
 import { cn } from "@/lib/tailwind";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { useToast } from "@/app/hooks/use-toast";
-import { uploadFile } from "@/lib/files";
+import useMarkdownUpload from "@/app/hooks/use-markdown-upload";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -73,72 +73,56 @@ export const EventForm: React.FC<EventFormProps> = ({
 
   // Upload
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
-  const hiddenInputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState<boolean>(false);
+  const hiddenAudioInputRef = useRef<HTMLInputElement>(null);
+  const hiddenImgInputRef = useRef<HTMLInputElement>(null);
 
-  // Textarea last cursor before upload
-  const [cursor, setCursor] = useState(0);
+  const { uploadMdFile, uploading, setCursor } =
+    useMarkdownUpload(descriptionRef);
 
-  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target?.files?.[0];
-    try {
-      if (!file) {
-        toast({
-          variant: "destructive",
-          title: "No file selected.",
-        });
-        return;
-      }
-      setUploading(true);
-      const textarea = descriptionRef.current;
-      const loadingText = `${cursor > 0 ? "\n" : ""}[Uploading ${file.name}...]\n`;
-
-      if (textarea) {
-        const before = textarea.value.substring(0, cursor);
-        const after = textarea.value.substring(cursor);
-
-        // Insert the text at cursor position
-        form.setValue("description", before + loadingText + after);
-
-        // Move cursor after the inserted text
-        const newCursorPos = cursor + loadingText.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-      }
-
-      const uri = await uploadFile(file);
-
-      if (textarea) {
-        const text = `${cursor > 0 ? "\n" : ""}![${file.name}](${uri})\n`;
-        const start = textarea.value.indexOf(loadingText);
-
-        if (start < 0) {
-          // If loading text not found, insert at cursor
-          const before = textarea.value.substring(0, cursor);
-          const after = textarea.value.substring(cursor);
-
-          // Insert the text at cursor position
-          form.setValue("description", before + text + after);
-        } else {
-          const before = textarea.value.substring(0, cursor);
-          const after = textarea.value.substring(start + loadingText.length);
-
-          form.setValue("description", before + text + after);
-
-          const newCursor = start + loadingText.length;
-          textarea.setSelectionRange(newCursor, newCursor);
-
-          textarea.focus();
-        }
-      }
-      setUploading(false);
-    } catch (e) {
-      console.error(e);
+    if (!file) {
       toast({
         variant: "destructive",
-        title: "Trouble uploading file!",
+        title: "No file selected.",
       });
+      return;
     }
-    setUploading(false);
+
+    await uploadMdFile(
+      file,
+      "image",
+      (text) => {
+        form.setValue("description", text);
+      },
+      (text) => {
+        form.setValue("description", text);
+        descriptionRef.current?.focus();
+      },
+    );
+  };
+
+  const handleAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target?.files?.[0];
+    if (!file) {
+      toast({
+        variant: "destructive",
+        title: "No file selected.",
+      });
+      return;
+    }
+
+    await uploadMdFile(
+      file,
+      "audio",
+      (text) => {
+        form.setValue("description", text);
+      },
+      (text) => {
+        form.setValue("description", text);
+        descriptionRef.current?.focus();
+      },
+    );
   };
 
   useEffect(() => {
@@ -212,7 +196,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   {/* Upload image buttons */}
                   <div className="flex flex-row gap-2 self-end">
                     <Button
-                      variant="input"
+                      variant="ghost"
                       className={cn(
                         "w-fit flex items-center justify-center cursor-pointer",
                         "hover:bg-neutral-700",
@@ -227,17 +211,46 @@ export const EventForm: React.FC<EventFormProps> = ({
                             descriptionRef.current?.textLength ??
                             0,
                         );
-                        hiddenInputRef.current?.click();
+                        hiddenImgInputRef.current?.click();
                       }}
                       aria-label="Add image"
                     >
-                      <Paperclip className="!h-4 !w-4" />
-                      <Text className="text-sm">Add image</Text>
+                      <ImageIcon className="!h-4 !w-4" />
                     </Button>
                     <input
                       type="file"
-                      onChange={handleChange}
-                      ref={hiddenInputRef}
+                      onChange={handleImageChange}
+                      ref={hiddenImgInputRef}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-fit flex px-4 items-center justify-center cursor-pointer",
+                        "hover:bg-neutral-700",
+                      )}
+                      title="Add audio"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (uploading) return;
+
+                        setCursor(
+                          descriptionRef.current?.selectionStart ??
+                            descriptionRef.current?.textLength ??
+                            0,
+                        );
+                        hiddenAudioInputRef.current?.click();
+                      }}
+                      aria-label="Add audio"
+                    >
+                      <AudioWaveformIcon className="!h-4 !w-4" />
+                    </Button>
+                    <input
+                      type="file"
+                      onChange={handleAudioChange}
+                      ref={hiddenAudioInputRef}
                       className="hidden"
                       disabled={uploading}
                     />

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
 import { EventInfo } from "../gen/zenao/v1/zenao_pb";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
-import { FromFilter } from "@/lib/searchParams";
+import { FromFilter } from "@/lib/search-params";
 import EmptyEventsList from "@/components/widgets/empty-events-list";
 import { EventCard } from "@/components/cards/event-card";
 import { idFromPkgPath } from "@/lib/queries/event";
