@@ -75,6 +75,11 @@ const uriSchema = z.union([
     .regex(ipfsPattern, "IPFS URI is not valid"),
 ]);
 
+export const emailSchema = z.object({
+  email: z.string().email(),
+});
+export type EmailSchemaType = z.infer<typeof emailSchema>;
+
 export const eventFormSchema = z.object({
   title: z.string().trim().min(2).max(140),
   description: z.string().trim().min(10).max(10000),
@@ -87,6 +92,7 @@ export const eventFormSchema = z.object({
   capacity: z.coerce.number().min(1),
   exclusive: z.boolean(),
   password: z.string().optional(),
+  gatekeepers: z.array(emailSchema),
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
