@@ -399,9 +399,13 @@ func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ti
 			}},
 		},
 	}
+	gasWanted, err := g.estimateRunTxGas(msgRun)
+	if err != nil {
+		return err
+	}
 	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
-		GasWanted: 200000000,
+		GasWanted: gasWanted,
 	}, msgRun))
 	if err != nil {
 		return err
@@ -417,9 +421,13 @@ func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ti
 			participantAddr,
 		},
 	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
 	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
 		GasFee:    "1000000ugnot",
-		GasWanted: 200000000,
+		GasWanted: gasWanted,
 	}, msgCall))
 	if err != nil {
 		return err
@@ -945,7 +953,7 @@ func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAd
 			Title: %q,
 			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
 				Title: "Remove participant",
-				Message: events.NewRemoveParticipantMsg(%q, %q, %q),
+				Message: events.NewRemoveParticipantMsg(%q, %q),
 			}),
 		})
 	}
