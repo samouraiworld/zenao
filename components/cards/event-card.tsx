@@ -51,7 +51,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
               </Heading>
             </div>
             <div className="flex flex-row gap-2 items-center">
-              <MapPin width={iconSize} height={iconSize} />
+              <MapPin width={iconSize} height={iconSize} className="min-w-4" />
               <Text className="line-clamp-1">{locationString} </Text>
             </div>
             <div className="flex flex-row gap-2 items-center">
