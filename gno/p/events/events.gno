@@ -251,7 +251,7 @@ func (msg *MsgRemoveParticipant) String() string {
 // XXX: in future we should ensure that the participant voted yes, a condition that ensure the addr from the msg voted yes
 func (e *Event) removeParticipantHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgRemoveParticipantKind, func(i interface{}) {
-		msg, ok := i.(MsgRemoveParticipant)
+		msg, ok := i.(*MsgRemoveParticipant)
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}

@@ -107,23 +107,25 @@ func TestRemoveParticipant(t *testing.T) {
 	if !event.DAOPrivate.Members.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String(), testTicket(t), "")))
+	ticket := testTicket(t)
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String(), ticket, "")))
 	if event.DAOPrivate.Members.GetMembers()[2] != bob.String() {
 		t.Fatalf("expected %s, got %s", bob.String(), event.DAOPrivate.Members.GetMembers()[2])
 	}
 	if !event.DAOPrivate.Members.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to have participant role")
 	}
-	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(bob.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(bob.String(), ticket)))
 	if len(event.DAOPrivate.Members.GetMembers()) != 2 {
 		t.Fatalf("expected 2 member, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
 	if event.DAOPrivate.Members.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to not have participant role")
 	}
+	ticket = testTicket(t)
 	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperMsg(dave.String())))
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String(), testTicket(t), "")))
-	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String(), ticket, "")))
+	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(dave.String(), ticket)))
 	if len(event.DAOPrivate.Members.GetMembers()) != 3 {
 		t.Fatalf("expected 3 member, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
