@@ -13,6 +13,7 @@ import "./globals.css";
 import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { Toaster } from "@/components/shadcn/toaster";
 import { Header } from "@/components/navigation/header";
+import PwaBottomBar from "@/components/navigation/pwa-bottom-bar";
 
 const albertSans = Albert_Sans({
   variable: "--font-albert-sans",
@@ -249,10 +250,11 @@ export default async function RootLayout({
               >
                 <NextIntlClientProvider messages={messages}>
                   <NextTopLoader showSpinner={false} color="#EC7E17" />
-                  <div className="h-screen flex flex-col family-name:var(--font-geist-sans)]">
+                  <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
                     <Header />
                     {children}
                     <Footer />
+                    <PwaBottomBar />
                   </div>
                 </NextIntlClientProvider>
               </ThemeProvider>
