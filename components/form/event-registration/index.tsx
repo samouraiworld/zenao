@@ -8,6 +8,7 @@ import { useState } from "react";
 import { SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { FormFieldInputString } from "../components/form-field-input-string";
+import { emailSchema } from "../types";
 import { InviteeForm } from "./invitee-form";
 import { ButtonWithLabel } from "@/components/buttons/button-with-label";
 import { Form } from "@/components/shadcn/form";
@@ -19,13 +20,9 @@ import { useToast } from "@/app/hooks/use-toast";
 import { eventOptions } from "@/lib/queries/event";
 import { captureException } from "@/lib/report";
 
-const emailListSchema = z.object({
-  email: z.string().email(),
-});
-
 const eventRegistrationFormSchema = z.object({
   email: z.string().email().optional(),
-  guests: z.array(emailListSchema),
+  guests: z.array(emailSchema),
 });
 
 export type EventRegistrationFormSchemaType = z.infer<
@@ -62,9 +59,7 @@ export function EventRegistrationForm({
   const form = useForm<EventRegistrationFormSchemaType>({
     resolver: zodResolver(
       eventRegistrationFormSchema.extend({
-        guests: z
-          .array(emailListSchema)
-          .max(data.capacity - data.participants - 1),
+        guests: z.array(emailSchema).max(data.capacity - data.participants - 1),
       }),
     ),
     defaultValues: {

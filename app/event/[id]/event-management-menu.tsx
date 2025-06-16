@@ -26,45 +26,47 @@ export function EventManagementMenu({
   const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
     useState(false);
 
+  if (!isOrganizer && !isGatekeeper) {
+    return null;
+  }
+
   return (
-    isOrganizer && (
-      <>
+    <Card className="flex flex-col gap-2">
+      <Text>{t("manage-event")}</Text>
+
+      {isOrganizer && (
         <BroadcastEmailDialog
           eventId={eventId}
           nbParticipants={nbParticipants}
           open={broadcastEmailDialogOpen}
           onOpenChange={setBroadcastEmailDialogOpen}
         />
+      )}
 
-        <Card className="flex flex-col gap-2">
-          <Text>{t("manage-event")}</Text>
+      <div className="flex flex-col">
+        {isOrganizer && (
+          <>
+            <Link href={`/edit/${eventId}`} className="text-main underline">
+              {t("edit-button")}
+            </Link>
+            <p
+              className="text-main underline cursor-pointer"
+              onClick={() => setBroadcastEmailDialogOpen(true)}
+            >
+              {t("send-global-message")}
+            </p>
+          </>
+        )}
 
-          <div className="flex flex-col">
-            {isOrganizer && (
-              <>
-                <Link href={`/edit/${eventId}`} className="text-main underline">
-                  {t("edit-button")}
-                </Link>
-                <p
-                  className="text-main underline cursor-pointer"
-                  onClick={() => setBroadcastEmailDialogOpen(true)}
-                >
-                  {t("send-global-message")}
-                </p>
-              </>
-            )}
-
-            {(isOrganizer || isGatekeeper) && (
-              <Link
-                href={`/event/${eventId}/scanner`}
-                className="text-main underline"
-              >
-                {t("gatekeeper-button")}
-              </Link>
-            )}
-          </div>
-        </Card>
-      </>
-    )
+        {(isOrganizer || isGatekeeper) && (
+          <Link
+            href={`/event/${eventId}/scanner`}
+            className="text-main underline"
+          >
+            {t("gatekeeper-button")}
+          </Link>
+        )}
+      </div>
+    </Card>
   );
 }

@@ -50,18 +50,20 @@ export function MarkdownPreview({
             {...props}
           ></iframe>
         ),
-        img: (props) => {
+        img: ({ src, ...props }) => {
           return (
             <Web3Image
               {...props}
-              src={props.src ?? ""}
+              src={typeof src === "string" ? src : ""}
               alt={props.alt ?? ""}
               width={960}
               height={960}
             />
           );
         },
-        audio: (props) => <Web3Audio {...props} src={props.src ?? ""} />,
+        audio: (props) => (
+          <Web3Audio {...props} src={(props.src as string) ?? ""} />
+        ),
         a: (props) => <a {...props} target="_blank" />,
       }}
       urlTransform={(options) => {

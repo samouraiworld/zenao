@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
 import { EditEventForm } from "./edit-event-form";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -18,8 +19,23 @@ export default async function EditPage({
   const address = await queryClient.fetchQuery(
     userAddressOptions(getToken, userId),
   );
-  void queryClient.prefetchQuery(eventOptions(p.id));
-  void queryClient.prefetchQuery(eventUserRoles(p.id, address));
+
+  let eventData;
+  try {
+    eventData = await queryClient.fetchQuery({
+      ...eventOptions(p.id),
+    });
+  } catch (err) {
+    console.error("error", err);
+    notFound();
+  }
+
+  eventData.gatekeepers.forEach((_addr) => {
+    // TODO prefetch emails
+    // queryClient.prefetchQuery(profileOptions(addr));
+  });
+
+  queryClient.prefetchQuery(eventUserRoles(p.id, address));
 
   return (
     <ScreenContainer isSignedOutModal={!userId}>

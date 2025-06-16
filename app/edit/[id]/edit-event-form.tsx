@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
-import { eventOptions } from "@/lib/queries/event";
+import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { EventForm } from "@/components/form/event-form";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -25,6 +25,12 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+  const { data: gatekeepers } = useSuspenseQuery(
+    eventGatekeepersEmails(id, getToken),
+  );
+
+  console.log(gatekeepers.gatekeepers);
+
   const isOrganizer = roles.includes("organizer");
   const router = useRouter();
 
@@ -33,6 +39,9 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const defaultValues: EventFormSchemaType = {
     ...data,
     location,
+    gatekeepers: gatekeepers.gatekeepers.map((gatekeeperEmail) => ({
+      email: gatekeeperEmail,
+    })),
     exclusive: data.privacy?.eventPrivacy.case === "guarded",
     password: "",
   };
