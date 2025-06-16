@@ -37,6 +37,9 @@ func (c *clerkZenaoAuth) GetUser(ctx context.Context) *zeni.AuthUser {
 
 // GetUsersFromIDs implements zeni.Auth.
 func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*zeni.AuthUser, error) {
+	if len(ids) == 0 {
+		return []*zeni.AuthUser{}, nil
+	}
 	userList, err := user.List(ctx, &user.ListParams{UserIDs: ids})
 	if err != nil {
 		return nil, err
