@@ -179,12 +179,14 @@ type DB interface {
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
+	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
 	GetEventUsersWithRole(eventID string, role string) ([]*User, error)
-	GetEventUserTickets(eventID string, userID string) ([]*SoldTicket, error)
+	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
+	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
@@ -210,6 +212,7 @@ type Chain interface {
 	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
 	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
 	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
+	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)

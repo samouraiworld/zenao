@@ -31,7 +31,7 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, errors.New("user is banned")
 	}
 
-	tickets, err := s.DB.GetEventUserTickets(req.Msg.EventId, zUser.ID)
+	tickets, err := s.DB.GetEventUserOrBuyerTickets(req.Msg.EventId, zUser.ID)
 	if err != nil {
 		return nil, err
 	}
