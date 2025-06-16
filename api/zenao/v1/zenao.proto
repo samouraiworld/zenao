@@ -19,6 +19,8 @@ service ZenaoService {
       returns (ValidatePasswordResponse);
   rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+  rpc CancelParticipation(CancelParticipationRequest)
+      returns (CancelParticipationResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
   rpc Checkin(CheckinRequest) returns (CheckinResponse);
 
@@ -100,6 +102,10 @@ message ParticipateRequest {
   repeated string guests = 3;
   string password = 4;
 }
+
+message CancelParticipationRequest { string event_id = 1; }
+
+message CancelParticipationResponse {}
 
 message ParticipateResponse { string ticket_secret = 1; }
 

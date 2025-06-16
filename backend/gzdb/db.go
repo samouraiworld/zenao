@@ -378,6 +378,27 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 	return nil
 }
 
+// CancelParticipation implements zeni.DB.
+func (g *gormZenaoDB) CancelParticipation(eventID string, userID string) error {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return err
+	}
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	if err := g.db.Model(&UserRole{}).Where("event_id = ? AND user_id = ? and role = ?", evtIDInt, userIDInt, "participant").Delete(&UserRole{}).Error; err != nil {
+		return err
+	}
+
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evtIDInt, userIDInt).Delete(&SoldTicket{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 // EditUser implements zeni.DB.
 func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) error {
 	// XXX: validate?
@@ -483,8 +504,27 @@ func (g *gormZenaoDB) GetEventTickets(eventID string) ([]*zeni.SoldTicket, error
 	return res, nil
 }
 
-// GetEventUserTickets implements zeni.DB.
-func (g *gormZenaoDB) GetEventUserTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
+// GetEventUserTicket implements zeni.DB.
+func (g *gormZenaoDB) GetEventUserTicket(eventID string, userID string) (*zeni.SoldTicket, error) {
+	userIDint, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
+	var ticket *SoldTicket
+	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Where("event_id = ? AND user_id = ?", eventID, userIDint).First(&ticket).Error
+	if err != nil {
+		return nil, err
+	}
+	res, err := dbSoldTicketToZeniSoldTicket(ticket)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+// GetEventUserOrBuyerTickets implements zeni.DB.
+func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parse buyer or user id: %w", err)
