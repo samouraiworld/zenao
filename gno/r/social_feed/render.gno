@@ -2,12 +2,14 @@ package social_feed
 
 import (
 	"std"
+	"strconv"
 	"strings"
 
 	"gno.land/p/demo/mux"
 	"gno.land/p/demo/seqid"
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	ma "gno.land/p/zenao/multiaddr"
 
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
@@ -146,7 +148,7 @@ func renderArticlePost(ext *feedsv1.ArticlePost) string {
 }
 
 func renderLinkPost(ext *feedsv1.LinkPost) string {
-	return md.H3("POST KIND: LINK") + md.Link(ext.Uri, ext.Uri)
+	return md.H3("POST KIND: LINK") + md.Link(ext.Uri, handleMultiaddrLink(ext.Uri))
 }
 
 func renderImagePost(ext *feedsv1.ImagePost) string {
@@ -155,6 +157,39 @@ func renderImagePost(ext *feedsv1.ImagePost) string {
 
 func renderVideoPost(ext *feedsv1.VideoPost) string {
 	return md.H3("POST KIND: VIDEO") + md.Link(ext.VideoUri, ext.VideoUri) + md.Image("video thumbnail", ext.ThumbnailImageUri) + md.Paragraph(ext.Description)
+}
+
+// XXX: adapt it to many different protocols
+func handleMultiaddrLink(link string) string {
+	ma, err := ma.NewMultiaddr(Protocols, link)
+	if err != nil {
+		return ""
+	}
+	p, err := Protocols.ProtocolWithName("gno")
+	if err != nil {
+		return ""
+	}
+	gnoPath, err := ma.ValueForProtocol(p.Code)
+	if err != nil {
+		return ""
+	}
+	poll, err := Protocols.ProtocolWithName("poll")
+	if err != nil {
+		return ""
+	}
+	pollID, err := ma.ValueForProtocol(poll.Code)
+	if err != nil {
+		return ""
+	}
+	pollIDint, err := strconv.ParseInt(pollID, 10, 64)
+	if err != nil {
+		return ""
+	}
+	slashIdx := strings.LastIndex(gnoPath, "/")
+	if slashIdx == -1 {
+		return ""
+	}
+	return "./" + gnoPath[slashIdx+1:] + ":" + seqid.ID(pollIDint).String()
 }
 
 func getLinkPath(pkgPath string) string {
