@@ -16,7 +16,7 @@ import {
   DrawerTitle,
 } from "../shadcn/drawer";
 import Heading from "../texts/heading";
-import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import { ButtonWithChildren } from "../buttons/button-with-children";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
 

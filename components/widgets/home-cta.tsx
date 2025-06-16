@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ButtonWithChildren } from "../buttons/ButtonWithChildren";
+import { ButtonWithChildren } from "../buttons/button-with-children";
 import Text from "../texts/text";
 import { LazyInstallButton } from "../buttons/pwa-install-button";
 
