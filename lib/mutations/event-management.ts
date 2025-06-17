@@ -1,9 +1,9 @@
-import { zenaoClient } from "@/app/zenao-client";
-import { EventFormSchemaType } from "@/components/form/types";
 import { useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "../get-query-client";
 import { eventOptions } from "../queries/event";
 import { currentTimezone } from "../time";
+import { zenaoClient } from "@/app/zenao-client";
+import { EventFormSchemaType } from "@/components/form/types";
 
 export const useCreateEvent = () => {
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
@@ -140,7 +140,6 @@ export const useEventBroadcastEmail = () => {
         {
           eventId,
           message,
-          attachTicket: true
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
