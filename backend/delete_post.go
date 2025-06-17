@@ -50,5 +50,10 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 	}); err != nil {
 		return nil, err
 	}
+
+	if err := s.Chain.DeletePost(zUser.ID, req.Msg.PostId); err != nil {
+		return nil, err
+	}
+
 	return connect.NewResponse(&zenaov1.DeletePostResponse{}), nil
 }

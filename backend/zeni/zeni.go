@@ -217,6 +217,7 @@ type Chain interface {
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
+	DeletePost(userID string, postID string) error
 	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
