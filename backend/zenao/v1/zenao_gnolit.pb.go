@@ -675,6 +675,27 @@ func (c *CreatePostResponse) GnoLiteral(typePrefix string, linePrefix string) st
 	return buf.String()
 }
 
+func (d *DeletePostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("DeletePostRequest{\n")
+	if d.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, d.PostId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (d *DeletePostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("DeletePostResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (r *ReactPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)

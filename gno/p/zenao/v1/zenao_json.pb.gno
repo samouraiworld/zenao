@@ -1178,6 +1178,35 @@ func (c *CreatePostResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (d *DeletePostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if d.PostId != "" {
+		fields["postId"] = json.StringNode("", d.PostId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (d *DeletePostRequest) FromJSON(node *json.Node) {
+	*d = DeletePostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		d.PostId = val.MustString()
+	}
+}
+
+func (d *DeletePostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (d *DeletePostResponse) FromJSON(node *json.Node) {
+	*d = DeletePostResponse{}
+}
+
 func (r *ReactPostRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
