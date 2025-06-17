@@ -58,10 +58,7 @@ func (s *ZenaoServer) EditPost(ctx context.Context, req *connect.Request[zenaov1
 		if len(roles) == 0 {
 			return errors.New("user is not a member of the event")
 		}
-		if err := db.EditPost(req.Msg.PostId, req.Msg); err != nil {
-			return err
-		}
-		return nil
+		return db.EditPost(req.Msg.PostId, req.Msg)
 	}); err != nil {
 		return nil, err
 	}
