@@ -692,6 +692,40 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 	return zpost, nil
 }
 
+// EditPost implements zeni.DB.
+func (g *gormZenaoDB) EditPost(postID string, req *zenaov1.EditPostRequest) error {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	if err := g.db.Model(&Post{}).
+		Where("id = ?", postIDInt).
+		Update("content", req.Content).Error; err != nil {
+		return err
+	}
+
+	if err := g.db.Where("post_id = ?", postIDInt).Delete(&Tag{}).Error; err != nil {
+		return err
+	}
+
+	var tags []Tag
+	for _, tagName := range req.Tags {
+		tags = append(tags, Tag{
+			PostID: uint(postIDInt),
+			Name:   tagName,
+		})
+	}
+
+	if len(tags) > 0 {
+		if err := g.db.Create(&tags).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // GetPostByID implements zeni.DB
 func (g *gormZenaoDB) GetPostByID(postID string) (*zeni.Post, error) {
 	postIDUint, err := strconv.ParseUint(postID, 10, 64)
