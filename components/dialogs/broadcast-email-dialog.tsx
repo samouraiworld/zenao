@@ -27,6 +27,7 @@ import {
   DrawerTitle,
 } from "../shadcn/drawer";
 import Text from "../texts/text";
+import { FormFieldCheckbox } from "../form/components/form-field-checkbox";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
 import { useEventBroadcastEmail } from "@/lib/mutations/event-management";
@@ -45,6 +46,7 @@ const broadcastEmailFormSchema = z.object({
     .string()
     .min(30, "Message must be at least 30 characters")
     .max(1000, "Message must be at most 1000 characters"),
+  attachTicket: z.boolean(),
 });
 
 type BroadcastEmailFormSchema = z.infer<typeof broadcastEmailFormSchema>;
@@ -161,7 +163,7 @@ function BroadcastEmailForm({
   isLoading,
   isDisabled,
 }: {
-  form: UseFormReturn<{ message: string }>;
+  form: UseFormReturn<BroadcastEmailFormSchema>;
   isLoading: boolean;
   isDisabled: boolean;
 } & React.ComponentProps<"form">) {
@@ -179,6 +181,13 @@ function BroadcastEmailForm({
         wordCounter
         disabled={isDisabled}
       />
+      <div>
+        <FormFieldCheckbox
+          control={form.control}
+          name="attachTicket"
+          label="Attach ticket to the message"
+        />
+      </div>
       <div className="flex justify-end">
         <ButtonWithChildren loading={isLoading} disabled={isDisabled}>
           <div className="flex gap-2 items-center">
