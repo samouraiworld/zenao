@@ -6,6 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -31,21 +32,23 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 		if err != nil {
 			return err
 		}
+		if post.UserID != zUser.ID {
+			return errors.New("user is not the author of the post")
+		}
 		feed, err := db.GetFeedByID(post.FeedID)
 		if err != nil {
 			return err
 		}
-		roles, err := db.UserRoles(zUser.ID, feed.ID)
+		roles, err := db.UserRoles(zUser.ID, feed.EventID)
 		if err != nil {
 			return err
 		}
 		if len(roles) == 0 {
 			return errors.New("user is not a member of the event")
 		}
-		if post.UserID != zUser.ID {
-			return errors.New("user is not the author of the post")
-		}
-		return db.DeletePost(req.Msg.PostId)
+		return nil
 	}); err != nil {
+		return nil, err
+	}
 	return connect.NewResponse(&zenaov1.DeletePostResponse{}), nil
 }
