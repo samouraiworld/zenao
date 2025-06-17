@@ -46,7 +46,7 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 		if len(roles) == 0 {
 			return errors.New("user is not a member of the event")
 		}
-		return nil
+		return db.DeletePost(req.Msg.PostId)
 	}); err != nil {
 		return nil, err
 	}

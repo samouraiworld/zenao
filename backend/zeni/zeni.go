@@ -194,6 +194,7 @@ type DB interface {
 	GetFeedByID(feedID string) (*Feed, error)
 
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	DeletePost(postID string) error
 	GetPostByID(postID string) (*Post, error)
 	GetAllPosts() ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error

@@ -692,6 +692,16 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 	return zpost, nil
 }
 
+// DeletePost implements zeni.DB.
+func (g *gormZenaoDB) DeletePost(postID string) error {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	return g.db.Delete(&Post{}, postIDInt).Error
+}
+
 // GetPostByID implements zeni.DB
 func (g *gormZenaoDB) GetPostByID(postID string) (*zeni.Post, error) {
 	postIDUint, err := strconv.ParseUint(postID, 10, 64)
