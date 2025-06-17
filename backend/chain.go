@@ -839,8 +839,6 @@ func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64
 	return fmt.Sprintf(`package main
 
 	import (
-		"std"
-
 		"gno.land/p/zenao/daokit"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		"gno.land/r/zenao/social_feed"
@@ -850,7 +848,7 @@ func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Edit post #%d",
-			Message: daokit.NewExecuteLambdaMsg(newPost),
+			Message: daokit.NewExecuteLambdaMsg(editPost),
 		})
 	}
 
@@ -858,7 +856,7 @@ func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64
 		postID := %d
 		post := %s
 
-		social_feed.EditPost(feedID, post)
+		social_feed.EditPost(uint64(postID), post)
 	}
 `, userRealmPkgPath, postIDint, postIDint, gnoLitPost)
 }
