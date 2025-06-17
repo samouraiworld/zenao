@@ -68,6 +68,7 @@ export function BroadcastEmailDialog({
     resolver: zodResolver(broadcastEmailFormSchema),
     defaultValues: {
       message: "",
+      attachTicket: false,
     },
   });
 
