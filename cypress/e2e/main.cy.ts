@@ -419,35 +419,35 @@ describe("main", () => {
     });
   });
 
-  // it("remove a gatekeeper", () => {
-  //   cy.createEvent({ exclusive: false, gatekeepers: [testEmail2] });
+  it("remove a gatekeeper", () => {
+    cy.createEvent({ exclusive: false, gatekeepers: [testEmail2] });
 
-  //   cy.get("a").contains("Edit event").click({ timeout: 16000 });
+    cy.get("a").contains("Edit event").click({ timeout: 16000 });
 
-  //   cy.get("button").contains("Manage gatekeepers (2)").click();
+    cy.get("button").contains("Manage gatekeepers (2)").click();
 
-  //   cy.get('button[aria-label="delete gatekeeper"]').click();
+    cy.get('button[aria-label="delete gatekeeper"]').click();
 
-  //   cy.get("button").contains("Done").click();
+    cy.get("button").contains("Done").click();
 
-  //   cy.get("button").should("contain", "Manage gatekeepers (1)");
+    cy.get("button").should("contain", "Manage gatekeepers (1)");
 
-  //   cy.get("button").contains("Edit event").click();
+    cy.get("button").contains("Edit event").click();
 
-  //   cy.url().should("include", "/event/");
-  //   cy.url().should("not.include", "/create");
+    cy.url().should("include", "/event/");
+    cy.url().should("not.include", "/create");
 
-  //   toastShouldContain("Event edited!");
+    toastShouldContain("Event edited!");
 
-  //   cy.url().then((url) => {
-  //     // Connect with other account
-  //     logout();
-  //     login(testEmail2);
-  //     cy.visit(url);
+    cy.url().then((url) => {
+      // Connect with other account
+      logout();
+      login(testEmail2);
+      cy.visit(url);
 
-  //     cy.get("a").contains("Open ticket scanner").should("not.exist");
-  //   });
-  // });
+      cy.get("a").contains("Open ticket scanner").should("not.exist");
+    });
+  });
 });
 
 Cypress.Commands.add(
