@@ -73,6 +73,7 @@ function GatekeeperManagementForm({
             <Button
               type="submit"
               variant="outline"
+              aria-label="add gatekeeper"
               disabled={
                 !internalForm.formState.isValid ||
                 !internalForm.formState.isDirty
@@ -97,6 +98,7 @@ function GatekeeperManagementForm({
             <Text>{field.email}</Text>
             <Button
               type="button"
+              aria-label="delete gatekeeper"
               variant="ghost"
               className="aspect-square p-0"
               onClick={() => removeOption(index)}
