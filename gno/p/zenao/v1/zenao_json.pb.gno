@@ -1213,6 +1213,65 @@ func (r *ReactPostResponse) FromJSON(node *json.Node) {
 	*r = ReactPostResponse{}
 }
 
+func (e *EditPostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.PostId != "" {
+		fields["postId"] = json.StringNode("", e.PostId)
+	}
+	if e.Content != "" {
+		fields["content"] = json.StringNode("", e.Content)
+	}
+	if len(e.Tags) != 0 {
+		arr := make([]*json.Node, len(e.Tags))
+		for i, val := range e.Tags {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["tags"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EditPostRequest) FromJSON(node *json.Node) {
+	*e = EditPostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		e.PostId = val.MustString()
+	}
+	if val, ok := fields["content"]; ok {
+		e.Content = val.MustString()
+	}
+	if val, ok := fields["tags"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Tags = arr
+	}
+}
+
+func (e *EditPostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.PostId != "" {
+		fields["postId"] = json.StringNode("", e.PostId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EditPostResponse) FromJSON(node *json.Node) {
+	*e = EditPostResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		e.PostId = val.MustString()
+	}
+}
+
 func (g *GetEventTicketsRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
