@@ -47,7 +47,7 @@ func (s *ZenaoServer) BroadcastEvent(
 
 	evt := (*zeni.Event)(nil)
 	var participants []*zeni.User
-	var tickets map[string][]*zeni.SoldTicket
+	tickets := make(map[string][]*zeni.SoldTicket)
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
@@ -124,11 +124,20 @@ func (s *ZenaoServer) BroadcastEvent(
 			Attachments: attachments,
 		})
 	}
-	// 100 emails at a time is the limit cf. https://resend.com/docs/api-reference/emails/send-batch-emails
-	for i := 0; i < len(requests); i += 100 {
-		batch := requests[i:min(i+100, len(requests))]
-		if _, err := s.MailClient.Batch.SendWithContext(ctx, batch); err != nil {
-			s.Logger.Error("send-event-broadcast-email", zap.Error(err))
+	if req.Msg.AttachTicket {
+		// cannot batch send w/ attachments: https://resend.com/docs/api-reference/emails/send-batch-emails
+		for _, request := range requests {
+			if _, err := s.MailClient.Emails.SendWithContext(ctx, request); err != nil {
+				s.Logger.Error("send-event-broadcast-email", zap.Error(err))
+			}
+		}
+	} else {
+		// 100 emails at a time is the limit cf. https://resend.com/docs/api-reference/emails/send-batch-emails
+		for i := 0; i < len(requests); i += 100 {
+			batch := requests[i:min(i+100, len(requests))]
+			if _, err := s.MailClient.Batch.SendWithContext(ctx, batch); err != nil {
+				s.Logger.Error("send-event-broadcast-email", zap.Error(err))
+			}
 		}
 	}
 
