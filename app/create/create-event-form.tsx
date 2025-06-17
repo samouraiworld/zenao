@@ -51,6 +51,7 @@ export const CreateEventForm: React.FC = () => {
       },
       exclusive: false,
       password: "",
+      gatekeepers: [],
     },
   });
 
