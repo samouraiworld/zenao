@@ -3,10 +3,13 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { Download } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 import { Card } from "@/components/cards/card";
 import Text from "@/components/texts/text";
 import { EventUserRole } from "@/lib/queries/event-users";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
+import { zenaoClient } from "@/app/zenao-client";
 
 type EventManagementMenuProps = {
   eventId: string;
@@ -19,12 +22,30 @@ export function EventManagementMenu({
   roles,
   nbParticipants,
 }: EventManagementMenuProps) {
+  // const { getToken } = useAuth();
   const t = useTranslations("event");
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isGatekeeper = useMemo(() => roles.includes("gatekeeper"), [roles]);
 
   const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
     useState(false);
+
+  const onDownloadParticipantList = async () => {
+    // const token = await getToken();
+    // const response = await zenaoClient.exportParticipants(
+    //   { eventId: eventId },
+    //   { headers: { Authorization: `Bearer ${token}` } },
+    // );
+    // const blob = new Blob([response.content], { type: response.mimeType });
+    // const url = URL.createObjectURL(blob);
+    // const link = document.createElement("a");
+    // link.href = url;
+    // link.download = response.filename;
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+    // URL.revokeObjectURL(url);
+  };
 
   if (!isOrganizer && !isGatekeeper) {
     return null;
@@ -55,6 +76,15 @@ export function EventManagementMenu({
             >
               {t("send-global-message")}
             </p>
+            <div className="flex items-center gap-1" role="group">
+              <p
+                className="text-main underline cursor-pointer"
+                onClick={onDownloadParticipantList}
+              >
+                {t("export-participant-list")}
+              </p>
+              <Download className="text-main" size={16} />
+            </div>
           </>
         )}
 
