@@ -435,7 +435,6 @@ describe("main", () => {
     });
 
     cy.get("a").contains("Edit event").click();
-    cy.wait(5000);
     cy.get("button").contains("Manage gatekeepers (2)").click();
 
     cy.get('button[aria-label="delete gatekeeper"]').click();
