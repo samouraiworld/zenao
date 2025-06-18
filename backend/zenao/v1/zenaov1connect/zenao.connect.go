@@ -63,6 +63,9 @@ const (
 	ZenaoServiceGetEventTicketsProcedure = "/zenao.v1.ZenaoService/GetEventTickets"
 	// ZenaoServiceCheckinProcedure is the fully-qualified name of the ZenaoService's Checkin RPC.
 	ZenaoServiceCheckinProcedure = "/zenao.v1.ZenaoService/Checkin"
+	// ZenaoServiceExportParticipantsProcedure is the fully-qualified name of the ZenaoService's
+	// ExportParticipants RPC.
+	ZenaoServiceExportParticipantsProcedure = "/zenao.v1.ZenaoService/ExportParticipants"
 	// ZenaoServiceCreatePollProcedure is the fully-qualified name of the ZenaoService's CreatePoll RPC.
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
 	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
@@ -92,6 +95,7 @@ type ZenaoServiceClient interface {
 	CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
+	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -179,6 +183,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("Checkin")),
 			connect.WithClientOptions(opts...),
 		),
+		exportParticipants: connect.NewClient[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse](
+			httpClient,
+			baseURL+ZenaoServiceExportParticipantsProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
+			connect.WithClientOptions(opts...),
+		),
 		createPoll: connect.NewClient[v1.CreatePollRequest, v1.CreatePollResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreatePollProcedure,
@@ -231,6 +241,7 @@ type zenaoServiceClient struct {
 	cancelParticipation *connect.Client[v1.CancelParticipationRequest, v1.CancelParticipationResponse]
 	getEventTickets     *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
 	checkin             *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
+	exportParticipants  *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
 	createPoll          *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll            *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 	createPost          *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
@@ -294,6 +305,11 @@ func (c *zenaoServiceClient) Checkin(ctx context.Context, req *connect.Request[v
 	return c.checkin.CallUnary(ctx, req)
 }
 
+// ExportParticipants calls zenao.v1.ZenaoService.ExportParticipants.
+func (c *zenaoServiceClient) ExportParticipants(ctx context.Context, req *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error) {
+	return c.exportParticipants.CallUnary(ctx, req)
+}
+
 // CreatePoll calls zenao.v1.ZenaoService.CreatePoll.
 func (c *zenaoServiceClient) CreatePoll(ctx context.Context, req *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return c.createPoll.CallUnary(ctx, req)
@@ -339,6 +355,7 @@ type ZenaoServiceHandler interface {
 	CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
+	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -422,6 +439,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("Checkin")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceExportParticipantsHandler := connect.NewUnaryHandler(
+		ZenaoServiceExportParticipantsProcedure,
+		svc.ExportParticipants,
+		connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCreatePollHandler := connect.NewUnaryHandler(
 		ZenaoServiceCreatePollProcedure,
 		svc.CreatePoll,
@@ -482,6 +505,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceGetEventTicketsHandler.ServeHTTP(w, r)
 		case ZenaoServiceCheckinProcedure:
 			zenaoServiceCheckinHandler.ServeHTTP(w, r)
+		case ZenaoServiceExportParticipantsProcedure:
+			zenaoServiceExportParticipantsHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
 		case ZenaoServiceVotePollProcedure:
@@ -545,6 +570,10 @@ func (UnimplementedZenaoServiceHandler) GetEventTickets(context.Context, *connec
 
 func (UnimplementedZenaoServiceHandler) Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.Checkin is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ExportParticipants is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {

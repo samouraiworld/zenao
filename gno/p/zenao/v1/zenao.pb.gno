@@ -239,3 +239,13 @@ type CheckinRequest struct {
 
 type CheckinResponse struct {
 }
+
+type ExportParticipantsRequest struct {
+	EventId string
+}
+
+type ExportParticipantsResponse struct {
+	Content  string
+	Filename string
+	MimeType string
+}
