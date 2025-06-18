@@ -38,6 +38,8 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
+import { Button } from "@/components/shadcn/button";
+import { CancelRegistrationConfirmationDialog } from "@/components/dialogs/cancel-registration-confirmation-dialog";
 
 interface EventSectionProps {
   title: string;
@@ -77,6 +79,8 @@ export function EventInfoLayout({
 
   const [guestEmail, setGuestEmail] = useState<string>("");
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
+
+  const [confirmCancelDialogOpen, setConfirmCancelDialogOpen] = useState(false);
 
   const t = useTranslations("event");
 
@@ -192,13 +196,36 @@ export function EventInfoLayout({
           open={guestDialogOpen}
           onOpenChange={(o) => setGuestDialogOpen(o)}
         />
+
+        <CancelRegistrationConfirmationDialog
+          open={confirmCancelDialogOpen}
+          onOpenChange={setConfirmCancelDialogOpen}
+          eventId={eventId}
+        />
+
         <Card className="mt-2">
           {isParticipant ? (
             <div>
               <div className="flex flex-row justify-between">
-                <Heading level={2} size="xl">
-                  {t("in")}
-                </Heading>
+                <div className="flex flex-col gap-2">
+                  <Heading level={2} size="xl">
+                    {t("in")}
+                  </Heading>
+                  <SignedIn>
+                    <>
+                      <Text variant="secondary">
+                        {"Not going to the event anymore ?"}
+                      </Text>
+                      <Button
+                        variant="link"
+                        className="justify-normal px-0"
+                        onClick={() => setConfirmCancelDialogOpen(true)}
+                      >
+                        Cancel my participation
+                      </Button>
+                    </>
+                  </SignedIn>
+                </div>
                 <SignedIn>
                   <Link
                     href={`/ticket/${eventId}`}
