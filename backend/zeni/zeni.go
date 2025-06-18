@@ -194,11 +194,8 @@ type DB interface {
 	GetFeedByID(feedID string) (*Feed, error)
 
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
-<<<<<<< HEAD
 	DeletePost(postID string) error
-=======
 	EditPost(postID string, req *zenaov1.EditPostRequest) error
->>>>>>> main
 	GetPostByID(postID string) (*Post, error)
 	GetAllPosts() ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
@@ -221,11 +218,8 @@ type Chain interface {
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
-<<<<<<< HEAD
 	DeletePost(userID string, postID string) error
-=======
 	EditPost(userID string, postID string, post *feedsv1.Post) error
->>>>>>> main
 	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
