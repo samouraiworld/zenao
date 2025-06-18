@@ -74,6 +74,9 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 			continue
 		}
 		createdAt := t.CreatedAt.Format(time.RFC3339)
+		if t.User.DisplayName == "" {
+			t.User.DisplayName = fmt.Sprintf("Zenao User #%s", t.User.ID)
+		}
 		if err := writer.Write([]string{email, t.User.DisplayName, createdAt}); err != nil {
 			return nil, err
 		}
