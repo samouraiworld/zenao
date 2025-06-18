@@ -341,7 +341,7 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 	}
 
 	var count int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND buyer_id = ?", evt.ID, userIDint).Count(&count).Error; err != nil {
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userIDint).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
@@ -358,20 +358,13 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return err
 	}
 
-	if err := g.db.Model(&UserRole{}).Where("event_id = ? AND user_id = ? and role = ?", evt.ID, userID, "participant").Count(&count).Error; err != nil {
-		return err
-	}
-	if count != 0 {
-		return errors.New("user is already participant for this event")
-	}
-
 	participant := &UserRole{
 		UserID:  uint(userIDint),
 		EventID: evt.ID,
 		Role:    "participant",
 	}
 
-	if err := g.db.Create(participant).Error; err != nil {
+	if err := g.db.Save(participant).Error; err != nil {
 		return err
 	}
 
@@ -690,6 +683,50 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 		return nil, err
 	}
 	return zpost, nil
+}
+
+// EditPost implements zeni.DB.
+func (g *gormZenaoDB) EditPost(postID string, req *zenaov1.EditPostRequest) error {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	if err := g.db.Model(&Post{}).
+		Where("id = ?", postIDInt).
+		Update("content", req.Content).Error; err != nil {
+		return err
+	}
+
+	if err := g.db.Where("post_id = ?", postIDInt).Delete(&Tag{}).Error; err != nil {
+		return err
+	}
+
+	var tags []Tag
+	for _, tagName := range req.Tags {
+		tags = append(tags, Tag{
+			PostID: uint(postIDInt),
+			Name:   tagName,
+		})
+	}
+
+	if len(tags) > 0 {
+		if err := g.db.Create(&tags).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// DeletePost implements zeni.DB.
+func (g *gormZenaoDB) DeletePost(postID string) error {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	return g.db.Delete(&Post{}, postIDInt).Error
 }
 
 // GetPostByID implements zeni.DB
