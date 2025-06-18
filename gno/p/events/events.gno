@@ -19,7 +19,7 @@ import (
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
-const gatewayDomain = "rose-many-bass-859.mypinata.cloud"
+const gatewayDomain = "pinata.zenao.io"
 
 // XXX: consider including a nonce unique to event in signed messages (checkin and participate)
 
