@@ -329,13 +329,19 @@ describe("main", () => {
   });
 
   it("send a comment on a post", () => {
-    cy.createEvent({ exclusive: false });
+    // start from the home
+    cy.visit("/");
 
-    // Participate to an event
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    cy.url().should("contain", "/event/");
+
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
 
     // Go Description tab
     cy.get("button").contains("Discussions").click();
