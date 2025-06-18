@@ -1,3 +1,5 @@
+import { useAuth } from "@clerk/nextjs";
+
 export function mergeRefs<T>(
   ...refs: (React.Ref<T> | undefined)[]
 ): React.RefCallback<T> {
@@ -11,3 +13,5 @@ export function mergeRefs<T>(
     });
   };
 }
+
+export type GetToken = ReturnType<typeof useAuth>["getToken"];
