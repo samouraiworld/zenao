@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -56,10 +57,44 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 	if err != nil {
 		return nil, err
 	}
+
 	mailMap := make(map[string]string)
 	for _, p := range authParticipants {
 		mailMap[p.ID] = p.Email
 	}
+
+	type ticketData struct {
+		email       string
+		displayName string
+		createdAt   time.Time
+	}
+
+	var ticketDataList []ticketData
+	for _, t := range tickets {
+		email := mailMap[t.User.AuthID]
+		if email == "" {
+			s.Logger.Warn("export-participants-fail-to-retrieve-auth-user",
+				zap.String("event-id", req.Msg.EventId),
+				zap.String("user-id", zUser.ID),
+				zap.String("auth-user-id", t.User.AuthID))
+			continue
+		}
+
+		displayName := t.User.DisplayName
+		if displayName == "" {
+			displayName = fmt.Sprintf("Zenao User #%s", t.User.ID)
+		}
+
+		ticketDataList = append(ticketDataList, ticketData{
+			email:       email,
+			displayName: displayName,
+			createdAt:   t.CreatedAt,
+		})
+	}
+
+	slices.SortFunc(ticketDataList, func(a, b ticketData) int {
+		return strings.Compare(a.email, b.email)
+	})
 
 	var buffer bytes.Buffer
 	writer := csv.NewWriter(&buffer)
@@ -67,17 +102,12 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 	if err := writer.Write([]string{"Email", "Name", "Ticket CreatedAt"}); err != nil {
 		return nil, err
 	}
-	for _, t := range tickets {
-		email := mailMap[t.User.AuthID]
-		if email == "" {
-			s.Logger.Warn("export-participants-fail-to-retrieve-auth-user", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.String("auth-user-id", t.User.AuthID))
-			continue
-		}
-		createdAt := t.CreatedAt.Format(time.RFC3339)
-		if t.User.DisplayName == "" {
-			t.User.DisplayName = fmt.Sprintf("Zenao User #%s", t.User.ID)
-		}
-		if err := writer.Write([]string{email, t.User.DisplayName, createdAt}); err != nil {
+	for _, data := range ticketDataList {
+		if err := writer.Write([]string{
+			data.email,
+			data.displayName,
+			data.createdAt.Format(time.RFC3339),
+		}); err != nil {
 			return nil, err
 		}
 	}
@@ -86,7 +116,7 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 		return nil, err
 	}
 
-	filename := fmt.Sprintf("participants-%s.csv", req.Msg.EventId)
+	filename := fmt.Sprintf("participants-event-%s.csv", req.Msg.EventId)
 
 	return connect.NewResponse(&zenaov1.ExportParticipantsResponse{
 		Content:  buffer.String(),
