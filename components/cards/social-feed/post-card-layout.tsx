@@ -22,7 +22,6 @@ import {
   PopoverTrigger,
 } from "@/components/shadcn/popover";
 import { useReactPost } from "@/lib/mutations/social-feed";
-import { getQueryClient } from "@/lib/get-query-client";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { Button } from "@/components/shadcn/button";
@@ -143,7 +142,6 @@ function Reactions({
   parentId: string;
 }) {
   const { resolvedTheme } = useTheme();
-  const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -154,7 +152,7 @@ function Reactions({
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
-  const { reactPost, isPending } = useReactPost(queryClient);
+  const { reactPost, isPending } = useReactPost();
   const onReactionChange = async (icon: string) => {
     try {
       const token = await getToken();
