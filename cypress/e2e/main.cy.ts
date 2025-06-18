@@ -434,8 +434,8 @@ describe("main", () => {
       cy.visit(url);
     });
 
-    cy.get("a").contains("Edit event").click({ timeout: 16000 });
-
+    cy.get("a").contains("Edit event").click();
+    cy.wait(5000);
     cy.get("button").contains("Manage gatekeepers (2)").click();
 
     cy.get('button[aria-label="delete gatekeeper"]').click();
