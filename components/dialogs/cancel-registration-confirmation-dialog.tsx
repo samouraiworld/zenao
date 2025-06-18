@@ -57,15 +57,16 @@ export function CancelRegistrationConfirmationDialog({
       toast({
         title: t("toast-cancel-participation-success"),
       });
+      onOpenChange(false);
     } catch (error) {
       // Known errors
       if (error instanceof Error) {
         let toastMessage = "";
         switch (error.message) {
-          case "event already started":
+          case "[unknown] event already started":
             toastMessage = t("event-already-started-error");
             break;
-          case "user already checked-in":
+          case "[unknown] user already checked-in":
             toastMessage = t("toast-user-already-checked-in-error");
             break;
           default:
@@ -91,8 +92,12 @@ export function CancelRegistrationConfirmationDialog({
             <DialogDescription>{t("desc")}</DialogDescription>
           </DialogHeader>
           <DialogFooter className="">
-            <DialogClose>
-              <ButtonWithChildren variant="outline" disabled={isPending}>
+            <DialogClose asChild>
+              <ButtonWithChildren
+                className="w-fit"
+                variant="outline"
+                disabled={isPending}
+              >
                 {t("go-back")}
               </ButtonWithChildren>
             </DialogClose>

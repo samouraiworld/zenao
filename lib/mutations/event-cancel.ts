@@ -3,6 +3,7 @@ import { getQueryClient } from "../get-query-client";
 import { GetToken } from "../utils";
 import { eventTickets } from "../queries/ticket";
 import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
+import { eventOptions } from "../queries/event";
 import { zenaoClient } from "@/app/zenao-client";
 
 type EventCancelParticipationRequest = {
@@ -24,7 +25,7 @@ export const useEventCancelParticipation = () => {
         throw new Error("not authenticated");
       }
 
-      zenaoClient.cancelParticipation(
+      await zenaoClient.cancelParticipation(
         {
           eventId,
         },
@@ -38,6 +39,7 @@ export const useEventCancelParticipation = () => {
         variables.eventId,
         variables.getToken,
       );
+      const eventInfoOpts = eventOptions(variables.eventId);
       const eventUserRolesOpts = eventUserRoles(
         variables.eventId,
         variables.userAddress,
@@ -47,6 +49,7 @@ export const useEventCancelParticipation = () => {
         "participant",
       );
 
+      queryClient.invalidateQueries(eventInfoOpts);
       queryClient.invalidateQueries(eventTicketsOpts);
       queryClient.invalidateQueries(eventUserRolesOpts);
       queryClient.invalidateQueries(eventUsersWithRoleOpts);

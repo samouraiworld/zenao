@@ -211,20 +211,22 @@ export function EventInfoLayout({
                   <Heading level={2} size="xl">
                     {t("in")}
                   </Heading>
-                  <SignedIn>
-                    <>
-                      <Text variant="secondary">
-                        {"Not going to the event anymore ?"}
-                      </Text>
-                      <Button
-                        variant="link"
-                        className="justify-normal px-0"
-                        onClick={() => setConfirmCancelDialogOpen(true)}
-                      >
-                        Cancel my participation
-                      </Button>
-                    </>
-                  </SignedIn>
+                  {!isStarted && (
+                    <SignedIn>
+                      <>
+                        <Text variant="secondary">
+                          {"Not going to the event anymore ?"}
+                        </Text>
+                        <Button
+                          variant="link"
+                          className="justify-normal px-0"
+                          onClick={() => setConfirmCancelDialogOpen(true)}
+                        >
+                          Cancel my participation
+                        </Button>
+                      </>
+                    </SignedIn>
+                  )}
                 </div>
                 <SignedIn>
                   <Link
