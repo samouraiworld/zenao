@@ -201,6 +201,13 @@ type CreatePostResponse struct {
 	PostId string
 }
 
+type DeletePostRequest struct {
+	PostId string
+}
+
+type DeletePostResponse struct {
+}
+
 type ReactPostRequest struct {
 	PostId string
 	Icon   string

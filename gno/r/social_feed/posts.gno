@@ -17,19 +17,21 @@ func NewPost(feedId string, post *feedsv1.Post) uint64 {
 	post.UpdatedAt = time.Now().Unix()
 	post.DeletedAt = 0
 
+	localPostId := id.Next()
 	feedRaw, ok := feeds.Get(feedId)
 	if ok {
 		feed := feedRaw.(*Feed)
-		if feed.authFunc != nil && !feed.authFunc(std.PreviousRealm().Address().String()) {
+		if feed.authFunc != nil && !feed.authFunc(creator) {
 			panic("this is a private feed and you are not authorized to post on it")
 		}
+		feedsByPost.Set(localPostId.String(), feed)
 	}
 
-	localPostId := id.Next()
 	post.LocalPostId = uint64(localPostId)
 	feedKey := feedId + ":" + localPostId.String()
 	posts.Set(localPostId.String(), post)
 	postsByFeed.Set(feedKey, post)
+
 	if post.ParentUri != "" {
 		parentIdInt, err := strconv.ParseUint(post.ParentUri, 10, 64)
 		if err != nil {
@@ -50,32 +52,47 @@ func GetPost(localPostId uint64) *feedsv1.Post {
 }
 
 func DeletePost(localPostId uint64) {
-	creator := std.PreviousRealm()
+	caller := std.PreviousRealm().Address().String()
 	localPostIdStr := seqid.ID(localPostId).String()
 	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
+	feedRaw, ok := feedsByPost.Get(localPostIdStr)
+	if ok {
+		feed := feedRaw.(*Feed)
+		if feed.authFunc != nil && !feed.authFunc(caller) {
+			panic("this is a private feed and you are not authorized to delete posts on it")
+		}
+	}
 	post := postRaw.(*feedsv1.Post)
-	if post.Author != creator.Address().String() {
-		panic("caller is not the author of this post")
+	if post.Author != caller {
+		panic("you are not the author of this post")
 	}
 	if post.DeletedAt != 0 {
 		panic("post is deleted")
 	}
+	// XXX: should we just remove the post from the feed & all trees ?
 	post.DeletedAt = time.Now().Unix()
 }
 
 func EditPost(localPostId uint64, newPost *feedsv1.Post) {
-	caller := std.PreviousRealm()
+	caller := std.PreviousRealm().Address().String()
 	localPostIdStr := seqid.ID(localPostId).String()
 	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
+	feedRaw, ok := feedsByPost.Get(localPostIdStr)
+	if ok {
+		feed := feedRaw.(*Feed)
+		if feed.authFunc != nil && !feed.authFunc(caller) {
+			panic("this is a private feed and you are not authorized to edit posts on it")
+		}
+	}
 	post := postRaw.(*feedsv1.Post)
-	if post.Author != caller.Address().String() {
-		panic("caller is not the author of this post")
+	if post.Author != caller {
+		panic("you are not the author of this post")
 	}
 	if post.DeletedAt != 0 {
 		panic("post is deleted")

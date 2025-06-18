@@ -519,4 +519,5 @@ func setupTest() {
 	postsByFeed = avl.NewTree()
 
 	feeds = avl.NewTree()
+	feedsByPost = avl.NewTree()
 }

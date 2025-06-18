@@ -30,6 +30,7 @@ service ZenaoService {
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
   rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
   rpc EditPost(EditPostRequest) returns (EditPostResponse);
 
@@ -205,6 +206,10 @@ message CreatePostRequest {
 }
 
 message CreatePostResponse { string post_id = 1; }
+
+message DeletePostRequest { string post_id = 1; }
+
+message DeletePostResponse {}
 
 message ReactPostRequest {
   string post_id = 1;
