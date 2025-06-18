@@ -1,26 +1,5 @@
 "use client";
 
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { zenaoClient } from "@/app/zenao-client";
-import { GnowebButton } from "@/components/buttons/gnoweb-button";
-import { GoTopButton } from "@/components/buttons/go-top-button";
-import { Card } from "@/components/cards/card";
-import { UserAvatarWithName } from "@/components/common/user";
-import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
-import { EventRegistrationForm } from "@/components/form/event-registration";
-import { Web3Image } from "@/components/images/web3-image";
-import { useEventPassword } from "@/components/providers/event-password-provider";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Separator } from "@/components/shadcn/separator";
-import { Skeleton } from "@/components/shadcn/skeleton";
-import Heading from "@/components/texts/heading";
-import Text from "@/components/texts/text";
-import EventLocationSection from "@/components/widgets/event-location-section";
-import { makeLocationFromEvent } from "@/lib/location";
-import { eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
-import { web2URL } from "@/lib/uris";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -39,6 +18,26 @@ import React, { useMemo, useState } from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./participants-section";
+import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { GnowebButton } from "@/components/buttons/gnoweb-button";
+import { GoTopButton } from "@/components/buttons/go-top-button";
+import { Card } from "@/components/cards/card";
+import { UserAvatarWithName } from "@/components/common/user";
+import { EventRegistrationForm } from "@/components/form/event-registration";
+import { Web3Image } from "@/components/images/web3-image";
+import { useEventPassword } from "@/components/providers/event-password-provider";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Separator } from "@/components/shadcn/separator";
+import Heading from "@/components/texts/heading";
+import Text from "@/components/texts/text";
+import EventLocationSection from "@/components/widgets/event-location-section";
+import { makeLocationFromEvent } from "@/lib/location";
+import { eventOptions } from "@/lib/queries/event";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { userAddressOptions } from "@/lib/queries/user";
+import { web2URL } from "@/lib/uris";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
 
 interface EventSectionProps {
   title: string;
@@ -96,18 +95,8 @@ export function EventInfoLayout({
 
   const iconSize = 22;
 
-  const onSubmitSignedOut = async () => {
-    const token = await getToken();
-    zenaoClient.cancelParticipation({
-      eventId,
-    },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
   return (
     <div className="flex flex-col w-full sm:h-full gap-8">
-      <button onClick={onSubmitSignedOut}>Cancel</button>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
