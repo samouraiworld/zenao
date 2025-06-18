@@ -576,6 +576,9 @@ func (b *BroadcastEventRequest) ToJSON() *json.Node {
 	if b.Message != "" {
 		fields["message"] = json.StringNode("", b.Message)
 	}
+	if b.AttachTicket != false {
+		fields["attachTicket"] = json.BoolNode("", b.AttachTicket)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -589,6 +592,9 @@ func (b *BroadcastEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["message"]; ok {
 		b.Message = val.MustString()
+	}
+	if val, ok := fields["attachTicket"]; ok {
+		b.AttachTicket = val.MustBool()
 	}
 }
 

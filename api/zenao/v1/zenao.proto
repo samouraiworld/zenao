@@ -113,6 +113,7 @@ message ParticipateResponse { string ticket_secret = 1; }
 message BroadcastEventRequest {
   string event_id = 1;
   string message = 2;
+  bool attach_ticket = 3;
 }
 
 message BroadcastEventResponse {}

@@ -104,8 +104,9 @@ type ParticipateResponse struct {
 }
 
 type BroadcastEventRequest struct {
-	EventId string
-	Message string
+	EventId      string
+	Message      string
+	AttachTicket bool
 }
 
 type BroadcastEventResponse struct {
