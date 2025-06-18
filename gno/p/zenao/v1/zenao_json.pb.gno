@@ -576,6 +576,9 @@ func (b *BroadcastEventRequest) ToJSON() *json.Node {
 	if b.Message != "" {
 		fields["message"] = json.StringNode("", b.Message)
 	}
+	if b.AttachTicket != false {
+		fields["attachTicket"] = json.BoolNode("", b.AttachTicket)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -589,6 +592,9 @@ func (b *BroadcastEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["message"]; ok {
 		b.Message = val.MustString()
+	}
+	if val, ok := fields["attachTicket"]; ok {
+		b.AttachTicket = val.MustBool()
 	}
 }
 
@@ -1320,4 +1326,54 @@ func (c *CheckinResponse) ToJSON() *json.Node {
 
 func (c *CheckinResponse) FromJSON(node *json.Node) {
 	*c = CheckinResponse{}
+}
+
+func (e *ExportParticipantsRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.EventId != "" {
+		fields["eventId"] = json.StringNode("", e.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *ExportParticipantsRequest) FromJSON(node *json.Node) {
+	*e = ExportParticipantsRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		e.EventId = val.MustString()
+	}
+}
+
+func (e *ExportParticipantsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.Content != "" {
+		fields["content"] = json.StringNode("", e.Content)
+	}
+	if e.Filename != "" {
+		fields["filename"] = json.StringNode("", e.Filename)
+	}
+	if e.MimeType != "" {
+		fields["mimeType"] = json.StringNode("", e.MimeType)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *ExportParticipantsResponse) FromJSON(node *json.Node) {
+	*e = ExportParticipantsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["content"]; ok {
+		e.Content = val.MustString()
+	}
+	if val, ok := fields["filename"]; ok {
+		e.Filename = val.MustString()
+	}
+	if val, ok := fields["mimeType"]; ok {
+		e.MimeType = val.MustString()
+	}
 }
