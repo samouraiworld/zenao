@@ -341,7 +341,7 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 	}
 
 	var count int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND buyer_id = ?", evt.ID, userIDint).Count(&count).Error; err != nil {
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userIDint).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != 0 {
@@ -358,20 +358,13 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return err
 	}
 
-	if err := g.db.Model(&UserRole{}).Where("event_id = ? AND user_id = ? and role = ?", evt.ID, userID, "participant").Count(&count).Error; err != nil {
-		return err
-	}
-	if count != 0 {
-		return errors.New("user is already participant for this event")
-	}
-
 	participant := &UserRole{
 		UserID:  uint(userIDint),
 		EventID: evt.ID,
 		Role:    "participant",
 	}
 
-	if err := g.db.Create(participant).Error; err != nil {
+	if err := g.db.Save(participant).Error; err != nil {
 		return err
 	}
 
