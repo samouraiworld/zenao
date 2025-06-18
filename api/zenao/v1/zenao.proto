@@ -30,7 +30,9 @@ service ZenaoService {
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
   rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
+  rpc EditPost(EditPostRequest) returns (EditPostResponse);
 
   // HEALTH
   rpc Health(HealthRequest) returns (HealthResponse);
@@ -205,12 +207,24 @@ message CreatePostRequest {
 
 message CreatePostResponse { string post_id = 1; }
 
+message DeletePostRequest { string post_id = 1; }
+
+message DeletePostResponse {}
+
 message ReactPostRequest {
   string post_id = 1;
   string icon = 2;
 }
 
 message ReactPostResponse {}
+
+message EditPostRequest {
+  string post_id = 1;
+  string content = 2;
+  repeated string tags = 3;
+}
+
+message EditPostResponse { string post_id = 1; }
 
 message GetEventTicketsRequest { string event_id = 1; }
 
