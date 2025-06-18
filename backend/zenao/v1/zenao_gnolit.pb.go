@@ -767,3 +767,33 @@ func (c *CheckinResponse) GnoLiteral(typePrefix string, linePrefix string) strin
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (e *ExportParticipantsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ExportParticipantsRequest{\n")
+	if e.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, e.EventId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *ExportParticipantsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ExportParticipantsResponse{\n")
+	if e.Content != "" {
+		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, e.Content)
+	}
+	if e.Filename != "" {
+		fmt.Fprintf(buf, "%s\tFilename: %q,\n", linePrefix, e.Filename)
+	}
+	if e.MimeType != "" {
+		fmt.Fprintf(buf, "%s\tMimeType: %q,\n", linePrefix, e.MimeType)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}

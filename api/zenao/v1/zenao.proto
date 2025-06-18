@@ -23,6 +23,8 @@ service ZenaoService {
       returns (CancelParticipationResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
   rpc Checkin(CheckinRequest) returns (CheckinResponse);
+  rpc ExportParticipants(ExportParticipantsRequest)
+      returns (ExportParticipantsResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
@@ -224,3 +226,13 @@ message CheckinRequest {
 }
 
 message CheckinResponse {}
+
+message ExportParticipantsRequest { string event_id = 1; }
+
+message ExportParticipantsResponse {
+  // XXX: cannot use bytes because not handled in gno-protoc-gen
+  string content = 1;
+  string filename = 2;
+  // XXX: use this to change the mime type without re-generating the proto
+  string mime_type = 3;
+}
