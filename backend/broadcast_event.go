@@ -116,7 +116,7 @@ func (s *ZenaoServer) BroadcastEvent(
 		}
 
 		requests = append(requests, &resend.SendEmailRequest{
-			From:        fmt.Sprintf("Zenao <broadcast@%s>", s.ResendDomain),
+			From:        fmt.Sprintf("Zenao <contact@%s>", s.ResendDomain),
 			To:          []string{authParticipant.Email},
 			Subject:     fmt.Sprintf("Message from %s's organizer", evt.Title),
 			Html:        htmlStr,

@@ -133,7 +133,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
-				From:        fmt.Sprintf("Zenao <ticket@%s>", s.ResendDomain),
+				From:        fmt.Sprintf("Zenao <contact@%s>", s.ResendDomain),
 				To:          append(req.Msg.Guests, authUser.Email),
 				Subject:     fmt.Sprintf("%s - Confirmation", evt.Title),
 				Html:        htmlStr,
