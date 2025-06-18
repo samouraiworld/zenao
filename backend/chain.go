@@ -570,6 +570,75 @@ func (g *gnoZenaoChain) CreatePost(userID string, eventID string, post *feedsv1.
 	return postID, nil
 }
 
+// EditPost implements ZenaoChain
+func (g *gnoZenaoChain) EditPost(userID string, postID string, post *feedsv1.Post) error {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return err
+	}
+	userRealmPkgPath := g.userRealmPkgPath(userID)
+	gnoLitPost := "&" + post.GnoLiteral("feedsv1.", "\t\t")
+
+	msg := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost, postIDInt),
+			}},
+		},
+	}
+	gasWanted, err := g.estimateRunTxGas(msg)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msg))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("edited post", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
+// DeletePost implements ZenaoChain
+func (g *gnoZenaoChain) DeletePost(userID string, postID string) error {
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return err
+	}
+	userRealmPkgPath := g.userRealmPkgPath(userID)
+	msg := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: genDeletePostMsgRunBody(userRealmPkgPath, postIDInt),
+			}},
+		},
+	}
+	gasWanted, err := g.estimateRunTxGas(msg)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msg))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("deleted post", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	return nil
+}
+
 // ReactPost implements ZenaoChain
 func (g *gnoZenaoChain) ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
@@ -797,6 +866,55 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 `, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
+}
+
+func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		"gno.land/p/zenao/daokit"
+		feedsv1 "gno.land/p/zenao/feeds/v1"
+		"gno.land/r/zenao/social_feed"
+		user %q
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: "Edit post #%d",
+			Message: daokit.NewExecuteLambdaMsg(editPost),
+		})
+	}
+
+	func editPost() {
+		postID := %d
+		post := %s
+
+		social_feed.EditPost(uint64(postID), post)
+	}
+`, userRealmPkgPath, postIDint, postIDint, gnoLitPost)
+}
+
+func genDeletePostMsgRunBody(userRealmPkgPath string, postIDInt uint64) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		"gno.land/p/zenao/daokit"
+		"gno.land/r/zenao/social_feed"
+		user %q
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: "Delete post #%d",
+			Message: daokit.NewExecuteLambdaMsg(deletePost),
+		})
+	}
+
+	func deletePost() {
+		postID := uint64(%d)
+		social_feed.DeletePost(postID)
+	}
+`, userRealmPkgPath, postIDInt, postIDInt)
 }
 
 func genReactPostMsgRunBody(userRealmPkgPath, userID, postID, eventID, icon string) string {
