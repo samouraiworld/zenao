@@ -467,6 +467,12 @@ describe("main", () => {
     cy.wait(2000);
 
     toastShouldContain("Your participation has been cancelled");
+
+    // Participate again to an event (potential regression)
+    cy.get("button").contains("Register").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
   });
 });
 
