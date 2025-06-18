@@ -98,11 +98,13 @@ func EditPost(localPostId uint64, newPost *feedsv1.Post) {
 		panic("post is deleted")
 	}
 
-	//XXX: this is a hack to force the localPostId to be the same as the original post
+	//XXX: this is a hack to force these fields to be same as the original post
 	newPost.LocalPostId = post.LocalPostId
-
+	newPost.CreatedAt = post.CreatedAt
+	newPost.Author = post.Author
+	newPost.ParentUri = post.ParentUri
+	newPost.UpdatedAt = time.Now().Unix()
 	*post = *newPost
-	post.UpdatedAt = time.Now().Unix()
 }
 
 func ReactPost(localPostId uint64, icon string) {

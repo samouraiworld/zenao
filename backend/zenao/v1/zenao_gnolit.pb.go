@@ -346,6 +346,9 @@ func (b *BroadcastEventRequest) GnoLiteral(typePrefix string, linePrefix string)
 	if b.Message != "" {
 		fmt.Fprintf(buf, "%s\tMessage: %q,\n", linePrefix, b.Message)
 	}
+	if b.AttachTicket != false {
+		fmt.Fprintf(buf, "%s\tAttachTicket: %t,\n", linePrefix, b.AttachTicket)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -720,6 +723,42 @@ func (r *ReactPostResponse) GnoLiteral(typePrefix string, linePrefix string) str
 	return buf.String()
 }
 
+func (e *EditPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EditPostRequest{\n")
+	if e.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, e.PostId)
+	}
+	if e.Content != "" {
+		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, e.Content)
+	}
+	if len(e.Tags) != 0 {
+		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Tags {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *EditPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EditPostResponse{\n")
+	if e.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, e.PostId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (g *GetEventTicketsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -784,6 +823,36 @@ func (c *CheckinResponse) GnoLiteral(typePrefix string, linePrefix string) strin
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("CheckinResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *ExportParticipantsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ExportParticipantsRequest{\n")
+	if e.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, e.EventId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *ExportParticipantsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ExportParticipantsResponse{\n")
+	if e.Content != "" {
+		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, e.Content)
+	}
+	if e.Filename != "" {
+		fmt.Fprintf(buf, "%s\tFilename: %q,\n", linePrefix, e.Filename)
+	}
+	if e.MimeType != "" {
+		fmt.Fprintf(buf, "%s\tMimeType: %q,\n", linePrefix, e.MimeType)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

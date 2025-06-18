@@ -63,6 +63,9 @@ const (
 	ZenaoServiceGetEventTicketsProcedure = "/zenao.v1.ZenaoService/GetEventTickets"
 	// ZenaoServiceCheckinProcedure is the fully-qualified name of the ZenaoService's Checkin RPC.
 	ZenaoServiceCheckinProcedure = "/zenao.v1.ZenaoService/Checkin"
+	// ZenaoServiceExportParticipantsProcedure is the fully-qualified name of the ZenaoService's
+	// ExportParticipants RPC.
+	ZenaoServiceExportParticipantsProcedure = "/zenao.v1.ZenaoService/ExportParticipants"
 	// ZenaoServiceCreatePollProcedure is the fully-qualified name of the ZenaoService's CreatePoll RPC.
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
 	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
@@ -73,6 +76,8 @@ const (
 	ZenaoServiceDeletePostProcedure = "/zenao.v1.ZenaoService/DeletePost"
 	// ZenaoServiceReactPostProcedure is the fully-qualified name of the ZenaoService's ReactPost RPC.
 	ZenaoServiceReactPostProcedure = "/zenao.v1.ZenaoService/ReactPost"
+	// ZenaoServiceEditPostProcedure is the fully-qualified name of the ZenaoService's EditPost RPC.
+	ZenaoServiceEditPostProcedure = "/zenao.v1.ZenaoService/EditPost"
 	// ZenaoServiceHealthProcedure is the fully-qualified name of the ZenaoService's Health RPC.
 	ZenaoServiceHealthProcedure = "/zenao.v1.ZenaoService/Health"
 )
@@ -92,12 +97,14 @@ type ZenaoServiceClient interface {
 	CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
+	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
 	CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error)
 	DeletePost(context.Context, *connect.Request[v1.DeletePostRequest]) (*connect.Response[v1.DeletePostResponse], error)
 	ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error)
+	EditPost(context.Context, *connect.Request[v1.EditPostRequest]) (*connect.Response[v1.EditPostResponse], error)
 	// HEALTH
 	Health(context.Context, *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error)
 }
@@ -179,6 +186,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("Checkin")),
 			connect.WithClientOptions(opts...),
 		),
+		exportParticipants: connect.NewClient[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse](
+			httpClient,
+			baseURL+ZenaoServiceExportParticipantsProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
+			connect.WithClientOptions(opts...),
+		),
 		createPoll: connect.NewClient[v1.CreatePollRequest, v1.CreatePollResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreatePollProcedure,
@@ -209,6 +222,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("ReactPost")),
 			connect.WithClientOptions(opts...),
 		),
+		editPost: connect.NewClient[v1.EditPostRequest, v1.EditPostResponse](
+			httpClient,
+			baseURL+ZenaoServiceEditPostProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("EditPost")),
+			connect.WithClientOptions(opts...),
+		),
 		health: connect.NewClient[v1.HealthRequest, v1.HealthResponse](
 			httpClient,
 			baseURL+ZenaoServiceHealthProcedure,
@@ -231,11 +250,13 @@ type zenaoServiceClient struct {
 	cancelParticipation *connect.Client[v1.CancelParticipationRequest, v1.CancelParticipationResponse]
 	getEventTickets     *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
 	checkin             *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
+	exportParticipants  *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
 	createPoll          *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll            *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 	createPost          *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
 	deletePost          *connect.Client[v1.DeletePostRequest, v1.DeletePostResponse]
 	reactPost           *connect.Client[v1.ReactPostRequest, v1.ReactPostResponse]
+	editPost            *connect.Client[v1.EditPostRequest, v1.EditPostResponse]
 	health              *connect.Client[v1.HealthRequest, v1.HealthResponse]
 }
 
@@ -294,6 +315,11 @@ func (c *zenaoServiceClient) Checkin(ctx context.Context, req *connect.Request[v
 	return c.checkin.CallUnary(ctx, req)
 }
 
+// ExportParticipants calls zenao.v1.ZenaoService.ExportParticipants.
+func (c *zenaoServiceClient) ExportParticipants(ctx context.Context, req *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error) {
+	return c.exportParticipants.CallUnary(ctx, req)
+}
+
 // CreatePoll calls zenao.v1.ZenaoService.CreatePoll.
 func (c *zenaoServiceClient) CreatePoll(ctx context.Context, req *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return c.createPoll.CallUnary(ctx, req)
@@ -319,6 +345,11 @@ func (c *zenaoServiceClient) ReactPost(ctx context.Context, req *connect.Request
 	return c.reactPost.CallUnary(ctx, req)
 }
 
+// EditPost calls zenao.v1.ZenaoService.EditPost.
+func (c *zenaoServiceClient) EditPost(ctx context.Context, req *connect.Request[v1.EditPostRequest]) (*connect.Response[v1.EditPostResponse], error) {
+	return c.editPost.CallUnary(ctx, req)
+}
+
 // Health calls zenao.v1.ZenaoService.Health.
 func (c *zenaoServiceClient) Health(ctx context.Context, req *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error) {
 	return c.health.CallUnary(ctx, req)
@@ -339,12 +370,14 @@ type ZenaoServiceHandler interface {
 	CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
+	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
 	CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error)
 	DeletePost(context.Context, *connect.Request[v1.DeletePostRequest]) (*connect.Response[v1.DeletePostResponse], error)
 	ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error)
+	EditPost(context.Context, *connect.Request[v1.EditPostRequest]) (*connect.Response[v1.EditPostResponse], error)
 	// HEALTH
 	Health(context.Context, *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error)
 }
@@ -422,6 +455,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("Checkin")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceExportParticipantsHandler := connect.NewUnaryHandler(
+		ZenaoServiceExportParticipantsProcedure,
+		svc.ExportParticipants,
+		connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCreatePollHandler := connect.NewUnaryHandler(
 		ZenaoServiceCreatePollProcedure,
 		svc.CreatePoll,
@@ -450,6 +489,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceReactPostProcedure,
 		svc.ReactPost,
 		connect.WithSchema(zenaoServiceMethods.ByName("ReactPost")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceEditPostHandler := connect.NewUnaryHandler(
+		ZenaoServiceEditPostProcedure,
+		svc.EditPost,
+		connect.WithSchema(zenaoServiceMethods.ByName("EditPost")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceHealthHandler := connect.NewUnaryHandler(
@@ -482,6 +527,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceGetEventTicketsHandler.ServeHTTP(w, r)
 		case ZenaoServiceCheckinProcedure:
 			zenaoServiceCheckinHandler.ServeHTTP(w, r)
+		case ZenaoServiceExportParticipantsProcedure:
+			zenaoServiceExportParticipantsHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
 		case ZenaoServiceVotePollProcedure:
@@ -492,6 +539,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceDeletePostHandler.ServeHTTP(w, r)
 		case ZenaoServiceReactPostProcedure:
 			zenaoServiceReactPostHandler.ServeHTTP(w, r)
+		case ZenaoServiceEditPostProcedure:
+			zenaoServiceEditPostHandler.ServeHTTP(w, r)
 		case ZenaoServiceHealthProcedure:
 			zenaoServiceHealthHandler.ServeHTTP(w, r)
 		default:
@@ -547,6 +596,10 @@ func (UnimplementedZenaoServiceHandler) Checkin(context.Context, *connect.Reques
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.Checkin is not implemented"))
 }
 
+func (UnimplementedZenaoServiceHandler) ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ExportParticipants is not implemented"))
+}
+
 func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreatePoll is not implemented"))
 }
@@ -565,6 +618,10 @@ func (UnimplementedZenaoServiceHandler) DeletePost(context.Context, *connect.Req
 
 func (UnimplementedZenaoServiceHandler) ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ReactPost is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) EditPost(context.Context, *connect.Request[v1.EditPostRequest]) (*connect.Response[v1.EditPostResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EditPost is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) Health(context.Context, *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error) {

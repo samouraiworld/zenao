@@ -23,6 +23,8 @@ service ZenaoService {
       returns (CancelParticipationResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
   rpc Checkin(CheckinRequest) returns (CheckinResponse);
+  rpc ExportParticipants(ExportParticipantsRequest)
+      returns (ExportParticipantsResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
@@ -30,6 +32,7 @@ service ZenaoService {
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
   rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
   rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
+  rpc EditPost(EditPostRequest) returns (EditPostResponse);
 
   // HEALTH
   rpc Health(HealthRequest) returns (HealthResponse);
@@ -113,6 +116,7 @@ message ParticipateResponse { string ticket_secret = 1; }
 message BroadcastEventRequest {
   string event_id = 1;
   string message = 2;
+  bool attach_ticket = 3;
 }
 
 message BroadcastEventResponse {}
@@ -214,6 +218,14 @@ message ReactPostRequest {
 
 message ReactPostResponse {}
 
+message EditPostRequest {
+  string post_id = 1;
+  string content = 2;
+  repeated string tags = 3;
+}
+
+message EditPostResponse { string post_id = 1; }
+
 message GetEventTicketsRequest { string event_id = 1; }
 
 message GetEventTicketsResponse { repeated TicketInfo tickets_info = 1; }
@@ -229,3 +241,13 @@ message CheckinRequest {
 }
 
 message CheckinResponse {}
+
+message ExportParticipantsRequest { string event_id = 1; }
+
+message ExportParticipantsResponse {
+  // XXX: cannot use bytes because not handled in gno-protoc-gen
+  string content = 1;
+  string filename = 2;
+  // XXX: use this to change the mime type without re-generating the proto
+  string mime_type = 3;
+}

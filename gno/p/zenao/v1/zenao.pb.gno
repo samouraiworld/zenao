@@ -104,8 +104,9 @@ type ParticipateResponse struct {
 }
 
 type BroadcastEventRequest struct {
-	EventId string
-	Message string
+	EventId      string
+	Message      string
+	AttachTicket bool
 }
 
 type BroadcastEventResponse struct {
@@ -215,6 +216,16 @@ type ReactPostRequest struct {
 type ReactPostResponse struct {
 }
 
+type EditPostRequest struct {
+	PostId  string
+	Content string
+	Tags    []string
+}
+
+type EditPostResponse struct {
+	PostId string
+}
+
 type GetEventTicketsRequest struct {
 	EventId string
 }
@@ -234,4 +245,14 @@ type CheckinRequest struct {
 }
 
 type CheckinResponse struct {
+}
+
+type ExportParticipantsRequest struct {
+	EventId string
+}
+
+type ExportParticipantsResponse struct {
+	Content  string
+	Filename string
+	MimeType string
 }
