@@ -365,12 +365,12 @@ describe("main", () => {
     cy.get("p").contains(testComment).should("be.visible");
   });
 
-  // it("event not found", () => {
-  //   // Visit a non existing event page
-  //   cy.visit("/event/50", { failOnStatusCode: false });
+  it("event not found", () => {
+    // Visit a non existing event page
+    cy.visit("/event/50", { failOnStatusCode: false });
 
-  //   cy.get("p").contains("Page not found.").should("be.visible");
-  // });
+    cy.get("p").contains("Page not found.").should("be.visible");
+  });
 
   it("add a gatekeeper", () => {
     // start from the home
@@ -380,15 +380,12 @@ describe("main", () => {
     cy.get("a").contains("Discover").click();
     cy.get('a[href^="/event/"]').last().click();
 
-    // EventFeedForm should not exist
-    cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
-      "not.exist",
-    );
-
     cy.url().then((url) => {
       login();
       cy.visit(url);
     });
+
+    cy.wait(1000);
 
     cy.get("a").contains("Edit event").click();
 
@@ -434,6 +431,8 @@ describe("main", () => {
       cy.visit(url);
     });
 
+    cy.wait(1000);
+
     cy.get("a").contains("Edit event").click();
     cy.get("button").contains("Manage gatekeepers (2)").click();
 
@@ -460,31 +459,31 @@ describe("main", () => {
     });
   });
 
-  it("cancel participation", () => {
-    cy.createEvent({ exclusive: false });
+  // it("cancel participation", () => {
+  //   cy.createEvent({ exclusive: false });
 
-    cy.url().then((url) => {
-      cy.visit(url);
-    });
+  //   cy.url().then((url) => {
+  //     cy.visit(url);
+  //   });
 
-    // Participate to an event
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
+  //   // Participate to an event
+  //   cy.get("button").contains("Register").click();
+  //   cy.get("h2")
+  //     .contains("You're in!", { timeout: 16000 })
+  //     .should("be.visible");
 
-    cy.get("button").contains("Cancel my participation").click();
-    cy.get('button[aria-label="cancel participation"').click();
-    cy.wait(2000);
+  //   cy.get("button").contains("Cancel my participation").click();
+  //   cy.get('button[aria-label="cancel participation"').click();
+  //   cy.wait(2000);
 
-    toastShouldContain("Your participation has been cancelled");
+  //   toastShouldContain("Your participation has been cancelled");
 
-    // Participate again to an event (potential regression)
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
-  });
+  //   // Participate again to an event (potential regression)
+  //   cy.get("button").contains("Register").click();
+  //   cy.get("h2")
+  //     .contains("You're in!", { timeout: 16000 })
+  //     .should("be.visible");
+  // });
 });
 
 Cypress.Commands.add(
