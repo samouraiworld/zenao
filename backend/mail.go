@@ -62,4 +62,4 @@ func web2URL(uri string) string {
 	return res
 }
 
-const gatewayDomain = `rose-many-bass-859.mypinata.cloud`
+const gatewayDomain = `pinata.zenao.io`
