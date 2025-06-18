@@ -678,6 +678,27 @@ func (c *CreatePostResponse) GnoLiteral(typePrefix string, linePrefix string) st
 	return buf.String()
 }
 
+func (d *DeletePostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("DeletePostRequest{\n")
+	if d.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, d.PostId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (d *DeletePostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("DeletePostResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (r *ReactPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -697,6 +718,42 @@ func (r *ReactPostResponse) GnoLiteral(typePrefix string, linePrefix string) str
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("ReactPostResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *EditPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EditPostRequest{\n")
+	if e.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, e.PostId)
+	}
+	if e.Content != "" {
+		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, e.Content)
+	}
+	if len(e.Tags) != 0 {
+		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range e.Tags {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (e *EditPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("EditPostResponse{\n")
+	if e.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, e.PostId)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

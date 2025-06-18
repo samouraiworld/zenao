@@ -201,12 +201,29 @@ type CreatePostResponse struct {
 	PostId string
 }
 
+type DeletePostRequest struct {
+	PostId string
+}
+
+type DeletePostResponse struct {
+}
+
 type ReactPostRequest struct {
 	PostId string
 	Icon   string
 }
 
 type ReactPostResponse struct {
+}
+
+type EditPostRequest struct {
+	PostId  string
+	Content string
+	Tags    []string
+}
+
+type EditPostResponse struct {
+	PostId string
 }
 
 type GetEventTicketsRequest struct {
