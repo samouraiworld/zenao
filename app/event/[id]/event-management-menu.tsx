@@ -22,7 +22,7 @@ export function EventManagementMenu({
   roles,
   nbParticipants,
 }: EventManagementMenuProps) {
-  // const { getToken } = useAuth();
+  const { getToken } = useAuth();
   const t = useTranslations("event");
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
   const isGatekeeper = useMemo(() => roles.includes("gatekeeper"), [roles]);
@@ -31,20 +31,20 @@ export function EventManagementMenu({
     useState(false);
 
   const onDownloadParticipantList = async () => {
-    // const token = await getToken();
-    // const response = await zenaoClient.exportParticipants(
-    //   { eventId: eventId },
-    //   { headers: { Authorization: `Bearer ${token}` } },
-    // );
-    // const blob = new Blob([response.content], { type: response.mimeType });
-    // const url = URL.createObjectURL(blob);
-    // const link = document.createElement("a");
-    // link.href = url;
-    // link.download = response.filename;
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
-    // URL.revokeObjectURL(url);
+    const token = await getToken();
+    const response = await zenaoClient.exportParticipants(
+      { eventId: eventId },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    const blob = new Blob([response.content], { type: response.mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = response.filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   if (!isOrganizer && !isGatekeeper) {
