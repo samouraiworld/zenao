@@ -57,6 +57,7 @@ type config struct {
 	chainEndpoint   string
 	chainID         string
 	dbPath          string
+	mailSender      string
 	resendSecretKey string
 	discordtoken    string
 	gasSecurityRate float64
@@ -72,6 +73,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
 	flset.StringVar(&conf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
+	flset.StringVar(&conf.mailSender, "mail-sender", "contact@mail.zenao.io", "Mail sender address")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
 	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
 	flset.Float64Var(&conf.gasSecurityRate, "gas-security-rate", 0.2, "margin multiplier for estimated gas wanted to be safe")
@@ -156,6 +158,7 @@ func execStart() error {
 		Chain:        chain,
 		DB:           db,
 		MailClient:   mailClient,
+		MailSender:   conf.mailSender,
 		DiscordToken: conf.discordtoken,
 		Maintenance:  conf.maintenance,
 	}

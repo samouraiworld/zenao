@@ -47,6 +47,7 @@ func (s *ZenaoServer) BroadcastEvent(
 
 	evt := (*zeni.Event)(nil)
 	var participants []*zeni.User
+	tickets := make(map[string][]*zeni.SoldTicket)
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
@@ -62,6 +63,14 @@ func (s *ZenaoServer) BroadcastEvent(
 		}
 		if !slices.Contains(roles, "organizer") {
 			return errors.New("user is not organizer of the event")
+		}
+		if req.Msg.AttachTicket {
+			for _, participant := range participants {
+				tickets[participant.AuthID], err = db.GetEventUserOrBuyerTickets(req.Msg.EventId, participant.ID)
+				if err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	}); err != nil {
@@ -90,19 +99,45 @@ func (s *ZenaoServer) BroadcastEvent(
 			s.Logger.Error("event-broadcast-email-content", zap.String("auth-id", authParticipant.ID), zap.String("email", authParticipant.Email))
 			continue
 		}
+		attachments := make([]*resend.Attachment, 0, len(tickets))
+		if req.Msg.AttachTicket {
+			for i, ticket := range tickets[authParticipant.ID] {
+				pdfData, err := GeneratePDFTicket(evt, ticket.Ticket.Secret(), ticket.User.DisplayName, authParticipant.Email, ticket.CreatedAt, s.Logger)
+				if err != nil {
+					s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Ticket.Secret()))
+					return nil, err
+				}
+				attachments = append(attachments, &resend.Attachment{
+					Content:     pdfData,
+					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", ticket.BuyerID, evt.ID, i),
+					ContentType: "application/pdf",
+				})
+			}
+		}
+
 		requests = append(requests, &resend.SendEmailRequest{
-			From:    "Zenao <broadcast@mail.zenao.io>",
-			To:      []string{authParticipant.Email},
-			Subject: fmt.Sprintf("Message from %s's organizer", evt.Title),
-			Html:    htmlStr,
-			Text:    text,
+			From:        fmt.Sprintf("Zenao <%s>", s.MailSender),
+			To:          []string{authParticipant.Email},
+			Subject:     fmt.Sprintf("Message from %s's organizer", evt.Title),
+			Html:        htmlStr,
+			Text:        text,
+			Attachments: attachments,
 		})
 	}
-	// 100 emails at a time is the limit cf. https://resend.com/docs/api-reference/emails/send-batch-emails
-	for i := 0; i < len(requests); i += 100 {
-		batch := requests[i:min(i+100, len(requests))]
-		if _, err := s.MailClient.Batch.SendWithContext(ctx, batch); err != nil {
-			s.Logger.Error("send-event-broadcast-email", zap.Error(err))
+	if req.Msg.AttachTicket {
+		// cannot batch send w/ attachments: https://resend.com/docs/api-reference/emails/send-batch-emails
+		for _, request := range requests {
+			if _, err := s.MailClient.Emails.SendWithContext(ctx, request); err != nil {
+				s.Logger.Error("send-event-broadcast-email", zap.Error(err))
+			}
+		}
+	} else {
+		// 100 emails at a time is the limit cf. https://resend.com/docs/api-reference/emails/send-batch-emails
+		for i := 0; i < len(requests); i += 100 {
+			batch := requests[i:min(i+100, len(requests))]
+			if _, err := s.MailClient.Batch.SendWithContext(ctx, batch); err != nil {
+				s.Logger.Error("send-event-broadcast-email", zap.Error(err))
+			}
 		}
 	}
 

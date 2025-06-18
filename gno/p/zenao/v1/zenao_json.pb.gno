@@ -576,6 +576,9 @@ func (b *BroadcastEventRequest) ToJSON() *json.Node {
 	if b.Message != "" {
 		fields["message"] = json.StringNode("", b.Message)
 	}
+	if b.AttachTicket != false {
+		fields["attachTicket"] = json.BoolNode("", b.AttachTicket)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -589,6 +592,9 @@ func (b *BroadcastEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["message"]; ok {
 		b.Message = val.MustString()
+	}
+	if val, ok := fields["attachTicket"]; ok {
+		b.AttachTicket = val.MustBool()
 	}
 }
 
@@ -1178,6 +1184,35 @@ func (c *CreatePostResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (d *DeletePostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if d.PostId != "" {
+		fields["postId"] = json.StringNode("", d.PostId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (d *DeletePostRequest) FromJSON(node *json.Node) {
+	*d = DeletePostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		d.PostId = val.MustString()
+	}
+}
+
+func (d *DeletePostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (d *DeletePostResponse) FromJSON(node *json.Node) {
+	*d = DeletePostResponse{}
+}
+
 func (r *ReactPostRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -1211,6 +1246,65 @@ func (r *ReactPostResponse) ToJSON() *json.Node {
 
 func (r *ReactPostResponse) FromJSON(node *json.Node) {
 	*r = ReactPostResponse{}
+}
+
+func (e *EditPostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.PostId != "" {
+		fields["postId"] = json.StringNode("", e.PostId)
+	}
+	if e.Content != "" {
+		fields["content"] = json.StringNode("", e.Content)
+	}
+	if len(e.Tags) != 0 {
+		arr := make([]*json.Node, len(e.Tags))
+		for i, val := range e.Tags {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["tags"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EditPostRequest) FromJSON(node *json.Node) {
+	*e = EditPostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		e.PostId = val.MustString()
+	}
+	if val, ok := fields["content"]; ok {
+		e.Content = val.MustString()
+	}
+	if val, ok := fields["tags"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Tags = arr
+	}
+}
+
+func (e *EditPostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.PostId != "" {
+		fields["postId"] = json.StringNode("", e.PostId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EditPostResponse) FromJSON(node *json.Node) {
+	*e = EditPostResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		e.PostId = val.MustString()
+	}
 }
 
 func (g *GetEventTicketsRequest) ToJSON() *json.Node {
@@ -1320,4 +1414,54 @@ func (c *CheckinResponse) ToJSON() *json.Node {
 
 func (c *CheckinResponse) FromJSON(node *json.Node) {
 	*c = CheckinResponse{}
+}
+
+func (e *ExportParticipantsRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.EventId != "" {
+		fields["eventId"] = json.StringNode("", e.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *ExportParticipantsRequest) FromJSON(node *json.Node) {
+	*e = ExportParticipantsRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		e.EventId = val.MustString()
+	}
+}
+
+func (e *ExportParticipantsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.Content != "" {
+		fields["content"] = json.StringNode("", e.Content)
+	}
+	if e.Filename != "" {
+		fields["filename"] = json.StringNode("", e.Filename)
+	}
+	if e.MimeType != "" {
+		fields["mimeType"] = json.StringNode("", e.MimeType)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *ExportParticipantsResponse) FromJSON(node *json.Node) {
+	*e = ExportParticipantsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["content"]; ok {
+		e.Content = val.MustString()
+	}
+	if val, ok := fields["filename"]; ok {
+		e.Filename = val.MustString()
+	}
+	if val, ok := fields["mimeType"]; ok {
+		e.MimeType = val.MustString()
+	}
 }

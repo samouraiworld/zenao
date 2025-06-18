@@ -27,6 +27,8 @@ var (
 	// XXX: add feed index into the composite key to ensure reply are in the same feed ?
 	postsByParent *avl.Tree // parent_id:local_post_id -> *Post // for search with parent_id
 	feeds         *avl.Tree // slug -> Feed
+
+	feedsByPost *avl.Tree // post_id -> feed_id
 )
 
 func init() {
@@ -37,6 +39,7 @@ func init() {
 	postsByFeed = avl.NewTree()
 	postsByParent = avl.NewTree()
 	feeds = avl.NewTree()
+	feedsByPost = avl.NewTree()
 }
 
 func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string {
@@ -79,6 +82,9 @@ func GetFeedPosts(feedId string, offset uint32, limit uint32, tags string, user 
 			if !hasTag(post.Tags, tag) {
 				return false
 			}
+		}
+		if post.DeletedAt != 0 {
+			return false
 		}
 		if post.ParentUri != "" {
 			return false
@@ -123,6 +129,9 @@ func GetChildrenPosts(parentId string, offset uint32, limit uint32, tags string,
 			if !hasTag(post.Tags, tag) {
 				return false
 			}
+		}
+		if post.DeletedAt != 0 {
+			return false
 		}
 		if i >= int(offset) {
 			postView := &feedsv1.PostView{
