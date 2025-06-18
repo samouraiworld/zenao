@@ -40,8 +40,8 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 		if err != nil {
 			return err
 		}
-		if !slices.Contains(roles, "organizer") && !slices.Contains(roles, "gatekeeper") {
-			return errors.New("user is not organizer or gatekeeper of the event")
+		if !slices.Contains(roles, "organizer") {
+			return errors.New("user is not organizer of the event")
 		}
 		tickets, err = db.GetEventTickets(req.Msg.EventId)
 		if err != nil {
