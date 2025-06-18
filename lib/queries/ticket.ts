@@ -1,8 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
-import { useAuth } from "@clerk/nextjs";
+import { GetToken } from "../utils";
 import { zenaoClient } from "@/app/zenao-client";
-
-type GetToken = ReturnType<typeof useAuth>["getToken"];
 
 export const eventTickets = (eventId: string, getToken: GetToken) =>
   queryOptions({

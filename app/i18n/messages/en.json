@@ -250,5 +250,15 @@
     "history-title": "Scanned tickets for event",
     "no-tickets-scanned": "No tickets scanned yet",
     "signature": "Signature"
+  },
+  "cancel-registration-confirmation-dialog": {
+    "title": "Cancel your participation",
+    "desc": "This action is irreversible ! Are you sure ?",
+    "go-back": "Go back",
+    "cancel": "Cancel",
+    "toast-cancel-participation-success": "Your participation has been cancelled",
+    "toast-cancel-participation-error": "Error while canceling participation",
+    "event-already-started-error": "You cannot cancel your participation as the event has already started",
+    "toast-user-already-checked-in-error": "You cannot cancel your participation as you already used your ticket to enter the venue"
   }
 }

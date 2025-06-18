@@ -1,12 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
-import { useAuth } from "@clerk/nextjs";
+import { GetToken } from "../utils";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
 import { zenaoClient } from "@/app/zenao-client";
-
-type GetToken = ReturnType<typeof useAuth>["getToken"];
 
 export const eventOptions = (id: string) =>
   queryOptions({
