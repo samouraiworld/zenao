@@ -104,6 +104,7 @@ export function CancelRegistrationConfirmationDialog({
             <ButtonWithChildren
               onClick={onCancel}
               className="w-fit"
+              aria-label="cancel participation"
               loading={isPending}
             >
               {t("cancel")}
@@ -127,7 +128,11 @@ export function CancelRegistrationConfirmationDialog({
               {t("go-back")}
             </ButtonWithChildren>
           </DrawerClose>
-          <ButtonWithChildren onClick={onCancel} loading={isPending}>
+          <ButtonWithChildren
+            onClick={onCancel}
+            aria-label="cancel participation"
+            loading={isPending}
+          >
             {t("cancel")}
           </ButtonWithChildren>
         </DrawerFooter>
