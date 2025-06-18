@@ -209,6 +209,16 @@ type ReactPostRequest struct {
 type ReactPostResponse struct {
 }
 
+type EditPostRequest struct {
+	PostId  string
+	Content string
+	Tags    []string
+}
+
+type EditPostResponse struct {
+	PostId string
+}
+
 type GetEventTicketsRequest struct {
 	EventId string
 }

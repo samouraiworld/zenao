@@ -31,6 +31,7 @@ service ZenaoService {
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
   rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
+  rpc EditPost(EditPostRequest) returns (EditPostResponse);
 
   // HEALTH
   rpc Health(HealthRequest) returns (HealthResponse);
@@ -211,6 +212,14 @@ message ReactPostRequest {
 }
 
 message ReactPostResponse {}
+
+message EditPostRequest {
+  string post_id = 1;
+  string content = 2;
+  repeated string tags = 3;
+}
+
+message EditPostResponse { string post_id = 1; }
 
 message GetEventTicketsRequest { string event_id = 1; }
 

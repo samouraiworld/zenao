@@ -58,7 +58,7 @@ func DeletePost(localPostId uint64) {
 	}
 	post := postRaw.(*feedsv1.Post)
 	if post.Author != creator.Address().String() {
-		panic("you are not the author of this post")
+		panic("caller is not the author of this post")
 	}
 	if post.DeletedAt != 0 {
 		panic("post is deleted")
@@ -75,17 +75,19 @@ func EditPost(localPostId uint64, newPost *feedsv1.Post) {
 	}
 	post := postRaw.(*feedsv1.Post)
 	if post.Author != caller.Address().String() {
-		panic("you are not the author of this post")
+		panic("caller is not the author of this post")
 	}
 	if post.DeletedAt != 0 {
 		panic("post is deleted")
 	}
 
-	//XXX: this is a hack to force the localPostId to be the same as the original post
+	//XXX: this is a hack to force these fields to be same as the original post
 	newPost.LocalPostId = post.LocalPostId
-
+	newPost.CreatedAt = post.CreatedAt
+	newPost.Author = post.Author
+	newPost.ParentUri = post.ParentUri
+	newPost.UpdatedAt = time.Now().Unix()
 	*post = *newPost
-	post.UpdatedAt = time.Now().Unix()
 }
 
 func ReactPost(localPostId uint64, icon string) {
