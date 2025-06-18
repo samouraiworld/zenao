@@ -19,7 +19,7 @@ const (
 	usersRealm    = "r/demo/users"
 	ghLinkHint    = "r/gnoland/ghverify?help&__func=RequestVerification"
 	ghProfileHint = "/r/demo/profile:u/"
-	gatewayDomain = "rose-many-bass-859.mypinata.cloud"
+	gatewayDomain = "pinata.zenao.io"
 )
 
 func Render(reqPath string) string {
