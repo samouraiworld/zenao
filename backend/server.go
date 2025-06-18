@@ -12,6 +12,7 @@ type ZenaoServer struct {
 	Chain        zeni.Chain
 	DB           zeni.DB
 	MailClient   *resend.Client
+	ResendDomain string
 	DiscordToken string
 	Maintenance  bool
 }

@@ -346,6 +346,9 @@ func (b *BroadcastEventRequest) GnoLiteral(typePrefix string, linePrefix string)
 	if b.Message != "" {
 		fmt.Fprintf(buf, "%s\tMessage: %q,\n", linePrefix, b.Message)
 	}
+	if b.AttachTicket != false {
+		fmt.Fprintf(buf, "%s\tAttachTicket: %t,\n", linePrefix, b.AttachTicket)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
