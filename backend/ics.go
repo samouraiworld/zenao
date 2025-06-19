@@ -12,7 +12,7 @@ import (
 const icsDateTime = "20060102T150405Z"
 
 // see: https://datatracker.ietf.org/doc/html/rfc5545
-func GenerateICS(event *zeni.Event, start time.Time, end time.Time, organizer, zenaoEmail string, logger *zap.Logger) []byte {
+func GenerateICS(event *zeni.Event, start time.Time, end time.Time, zenaoEmail string, logger *zap.Logger) []byte {
 	uid := fmt.Sprintf("evt_%s@zenao.io", event.ID)
 	summary := formatICSText(event.Title)
 	dtstamp := time.Now().UTC().Format(icsDateTime)
@@ -26,8 +26,7 @@ func GenerateICS(event *zeni.Event, start time.Time, end time.Time, organizer, z
 		location = ""
 	}
 	location = formatICSText(location)
-	organizerCN := formatICSText(organizer)
-	organizerFormatted := fmt.Sprintf("CN=%s:mailto:%s", organizerCN, zenaoEmail)
+	organizerFormatted := fmt.Sprintf("CN=Zenao:mailto:%s", zenaoEmail)
 
 	// XXX: save event edit history in the database to track sequence number
 	ics := fmt.Sprintf(`BEGIN:VCALENDAR

@@ -129,7 +129,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
 					ContentType: "application/pdf",
 				})
-				icsData := GenerateICS(evt, evt.StartDate, evt.EndDate, buyer.DisplayName, authUser.Email, s.Logger)
+				icsData := GenerateICS(evt, evt.StartDate, evt.EndDate, s.MailSender, s.Logger)
 				attachments = append(attachments, &resend.Attachment{
 					Content:     icsData,
 					Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
