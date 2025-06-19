@@ -14,8 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
-import { useDeletePost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
+import { DeletePostConfirmationDialog } from "@/components/dialogs/delete-post-confirmation-dialog";
 
 type PostMenuProps = {
   eventId: string;
@@ -35,29 +35,16 @@ export function PostMenu({
     userAddressOptions(getToken, userId),
   );
   const t = useTranslations("components.buttons");
-
-  const { deletePost } = useDeletePost();
-  const onDelete = async () => {
-    const token = await getToken();
-
-    try {
-      if (!token || !userAddress) {
-        throw new Error("not authenticated");
-      }
-
-      await deletePost({
-        eventId,
-        postId: postId.toString(10),
-        token,
-        userAddress,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   return (
     <>
+      <DeletePostConfirmationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        eventId={eventId}
+        postId={postId}
+      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="px-2">
@@ -71,7 +58,9 @@ export function PostMenu({
             </Link>
           )}
           {author === userAddress && (
-            <DropdownMenuItem onClick={onDelete}>Delete post</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setDialogOpen(true)}>
+              Delete post
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
