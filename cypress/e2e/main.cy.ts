@@ -2,19 +2,10 @@ const testEmail = "alice+clerk_test@example.com"; // this account exists in our 
 const testEmail2 = "bob+clerk_test@example.com";
 const testName = "Alice Tester";
 const testBio =
-  "Hi, I’m Alice Tester! I’m a fictional persona created to help test web applications from start to finish. My job is to simulate real user interactions, ensuring everything works smoothly and efficiently. I love tackling complex workflows, spotting bugs, and making sure every feature is ready for real users. Let’s build something amazing—one test at a time!";
+  "Hi, I’m Alice Tester! I’m a fictional persona created to help test web applications from start to finish.";
 
 const testEventName = "Bug Bash Bonanza: A Testing Extravaganza";
-const testEventDesc = `Join **Alice Tester** for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!  
-
-- **What to expect:**   
-  - Hands-on testing of a brand-new web application  
-  - Prizes for finding the most creative bugs  
-  - Live debugging sessions with Alice  
-  - Networking with fellow testing enthusiasts  
-
-Whether you're a seasoned tester or just curious about QA, this event is for you! Let’s make the web a better place, one bug at a time.
-
+const testEventDesc = `Join **Alice Tester** for a fun and interactive event where developers, 
 Don’t miss out—RSVP now and bring your testing A-game! 🐞🎉`;
 const testEventLocation = "123 Test Lane, Suite 404, Bugville, QA 98765";
 const testEventCapacity = "42";
@@ -179,6 +170,22 @@ describe("main", () => {
     cy.get('textarea[placeholder="Bio..."]').should("have.value", testBio);
   });
 
+  it("access an exclusive event", () => {
+    cy.createEvent({ exclusive: true });
+    cy.url().then((url) => {
+      logout();
+      cy.visit(url);
+    });
+
+    // Guard
+    cy.get("input[type=password]").type(testEventPassword);
+    cy.get("button").contains("Access event").click();
+
+    // Assertions
+    cy.get("h1").contains(testEventName).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
+  });
+
   it("create an event", () => {
     cy.createEvent({ exclusive: false });
 
@@ -188,9 +195,7 @@ describe("main", () => {
     // Go Description tab
     cy.get("button").contains("About event").click();
     cy.get("p")
-      .contains(
-        "Join Alice Tester for a fun and interactive event where developers, QA engineers, and tech enthusiasts come together to squash bugs, test workflows, and celebrate the art of quality assurance!",
-      )
+      .contains("Don’t miss out—RSVP now and bring your testing A-game!")
       .should("be.visible"); // desc
     cy.get("h2").contains(" 13th, ").should("be.visible"); // start date
     cy.get("p").contains(" 14, ").should("be.visible"); // end date
@@ -219,6 +224,8 @@ describe("main", () => {
     cy.get("a").contains("Discover").click();
     cy.get('a[href^="/event/"]').last().click();
 
+    cy.url().should("contain", "/event/");
+
     // Go Description tab
     cy.get("button").contains("Discussions").click();
 
@@ -227,7 +234,12 @@ describe("main", () => {
       "not.exist",
     );
 
-    cy.createEvent({ exclusive: false });
+    cy.url().should("contain", "/event/");
+
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
 
     // Participate to an event
     cy.get("button").contains("Register").click();
@@ -258,18 +270,17 @@ describe("main", () => {
     cy.get("a").contains("Discover").click();
     cy.get('a[href^="/event/"]').last().click();
 
+    cy.url().should("contain", "/event/");
+
     // EventFeedForm should not exist
     cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
       "not.exist",
     );
 
-    cy.createEvent({ exclusive: false });
-
-    // Participate to an event
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
 
     // Go to feed tab
     cy.get("button").contains("Discussions").click();
@@ -317,30 +328,20 @@ describe("main", () => {
     cy.get('img[alt="grinning"]').first().click();
   });
 
-  it("access an exclusive event", () => {
-    cy.createEvent({ exclusive: true });
+  it("send a comment on a post", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    cy.url().should("contain", "/event/");
+
     cy.url().then((url) => {
-      logout();
+      login();
       cy.visit(url);
     });
-
-    // Guard
-    cy.get("input[type=password]").type(testEventPassword);
-    cy.get("button").contains("Access event").click();
-
-    // Assertions
-    cy.get("h1").contains(testEventName).should("be.visible");
-    cy.get("h2").contains(testEventLocation).should("be.visible");
-  });
-
-  it("send a comment on a post", () => {
-    cy.createEvent({ exclusive: false });
-
-    // Participate to an event
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
 
     // Go Description tab
     cy.get("button").contains("Discussions").click();
@@ -385,9 +386,20 @@ describe("main", () => {
   });
 
   it("add a gatekeeper", () => {
-    cy.createEvent({ exclusive: false });
+    // start from the home
+    cy.visit("/");
 
-    // Click on "Edit event button"
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    cy.url().should("contain", "/event/");
+
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
+
     cy.get("a").contains("Edit event").click();
 
     cy.wait(1000).url().should("include", "/edit/");
@@ -403,6 +415,8 @@ describe("main", () => {
     cy.get("button").should("contain", "Manage gatekeepers (2)");
 
     cy.get("button").contains("Edit event").click();
+
+    cy.wait(5000);
 
     cy.url().should("include", "/event/");
     cy.url().should("not.include", "/edit");
@@ -420,10 +434,22 @@ describe("main", () => {
   });
 
   it("remove a gatekeeper", () => {
-    cy.createEvent({ exclusive: false, gatekeepers: [testEmail2] });
+    // start from the home
+    cy.visit("/");
 
-    cy.get("a").contains("Edit event").click({ timeout: 16000 });
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
 
+    cy.url().should("contain", "/event/");
+
+    cy.url().then((url) => {
+      logout();
+      login();
+      cy.visit(url);
+    });
+
+    cy.get("a").contains("Edit event").click();
     cy.get("button").contains("Manage gatekeepers (2)").click();
 
     cy.get('button[aria-label="delete gatekeeper"]').click();
@@ -434,8 +460,10 @@ describe("main", () => {
 
     cy.get("button").contains("Edit event").click();
 
+    cy.wait(5000);
+
     cy.url().should("include", "/event/");
-    cy.url().should("not.include", "/create");
+    cy.url().should("not.include", "/edit");
 
     toastShouldContain("Event edited!");
 

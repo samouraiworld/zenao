@@ -105,7 +105,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       isLoaded={isPending}
       defaultExclusive={defaultValues.exclusive}
       isEditing
-      maxDateRange={new Date()}
+      minDateRange={new Date()}
     />
   );
 }
