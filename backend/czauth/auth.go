@@ -14,15 +14,20 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2/user"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.uber.org/zap"
 )
 
 // czauth means clerk zenao auth and is a clerk client wrapper implementing the zeni.Auth interface
 
-type clerkZenaoAuth struct{}
+type clerkZenaoAuth struct {
+	logger *zap.Logger
+}
 
-func SetupAuth(clerkSecretKey string) (zeni.Auth, error) {
+func SetupAuth(clerkSecretKey string, logger *zap.Logger) (zeni.Auth, error) {
 	clerk.SetKey(clerkSecretKey)
-	return &clerkZenaoAuth{}, nil
+	return &clerkZenaoAuth{
+		logger: logger,
+	}, nil
 }
 
 // GetUser implements zeni.Auth.
@@ -41,31 +46,68 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 		return []*zeni.AuthUser{}, nil
 	}
 
-	limit := int64(500)
-	var allUsers []*zeni.AuthUser
-	for start := 0; start < len(ids); {
-		end := start + int(limit)
-		if end > len(ids) {
-			end = len(ids)
+	// ids set to keep track of the ids that have been processed
+	pending := make(map[string]struct{}, len(ids))
+	for _, id := range ids {
+		pending[id] = struct{}{}
+	}
+
+	// Map of returned users - used to rebuild slice ordered as given
+	limit := 500
+	found := make(map[string]*zeni.AuthUser)
+
+	for len(pending) > 0 {
+		chunk := make([]string, 0, limit)
+		for id := range pending {
+			chunk = append(chunk, id)
+			if len(chunk) >= limit {
+				break
+			}
 		}
 
 		params := &user.ListParams{
-			UserIDs: ids[start:end],
+			UserIDs: chunk,
 		}
-		params.Limit = clerk.Int64(limit)
+		params.Limit = clerk.Int64(int64(limit))
 
 		userList, err := user.List(ctx, params)
 		if err != nil {
 			return nil, err
 		}
 
-		users := mapsl.Map(userList.Users, toAuthUser)
-		allUsers = append(allUsers, users...)
+		// assume remaining IDs are invalid
+		if len(userList.Users) == 0 {
+			break
+		}
 
-		start += len(userList.Users)
+		for _, u := range userList.Users {
+			found[u.ID] = toAuthUser(u)
+			delete(pending, u.ID)
+		}
 	}
 
-	return allUsers, nil
+	// Preserve original order
+	var ordered []*zeni.AuthUser
+	for _, id := range ids {
+		if u, ok := found[id]; ok {
+			ordered = append(ordered, u)
+		}
+	}
+
+	// log as error the invalid / not found ids
+	if len(pending) > 0 {
+		missingIDs := make([]string, 0, len(pending))
+		for id := range pending {
+			missingIDs = append(missingIDs, id)
+		}
+
+		c.logger.Error("Some user IDs not found in Clerk",
+			zap.Int("count", len(missingIDs)),
+			zap.Strings("user_ids", missingIDs),
+		)
+	}
+
+	return ordered, nil
 }
 
 // EnsureUserExists implements zeni.Auth.
