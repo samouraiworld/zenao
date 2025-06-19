@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"slices"
 	"strings"
@@ -77,7 +78,7 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 
 		// assume remaining IDs are invalid
 		if len(userList.Users) == 0 {
-			break
+			return nil, fmt.Errorf("no clerk users found for ids: %v", chunk)
 		}
 
 		for _, u := range userList.Users {
@@ -92,19 +93,6 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 		if u, ok := found[id]; ok {
 			ordered = append(ordered, u)
 		}
-	}
-
-	// log as error the invalid / not found ids
-	if len(pending) > 0 {
-		missingIDs := make([]string, 0, len(pending))
-		for id := range pending {
-			missingIDs = append(missingIDs, id)
-		}
-
-		c.logger.Error("Some user IDs not found in Clerk",
-			zap.Int("count", len(missingIDs)),
-			zap.Strings("user_ids", missingIDs),
-		)
 	}
 
 	return ordered, nil
