@@ -154,6 +154,10 @@ func CountChildren(parentId uint64) uint64 {
 	count := uint64(0)
 	parentIdStr := seqid.ID(parentId).String()
 	postsByParent.ReverseIterate(parentIdStr+":", parentIdStr+";", func(key string, value interface{}) bool {
+		post := value.(*feedsv1.Post)
+		if post.DeletedAt != 0 {
+			return false
+		}
 		count++
 		return false
 	})
