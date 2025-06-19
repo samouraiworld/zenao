@@ -210,6 +210,10 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		return nil, err
 	}
 
+	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("sequence_number", gorm.Expr("sequence_number + ?", 1)).Error; err != nil {
+		return nil, err
+	}
+
 	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs
 	// we should rewrite this if db become bottleneck
 	if req.UpdatePassword && req.Password == "" {

@@ -12,12 +12,12 @@ import (
 const icsDateTime = "20060102T150405Z"
 
 // see: https://datatracker.ietf.org/doc/html/rfc5545
-func GenerateICS(event *zeni.Event, start time.Time, end time.Time, zenaoEmail string, logger *zap.Logger) []byte {
+func GenerateICS(event *zeni.Event, zenaoEmail string, logger *zap.Logger) []byte {
 	uid := fmt.Sprintf("evt_%s@zenao.io", event.ID)
 	summary := formatICSText(event.Title)
 	dtstamp := time.Now().UTC().Format(icsDateTime)
-	dtstart := start.Format(icsDateTime)
-	dtend := end.Format(icsDateTime)
+	dtstart := event.StartDate.Format(icsDateTime)
+	dtend := event.EndDate.Format(icsDateTime)
 	eventURL := fmt.Sprintf("https://zenao.io/event/%s", event.ID)
 	description := formatICSText(fmt.Sprintf("You are invited to %s!", event.Title))
 	location, err := zeni.LocationToString(event.Location)
@@ -45,9 +45,9 @@ URL:%s
 LOCATION:%s
 ORGANIZER;%s
 STATUS:CONFIRMED
-SEQUENCE:0
+SEQUENCE:%d
 END:VEVENT
-END:VCALENDAR`, uid, dtstamp, summary, description, dtstart, dtend, eventURL, location, organizerFormatted)
+END:VCALENDAR`, uid, dtstamp, summary, description, dtstart, dtend, eventURL, location, organizerFormatted, event.SequenceNumber)
 	return []byte(ics)
 }
 
