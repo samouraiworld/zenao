@@ -22,6 +22,7 @@ type PostMenuProps = {
   postId: bigint;
   gnowebHref?: Url;
   author: string;
+  onDeleteSuccess?: () => void;
 };
 
 export function PostMenu({
@@ -29,6 +30,7 @@ export function PostMenu({
   author,
   postId,
   gnowebHref,
+  onDeleteSuccess,
 }: PostMenuProps) {
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -44,6 +46,7 @@ export function PostMenu({
         onOpenChange={setDialogOpen}
         eventId={eventId}
         postId={postId}
+        onSuccess={onDeleteSuccess}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

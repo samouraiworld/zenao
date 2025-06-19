@@ -31,6 +31,7 @@ type DeletePostConfirmationDialogProps = {
   open: boolean;
   postId: bigint;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 };
 
 export function DeletePostConfirmationDialog({
@@ -38,6 +39,7 @@ export function DeletePostConfirmationDialog({
   postId,
   open,
   onOpenChange,
+  onSuccess,
 }: DeletePostConfirmationDialogProps) {
   const { toast } = useToast();
   const t = useTranslations("delete-post-confirmation-dialog");
@@ -66,7 +68,9 @@ export function DeletePostConfirmationDialog({
       toast({
         title: t("toast-delete-post-success"),
       });
+
       onOpenChange(false);
+      onSuccess?.();
     } catch (error) {
       if (error instanceof Error) {
         captureException(error);

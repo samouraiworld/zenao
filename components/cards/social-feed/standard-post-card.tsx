@@ -10,10 +10,12 @@ export function StandardPostCard({
   eventId,
   post,
   canReply,
+  onDeleteSuccess,
 }: {
   eventId: string;
   post: StandardPostView;
   canReply?: boolean;
+  onDeleteSuccess?: () => void;
 }) {
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
@@ -29,19 +31,10 @@ export function StandardPostCard({
         createdBy={createdBy}
         gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${post.post.localPostId.toString(32).padStart(7, "0")}`}
         canReply={canReply}
+        onDeleteSuccess={onDeleteSuccess}
       >
         <MarkdownPreview markdownString={standardPost.content} />
       </PostCardLayout>
-      {/* {showReplies && (
-        <div className="pl-6">
-          <Suspense fallback={<PostCardSkeleton />}>
-            <PostComments
-              eventId={eventId}
-              parentId={post.post.localPostId.toString()}
-            />
-          </Suspense>
-        </div>
-      )} */}
     </div>
   );
 }

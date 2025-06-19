@@ -34,6 +34,7 @@ export function PostCardLayout({
   children,
   canReply,
   parentId = "",
+  onDeleteSuccess,
 }: {
   post: PostView;
   eventId: string;
@@ -42,6 +43,7 @@ export function PostCardLayout({
   canReply?: boolean;
   gnowebHref?: Url;
   parentId?: string;
+  onDeleteSuccess?: () => void;
 }) {
   if (!post.post) {
     return null;
@@ -102,6 +104,7 @@ export function PostCardLayout({
               eventId={eventId}
               postId={post.post.localPostId}
               author={post.post.author}
+              onDeleteSuccess={onDeleteSuccess}
             />
           </div>
         </div>

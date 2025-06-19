@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
 import { FeedPostFormSchemaType } from "@/components/form/types";
 import { StandardPostForm } from "@/components/form/social-feed/standard-post-form";
@@ -54,9 +55,7 @@ export default function PostInfo({
   eventId: string;
   postId: string;
 }) {
-  void eventId;
-  void postId;
-
+  const router = useRouter();
   const { userId, getToken } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -81,7 +80,11 @@ export default function PostInfo({
     <div className="w-full flex flex-col gap-12">
       {isStandardPost(post) && (
         <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
-          <StandardPostCard eventId={eventId} post={post} />
+          <StandardPostCard
+            eventId={eventId}
+            post={post}
+            onDeleteSuccess={() => router.push(`/event/${eventId}/feed`)}
+          />
         </Suspense>
       )}
       {isPollPost(post) && (
