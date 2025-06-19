@@ -183,7 +183,7 @@ export function Header() {
             <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
           </Link>
         </div>
-        <div className="standalone:hidden flex flex-row gap-4">
+        <div className="hidden standalone:md:flex flex-row gap-4">
           <HeaderLinks />
         </div>
       </div>
