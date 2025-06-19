@@ -66,6 +66,10 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
 
+  unstable_sentryWebpackPluginOptions: {
+    disable: (process.env.VERCEL ?? "0") !== "1",
+  },
+
   // For all available options, see:
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
 
