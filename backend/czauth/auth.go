@@ -41,11 +41,10 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 		return []*zeni.AuthUser{}, nil
 	}
 
-	const batchSize = 500
+	limit := int64(500)
 	var allUsers []*zeni.AuthUser
-
-	for start := 0; start < len(ids); start += batchSize {
-		end := start + batchSize
+	for start := 0; start < len(ids); {
+		end := start + int(limit)
 		if end > len(ids) {
 			end = len(ids)
 		}
@@ -53,7 +52,7 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 		params := &user.ListParams{
 			UserIDs: ids[start:end],
 		}
-		params.Limit = clerk.Int64(500)
+		params.Limit = clerk.Int64(limit)
 
 		userList, err := user.List(ctx, params)
 		if err != nil {
@@ -62,6 +61,8 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 
 		users := mapsl.Map(userList.Users, toAuthUser)
 		allUsers = append(allUsers, users...)
+
+		start += len(userList.Users)
 	}
 
 	return allUsers, nil
