@@ -12,6 +12,7 @@ import { StandardPostForm } from "@/components/form/social-feed/standard-post-fo
 import { useEditStandardPost } from "@/lib/mutations/social-feed";
 import { FeedPostFormSchemaType } from "@/components/form/types";
 import { userAddressOptions } from "@/lib/queries/user";
+import { captureException } from "@/lib/report";
 
 export function StandardPostCard({
   eventId,
@@ -44,7 +45,6 @@ export function StandardPostCard({
     },
   });
 
-  // TODO use
   const onSubmit = async (values: FeedPostFormSchemaType) => {
     try {
       if (values.kind === "POLL") {
@@ -55,8 +55,6 @@ export function StandardPostCard({
       if (!token) {
         throw new Error("invalid token");
       }
-
-      console.log("EHERERE");
 
       await editPost({
         content: values.content,
@@ -69,8 +67,7 @@ export function StandardPostCard({
 
       setEditMode(false);
     } catch (error) {
-      // TODO captureError
-      console.error(error);
+      captureException(error);
     }
   };
 
