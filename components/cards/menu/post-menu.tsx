@@ -5,6 +5,8 @@ import * as React from "react";
 import { EllipsisVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "@/components/shadcn/button";
 import {
   DropdownMenu,
@@ -12,26 +14,67 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import { useDeletePost } from "@/lib/mutations/social-feed";
+import { userAddressOptions } from "@/lib/queries/user";
 
-type PostMenu = {
-  gnowebHref: Url;
+type PostMenuProps = {
+  eventId: string;
+  postId: bigint;
+  gnowebHref?: Url;
+  author: string;
 };
 
-export function PostMenu({ gnowebHref }: PostMenu) {
+export function PostMenu({
+  eventId,
+  author,
+  postId,
+  gnowebHref,
+}: PostMenuProps) {
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
   const t = useTranslations("components.buttons");
 
+  const { deletePost } = useDeletePost();
+  const onDelete = async () => {
+    const token = await getToken();
+
+    try {
+      if (!token || !userAddress) {
+        throw new Error("not authenticated");
+      }
+
+      await deletePost({
+        eventId,
+        postId: postId.toString(10),
+        token,
+        userAddress,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="px-2">
-          <EllipsisVertical />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-36">
-        <Link href={gnowebHref}>
-          <DropdownMenuItem>{t("gnoweb-button")}</DropdownMenuItem>
-        </Link>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="px-2">
+            <EllipsisVertical />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-36">
+          {gnowebHref && (
+            <Link href={gnowebHref}>
+              <DropdownMenuItem>{t("gnoweb-button")}</DropdownMenuItem>
+            </Link>
+          )}
+          {author === userAddress && (
+            <DropdownMenuItem onClick={onDelete}>Delete post</DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

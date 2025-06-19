@@ -102,9 +102,17 @@ export function PollPostForm({
       form.reset(
         {
           kind: "POLL",
+          question: "",
+          options: [{ text: "" }, { text: "" }],
+          allowMultipleOptions: false,
+          duration: {
+            days: 1,
+            hours: 0,
+            minutes: 0,
+          },
         },
         {
-          keepValues: false,
+          keepDefaultValues: true,
         },
       );
 

@@ -466,21 +466,17 @@ type DeletePostRequestMutation = {
 export const useDeletePost = () => {
   const queryClient = getQueryClient();
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
-    mutationFn: async ({
-      postId: _p,
-      userAddress: _ua,
-      token,
-    }: DeletePostRequestMutation) => {
+    mutationFn: async ({ postId, token }: DeletePostRequestMutation) => {
       if (!token) {
         throw new Error("not authenticated");
       }
 
-      // await zenaoClient.deletePost(
-      //   {
-      //     postId,
-      //   },
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
+      await zenaoClient.deletePost(
+        {
+          postId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
     },
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
@@ -502,7 +498,7 @@ export const useDeletePost = () => {
   });
 
   return {
-    editPost: mutateAsync,
+    deletePost: mutateAsync,
     isPending,
     isSuccess,
     isError,

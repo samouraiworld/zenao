@@ -53,7 +53,19 @@ const EventFeedForm = ({
             onSuccess={() => {
               form.reset(
                 { kind: "STANDARD_POST", content: "" },
-                { keepValues: false },
+                { keepDefaultValues: true },
+              );
+              form.reset(
+                {
+                  options: [{ text: "" }, { text: "" }],
+                  allowMultipleOptions: false,
+                  duration: {
+                    days: 1,
+                    hours: 0,
+                    minutes: 0,
+                  },
+                },
+                { keepDefaultValues: true, keepValues: true },
               );
             }}
           />

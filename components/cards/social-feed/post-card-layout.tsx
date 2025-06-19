@@ -97,7 +97,12 @@ export function PostCardLayout({
             </div>
           )}
           <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
-            {gnowebHref && <PostMenu gnowebHref={gnowebHref} />}
+            <PostMenu
+              gnowebHref={gnowebHref}
+              eventId={eventId}
+              postId={post.post.localPostId}
+              author={post.post.author}
+            />
           </div>
         </div>
       </div>
