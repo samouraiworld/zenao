@@ -6,12 +6,13 @@ import (
 	"time"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.uber.org/zap"
 )
 
 const icsDateTime = "20060102T150405Z"
 
 // see: https://datatracker.ietf.org/doc/html/rfc5545
-func GenerateICS(event *zeni.Event, start time.Time, end time.Time, organizer, zenaoEmail string) ([]byte, string, error) {
+func GenerateICS(event *zeni.Event, start time.Time, end time.Time, organizer, zenaoEmail string, logger *zap.Logger) []byte {
 	uid := fmt.Sprintf("evt_%s@zenao.io", event.ID)
 	summary := formatICSText(event.Title)
 	dtstamp := time.Now().UTC().Format(icsDateTime)
@@ -21,7 +22,8 @@ func GenerateICS(event *zeni.Event, start time.Time, end time.Time, organizer, z
 	description := formatICSText(fmt.Sprintf("You are invited to %s!", event.Title))
 	location, err := zeni.LocationToString(event.Location)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to convert location to string: %w", err)
+		logger.Error("failed to convert location to string", zap.Error(err), zap.String("event-id", event.ID))
+		location = ""
 	}
 	location = formatICSText(location)
 	organizerCN := formatICSText(organizer)
@@ -47,7 +49,7 @@ STATUS:CONFIRMED
 SEQUENCE:0
 END:VEVENT
 END:VCALENDAR`, uid, dtstamp, summary, description, dtstart, dtend, eventURL, location, organizerFormatted)
-	return []byte(ics), uid, nil
+	return []byte(ics)
 }
 
 func formatICSText(input string) string {
