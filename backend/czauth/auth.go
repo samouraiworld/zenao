@@ -40,11 +40,32 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 	if len(ids) == 0 {
 		return []*zeni.AuthUser{}, nil
 	}
-	userList, err := user.List(ctx, &user.ListParams{UserIDs: ids})
-	if err != nil {
-		return nil, err
+
+	limit := int64(500)
+	var allUsers []*zeni.AuthUser
+	for start := 0; start < len(ids); {
+		end := start + int(limit)
+		if end > len(ids) {
+			end = len(ids)
+		}
+
+		params := &user.ListParams{
+			UserIDs: ids[start:end],
+		}
+		params.Limit = clerk.Int64(limit)
+
+		userList, err := user.List(ctx, params)
+		if err != nil {
+			return nil, err
+		}
+
+		users := mapsl.Map(userList.Users, toAuthUser)
+		allUsers = append(allUsers, users...)
+
+		start += len(userList.Users)
 	}
-	return mapsl.Map(userList.Users, toAuthUser), nil
+
+	return allUsers, nil
 }
 
 // EnsureUserExists implements zeni.Auth.
