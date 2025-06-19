@@ -30,6 +30,7 @@ type DeletePostConfirmationDialogProps = {
   eventId: string;
   open: boolean;
   postId: bigint;
+  parentId?: string;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 };
@@ -37,6 +38,7 @@ type DeletePostConfirmationDialogProps = {
 export function DeletePostConfirmationDialog({
   eventId,
   postId,
+  parentId,
   open,
   onOpenChange,
   onSuccess,
@@ -61,6 +63,7 @@ export function DeletePostConfirmationDialog({
       await deletePost({
         eventId,
         postId: postId.toString(10),
+        parentId,
         token,
         userAddress,
       });

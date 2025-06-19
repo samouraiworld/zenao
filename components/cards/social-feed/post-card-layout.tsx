@@ -119,6 +119,7 @@ export function PostCardLayout({
                 gnowebHref={gnowebHref}
                 eventId={eventId}
                 postId={post.post.localPostId}
+                parentId={parentId}
                 author={post.post.author}
                 onDeleteSuccess={onDeleteSuccess}
                 onEdit={() => onEditModeChange?.(true)}

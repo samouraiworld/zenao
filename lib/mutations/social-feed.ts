@@ -467,6 +467,7 @@ export const useEditStandardPost = () => {
 type DeletePostRequestMutation = {
   eventId: string;
   postId: string;
+  parentId?: string;
   userAddress: string;
   token: string | null;
 };
@@ -487,6 +488,19 @@ export const useDeletePost = () => {
       );
     },
     onSuccess: (_, variables) => {
+      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
+      queryClient.invalidateQueries(feedPostOpts);
+
+      if (variables.parentId) {
+        const feedPostsChildrenOpts = feedPostsChildren(
+          variables.parentId,
+          DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+          "",
+          variables.userAddress,
+        );
+
+        queryClient.invalidateQueries(feedPostsChildrenOpts);
+      }
       const feedPostsOpts = feedPosts(
         variables.eventId,
         DEFAULT_FEED_POSTS_LIMIT,

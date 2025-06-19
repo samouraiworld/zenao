@@ -147,7 +147,7 @@ export function StandardPostForm({
                 <ButtonBase
                   variant="link"
                   className={cn(
-                    "flex items-center justify-center rounded-full aspect-square cursor-pointer",
+                    "flex items-center justify-center rounded-full aspect-square cursor-pointer w-7 h-7 md:w-12 md:h-12",
                     "hover:bg-neutral-500/20",
                   )}
                   title="Upload image"
@@ -163,12 +163,8 @@ export function StandardPostForm({
                     hiddenImgInputRef.current?.click();
                   }}
                   aria-label="upload image"
-                  style={{
-                    height: textareaMinHeight,
-                    width: textareaMinHeight,
-                  }}
                 >
-                  <ImageIcon className="!h-6 !w-6" />
+                  <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
                 </ButtonBase>
                 <input
                   type="file"
@@ -181,7 +177,7 @@ export function StandardPostForm({
                 <ButtonBase
                   variant="link"
                   className={cn(
-                    "flex items-center justify-center rounded-full aspect-square cursor-pointer",
+                    "flex items-center justify-center rounded-full aspect-square cursor-pointer w-7 h-7 md:w-12 md:h-12",
                     "hover:bg-neutral-500/20",
                   )}
                   title="Upload audio"
@@ -197,12 +193,8 @@ export function StandardPostForm({
                     hiddenAudioInputRef.current?.click();
                   }}
                   aria-label="upload audio"
-                  style={{
-                    height: textareaMinHeight,
-                    width: textareaMinHeight,
-                  }}
                 >
-                  <AudioWaveform className="!h-6 !w-6" />
+                  <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
                 </ButtonBase>
                 <input
                   type="file"
@@ -212,7 +204,6 @@ export function StandardPostForm({
                   disabled={uploading}
                 />
                 <FeedInputButtons
-                  buttonSize={textareaMinHeight}
                   feedInputMode={feedInputMode}
                   isReplying={!!parentPostId || !!isEditing}
                   setFeedInputMode={setFeedInputMode}

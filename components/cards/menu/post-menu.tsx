@@ -20,6 +20,7 @@ import { DeletePostConfirmationDialog } from "@/components/dialogs/delete-post-c
 type PostMenuProps = {
   eventId: string;
   postId: bigint;
+  parentId?: string;
   gnowebHref?: Url;
   author: string;
   onEdit?: () => void;
@@ -30,6 +31,7 @@ export function PostMenu({
   eventId,
   author,
   postId,
+  parentId,
   gnowebHref,
   onEdit,
   onDeleteSuccess,
@@ -48,6 +50,7 @@ export function PostMenu({
         onOpenChange={setDialogOpen}
         eventId={eventId}
         postId={postId}
+        parentId={parentId}
         onSuccess={onDeleteSuccess}
       />
       <DropdownMenu>

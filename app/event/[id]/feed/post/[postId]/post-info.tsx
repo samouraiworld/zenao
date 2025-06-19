@@ -5,6 +5,7 @@ import { useForm, UseFormReturn } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
 import { FeedPostFormSchemaType } from "@/components/form/types";
 import { StandardPostForm } from "@/components/form/social-feed/standard-post-form";
@@ -16,6 +17,9 @@ import { parsePollUri } from "@/lib/multiaddr";
 import { PollPost } from "@/components/widgets/poll-post";
 import Heading from "@/components/texts/heading";
 import { PostComments } from "@/components/form/social-feed/post-comments";
+import { useCreateStandardPost } from "@/lib/mutations/social-feed";
+import { useToast } from "@/app/hooks/use-toast";
+import { captureException } from "@/lib/report";
 
 function PostCommentForm({
   eventId,
@@ -26,22 +30,91 @@ function PostCommentForm({
   parentId: bigint;
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
+  const { toast } = useToast();
+  const t = useTranslations("event-feed.standard-post-form");
+
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { createStandardPost, isPending } = useCreateStandardPost();
+
+  const onSubmit = async (values: FeedPostFormSchemaType) => {
+    try {
+      if (values.kind !== "STANDARD_POST") {
+        throw new Error("invalid form");
+      }
+
+      const token = await getToken();
+      if (!token) {
+        throw new Error("invalid clerk token");
+      }
+
+      await createStandardPost({
+        eventId,
+        content: values.content,
+        parentId: parentId.toString(),
+        token,
+        userAddress: userAddress ?? "",
+        tags: [],
+      });
+
+      toast({
+        title: t("toast-post-creation-success"),
+      });
+
+      form.reset(
+        { kind: "STANDARD_POST", content: "" },
+        { keepDefaultValues: true },
+      );
+      form.reset(
+        {
+          options: [{ text: "" }, { text: "" }],
+          allowMultipleOptions: false,
+          duration: {
+            days: 1,
+            hours: 0,
+            minutes: 0,
+          },
+        },
+        { keepDefaultValues: true, keepValues: true },
+      );
+      form.reset(
+        { kind: "STANDARD_POST", content: "" },
+        { keepDefaultValues: true },
+      );
+      form.reset(
+        {
+          options: [{ text: "" }, { text: "" }],
+          allowMultipleOptions: false,
+          duration: {
+            days: 1,
+            hours: 0,
+            minutes: 0,
+          },
+        },
+        { keepDefaultValues: true, keepValues: true },
+      );
+    } catch (err) {
+      captureException(err);
+      toast({
+        variant: "destructive",
+        title: t("toast-post-creation-error"),
+      });
+    }
+  };
+
   return (
     <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
       <div className="w-full">
         <StandardPostForm
-          eventId={eventId}
           form={form}
           feedInputMode={"STANDARD_POST"}
           setFeedInputMode={() => {
             console.log("not available");
           }}
-          onSuccess={() => {
-            form.reset(
-              { kind: "STANDARD_POST", parentPostId: parentId, content: "" },
-              { keepValues: false },
-            );
-          }}
+          onSubmit={onSubmit}
+          isLoading={isPending}
         />
       </div>
     </div>

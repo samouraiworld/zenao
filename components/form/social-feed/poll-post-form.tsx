@@ -159,7 +159,6 @@ export function PollPostForm({
             )}
           />
           <FeedInputButtons
-            buttonSize={textareaMinHeight}
             feedInputMode={feedInputMode}
             isReplying={!!parentPostId}
             setFeedInputMode={setFeedInputMode}
