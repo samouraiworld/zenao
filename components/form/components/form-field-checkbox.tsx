@@ -16,7 +16,11 @@ export function FormFieldCheckbox<T extends FieldValues>({
   name,
   className,
   label,
-}: FormFieldProps<T, boolean> & { label?: string }) {
+  placement = "left",
+}: FormFieldProps<T, boolean> & {
+  label?: string;
+  placement?: "left" | "right";
+}) {
   const checkboxId = `checkbox-${name}`;
   return (
     <FormField
@@ -26,13 +30,31 @@ export function FormFieldCheckbox<T extends FieldValues>({
         <FormItem>
           <FormControl>
             <div className="flex flex-row items-center gap-2">
-              <FormLabel className="cursor-pointer">{label}</FormLabel>
-              <Checkbox
-                id={checkboxId}
-                checked={field.value}
-                className={className}
-                onCheckedChange={field.onChange}
-              />
+              {placement === "left" ? (
+                <>
+                  <Checkbox
+                    id={checkboxId}
+                    checked={field.value}
+                    className={className}
+                    onCheckedChange={field.onChange}
+                  />
+                  <FormLabel htmlFor={checkboxId} className="cursor-pointer">
+                    {label}
+                  </FormLabel>
+                </>
+              ) : (
+                <>
+                  <FormLabel htmlFor={checkboxId} className="cursor-pointer">
+                    {label}
+                  </FormLabel>
+                  <Checkbox
+                    id={checkboxId}
+                    checked={field.value}
+                    className={className}
+                    onCheckedChange={field.onChange}
+                  />
+                </>
+              )}
             </div>
           </FormControl>
           <FormMessage />

@@ -52,6 +52,7 @@ export function PollFields({
             <FormFieldCheckbox
               name="allowMultipleOptions"
               control={form.control}
+              placement="right"
               label={t("label-allow-multiple-answers")}
             />
           </div>

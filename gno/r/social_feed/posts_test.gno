@@ -266,7 +266,7 @@ func TestEditPost(t *testing.T) {
 		Post:      &feedsv1.StandardPost{Content: "original content"},
 	}
 
-	newPost := &feedsv1.Post{
+	bobPost := &feedsv1.Post{
 		Author:    bob.String(),
 		DeletedAt: 0,
 		UpdatedAt: 0,
@@ -274,27 +274,38 @@ func TestEditPost(t *testing.T) {
 		Post:      &feedsv1.StandardPost{Content: "new content"},
 	}
 
+	aliceNewPost := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 0,
+		UpdatedAt: 0,
+		Tags:      []string{"tag1", "tag2"},
+		Post:      &feedsv1.StandardPost{Content: "new content"},
+	}
+
 	std.TestSetOriginCaller(alice)
 	NewPost("public", post)
 	NewPost("public", deletedPost)
 	DeletePost(2)
+	std.TestSetOriginCaller(bob)
+	NewPost("public", bobPost)
+	std.TestSetOriginCaller(alice)
 
 	tests := testTable{
 		"valid post": {
 			input: input{
 				localPostId: 1,
-				newPost:     newPost,
+				newPost:     aliceNewPost,
 			},
 			output: output{
-				post:    newPost,
+				post:    aliceNewPost,
 				panic:   false,
 				updated: true,
 			},
 		},
 		"invalid post": {
 			input: input{
-				localPostId: 3,
-				newPost:     newPost,
+				localPostId: 4,
+				newPost:     aliceNewPost,
 			},
 			output: output{
 				post:    nil,
@@ -304,8 +315,8 @@ func TestEditPost(t *testing.T) {
 		},
 		"not the creator": {
 			input: input{
-				localPostId: 1,
-				newPost:     newPost,
+				localPostId: 3,
+				newPost:     aliceNewPost,
 			},
 			output: output{
 				post:    nil,
@@ -316,7 +327,7 @@ func TestEditPost(t *testing.T) {
 		"already deleted": {
 			input: input{
 				localPostId: 2,
-				newPost:     newPost,
+				newPost:     aliceNewPost,
 			},
 			output: output{
 				post:    nil,
@@ -508,4 +519,5 @@ func setupTest() {
 	postsByFeed = avl.NewTree()
 
 	feeds = avl.NewTree()
+	feedsByPost = avl.NewTree()
 }
