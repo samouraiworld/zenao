@@ -101,7 +101,7 @@ func (s *ZenaoServer) CreateEvent(
 		} else {
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
-				From:    "Zenao <noreply@mail.zenao.io>",
+				From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
 				To:      []string{user.Email},
 				Subject: fmt.Sprintf("%s - Creation confirmed", evt.Title),
 				Html:    htmlStr,
