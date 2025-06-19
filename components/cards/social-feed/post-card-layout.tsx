@@ -2,7 +2,7 @@
 
 import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode, useMemo } from "react";
-import { Hash, MapPin, MessageCircle, Smile } from "lucide-react";
+import { Hash, MapPin, MessageCircle, Smile, X } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -34,6 +34,8 @@ export function PostCardLayout({
   children,
   canReply,
   parentId = "",
+  editMode,
+  onEditModeChange,
   onDeleteSuccess,
 }: {
   post: PostView;
@@ -41,6 +43,8 @@ export function PostCardLayout({
   createdBy: GnoProfile | null;
   children: ReactNode;
   canReply?: boolean;
+  editMode?: boolean;
+  onEditModeChange?: (editMode: boolean) => void;
   gnowebHref?: Url;
   parentId?: string;
   onDeleteSuccess?: () => void;
@@ -70,70 +74,86 @@ export function PostCardLayout({
             />
           </div>
         </div>
-        <div className="flex flex-row items-center gap-2 w-full sm:justify-end">
-          {!!post.post.tags.length && (
-            <div className="flex flex-row items-center gap-2">
-              {/*TODO: Handle display if a lot of tags*/}
-
-              {post.post.tags
-                .filter((tag) => tag !== "poll")
-                .map((tag, index) => (
-                  <div
-                    className="flex flex-row items-center gap-0.5 cursor-pointer hover:opacity-50"
-                    key={index}
-                  >
-                    <Hash size={14} color="hsl(var(--secondary-color))" />
-                    <Text className="text-sm" variant="secondary">
-                      {tag}
-                    </Text>
-                  </div>
-                ))}
-            </div>
-          )}
-          {post.post.loc && (
-            <div className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50">
-              <MapPin size={14} color="hsl(var(--secondary-color))" />
-              <Text className="text-sm" variant="secondary">
-                Location
-              </Text>
-            </div>
-          )}
+        {editMode ? (
           <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
-            <PostMenu
-              gnowebHref={gnowebHref}
-              eventId={eventId}
-              postId={post.post.localPostId}
-              author={post.post.author}
-              onDeleteSuccess={onDeleteSuccess}
-            />
+            <Button
+              variant="ghost"
+              className="px-2"
+              title="Cancel modification"
+              onClick={() => onEditModeChange?.(false)}
+            >
+              <X />
+            </Button>
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-row items-center gap-2 w-full sm:justify-end">
+            {!!post.post.tags.length && (
+              <div className="flex flex-row items-center gap-2">
+                {/*TODO: Handle display if a lot of tags*/}
+
+                {post.post.tags
+                  .filter((tag) => tag !== "poll")
+                  .map((tag, index) => (
+                    <div
+                      className="flex flex-row items-center gap-0.5 cursor-pointer hover:opacity-50"
+                      key={index}
+                    >
+                      <Hash size={14} color="hsl(var(--secondary-color))" />
+                      <Text className="text-sm" variant="secondary">
+                        {tag}
+                      </Text>
+                    </div>
+                  ))}
+              </div>
+            )}
+            {post.post.loc && (
+              <div className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50">
+                <MapPin size={14} color="hsl(var(--secondary-color))" />
+                <Text className="text-sm" variant="secondary">
+                  Location
+                </Text>
+              </div>
+            )}
+            <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
+              <PostMenu
+                gnowebHref={gnowebHref}
+                eventId={eventId}
+                postId={post.post.localPostId}
+                author={post.post.author}
+                onDeleteSuccess={onDeleteSuccess}
+                onEdit={() => onEditModeChange?.(true)}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="my-1">{children}</div>
 
-      <div className="flex sm:flex-row sm:items-center gap-2">
-        {canReply && (
-          <Link href={`/event/${eventId}/feed/post/${post.post.localPostId}`}>
-            <Button
-              variant="outline"
-              className={
-                "rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
-              }
-              title="Show replies"
-            >
-              <MessageCircle size={16} color="hsl(var(--secondary-color))" />
-              <span className="text-xs">{post.childrenCount}</span>
-            </Button>
-          </Link>
-        )}
-        <Reactions
-          postId={post.post.localPostId}
-          eventId={eventId}
-          reactions={post.reactions}
-          parentId={parentId}
-        />
-      </div>
+      {!editMode && (
+        <div className="flex sm:flex-row sm:items-center gap-2">
+          {canReply && (
+            <Link href={`/event/${eventId}/feed/post/${post.post.localPostId}`}>
+              <Button
+                variant="outline"
+                className={
+                  "rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+                }
+                title="Show replies"
+              >
+                <MessageCircle size={16} color="hsl(var(--secondary-color))" />
+                <span className="text-xs">{post.childrenCount}</span>
+              </Button>
+            </Link>
+          )}
+          <Reactions
+            postId={post.post.localPostId}
+            eventId={eventId}
+            reactions={post.reactions}
+            parentId={parentId}
+          />
+        </div>
+      )}
     </Card>
   );
 }

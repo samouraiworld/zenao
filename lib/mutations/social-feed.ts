@@ -413,20 +413,28 @@ export const useEditStandardPost = () => {
   const queryClient = getQueryClient();
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
-      userAddress: _ua,
       token,
-      ..._request
+      content,
+      postId,
     }: EditStandardPostRequestMutation) => {
       if (!token) {
         throw new Error("not authenticated");
       }
 
-      // await zenaoClient.editPost(
-      //   request,
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
+      await zenaoClient.editPost(
+        {
+          content,
+          postId,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
     },
     onSuccess: (_, variables) => {
+      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
+      queryClient.invalidateQueries(feedPostOpts);
+
       const feedPostsOpts = feedPosts(
         variables.eventId,
         DEFAULT_FEED_POSTS_LIMIT,

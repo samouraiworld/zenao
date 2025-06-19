@@ -1,12 +1,9 @@
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { AudioWaveform, ImageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useMediaQuery } from "react-responsive";
 import { UseFormReturn } from "react-hook-form";
 import { FeedInputButtons } from "./feed-input-buttons";
-import { useToast } from "@/app/hooks/use-toast";
 import { ButtonBase } from "@/components/buttons/button-bases";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
 import {
@@ -28,37 +25,33 @@ import {
 } from "@/components/shadcn/tabs";
 import { Textarea } from "@/components/shadcn/textarea";
 import Text from "@/components/texts/text";
-import { useCreateStandardPost } from "@/lib/mutations/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
-import { captureException } from "@/lib/report";
 import useMarkdownUpload from "@/app/hooks/use-markdown-upload";
+import { useToast } from "@/app/hooks/use-toast";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
 export function StandardPostForm({
-  eventId,
   feedInputMode,
   setFeedInputMode,
+  onSubmit,
+  isEditing,
   form,
-  onSuccess,
+  isLoading,
 }: {
-  eventId: string;
   feedInputMode: FeedInputMode;
+  isEditing?: boolean;
+  onSubmit: (values: FeedPostFormSchemaType) => Promise<void> | void;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
   form: UseFormReturn<FeedPostFormSchemaType>;
-  onSuccess?: () => void;
+  isLoading?: boolean;
 }) {
-  const { createStandardPost, isPending } = useCreateStandardPost();
-  const t = useTranslations("event-feed.standard-post-form");
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
   const { toast } = useToast();
+
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const content = form.watch("content");
   const parentPostId = form.watch("parentPostId");
+  const t = useTranslations("event-feed.standard-post-form");
 
   const textareaMaxLength =
     standardPostFormSchema.shape.content._def.checks.find(
@@ -131,45 +124,11 @@ export function StandardPostForm({
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [content]);
 
-  const onSubmitStandardPost = async (values: FeedPostFormSchemaType) => {
-    try {
-      if (values.kind !== "STANDARD_POST") {
-        throw new Error("invalid form");
-      }
-
-      const token = await getToken();
-      if (!token) {
-        throw new Error("invalid clerk token");
-      }
-
-      await createStandardPost({
-        eventId,
-        content: values.content,
-        parentId: values.parentPostId?.toString() ?? "",
-        token,
-        userAddress: userAddress ?? "",
-        tags: [],
-      });
-
-      onSuccess?.();
-
-      toast({
-        title: t("toast-post-creation-success"),
-      });
-    } catch (err) {
-      captureException(err);
-      toast({
-        variant: "destructive",
-        title: t("toast-post-creation-error"),
-      });
-    }
-  };
-
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmitStandardPost)}
-        className="flex flex-col gap-4 p-4 rounded"
+        onSubmit={form.handleSubmit(onSubmit)}
+        className={cn("flex flex-col gap-4 p-4 rounded", isEditing && "p-0")}
       >
         <div className="flex flex-row gap-4">
           <Tabs defaultValue="form" className="w-full">
@@ -255,9 +214,9 @@ export function StandardPostForm({
                 <FeedInputButtons
                   buttonSize={textareaMinHeight}
                   feedInputMode={feedInputMode}
-                  isReplying={!!parentPostId}
+                  isReplying={!!parentPostId || !!isEditing}
                   setFeedInputMode={setFeedInputMode}
-                  isLoading={isPending}
+                  isLoading={isLoading}
                 />
               </div>
             </div>

@@ -22,6 +22,7 @@ type PostMenuProps = {
   postId: bigint;
   gnowebHref?: Url;
   author: string;
+  onEdit?: () => void;
   onDeleteSuccess?: () => void;
 };
 
@@ -30,6 +31,7 @@ export function PostMenu({
   author,
   postId,
   gnowebHref,
+  onEdit,
   onDeleteSuccess,
 }: PostMenuProps) {
   const { getToken, userId } = useAuth();
@@ -61,9 +63,14 @@ export function PostMenu({
             </Link>
           )}
           {author === userAddress && (
-            <DropdownMenuItem onClick={() => setDialogOpen(true)}>
-              Delete post
-            </DropdownMenuItem>
+            <>
+              {onEdit && (
+                <DropdownMenuItem onClick={onEdit}>Edit post</DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => setDialogOpen(true)}>
+                Delete post
+              </DropdownMenuItem>
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
