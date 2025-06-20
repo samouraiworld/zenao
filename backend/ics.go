@@ -40,6 +40,5 @@ func GenerateICS(zEvent *zeni.Event, zenaoEmail string, logger *zap.Logger) []by
 
 	// see:https://github.com/arran4/golang-ical/issues/116
 	serialized := cal.Serialize(ics.WithNewLineWindows)
-	logger.Info("generated ics", zap.String("ics", string(serialized)))
 	return []byte(serialized)
 }
