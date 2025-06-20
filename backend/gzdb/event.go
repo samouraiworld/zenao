@@ -39,7 +39,7 @@ type Event struct {
 	LocLng float32
 
 	// Used to handle updates of ics file
-	SequenceNumber uint32 `gorm:"not null;default:0"`
+	ICSSequenceNumber uint32 `gorm:"column:ics_sequence_number;not null;default:0"`
 }
 
 func (e *Event) SetLocation(loc *zenaov1.EventLocation) error {
@@ -104,18 +104,18 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 	}
 
 	return &zeni.Event{
-		ID:             fmt.Sprintf("%d", dbevt.ID),
-		CreatedAt:      dbevt.CreatedAt,
-		Title:          dbevt.Title,
-		Description:    dbevt.Description,
-		StartDate:      dbevt.StartDate,
-		EndDate:        dbevt.EndDate,
-		ImageURI:       dbevt.ImageURI,
-		TicketPrice:    dbevt.TicketPrice,
-		Capacity:       dbevt.Capacity,
-		CreatorID:      fmt.Sprintf("%d", dbevt.CreatorID),
-		Location:       loc,
-		PasswordHash:   dbevt.PasswordHash,
-		SequenceNumber: dbevt.SequenceNumber,
+		ID:                fmt.Sprintf("%d", dbevt.ID),
+		CreatedAt:         dbevt.CreatedAt,
+		Title:             dbevt.Title,
+		Description:       dbevt.Description,
+		StartDate:         dbevt.StartDate,
+		EndDate:           dbevt.EndDate,
+		ImageURI:          dbevt.ImageURI,
+		TicketPrice:       dbevt.TicketPrice,
+		Capacity:          dbevt.Capacity,
+		CreatorID:         fmt.Sprintf("%d", dbevt.CreatorID),
+		Location:          loc,
+		PasswordHash:      dbevt.PasswordHash,
+		ICSSequenceNumber: dbevt.ICSSequenceNumber,
 	}, nil
 }

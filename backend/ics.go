@@ -2,82 +2,44 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
+	ics "github.com/arran4/golang-ical"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
-const icsDateTime = "20060102T150405Z"
-
 // see: https://datatracker.ietf.org/doc/html/rfc5545
-func GenerateICS(event *zeni.Event, zenaoEmail string, logger *zap.Logger) []byte {
-	uid := fmt.Sprintf("evt_%s@zenao.io", event.ID)
-	summary := formatICSText(event.Title)
-	dtstamp := time.Now().UTC().Format(icsDateTime)
-	dtstart := event.StartDate.Format(icsDateTime)
-	dtend := event.EndDate.Format(icsDateTime)
-	eventURL := fmt.Sprintf("https://zenao.io/event/%s", event.ID)
-	description := formatICSText(fmt.Sprintf("You are invited to %s!", event.Title))
-	location, err := zeni.LocationToString(event.Location)
+func GenerateICS(zEvent *zeni.Event, zenaoEmail string, logger *zap.Logger) []byte {
+	uid := fmt.Sprintf("evt_%s@zenaooo.io", zEvent.ID)
+	eventURL := fmt.Sprintf("https://zenao.io/event/%s", zEvent.ID)
+	description := fmt.Sprintf("You are invited to %s!", zEvent.Title)
+	location, err := zeni.LocationToString(zEvent.Location)
 	if err != nil {
-		logger.Error("failed to convert location to string", zap.Error(err), zap.String("event-id", event.ID))
+		logger.Error("failed to convert location to string", zap.Error(err), zap.String("event-id", zEvent.ID))
 		location = ""
 	}
-	location = formatICSText(location)
-	organizerFormatted := fmt.Sprintf("CN=Zenao:mailto:%s", zenaoEmail)
+	cal := ics.NewCalendar()
+	cal.SetCalscale("GREGORIAN")
+	cal.SetProductId("-//Zenao//EN")
+	cal.SetVersion("2.0")
+	cal.SetMethod(ics.MethodRequest)
+	event := cal.AddEvent(uid)
+	event.SetCreatedTime(time.Now().UTC())
+	event.SetDtStampTime(time.Now().UTC())
+	event.SetSummary(zEvent.Title)
+	event.SetDescription(description)
+	event.SetStartAt(zEvent.StartDate)
+	event.SetEndAt(zEvent.EndDate)
+	event.SetURL(eventURL)
+	event.SetLocation(location)
+	event.SetStatus(ics.ObjectStatusConfirmed)
+	event.SetSequence(int(zEvent.ICSSequenceNumber))
+	// XXX: We could set the display name of the organizer if not empty
+	event.SetOrganizer(zenaoEmail, ics.WithCN("Zenao"))
 
-	// XXX: save event edit history in the database to track sequence number
-	ics := fmt.Sprintf(`BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Zenao//EN
-CALSCALE:GREGORIAN
-METHOD:REQUEST
-BEGIN:VEVENT
-UID:%s
-DTSTAMP:%s
-SUMMARY:%s
-DESCRIPTION:%s
-DTSTART:%s
-DTEND:%s
-URL:%s
-LOCATION:%s
-ORGANIZER;%s
-STATUS:CONFIRMED
-SEQUENCE:%d
-END:VEVENT
-END:VCALENDAR`, uid, dtstamp, summary, description, dtstart, dtend, eventURL, location, organizerFormatted, event.SequenceNumber)
-	return []byte(ics)
-}
-
-func formatICSText(input string) string {
-	// see page 46 of the RFC 5545 for special characters
-	replacer := strings.NewReplacer(
-		"\\", "\\\\",
-		";", `\;`,
-		",", `\,`,
-		"\n", `\n`,
-		"\r", "",
-	)
-	escaped := replacer.Replace(input)
-
-	var out strings.Builder
-	var line strings.Builder
-	lineLen := 0
-
-	//XXX: we need to fold to 75 bytes per line including the CRLF + space
-	for _, r := range escaped {
-		runeStr := string(r)
-		runeBytes := len(runeStr)
-		if lineLen+runeBytes > 73 {
-			out.WriteString(line.String() + "\r\n ")
-			line.Reset()
-			lineLen = 0
-		}
-		line.WriteString(runeStr)
-		lineLen += runeBytes
-	}
-	out.WriteString(line.String())
-	return out.String()
+	// see:https://github.com/arran4/golang-ical/issues/116
+	serialized := cal.Serialize(ics.WithNewLineWindows)
+	logger.Info("generated ics", zap.String("ics", string(serialized)))
+	return []byte(serialized)
 }

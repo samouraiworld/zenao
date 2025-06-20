@@ -1,4 +1,4 @@
-h1:d7xewhlS65iQvhG1Vahkal24pcKciWs5CQyP/VvbnH4=
+h1:HX40JLD0dHtZFeuGviLTZILKEUF4a+MHeboF1gj61xI=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
@@ -15,4 +15,4 @@ h1:d7xewhlS65iQvhG1Vahkal24pcKciWs5CQyP/VvbnH4=
 20250507115126_checkin.sql h1:T11RdziA3eCa4cfjECA1p1WU3nn+f9SIn30RTYZleUc=
 20250521235327_event-password.sql h1:Mcs7KcrGv6y0qlcRUFRmJhihmEYckgtd5xddYTyMZsI=
 20250527231017_tickets-info.sql h1:dFuMbUV5rrFZHnP4WiXQVDYkalQttrm2VkveC/O5Y6w=
-20250619151208_ics-seq-nb.sql h1:fP4niWTwkNZ9qvr2VrgdXR1zcLgHqWTnoFiVMKoQuiE=
+20250620082945_ics-seq-nb.sql h1:kqXMe9GDFx+RpeDd9CwByRU4QJg/q1wIPMmH5mL5+/0=

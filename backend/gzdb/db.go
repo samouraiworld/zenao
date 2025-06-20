@@ -210,7 +210,7 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		return nil, err
 	}
 
-	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("sequence_number", gorm.Expr("sequence_number + ?", 1)).Error; err != nil {
+	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("ics_sequence_number", gorm.Expr("ics_sequence_number + ?", 1)).Error; err != nil {
 		return nil, err
 	}
 
