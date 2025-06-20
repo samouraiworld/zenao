@@ -4,7 +4,6 @@ import { GithubIcon, TwitterIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
 import Link from "next/link";
-import * as Sentry from "@sentry/nextjs";
 import Text from "../texts/text";
 import { Button } from "../shadcn/button";
 
@@ -35,24 +34,12 @@ export const Footer = () => {
         >
           {t("footer.security")}
         </Text>
-        <Button
-          variant="link"
-          className="p-0 h-fit"
-          onClick={() => {
-            const eventId =
-              Sentry.lastEventId() ||
-              // Fallback in case Sentry didn't capture an error before the user clicked the button
-              Sentry.captureException(new Error("Custom Error Report"));
-
-            Sentry.showReportDialog({
-              eventId: eventId,
-            });
-          }}
-        >
+        <Button variant="link" className="p-0 h-fit">
           <Text
             size="sm"
             variant="secondary"
             className="underline underline-offset-1"
+            id="report-btn"
           >
             {t("footer.report-bug")}
           </Text>
