@@ -281,7 +281,8 @@ interface ReactPostRequestMutation {
   eventId: string;
 }
 
-export const useReactPost = (queryClient: QueryClient) => {
+export const useReactPost = () => {
+  const queryClient = getQueryClient();
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token: token,
@@ -392,6 +393,134 @@ export const useReactPost = (queryClient: QueryClient) => {
 
   return {
     reactPost: mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
+};
+
+type EditStandardPostRequestMutation = {
+  eventId: string;
+  postId: string;
+  userAddress: string;
+  token: string | null;
+  content: string;
+  tags: string[];
+  parentId?: string;
+};
+
+export const useEditStandardPost = () => {
+  const queryClient = getQueryClient();
+  const { isPending, mutateAsync, isSuccess, isError } = useMutation({
+    mutationFn: async ({
+      token,
+      content,
+      postId,
+    }: EditStandardPostRequestMutation) => {
+      if (!token) {
+        throw new Error("not authenticated");
+      }
+
+      await zenaoClient.editPost(
+        {
+          content,
+          postId,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+    },
+    onSuccess: (_, variables) => {
+      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
+      queryClient.invalidateQueries(feedPostOpts);
+
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+      queryClient.invalidateQueries(feedPostsOpts);
+
+      if (variables.parentId) {
+        const feedPostsChildrenOpts = feedPostsChildren(
+          variables.parentId,
+          DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+          "",
+          variables.userAddress,
+        );
+
+        queryClient.invalidateQueries(feedPostsChildrenOpts);
+      }
+    },
+  });
+
+  return {
+    editPost: mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
+};
+
+type DeletePostRequestMutation = {
+  eventId: string;
+  postId: string;
+  parentId?: string;
+  userAddress: string;
+  token: string | null;
+};
+
+export const useDeletePost = () => {
+  const queryClient = getQueryClient();
+  const { isPending, mutateAsync, isSuccess, isError } = useMutation({
+    mutationFn: async ({ postId, token }: DeletePostRequestMutation) => {
+      if (!token) {
+        throw new Error("not authenticated");
+      }
+
+      await zenaoClient.deletePost(
+        {
+          postId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+    },
+    onSuccess: (_, variables) => {
+      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
+      queryClient.invalidateQueries(feedPostOpts);
+
+      if (variables.parentId) {
+        const feedPostsChildrenOpts = feedPostsChildren(
+          variables.parentId,
+          DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+          "",
+          variables.userAddress,
+        );
+
+        queryClient.invalidateQueries(feedPostsChildrenOpts);
+      }
+      const feedPostsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "",
+        variables.userAddress,
+      );
+      const feedPollsOpts = feedPosts(
+        variables.eventId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "poll",
+        variables.userAddress,
+      );
+
+      queryClient.invalidateQueries(feedPostsOpts);
+      queryClient.invalidateQueries(feedPollsOpts);
+    },
+  });
+
+  return {
+    deletePost: mutateAsync,
     isPending,
     isSuccess,
     isError,

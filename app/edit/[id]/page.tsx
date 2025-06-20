@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { EditEventForm } from "./edit-event-form";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
-import { eventOptions } from "@/lib/queries/event";
+import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 
@@ -20,9 +20,8 @@ export default async function EditPage({
     userAddressOptions(getToken, userId),
   );
 
-  let eventData;
   try {
-    eventData = await queryClient.fetchQuery({
+    await queryClient.fetchQuery({
       ...eventOptions(p.id),
     });
   } catch (err) {
@@ -30,11 +29,7 @@ export default async function EditPage({
     notFound();
   }
 
-  eventData.gatekeepers.forEach((_addr) => {
-    // TODO prefetch emails
-    // queryClient.prefetchQuery(profileOptions(addr));
-  });
-
+  queryClient.prefetchQuery(eventGatekeepersEmails(p.id, getToken));
   queryClient.prefetchQuery(eventUserRoles(p.id, address));
 
   return (

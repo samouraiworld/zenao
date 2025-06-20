@@ -2,12 +2,19 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import {
   StandardPostForm,
   FeedInputMode,
 } from "@/components/form/social-feed/standard-post-form";
 import { PollPostForm } from "@/components/form/social-feed/poll-post-form";
 import { FeedPostFormSchemaType } from "@/components/form/types";
+import { userAddressOptions } from "@/lib/queries/user";
+import { useCreateStandardPost } from "@/lib/mutations/social-feed";
+import { useToast } from "@/app/hooks/use-toast";
+import { captureException } from "@/lib/report";
 
 const _eventTabs = ["description", "discussion", "votes"] as const;
 export type EventTab = (typeof _eventTabs)[number];
@@ -19,6 +26,16 @@ const EventFeedForm = ({
   eventId: string;
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) => {
+  const { toast } = useToast();
+
+  const { createStandardPost, isPending } = useCreateStandardPost();
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+
+  const t = useTranslations("event-feed.standard-post-form");
+
   const formContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
     useState<FeedInputMode>("STANDARD_POST");
@@ -30,6 +47,55 @@ const EventFeedForm = ({
       form.setValue("kind", "STANDARD_POST");
     }
   }, [feedInputMode, form]);
+
+  const onSubmitStandardPost = async (values: FeedPostFormSchemaType) => {
+    try {
+      if (values.kind !== "STANDARD_POST") {
+        throw new Error("invalid form");
+      }
+
+      const token = await getToken();
+      if (!token) {
+        throw new Error("invalid clerk token");
+      }
+
+      await createStandardPost({
+        eventId,
+        content: values.content,
+        parentId: values.parentPostId?.toString() ?? "",
+        token,
+        userAddress: userAddress ?? "",
+        tags: [],
+      });
+
+      toast({
+        title: t("toast-post-creation-success"),
+      });
+
+      form.reset(
+        { kind: "STANDARD_POST", content: "" },
+        { keepDefaultValues: true },
+      );
+      form.reset(
+        {
+          options: [{ text: "" }, { text: "" }],
+          allowMultipleOptions: false,
+          duration: {
+            days: 1,
+            hours: 0,
+            minutes: 0,
+          },
+        },
+        { keepDefaultValues: true, keepValues: true },
+      );
+    } catch (err) {
+      captureException(err);
+      toast({
+        variant: "destructive",
+        title: t("toast-post-creation-error"),
+      });
+    }
+  };
 
   return (
     <div
@@ -46,16 +112,11 @@ const EventFeedForm = ({
           />
         ) : (
           <StandardPostForm
-            eventId={eventId}
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
             form={form}
-            onSuccess={() => {
-              form.reset(
-                { kind: "STANDARD_POST", content: "" },
-                { keepValues: false },
-              );
-            }}
+            onSubmit={onSubmitStandardPost}
+            isLoading={isPending}
           />
         )}
       </div>
