@@ -8,6 +8,7 @@ require (
 	connectrpc.com/authn v0.2.0
 	connectrpc.com/connect v1.18.1
 	connectrpc.com/cors v0.1.0
+	github.com/arran4/golang-ical v0.3.2
 	github.com/bufbuild/buf v1.50.0
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/clerk/clerk-sdk-go/v2 v2.3.1
