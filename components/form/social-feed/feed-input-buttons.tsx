@@ -1,7 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { SendHorizonalIcon, VoteIcon } from "lucide-react";
+import { Save, SendHorizonalIcon, VoteIcon } from "lucide-react";
 import { FeedInputMode } from "./standard-post-form";
 import { cn } from "@/lib/tailwind";
 import { ButtonBase } from "@/components/buttons/button-bases";
@@ -11,11 +11,13 @@ export function FeedInputButtons({
   setFeedInputMode,
   isLoading = false,
   isReplying = false,
+  isEditing = false,
 }: {
   feedInputMode: FeedInputMode;
   isReplying: boolean;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
   isLoading?: boolean;
+  isEditing?: boolean;
 }) {
   return (
     <>
@@ -56,7 +58,11 @@ export function FeedInputButtons({
         loading={isLoading}
         disabled={isLoading}
       >
-        <SendHorizonalIcon className="w-5 h-5 md:!h-6 md:!w-6 dark:text-white" />
+        {isEditing ? (
+          <Save className="w-5 h-5 md:!h-6 md:!w-6 dark:text-white" />
+        ) : (
+          <SendHorizonalIcon className="w-5 h-5 md:!h-6 md:!w-6 dark:text-white" />
+        )}
       </ButtonBase>
     </>
   );

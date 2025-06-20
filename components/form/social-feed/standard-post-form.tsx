@@ -205,7 +205,8 @@ export function StandardPostForm({
                 />
                 <FeedInputButtons
                   feedInputMode={feedInputMode}
-                  isReplying={!!parentPostId || !!isEditing}
+                  isReplying={!!parentPostId}
+                  isEditing={!!isEditing}
                   setFeedInputMode={setFeedInputMode}
                   isLoading={isLoading}
                 />
