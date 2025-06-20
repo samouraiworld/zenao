@@ -11,7 +11,7 @@ import (
 
 // see: https://datatracker.ietf.org/doc/html/rfc5545
 func GenerateICS(zEvent *zeni.Event, zenaoEmail string, logger *zap.Logger) []byte {
-	uid := fmt.Sprintf("evt_%s@zenaooo.io", zEvent.ID)
+	uid := fmt.Sprintf("evt_%s@zenao.io", zEvent.ID)
 	eventURL := fmt.Sprintf("https://zenao.io/event/%s", zEvent.ID)
 	description := fmt.Sprintf("You are invited to %s!", zEvent.Title)
 	location, err := zeni.LocationToString(zEvent.Location)
