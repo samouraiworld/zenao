@@ -262,5 +262,13 @@
     "toast-cancel-participation-error": "Error while canceling participation",
     "event-already-started-error": "You cannot cancel your participation as the event has already started",
     "toast-user-already-checked-in-error": "You cannot cancel your participation as you already used your ticket to enter the venue"
+  },
+  "delete-post-confirmation-dialog": {
+    "title": "Delete post",
+    "desc": "Are you sure you want to delete this post ?",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "toast-delete-post-success": "Your post has been deleted",
+    "toast-delete-post-error": "Error while deleting the post"
   }
 }
