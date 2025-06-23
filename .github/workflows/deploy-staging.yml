@@ -48,12 +48,18 @@ jobs:
             docker compose -f staging.docker-compose.yml up -d backend
 
       - name: Backup DB
-        uses: tursodatabase/create-database-action@v1
-        with:
-          organization_name: samourai-coop
-          api_token: ${{ secrets.TURSO_API_TOKEN }}
-          existing_database_name: zenao-staging
-          new_database_name: zenao-staging-${{ steps.date.outputs.date }}
+        shell: bash
+        run: |
+          RESPONSE=$(curl -s -f -X POST \
+            -H "Authorization: Bearer ${{ secrets.TURSO_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"name": "zenao-staging-${{ steps.date.outputs.date }}", "group": "zenao", "seed": {"type": "database", "name": "zenao-staging"} }' \
+                "https://api.turso.tech/v1/organizations/samourai-coop/databases")
+
+          if [ $? -ne 0 ]; then
+            echo "API call failed"
+            exit 1
+          fi
 
       - name: Migrate DB
         run: TURSO_TOKEN=${{ secrets.STAGING_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env staging
