@@ -208,7 +208,7 @@ func execGenTxs() error {
 		}
 	}
 
-	posts, err := db.GetAllPosts()
+	posts, err := db.GetAllPosts(true)
 	if err != nil {
 		return err
 	}
@@ -244,11 +244,11 @@ func execGenTxs() error {
 				logger.Info("vote tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("event-id", feed.EventID), zap.String("user-id", vote.UserID))
 			}
 		} else {
-			tx, err := createPostTx(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, post)
+			cptxs, err := createPostTxs(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, post)
 			if err != nil {
 				return err
 			}
-			txs = append(txs, tx)
+			txs = append(txs, cptxs...)
 			logger.Info("post tx created", zap.String("post-id", post.ID), zap.String("event-id", feed.EventID))
 		}
 
@@ -283,7 +283,7 @@ func execGenTxs() error {
 	return nil
 }
 
-func createPostTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, post *zeni.Post) (gnoland.TxWithMetadata, error) {
+func createPostTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(eventID)
 	userPkgPath := chain.userRealmPkgPath(authorID)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
@@ -307,12 +307,41 @@ func createPostTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addre
 		},
 	}
 
-	return gnoland.TxWithMetadata{
+	txs := []gnoland.TxWithMetadata{{
 		Tx: tx,
 		Metadata: &gnoland.GnoTxMetadata{
 			Timestamp: post.CreatedAt.Unix(),
 		},
-	}, nil
+	}}
+
+	if post.Post.DeletedAt != 0 {
+		body := genDeletePostMsgRunBody(userPkgPath, post.Post.LocalPostId)
+		tx := std.Tx{
+			Msgs: []std.Msg{
+				vm.MsgRun{
+					Caller: creator,
+					Send:   []std.Coin{},
+					Package: &gnovm.MemPackage{
+						Name:  "main",
+						Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					},
+				},
+			},
+			Fee: std.Fee{
+				GasWanted: 10000000,
+				GasFee:    std.NewCoin("ugnot", 1000000),
+			},
+		}
+
+		txs = append(txs, gnoland.TxWithMetadata{
+			Tx: tx,
+			Metadata: &gnoland.GnoTxMetadata{
+				Timestamp: post.Post.DeletedAt,
+			},
+		})
+	}
+
+	return txs, nil
 }
 
 func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {

@@ -197,7 +197,7 @@ type DB interface {
 	DeletePost(postID string) error
 	EditPost(postID string, req *zenaov1.EditPostRequest) error
 	GetPostByID(postID string) (*Post, error)
-	GetAllPosts() ([]*Post, error)
+	GetAllPosts(getDeleted bool) ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 
 	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
