@@ -53,7 +53,7 @@ jobs:
           RESPONSE=$(curl -s -f -X POST \
             -H "Authorization: Bearer ${{ secrets.TURSO_API_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"name": "zenao-staging-${{ steps.date.outputs.date }}", "group": "zenao", "seed": {"type": "database", "name": "zenao-staging"} }' \
+            -d '{"name": "zenao-staging-backup-${{ steps.date.outputs.date }}", "group": "zenao", "seed": {"type": "database", "name": "zenao-staging"} }' \
                 "https://api.turso.tech/v1/organizations/samourai-coop/databases")
 
           if [ $? -ne 0 ]; then
