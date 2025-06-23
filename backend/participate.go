@@ -129,6 +129,12 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
 					ContentType: "application/pdf",
 				})
+				icsData := GenerateICS(evt, s.MailSender, s.Logger)
+				attachments = append(attachments, &resend.Attachment{
+					Content:     icsData,
+					Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
+					ContentType: "text/calendar",
+				})
 			}
 
 			// XXX: Replace sender name with organizer name
