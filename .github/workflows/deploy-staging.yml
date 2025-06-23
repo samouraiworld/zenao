@@ -86,7 +86,6 @@ jobs:
           script: |
             set -xe
             cd zenao
-            go run ./backend gentxs --db "libsql://zenao-staging-samourai-coop.turso.io?authToken=${{ secrets.STAGING_TURSO_TOKEN }}" --admin-mnemonic '${{ secrets.STAGING_ADMIN_MNEMONIC }}' --chain-id zenao-dev
             docker compose -f staging.docker-compose.yml up -d --build gno --wait
             yq -iy 'del(.services.backend.command)' staging.docker-compose.yml
             docker compose -f staging.docker-compose.yml up -d --build backend
