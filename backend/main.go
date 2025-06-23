@@ -104,6 +104,7 @@ func injectStartEnv() {
 		"ZENAO_DB":                &conf.dbPath,
 		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
+		"ZENAO_MAIL_SENDER":       &conf.mailSender,
 		"DISCORD_TOKEN":           &conf.discordtoken,
 	}
 
