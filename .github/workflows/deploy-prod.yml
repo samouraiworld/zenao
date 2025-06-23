@@ -41,8 +41,8 @@ jobs:
           script: |
             set -e
             cd zenao
-            yq -i 'del(.services.backend.command)' prod.backend.docker-compose.yml
-            yq -i '.services.backend |= ({"command": "--maintenance"} + .)' prod.backend.docker-compose.yml
+            yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
+            yq -iy '.services.backend |= ({"command": "--maintenance"} + .)' prod.backend.docker-compose.yml
             docker compose -f prod.backend.docker-compose.yml up -d backend
 
       - name: Backup DB
@@ -81,5 +81,5 @@ jobs:
             cd zenao
             git fetch
             git checkout ${{ github.sha }}
-            yq -i 'del(.services.backend.command)' prod.backend.docker-compose.yml
+            yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
             docker compose -f prod.backend.docker-compose.yml up -d --build backend
