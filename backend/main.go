@@ -124,7 +124,7 @@ func execStart() error {
 
 	injectStartEnv()
 
-	auth, err := czauth.SetupAuth(conf.clerkSecretKey)
+	auth, err := czauth.SetupAuth(conf.clerkSecretKey, logger)
 	if err != nil {
 		return err
 	}
