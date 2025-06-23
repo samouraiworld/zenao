@@ -74,7 +74,8 @@ jobs:
           username: root
           key: ${{ secrets.PROD_SSH_KEY }}
           source: genesis_txs.jsonl
-          target: /root/zenao/genesis_txs.jsonl
+          target: /root/zenao
+          overwrite: true
 
       - name: Upgrade gno
         uses: appleboy/ssh-action@v1

@@ -74,7 +74,8 @@ jobs:
           username: root
           key: ${{ secrets.STAGING_SSH_KEY }}
           source: genesis_txs.jsonl
-          target: /root/zenao/genesis_txs.jsonl
+          target: /root/zenao
+          overwrite: true
 
       - name: Upgrade services
         uses: appleboy/ssh-action@v1
