@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+        - ./backend.env
+    ports:
+      - 4242:4242
+    container_name: backend
+    restart: always
+    depends_on:
+      gno:
+        condition: service_healthy
+
+  gno:
+    build:
+      context: .
+      dockerfile: gno.Dockerfile
+      args:
+         ZENAO_ADMIN_ADDR: g1qjkqq0ycmvq0g6f5gyvm60phcj0fpam6z8zvd4
+    ports:
+      - 8888:8888
+      - 26657:26657
+    restart: always
+    healthcheck:
+      test: curl --fail http://localhost:26657/health || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 50
+      start_period: 30s
