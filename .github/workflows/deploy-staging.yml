@@ -1,0 +1,76 @@
+name: Deploy Staging
+
+on:
+  workflow_dispatch:
+
+jobs:
+  buf-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Golang with cache
+        uses: magnetikonline/action-golang-cache@v5
+        with:
+          go-version-file: go.mod
+          cache-key-suffix: deploy-staging
+
+      - name: Get go binaries path
+        id: go-bin-path
+        run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
+      - name: Cache atlas
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.go-bin-path.outputs.PATH }}
+          key: ${{ runner.os }}-atlas-bin2-c261f318ac25924555e63fdf005cc53de43fa5db
+      - name: Install atlas
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: make install-atlas
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Enable maintenance mode
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 51.159.98.163
+          username: root
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            cd zenao
+            yq -i 'del(.services.backend.command)' staging.docker-compose.yml
+            yq -i '.services.backend |= ({"command": "--maintenance"} + .)' staging.docker-compose.yml
+            docker compose -f staging.docker-compose.yml up -d backend
+
+      - name: Backup DB
+        uses: tursodatabase/create-database-action@v1
+        with:
+          organization_name: samourai-coop
+          api_token: ${{ secrets.TURSO_API_TOKEN }}
+          existing_database_name: zenao-staging
+          new_database_name: zenao-staging-${{ steps.date.outputs.date }}
+
+      - name: Backup DB
+        run: turso db create zenao-staging-$(date +%Y-%m-%d) --from-db zenao-staging 
+
+      - name: Migrate DB
+        run: TURSO_TOKEN=${{ secrets.STAGING_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env staging
+
+      - name: Upgrade services
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 51.159.98.163
+          username: root
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
+            cd zenao
+            git fetch
+            git checkout ${{ github.sha }}
+            go run ./backend gentxs --db "libsql://zenao-staging-samourai-coop.turso.io?authToken=${{ secrets.STAGING_TURSO_TOKEN }}" --admin-mnemonic '${{ secrets.STAGING_ADMIN_MNEMONIC }}' --chain-id zenao-dev
+            docker compose -f staging.docker-compose.yml up -d --build gno --wait
+            yq -i 'del(.services.backend.command)' staging.docker-compose.yml
+            docker compose -f staging.docker-compose.yml up -d --build backend

@@ -1,0 +1,17 @@
+services:
+  gno:
+    build:
+      context: .
+      dockerfile: gno.Dockerfile
+      args:
+        ZENAO_ADMIN_ADDR: g1djrkw9tf4px658j85cc6fhsvm50uf9s0g6kfsm
+    ports:
+      - 8888:8888
+      - 26657:26657
+    restart: always
+    healthcheck:
+      test: curl --fail http://localhost:26657/health || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 50
+      start_period: 30s
