@@ -39,8 +39,10 @@ jobs:
           username: root
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
-            set -e
+            set -xe
             cd zenao
+            git fetch
+            git checkout ${{ github.sha }}
             yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
             yq -iy '.services.backend |= ({"command": "--maintenance"} + .)' prod.backend.docker-compose.yml
             docker compose -f prod.backend.docker-compose.yml up -d backend
@@ -63,7 +65,7 @@ jobs:
           username: root
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
-            set -e
+            set -xe
             cd zenao
             git fetch
             git checkout ${{ github.sha }}
@@ -77,9 +79,7 @@ jobs:
           username: root
           key: ${{ secrets.PROD_SSH_KEY }}
           script: |
-            set -e
+            set -xe
             cd zenao
-            git fetch
-            git checkout ${{ github.sha }}
             yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
             docker compose -f prod.backend.docker-compose.yml up -d --build backend
