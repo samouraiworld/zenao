@@ -53,9 +53,6 @@ jobs:
           existing_database_name: zenao-staging
           new_database_name: zenao-staging-${{ steps.date.outputs.date }}
 
-      - name: Backup DB
-        run: turso db create zenao-staging-$(date +%Y-%m-%d) --from-db zenao-staging 
-
       - name: Migrate DB
         run: TURSO_TOKEN=${{ secrets.STAGING_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env staging
 
