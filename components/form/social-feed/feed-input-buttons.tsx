@@ -1,23 +1,23 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { SendHorizonalIcon, VoteIcon } from "lucide-react";
+import { Save, SendHorizonalIcon, VoteIcon } from "lucide-react";
 import { FeedInputMode } from "./standard-post-form";
 import { cn } from "@/lib/tailwind";
 import { ButtonBase } from "@/components/buttons/button-bases";
 
 export function FeedInputButtons({
-  buttonSize,
   feedInputMode,
   setFeedInputMode,
   isLoading = false,
   isReplying = false,
+  isEditing = false,
 }: {
-  buttonSize: number;
   feedInputMode: FeedInputMode;
   isReplying: boolean;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
   isLoading?: boolean;
+  isEditing?: boolean;
 }) {
   return (
     <>
@@ -25,15 +25,11 @@ export function FeedInputButtons({
         <ButtonBase
           variant="link"
           className={cn(
-            "flex items-center justify-center rounded-full aspect-square cursor-pointer",
+            "flex items-center justify-center rounded-full aspect-square cursor-pointer w-7 h-7 md:w-12 md:h-12",
             feedInputMode === "POLL"
               ? "dark:bg-white bg-black"
               : "hover:bg-neutral-500/20",
           )}
-          style={{
-            height: buttonSize,
-            width: buttonSize,
-          }}
           onClick={() =>
             setFeedInputMode((feedInputMode) =>
               feedInputMode === "STANDARD_POST" ? "POLL" : "STANDARD_POST",
@@ -44,7 +40,7 @@ export function FeedInputButtons({
         >
           <VoteIcon
             className={cn(
-              "!h-6 !w-6",
+              "w-5 h-5 md:!h-6 md:!w-6",
               feedInputMode === "POLL"
                 ? "dark:text-black text-white"
                 : "dark:text-white text-black",
@@ -54,13 +50,19 @@ export function FeedInputButtons({
       )}
       <ButtonBase
         variant="link"
-        className="dark:text-white text-black flex items-center justify-center rounded-full  aspect-square hover:bg-neutral-500/20 cursor-pointer"
+        className={cn(
+          "dark:text-white text-black flex items-center justify-center rounded-full aspect-square",
+          "hover:bg-neutral-500/20 cursor-pointer w-7 h-7 md:w-12 md:h-12",
+        )}
         aria-label="submit post"
-        style={{ height: buttonSize, width: buttonSize }}
         loading={isLoading}
         disabled={isLoading}
       >
-        <SendHorizonalIcon className="!h-6 !w-6 dark:text-white" />
+        {isEditing ? (
+          <Save className="w-5 h-5 md:!h-6 md:!w-6 dark:text-white" />
+        ) : (
+          <SendHorizonalIcon className="w-5 h-5 md:!h-6 md:!w-6 dark:text-white" />
+        )}
       </ButtonBase>
     </>
   );
