@@ -210,6 +210,10 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		return nil, err
 	}
 
+	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("ics_sequence_number", gorm.Expr("ics_sequence_number + ?", 1)).Error; err != nil {
+		return nil, err
+	}
+
 	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs
 	// we should rewrite this if db become bottleneck
 	if req.UpdatePassword && req.Password == "" {
@@ -748,11 +752,17 @@ func (g *gormZenaoDB) GetPostByID(postID string) (*zeni.Post, error) {
 }
 
 // GetAllPosts implements zeni.DB.
-func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
+func (g *gormZenaoDB) GetAllPosts(getDeleted bool) ([]*zeni.Post, error) {
+	db := g.db
+	if getDeleted {
+		db = db.Unscoped()
+	}
+
 	var posts []*Post
-	if err := g.db.Preload("Reactions").Preload("Tags").Find(&posts).Error; err != nil {
+	if err := db.Preload("Reactions").Preload("Tags").Find(&posts).Error; err != nil {
 		return nil, err
 	}
+
 	res := make([]*zeni.Post, 0, len(posts))
 	for _, p := range posts {
 		zpost, err := dbPostToZeniPost(p)
@@ -761,6 +771,7 @@ func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
 		}
 		res = append(res, zpost)
 	}
+
 	return res, nil
 }
 
