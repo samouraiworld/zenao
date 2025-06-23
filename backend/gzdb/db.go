@@ -752,11 +752,17 @@ func (g *gormZenaoDB) GetPostByID(postID string) (*zeni.Post, error) {
 }
 
 // GetAllPosts implements zeni.DB.
-func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
+func (g *gormZenaoDB) GetAllPosts(getDeleted bool) ([]*zeni.Post, error) {
+	db := g.db
+	if getDeleted {
+		db = db.Unscoped()
+	}
+
 	var posts []*Post
-	if err := g.db.Preload("Reactions").Preload("Tags").Find(&posts).Error; err != nil {
+	if err := db.Preload("Reactions").Preload("Tags").Find(&posts).Error; err != nil {
 		return nil, err
 	}
+
 	res := make([]*zeni.Post, 0, len(posts))
 	for _, p := range posts {
 		zpost, err := dbPostToZeniPost(p)
@@ -765,6 +771,7 @@ func (g *gormZenaoDB) GetAllPosts() ([]*zeni.Post, error) {
 		}
 		res = append(res, zpost)
 	}
+
 	return res, nil
 }
 
