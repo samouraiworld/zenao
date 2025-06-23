@@ -15,7 +15,8 @@ RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive \
     apt-get install --no-install-recommends --assume-yes \
       build-essential \
-      ca-certificates
+      ca-certificates \
+      curl
 
 WORKDIR /app
 RUN git clone https://github.com/gnolang/gno.git
@@ -45,6 +46,7 @@ RUN echo "${ZENAO_ADMIN_ADDR}=100000000000ugnot" > genesis_balances.txt
 
 FROM ${RUNNER_IMAGE}
 
+COPY --from=ghcr.io/tarampampam/curl:8.6.0 /bin/curl /bin/curl
 COPY --from=builder /app/build/gnodev /bin/gnodev
 COPY --from=builder /app/gno /app/gno
 COPY --from=builder /app/packages /packages
