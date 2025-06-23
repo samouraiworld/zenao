@@ -283,7 +283,7 @@ func execGenTxs() error {
 	return nil
 }
 
-func createPostTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
+func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(eventID)
 	userPkgPath := chain.userRealmPkgPath(authorID)
 	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
