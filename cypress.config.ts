@@ -1,3 +1,5 @@
+import path from "path";
+import fs from "fs";
 import { clerkSetup } from "@clerk/testing/cypress";
 import { defineConfig } from "cypress";
 
@@ -19,6 +21,21 @@ export default defineConfig({
         }
 
         return launchOptions;
+      });
+
+      on("task", {
+        changeVideoSource(videoSource) {
+          console.log("TASK - Changing video source to", videoSource);
+
+          const webcamPath = path.join("cypress", "fixtures", "fake_qr.mjpeg");
+          const sourceVideoPath = path.join("cypress", "fixtures", videoSource);
+
+          const video = fs.readFileSync(sourceVideoPath);
+
+          fs.writeFileSync(webcamPath, video);
+
+          return null;
+        },
       });
 
       return clerkSetup({ config });
