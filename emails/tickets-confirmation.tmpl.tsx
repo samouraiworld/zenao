@@ -25,8 +25,8 @@ export const TicketsConfirmationEmail = () => (
         <Img
           alt="Event presentation"
           src="{{.ImageURL}}"
-          width={600}
-          height={400}
+          width={960}
+          height={540}
         />
         <Section style={welcome.section}>
           <Text style={welcome.text}>{"{{.WelcomeText}}"}</Text>
