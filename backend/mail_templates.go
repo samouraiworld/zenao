@@ -72,7 +72,7 @@ func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string) (stri
 		return "", "", err
 	}
 	data := ticketsConfirmation{
-		ImageURL:        web2URL(event.ImageURI) + "?img-width=600&img-height=400&img-fit=cover&dpr=2",
+		ImageURL:        web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
 		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
 		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
 		EventName:       event.Title,
@@ -106,7 +106,7 @@ type eventBroadcast struct {
 
 func eventBroadcastMailContent(event *zeni.Event, message string) (string, string, error) {
 	data := eventBroadcast{
-		ImageURL:  web2URL(event.ImageURI) + "?img-width=600&img-height=400&img-fit=cover&dpr=2",
+		ImageURL:  web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
 		EventName: event.Title,
 		Message:   message,
 		EventURL:  eventPublicURL(event.ID),
