@@ -102,6 +102,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
       <div className="w-full grid grid-cols-2 gap-8">
         <Scanner
           onScan={(result) => handleQRCodeValue(result[0].rawValue)}
+          paused={confirmDialogOpen || isPending}
           allowMultiple
           scanDelay={2000}
           classNames={{
@@ -122,7 +123,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
             )}
             {history.map((sig) => (
               <div key={sig} className="p-4 hover:bg-accent">
-                <Text>{t("signature")}: Test</Text>
+                <Text>{t("signature")}</Text>
               </div>
             ))}
           </div>
