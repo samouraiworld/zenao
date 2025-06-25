@@ -56,7 +56,11 @@ jobs:
       - name: Install atlas
         if: steps.cache.outputs.cache-hit != 'true'
         run: make install-atlas
-
+      - name: Install ffmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        id: setup-ffmpeg
+        with:
+          ffmpeg-version: release
       - run: go install ./backend
 
       - uses: cypress-io/github-action@v6
