@@ -433,7 +433,7 @@ describe("main", () => {
     cy.get(".qrcode").first().screenshot("qrcode", { overwrite: true });
 
     // Load ticket and create video
-    cy.generateValidQRVideo("cypress/screenshots/qrcode.png");
+    cy.generateValidQRVideo("cypress/screenshots/main.cy.ts/qrcode.png");
 
     // Set video source
     cy.task("changeVideoSource", "output.mjpeg");
