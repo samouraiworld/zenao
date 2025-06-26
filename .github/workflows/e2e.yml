@@ -57,10 +57,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: make install-atlas
       - name: Install ffmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        id: setup-ffmpeg
-        with:
-          ffmpeg-version: release
+        run: sudo apt update && sudo add-apt-repository ppa:ubuntuhandbook1/ffmpeg7 && sudo apt install -y ffmpeg
       - run: go install ./backend
 
       - uses: cypress-io/github-action@v6
