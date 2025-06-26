@@ -308,7 +308,7 @@ describe("main", () => {
     toastShouldContain("Vote submitted !");
 
     // Add reaction to post
-    cy.get(".reaction-btn").click();
+    cy.get(".reaction-btn").first().click();
     // Select emoji
     cy.get('img[alt="grinning"]').first().click();
   });
