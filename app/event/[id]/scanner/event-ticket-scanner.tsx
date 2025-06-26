@@ -103,8 +103,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
         <div className="md:max-w-[650px] max-md:col-span-2 self-center">
           <BarcodeScanner
             onUpdate={(_, result) => {
-              if (result && (!confirmDialogOpen || !isPending)) {
-                console.log(result.getText());
+              if (result && !confirmDialogOpen && !isPending) {
                 if ("vibrate" in navigator) {
                   navigator.vibrate(200);
                 }
