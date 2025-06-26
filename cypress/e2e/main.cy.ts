@@ -171,22 +171,6 @@ describe("main", () => {
     cy.get('textarea[placeholder="Bio..."]').should("have.value", testBio);
   });
 
-  it("access an exclusive event", () => {
-    cy.createEvent({ exclusive: true });
-    cy.url().then((url) => {
-      logout();
-      cy.visit(url);
-    });
-
-    // Guard
-    cy.get("input[type=password]").type(testEventPassword);
-    cy.get("button").contains("Access event").click();
-
-    // Assertions
-    cy.get("h1").contains(testEventName).should("be.visible");
-    cy.get("h2").contains(testEventLocation).should("be.visible");
-  });
-
   it("create an event", () => {
     cy.createEvent({ exclusive: false });
 
@@ -573,6 +557,22 @@ describe("main", () => {
     cy.get("h2")
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
+  });
+
+  it("access an exclusive event", () => {
+    cy.createEvent({ exclusive: true });
+    cy.url().then((url) => {
+      logout();
+      cy.visit(url);
+    });
+
+    // Guard
+    cy.get("input[type=password]").type(testEventPassword);
+    cy.get("button").contains("Access event").click();
+
+    // Assertions
+    cy.get("h1").contains(testEventName).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
   });
 });
 
