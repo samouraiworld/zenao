@@ -74,6 +74,7 @@
     "react-hook-form": "^7.54.2",
     "react-leaflet": "^5.0.0",
     "react-markdown": "^9.1.0",
+    "react-qr-barcode-scanner": "^2.1.7",
     "react-responsive": "^10.0.1",
     "remark-directive": "^4.0.0",
     "remark-gfm": "^4.0.1",

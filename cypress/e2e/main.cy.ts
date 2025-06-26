@@ -33,11 +33,11 @@ describe("main", () => {
   // NOTE: this test requires a valid pinata upload setup in the nextjs server
 
   it("prepare state", () => {
+    cy.task("resetVideoSource");
     cy.request({
       url: "http://localhost:4243/reset",
       timeout: 120000,
     });
-    cy.task("resetVideoSource");
   });
 
   it("participate without login", () => {
