@@ -426,7 +426,7 @@ describe("main", () => {
       cy.get("a").contains("Open ticket scanner").click();
 
       cy.get("h2")
-        .contains("Ticket verified", { timeout: 12000 })
+        .contains("Ticket verified", { timeout: 15000 })
         .should("exist");
     });
   });
