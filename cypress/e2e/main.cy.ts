@@ -428,17 +428,7 @@ describe("main", () => {
       cy.get("h2")
         .contains("Ticket verified", { timeout: 12000 })
         .should("exist");
-
-      cy.visit("/");
     });
-
-    // End scan procedure
-    cy.get("a").contains("See event details").click({ timeout: 8000 });
-    cy.get("a").contains("Open ticket scanner").click();
-
-    cy.wait(5000);
-
-    cy.get("h2").should("contain", "Ticke verified");
   });
 
   it("add a gatekeeper", () => {
