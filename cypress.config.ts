@@ -24,6 +24,10 @@ export default defineConfig({
       });
 
       on("task", {
+        log(message) {
+          console.log(message);
+          return null;
+        },
         changeVideoSource(videoSource) {
           console.log("TASK - Changing video source to", videoSource);
 
