@@ -1,6 +1,5 @@
 "use client";
 
-// import { Scanner } from "@yudiel/react-qr-scanner";
 import { useState } from "react";
 import { z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -101,15 +100,6 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
       />
 
       <div className="w-full grid grid-cols-2 gap-8">
-        {/* <Scanner
-          onScan={(result) => handleQRCodeValue(result[0].rawValue)}
-          paused={confirmDialogOpen || isPending}
-          allowMultiple
-          scanDelay={2000}
-          classNames={{
-            container: "md:max-w-[650px] max-md:col-span-2 self-center",
-          }}
-        /> */}
         <div className="md:max-w-[650px] max-md:col-span-2 self-center">
           <BarcodeScanner
             onUpdate={(_, result) => {
