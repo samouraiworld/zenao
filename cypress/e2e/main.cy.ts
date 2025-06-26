@@ -436,7 +436,17 @@ describe("main", () => {
     cy.generateValidQRVideo("cypress/screenshots/main.cy.ts/qrcode.png");
 
     // Set video source
-    cy.task("changeVideoSource", "output.mjpeg");
+    cy.task("changeVideoSource", "output.mjpeg").then(() => {
+      // End scan procedure
+      cy.get("a").contains("See event details").click({ timeout: 8000 });
+      cy.get("a").contains("Open ticket scanner").click();
+
+      cy.get("h2")
+        .contains("Ticket verified", { timeout: 12000 })
+        .should("exist");
+
+      cy.visit("/");
+    });
 
     // End scan procedure
     cy.get("a").contains("See event details").click({ timeout: 8000 });
