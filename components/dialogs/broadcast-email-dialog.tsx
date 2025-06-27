@@ -45,7 +45,7 @@ const broadcastEmailFormSchema = z.object({
   message: z
     .string()
     .min(30, "Message must be at least 30 characters")
-    .max(1000, "Message must be at most 1000 characters"),
+    .max(2500, "Message must be at most 2500 characters"),
   attachTicket: z.boolean(),
 });
 
