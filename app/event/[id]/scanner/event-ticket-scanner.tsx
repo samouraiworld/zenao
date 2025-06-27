@@ -42,7 +42,9 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const { checkIn, isPending } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const [facingMode, setFacingMode] = useState<"user" | "environment">(
+    "environment",
+  );
   const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
