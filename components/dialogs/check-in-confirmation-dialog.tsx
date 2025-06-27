@@ -94,9 +94,9 @@ export function CheckinConfirmationDialog({
       <DrawerContent className={error ? "bg-red-500" : "bg-green-400"}>
         <CheckinConfirmationDialogContent error={error} />
         <DrawerFooter className="pt-2">
-          {!loading || (
+          {!loading && (
             <DrawerClose asChild>
-              <ButtonWithChildren variant="outline">
+              <ButtonWithChildren variant="outline" className="w-full">
                 {t("close")}
               </ButtonWithChildren>
             </DrawerClose>
