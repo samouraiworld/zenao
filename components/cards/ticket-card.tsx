@@ -93,19 +93,21 @@ export function TicketCard({
           </Link>
 
           <div className="flex flex-col grow items-center justify-center">
-            <QRCode
-              text={ticketInfo.ticketSecret}
-              options={{
-                errorCorrectionLevel: "M",
-                margin: 2,
-                scale: 5,
-                width: 125,
-                color: {
-                  dark: "#000005",
-                  light: "#ffffff",
-                },
-              }}
-            />
+            <div className="aspect-video flex flex-col items-center justify-center qrcode">
+              <QRCode
+                text={ticketInfo.ticketSecret}
+                options={{
+                  errorCorrectionLevel: "M",
+                  margin: 2,
+                  scale: 5,
+                  width: 125,
+                  color: {
+                    dark: "#000005",
+                    light: "#ffffff",
+                  },
+                }}
+              />
+            </div>
           </div>
         </div>
       </motion.div>

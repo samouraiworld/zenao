@@ -243,7 +243,7 @@
   },
   "event-scanner": {
     "check-in-confirmation-dialog": {
-      "title-success": "Ticke verified",
+      "title-success": "Ticket verified",
       "description-error": "Error while trying to validate your ticket",
       "title-error": "Invalid ticket",
       "description-success": "You can enter the venue",
