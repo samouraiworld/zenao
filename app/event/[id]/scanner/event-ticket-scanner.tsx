@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
+import { boolean, z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
@@ -118,9 +118,11 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
                 handleQRCodeValue(result.getText());
               }
             }}
-            facingMode={facingMode}
             delay={2000}
             videoConstraints={{
+              facingMode: {
+                ideal: facingMode,
+              },
               aspectRatio: {
                 ideal: 4 / 3,
               },
@@ -132,9 +134,9 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
           <div className="mt-8">
             <Select
               value={facingMode}
-              onValueChange={(value) =>
-                setFacingMode(value as "user" | "environment")
-              }
+              onValueChange={(value) => {
+                setFacingMode(value as "user" | "environment");
+              }}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select Camera" />
