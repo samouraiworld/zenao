@@ -13,6 +13,13 @@ import { useEventCheckIn } from "@/lib/mutations/event-management";
 import { userAddressOptions } from "@/lib/queries/user";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/select";
 
 type EventTicketScannerProps = {
   eventId: string;
@@ -35,6 +42,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const { checkIn, isPending } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
 
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,7 +118,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
                 handleQRCodeValue(result.getText());
               }
             }}
-            facingMode="environment"
+            facingMode={facingMode}
             delay={2000}
             videoConstraints={{
               aspectRatio: {
@@ -120,6 +128,23 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
             width={640}
             height={480}
           />
+
+          <div className="mt-8">
+            <Select
+              value={facingMode}
+              onValueChange={(value) =>
+                setFacingMode(value as "user" | "environment")
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select Camera" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="environment">Environment</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex flex-col h-full max-md:col-span-2 gap-6">
