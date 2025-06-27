@@ -117,6 +117,8 @@ Add back the `PINATA_JWT` in `.env.local`
 
 Be careful not to commit the PINATA_JWT or clerk secret!
 
+Make sure `ffmpeg` is installed ! It is required to generate videos of qr code for check-in tests.
+
 Now, run the e2e stack
 ```bash
 export ZENAO_CLERK_SECRET_KEY=<clerk-testing-secret-key>
@@ -145,6 +147,14 @@ READY   | ----------------------------
 In a third terminal, open cypress in e2e mode
 ```bash
 npm run cypress:e2e
+```
+
+Note: To make sure the test `able to scan a ticket` pass, update this line:
+```sh
+# CI to run
+cy.generateValidQRVideo("cypress/screenshots/main.cy.ts/qrcode.png");
+# Locally
+cy.generateValidQRVideo("cypress/screenshots/qrcode.png");
 ```
 
 Select a test like `main.cy.ts`, this will automatically start runnning the test and when done watch for changes in the test file located at `cypress/e2e/main.cy.ts`.
