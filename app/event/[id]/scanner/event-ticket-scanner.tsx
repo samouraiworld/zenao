@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { boolean, z } from "zod";
+import { z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
