@@ -1,12 +1,12 @@
 "use client";
 
-import { Scanner } from "@yudiel/react-qr-scanner";
 import { useState } from "react";
 import { z } from "zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
 import { useTranslations } from "next-intl";
+import BarcodeScanner from "./scanner";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
@@ -100,14 +100,27 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
       />
 
       <div className="w-full grid grid-cols-2 gap-8">
-        <Scanner
-          onScan={(result) => handleQRCodeValue(result[0].rawValue)}
-          allowMultiple
-          scanDelay={2000}
-          classNames={{
-            container: "md:max-w-[650px] max-md:col-span-2 self-center",
-          }}
-        />
+        <div className="md:max-w-[650px] max-md:col-span-2 self-center">
+          <BarcodeScanner
+            onUpdate={(_, result) => {
+              if (result && !confirmDialogOpen && !isPending) {
+                if ("vibrate" in navigator) {
+                  navigator.vibrate(200);
+                }
+                handleQRCodeValue(result.getText());
+              }
+            }}
+            facingMode="environment"
+            delay={2000}
+            videoConstraints={{
+              aspectRatio: {
+                ideal: 4 / 3,
+              },
+            }}
+            width={640}
+            height={480}
+          />
+        </div>
 
         <div className="flex flex-col h-full max-md:col-span-2 gap-6">
           <Heading level={2}>
@@ -122,7 +135,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
             )}
             {history.map((sig) => (
               <div key={sig} className="p-4 hover:bg-accent">
-                <Text>{t("signature")}: Test</Text>
+                <Text>{t("signature")}</Text>
               </div>
             ))}
           </div>

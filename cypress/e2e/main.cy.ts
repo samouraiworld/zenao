@@ -33,6 +33,7 @@ describe("main", () => {
   // NOTE: this test requires a valid pinata upload setup in the nextjs server
 
   it("prepare state", () => {
+    cy.task("resetVideoSource");
     cy.request({
       url: "http://localhost:4243/reset",
       timeout: 120000,
@@ -168,22 +169,6 @@ describe("main", () => {
     // check that the values are still correct
     cy.get('input[placeholder="Name..."]').should("have.value", testName);
     cy.get('textarea[placeholder="Bio..."]').should("have.value", testBio);
-  });
-
-  it("access an exclusive event", () => {
-    cy.createEvent({ exclusive: true });
-    cy.url().then((url) => {
-      logout();
-      cy.visit(url);
-    });
-
-    // Guard
-    cy.get("input[type=password]").type(testEventPassword);
-    cy.get("button").contains("Access event").click();
-
-    // Assertions
-    cy.get("h1").contains(testEventName).should("be.visible");
-    cy.get("h2").contains(testEventLocation).should("be.visible");
   });
 
   it("create an event", () => {
@@ -323,7 +308,7 @@ describe("main", () => {
     toastShouldContain("Vote submitted !");
 
     // Add reaction to post
-    cy.get(".reaction-btn").click();
+    cy.get(".reaction-btn").first().click();
     // Select emoji
     cy.get('img[alt="grinning"]').first().click();
   });
@@ -383,6 +368,67 @@ describe("main", () => {
     cy.visit("/event/50", { failOnStatusCode: false });
 
     cy.get("p").contains("Page not found.").should("be.visible");
+  });
+
+  it("unable to scan a ticket", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    cy.url().should("contain", "/event/");
+
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
+
+    cy.get("a").contains("Open ticket scanner").click();
+
+    cy.wait(5000);
+
+    cy.get("h2").should("contain", "Invalid ticket");
+
+    cy.visit("/");
+  });
+
+  it("able to scan a ticket", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore an event
+    cy.get("a").contains("Discover").click();
+    cy.get('a[href^="/event/"]').last().click();
+
+    cy.url().should("contain", "/event/");
+
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
+
+    cy.get("a", { timeout: 8000 }).contains("See ticket").click();
+    cy.wait(2000);
+
+    // Screenshot ticket
+    cy.url().should("contain", "/ticket/");
+    cy.get(".qrcode").first().screenshot("qrcode", { overwrite: true });
+
+    // Load ticket and create video
+    cy.generateValidQRVideo("cypress/screenshots/main.cy.ts/qrcode.png");
+
+    // Set video source
+    cy.task("changeVideoSource", "output.mjpeg").then(() => {
+      // End scan procedure
+      cy.get("a").contains("See event details").click({ timeout: 8000 });
+      cy.get("a").contains("Open ticket scanner").click();
+
+      cy.get("h2")
+        .contains("Ticket verified", { timeout: 15000 })
+        .should("exist");
+    });
   });
 
   it("add a gatekeeper", () => {
@@ -501,6 +547,22 @@ describe("main", () => {
     cy.get("h2")
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
+  });
+
+  it("access an exclusive event", () => {
+    cy.createEvent({ exclusive: true });
+    cy.url().then((url) => {
+      logout();
+      cy.visit(url);
+    });
+
+    // Guard
+    cy.get("input[type=password]").type(testEventPassword);
+    cy.get("button").contains("Access event").click();
+
+    // Assertions
+    cy.get("h1").contains(testEventName).should("be.visible");
+    cy.get("h2").contains(testEventLocation).should("be.visible");
   });
 });
 
