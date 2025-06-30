@@ -116,44 +116,6 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
               container: "md:max-w-[650px] max-md:col-span-2 self-center",
             }}
           />
-          {/* <BarcodeScanner
-            onUpdate={(_, result) => {
-              if (result && !confirmDialogOpen && !isPending) {
-                if ("vibrate" in navigator) {
-                  navigator.vibrate(200);
-                }
-                handleQRCodeValue(result.getText());
-              }
-            }}
-            delay={2000}
-            videoConstraints={{
-              facingMode: {
-                ideal: facingMode,
-              },
-              aspectRatio: {
-                ideal: 4 / 3,
-              },
-            }}
-            width={640}
-            height={480}
-          />
-
-          <div className="mt-8">
-            <Select
-              value={facingMode}
-              onValueChange={(value) => {
-                setFacingMode(value as "user" | "environment");
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Camera" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="environment">Environment</SelectItem>
-              </SelectContent>
-            </Select>
-          </div> */}
         </div>
 
         <div className="flex flex-col h-full max-md:col-span-2 gap-6">
