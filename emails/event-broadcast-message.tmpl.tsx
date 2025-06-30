@@ -26,7 +26,6 @@ export const EventBroadcastMessageEmail = () => (
           src="{{.ImageURL}}"
           width={960}
           height={540}
-          style={eventImage}
         />
         <Section style={welcome.section}>
           <Text style={welcome.text}>Message from {"{{.EventName}}"}</Text>
@@ -110,13 +109,6 @@ const details = {
     paddingBottom: 14,
     fontWeight: 500,
   },
-} as const;
-
-const eventImage = {
-  width: "100%",
-  objectFit: "cover",
-  borderTopLeftRadius: 4,
-  borderTopRightRadius: 4,
 } as const;
 
 const messageBox = {
