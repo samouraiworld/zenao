@@ -97,7 +97,7 @@ export function CheckinConfirmationDialog({
           loading && "bg-main",
         )}
       >
-        <CheckinConfirmationDialogContent error={error} />
+        <CheckinConfirmationDialogContent loading={loading} error={error} />
         <DrawerFooter className="pt-2">
           {!loading && (
             <DrawerClose asChild>
