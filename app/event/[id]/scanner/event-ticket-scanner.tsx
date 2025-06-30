@@ -36,16 +36,12 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const { checkIn } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-  // const [facingMode, setFacingMode] = useState<"user" | "environment">(
-  //   "environment",
-  // );
   const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const updateHistory = (newSig: string) => {
     setHistory((old) => {
       const upToDate = [newSig, ...old];
-
       return upToDate;
     });
   };
@@ -131,7 +127,9 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
             )}
             {history.map((sig) => (
               <div key={sig} className="p-4 hover:bg-accent">
-                <Text>{t("signature")}</Text>
+                <Text>
+                  {t("signature")}: {sig}
+                </Text>
               </div>
             ))}
           </div>
