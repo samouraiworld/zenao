@@ -45,7 +45,7 @@ const broadcastEmailFormSchema = z.object({
   message: z
     .string()
     .min(30, "Message must be at least 30 characters")
-    .max(1000, "Message must be at most 1000 characters"),
+    .max(5000, "Message must be at most 5000 characters"),
   attachTicket: z.boolean(),
 });
 
@@ -178,7 +178,7 @@ function BroadcastEmailForm({
         placeholder={t("message-input-placeholder")}
         label={t("message-input-label")}
         className="min-h-[100px] max-h-[500px]"
-        maxLength={1000}
+        maxLength={5000}
         wordCounter
         disabled={isDisabled}
       />
