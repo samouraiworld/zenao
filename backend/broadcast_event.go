@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
@@ -125,8 +124,6 @@ func (s *ZenaoServer) BroadcastEvent(
 			Attachments: attachments,
 		})
 	}
-
-	time.Sleep(900 * time.Second)
 
 	count := 0
 	s.Logger.Info("broadcast-event-starting-send-mails", zap.Int("requests-count", len(requests)), zap.Bool("attach-ticket", req.Msg.AttachTicket))
