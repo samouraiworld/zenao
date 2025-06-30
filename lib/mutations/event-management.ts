@@ -129,6 +129,7 @@ type EventBroadcastEmailRequest = {
   eventId: string;
   token: string;
   message: string;
+  attachTicket: boolean;
 };
 
 export const useEventBroadcastEmail = () => {
@@ -137,11 +138,13 @@ export const useEventBroadcastEmail = () => {
       eventId,
       token,
       message,
+      attachTicket,
     }: EventBroadcastEmailRequest) => {
       await zenaoClient.broadcastEvent(
         {
           eventId,
           message,
+          attachTicket,
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
