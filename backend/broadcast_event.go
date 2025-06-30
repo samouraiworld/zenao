@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
@@ -125,11 +126,20 @@ func (s *ZenaoServer) BroadcastEvent(
 		})
 	}
 
+	time.Sleep(900 * time.Second)
+
+	count := 0
+	s.Logger.Info("broadcast-event-starting-send-mails", zap.Int("requests-count", len(requests)), zap.Bool("attach-ticket", req.Msg.AttachTicket))
 	if req.Msg.AttachTicket {
 		// cannot batch send w/ attachments: https://resend.com/docs/api-reference/emails/send-batch-emails
 		for _, request := range requests {
 			if _, err := s.MailClient.Emails.SendWithContext(context.Background(), request); err != nil {
 				s.Logger.Error("send-event-broadcast-email", zap.Error(err))
+				continue
+			}
+			count++
+			if count%50 == 0 {
+				s.Logger.Info("broadcast-event-sent-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
 			}
 		}
 	} else {
@@ -138,9 +148,14 @@ func (s *ZenaoServer) BroadcastEvent(
 			batch := requests[i:min(i+100, len(requests))]
 			if _, err := s.MailClient.Batch.SendWithContext(context.Background(), batch); err != nil {
 				s.Logger.Error("send-event-broadcast-email", zap.Error(err))
+				continue
 			}
+			count += len(batch)
+			s.Logger.Info("broadcast-event-sent-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
 		}
 	}
+
+	s.Logger.Info("broadcast-event-emails-sent", zap.Int("total-sent", count), zap.Int("total-to-send", len(requests)))
 
 	return connect.NewResponse(&zenaov1.BroadcastEventResponse{}), nil
 }
