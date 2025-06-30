@@ -6,20 +6,13 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
 import { useTranslations } from "next-intl";
-import BarcodeScanner from "./scanner";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
 import { userAddressOptions } from "@/lib/queries/user";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn/select";
 
 type EventTicketScannerProps = {
   eventId: string;
@@ -39,12 +32,13 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { checkIn, isPending } = useEventCheckIn();
+  const [isLoading, setIsLoading] = useState(false);
+  const { checkIn } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-  const [facingMode, setFacingMode] = useState<"user" | "environment">(
-    "environment",
-  );
+  // const [facingMode, setFacingMode] = useState<"user" | "environment">(
+  //   "environment",
+  // );
   const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,6 +52,8 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
 
   const handleQRCodeValue = async (value: string) => {
     setError(null);
+    setIsLoading(true);
+    setConfirmationDialogOpen(true);
 
     try {
       const token = await getToken();
@@ -96,8 +92,9 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
       } else {
         setError(t("check-in-confirmation-dialog.description-error"));
       }
+    } finally {
+      setIsLoading(false);
     }
-    setConfirmationDialogOpen(true);
   };
 
   return (
@@ -105,13 +102,21 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
       <CheckinConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmationDialogOpen}
-        loading={isPending}
+        loading={isLoading}
         error={error}
       />
 
       <div className="w-full grid grid-cols-2 gap-8">
         <div className="md:max-w-[650px] max-md:col-span-2 self-center">
-          <BarcodeScanner
+          <Scanner
+            onScan={(result) => handleQRCodeValue(result[0].rawValue)}
+            allowMultiple
+            paused={isLoading || confirmDialogOpen}
+            classNames={{
+              container: "md:max-w-[650px] max-md:col-span-2 self-center",
+            }}
+          />
+          {/* <BarcodeScanner
             onUpdate={(_, result) => {
               if (result && !confirmDialogOpen && !isPending) {
                 if ("vibrate" in navigator) {
@@ -148,7 +153,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
                 <SelectItem value="environment">Environment</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
         </div>
 
         <div className="flex flex-col h-full max-md:col-span-2 gap-6">

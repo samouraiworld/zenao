@@ -91,7 +91,12 @@ export function CheckinConfirmationDialog({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className={error ? "bg-red-500" : "bg-green-400"}>
+      <DrawerContent
+        className={cn(
+          error ? "bg-red-500" : "bg-green-400",
+          loading && "bg-main",
+        )}
+      >
         <CheckinConfirmationDialogContent error={error} />
         <DrawerFooter className="pt-2">
           {!loading && (
