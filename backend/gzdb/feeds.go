@@ -118,7 +118,7 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 		})
 	}
 
-	// if deletedAt is null, Unix() method would returns a negative value
+	// on null value, Unix() returns negative value
 	deletedAt := int64(0)
 	if post.DeletedAt.Valid {
 		deletedAt = post.DeletedAt.Time.Unix()
