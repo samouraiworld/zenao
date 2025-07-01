@@ -33,6 +33,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
     userAddressOptions(getToken, userId),
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [lastSignature, setLastSignature] = useState<string | null>(null);
   const { checkIn } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
 
@@ -40,7 +41,9 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const [error, setError] = useState<string | null>(null);
 
   const updateHistory = (newSig: string) => {
+    setLastSignature(newSig);
     setHistory((old) => {
+      console.log("old", old);
       const upToDate = [newSig, ...old];
       return upToDate;
     });
@@ -103,7 +106,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
       />
 
       <div className="w-full grid grid-cols-2 gap-8">
-        <div className="md:max-w-[650px] max-md:col-span-2 self-center">
+        <div className="md:max-w-[650px] max-md:col-span-2 self-start">
           <Scanner
             onScan={(result) => handleQRCodeValue(result[0].rawValue)}
             allowMultiple
@@ -125,13 +128,17 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
                 <Text>{t("no-tickets-scanned")}</Text>
               </div>
             )}
-            {history.map((sig) => (
-              <div key={sig} className="p-4 hover:bg-accent">
-                <Text>
-                  {t("signature")}: {sig}
-                </Text>
-              </div>
-            ))}
+            {lastSignature && <Text>Last ticket signed: {lastSignature}</Text>}
+
+            <div className="max-h-[524px] overflow-auto">
+              {history.map((sig) => (
+                <div key={sig} className="p-4 hover:bg-accent">
+                  <Text>
+                    {t("signature")}: {sig}
+                  </Text>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
