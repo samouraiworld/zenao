@@ -35,6 +35,7 @@ type Event struct {
 	DAOPrivate          *basedao.DAOPrivate
 	DAO                 daokit.DAO
 	participationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
+	checkedIn           uint32 // number of checked-in participants, used for rendering only
 }
 
 type Config struct {
@@ -131,6 +132,7 @@ func NewEvent(conf *Config) *Event {
 		DAO:                 pubdao,
 		location:            conf.Location,
 		participationPubkey: participationPubkey,
+		checkedIn:           0,
 		// XXX: set PkgPath?
 	}
 
@@ -365,6 +367,7 @@ func (e *Event) checkinHandler() daokit.MessageHandler {
 
 		now := time.Now()
 		ticket.UsedAt = &now
+		e.checkedIn += 1
 	})
 }
 
@@ -377,18 +380,6 @@ func NewCheckinMsg(ticketPubkey string, checkinSignature string) daokit.Executab
 
 func (e *Event) CountParticipants() uint32 {
 	return e.DAOPrivate.Members.CountMembersWithRole("participant")
-}
-
-func (e *Event) CountCheckedIn() uint32 {
-	count := 0
-	e.tickets.Iterate("", "", func(key string, value interface{}) bool {
-		ticket := value.(*Ticket)
-		if ticket.Used() {
-			count++
-		}
-		return false
-	})
-	return uint32(count)
 }
 
 const MsgEditEventKind = "gno.land/p/zenao/events.EditEvent"
