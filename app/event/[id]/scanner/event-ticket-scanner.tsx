@@ -99,7 +99,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   };
 
   return (
-    <div>
+    <div className="w-full">
       {/* Loading overlay */}
       <div
         className={cn(

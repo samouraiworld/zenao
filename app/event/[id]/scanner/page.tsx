@@ -40,16 +40,8 @@ export default async function ScannerPage({ params }: Props) {
   }
 
   return (
-    <ScreenContainer
-      background={{
-        src: eventData.imageUri,
-        width: imageWidth,
-        height: imageHeight,
-      }}
-    >
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventTicketScanner eventId={p.id} eventData={eventData} />
-      </HydrationBoundary>
-    </ScreenContainer>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <EventTicketScanner eventId={p.id} eventData={eventData} />
+    </HydrationBoundary>
   );
 }
