@@ -158,6 +158,7 @@ type EventInfo struct {
 	Participants uint32
 	PkgPath      string
 	Privacy      *EventPrivacy
+	CheckedIn    uint32
 }
 
 type BatchProfileField struct {

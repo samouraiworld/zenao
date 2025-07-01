@@ -379,6 +379,18 @@ func (e *Event) CountParticipants() uint32 {
 	return e.DAOPrivate.Members.CountMembersWithRole("participant")
 }
 
+func (e *Event) CountCheckedIn() uint32 {
+	count := 0
+	e.tickets.Iterate("", "", func(key string, value interface{}) bool {
+		ticket := value.(*Ticket)
+		if ticket.Used() {
+			count++
+		}
+		return false
+	})
+	return uint32(count)
+}
+
 const MsgEditEventKind = "gno.land/p/zenao/events.EditEvent"
 
 func (e *Event) editEventHandler() daokit.MessageHandler {
