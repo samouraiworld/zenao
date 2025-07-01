@@ -107,7 +107,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
           isLoading ? "flex" : "hidden",
         )}
       >
-        <Loader2 size={24} className="animate-spin" />
+        <Loader2 size={24} className="animate-spin text-white" />
       </div>
       <CheckinConfirmationDialog
         open={confirmDialogOpen}
