@@ -871,6 +871,9 @@ func (e *EventInfo) ToJSON() *json.Node {
 	if e.Privacy != nil {
 		fields["privacy"] = e.Privacy.ToJSON()
 	}
+	if e.CheckedIn != 0 {
+		fields["checkedIn"] = json.NumberNode("", float64(e.CheckedIn))
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -936,6 +939,9 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 		fv := &EventPrivacy{}
 		fv.FromJSON(val)
 		e.Privacy = fv
+	}
+	if val, ok := fields["checkedIn"]; ok {
+		e.CheckedIn = uint32(val.MustNumeric())
 	}
 }
 
