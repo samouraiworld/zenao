@@ -7,12 +7,14 @@ import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
 import { useTranslations } from "next-intl";
 import { Scanner } from "@yudiel/react-qr-scanner";
+import { Loader2 } from "lucide-react";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
 import { userAddressOptions } from "@/lib/queries/user";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
+import { cn } from "@/lib/tailwind";
 
 type EventTicketScannerProps = {
   eventId: string;
@@ -52,7 +54,6 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const handleQRCodeValue = async (value: string) => {
     setError(null);
     setIsLoading(true);
-    setConfirmationDialogOpen(true);
 
     try {
       const token = await getToken();
@@ -83,6 +84,8 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
         token,
       });
 
+      setConfirmationDialogOpen(true);
+
       updateHistory(signature);
     } catch (err) {
       console.error("Error", err);
@@ -98,10 +101,18 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
 
   return (
     <div>
+      {/* Loading overlay */}
+      <div
+        className={cn(
+          "w-screen h-screen absolute top-0 left-0 z-50 bg-black/80 justify-center items-center",
+          isLoading ? "flex" : "hidden",
+        )}
+      >
+        <Loader2 size={24} className="animate-spin" />
+      </div>
       <CheckinConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmationDialogOpen}
-        loading={isLoading}
         error={error}
       />
 
