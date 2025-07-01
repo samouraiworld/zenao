@@ -45,7 +45,6 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   const updateHistory = (newSig: string) => {
     setLastSignature(newSig);
     setHistory((old) => {
-      console.log("old", old);
       const upToDate = [newSig, ...old];
       return upToDate;
     });
