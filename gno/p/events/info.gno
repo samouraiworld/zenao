@@ -30,6 +30,7 @@ func (e *Event) Info() *zenaov1.EventInfo {
 		Gatekeepers:  e.DAOPrivate.Members.GetMembersWithRole("gatekeeper"),
 		Location:     e.location,
 		Participants: e.CountParticipants(),
+		CheckedIn:    e.checkedIn,
 		Privacy:      privacy,
 	}
 }

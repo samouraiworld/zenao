@@ -169,6 +169,7 @@ message EventInfo {
   uint32 participants = 10;
   string pkg_path = 11;
   EventPrivacy privacy = 12;
+  uint32 checked_in = 13;
 }
 
 message BatchProfileField {

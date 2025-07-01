@@ -526,6 +526,9 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	if e.Privacy != nil {
 		fmt.Fprintf(buf, "%s\tPrivacy: &%s%s,\n", linePrefix, typePrefix, e.Privacy.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
+	if e.CheckedIn != 0 {
+		fmt.Fprintf(buf, "%s\tCheckedIn: %d,\n", linePrefix, e.CheckedIn)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
