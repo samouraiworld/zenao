@@ -84,8 +84,6 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
         token,
       });
 
-      setConfirmationDialogOpen(true);
-
       updateHistory(signature);
     } catch (err) {
       console.error("Error", err);
@@ -95,6 +93,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
         setError(t("check-in-confirmation-dialog.description-error"));
       }
     } finally {
+      setConfirmationDialogOpen(true);
       setIsLoading(false);
     }
   };
