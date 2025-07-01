@@ -94,7 +94,7 @@ export function CheckinConfirmationDialog({
       <DrawerContent
         className={cn(
           "h-full",
-          error ? "bg-red-500" : "bg-green-400",
+          error ? "bg-red-500 border-red-500" : "bg-green-400 border-green-400",
           loading && "bg-main",
         )}
       >
