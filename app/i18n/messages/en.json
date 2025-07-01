@@ -246,6 +246,7 @@
       "description-error": "Error while trying to validate your ticket",
       "title-error": "Invalid ticket",
       "description-success": "You can enter the venue",
+      "last-ticket-scanned": "Last ticket signed",
       "close": "Close"
     },
     "history-title": "Scanned tickets for event",

@@ -97,7 +97,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
   };
 
   return (
-    <div className="mx-auto">
+    <div>
       <CheckinConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmationDialogOpen}
@@ -122,13 +122,20 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
             {t("history-title")}: {eventData.title}
           </Heading>
 
+          <div className="overflow-auto">
+            {lastSignature && (
+              <Text>
+                {t("last-ticket-scanned")}: {lastSignature.slice(-6)}
+              </Text>
+            )}
+          </div>
+
           <div className="flex flex-col bg-secondary">
             {history.length === 0 && (
               <div className="p-4">
                 <Text>{t("no-tickets-scanned")}</Text>
               </div>
             )}
-            {lastSignature && <Text>Last ticket signed: {lastSignature}</Text>}
 
             <div className="max-h-[524px] overflow-auto">
               {history.map((sig) => (
