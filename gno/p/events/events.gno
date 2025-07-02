@@ -35,6 +35,7 @@ type Event struct {
 	DAOPrivate          *basedao.DAOPrivate
 	DAO                 daokit.DAO
 	participationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
+	checkedIn           uint32 // number of checked-in participants, used for rendering only
 }
 
 type Config struct {
@@ -131,6 +132,7 @@ func NewEvent(conf *Config) *Event {
 		DAO:                 pubdao,
 		location:            conf.Location,
 		participationPubkey: participationPubkey,
+		checkedIn:           0,
 		// XXX: set PkgPath?
 	}
 
@@ -365,6 +367,7 @@ func (e *Event) checkinHandler() daokit.MessageHandler {
 
 		now := time.Now()
 		ticket.UsedAt = &now
+		e.checkedIn += 1
 	})
 }
 
