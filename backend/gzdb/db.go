@@ -1075,7 +1075,7 @@ func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs 
 			Role:    role,
 		}
 
-		if err := g.db.Create(userRole).Error; err != nil {
+		if err := g.db.Save(userRole).Error; err != nil {
 			return fmt.Errorf("create %s role assignment in db: %w", role, err)
 		}
 	}
