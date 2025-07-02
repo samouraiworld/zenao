@@ -118,6 +118,11 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 		})
 	}
 
+	// on null value, Unix() returns negative value
+	deletedAt := int64(0)
+	if post.DeletedAt.Valid {
+		deletedAt = post.DeletedAt.Time.Unix()
+	}
 	zpost := &zeni.Post{
 		ID:        strconv.FormatUint(uint64(post.ID), 10),
 		CreatedAt: post.CreatedAt,
@@ -132,7 +137,7 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 
 			CreatedAt: post.CreatedAt.Unix(),
 			UpdatedAt: post.UpdatedAt.Unix(),
-			DeletedAt: post.DeletedAt.Time.Unix(),
+			DeletedAt: deletedAt,
 			Loc:       nil,
 			Tags:      tags,
 		},
