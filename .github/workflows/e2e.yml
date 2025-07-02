@@ -57,9 +57,6 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: make install-atlas
       
-        # Disable for now
-      # - name: Install ffmpeg
-      #   run: sudo apt update && sudo add-apt-repository ppa:ubuntuhandbook1/ffmpeg7 && sudo apt install -y ffmpeg
       - run: go install ./backend
 
       - uses: cypress-io/github-action@v6

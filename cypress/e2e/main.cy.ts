@@ -394,43 +394,6 @@ describe("main", () => {
     cy.visit("/");
   });
 
-  // it("able to scan a ticket", () => {
-  //   // start from the home
-  //   cy.visit("/");
-
-  //   // Explore an event
-  //   cy.get("a").contains("Discover").click();
-  //   cy.get('a[href^="/event/"]').last().click();
-
-  //   cy.url().should("contain", "/event/");
-
-  //   cy.url().then((url) => {
-  //     login();
-  //     cy.visit(url);
-  //   });
-
-  //   cy.get("a", { timeout: 8000 }).contains("See ticket").click();
-  //   cy.wait(2000);
-
-  //   // Screenshot ticket
-  //   cy.url().should("contain", "/ticket/");
-  //   cy.get(".qrcode").first().screenshot("qrcode", { overwrite: true });
-
-  //   // Load ticket and create video
-  //   cy.generateValidQRVideo("cypress/screenshots/main.cy.ts/qrcode.png");
-
-  //   // Set video source
-  //   cy.task("changeVideoSource", "output.mjpeg").then(() => {
-  //     // End scan procedure
-  //     cy.get("a").contains("See event details").click({ timeout: 8000 });
-  //     cy.get("a").contains("Open ticket scanner").click();
-
-  //     cy.get("h2")
-  //       .contains("Ticket verified", { timeout: 15000 })
-  //       .should("exist");
-  //   });
-  // });
-
   it("add a gatekeeper", () => {
     // start from the home
     cy.visit("/");
