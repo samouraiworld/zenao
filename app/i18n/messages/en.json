@@ -248,6 +248,8 @@
       "description-success": "You can enter the venue",
       "close": "Close"
     },
+    "last-ticket-scanned": "Last ticket signed",
+    "checkin-count": "Total tickets checked-in",
     "history-title": "Scanned tickets for event",
     "no-tickets-scanned": "No tickets scanned yet",
     "signature": "Signature"

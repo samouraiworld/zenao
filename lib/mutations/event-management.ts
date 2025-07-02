@@ -160,12 +160,14 @@ export const useEventBroadcastEmail = () => {
 };
 
 type EventCheckInRequest = {
+  eventId: string;
   signature: string;
   ticketPubkey: string;
   token: string;
 };
 
 export const useEventCheckIn = () => {
+  const queryClient = getQueryClient();
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       signature,
@@ -179,6 +181,11 @@ export const useEventCheckIn = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
+    },
+    onSuccess: (_, variables) => {
+      const eventOpts = eventOptions(variables.eventId);
+
+      queryClient.invalidateQueries(eventOpts);
     },
   });
 

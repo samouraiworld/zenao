@@ -34,7 +34,7 @@ function CheckinConfirmationDialogContent({
   const t = useTranslations("event-scanner.check-in-confirmation-dialog");
 
   return (
-    <div className="flex flex-col py-8 gap-2 items-center text-white">
+    <div className="flex flex-col h-full justify-center gap-2 items-center text-white">
       {loading ? (
         <div className="flex justify-center items-center p-6">
           <Loader2 className="animate-spin" />
@@ -91,8 +91,14 @@ export function CheckinConfirmationDialog({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className={error ? "bg-red-500" : "bg-green-400"}>
-        <CheckinConfirmationDialogContent error={error} />
+      <DrawerContent
+        className={cn(
+          "h-full",
+          error ? "bg-red-500 border-red-500" : "bg-green-400 border-green-400",
+          loading && "bg-main",
+        )}
+      >
+        <CheckinConfirmationDialogContent loading={loading} error={error} />
         <DrawerFooter className="pt-2">
           {!loading && (
             <DrawerClose asChild>
