@@ -1,11 +1,9 @@
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
-import { imageHeight, imageWidth } from "../constants";
 import { EventTicketScanner } from "./event-ticket-scanner";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
-import { ScreenContainer } from "@/components/layout/screen-container";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
 
@@ -40,16 +38,8 @@ export default async function ScannerPage({ params }: Props) {
   }
 
   return (
-    <ScreenContainer
-      background={{
-        src: eventData.imageUri,
-        width: imageWidth,
-        height: imageHeight,
-      }}
-    >
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <EventTicketScanner eventId={p.id} eventData={eventData} />
-      </HydrationBoundary>
-    </ScreenContainer>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <EventTicketScanner eventId={p.id} eventData={eventData} />
+    </HydrationBoundary>
   );
 }

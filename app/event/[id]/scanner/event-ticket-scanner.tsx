@@ -6,20 +6,18 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
 import { useTranslations } from "next-intl";
-import BarcodeScanner from "./scanner";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { Loader2, RefreshCcw } from "lucide-react";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
 import { userAddressOptions } from "@/lib/queries/user";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn/select";
+import { cn } from "@/lib/tailwind";
+import { eventOptions } from "@/lib/queries/event";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { Button } from "@/components/shadcn/button";
 
 type EventTicketScannerProps = {
   eventId: string;
@@ -33,31 +31,39 @@ const ticketSecretSchema = z
   })
   .transform((value) => Buffer.from(value, "base64"));
 
-export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
+export function EventTicketScanner({
+  eventId,
+  eventData,
+}: EventTicketScannerProps) {
   const t = useTranslations("event-scanner");
   const { getToken, userId } = useAuth();
+  const {
+    data: { checkedIn },
+    isFetching,
+    refetch,
+  } = useSuspenseQuery(eventOptions(eventId));
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { checkIn, isPending } = useEventCheckIn();
+  const [isLoading, setIsLoading] = useState(false);
+  const [lastSignature, setLastSignature] = useState<string | null>(null);
+  const { checkIn } = useEventCheckIn();
   const [confirmDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-  const [facingMode, setFacingMode] = useState<"user" | "environment">(
-    "environment",
-  );
   const [history, setHistory] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const updateHistory = (newSig: string) => {
+    setLastSignature(newSig);
     setHistory((old) => {
       const upToDate = [newSig, ...old];
-
       return upToDate;
     });
   };
 
   const handleQRCodeValue = async (value: string) => {
     setError(null);
+    setIsLoading(true);
 
     try {
       const token = await getToken();
@@ -83,6 +89,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
 
       // Call mutation
       await checkIn({
+        eventId,
         signature,
         ticketPubkey,
         token,
@@ -96,65 +103,66 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
       } else {
         setError(t("check-in-confirmation-dialog.description-error"));
       }
+    } finally {
+      setConfirmationDialogOpen(true);
+      setIsLoading(false);
     }
-    setConfirmationDialogOpen(true);
   };
 
   return (
-    <div className="mx-auto">
+    <div className="w-full">
+      {/* Loading overlay */}
+      <div
+        className={cn(
+          "w-screen h-screen absolute top-0 left-0 z-50 bg-black/80 justify-center items-center",
+          isLoading ? "flex" : "hidden",
+        )}
+      >
+        <Loader2 size={24} className="animate-spin text-white" />
+      </div>
       <CheckinConfirmationDialog
         open={confirmDialogOpen}
         onOpenChange={setConfirmationDialogOpen}
-        loading={isPending}
         error={error}
       />
 
       <div className="w-full grid grid-cols-2 gap-8">
-        <div className="md:max-w-[650px] max-md:col-span-2 self-center">
-          <BarcodeScanner
-            onUpdate={(_, result) => {
-              if (result && !confirmDialogOpen && !isPending) {
-                if ("vibrate" in navigator) {
-                  navigator.vibrate(200);
-                }
-                handleQRCodeValue(result.getText());
-              }
+        <div className="md:max-w-[650px] max-md:col-span-2 self-start">
+          <Scanner
+            onScan={(result) => handleQRCodeValue(result[0].rawValue)}
+            allowMultiple
+            paused={isLoading || confirmDialogOpen}
+            classNames={{
+              container: "md:max-w-[650px] max-md:col-span-2 self-center",
             }}
-            delay={2000}
-            videoConstraints={{
-              facingMode: {
-                ideal: facingMode,
-              },
-              aspectRatio: {
-                ideal: 4 / 3,
-              },
-            }}
-            width={640}
-            height={480}
           />
-
-          <div className="mt-8">
-            <Select
-              value={facingMode}
-              onValueChange={(value) => {
-                setFacingMode(value as "user" | "environment");
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Camera" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="environment">Environment</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         <div className="flex flex-col h-full max-md:col-span-2 gap-6">
+          <div className="flex gap-2 items-center">
+            <Heading level={2}>
+              {t("checkin-count")}: {isFetching ? <Skeleton /> : checkedIn}
+            </Heading>
+            <Button
+              variant="ghost"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              <RefreshCcw />
+            </Button>
+          </div>
+
           <Heading level={2}>
             {t("history-title")}: {eventData.title}
           </Heading>
+
+          <div className="overflow-auto">
+            {lastSignature && (
+              <Text>
+                {t("last-ticket-scanned")}: {lastSignature.slice(-6)}
+              </Text>
+            )}
+          </div>
 
           <div className="flex flex-col bg-secondary">
             {history.length === 0 && (
@@ -162,11 +170,16 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
                 <Text>{t("no-tickets-scanned")}</Text>
               </div>
             )}
-            {history.map((sig) => (
-              <div key={sig} className="p-4 hover:bg-accent">
-                <Text>{t("signature")}</Text>
-              </div>
-            ))}
+
+            <div className="max-h-[524px] overflow-auto">
+              {history.map((sig) => (
+                <div key={sig} className="p-4 hover:bg-accent">
+                  <Text>
+                    {t("signature")}: {sig}
+                  </Text>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
