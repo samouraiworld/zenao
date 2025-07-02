@@ -7,7 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 import * as ed from "@noble/ed25519";
 import { useTranslations } from "next-intl";
 import { Scanner } from "@yudiel/react-qr-scanner";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCcw } from "lucide-react";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
@@ -15,6 +15,9 @@ import { userAddressOptions } from "@/lib/queries/user";
 import Heading from "@/components/texts/heading";
 import Text from "@/components/texts/text";
 import { cn } from "@/lib/tailwind";
+import { eventOptions } from "@/lib/queries/event";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { Button } from "@/components/shadcn/button";
 
 type EventTicketScannerProps = {
   eventId: string;
@@ -28,9 +31,17 @@ const ticketSecretSchema = z
   })
   .transform((value) => Buffer.from(value, "base64"));
 
-export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
+export function EventTicketScanner({
+  eventId,
+  eventData,
+}: EventTicketScannerProps) {
   const t = useTranslations("event-scanner");
   const { getToken, userId } = useAuth();
+  const {
+    data: { checkedIn },
+    isFetching,
+    refetch,
+  } = useSuspenseQuery(eventOptions(eventId));
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
@@ -78,6 +89,7 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
 
       // Call mutation
       await checkIn({
+        eventId,
         signature,
         ticketPubkey,
         token,
@@ -127,6 +139,19 @@ export function EventTicketScanner({ eventData }: EventTicketScannerProps) {
         </div>
 
         <div className="flex flex-col h-full max-md:col-span-2 gap-6">
+          <div className="flex gap-2 items-center">
+            <Heading level={2}>
+              {t("checkin-count")}: {isFetching ? <Skeleton /> : checkedIn}
+            </Heading>
+            <Button
+              variant="ghost"
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              <RefreshCcw />
+            </Button>
+          </div>
+
           <Heading level={2}>
             {t("history-title")}: {eventData.title}
           </Heading>

@@ -29,8 +29,6 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     eventGatekeepersEmails(id, getToken),
   );
 
-  console.log(gatekeepers.gatekeepers);
-
   const isOrganizer = roles.includes("organizer");
   const router = useRouter();
 

@@ -246,9 +246,10 @@
       "description-error": "Error while trying to validate your ticket",
       "title-error": "Invalid ticket",
       "description-success": "You can enter the venue",
-      "last-ticket-scanned": "Last ticket signed",
       "close": "Close"
     },
+    "last-ticket-scanned": "Last ticket signed",
+    "checkin-count": "Total tickets checked-in",
     "history-title": "Scanned tickets for event",
     "no-tickets-scanned": "No tickets scanned yet",
     "signature": "Signature"
