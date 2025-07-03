@@ -76,6 +76,8 @@
     "votes": "Votes",
     "your-email": "Your email",
     "guests": "Guests",
+    "cancel-my-participation": "Cancel my participation",
+    "sold-out-msg": "The event is now sold out !",
     "email-placeholder": "Email...",
     "toast-confirmation": "You take part in the event!",
     "toast-already-registered-error": "Email(s) already registered for this event!",
