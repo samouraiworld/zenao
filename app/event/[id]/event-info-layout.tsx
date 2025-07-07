@@ -76,6 +76,7 @@ export function EventInfoLayout({
 
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(data.startDate) * 1000;
+  const isSoldOut = data.capacity - data.participants <= 0;
 
   const [guestEmail, setGuestEmail] = useState<string>("");
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
@@ -222,7 +223,7 @@ export function EventInfoLayout({
                           className="justify-normal px-0"
                           onClick={() => setConfirmCancelDialogOpen(true)}
                         >
-                          Cancel my participation
+                          {t("cancel-my-participation")}
                         </Button>
                       </>
                     </SignedIn>
@@ -256,6 +257,12 @@ export function EventInfoLayout({
                 {t("already-begun")}
               </Heading>
               <Text className="my-4">{t("too-late")}</Text>
+            </div>
+          ) : isSoldOut ? (
+            <div>
+              <Heading level={2} size="xl">
+                {t("sold-out-msg")}
+              </Heading>
             </div>
           ) : (
             <div>
