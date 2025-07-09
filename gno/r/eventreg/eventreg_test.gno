@@ -134,6 +134,11 @@ func TestEvents(t *testing.T) {
 		events := listEvents(time.Now().Unix(), lastYearUnix, 10, 0)
 		urequire.Equal(t, `3-past-event-hour, 4-past-event-day, 5-past-event-month`, eventsString(events))
 	}
+	// list past events with offset 1 and limit 1
+	{
+		events := listEvents(time.Now().Unix(), lastYearUnix, 1, 1)
+		urequire.Equal(t, `4-past-event-day`, eventsString(events))
+	}
 	// list past event with offset 1
 	{
 		events := listEvents(time.Now().Unix(), lastYearUnix, 10, 1)
