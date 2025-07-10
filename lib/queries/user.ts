@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 
 type GetToken = ReturnType<typeof useAuth>["getToken"];
 

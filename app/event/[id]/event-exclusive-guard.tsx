@@ -16,7 +16,7 @@ import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { EventPasswordProvider } from "@/components/providers/event-password-provider";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/widgets/images/web3-image";

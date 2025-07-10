@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "../get-query-client";
 import { eventOptions } from "../queries/event";
 import { currentTimezone } from "../time";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 import { EventFormSchemaType } from "@/types/schemas";
 
 export const useCreateEvent = () => {

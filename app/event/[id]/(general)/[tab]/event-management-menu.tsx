@@ -9,7 +9,7 @@ import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import { EventUserRole } from "@/lib/queries/event-users";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 
 type EventManagementMenuProps = {
   eventId: string;

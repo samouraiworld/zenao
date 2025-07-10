@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventOptions } from "../queries/event";
 import { getQueryClient } from "../get-query-client";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 
 type EventParticipateLoggedInRequest = {
   eventId: string;

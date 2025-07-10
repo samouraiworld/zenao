@@ -1,6 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GetToken } from "../utils";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 
 export const eventTickets = (eventId: string, getToken: GetToken) =>
   queryOptions({
