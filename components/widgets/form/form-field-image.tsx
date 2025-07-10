@@ -17,7 +17,7 @@ import {
 } from "@/components/shadcn/tooltip";
 import { Card } from "@/components/widgets/cards/card";
 import { cn } from "@/lib/tailwind";
-import { Web3Image } from "@/components/images/web3-image";
+import { Web3Image } from "@/components/widgets/images/web3-image";
 import { FormFieldProps, urlPattern } from "@/types/schemas";
 
 export const FormFieldImage = <T extends FieldValues>(

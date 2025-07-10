@@ -9,7 +9,7 @@ import Heading from "@/components/widgets/texts/heading";
 import { idFromPkgPath } from "@/lib/queries/event";
 import { eventsByOrganizerList } from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";
-import EventCardListLayout from "@/components/layout/event-card-list-layout";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 
 export function ProfileInfo({
   address,

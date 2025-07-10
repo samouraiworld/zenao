@@ -19,7 +19,7 @@ import { EventPasswordProvider } from "@/components/providers/event-password-pro
 import { zenaoClient } from "@/app/zenao-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Web3Image } from "@/components/images/web3-image";
+import { Web3Image } from "@/components/widgets/images/web3-image";
 import { captureException } from "@/lib/report";
 import {
   eventProtectionFormSchema,

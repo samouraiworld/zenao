@@ -8,7 +8,7 @@ import { eventsList } from "@/lib/queries/events-list";
 import EmptyEventsList from "@/components/features/event/event-empty-list";
 import { idFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
-import EventCardListLayout from "@/components/layout/event-card-list-layout";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { EventCard } from "@/components/features/event/event-card";
 
 export function DiscoverEventsList({

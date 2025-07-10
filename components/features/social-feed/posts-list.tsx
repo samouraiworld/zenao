@@ -3,14 +3,14 @@
 import { Suspense, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { PostCardSkeleton } from "../features/social-feed/post-card-skeleton";
-import { PollPost } from "../widgets/poll-post";
-import Text from "./texts/text";
-import { LoaderMoreButton } from "./buttons/load-more-button";
+import { PostCardSkeleton } from "./post-card-skeleton";
+import { PollPost } from "./poll-post";
 import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
+import Text from "@/components/widgets/texts/text";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 
 function EmptyPostsList() {
   const t = useTranslations("event-feed");

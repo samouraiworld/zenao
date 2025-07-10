@@ -7,7 +7,7 @@ import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import { Web3Image } from "@/components/images/web3-image";
+import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
 

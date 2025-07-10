@@ -24,7 +24,7 @@ import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import { Card } from "@/components/widgets/cards/card";
 import { UserAvatarWithName } from "@/components/common/user";
 import { EventRegistrationForm } from "@/components/features/event/event-registration";
-import { Web3Image } from "@/components/images/web3-image";
+import { Web3Image } from "@/components/widgets/images/web3-image";
 import { useEventPassword } from "@/components/providers/event-password-provider";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Separator } from "@/components/shadcn/separator";

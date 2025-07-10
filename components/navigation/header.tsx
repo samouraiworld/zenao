@@ -22,7 +22,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import Text from "../widgets/texts/text";
 import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
-import { Web3Image } from "../images/web3-image";
+import { Web3Image } from "../widgets/images/web3-image";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";

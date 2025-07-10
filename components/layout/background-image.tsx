@@ -1,6 +1,6 @@
 "use client";
 
-import { Web3Image } from "../images/web3-image";
+import { Web3Image } from "../widgets/images/web3-image";
 
 export interface BackgroundProps {
   src: string;

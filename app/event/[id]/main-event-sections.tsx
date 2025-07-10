@@ -12,8 +12,6 @@ import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
 import { TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
-import { PollsList } from "@/components/widgets/polls-list";
-import { PostsList } from "@/components/widgets/posts-list";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -21,6 +19,8 @@ import {
   EventInfoTabsSchemaType,
   FeedPostFormSchemaType,
 } from "@/types/schemas";
+import { PollsList } from "@/components/features/social-feed/polls-list";
+import { PostsList } from "@/components/features/social-feed/posts-list";
 
 export function MainEventSections({
   className,

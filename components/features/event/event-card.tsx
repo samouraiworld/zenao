@@ -6,7 +6,7 @@ import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
 import { UserAvatarWithName } from "../../common/user";
-import { Web3Image } from "../../images/web3-image";
+import { Web3Image } from "../../widgets/images/web3-image";
 import Heading from "../../widgets/texts/heading";
 import Text from "../../widgets/texts/text";
 import { AspectRatio } from "../../shadcn/aspect-ratio";

@@ -6,7 +6,7 @@ import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import supersub from "remark-supersub";
 import remarkHtml from "remark-html";
 import remarkDirective from "remark-directive";
-import { Web3Image } from "../images/web3-image";
+import { Web3Image } from "../widgets/images/web3-image";
 import { Web3Audio } from "../widgets/audio/web3-audio";
 import { cn } from "@/lib/tailwind";
 import remarkAudioDirective from "@/lib/remark-audio-directive-plugin";

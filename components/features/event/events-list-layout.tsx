@@ -1,4 +1,4 @@
-import HeaderEventsList from "../features/event/event-list-header";
+import HeaderEventsList from "./event-list-header";
 import { FromFilter } from "@/lib/search-params";
 
 export const EventsListLayout: React.FC<{

@@ -10,7 +10,7 @@ import EmptyEventsList from "@/components/features/event/event-empty-list";
 import { EventCard } from "@/components/features/event/event-card";
 import { idFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
-import EventCardListLayout from "@/components/layout/event-card-list-layout";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 
 export function TicketsEventsList({
   now,

@@ -3,13 +3,13 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { Suspense, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { PostCardSkeleton } from "../features/social-feed/post-card-skeleton";
-import { PollPost } from "../widgets/poll-post";
-import Text from "./texts/text";
-import { LoaderMoreButton } from "./buttons/load-more-button";
+import { PollPost } from "./poll-post";
+import { PostCardSkeleton } from "./post-card-skeleton";
 import { PollPostView } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
+import Text from "@/components/widgets/texts/text";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 
 function EmptyPollsList() {
   const t = useTranslations("event-feed");

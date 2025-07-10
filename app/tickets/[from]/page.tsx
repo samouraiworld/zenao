@@ -10,7 +10,7 @@ import {
 } from "@/components/layout/screen-container";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
-import { EventsListLayout } from "@/components/layout/events-list-layout";
+import { EventsListLayout } from "@/components/features/event/events-list-layout";
 
 export const revalidate = 60;
 

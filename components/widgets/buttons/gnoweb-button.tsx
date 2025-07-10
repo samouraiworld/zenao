@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Url } from "next/dist/shared/lib/router/router";
 import { buttonVariants } from "../../shadcn/button";
 import Text from "../texts/text";
-import { Web3Image } from "../../images/web3-image";
+import { Web3Image } from "../images/web3-image";
 import { cn } from "@/lib/tailwind";
 
 interface GnowebButtonProps {

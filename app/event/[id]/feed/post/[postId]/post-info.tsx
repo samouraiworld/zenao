@@ -13,13 +13,13 @@ import { feedPost } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
 import { parsePollUri } from "@/lib/multiaddr";
-import { PollPost } from "@/components/widgets/poll-post";
 import Heading from "@/components/widgets/texts/heading";
 import { PostComments } from "@/components/form/social-feed/post-comments";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/app/hooks/use-toast";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
+import { PollPost } from "@/components/features/social-feed/poll-post";
 
 function PostCommentForm({
   eventId,

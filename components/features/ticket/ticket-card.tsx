@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { cn } from "@/lib/tailwind";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Web3Image } from "@/components/images/web3-image";
+import { Web3Image } from "@/components/widgets/images/web3-image";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 

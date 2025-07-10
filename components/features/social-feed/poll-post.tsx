@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { PollPostCard } from "../features/social-feed/poll-post-card";
+import { PollPostCard } from "./poll-post-card";
 import { PollPostView, PollPostViewInfo } from "@/lib/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { pollInfo } from "@/lib/queries/social-feed";
