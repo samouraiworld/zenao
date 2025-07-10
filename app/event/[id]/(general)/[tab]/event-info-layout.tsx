@@ -17,7 +17,7 @@ import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
-import { ParticipantsSection } from "./participants-section";
+import { ParticipantsSection } from "./event-participants-section";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
