@@ -9,7 +9,6 @@ import { useToast } from "@/app/hooks/use-toast";
 import { userFormSchema, UserFormSchemaType } from "@/components/form/types";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/form/components/form-field-input-string";
-import { ButtonWithLabel } from "@/components/buttons/button-with-label";
 import { FormFieldTextArea } from "@/components/form/components/form-field-textarea";
 import { FormFieldImage } from "@/components/form/components/form-field-image";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -17,6 +16,7 @@ import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/texts/text";
 import { useEditUserProfile } from "@/lib/mutations/profile";
 import { captureException } from "@/lib/report";
+import { ButtonWithChildren } from "@/components/buttons/button-with-children";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -100,11 +100,9 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               maxLength={1000}
             />
             <div>
-              <ButtonWithLabel
-                loading={isPending}
-                label={t("save-button")}
-                type="submit"
-              />
+              <ButtonWithChildren loading={isPending} type="submit">
+                {t("save-button")}
+              </ButtonWithChildren>
             </div>
           </div>
         </div>

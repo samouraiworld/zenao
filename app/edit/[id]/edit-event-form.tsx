@@ -100,7 +100,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     <EventForm
       form={form}
       onSubmit={onSubmit}
-      isLoaded={isPending}
+      isLoading={isPending}
       defaultExclusive={defaultValues.exclusive}
       isEditing
       minDateRange={new Date()}

@@ -12,13 +12,13 @@ import { AudioWaveformIcon, ImageIcon } from "lucide-react";
 import { Card } from "../cards/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { MarkdownPreview } from "../common/markdown-preview";
-import { ButtonWithLabel } from "../buttons/button-with-label";
 import { Switch } from "../shadcn/switch";
 import { Label } from "../shadcn/label";
 import MapCaller from "../common/map/map-lazy-components";
 import Text from "../texts/text";
 import { Button } from "../shadcn/button";
 import { GatekeeperManagementDialog } from "../dialogs/gatekeeper-management-dialog";
+import { ButtonWithChildren } from "../buttons/button-with-children";
 import { FormFieldInputString } from "./components/form-field-input-string";
 import { FormFieldInputNumber } from "./components/form-field-input-number";
 import { TimeZonesPopover } from "./components/time-zones-popover";
@@ -39,7 +39,7 @@ import { useMediaQuery } from "@/app/hooks/use-media-query";
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
   onSubmit: (values: EventFormSchemaType) => Promise<void>;
-  isLoaded: boolean;
+  isLoading: boolean;
   defaultExclusive?: boolean;
   isEditing?: boolean;
   minDateRange?: Date;
@@ -49,7 +49,7 @@ interface EventFormProps {
 export const EventForm: React.FC<EventFormProps> = ({
   form,
   onSubmit,
-  isLoaded,
+  isLoading,
   defaultExclusive,
   minDateRange,
   maxDateRange,
@@ -470,13 +470,9 @@ export const EventForm: React.FC<EventFormProps> = ({
               </Button>
             )}
 
-            <ButtonWithLabel
-              loading={isLoaded}
-              label={
-                isEditing ? t("edit-event-button") : t("create-event-button")
-              }
-              type="submit"
-            />
+            <ButtonWithChildren loading={isLoading} type="submit">
+              {isEditing ? t("edit-event-button") : t("create-event-button")}
+            </ButtonWithChildren>
           </div>
         </form>
       </Form>

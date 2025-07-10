@@ -10,7 +10,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { FormFieldInputString } from "../components/form-field-input-string";
 import { emailSchema } from "../types";
 import { InviteeForm } from "./invitee-form";
-import { ButtonWithLabel } from "@/components/buttons/button-with-label";
 import { Form } from "@/components/shadcn/form";
 import {
   useEventParticipateGuest,
@@ -19,6 +18,7 @@ import {
 import { useToast } from "@/app/hooks/use-toast";
 import { eventOptions } from "@/lib/queries/event";
 import { captureException } from "@/lib/report";
+import { ButtonWithChildren } from "@/components/buttons/button-with-children";
 
 const eventRegistrationFormSchema = z.object({
   email: z.string().email().optional(),
@@ -142,11 +142,9 @@ export function EventRegistrationForm({
             />
           </SignedOut>
           <InviteeForm userId={userId} loading={isPending} />
-          <ButtonWithLabel
-            type="submit"
-            loading={isPending}
-            label={t("register-button")}
-          />
+          <ButtonWithChildren loading={isPending} type="submit">
+            {t("register-button")}
+          </ButtonWithChildren>
         </div>
       </form>
     </Form>

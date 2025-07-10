@@ -90,7 +90,7 @@ export const CreateEventForm: React.FC = () => {
     <EventForm
       form={form}
       onSubmit={onSubmit}
-      isLoaded={isPending}
+      isLoading={isPending}
       minDateRange={new Date()}
     />
   );
