@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Separator } from "@/components/shadcn/separator";
-import Text from "@/components/texts/text";
+import Text from "@/components/widgets/texts/text";
 import { cn } from "@/lib/tailwind";
 
 export function EventSection({

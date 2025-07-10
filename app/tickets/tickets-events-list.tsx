@@ -6,10 +6,10 @@ import { format, fromUnixTime } from "date-fns";
 import { EventInfo } from "../gen/zenao/v1/zenao_pb";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { FromFilter } from "@/lib/search-params";
-import EmptyEventsList from "@/components/widgets/empty-events-list";
-import { EventCard } from "@/components/cards/event-card";
+import EmptyEventsList from "@/components/features/event/event-empty-list";
+import { EventCard } from "@/components/features/event/event-card";
 import { idFromPkgPath } from "@/lib/queries/event";
-import Text from "@/components/texts/text";
+import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/layout/event-card-list-layout";
 
 export function TicketsEventsList({

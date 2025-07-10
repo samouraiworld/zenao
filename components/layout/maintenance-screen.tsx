@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import Text from "../texts/text";
+import Text from "../widgets/texts/text";
 
 export function MaintenanceScreen() {
   const t = useTranslations("common");

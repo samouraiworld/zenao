@@ -3,13 +3,13 @@
 import { Control, useFieldArray, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { PlusIcon, Trash2Icon } from "lucide-react";
-import { FormFieldInputString } from "../components/form-field-input-string";
-import { FeedPostFormSchemaType, pollFormSchema } from "../types";
-import { FormFieldInputNumber } from "../components/form-field-input-number";
-import { ButtonWithChildren } from "@/components/buttons/button-with-children";
+import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { cn } from "@/lib/tailwind";
-import { FormFieldCheckbox } from "@/components/form/components/form-field-checkbox";
-import Text from "@/components/texts/text";
+import Text from "@/components/widgets/texts/text";
+import { FormFieldCheckbox } from "@/components/widgets/form/form-field-checkbox";
+import { FormFieldInputNumber } from "@/components/widgets/form/form-field-input-number";
+import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
+import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
 
 export function PollFields({
   form,

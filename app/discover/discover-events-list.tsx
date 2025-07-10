@@ -5,11 +5,11 @@ import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
 import { EventInfo } from "../gen/zenao/v1/zenao_pb";
 import { eventsList } from "@/lib/queries/events-list";
-import EmptyEventsList from "@/components/widgets/empty-events-list";
+import EmptyEventsList from "@/components/features/event/event-empty-list";
 import { idFromPkgPath } from "@/lib/queries/event";
-import Text from "@/components/texts/text";
+import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/layout/event-card-list-layout";
-import { EventCard } from "@/components/cards/event-card";
+import { EventCard } from "@/components/features/event/event-card";
 
 export function DiscoverEventsList({
   from,

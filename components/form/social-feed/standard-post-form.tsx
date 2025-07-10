@@ -4,12 +4,8 @@ import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useMediaQuery } from "react-responsive";
 import { UseFormReturn } from "react-hook-form";
 import { FeedInputButtons } from "./feed-input-buttons";
-import { ButtonBase } from "@/components/buttons/button-bases";
+import { ButtonBase } from "@/components/widgets/buttons/button-bases";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
-import {
-  FeedPostFormSchemaType,
-  standardPostFormSchema,
-} from "@/components/form/types";
 import {
   Form,
   FormControl,
@@ -24,10 +20,14 @@ import {
   TabsTrigger,
 } from "@/components/shadcn/tabs";
 import { Textarea } from "@/components/shadcn/textarea";
-import Text from "@/components/texts/text";
+import Text from "@/components/widgets/texts/text";
 import { cn } from "@/lib/tailwind";
 import useMarkdownUpload from "@/app/hooks/use-markdown-upload";
 import { useToast } from "@/app/hooks/use-toast";
+import {
+  FeedPostFormSchemaType,
+  standardPostFormSchema,
+} from "@/types/schemas";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 

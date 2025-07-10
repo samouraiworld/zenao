@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Card } from "@/components/cards/card";
-import Text from "@/components/texts/text";
-import Heading from "@/components/texts/heading";
+import { Card } from "@/components/widgets/cards/card";
+import Text from "@/components/widgets/texts/text";
+import Heading from "@/components/widgets/texts/heading";
 import { Web3Image } from "@/components/images/web3-image";
 
 interface BlogPostCardProps {

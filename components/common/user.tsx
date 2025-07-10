@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import { Skeleton } from "../shadcn/skeleton";
-import Text from "../texts/text";
+import Text from "../widgets/texts/text";
 import { Web3Image } from "../images/web3-image";
 import { profileOptions } from "@/lib/queries/profile";
 import { cn } from "@/lib/tailwind";

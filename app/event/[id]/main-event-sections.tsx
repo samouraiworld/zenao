@@ -15,12 +15,12 @@ import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { PollsList } from "@/components/widgets/polls-list";
 import { PostsList } from "@/components/widgets/posts-list";
 import { userAddressOptions } from "@/lib/queries/user";
+import { eventOptions } from "@/lib/queries/event";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import {
   EventInfoTabsSchemaType,
   FeedPostFormSchemaType,
-} from "@/components/form/types";
-import { eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-users";
+} from "@/types/schemas";
 
 export function MainEventSections({
   className,

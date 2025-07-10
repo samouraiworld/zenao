@@ -1,7 +1,7 @@
 import React from "react";
 import { SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
-import Text from "../texts/text";
+import Text from "../widgets/texts/text";
 import {
   AlertDialog,
   AlertDialogContent,

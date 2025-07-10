@@ -4,8 +4,8 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { LoaderMoreButton } from "@/components/buttons/load-more-button";
-import { PostCardLayout } from "@/components/cards/social-feed/post-card-layout";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+import { PostCardLayout } from "@/components/features/social-feed/post-card-layout";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
 import { profileOptions } from "@/lib/queries/profile";
 import {

@@ -17,7 +17,7 @@ import {
 } from "@/components/shadcn/dialog";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
 import { UserAvatar, UserAvatarWithName } from "@/components/common/user";
-import Text from "@/components/texts/text";
+import Text from "@/components/widgets/texts/text";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import {
   Drawer,

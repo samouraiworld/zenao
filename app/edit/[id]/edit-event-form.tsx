@@ -7,16 +7,16 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
-import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
-import { EventForm } from "@/components/form/event-form";
+import { EventForm } from "@/components/features/event/event-form";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
-import Text from "@/components/texts/text";
+import Text from "@/components/widgets/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
 import { captureException } from "@/lib/report";
+import { eventFormSchema, EventFormSchemaType } from "@/types/schemas";
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values

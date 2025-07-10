@@ -4,7 +4,7 @@ import { GithubIcon, TwitterIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React from "react";
 import Link from "next/link";
-import Text from "../texts/text";
+import Text from "../widgets/texts/text";
 
 export const Footer = () => {
   const t = useTranslations("navigation");

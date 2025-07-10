@@ -1,7 +1,7 @@
 import { redirect, RedirectType } from "next/navigation";
 import { MainEventSections } from "../../main-event-sections";
 import { EventInfoLayout } from "../../event-info-layout";
-import { eventInfoTabsSchema } from "@/components/form/types";
+import { eventInfoTabsSchema } from "@/types/schemas";
 
 export const revalidate = 60;
 

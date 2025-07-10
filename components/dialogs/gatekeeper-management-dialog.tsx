@@ -18,16 +18,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../shadcn/dialog";
-import {
-  emailSchema,
-  EmailSchemaType,
-  EventFormSchemaType,
-} from "../form/types";
 import { Form } from "../shadcn/form";
-import { FormFieldInputString } from "../form/components/form-field-input-string";
 import { Button } from "../shadcn/button";
-import Text from "../texts/text";
+import Text from "../widgets/texts/text";
+import { FormFieldInputString } from "../widgets/form/form-field-input-string";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
+import {
+  EventFormSchemaType,
+  EmailSchemaType,
+  emailSchema,
+} from "@/types/schemas";
 
 function GatekeeperManagementForm({
   form,

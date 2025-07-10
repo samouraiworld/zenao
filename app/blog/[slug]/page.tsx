@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { getPostContent, getPostsMetadata } from "@/lib/blog";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { MarkdownPreview } from "@/components/common/markdown-preview";
-import Text from "@/components/texts/text";
+import Text from "@/components/widgets/texts/text";
 
 type Props = {
   params: Promise<{ slug: string }>;

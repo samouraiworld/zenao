@@ -19,7 +19,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "../shadcn/drawer";
-import { ButtonWithChildren } from "../buttons/button-with-children";
+import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
 import { useToast } from "@/app/hooks/use-toast";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { useEventCancelParticipation } from "@/lib/mutations/event-cancel";

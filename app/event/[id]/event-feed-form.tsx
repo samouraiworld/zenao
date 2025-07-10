@@ -10,11 +10,11 @@ import {
   FeedInputMode,
 } from "@/components/form/social-feed/standard-post-form";
 import { PollPostForm } from "@/components/form/social-feed/poll-post-form";
-import { FeedPostFormSchemaType } from "@/components/form/types";
 import { userAddressOptions } from "@/lib/queries/user";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/app/hooks/use-toast";
 import { captureException } from "@/lib/report";
+import { FeedPostFormSchemaType } from "@/types/schemas";
 
 const _eventTabs = ["description", "discussion", "votes"] as const;
 export type EventTab = (typeof _eventTabs)[number];

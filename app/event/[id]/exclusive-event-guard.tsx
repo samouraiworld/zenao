@@ -8,15 +8,10 @@ import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { imageHeight, imageWidth } from "./constants";
-import Heading from "@/components/texts/heading";
-import Text from "@/components/texts/text";
+import Heading from "@/components/widgets/texts/heading";
+import Text from "@/components/widgets/texts/text";
 import { Form } from "@/components/shadcn/form";
-import { FormFieldInputString } from "@/components/form/components/form-field-input-string";
-import { ButtonWithChildren } from "@/components/buttons/button-with-children";
-import {
-  eventProtectionFormSchema,
-  EventProtectionFormSchemaType,
-} from "@/components/form/types";
+import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { useToast } from "@/app/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -26,6 +21,11 @@ import { ScreenContainer } from "@/components/layout/screen-container";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/images/web3-image";
 import { captureException } from "@/lib/report";
+import {
+  eventProtectionFormSchema,
+  EventProtectionFormSchemaType,
+} from "@/types/schemas";
+import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 
 type ExclusiveEventGuardProps = {
   eventId: string;

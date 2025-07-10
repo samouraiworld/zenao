@@ -7,7 +7,6 @@ import { UseFormReturn } from "react-hook-form";
 import { hoursToSeconds, minutesToSeconds } from "date-fns";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { FeedPostFormSchemaType, pollFormSchema } from "../types";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { useToast } from "@/app/hooks/use-toast";
 import { PollFields } from "@/components/form/social-feed/poll-fields";
@@ -24,6 +23,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
+import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 

@@ -6,20 +6,20 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { PostCardSkeleton } from "@/components/loader/social-feed/post-card-skeleton";
-import { FeedPostFormSchemaType } from "@/components/form/types";
+import { PostCardSkeleton } from "@/components/features/social-feed/post-card-skeleton";
 import { StandardPostForm } from "@/components/form/social-feed/standard-post-form";
 import { userAddressOptions } from "@/lib/queries/user";
 import { feedPost } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
-import { StandardPostCard } from "@/components/cards/social-feed/standard-post-card";
+import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
 import { parsePollUri } from "@/lib/multiaddr";
 import { PollPost } from "@/components/widgets/poll-post";
-import Heading from "@/components/texts/heading";
+import Heading from "@/components/widgets/texts/heading";
 import { PostComments } from "@/components/form/social-feed/post-comments";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/app/hooks/use-toast";
 import { captureException } from "@/lib/report";
+import { FeedPostFormSchemaType } from "@/types/schemas";
 
 function PostCommentForm({
   eventId,

@@ -3,7 +3,7 @@ import { getQueryClient } from "../get-query-client";
 import { eventOptions } from "../queries/event";
 import { currentTimezone } from "../time";
 import { zenaoClient } from "@/app/zenao-client";
-import { EventFormSchemaType } from "@/components/form/types";
+import { EventFormSchemaType } from "@/types/schemas";
 
 export const useCreateEvent = () => {
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({

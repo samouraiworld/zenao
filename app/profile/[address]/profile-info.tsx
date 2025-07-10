@@ -3,9 +3,9 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Person, WithContext } from "schema-dts";
 import ProfileHeader from "./profile-header";
-import { EventCard } from "@/components/cards/event-card";
+import { EventCard } from "@/components/features/event/event-card";
 import { Separator } from "@/components/shadcn/separator";
-import Heading from "@/components/texts/heading";
+import Heading from "@/components/widgets/texts/heading";
 import { idFromPkgPath } from "@/lib/queries/event";
 import { eventsByOrganizerList } from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";

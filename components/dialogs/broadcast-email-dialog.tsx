@@ -15,8 +15,7 @@ import {
   DialogTitle,
 } from "../shadcn/dialog";
 import { Form } from "../shadcn/form";
-import { FormFieldTextArea } from "../form/components/form-field-textarea";
-import { ButtonWithChildren } from "../buttons/button-with-children";
+import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
 import {
   Drawer,
   DrawerClose,
@@ -26,8 +25,9 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "../shadcn/drawer";
-import Text from "../texts/text";
-import { FormFieldCheckbox } from "../form/components/form-field-checkbox";
+import Text from "../widgets/texts/text";
+import { FormFieldCheckbox } from "../widgets/form/form-field-checkbox";
+import { FormFieldTextArea } from "../widgets/form/form-field-textarea";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
 import { useEventBroadcastEmail } from "@/lib/mutations/event-management";
