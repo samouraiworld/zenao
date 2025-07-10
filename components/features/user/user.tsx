@@ -2,12 +2,12 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
-import { Skeleton } from "../shadcn/skeleton";
-import Text from "../widgets/texts/text";
-import { Web3Image } from "../widgets/images/web3-image";
 import { profileOptions } from "@/lib/queries/profile";
 import { cn } from "@/lib/tailwind";
+import { Web3Image } from "@/components/widgets/images/web3-image";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
+import Text from "@/components/widgets/texts/text";
 
 interface UserComponentProps {
   address: string | null | undefined;

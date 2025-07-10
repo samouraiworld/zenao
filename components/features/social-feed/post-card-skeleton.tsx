@@ -1,5 +1,5 @@
+import { UserAvatarSkeleton } from "../user/user";
 import { Card } from "@/components/widgets/cards/card";
-import { UserAvatarSkeleton } from "@/components/common/user";
 import { Skeleton } from "@/components/shadcn/skeleton";
 
 export function PostCardSkeleton() {

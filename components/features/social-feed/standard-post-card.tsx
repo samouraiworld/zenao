@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { PostCardLayout } from "@/components/features/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
-import { MarkdownPreview } from "@/components/common/markdown-preview";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { StandardPostForm } from "@/components/form/social-feed/standard-post-form";
 import { useEditStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";

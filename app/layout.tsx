@@ -8,12 +8,12 @@ import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import QueryProviders from "./query-providers";
 import { zenaoClient } from "./zenao-client";
-import { Footer } from "@/components/navigation/footer";
 import "./globals.css";
 import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { Toaster } from "@/components/shadcn/toaster";
-import { Header } from "@/components/navigation/header";
-import PwaBottomBar from "@/components/navigation/pwa-bottom-bar";
+import { Header } from "@/components/layout/navigation/header";
+import { Footer } from "@/components/layout/navigation/footer";
+import PwaBottomBar from "@/components/layout/navigation/pwa-bottom-bar";
 
 const albertSans = Albert_Sans({
   variable: "--font-albert-sans",

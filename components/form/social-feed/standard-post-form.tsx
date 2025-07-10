@@ -5,7 +5,7 @@ import { useMediaQuery } from "react-responsive";
 import { UseFormReturn } from "react-hook-form";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { ButtonBase } from "@/components/widgets/buttons/button-bases";
-import { MarkdownPreview } from "@/components/common/markdown-preview";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import {
   Form,
   FormControl,

@@ -11,10 +11,10 @@ import {
 import { AudioWaveformIcon, ImageIcon } from "lucide-react";
 import { Card } from "../../widgets/cards/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../shadcn/tabs";
-import { MarkdownPreview } from "../../common/markdown-preview";
+import { MarkdownPreview } from "../../widgets/markdown-preview";
 import { Switch } from "../../shadcn/switch";
 import { Label } from "../../shadcn/label";
-import MapCaller from "../../common/map/map-lazy-components";
+import MapCaller from "../../widgets/map/map-lazy-components";
 import { Button } from "../../shadcn/button";
 import { GatekeeperManagementDialog } from "../../dialogs/gatekeeper-management-dialog";
 import { ButtonWithChildren } from "../../widgets/buttons/button-with-children";

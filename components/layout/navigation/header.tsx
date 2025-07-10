@@ -20,13 +20,9 @@ import {
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
-import Text from "../widgets/texts/text";
-import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
-import { Web3Image } from "../widgets/images/web3-image";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
-import { UserAvatarSkeleton, UserAvatar } from "@/components/common/user";
 import { cn } from "@/lib/tailwind";
 import {
   DropdownMenu,
@@ -36,6 +32,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import useSmartBack from "@/app/hooks/use-smart-back";
+import Text from "@/components/widgets/texts/text";
+import { Web3Image } from "@/components/widgets/images/web3-image";
+import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
+import {
+  UserAvatar,
+  UserAvatarSkeleton,
+} from "@/components/features/user/user";
 
 export type NavItem = {
   key: string;

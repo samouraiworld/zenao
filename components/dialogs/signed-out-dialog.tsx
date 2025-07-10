@@ -12,7 +12,7 @@ import {
 } from "@/components/shadcn/alert-dialog";
 import { Button } from "@/components/shadcn/button";
 
-export const SignedOutModal: React.FC = () => {
+export const SignedOutDialog: React.FC = () => {
   const t = useTranslations("components.modals.signed-out-modal");
 
   return (

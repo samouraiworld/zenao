@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SignedOutModal } from "../modals/signed-out-modal";
+import { SignedOutDialog } from "../dialogs/signed-out-dialog";
 import { BackgroundImage, BackgroundProps } from "./background-image";
 
 interface ScreenContainerProps {
@@ -37,7 +37,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
           {children}
         </div>
       </main>
-      {isSignedOutModal && <SignedOutModal />}
+      {isSignedOutModal && <SignedOutDialog />}
     </div>
   );
 };
@@ -51,7 +51,7 @@ export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
       <main className="flex flex-col w-full justify-center items-center mb-10 sm:mb-0">
         <div className="mt-8 mx-5">{children}</div>
       </main>
-      {isSignedOutModal && <SignedOutModal />}
+      {isSignedOutModal && <SignedOutDialog />}
     </div>
   );
 };

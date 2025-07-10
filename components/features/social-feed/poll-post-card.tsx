@@ -10,7 +10,7 @@ import { PostCardLayout } from "@/components/features/social-feed/post-card-layo
 import Text from "@/components/widgets/texts/text";
 import { PollPostViewInfo } from "@/lib/social-feed";
 import { cn } from "@/lib/tailwind";
-import { Gauge } from "@/components/common/gauge";
+import { Gauge } from "@/components/widgets/gauge";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import { getQueryClient } from "@/lib/get-query-client";
 import { useToast } from "@/app/hooks/use-toast";

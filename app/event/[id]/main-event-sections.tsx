@@ -11,7 +11,7 @@ import EventFeedForm from "./event-feed-form";
 import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
 import { TabsContent } from "@/components/shadcn/tabs";
-import { MarkdownPreview } from "@/components/common/markdown-preview";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";

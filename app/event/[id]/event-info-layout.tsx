@@ -22,7 +22,6 @@ import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import { Card } from "@/components/widgets/cards/card";
-import { UserAvatarWithName } from "@/components/common/user";
 import { EventRegistrationForm } from "@/components/features/event/event-registration";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { useEventPassword } from "@/components/providers/event-password-provider";
@@ -40,6 +39,7 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
 import { Button } from "@/components/shadcn/button";
 import { CancelRegistrationConfirmationDialog } from "@/components/dialogs/cancel-registration-confirmation-dialog";
+import { UserAvatarWithName } from "@/components/features/user/user";
 
 interface EventSectionProps {
   title: string;

@@ -6,7 +6,7 @@ import {
 import { useMemo, useState } from "react";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { PostCardLayout } from "@/components/features/social-feed/post-card-layout";
-import { MarkdownPreview } from "@/components/common/markdown-preview";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { profileOptions } from "@/lib/queries/profile";
 import {
   DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
