@@ -23,7 +23,8 @@ export const eventsList = (
       EventInfo[],
       Error,
       InfiniteData<EventInfo[]>,
-      (string | number)[]
+      (string | number)[],
+      number // pageParam type
     >,
     "queryKey" | "queryFn"
   >,
@@ -32,35 +33,35 @@ export const eventsList = (
   const toInt = Math.floor(toUnixSec);
   const limitInt = Math.floor(limit);
 
-  // TODO Use of key-based pagination skipping fetched events
-
   return infiniteQueryOptions({
     queryKey: ["events", fromInt, toInt, limitInt],
-    initialPageParam: fromInt,
+    initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEvents(${pageParam}, ${toInt}, ${limitInt}))`,
+        `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}, ${
+          pageParam * limitInt
+        }))`,
       );
       const raw = extractGnoJSONResponse(res);
       const json = eventListFromJson(raw);
 
       return json;
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
         return undefined;
       }
-      return Number(lastPage[lastPage.length - 1].startDate);
+      return pages.length;
     },
-    getPreviousPageParam: (firstPage) => {
+    getPreviousPageParam: (firstPage, pages) => {
       if (firstPage.length < limitInt) {
         return undefined;
       }
-      return Number(firstPage[0].startDate);
+      return pages.length - 2;
     },
     staleTime: 60000, // 1 minute
     ...options,
@@ -79,29 +80,29 @@ export const eventsByOrganizerList = (
 
   return infiniteQueryOptions({
     queryKey: ["eventsByOrganizer", organizer, fromInt, toInt, limitInt],
-    initialPageParam: fromInt,
-    queryFn: async ({ pageParam }) => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${pageParam}, ${toInt}, ${limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
         return undefined;
       }
-      return Number(lastPage[lastPage.length - 1].startDate);
+      return pages.length;
     },
-    getPreviousPageParam: (fistPage) => {
+    getPreviousPageParam: (fistPage, pages) => {
       if (fistPage.length < limitInt) {
         return undefined;
       }
-      return Number(fistPage[0].startDate);
+      return pages.length - 2;
     },
   });
 };
@@ -118,29 +119,29 @@ export const eventsByParticipantList = (
 
   return infiniteQueryOptions({
     queryKey: ["eventsByParticipant", participant, fromInt, toInt, limitInt],
-    initialPageParam: fromInt,
-    queryFn: async ({ pageParam }) => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${pageParam}, ${toInt}, ${limitInt}))`,
+        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
     },
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
         return undefined;
       }
-      return Number(lastPage[lastPage.length - 1].startDate);
+      return pages.length;
     },
-    getPreviousPageParam: (fistPage) => {
-      if (fistPage.length < limitInt) {
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
         return undefined;
       }
-      return Number(fistPage[0].startDate) + 1;
+      return pages.length - 2;
     },
   });
 };
