@@ -7,7 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import EventFeedForm from "./event-feed-form";
+import EventFeedForm from "../../../components/features/social-feed/event-feed-form/event-feed-form";
 import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
 import { TabsContent } from "@/components/shadcn/tabs";

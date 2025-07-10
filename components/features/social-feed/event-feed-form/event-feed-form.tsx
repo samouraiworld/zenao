@@ -5,11 +5,8 @@ import { UseFormReturn } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import {
-  StandardPostForm,
-  FeedInputMode,
-} from "@/components/form/social-feed/standard-post-form";
-import { PollPostForm } from "@/components/form/social-feed/poll-post-form";
+import { PollPostForm } from "./poll-post-form";
+import { FeedInputMode, StandardPostForm } from "./standard-post-form";
 import { userAddressOptions } from "@/lib/queries/user";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/app/hooks/use-toast";
