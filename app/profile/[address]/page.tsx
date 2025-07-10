@@ -2,7 +2,10 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { ProfileInfo } from "./profile-info";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
-import { eventsByOrganizerList } from "@/lib/queries/events-list";
+import {
+  DEFAULT_EVENTS_LIMIT,
+  eventsByOrganizerList,
+} from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";
 
 type Props = {
@@ -23,10 +26,17 @@ export default async function ProfilePage({ params }: Props) {
 
   // In seconds
   const now = Date.now() / 1000;
-  queryClient.prefetchQuery(
-    eventsByOrganizerList(p.address, now, Number.MAX_SAFE_INTEGER, 20),
+  queryClient.prefetchInfiniteQuery(
+    eventsByOrganizerList(
+      p.address,
+      now,
+      Number.MAX_SAFE_INTEGER,
+      DEFAULT_EVENTS_LIMIT,
+    ),
   );
-  queryClient.prefetchQuery(eventsByOrganizerList(p.address, now - 1, 0, 20));
+  queryClient.prefetchInfiniteQuery(
+    eventsByOrganizerList(p.address, now - 1, 0, DEFAULT_EVENTS_LIMIT),
+  );
 
   return (
     <ScreenContainer>

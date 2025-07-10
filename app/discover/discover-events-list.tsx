@@ -59,7 +59,7 @@ export function DiscoverEventsList({
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-8">
       {Object.entries(eventsByDay).map(([startOfDay, eventsOfTheDay]) => {
         return (
           <div key={startOfDay} className="flex flex-col gap-4">
