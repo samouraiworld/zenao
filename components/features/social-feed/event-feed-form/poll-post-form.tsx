@@ -8,8 +8,8 @@ import { hoursToSeconds, minutesToSeconds } from "date-fns";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { FeedInputButtons } from "./feed-input-buttons";
+import { PollFields } from "./poll-fields";
 import { useToast } from "@/app/hooks/use-toast";
-import { PollFields } from "@/components/form/social-feed/poll-fields";
 import { Textarea } from "@/components/shadcn/textarea";
 import {
   Form,
