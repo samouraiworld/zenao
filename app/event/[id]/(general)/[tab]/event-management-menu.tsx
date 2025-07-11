@@ -3,8 +3,8 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Download } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { Download } from "lucide-react";
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import { EventUserRole } from "@/lib/queries/event-users";
@@ -17,6 +17,60 @@ type EventManagementMenuProps = {
   nbParticipants: number;
 };
 
+const getRoleLevel = (roles: EventUserRole[]) => {
+  if (roles.includes("organizer")) return 2;
+  if (roles.includes("gatekeeper")) return 1;
+  return 0;
+};
+
+function EventManagementMenuOrganizer({
+  eventId,
+  onDownloadParticipantList,
+  nbParticipants,
+}: {
+  eventId: string;
+  onDownloadParticipantList: () => void;
+  nbParticipants: number;
+}) {
+  const t = useTranslations("event");
+  const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
+    useState(false);
+
+  return (
+    <>
+      {" "}
+      <BroadcastEmailDialog
+        eventId={eventId}
+        nbParticipants={nbParticipants}
+        open={broadcastEmailDialogOpen}
+        onOpenChange={setBroadcastEmailDialogOpen}
+      />
+      <div className="flex flex-col">
+        <Link href={`/edit/${eventId}`} className="text-main underline">
+          {t("edit-button")}
+        </Link>
+
+        <p
+          className="text-main underline cursor-pointer"
+          onClick={() => setBroadcastEmailDialogOpen(true)}
+        >
+          {t("send-global-message")}
+        </p>
+
+        <div className="flex items-center gap-1" role="group">
+          <p
+            className="text-main underline cursor-pointer"
+            onClick={onDownloadParticipantList}
+          >
+            {t("export-participant-list")}
+          </p>
+          <Download className="text-main" size={16} />
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function EventManagementMenu({
   eventId,
   roles,
@@ -24,11 +78,8 @@ export function EventManagementMenu({
 }: EventManagementMenuProps) {
   const { getToken } = useAuth();
   const t = useTranslations("event");
-  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
-  const isGatekeeper = useMemo(() => roles.includes("gatekeeper"), [roles]);
 
-  const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
-    useState(false);
+  const roleLevel = useMemo(() => getRoleLevel(roles), [roles]);
 
   const onDownloadParticipantList = async () => {
     const token = await getToken();
@@ -47,54 +98,31 @@ export function EventManagementMenu({
     URL.revokeObjectURL(url);
   };
 
-  if (!isOrganizer && !isGatekeeper) {
-    return null;
+  if (roleLevel === 0) {
+    return null; // No management options for users without roles
   }
 
   return (
     <Card className="flex flex-col gap-2">
       <Text>{t("manage-event")}</Text>
 
-      {isOrganizer && (
-        <BroadcastEmailDialog
-          eventId={eventId}
-          nbParticipants={nbParticipants}
-          open={broadcastEmailDialogOpen}
-          onOpenChange={setBroadcastEmailDialogOpen}
-        />
-      )}
-
       <div className="flex flex-col">
-        {isOrganizer && (
-          <>
-            <Link href={`/edit/${eventId}`} className="text-main underline">
-              {t("edit-button")}
-            </Link>
-            <p
-              className="text-main underline cursor-pointer"
-              onClick={() => setBroadcastEmailDialogOpen(true)}
-            >
-              {t("send-global-message")}
-            </p>
-            <div className="flex items-center gap-1" role="group">
-              <p
-                className="text-main underline cursor-pointer"
-                onClick={onDownloadParticipantList}
-              >
-                {t("export-participant-list")}
-              </p>
-              <Download className="text-main" size={16} />
-            </div>
-          </>
+        {roleLevel >= 2 && (
+          <EventManagementMenuOrganizer
+            eventId={eventId}
+            onDownloadParticipantList={onDownloadParticipantList}
+            nbParticipants={nbParticipants}
+          />
         )}
-
-        {(isOrganizer || isGatekeeper) && (
-          <Link
-            href={`/event/${eventId}/scanner`}
-            className="text-main underline"
-          >
-            {t("gatekeeper-button")}
-          </Link>
+        {roleLevel >= 1 && (
+          <div className="flex flex-col">
+            <Link
+              href={`/event/${eventId}/scanner`}
+              className="text-main underline"
+            >
+              {t("gatekeeper-button")}
+            </Link>
+          </div>
         )}
       </div>
     </Card>
