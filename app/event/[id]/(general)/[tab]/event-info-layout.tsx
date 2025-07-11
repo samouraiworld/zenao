@@ -1,28 +1,18 @@
 "use client";
 
-import {
-  ClerkLoaded,
-  ClerkLoading,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  useAuth,
-} from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
 import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
-import { Card } from "@/components/widgets/cards/card";
-import { EventRegistrationForm } from "@/components/features/event/event-registration";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { useEventPassword } from "@/components/providers/event-password-provider";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
@@ -35,11 +25,8 @@ import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
-import { Skeleton } from "@/components/shadcn/skeleton";
-import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
-import { Button } from "@/components/shadcn/button";
-import { CancelRegistrationConfirmationDialog } from "@/components/dialogs/cancel-registration-confirmation-dialog";
 import { UserAvatarWithName } from "@/components/features/user/user";
+import EventParticipationInfo from "@/components/features/event/event-participation-info";
 
 interface EventSectionProps {
   title: string;
@@ -73,15 +60,6 @@ export function EventInfoLayout({
 
   const location = makeLocationFromEvent(data.location);
   const timezone = useLocationTimezone(location);
-
-  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
-  const isStarted = Date.now() > Number(data.startDate) * 1000;
-  const isSoldOut = data.capacity - data.participants <= 0;
-
-  const [guestEmail, setGuestEmail] = useState<string>("");
-  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
-
-  const [confirmCancelDialogOpen, setConfirmCancelDialogOpen] = useState(false);
 
   const t = useTranslations("event");
 
@@ -187,102 +165,12 @@ export function EventInfoLayout({
       </div>
 
       {/* Participate Card */}
-      <ClerkLoading>
-        <Skeleton className="w-full h-28" />
-      </ClerkLoading>
-      <ClerkLoaded>
-        <GuestRegistrationSuccessDialog
-          title={data.title}
-          email={guestEmail}
-          open={guestDialogOpen}
-          onOpenChange={(o) => setGuestDialogOpen(o)}
-        />
-
-        <CancelRegistrationConfirmationDialog
-          open={confirmCancelDialogOpen}
-          onOpenChange={setConfirmCancelDialogOpen}
-          eventId={eventId}
-        />
-
-        <Card className="mt-2">
-          {isParticipant ? (
-            <div>
-              <div className="flex flex-row justify-between">
-                <div className="flex flex-col gap-2">
-                  <Heading level={2} size="xl">
-                    {t("in")}
-                  </Heading>
-                  {!isStarted && (
-                    <SignedIn>
-                      <>
-                        <Text variant="secondary">
-                          {"Not going to the event anymore ?"}
-                        </Text>
-                        <Button
-                          variant="link"
-                          className="justify-normal px-0"
-                          onClick={() => setConfirmCancelDialogOpen(true)}
-                        >
-                          {t("cancel-my-participation")}
-                        </Button>
-                      </>
-                    </SignedIn>
-                  )}
-                </div>
-                <SignedIn>
-                  <Link
-                    href={`/ticket/${eventId}`}
-                    className="text-main underline"
-                  >
-                    {t("see-ticket")}
-                  </Link>
-                </SignedIn>
-                <SignedOut>
-                  <SignInButton>
-                    <Text className="text-main underline">
-                      {t("login-to-see-tickets")}
-                    </Text>
-                  </SignInButton>
-                </SignedOut>
-                {/* TODO: create a clean decount timer */}
-                {/* <SmallText>{t("start", { count: 2 })}</SmallText> */}
-              </div>
-              {/* add back when we can cancel
-                <Text className="my-4">{t("cancel-desc")}</Text>
-              */}
-            </div>
-          ) : isStarted ? (
-            <div>
-              <Heading level={2} size="xl">
-                {t("already-begun")}
-              </Heading>
-              <Text className="my-4">{t("too-late")}</Text>
-            </div>
-          ) : isSoldOut ? (
-            <div>
-              <Heading level={2} size="xl">
-                {t("sold-out-msg")}
-              </Heading>
-            </div>
-          ) : (
-            <div>
-              <Heading level={2} size="xl">
-                {t("registration")}
-              </Heading>
-              <Text className="my-4">{t("join-desc")}</Text>
-              <EventRegistrationForm
-                eventId={eventId}
-                userAddress={address}
-                eventPassword={password}
-                onGuestRegistrationSuccess={(email) => {
-                  setGuestEmail(email);
-                  setGuestDialogOpen(true);
-                }}
-              />
-            </div>
-          )}
-        </Card>
-      </ClerkLoaded>
+      <EventParticipationInfo
+        eventId={eventId}
+        eventData={data}
+        roles={roles}
+        password={password}
+      />
 
       {children}
 
