@@ -43,7 +43,7 @@ export default async function TicketsPage({ params }: PageProps) {
     );
   }
 
-  queryClient.prefetchQuery(
+  queryClient.prefetchInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(address, now, Number.MAX_SAFE_INTEGER, 20)
       : eventsByParticipantList(address, now - 1, 0, 20),

@@ -19,13 +19,13 @@ func Render(path string) string {
 	switch {
 	case strings.HasPrefix(path, "created/"):
 		title = "My Zenao Events"
-		listFn = func(from int64, to int64, limit uint32) []*zenaov1.EventInfo {
-			return listEventsByOrganizer(strings.TrimPrefix(path, "created/"), from, to, limit)
+		listFn = func(from int64, to int64, limit uint32, offset uint32) []*zenaov1.EventInfo {
+			return listEventsByOrganizer(strings.TrimPrefix(path, "created/"), from, to, limit, offset)
 		}
 	case strings.HasPrefix(path, "tickets/"):
 		title = "My Zenao Tickets"
-		listFn = func(from int64, to int64, limit uint32) []*zenaov1.EventInfo {
-			return listEventsByParticipant(strings.TrimPrefix(path, "tickets/"), from, to, limit)
+		listFn = func(from int64, to int64, limit uint32, offset uint32) []*zenaov1.EventInfo {
+			return listEventsByParticipant(strings.TrimPrefix(path, "tickets/"), from, to, limit, offset)
 		}
 	}
 
@@ -37,9 +37,9 @@ func Render(path string) string {
 	return buf.String()
 }
 
-func renderSection(buf *strings.Builder, listFn func(int64, int64, uint32) []*zenaov1.EventInfo, title string, from int64, to int64, limit uint32) {
+func renderSection(buf *strings.Builder, listFn func(int64, int64, uint32, uint32) []*zenaov1.EventInfo, title string, from int64, to int64, limit uint32) {
 	buf.WriteString(md.H2(title))
-	evts := listFn(from, to, limit)
+	evts := listFn(from, to, limit, 0)
 	for _, evt := range evts {
 		buf.WriteString(md.HorizontalRule())
 		renderEvent(buf, evt)
