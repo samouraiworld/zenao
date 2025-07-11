@@ -1,6 +1,10 @@
 import { fromJson } from "@bufbuild/protobuf";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
-import { queryOptions, UseQueryOptions } from "@tanstack/react-query";
+import {
+  InfiniteData,
+  infiniteQueryOptions,
+  UseInfiniteQueryOptions,
+} from "@tanstack/react-query";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import {
   EventInfo,
@@ -8,31 +12,58 @@ import {
   EventInfoSchema,
 } from "@/app/gen/zenao/v1/zenao_pb";
 
+export const DEFAULT_EVENTS_LIMIT = 2;
+
 export const eventsList = (
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
   options?: Omit<
-    UseQueryOptions<EventInfo[], Error, EventInfo[], (string | number)[]>,
+    UseInfiniteQueryOptions<
+      EventInfo[],
+      Error,
+      InfiniteData<EventInfo[]>,
+      (string | number)[],
+      number // pageParam type
+    >,
     "queryKey" | "queryFn"
   >,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
   const limitInt = Math.floor(limit);
-  return queryOptions({
+
+  return infiniteQueryOptions({
     queryKey: ["events", fromInt, toInt, limitInt],
-    queryFn: async () => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}))`,
+        `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}, ${
+          pageParam * limitInt
+        }))`,
       );
       const raw = extractGnoJSONResponse(res);
-      return eventListFromJson(raw);
+      const json = eventListFromJson(raw);
+
+      return json;
     },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
+    },
+    staleTime: 60000, // 1 minute
     ...options,
   });
 };
@@ -46,18 +77,32 @@ export const eventsByOrganizerList = (
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
   const limitInt = Math.floor(limit);
-  return queryOptions({
+
+  return infiniteQueryOptions({
     queryKey: ["eventsByOrganizer", organizer, fromInt, toInt, limitInt],
-    queryFn: async () => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${fromInt}, ${toInt}, ${limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (fistPage, pages) => {
+      if (fistPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
     },
   });
 };
@@ -71,18 +116,32 @@ export const eventsByParticipantList = (
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
   const limitInt = Math.floor(limit);
-  return queryOptions({
+
+  return infiniteQueryOptions({
     queryKey: ["eventsByParticipant", participant, fromInt, toInt, limitInt],
-    queryFn: async () => {
+    initialPageParam: 0,
+    queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${fromInt}, ${toInt}, ${limitInt}))`,
+        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
     },
   });
 };
