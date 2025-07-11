@@ -5,11 +5,14 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Download } from "lucide-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import { EventUserRole } from "@/lib/queries/event-users";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { zenaoClient } from "@/lib/zenao-client";
+import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
+import { GatekeeperManagementDialog } from "@/components/dialogs/gatekeeper-management-dialog";
 
 type EventManagementMenuProps = {
   eventId: string;
@@ -32,23 +35,46 @@ function EventManagementMenuOrganizer({
   onDownloadParticipantList: () => void;
   nbParticipants: number;
 }) {
+  const { getToken } = useAuth();
   const t = useTranslations("event");
   const [broadcastEmailDialogOpen, setBroadcastEmailDialogOpen] =
     useState(false);
+  const [manageGatekeepersDialogOpen, setManageGatekeepersDialogOpen] =
+    useState(false);
+
+  const { data: eventInfo } = useSuspenseQuery(eventOptions(eventId));
+  const { data: gatekeepers } = useSuspenseQuery(
+    eventGatekeepersEmails(eventId, getToken),
+  );
 
   return (
     <>
-      {" "}
       <BroadcastEmailDialog
         eventId={eventId}
         nbParticipants={nbParticipants}
         open={broadcastEmailDialogOpen}
         onOpenChange={setBroadcastEmailDialogOpen}
       />
+
+      <GatekeeperManagementDialog
+        eventId={eventId}
+        eventInfo={eventInfo}
+        gatekeepers={gatekeepers.gatekeepers}
+        open={manageGatekeepersDialogOpen}
+        onOpenChange={setManageGatekeepersDialogOpen}
+      />
+
       <div className="flex flex-col">
         <Link href={`/edit/${eventId}`} className="text-main underline">
           {t("edit-button")}
         </Link>
+
+        <p
+          className="text-main underline cursor-pointer"
+          onClick={() => setManageGatekeepersDialogOpen(true)}
+        >
+          {t("manage-gatekeepers-button")} ({gatekeepers.gatekeepers.length})
+        </p>
 
         <p
           className="text-main underline cursor-pointer"
