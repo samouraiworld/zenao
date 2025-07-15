@@ -73,7 +73,8 @@ function EventManagementMenuOrganizer({
           className="text-main underline cursor-pointer"
           onClick={() => setManageGatekeepersDialogOpen(true)}
         >
-          {t("manage-gatekeepers-button")} ({gatekeepers.gatekeepers.length})
+          {t("manage-gatekeepers-button")} ({gatekeepers.gatekeepers.length + 1}
+          )
         </p>
 
         <p
