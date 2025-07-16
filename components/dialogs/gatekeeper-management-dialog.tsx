@@ -161,15 +161,15 @@ export function GatekeeperManagementDialog({
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
       await editEvent({ ...values, eventId });
-      toast({
-        title: t("toast-edit-success"),
-      });
       onOpenChange(false);
+      toast({
+        title: t("toast-gatekeeper-management-success"),
+      });
     } catch (err) {
       captureException(err);
       toast({
         variant: "destructive",
-        title: t("toast-edit-error"),
+        title: t("toast-gatekeeper-management-error"),
       });
     }
   };

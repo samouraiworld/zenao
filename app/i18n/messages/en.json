@@ -109,6 +109,8 @@
     "description": "Assign and manage gatekeepers responsible for controlling access to the event.",
     "input-placeholder": "Email...",
     "default": "Default (You)",
+    "toast-gatekeeper-management-success": "Gatekeepers successfully updated!",
+    "toast-gatekeeper-management-error": "Error while updating gatekeepers!",
     "done": "Done"
   },
   "manifesto": {
