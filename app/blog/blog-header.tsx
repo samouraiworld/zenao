@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
-import Text from "@/components/texts/text";
-import Heading from "@/components/texts/heading";
+import Text from "@/components/widgets/texts/text";
+import Heading from "@/components/widgets/texts/heading";
 
 export default function BlogHeader() {
   const t = useTranslations("blog");

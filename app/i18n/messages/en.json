@@ -92,7 +92,8 @@
     "gatekeeper-button": "Open ticket scanner",
     "view-more": "View more",
     "view-less": "View less",
-    "export-participant-list": "Export participants list"
+    "export-participant-list": "Export participants list",
+    "manage-gatekeepers-button": "Manage gatekeepers"
   },
   "guest-registration-success-dialog": {
     "registration-title": "You're in !",
@@ -108,6 +109,8 @@
     "description": "Assign and manage gatekeepers responsible for controlling access to the event.",
     "input-placeholder": "Email...",
     "default": "Default (You)",
+    "toast-gatekeeper-management-success": "Gatekeepers successfully updated!",
+    "toast-gatekeeper-management-error": "Error while updating gatekeepers!",
     "done": "Done"
   },
   "manifesto": {

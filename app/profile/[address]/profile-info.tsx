@@ -7,17 +7,17 @@ import {
 import { Person, WithContext } from "schema-dts";
 import { useMemo } from "react";
 import ProfileHeader from "./profile-header";
-import { EventCard } from "@/components/cards/event-card";
+import { EventCard } from "@/components/features/event/event-card";
 import { Separator } from "@/components/shadcn/separator";
-import Heading from "@/components/texts/heading";
+import Heading from "@/components/widgets/texts/heading";
 import { idFromPkgPath } from "@/lib/queries/event";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByOrganizerList,
 } from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";
-import EventCardListLayout from "@/components/layout/event-card-list-layout";
-import { LoaderMoreButton } from "@/components/buttons/load-more-button";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 
 export function ProfileInfo({
   address,

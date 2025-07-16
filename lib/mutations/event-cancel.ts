@@ -4,7 +4,7 @@ import { GetToken } from "../utils";
 import { eventTickets } from "../queries/ticket";
 import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventOptions } from "../queries/event";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 
 type EventCancelParticipationRequest = {
   eventId: string;

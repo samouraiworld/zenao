@@ -2,7 +2,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { imageHeight, imageWidth } from "./constants";
-import { ExclusiveEventGuard } from "./exclusive-event-guard";
+import { ExclusiveEventGuard } from "./event-exclusive-guard";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";

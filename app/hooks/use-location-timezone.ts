@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { determineTimezone } from "@/lib/determine-timezone";
-import { EventFormSchemaType } from "@/components/form/types";
 import { currentTimezone } from "@/lib/time";
+import { EventFormSchemaType } from "@/types/schemas";
 
 export const useLocationTimezone = (
   location: EventFormSchemaType["location"],

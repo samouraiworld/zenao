@@ -13,7 +13,7 @@ import {
   CreatePostRequest,
   VotePollRequest,
 } from "@/app/gen/zenao/v1/zenao_pb";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 
 interface CreatePollRequestMutation
   extends Required<Omit<CreatePollRequest, "$typeName" | "$unknown">> {

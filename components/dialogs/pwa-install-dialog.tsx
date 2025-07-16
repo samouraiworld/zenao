@@ -1,5 +1,5 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
-import { BeforeInstallPromptEvent } from "../buttons/pwa-install-button";
+import { BeforeInstallPromptEvent } from "../widgets/buttons/pwa-install-button";
 import {
   Dialog,
   DialogClose,
@@ -15,8 +15,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "../shadcn/drawer";
-import Heading from "../texts/heading";
-import { ButtonWithChildren } from "../buttons/button-with-children";
+import Heading from "../widgets/texts/heading";
+import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
 import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
 

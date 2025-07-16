@@ -1,27 +1,8 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../shadcn/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "../shadcn/drawer";
-import { ButtonWithChildren } from "../buttons/button-with-children";
+import ConfirmationDialog from "./confirmation-dialog";
 import { useToast } from "@/app/hooks/use-toast";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
 import { useEventCancelParticipation } from "@/lib/mutations/event-cancel";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
@@ -43,7 +24,6 @@ export function CancelRegistrationConfirmationDialog({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const isDesktop = useMediaQuery("(min-width: 768px)");
   const { cancelParticipation, isPending } = useEventCancelParticipation();
 
   const onCancel = async () => {
@@ -82,61 +62,17 @@ export function CancelRegistrationConfirmationDialog({
     }
   };
 
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogClose />
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription>{t("desc")}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="">
-            <DialogClose asChild>
-              <ButtonWithChildren
-                className="w-fit"
-                variant="outline"
-                disabled={isPending}
-              >
-                {t("go-back")}
-              </ButtonWithChildren>
-            </DialogClose>
-            <ButtonWithChildren
-              onClick={onCancel}
-              className="w-fit"
-              aria-label="cancel participation"
-              loading={isPending}
-            >
-              {t("cancel")}
-            </ButtonWithChildren>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="pb-6">
-        <DrawerHeader className="text-left">
-          <DrawerTitle>{t("title")}</DrawerTitle>
-          <DrawerDescription>{t("desc")}</DrawerDescription>
-        </DrawerHeader>
-        <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <ButtonWithChildren variant="outline" disabled={isPending}>
-              {t("go-back")}
-            </ButtonWithChildren>
-          </DrawerClose>
-          <ButtonWithChildren
-            onClick={onCancel}
-            aria-label="cancel participation"
-            loading={isPending}
-          >
-            {t("cancel")}
-          </ButtonWithChildren>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+    <ConfirmationDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("title")}
+      description={t("desc")}
+      confirmText={t("cancel")}
+      cancelText={t("go-back")}
+      onConfirm={onCancel}
+      isPending={isPending}
+      confirmButtonAriaLabel="cancel participation"
+    />
   );
 }

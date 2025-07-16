@@ -12,7 +12,7 @@ import {
   EventInfoSchema,
 } from "@/app/gen/zenao/v1/zenao_pb";
 
-export const DEFAULT_EVENTS_LIMIT = 2;
+export const DEFAULT_EVENTS_LIMIT = 20;
 
 export const eventsList = (
   fromUnixSec: number,
@@ -26,7 +26,11 @@ export const eventsList = (
       (string | number)[],
       number // pageParam type
     >,
-    "queryKey" | "queryFn"
+    | "queryKey"
+    | "queryFn"
+    | "getNextPageParam"
+    | "initialPageParam"
+    | "getPreviousPageParam"
   >,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
@@ -63,7 +67,6 @@ export const eventsList = (
       }
       return pages.length - 2;
     },
-    staleTime: 60000, // 1 minute
     ...options,
   });
 };

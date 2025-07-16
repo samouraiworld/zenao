@@ -5,12 +5,12 @@ import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
 import { EventInfo } from "../gen/zenao/v1/zenao_pb";
 import { DEFAULT_EVENTS_LIMIT, eventsList } from "@/lib/queries/events-list";
-import EmptyEventsList from "@/components/widgets/empty-events-list";
+import EmptyEventsList from "@/components/features/event/event-empty-list";
 import { idFromPkgPath } from "@/lib/queries/event";
-import Text from "@/components/texts/text";
-import EventCardListLayout from "@/components/layout/event-card-list-layout";
-import { EventCard } from "@/components/cards/event-card";
-import { LoaderMoreButton } from "@/components/buttons/load-more-button";
+import Text from "@/components/widgets/texts/text";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
+import { EventCard } from "@/components/features/event/event-card";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 
 export function DiscoverEventsList({
   from,
@@ -28,10 +28,13 @@ export function DiscoverEventsList({
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
       ? eventsList(now, Number.MAX_SAFE_INTEGER, DEFAULT_EVENTS_LIMIT)
-      : eventsList(now - 1, 0, DEFAULT_EVENTS_LIMIT),
+      : eventsList(now - 1, 0, DEFAULT_EVENTS_LIMIT, {
+          staleTime: 1000 * 60, // 1 minute
+        }),
   );
 
   const events = useMemo(() => eventsPages.pages.flat(), [eventsPages]);
+
   const eventsByDay = useMemo(() => {
     return events.reduce(
       (acc, event) => {

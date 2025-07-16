@@ -9,12 +9,12 @@ import {
   eventsByParticipantList,
 } from "@/lib/queries/events-list";
 import { FromFilter } from "@/lib/search-params";
-import EmptyEventsList from "@/components/widgets/empty-events-list";
-import { EventCard } from "@/components/cards/event-card";
+import EmptyEventsList from "@/components/features/event/event-empty-list";
+import { EventCard } from "@/components/features/event/event-card";
 import { idFromPkgPath } from "@/lib/queries/event";
-import Text from "@/components/texts/text";
-import EventCardListLayout from "@/components/layout/event-card-list-layout";
-import { LoaderMoreButton } from "@/components/buttons/load-more-button";
+import Text from "@/components/widgets/texts/text";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 
 export function TicketsEventsList({
   now,
