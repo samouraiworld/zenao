@@ -64,18 +64,13 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   });
 
   // EditEvent call loaded value
-  const { editEvent, isPending } = useEditEvent();
+  const { editEvent, isPending } = useEditEvent(getToken);
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
-      const token = await getToken();
-      if (!token) {
-        throw new Error("invalid clerk authToken");
-      }
-
-      await editEvent({ ...values, eventId: id, token });
+      await editEvent({ ...values, eventId: id });
       toast({
         title: t("toast-edit-success"),
       });

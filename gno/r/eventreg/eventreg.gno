@@ -177,30 +177,35 @@ func mustGetEventByPkgPath(pkgPath string) *zenaov1.EventInfo {
 	return evt
 }
 
-func listEvents(from, to int64, limit uint32) []*zenaov1.EventInfo {
+func listEvents(from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := unixTimeKey(from) + "/"
 	toKey := unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByEndDate, fromKey, toKey, from > to, limit)
+	return listEventsInternal(&eventsByEndDate, fromKey, toKey, from > to, limit, offset)
 }
 
-func listEventsByOrganizer(organizerID string, from, to int64, limit uint32) []*zenaov1.EventInfo {
+func listEventsByOrganizer(organizerID string, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := organizerID + "/" + unixTimeKey(from) + "/"
 	toKey := organizerID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByOrganizer, fromKey, toKey, from > to, limit)
+	return listEventsInternal(&eventsByOrganizer, fromKey, toKey, from > to, limit, offset)
 }
 
-func listEventsByParticipant(participantID string, from, to int64, limit uint32) []*zenaov1.EventInfo {
+func listEventsByParticipant(participantID string, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := participantID + "/" + unixTimeKey(from) + "/"
 	toKey := participantID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByParticipant, fromKey, toKey, from > to, limit)
+	return listEventsInternal(&eventsByParticipant, fromKey, toKey, from > to, limit, offset)
 }
 
-func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, limit uint32) []*zenaov1.EventInfo {
+func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, limit, offset uint32) []*zenaov1.EventInfo {
 	res := []*zenaov1.EventInfo{}
+	count := uint32(0)
 	it := func(key string, value interface{}) bool {
+		if count < offset {
+			count++
+			return false
+		}
 		var evt zenaov1.EventInfo
 		switch val := value.(type) {
 		case *zenaov1.EventInfo:

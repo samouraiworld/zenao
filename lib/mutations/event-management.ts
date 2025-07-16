@@ -1,7 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "../get-query-client";
-import { eventOptions } from "../queries/event";
+import { eventGatekeepersEmails, eventOptions } from "../queries/event";
 import { currentTimezone } from "../time";
+import { GetToken } from "../utils";
 import { zenaoClient } from "@/lib/zenao-client";
 import { EventFormSchemaType } from "@/types/schemas";
 
@@ -61,19 +62,23 @@ export const useCreateEvent = () => {
   };
 };
 
-export const useEditEvent = () => {
+export const useEditEvent = (getToken: GetToken) => {
   const queryClient = getQueryClient();
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       eventId,
-      token,
       password,
       exclusive,
       ...data
     }: EventFormSchemaType & {
       eventId: string;
-      token: string;
     }) => {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("not authenticated");
+      }
+
       // Construct location object for the call
       let value = {};
       switch (data.location.kind) {
@@ -114,6 +119,9 @@ export const useEditEvent = () => {
     },
     onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries(eventOptions(variables.eventId));
+      await queryClient.invalidateQueries(
+        eventGatekeepersEmails(variables.eventId, getToken),
+      );
     },
   });
 

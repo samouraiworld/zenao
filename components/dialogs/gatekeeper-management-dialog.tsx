@@ -156,17 +156,11 @@ export function GatekeeperManagementDialog({
     defaultValues,
   });
 
-  const { editEvent, isPending } = useEditEvent();
+  const { editEvent, isPending } = useEditEvent(getToken);
 
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
-      console.log("Values", values);
-      const token = await getToken();
-      if (!token) {
-        throw new Error("invalid clerk authToken");
-      }
-
-      await editEvent({ ...values, eventId, token });
+      await editEvent({ ...values, eventId });
       toast({
         title: t("toast-edit-success"),
       });
