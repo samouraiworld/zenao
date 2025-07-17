@@ -165,3 +165,11 @@ export const eventInfoTabsSchema = z
   .union([z.literal("description"), z.literal("feed"), z.literal("votes")])
   .default("description");
 export type EventInfoTabsSchemaType = z.infer<typeof eventInfoTabsSchema>;
+
+export const communityTabsSchema = z.union([
+  z.literal("posts"),
+  z.literal("events"),
+  z.literal("members"),
+  z.literal("proposals"),
+]);
+export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;

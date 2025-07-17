@@ -276,5 +276,11 @@
     "cancel": "Cancel",
     "toast-delete-post-success": "Your post has been deleted",
     "toast-delete-post-error": "Error while deleting the post"
+  },
+  "community": {
+    "posts": "Posts",
+    "events": "Events",
+    "members": "Members",
+    "proposals": "Proposals"
   }
 }
