@@ -64,7 +64,7 @@ function CommunityMainSections({
       </TabsList>
       <Separator className="mb-3" />
       <TabsContent value="posts">
-        <CommunityPosts />
+        <CommunityPosts communityId={communityId} />
       </TabsContent>
       <TabsContent value="events">
         <CommunityEvents />

@@ -9,21 +9,8 @@ import { StandardPostCard } from "@/components/features/social-feed/standard-pos
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
-import Text from "@/components/widgets/texts/text";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-
-function EmptyPostsList() {
-  const t = useTranslations("event-feed");
-
-  return (
-    <div className="flex flex-col items-center gap-5 mt-10 text-center">
-      <Text className="font-bold">{t("no-posts-title")}</Text>
-      <Text size="sm" variant="secondary">
-        {t("no-posts-description")}
-      </Text>
-    </div>
-  );
-}
+import EmptyList from "@/components/widgets/lists/empty-list";
 
 export function PostsList({
   eventId,
@@ -69,7 +56,10 @@ export function PostsList({
     <>
       <div className="space-y-4">
         {!posts.length ? (
-          <EmptyPostsList />
+          <EmptyList
+            title={t("no-posts-title")}
+            description={t("no-posts-description")}
+          />
         ) : (
           posts.map((post) => {
             switch (post.postType) {

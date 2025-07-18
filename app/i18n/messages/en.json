@@ -165,6 +165,12 @@
     "toast-access-invalid-password": "Invalid password !",
     "toast-access-error": "Could not grant access to event information!"
   },
+  "no-events-title": "No events to show.",
+  "no-events-description": "You have no events. Why not create one?",
+  "no-members-title": "No members to show.",
+  "no-members-description": "Let's change that!",
+  "no-proposals-title": "No proposals to show.",
+  "no-proposals-description": "You have no proposals or votes. Why not create one?",
   "events-list": {
     "no-events": "No events to show.",
     "no-events-desc": "You have no events. Why not create one?",
@@ -199,14 +205,14 @@
     "publishedAt": "Published at"
   },
   "load-more": "Load more",
+  "no-posts-title": "No posts to show.",
+  "no-posts-description": "You have no posts. Why not create one?",
   "event-feed": {
     "global-feed": "Global feed",
     "polls-feed": "Polls",
     "no-more-posts": "No more to show for now.",
     "no-polls-title": "No polls to show.",
     "no-polls-description": "You have no polls. Why not create one?",
-    "no-posts-title": "No posts to show.",
-    "no-posts-description": "You have no posts. Why not create one?",
     "poll-form": {
       "question-placeholder-sm": "Ask a question...",
       "question-placeholder-lg": "What do you wanna ask to the community ?",
@@ -282,5 +288,9 @@
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals"
+  },
+  "empty-list": {
+    "title": "Nothing listed",
+    "description": "Let's change that!"
   }
 }
