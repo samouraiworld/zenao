@@ -3,8 +3,17 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Separator } from "@/components/shadcn/separator";
-import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn/tabs";
 import { CommunityTabsSchemaType } from "@/types/schemas";
+import CommunityEvents from "@/app/community/[id]/[tab]/events";
+import CommunityPosts from "@/app/community/[id]/[tab]/posts";
+import CommunityMembers from "@/app/community/[id]/[tab]/members";
+import CommunityProposals from "@/app/community/[id]/[tab]/proposals";
 
 type CommunityMainSectionsProps = {
   communityId: string;
@@ -54,6 +63,18 @@ function CommunityMainSections({
         </Link>
       </TabsList>
       <Separator className="mb-3" />
+      <TabsContent value="posts">
+        <CommunityPosts />
+      </TabsContent>
+      <TabsContent value="events">
+        <CommunityEvents />
+      </TabsContent>
+      <TabsContent value="members">
+        <CommunityMembers />
+      </TabsContent>
+      <TabsContent value="proposals">
+        <CommunityProposals />
+      </TabsContent>
     </Tabs>
   );
 }
