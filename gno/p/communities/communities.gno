@@ -15,16 +15,16 @@ type Community struct {
 }
 
 type Config struct {
-	Creator      string
-	Members     []string
-	Events      []string
-	DisplayName string
-	Description string
-	AvatarURI   string
-	BannerURI   string
-	GetProfileString    basedao.ProfileStringGetter
-	SetProfileString    basedao.ProfileStringSetter
-	ZenaoAdminAddr      string
+	Creator          string
+	Members          []string
+	Events           []string
+	DisplayName      string
+	Description      string
+	AvatarURI        string
+	BannerURI        string
+	GetProfileString basedao.ProfileStringGetter
+	SetProfileString basedao.ProfileStringSetter
+	ZenaoAdminAddr   string
 }
 
 func NewCommunity(conf *Config) *Community {
@@ -38,13 +38,13 @@ func NewCommunity(conf *Config) *Community {
 			Description: "Person in charge of the community",
 		},
 		{
-			Name:		"member",
+			Name:        "member",
 			Description: "Person who is a member of the community",
-		}
+		},
 		{
 			Name:        "event",
 			Description: "Event organized & managed by the community",
-		}
+		},
 	}
 	var members []basedao.Member
 	for _, member := range conf.Members {
