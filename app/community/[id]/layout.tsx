@@ -5,6 +5,7 @@ import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
+import { Web3Image } from "@/components/widgets/images/web3-image";
 
 // enable ssg for all events
 export async function generateStaticParams() {
@@ -27,16 +28,33 @@ async function CommunityPageLayout({
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ScreenContainer>
         <div className="flex flex-col gap-8 w-full">
-          {/* Header (with hero) */}
           <div className="relative w-full">
             <AspectRatio ratio={48 / 9}>
-              {/* TODO replace by Web3Image */}
-              <div className="rounded bg-red-500 w-full h-full"></div>
+              <Web3Image
+                className="rounded bg-gray-300 w-full h-full"
+                alt="Community hero img"
+                src="ipfs://bafybeidrcgelzhfblffpsmo6jukdnzmvae7xhu5zud4nn3os6qzdxbesu4"
+                priority
+                fetchPriority="high"
+                fill
+                quality={70}
+              />
             </AspectRatio>
 
             <div className="w-[128px] absolute -bottom-14 left-10">
               <AspectRatio ratio={1}>
-                <div className="rounded bg-yellow-400 h-full"></div>
+                <Web3Image
+                  className="rounded h-full self-center object-cover"
+                  // TODO use uri
+                  src="ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
+                  alt="Community profile img"
+                  priority
+                  fetchPriority="high"
+                  fill
+                  sizes="(max-width: 768px) 100vw,
+                  (max-width: 1200px) 50vw,
+                  33vw"
+                />
               </AspectRatio>
             </div>
           </div>
@@ -45,7 +63,7 @@ async function CommunityPageLayout({
             <div className="flex justify-between">
               <div className="flex flex-col">
                 <Heading level={1} className="text-2xl">
-                  The village
+                  HyperHactive
                 </Heading>
                 <Text className="text-secondary-color">@village.tori</Text>
               </div>
