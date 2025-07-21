@@ -161,6 +161,17 @@ type EventInfo struct {
 	CheckedIn    uint32
 }
 
+type CommunityInfo struct {
+	DisplayName    string
+	Description    string
+	AvatarUri      string
+	BannerUri      string
+	Creator        string
+	Administrators []string
+	CountMembers   uint32
+	PkgPath        string
+}
+
 type BatchProfileField struct {
 	Type string
 	Key  string

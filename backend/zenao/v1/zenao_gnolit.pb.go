@@ -534,6 +534,45 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	return buf.String()
 }
 
+func (c *CommunityInfo) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CommunityInfo{\n")
+	if c.DisplayName != "" {
+		fmt.Fprintf(buf, "%s\tDisplayName: %q,\n", linePrefix, c.DisplayName)
+	}
+	if c.Description != "" {
+		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, c.Description)
+	}
+	if c.AvatarUri != "" {
+		fmt.Fprintf(buf, "%s\tAvatarUri: %q,\n", linePrefix, c.AvatarUri)
+	}
+	if c.BannerUri != "" {
+		fmt.Fprintf(buf, "%s\tBannerUri: %q,\n", linePrefix, c.BannerUri)
+	}
+	if c.Creator != "" {
+		fmt.Fprintf(buf, "%s\tCreator: %q,\n", linePrefix, c.Creator)
+	}
+	if len(c.Administrators) != 0 {
+		fmt.Fprintf(buf, "%s\tAdministrators: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Administrators {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if c.CountMembers != 0 {
+		fmt.Fprintf(buf, "%s\tCountMembers: %d,\n", linePrefix, c.CountMembers)
+	}
+	if c.PkgPath != "" {
+		fmt.Fprintf(buf, "%s\tPkgPath: %q,\n", linePrefix, c.PkgPath)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (b *BatchProfileField) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)

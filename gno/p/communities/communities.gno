@@ -16,6 +16,7 @@ type Community struct {
 
 type Config struct {
 	Creator          string
+	Administrators   []string
 	Members          []string
 	Events           []string
 	DisplayName      string
@@ -35,7 +36,11 @@ func NewCommunity(conf *Config) *Community {
 		},
 		{
 			Name:        "creator",
-			Description: "Person in charge of the community",
+			Description: "Person that created the community",
+		},
+		{
+			Name:        "administrator",
+			Description: "Person who can manage the community",
 		},
 		{
 			Name:        "member",
@@ -47,32 +52,38 @@ func NewCommunity(conf *Config) *Community {
 		},
 	}
 	var members []basedao.Member
+	for _, admin := range conf.Administrators {
+		members = append(members, basedao.Member{
+			Address: admin,
+			Roles:   []string{"administrator"},
+		})
+	}
 	for _, member := range conf.Members {
 		members = append(members, basedao.Member{
 			Address: member,
-			Role:    "member",
+			Roles:   []string{"member"},
 		})
 	}
 	for _, event := range conf.Events {
 		members = append(members, basedao.Member{
 			Address: event,
-			Role:    "event",
+			Roles:   []string{"event"},
 		})
 	}
 	members = append(members, basedao.Member{
 		Address: conf.Creator,
-		Role:    "creator",
+		Roles:   []string{"creator", "administrator"},
 	})
 	members = append(members, basedao.Member{
 		Address: conf.ZenaoAdminAddr,
-		Role:    "zenao-admin",
+		Roles:   []string{"zenao-admin"},
 	})
 
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
 
 	pubdao, privdao := basedao.New(&basedao.Config{
-		Name:             conf.Title,
+		Name:             conf.DisplayName,
 		Description:      conf.Description,
 		ImageURI:         conf.AvatarURI,
 		Members:          memberStore,
