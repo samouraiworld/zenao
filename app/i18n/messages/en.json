@@ -208,10 +208,10 @@
   "load-more": "Load more",
   "no-posts-title": "No posts to show.",
   "no-posts-description": "You have no posts. Why not create one?",
+  "no-more-posts": "No more to show for now.",
   "event-feed": {
     "global-feed": "Global feed",
     "polls-feed": "Polls",
-    "no-more-posts": "No more to show for now.",
     "no-polls-title": "No polls to show.",
     "no-polls-description": "You have no polls. Why not create one?",
     "poll-form": {

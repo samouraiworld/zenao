@@ -6,7 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
-import { PostCardLayout } from "@/components/features/social-feed/post-card-layout";
+import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import Text from "@/components/widgets/texts/text";
 import { PollPostViewInfo } from "@/lib/social-feed";
 import { cn } from "@/lib/tailwind";
@@ -14,7 +14,7 @@ import { Gauge } from "@/components/widgets/gauge";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import { getQueryClient } from "@/lib/get-query-client";
 import { useToast } from "@/app/hooks/use-toast";
-import { useVotePoll } from "@/lib/mutations/social-feed";
+import { useReactPost, useVotePoll } from "@/lib/mutations/social-feed";
 import { Button } from "@/components/shadcn/button";
 import { profileOptions } from "@/lib/queries/profile";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -42,6 +42,7 @@ export function PollPostCard({
   );
 
   const { votePoll, isPending } = useVotePoll(queryClient);
+  const { reactPost, isPending: isReacting } = useReactPost();
 
   const { data: roles } = useSuspenseQuery(
     eventUserRoles(eventId, userAddress),
@@ -87,6 +88,26 @@ export function PollPostCard({
     }
   };
 
+  const onReactionChange = async (icon: string) => {
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("Missing token");
+      }
+      await reactPost({
+        token,
+        userAddress: userAddress || "",
+        postId: pollPost.post.localPostId.toString(10),
+        icon,
+        eventId,
+        parentId: "",
+      });
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1">
       <PostCardLayout
@@ -95,6 +116,9 @@ export function PollPostCard({
         createdBy={createdBy}
         gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
         canReply={canReply}
+        onReactionChange={onReactionChange}
+        isReacting={isReacting}
+        userRoles={roles}
       >
         <div className="w-full flex flex-col gap-2">
           <div className="flex flex-row items-center gap-2">
@@ -122,16 +146,6 @@ export function PollPostCard({
           </div>
         </div>
       </PostCardLayout>
-      {/* {showReplies && (
-        <div className="pl-6">
-          <Suspense fallback={<PostCardSkeleton />}>
-            <PostComments
-              eventId={eventId}
-              parentId={pollPost.post.localPostId.toString()}
-            />
-          </Suspense>
-        </div>
-      )} */}
     </div>
   );
 }

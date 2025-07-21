@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import { PostCardLayout } from "@/components/features/social-feed/post-card-layout";
+import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { profileOptions } from "@/lib/queries/profile";
 import {
@@ -14,6 +14,8 @@ import {
 } from "@/lib/queries/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { isStandardPost, StandardPostView } from "@/lib/social-feed";
+import { useReactPost } from "@/lib/mutations/social-feed";
+import { eventUserRoles } from "@/lib/queries/event-users";
 
 function PostComment({
   eventId,
@@ -24,12 +26,41 @@ function PostComment({
   parentId: string;
   comment: StandardPostView;
 }) {
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(comment.post.author),
   );
   const [editMode, setEditMode] = useState(false);
+  const { reactPost, isPending: isReacting } = useReactPost();
+
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userAddress),
+  );
 
   const standardPost = comment.post.post.value;
+
+  const onReactionChange = async (icon: string) => {
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("Missing token");
+      }
+      await reactPost({
+        token,
+        userAddress: userAddress || "",
+        postId: comment.post.localPostId.toString(10),
+        icon,
+        eventId,
+        parentId,
+      });
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
 
   return (
     <PostCardLayout
@@ -40,6 +71,9 @@ function PostComment({
       parentId={parentId}
       editMode={editMode}
       onEditModeChange={setEditMode}
+      onReactionChange={onReactionChange}
+      isReacting={isReacting}
+      userRoles={roles}
     >
       <MarkdownPreview markdownString={standardPost.content} />
     </PostCardLayout>

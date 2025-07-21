@@ -5,14 +5,15 @@ import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useForm } from "react-hook-form";
 import { StandardPostForm } from "./event-feed-form/standard-post-form";
-import { PostCardLayout } from "@/components/features/social-feed/post-card-layout";
+import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import { useEditStandardPost } from "@/lib/mutations/social-feed";
+import { useEditStandardPost, useReactPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
+import { eventUserRoles } from "@/lib/queries/event-users";
 
 export function StandardPostCard({
   eventId,
@@ -29,10 +30,15 @@ export function StandardPostCard({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userAddress),
+  );
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
   );
   const { editPost, isPending } = useEditStandardPost();
+  const { reactPost, isPending: isReacting } = useReactPost();
+
   const [editMode, setEditMode] = useState(false);
 
   const standardPost = post.post.post.value;
@@ -71,6 +77,26 @@ export function StandardPostCard({
     }
   };
 
+  const onReactionChange = async (icon: string) => {
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("Missing token");
+      }
+      await reactPost({
+        token,
+        userAddress: userAddress || "",
+        postId: post.post.localPostId.toString(10),
+        icon,
+        eventId,
+        parentId: "",
+      });
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1">
       <PostCardLayout
@@ -79,9 +105,12 @@ export function StandardPostCard({
         createdBy={createdBy}
         gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${post.post.localPostId.toString(32).padStart(7, "0")}`}
         canReply={canReply}
+        userRoles={roles}
         onDeleteSuccess={onDeleteSuccess}
         editMode={editMode}
         onEditModeChange={setEditMode}
+        onReactionChange={onReactionChange}
+        isReacting={isReacting}
       >
         {editMode ? (
           <StandardPostForm

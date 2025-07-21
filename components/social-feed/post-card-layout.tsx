@@ -1,30 +1,35 @@
 "use client";
 
 import { Url } from "next/dist/shared/lib/router/router";
-import React, { ReactNode, useMemo } from "react";
-import { Hash, MapPin, MessageCircle, Smile, X } from "lucide-react";
+import React, { ReactNode } from "react";
+import { Hash, MapPin, MessageCircle, X } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import EmojiPicker, { Theme } from "emoji-picker-react";
-import { useTheme } from "next-themes";
-import { UserAvatar } from "../user/user";
-import { PostMenu } from "./post-menu";
+import { UserAvatar } from "../features/user/user";
+import { PostMenu } from "../features/social-feed/post-menu";
+import PostReactions from "./post-reactions";
 import { Card } from "@/components/widgets/cards/card";
-import { PostView, ReactionView } from "@/app/gen/feeds/v1/feeds_pb";
+import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 import { DateTimeText } from "@/components/widgets/date-time-text";
 import Text from "@/components/widgets/texts/text";
-import { cn } from "@/lib/tailwind";
 import { GnoProfile } from "@/lib/queries/profile";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/shadcn/popover";
-import { useReactPost } from "@/lib/mutations/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
-import { eventUserRoles } from "@/lib/queries/event-users";
+import { EventUserRole } from "@/lib/queries/event-users";
 import { Button } from "@/components/shadcn/button";
+
+type PostCardLayoutProps = {
+  post: PostView;
+  eventId: string;
+  createdBy: GnoProfile | null;
+  children: ReactNode;
+  canReply?: boolean;
+  editMode?: boolean;
+  gnowebHref?: Url;
+  parentId?: string;
+  userRoles?: EventUserRole[];
+  onEditModeChange?: (editMode: boolean) => void;
+  onDeleteSuccess?: () => void;
+  onReactionChange: (icon: string) => void | Promise<void>;
+  isReacting?: boolean;
+};
 
 export function PostCardLayout({
   post,
@@ -33,25 +38,18 @@ export function PostCardLayout({
   gnowebHref,
   children,
   canReply,
-  parentId = "",
   editMode,
+  parentId = "",
+  userRoles = [],
   onEditModeChange,
   onDeleteSuccess,
-}: {
-  post: PostView;
-  eventId: string;
-  createdBy: GnoProfile | null;
-  children: ReactNode;
-  canReply?: boolean;
-  editMode?: boolean;
-  onEditModeChange?: (editMode: boolean) => void;
-  gnowebHref?: Url;
-  parentId?: string;
-  onDeleteSuccess?: () => void;
-}) {
+  onReactionChange,
+  isReacting,
+}: PostCardLayoutProps) {
   if (!post.post) {
     return null;
   }
+
   return (
     <Card className="w-full flex flex-col gap-2">
       <div className="flex flex-col sm:flex-row items-start gap-2 relative">
@@ -147,110 +145,18 @@ export function PostCardLayout({
               </Button>
             </Link>
           )}
-          <Reactions
-            postId={post.post.localPostId}
-            eventId={eventId}
+
+          <PostReactions
             reactions={post.reactions}
-            parentId={parentId}
+            canReact={
+              userRoles.includes("participant") ||
+              userRoles.includes("organizer")
+            }
+            isPending={isReacting}
+            onReactionChange={onReactionChange}
           />
         </div>
       )}
     </Card>
-  );
-}
-
-function Reactions({
-  postId,
-  eventId,
-  reactions,
-  parentId,
-}: {
-  postId: bigint;
-  eventId: string;
-  reactions: ReactionView[];
-  parentId: string;
-}) {
-  const { resolvedTheme } = useTheme();
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
-  );
-  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
-  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
-  const [emojiPickerOpen, setEmojiPickerOpen] = React.useState(false);
-  const { reactPost, isPending } = useReactPost();
-  const onReactionChange = async (icon: string) => {
-    try {
-      const token = await getToken();
-
-      if (!token) {
-        throw new Error("Missing token");
-      }
-      await reactPost({
-        token,
-        userAddress: userAddress || "",
-        postId: postId.toString(),
-        icon,
-        eventId,
-        parentId,
-      });
-    } catch (error) {
-      console.error("error", error);
-    }
-  };
-
-  return (
-    <div className="flex flex-row gap-2 overflow-auto">
-      {(isOrganizer || isParticipant) && (
-        <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="reaction-btn rounded-full cursor-pointer size-8 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
-            >
-              <Smile size={16} color="hsl(var(--secondary-color))" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-fit bg-transparent p-0 border-none transition-all">
-            <EmojiPicker
-              theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
-              onEmojiClick={(choice) => {
-                if (isPending) return;
-                onReactionChange(choice.emoji);
-                setEmojiPickerOpen(false);
-              }}
-            />
-          </PopoverContent>
-        </Popover>
-      )}
-
-      <div className="flex flex-row gap-1 grow overflow-auto">
-        {reactions
-          .sort((a, b) => b.count - a.count)
-          .map((reaction) => (
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (isPending) return;
-                if (isOrganizer || isParticipant)
-                  onReactionChange(reaction.icon);
-              }}
-              className={cn(
-                "flex flex-row items-center h-8 px-2 rounded-full gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800",
-                reaction.userHasVoted && "border-[#EC7E17]",
-              )}
-              key={reaction.icon}
-            >
-              <Text className="text-sm">{reaction.icon}</Text>
-              <Text variant="secondary" className="text-sm">
-                {reaction.count}
-              </Text>
-            </Button>
-          ))}
-      </div>
-    </div>
   );
 }

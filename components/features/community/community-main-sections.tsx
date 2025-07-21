@@ -66,7 +66,7 @@ function CommunityMainSections({
           </TabsTrigger>
         </Link>
       </TabsList>
-      <Separator className="mb-3" />
+      <Separator className="mb-8" />
       <TabsContent value="posts">
         <Suspense fallback={<Loader2 className="animate-spin" />}>
           <CommunityPosts communityId={communityId} />

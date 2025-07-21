@@ -83,7 +83,7 @@ const EventFeedForm = ({
             minutes: 0,
           },
         },
-        { keepDefaultValues: true, keepValues: true },
+        { keepValues: true },
       );
     } catch (err) {
       captureException(err);

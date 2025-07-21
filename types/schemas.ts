@@ -128,7 +128,10 @@ export const pollFormSchema = z.object({
   parentPostId: z.bigint().optional(),
   kind: z.literal("POLL"),
   question: z.string().trim().min(1, "Required").max(300),
-  options: z.array(pollOptionFormSchema).min(2).max(8),
+  options: z
+    .array(pollOptionFormSchema)
+    .min(2, "There must be at least 2 options")
+    .max(8),
   allowMultipleOptions: z.boolean(),
   duration: pollDurationFormSchema,
 });
