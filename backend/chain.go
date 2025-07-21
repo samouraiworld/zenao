@@ -21,7 +21,6 @@ import (
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
-	communitiesv1 "github.com/samouraiworld/zenao/backend/communities/v1"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -470,7 +469,7 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 }
 
 // CreateCommunity implements ZenaoChain.
-func (g *gnoZenaoChain) CreateCommunity(communityID string, creatorID string, administratorsIDs []string, membersIDs []string, req *communitiesv1.CreateCommunityRequest) error {
+func (g *gnoZenaoChain) CreateCommunity(communityID string, creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error {
 	creatorAddr := g.UserAddress(creatorID)
 	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
 	membersAddr := mapsl.Map(membersIDs, g.UserAddress)
@@ -1215,7 +1214,7 @@ func Render(path string) string {
 }
 `
 
-func genCommunityRealmSource(creatorAddr string, adminsAddr []string, membersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *communitiesv1.CreateCommunityRequest) (string, error) {
+func genCommunityRealmSource(creatorAddr string, adminsAddr []string, membersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateCommunityRequest) (string, error) {
 	m := map[string]string{
 		"creatorAddr":    strconv.Quote(creatorAddr),
 		"adminsAddr":     stringSliceLit(adminsAddr),
@@ -1254,11 +1253,9 @@ var (
 )
 
 func init() {
-	zenaoAdmin := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94"
-	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
 	conf := communities.Config{
 		Creator:          {{.creatorAddr}},
-		ZenaoAdminAddr:   "{{.zenaoAdminAddr}}",
+		ZenaoAdminAddr:   {{.zenaoAdminAddr}},
 		Administrators:   {{.adminsAddr}},
 		Members:          {{.membersAddr}},
 		DisplayName:      {{.displayName}},

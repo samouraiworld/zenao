@@ -5,11 +5,10 @@ import (
 	"errors"
 	"flag"
 
-	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/tm2/pkg/commands"
-	communitiesv1 "github.com/samouraiworld/zenao/backend/communities/v1"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/mapsl"
+	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
@@ -31,28 +30,32 @@ func newConvertEvtToComCmd() *commands.Command {
 var evtToComConf EvtToComConfig
 
 type EvtToComConfig struct {
-	adminMnemonic  string
-	chainId        string
-	chainNamespace string
-	dbPath         string
-	evtID          string
-	displayName    string
-	description    string
-	avatarURI      string
-	bannerURI      string
-	verbose        bool
+	adminMnemonic   string
+	chainID         string
+	chainEndpoint   string
+	gnoNamespace    string
+	dbPath          string
+	evtID           string
+	displayName     string
+	description     string
+	avatarURI       string
+	bannerURI       string
+	gasSecurityRate float64
+	verbose         bool
 }
 
 func (conf *EvtToComConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&evtToComConf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
-	flset.StringVar(&evtToComConf.chainId, "chain-id", "", "Chain ID")
-	flset.StringVar(&evtToComConf.chainNamespace, "chain-namespace", "zenao", "Namespace used to deploy pkg on the chain")
-	flset.StringVar(&evtToComConf.dbPath, "db-path", "", "Path to the database")
+	flset.StringVar(&evtToComConf.chainID, "chain-id", "dev", "Chain ID")
+	flset.StringVar(&evtToComConf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
+	flset.StringVar(&evtToComConf.gnoNamespace, "gno-namespace", "zenao", "Namespace used to deploy pkg on the chain")
+	flset.StringVar(&evtToComConf.dbPath, "db-path", "dev.db", "Path to the database")
 	flset.StringVar(&evtToComConf.evtID, "evt-id", "", "ID of the event to convert")
 	flset.StringVar(&evtToComConf.displayName, "display-name", "", "Display name for the new community")
 	flset.StringVar(&evtToComConf.description, "description", "", "Description for the new community")
 	flset.StringVar(&evtToComConf.avatarURI, "avatar-uri", "", "Avatar URI for the new community")
 	flset.StringVar(&evtToComConf.bannerURI, "banner-uri", "", "Banner URI for the new community")
+	flset.Float64Var(&evtToComConf.gasSecurityRate, "gas-security-rate", 0.2, "Margin multiplier for estimated gas wanted to be safe")
 	flset.BoolVar(&evtToComConf.verbose, "v", false, "Enable verbose logging")
 }
 
@@ -65,22 +68,17 @@ func convertEvtToCom() error {
 			return err
 		}
 	}
-	logger.Info("converting an event to a community with args: ", zap.String("chain-id", evtToComConf.chainId), zap.String("db-path", evtToComConf.dbPath), zap.String("evt-id", evtToComConf.evtID), zap.String("display-name", evtToComConf.displayName), zap.String("description", evtToComConf.description), zap.String("avatar-uri", evtToComConf.avatarURI), zap.String("banner-uri", evtToComConf.bannerURI))
+	logger.Info("converting an event to a community with args: ", zap.String("chain-id", evtToComConf.chainID), zap.String("db-path", evtToComConf.dbPath), zap.String("evt-id", evtToComConf.evtID), zap.String("display-name", evtToComConf.displayName), zap.String("description", evtToComConf.description), zap.String("avatar-uri", evtToComConf.avatarURI), zap.String("banner-uri", evtToComConf.bannerURI), zap.Float64("gas-security-rate", evtToComConf.gasSecurityRate), zap.Bool("verbose", evtToComConf.verbose), zap.String("gno-namespace", evtToComConf.gnoNamespace), zap.String("chain-endpoint", evtToComConf.chainEndpoint))
 
-	signer, err := gnoclient.SignerFromBip39(evtToComConf.adminMnemonic, "dev", "", 0, 0)
+	if evtToComConf.evtID == "" {
+		return errors.New("evt-id is required")
+	}
+
+	chain, err := setupChain(evtToComConf.adminMnemonic, evtToComConf.gnoNamespace, evtToComConf.chainID, evtToComConf.chainEndpoint, evtToComConf.gasSecurityRate, logger)
 	if err != nil {
 		return err
 	}
-	signerInfo, err := signer.Info()
-	if err != nil {
-		return err
-	}
-	chain := &gnoZenaoChain{
-		signerInfo: signerInfo,
-		logger:     logger,
-		namespace:  evtToComConf.chainNamespace,
-	}
-	logger.Info("Signer initialized", zap.String("address", signerInfo.GetAddress().String()))
+	logger.Info("Signer initialized", zap.String("address", chain.signerInfo.GetAddress().String()))
 
 	db, err := gzdb.SetupDB(evtToComConf.dbPath)
 	if err != nil {
@@ -90,7 +88,7 @@ func convertEvtToCom() error {
 
 	var cmt *zeni.Community
 	var membersIDs []string
-	var cmtReq *communitiesv1.CreateCommunityRequest
+	var cmtReq *zenaov1.CreateCommunityRequest
 	if err := db.Tx(func(tx zeni.DB) error {
 		evt, err := tx.GetEvent(evtToComConf.evtID)
 		if err != nil {
@@ -101,7 +99,7 @@ func convertEvtToCom() error {
 		}
 		logger.Info("event found", zap.String("event-id", evt.ID), zap.String("title", evt.Title))
 
-		cmtReq = &communitiesv1.CreateCommunityRequest{
+		cmtReq = &zenaov1.CreateCommunityRequest{
 			DisplayName: evt.Title,
 			Description: evt.Description,
 			AvatarURI:   evt.ImageURI,

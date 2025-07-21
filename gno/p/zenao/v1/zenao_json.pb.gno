@@ -1471,3 +1471,144 @@ func (e *ExportParticipantsResponse) FromJSON(node *json.Node) {
 		e.MimeType = val.MustString()
 	}
 }
+
+func (c *CommunityInfo) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.DisplayName != "" {
+		fields["displayName"] = json.StringNode("", c.DisplayName)
+	}
+	if c.Description != "" {
+		fields["description"] = json.StringNode("", c.Description)
+	}
+	if c.AvatarUri != "" {
+		fields["avatarUri"] = json.StringNode("", c.AvatarUri)
+	}
+	if c.BannerUri != "" {
+		fields["bannerUri"] = json.StringNode("", c.BannerUri)
+	}
+	if c.Creator != "" {
+		fields["creator"] = json.StringNode("", c.Creator)
+	}
+	if len(c.Administrators) != 0 {
+		arr := make([]*json.Node, len(c.Administrators))
+		for i, val := range c.Administrators {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["administrators"] = json.ArrayNode("", arr)
+	}
+	if c.CountMembers != 0 {
+		fields["countMembers"] = json.NumberNode("", float64(c.CountMembers))
+	}
+	if c.PkgPath != "" {
+		fields["pkgPath"] = json.StringNode("", c.PkgPath)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CommunityInfo) FromJSON(node *json.Node) {
+	*c = CommunityInfo{}
+	fields := node.MustObject()
+
+	if val, ok := fields["displayName"]; ok {
+		c.DisplayName = val.MustString()
+	}
+	if val, ok := fields["description"]; ok {
+		c.Description = val.MustString()
+	}
+	if val, ok := fields["avatarUri"]; ok {
+		c.AvatarUri = val.MustString()
+	}
+	if val, ok := fields["bannerUri"]; ok {
+		c.BannerUri = val.MustString()
+	}
+	if val, ok := fields["creator"]; ok {
+		c.Creator = val.MustString()
+	}
+	if val, ok := fields["administrators"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Administrators = arr
+	}
+	if val, ok := fields["countMembers"]; ok {
+		c.CountMembers = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["pkgPath"]; ok {
+		c.PkgPath = val.MustString()
+	}
+}
+
+func (c *CreateCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.DisplayName != "" {
+		fields["DisplayName"] = json.StringNode("", c.DisplayName)
+	}
+	if c.Description != "" {
+		fields["Description"] = json.StringNode("", c.Description)
+	}
+	if c.AvatarURI != "" {
+		fields["AvatarURI"] = json.StringNode("", c.AvatarURI)
+	}
+	if c.BannerURI != "" {
+		fields["BannerURI"] = json.StringNode("", c.BannerURI)
+	}
+	if len(c.Administrators) != 0 {
+		arr := make([]*json.Node, len(c.Administrators))
+		for i, val := range c.Administrators {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["administrators"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreateCommunityRequest) FromJSON(node *json.Node) {
+	*c = CreateCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["DisplayName"]; ok {
+		c.DisplayName = val.MustString()
+	}
+	if val, ok := fields["Description"]; ok {
+		c.Description = val.MustString()
+	}
+	if val, ok := fields["AvatarURI"]; ok {
+		c.AvatarURI = val.MustString()
+	}
+	if val, ok := fields["BannerURI"]; ok {
+		c.BannerURI = val.MustString()
+	}
+	if val, ok := fields["administrators"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		c.Administrators = arr
+	}
+}
+
+func (c *CreateCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", c.CommunityId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CreateCommunityResponse) FromJSON(node *json.Node) {
+	*c = CreateCommunityResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		c.CommunityId = val.MustString()
+	}
+}

@@ -8,7 +8,6 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	v11 "github.com/samouraiworld/zenao/backend/communities/v1"
 	v1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	http "net/http"
 	strings "strings"
@@ -103,7 +102,7 @@ type ZenaoServiceClient interface {
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// COMMUNITY
-	CreateCommunity(context.Context, *connect.Request[v11.CreateCommunityRequest]) (*connect.Response[v11.CreateCommunityResponse], error)
+	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -198,7 +197,7 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
 			connect.WithClientOptions(opts...),
 		),
-		createCommunity: connect.NewClient[v11.CreateCommunityRequest, v11.CreateCommunityResponse](
+		createCommunity: connect.NewClient[v1.CreateCommunityRequest, v1.CreateCommunityResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreateCommunityProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("CreateCommunity")),
@@ -263,7 +262,7 @@ type zenaoServiceClient struct {
 	getEventTickets     *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
 	checkin             *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
 	exportParticipants  *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
-	createCommunity     *connect.Client[v11.CreateCommunityRequest, v11.CreateCommunityResponse]
+	createCommunity     *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
 	createPoll          *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll            *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 	createPost          *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
@@ -334,7 +333,7 @@ func (c *zenaoServiceClient) ExportParticipants(ctx context.Context, req *connec
 }
 
 // CreateCommunity calls zenao.v1.ZenaoService.CreateCommunity.
-func (c *zenaoServiceClient) CreateCommunity(ctx context.Context, req *connect.Request[v11.CreateCommunityRequest]) (*connect.Response[v11.CreateCommunityResponse], error) {
+func (c *zenaoServiceClient) CreateCommunity(ctx context.Context, req *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error) {
 	return c.createCommunity.CallUnary(ctx, req)
 }
 
@@ -390,7 +389,7 @@ type ZenaoServiceHandler interface {
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// COMMUNITY
-	CreateCommunity(context.Context, *connect.Request[v11.CreateCommunityRequest]) (*connect.Response[v11.CreateCommunityResponse], error)
+	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -628,7 +627,7 @@ func (UnimplementedZenaoServiceHandler) ExportParticipants(context.Context, *con
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ExportParticipants is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) CreateCommunity(context.Context, *connect.Request[v11.CreateCommunityRequest]) (*connect.Response[v11.CreateCommunityResponse], error) {
+func (UnimplementedZenaoServiceHandler) CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreateCommunity is not implemented"))
 }
 

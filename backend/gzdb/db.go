@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	communitiesv1 "github.com/samouraiworld/zenao/backend/communities/v1"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -572,7 +571,7 @@ func (g *gormZenaoDB) UserRoles(userID string, eventID string) ([]string, error)
 }
 
 // CreateCommunity implements zeni.DB.
-func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *communitiesv1.CreateCommunityRequest) (*zeni.Community, error) {
+func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) (*zeni.Community, error) {
 	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parse creator id: %w", err)

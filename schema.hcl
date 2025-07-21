@@ -89,6 +89,58 @@ table "users" {
     columns = [column.deleted_at]
   }
 }
+table "communities" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "display_name" {
+    null = true
+    type = text
+  }
+  column "description" {
+    null = true
+    type = text
+  }
+  column "avatar_uri" {
+    null = true
+    type = text
+  }
+  column "banner_uri" {
+    null = true
+    type = text
+  }
+  column "creator_id" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_communities_creator" {
+    columns     = [column.creator_id]
+    ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_communities_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
 table "events" {
   schema = schema.main
   column "id" {
@@ -480,15 +532,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_reactions_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_reactions" {
     columns     = [column.post_id]
     ref_columns = [table.posts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_reactions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -583,7 +635,52 @@ table "tags" {
     on_delete   = NO_ACTION
   }
 }
-table "user_roles" {
+table "user_community_roles" {
+  schema = schema.main
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "user_id" {
+    null = true
+    type = integer
+  }
+  column "community_id" {
+    null = true
+    type = integer
+  }
+  column "role" {
+    null = true
+    type = text
+  }
+  primary_key {
+    columns = [column.user_id, column.community_id, column.role]
+  }
+  foreign_key "fk_user_community_roles_community" {
+    columns     = [column.community_id]
+    ref_columns = [table.communities.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_user_community_roles_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_user_community_roles_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
+table "user_event_roles" {
   schema = schema.main
   column "created_at" {
     null = true
@@ -612,19 +709,19 @@ table "user_roles" {
   primary_key {
     columns = [column.user_id, column.event_id, column.role]
   }
-  foreign_key "fk_user_roles_event" {
+  foreign_key "fk_user_event_roles_event" {
     columns     = [column.event_id]
     ref_columns = [table.events.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
-  foreign_key "fk_user_roles_user" {
+  foreign_key "fk_user_event_roles_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
-  index "idx_user_roles_deleted_at" {
+  index "idx_user_event_roles_deleted_at" {
     columns = [column.deleted_at]
   }
 }

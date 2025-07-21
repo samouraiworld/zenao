@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/ringsaturn/tzf"
-	communitiesv1 "github.com/samouraiworld/zenao/backend/communities/v1"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -201,7 +200,7 @@ type DB interface {
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
-	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *communitiesv1.CreateCommunityRequest) (*Community, error)
+	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
@@ -231,7 +230,7 @@ type Chain interface {
 	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
-	CreateCommunity(communityID string, creatorID string, administratorsIDs []string, membersIDs []string, req *communitiesv1.CreateCommunityRequest) error
+	CreateCommunity(communityID string, creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error
