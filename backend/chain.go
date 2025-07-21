@@ -21,6 +21,7 @@ import (
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
+	communitiesv1 "github.com/samouraiworld/zenao/backend/communities/v1"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -468,6 +469,42 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 	return nil
 }
 
+// CreateCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) CreateCommunity(communityID string, creatorID string, administratorsIDs []string, membersIDs []string, req *communitiesv1.CreateCommunityRequest) error {
+	creatorAddr := g.UserAddress(creatorID)
+	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
+	membersAddr := mapsl.Map(membersIDs, g.UserAddress)
+	communityPkgPath := g.communityPkgPath(communityID)
+	cmtRealmSrc, err := genCommunityRealmSource(creatorAddr, adminsAddr, membersAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
+	if err != nil {
+		return err
+	}
+	g.logger.Info("creating community on chain", zap.String("pkg-path", communityPkgPath))
+	// TODO: single tx with all messages
+	msgkg := vm.MsgAddPackage{
+		Creator: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name:  "community",
+			Path:  communityPkgPath,
+			Files: []*gnovm.MemFile{{Name: "community.gno", Body: cmtRealmSrc}},
+		},
+	}
+	gasWanted, err := g.estimateAddPackageTxGas(msgkg)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msgkg))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("created community realm", zap.String("pkg-path", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	//TODO: add registry call
+	return nil
+}
+
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
@@ -757,6 +794,10 @@ func (g *gnoZenaoChain) VotePoll(userID string, req *zenaov1.VotePollRequest) er
 
 func (g *gnoZenaoChain) eventRealmPkgPath(eventID string) string {
 	return fmt.Sprintf("gno.land/r/%s/events/e%s", g.namespace, eventID)
+}
+
+func (g *gnoZenaoChain) communityPkgPath(communityID string) string {
+	return fmt.Sprintf("gno.land/r/%s/communities/c%s", g.namespace, communityID)
 }
 
 func (g *gnoZenaoChain) userRealmPkgPath(userID string) string {
@@ -1171,6 +1212,85 @@ func Execute(proposalID uint64) {
 
 func Render(path string) string {
 	return event.Render(path)
+}
+`
+
+func genCommunityRealmSource(creatorAddr string, adminsAddr []string, membersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *communitiesv1.CreateCommunityRequest) (string, error) {
+	m := map[string]string{
+		"creatorAddr":    strconv.Quote(creatorAddr),
+		"adminsAddr":     stringSliceLit(adminsAddr),
+		"membersAddr":    stringSliceLit(membersAddr),
+		"displayName":    strconv.Quote(req.DisplayName),
+		"description":    strconv.Quote(req.Description),
+		"avatarURI":      strconv.Quote(req.AvatarURI),
+		"bannerURI":      strconv.Quote(req.BannerURI),
+		"namespace":      gnoNamespace,
+		"zenaoAdminAddr": strconv.Quote(zenaoAdminAddr),
+	}
+
+	t := template.Must(template.New("").Parse(communityRealmSourceTemplate))
+	buf := strings.Builder{}
+	if err := t.Execute(&buf, m); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+const communityRealmSourceTemplate = `package community
+
+import (
+	"gno.land/p/{{.namespace}}/communities"
+	"gno.land/p/{{.namespace}}/basedao"
+	"gno.land/p/{{.namespace}}/daokit"
+	"gno.land/p/{{.namespace}}/daocond"
+	"gno.land/r/demo/profile"
+	"gno.land/r/{{.namespace}}/social_feed"
+)
+
+var (
+	DAO daokit.DAO
+	daoPrivate *basedao.DAOPrivate
+	community *communities.Community
+)
+
+func init() {
+	zenaoAdmin := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94"
+	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
+	conf := communities.Config{
+		Creator:          {{.creatorAddr}},
+		ZenaoAdminAddr:   "{{.zenaoAdminAddr}}",
+		Administrators:   {{.adminsAddr}},
+		Members:          {{.membersAddr}},
+		DisplayName:      {{.displayName}},
+		Description:      {{.description}},
+		AvatarURI:        {{.avatarURI}},
+		BannerURI:        {{.bannerURI}},
+		GetProfileString: profile.GetStringField,
+		SetProfileString: profile.SetStringField,
+	}
+	community = communities.NewCommunity(&conf)
+	daoPrivate = community.DAOPrivate
+	DAO = community.DAO
+	//TODO: ADD IT TO COMMUNITY REGISTRY
+	//communityreg.Register(func() *zenaov1.CommunityInfo { return community.Info() })
+	social_feed.NewFeed("main", false, IsMember)
+}
+
+// Set public to be used as auth layer for external entities (e.g polls)
+func IsMember(memberId string) bool {
+	return daoPrivate.Members.IsMember(memberId)
+}
+
+func Vote(proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(proposalID, vote)
+}
+
+func Execute(proposalID uint64) {
+	DAO.Execute(proposalID)
+}
+
+func Render(path string) string {
+	return community.Render(path)
 }
 `
 

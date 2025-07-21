@@ -102,3 +102,7 @@ func NewCommunity(conf *Config) *Community {
 
 	return community
 }
+
+func (c *Community) Render(path string) string {
+	s = "# Community: " + e.getProfileString("DisplayName") + "\n"
+}
