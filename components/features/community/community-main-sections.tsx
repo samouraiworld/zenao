@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/shadcn/separator";
 import {
   Tabs,
@@ -18,11 +20,13 @@ import CommunityProposals from "@/app/community/[id]/[tab]/proposals";
 type CommunityMainSectionsProps = {
   communityId: string;
   section: CommunityTabsSchemaType;
+  now: number;
 };
 
 function CommunityMainSections({
   communityId,
   section,
+  now,
 }: CommunityMainSectionsProps) {
   const t = useTranslations("community");
 
@@ -64,16 +68,24 @@ function CommunityMainSections({
       </TabsList>
       <Separator className="mb-3" />
       <TabsContent value="posts">
-        <CommunityPosts communityId={communityId} />
+        <Suspense fallback={<Loader2 className="animate-spin" />}>
+          <CommunityPosts communityId={communityId} />
+        </Suspense>
       </TabsContent>
       <TabsContent value="events">
-        <CommunityEvents />
+        <Suspense fallback={<Loader2 className="animate-spin" />}>
+          <CommunityEvents communityId={communityId} now={now} />
+        </Suspense>
       </TabsContent>
       <TabsContent value="members">
-        <CommunityMembers />
+        <Suspense fallback={<Loader2 className="animate-spin" />}>
+          <CommunityMembers />
+        </Suspense>
       </TabsContent>
       <TabsContent value="proposals">
-        <CommunityProposals />
+        <Suspense fallback={<Loader2 className="animate-spin" />}>
+          <CommunityProposals />
+        </Suspense>
       </TabsContent>
     </Tabs>
   );

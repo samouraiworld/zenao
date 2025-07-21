@@ -14,8 +14,14 @@ async function CommunityPage({ params }: PageProps) {
     notFound();
   }
 
+  const now = Date.now() / 1000;
+
   return (
-    <CommunityMainSections communityId={communityId} section={section.data} />
+    <CommunityMainSections
+      communityId={communityId}
+      section={section.data}
+      now={now}
+    />
   );
 }
 
