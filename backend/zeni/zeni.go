@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ringsaturn/tzf"
+	communitiesv1 "github.com/samouraiworld/zenao/backend/communities/v1"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -75,6 +76,16 @@ type Event struct {
 	Location          *zenaov1.EventLocation
 	PasswordHash      string
 	ICSSequenceNumber uint32
+}
+
+type Community struct {
+	CreatedAt   time.Time
+	ID          string
+	DisplayName string
+	Description string
+	AvatarURI   string
+	BannerURI   string
+	CreatorID   string
 }
 
 type Feed struct {
@@ -189,6 +200,8 @@ type DB interface {
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
+
+	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *communitiesv1.CreateCommunityRequest) (*Community, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
