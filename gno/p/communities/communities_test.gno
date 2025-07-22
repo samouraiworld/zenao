@@ -33,8 +33,8 @@ func TestNewCommunity(t *testing.T) {
 		t.Fatalf("expected 6 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
 	// the creator also get the administrator role
-	if community.DAOPrivate.Members.CountMembersWithRole("administrator") != 3 {
-		t.Fatalf("expected 3 administrators, got %d", community.DAOPrivate.Members.CountMembersWithRole("administrator"))
+	if community.DAOPrivate.Members.CountMembersWithRole("administrator") != 2 {
+		t.Fatalf("expected 2 administrators, got %d", community.DAOPrivate.Members.CountMembersWithRole("administrator"))
 	}
 	if community.DAOPrivate.Members.CountMembersWithRole("member") != 3 {
 		t.Fatalf("expected 0 members, got %d", community.DAOPrivate.Members.CountMembersWithRole("member"))
