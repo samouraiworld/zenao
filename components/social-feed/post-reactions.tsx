@@ -16,7 +16,7 @@ type PostReactionsProps = {
   reactions: ReactionView[];
   canReact?: boolean;
   isPending?: boolean;
-  onReactionChange: (icon: string) => void | Promise<void>;
+  onReactionChange?: (icon: string) => void | Promise<void>;
 };
 
 function PostReactions({
@@ -45,7 +45,7 @@ function PostReactions({
               theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
               onEmojiClick={(choice) => {
                 if (isPending) return;
-                onReactionChange(choice.emoji);
+                onReactionChange?.(choice.emoji);
                 setEmojiPickerOpen(false);
               }}
             />
@@ -61,7 +61,7 @@ function PostReactions({
               variant="outline"
               onClick={() => {
                 if (isPending) return;
-                if (canReact) onReactionChange(reaction.icon);
+                if (canReact) onReactionChange?.(reaction.icon);
               }}
               className={cn(
                 "flex flex-row items-center h-8 px-2 rounded-full gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800",

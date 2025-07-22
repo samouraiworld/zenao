@@ -9,21 +9,27 @@ import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import { useEditStandardPost, useReactPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
-import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { eventUserRoles } from "@/lib/queries/event-users";
 
 export function StandardPostCard({
-  eventId,
+  // eventId,
   post,
   canReply,
+  onEdit,
+  isEditing,
+  onReactionChange,
+  isReacting,
   onDeleteSuccess,
 }: {
-  eventId: string;
+  // eventId: string;
   post: StandardPostView;
   canReply?: boolean;
+  onEdit?: (values: FeedPostFormSchemaType) => void | Promise<void>;
+  isEditing?: boolean;
+  onReactionChange?: (icon: string) => void | Promise<void>;
+  isReacting?: boolean;
   onDeleteSuccess?: () => void;
 }) {
   const { getToken, userId } = useAuth();
@@ -36,8 +42,6 @@ export function StandardPostCard({
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
   );
-  const { editPost, isPending } = useEditStandardPost();
-  const { reactPost, isPending: isReacting } = useReactPost();
 
   const [editMode, setEditMode] = useState(false);
 
@@ -52,49 +56,8 @@ export function StandardPostCard({
   });
 
   const onSubmit = async (values: FeedPostFormSchemaType) => {
-    try {
-      if (values.kind === "POLL") {
-        throw new Error("invalid kind");
-      }
-
-      const token = await getToken();
-      if (!token) {
-        throw new Error("invalid token");
-      }
-
-      await editPost({
-        content: values.content,
-        eventId,
-        tags: [],
-        postId: post.post.localPostId.toString(10),
-        token,
-        userAddress: userAddress || "",
-      });
-
-      setEditMode(false);
-    } catch (error) {
-      captureException(error);
-    }
-  };
-
-  const onReactionChange = async (icon: string) => {
-    try {
-      const token = await getToken();
-
-      if (!token) {
-        throw new Error("Missing token");
-      }
-      await reactPost({
-        token,
-        userAddress: userAddress || "",
-        postId: post.post.localPostId.toString(10),
-        icon,
-        eventId,
-        parentId: "",
-      });
-    } catch (error) {
-      console.error("error", error);
-    }
+    await onEdit?.(values);
+    setEditMode(false);
   };
 
   return (
@@ -121,7 +84,7 @@ export function StandardPostCard({
               console.log("not available");
             }}
             isEditing
-            isLoading={isPending}
+            isLoading={isEditing}
           />
         ) : (
           <MarkdownPreview markdownString={standardPost.content} />

@@ -27,7 +27,7 @@ type PostCardLayoutProps = {
   userRoles?: EventUserRole[];
   onEditModeChange?: (editMode: boolean) => void;
   onDeleteSuccess?: () => void;
-  onReactionChange: (icon: string) => void | Promise<void>;
+  onReactionChange?: (icon: string) => void | Promise<void>;
   isReacting?: boolean;
 };
 

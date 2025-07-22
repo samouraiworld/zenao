@@ -13,6 +13,9 @@ import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { PostsList } from "@/components/social-feed/posts-list";
+import { useEditStandardPost, useReactPost } from "@/lib/mutations/social-feed";
+import { FeedPostFormSchemaType } from "@/types/schemas";
+import { captureException } from "@/lib/report";
 
 type EventFeedProps = {
   eventId: string;
@@ -23,6 +26,8 @@ function EventFeed({ eventId }: EventFeedProps) {
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const { editPost, isPending: isEditing } = useEditStandardPost();
+  const { reactPost, isPending: isReacting } = useReactPost();
 
   const t = useTranslations("");
   // Event's social feed posts
@@ -57,6 +62,52 @@ function EventFeed({ eventId }: EventFeedProps) {
     [postsPages],
   );
 
+  const onEditStandardPost = async (
+    postId: string,
+    values: FeedPostFormSchemaType,
+  ) => {
+    try {
+      if (values.kind === "POLL") {
+        throw new Error("invalid kind");
+      }
+
+      const token = await getToken();
+      if (!token) {
+        throw new Error("invalid token");
+      }
+      await editPost({
+        content: values.content,
+        eventId,
+        tags: [],
+        postId,
+        token,
+        userAddress: userAddress || "",
+      });
+    } catch (error) {
+      captureException(error);
+    }
+  };
+
+  const onReactionChange = async (postId: string, icon: string) => {
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("Missing token");
+      }
+      await reactPost({
+        token,
+        userAddress: userAddress || "",
+        postId,
+        icon,
+        eventId,
+        parentId: "",
+      });
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
+
   return (
     <>
       <div className="space-y-4">
@@ -66,7 +117,13 @@ function EventFeed({ eventId }: EventFeedProps) {
             description={t("no-posts-description")}
           />
         ) : (
-          <PostsList eventId={eventId} posts={posts} />
+          <PostsList
+            posts={posts}
+            onEdit={onEditStandardPost}
+            onReactionChange={onReactionChange}
+            isEditing={isEditing}
+            isReacting={isReacting}
+          />
         )}
       </div>
       <div className="py-4">
