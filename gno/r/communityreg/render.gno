@@ -16,7 +16,7 @@ func Render(path string) string {
 	buf.WriteString(md.H1("Zenao Communities"))
 	buf.WriteString(md.HorizontalRule())
 	listFn := listCommunities
-	renderSection(&buf, listFn, 0, 10)
+	renderSection(&buf, listFn, 10, 0)
 
 	return buf.String()
 }
@@ -48,7 +48,7 @@ func renderCommunity(buf *strings.Builder, community *zenaov1.CommunityInfo) {
 	buf.WriteString(md.H3(community.DisplayName))
 	buf.WriteString(md.Paragraph(community.Description))
 	buf.WriteString(md.Paragraph("Members: " + ufmt.Sprintf("%d", community.CountMembers)))
-	buf.WriteString(md.Link("🔗 View Community", trimDomain(community.PkgPath)))
+	buf.WriteString(md.Paragraph(md.Link("🔗 View Community", trimDomain(community.PkgPath))))
 	buf.WriteString(md.Paragraph("Administrators: "))
 	buf.WriteString(md.BulletList(admRendered))
 	buf.WriteString(md.HorizontalRule())

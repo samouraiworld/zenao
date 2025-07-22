@@ -135,7 +135,7 @@ func convertEvtToCom() error {
 		membersIDs = append(membersIDs, mapsl.Map(gkpsIDs, func(usr *zeni.User) string { return usr.ID })...)
 		membersIDs = append(membersIDs, mapsl.Map(participantIDs, func(usr *zeni.User) string { return usr.ID })...)
 
-		cmt, err = tx.CreateCommunity(evt.CreatorID, []string{}, membersIDs, cmtReq)
+		cmt, err = tx.CreateCommunity(evt.CreatorID, []string{evt.CreatorID}, membersIDs, cmtReq)
 		return err
 	}); err != nil {
 		return err

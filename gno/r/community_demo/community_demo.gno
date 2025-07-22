@@ -17,9 +17,8 @@ func init() {
 	zenaoAdmin := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94"
 	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
 	conf := communities.Config{
-		Creator:          creator,
 		ZenaoAdminAddr:   zenaoAdmin,
-		Administrators:   []string{},
+		Administrators:   []string{creator},
 		Members:          []string{},
 		DisplayName:      "Demo Community",
 		Description:      "This is a demo community for Zenao",

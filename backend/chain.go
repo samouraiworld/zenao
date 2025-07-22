@@ -1260,6 +1260,7 @@ func genCommunityRealmSource(adminsAddr []string, membersAddr []string, zenaoAdm
 const communityRealmSourceTemplate = `package community
 
 import (
+	zenaov1 "gno.land/p/{{.namespace}}/zenao/v1"
 	"gno.land/p/{{.namespace}}/communities"
 	"gno.land/p/{{.namespace}}/basedao"
 	"gno.land/p/{{.namespace}}/daokit"
