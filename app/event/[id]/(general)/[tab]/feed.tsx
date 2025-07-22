@@ -13,21 +13,34 @@ import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { PostsList } from "@/components/social-feed/posts-list";
-import { useEditStandardPost, useReactPost } from "@/lib/mutations/social-feed";
+import {
+  useDeletePost,
+  useEditStandardPost,
+  useReactPost,
+} from "@/lib/mutations/social-feed";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { useToast } from "@/app/hooks/use-toast";
 
 type EventFeedProps = {
   eventId: string;
 };
 
 function EventFeed({ eventId }: EventFeedProps) {
+  const { toast } = useToast();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userAddress),
+  );
+
   const { editPost, isPending: isEditing } = useEditStandardPost();
   const { reactPost, isPending: isReacting } = useReactPost();
+  const { deletePost, isPending: isDeleting } = useDeletePost();
 
   const t = useTranslations("");
   // Event's social feed posts
@@ -108,6 +121,36 @@ function EventFeed({ eventId }: EventFeedProps) {
     }
   };
 
+  const onDelete = async (postId: string, parentId?: string) => {
+    const token = await getToken();
+
+    try {
+      if (!token || !userAddress) {
+        throw new Error("not authenticated");
+      }
+
+      await deletePost({
+        eventId,
+        postId,
+        parentId,
+        token,
+        userAddress,
+      });
+
+      toast({
+        title: t("toast-delete-post-success"),
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        captureException(error);
+        toast({
+          variant: "destructive",
+          title: t("toast-delete-post-error"),
+        });
+      }
+    }
+  };
+
   return (
     <>
       <div className="space-y-4">
@@ -119,10 +162,19 @@ function EventFeed({ eventId }: EventFeedProps) {
         ) : (
           <PostsList
             posts={posts}
+            userAddress={userAddress}
             onEdit={onEditStandardPost}
             onReactionChange={onReactionChange}
+            canInteract={
+              roles.includes("organizer") || roles.includes("participant")
+            }
+            onDelete={onDelete}
+            replyHrefFormatter={(postId) =>
+              `/event/${eventId}/feed/post/${postId}`
+            }
             isEditing={isEditing}
             isReacting={isReacting}
+            isDeleting={isDeleting}
           />
         )}
       </div>

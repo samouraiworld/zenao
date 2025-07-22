@@ -9,24 +9,32 @@ import { parsePollUri } from "@/lib/multiaddr";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
 export function PostsList({
-  // eventId,
+  userAddress,
   posts,
   onEdit,
   onReactionChange,
+  onDelete,
+  replyHrefFormatter,
   canReply,
+  canInteract,
   isEditing,
   isReacting,
+  isDeleting,
 }: {
-  // eventId: string;
+  userAddress: string | null;
   onEdit?: (
     postId: string,
     values: FeedPostFormSchemaType,
   ) => void | Promise<void>;
   onReactionChange?: (postId: string, icon: string) => void | Promise<void>;
+  onDelete?: (postId: string, parentId?: string) => void | Promise<void>;
   posts: SocialFeedPost[];
   canReply?: boolean;
+  replyHrefFormatter?: (postId: bigint) => string;
+  canInteract?: boolean;
   isEditing?: boolean;
   isReacting?: boolean;
+  isDeleting?: boolean;
 }) {
   return posts.map((post) => {
     const postId = post.data.post!.localPostId.toString(10);
@@ -44,9 +52,16 @@ export function PostsList({
               onReactionChange={async (icon) =>
                 await onReactionChange?.(postId, icon)
               }
+              onDelete={async (parentId) => {
+                await onDelete?.(postId, parentId);
+              }}
+              isOwner={post.data.post.author === userAddress}
               canReply={canReply}
+              replyHref={replyHrefFormatter?.(post.data.post.localPostId)}
+              canInteract={canInteract}
               isEditing={isEditing}
               isReacting={isReacting}
+              isDeleting={isDeleting}
             />
           </Suspense>
         );

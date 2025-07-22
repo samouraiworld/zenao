@@ -280,10 +280,10 @@
     "title": "Delete post",
     "desc": "Are you sure you want to delete this post ?",
     "delete": "Delete",
-    "cancel": "Cancel",
-    "toast-delete-post-success": "Your post has been deleted",
-    "toast-delete-post-error": "Error while deleting the post"
+    "cancel": "Cancel"
   },
+  "toast-delete-post-success": "Your post has been deleted",
+  "toast-delete-post-error": "Error while deleting the post",
   "community": {
     "posts": "Posts",
     "events": "Events",

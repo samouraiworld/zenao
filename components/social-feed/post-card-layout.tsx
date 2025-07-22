@@ -12,39 +12,42 @@ import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 import { DateTimeText } from "@/components/widgets/date-time-text";
 import Text from "@/components/widgets/texts/text";
 import { GnoProfile } from "@/lib/queries/profile";
-import { EventUserRole } from "@/lib/queries/event-users";
 import { Button } from "@/components/shadcn/button";
 
 type PostCardLayoutProps = {
   post: PostView;
-  eventId: string;
   createdBy: GnoProfile | null;
   children: ReactNode;
+  isOwner?: boolean;
   canReply?: boolean;
+  replyHref?: string;
   editMode?: boolean;
   gnowebHref?: Url;
   parentId?: string;
-  userRoles?: EventUserRole[];
+  canInteract?: boolean;
   onEditModeChange?: (editMode: boolean) => void;
-  onDeleteSuccess?: () => void;
+  onDelete?: (parentId?: string) => void | Promise<void>;
   onReactionChange?: (icon: string) => void | Promise<void>;
   isReacting?: boolean;
+  isDeleting?: boolean;
 };
 
 export function PostCardLayout({
   post,
-  eventId,
   createdBy,
   gnowebHref,
   children,
+  isOwner,
   canReply,
+  replyHref,
   editMode,
   parentId = "",
-  userRoles = [],
+  canInteract,
   onEditModeChange,
-  onDeleteSuccess,
+  onDelete,
   onReactionChange,
   isReacting,
+  isDeleting,
 }: PostCardLayoutProps) {
   if (!post.post) {
     return null;
@@ -115,11 +118,9 @@ export function PostCardLayout({
             <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
               <PostMenu
                 gnowebHref={gnowebHref}
-                eventId={eventId}
-                postId={post.post.localPostId}
-                parentId={parentId}
-                author={post.post.author}
-                onDeleteSuccess={onDeleteSuccess}
+                isOwner={isOwner}
+                onDelete={async () => await onDelete?.(parentId)}
+                isDeleting={isDeleting}
                 onEdit={() => onEditModeChange?.(true)}
               />
             </div>
@@ -131,8 +132,8 @@ export function PostCardLayout({
 
       {!editMode && (
         <div className="flex sm:flex-row sm:items-center gap-2">
-          {canReply && (
-            <Link href={`/event/${eventId}/feed/post/${post.post.localPostId}`}>
+          {canReply && replyHref && (
+            <Link href={replyHref}>
               <Button
                 variant="outline"
                 className={
@@ -148,10 +149,7 @@ export function PostCardLayout({
 
           <PostReactions
             reactions={post.reactions}
-            canReact={
-              userRoles.includes("participant") ||
-              userRoles.includes("organizer")
-            }
+            canReact={canInteract}
             isPending={isReacting}
             onReactionChange={onReactionChange}
           />

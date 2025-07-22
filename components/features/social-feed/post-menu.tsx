@@ -5,8 +5,6 @@ import * as React from "react";
 import { EllipsisVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { Button } from "@/components/shadcn/button";
 import {
   DropdownMenu,
@@ -14,44 +12,38 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
-import { userAddressOptions } from "@/lib/queries/user";
 import { DeletePostConfirmationDialog } from "@/components/dialogs/delete-post-confirmation-dialog";
 
 type PostMenuProps = {
-  eventId: string;
-  postId: bigint;
-  parentId?: string;
   gnowebHref?: Url;
-  author: string;
-  onEdit?: () => void;
-  onDeleteSuccess?: () => void;
+  isOwner?: boolean;
+  onEdit?: () => void | Promise<void>;
+  onDelete?: () => void | Promise<void>;
+  isDeleting?: boolean;
 };
 
 export function PostMenu({
-  eventId,
-  author,
-  postId,
-  parentId,
+  isOwner,
   gnowebHref,
   onEdit,
-  onDeleteSuccess,
+  onDelete,
+  isDeleting,
 }: PostMenuProps) {
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
   const t = useTranslations("components.buttons");
   const [dialogOpen, setDialogOpen] = React.useState(false);
+
+  const onDeletePost = async () => {
+    await onDelete?.();
+    setDialogOpen(false);
+  };
 
   return (
     <>
       <DeletePostConfirmationDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        eventId={eventId}
-        postId={postId}
-        parentId={parentId}
-        onSuccess={onDeleteSuccess}
+        onDelete={onDeletePost}
+        isDeleting={isDeleting}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -65,7 +57,7 @@ export function PostMenu({
               <DropdownMenuItem>{t("gnoweb-button")}</DropdownMenuItem>
             </Link>
           )}
-          {author === userAddress && (
+          {isOwner && (
             <>
               {onEdit && (
                 <DropdownMenuItem onClick={onEdit}>Edit post</DropdownMenuItem>
