@@ -112,7 +112,7 @@ func listCommunities(limit, offset uint32) []*zenaov1.CommunityInfo {
 }
 
 func listCommunitiesByMembers(memberID string, limit, offset uint32) []*zenaov1.CommunityInfo {
-	// xff is 255 in hex, which is the highest byte value, so it will match all keys that start with memberID.
+	// ff is 255 in hex, which is the highest byte value, so it will match all keys that start with memberID.
 	fromKey := memberID + "/"
 	toKey := memberID + "/\xff"
 
