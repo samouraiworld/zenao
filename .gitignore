@@ -55,3 +55,7 @@ genesis_txs.jsonl
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# mikael gnopls scripts fix
+dev-gnopls.sh
+revert-gnopls.sh
