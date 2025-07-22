@@ -52,22 +52,24 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 	client := gnoclient.Client{Signer: signer, RPCClient: tmClient}
 
 	return &gnoZenaoChain{
-		client:             client,
-		eventsIndexPkgPath: path.Join("gno.land/r", namespace, "eventreg"),
-		signerInfo:         signerInfo,
-		logger:             logger,
-		namespace:          namespace,
-		gasSecurityRate:    gasSecurityRate,
+		client:                  client,
+		eventsIndexPkgPath:      path.Join("gno.land/r", namespace, "eventreg"),
+		communitiesIndexPkgPath: path.Join("gno.land/r", namespace, "communityreg"),
+		signerInfo:              signerInfo,
+		logger:                  logger,
+		namespace:               namespace,
+		gasSecurityRate:         gasSecurityRate,
 	}, nil
 }
 
 type gnoZenaoChain struct {
-	client             gnoclient.Client
-	eventsIndexPkgPath string
-	signerInfo         keys.Info
-	logger             *zap.Logger
-	namespace          string
-	gasSecurityRate    float64
+	client                  gnoclient.Client
+	eventsIndexPkgPath      string
+	communitiesIndexPkgPath string
+	signerInfo              keys.Info
+	logger                  *zap.Logger
+	namespace               string
+	gasSecurityRate         float64
 }
 
 const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
@@ -469,12 +471,11 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 }
 
 // CreateCommunity implements ZenaoChain.
-func (g *gnoZenaoChain) CreateCommunity(communityID string, creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error {
-	creatorAddr := g.UserAddress(creatorID)
+func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error {
 	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
 	membersAddr := mapsl.Map(membersIDs, g.UserAddress)
 	communityPkgPath := g.communityPkgPath(communityID)
-	cmtRealmSrc, err := genCommunityRealmSource(creatorAddr, adminsAddr, membersAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
+	cmtRealmSrc, err := genCommunityRealmSource(adminsAddr, membersAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
 	if err != nil {
 		return err
 	}
@@ -500,7 +501,29 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, creatorID string, ad
 		return err
 	}
 	g.logger.Info("created community realm", zap.String("pkg-path", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
-	//TODO: add registry call
+
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "IndexCommunity",
+		Args: []string{
+			communityPkgPath,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("indexed community", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
 	return nil
 }
 
@@ -1214,9 +1237,8 @@ func Render(path string) string {
 }
 `
 
-func genCommunityRealmSource(creatorAddr string, adminsAddr []string, membersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateCommunityRequest) (string, error) {
+func genCommunityRealmSource(adminsAddr []string, membersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateCommunityRequest) (string, error) {
 	m := map[string]string{
-		"creatorAddr":    strconv.Quote(creatorAddr),
 		"adminsAddr":     stringSliceLit(adminsAddr),
 		"membersAddr":    stringSliceLit(membersAddr),
 		"displayName":    strconv.Quote(req.DisplayName),
@@ -1243,6 +1265,7 @@ import (
 	"gno.land/p/{{.namespace}}/daokit"
 	"gno.land/p/{{.namespace}}/daocond"
 	"gno.land/r/demo/profile"
+	"gno.land/r/{{.namespace}}/communityreg"
 	"gno.land/r/{{.namespace}}/social_feed"
 )
 
@@ -1254,7 +1277,6 @@ var (
 
 func init() {
 	conf := communities.Config{
-		Creator:          {{.creatorAddr}},
 		ZenaoAdminAddr:   {{.zenaoAdminAddr}},
 		Administrators:   {{.adminsAddr}},
 		Members:          {{.membersAddr}},
@@ -1268,8 +1290,7 @@ func init() {
 	community = communities.NewCommunity(&conf)
 	daoPrivate = community.DAOPrivate
 	DAO = community.DAO
-	//TODO: ADD IT TO COMMUNITY REGISTRY
-	//communityreg.Register(func() *zenaov1.CommunityInfo { return community.Info() })
+	communityreg.Register(func() *zenaov1.CommunityInfo { return community.Info() })
 	social_feed.NewFeed("main", false, IsMember)
 }
 

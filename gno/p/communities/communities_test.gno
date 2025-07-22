@@ -14,7 +14,6 @@ var (
 	carol = testutils.TestAddress("carol")
 	dave  = testutils.TestAddress("dave")
 	eve   = testutils.TestAddress("eve")
-	henry = testutils.TestAddress("henry")
 )
 
 func TestNewCommunity(t *testing.T) {
@@ -22,31 +21,32 @@ func TestNewCommunity(t *testing.T) {
 	std.TestSetOriginCaller(alice)
 	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
-		Creator:          alice.String(),
-		Administrators:   []string{eve.String(), henry.String()},
-		Members:          []string{bob.String(), carol.String()},
-		Events:           []string{dave.String()},
+		Administrators:   []string{alice.String(), bob.String()},
+		Members:          []string{carol.String(), dave.String(), eve.String()},
 		DisplayName:      "Community Name",
 		Description:      "this is a community",
 		SetProfileString: profile.SetStringField,
 		GetProfileString: profile.GetProfileString,
 	}
 	community := NewCommunity(&conf)
-	if len(community.DAOPrivate.Members.GetMembers()) != 7 {
-		t.Fatalf("expected 7 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
+	if len(community.DAOPrivate.Members.GetMembers()) != 6 {
+		t.Fatalf("expected 6 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
 	// the creator also get the administrator role
 	if community.DAOPrivate.Members.CountMembersWithRole("administrator") != 3 {
 		t.Fatalf("expected 3 administrators, got %d", community.DAOPrivate.Members.CountMembersWithRole("administrator"))
 	}
-	if community.DAOPrivate.Members.CountMembersWithRole("member") != 2 {
-		t.Fatalf("expected 2 members, got %d", community.DAOPrivate.Members.CountMembersWithRole("member"))
+	if community.DAOPrivate.Members.CountMembersWithRole("member") != 3 {
+		t.Fatalf("expected 0 members, got %d", community.DAOPrivate.Members.CountMembersWithRole("member"))
 	}
-	if community.DAOPrivate.Members.CountMembersWithRole("event") != 1 {
-		t.Fatalf("expected 1 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
+	if community.DAOPrivate.Members.CountMembersWithRole("event") != 0 {
+		t.Fatalf("expected 0 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}
-	if !community.DAOPrivate.Members.HasRole(alice.String(), "creator") {
+	if !community.DAOPrivate.Members.HasRole(alice.String(), "administrator") {
 		t.Fatalf("expected user to have creator role")
+	}
+	if !community.DAOPrivate.Members.HasRole(eve.String(), "member") {
+		t.Fatalf("expected user to have member role")
 	}
 }
 

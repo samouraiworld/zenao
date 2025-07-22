@@ -263,7 +263,6 @@ type CommunityInfo struct {
 	Description    string
 	AvatarUri      string
 	BannerUri      string
-	Creator        string
 	Administrators []string
 	CountMembers   uint32
 	PkgPath        string

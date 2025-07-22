@@ -143,7 +143,7 @@ func convertEvtToCom() error {
 
 	logger.Info("community persisted successfully in the database")
 
-	err = chain.CreateCommunity(cmt.ID, cmt.CreatorID, []string{}, membersIDs, cmtReq)
+	err = chain.CreateCommunity(cmt.ID, []string{cmt.CreatorID}, membersIDs, cmtReq)
 	if err != nil {
 		return err
 	}

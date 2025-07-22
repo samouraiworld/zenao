@@ -877,9 +877,6 @@ func (c *CommunityInfo) GnoLiteral(typePrefix string, linePrefix string) string 
 	if c.BannerUri != "" {
 		fmt.Fprintf(buf, "%s\tBannerUri: %q,\n", linePrefix, c.BannerUri)
 	}
-	if c.Creator != "" {
-		fmt.Fprintf(buf, "%s\tCreator: %q,\n", linePrefix, c.Creator)
-	}
 	if len(c.Administrators) != 0 {
 		fmt.Fprintf(buf, "%s\tAdministrators: []string{\n", linePrefix)
 		linePrefix += "\t"

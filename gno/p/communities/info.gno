@@ -14,7 +14,6 @@ func (c *Community) Info() *zenaov1.CommunityInfo {
 		Description:    c.getProfileString(std.CurrentRealm().Address(), "Bio", ""),
 		AvatarUri:      c.getProfileString(std.CurrentRealm().Address(), "Avatar", ""),
 		BannerUri:      c.getProfileString(std.CurrentRealm().Address(), "Banner", ""),
-		Creator:        c.DAOPrivate.Members.GetMembersWithRole("creator")[0],
 		Administrators: c.DAOPrivate.Members.GetMembersWithRole("administrator"),
 		CountMembers:   uint32(c.DAOPrivate.Members.MembersCount()),
 	}

@@ -1,11 +1,13 @@
 package communityreg
 
 import (
+	"std"
 	"strings"
 
 	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
+	"gno.land/r/demo/profile"
 )
 
 // TODO: enhance rendering with pagination, search, etc.
@@ -34,11 +36,21 @@ func renderSection(buf *strings.Builder, listFn func(uint32, uint32) []*zenaov1.
 }
 
 func renderCommunity(buf *strings.Builder, community *zenaov1.CommunityInfo) {
+	var admRendered []string
+	for _, adm := range community.Administrators {
+		admin := profile.GetStringField(std.Address(adm), "DisplayName", "")
+		if adm == "" {
+			admin = adm
+		}
+		admRendered = append(admRendered, admin)
+	}
+
 	buf.WriteString(md.H3(community.DisplayName))
 	buf.WriteString(md.Paragraph(community.Description))
-	buf.WriteString(md.Paragraph("Creator: " + community.Creator))
 	buf.WriteString(md.Paragraph("Members: " + ufmt.Sprintf("%d", community.CountMembers)))
 	buf.WriteString(md.Link("🔗 View Community", trimDomain(community.PkgPath)))
+	buf.WriteString(md.Paragraph("Administrators: "))
+	buf.WriteString(md.BulletList(admRendered))
 	buf.WriteString(md.HorizontalRule())
 }
 

@@ -15,10 +15,8 @@ type Community struct {
 }
 
 type Config struct {
-	Creator          string
 	Administrators   []string
 	Members          []string
-	Events           []string
 	DisplayName      string
 	Description      string
 	AvatarURI        string
@@ -33,10 +31,6 @@ func NewCommunity(conf *Config) *Community {
 		{
 			Name:        "zenao-admin",
 			Description: "Admin responsible for managing the DAO until it becomes self-custodial",
-		},
-		{
-			Name:        "creator",
-			Description: "Person that created the community",
 		},
 		{
 			Name:        "administrator",
@@ -64,16 +58,6 @@ func NewCommunity(conf *Config) *Community {
 			Roles:   []string{"member"},
 		})
 	}
-	for _, event := range conf.Events {
-		members = append(members, basedao.Member{
-			Address: event,
-			Roles:   []string{"event"},
-		})
-	}
-	members = append(members, basedao.Member{
-		Address: conf.Creator,
-		Roles:   []string{"creator", "administrator"},
-	})
 	members = append(members, basedao.Member{
 		Address: conf.ZenaoAdminAddr,
 		Roles:   []string{"zenao-admin"},

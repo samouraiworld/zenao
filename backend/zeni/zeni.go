@@ -230,7 +230,7 @@ type Chain interface {
 	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
-	CreateCommunity(communityID string, creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error
+	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error

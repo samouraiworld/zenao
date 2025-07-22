@@ -261,10 +261,9 @@ message CommunityInfo {
   string description = 2;
   string avatar_uri = 3;
   string banner_uri = 4;
-  string creator = 5;
-  repeated string administrators = 6;
-  uint32 count_members = 7;
-  string pkg_path = 8;
+  repeated string administrators = 5;
+  uint32 count_members = 6;
+  string pkg_path = 7;
 }
 
 message CreateCommunityRequest {

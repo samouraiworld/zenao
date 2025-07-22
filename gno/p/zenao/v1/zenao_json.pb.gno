@@ -1487,9 +1487,6 @@ func (c *CommunityInfo) ToJSON() *json.Node {
 	if c.BannerUri != "" {
 		fields["bannerUri"] = json.StringNode("", c.BannerUri)
 	}
-	if c.Creator != "" {
-		fields["creator"] = json.StringNode("", c.Creator)
-	}
 	if len(c.Administrators) != 0 {
 		arr := make([]*json.Node, len(c.Administrators))
 		for i, val := range c.Administrators {
@@ -1522,9 +1519,6 @@ func (c *CommunityInfo) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["bannerUri"]; ok {
 		c.BannerUri = val.MustString()
-	}
-	if val, ok := fields["creator"]; ok {
-		c.Creator = val.MustString()
 	}
 	if val, ok := fields["administrators"]; ok {
 		jarr := val.MustArray()
