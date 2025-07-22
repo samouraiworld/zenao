@@ -87,7 +87,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		if err != nil {
 			return err
 		}
-		if slices.Contains(buyerRoles, "organizer") {
+		if slices.Contains(buyerRoles, zeni.RoleOrganizer) {
 			needPasswordIfGuarded = false
 		}
 

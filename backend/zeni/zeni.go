@@ -45,6 +45,20 @@ func (p Plan) IsValid() bool {
 	return p == FreePlan || p == ProPlan
 }
 
+const (
+	RoleOrganizer   string = "organizer"   // for events
+	RoleGatekeeper  string = "gatekeeper"  // for events
+	RoleParticipant string = "participant" // for events
+
+	RoleAdministrator string = "administrator" // for communities
+	RoleMember        string = "member"        // for communities
+)
+
+const (
+	OrgTypeEvent     string = "event"
+	OrgTypeCommunity string = "community"
+)
+
 type AuthUser struct {
 	ID     string
 	Email  string

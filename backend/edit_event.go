@@ -80,7 +80,7 @@ func (s *ZenaoServer) EditEvent(
 		if err != nil {
 			return err
 		}
-		if !slices.Contains(roles, "organizer") {
+		if !slices.Contains(roles, zeni.RoleOrganizer) {
 			return errors.New("user is not organizer of the event")
 		}
 
