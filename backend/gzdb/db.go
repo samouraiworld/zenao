@@ -393,7 +393,7 @@ func (g *gormZenaoDB) CancelParticipation(eventID string, userID string) error {
 		return err
 	}
 
-	if err := g.db.Model(&SoldTicket{}).Where("org_type = ? AND org_id = ? AND user_id = ?", zeni.OrgTypeEvent, evtIDInt, userIDInt).Delete(&SoldTicket{}).Error; err != nil {
+	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evtIDInt, userIDInt).Delete(&SoldTicket{}).Error; err != nil {
 		return err
 	}
 	return nil
