@@ -907,11 +907,11 @@ func (c *CreateCommunityRequest) GnoLiteral(typePrefix string, linePrefix string
 	if c.Description != "" {
 		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, c.Description)
 	}
-	if c.AvatarURI != "" {
-		fmt.Fprintf(buf, "%s\tAvatarURI: %q,\n", linePrefix, c.AvatarURI)
+	if c.AvatarUri != "" {
+		fmt.Fprintf(buf, "%s\tAvatarUri: %q,\n", linePrefix, c.AvatarUri)
 	}
-	if c.BannerURI != "" {
-		fmt.Fprintf(buf, "%s\tBannerURI: %q,\n", linePrefix, c.BannerURI)
+	if c.BannerUri != "" {
+		fmt.Fprintf(buf, "%s\tBannerUri: %q,\n", linePrefix, c.BannerUri)
 	}
 	if len(c.Administrators) != 0 {
 		fmt.Fprintf(buf, "%s\tAdministrators: []string{\n", linePrefix)

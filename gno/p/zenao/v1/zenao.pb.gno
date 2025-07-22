@@ -271,8 +271,8 @@ type CommunityInfo struct {
 type CreateCommunityRequest struct {
 	DisplayName    string
 	Description    string
-	AvatarURI      string
-	BannerURI      string
+	AvatarUri      string
+	BannerUri      string
 	Administrators []string
 }
 

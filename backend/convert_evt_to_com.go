@@ -102,8 +102,8 @@ func convertEvtToCom() error {
 		cmtReq = &zenaov1.CreateCommunityRequest{
 			DisplayName: evt.Title,
 			Description: evt.Description,
-			AvatarURI:   evt.ImageURI,
-			BannerURI:   "",
+			AvatarUri:   evt.ImageURI,
+			BannerUri:   "",
 		}
 		if evtToComConf.displayName != "" {
 			cmtReq.DisplayName = evtToComConf.displayName
@@ -112,10 +112,10 @@ func convertEvtToCom() error {
 			cmtReq.Description = evtToComConf.description
 		}
 		if evtToComConf.avatarURI != "" {
-			cmtReq.AvatarURI = evtToComConf.avatarURI
+			cmtReq.AvatarUri = evtToComConf.avatarURI
 		}
 		if evtToComConf.bannerURI != "" {
-			cmtReq.BannerURI = evtToComConf.bannerURI
+			cmtReq.BannerUri = evtToComConf.bannerURI
 		}
 		logger.Info("creating community with request", zap.Any("request", cmtReq))
 

@@ -570,8 +570,8 @@ func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []stri
 	community := &Community{
 		DisplayName: req.DisplayName,
 		Description: req.Description,
-		AvatarURI:   req.AvatarURI,
-		BannerURI:   req.BannerURI,
+		AvatarURI:   req.AvatarUri,
+		BannerURI:   req.BannerUri,
 		CreatorID:   uint(creatorIDInt),
 	}
 

@@ -1540,16 +1540,16 @@ func (c *CreateCommunityRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
 	if c.DisplayName != "" {
-		fields["DisplayName"] = json.StringNode("", c.DisplayName)
+		fields["displayName"] = json.StringNode("", c.DisplayName)
 	}
 	if c.Description != "" {
-		fields["Description"] = json.StringNode("", c.Description)
+		fields["description"] = json.StringNode("", c.Description)
 	}
-	if c.AvatarURI != "" {
-		fields["AvatarURI"] = json.StringNode("", c.AvatarURI)
+	if c.AvatarUri != "" {
+		fields["avatarUri"] = json.StringNode("", c.AvatarUri)
 	}
-	if c.BannerURI != "" {
-		fields["BannerURI"] = json.StringNode("", c.BannerURI)
+	if c.BannerUri != "" {
+		fields["bannerUri"] = json.StringNode("", c.BannerUri)
 	}
 	if len(c.Administrators) != 0 {
 		arr := make([]*json.Node, len(c.Administrators))
@@ -1566,17 +1566,17 @@ func (c *CreateCommunityRequest) FromJSON(node *json.Node) {
 	*c = CreateCommunityRequest{}
 	fields := node.MustObject()
 
-	if val, ok := fields["DisplayName"]; ok {
+	if val, ok := fields["displayName"]; ok {
 		c.DisplayName = val.MustString()
 	}
-	if val, ok := fields["Description"]; ok {
+	if val, ok := fields["description"]; ok {
 		c.Description = val.MustString()
 	}
-	if val, ok := fields["AvatarURI"]; ok {
-		c.AvatarURI = val.MustString()
+	if val, ok := fields["avatarUri"]; ok {
+		c.AvatarUri = val.MustString()
 	}
-	if val, ok := fields["BannerURI"]; ok {
-		c.BannerURI = val.MustString()
+	if val, ok := fields["bannerUri"]; ok {
+		c.BannerUri = val.MustString()
 	}
 	if val, ok := fields["administrators"]; ok {
 		jarr := val.MustArray()

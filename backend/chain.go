@@ -1243,8 +1243,8 @@ func genCommunityRealmSource(adminsAddr []string, membersAddr []string, zenaoAdm
 		"membersAddr":    stringSliceLit(membersAddr),
 		"displayName":    strconv.Quote(req.DisplayName),
 		"description":    strconv.Quote(req.Description),
-		"avatarURI":      strconv.Quote(req.AvatarURI),
-		"bannerURI":      strconv.Quote(req.BannerURI),
+		"avatarURI":      strconv.Quote(req.AvatarUri),
+		"bannerURI":      strconv.Quote(req.BannerUri),
 		"namespace":      gnoNamespace,
 		"zenaoAdminAddr": strconv.Quote(zenaoAdminAddr),
 	}
