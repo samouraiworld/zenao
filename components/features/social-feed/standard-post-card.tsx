@@ -66,6 +66,7 @@ export function StandardPostCard({
         replyHref={replyHref}
         canInteract={canInteract}
         onDelete={onDelete}
+        canEdit
         editMode={editMode}
         onEditModeChange={setEditMode}
         onReactionChange={onReactionChange}

@@ -73,7 +73,23 @@ export function PostsList({
             fallback={<PostCardSkeleton />}
             key={post.data.post.localPostId}
           >
-            {/* <PollPost eventId={eventId} pollId={pollId} pollPost={post.data} /> */}
+            <PollPost
+              userAddress={userAddress}
+              pollId={pollId}
+              pollPost={post.data}
+              onDelete={async (parentId) => {
+                await onDelete?.(postId, parentId);
+              }}
+              onReactionChange={async (icon) =>
+                await onReactionChange?.(postId, icon)
+              }
+              isOwner={post.data.post.author === userAddress}
+              replyHref={replyHrefFormatter?.(post.data.post.localPostId)}
+              canReply={canReply}
+              canInteract={canInteract}
+              isDeleting={isDeleting}
+              isReacting={isReacting}
+            />
           </Suspense>
         );
 

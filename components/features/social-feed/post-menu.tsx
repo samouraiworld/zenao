@@ -19,12 +19,14 @@ type PostMenuProps = {
   isOwner?: boolean;
   onEdit?: () => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
+  canEdit?: boolean;
   isDeleting?: boolean;
 };
 
 export function PostMenu({
   isOwner,
   gnowebHref,
+  canEdit,
   onEdit,
   onDelete,
   isDeleting,
@@ -59,7 +61,7 @@ export function PostMenu({
           )}
           {isOwner && (
             <>
-              {onEdit && (
+              {canEdit && onEdit && (
                 <DropdownMenuItem onClick={onEdit}>Edit post</DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={() => setDialogOpen(true)}>

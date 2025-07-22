@@ -172,6 +172,7 @@ function EventFeed({ eventId }: EventFeedProps) {
             replyHrefFormatter={(postId) =>
               `/event/${eventId}/feed/post/${postId}`
             }
+            canReply
             isEditing={isEditing}
             isReacting={isReacting}
             isDeleting={isDeleting}

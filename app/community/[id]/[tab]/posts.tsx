@@ -49,7 +49,7 @@ function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
     }
   };
 
-  const onReactionChange = async (icon: string) => {
+  const onReactionChange = async (_: string) => {
     try {
       const token = await getToken();
 

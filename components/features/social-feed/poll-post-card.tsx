@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -14,23 +14,34 @@ import { Gauge } from "@/components/widgets/gauge";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import { getQueryClient } from "@/lib/get-query-client";
 import { useToast } from "@/app/hooks/use-toast";
-import { useReactPost, useVotePoll } from "@/lib/mutations/social-feed";
+import { useVotePoll } from "@/lib/mutations/social-feed";
 import { Button } from "@/components/shadcn/button";
 import { profileOptions } from "@/lib/queries/profile";
-import { eventUserRoles } from "@/lib/queries/event-users";
 
 export function PollPostCard({
   pollId,
-  eventId,
   pollPost,
   userAddress,
   canReply,
+  canInteract,
+  onDelete,
+  onReactionChange,
+  isDeleting,
+  isReacting,
+  replyHref,
+  isOwner,
 }: {
   pollId: string;
-  eventId: string;
   pollPost: PollPostViewInfo;
   userAddress: string;
   canReply?: boolean;
+  canInteract?: boolean;
+  isOwner?: boolean;
+  replyHref?: string;
+  onDelete?: (parentId?: string) => void;
+  onReactionChange?: (icon: string) => void | Promise<void>;
+  isDeleting?: boolean;
+  isReacting?: boolean;
 }) {
   const t = useTranslations("event-feed");
   const queryClient = getQueryClient();
@@ -42,14 +53,7 @@ export function PollPostCard({
   );
 
   const { votePoll, isPending } = useVotePoll(queryClient);
-  const { reactPost, isPending: isReacting } = useReactPost();
-
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
-  );
-
-  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
-  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
+  // const { reactPost, isPending: isReacting } = useReactPost();
 
   const now = new Date();
   const endTime =
@@ -88,37 +92,20 @@ export function PollPostCard({
     }
   };
 
-  const onReactionChange = async (icon: string) => {
-    try {
-      const token = await getToken();
-
-      if (!token) {
-        throw new Error("Missing token");
-      }
-      await reactPost({
-        token,
-        userAddress: userAddress || "",
-        postId: pollPost.post.localPostId.toString(10),
-        icon,
-        eventId,
-        parentId: "",
-      });
-    } catch (error) {
-      console.error("error", error);
-    }
-  };
-
   return (
     <div className="flex flex-col gap-1">
       <PostCardLayout
-        eventId={eventId}
         post={pollPost}
         createdBy={createdBy}
         gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
         canReply={canReply}
+        canInteract={canInteract}
+        isDeleting={isDeleting}
+        onDelete={onDelete}
+        isOwner={isOwner}
         onReactionChange={onReactionChange}
         isReacting={isReacting}
-        userRoles={roles}
+        replyHref={replyHref}
       >
         <div className="w-full flex flex-col gap-2">
           <div className="flex flex-row items-center gap-2">
@@ -134,9 +121,7 @@ export function PollPostCard({
                 key={index}
                 pollResult={pollResult}
                 totalVotesCount={totalVotesCount}
-                disabled={
-                  isPollEnded || isPending || (!isOrganizer && !isParticipant)
-                }
+                disabled={isPollEnded || isPending || !canInteract}
                 onCheckedChange={() => {
                   onVote(pollResult.option);
                 }}

@@ -24,6 +24,7 @@ type PostCardLayoutProps = {
   editMode?: boolean;
   gnowebHref?: Url;
   parentId?: string;
+  canEdit?: boolean;
   canInteract?: boolean;
   onEditModeChange?: (editMode: boolean) => void;
   onDelete?: (parentId?: string) => void | Promise<void>;
@@ -42,6 +43,7 @@ export function PostCardLayout({
   replyHref,
   editMode,
   parentId = "",
+  canEdit,
   canInteract,
   onEditModeChange,
   onDelete,
@@ -121,6 +123,7 @@ export function PostCardLayout({
                 isOwner={isOwner}
                 onDelete={async () => await onDelete?.(parentId)}
                 isDeleting={isDeleting}
+                canEdit={canEdit}
                 onEdit={() => onEditModeChange?.(true)}
               />
             </div>
