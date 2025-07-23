@@ -8,11 +8,11 @@ import { mockSocialFeedPosts } from "./mock-posts";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { PostCardSkeleton } from "@/components/features/social-feed/post-card-skeleton";
 import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
-// import { parsePollUri } from "@/lib/multiaddr";
-// import { PollPost } from "@/components/features/social-feed/poll-post";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
+import { PollPost } from "@/components/features/social-feed/poll-post";
+import { parsePollUri } from "@/lib/multiaddr";
 
 type CommunityPostsProps = {
   communityId: string;
@@ -21,7 +21,9 @@ type CommunityPostsProps = {
 function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
-  const { data: _ua } = useSuspenseQuery(userAddressOptions(getToken, userId));
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
 
   const onEdit = async (values: FeedPostFormSchemaType) => {
     try {
@@ -34,14 +36,6 @@ function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
         throw new Error("invalid token");
       }
       // Community post edit
-      // await editPost({
-      //   content: values.content,
-      //   eventId,
-      //   tags: [],
-      //   postId: post.post.localPostId.toString(10),
-      //   token,
-      //   userAddress: userAddress || "",
-      // });
     } catch (error) {
       captureException(error);
     }
@@ -54,14 +48,7 @@ function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
       if (!token) {
         throw new Error("Missing token");
       }
-      // await reactPost({
-      //   token,
-      //   userAddress: userAddress || "",
-      //   postId,
-      //   icon,
-      //   eventId,
-      //   parentId: "",
-      // });
+      // React
     } catch (error) {
       console.error("error", error);
     }
@@ -91,14 +78,18 @@ function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
                 </Suspense>
               );
             case "poll":
-              // const { pollId } = parsePollUri(post.data.post.post.value.uri);
+              const { pollId } = parsePollUri(post.data.post.post.value.uri);
 
               return (
                 <Suspense
                   fallback={<PostCardSkeleton />}
                   key={post.data.post.localPostId}
                 >
-                  {/* <PollPost eventId="0" pollId={pollId} pollPost={post.data} /> */}
+                  <PollPost
+                    userAddress={userAddress}
+                    pollId={pollId}
+                    pollPost={post.data}
+                  />
                 </Suspense>
               );
 
