@@ -36,9 +36,7 @@ function PostComment({
   const [editMode, setEditMode] = useState(false);
   const { reactPost, isPending: isReacting } = useReactPost();
 
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
-  );
+  const { data: _ } = useSuspenseQuery(eventUserRoles(eventId, userAddress));
 
   const standardPost = comment.post.post.value;
 
@@ -62,10 +60,11 @@ function PostComment({
     }
   };
 
+  // TODO
   return (
     <PostCardLayout
       key={comment.post.localPostId}
-      eventId={eventId}
+      // eventId={eventId}
       post={comment}
       createdBy={createdBy}
       parentId={parentId}
@@ -73,7 +72,7 @@ function PostComment({
       onEditModeChange={setEditMode}
       onReactionChange={onReactionChange}
       isReacting={isReacting}
-      userRoles={roles}
+      // userRoles={roles}
     >
       <MarkdownPreview markdownString={standardPost.content} />
     </PostCardLayout>

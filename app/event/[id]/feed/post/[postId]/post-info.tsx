@@ -4,20 +4,20 @@ import { Suspense } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { PostCardSkeleton } from "@/components/features/social-feed/post-card-skeleton";
 import { userAddressOptions } from "@/lib/queries/user";
 import { feedPost } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
-import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
-import { parsePollUri } from "@/lib/multiaddr";
+// import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
+// import { parsePollUri } from "@/lib/multiaddr";
 import Heading from "@/components/widgets/texts/heading";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/app/hooks/use-toast";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
-import { PollPost } from "@/components/features/social-feed/poll-post";
+// import { PollPost } from "@/components/features/social-feed/poll-post";
 import { PostComments } from "@/components/features/social-feed/event-feed-form/post-comments";
 import { StandardPostForm } from "@/components/features/social-feed/event-feed-form/standard-post-form";
 
@@ -128,7 +128,7 @@ export default function PostInfo({
   eventId: string;
   postId: string;
 }) {
-  const router = useRouter();
+  // const router = useRouter();
   const { userId, getToken } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -149,12 +149,13 @@ export default function PostInfo({
     return null;
   }
 
+  // TODO
   return (
     <div className="w-full flex flex-col gap-12">
-      {isStandardPost(post) && (
+      {/* {isStandardPost(post) && (
         <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
           <StandardPostCard
-            eventId={eventId}
+            // eventId={eventId}
             post={post}
             onDeleteSuccess={() => router.push(`/event/${eventId}/feed`)}
           />
@@ -168,7 +169,7 @@ export default function PostInfo({
             pollPost={post}
           />
         </Suspense>
-      )}
+      )} */}
 
       <div className="flex flex-col gap-4">
         <Heading level={2}>Comments ({post.childrenCount})</Heading>

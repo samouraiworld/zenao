@@ -29,8 +29,8 @@ export function PostsList({
   onReactionChange?: (postId: string, icon: string) => void | Promise<void>;
   onDelete?: (postId: string, parentId?: string) => void | Promise<void>;
   posts: SocialFeedPost[];
-  canReply?: boolean;
   replyHrefFormatter?: (postId: bigint) => string;
+  canReply?: boolean;
   canInteract?: boolean;
   isEditing?: boolean;
   isReacting?: boolean;

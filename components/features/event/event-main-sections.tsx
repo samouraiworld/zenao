@@ -19,8 +19,8 @@ import {
   EventInfoTabsSchemaType,
   FeedPostFormSchemaType,
 } from "@/types/schemas";
-import { PollsList } from "@/components/features/social-feed/polls-list";
 import EventFeed from "@/app/event/[id]/(general)/[tab]/feed";
+import EventPolls from "@/app/event/[id]/(general)/[tab]/votes";
 
 export function MainEventSections({
   className,
@@ -111,7 +111,7 @@ export function MainEventSections({
           </TabsContent>
           {/* Social Feed (Votes) */}
           <TabsContent value="votes">
-            <PollsList eventId={eventId} userAddress={userAddress} />
+            <EventPolls eventId={eventId} />
           </TabsContent>
         </div>
       </div>
