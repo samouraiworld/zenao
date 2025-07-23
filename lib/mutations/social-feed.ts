@@ -498,8 +498,13 @@ export const useDeletePost = () => {
           "",
           variables.userAddress,
         );
+        const feedParentPostOpts = feedPost(
+          variables.parentId,
+          variables.userAddress,
+        );
 
         queryClient.invalidateQueries(feedPostsChildrenOpts);
+        queryClient.invalidateQueries(feedParentPostOpts);
       }
       const feedPostsOpts = feedPosts(
         variables.eventId,

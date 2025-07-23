@@ -140,7 +140,7 @@ function EventPolls({ eventId }: EventPollsProps) {
           isFetching={isFetching}
           isFetchingNextPage={isFetchingNextPage}
           page={polls}
-          noMoreLabel={t("event-feed.no-more-posts")}
+          noMoreLabel={t("no-more-posts")}
         />
       </div>
     </>

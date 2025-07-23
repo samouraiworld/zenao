@@ -2,10 +2,11 @@
 
 import { Suspense } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { useAuth } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 // import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { PostCardSkeleton } from "@/components/features/social-feed/post-card-skeleton";
 import { userAddressOptions } from "@/lib/queries/user";
 import { feedPost } from "@/lib/queries/social-feed";
@@ -13,21 +14,32 @@ import { isPollPost, isStandardPost } from "@/lib/social-feed";
 // import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
 // import { parsePollUri } from "@/lib/multiaddr";
 import Heading from "@/components/widgets/texts/heading";
-import { useCreateStandardPost } from "@/lib/mutations/social-feed";
+import {
+  useCreateStandardPost,
+  useDeletePost,
+  useEditStandardPost,
+  useReactPost,
+} from "@/lib/mutations/social-feed";
 import { useToast } from "@/app/hooks/use-toast";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 // import { PollPost } from "@/components/features/social-feed/poll-post";
 import { PostComments } from "@/components/features/social-feed/event-feed-form/post-comments";
 import { StandardPostForm } from "@/components/features/social-feed/event-feed-form/standard-post-form";
+import { parsePollUri } from "@/lib/multiaddr";
+import { PollPost } from "@/components/features/social-feed/poll-post";
+import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
+import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
 
 function PostCommentForm({
   eventId,
   parentId,
+  userRoles,
   form,
 }: {
   eventId: string;
   parentId: bigint;
+  userRoles: EventUserRole[];
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const { toast } = useToast();
@@ -103,21 +115,40 @@ function PostCommentForm({
       });
     }
   };
-
   return (
-    <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
-      <div className="w-full">
-        <StandardPostForm
-          form={form}
-          feedInputMode={"STANDARD_POST"}
-          setFeedInputMode={() => {
-            console.log("not available");
-          }}
-          onSubmit={onSubmit}
-          isLoading={isPending}
-        />
-      </div>
-    </div>
+    <>
+      <SignedOut>
+        <div className="flex justify-center w-full">
+          <div className="w-full">
+            You must be a participant to submit a comment.
+          </div>
+        </div>
+      </SignedOut>
+      <SignedIn>
+        {!userRoles.includes("organizer") &&
+        !userRoles.includes("participant") ? (
+          <div className="flex justify-center w-full">
+            <div className="w-full">
+              You must be a participant to submit a comment.
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
+            <div className="w-full">
+              <StandardPostForm
+                form={form}
+                feedInputMode={"STANDARD_POST"}
+                setFeedInputMode={() => {
+                  console.log("not available");
+                }}
+                onSubmit={onSubmit}
+                isLoading={isPending}
+              />
+            </div>
+          </div>
+        )}
+      </SignedIn>
+    </>
   );
 }
 
@@ -128,11 +159,20 @@ export default function PostInfo({
   eventId: string;
   postId: string;
 }) {
-  // const router = useRouter();
+  const router = useRouter();
+  const { toast } = useToast();
+  const t = useTranslations("");
   const { userId, getToken } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userAddress),
+  );
+
+  const { editPost, isPending: isEditing } = useEditStandardPost();
+  const { reactPost, isPending: isReacting } = useReactPost();
+  const { deletePost, isPending: isDeleting } = useDeletePost();
 
   const { data: post } = useSuspenseQuery(feedPost(postId, userAddress || ""));
 
@@ -145,37 +185,128 @@ export default function PostInfo({
     },
   });
 
+  const onEditStandardPost = async (values: FeedPostFormSchemaType) => {
+    try {
+      if (values.kind === "POLL") {
+        throw new Error("invalid kind");
+      }
+
+      const token = await getToken();
+      if (!token) {
+        throw new Error("invalid token");
+      }
+      await editPost({
+        content: values.content,
+        eventId,
+        tags: [],
+        postId,
+        token,
+        userAddress: userAddress || "",
+      });
+    } catch (error) {
+      captureException(error);
+    }
+  };
+
+  const onReactionChange = async (icon: string, parentId = "") => {
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("Missing token");
+      }
+      await reactPost({
+        token,
+        userAddress: userAddress || "",
+        postId,
+        icon,
+        eventId,
+        parentId,
+      });
+    } catch (error) {
+      console.error("error", error);
+    }
+  };
+
+  const onDelete = async (parentId?: string) => {
+    const token = await getToken();
+
+    try {
+      if (!token || !userAddress) {
+        throw new Error("not authenticated");
+      }
+
+      await deletePost({
+        eventId,
+        postId,
+        parentId,
+        token,
+        userAddress,
+      });
+
+      toast({
+        title: t("toast-delete-post-success"),
+      });
+
+      router.push(`/event/${eventId}/feed`);
+    } catch (error) {
+      if (error instanceof Error) {
+        captureException(error);
+        toast({
+          variant: "destructive",
+          title: t("toast-delete-post-error"),
+        });
+      }
+    }
+  };
+
   if (!isStandardPost(post) && !isPollPost(post)) {
     return null;
   }
 
-  // TODO
   return (
     <div className="w-full flex flex-col gap-12">
-      {/* {isStandardPost(post) && (
+      {isStandardPost(post) && (
         <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
           <StandardPostCard
-            // eventId={eventId}
             post={post}
-            onDeleteSuccess={() => router.push(`/event/${eventId}/feed`)}
+            isOwner={
+              roles.includes("organizer") || roles.includes("participant")
+            }
+            onReactionChange={onReactionChange}
+            onDelete={onDelete}
+            onEdit={onEditStandardPost}
+            isDeleting={isDeleting}
+            isReacting={isReacting}
+            isEditing={isEditing}
+            canInteract
           />
         </Suspense>
       )}
       {isPollPost(post) && (
         <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
           <PollPost
-            eventId={eventId}
+            userAddress={userAddress}
             pollId={parsePollUri(post.post.post.value.uri).pollId}
             pollPost={post}
+            onReactionChange={onReactionChange}
+            onDelete={onDelete}
+            isDeleting={isDeleting}
+            isReacting={isReacting}
+            isOwner={
+              roles.includes("organizer") || roles.includes("participant")
+            }
+            canInteract
           />
         </Suspense>
-      )} */}
+      )}
 
       <div className="flex flex-col gap-4">
         <Heading level={2}>Comments ({post.childrenCount})</Heading>
         <PostCommentForm
           eventId={eventId}
           parentId={post.post.localPostId}
+          userRoles={roles}
           form={form}
         />
 
