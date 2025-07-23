@@ -468,10 +468,10 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 	return res, nil
 }
 
-// GetEventUsersWithRole implements zeni.DB.
-func (g *gormZenaoDB) GetEventUsersWithRole(eventID string, role string) ([]*zeni.User, error) {
+// GetOrgUsersWithRole implements zeni.DB.
+func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*zeni.User, error) {
 	var participants []*UserRole
-	if err := g.db.Preload("User").Find(&participants, "org_type = ? AND org_id = ? AND role = ?", zeni.OrgTypeEvent, eventID, role).Error; err != nil {
+	if err := g.db.Preload("User").Find(&participants, "org_type = ? AND org_id = ? AND role = ?", orgType, orgID, role).Error; err != nil {
 		return nil, err
 	}
 	res := make([]*zeni.User, 0, len(participants))
@@ -621,6 +621,23 @@ func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []stri
 	}
 
 	return zcmt, nil
+}
+
+// GetAllCommunities implements zeni.DB.
+func (g *gormZenaoDB) GetAllCommunities() ([]*zeni.Community, error) {
+	var communities []*Community
+	if err := g.db.Find(&communities).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*zeni.Community, 0, len(communities))
+	for _, c := range communities {
+		zcmt, err := dbCommunityToZeniCommunity(c)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, zcmt)
+	}
+	return res, nil
 }
 
 // CreateFeed implements zeni.DB.
@@ -1101,7 +1118,7 @@ func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs 
 	}
 
 	var currentUsersIDs []string
-	currentUsers, err := g.GetEventUsersWithRole(eventID, role)
+	currentUsers, err := g.GetOrgUsersWithRole(zeni.OrgTypeEvent, eventID, role)
 	if err != nil {
 		return fmt.Errorf("get users with role %s: %w", role, err)
 	}

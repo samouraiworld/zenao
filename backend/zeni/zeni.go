@@ -209,12 +209,14 @@ type DB interface {
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
-	GetEventUsersWithRole(eventID string, role string) ([]*User, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+	GetAllCommunities() ([]*Community, error)
+
+	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)

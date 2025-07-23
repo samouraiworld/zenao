@@ -95,10 +95,11 @@ func execGenTxs() error {
 	}
 
 	chain := &gnoZenaoChain{
-		eventsIndexPkgPath: path.Join("gno.land/r", genTxsConf.name, "eventreg"),
-		signerInfo:         signerInfo,
-		logger:             logger,
-		namespace:          genTxsConf.name,
+		eventsIndexPkgPath:      path.Join("gno.land/r", genTxsConf.name, "eventreg"),
+		communitiesIndexPkgPath: path.Join("gno.land/r", genTxsConf.name, "communityreg"),
+		signerInfo:              signerInfo,
+		logger:                  logger,
+		namespace:               genTxsConf.name,
 	}
 	logger.Info("Signer initialized", zap.String("address", signerInfo.GetAddress().String()))
 
@@ -147,7 +148,7 @@ func execGenTxs() error {
 			return err
 		}
 
-		organizers, err := db.GetEventUsersWithRole(event.ID, zeni.RoleOrganizer)
+		organizers, err := db.GetOrgUsersWithRole(zeni.OrgTypeEvent, event.ID, zeni.RoleOrganizer)
 		if err != nil {
 			return err
 		}
@@ -157,7 +158,7 @@ func execGenTxs() error {
 			organizersIDs = append(organizersIDs, org.ID)
 		}
 
-		gatekeepers, err := db.GetEventUsersWithRole(event.ID, zeni.RoleGatekeeper)
+		gatekeepers, err := db.GetOrgUsersWithRole(zeni.OrgTypeEvent, event.ID, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}
@@ -206,6 +207,47 @@ func execGenTxs() error {
 				logger.Info("checkin tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 			}
 		}
+	}
+
+	//TODO: use proposals tx to add members to avoid loosing time of joining the community
+	communities, err := db.GetAllCommunities()
+	if err != nil {
+		return err
+	}
+
+	for _, community := range communities {
+		administrators, err := db.GetOrgUsersWithRole(zeni.OrgTypeCommunity, community.ID, zeni.RoleAdministrator)
+		if err != nil {
+			return err
+		}
+
+		var administratorsIDs []string
+		for _, admin := range administrators {
+			administratorsIDs = append(administratorsIDs, admin.ID)
+		}
+
+		members, err := db.GetOrgUsersWithRole(zeni.OrgTypeCommunity, community.ID, zeni.RoleMember)
+		if err != nil {
+			return err
+		}
+
+		var membersIDs []string
+		for _, member := range members {
+			membersIDs = append(membersIDs, member.ID)
+		}
+
+		tx, err := createCommunityRealmTx(chain, community, signerInfo.GetAddress(), administratorsIDs, membersIDs)
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("community realm tx created", zap.String("community-id", community.ID))
+		tx, err = createCommunityRegTx(chain, community, signerInfo.GetAddress())
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("community indexed into community registry tx created", zap.String("community-id", community.ID))
 	}
 
 	posts, err := db.GetAllPosts(true)
@@ -690,4 +732,70 @@ func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, gen
 	}
 
 	return txs, nil
+}
+
+func createCommunityRegTx(chain *gnoZenaoChain, community *zeni.Community, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	communityPkgPath := chain.communityPkgPath(community.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.communitiesIndexPkgPath,
+				Func:    "IndexCommunity",
+				Args:    []string{communityPkgPath},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: community.CreatedAt.Unix() + 1, // +1 to avoid collision with community creation
+		},
+	}, nil
+}
+
+func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, creator cryptoGno.Address, administratorsIDs []string, membersIDs []string) (gnoland.TxWithMetadata, error) {
+	administratorsAddrs := mapsl.Map(administratorsIDs, chain.UserAddress)
+	membersAddrs := mapsl.Map(membersIDs, chain.UserAddress)
+	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, creator.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
+		DisplayName: community.DisplayName,
+		Description: community.Description,
+		AvatarUri:   community.AvatarURI,
+		BannerUri:   community.BannerURI,
+	})
+	if err != nil {
+		return gnoland.TxWithMetadata{}, err
+	}
+
+	communityPkgPath := chain.communityPkgPath(community.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgAddPackage{
+				Creator: creator,
+				Deposit: []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "community",
+					Path:  communityPkgPath,
+					Files: []*gnovm.MemFile{{Name: "community.gno", Body: cRealm}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: community.CreatedAt.Unix(),
+		},
+	}, nil
 }
