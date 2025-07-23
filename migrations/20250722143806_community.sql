@@ -3,7 +3,7 @@ PRAGMA foreign_keys = off;
 -- Create "new_user_roles" table
 CREATE TABLE `new_user_roles` (`created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `user_id` integer NULL, `org_type` text NULL, `org_id` integer NULL, `role` text NULL, PRIMARY KEY (`user_id`, `org_type`, `org_id`, `role`), CONSTRAINT `fk_user_roles_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION);
 -- Copy rows from old table "user_roles" to new temporary table "new_user_roles"
-INSERT INTO `new_user_roles` (`created_at`, `updated_at`, `deleted_at`, `user_id`, `org_id`, `role`) SELECT `created_at`, `updated_at`, `deleted_at`, `user_id`, `event_id`, `role` FROM `user_roles`;
+INSERT INTO `new_user_roles` (`created_at`, `updated_at`, `deleted_at`, `user_id`, `org_type`, `org_id`, `role`) SELECT `created_at`, `updated_at`, `deleted_at`, `user_id`, 'event', `event_id`, `role` FROM `user_roles`;
 -- Drop "user_roles" table after copying rows
 DROP TABLE `user_roles`;
 -- Rename temporary table "new_user_roles" to "user_roles"
