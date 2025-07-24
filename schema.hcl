@@ -81,11 +81,63 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
+  }
   index "idx_users_auth_id" {
     unique  = true
     columns = [column.auth_id]
   }
-  index "idx_users_deleted_at" {
+}
+table "communities" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "display_name" {
+    null = true
+    type = text
+  }
+  column "description" {
+    null = true
+    type = text
+  }
+  column "avatar_uri" {
+    null = true
+    type = text
+  }
+  column "banner_uri" {
+    null = true
+    type = text
+  }
+  column "creator_id" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_communities_creator" {
+    columns     = [column.creator_id]
+    ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_communities_deleted_at" {
     columns = [column.deleted_at]
   }
 }
@@ -480,15 +532,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_reactions_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_reactions" {
     columns     = [column.post_id]
     ref_columns = [table.posts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_reactions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -548,6 +600,12 @@ table "sold_tickets" {
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
+  index "idx_sold_tickets_event_id" {
+    columns = [column.event_id]
+  }
+  index "idx_sold_tickets_deleted_at" {
+    columns = [column.deleted_at]
+  }
   index "idx_sold_tickets_pubkey" {
     unique  = true
     columns = [column.pubkey]
@@ -555,12 +613,6 @@ table "sold_tickets" {
   index "idx_sold_tickets_secret" {
     unique  = true
     columns = [column.secret]
-  }
-  index "idx_sold_tickets_event_id" {
-    columns = [column.event_id]
-  }
-  index "idx_sold_tickets_deleted_at" {
-    columns = [column.deleted_at]
   }
 }
 table "tags" {
@@ -601,7 +653,11 @@ table "user_roles" {
     null = true
     type = integer
   }
-  column "event_id" {
+  column "org_type" {
+    null = true
+    type = text
+  }
+  column "org_id" {
     null = true
     type = integer
   }
@@ -610,13 +666,7 @@ table "user_roles" {
     type = text
   }
   primary_key {
-    columns = [column.user_id, column.event_id, column.role]
-  }
-  foreign_key "fk_user_roles_event" {
-    columns     = [column.event_id]
-    ref_columns = [table.events.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
+    columns = [column.user_id, column.org_type, column.org_id, column.role]
   }
   foreign_key "fk_user_roles_user" {
     columns     = [column.user_id]

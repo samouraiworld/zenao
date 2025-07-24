@@ -45,6 +45,20 @@ func (p Plan) IsValid() bool {
 	return p == FreePlan || p == ProPlan
 }
 
+const (
+	RoleOrganizer   string = "organizer"   // for events
+	RoleGatekeeper  string = "gatekeeper"  // for events
+	RoleParticipant string = "participant" // for events
+
+	RoleAdministrator string = "administrator" // for communities
+	RoleMember        string = "member"        // for communities
+)
+
+const (
+	OrgTypeEvent     string = "event"
+	OrgTypeCommunity string = "community"
+)
+
 type AuthUser struct {
 	ID     string
 	Email  string
@@ -75,6 +89,16 @@ type Event struct {
 	Location          *zenaov1.EventLocation
 	PasswordHash      string
 	ICSSequenceNumber uint32
+}
+
+type Community struct {
+	CreatedAt   time.Time
+	ID          string
+	DisplayName string
+	Description string
+	AvatarURI   string
+	BannerURI   string
+	CreatorID   string
 }
 
 type Feed struct {
@@ -190,6 +214,8 @@ type DB interface {
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
+	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
@@ -217,6 +243,8 @@ type Chain interface {
 	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
 	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
+
+	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error

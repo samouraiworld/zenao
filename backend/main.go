@@ -43,6 +43,7 @@ func main() {
 		newGenticketCmd(),
 		newGenPdfTicketCmd(),
 		newGenTxsCmd(),
+		newConvertEvtToComCmd(),
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])

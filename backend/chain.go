@@ -52,22 +52,24 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 	client := gnoclient.Client{Signer: signer, RPCClient: tmClient}
 
 	return &gnoZenaoChain{
-		client:             client,
-		eventsIndexPkgPath: path.Join("gno.land/r", namespace, "eventreg"),
-		signerInfo:         signerInfo,
-		logger:             logger,
-		namespace:          namespace,
-		gasSecurityRate:    gasSecurityRate,
+		client:                  client,
+		eventsIndexPkgPath:      path.Join("gno.land/r", namespace, "eventreg"),
+		communitiesIndexPkgPath: path.Join("gno.land/r", namespace, "communityreg"),
+		signerInfo:              signerInfo,
+		logger:                  logger,
+		namespace:               namespace,
+		gasSecurityRate:         gasSecurityRate,
 	}, nil
 }
 
 type gnoZenaoChain struct {
-	client             gnoclient.Client
-	eventsIndexPkgPath string
-	signerInfo         keys.Info
-	logger             *zap.Logger
-	namespace          string
-	gasSecurityRate    float64
+	client                  gnoclient.Client
+	eventsIndexPkgPath      string
+	communitiesIndexPkgPath string
+	signerInfo              keys.Info
+	logger                  *zap.Logger
+	namespace               string
+	gasSecurityRate         float64
 }
 
 const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
@@ -468,6 +470,63 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 	return nil
 }
 
+// CreateCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error {
+	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
+	membersAddr := mapsl.Map(membersIDs, g.UserAddress)
+	communityPkgPath := g.communityPkgPath(communityID)
+	cmtRealmSrc, err := genCommunityRealmSource(adminsAddr, membersAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
+	if err != nil {
+		return err
+	}
+	g.logger.Info("creating community on chain", zap.String("pkg-path", communityPkgPath))
+	// TODO: single tx with all messages
+	msgkg := vm.MsgAddPackage{
+		Creator: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name:  "community",
+			Path:  communityPkgPath,
+			Files: []*gnovm.MemFile{{Name: "community.gno", Body: cmtRealmSrc}},
+		},
+	}
+	gasWanted, err := g.estimateAddPackageTxGas(msgkg)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.AddPackage(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msgkg))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("created community realm", zap.String("pkg-path", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "IndexCommunity",
+		Args: []string{
+			communityPkgPath,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("indexed community", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
@@ -757,6 +816,10 @@ func (g *gnoZenaoChain) VotePoll(userID string, req *zenaov1.VotePollRequest) er
 
 func (g *gnoZenaoChain) eventRealmPkgPath(eventID string) string {
 	return fmt.Sprintf("gno.land/r/%s/events/e%s", g.namespace, eventID)
+}
+
+func (g *gnoZenaoChain) communityPkgPath(communityID string) string {
+	return fmt.Sprintf("gno.land/r/%s/communities/c%s", g.namespace, communityID)
 }
 
 func (g *gnoZenaoChain) userRealmPkgPath(userID string) string {
@@ -1171,6 +1234,82 @@ func Execute(proposalID uint64) {
 
 func Render(path string) string {
 	return event.Render(path)
+}
+`
+
+func genCommunityRealmSource(adminsAddr []string, membersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateCommunityRequest) (string, error) {
+	m := map[string]string{
+		"adminsAddr":     stringSliceLit(adminsAddr),
+		"membersAddr":    stringSliceLit(membersAddr),
+		"displayName":    strconv.Quote(req.DisplayName),
+		"description":    strconv.Quote(req.Description),
+		"avatarURI":      strconv.Quote(req.AvatarUri),
+		"bannerURI":      strconv.Quote(req.BannerUri),
+		"namespace":      gnoNamespace,
+		"zenaoAdminAddr": strconv.Quote(zenaoAdminAddr),
+	}
+
+	t := template.Must(template.New("").Parse(communityRealmSourceTemplate))
+	buf := strings.Builder{}
+	if err := t.Execute(&buf, m); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+const communityRealmSourceTemplate = `package community
+
+import (
+	zenaov1 "gno.land/p/{{.namespace}}/zenao/v1"
+	"gno.land/p/{{.namespace}}/communities"
+	"gno.land/p/{{.namespace}}/basedao"
+	"gno.land/p/{{.namespace}}/daokit"
+	"gno.land/p/{{.namespace}}/daocond"
+	"gno.land/r/demo/profile"
+	"gno.land/r/{{.namespace}}/communityreg"
+	"gno.land/r/{{.namespace}}/social_feed"
+)
+
+var (
+	DAO daokit.DAO
+	daoPrivate *basedao.DAOPrivate
+	community *communities.Community
+)
+
+func init() {
+	conf := communities.Config{
+		ZenaoAdminAddr:   {{.zenaoAdminAddr}},
+		Administrators:   {{.adminsAddr}},
+		Members:          {{.membersAddr}},
+		DisplayName:      {{.displayName}},
+		Description:      {{.description}},
+		AvatarURI:        {{.avatarURI}},
+		BannerURI:        {{.bannerURI}},
+		GetProfileString: profile.GetStringField,
+		SetProfileString: profile.SetStringField,
+	}
+	community = communities.NewCommunity(&conf)
+	daoPrivate = community.DAOPrivate
+	DAO = community.DAO
+	communityreg.Register(func() *zenaov1.CommunityInfo { return community.Info() })
+	social_feed.NewFeed("main", false, IsMember)
+}
+
+// Set public to be used as auth layer for external entities (e.g polls)
+func IsMember(memberId string) bool {
+	return daoPrivate.Members.IsMember(memberId)
+}
+
+func Vote(proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(proposalID, vote)
+}
+
+func Execute(proposalID uint64) {
+	DAO.Execute(proposalID)
+}
+
+func Render(path string) string {
+	return community.Render(path)
 }
 `
 

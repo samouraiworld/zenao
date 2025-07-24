@@ -55,3 +55,6 @@ genesis_txs.jsonl
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# mikael gnopls helper scripts waiting for new pkg loader
+mikael-gnopls-*.sh
