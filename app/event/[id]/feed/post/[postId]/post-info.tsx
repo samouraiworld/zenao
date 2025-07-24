@@ -4,32 +4,26 @@ import { Suspense } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-// import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 import { userAddressOptions } from "@/lib/queries/user";
 import { feedPost } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
-// import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
-// import { parsePollUri } from "@/lib/multiaddr";
 import Heading from "@/components/widgets/texts/heading";
-import {
-  useCreateStandardPost,
-  useDeletePost,
-  useEditStandardPost,
-  useReactPost,
-} from "@/lib/mutations/social-feed";
-import { useToast } from "@/app/hooks/use-toast";
+import { useCreateStandardPost } from "@/lib/mutations/social-feed";
+import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
-// import { PollPost } from "@/components/features/social-feed/poll-post";
 import { PostComments } from "@/components/event-feed-form/post-comments";
 import { StandardPostForm } from "@/components/event-feed-form/standard-post-form";
 import { parsePollUri } from "@/lib/multiaddr";
 import { PollPost } from "@/components/social-feed/poll-post";
 import { StandardPostCard } from "@/components/social-feed/standard-post-card";
 import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
+import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
+import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
+import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 
 function PostCommentForm({
   eventId,
@@ -115,6 +109,7 @@ function PostCommentForm({
       });
     }
   };
+
   return (
     <>
       <SignedOut>
@@ -160,8 +155,6 @@ export default function PostInfo({
   postId: string;
 }) {
   const router = useRouter();
-  const { toast } = useToast();
-  const t = useTranslations("");
   const { userId, getToken } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -169,11 +162,6 @@ export default function PostInfo({
   const { data: roles } = useSuspenseQuery(
     eventUserRoles(eventId, userAddress),
   );
-
-  const { editPost, isPending: isEditing } = useEditStandardPost();
-  const { reactPost, isPending: isReacting } = useReactPost();
-  const { deletePost, isPending: isDeleting } = useDeletePost();
-
   const { data: post } = useSuspenseQuery(feedPost(postId, userAddress || ""));
 
   const form = useForm<FeedPostFormSchemaType>({
@@ -185,80 +173,9 @@ export default function PostInfo({
     },
   });
 
-  const onEditStandardPost = async (values: FeedPostFormSchemaType) => {
-    try {
-      if (values.kind === "POLL") {
-        throw new Error("invalid kind");
-      }
-
-      const token = await getToken();
-      if (!token) {
-        throw new Error("invalid token");
-      }
-      await editPost({
-        content: values.content,
-        eventId,
-        tags: [],
-        postId,
-        token,
-        userAddress: userAddress || "",
-      });
-    } catch (error) {
-      captureException(error);
-    }
-  };
-
-  const onReactionChange = async (icon: string, parentId = "") => {
-    try {
-      const token = await getToken();
-
-      if (!token) {
-        throw new Error("Missing token");
-      }
-      await reactPost({
-        token,
-        userAddress: userAddress || "",
-        postId,
-        icon,
-        eventId,
-        parentId,
-      });
-    } catch (error) {
-      console.error("error", error);
-    }
-  };
-
-  const onDelete = async (parentId?: string) => {
-    const token = await getToken();
-
-    try {
-      if (!token || !userAddress) {
-        throw new Error("not authenticated");
-      }
-
-      await deletePost({
-        eventId,
-        postId,
-        parentId,
-        token,
-        userAddress,
-      });
-
-      toast({
-        title: t("toast-delete-post-success"),
-      });
-
-      router.push(`/event/${eventId}/feed`);
-    } catch (error) {
-      if (error instanceof Error) {
-        captureException(error);
-        toast({
-          variant: "destructive",
-          title: t("toast-delete-post-error"),
-        });
-      }
-    }
-  };
+  const { onEditStandardPost, isEditing } = useEventPostEditHandler(eventId);
+  const { onReactionChange, isReacting } = useEventPostReactionHandler(eventId);
+  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
 
   if (!isStandardPost(post) && !isPollPost(post)) {
     return null;
@@ -273,9 +190,14 @@ export default function PostInfo({
             isOwner={
               roles.includes("organizer") || roles.includes("participant")
             }
-            onReactionChange={onReactionChange}
-            onDelete={onDelete}
-            onEdit={onEditStandardPost}
+            onReactionChange={async (icon) =>
+              await onReactionChange(postId, icon)
+            }
+            onDelete={async (parentId) => {
+              await onDelete(postId, parentId);
+              router.push(`/event/${eventId}/feed`);
+            }}
+            onEdit={async (values) => await onEditStandardPost(postId, values)}
             isDeleting={isDeleting}
             isReacting={isReacting}
             isEditing={isEditing}
@@ -289,8 +211,13 @@ export default function PostInfo({
             userAddress={userAddress}
             pollId={parsePollUri(post.post.post.value.uri).pollId}
             pollPost={post}
-            onReactionChange={onReactionChange}
-            onDelete={onDelete}
+            onReactionChange={async (icon) =>
+              await onReactionChange(postId, icon)
+            }
+            onDelete={async (parentId) => {
+              await onDelete(postId, parentId);
+              router.push(`/event/${eventId}/feed`);
+            }}
             isDeleting={isDeleting}
             isReacting={isReacting}
             isOwner={

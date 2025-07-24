@@ -13,22 +13,16 @@ import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { PostsList } from "@/components/social-feed/posts-list";
-import {
-  useDeletePost,
-  useEditStandardPost,
-  useReactPost,
-} from "@/lib/mutations/social-feed";
-import { FeedPostFormSchemaType } from "@/types/schemas";
-import { captureException } from "@/lib/report";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { useToast } from "@/app/hooks/use-toast";
+import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
+import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
+import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 
 type EventFeedProps = {
   eventId: string;
 };
 
 function EventFeed({ eventId }: EventFeedProps) {
-  const { toast } = useToast();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -37,12 +31,8 @@ function EventFeed({ eventId }: EventFeedProps) {
   const { data: roles } = useSuspenseQuery(
     eventUserRoles(eventId, userAddress),
   );
+  const t = useTranslations();
 
-  const { editPost, isPending: isEditing } = useEditStandardPost();
-  const { reactPost, isPending: isReacting } = useReactPost();
-  const { deletePost, isPending: isDeleting } = useDeletePost();
-
-  const t = useTranslations("");
   // Event's social feed posts
   const {
     data: postsPages,
@@ -75,81 +65,9 @@ function EventFeed({ eventId }: EventFeedProps) {
     [postsPages],
   );
 
-  const onEditStandardPost = async (
-    postId: string,
-    values: FeedPostFormSchemaType,
-  ) => {
-    try {
-      if (values.kind === "POLL") {
-        throw new Error("invalid kind");
-      }
-
-      const token = await getToken();
-      if (!token) {
-        throw new Error("invalid token");
-      }
-      await editPost({
-        content: values.content,
-        eventId,
-        tags: [],
-        postId,
-        token,
-        userAddress: userAddress || "",
-      });
-    } catch (error) {
-      captureException(error);
-    }
-  };
-
-  const onReactionChange = async (postId: string, icon: string) => {
-    try {
-      const token = await getToken();
-
-      if (!token) {
-        throw new Error("Missing token");
-      }
-      await reactPost({
-        token,
-        userAddress: userAddress || "",
-        postId,
-        icon,
-        eventId,
-        parentId: "",
-      });
-    } catch (error) {
-      console.error("error", error);
-    }
-  };
-
-  const onDelete = async (postId: string, parentId?: string) => {
-    const token = await getToken();
-
-    try {
-      if (!token || !userAddress) {
-        throw new Error("not authenticated");
-      }
-
-      await deletePost({
-        eventId,
-        postId,
-        parentId,
-        token,
-        userAddress,
-      });
-
-      toast({
-        title: t("toast-delete-post-success"),
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        captureException(error);
-        toast({
-          variant: "destructive",
-          title: t("toast-delete-post-error"),
-        });
-      }
-    }
-  };
+  const { onEditStandardPost, isEditing } = useEventPostEditHandler(eventId);
+  const { onReactionChange, isReacting } = useEventPostReactionHandler(eventId);
+  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
 
   return (
     <>

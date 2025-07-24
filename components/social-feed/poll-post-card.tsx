@@ -13,7 +13,7 @@ import { cn } from "@/lib/tailwind";
 import { Gauge } from "@/components/widgets/gauge";
 import { Checkbox } from "@/components/shadcn/checkbox";
 import { getQueryClient } from "@/lib/get-query-client";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useVotePoll } from "@/lib/mutations/social-feed";
 import { Button } from "@/components/shadcn/button";
 import { profileOptions } from "@/lib/queries/profile";

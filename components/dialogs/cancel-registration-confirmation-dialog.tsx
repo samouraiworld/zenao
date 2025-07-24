@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import ConfirmationDialog from "./confirmation-dialog";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useEventCancelParticipation } from "@/lib/mutations/event-cancel";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";

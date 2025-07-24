@@ -22,8 +22,8 @@ import {
 import { Textarea } from "@/components/shadcn/textarea";
 import Text from "@/components/widgets/texts/text";
 import { cn } from "@/lib/tailwind";
-import useMarkdownUpload from "@/app/hooks/use-markdown-upload";
-import { useToast } from "@/app/hooks/use-toast";
+import useMarkdownUpload from "@/hooks/use-markdown-upload";
+import { useToast } from "@/hooks/use-toast";
 import {
   FeedPostFormSchemaType,
   standardPostFormSchema,

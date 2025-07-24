@@ -333,6 +333,7 @@ export const useReactPost = () => {
       };
     },
     onSuccess: (_, variables) => {
+      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
       const feedPostsOpts = feedPosts(
         variables.eventId,
         DEFAULT_FEED_POSTS_LIMIT,
@@ -354,6 +355,7 @@ export const useReactPost = () => {
 
       queryClient.invalidateQueries(feedPostsChildrenOpts);
       queryClient.invalidateQueries(feedPostsOpts);
+      queryClient.invalidateQueries(feedPostOpts);
       queryClient.invalidateQueries(feedPollsOpts);
     },
     onError: (_, variables, context) => {

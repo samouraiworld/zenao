@@ -4,7 +4,6 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
@@ -15,10 +14,9 @@ import {
 } from "@/lib/queries/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { isStandardPost, StandardPostView } from "@/lib/social-feed";
-import { useDeletePost, useReactPost } from "@/lib/mutations/social-feed";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { captureException } from "@/lib/report";
-import { useToast } from "@/app/hooks/use-toast";
+import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
+import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
 
 function PostComment({
   eventId,
@@ -88,8 +86,6 @@ export function PostComments({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { toast } = useToast();
-  const t = useTranslations("");
   const {
     data: commentsPages,
     isFetchingNextPage,
@@ -110,58 +106,11 @@ export function PostComments({
     });
   }, [commentsPages]);
 
-  const { deletePost, isPending: isDeleting } = useDeletePost();
-  const { reactPost, isPending: isReacting } = useReactPost();
-
-  const onReactionChange = async (commentPostId: string, icon: string) => {
-    try {
-      const token = await getToken();
-
-      if (!token) {
-        throw new Error("Missing token");
-      }
-      await reactPost({
-        token,
-        userAddress: userAddress || "",
-        postId: commentPostId,
-        icon,
-        eventId,
-        parentId,
-      });
-    } catch (error) {
-      console.error("error", error);
-    }
-  };
-
-  const onDelete = async (commentPostId: string, parentId?: string) => {
-    const token = await getToken();
-
-    try {
-      if (!token || !userAddress) {
-        throw new Error("not authenticated");
-      }
-
-      await deletePost({
-        eventId,
-        postId: commentPostId,
-        parentId,
-        token,
-        userAddress,
-      });
-
-      toast({
-        title: t("toast-delete-post-success"),
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        captureException(error);
-        toast({
-          variant: "destructive",
-          title: t("toast-delete-post-error"),
-        });
-      }
-    }
-  };
+  const { onReactionChange, isReacting } = useEventPostReactionHandler(
+    eventId,
+    parentId,
+  );
+  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
 
   return (
     <div className="space-y-1">

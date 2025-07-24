@@ -1,5 +1,5 @@
 "use client";
-import { useMediaQuery } from "../hooks/use-media-query";
+import { useMediaQuery } from "../../hooks/use-media-query";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
