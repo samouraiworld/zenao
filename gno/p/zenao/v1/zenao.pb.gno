@@ -257,3 +257,25 @@ type ExportParticipantsResponse struct {
 	Filename string
 	MimeType string
 }
+
+type CommunityInfo struct {
+	DisplayName    string
+	Description    string
+	AvatarUri      string
+	BannerUri      string
+	Administrators []string
+	CountMembers   uint32
+	PkgPath        string
+}
+
+type CreateCommunityRequest struct {
+	DisplayName    string
+	Description    string
+	AvatarUri      string
+	BannerUri      string
+	Administrators []string
+}
+
+type CreateCommunityResponse struct {
+	CommunityId string
+}
