@@ -48,9 +48,7 @@ export default async function EventLayout({ params, children }: Props) {
 
   let eventData;
   try {
-    eventData = await queryClient.fetchQuery({
-      ...eventOptions(p.id),
-    });
+    eventData = await queryClient.fetchQuery(eventOptions(p.id));
   } catch (err) {
     console.error("error", err);
     notFound();
