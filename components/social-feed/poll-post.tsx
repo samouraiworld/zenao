@@ -1,26 +1,36 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { PollPostCard } from "./poll-post-card";
 import { PollPostView, PollPostViewInfo } from "@/lib/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
 import { pollInfo } from "@/lib/queries/social-feed";
 
 export function PollPost({
   pollId,
-  eventId,
+  userAddress,
   pollPost,
+  onDelete,
+  onReactionChange,
+  isDeleting,
+  isReacting,
+  canReply,
+  replyHref,
+  canInteract,
+  isOwner,
 }: {
   pollId: string;
-  eventId: string;
+  userAddress: string | null;
   pollPost: PollPostView;
+  canReply?: boolean;
+  replyHref?: string;
+  onDelete?: (parentId?: string) => void;
+  onReactionChange?: (icon: string) => void | Promise<void>;
+  isDeleting?: boolean;
+  isReacting?: boolean;
+  isOwner?: boolean;
+  canInteract?: boolean;
 }) {
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
   const { data } = useSuspenseQuery(pollInfo(pollId, userAddress || ""));
 
   const combined: PollPostViewInfo = useMemo(() => {
@@ -33,10 +43,16 @@ export function PollPost({
   return (
     <PollPostCard
       pollId={pollId}
-      eventId={eventId}
       pollPost={combined}
       userAddress={userAddress || ""}
-      canReply
+      onDelete={onDelete}
+      onReactionChange={onReactionChange}
+      isDeleting={isDeleting}
+      isReacting={isReacting}
+      canReply={canReply}
+      replyHref={replyHref}
+      canInteract={canInteract}
+      isOwner={isOwner}
     />
   );
 }

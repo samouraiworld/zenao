@@ -13,7 +13,7 @@ import {
   useEventParticipateGuest,
   useEventParticipateLoggedIn,
 } from "@/lib/mutations/event-participate";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { eventOptions } from "@/lib/queries/event";
 import { captureException } from "@/lib/report";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";

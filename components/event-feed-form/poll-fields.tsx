@@ -10,6 +10,12 @@ import { FormFieldCheckbox } from "@/components/widgets/form/form-field-checkbox
 import { FormFieldInputNumber } from "@/components/widgets/form/form-field-input-number";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/shadcn/form";
 
 export function PollFields({
   form,
@@ -45,9 +51,20 @@ export function PollFields({
           ))}
 
           <div className="flex justify-between items-center w-full">
-            {optionFields.length < 9 && (
-              <AddOptionButton onClick={onClickAddOption} />
-            )}
+            <FormField
+              control={form.control}
+              name="options"
+              render={() => (
+                <FormItem>
+                  <FormControl>
+                    {optionFields.length < 9 && (
+                      <AddOptionButton onClick={onClickAddOption} />
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormFieldCheckbox
               name="allowMultipleOptions"

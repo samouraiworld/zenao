@@ -25,7 +25,7 @@ import { Button } from "../shadcn/button";
 import Text from "../widgets/texts/text";
 import { FormFieldInputString } from "../widgets/form/form-field-input-string";
 import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   EventFormSchemaType,
   EmailSchemaType,
@@ -35,7 +35,7 @@ import {
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 function GatekeeperManagementForm({
   form,
