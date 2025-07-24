@@ -17,7 +17,7 @@ import {
 } from "@/components/shadcn/dialog";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
 import Text from "@/components/widgets/texts/text";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Drawer,
   DrawerContent,

@@ -12,7 +12,7 @@ import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { Form } from "@/components/shadcn/form";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { EventPasswordProvider } from "@/components/providers/event-password-provider";

@@ -7,7 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import EventFeedForm from "../../../../../components/features/social-feed/event-feed-form/event-feed-form";
+import EventFeedForm from "../../event-feed-form/event-feed-form";
 import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
 import { TabsContent } from "@/components/shadcn/tabs";
@@ -19,8 +19,8 @@ import {
   EventInfoTabsSchemaType,
   FeedPostFormSchemaType,
 } from "@/types/schemas";
-import { PollsList } from "@/components/features/social-feed/polls-list";
-import { PostsList } from "@/components/features/social-feed/posts-list";
+import EventFeed from "@/app/event/[id]/(general)/[tab]/feed";
+import EventPolls from "@/app/event/[id]/(general)/[tab]/votes";
 
 export function MainEventSections({
   className,
@@ -107,11 +107,11 @@ export function MainEventSections({
           )}
           {/* Social Feed (Discussions) */}
           <TabsContent value="feed">
-            <PostsList eventId={eventId} userAddress={userAddress} />
+            <EventFeed eventId={eventId} />
           </TabsContent>
           {/* Social Feed (Votes) */}
           <TabsContent value="votes">
-            <PollsList eventId={eventId} userAddress={userAddress} />
+            <EventPolls eventId={eventId} />
           </TabsContent>
         </div>
       </div>

@@ -9,7 +9,7 @@ import { PollPostForm } from "./poll-post-form";
 import { FeedInputMode, StandardPostForm } from "./standard-post-form";
 import { userAddressOptions } from "@/lib/queries/user";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
@@ -83,7 +83,7 @@ const EventFeedForm = ({
             minutes: 0,
           },
         },
-        { keepDefaultValues: true, keepValues: true },
+        { keepValues: true },
       );
     } catch (err) {
       captureException(err);

@@ -17,7 +17,7 @@ import {
 } from "../shadcn/drawer";
 import Heading from "../widgets/texts/heading";
 import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
 
 type PwaInstallDialogProps = {

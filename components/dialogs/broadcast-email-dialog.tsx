@@ -28,10 +28,10 @@ import {
 import Text from "../widgets/texts/text";
 import { FormFieldCheckbox } from "../widgets/form/form-field-checkbox";
 import { FormFieldTextArea } from "../widgets/form/form-field-textarea";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
 import { useEventBroadcastEmail } from "@/lib/mutations/event-management";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
 
 type BroadcastEmailDialogProps = {

@@ -2,37 +2,43 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
 import { useForm } from "react-hook-form";
-import { StandardPostForm } from "./event-feed-form/standard-post-form";
-import { PostCardLayout } from "@/components/features/social-feed/post-card-layout";
+import { StandardPostForm } from "../event-feed-form/standard-post-form";
+import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import { useEditStandardPost } from "@/lib/mutations/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
-import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
 export function StandardPostCard({
-  eventId,
   post,
+  isOwner,
+  canInteract,
   canReply,
-  onDeleteSuccess,
+  replyHref,
+  onEdit,
+  isEditing,
+  onReactionChange,
+  isReacting,
+  onDelete,
+  isDeleting,
 }: {
-  eventId: string;
+  isOwner?: boolean;
+  canInteract?: boolean;
   post: StandardPostView;
   canReply?: boolean;
-  onDeleteSuccess?: () => void;
+  replyHref?: string;
+  onEdit?: (values: FeedPostFormSchemaType) => void | Promise<void>;
+  isEditing?: boolean;
+  onReactionChange?: (icon: string) => void | Promise<void>;
+  isReacting?: boolean;
+  onDelete?: (parentId?: string) => void;
+  isDeleting?: boolean;
 }) {
-  const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
   );
-  const { editPost, isPending } = useEditStandardPost();
+
   const [editMode, setEditMode] = useState(false);
 
   const standardPost = post.post.post.value;
@@ -46,42 +52,27 @@ export function StandardPostCard({
   });
 
   const onSubmit = async (values: FeedPostFormSchemaType) => {
-    try {
-      if (values.kind === "POLL") {
-        throw new Error("invalid kind");
-      }
-
-      const token = await getToken();
-      if (!token) {
-        throw new Error("invalid token");
-      }
-
-      await editPost({
-        content: values.content,
-        eventId,
-        tags: [],
-        postId: post.post.localPostId.toString(10),
-        token,
-        userAddress: userAddress || "",
-      });
-
-      setEditMode(false);
-    } catch (error) {
-      captureException(error);
-    }
+    await onEdit?.(values);
+    setEditMode(false);
   };
 
   return (
     <div className="flex flex-col gap-1">
       <PostCardLayout
-        eventId={eventId}
         post={post}
         createdBy={createdBy}
         gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${post.post.localPostId.toString(32).padStart(7, "0")}`}
         canReply={canReply}
-        onDeleteSuccess={onDeleteSuccess}
+        replyHref={replyHref}
+        canInteract={canInteract}
+        onDelete={onDelete}
+        canEdit
         editMode={editMode}
         onEditModeChange={setEditMode}
+        onReactionChange={onReactionChange}
+        isReacting={isReacting}
+        isDeleting={isDeleting}
+        isOwner={isOwner}
       >
         {editMode ? (
           <StandardPostForm
@@ -92,7 +83,7 @@ export function StandardPostCard({
               console.log("not available");
             }}
             isEditing
-            isLoading={isPending}
+            isLoading={isEditing}
           />
         ) : (
           <MarkdownPreview markdownString={standardPost.content} />

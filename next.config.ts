@@ -31,6 +31,10 @@ const nextConfig: NextConfig = {
         source: "/event/:id",
         destination: "/event/:id/description",
       },
+      {
+        source: "/community/:id",
+        destination: "/community/:id/posts",
+      },
     ];
   },
   async headers() {

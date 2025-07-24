@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
+import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import {
   Carousel,
   CarouselContent,

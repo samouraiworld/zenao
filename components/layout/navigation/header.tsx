@@ -31,7 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
-import useSmartBack from "@/app/hooks/use-smart-back";
+import useSmartBack from "@/hooks/use-smart-back";
 import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";

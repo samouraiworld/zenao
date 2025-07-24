@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { Button } from "../../shadcn/button";
 import Text from "../texts/text";
 import { PwaInstallDialog } from "../../dialogs/pwa-install-dialog";
-import useIsPWAInstalled from "@/app/hooks/use-is-pwa-installed";
+import useIsPWAInstalled from "@/hooks/use-is-pwa-installed";
 
 export const LazyInstallButton = dynamic(
   () => import("@/components/widgets/buttons/pwa-install-button"),

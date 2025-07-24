@@ -36,7 +36,7 @@ export default function ProfileHeader({
           <AspectRatio ratio={1 / 1}>
             <Web3Image
               src={avatarUri}
-              alt="Event"
+              alt="Profile picture"
               priority
               fetchPriority="high"
               fill
