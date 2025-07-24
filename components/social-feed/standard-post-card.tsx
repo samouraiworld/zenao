@@ -3,7 +3,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { StandardPostForm } from "./event-feed-form/standard-post-form";
+import { StandardPostForm } from "../event-feed-form/standard-post-form";
 import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";

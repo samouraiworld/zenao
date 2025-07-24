@@ -6,12 +6,12 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { mockSocialFeedPosts } from "./mock-posts";
 import EmptyList from "@/components/widgets/lists/empty-list";
-import { PostCardSkeleton } from "@/components/features/social-feed/post-card-skeleton";
-import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
+import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
+import { StandardPostCard } from "@/components/social-feed/standard-post-card";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
-import { PollPost } from "@/components/features/social-feed/poll-post";
+import { PollPost } from "@/components/social-feed/poll-post";
 import { parsePollUri } from "@/lib/multiaddr";
 
 type CommunityPostsProps = {

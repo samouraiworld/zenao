@@ -1,8 +1,8 @@
 "use client";
 
 import { Suspense } from "react";
-import { PostCardSkeleton } from "../features/social-feed/post-card-skeleton";
-import { PollPost } from "../features/social-feed/poll-post";
+import { PostCardSkeleton } from "./post-card-skeleton";
+import { PollPost } from "./poll-post";
 import { PollPostView } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
 

@@ -7,7 +7,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 // import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { PostCardSkeleton } from "@/components/features/social-feed/post-card-skeleton";
+import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 import { userAddressOptions } from "@/lib/queries/user";
 import { feedPost } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
@@ -24,11 +24,11 @@ import { useToast } from "@/app/hooks/use-toast";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 // import { PollPost } from "@/components/features/social-feed/poll-post";
-import { PostComments } from "@/components/features/social-feed/event-feed-form/post-comments";
-import { StandardPostForm } from "@/components/features/social-feed/event-feed-form/standard-post-form";
+import { PostComments } from "@/components/event-feed-form/post-comments";
+import { StandardPostForm } from "@/components/event-feed-form/standard-post-form";
 import { parsePollUri } from "@/lib/multiaddr";
-import { PollPost } from "@/components/features/social-feed/poll-post";
-import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
+import { PollPost } from "@/components/social-feed/poll-post";
+import { StandardPostCard } from "@/components/social-feed/standard-post-card";
 import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
 
 function PostCommentForm({
