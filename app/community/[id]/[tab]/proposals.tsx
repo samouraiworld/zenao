@@ -7,24 +7,12 @@ function CommunityProposals() {
   const t = useTranslations();
 
   return (
-    <>
-      <div className="space-y-4">
-        <EmptyList
-          title={t("no-proposals-title")}
-          description={t("no-proposals-description")}
-        />
-      </div>
-      {/* <div className="py-4">
-        <LoaderMoreButton
-          fetchNextPage={fetchNextPage}
-          hasNextPage={hasNextPage}
-          isFetching={isFetching}
-          isFetchingNextPage={isFetchingNextPage}
-          page={proposals}
-          noMoreLabel={t("no-more-proposals")}
-        />
-      </div> */}
-    </>
+    <div className="space-y-8">
+      <EmptyList
+        title={t("no-proposals-title")}
+        description={t("no-proposals-description")}
+      />
+    </div>
   );
 }
 

@@ -22,7 +22,13 @@ async function CommunityPageLayout({
   const queryClient = getQueryClient();
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ScreenContainer>
+      <ScreenContainer
+        background={{
+          src: "ipfs://bafybeidrcgelzhfblffpsmo6jukdnzmvae7xhu5zud4nn3os6qzdxbesu4",
+          width: 3840,
+          height: 720,
+        }}
+      >
         <CommunityInfoLayout>{children}</CommunityInfoLayout>
       </ScreenContainer>
     </HydrationBoundary>
