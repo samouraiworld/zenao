@@ -60,8 +60,8 @@ function EventPolls({ eventId }: EventPollsProps) {
       <div className="space-y-4">
         {!polls.length ? (
           <EmptyList
-            title={t("no-polls-title")}
-            description={t("no-polls-description")}
+            title={t("event-feed.no-polls-title")}
+            description={t("event-feed.no-polls-description")}
           />
         ) : (
           <PollsList
