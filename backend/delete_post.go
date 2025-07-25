@@ -39,7 +39,7 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 		if err != nil {
 			return err
 		}
-		roles, err := db.UserRoles(zUser.ID, feed.EventID)
+		roles, err := db.MemberRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, feed.EventID)
 		if err != nil {
 			return err
 		}

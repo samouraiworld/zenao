@@ -36,7 +36,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	roles, err := s.DB.UserRoles(zUser.ID, req.Msg.EventId)
+	roles, err := s.DB.MemberRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, req.Msg.EventId)
 	if err != nil {
 		return nil, err
 	}

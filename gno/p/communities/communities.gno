@@ -17,6 +17,7 @@ type Community struct {
 type Config struct {
 	Administrators   []string
 	Members          []string
+	Events           []string
 	DisplayName      string
 	Description      string
 	AvatarURI        string
@@ -56,6 +57,12 @@ func NewCommunity(conf *Config) *Community {
 		members = append(members, basedao.Member{
 			Address: member,
 			Roles:   []string{"member"},
+		})
+	}
+	for _, event := range conf.Events {
+		members = append(members, basedao.Member{
+			Address: event,
+			Roles:   []string{"event"},
 		})
 	}
 	members = append(members, basedao.Member{

@@ -32,7 +32,7 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 		if err != nil {
 			return err
 		}
-		roles, err := db.UserRoles(zUser.ID, evt.ID)
+		roles, err := db.MemberRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, evt.ID)
 		if err != nil {
 			return err
 		}
