@@ -31,7 +31,7 @@ func (s *ZenaoServer) GetEventGatekeepers(ctx context.Context, req *connect.Requ
 
 	var gatekeepers []*zeni.User
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
+		roles, err := db.MemberRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}

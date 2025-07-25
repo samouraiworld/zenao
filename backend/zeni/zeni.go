@@ -55,6 +55,7 @@ const (
 )
 
 const (
+	OrgTypeUser      string = "user"
 	OrgTypeEvent     string = "event"
 	OrgTypeCommunity string = "community"
 )
@@ -196,7 +197,7 @@ type DB interface {
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
-	UserRoles(userID string, eventID string) ([]string, error)
+	MemberRoles(childType string, childID string, parentType string, parentID string) ([]string, error)
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)

@@ -763,7 +763,7 @@ func createCommunityRegTx(chain *gnoZenaoChain, community *zeni.Community, calle
 func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, creator cryptoGno.Address, administratorsIDs []string, membersIDs []string) (gnoland.TxWithMetadata, error) {
 	administratorsAddrs := mapsl.Map(administratorsIDs, chain.UserAddress)
 	membersAddrs := mapsl.Map(membersIDs, chain.UserAddress)
-	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, creator.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
+	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, []string{}, creator.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
 		DisplayName: community.DisplayName,
 		Description: community.Description,
 		AvatarUri:   community.AvatarURI,

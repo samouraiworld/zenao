@@ -57,7 +57,7 @@ func (s *ZenaoServer) BroadcastEvent(
 		if err != nil {
 			return err
 		}
-		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
+		roles, err := db.MemberRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
