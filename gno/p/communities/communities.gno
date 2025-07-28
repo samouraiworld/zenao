@@ -94,7 +94,24 @@ func NewCommunity(conf *Config) *Community {
 	return community
 }
 
+// TODO: Improve render avoid double rendering on member with multiple roles
 func (c *Community) Render(path string) string {
 	info := c.Info()
-	return "# Community: " + info.DisplayName + "\n"
+	s := "# Community: " + info.DisplayName + "\n"
+	s += "## Description\n" + info.Description + "\n"
+	s += "---"
+	s += "\n## Members\n"
+	for _, member := range info.Administrators {
+		s += "- " + member + " (Administrator)\n"
+	}
+	for _, member := range c.DAOPrivate.Members.GetMembersWithRole("member") {
+		s += "- " + member + " (Member)\n"
+	}
+	for _, event := range c.DAOPrivate.Members.GetMembersWithRole("event") {
+		s += "- " + event + " (Event)\n"
+	}
+	s += "- " + c.DAOPrivate.Members.GetMembersWithRole("zenao-admin")[0] + " (Zenao Admin)\n"
+	s += "---"
+	return s
+
 }

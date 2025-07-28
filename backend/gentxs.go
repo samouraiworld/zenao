@@ -236,7 +236,7 @@ func execGenTxs() error {
 			membersIDs = append(membersIDs, member.ID)
 		}
 
-		events, err := db.GetOrgsEventsWithRole(zeni.OrgTypeCommunity, community.ID, zeni.RoleAdministrator)
+		events, err := db.GetOrgsEventsWithRole(zeni.OrgTypeCommunity, community.ID, zeni.RoleEvent)
 		if err != nil {
 			return err
 		}
