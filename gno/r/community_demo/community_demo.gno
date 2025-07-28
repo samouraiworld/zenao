@@ -20,6 +20,7 @@ func init() {
 		ZenaoAdminAddr:   zenaoAdmin,
 		Administrators:   []string{creator},
 		Members:          []string{},
+		Events:           []string{},
 		DisplayName:      "Demo Community",
 		Description:      "This is a demo community for Zenao",
 		AvatarURI:        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Wiki-IMG_20200904_200004436.jpg/640px-Wiki-IMG_20200904_200004436.jpg",
