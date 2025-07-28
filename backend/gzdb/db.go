@@ -479,7 +479,7 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*zeni.User, error) {
 	var roles []MembershipRole
 	if err := g.db.
-		Where("object_type = ? AND object_id = ? AND role = ? AND subject_type = ?",
+		Where("org_parent_type = ? AND org_parent_id = ? AND role = ? AND org_child_type = ?",
 			orgType, orgID, role, zeni.OrgTypeUser).
 		Find(&roles).Error; err != nil {
 		return nil, err
