@@ -236,7 +236,17 @@ func execGenTxs() error {
 			membersIDs = append(membersIDs, member.ID)
 		}
 
-		tx, err := createCommunityRealmTx(chain, community, signerInfo.GetAddress(), administratorsIDs, membersIDs)
+		events, err := db.GetOrgsEventsWithRole(zeni.OrgTypeCommunity, community.ID, zeni.RoleAdministrator)
+		if err != nil {
+			return err
+		}
+
+		var eventsIDs []string
+		for _, event := range events {
+			eventsIDs = append(eventsIDs, event.ID)
+		}
+
+		tx, err := createCommunityRealmTx(chain, community, signerInfo.GetAddress(), administratorsIDs, membersIDs, eventsIDs)
 		if err != nil {
 			return err
 		}
@@ -760,10 +770,11 @@ func createCommunityRegTx(chain *gnoZenaoChain, community *zeni.Community, calle
 	}, nil
 }
 
-func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, creator cryptoGno.Address, administratorsIDs []string, membersIDs []string) (gnoland.TxWithMetadata, error) {
+func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, creator cryptoGno.Address, administratorsIDs []string, membersIDs []string, eventsIDs []string) (gnoland.TxWithMetadata, error) {
 	administratorsAddrs := mapsl.Map(administratorsIDs, chain.UserAddress)
 	membersAddrs := mapsl.Map(membersIDs, chain.UserAddress)
-	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, []string{}, creator.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
+	eventsAddrs := mapsl.Map(eventsIDs, chain.EventAddress)
+	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, eventsAddrs, creator.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
 		DisplayName: community.DisplayName,
 		Description: community.Description,
 		AvatarUri:   community.AvatarURI,

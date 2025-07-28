@@ -506,6 +506,38 @@ func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role str
 	return result, nil
 }
 
+func (g *gormZenaoDB) GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*zeni.Event, error) {
+	var roles []MembershipRole
+	if err := g.db.
+		Where("org_parent_type = ? AND org_parent_id = ? AND role = ? AND org_child_type = ?",
+			orgType, orgID, role, zeni.OrgTypeEvent).
+		Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return []*zeni.Event{}, nil
+	}
+
+	eventIDs := make([]uint, 0, len(roles))
+	for _, r := range roles {
+		eventIDs = append(eventIDs, r.OrgChildID)
+	}
+
+	var events []Event
+	if err := g.db.Where("id IN ?", eventIDs).Find(&events).Error; err != nil {
+		return nil, err
+	}
+	result := make([]*zeni.Event, 0, len(events))
+	for _, e := range events {
+		zevt, err := dbEventToZeniEvent(&e)
+		if err != nil {
+			return nil, fmt.Errorf("convert db event to zeni event: %w", err)
+		}
+		result = append(result, zevt)
+	}
+	return result, nil
+}
+
 // GetEventTickets implements zeni.DB.
 func (g *gormZenaoDB) GetEventTickets(eventID string) ([]*zeni.SoldTicket, error) {
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
@@ -591,7 +623,7 @@ func (g *gormZenaoDB) MemberRoles(childType string, childID string, parentType s
 }
 
 // CreateCommunity implements zeni.DB.
-func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) (*zeni.Community, error) {
+func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*zeni.Community, error) {
 	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parse creator id: %w", err)
@@ -644,6 +676,25 @@ func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []stri
 
 		if err := g.db.Create(membershipRole).Error; err != nil {
 			return nil, fmt.Errorf("create member role assignment in db: %w", err)
+		}
+	}
+
+	for _, eventID := range eventsIDs {
+		eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse event id: %w", err)
+		}
+
+		membershipRole := &MembershipRole{
+			OrgChildType:  zeni.OrgTypeEvent,
+			OrgChildID:    uint(eventIDInt),
+			OrgParentType: zeni.OrgTypeCommunity,
+			OrgParentID:   community.ID,
+			Role:          zeni.RoleEvent,
+		}
+
+		if err := g.db.Create(membershipRole).Error; err != nil {
+			return nil, fmt.Errorf("create event role assignment in db: %w", err)
 		}
 	}
 
