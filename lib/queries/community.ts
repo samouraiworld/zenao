@@ -6,12 +6,28 @@ import {
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
 import { fromJson } from "@bufbuild/protobuf";
+import { z } from "zod";
 import { extractGnoJSONResponse } from "../gno";
 import {
   CommunityInfo,
   CommunityInfoJson,
   CommunityInfoSchema,
 } from "@/app/gen/zenao/v1/zenao_pb";
+
+const communityUserRolesEnum = z.enum(["administrator", "member"]);
+
+export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
+
+export const communityGetUserRolesSchema = z.array(communityUserRolesEnum);
+
+const communityUsersWithRolesResponseSchema = z.object({
+  address: z.string(),
+  roles: z.string().array(),
+});
+
+export type CommunityUsersWithRolesResponseSchema = z.infer<
+  typeof communityUsersWithRolesResponseSchema
+>;
 
 export const communityInfo = (communityId: string) =>
   queryOptions({
@@ -57,7 +73,7 @@ export const communitiesList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listCommunities(${limitInt}, ${pageParam * limitInt}))`,
+        `communitiesToJSON(listCommunities(${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       const json = communitiesListFromJson(raw);
@@ -80,9 +96,33 @@ export const communitiesList = (
   });
 };
 
+export const communityUsersWithRole = (
+  communityId: string,
+  roles: CommunityUserRole[],
+) =>
+  queryOptions({
+    queryKey: ["communityRoles", communityId, JSON.stringify(roles)],
+    queryFn: async () => {
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/communities/c${communityId}`,
+        `community.GetUsersWithRolesJSON(${jsonStringArrayIntoGoArray(roles)})`,
+      );
+      const raw = extractGnoJSONResponse(res);
+
+      return communityUsersWithRolesResponseSchema.array().parse(raw);
+    },
+  });
+
 function communitiesListFromJson(raw: unknown) {
   const list = raw as unknown[];
   return list.map((elem) =>
     fromJson(CommunityInfoSchema, elem as CommunityInfoJson),
   );
+}
+
+function jsonStringArrayIntoGoArray(arr: string[]): string {
+  return `[]string${JSON.stringify(arr).replace("[", "{").replace("]", "}")}`;
 }
