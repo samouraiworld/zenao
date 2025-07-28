@@ -79,7 +79,7 @@ function CommunityMainSections({
       </TabsContent>
       <TabsContent value="members">
         <Suspense fallback={<Loader2 className="animate-spin" />}>
-          <CommunityMembers />
+          <CommunityMembers communityId={communityId} />
         </Suspense>
       </TabsContent>
       <TabsContent value="proposals">

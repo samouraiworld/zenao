@@ -1,4 +1,5 @@
 import { UserAvatar } from "../features/user/user";
+import { Badge } from "../shadcn/badge";
 import { Card } from "../widgets/cards/card";
 import Text from "../widgets/texts/text";
 
@@ -15,7 +16,7 @@ function CommunityMemberCard({
   avatarUri,
   displayName,
   description,
-  roles: _,
+  roles,
 }: CommunityMemberCardProps) {
   return (
     <Card className="flex flex-col gap-2 md:max-w-[450px] bg-secondary/50 hover:bg-secondary/100">
@@ -31,6 +32,11 @@ function CommunityMemberCard({
       </div>
       <div>
         <Text size="sm">Roles</Text>
+        {roles.map((role) => (
+          <Badge key={role} variant="outline">
+            {role}
+          </Badge>
+        ))}
       </div>
     </Card>
   );

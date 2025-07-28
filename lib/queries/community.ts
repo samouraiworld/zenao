@@ -96,7 +96,7 @@ export const communitiesList = (
   });
 };
 
-export const communityUsersWithRole = (
+export const communityUsersWithRoles = (
   communityId: string,
   roles: CommunityUserRole[],
 ) =>

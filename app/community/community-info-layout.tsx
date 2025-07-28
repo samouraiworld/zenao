@@ -20,8 +20,6 @@ function CommunityInfoLayout({
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data } = useSuspenseQuery(communityInfo(communityId));
 
-  console.log(data);
-
   return (
     <div className="flex flex-col gap-8 w-full">
       <div className="relative w-full">

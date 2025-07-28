@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import CommunityInfoLayout from "../community-info-layout";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
-import { communityInfo, communityUsersWithRole } from "@/lib/queries/community";
+import {
+  communityInfo,
+  communityUsersWithRoles,
+} from "@/lib/queries/community";
 import { profileOptions } from "@/lib/queries/profile";
 
 // enable ssg for all events
@@ -38,7 +41,7 @@ async function CommunityPageLayout({
 
   // Prefetch all members profiles
   const members = await queryClient.fetchQuery(
-    communityUsersWithRole(communityId, ["member"]),
+    communityUsersWithRoles(communityId, ["member"]),
   );
   members.forEach(
     (member) => void queryClient.prefetchQuery(profileOptions(member.address)),
