@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { EventForm } from "@/components/features/event/event-form";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import Text from "@/components/widgets/texts/text";

@@ -2,32 +2,38 @@
 
 import { Suspense } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { useAuth } from "@clerk/nextjs";
+import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { PostCardSkeleton } from "@/components/features/social-feed/post-card-skeleton";
+import { useRouter } from "next/navigation";
+import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 import { userAddressOptions } from "@/lib/queries/user";
 import { feedPost } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
-import { StandardPostCard } from "@/components/features/social-feed/standard-post-card";
-import { parsePollUri } from "@/lib/multiaddr";
 import Heading from "@/components/widgets/texts/heading";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType } from "@/types/schemas";
-import { PollPost } from "@/components/features/social-feed/poll-post";
-import { PostComments } from "@/components/features/social-feed/event-feed-form/post-comments";
-import { StandardPostForm } from "@/components/features/social-feed/event-feed-form/standard-post-form";
+import { PostComments } from "@/components/event-feed-form/post-comments";
+import { StandardPostForm } from "@/components/event-feed-form/standard-post-form";
+import { parsePollUri } from "@/lib/multiaddr";
+import { PollPost } from "@/components/social-feed/poll-post";
+import { StandardPostCard } from "@/components/social-feed/standard-post-card";
+import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
+import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
+import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
+import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 
 function PostCommentForm({
   eventId,
   parentId,
+  userRoles,
   form,
 }: {
   eventId: string;
   parentId: bigint;
+  userRoles: EventUserRole[];
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const { toast } = useToast();
@@ -75,19 +81,39 @@ function PostCommentForm({
   };
 
   return (
-    <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
-      <div className="w-full">
-        <StandardPostForm
-          form={form}
-          feedInputMode={"STANDARD_POST"}
-          setFeedInputMode={() => {
-            console.log("not available");
-          }}
-          onSubmit={onSubmit}
-          isLoading={isPending}
-        />
-      </div>
-    </div>
+    <>
+      <SignedOut>
+        <div className="flex justify-center w-full">
+          <div className="w-full">
+            You must be a participant to submit a comment.
+          </div>
+        </div>
+      </SignedOut>
+      <SignedIn>
+        {!userRoles.includes("organizer") &&
+        !userRoles.includes("participant") ? (
+          <div className="flex justify-center w-full">
+            <div className="w-full">
+              You must be a participant to submit a comment.
+            </div>
+          </div>
+        ) : (
+          <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
+            <div className="w-full">
+              <StandardPostForm
+                form={form}
+                feedInputMode={"STANDARD_POST"}
+                setFeedInputMode={() => {
+                  console.log("not available");
+                }}
+                onSubmit={onSubmit}
+                isLoading={isPending}
+              />
+            </div>
+          </div>
+        )}
+      </SignedIn>
+    </>
   );
 }
 
@@ -103,7 +129,9 @@ export default function PostInfo({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userAddress),
+  );
   const { data: post } = useSuspenseQuery(feedPost(postId, userAddress || ""));
 
   const form = useForm<FeedPostFormSchemaType>({
@@ -115,6 +143,10 @@ export default function PostInfo({
     },
   });
 
+  const { onEditStandardPost, isEditing } = useEventPostEditHandler(eventId);
+  const { onReactionChange, isReacting } = useEventPostReactionHandler(eventId);
+  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
+
   if (!isStandardPost(post) && !isPollPost(post)) {
     return null;
   }
@@ -124,18 +156,44 @@ export default function PostInfo({
       {isStandardPost(post) && (
         <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
           <StandardPostCard
-            eventId={eventId}
             post={post}
-            onDeleteSuccess={() => router.push(`/event/${eventId}/feed`)}
+            isOwner={
+              roles.includes("organizer") || roles.includes("participant")
+            }
+            onReactionChange={async (icon) =>
+              await onReactionChange(postId, icon)
+            }
+            onDelete={async (parentId) => {
+              await onDelete(postId, parentId);
+              router.push(`/event/${eventId}/feed`);
+            }}
+            onEdit={async (values) => await onEditStandardPost(postId, values)}
+            isDeleting={isDeleting}
+            isReacting={isReacting}
+            isEditing={isEditing}
+            canInteract
           />
         </Suspense>
       )}
       {isPollPost(post) && (
         <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
           <PollPost
-            eventId={eventId}
+            userAddress={userAddress}
             pollId={parsePollUri(post.post.post.value.uri).pollId}
             pollPost={post}
+            onReactionChange={async (icon) =>
+              await onReactionChange(postId, icon)
+            }
+            onDelete={async (parentId) => {
+              await onDelete(postId, parentId);
+              router.push(`/event/${eventId}/feed`);
+            }}
+            isDeleting={isDeleting}
+            isReacting={isReacting}
+            isOwner={
+              roles.includes("organizer") || roles.includes("participant")
+            }
+            canInteract
           />
         </Suspense>
       )}
@@ -145,6 +203,7 @@ export default function PostInfo({
         <PostCommentForm
           eventId={eventId}
           parentId={post.post.localPostId}
+          userRoles={roles}
           form={form}
         />
 

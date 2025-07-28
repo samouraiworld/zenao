@@ -860,3 +860,81 @@ func (e *ExportParticipantsResponse) GnoLiteral(typePrefix string, linePrefix st
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (c *CommunityInfo) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CommunityInfo{\n")
+	if c.DisplayName != "" {
+		fmt.Fprintf(buf, "%s\tDisplayName: %q,\n", linePrefix, c.DisplayName)
+	}
+	if c.Description != "" {
+		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, c.Description)
+	}
+	if c.AvatarUri != "" {
+		fmt.Fprintf(buf, "%s\tAvatarUri: %q,\n", linePrefix, c.AvatarUri)
+	}
+	if c.BannerUri != "" {
+		fmt.Fprintf(buf, "%s\tBannerUri: %q,\n", linePrefix, c.BannerUri)
+	}
+	if len(c.Administrators) != 0 {
+		fmt.Fprintf(buf, "%s\tAdministrators: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Administrators {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if c.CountMembers != 0 {
+		fmt.Fprintf(buf, "%s\tCountMembers: %d,\n", linePrefix, c.CountMembers)
+	}
+	if c.PkgPath != "" {
+		fmt.Fprintf(buf, "%s\tPkgPath: %q,\n", linePrefix, c.PkgPath)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreateCommunityRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreateCommunityRequest{\n")
+	if c.DisplayName != "" {
+		fmt.Fprintf(buf, "%s\tDisplayName: %q,\n", linePrefix, c.DisplayName)
+	}
+	if c.Description != "" {
+		fmt.Fprintf(buf, "%s\tDescription: %q,\n", linePrefix, c.Description)
+	}
+	if c.AvatarUri != "" {
+		fmt.Fprintf(buf, "%s\tAvatarUri: %q,\n", linePrefix, c.AvatarUri)
+	}
+	if c.BannerUri != "" {
+		fmt.Fprintf(buf, "%s\tBannerUri: %q,\n", linePrefix, c.BannerUri)
+	}
+	if len(c.Administrators) != 0 {
+		fmt.Fprintf(buf, "%s\tAdministrators: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range c.Administrators {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreateCommunityResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreateCommunityResponse{\n")
+	if c.CommunityId != "" {
+		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, c.CommunityId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}

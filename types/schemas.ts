@@ -128,7 +128,10 @@ export const pollFormSchema = z.object({
   parentPostId: z.bigint().optional(),
   kind: z.literal("POLL"),
   question: z.string().trim().min(1, "Required").max(300),
-  options: z.array(pollOptionFormSchema).min(2).max(8),
+  options: z
+    .array(pollOptionFormSchema)
+    .min(2, "There must be at least 2 options")
+    .max(8),
   allowMultipleOptions: z.boolean(),
   duration: pollDurationFormSchema,
 });
@@ -165,3 +168,11 @@ export const eventInfoTabsSchema = z
   .union([z.literal("description"), z.literal("feed"), z.literal("votes")])
   .default("description");
 export type EventInfoTabsSchemaType = z.infer<typeof eventInfoTabsSchema>;
+
+export const communityTabsSchema = z.union([
+  z.literal("posts"),
+  z.literal("events"),
+  z.literal("members"),
+  z.literal("proposals"),
+]);
+export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;

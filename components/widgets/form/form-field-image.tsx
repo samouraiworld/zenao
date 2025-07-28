@@ -3,7 +3,7 @@
 import { FieldValues, useController, useWatch } from "react-hook-form";
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
-import { useToast } from "@/app/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { uploadFile } from "@/lib/files";
 import { isValidURL, web2URL } from "@/lib/uris";
 import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";

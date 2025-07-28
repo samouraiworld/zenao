@@ -35,10 +35,10 @@ func (s *ZenaoServer) GetEventGatekeepers(ctx context.Context, req *connect.Requ
 		if err != nil {
 			return err
 		}
-		if !slices.Contains(roles, "organizer") {
+		if !slices.Contains(roles, zeni.RoleOrganizer) {
 			return errors.New("user is not organizer of the event")
 		}
-		gatekeepers, err = db.GetEventUsersWithRole(req.Msg.EventId, "gatekeeper")
+		gatekeepers, err = db.GetEventUsersWithRole(req.Msg.EventId, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}

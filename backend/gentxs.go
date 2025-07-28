@@ -147,7 +147,7 @@ func execGenTxs() error {
 			return err
 		}
 
-		organizers, err := db.GetEventUsersWithRole(event.ID, "organizer")
+		organizers, err := db.GetEventUsersWithRole(event.ID, zeni.RoleOrganizer)
 		if err != nil {
 			return err
 		}
@@ -157,7 +157,7 @@ func execGenTxs() error {
 			organizersIDs = append(organizersIDs, org.ID)
 		}
 
-		gatekeepers, err := db.GetEventUsersWithRole(event.ID, "gatekeeper")
+		gatekeepers, err := db.GetEventUsersWithRole(event.ID, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}
