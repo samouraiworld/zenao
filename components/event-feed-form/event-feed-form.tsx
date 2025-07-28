@@ -69,22 +69,8 @@ const EventFeedForm = ({
         title: t("toast-post-creation-success"),
       });
 
-      form.reset(
-        { kind: "STANDARD_POST", content: "" },
-        { keepDefaultValues: true },
-      );
-      form.reset(
-        {
-          options: [{ text: "" }, { text: "" }],
-          allowMultipleOptions: false,
-          duration: {
-            days: 1,
-            hours: 0,
-            minutes: 0,
-          },
-        },
-        { keepValues: true },
-      );
+      form.resetField("content", { defaultValue: "" });
+      form.resetField("parentPostId");
     } catch (err) {
       captureException(err);
       toast({
