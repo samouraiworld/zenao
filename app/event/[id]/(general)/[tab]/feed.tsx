@@ -17,6 +17,7 @@ import { eventUserRoles } from "@/lib/queries/event-users";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
 import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
+import { derivePkgAddr } from "@/lib/gno";
 
 type EventFeedProps = {
   eventId: string;
@@ -34,6 +35,9 @@ function EventFeed({ eventId }: EventFeedProps) {
   const t = useTranslations();
 
   // Event's social feed posts
+  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
+  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
   const {
     data: postsPages,
     isFetchingNextPage,
@@ -41,7 +45,7 @@ function EventFeed({ eventId }: EventFeedProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(eventId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
   );
   const posts = useMemo(
     () =>
@@ -65,9 +69,9 @@ function EventFeed({ eventId }: EventFeedProps) {
     [postsPages],
   );
 
-  const { onEditStandardPost, isEditing } = useEventPostEditHandler(eventId);
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(eventId);
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
+  const { onEditStandardPost, isEditing } = useEventPostEditHandler(feedId);
+  const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
+  const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
 
   return (
     <>

@@ -5,7 +5,7 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
 
-function useEventPostEditHandler(eventId: string) {
+function useEventPostEditHandler(feedId: string) {
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -27,7 +27,7 @@ function useEventPostEditHandler(eventId: string) {
       }
       await editPost({
         content: values.content,
-        eventId,
+        feedId,
         tags: [],
         postId,
         token,

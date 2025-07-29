@@ -6,7 +6,7 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { useDeletePost } from "@/lib/mutations/social-feed";
 import { captureException } from "@/lib/report";
 
-function useEventPostDeleteHandler(eventId: string) {
+function useEventPostDeleteHandler(feedId: string) {
   const t = useTranslations();
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
@@ -24,7 +24,7 @@ function useEventPostDeleteHandler(eventId: string) {
       }
 
       await deletePost({
-        eventId,
+        feedId,
         postId,
         parentId,
         token,
