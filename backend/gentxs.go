@@ -281,36 +281,36 @@ func execGenTxs() error {
 				options = append(options, res.Option)
 			}
 
-			tx, err := createPollTx(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, poll, options)
+			tx, err := createPollTx(chain, post.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, poll, options)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
-			logger.Info("poll tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("event-id", feed.EventID))
+			logger.Info("poll tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", post.UserID))
 			for _, vote := range poll.Votes {
 				tx, err := createVoteTx(chain, vote.UserID, signerInfo.GetAddress(), poll.ID, vote)
 				if err != nil {
 					return err
 				}
 				txs = append(txs, tx)
-				logger.Info("vote tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("event-id", feed.EventID), zap.String("user-id", vote.UserID))
+				logger.Info("vote tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", vote.UserID), zap.String("vote-option", vote.Option))
 			}
 		} else {
-			cptxs, err := createPostTxs(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, post)
+			cptxs, err := createPostTxs(chain, post.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, post)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, cptxs...)
-			logger.Info("post tx created", zap.String("post-id", post.ID), zap.String("event-id", feed.EventID))
+			logger.Info("post tx created", zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", post.UserID))
 		}
 
 		for _, reaction := range post.Reactions {
-			tx, err := createReactionTx(chain, reaction.UserID, signerInfo.GetAddress(), feed.EventID, reaction)
+			tx, err := createReactionTx(chain, reaction.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, reaction)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
-			logger.Info("reaction tx created", zap.String("post-id", post.ID), zap.String("event-id", feed.EventID), zap.String("user-id", reaction.UserID), zap.String("reaction-id", reaction.ID), zap.String("reaction-icon", reaction.Icon))
+			logger.Info("reaction tx created", zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", reaction.UserID), zap.String("reaction-id", reaction.ID), zap.String("reaction-icon", reaction.Icon))
 		}
 	}
 
@@ -335,10 +335,10 @@ func execGenTxs() error {
 	return nil
 }
 
-func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
-	eventPkgPath := chain.eventRealmPkgPath(eventID)
+func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
+	orgPkgPath := chain.orgPkgPath(orgType, orgID)
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
 	gnoLitPost := "&" + post.Post.GnoLiteral("feedsv1.", "\t\t")
 	body := genCreatePostMsgRunBody(userPkgPath, feedID, gnoLitPost)
 
@@ -396,9 +396,9 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addr
 	return txs, nil
 }
 
-func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
+func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, eventID, reaction.Icon)
+	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, orgType, orgID, reaction.Icon)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
@@ -453,11 +453,11 @@ func createVoteTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addre
 	}, nil
 }
 
-func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
+func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	eventPkgPath := chain.eventRealmPkgPath(eventID)
-	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
-	body := genCreatePollMsgRunBody(eventPkgPath, userPkgPath, feedID, poll.Question, options, poll.Kind, poll.Duration)
+	orgPkgPath := chain.orgPkgPath(orgType, orgID)
+	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
+	body := genCreatePollMsgRunBody(orgPkgPath, userPkgPath, feedID, poll.Question, options, poll.Kind, poll.Duration)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{

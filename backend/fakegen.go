@@ -154,7 +154,7 @@ func execFakegen() error {
 		}
 
 		// Create Feed
-		zfeed, err := db.CreateFeed(zevt.ID, "main")
+		zfeed, err := db.CreateFeed(zeni.EntityTypeEvent, zevt.ID, "main")
 		if err != nil {
 			return err
 		}
@@ -182,7 +182,7 @@ func execFakegen() error {
 
 				postID := fmt.Sprintf("%d", pID)
 				if !fakegenConf.skipChain {
-					postID, err = chain.CreatePost(creatorID, zevt.ID, post)
+					postID, err = chain.CreatePost(creatorID, zeni.EntityTypeEvent, zevt.ID, post)
 					if err != nil {
 						return err
 					}
@@ -207,7 +207,7 @@ func execFakegen() error {
 						}
 
 						if !fakegenConf.skipChain {
-							if err = chain.ReactPost(creatorID, zevt.ID, reactReq); err != nil {
+							if err = chain.ReactPost(creatorID, zeni.EntityTypeEvent, zevt.ID, reactReq); err != nil {
 								return err
 							}
 						}
@@ -231,7 +231,8 @@ func execFakegen() error {
 				}
 
 				pollReq := &zenaov1.CreatePollRequest{
-					EventId:  zevt.ID,
+					OrgType:  zeni.EntityTypeEvent,
+					OrgId:    zevt.ID,
 					Question: p.Question,
 					Options:  options,
 					Duration: int64(p.DaysDuration * 24 * 60 * 60),

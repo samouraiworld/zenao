@@ -36,12 +36,12 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	roles, err := s.DB.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	roles, err := s.DB.EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, err
 	}
 	if len(roles) == 0 {
-		return nil, errors.New("user is not a member of the event")
+		return nil, errors.New("user is not a member of the organization that owns the feed")
 	}
 	pollID, postID, err := s.Chain.CreatePoll(zUser.ID, req.Msg)
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 
 	zpoll := (*zeni.Poll)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		feed, err := db.GetFeed(req.Msg.EventId, "main")
+		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
 		if err != nil {
 			return err
 		}
@@ -81,6 +81,9 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 }
 
 func validatePoll(req *zenaov1.CreatePollRequest) error {
+	if req.OrgType != zeni.EntityTypeEvent && req.OrgType != zeni.EntityTypeCommunity {
+		return errors.New("invalid org type (only event or community allowed)")
+	}
 	if len(req.Options) < 2 {
 		return errors.New("poll must have at least 2 options")
 	}

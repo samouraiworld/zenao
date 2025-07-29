@@ -1,4 +1,11 @@
+import {
+  CreatePollRequest,
+  CreatePostRequest,
+  VotePollRequest,
+} from "@/app/gen/zenao/v1/zenao_pb";
+import { zenaoClient } from "@/lib/zenao-client";
 import { QueryClient, useMutation } from "@tanstack/react-query";
+import { getQueryClient } from "../get-query-client";
 import {
   DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
   DEFAULT_FEED_POSTS_LIMIT,
@@ -7,13 +14,6 @@ import {
   feedPostsChildren,
   pollInfo,
 } from "../queries/social-feed";
-import { getQueryClient } from "../get-query-client";
-import {
-  CreatePollRequest,
-  CreatePostRequest,
-  VotePollRequest,
-} from "@/app/gen/zenao/v1/zenao_pb";
-import { zenaoClient } from "@/lib/zenao-client";
 
 interface CreatePollRequestMutation
   extends Required<Omit<CreatePollRequest, "$typeName" | "$unknown">> {
@@ -31,13 +31,13 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     },
     onMutate: async (variables) => {
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -54,13 +54,13 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     },
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -71,14 +71,14 @@ export const useCreatePoll = (queryClient: QueryClient) => {
     },
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
 
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -168,7 +168,7 @@ export const useCreateStandardPost = () => {
     },
     onMutate: async (variables) => {
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
@@ -205,7 +205,7 @@ export const useCreateStandardPost = () => {
     },
     onSuccess: (_, variables) => {
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
@@ -229,7 +229,7 @@ export const useCreateStandardPost = () => {
     },
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.orgId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,

@@ -254,32 +254,32 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 	return dbEventToZeniEvent(evt)
 }
 
-func (g *gormZenaoDB) GetEventByPollID(pollID string) (*zeni.Event, error) {
+func (g *gormZenaoDB) GetOrgByPollID(pollID string) (orgType, orgID string, err error) {
 	pollIDInt, err := strconv.ParseUint(pollID, 10, 64)
 	if err != nil {
-		return nil, err
+		return "", "", fmt.Errorf("parse poll id: %w", err)
 	}
 
 	var poll Poll
 	if err := g.db.Where("id = ?", pollIDInt).Preload("Post").Preload("Post.Feed").Preload("Post.Feed.Event").First(&poll).Error; err != nil {
-		return nil, err
+		return "", "", fmt.Errorf("get poll by id: %w", err)
 	}
 
-	return dbEventToZeniEvent(&poll.Post.Feed.Event)
+	return poll.Post.Feed.OrgType, strconv.FormatUint(uint64(poll.Post.Feed.OrgID), 10), nil
 }
 
-func (g *gormZenaoDB) GetEventByPostID(postID string) (*zeni.Event, error) {
+func (g *gormZenaoDB) GetOrgByPostID(postID string) (orgType, orgID string, err error) {
 	postIDInt, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
-		return nil, err
+		return "", "", fmt.Errorf("parse post id: %w", err)
 	}
 
 	var post Post
 	if err := g.db.Where("id = ?", postIDInt).Preload("Feed").Preload("Feed.Event").First(&post).Error; err != nil {
-		return nil, err
+		return "", "", fmt.Errorf("get post by id: %w", err)
 	}
 
-	return dbEventToZeniEvent(&post.Feed.Event)
+	return post.Feed.OrgType, strconv.FormatUint(uint64(post.Feed.OrgID), 10), nil
 }
 
 // GetEvent implements zeni.DB.
@@ -724,15 +724,16 @@ func (g *gormZenaoDB) GetAllCommunities() ([]*zeni.Community, error) {
 }
 
 // CreateFeed implements zeni.DB.
-func (g *gormZenaoDB) CreateFeed(eventID string, slug string) (*zeni.Feed, error) {
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+func (g *gormZenaoDB) CreateFeed(orgType string, orgID string, slug string) (*zeni.Feed, error) {
+	orgIDInt, err := strconv.ParseUint(orgID, 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse org id: %w", err)
 	}
 
 	feed := &Feed{
 		Slug:    slug,
-		EventID: uint(evtIDInt),
+		OrgType: orgType,
+		OrgID:   uint(orgIDInt),
 	}
 
 	if err := g.db.Create(feed).Error; err != nil {
@@ -748,14 +749,14 @@ func (g *gormZenaoDB) CreateFeed(eventID string, slug string) (*zeni.Feed, error
 }
 
 // GetFeed implements zeni.DB.
-func (g *gormZenaoDB) GetFeed(eventID string, slug string) (*zeni.Feed, error) {
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+func (g *gormZenaoDB) GetFeed(orgType string, orgID string, slug string) (*zeni.Feed, error) {
+	orgIDint, err := strconv.ParseUint(orgID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
 	var feed Feed
-	if err := g.db.Where("event_id = ? AND slug = ?", evtIDInt, slug).First(&feed).Error; err != nil {
+	if err := g.db.Where("org_type = ? AND org_id = ? AND slug = ?", orgType, orgIDint, slug).First(&feed).Error; err != nil {
 		return nil, err
 	}
 
