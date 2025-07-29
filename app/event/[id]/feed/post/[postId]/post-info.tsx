@@ -1,5 +1,11 @@
 "use client";
 
+import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { PostComments } from "@/components/event-feed-form/post-comments";
 import { StandardPostForm } from "@/components/event-feed-form/standard-post-form";
 import { PollPost } from "@/components/social-feed/poll-post";
@@ -18,12 +24,6 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { FeedPostFormSchemaType } from "@/types/schemas";
-import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { Suspense } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
 
 function PostCommentForm({
   eventId,
