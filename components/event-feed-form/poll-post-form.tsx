@@ -99,22 +99,19 @@ export function PollPostForm({
         userAddress: userAddress || "",
       });
 
-      form.reset(
-        {
-          kind: "POLL",
-          question: "",
-          options: [{ text: "" }, { text: "" }],
-          allowMultipleOptions: false,
-          duration: {
-            days: 1,
-            hours: 0,
-            minutes: 0,
-          },
+      form.resetField("question", {
+        defaultValue: "",
+      });
+      form.resetField("options", {
+        defaultValue: [{ text: "" }, { text: "" }],
+      });
+      form.resetField("duration", {
+        defaultValue: {
+          days: 1,
+          hours: 0,
+          minutes: 0,
         },
-        {
-          keepDefaultValues: true,
-        },
-      );
+      });
 
       toast({
         title: t("toast-poll-creation-success"),
