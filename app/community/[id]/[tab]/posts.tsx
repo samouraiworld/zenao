@@ -1,10 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { mockSocialFeedPosts } from "./mock-posts";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 import { StandardPostCard } from "@/components/social-feed/standard-post-card";
@@ -13,16 +15,54 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { PollPost } from "@/components/social-feed/poll-post";
 import { parsePollUri } from "@/lib/multiaddr";
+import { derivePkgAddr } from "@/lib/gno";
+import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
+import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 
 type CommunityPostsProps = {
   communityId: string;
 };
 
-function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
+function CommunityPosts({ communityId }: CommunityPostsProps) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
+  );
+
+  const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
+  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
+  const {
+    data: postsPages,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    isFetching,
+  } = useSuspenseInfiniteQuery(
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
+  );
+  const posts = useMemo(
+    () =>
+      postsPages.pages.flat().map<SocialFeedPost>((post) => {
+        if (isPollPost(post)) {
+          return {
+            postType: "poll",
+            data: post,
+          };
+        } else if (isStandardPost(post)) {
+          return {
+            postType: "standard",
+            data: post,
+          };
+        }
+        return {
+          postType: "unknown",
+          data: post,
+        };
+      }),
+    [postsPages],
   );
 
   const onEdit = async (values: FeedPostFormSchemaType) => {
@@ -56,13 +96,13 @@ function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
 
   return (
     <div className="space-y-8">
-      {mockSocialFeedPosts.length === 0 ? (
+      {posts.length === 0 ? (
         <EmptyList
           title={t("no-posts-title")}
           description={t("no-posts-description")}
         />
       ) : (
-        mockSocialFeedPosts.map((post) => {
+        posts.map((post) => {
           switch (post.postType) {
             case "standard":
               return (
@@ -99,7 +139,7 @@ function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
         })
       )}
 
-      {/* <div className="py-4">
+      <div className="py-4">
         <LoaderMoreButton
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
@@ -108,7 +148,7 @@ function CommunityPosts({ communityId: _ }: CommunityPostsProps) {
           page={posts}
           noMoreLabel={t("no-more-posts")}
         />
-      </div> */}
+      </div>
     </div>
   );
 }
