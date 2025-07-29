@@ -26,16 +26,16 @@ type User struct {
 	Plan        string `gorm:"default:'free'"`
 }
 
-type MembershipRole struct {
+type EntityRole struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	OrgChildType string `gorm:"primaryKey"` // e.g. "user", "event"
-	OrgChildID   uint   `gorm:"primaryKey;autoIncrement:false"`
+	EntityType string `gorm:"primaryKey"` // e.g. "user", "event"
+	EntityID   uint   `gorm:"primaryKey;autoIncrement:false"`
 
-	OrgParentType string `gorm:"primaryKey"` // e.g. "event", "community"
-	OrgParentID   uint   `gorm:"primaryKey;autoIncrement:false"`
+	OrgType string `gorm:"primaryKey"` // e.g. "event", "community"
+	OrgID   uint   `gorm:"primaryKey;autoIncrement:false"`
 
 	Role string `gorm:"primaryKey"`
 }
@@ -133,15 +133,15 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, gate
 			return nil, fmt.Errorf("parse organizer id: %w", err)
 		}
 
-		membershipRole := &MembershipRole{
-			OrgChildType:  zeni.OrgTypeUser,
-			OrgChildID:    uint(organizerIDInt),
-			OrgParentType: zeni.OrgTypeEvent,
-			OrgParentID:   evt.ID,
-			Role:          zeni.RoleOrganizer,
+		entityRole := &EntityRole{
+			EntityType: zeni.OrgTypeUser,
+			EntityID:   uint(organizerIDInt),
+			OrgType:    zeni.OrgTypeEvent,
+			OrgID:      evt.ID,
+			Role:       zeni.RoleOrganizer,
 		}
 
-		if err := g.db.Create(membershipRole).Error; err != nil {
+		if err := g.db.Create(entityRole).Error; err != nil {
 			return nil, fmt.Errorf("create organizer role assignment in db: %w", err)
 		}
 	}
@@ -152,15 +152,15 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, gate
 			return nil, fmt.Errorf("parse gatekeeper id: %w", err)
 		}
 
-		membershipRole := &MembershipRole{
-			OrgChildType:  zeni.OrgTypeUser,
-			OrgChildID:    uint(gatekeeperIDInt),
-			OrgParentType: zeni.OrgTypeEvent,
-			OrgParentID:   evt.ID,
-			Role:          zeni.RoleGatekeeper,
+		entityRole := &EntityRole{
+			EntityType: zeni.OrgTypeUser,
+			EntityID:   uint(gatekeeperIDInt),
+			OrgType:    zeni.OrgTypeEvent,
+			OrgID:      evt.ID,
+			Role:       zeni.RoleGatekeeper,
 		}
 
-		if err := g.db.Create(membershipRole).Error; err != nil {
+		if err := g.db.Create(entityRole).Error; err != nil {
 			return nil, fmt.Errorf("create gatekeeper role assignment in db: %w", err)
 		}
 	}
@@ -367,12 +367,12 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return err
 	}
 
-	participant := &MembershipRole{
-		OrgChildType:  zeni.OrgTypeUser,
-		OrgChildID:    uint(userIDint),
-		OrgParentType: zeni.OrgTypeEvent,
-		OrgParentID:   evt.ID,
-		Role:          zeni.RoleParticipant,
+	participant := &EntityRole{
+		EntityType: zeni.OrgTypeUser,
+		EntityID:   uint(userIDint),
+		OrgType:    zeni.OrgTypeEvent,
+		OrgID:      evt.ID,
+		Role:       zeni.RoleParticipant,
 	}
 
 	if err := g.db.Save(participant).Error; err != nil {
@@ -394,9 +394,9 @@ func (g *gormZenaoDB) CancelParticipation(eventID string, userID string) error {
 	}
 
 	if err := g.db.
-		Model(&MembershipRole{}).Where("org_parent_type = ? AND org_parent_id = ? AND org_child_type = ? AND org_child_id = ? AND role = ?",
+		Model(&EntityRole{}).Where("org_type = ? AND org_id = ? AND entity_type = ? AND entity_id = ? AND role = ?",
 		zeni.OrgTypeEvent, evtIDInt, zeni.OrgTypeUser, userIDInt, zeni.RoleParticipant).
-		Delete(&MembershipRole{}).Error; err != nil {
+		Delete(&EntityRole{}).Error; err != nil {
 		return err
 	}
 
@@ -477,9 +477,9 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 
 // GetOrgUsersWithRole implements zeni.DB.
 func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*zeni.User, error) {
-	var roles []MembershipRole
+	var roles []EntityRole
 	if err := g.db.
-		Where("org_parent_type = ? AND org_parent_id = ? AND role = ? AND org_child_type = ?",
+		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ?",
 			orgType, orgID, role, zeni.OrgTypeUser).
 		Find(&roles).Error; err != nil {
 		return nil, err
@@ -490,7 +490,7 @@ func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role str
 
 	userIDs := make([]uint, 0, len(roles))
 	for _, r := range roles {
-		userIDs = append(userIDs, r.OrgChildID)
+		userIDs = append(userIDs, r.EntityID)
 	}
 
 	var users []User
@@ -507,9 +507,9 @@ func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role str
 }
 
 func (g *gormZenaoDB) GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*zeni.Event, error) {
-	var roles []MembershipRole
+	var roles []EntityRole
 	if err := g.db.
-		Where("org_parent_type = ? AND org_parent_id = ? AND role = ? AND org_child_type = ?",
+		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ?",
 			orgType, orgID, role, zeni.OrgTypeEvent).
 		Find(&roles).Error; err != nil {
 		return nil, err
@@ -520,7 +520,7 @@ func (g *gormZenaoDB) GetOrgsEventsWithRole(orgType string, orgID string, role s
 
 	eventIDs := make([]uint, 0, len(roles))
 	for _, r := range roles {
-		eventIDs = append(eventIDs, r.OrgChildID)
+		eventIDs = append(eventIDs, r.EntityID)
 	}
 
 	var events []Event
@@ -604,12 +604,12 @@ func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventID string, userID string) 
 	return res, nil
 }
 
-func (g *gormZenaoDB) MemberRoles(childType string, childID string, parentType string, parentID string) ([]string, error) {
-	var roles []MembershipRole
+func (g *gormZenaoDB) EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error) {
+	var roles []EntityRole
 
 	if err := g.db.
-		Where("org_child_type = ? AND org_child_id = ? AND org_parent_type = ? AND org_parent_id = ?",
-			childType, childID, parentType, parentID).
+		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND org_id = ?",
+			entityType, entityID, orgType, orgID).
 		Find(&roles).Error; err != nil {
 		return nil, err
 	}
@@ -647,15 +647,15 @@ func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []stri
 			return nil, fmt.Errorf("parse admin id: %w", err)
 		}
 
-		membershipRole := &MembershipRole{
-			OrgChildType:  zeni.OrgTypeUser,
-			OrgChildID:    uint(adminIDInt),
-			OrgParentType: zeni.OrgTypeCommunity,
-			OrgParentID:   community.ID,
-			Role:          zeni.RoleAdministrator,
+		entityRole := &EntityRole{
+			EntityType: zeni.OrgTypeUser,
+			EntityID:   uint(adminIDInt),
+			OrgType:    zeni.OrgTypeCommunity,
+			OrgID:      community.ID,
+			Role:       zeni.RoleAdministrator,
 		}
 
-		if err := g.db.Create(membershipRole).Error; err != nil {
+		if err := g.db.Create(entityRole).Error; err != nil {
 			return nil, fmt.Errorf("create administrator role assignment in db: %w", err)
 		}
 	}
@@ -666,15 +666,15 @@ func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []stri
 			return nil, fmt.Errorf("parse member id: %w", err)
 		}
 
-		membershipRole := &MembershipRole{
-			OrgChildType:  zeni.OrgTypeUser,
-			OrgChildID:    uint(memberIDInt),
-			OrgParentType: zeni.OrgTypeCommunity,
-			OrgParentID:   community.ID,
-			Role:          zeni.RoleMember,
+		entityRole := &EntityRole{
+			EntityType: zeni.OrgTypeUser,
+			EntityID:   uint(memberIDInt),
+			OrgType:    zeni.OrgTypeCommunity,
+			OrgID:      community.ID,
+			Role:       zeni.RoleMember,
 		}
 
-		if err := g.db.Create(membershipRole).Error; err != nil {
+		if err := g.db.Create(entityRole).Error; err != nil {
 			return nil, fmt.Errorf("create member role assignment in db: %w", err)
 		}
 	}
@@ -685,15 +685,15 @@ func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []stri
 			return nil, fmt.Errorf("parse event id: %w", err)
 		}
 
-		membershipRole := &MembershipRole{
-			OrgChildType:  zeni.OrgTypeEvent,
-			OrgChildID:    uint(eventIDInt),
-			OrgParentType: zeni.OrgTypeCommunity,
-			OrgParentID:   community.ID,
-			Role:          zeni.RoleEvent,
+		entityRole := &EntityRole{
+			EntityType: zeni.OrgTypeEvent,
+			EntityID:   uint(eventIDInt),
+			OrgType:    zeni.OrgTypeCommunity,
+			OrgID:      community.ID,
+			Role:       zeni.RoleEvent,
 		}
 
-		if err := g.db.Create(membershipRole).Error; err != nil {
+		if err := g.db.Create(entityRole).Error; err != nil {
 			return nil, fmt.Errorf("create event role assignment in db: %w", err)
 		}
 	}
@@ -1135,7 +1135,7 @@ func (g *gormZenaoDB) Checkin(pubkey string, gatekeeperID string, signature stri
 		return nil, errors.New("ticket already checked-in")
 	}
 
-	roles, err := g.MemberRoles(zeni.OrgTypeUser, fmt.Sprintf("%d", dbTicket.UserID), zeni.OrgTypeEvent, fmt.Sprint(dbTicket.EventID))
+	roles, err := g.EntityRoles(zeni.OrgTypeUser, fmt.Sprintf("%d", dbTicket.UserID), zeni.OrgTypeEvent, fmt.Sprint(dbTicket.EventID))
 	if err != nil {
 		return nil, err
 	}
@@ -1217,9 +1217,9 @@ func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs 
 	}
 	if len(usersToRemove) > 0 {
 		if err := g.db.
-			Where("org_parent_type = ? AND org_parent_id = ? AND role = ? AND org_child_type = ? AND org_child_id IN ?",
+			Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ? AND entity_id IN ?",
 				zeni.OrgTypeEvent, evtIDInt, role, zeni.OrgTypeUser, usersToRemove).
-			Delete(&MembershipRole{}).Error; err != nil {
+			Delete(&EntityRole{}).Error; err != nil {
 			return fmt.Errorf("delete existing %s roles before adding the new ones: %w", role, err)
 		}
 	}
@@ -1237,15 +1237,15 @@ func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs 
 			return fmt.Errorf("parse %s id: %w", role, err)
 		}
 
-		membershipRole := &MembershipRole{
-			OrgChildType:  zeni.OrgTypeUser,
-			OrgChildID:    uint(userIDInt),
-			OrgParentType: zeni.OrgTypeEvent,
-			OrgParentID:   uint(evtIDInt),
-			Role:          role,
+		entityRole := &EntityRole{
+			EntityType: zeni.OrgTypeUser,
+			EntityID:   uint(userIDInt),
+			OrgType:    zeni.OrgTypeEvent,
+			OrgID:      uint(evtIDInt),
+			Role:       role,
 		}
 
-		if err := g.db.Save(membershipRole).Error; err != nil {
+		if err := g.db.Save(entityRole).Error; err != nil {
 			return fmt.Errorf("create %s role assignment in db: %w", role, err)
 		}
 	}

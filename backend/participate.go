@@ -83,7 +83,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
-		buyerRoles, err := db.MemberRoles(zeni.OrgTypeUser, buyer.ID, zeni.OrgTypeEvent, req.Msg.EventId)
+		buyerRoles, err := db.EntityRoles(zeni.OrgTypeUser, buyer.ID, zeni.OrgTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}

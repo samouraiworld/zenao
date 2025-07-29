@@ -51,7 +51,7 @@ func (s *ZenaoServer) EditPost(ctx context.Context, req *connect.Request[zenaov1
 		if err != nil {
 			return err
 		}
-		roles, err := db.MemberRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, feed.EventID)
+		roles, err := db.EntityRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, feed.EventID)
 		if err != nil {
 			return err
 		}

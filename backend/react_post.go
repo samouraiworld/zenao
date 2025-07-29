@@ -37,7 +37,7 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		if err != nil {
 			return err
 		}
-		roles, err := db.MemberRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, evt.ID)
+		roles, err := db.EntityRoles(zeni.OrgTypeUser, zUser.ID, zeni.OrgTypeEvent, evt.ID)
 		if err != nil {
 			return err
 		}

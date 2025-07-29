@@ -81,12 +81,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
-  }
   index "idx_users_auth_id" {
     unique  = true
     columns = [column.auth_id]
+  }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
   }
 }
 table "communities" {
@@ -138,6 +138,47 @@ table "communities" {
     on_delete   = NO_ACTION
   }
   index "idx_communities_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
+table "entity_roles" {
+  schema = schema.main
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "entity_type" {
+    null = true
+    type = text
+  }
+  column "entity_id" {
+    null = true
+    type = integer
+  }
+  column "org_type" {
+    null = true
+    type = text
+  }
+  column "org_id" {
+    null = true
+    type = integer
+  }
+  column "role" {
+    null = true
+    type = text
+  }
+  primary_key {
+    columns = [column.entity_type, column.entity_id, column.org_type, column.org_id, column.role]
+  }
+  index "idx_entity_roles_deleted_at" {
     columns = [column.deleted_at]
   }
 }
@@ -282,47 +323,6 @@ table "feeds" {
     columns = [column.deleted_at]
   }
 }
-table "membership_roles" {
-  schema = schema.main
-  column "created_at" {
-    null = true
-    type = datetime
-  }
-  column "updated_at" {
-    null = true
-    type = datetime
-  }
-  column "deleted_at" {
-    null = true
-    type = datetime
-  }
-  column "org_child_type" {
-    null = true
-    type = text
-  }
-  column "org_child_id" {
-    null = true
-    type = integer
-  }
-  column "org_parent_type" {
-    null = true
-    type = text
-  }
-  column "org_parent_id" {
-    null = true
-    type = integer
-  }
-  column "role" {
-    null = true
-    type = text
-  }
-  primary_key {
-    columns = [column.org_child_type, column.org_child_id, column.org_parent_type, column.org_parent_id, column.role]
-  }
-  index "idx_membership_roles_deleted_at" {
-    columns = [column.deleted_at]
-  }
-}
 table "posts" {
   schema = schema.main
   column "id" {
@@ -409,15 +409,15 @@ table "posts" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_feed" {
-    columns     = [column.feed_id]
-    ref_columns = [table.feeds.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_feed" {
+    columns     = [column.feed_id]
+    ref_columns = [table.feeds.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -573,15 +573,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_reactions" {
-    columns     = [column.post_id]
-    ref_columns = [table.posts.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_reactions_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_reactions" {
+    columns     = [column.post_id]
+    ref_columns = [table.posts.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
