@@ -120,15 +120,15 @@ func convertEvtToCom() error {
 		}
 		logger.Info("creating community with request", zap.Any("request", cmtReq))
 
-		organizers, err := tx.GetOrgUsersWithRole(zeni.OrgTypeEvent, evt.ID, zeni.RoleOrganizer)
+		organizers, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleOrganizer)
 		if err != nil {
 			return err
 		}
-		gkps, err := tx.GetOrgUsersWithRole(zeni.OrgTypeEvent, evt.ID, zeni.RoleGatekeeper)
+		gkps, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}
-		participants, err := tx.GetOrgUsersWithRole(zeni.OrgTypeEvent, evt.ID, zeni.RoleParticipant)
+		participants, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleParticipant)
 		if err != nil {
 			return err
 		}

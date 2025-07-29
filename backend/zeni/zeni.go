@@ -56,9 +56,9 @@ const (
 )
 
 const (
-	OrgTypeUser      string = "user"
-	OrgTypeEvent     string = "event"
-	OrgTypeCommunity string = "community"
+	EntityTypeUser      string = "user"
+	EntityTypeEvent     string = "event"
+	EntityTypeCommunity string = "community"
 )
 
 type AuthUser struct {

@@ -148,7 +148,7 @@ func execGenTxs() error {
 			return err
 		}
 
-		organizers, err := db.GetOrgUsersWithRole(zeni.OrgTypeEvent, event.ID, zeni.RoleOrganizer)
+		organizers, err := db.GetOrgUsersWithRole(zeni.EntityTypeEvent, event.ID, zeni.RoleOrganizer)
 		if err != nil {
 			return err
 		}
@@ -158,7 +158,7 @@ func execGenTxs() error {
 			organizersIDs = append(organizersIDs, org.ID)
 		}
 
-		gatekeepers, err := db.GetOrgUsersWithRole(zeni.OrgTypeEvent, event.ID, zeni.RoleGatekeeper)
+		gatekeepers, err := db.GetOrgUsersWithRole(zeni.EntityTypeEvent, event.ID, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}
@@ -216,7 +216,7 @@ func execGenTxs() error {
 	}
 
 	for _, community := range communities {
-		administrators, err := db.GetOrgUsersWithRole(zeni.OrgTypeCommunity, community.ID, zeni.RoleAdministrator)
+		administrators, err := db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleAdministrator)
 		if err != nil {
 			return err
 		}
@@ -226,7 +226,7 @@ func execGenTxs() error {
 			administratorsIDs = append(administratorsIDs, admin.ID)
 		}
 
-		members, err := db.GetOrgUsersWithRole(zeni.OrgTypeCommunity, community.ID, zeni.RoleMember)
+		members, err := db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleMember)
 		if err != nil {
 			return err
 		}
@@ -236,7 +236,7 @@ func execGenTxs() error {
 			membersIDs = append(membersIDs, member.ID)
 		}
 
-		events, err := db.GetOrgsEventsWithRole(zeni.OrgTypeCommunity, community.ID, zeni.RoleEvent)
+		events, err := db.GetOrgsEventsWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleEvent)
 		if err != nil {
 			return err
 		}
