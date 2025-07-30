@@ -261,8 +261,10 @@ func (g *gormZenaoDB) GetOrgByPollID(pollID string) (orgType, orgID string, err 
 	}
 
 	var poll Poll
-	if err := g.db.Where("id = ?", pollIDInt).Preload("Post").Preload("Post.Feed").Preload("Post.Feed.Event").First(&poll).Error; err != nil {
-		return "", "", fmt.Errorf("get poll by id: %w", err)
+	if err := g.db.
+		Preload("Post.Feed").
+		First(&poll, pollIDInt).Error; err != nil {
+		return "", "", fmt.Errorf("get poll by id %d: %w", pollIDInt, err)
 	}
 
 	return poll.Post.Feed.OrgType, strconv.FormatUint(uint64(poll.Post.Feed.OrgID), 10), nil
@@ -275,8 +277,10 @@ func (g *gormZenaoDB) GetOrgByPostID(postID string) (orgType, orgID string, err 
 	}
 
 	var post Post
-	if err := g.db.Where("id = ?", postIDInt).Preload("Feed").Preload("Feed.Event").First(&post).Error; err != nil {
-		return "", "", fmt.Errorf("get post by id: %w", err)
+	if err := g.db.
+		Preload("Feed").
+		First(&post, postIDInt).Error; err != nil {
+		return "", "", fmt.Errorf("get post by id %d: %w", postIDInt, err)
 	}
 
 	return post.Feed.OrgType, strconv.FormatUint(uint64(post.Feed.OrgID), 10), nil
