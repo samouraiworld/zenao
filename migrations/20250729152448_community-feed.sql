@@ -1,4 +1,6 @@
 -- Disable the enforcement of foreign-keys constraints
+PRAGMA defer_foreign_keys = on;
+
 PRAGMA foreign_keys = off;
 -- Create "new_feeds" table with the new schema
 CREATE TABLE `new_feeds` (
@@ -38,3 +40,5 @@ ALTER TABLE `new_feeds` RENAME TO `feeds`;
 CREATE INDEX `idx_feeds_deleted_at` ON `feeds` (`deleted_at`);
 -- Re-enable foreign key constraints
 PRAGMA foreign_keys = on;
+
+PRAGMA defer_foreign_keys = off;
