@@ -52,11 +52,13 @@ const (
 
 	RoleAdministrator string = "administrator" // for communities
 	RoleMember        string = "member"        // for communities
+	RoleEvent         string = "event"         // for communities
 )
 
 const (
-	OrgTypeEvent     string = "event"
-	OrgTypeCommunity string = "community"
+	EntityTypeUser      string = "user"
+	EntityTypeEvent     string = "event"
+	EntityTypeCommunity string = "community"
 )
 
 type AuthUser struct {
@@ -196,7 +198,7 @@ type DB interface {
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
-	UserRoles(userID string, eventID string) ([]string, error)
+	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)
@@ -209,12 +211,16 @@ type DB interface {
 	GetEventByPollID(pollID string) (*Event, error)
 	GetEventByPostID(postID string) (*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
-	GetEventUsersWithRole(eventID string, role string) ([]*User, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
-	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+	GetAllCommunities() ([]*Community, error)
+
+	// XXX: we can create a common interface for orgs
+	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
+	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
 
 	CreateFeed(eventID string, slug string) (*Feed, error)
 	GetFeed(eventID string, slug string) (*Feed, error)
@@ -237,6 +243,7 @@ type Chain interface {
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserAddress(userID string) string
+	EventAddress(eventID string) string
 
 	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
 	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
@@ -244,7 +251,7 @@ type Chain interface {
 	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
-	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error
+	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
 
 	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error

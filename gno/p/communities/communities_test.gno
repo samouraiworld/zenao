@@ -23,6 +23,7 @@ func TestNewCommunity(t *testing.T) {
 	conf := Config{
 		Administrators:   []string{alice.String(), bob.String()},
 		Members:          []string{carol.String(), dave.String(), eve.String()},
+		Events:           []string{},
 		DisplayName:      "Community Name",
 		Description:      "this is a community",
 		SetProfileString: profile.SetStringField,

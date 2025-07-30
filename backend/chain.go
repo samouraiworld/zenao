@@ -471,11 +471,12 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 }
 
 // CreateCommunity implements ZenaoChain.
-func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, req *zenaov1.CreateCommunityRequest) error {
+func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error {
 	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
 	membersAddr := mapsl.Map(membersIDs, g.UserAddress)
+	eventsAddr := mapsl.Map(eventsIDs, g.EventAddress)
 	communityPkgPath := g.communityPkgPath(communityID)
-	cmtRealmSrc, err := genCommunityRealmSource(adminsAddr, membersAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
+	cmtRealmSrc, err := genCommunityRealmSource(adminsAddr, membersAddr, eventsAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
 	if err != nil {
 		return err
 	}
@@ -577,6 +578,11 @@ func main() {
 // UserAddress implements ZenaoChain.
 func (g *gnoZenaoChain) UserAddress(userID string) string {
 	return gnolang.DerivePkgAddr(g.userRealmPkgPath(userID)).String()
+}
+
+// EventAddress implements ZenaoChain.
+func (g *gnoZenaoChain) EventAddress(eventID string) string {
+	return gnolang.DerivePkgAddr(g.eventRealmPkgPath(eventID)).String()
 }
 
 // CreatePost implements ZenaoChain
@@ -1237,10 +1243,11 @@ func Render(path string) string {
 }
 `
 
-func genCommunityRealmSource(adminsAddr []string, membersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateCommunityRequest) (string, error) {
+func genCommunityRealmSource(adminsAddr []string, membersAddr []string, eventsAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateCommunityRequest) (string, error) {
 	m := map[string]string{
 		"adminsAddr":     stringSliceLit(adminsAddr),
 		"membersAddr":    stringSliceLit(membersAddr),
+		"eventsAddr":     stringSliceLit(eventsAddr),
 		"displayName":    strconv.Quote(req.DisplayName),
 		"description":    strconv.Quote(req.Description),
 		"avatarURI":      strconv.Quote(req.AvatarUri),
@@ -1281,6 +1288,7 @@ func init() {
 		ZenaoAdminAddr:   {{.zenaoAdminAddr}},
 		Administrators:   {{.adminsAddr}},
 		Members:          {{.membersAddr}},
+		Events:           {{.eventsAddr}},
 		DisplayName:      {{.displayName}},
 		Description:      {{.description}},
 		AvatarURI:        {{.avatarURI}},
