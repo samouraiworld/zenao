@@ -510,6 +510,66 @@ func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role str
 	return result, nil
 }
 
+// GetDeletedOrgUsersWithRole implements zeni.DB.
+func (g *gormZenaoDB) GetDeletedOrgUsersWithRole(orgType string, orgID string, role string) ([]*zeni.User, error) {
+	var roles []EntityRole
+	if err := g.db.
+		Unscoped().
+		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ? AND deleted_at IS NOT NULL",
+			orgType, orgID, role, zeni.EntityTypeUser).
+		Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return []*zeni.User{}, nil
+	}
+	userIDs := make([]uint, 0, len(roles))
+	for _, r := range roles {
+		userIDs = append(userIDs, r.EntityID)
+	}
+	var users []User
+	if err := g.db.Unscoped().Where("id IN ?", userIDs).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	result := make([]*zeni.User, 0, len(users))
+	for _, u := range users {
+		result = append(result, dbUserToZeniDBUser(&u))
+	}
+	return result, nil
+}
+
+// GetDeletedOrgEventsWithRole implements zeni.DB.
+func (g *gormZenaoDB) GetDeletedOrgEventsWithRole(orgType string, orgID string, role string) ([]*zeni.Event, error) {
+	var roles []EntityRole
+	if err := g.db.
+		Unscoped().
+		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ? AND deleted_at IS NOT NULL",
+			orgType, orgID, role, zeni.EntityTypeEvent).
+		Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return []*zeni.Event{}, nil
+	}
+	eventIDs := make([]uint, 0, len(roles))
+	for _, r := range roles {
+		eventIDs = append(eventIDs, r.EntityID)
+	}
+	var events []Event
+	if err := g.db.Unscoped().Where("id IN ?", eventIDs).Find(&events).Error; err != nil {
+		return nil, err
+	}
+	result := make([]*zeni.Event, 0, len(events))
+	for _, e := range events {
+		zevt, err := dbEventToZeniEvent(&e)
+		if err != nil {
+			return nil, fmt.Errorf("convert db event to zeni event: %w", err)
+		}
+		result = append(result, zevt)
+	}
+	return result, nil
+}
+
 func (g *gormZenaoDB) GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*zeni.Event, error) {
 	var roles []EntityRole
 	if err := g.db.

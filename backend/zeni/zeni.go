@@ -217,7 +217,6 @@ type DB interface {
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
 	GetAllCommunities() ([]*Community, error)
 
-	// XXX: we can create a common interface for orgs
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
 	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
@@ -237,6 +236,10 @@ type DB interface {
 	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
+
+	// gentxs specific
+	GetDeletedOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
+	GetDeletedOrgEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
 }
 
 type Chain interface {

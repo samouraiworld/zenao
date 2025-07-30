@@ -221,12 +221,27 @@ func execGenTxs() error {
 			return err
 		}
 
+		deletedAdmins, err := db.GetDeletedOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleAdministrator)
+		if err != nil {
+			return err
+		}
+
 		var administratorsIDs []string
 		for _, admin := range administrators {
 			administratorsIDs = append(administratorsIDs, admin.ID)
 		}
 
+		// XXX: Add deleted administrators so we can add their post before deleting them
+		for _, deletedAdmin := range deletedAdmins {
+			administratorsIDs = append(administratorsIDs, deletedAdmin.ID)
+		}
+
 		members, err := db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleMember)
+		if err != nil {
+			return err
+		}
+
+		deletedMembers, err := db.GetDeletedOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleMember)
 		if err != nil {
 			return err
 		}
@@ -236,7 +251,17 @@ func execGenTxs() error {
 			membersIDs = append(membersIDs, member.ID)
 		}
 
+		// XXX: Add deleted members so we can add their post before deleting them
+		for _, deletedMember := range deletedMembers {
+			membersIDs = append(membersIDs, deletedMember.ID)
+		}
+
 		events, err := db.GetOrgsEventsWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleEvent)
+		if err != nil {
+			return err
+		}
+
+		deletedEvents, err := db.GetDeletedOrgEventsWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleEvent)
 		if err != nil {
 			return err
 		}
@@ -244,6 +269,11 @@ func execGenTxs() error {
 		var eventsIDs []string
 		for _, event := range events {
 			eventsIDs = append(eventsIDs, event.ID)
+		}
+
+		// XXX: Add deleted events so we can add their post before deleting them
+		for _, deletedEvent := range deletedEvents {
+			eventsIDs = append(eventsIDs, deletedEvent.ID)
 		}
 
 		tx, err := createCommunityRealmTx(chain, community, signerInfo.GetAddress(), administratorsIDs, membersIDs, eventsIDs)
