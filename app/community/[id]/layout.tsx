@@ -43,9 +43,15 @@ async function CommunityPageLayout({
   const members = await queryClient.fetchQuery(
     communityUsersWithRoles(communityId, ["member"]),
   );
-  members.forEach(
-    (member) => void queryClient.prefetchQuery(profileOptions(member.address)),
+  members.forEach((member) =>
+    queryClient.prefetchQuery(profileOptions(member.address)),
   );
+
+  const events = await queryClient.fetchQuery(
+    communityUsersWithRoles(communityId, ["event"]),
+  );
+
+  console.log(events);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

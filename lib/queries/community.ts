@@ -14,7 +14,7 @@ import {
   CommunityInfoSchema,
 } from "@/app/gen/zenao/v1/zenao_pb";
 
-const communityUserRolesEnum = z.enum(["administrator", "member"]);
+const communityUserRolesEnum = z.enum(["administrator", "member", "event"]);
 
 export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
 
