@@ -1,7 +1,7 @@
 "use client";
 
 import React, { RefObject } from "react";
-import { FieldValues } from "react-hook-form";
+import { FieldValues, useFormContext } from "react-hook-form";
 import {
   FormControl,
   FormField,
@@ -38,6 +38,7 @@ export const FormFieldTextArea = <T extends FieldValues>({
   const adjustHeight = () => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "inherit";
+      console.log(textAreaRef.current.scrollHeight);
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
     }
   };
@@ -46,18 +47,23 @@ export const FormFieldTextArea = <T extends FieldValues>({
     adjustHeight();
   }, []);
 
+  const { getFieldState, formState } = useFormContext<T>();
+  const fieldState = getFieldState(name, formState);
+
   return (
     <FormField
       rules={{ required: true }}
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={cn("relative", wordCounter ? "pb-6" : null)}>
+        <FormItem
+          className={cn("relative w-full", wordCounter ? "pb-6" : null)}
+        >
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
             <Textarea
               className={cn(
-                "resize-none break-words min-h-[52px] max-h-[400px]",
+                "resize-none break-words min-h-[48px] max-h-[400px]",
                 className,
               )}
               placeholder={placeholder}
@@ -70,23 +76,25 @@ export const FormFieldTextArea = <T extends FieldValues>({
               ref={mergeRefs(ref, textAreaRef)}
             />
           </FormControl>
-          <div
-            className={cn(
-              "flex w-full justify-between",
-              wordCounter ? "absolute bottom-0" : null,
-            )}
-          >
-            <FormMessage />
-            {wordCounter && (
-              <>
-                <div />
-                <Text size="sm" className="text-primary-color/80">
-                  <span>{field.value.length}</span> /
-                  <span>{otherProps.maxLength}</span>
-                </Text>
-              </>
-            )}
-          </div>
+          {(fieldState.error || wordCounter) && (
+            <div
+              className={cn(
+                "flex w-full justify-between",
+                wordCounter ? "absolute bottom-0" : null,
+              )}
+            >
+              <FormMessage />
+              {wordCounter && (
+                <>
+                  <div />
+                  <Text size="sm" className="text-primary-color/80">
+                    <span>{field.value.length}</span> /
+                    <span>{otherProps.maxLength}</span>
+                  </Text>
+                </>
+              )}
+            </div>
+          )}
         </FormItem>
       )}
     />

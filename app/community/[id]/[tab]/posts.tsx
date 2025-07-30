@@ -19,6 +19,7 @@ import { derivePkgAddr } from "@/lib/gno";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+import FeedPostForm from "@/components/social-feed/feed-post-form";
 
 type CommunityPostsProps = {
   communityId: string;
@@ -149,6 +150,8 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
           noMoreLabel={t("no-more-posts")}
         />
       </div>
+
+      <FeedPostForm />
     </div>
   );
 }
