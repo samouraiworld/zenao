@@ -39,7 +39,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		}
 	}
 
-	roles, err := s.DB.UserRoles(zUser.ID, req.Msg.EventId)
+	roles, err := s.DB.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 	if err != nil {
 		return nil, err
 	}

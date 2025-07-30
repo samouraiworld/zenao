@@ -89,8 +89,9 @@ func convertEvtToCom() error {
 	var cmt *zeni.Community
 	var membersIDs []string
 	var cmtReq *zenaov1.CreateCommunityRequest
+	var evt *zeni.Event
 	if err := db.Tx(func(tx zeni.DB) error {
-		evt, err := tx.GetEvent(evtToComConf.evtID)
+		evt, err = tx.GetEvent(evtToComConf.evtID)
 		if err != nil {
 			return err
 		}
@@ -119,23 +120,23 @@ func convertEvtToCom() error {
 		}
 		logger.Info("creating community with request", zap.Any("request", cmtReq))
 
-		organizersIDs, err := tx.GetEventUsersWithRole(evt.ID, zeni.RoleOrganizer)
+		organizers, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleOrganizer)
 		if err != nil {
 			return err
 		}
-		gkpsIDs, err := tx.GetEventUsersWithRole(evt.ID, zeni.RoleGatekeeper)
+		gkps, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}
-		participantIDs, err := tx.GetEventUsersWithRole(evt.ID, zeni.RoleParticipant)
+		participants, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleParticipant)
 		if err != nil {
 			return err
 		}
-		membersIDs = mapsl.Map(organizersIDs, func(usr *zeni.User) string { return usr.ID })
-		membersIDs = append(membersIDs, mapsl.Map(gkpsIDs, func(usr *zeni.User) string { return usr.ID })...)
-		membersIDs = append(membersIDs, mapsl.Map(participantIDs, func(usr *zeni.User) string { return usr.ID })...)
+		membersIDs = mapsl.Map(organizers, func(usr *zeni.User) string { return usr.ID })
+		membersIDs = append(membersIDs, mapsl.Map(gkps, func(usr *zeni.User) string { return usr.ID })...)
+		membersIDs = append(membersIDs, mapsl.Map(participants, func(usr *zeni.User) string { return usr.ID })...)
 
-		cmt, err = tx.CreateCommunity(evt.CreatorID, []string{evt.CreatorID}, membersIDs, cmtReq)
+		cmt, err = tx.CreateCommunity(evt.CreatorID, []string{evt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
 		return err
 	}); err != nil {
 		return err
@@ -143,7 +144,7 @@ func convertEvtToCom() error {
 
 	logger.Info("community persisted successfully in the database")
 
-	err = chain.CreateCommunity(cmt.ID, []string{cmt.CreatorID}, membersIDs, cmtReq)
+	err = chain.CreateCommunity(cmt.ID, []string{cmt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
 	if err != nil {
 		return err
 	}
