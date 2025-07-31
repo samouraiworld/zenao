@@ -105,9 +105,9 @@ type Community struct {
 
 type EntityRole struct {
 	DeletedAt  time.Time
-	EntityType string // one of: user, event, community
+	EntityType string // one of: user, event
 	EntityID   string
-	OrgType    string // one of: user, event, community
+	OrgType    string // one of: event, community
 	OrgID      string
 	Role       string // one of: organizer, gatekeeper, participant, administrator, member,
 }
@@ -116,7 +116,7 @@ type Feed struct {
 	CreatedAt time.Time
 	ID        string
 	Slug      string
-	OrgType   string // one of: user, event, community
+	OrgType   string // one of: event, community
 	OrgID     string
 }
 

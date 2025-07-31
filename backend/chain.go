@@ -548,30 +548,6 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 		g.logger.Info("added member to community", zap.String("member", member), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	}
 
-	for _, admin := range adminsAddr {
-		msgCall = vm.MsgCall{
-			Caller:  g.signerInfo.GetAddress(),
-			PkgPath: g.communitiesIndexPkgPath,
-			Func:    "AddMember",
-			Args: []string{
-				communityPkgPath,
-				admin,
-			},
-		}
-		gasWanted, err = g.estimateCallTxGas(msgCall)
-		if err != nil {
-			return err
-		}
-		broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-			GasFee:    "10000000ugnot",
-			GasWanted: gasWanted,
-		}, msgCall))
-		if err != nil {
-			return err
-		}
-		g.logger.Info("added admin to community", zap.String("admin", admin), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
-	}
-
 	return nil
 }
 
