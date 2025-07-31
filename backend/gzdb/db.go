@@ -511,63 +511,43 @@ func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role str
 }
 
 // GetDeletedOrgUsersWithRole implements zeni.DB.
-func (g *gormZenaoDB) GetDeletedOrgUsersWithRole(orgType string, orgID string, role string) ([]*zeni.User, error) {
+func (g *gormZenaoDB) GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*zeni.EntityRole, error) {
 	var roles []EntityRole
 	if err := g.db.
 		Unscoped().
 		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ? AND deleted_at IS NOT NULL",
-			orgType, orgID, role, zeni.EntityTypeUser).
+			orgType, orgID, role, entityType).
 		Find(&roles).Error; err != nil {
 		return nil, err
 	}
 	if len(roles) == 0 {
-		return []*zeni.User{}, nil
+		return []*zeni.EntityRole{}, nil
 	}
-	userIDs := make([]uint, 0, len(roles))
+	result := make([]*zeni.EntityRole, 0, len(role))
 	for _, r := range roles {
-		userIDs = append(userIDs, r.EntityID)
-	}
-	var users []User
-	if err := g.db.Unscoped().Where("id IN ?", userIDs).Find(&users).Error; err != nil {
-		return nil, err
-	}
-	result := make([]*zeni.User, 0, len(users))
-	for _, u := range users {
-		result = append(result, dbUserToZeniDBUser(&u))
+		result = append(result, dbEntityRoleToZeniEntityRole(&r))
 	}
 	return result, nil
 }
 
-// GetDeletedOrgEventsWithRole implements zeni.DB.
-func (g *gormZenaoDB) GetDeletedOrgEventsWithRole(orgType string, orgID string, role string) ([]*zeni.Event, error) {
-	var roles []EntityRole
-	if err := g.db.
-		Unscoped().
-		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ? AND deleted_at IS NOT NULL",
-			orgType, orgID, role, zeni.EntityTypeEvent).
-		Find(&roles).Error; err != nil {
+// GetDeletedTickets implements zeni.DB.
+func (g *gormZenaoDB) GetDeletedTickets(eventID string) ([]*zeni.SoldTicket, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse event id: %w", err)
+	}
+	var tickets []SoldTicket
+	if err := g.db.Unscoped().Where("event_id = ? AND deleted_at IS NOT NULL", evtIDInt).Find(&tickets).Error; err != nil {
 		return nil, err
 	}
-	if len(roles) == 0 {
-		return []*zeni.Event{}, nil
-	}
-	eventIDs := make([]uint, 0, len(roles))
-	for _, r := range roles {
-		eventIDs = append(eventIDs, r.EntityID)
-	}
-	var events []Event
-	if err := g.db.Unscoped().Where("id IN ?", eventIDs).Find(&events).Error; err != nil {
-		return nil, err
-	}
-	result := make([]*zeni.Event, 0, len(events))
-	for _, e := range events {
-		zevt, err := dbEventToZeniEvent(&e)
+	res := make([]*zeni.SoldTicket, len(tickets))
+	for i, ticket := range tickets {
+		res[i], err = dbSoldTicketToZeniSoldTicket(&ticket)
 		if err != nil {
-			return nil, fmt.Errorf("convert db event to zeni event: %w", err)
+			return nil, err
 		}
-		result = append(result, zevt)
 	}
-	return result, nil
+	return res, nil
 }
 
 func (g *gormZenaoDB) GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*zeni.Event, error) {
@@ -1232,6 +1212,20 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	}
 }
 
+func dbEntityRoleToZeniEntityRole(dbrole *EntityRole) *zeni.EntityRole {
+	er := &zeni.EntityRole{
+		EntityType: dbrole.EntityType,
+		EntityID:   fmt.Sprintf("%d", dbrole.EntityID),
+		OrgType:    dbrole.OrgType,
+		OrgID:      fmt.Sprintf("%d", dbrole.OrgID),
+		Role:       dbrole.Role,
+	}
+	if dbrole.DeletedAt.Valid {
+		er.DeletedAt = dbrole.DeletedAt.Time
+	}
+	return er
+}
+
 func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) {
 	tickobj, err := zeni.NewTicketFromSecret(dbtick.Secret)
 	if err != nil {
@@ -1249,14 +1243,18 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	if dbtick.User != nil {
 		user = dbUserToZeniDBUser(dbtick.User)
 	}
-	return &zeni.SoldTicket{
+	ticket := &zeni.SoldTicket{
 		Ticket:    tickobj,
 		BuyerID:   fmt.Sprint(dbtick.BuyerID),
 		UserID:    fmt.Sprint(dbtick.UserID),
 		Checkin:   checkin,
 		User:      user,
 		CreatedAt: dbtick.CreatedAt,
-	}, nil
+	}
+	if dbtick.DeletedAt.Valid {
+		ticket.DeletedAt = dbtick.DeletedAt.Time
+	}
+	return ticket, nil
 }
 
 func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs []string) error {

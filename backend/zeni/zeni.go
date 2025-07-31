@@ -103,6 +103,15 @@ type Community struct {
 	CreatorID   string
 }
 
+type EntityRole struct {
+	DeletedAt  time.Time
+	EntityType string // one of: user, event, community
+	EntityID   string
+	OrgType    string // one of: user, event, community
+	OrgID      string
+	Role       string // one of: organizer, gatekeeper, participant, administrator, member,
+}
+
 type Feed struct {
 	CreatedAt time.Time
 	ID        string
@@ -147,6 +156,7 @@ type Reaction struct {
 }
 
 type SoldTicket struct {
+	DeletedAt time.Time
 	CreatedAt time.Time
 	Ticket    *Ticket
 	BuyerID   string
@@ -238,8 +248,8 @@ type DB interface {
 	GetPollByPostID(postID string) (*Poll, error)
 
 	// gentxs specific
-	GetDeletedOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
-	GetDeletedOrgEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
+	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
+	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
 }
 
 type Chain interface {
