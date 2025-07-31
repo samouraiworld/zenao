@@ -545,7 +545,7 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 		if err != nil {
 			return err
 		}
-		g.logger.Info("added member to community", zap.String("member", member), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+		g.logger.Info("added member to community registry", zap.String("member", member), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	}
 
 	return nil
