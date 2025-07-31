@@ -30,7 +30,12 @@ import { captureException } from "@/lib/report";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 
-const FeedPostForm = () => {
+type FeedPostFormProps = {
+  orgId: string;
+  orgType: "event" | "community";
+};
+
+const FeedPostForm = ({ orgId, orgType }: FeedPostFormProps) => {
   const { createStandardPost, isPending } = useCreateStandardPost();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -41,15 +46,8 @@ const FeedPostForm = () => {
   const form = useForm<FeedPostFormSchemaType>({
     mode: "all",
     defaultValues: {
+      kind: "STANDARD_POST",
       content: "",
-      question: "",
-      options: [{ text: "" }, { text: "" }],
-      allowMultipleOptions: false,
-      duration: {
-        days: 1,
-        hours: 0,
-        minutes: 0,
-      },
     },
   });
 
@@ -117,7 +115,8 @@ const FeedPostForm = () => {
       }
 
       await createStandardPost({
-        eventId: "", // TODO Replace
+        orgId,
+        orgType,
         content: values.content,
         parentId: values.parentPostId?.toString() ?? "",
         token,

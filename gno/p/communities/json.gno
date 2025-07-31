@@ -5,6 +5,15 @@ import (
 	"gno.land/p/demo/json"
 )
 
+func (c *Community) GetUserRolesJSON(addr string) string {
+	userRoles := c.DAOPrivate.Members.GetMemberRoles(addr)
+	nodes := make([]*json.Node, 0, len(userRoles))
+	for _, role := range userRoles {
+		nodes = append(nodes, json.StringNode("", role))
+	}
+	return mustMarshalString(json.ArrayNode("", nodes))
+}
+
 func (c *Community) GetMembersWithRoleJSON(role string) string {
 	users := c.DAOPrivate.Members.GetMembersWithRole(role)
 	nodes := make([]*json.Node, 0, len(users))

@@ -98,6 +98,27 @@ export const communitiesList = (
   });
 };
 
+export const communityUserRoles = (
+  communityId: string | null,
+  userAddress: string | null,
+) =>
+  queryOptions({
+    queryKey: ["communityUserRoles", communityId, userAddress],
+    queryFn: async () => {
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/communities/c${communityId}`,
+        `community.GetUserRolesJSON(${JSON.stringify(userAddress)})`,
+      );
+      const roles = extractGnoJSONResponse(res);
+      return communityGetUserRolesSchema.parse(roles);
+    },
+    enabled: !!communityId && !!userAddress,
+    initialData: [],
+  });
+
 export const communityUsersWithRoles = (
   communityId: string,
   roles: CommunityUserRole[],
