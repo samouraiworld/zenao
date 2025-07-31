@@ -16,6 +16,7 @@ import CommunityEvents from "@/app/community/[id]/[tab]/events";
 import CommunityPosts from "@/app/community/[id]/[tab]/posts";
 import CommunityMembers from "@/app/community/[id]/[tab]/members";
 import CommunityProposals from "@/app/community/[id]/[tab]/proposals";
+import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 
 type CommunityMainSectionsProps = {
   communityId: string;
@@ -68,7 +69,7 @@ function CommunityMainSections({
       </TabsList>
       <Separator className="mb-8" />
       <TabsContent value="posts">
-        <Suspense fallback={<Loader2 className="animate-spin" />}>
+        <Suspense fallback={<PostCardSkeleton />}>
           <CommunityPosts communityId={communityId} />
         </Suspense>
       </TabsContent>
