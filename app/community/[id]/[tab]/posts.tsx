@@ -19,6 +19,7 @@ import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
 import { communityUserRoles } from "@/lib/queries/community";
+import { FeedPostFormSchemaType } from "@/types/schemas";
 
 type CommunityPostsProps = {
   communityId: string;
@@ -77,6 +78,11 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
   const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
   const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
 
+  const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
+    await onEditStandardPost(postId, values);
+    setPostInEdition(null);
+  };
+
   return (
     <div className="space-y-8">
       {posts.length === 0 ? (
@@ -122,7 +128,7 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
         orgType="community"
         editMode={!!postInEdition}
         postInEdition={postInEdition}
-        onEdit={onEditStandardPost}
+        onEdit={onEdit}
         onCancelEdit={() => setPostInEdition(null)}
         isEditing={isEditing}
       />
