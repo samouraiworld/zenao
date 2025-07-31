@@ -5,9 +5,11 @@ import {
   AudioWaveformIcon,
   ImageIcon,
   PaperclipIcon,
+  SaveIcon,
   SendHorizonalIcon,
+  X,
 } from "lucide-react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -22,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "../shadcn/dropdown-menu";
 import { ButtonBase } from "../widgets/buttons/button-bases";
+import Text from "../widgets/texts/text";
 import { cn } from "@/lib/tailwind";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { useToast } from "@/hooks/use-toast";
@@ -33,9 +36,25 @@ import { userAddressOptions } from "@/lib/queries/user";
 type FeedPostFormProps = {
   orgId: string;
   orgType: "event" | "community";
+  editMode: boolean;
+  postInEdition: { postId: string; content: string } | null;
+  onEdit?: (
+    postId: string,
+    values: FeedPostFormSchemaType,
+  ) => void | Promise<void>;
+  onCancelEdit?: () => void | Promise<void>;
+  isEditing?: boolean;
 };
 
-const FeedPostForm = ({ orgId, orgType }: FeedPostFormProps) => {
+const FeedPostForm = ({
+  orgId,
+  orgType,
+  onEdit,
+  editMode,
+  onCancelEdit,
+  postInEdition,
+  isEditing,
+}: FeedPostFormProps) => {
   const { createStandardPost, isPending } = useCreateStandardPost();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -139,8 +158,29 @@ const FeedPostForm = ({ orgId, orgType }: FeedPostFormProps) => {
     }
   };
 
+  const onSubmit = async (values: FeedPostFormSchemaType) => {
+    if (editMode && postInEdition) {
+      await onEdit?.(postInEdition.postId, values);
+      form.resetField("content");
+    } else {
+      await onSubmitStandardPost(values);
+    }
+  };
+
+  useEffect(() => {
+    form.clearErrors();
+    if (!postInEdition) {
+      form.resetField("content");
+    } else {
+      form.setValue("content", postInEdition.content);
+    }
+  }, [form, postInEdition]);
+
   return (
     <Form {...form}>
+      {editMode && (
+        <div className="fixed left-0 top-0 !mt-0 w-screen h-screen bg-accent/50 backdrop-blur-md"></div>
+      )}
       <div
         className={cn(
           "flex justify-center fixed left-0 bottom-0 z-50 w-full p-2 gap-2 bg-accent/70 backdrop-blur-md",
@@ -152,7 +192,7 @@ const FeedPostForm = ({ orgId, orgType }: FeedPostFormProps) => {
           style={{
             maxWidth: defaultScreenContainerMaxWidth,
           }}
-          onSubmit={form.handleSubmit(onSubmitStandardPost)}
+          onSubmit={form.handleSubmit(onSubmit)}
         >
           {/* Attachement menu button */}
           <DropdownMenu>
@@ -206,37 +246,55 @@ const FeedPostForm = ({ orgId, orgType }: FeedPostFormProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <FormFieldTextArea
-            ref={textareaRef}
-            className="rounded-xl w-full"
-            control={form.control}
-            name="content"
-            placeholder="Enter your message"
-            disabled={isPending}
-          />
-          <input
-            type="file"
-            onChange={handleAudioChange}
-            ref={hiddenAudioInputRef}
-            className="hidden"
-            disabled={uploading}
-          />
-          <input
-            type="file"
-            onChange={handleImageChange}
-            ref={hiddenImgInputRef}
-            className="hidden"
-            disabled={uploading}
-          />
+          <div className="flex flex-1 flex-col gap-2">
+            {editMode && (
+              <div className="flex w-full items-center justify-between">
+                <Text size="sm" variant="secondary">
+                  (Editing)
+                </Text>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-4 h-4"
+                  title="Cancel modification"
+                  onClick={() => onCancelEdit?.()}
+                >
+                  <X className="!w-4 !h-4" />
+                </Button>
+              </div>
+            )}
+            <FormFieldTextArea
+              ref={textareaRef}
+              className="rounded-xl w-full"
+              control={form.control}
+              name="content"
+              placeholder="Enter your message"
+              disabled={uploading || isPending || isEditing}
+            />
+            <input
+              type="file"
+              onChange={handleAudioChange}
+              ref={hiddenAudioInputRef}
+              className="hidden"
+              disabled={uploading || isPending || isEditing}
+            />
+            <input
+              type="file"
+              onChange={handleImageChange}
+              ref={hiddenImgInputRef}
+              className="hidden"
+              disabled={uploading || isPending || isEditing}
+            />
+          </div>
           <ButtonBase
             className={cn(
               "rounded-full w-8 h-8 hover:bg-transparent hover:ring-1 hover:ring-secondary-foreground hover:text-secondary-foreground",
             )}
             type="submit"
-            loading={isPending}
-            disabled={isPending}
+            loading={isPending || isEditing}
+            disabled={isPending || isEditing}
           >
-            {<SendHorizonalIcon />}
+            {editMode ? <SaveIcon /> : <SendHorizonalIcon />}
           </ButtonBase>
         </form>
       </div>

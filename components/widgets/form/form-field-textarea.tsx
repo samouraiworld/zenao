@@ -38,7 +38,6 @@ export const FormFieldTextArea = <T extends FieldValues>({
   const adjustHeight = () => {
     if (textAreaRef.current) {
       textAreaRef.current.style.height = "inherit";
-      console.log(textAreaRef.current.scrollHeight);
       textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
     }
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import {
   useSuspenseInfiniteQuery,
@@ -33,6 +33,11 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
   const { data: userRoles } = useSuspenseQuery(
     communityUserRoles(communityId, userAddress),
   );
+
+  const [postInEdition, setPostInEdition] = useState<{
+    postId: string;
+    content: string;
+  } | null>(null);
 
   const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
   const feedId = `${derivePkgAddr(pkgPath)}:main`;
@@ -83,13 +88,19 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
         <PostsList
           posts={posts}
           userAddress={userAddress}
-          onEdit={onEditStandardPost}
           onReactionChange={onReactionChange}
           canInteract={
             userRoles.includes("member") || userRoles.includes("administrator")
           }
           onDelete={onDelete}
-          isEditing={isEditing}
+          postInEdition={postInEdition?.postId ?? null}
+          onEditModeChange={(postId, content, editMode) => {
+            if (!editMode) {
+              setPostInEdition(null);
+              return;
+            }
+            setPostInEdition({ postId, content });
+          }}
           isReacting={isReacting}
           isDeleting={isDeleting}
         />
@@ -106,7 +117,15 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
         />
       </div>
 
-      <FeedPostForm orgId={communityId} orgType="community" />
+      <FeedPostForm
+        orgId={communityId}
+        orgType="community"
+        editMode={!!postInEdition}
+        postInEdition={postInEdition}
+        onEdit={onEditStandardPost}
+        onCancelEdit={() => setPostInEdition(null)}
+        isEditing={isEditing}
+      />
     </div>
   );
 }

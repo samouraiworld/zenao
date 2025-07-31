@@ -6,7 +6,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { userAddressOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
@@ -16,8 +16,10 @@ import { PostsList } from "@/components/social-feed/posts-list";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
+// import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 import { derivePkgAddr } from "@/lib/gno";
+import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
+import { FeedPostFormSchemaType } from "@/types/schemas";
 
 type EventFeedProps = {
   eventId: string;
@@ -32,6 +34,12 @@ function EventFeed({ eventId }: EventFeedProps) {
   const { data: roles } = useSuspenseQuery(
     eventUserRoles(eventId, userAddress),
   );
+
+  const [postInEdition, setPostInEdition] = useState<{
+    postId: string;
+    content: string;
+  } | null>(null);
+
   const t = useTranslations();
 
   // Event's social feed posts
@@ -73,6 +81,11 @@ function EventFeed({ eventId }: EventFeedProps) {
   const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
   const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
 
+  const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
+    await onEditStandardPost(postId, values);
+    setPostInEdition(null);
+  };
+
   return (
     <>
       <div className="space-y-4">
@@ -85,7 +98,6 @@ function EventFeed({ eventId }: EventFeedProps) {
           <PostsList
             posts={posts}
             userAddress={userAddress}
-            onEdit={onEditStandardPost}
             onReactionChange={onReactionChange}
             canInteract={
               roles.includes("organizer") || roles.includes("participant")
@@ -95,6 +107,16 @@ function EventFeed({ eventId }: EventFeedProps) {
               `/event/${eventId}/feed/post/${postId}`
             }
             canReply
+            postInEdition={postInEdition?.postId ?? null}
+            innerEditMode
+            onEdit={onEdit}
+            onEditModeChange={(postId, content, editMode) => {
+              if (!editMode) {
+                setPostInEdition(null);
+                return;
+              }
+              setPostInEdition({ postId, content });
+            }}
             isEditing={isEditing}
             isReacting={isReacting}
             isDeleting={isDeleting}

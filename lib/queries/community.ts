@@ -115,8 +115,6 @@ export const communityUserRoles = (
       const roles = extractGnoJSONResponse(res);
       return communityGetUserRolesSchema.parse(roles);
     },
-    enabled: !!communityId && !!userAddress,
-    initialData: [],
   });
 
 export const communityUsersWithRoles = (
