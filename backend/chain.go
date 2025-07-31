@@ -1199,11 +1199,11 @@ func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberA
 			}),
 		})
 	}
-`, callerPkgPath, communityPkgPath, "Remove member in "+communityPkgPath, memberAddr)
+`, callerPkgPath, communityPkgPath, "Remove member role from: "+memberAddr+" within "+communityPkgPath, memberAddr)
 }
 
-// XXX: used by gentxs to remove admin from a community
-func genCommunityRemoveEventAdminMsgRunBody(callerPkgPath, communityPkgPath, adminAddr string) string {
+// XXX: used by gentxs to remove event from a community
+func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -1217,12 +1217,12 @@ func genCommunityRemoveEventAdminMsgRunBody(callerPkgPath, communityPkgPath, adm
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
 			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
-				Title: "Remove admin",
-				Message: communities.NewRemoveAdminMsg(%q),
+				Title: "Remove event",
+				Message: communities.NewRemoveEventMsg(%q),
 			}),
 		})
 	}
-`, callerPkgPath, communityPkgPath, "Remove admin in "+communityPkgPath, adminAddr)
+`, callerPkgPath, communityPkgPath, "Remove event role from: "+eventAddr+"within "+communityPkgPath, eventAddr)
 }
 
 func genEventRealmSource(organizersAddr []string, gatekeepersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
