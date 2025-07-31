@@ -520,10 +520,7 @@ func (g *gormZenaoDB) GetDeletedOrgEntitiesWithRole(orgType string, orgID string
 		Find(&roles).Error; err != nil {
 		return nil, err
 	}
-	if len(roles) == 0 {
-		return []*zeni.EntityRole{}, nil
-	}
-	result := make([]*zeni.EntityRole, 0, len(role))
+	result := make([]*zeni.EntityRole, 0, len(roles))
 	for _, r := range roles {
 		result = append(result, dbEntityRoleToZeniEntityRole(&r))
 	}
