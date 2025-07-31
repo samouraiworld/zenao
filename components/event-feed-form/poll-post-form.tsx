@@ -50,6 +50,9 @@ export function PollPostForm({
 
   const parentPostId = form.watch("parentPostId");
   const question = form.watch("question");
+  // Force rendering
+  const _ = form.watch("options");
+
   const textareaMaxLength = pollFormSchema.shape.question._def.checks.find(
     (check) => check.kind === "max",
   )?.value;
@@ -134,7 +137,6 @@ export function PollPostForm({
       >
         <div className="flex flex-row gap-4">
           <FormField
-            rules={{ required: true }}
             control={form.control}
             name="question"
             render={({ field }) => (
