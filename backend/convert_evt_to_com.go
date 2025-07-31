@@ -144,7 +144,7 @@ func convertEvtToCom() error {
 			return err
 		}
 
-		if _, err = db.CreateFeed(zeni.EntityTypeCommunity, cmt.ID, "main"); err != nil {
+		if _, err = tx.CreateFeed(zeni.EntityTypeCommunity, cmt.ID, "main"); err != nil {
 			return err
 		}
 		return err
