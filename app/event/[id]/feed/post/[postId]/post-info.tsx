@@ -16,6 +16,7 @@ import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
 import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import { useToast } from "@/hooks/use-toast";
+import { derivePkgAddr } from "@/lib/gno";
 import { parsePollUri } from "@/lib/multiaddr";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
@@ -144,9 +145,12 @@ export default function PostInfo({
     },
   });
 
-  const { onEditStandardPost, isEditing } = useEventPostEditHandler(eventId);
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(eventId);
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
+  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
+  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
+  const { onEditStandardPost, isEditing } = useEventPostEditHandler(feedId);
+  const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
+  const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
 
   if (!isStandardPost(post) && !isPollPost(post)) {
     return null;

@@ -16,6 +16,7 @@ import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
+import { derivePkgAddr } from "@/lib/gno";
 
 type EventPollsProps = {
   eventId: string;
@@ -32,6 +33,9 @@ function EventPolls({ eventId }: EventPollsProps) {
     eventUserRoles(eventId, userAddress),
   );
 
+  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
+  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
   const {
     data: pollsPages,
     isFetchingNextPage,
@@ -39,7 +43,7 @@ function EventPolls({ eventId }: EventPollsProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(eventId, DEFAULT_FEED_POSTS_LIMIT, "poll", userAddress || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userAddress || ""),
   );
 
   const polls = useMemo(
@@ -52,8 +56,8 @@ function EventPolls({ eventId }: EventPollsProps) {
     [pollsPages],
   );
 
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(eventId);
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
+  const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
+  const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
 
   return (
     <>

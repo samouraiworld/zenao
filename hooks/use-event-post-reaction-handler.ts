@@ -4,7 +4,7 @@ import { useReactPost } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 
-function useEventPostReactionHandler(eventId: string, parentId: string = "") {
+function useEventPostReactionHandler(feedId: string, parentId: string = "") {
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
@@ -23,7 +23,7 @@ function useEventPostReactionHandler(eventId: string, parentId: string = "") {
         userAddress: userAddress || "",
         postId,
         icon,
-        eventId,
+        feedId,
         parentId,
       });
     } catch (error) {
