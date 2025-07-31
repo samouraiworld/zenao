@@ -1,4 +1,6 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
+import { getQueryClient } from "../get-query-client";
+import { derivePkgAddr } from "../gno";
 import {
   DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
   DEFAULT_FEED_POSTS_LIMIT,
@@ -7,14 +9,12 @@ import {
   feedPostsChildren,
   pollInfo,
 } from "../queries/social-feed";
-import { getQueryClient } from "../get-query-client";
-import { derivePkgAddr } from "../gno";
+import { zenaoClient } from "@/lib/zenao-client";
 import {
   CreatePollRequest,
   CreatePostRequest,
   VotePollRequest,
 } from "@/app/gen/zenao/v1/zenao_pb";
-import { zenaoClient } from "@/lib/zenao-client";
 
 interface CreatePollRequestMutation
   extends Required<Omit<CreatePollRequest, "$typeName" | "$unknown">> {
@@ -31,7 +31,10 @@ export const useCreatePoll = (queryClient: QueryClient) => {
       });
     },
     onMutate: async (variables) => {
-      const pkgPath = `gno.land/r/zenao/events/e${variables.eventId}`;
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
       const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
       const feedPostsOpts = feedPosts(
@@ -57,7 +60,10 @@ export const useCreatePoll = (queryClient: QueryClient) => {
       return { previousFeedPosts, previousFeedPolls };
     },
     onSuccess: (_, variables) => {
-      const pkgPath = `gno.land/r/zenao/events/e${variables.eventId}`;
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
       const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
       const feedPostsOpts = feedPosts(
@@ -77,7 +83,10 @@ export const useCreatePoll = (queryClient: QueryClient) => {
       queryClient.invalidateQueries(feedPollsOpts);
     },
     onError: (_, variables, context) => {
-      const pkgPath = `gno.land/r/zenao/events/e${variables.eventId}`;
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
       const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
       const feedPostsOpts = feedPosts(
@@ -177,7 +186,10 @@ export const useCreateStandardPost = () => {
       });
     },
     onMutate: async (variables) => {
-      const pkgPath = `gno.land/r/zenao/events/e${variables.eventId}`;
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
       const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
       const feedPostsOpts = feedPosts(
@@ -217,7 +229,10 @@ export const useCreateStandardPost = () => {
       };
     },
     onSuccess: (_, variables) => {
-      const pkgPath = `gno.land/r/zenao/events/e${variables.eventId}`;
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
       const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
       const feedPostsOpts = feedPosts(
@@ -244,7 +259,10 @@ export const useCreateStandardPost = () => {
       queryClient.invalidateQueries(feedPostsChildrenOpts);
     },
     onError: (_, variables, context) => {
-      const pkgPath = `gno.land/r/zenao/events/e${variables.eventId}`;
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
       const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
       const feedPostsOpts = feedPosts(

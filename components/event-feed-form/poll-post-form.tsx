@@ -1,16 +1,15 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { useMediaQuery } from "react-responsive";
-import { UseFormReturn } from "react-hook-form";
-import { hoursToSeconds, minutesToSeconds } from "date-fns";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { hoursToSeconds, minutesToSeconds } from "date-fns";
 import { useTranslations } from "next-intl";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { UseFormReturn } from "react-hook-form";
+import { useMediaQuery } from "react-responsive";
 import { FeedInputButtons } from "./feed-input-buttons";
 import { PollFields } from "./poll-fields";
-import { useToast } from "@/hooks/use-toast";
-import { Textarea } from "@/components/shadcn/textarea";
+import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 import {
   Form,
   FormControl,
@@ -18,9 +17,10 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/shadcn/form";
-import { useCreatePoll } from "@/lib/mutations/social-feed";
+import { Textarea } from "@/components/shadcn/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { getQueryClient } from "@/lib/get-query-client";
-import { PollKind } from "@/app/gen/polls/v1/polls_pb";
+import { useCreatePoll } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
@@ -93,7 +93,8 @@ export function PollPostForm({
       );
 
       await createPoll({
-        eventId,
+        orgType: "event",
+        orgId: eventId,
         question: values.question,
         duration,
         options: values.options.map((option) => option.text),

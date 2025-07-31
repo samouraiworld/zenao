@@ -186,11 +186,12 @@ message BatchProfileRequest {
 }
 
 message CreatePollRequest {
-  string event_id = 1;
-  string question = 2;
-  repeated string options = 3;
-  int64 duration = 4; // unix seconds
-  polls.v1.PollKind kind = 5;
+  string org_type = 1; // one of: event, community
+  string org_id = 2;
+  string question = 3;
+  repeated string options = 4;
+  int64 duration = 5; // unix seconds
+  polls.v1.PollKind kind = 6;
 }
 
 message CreatePollResponse { string post_id = 1; }
@@ -203,10 +204,11 @@ message VotePollRequest {
 message VotePollResponse {}
 
 message CreatePostRequest {
-  string event_id = 1;
-  string content = 2;
-  string parent_id = 3;
-  repeated string tags = 4;
+  string org_type = 1; // one of: event, community
+  string org_id = 2;
+  string content = 3;
+  string parent_id = 4;
+  repeated string tags = 5;
 }
 
 message CreatePostResponse { string post_id = 1; }
