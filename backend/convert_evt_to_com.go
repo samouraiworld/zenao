@@ -135,10 +135,6 @@ func convertEvtToCom() error {
 		membersIDs = mapsl.Map(organizers, func(usr *zeni.User) string { return usr.ID })
 		membersIDs = append(membersIDs, mapsl.Map(gkps, func(usr *zeni.User) string { return usr.ID })...)
 		membersIDs = append(membersIDs, mapsl.Map(participants, func(usr *zeni.User) string { return usr.ID })...)
-		if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
-			return err
-		}
-
 		cmt, err = tx.CreateCommunity(evt.CreatorID, []string{evt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
 		if err != nil {
 			return err
