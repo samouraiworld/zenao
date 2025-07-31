@@ -18,6 +18,9 @@ type CommunityEventsProps = {
 
 function CommunityEvents({ communityId: _, now }: CommunityEventsProps) {
   const t = useTranslations();
+
+  // event addr : "g1fehxwjgvqlyfljp8j07q43z74e3knmt7g686e5"
+
   // TODO Change endpoints
   const {
     data: upcomingEventsPages,
@@ -90,7 +93,7 @@ function CommunityEvents({ communityId: _, now }: CommunityEventsProps) {
       </Heading>
 
       <div className="flex flex-col gap-0">
-        {upcomingEvents.length === 0 && (
+        {pastEvents.length === 0 && (
           <EmptyList
             title={t("no-events-title")}
             description={t("no-events-description")}

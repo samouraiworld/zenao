@@ -14,6 +14,8 @@ import {
   CommunityInfoSchema,
 } from "@/app/gen/zenao/v1/zenao_pb";
 
+export const DEFAULT_COMMUNITIES_LIMIT = 20;
+
 const communityUserRolesEnum = z.enum(["administrator", "member", "event"]);
 
 export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;

@@ -57,7 +57,9 @@ async function CommunityPageLayout({
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ScreenContainer
         background={{
-          src: communityData.bannerUri,
+          src:
+            communityData.bannerUri ??
+            "bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24",
           width: 3840,
           height: 720,
         }}
