@@ -28,11 +28,11 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 	}
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		evt, err := db.GetEventByPollID(req.Msg.PollId)
+		orgType, orgID, err := db.GetOrgByPollID(req.Msg.PollId)
 		if err != nil {
 			return err
 		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, evt.ID)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, orgType, orgID)
 		if err != nil {
 			return err
 		}

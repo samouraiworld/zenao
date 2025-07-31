@@ -580,8 +580,11 @@ func (c *CreatePollRequest) GnoLiteral(typePrefix string, linePrefix string) str
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("CreatePollRequest{\n")
-	if c.EventId != "" {
-		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	if c.OrgType != "" {
+		fmt.Fprintf(buf, "%s\tOrgType: %q,\n", linePrefix, c.OrgType)
+	}
+	if c.OrgId != "" {
+		fmt.Fprintf(buf, "%s\tOrgId: %q,\n", linePrefix, c.OrgId)
 	}
 	if c.Question != "" {
 		fmt.Fprintf(buf, "%s\tQuestion: %q,\n", linePrefix, c.Question)
@@ -646,8 +649,11 @@ func (c *CreatePostRequest) GnoLiteral(typePrefix string, linePrefix string) str
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("CreatePostRequest{\n")
-	if c.EventId != "" {
-		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
+	if c.OrgType != "" {
+		fmt.Fprintf(buf, "%s\tOrgType: %q,\n", linePrefix, c.OrgType)
+	}
+	if c.OrgId != "" {
+		fmt.Fprintf(buf, "%s\tOrgId: %q,\n", linePrefix, c.OrgId)
 	}
 	if c.Content != "" {
 		fmt.Fprintf(buf, "%s\tContent: %q,\n", linePrefix, c.Content)

@@ -120,18 +120,18 @@ const pollDurationFormSchema = z.object({
 export const standardPostFormSchema = z.object({
   kind: z.literal("STANDARD_POST"),
   parentPostId: z.bigint().optional(),
-  content: z.string().trim().min(1, "Required").max(5000),
+  content: z.string().trim().min(1, "You must enter something").max(5000),
 });
 export type StandardPostFormSchemaType = z.infer<typeof standardPostFormSchema>;
 
 export const pollFormSchema = z.object({
   parentPostId: z.bigint().optional(),
   kind: z.literal("POLL"),
-  question: z.string().trim().min(1, "Required").max(300),
+  question: z.string().trim().min(1, "You must enter a question").max(300),
   options: z
     .array(pollOptionFormSchema)
     .min(2, "There must be at least 2 options")
-    .max(8),
+    .max(8, "There must be at most 8 options"),
   allowMultipleOptions: z.boolean(),
   duration: pollDurationFormSchema,
 });

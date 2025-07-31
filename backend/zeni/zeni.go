@@ -107,7 +107,8 @@ type Feed struct {
 	CreatedAt time.Time
 	ID        string
 	Slug      string
-	EventID   string
+	OrgType   string // one of: user, event, community
+	OrgID     string
 }
 
 type Post struct {
@@ -208,8 +209,6 @@ type DB interface {
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
-	GetEventByPollID(pollID string) (*Event, error)
-	GetEventByPostID(postID string) (*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
@@ -221,9 +220,11 @@ type DB interface {
 	// XXX: we can create a common interface for orgs
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
 	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
+	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
+	GetOrgByPostID(postID string) (orgType, orgID string, err error)
 
-	CreateFeed(eventID string, slug string) (*Feed, error)
-	GetFeed(eventID string, slug string) (*Feed, error)
+	CreateFeed(orgType string, orgID string, slug string) (*Feed, error)
+	GetFeed(orgType string, orgID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
 
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
@@ -253,10 +254,10 @@ type Chain interface {
 
 	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
 
-	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
+	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error
 	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
+	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }

@@ -172,7 +172,8 @@ type BatchProfileRequest struct {
 }
 
 type CreatePollRequest struct {
-	EventId  string
+	OrgType  string
+	OrgId    string
 	Question string
 	Options  []string
 	Duration int64
@@ -192,7 +193,8 @@ type VotePollResponse struct {
 }
 
 type CreatePostRequest struct {
-	EventId  string
+	OrgType  string
+	OrgId    string
 	Content  string
 	ParentId string
 	Tags     []string

@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
+import { UseFormReturn } from "react-hook-form";
 import { PollPostForm } from "./poll-post-form";
 import { FeedInputMode, StandardPostForm } from "./standard-post-form";
+import { FeedPostFormSchemaType } from "@/types/schemas";
+import { captureException } from "@/lib/report";
 import { userAddressOptions } from "@/lib/queries/user";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/hooks/use-toast";
-import { captureException } from "@/lib/report";
-import { FeedPostFormSchemaType } from "@/types/schemas";
 
 const _eventTabs = ["description", "discussion", "votes"] as const;
 export type EventTab = (typeof _eventTabs)[number];
@@ -57,7 +57,8 @@ const EventFeedForm = ({
       }
 
       await createStandardPost({
-        eventId,
+        orgType: "event",
+        orgId: eventId,
         content: values.content,
         parentId: values.parentPostId?.toString() ?? "",
         token,

@@ -23,8 +23,8 @@ type Feed struct {
 	gorm.Model
 	Slug string
 
-	EventID uint
-	Event   Event
+	OrgType string // one of: user, event, community
+	OrgID   uint
 }
 
 type Tag struct {
@@ -97,7 +97,8 @@ func dbFeedToZeniFeed(feed *Feed) (*zeni.Feed, error) {
 		ID:        strconv.FormatUint(uint64(feed.ID), 10),
 		CreatedAt: feed.CreatedAt,
 		Slug:      feed.Slug,
-		EventID:   strconv.FormatUint(uint64(feed.EventID), 10),
+		OrgType:   feed.OrgType,
+		OrgID:     strconv.FormatUint(uint64(feed.OrgID), 10),
 	}, nil
 }
 

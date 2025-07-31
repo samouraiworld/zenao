@@ -586,10 +586,10 @@ func (g *gnoZenaoChain) EventAddress(eventID string) string {
 }
 
 // CreatePost implements ZenaoChain
-func (g *gnoZenaoChain) CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error) {
+func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error) {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
-	eventPkgPath := g.eventRealmPkgPath(eventID)
-	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+	orgPkgPath := g.orgPkgPath(orgType, orgID)
+	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
 	gnoLitPost := "&" + post.GnoLiteral("feedsv1.", "\t\t")
 
 	msg := vm.MsgRun{
@@ -705,7 +705,7 @@ func (g *gnoZenaoChain) DeletePost(userID string, postID string) error {
 }
 
 // ReactPost implements ZenaoChain
-func (g *gnoZenaoChain) ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error {
+func (g *gnoZenaoChain) ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -713,7 +713,7 @@ func (g *gnoZenaoChain) ReactPost(userID string, eventID string, req *zenaov1.Re
 			Name: "main",
 			Files: []*gnovm.MemFile{{
 				Name: "main.gno",
-				Body: genReactPostMsgRunBody(userRealmPkgPath, userID, req.PostId, eventID, req.Icon),
+				Body: genReactPostMsgRunBody(userRealmPkgPath, userID, req.PostId, orgType, orgID, req.Icon),
 			}},
 		},
 	}
@@ -736,8 +736,8 @@ func (g *gnoZenaoChain) ReactPost(userID string, eventID string, req *zenaov1.Re
 // CreatePoll implements ZenaoChain
 func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error) {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
-	eventPkgPath := g.eventRealmPkgPath(req.EventId)
-	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+	orgPkgPath := g.orgPkgPath(req.OrgType, req.OrgId)
+	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -745,7 +745,7 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 			Name: "main",
 			Files: []*gnovm.MemFile{{
 				Name: "main.gno",
-				Body: genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID, req.Question, req.Options, req.Kind, req.Duration),
+				Body: genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID, req.Question, req.Options, req.Kind, req.Duration),
 			}},
 		},
 	}
@@ -826,6 +826,15 @@ func (g *gnoZenaoChain) eventRealmPkgPath(eventID string) string {
 
 func (g *gnoZenaoChain) communityPkgPath(communityID string) string {
 	return fmt.Sprintf("gno.land/r/%s/communities/c%s", g.namespace, communityID)
+}
+
+func (g *gnoZenaoChain) orgPkgPath(orgType string, orgID string) string {
+	if orgType == zeni.EntityTypeEvent {
+		return g.eventRealmPkgPath(orgID)
+	} else if orgType == zeni.EntityTypeCommunity {
+		return g.communityPkgPath(orgID)
+	}
+	return ""
 }
 
 func (g *gnoZenaoChain) userRealmPkgPath(userID string) string {
@@ -986,7 +995,7 @@ func genDeletePostMsgRunBody(userRealmPkgPath string, postIDInt uint64) string {
 `, userRealmPkgPath, postIDInt, postIDInt)
 }
 
-func genReactPostMsgRunBody(userRealmPkgPath, userID, postID, eventID, icon string) string {
+func genReactPostMsgRunBody(userRealmPkgPath, userID, postID, orgType, orgID, icon string) string {
 	return fmt.Sprintf(`package main
 import (
 	"gno.land/p/zenao/daokit"
@@ -996,7 +1005,7 @@ import (
 	
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-		Title: "User #%s reacts to post #%s in event #%s.",
+		Title: "User #%s reacts to post #%s in %s #%s.",
 		Message: daokit.NewExecuteLambdaMsg(newReaction),
 	})
 }
@@ -1004,7 +1013,7 @@ func main() {
 func newReaction() {
 	social_feed.ReactPost(%s, %q)
 }
-`, userRealmPkgPath, userID, postID, eventID, postID, icon)
+`, userRealmPkgPath, userID, postID, orgType, orgID, postID, icon)
 }
 
 func genVotePollMsgRunBody(userRealmPkgPath, pollID, option string) string {
@@ -1031,7 +1040,7 @@ func genVotePollMsgRunBody(userRealmPkgPath, pollID, option string) string {
 `, userRealmPkgPath, pollID, option)
 }
 
-func genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID string, question string, options []string, kind pollsv1.PollKind, duration int64) string {
+func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, question string, options []string, kind pollsv1.PollKind, duration int64) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -1041,7 +1050,7 @@ func genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID string, ques
 		"gno.land/p/zenao/daokit"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		pollsv1 "gno.land/p/zenao/polls/v1"
-		event %q
+		org %q
 		"gno.land/r/zenao/polls"
 		"gno.land/r/zenao/social_feed"
 		user %q
@@ -1059,7 +1068,7 @@ func genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID string, ques
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		p := polls.NewPoll(question, kind, %d, options, event.IsMember)
+		p := polls.NewPoll(question, kind, %d, options, org.IsMember)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
 			panic("multiaddr validation failed")
@@ -1078,7 +1087,7 @@ func genCreatePollMsgRunBody(eventPkgPath, userRealmPkgPath, feedID string, ques
 		postID := social_feed.NewPost(feedID, post)
 		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
-	`, eventPkgPath, userRealmPkgPath, question, stringSliceLit(options), kind, duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
+	`, orgPkgPath, userRealmPkgPath, question, stringSliceLit(options), kind, duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
 }
 func genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, ticketPubkey, signature string) string {
 	return fmt.Sprintf(`package main

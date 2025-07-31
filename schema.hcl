@@ -81,12 +81,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
+  }
   index "idx_users_auth_id" {
     unique  = true
     columns = [column.auth_id]
-  }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
   }
 }
 table "communities" {
@@ -306,18 +306,16 @@ table "feeds" {
     null = true
     type = text
   }
-  column "event_id" {
+  column "org_type" {
+    null = true
+    type = text
+  }
+  column "org_id" {
     null = true
     type = integer
   }
   primary_key {
     columns = [column.id]
-  }
-  foreign_key "fk_feeds_event" {
-    columns     = [column.event_id]
-    ref_columns = [table.events.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
   }
   index "idx_feeds_deleted_at" {
     columns = [column.deleted_at]
@@ -409,15 +407,15 @@ table "posts" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_feed" {
     columns     = [column.feed_id]
     ref_columns = [table.feeds.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -573,15 +571,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_reactions_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_reactions" {
     columns     = [column.post_id]
     ref_columns = [table.posts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_reactions_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -641,6 +639,9 @@ table "sold_tickets" {
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
+  index "idx_sold_tickets_deleted_at" {
+    columns = [column.deleted_at]
+  }
   index "idx_sold_tickets_pubkey" {
     unique  = true
     columns = [column.pubkey]
@@ -651,9 +652,6 @@ table "sold_tickets" {
   }
   index "idx_sold_tickets_event_id" {
     columns = [column.event_id]
-  }
-  index "idx_sold_tickets_deleted_at" {
-    columns = [column.deleted_at]
   }
 }
 table "tags" {

@@ -7,6 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
 import EventFeedForm from "../../event-feed-form/event-feed-form";
 import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
@@ -17,6 +18,7 @@ import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import {
   EventInfoTabsSchemaType,
+  feedPostFormSchema,
   FeedPostFormSchemaType,
 } from "@/types/schemas";
 import EventFeed from "@/app/event/[id]/(general)/[tab]/feed";
@@ -50,6 +52,7 @@ export function MainEventSections({
 
   const form = useForm<FeedPostFormSchemaType>({
     mode: "all",
+    resolver: zodResolver(feedPostFormSchema),
     defaultValues: {
       content: "",
       question: "",

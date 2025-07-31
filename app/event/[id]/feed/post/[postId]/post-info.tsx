@@ -1,30 +1,30 @@
 "use client";
 
-import { Suspense } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
 import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
-import { userAddressOptions } from "@/lib/queries/user";
-import { feedPost } from "@/lib/queries/social-feed";
-import { isPollPost, isStandardPost } from "@/lib/social-feed";
-import Heading from "@/components/widgets/texts/heading";
-import { useCreateStandardPost } from "@/lib/mutations/social-feed";
-import { useToast } from "@/hooks/use-toast";
-import { captureException } from "@/lib/report";
-import { FeedPostFormSchemaType } from "@/types/schemas";
+import { Suspense } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { PostComments } from "@/components/event-feed-form/post-comments";
 import { StandardPostForm } from "@/components/event-feed-form/standard-post-form";
-import { parsePollUri } from "@/lib/multiaddr";
 import { PollPost } from "@/components/social-feed/poll-post";
+import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 import { StandardPostCard } from "@/components/social-feed/standard-post-card";
-import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
-import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
+import Heading from "@/components/widgets/texts/heading";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
 import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
+import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
+import { useToast } from "@/hooks/use-toast";
 import { derivePkgAddr } from "@/lib/gno";
+import { parsePollUri } from "@/lib/multiaddr";
+import { useCreateStandardPost } from "@/lib/mutations/social-feed";
+import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
+import { feedPost } from "@/lib/queries/social-feed";
+import { userAddressOptions } from "@/lib/queries/user";
+import { captureException } from "@/lib/report";
+import { isPollPost, isStandardPost } from "@/lib/social-feed";
+import { FeedPostFormSchemaType } from "@/types/schemas";
 
 function PostCommentForm({
   eventId,
@@ -58,7 +58,8 @@ function PostCommentForm({
       }
 
       await createStandardPost({
-        eventId,
+        orgType: "event",
+        orgId: eventId,
         content: values.content,
         parentId: parentId.toString(),
         token,
