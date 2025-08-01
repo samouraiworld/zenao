@@ -128,7 +128,7 @@ type MsgAddMember struct {
 }
 
 func (msg *MsgAddMember) String() string {
-	return "Add" + msg.address + " to community as a member"
+	return "Add " + msg.address + " to community as a member"
 }
 
 func (c *Community) addMemberHandler() daokit.MessageHandler {
