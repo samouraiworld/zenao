@@ -148,8 +148,8 @@ function communitiesListFromJson(raw: unknown) {
   );
 }
 
-function jsonStringArrayIntoGoArray(arr: string[]): string {
-  return `[]string${JSON.stringify(arr).replace("[", "{").replace("]", "}")}`;
+function goStringSliceLiteral(arr: string[]): string {
+  return `[]string{${arr.map(s => JSON.stringify(s)).join(",")}}`;
 }
 
 export function communityIdFromPkgPath(pkgPath: string): string {
