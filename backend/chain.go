@@ -1245,7 +1245,7 @@ func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAdd
 			}),
 		})
 	}
-`, callerPkgPath, communityPkgPath, "Remove event role from: "+eventAddr+"within "+communityPkgPath, eventAddr)
+`, callerPkgPath, communityPkgPath, "Remove event role from: "+eventAddr+" within "+communityPkgPath, eventAddr)
 }
 
 func genEventRealmSource(organizersAddr []string, gatekeepersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
