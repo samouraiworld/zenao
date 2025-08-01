@@ -174,7 +174,7 @@ func execGenTxs() error {
 		}
 
 		for _, deletedGkp := range deletedGatekeepers {
-			gatekeepersIDs = append(gatekeepersIDs, deletedGkp.OrgID)
+			gatekeepersIDs = append(gatekeepersIDs, deletedGkp.EntityID)
 			tx, err := createEventRemoveGatekeeperTx(chain, signerInfo.GetAddress(), event, deletedGkp.EntityID, deletedGkp.DeletedAt)
 			logger.Info("event remove gatekeeper tx created", zap.String("event-id", event.ID), zap.String("gatekeeper-id", deletedGkp.EntityID), zap.Time("deleted-at", deletedGkp.DeletedAt))
 			if err != nil {
