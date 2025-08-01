@@ -716,7 +716,7 @@ func createCancelParticipationTx(chain *gnoZenaoChain, event *zeni.Event, creato
 	return gnoland.TxWithMetadata{
 		Tx: tx,
 		Metadata: &gnoland.GnoTxMetadata{
-			Timestamp: ticket.CreatedAt.Unix(),
+			Timestamp: ticket.DeletedAt.Unix(),
 		},
 	}, nil
 }
