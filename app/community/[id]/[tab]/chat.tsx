@@ -22,11 +22,11 @@ import { communityUserRoles } from "@/lib/queries/community";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { usePwaContext } from "@/components/providers/pwa-state-provider";
 
-type CommunityPostsProps = {
+type CommunityChatProps = {
   communityId: string;
 };
 
-function CommunityPosts({ communityId }: CommunityPostsProps) {
+function CommunityChat({ communityId }: CommunityChatProps) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -155,4 +155,4 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
   );
 }
 
-export default CommunityPosts;
+export default CommunityChat;
