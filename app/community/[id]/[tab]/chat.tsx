@@ -1,49 +1,49 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useAuth } from "@clerk/nextjs";
-import { useMemo, useState } from "react";
+import EmptyList from "@/components/widgets/lists/empty-list";
 import { userAddressOptions } from "@/lib/queries/user";
+import { derivePkgAddr } from "@/lib/gno";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
-import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+import FeedPostForm from "@/components/social-feed/feed-post-form";
 import { PostsList } from "@/components/social-feed/posts-list";
-import { eventUserRoles } from "@/lib/queries/event-users";
+import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-// import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
-import { derivePkgAddr } from "@/lib/gno";
-import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
+import { communityUserRoles } from "@/lib/queries/community";
 import { FeedPostFormSchemaType } from "@/types/schemas";
+import { usePwaContext } from "@/components/providers/pwa-state-provider";
 
-type EventFeedProps = {
-  eventId: string;
+type CommunityChatProps = {
+  communityId: string;
 };
 
-function EventFeed({ eventId }: EventFeedProps) {
+function CommunityChat({ communityId }: CommunityChatProps) {
+  const t = useTranslations();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
+  const { data: userRoles } = useSuspenseQuery(
+    communityUserRoles(communityId, userAddress),
   );
+
+  const { onDisplayBottomBarChange } = usePwaContext();
 
   const [postInEdition, setPostInEdition] = useState<{
     postId: string;
     content: string;
   } | null>(null);
 
-  const t = useTranslations();
-
-  // Event's social feed posts
-  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
+  const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
   const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
   const {
@@ -86,30 +86,35 @@ function EventFeed({ eventId }: EventFeedProps) {
     setPostInEdition(null);
   };
 
+  useEffect(() => {
+    if (userRoles.includes("member") || userRoles.includes("administrator")) {
+      onDisplayBottomBarChange(false);
+    }
+
+    return () => {
+      onDisplayBottomBarChange(true);
+    };
+  }, [onDisplayBottomBarChange, userRoles]);
+
   return (
-    <>
-      <div className="space-y-4">
-        {!posts.length ? (
-          <EmptyList
-            title={t("no-posts-title")}
-            description={t("no-posts-description")}
-          />
-        ) : (
+    <div className="relative space-y-8">
+      {posts.length === 0 ? (
+        <EmptyList
+          title={t("no-posts-title")}
+          description={t("no-posts-description")}
+        />
+      ) : (
+        <div className="space-y-4">
           <PostsList
             posts={posts}
             userAddress={userAddress}
             onReactionChange={onReactionChange}
             canInteract={
-              roles.includes("organizer") || roles.includes("participant")
+              userRoles.includes("member") ||
+              userRoles.includes("administrator")
             }
             onDelete={onDelete}
-            replyHrefFormatter={(postId) =>
-              `/event/${eventId}/feed/post/${postId}`
-            }
-            canReply
             postInEdition={postInEdition?.postId ?? null}
-            innerEditMode
-            onEdit={onEdit}
             onEditModeChange={(postId, content, editMode) => {
               if (!editMode) {
                 setPostInEdition(null);
@@ -117,12 +122,12 @@ function EventFeed({ eventId }: EventFeedProps) {
               }
               setPostInEdition({ postId, content });
             }}
-            isEditing={isEditing}
             isReacting={isReacting}
             isDeleting={isDeleting}
           />
-        )}
-      </div>
+        </div>
+      )}
+
       <div className="py-4">
         <LoaderMoreButton
           fetchNextPage={fetchNextPage}
@@ -130,11 +135,24 @@ function EventFeed({ eventId }: EventFeedProps) {
           isFetching={isFetching}
           isFetchingNextPage={isFetchingNextPage}
           page={posts}
-          noMoreLabel={t("no-more-posts")}
+          noMoreLabel={""}
         />
       </div>
-    </>
+
+      {(userRoles.includes("member") ||
+        userRoles.includes("administrator")) && (
+        <FeedPostForm
+          orgId={communityId}
+          orgType="community"
+          editMode={!!postInEdition}
+          postInEdition={postInEdition}
+          onEdit={onEdit}
+          onCancelEdit={() => setPostInEdition(null)}
+          isEditing={isEditing}
+        />
+      )}
+    </div>
   );
 }
 
-export default EventFeed;
+export default CommunityChat;

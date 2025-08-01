@@ -10,7 +10,7 @@ export const Footer = () => {
   const t = useTranslations("navigation");
 
   return (
-    <footer className="flex flex-row justify-between items-end p-4">
+    <footer className="standalone:hidden flex flex-row justify-between items-end p-4">
       <div className="flex flex-row gap-3 sm:gap-5">
         <Text
           size="sm"
