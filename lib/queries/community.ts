@@ -133,7 +133,7 @@ export const communityUsersWithRoles = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/communities/c${communityId}`,
-        `community.GetUsersWithRolesJSON(${jsonStringArrayIntoGoArray(roles)})`,
+        `community.GetUsersWithRolesJSON(${goStringSliceLiteral(roles)})`,
       );
       const raw = extractGnoJSONResponse(res);
 
@@ -149,7 +149,7 @@ function communitiesListFromJson(raw: unknown) {
 }
 
 function goStringSliceLiteral(arr: string[]): string {
-  return `[]string{${arr.map(s => JSON.stringify(s)).join(",")}}`;
+  return `[]string{${arr.map((s) => JSON.stringify(s)).join(",")}}`;
 }
 
 export function communityIdFromPkgPath(pkgPath: string): string {
