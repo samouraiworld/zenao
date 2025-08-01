@@ -1,6 +1,8 @@
 package communities
 
 import (
+	"std"
+
 	"gno.land/p/zenao/basedao"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
@@ -91,7 +93,192 @@ func NewCommunity(conf *Config) *Community {
 		DAO:              pubdao,
 	}
 
+	oneAdmin := daocond.RoleCount(1, "administrator", memberStore.HasRole)
+
+	resources := []*daokit.Resource{
+		{
+			Condition: oneAdmin,
+			Handler:   community.addMemberHandler(),
+		},
+		{
+			Condition: oneAdmin,
+			Handler:   community.removeMemberHandler(),
+		},
+		{
+			Condition: oneAdmin,
+			Handler:   community.addEventHandler(),
+		},
+		{
+			Condition: oneAdmin,
+			Handler:   community.removeEventHandler(),
+		},
+	}
+
+	for _, res := range resources {
+		community.DAOPrivate.Core.Resources.Set(res)
+	}
+
 	return community
+}
+
+const MsgAddMemberKind = "gno.land/p/zenao/communities.AddMember"
+
+type MsgAddMember struct {
+	address string
+}
+
+func (msg *MsgAddMember) String() string {
+	return "Add " + msg.address + " to community as a member"
+}
+
+func (c *Community) addMemberHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgAddMemberKind, func(i interface{}) {
+		msg, ok := i.(*MsgAddMember)
+		if !ok {
+			panic("invalid payload type")
+		}
+
+		callerIsAdmin := c.DAOPrivate.Members.HasRole(std.PreviousRealm().Address().String(), "administrator")
+		if !callerIsAdmin {
+			panic("only administrators can add members")
+		}
+
+		if c.DAOPrivate.Members.HasRole(msg.address, "member") {
+			panic("address is already a member of the community")
+		}
+
+		if c.DAOPrivate.Members.CountMemberRoles(msg.address) > 0 {
+			c.DAOPrivate.Members.AddRoleToMember(msg.address, "member")
+		} else {
+			c.DAOPrivate.Members.AddMember(msg.address, []string{"member"})
+		}
+	})
+}
+
+func NewAddMemberMsg(address string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddMemberKind, &MsgAddMember{
+		address: address,
+	})
+}
+
+const MsgRemoveMemberKind = "gno.land/p/zenao/communities.RemoveMember"
+
+type MsgRemoveMember struct {
+	address string
+}
+
+func (msg *MsgRemoveMember) String() string {
+	return "Remove " + msg.address + " from community"
+}
+
+func (c *Community) removeMemberHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgRemoveMemberKind, func(i interface{}) {
+		msg, ok := i.(*MsgRemoveMember)
+		if !ok {
+			panic("invalid payload type")
+		}
+
+		callerIsAdmin := c.DAOPrivate.Members.HasRole(std.PreviousRealm().Address().String(), "administrator")
+		if !callerIsAdmin {
+			panic("only administrators can remove members")
+		}
+
+		if !c.DAOPrivate.Members.HasRole(msg.address, "member") {
+			panic("address is not a member of the community")
+		}
+
+		if c.DAOPrivate.Members.CountMemberRoles(msg.address) > 1 {
+			c.DAOPrivate.Members.RemoveRoleFromMember(msg.address, "member")
+		} else {
+			c.DAOPrivate.Members.RemoveMember(msg.address)
+		}
+	})
+}
+
+func NewRemoveMemberMsg(address string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgRemoveMemberKind, &MsgRemoveMember{
+		address: address,
+	})
+}
+
+const MsgAddEventKind = "gno.land/p/zenao/communities.AddEvent"
+
+type MsgAddEvent struct {
+	address string
+}
+
+func (msg *MsgAddEvent) String() string {
+	return "Add " + msg.address + " to community as an event"
+}
+
+func (c *Community) addEventHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgAddEventKind, func(i interface{}) {
+		msg, ok := i.(*MsgAddEvent)
+		if !ok {
+			panic("invalid payload type")
+		}
+
+		callerIsAdmin := c.DAOPrivate.Members.HasRole(std.PreviousRealm().Address().String(), "administrator")
+		if !callerIsAdmin {
+			panic("only administrators can add events")
+		}
+
+		if c.DAOPrivate.Members.HasRole(msg.address, "event") {
+			panic("address is already an event in the community")
+		}
+
+		if c.DAOPrivate.Members.CountMemberRoles(msg.address) > 0 {
+			c.DAOPrivate.Members.AddRoleToMember(msg.address, "event")
+		} else {
+			c.DAOPrivate.Members.AddMember(msg.address, []string{"event"})
+		}
+	})
+}
+
+func NewAddEventMsg(address string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddEventKind, &MsgAddEvent{
+		address: address,
+	})
+}
+
+const MsgRemoveEventKind = "gno.land/p/zenao/communities.RemoveEvent"
+
+type MsgRemoveEvent struct {
+	address string
+}
+
+func (msg *MsgRemoveEvent) String() string {
+	return "Remove " + msg.address + " from community as an event"
+}
+
+func (c *Community) removeEventHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgRemoveEventKind, func(i interface{}) {
+		msg, ok := i.(*MsgRemoveEvent)
+		if !ok {
+			panic("invalid payload type")
+		}
+
+		callerIsAdmin := c.DAOPrivate.Members.HasRole(std.PreviousRealm().Address().String(), "administrator")
+		if !callerIsAdmin {
+			panic("only administrators can remove events")
+		}
+
+		if !c.DAOPrivate.Members.HasRole(msg.address, "event") {
+			panic("address is not an event in the community")
+		}
+
+		if c.DAOPrivate.Members.CountMemberRoles(msg.address) > 1 {
+			c.DAOPrivate.Members.RemoveRoleFromMember(msg.address, "event")
+		} else {
+			c.DAOPrivate.Members.RemoveMember(msg.address)
+		}
+	})
+}
+
+func NewRemoveEventMsg(address string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgRemoveEventKind, &MsgRemoveEvent{
+		address: address,
+	})
 }
 
 // TODO: Improve render avoid double rendering on member with multiple roles
