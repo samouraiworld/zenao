@@ -7,7 +7,7 @@ import EmptyList from "@/components/widgets/lists/empty-list";
 import { DEFAULT_EVENTS_LIMIT, eventsList } from "@/lib/queries/events-list";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { EventCard } from "@/components/features/event/event-card";
-import { idFromPkgPath } from "@/lib/queries/event";
+import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import Heading from "@/components/widgets/texts/heading";
 
@@ -71,7 +71,7 @@ function CommunityEvents({ communityId: _, now }: CommunityEventsProps) {
         <EventCardListLayout>
           {upcomingEvents.map((evt) => (
             <EventCard
-              href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
               key={evt.pkgPath}
               evt={evt}
             />
@@ -103,7 +103,7 @@ function CommunityEvents({ communityId: _, now }: CommunityEventsProps) {
         <EventCardListLayout>
           {pastEvents.map((evt) => (
             <EventCard
-              href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
               key={evt.pkgPath}
               evt={evt}
             />

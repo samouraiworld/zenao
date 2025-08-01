@@ -61,7 +61,7 @@ const FeedPostForm = ({
     userAddressOptions(getToken, userId),
   );
   const { toast } = useToast();
-  const t = useTranslations();
+  const t = useTranslations("event-feed.standard-post-form");
   const form = useForm<FeedPostFormSchemaType>({
     mode: "all",
     defaultValues: {
@@ -183,7 +183,7 @@ const FeedPostForm = ({
       )}
       <div
         className={cn(
-          "flex justify-center fixed left-0 bottom-0 z-50 w-full p-2 gap-2 bg-accent/70 backdrop-blur-md",
+          "flex justify-center fixed left-0 bottom-0 z-[100] w-full p-2 gap-2 bg-accent/70 backdrop-blur-md",
           "translate-y-32 animate-gotop-appear",
         )}
       >

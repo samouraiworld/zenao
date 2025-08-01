@@ -74,7 +74,7 @@ export const communitiesList = (
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
-        `gno.land/r/zenao/eventreg`,
+        `gno.land/r/zenao/communityreg`,
         `communitiesToJSON(listCommunities(${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
@@ -105,6 +105,10 @@ export const communityUserRoles = (
   queryOptions({
     queryKey: ["communityUserRoles", communityId, userAddress],
     queryFn: async () => {
+      if (!communityId || !userAddress) {
+        return [];
+      }
+
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
@@ -146,4 +150,9 @@ function communitiesListFromJson(raw: unknown) {
 
 function jsonStringArrayIntoGoArray(arr: string[]): string {
   return `[]string${JSON.stringify(arr).replace("[", "{").replace("]", "}")}`;
+}
+
+export function communityIdFromPkgPath(pkgPath: string): string {
+  const res = /(c\d+)$/.exec(pkgPath);
+  return res?.[1].substring(1) || "";
 }

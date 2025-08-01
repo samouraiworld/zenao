@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import {
   useSuspenseInfiniteQuery,
@@ -20,6 +20,7 @@ import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
 import { communityUserRoles } from "@/lib/queries/community";
 import { FeedPostFormSchemaType } from "@/types/schemas";
+import { usePwaContext } from "@/components/providers/pwa-state-provider";
 
 type CommunityPostsProps = {
   communityId: string;
@@ -34,6 +35,8 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
   const { data: userRoles } = useSuspenseQuery(
     communityUserRoles(communityId, userAddress),
   );
+
+  const { onDisplayBottomBarChange } = usePwaContext();
 
   const [postInEdition, setPostInEdition] = useState<{
     postId: string;
@@ -83,33 +86,46 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
     setPostInEdition(null);
   };
 
+  useEffect(() => {
+    if (userRoles.includes("member") || userRoles.includes("administrator")) {
+      onDisplayBottomBarChange(false);
+    }
+
+    return () => {
+      onDisplayBottomBarChange(true);
+    };
+  }, [onDisplayBottomBarChange, userRoles]);
+
   return (
-    <div className="space-y-8">
+    <div className="relative space-y-8">
       {posts.length === 0 ? (
         <EmptyList
           title={t("no-posts-title")}
           description={t("no-posts-description")}
         />
       ) : (
-        <PostsList
-          posts={posts}
-          userAddress={userAddress}
-          onReactionChange={onReactionChange}
-          canInteract={
-            userRoles.includes("member") || userRoles.includes("administrator")
-          }
-          onDelete={onDelete}
-          postInEdition={postInEdition?.postId ?? null}
-          onEditModeChange={(postId, content, editMode) => {
-            if (!editMode) {
-              setPostInEdition(null);
-              return;
+        <div className="space-y-4">
+          <PostsList
+            posts={posts}
+            userAddress={userAddress}
+            onReactionChange={onReactionChange}
+            canInteract={
+              userRoles.includes("member") ||
+              userRoles.includes("administrator")
             }
-            setPostInEdition({ postId, content });
-          }}
-          isReacting={isReacting}
-          isDeleting={isDeleting}
-        />
+            onDelete={onDelete}
+            postInEdition={postInEdition?.postId ?? null}
+            onEditModeChange={(postId, content, editMode) => {
+              if (!editMode) {
+                setPostInEdition(null);
+                return;
+              }
+              setPostInEdition({ postId, content });
+            }}
+            isReacting={isReacting}
+            isDeleting={isDeleting}
+          />
+        </div>
       )}
 
       <div className="py-4">
@@ -123,15 +139,18 @@ function CommunityPosts({ communityId }: CommunityPostsProps) {
         />
       </div>
 
-      <FeedPostForm
-        orgId={communityId}
-        orgType="community"
-        editMode={!!postInEdition}
-        postInEdition={postInEdition}
-        onEdit={onEdit}
-        onCancelEdit={() => setPostInEdition(null)}
-        isEditing={isEditing}
-      />
+      {(userRoles.includes("member") ||
+        userRoles.includes("administrator")) && (
+        <FeedPostForm
+          orgId={communityId}
+          orgType="community"
+          editMode={!!postInEdition}
+          postInEdition={postInEdition}
+          onEdit={onEdit}
+          onCancelEdit={() => setPostInEdition(null)}
+          isEditing={isEditing}
+        />
+      )}
     </div>
   );
 }

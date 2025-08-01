@@ -47,19 +47,18 @@ async function CommunityPageLayout({
     queryClient.prefetchQuery(profileOptions(member.address)),
   );
 
-  const events = await queryClient.fetchQuery(
-    communityUsersWithRoles(communityId, ["event"]),
-  );
-
-  console.log(events);
+  // const events = await queryClient.fetchQuery(
+  //   communityUsersWithRoles(communityId, ["event"]),
+  // );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ScreenContainer
         background={{
           src:
-            communityData.bannerUri ??
-            "bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24",
+            communityData.bannerUri.length > 0
+              ? communityData.bannerUri
+              : "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24",
           width: 3840,
           height: 720,
         }}
