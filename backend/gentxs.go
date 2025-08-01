@@ -400,6 +400,18 @@ func execGenTxs() error {
 		}
 	}
 
+	slices.SortStableFunc(txs, func(a, b gnoland.TxWithMetadata) int {
+		if a.Metadata == nil || b.Metadata == nil {
+			return 0 // If metadata is nil, we can't compare timestamps
+		}
+		if a.Metadata.Timestamp < b.Metadata.Timestamp {
+			return -1
+		} else if a.Metadata.Timestamp > b.Metadata.Timestamp {
+			return 1
+		}
+		return 0
+	})
+
 	if err := gnoland.SignGenesisTxs(txs, privKey, genTxsConf.chainId); err != nil {
 		return err
 	}
