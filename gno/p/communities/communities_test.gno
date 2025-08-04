@@ -1,0 +1,206 @@
+package communities
+
+import (
+	"std"
+	"testing"
+
+	"gno.land/p/demo/avl"
+	"gno.land/p/demo/testutils"
+	"gno.land/p/zenao/daokit"
+)
+
+var (
+	alice = testutils.TestAddress("alice")
+	bob   = testutils.TestAddress("bob")
+	carol = testutils.TestAddress("carol")
+	dave  = testutils.TestAddress("dave")
+	eve   = testutils.TestAddress("eve")
+)
+
+func TestNewCommunity(t *testing.T) {
+	var profile mockProfile
+	std.TestSetOriginCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	conf := Config{
+		Administrators:   []string{alice.String(), bob.String()},
+		Members:          []string{carol.String(), dave.String(), eve.String()},
+		Events:           []string{},
+		DisplayName:      "Community Name",
+		Description:      "this is a community",
+		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
+	}
+	community := NewCommunity(&conf)
+	if len(community.DAOPrivate.Members.GetMembers()) != 6 {
+		t.Fatalf("expected 6 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
+	}
+	// the creator also get the administrator role
+	if community.DAOPrivate.Members.CountMembersWithRole("administrator") != 2 {
+		t.Fatalf("expected 2 administrators, got %d", community.DAOPrivate.Members.CountMembersWithRole("administrator"))
+	}
+	if community.DAOPrivate.Members.CountMembersWithRole("member") != 3 {
+		t.Fatalf("expected 0 members, got %d", community.DAOPrivate.Members.CountMembersWithRole("member"))
+	}
+	if community.DAOPrivate.Members.CountMembersWithRole("event") != 0 {
+		t.Fatalf("expected 0 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
+	}
+	if !community.DAOPrivate.Members.HasRole(alice.String(), "administrator") {
+		t.Fatalf("expected user to have creator role")
+	}
+	if !community.DAOPrivate.Members.HasRole(eve.String(), "member") {
+		t.Fatalf("expected user to have member role")
+	}
+}
+
+func TestAddMember(t *testing.T) {
+	var profile mockProfile
+	std.TestSetOriginCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	conf := Config{
+		Administrators:   []string{alice.String()},
+		Members:          []string{carol.String(), dave.String()},
+		Events:           []string{},
+		DisplayName:      "Community Name",
+		Description:      "this is a community",
+		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
+	}
+	community := NewCommunity(&conf)
+	if len(community.DAOPrivate.Members.GetMembers()) != 4 {
+		t.Fatalf("expected 4 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
+	}
+	if !community.DAOPrivate.Members.HasRole(carol.String(), "member") {
+		t.Fatalf("expected carol to have member role")
+	}
+	daokit.InstantExecute(community.DAO, testReq(NewAddMemberMsg(bob.String())))
+	if len(community.DAOPrivate.Members.GetMembers()) != 5 {
+		t.Fatalf("expected 5 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
+	}
+	if !community.DAOPrivate.Members.HasRole(bob.String(), "member") {
+		t.Fatalf("expected bob to have member role")
+	}
+}
+
+func TestRemoveMember(t *testing.T) {
+	var profile mockProfile
+	std.TestSetOriginCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	conf := Config{
+		Administrators:   []string{alice.String()},
+		Members:          []string{carol.String(), dave.String()},
+		Events:           []string{},
+		DisplayName:      "Community Name",
+		Description:      "this is a community",
+		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
+	}
+	community := NewCommunity(&conf)
+	if len(community.DAOPrivate.Members.GetMembers()) != 4 {
+		t.Fatalf("expected 4 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
+	}
+	if !community.DAOPrivate.Members.HasRole(carol.String(), "member") {
+		t.Fatalf("expected carol to have member role")
+	}
+	if !community.DAOPrivate.Members.HasRole(dave.String(), "member") {
+		t.Fatalf("expected dave to have member role")
+	}
+	daokit.InstantExecute(community.DAO, testReq(NewRemoveMemberMsg(carol.String())))
+	if len(community.DAOPrivate.Members.GetMembers()) != 3 {
+		t.Fatalf("expected 3 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
+	}
+	if community.DAOPrivate.Members.HasRole(carol.String(), "member") {
+		t.Fatalf("expected carol to not have member role")
+	}
+}
+
+func TestAddEvent(t *testing.T) {
+	var profile mockProfile
+	std.TestSetOriginCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	conf := Config{
+		Administrators:   []string{alice.String()},
+		Members:          []string{carol.String(), dave.String()},
+		Events:           []string{},
+		DisplayName:      "Community Name",
+		Description:      "this is a community",
+		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
+	}
+	community := NewCommunity(&conf)
+	if len(community.DAOPrivate.Members.GetMembers()) != 4 {
+		t.Fatalf("expected 4 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
+	}
+	if !community.DAOPrivate.Members.HasRole(carol.String(), "member") {
+		t.Fatalf("expected carol to have member role")
+	}
+	if !community.DAOPrivate.Members.HasRole(dave.String(), "member") {
+		t.Fatalf("expected dave to have member role")
+	}
+	if community.DAOPrivate.Members.CountMembersWithRole("event") != 0 {
+		t.Fatalf("expected 0 events, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
+	}
+	event := testutils.TestAddress("event1")
+	daokit.InstantExecute(community.DAO, testReq(NewAddEventMsg(event.String())))
+	if community.DAOPrivate.Members.CountMembersWithRole("event") != 1 {
+		t.Fatalf("expected 1 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
+	}
+	if !community.DAOPrivate.Members.HasRole(event.String(), "event") {
+		t.Fatalf("expected event to have event role")
+	}
+}
+
+func TestRemoveEvent(t *testing.T) {
+	var profile mockProfile
+	std.TestSetOriginCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	conf := Config{
+		Administrators:   []string{alice.String()},
+		Members:          []string{carol.String(), dave.String()},
+		Events:           []string{},
+		DisplayName:      "Community Name",
+		Description:      "this is a community",
+		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
+	}
+	community := NewCommunity(&conf)
+	if len(community.DAOPrivate.Members.GetMembers()) != 4 {
+		t.Fatalf("expected 4 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
+	}
+	event := testutils.TestAddress("event1")
+	daokit.InstantExecute(community.DAO, testReq(NewAddEventMsg(event.String())))
+	if community.DAOPrivate.Members.CountMembersWithRole("event") != 1 {
+		t.Fatalf("expected 1 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
+	}
+	if !community.DAOPrivate.Members.HasRole(event.String(), "event") {
+		t.Fatalf("expected event to have event role")
+	}
+	daokit.InstantExecute(community.DAO, testReq(NewRemoveEventMsg(event.String())))
+	if community.DAOPrivate.Members.CountMembersWithRole("event") != 0 {
+		t.Fatalf("expected 0 events, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
+	}
+	if community.DAOPrivate.Members.HasRole(event.String(), "event") {
+		t.Fatalf("expected event to not have event role")
+	}
+}
+
+type mockProfile struct {
+	fields avl.Tree
+}
+
+func (p *mockProfile) GetProfileString(addr std.Address, field string, def string) string {
+	v, ok := p.fields.Get(field)
+	if !ok {
+		return def
+	}
+	return v.(string)
+}
+
+func (p *mockProfile) SetStringField(field, value string) bool {
+	return p.fields.Set(field, value)
+}
+
+func testReq(msg daokit.ExecutableMessage) daokit.ProposalRequest {
+	return daokit.ProposalRequest{
+		Message: msg,
+	}
+}

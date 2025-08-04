@@ -22,10 +22,14 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		return nil, err
 	}
 
-	s.Logger.Info("create-standard-post", zap.String("event-id", req.Msg.EventId), zap.String("content", req.Msg.Content), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("create-standard-post", zap.String("org-type", req.Msg.OrgType), zap.String("org-id", req.Msg.OrgId), zap.String("content", req.Msg.Content), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
+	}
+
+	if req.Msg.OrgType != zeni.EntityTypeEvent && req.Msg.OrgType != zeni.EntityTypeCommunity {
+		return nil, errors.New("invalid org type (must be event or community)")
 	}
 
 	//XXX: do more verification ?
@@ -39,7 +43,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		}
 	}
 
-	roles, err := s.DB.UserRoles(zUser.ID, req.Msg.EventId)
+	roles, err := s.DB.EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, err
 	}
@@ -65,14 +69,14 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		},
 	}
 
-	postID, err := s.Chain.CreatePost(zUser.ID, req.Msg.EventId, post)
+	postID, err := s.Chain.CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
 	if err != nil {
 		return nil, err
 	}
 
 	zpost := (*zeni.Post)(nil)
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		feed, err := db.GetFeed(req.Msg.EventId, "main")
+		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
 		if err != nil {
 			return err
 		}

@@ -1,4 +1,4 @@
-h1:HX40JLD0dHtZFeuGviLTZILKEUF4a+MHeboF1gj61xI=
+h1:USPUhefOcXTaxkjPNund/fyy4cUAMEi5cdyDqebgm3M=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
@@ -16,3 +16,6 @@ h1:HX40JLD0dHtZFeuGviLTZILKEUF4a+MHeboF1gj61xI=
 20250521235327_event-password.sql h1:Mcs7KcrGv6y0qlcRUFRmJhihmEYckgtd5xddYTyMZsI=
 20250527231017_tickets-info.sql h1:dFuMbUV5rrFZHnP4WiXQVDYkalQttrm2VkveC/O5Y6w=
 20250620082945_ics-seq-nb.sql h1:kqXMe9GDFx+RpeDd9CwByRU4QJg/q1wIPMmH5mL5+/0=
+20250722143806_community.sql h1:6iko/RCOIGdrtHo9pA5ByA7CHQQpf36OT0+NSdTroQE=
+20250729123743_membership-roles.sql h1:UoXH4kxOgouwDk64x40BrzDNGij9g4/44CmgeZJs2Fs=
+20250729152448_community-feed.sql h1:OfFTIdZubRWgoP0XPruv6NtXn2rUy8Ze6tBPSTYnqQw=

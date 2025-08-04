@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { profileOptions } from "../queries/profile";
 import { getQueryClient } from "../get-query-client";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 
 interface EditUserProfileRequest {
   displayName: string;

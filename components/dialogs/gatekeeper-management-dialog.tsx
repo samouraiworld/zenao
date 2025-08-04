@@ -2,6 +2,8 @@ import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useAuth } from "@clerk/nextjs";
+import { captureException } from "@sentry/nextjs";
 import {
   Drawer,
   DrawerContent,
@@ -18,16 +20,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../shadcn/dialog";
-import {
-  emailSchema,
-  EmailSchemaType,
-  EventFormSchemaType,
-} from "../form/types";
 import { Form } from "../shadcn/form";
-import { FormFieldInputString } from "../form/components/form-field-input-string";
 import { Button } from "../shadcn/button";
-import Text from "../texts/text";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
+import Text from "../widgets/texts/text";
+import { FormFieldInputString } from "../widgets/form/form-field-input-string";
+import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  EventFormSchemaType,
+  EmailSchemaType,
+  emailSchema,
+  eventFormSchema,
+} from "@/types/schemas";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { makeLocationFromEvent } from "@/lib/location";
+import { useEditEvent } from "@/lib/mutations/event-management";
+import { useToast } from "@/hooks/use-toast";
 
 function GatekeeperManagementForm({
   form,
@@ -113,65 +121,117 @@ function GatekeeperManagementForm({
 }
 
 export function GatekeeperManagementDialog({
+  eventId,
+  eventInfo,
+  gatekeepers,
   open,
   onOpenChange,
-  form,
 }: {
+  eventId: string;
+  eventInfo: EventInfo;
+  gatekeepers: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  form: UseFormReturn<EventFormSchemaType>;
 }) {
+  const { toast } = useToast();
+  const { getToken } = useAuth();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isStandalone = useMediaQuery("(display-mode: standalone)");
   const t = useTranslations("gatekeeper-management-dialog");
 
+  const location = makeLocationFromEvent(eventInfo.location);
+  const defaultValues: EventFormSchemaType = {
+    ...eventInfo,
+    location,
+    gatekeepers: gatekeepers.map((gatekeeperEmail) => ({
+      email: gatekeeperEmail,
+    })),
+    exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
+    password: "",
+  };
+
+  const form = useForm<EventFormSchemaType>({
+    mode: "all",
+    resolver: zodResolver(eventFormSchema),
+    defaultValues,
+  });
+
+  const { editEvent, isPending } = useEditEvent(getToken);
+
+  const onSubmit = async (values: EventFormSchemaType) => {
+    try {
+      await editEvent({ ...values, eventId });
+      onOpenChange(false);
+      toast({
+        title: t("toast-gatekeeper-management-success"),
+      });
+    } catch (err) {
+      captureException(err);
+      toast({
+        variant: "destructive",
+        title: t("toast-gatekeeper-management-error"),
+      });
+    }
+  };
+
   if (isDesktop) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="flex flex-col gap-8 max-h-screen overflow-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl">{t("title")}</DialogTitle>
-            <DialogDescription className="text-base">
-              {t("description")}
-            </DialogDescription>
-          </DialogHeader>
-          <GatekeeperManagementForm form={form} />
-          <DialogFooter>
-            <Button
-              className="w-full"
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              {t("done")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <Form {...form}>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="flex flex-col gap-8 max-h-screen overflow-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl">{t("title")}</DialogTitle>
+              <DialogDescription className="text-base">
+                {t("description")}
+              </DialogDescription>
+            </DialogHeader>
+            <GatekeeperManagementForm form={form} />
+            <DialogFooter>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
+                <ButtonWithChildren
+                  className="w-full"
+                  type="submit"
+                  loading={isPending}
+                  variant="outline"
+                >
+                  {t("done")}
+                </ButtonWithChildren>
+              </form>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </Form>
     );
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} modal={!isStandalone}>
-      <DrawerContent className="flex flex-col gap-8 pb-8 px-4 max-h-full overflow-auto">
-        <DrawerHeader>
-          <DrawerTitle className="text-xl">{t("title")}</DrawerTitle>
-          <DrawerDescription className="text-base">
-            {t("description")}
-          </DrawerDescription>
-        </DrawerHeader>
-        <GatekeeperManagementForm form={form} />
-        <DrawerFooter>
-          <Button
-            className="w-full"
-            type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
-            {t("done")}
-          </Button>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+    <Form {...form}>
+      <Drawer open={open} onOpenChange={onOpenChange} modal={!isStandalone}>
+        <DrawerContent className="flex flex-col gap-8 pb-8 px-4 max-h-full overflow-auto">
+          <DrawerHeader>
+            <DrawerTitle className="text-xl">{t("title")}</DrawerTitle>
+            <DrawerDescription className="text-base">
+              {t("description")}
+            </DrawerDescription>
+          </DrawerHeader>
+          <GatekeeperManagementForm form={form} />
+          <DrawerFooter>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="w-full h-fit"
+            >
+              <ButtonWithChildren
+                className="w-full"
+                type="submit"
+                variant="outline"
+                loading={isPending}
+              >
+                {t("done")}
+              </ButtonWithChildren>
+            </form>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </Form>
   );
 }

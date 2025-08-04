@@ -53,15 +53,15 @@ func (s *ZenaoServer) BroadcastEvent(
 		if err != nil {
 			return err
 		}
-		participants, err = db.GetEventUsersWithRole(req.Msg.EventId, "participant")
+		participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
 		if err != nil {
 			return err
 		}
-		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
-		if !slices.Contains(roles, "organizer") {
+		if !slices.Contains(roles, zeni.RoleOrganizer) {
 			return errors.New("user is not organizer of the event")
 		}
 		if req.Msg.AttachTicket {

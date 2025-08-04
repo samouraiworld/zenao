@@ -16,8 +16,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "../shadcn/drawer";
-import Text from "../texts/text";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
+import Text from "../widgets/texts/text";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 type DialogProps = {
   title: string;

@@ -1,5 +1,5 @@
 import { EventLocation } from "@/app/gen/zenao/v1/zenao_pb";
-import { EventFormSchemaType } from "@/components/form/types";
+import { EventFormSchemaType } from "@/types/schemas";
 
 export const makeLocationFromEvent = (
   eventLocation: EventLocation | undefined,

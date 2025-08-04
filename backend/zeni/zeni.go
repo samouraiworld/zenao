@@ -45,6 +45,22 @@ func (p Plan) IsValid() bool {
 	return p == FreePlan || p == ProPlan
 }
 
+const (
+	RoleOrganizer   string = "organizer"   // for events
+	RoleGatekeeper  string = "gatekeeper"  // for events
+	RoleParticipant string = "participant" // for events
+
+	RoleAdministrator string = "administrator" // for communities
+	RoleMember        string = "member"        // for communities
+	RoleEvent         string = "event"         // for communities
+)
+
+const (
+	EntityTypeUser      string = "user"
+	EntityTypeEvent     string = "event"
+	EntityTypeCommunity string = "community"
+)
+
 type AuthUser struct {
 	ID     string
 	Email  string
@@ -77,11 +93,31 @@ type Event struct {
 	ICSSequenceNumber uint32
 }
 
+type Community struct {
+	CreatedAt   time.Time
+	ID          string
+	DisplayName string
+	Description string
+	AvatarURI   string
+	BannerURI   string
+	CreatorID   string
+}
+
+type EntityRole struct {
+	DeletedAt  time.Time
+	EntityType string // one of: user, event
+	EntityID   string
+	OrgType    string // one of: event, community
+	OrgID      string
+	Role       string // one of: organizer, gatekeeper, participant, administrator, member,
+}
+
 type Feed struct {
 	CreatedAt time.Time
 	ID        string
 	Slug      string
-	EventID   string
+	OrgType   string // one of: event, community
+	OrgID     string
 }
 
 type Post struct {
@@ -120,6 +156,7 @@ type Reaction struct {
 }
 
 type SoldTicket struct {
+	DeletedAt time.Time
 	CreatedAt time.Time
 	Ticket    *Ticket
 	BuyerID   string
@@ -172,7 +209,7 @@ type DB interface {
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
-	UserRoles(userID string, eventID string) ([]string, error)
+	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)
@@ -182,16 +219,21 @@ type DB interface {
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
-	GetEventByPollID(pollID string) (*Event, error)
-	GetEventByPostID(postID string) (*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
-	GetEventUsersWithRole(eventID string, role string) ([]*User, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
-	CreateFeed(eventID string, slug string) (*Feed, error)
-	GetFeed(eventID string, slug string) (*Feed, error)
+	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+	GetAllCommunities() ([]*Community, error)
+
+	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
+	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
+	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
+	GetOrgByPostID(postID string) (orgType, orgID string, err error)
+
+	CreateFeed(orgType string, orgID string, slug string) (*Feed, error)
+	GetFeed(orgType string, orgID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
 
 	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
@@ -204,6 +246,10 @@ type DB interface {
 	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
+
+	// gentxs specific
+	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
+	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
 }
 
 type Chain interface {
@@ -211,6 +257,7 @@ type Chain interface {
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserAddress(userID string) string
+	EventAddress(eventID string) string
 
 	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
 	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
@@ -218,10 +265,12 @@ type Chain interface {
 	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
-	CreatePost(userID string, eventID string, post *feedsv1.Post) (postID string, err error)
+	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
+
+	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error
 	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, eventID string, req *zenaov1.ReactPostRequest) error
+	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }

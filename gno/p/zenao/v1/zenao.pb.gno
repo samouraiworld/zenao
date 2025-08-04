@@ -172,7 +172,8 @@ type BatchProfileRequest struct {
 }
 
 type CreatePollRequest struct {
-	EventId  string
+	OrgType  string
+	OrgId    string
 	Question string
 	Options  []string
 	Duration int64
@@ -192,7 +193,8 @@ type VotePollResponse struct {
 }
 
 type CreatePostRequest struct {
-	EventId  string
+	OrgType  string
+	OrgId    string
 	Content  string
 	ParentId string
 	Tags     []string
@@ -256,4 +258,26 @@ type ExportParticipantsResponse struct {
 	Content  string
 	Filename string
 	MimeType string
+}
+
+type CommunityInfo struct {
+	DisplayName    string
+	Description    string
+	AvatarUri      string
+	BannerUri      string
+	Administrators []string
+	CountMembers   uint32
+	PkgPath        string
+}
+
+type CreateCommunityRequest struct {
+	DisplayName    string
+	Description    string
+	AvatarUri      string
+	BannerUri      string
+	Administrators []string
+}
+
+type CreateCommunityResponse struct {
+	CommunityId string
 }

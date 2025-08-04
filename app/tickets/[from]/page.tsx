@@ -10,7 +10,7 @@ import {
 } from "@/components/layout/screen-container";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
-import { EventsListLayout } from "@/components/layout/events-list-layout";
+import { EventsListLayout } from "@/components/features/event/events-list-layout";
 
 export const revalidate = 60;
 
@@ -43,7 +43,7 @@ export default async function TicketsPage({ params }: PageProps) {
     );
   }
 
-  queryClient.prefetchQuery(
+  queryClient.prefetchInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(address, now, Number.MAX_SAFE_INTEGER, 20)
       : eventsByParticipantList(address, now - 1, 0, 20),

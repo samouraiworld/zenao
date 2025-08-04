@@ -84,7 +84,7 @@ func (s *ZenaoServer) CreateEvent(
 			return err
 		}
 
-		if _, err = db.CreateFeed(evt.ID, "main"); err != nil {
+		if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
 			return err
 		}
 		return nil

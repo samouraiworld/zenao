@@ -1,13 +1,13 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { GnowebButton } from "@/components/buttons/gnoweb-button";
-import { Card } from "@/components/cards/card";
+import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
+import { Card } from "@/components/widgets/cards/card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import Heading from "@/components/texts/heading";
-import Text from "@/components/texts/text";
-import { Web3Image } from "@/components/images/web3-image";
+import Heading from "@/components/widgets/texts/heading";
+import Text from "@/components/widgets/texts/text";
+import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
 
@@ -36,7 +36,7 @@ export default function ProfileHeader({
           <AspectRatio ratio={1 / 1}>
             <Web3Image
               src={avatarUri}
-              alt="Event"
+              alt="Profile picture"
               priority
               fetchPriority="high"
               fill

@@ -21,7 +21,7 @@ func TestEvents(t *testing.T) {
 
 	// list no events
 	{
-		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
+		events := listEvents(time.Now().Unix(), nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 
@@ -56,29 +56,29 @@ func TestEvents(t *testing.T) {
 
 	// list upcoming events
 	{
-		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
+		events := listEvents(time.Now().Unix(), nextYearUnix, 10, 0)
 		urequire.Equal(t, `2-future-event-day, 1-future-event-month`, eventsString(events), "future events list should match")
 	}
 	// list past events
 	{
-		events := listEvents(time.Now().Unix(), lastYearUnix, 10)
+		events := listEvents(time.Now().Unix(), lastYearUnix, 10, 0)
 		urequire.Equal(t, `3-past-event-hour, 4-past-event-day, 5-past-event-month, 6-event-will-change`, eventsString(events))
 	}
 
 	// list events by organizer
 	{
 		// from future to past
-		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10)
+		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `6-event-will-change, 4-past-event-day, 2-future-event-day`, eventsString(events))
 	}
 	{
 		// none
-		events := listEventsByOrganizer("eve", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByOrganizer("eve", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 
@@ -100,17 +100,17 @@ func TestEvents(t *testing.T) {
 	// list events by participant
 	{
 		// from future to past
-		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10)
+		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `6-event-will-change, 4-past-event-day, 2-future-event-day`, eventsString(events))
 	}
 	{
 		// none
-		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 
@@ -121,41 +121,61 @@ func TestEvents(t *testing.T) {
 
 	// list upcoming events
 	{
-		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
+		events := listEvents(time.Now().Unix(), nextYearUnix, 10, 0)
 		urequire.Equal(t, `2-future-event-day, 1-future-event-month, 6-event-will-change`, eventsString(events))
+	}
+	{
+		// list upcoming events with offset 1
+		events := listEvents(time.Now().Unix(), nextYearUnix, 10, 1)
+		urequire.Equal(t, `1-future-event-month, 6-event-will-change`, eventsString(events))
 	}
 	// list past events
 	{
-		events := listEvents(time.Now().Unix(), lastYearUnix, 10)
+		events := listEvents(time.Now().Unix(), lastYearUnix, 10, 0)
 		urequire.Equal(t, `3-past-event-hour, 4-past-event-day, 5-past-event-month`, eventsString(events))
+	}
+	// list past events with offset 1 and limit 1
+	{
+		events := listEvents(time.Now().Unix(), lastYearUnix, 1, 1)
+		urequire.Equal(t, `4-past-event-day`, eventsString(events))
+	}
+	// list past event with offset 1
+	{
+		events := listEvents(time.Now().Unix(), lastYearUnix, 10, 1)
+		urequire.Equal(t, `4-past-event-day, 5-past-event-month`, eventsString(events))
 	}
 
 	// list events by organizer
 	{
 		// from future to past
-		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10)
+		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `4-past-event-day, 2-future-event-day, 6-event-will-change`, eventsString(events))
 	}
 
 	// list events by participant
 	{
 		// from future to past
-		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10)
+		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
 	}
 	{
+		// from future to past with offset 2
+		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10, 2)
+		urequire.Equal(t, `5-past-event-month`, eventsString(events))
+	}
+	{
 		// from past to future
-		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `4-past-event-day, 2-future-event-day, 6-event-will-change`, eventsString(events))
 	}
 	{
 		// none
-		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 
@@ -166,41 +186,51 @@ func TestEvents(t *testing.T) {
 
 	// list upcoming events
 	{
-		events := listEvents(time.Now().Unix(), nextYearUnix, 10)
+		events := listEvents(time.Now().Unix(), nextYearUnix, 10, 0)
 		urequire.Equal(t, `2-future-event-day, 1-future-event-month, 6-event-will-change`, eventsString(events))
 	}
 	// list past events
 	{
-		events := listEvents(time.Now().Unix(), lastYearUnix, 10)
+		events := listEvents(time.Now().Unix(), lastYearUnix, 10, 0)
 		urequire.Equal(t, `3-past-event-hour, 4-past-event-day, 5-past-event-month`, eventsString(events))
 	}
 
 	// list events by organizer
 	{
 		// from future to past
-		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10)
+		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `6-event-will-change, 1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
 	}
 	{
+		// from future to past with offset 2
+		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10, 2)
+		urequire.Equal(t, `3-past-event-hour, 5-past-event-month`, eventsString(events))
+	}
+	{
 		// from past to future
-		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `4-past-event-day, 2-future-event-day`, eventsString(events))
+	}
+	{
+		// from past to future with offset 2
+		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10, 2)
+		urequire.Equal(t, 0, len(events))
 	}
 
 	// list events by participant
 	{
 		// from future to past
-		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10)
+		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `1-future-event-month, 3-past-event-hour, 5-past-event-month`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `4-past-event-day, 2-future-event-day, 6-event-will-change`, eventsString(events))
 	}
 	{
 		// none
-		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10)
+		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 }

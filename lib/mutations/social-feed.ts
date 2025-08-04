@@ -1,4 +1,6 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
+import { getQueryClient } from "../get-query-client";
+import { derivePkgAddr } from "../gno";
 import {
   DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
   DEFAULT_FEED_POSTS_LIMIT,
@@ -7,13 +9,12 @@ import {
   feedPostsChildren,
   pollInfo,
 } from "../queries/social-feed";
-import { getQueryClient } from "../get-query-client";
+import { zenaoClient } from "@/lib/zenao-client";
 import {
   CreatePollRequest,
   CreatePostRequest,
   VotePollRequest,
 } from "@/app/gen/zenao/v1/zenao_pb";
-import { zenaoClient } from "@/app/zenao-client";
 
 interface CreatePollRequestMutation
   extends Required<Omit<CreatePollRequest, "$typeName" | "$unknown">> {
@@ -30,14 +31,20 @@ export const useCreatePoll = (queryClient: QueryClient) => {
       });
     },
     onMutate: async (variables) => {
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
+      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -53,14 +60,20 @@ export const useCreatePoll = (queryClient: QueryClient) => {
       return { previousFeedPosts, previousFeedPolls };
     },
     onSuccess: (_, variables) => {
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
+      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -70,15 +83,21 @@ export const useCreatePoll = (queryClient: QueryClient) => {
       queryClient.invalidateQueries(feedPollsOpts);
     },
     onError: (_, variables, context) => {
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
+      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
 
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -156,10 +175,10 @@ interface CreateStandardPostRequestMutation
 
 export const useCreateStandardPost = () => {
   const queryClient = getQueryClient();
+
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token,
-      userAddress: _,
       ...request
     }: CreateStandardPostRequestMutation) => {
       await zenaoClient.createPost(request, {
@@ -167,8 +186,14 @@ export const useCreateStandardPost = () => {
       });
     },
     onMutate: async (variables) => {
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
+      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
@@ -204,8 +229,14 @@ export const useCreateStandardPost = () => {
       };
     },
     onSuccess: (_, variables) => {
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
+      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
@@ -228,8 +259,14 @@ export const useCreateStandardPost = () => {
       queryClient.invalidateQueries(feedPostsChildrenOpts);
     },
     onError: (_, variables, context) => {
+      const pkgPath =
+        variables.orgType === "event"
+          ? `gno.land/r/zenao/events/e${variables.orgId}`
+          : `gno.land/r/zenao/communities/c${variables.orgId}`;
+      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
@@ -278,7 +315,7 @@ interface ReactPostRequestMutation {
   userAddress: string;
   postId: string;
   icon: string;
-  eventId: string;
+  feedId: string;
 }
 
 export const useReactPost = () => {
@@ -287,7 +324,6 @@ export const useReactPost = () => {
     mutationFn: async ({
       token: token,
       userAddress: _addr,
-      eventId: _eventId,
       ...request
     }: ReactPostRequestMutation) => {
       await zenaoClient.reactPost(request, {
@@ -296,7 +332,7 @@ export const useReactPost = () => {
     },
     onMutate: async (variables) => {
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
@@ -308,7 +344,7 @@ export const useReactPost = () => {
         variables.userAddress,
       );
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -333,8 +369,9 @@ export const useReactPost = () => {
       };
     },
     onSuccess: (_, variables) => {
+      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
@@ -346,7 +383,7 @@ export const useReactPost = () => {
         variables.userAddress,
       );
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -354,17 +391,18 @@ export const useReactPost = () => {
 
       queryClient.invalidateQueries(feedPostsChildrenOpts);
       queryClient.invalidateQueries(feedPostsOpts);
+      queryClient.invalidateQueries(feedPostOpts);
       queryClient.invalidateQueries(feedPollsOpts);
     },
     onError: (_, variables, context) => {
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,
@@ -400,7 +438,7 @@ export const useReactPost = () => {
 };
 
 type EditStandardPostRequestMutation = {
-  eventId: string;
+  feedId: string;
   postId: string;
   userAddress: string;
   token: string | null;
@@ -436,7 +474,7 @@ export const useEditStandardPost = () => {
       queryClient.invalidateQueries(feedPostOpts);
 
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
@@ -465,7 +503,7 @@ export const useEditStandardPost = () => {
 };
 
 type DeletePostRequestMutation = {
-  eventId: string;
+  feedId: string;
   postId: string;
   parentId?: string;
   userAddress: string;
@@ -498,17 +536,22 @@ export const useDeletePost = () => {
           "",
           variables.userAddress,
         );
+        const feedParentPostOpts = feedPost(
+          variables.parentId,
+          variables.userAddress,
+        );
 
         queryClient.invalidateQueries(feedPostsChildrenOpts);
+        queryClient.invalidateQueries(feedParentPostOpts);
       }
       const feedPostsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
         variables.userAddress,
       );
       const feedPollsOpts = feedPosts(
-        variables.eventId,
+        variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
         variables.userAddress,

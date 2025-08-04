@@ -4,7 +4,7 @@ import { fromJson } from "@bufbuild/protobuf";
 import { GetToken } from "../utils";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
-import { zenaoClient } from "@/app/zenao-client";
+import { zenaoClient } from "@/lib/zenao-client";
 
 export const eventOptions = (id: string) =>
   queryOptions({

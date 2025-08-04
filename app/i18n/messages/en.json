@@ -93,7 +93,8 @@
     "gatekeeper-button": "Open ticket scanner",
     "view-more": "View more",
     "view-less": "View less",
-    "export-participant-list": "Export participants list"
+    "export-participant-list": "Export participants list",
+    "manage-gatekeepers-button": "Manage gatekeepers"
   },
   "guest-registration-success-dialog": {
     "registration-title": "You're in !",
@@ -109,6 +110,8 @@
     "description": "Assign and manage gatekeepers responsible for controlling access to the event.",
     "input-placeholder": "Email...",
     "default": "Default (You)",
+    "toast-gatekeeper-management-success": "Gatekeepers successfully updated!",
+    "toast-gatekeeper-management-error": "Error while updating gatekeepers!",
     "done": "Done"
   },
   "manifesto": {
@@ -163,6 +166,13 @@
     "toast-access-invalid-password": "Invalid password !",
     "toast-access-error": "Could not grant access to event information!"
   },
+  "no-events-title": "No events to show.",
+  "no-events-description": "You have no events. Why not create one?",
+  "no-more-events": "No more to show for now.",
+  "no-members-title": "No members to show.",
+  "no-members-description": "Let's change that!",
+  "no-proposals-title": "No proposals to show.",
+  "no-proposals-description": "You have no proposals or votes. Why not create one?",
   "events-list": {
     "no-events": "No events to show.",
     "no-events-desc": "You have no events. Why not create one?",
@@ -197,14 +207,14 @@
     "publishedAt": "Published at"
   },
   "load-more": "Load more",
+  "no-posts-title": "No posts to show.",
+  "no-posts-description": "You have no posts. Why not create one?",
+  "no-more-posts": "No more to show for now.",
   "event-feed": {
     "global-feed": "Global feed",
     "polls-feed": "Polls",
-    "no-more-posts": "No more to show for now.",
     "no-polls-title": "No polls to show.",
     "no-polls-description": "You have no polls. Why not create one?",
-    "no-posts-title": "No posts to show.",
-    "no-posts-description": "You have no posts. Why not create one?",
     "poll-form": {
       "question-placeholder-sm": "Ask a question...",
       "question-placeholder-lg": "What do you wanna ask to the community ?",
@@ -271,8 +281,18 @@
     "title": "Delete post",
     "desc": "Are you sure you want to delete this post ?",
     "delete": "Delete",
-    "cancel": "Cancel",
-    "toast-delete-post-success": "Your post has been deleted",
-    "toast-delete-post-error": "Error while deleting the post"
+    "cancel": "Cancel"
+  },
+  "toast-delete-post-success": "Your post has been deleted",
+  "toast-delete-post-error": "Error while deleting the post",
+  "community": {
+    "posts": "Posts",
+    "events": "Events",
+    "members": "Members",
+    "proposals": "Proposals"
+  },
+  "empty-list": {
+    "title": "Nothing listed",
+    "description": "Let's change that!"
   }
 }

@@ -7,11 +7,11 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { z } from "zod";
-import { eventFormSchema, EventFormSchemaType } from "@/components/form/types";
-import { EventForm } from "@/components/form/event-form";
-import { useToast } from "@/app/hooks/use-toast";
+import { EventForm } from "@/components/features/event/event-form";
+import { useToast } from "@/hooks/use-toast";
 import { useCreateEvent } from "@/lib/mutations/event-management";
 import { captureException } from "@/lib/report";
+import { EventFormSchemaType, eventFormSchema } from "@/types/schemas";
 
 export const CreateEventForm: React.FC = () => {
   const { getToken } = useAuth();
@@ -90,7 +90,7 @@ export const CreateEventForm: React.FC = () => {
     <EventForm
       form={form}
       onSubmit={onSubmit}
-      isLoaded={isPending}
+      isLoading={isPending}
       minDateRange={new Date()}
     />
   );

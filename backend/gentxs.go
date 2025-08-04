@@ -95,10 +95,11 @@ func execGenTxs() error {
 	}
 
 	chain := &gnoZenaoChain{
-		eventsIndexPkgPath: path.Join("gno.land/r", genTxsConf.name, "eventreg"),
-		signerInfo:         signerInfo,
-		logger:             logger,
-		namespace:          genTxsConf.name,
+		eventsIndexPkgPath:      path.Join("gno.land/r", genTxsConf.name, "eventreg"),
+		communitiesIndexPkgPath: path.Join("gno.land/r", genTxsConf.name, "communityreg"),
+		signerInfo:              signerInfo,
+		logger:                  logger,
+		namespace:               genTxsConf.name,
 	}
 	logger.Info("Signer initialized", zap.String("address", signerInfo.GetAddress().String()))
 
@@ -147,7 +148,7 @@ func execGenTxs() error {
 			return err
 		}
 
-		organizers, err := db.GetEventUsersWithRole(event.ID, "organizer")
+		organizers, err := db.GetOrgUsersWithRole(zeni.EntityTypeEvent, event.ID, zeni.RoleOrganizer)
 		if err != nil {
 			return err
 		}
@@ -157,7 +158,12 @@ func execGenTxs() error {
 			organizersIDs = append(organizersIDs, org.ID)
 		}
 
-		gatekeepers, err := db.GetEventUsersWithRole(event.ID, "gatekeeper")
+		gatekeepers, err := db.GetOrgUsersWithRole(zeni.EntityTypeEvent, event.ID, zeni.RoleGatekeeper)
+		if err != nil {
+			return err
+		}
+
+		deletedGatekeepers, err := db.GetDeletedOrgEntitiesWithRole(zeni.EntityTypeEvent, event.ID, zeni.EntityTypeUser, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}
@@ -166,6 +172,17 @@ func execGenTxs() error {
 		for _, gkp := range gatekeepers {
 			gatekeepersIDs = append(gatekeepersIDs, gkp.ID)
 		}
+
+		for _, deletedGkp := range deletedGatekeepers {
+			gatekeepersIDs = append(gatekeepersIDs, deletedGkp.EntityID)
+			tx, err := createEventRemoveGatekeeperTx(chain, signerInfo.GetAddress(), event, deletedGkp.EntityID, deletedGkp.DeletedAt)
+			logger.Info("event remove gatekeeper tx created", zap.String("event-id", event.ID), zap.String("gatekeeper-id", deletedGkp.EntityID), zap.Time("deleted-at", deletedGkp.DeletedAt))
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+		}
+
 		tx, err := createEventRealmTx(chain, event, signerInfo.GetAddress(), organizersIDs, gatekeepersIDs, privacy)
 		if err != nil {
 			return err
@@ -206,6 +223,127 @@ func execGenTxs() error {
 				logger.Info("checkin tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 			}
 		}
+		deletedTickets, err := db.GetDeletedTickets(event.ID)
+		if err != nil {
+			return err
+		}
+		for _, ticket := range deletedTickets {
+			tx, err := createParticipationTx(chain, signerInfo.GetAddress(), event, ticket, sk)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("participation tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
+			tx, err = createCancelParticipationTx(chain, event, signerInfo.GetAddress(), ticket)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("cancel participation tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
+			if ticket.UserID != "" {
+				tx, err = createParticipationRegTx(chain, event, signerInfo.GetAddress(), ticket, chain.UserAddress(ticket.UserID))
+				if err != nil {
+					return err
+				}
+				txs = append(txs, tx)
+				logger.Info("participation indexed into event registry tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
+				tx, err = createCancelParticipationRegTx(chain, event, signerInfo.GetAddress(), ticket, chain.UserAddress(ticket.UserID))
+				if err != nil {
+					return err
+				}
+				txs = append(txs, tx)
+				logger.Info("cancel participation indexed into event registry tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
+			}
+		}
+	}
+
+	//TODO: use proposals tx to add members to avoid loosing time of joining the community
+	communities, err := db.GetAllCommunities()
+	if err != nil {
+		return err
+	}
+
+	for _, community := range communities {
+		administrators, err := db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleAdministrator)
+		if err != nil {
+			return err
+		}
+
+		var administratorsIDs []string
+		for _, admin := range administrators {
+			administratorsIDs = append(administratorsIDs, admin.ID)
+		}
+
+		members, err := db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleMember)
+		if err != nil {
+			return err
+		}
+
+		deletedMembers, err := db.GetDeletedOrgEntitiesWithRole(zeni.EntityTypeCommunity, community.ID, zeni.EntityTypeUser, zeni.RoleMember)
+		if err != nil {
+			return err
+		}
+
+		var membersIDs []string
+		for _, member := range members {
+			membersIDs = append(membersIDs, member.ID)
+		}
+
+		// XXX: Add deleted members so we can add their post before deleting them
+		for _, deletedMember := range deletedMembers {
+			membersIDs = append(membersIDs, deletedMember.EntityID)
+			tx, err := createCommunityRemoveMemberTx(chain, signerInfo.GetAddress(), community, deletedMember.EntityID, deletedMember.DeletedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community remove member tx created", zap.String("community-id", community.ID), zap.String("member-id", deletedMember.EntityID), zap.Time("deleted-at", deletedMember.DeletedAt))
+			tx, err = createCommunityRemoveMemberRegTx(chain, community, signerInfo.GetAddress(), deletedMember.EntityID, deletedMember.DeletedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community remove member indexed into community registry tx created", zap.String("community-id", community.ID), zap.String("member-id", deletedMember.EntityID), zap.Time("deleted-at", deletedMember.DeletedAt))
+		}
+
+		events, err := db.GetOrgsEventsWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleEvent)
+		if err != nil {
+			return err
+		}
+
+		deletedEvents, err := db.GetDeletedOrgEntitiesWithRole(zeni.EntityTypeCommunity, community.ID, zeni.EntityTypeEvent, zeni.RoleEvent)
+		if err != nil {
+			return err
+		}
+
+		var eventsIDs []string
+		for _, event := range events {
+			eventsIDs = append(eventsIDs, event.ID)
+		}
+
+		// XXX: Add deleted events so we can add their post before deleting them
+		for _, deletedEvent := range deletedEvents {
+			eventsIDs = append(eventsIDs, deletedEvent.EntityID)
+			tx, err := createCommunityRemoveEventTx(chain, signerInfo.GetAddress(), community, deletedEvent.EntityID, deletedEvent.DeletedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community remove event tx created", zap.String("community-id", community.ID), zap.String("event-id", deletedEvent.EntityID), zap.Time("deleted-at", deletedEvent.DeletedAt))
+		}
+
+		tx, err := createCommunityRealmTx(chain, community, signerInfo.GetAddress(), administratorsIDs, membersIDs, eventsIDs)
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("community realm tx created", zap.String("community-id", community.ID))
+		tx, err = createCommunityRegTx(chain, community, signerInfo.GetAddress())
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("community indexed into community registry tx created", zap.String("community-id", community.ID))
 	}
 
 	posts, err := db.GetAllPosts(true)
@@ -229,38 +367,50 @@ func execGenTxs() error {
 				options = append(options, res.Option)
 			}
 
-			tx, err := createPollTx(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, poll, options)
+			tx, err := createPollTx(chain, post.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, poll, options)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
-			logger.Info("poll tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("event-id", feed.EventID))
+			logger.Info("poll tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", post.UserID))
 			for _, vote := range poll.Votes {
 				tx, err := createVoteTx(chain, vote.UserID, signerInfo.GetAddress(), poll.ID, vote)
 				if err != nil {
 					return err
 				}
 				txs = append(txs, tx)
-				logger.Info("vote tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("event-id", feed.EventID), zap.String("user-id", vote.UserID))
+				logger.Info("vote tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", vote.UserID), zap.String("vote-option", vote.Option))
 			}
 		} else {
-			cptxs, err := createPostTxs(chain, post.UserID, signerInfo.GetAddress(), feed.EventID, post)
+			cptxs, err := createPostTxs(chain, post.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, post)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, cptxs...)
-			logger.Info("post tx created", zap.String("post-id", post.ID), zap.String("event-id", feed.EventID))
+			logger.Info("post tx created", zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", post.UserID))
 		}
 
 		for _, reaction := range post.Reactions {
-			tx, err := createReactionTx(chain, reaction.UserID, signerInfo.GetAddress(), feed.EventID, reaction)
+			tx, err := createReactionTx(chain, reaction.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, reaction)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
-			logger.Info("reaction tx created", zap.String("post-id", post.ID), zap.String("event-id", feed.EventID), zap.String("user-id", reaction.UserID), zap.String("reaction-id", reaction.ID), zap.String("reaction-icon", reaction.Icon))
+			logger.Info("reaction tx created", zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", reaction.UserID), zap.String("reaction-id", reaction.ID), zap.String("reaction-icon", reaction.Icon))
 		}
 	}
+
+	slices.SortStableFunc(txs, func(a, b gnoland.TxWithMetadata) int {
+		if a.Metadata == nil || b.Metadata == nil {
+			return 0 // If metadata is nil, we can't compare timestamps
+		}
+		if a.Metadata.Timestamp < b.Metadata.Timestamp {
+			return -1
+		} else if a.Metadata.Timestamp > b.Metadata.Timestamp {
+			return 1
+		}
+		return 0
+	})
 
 	if err := gnoland.SignGenesisTxs(txs, privKey, genTxsConf.chainId); err != nil {
 		return err
@@ -283,10 +433,10 @@ func execGenTxs() error {
 	return nil
 }
 
-func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
-	eventPkgPath := chain.eventRealmPkgPath(eventID)
+func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
+	orgPkgPath := chain.orgPkgPath(orgType, orgID)
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
+	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
 	gnoLitPost := "&" + post.Post.GnoLiteral("feedsv1.", "\t\t")
 	body := genCreatePostMsgRunBody(userPkgPath, feedID, gnoLitPost)
 
@@ -344,9 +494,9 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addr
 	return txs, nil
 }
 
-func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
+func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, eventID, reaction.Icon)
+	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, orgType, orgID, reaction.Icon)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
@@ -401,11 +551,11 @@ func createVoteTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addre
 	}, nil
 }
 
-func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, eventID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
+func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	eventPkgPath := chain.eventRealmPkgPath(eventID)
-	feedID := gnolang.DerivePkgAddr(eventPkgPath).String() + ":main"
-	body := genCreatePollMsgRunBody(eventPkgPath, userPkgPath, feedID, poll.Question, options, poll.Kind, poll.Duration)
+	orgPkgPath := chain.orgPkgPath(orgType, orgID)
+	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
+	body := genCreatePollMsgRunBody(orgPkgPath, userPkgPath, feedID, poll.Question, options, poll.Kind, poll.Duration)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
@@ -522,6 +672,63 @@ func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cr
 		Tx: tx,
 		Metadata: &gnoland.GnoTxMetadata{
 			Timestamp: ticket.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createCancelParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, ticket *zeni.SoldTicket, participantAddr string) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.eventsIndexPkgPath,
+				Func:    "RemoveParticipant",
+				Args:    []string{eventPkgPath, participantAddr},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: ticket.DeletedAt.Unix() + 1, // +1 to avoid collision with cancel participation tx.
+		},
+	}, nil
+}
+
+func createCancelParticipationTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, ticket *zeni.SoldTicket) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	callerPkgPath := chain.userRealmPkgPath(event.CreatorID)
+	participantAddr := chain.UserAddress(ticket.UserID)
+	body := genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticket.Ticket.Pubkey())
+
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: ticket.DeletedAt.Unix(),
 		},
 	}, nil
 }
@@ -690,4 +897,191 @@ func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, gen
 	}
 
 	return txs, nil
+}
+
+func createCommunityRegTx(chain *gnoZenaoChain, community *zeni.Community, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	communityPkgPath := chain.communityPkgPath(community.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.communitiesIndexPkgPath,
+				Func:    "IndexCommunity",
+				Args:    []string{communityPkgPath},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: community.CreatedAt.Unix() + 1, // +1 to avoid collision with community creation
+		},
+	}, nil
+}
+
+func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, creator cryptoGno.Address, administratorsIDs []string, membersIDs []string, eventsIDs []string) (gnoland.TxWithMetadata, error) {
+	administratorsAddrs := mapsl.Map(administratorsIDs, chain.UserAddress)
+	membersAddrs := mapsl.Map(membersIDs, chain.UserAddress)
+	eventsAddrs := mapsl.Map(eventsIDs, chain.EventAddress)
+	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, eventsAddrs, creator.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
+		DisplayName: community.DisplayName,
+		Description: community.Description,
+		AvatarUri:   community.AvatarURI,
+		BannerUri:   community.BannerURI,
+	})
+	if err != nil {
+		return gnoland.TxWithMetadata{}, err
+	}
+
+	communityPkgPath := chain.communityPkgPath(community.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgAddPackage{
+				Creator: creator,
+				Deposit: []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "community",
+					Path:  communityPkgPath,
+					Files: []*gnovm.MemFile{{Name: "community.gno", Body: cRealm}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: community.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createEventRemoveGatekeeperTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zeni.Event, gatekeeperID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	gatekeeperPkgPath := chain.userRealmPkgPath(gatekeeperID)
+	callerPkgPath := chain.userRealmPkgPath(event.CreatorID)
+	body := genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperPkgPath)
+
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: deletedAt.Unix(),
+		},
+	}, nil
+}
+
+func createCommunityRemoveMemberTx(chain *gnoZenaoChain, creator cryptoGno.Address, community *zeni.Community, memberID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
+	communityPkgPath := chain.communityPkgPath(community.ID)
+	memberPkgPath := chain.userRealmPkgPath(memberID)
+	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
+	body := genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberPkgPath)
+
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: deletedAt.Unix(),
+		},
+	}, nil
+}
+
+func createCommunityRemoveMemberRegTx(chain *gnoZenaoChain, community *zeni.Community, caller cryptoGno.Address, memberID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
+	communityPkgPath := chain.communityPkgPath(community.ID)
+	userAddr := chain.UserAddress(memberID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.communitiesIndexPkgPath,
+				Func:    "RemoveMember",
+				Args:    []string{communityPkgPath, userAddr},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: deletedAt.Unix() + 1, // +1 to avoid collision with member removal
+		},
+	}, nil
+}
+
+func createCommunityRemoveEventTx(chain *gnoZenaoChain, creator cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
+	communityPkgPath := chain.communityPkgPath(community.ID)
+	eventPkgPath := chain.eventRealmPkgPath(eventID)
+	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
+	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventPkgPath)
+
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: creator,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name:  "main",
+					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: deletedAt.Unix(),
+		},
+	}, nil
 }

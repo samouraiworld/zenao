@@ -15,9 +15,9 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "../shadcn/drawer";
-import { ButtonWithChildren } from "../buttons/button-with-children";
+import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
 import { Button } from "../shadcn/button";
-import { useMediaQuery } from "@/app/hooks/use-media-query";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/tailwind";
 
 type CheckinConfirmationDialogProps = {

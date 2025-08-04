@@ -36,11 +36,11 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 
 	var tickets []*zeni.SoldTicket
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.UserRoles(zUser.ID, req.Msg.EventId)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
-		if !slices.Contains(roles, "organizer") {
+		if !slices.Contains(roles, zeni.RoleOrganizer) {
 			return errors.New("user is not organizer of the event")
 		}
 		tickets, err = db.GetEventTickets(req.Msg.EventId)

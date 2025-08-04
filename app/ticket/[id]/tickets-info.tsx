@@ -3,8 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useLocationTimezone } from "@/app/hooks/use-location-timezone";
-import { TicketCard } from "@/components/cards/ticket-card";
+import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import {
   Carousel,
   CarouselContent,
@@ -13,10 +12,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/shadcn/carousel";
-import Heading from "@/components/texts/heading";
+import Heading from "@/components/widgets/texts/heading";
 import { makeLocationFromEvent } from "@/lib/location";
 import { eventOptions } from "@/lib/queries/event";
 import { eventTickets } from "@/lib/queries/ticket";
+import { TicketCard } from "@/components/features/ticket/ticket-card";
 
 type TicketsInfoProps = {
   id: string;

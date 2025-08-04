@@ -1,7 +1,7 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
-import { derivePkgAddr, extractGnoJSONResponse } from "@/lib/gno";
+import { extractGnoJSONResponse } from "@/lib/gno";
 import { PostViewJson, PostViewSchema } from "@/app/gen/feeds/v1/feeds_pb";
 import { PollJson, PollSchema } from "@/app/gen/polls/v1/polls_pb";
 
@@ -27,19 +27,17 @@ export const feedPost = (postId: string, userAddress: string) =>
   });
 
 export const feedPosts = (
-  eventId: string,
+  feedId: string,
   limit: number,
   tags: string,
   userAddress: string,
 ) =>
   infiniteQueryOptions({
-    queryKey: ["feedPosts", eventId, tags, userAddress],
+    queryKey: ["feedPosts", feedId, tags, userAddress],
     queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
-      const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-      const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
       const res = await client.evaluateExpression(
         "gno.land/r/zenao/social_feed",

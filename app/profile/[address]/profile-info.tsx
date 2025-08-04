@@ -1,15 +1,23 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { Person, WithContext } from "schema-dts";
+import { useMemo } from "react";
 import ProfileHeader from "./profile-header";
-import { EventCard } from "@/components/cards/event-card";
+import { EventCard } from "@/components/features/event/event-card";
 import { Separator } from "@/components/shadcn/separator";
-import Heading from "@/components/texts/heading";
+import Heading from "@/components/widgets/texts/heading";
 import { idFromPkgPath } from "@/lib/queries/event";
-import { eventsByOrganizerList } from "@/lib/queries/events-list";
+import {
+  DEFAULT_EVENTS_LIMIT,
+  eventsByOrganizerList,
+} from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";
-import EventCardListLayout from "@/components/layout/event-card-list-layout";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 
 export function ProfileInfo({
   address,
@@ -19,11 +27,38 @@ export function ProfileInfo({
   now: number;
 }) {
   const { data: profile } = useSuspenseQuery(profileOptions(address));
-  const { data: upcomingEvents } = useSuspenseQuery(
-    eventsByOrganizerList(address, now, Number.MAX_SAFE_INTEGER, 20),
+  const {
+    data: upcomingEventsPages,
+    isFetchingNextPage: isFetchingUpcomingNextPage,
+    hasNextPage: hasNextUpcomingPage,
+    isFetching: isFetchingUpcoming,
+    fetchNextPage: fetchNextUpcomingPage,
+  } = useSuspenseInfiniteQuery(
+    eventsByOrganizerList(
+      address,
+      now,
+      Number.MAX_SAFE_INTEGER,
+      DEFAULT_EVENTS_LIMIT,
+    ),
   );
-  const { data: pastEvents } = useSuspenseQuery(
-    eventsByOrganizerList(address, now - 1, 0, 20),
+  const {
+    data: pastEventsPages,
+    isFetchingNextPage: isFetchingPastNextPage,
+    hasNextPage: hasNextPastPage,
+    isFetching: isFetchingPast,
+    fetchNextPage: fetchNextPastPage,
+  } = useSuspenseInfiniteQuery(
+    eventsByOrganizerList(address, now - 1, 0, DEFAULT_EVENTS_LIMIT),
+  );
+
+  const upcomingEvents = useMemo(
+    () => upcomingEventsPages.pages.flat(),
+    [upcomingEventsPages],
+  );
+
+  const pastEvents = useMemo(
+    () => pastEventsPages.pages.flat(),
+    [pastEventsPages],
   );
 
   // profileOptions can return array of object with empty string (except address)
@@ -71,6 +106,15 @@ export function ProfileInfo({
             />
           ))}
         </EventCardListLayout>
+
+        <LoaderMoreButton
+          fetchNextPage={fetchNextUpcomingPage}
+          hasNextPage={hasNextUpcomingPage}
+          isFetching={isFetchingUpcoming}
+          isFetchingNextPage={isFetchingUpcomingNextPage}
+          page={upcomingEvents}
+          noMoreLabel=""
+        />
       </div>
 
       <Heading level={2} size="lg">
@@ -87,6 +131,17 @@ export function ProfileInfo({
             />
           ))}
         </EventCardListLayout>
+
+        <div className="mt-8">
+          <LoaderMoreButton
+            fetchNextPage={fetchNextPastPage}
+            hasNextPage={hasNextPastPage}
+            isFetching={isFetchingPast}
+            isFetchingNextPage={isFetchingPastNextPage}
+            page={pastEvents}
+            noMoreLabel=""
+          />
+        </div>
       </div>
     </div>
   );

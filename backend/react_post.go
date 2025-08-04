@@ -31,13 +31,13 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		return nil, errors.New("icon cannot be empty")
 	}
 
-	evt := (*zeni.Event)(nil)
+	var orgType, orgID string
 	if err := s.DB.Tx(func(db zeni.DB) error {
-		evt, err = db.GetEventByPostID(req.Msg.PostId)
+		orgType, orgID, err = db.GetOrgByPostID(req.Msg.PostId)
 		if err != nil {
 			return err
 		}
-		roles, err := db.UserRoles(zUser.ID, evt.ID)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, orgType, orgID)
 		if err != nil {
 			return err
 		}
@@ -54,7 +54,7 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		return nil, err
 	}
 
-	if err = s.Chain.ReactPost(zUser.ID, evt.ID, req.Msg); err != nil {
+	if err = s.Chain.ReactPost(zUser.ID, orgID, orgID, req.Msg); err != nil {
 		return nil, err
 	}
 

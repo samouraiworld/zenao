@@ -1,6 +1,6 @@
 import GeoTZFind from "tz-lookup";
 import { currentTimezone } from "./time";
-import { EventFormSchemaType } from "@/components/form/types";
+import { EventFormSchemaType } from "@/types/schemas";
 
 export const determineTimezone = (
   location: EventFormSchemaType["location"],

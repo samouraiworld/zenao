@@ -83,11 +83,11 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
-		buyerRoles, err := db.UserRoles(req.Msg.EventId, buyer.ID)
+		buyerRoles, err := db.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
-		if slices.Contains(buyerRoles, "organizer") {
+		if slices.Contains(buyerRoles, zeni.RoleOrganizer) {
 			needPasswordIfGuarded = false
 		}
 
