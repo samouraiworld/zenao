@@ -522,8 +522,31 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	if err != nil {
 		return err
 	}
-
 	g.logger.Info("indexed community", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	for _, member := range membersAddr {
+		msgCall = vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: g.communitiesIndexPkgPath,
+			Func:    "AddMember",
+			Args: []string{
+				communityPkgPath,
+				member,
+			},
+		}
+		gasWanted, err = g.estimateCallTxGas(msgCall)
+		if err != nil {
+			return err
+		}
+		broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+			GasFee:    "10000000ugnot",
+			GasWanted: gasWanted,
+		}, msgCall))
+		if err != nil {
+			return err
+		}
+		g.logger.Info("added member to community registry", zap.String("member", member), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	}
 
 	return nil
 }
@@ -1154,6 +1177,75 @@ func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAd
 		})
 	}
 `, callerPkgPath, eventPkgPath, "Remove participant in "+eventPkgPath, participantAddr, ticketPubkey)
+}
+
+// XXX: used by gentxs to remove gatekeeper from an event
+func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperAddr string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		event %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/events"
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+				Title: "Remove gatekeeper",
+				Message: events.NewRemoveGatekeeperMsg(%q),
+			}),
+		})
+	}
+`, callerPkgPath, eventPkgPath, "Remove gatekeeper in "+eventPkgPath, gatekeeperAddr)
+}
+
+// XXX: used by gentxs to remove member from a community
+func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		community %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/communities"
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+				Title: "Remove member",
+				Message: communities.NewRemoveMemberMsg(%q),
+			}),
+		})
+	}
+`, callerPkgPath, communityPkgPath, "Remove member role from: "+memberAddr+" within "+communityPkgPath, memberAddr)
+}
+
+// XXX: used by gentxs to remove event from a community
+func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		community %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/communities"
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+				Title: "Remove event",
+				Message: communities.NewRemoveEventMsg(%q),
+			}),
+		})
+	}
+`, callerPkgPath, communityPkgPath, "Remove event role from: "+eventAddr+" within "+communityPkgPath, eventAddr)
 }
 
 func genEventRealmSource(organizersAddr []string, gatekeepersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {

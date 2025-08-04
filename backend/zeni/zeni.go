@@ -103,11 +103,20 @@ type Community struct {
 	CreatorID   string
 }
 
+type EntityRole struct {
+	DeletedAt  time.Time
+	EntityType string // one of: user, event
+	EntityID   string
+	OrgType    string // one of: event, community
+	OrgID      string
+	Role       string // one of: organizer, gatekeeper, participant, administrator, member,
+}
+
 type Feed struct {
 	CreatedAt time.Time
 	ID        string
 	Slug      string
-	OrgType   string // one of: user, event, community
+	OrgType   string // one of: event, community
 	OrgID     string
 }
 
@@ -147,6 +156,7 @@ type Reaction struct {
 }
 
 type SoldTicket struct {
+	DeletedAt time.Time
 	CreatedAt time.Time
 	Ticket    *Ticket
 	BuyerID   string
@@ -217,7 +227,6 @@ type DB interface {
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
 	GetAllCommunities() ([]*Community, error)
 
-	// XXX: we can create a common interface for orgs
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
 	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
@@ -237,6 +246,10 @@ type DB interface {
 	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
+
+	// gentxs specific
+	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
+	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
 }
 
 type Chain interface {
