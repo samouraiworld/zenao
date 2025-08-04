@@ -1,9 +1,8 @@
 "use client";
 
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import Link from "next/link";
-import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import {
   communitiesList,
   communityIdFromPkgPath,
@@ -11,8 +10,8 @@ import {
 } from "@/lib/queries/community";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import Heading from "@/components/widgets/texts/heading";
-import { Card } from "@/components/widgets/cards/card";
-import { Web3Image } from "@/components/widgets/images/web3-image";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import CommunityCard from "@/components/community/community-card";
 
 function CommunitiesListPage() {
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
@@ -41,30 +40,9 @@ function CommunitiesListPage() {
           const communityId = communityIdFromPkgPath(community.pkgPath);
           return (
             <Link key={communityId} href={`/community/${communityId}`}>
-              <Card className="flex flex-col gap-2 bg-secondary/50 hover:bg-secondary/100">
-                <div className="flex gap-4">
-                  <div className="sm:w-2/12 sm:h-2/12 w-3/12 h-3/12">
-                    <AspectRatio ratio={1 / 1}>
-                      <Web3Image
-                        src={community.avatarUri}
-                        alt="Profile picture"
-                        priority
-                        fetchPriority="high"
-                        fill
-                        sizes="(max-width: 768px) 100vw,
-              (max-width: 1200px) 50vw,
-              33vw"
-                        className="flex w-full rounded-xl md:rounded self-center object-cover"
-                      />
-                    </AspectRatio>
-                  </div>
-                  <div>
-                    <Heading level={3} className="text-lg sm:text-2xl">
-                      {community.displayName}
-                    </Heading>
-                  </div>
-                </div>
-              </Card>
+              <Suspense fallback={<Skeleton className="w-full h-[52px]" />}>
+                <CommunityCard id={communityId} community={community} />
+              </Suspense>
             </Link>
           );
         })}
