@@ -189,7 +189,7 @@ func listEventsPkgPathByAddrs(addresses []string) []string {
 		if pkgPath, ok := eventsPkgPathByAddr.Get(addr); ok {
 			res = append(res, pkgPath.(string))
 		} else {
-			res = append(res, "")
+			panic("event not found for address: " + addr)
 		}
 	}
 	return res
