@@ -52,6 +52,7 @@ export default async function EventLayout({ params, children }: Props) {
       ...eventOptions(p.id),
     });
   } catch (err) {
+    console.log("HERE");
     console.error("error", err);
     notFound();
   }
