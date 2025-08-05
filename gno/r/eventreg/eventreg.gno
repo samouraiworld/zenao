@@ -17,6 +17,7 @@ var (
 	Ownable *ownable.Ownable
 
 	registered          avl.Tree // <eventPkgPath> -> func() events.Info
+	eventsPkgPathByAddr avl.Tree // <eventAddr> -> pkgPath
 	eventsByPkgPath     avl.Tree // <eventPkgPath> -> events.Info
 	eventsByEndDate     avl.Tree // <endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
@@ -64,7 +65,6 @@ func IndexEvent(pkgPath string) {
 	if prev := getEventByPkgPath(pkgPath); prev != nil {
 		panic("already added")
 	}
-
 	info := mustGetInfo(pkgPath)
 	key := pkgPath
 	eventsByPkgPath.Set(key, info)
