@@ -22,6 +22,9 @@ var (
 	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	eventsByOrganizer   avl.Tree // <organizerID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	participantsByEvent avl.Tree // <eventPkgPath>/<participantID> -> participantID
+
+	// TODO: Remove this when we have a better way to handle lookup by event address.
+	eventsPkgPathByAddr avl.Tree // <eventAddr> -> pkgPath
 )
 
 func init() {
@@ -38,8 +41,11 @@ func Register(infoGetter events.InfoGetter) {
 		// XXX: remove from index??
 		return
 	}
-
 	registered.Set(pkgPath, infoGetter)
+
+	// TODO: Remove this when we have a better way to handle lookup by event address.
+	addr := std.DerivePkgAddr(pkgPath)
+	eventsPkgPathByAddr.Set(addr.String(), pkgPath)
 }
 
 func getInfo(pkgPath string) (*zenaov1.EventInfo, bool) {
@@ -64,7 +70,6 @@ func IndexEvent(pkgPath string) {
 	if prev := getEventByPkgPath(pkgPath); prev != nil {
 		panic("already added")
 	}
-
 	info := mustGetInfo(pkgPath)
 	key := pkgPath
 	eventsByPkgPath.Set(key, info)
@@ -175,6 +180,19 @@ func mustGetEventByPkgPath(pkgPath string) *zenaov1.EventInfo {
 		panic(ErrEventNotFound)
 	}
 	return evt
+}
+
+// TODO: Remove this when we have a better way to handle lookup by event address.
+func listEventsPkgPathByAddrs(addresses []string) []string {
+	res := make([]string, 0, len(addresses))
+	for _, addr := range addresses {
+		if pkgPath, ok := eventsPkgPathByAddr.Get(addr); ok {
+			res = append(res, pkgPath.(string))
+		} else {
+			panic("event not found for address: " + addr)
+		}
+	}
+	return res
 }
 
 func listEvents(from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
