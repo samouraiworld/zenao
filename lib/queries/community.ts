@@ -148,7 +148,7 @@ function communitiesListFromJson(raw: unknown) {
   );
 }
 
-function goStringSliceLiteral(arr: string[]): string {
+export function goStringSliceLiteral(arr: string[]): string {
   return `[]string{${arr.map((s) => JSON.stringify(s)).join(",")}}`;
 }
 

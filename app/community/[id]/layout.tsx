@@ -8,6 +8,7 @@ import {
   communityUsersWithRoles,
 } from "@/lib/queries/community";
 import { profileOptions } from "@/lib/queries/profile";
+import { eventsPkgPathsByAddrs } from "@/lib/queries/events-list";
 
 // enable ssg for all events
 export async function generateStaticParams() {
@@ -47,9 +48,17 @@ async function CommunityPageLayout({
     queryClient.prefetchQuery(profileOptions(member.address)),
   );
 
-  // const events = await queryClient.fetchQuery(
-  //   communityUsersWithRoles(communityId, ["event"]),
-  // );
+  const events = await queryClient.fetchQuery(
+    communityUsersWithRoles(communityId, ["event"]),
+  );
+
+  console.log("eventAddresses", events);
+
+  console.log(
+    await queryClient.fetchQuery(
+      eventsPkgPathsByAddrs(events.map((e) => e.address)),
+    ),
+  );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
