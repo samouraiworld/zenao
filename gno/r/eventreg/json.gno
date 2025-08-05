@@ -19,3 +19,16 @@ func eventsToJSON(events []*zenaov1.EventInfo) string {
 	}
 	return string(bz)
 }
+
+func stringArrayToJSON(arr []string) string {
+	nodes := []*json.Node{}
+	for _, str := range arr {
+		nodes = append(nodes, json.StringNode("", str))
+	}
+	jsonArr := json.ArrayNode("", nodes)
+	bz, err := json.Marshal(jsonArr)
+	if err != nil {
+		panic(err)
+	}
+	return string(bz)
+}
