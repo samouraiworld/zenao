@@ -17,7 +17,8 @@
     "footer": {
       "terms": "Terms",
       "privacy": "Privacy",
-      "security": "Security"
+      "security": "Security",
+      "report-bug": "Report a bug"
     }
   },
   "home": {
