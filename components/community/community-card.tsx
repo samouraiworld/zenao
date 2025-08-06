@@ -31,7 +31,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
   return (
     <Card className="flex flex-col gap-2 bg-secondary/50 hover:bg-secondary/100">
       <div className="flex gap-4">
-        <div className="sm:w-2/12 sm:h-2/12 w-3/12 h-3/12">
+        <div className="min-w-[128px]">
           <AspectRatio ratio={1 / 1}>
             <Web3Image
               src={community.avatarUri}
@@ -50,7 +50,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
           <Heading level={3} className="text-lg sm:text-2xl">
             {community.displayName}
           </Heading>
-          <Text className="text-xs md:text-sm text-ellipsis text-secondary-color">
+          <Text className="text-xs md:text-sm text-ellipsis line-clamp-2 text-secondary-color">
             {community.description}
           </Text>
 
