@@ -52,12 +52,8 @@ async function CommunityPageLayout({
     communityUsersWithRoles(communityId, ["event"]),
   );
 
-  console.log("eventAddresses", events);
-
-  console.log(
-    await queryClient.fetchQuery(
-      eventsPkgPathsByAddrs(events.map((e) => e.address)),
-    ),
+  queryClient.prefetchQuery(
+    eventsPkgPathsByAddrs(events.map((e) => e.address)),
   );
 
   return (

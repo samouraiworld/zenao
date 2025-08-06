@@ -12,6 +12,8 @@ import { communityUsersWithRoles } from "@/lib/queries/community";
 import { eventsPkgPathsByAddrs } from "@/lib/queries/events-list";
 import { eventIdFromPkgPath, eventOptions } from "@/lib/queries/event";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
+import { EventCard } from "@/components/features/event/event-card";
 
 type CommunityEventsProps = {
   communityId: string;
@@ -40,30 +42,31 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
         .map((elem) => elem.data),
   });
 
-  console.log(events);
-
   return (
-    <div className="space-y-8">
-      <Heading level={2} size="lg">
-        Hosting events ({0})
-      </Heading>
+    <div className="space-y-8 pb-8">
+      <div className="flex flex-col gap-4">
+        <Heading level={2} size="lg">
+          {t("community.events")}
+        </Heading>
 
-      <div className="flex flex-col gap-0">
-        <EmptyList
-          title={t("no-events-title")}
-          description={t("no-events-description")}
-        />
-      </div>
+        <div className="flex flex-col gap-0">
+          {events.length === 0 && (
+            <EmptyList
+              title={t("no-events-title")}
+              description={t("no-events-description")}
+            />
+          )}
+        </div>
 
-      <Heading level={2} size="lg">
-        Past events ({0})
-      </Heading>
-
-      <div className="flex flex-col gap-0">
-        <EmptyList
-          title={t("no-events-title")}
-          description={t("no-events-description")}
-        />
+        <EventCardListLayout>
+          {events.map((evt) => (
+            <EventCard
+              key={evt.pkgPath}
+              evt={evt}
+              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
+            />
+          ))}
+        </EventCardListLayout>
       </div>
     </div>
   );

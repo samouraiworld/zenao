@@ -83,7 +83,7 @@ export const eventsPkgPathsByAddrs = (addresses: string[]) =>
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `listEventsPkgPathByAddrs(${goStringSliceLiteral(addresses)})`,
+        `stringArrayToJSON(listEventsPkgPathByAddrs(${goStringSliceLiteral(addresses)}))`,
       );
       const raw = extractGnoJSONResponse(res);
 
