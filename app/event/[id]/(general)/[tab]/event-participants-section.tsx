@@ -1,13 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  useSuspenseQueries,
-  useSuspenseQuery,
-  UseSuspenseQueryResult,
-} from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +11,6 @@ import {
   DialogTrigger,
 } from "@/components/shadcn/dialog";
 import { eventUsersWithRole } from "@/lib/queries/event-users";
-import Text from "@/components/widgets/texts/text";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Drawer,
@@ -24,63 +18,9 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from "@/components/shadcn/drawer";
-import {
-  UserAvatar,
-  UserAvatarWithName,
-} from "@/components/features/user/user";
-
-function ParticipantsAvatarsPreview({
-  participants,
-}: {
-  participants: string[];
-}) {
-  return (
-    <div className="flex -space-x-2 overflow-hidden">
-      {participants.map((address) => (
-        <UserAvatar
-          key={address}
-          className="flex ring-2 ring-background/80"
-          address={address}
-        />
-      ))}
-    </div>
-  );
-}
-
-function ParticipantsNamesPreview({
-  participants: participantsAddresses,
-}: {
-  participants: string[];
-}) {
-  const participants = useSuspenseQueries({
-    queries: participantsAddresses.map((address) => profileOptions(address)),
-    combine: (results) =>
-      results
-        .filter(
-          (elem): elem is UseSuspenseQueryResult<GnoProfile, Error> =>
-            elem.isSuccess && !!elem.data,
-        )
-        .map((elem) => elem.data),
-  });
-  return (
-    <div className="flex flex-row">
-      {participants.length > 2 ? (
-        <>
-          <Text
-            size="sm"
-            className="text-start"
-          >{`${participants[0]?.displayName}, ${participants[1]?.displayName} and ${participants.length - 2} others`}</Text>
-        </>
-      ) : (
-        <Text size="sm">
-          {participants
-            .map((participant) => participant?.displayName)
-            .join(", ")}
-        </Text>
-      )}
-    </div>
-  );
-}
+import { UserAvatarWithName } from "@/components/features/user/user";
+import UsersAvatarsPreview from "@/components/user/users-avatars-preview";
+import UsersNamesPreview from "@/components/user/users-names-preview";
 
 export function ParticipantsSection({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
@@ -102,14 +42,14 @@ export function ParticipantsSection({ id }: { id: string }) {
           <DialogTrigger>
             <div className="flex flex-col gap-2">
               {/* 6 because we decide to show the first 6 participants avatars as preview */}
-              <ParticipantsAvatarsPreview
-                participants={
+              <UsersAvatarsPreview
+                usersAddresses={
                   participantsAddresses.length > 6
                     ? participantsAddresses.slice(0, 6)
                     : participantsAddresses
                 }
               />
-              <ParticipantsNamesPreview participants={participantsAddresses} />
+              <UsersNamesPreview usersAddresses={participantsAddresses} />
             </div>
           </DialogTrigger>
           <DialogContent className="max-h-screen overflow-auto">
@@ -139,14 +79,14 @@ export function ParticipantsSection({ id }: { id: string }) {
       <DrawerTrigger asChild>
         <div className="flex flex-col gap-2">
           {/* 6 because we decide to show the first 6 participants avatars as preview */}
-          <ParticipantsAvatarsPreview
-            participants={
+          <UsersAvatarsPreview
+            usersAddresses={
               participantsAddresses.length > 6
                 ? participantsAddresses.slice(0, 6)
                 : participantsAddresses
             }
           />
-          <ParticipantsNamesPreview participants={participantsAddresses} />
+          <UsersAvatarsPreview usersAddresses={participantsAddresses} />
         </div>
       </DrawerTrigger>
 

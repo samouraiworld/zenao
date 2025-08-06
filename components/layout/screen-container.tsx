@@ -24,7 +24,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
     <div className="flex flex-col flex-1 items-center">
       {background && <BackgroundImage {...background} />}
       <main
-        className="h-full w-full mb-10 sm:mb-0"
+        className="h-full w-full mb-10 sm:mb-0 standalone:mb-24"
         style={{ maxWidth: screenContainerMaxWidth }}
       >
         <div
@@ -48,7 +48,7 @@ export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
 }) => {
   return (
     <div className="flex grow flex-col items-center justify-center">
-      <main className="flex flex-col w-full justify-center items-center mb-10 sm:mb-0">
+      <main className="flex flex-col w-full justify-center items-center mb-10 sm:mb-0 standalone:mb-24">
         <div className="mt-8 mx-5">{children}</div>
       </main>
       {isSignedOutModal && <SignedOutDialog />}
