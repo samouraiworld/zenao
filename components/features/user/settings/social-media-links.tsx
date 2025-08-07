@@ -1,17 +1,18 @@
 "use client";
 
+import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { useCallback } from "react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/select";
-import { SocialLinksSchemaType } from "@/types/schemas";
+import { UserFormSchemaType } from "@/types/schemas";
+import { FormField, FormItem } from "@/components/shadcn/form";
 
 const SOCIAL_LINKS_KEYS = [
   "twitter",
@@ -23,36 +24,75 @@ const SOCIAL_LINKS_KEYS = [
 ] as const;
 
 function getUndefinedSocialLinkKeys(
-  socialLinks: SocialLinksSchemaType,
+  socialLinks: UserFormSchemaType["socialMediaLinks"],
 ): (typeof SOCIAL_LINKS_KEYS)[number][] {
-  return SOCIAL_LINKS_KEYS.filter((key) => !socialLinks[key]);
+  const filters = SOCIAL_LINKS_KEYS.filter(
+    (key) => socialLinks.findIndex(({ name }) => name === key) === -1,
+  );
+  return filters;
 }
 
-const testObject: SocialLinksSchemaType = {
-  twitter: "https://twitter.com/example",
-  website: "",
-};
+function SocialMediaLinks({
+  form,
+}: {
+  form: UseFormReturn<UserFormSchemaType>;
+}) {
+  const {
+    fields: linkFields,
+    append: appendLink,
+    remove: removeLink,
+  } = useFieldArray({
+    control: form.control,
+    name: "socialMediaLinks",
+  });
+  const links = form.watch("socialMediaLinks");
 
-function SocialMediaLinks() {
-  const notSetSocialLinksKeys = getUndefinedSocialLinkKeys(testObject);
+  const selectItemValues = useCallback(
+    (currentValue?: string) => {
+      const items = [
+        ...new Set([...getUndefinedSocialLinkKeys(links), currentValue]),
+      ];
+
+      return items.map(
+        (item) =>
+          item && (
+            <SelectItem key={item} value={item}>
+              {item.charAt(0).toUpperCase() + item.slice(1)}
+            </SelectItem>
+          ),
+      );
+    },
+    [links],
+  );
 
   return (
-    <div className="flex gap-2">
-      <Select>
-        <SelectTrigger className="w-[180px] h-full">
-          <SelectValue placeholder="Choose" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {notSetSocialLinksKeys.map((key) => (
-              <SelectItem key={key} value={key}>
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      <Input type="text" placeholder="Enter URL" />
+    <div className="flex flex-col gap-4">
+      <Button
+        type="button"
+        onClick={() =>
+          appendLink({ name: getUndefinedSocialLinkKeys(links)[0] })
+        }
+      >
+        Add link
+      </Button>
+      {linkFields.map((_, index) => (
+        <div className="flex gap-2" key={index}>
+          <FormItem>
+            <FormField
+              name={`socialMediaLinks.${index}.name`}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="w-[180px] h-12">
+                    <SelectValue placeholder="Choose" />
+                  </SelectTrigger>
+                  <SelectContent>{selectItemValues(field.value)}</SelectContent>
+                </Select>
+              )}
+            />
+          </FormItem>
+          <Input type="text" placeholder="Enter URL" />
+        </div>
+      ))}
     </div>
   );
 }

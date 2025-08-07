@@ -38,7 +38,10 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const form = useForm<UserFormSchemaType>({
     mode: "all",
     resolver: zodResolver(userFormSchema),
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      socialMediaLinks: [],
+    },
   });
   const { toast } = useToast();
   const t = useTranslations("settings");
@@ -101,7 +104,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               maxLength={1000}
             />
 
-            <SocialMediaLinks />
+            <SocialMediaLinks form={form} />
 
             <div>
               <ButtonWithChildren loading={isPending} type="submit">

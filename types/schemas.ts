@@ -96,9 +96,22 @@ export const eventFormSchema = z.object({
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
+export const userFromSocialLinksSchema = z.object({
+  name: z.union([
+    z.literal("twitter"),
+    z.literal("github"),
+    z.literal("website"),
+    z.literal("discord"),
+    z.literal("telegram"),
+    z.literal("linkedin"),
+  ]),
+  url: z.string().url().max(400).optional(),
+});
+
 export const userFormSchema = z.object({
   bio: z.string().trim().min(2).max(1000),
   displayName: z.string().trim().min(1),
+  socialMediaLinks: userFromSocialLinksSchema.array(),
   avatarUri: uriSchema,
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
