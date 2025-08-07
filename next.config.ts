@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
   experimental: {
     serverComponentsHmrCache: false, // defaults to true
   },
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: [
+          {
+            loader: "@svgr/webpack",
+            options: {
+              icon: true,
+            },
+          },
+        ],
+        as: "*.js",
+      },
+    },
+  },
   async rewrites() {
     return [
       {

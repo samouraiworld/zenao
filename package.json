@@ -95,6 +95,7 @@
     "@bufbuild/protoc-gen-es": "^2.2.3",
     "@clerk/testing": "^1.4.23",
     "@eslint/eslintrc": "^3",
+    "@svgr/webpack": "^8.1.0",
     "@types/geobuf": "^3.0.4",
     "@types/leaflet": "^1.9.16",
     "@types/node": "^20",
