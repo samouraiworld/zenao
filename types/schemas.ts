@@ -176,3 +176,14 @@ export const communityTabsSchema = z.union([
   z.literal("proposals"),
 ]);
 export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;
+
+export const socialLinksSchema = z.object({
+  twitter: z.string().url().max(400).optional(),
+  github: z.string().url().max(400).optional(),
+  website: z.string().url().max(400).optional(),
+  discord: z.string().url().max(400).optional(),
+  telegram: z.string().url().max(400).optional(),
+  linkedin: z.string().url().max(400).optional(),
+});
+
+export type SocialLinksSchemaType = z.infer<typeof socialLinksSchema>;

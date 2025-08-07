@@ -17,6 +17,7 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
 import { UserFormSchemaType, userFormSchema } from "@/types/schemas";
+import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -99,6 +100,9 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               wordCounter
               maxLength={1000}
             />
+
+            <SocialMediaLinks />
+
             <div>
               <ButtonWithChildren loading={isPending} type="submit">
                 {t("save-button")}
