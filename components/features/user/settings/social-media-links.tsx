@@ -2,6 +2,7 @@
 
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { useCallback } from "react";
+import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import {
@@ -12,7 +13,9 @@ import {
   SelectValue,
 } from "@/components/shadcn/select";
 import { UserFormSchemaType } from "@/types/schemas";
-import { FormField, FormItem } from "@/components/shadcn/form";
+import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
+import Heading from "@/components/widgets/texts/heading";
+import { cn } from "@/lib/tailwind";
 
 const SOCIAL_LINKS_KEYS = [
   "twitter",
@@ -67,6 +70,8 @@ function SocialMediaLinks({
 
   return (
     <div className="flex flex-col gap-4">
+      <Heading>Social links</Heading>
+
       <Button
         type="button"
         onClick={() =>
@@ -76,21 +81,49 @@ function SocialMediaLinks({
         Add link
       </Button>
       {linkFields.map((_, index) => (
-        <div className="flex gap-2" key={index}>
+        <div className="flex gap-2 items-start" key={index}>
           <FormItem>
             <FormField
               name={`socialMediaLinks.${index}.name`}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="w-[180px] h-12">
-                    <SelectValue placeholder="Choose" />
-                  </SelectTrigger>
-                  <SelectContent>{selectItemValues(field.value)}</SelectContent>
-                </Select>
+                <div>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-[128px] h-12">
+                      <SelectValue placeholder="Choose" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectItemValues(field.value)}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </div>
               )}
             />
           </FormItem>
-          <Input type="text" placeholder="Enter URL" />
+          <FormItem className="grow">
+            <FormField
+              name={`socialMediaLinks.${index}.url`}
+              render={({ field }) => (
+                <div className="flex flex-col gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Enter URL"
+                    value={field.value}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                  <FormMessage />
+                </div>
+              )}
+            />
+          </FormItem>
+          <div
+            onClick={() => removeLink(index)}
+            className={cn(
+              "hover:cursor-pointer hover:bg-destructive flex items-center justify-center rounded-full size-11 aspect-square",
+            )}
+          >
+            <Trash2Icon className="size-4" />
+          </div>
         </div>
       ))}
     </div>
