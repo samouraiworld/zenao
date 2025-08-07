@@ -59,7 +59,7 @@ function SocialMediaLinks({
       return items.map(
         (item) =>
           item && (
-            <SelectItem key={item} value={item}>
+            <SelectItem key={item} data-cy-value={item} value={item}>
               {item.charAt(0).toUpperCase() + item.slice(1)}
             </SelectItem>
           ),
@@ -85,7 +85,10 @@ function SocialMediaLinks({
                       value={field.value}
                       defaultValue={field.value}
                     >
-                      <SelectTrigger className="w-[128px] h-12">
+                      <SelectTrigger
+                        aria-label="Select link type"
+                        className="w-[128px] h-12"
+                      >
                         <SelectValue placeholder="Choose" />
                       </SelectTrigger>
                       <SelectContent>

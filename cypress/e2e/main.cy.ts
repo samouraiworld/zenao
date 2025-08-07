@@ -14,6 +14,11 @@ const testEventPassword = "zenao_everyday";
 const testStandardPost = "Post to test";
 const testComment = "A comment to test";
 
+const testSocialLink = {
+  name: "twitter",
+  value: "https://twitter.com/alice_tester",
+};
+
 const login = (email = testEmail) => {
   cy.clerkSignIn({ strategy: "email_code", identifier: email });
   cy.wait(1000);
@@ -152,6 +157,17 @@ describe("main", () => {
     cy.get('textarea[placeholder="Bio..."]')
       .clear()
       .type(testBio, { delay: 1 });
+
+    // add social links
+    cy.get("button").contains("Add link").click();
+    cy.get("button[aria-label='Select link type']").click();
+    cy.get(`div[data-cy-value="${testSocialLink.name}"]`)
+      .contains("Twitter")
+      .click();
+
+    cy.get('input[placeholder="Enter URL"]').type(testSocialLink.value, {
+      delay: 1,
+    });
 
     // save changes
     cy.get("button").contains("Save changes").click();
