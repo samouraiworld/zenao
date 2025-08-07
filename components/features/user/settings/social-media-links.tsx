@@ -70,16 +70,8 @@ function SocialMediaLinks({
 
   return (
     <div className="flex flex-col gap-4">
-      <Heading>Social links</Heading>
+      <Heading level={3}>Social links</Heading>
 
-      <Button
-        type="button"
-        onClick={() =>
-          appendLink({ name: getUndefinedSocialLinkKeys(links)[0] })
-        }
-      >
-        Add link
-      </Button>
       {linkFields.map((_, index) => (
         <div className="flex gap-2 items-start" key={index}>
           <FormItem>
@@ -126,6 +118,16 @@ function SocialMediaLinks({
           </div>
         </div>
       ))}
+      <Button
+        type="button"
+        className="w-fit"
+        onClick={() =>
+          appendLink({ name: getUndefinedSocialLinkKeys(links)[0], url: "" })
+        }
+        disabled={linkFields.length >= SOCIAL_LINKS_KEYS.length}
+      >
+        Add link
+      </Button>
     </div>
   );
 }

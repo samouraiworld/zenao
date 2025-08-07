@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userAddressOptions } from "@/lib/queries/user";
-import { GnoProfile, profileOptions } from "@/lib/queries/profile";
+import { profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/widgets/texts/text";
 import { useEditUserProfile } from "@/lib/mutations/profile";
 import { captureException } from "@/lib/report";
@@ -16,8 +16,17 @@ import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-chi
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
-import { UserFormSchemaType, userFormSchema } from "@/types/schemas";
+import {
+  SocialLinksSchemaType,
+  UserFormSchemaType,
+  UserFormSocialLinksSchemaType,
+  userFormSchema,
+} from "@/types/schemas";
 import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
+import {
+  deserializeUserProfileDetails,
+  serializeUserProfileDetails,
+} from "@/lib/user-profile-serialization";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -26,22 +35,25 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     userAddressOptions(getToken, userId),
   );
   const { data: user } = useSuspenseQuery(profileOptions(address));
+  const profileDetails = deserializeUserProfileDetails(user?.bio ?? "");
 
-  const defaultValues: GnoProfile = user || {
-    address: address || "",
-    displayName: "",
-    bio: "",
-    avatarUri: "",
+  const defaultValues: UserFormSchemaType = {
+    avatarUri: user?.avatarUri || "",
+    displayName: user?.displayName || "",
+    bio: profileDetails.bio || "",
+    socialMediaLinks: Object.entries(profileDetails.socialMediaLinks || {}).map(
+      ([name, url]) => ({
+        name: name as UserFormSocialLinksSchemaType["name"],
+        url,
+      }),
+    ),
   };
 
   const { editUser, isPending } = useEditUserProfile();
   const form = useForm<UserFormSchemaType>({
     mode: "all",
     resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      ...defaultValues,
-      socialMediaLinks: [],
-    },
+    defaultValues,
   });
   const { toast } = useToast();
   const t = useTranslations("settings");
@@ -56,10 +68,23 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         throw new Error("invalid clerk token");
       }
 
+      const socialMediaLinks =
+        values.socialMediaLinks.reduce<SocialLinksSchemaType>((acc, link) => {
+          if (link.url) {
+            acc[link.name] = link.url;
+          }
+          return acc;
+        }, {});
+
       await editUser({
-        ...values,
         address: address || "",
         token,
+        avatarUri: values.avatarUri,
+        displayName: values.displayName,
+        bio: serializeUserProfileDetails({
+          bio: values.bio,
+          socialMediaLinks,
+        }),
       });
       toast({
         title: t("toast-success"),
