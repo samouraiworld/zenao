@@ -72,24 +72,30 @@ function SocialMediaLinks({
     <div className="flex flex-col gap-4">
       <Heading level={3}>Social links</Heading>
 
-      {linkFields.map((_, index) => (
-        <div className="flex gap-2 items-start" key={index}>
+      {linkFields.map((link, index) => (
+        <div className="flex gap-2 items-start" key={link.id}>
           <FormItem>
             <FormField
               name={`socialMediaLinks.${index}.name`}
-              render={({ field }) => (
-                <div>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-[128px] h-12">
-                      <SelectValue placeholder="Choose" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectItemValues(field.value)}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </div>
-              )}
+              render={({ field }) => {
+                return (
+                  <div>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-[128px] h-12">
+                        <SelectValue placeholder="Choose" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectItemValues(field.value)}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </div>
+                );
+              }}
             />
           </FormItem>
           <FormItem className="grow">
@@ -109,7 +115,9 @@ function SocialMediaLinks({
             />
           </FormItem>
           <div
-            onClick={() => removeLink(index)}
+            onClick={() => {
+              removeLink(index);
+            }}
             className={cn(
               "hover:cursor-pointer hover:bg-destructive flex items-center justify-center rounded-full size-11 aspect-square",
             )}
