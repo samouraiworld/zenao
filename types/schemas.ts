@@ -96,12 +96,47 @@ export const eventFormSchema = z.object({
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
+export const userFormSocialLinksSchema = z.object({
+  name: z.union([
+    z.literal("twitter"),
+    z.literal("github"),
+    z.literal("website"),
+    z.literal("discord"),
+    z.literal("telegram"),
+    z.literal("linkedin"),
+  ]),
+  url: z.string().url().max(400),
+});
+
+export type UserFormSocialLinksSchemaType = z.infer<
+  typeof userFormSocialLinksSchema
+>;
+
 export const userFormSchema = z.object({
   bio: z.string().trim().min(2).max(1000),
   displayName: z.string().trim().min(1),
+  socialMediaLinks: userFormSocialLinksSchema.array(),
   avatarUri: uriSchema,
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
+
+export const socialLinksSchema = z.object({
+  twitter: z.string().url().max(400).optional(),
+  github: z.string().url().max(400).optional(),
+  website: z.string().url().max(400).optional(),
+  discord: z.string().url().max(400).optional(),
+  telegram: z.string().url().max(400).optional(),
+  linkedin: z.string().url().max(400).optional(),
+});
+
+export type SocialLinksSchemaType = z.infer<typeof socialLinksSchema>;
+
+export const gnoProfileDetailsSchema = z.object({
+  bio: z.string().trim().min(2).max(1000),
+  socialMediaLinks: socialLinksSchema,
+});
+
+export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
 
 const pollOptionFormSchema = z.object({
   text: z
