@@ -2,10 +2,9 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { GlobeIcon, LinkedinIcon, TwitterIcon } from "lucide-react";
-import { FC, SVGProps } from "react";
-import DiscordIcon from "@/components/icons/discord.svg";
-import TelegramIcon from "@/components/icons/telegram.svg";
-import GithubIcon from "@/components/icons/github.svg";
+import DiscordIcon from "@/components/icons/discord.tsx";
+import TelegramIcon from "@/components/icons/telegram.tsx";
+import GithubIcon from "@/components/icons/github.tsx";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Card } from "@/components/widgets/cards/card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
@@ -27,7 +26,7 @@ type ProfileHeaderProps = {
 
 const socialLinksIcons: Record<
   UserFormSocialLinksSchemaType["name"],
-  FC<SVGProps<SVGSVGElement>>
+  (props: React.SVGProps<SVGSVGElement>) => React.ReactNode
 > = {
   twitter: TwitterIcon,
   github: GithubIcon,
@@ -48,7 +47,6 @@ export default function ProfileHeader({
     userAddressOptions(getToken, userId),
   );
   const profileDetails = deserializeUserProfileDetails(bio ?? "");
-  console.log("ProfileDetails", profileDetails);
 
   return (
     <>
