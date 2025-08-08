@@ -48,6 +48,7 @@ export default function ProfileHeader({
     userAddressOptions(getToken, userId),
   );
   const profileDetails = deserializeUserProfileDetails(bio ?? "");
+  console.log("ProfileDetails", profileDetails);
 
   return (
     <>
@@ -98,7 +99,6 @@ export default function ProfileHeader({
                     socialLinksIcons[
                       name as UserFormSocialLinksSchemaType["name"]
                     ];
-                  console.log(Icon);
 
                   return (
                     <li key={name}>
