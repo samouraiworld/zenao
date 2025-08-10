@@ -578,8 +578,29 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 	if err != nil {
 		return err
 	}
-
 	g.logger.Info("added member to community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "AddMember",
+		Args: []string{
+			communityPkgPath,
+			userAddr,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("indexed member in community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
