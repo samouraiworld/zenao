@@ -25,6 +25,14 @@ var eventBroadcastMessageTmplHTML *template.Template
 var eventBroadcastMessageTmplTextSrc string
 var eventBroadcastMessageTmplText *template.Template
 
+//go:embed mails/html/community-new-event.tmpl.html
+var communityNewEventTmplHTMLSrc string
+var communityNewEventTmplHTML *template.Template
+
+//go:embed mails/text/community-new-event.tmpl.txt
+var communityNewEventTmplTextSrc string
+var communityNewEventTmplText *template.Template
+
 func init() {
 	tmpl, err := template.New("ticketsConfirmationHTML").Parse(ticketsConfirmationTmplHTMLSrc)
 	if err != nil {
@@ -49,6 +57,18 @@ func init() {
 		panic(err)
 	}
 	eventBroadcastMessageTmplText = tmpl
+
+	tmpl, err = template.New("communityNewEventHTML").Parse(communityNewEventTmplHTMLSrc)
+	if err != nil {
+		panic(err)
+	}
+	communityNewEventTmplHTML = tmpl
+
+	tmpl, err = template.New("communityNewEventText").Parse(communityNewEventTmplTextSrc)
+	if err != nil {
+		panic(err)
+	}
+	communityNewEventTmplText = tmpl
 }
 
 type ticketsConfirmation struct {
@@ -120,6 +140,44 @@ func eventBroadcastMailContent(event *zeni.Event, message string) (string, strin
 
 	buf = &strings.Builder{}
 	if err := eventBroadcastMessageTmplText.Execute(buf, data); err != nil {
+		return "", "", err
+	}
+	textContent := buf.String()
+
+	return htmlContent, textContent, nil
+}
+
+type communityNewEvent struct {
+	EventName       string
+	EventImage      string
+	EventDate       string
+	EventEndDate    string
+	EventURL        string
+	CommunityName   string
+	CommunityImage  string
+	CalendarIconURL string
+}
+
+func communityNewEventMailContent(event *zeni.Event, community *zeni.Community) (string, string, error) {
+	data := communityNewEvent{
+		EventName:       event.Title,
+		EventImage:      web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		EventDate:       event.StartDate.Format(time.ANSIC),
+		EventEndDate:    event.EndDate.Format(time.ANSIC),
+		EventURL:        eventPublicURL(event.ID),
+		CommunityName:   community.DisplayName,
+		CommunityImage:  web2URL(community.AvatarURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
+	}
+
+	buf := &strings.Builder{}
+	if err := communityNewEventTmplHTML.Execute(buf, data); err != nil {
+		return "", "", err
+	}
+	htmlContent := buf.String()
+
+	buf = &strings.Builder{}
+	if err := communityNewEventTmplText.Execute(buf, data); err != nil {
 		return "", "", err
 	}
 	textContent := buf.String()

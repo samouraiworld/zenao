@@ -28,6 +28,8 @@ service ZenaoService {
 
   // COMMUNITY
   rpc CreateCommunity(CreateCommunityRequest) returns (CreateCommunityResponse);
+  rpc AddEventToCommunity(AddEventToCommunityRequest)
+      returns (AddEventToCommunityResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
@@ -277,3 +279,10 @@ message CreateCommunityRequest {
 }
 
 message CreateCommunityResponse { string community_id = 1; }
+
+message AddEventToCommunityRequest {
+  string community_id = 1;
+  string event_id = 2;
+}
+
+message AddEventToCommunityResponse {}
