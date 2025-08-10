@@ -39,11 +39,14 @@ func (s *ZenaoServer) AddEventToCommunity(
 		return nil, errors.New("this feature is only available for pro users")
 	}
 
-	var targets []*zeni.User
-	var participants []*zeni.User
-	var targetIDs = make(map[string]bool)
-	var cmt *zeni.Community
-	var evt *zeni.Event
+	var (
+		targets      []*zeni.User
+		participants []*zeni.User
+		targetIDs    = make(map[string]bool)
+		cmt          *zeni.Community
+		evt          *zeni.Event
+	)
+
 	if err := s.DB.Tx(func(tx zeni.DB) error {
 		cmt, err = tx.GetCommunity(req.Msg.CommunityId)
 		if err != nil {
@@ -96,7 +99,9 @@ func (s *ZenaoServer) AddEventToCommunity(
 
 		for _, participant := range participants {
 			if !targetIDs[participant.ID] {
-				tx.AddEventToCommunity(participant.ID, req.Msg.CommunityId)
+				if err := tx.AddMemberToCommunity(req.Msg.CommunityId, participant.ID); err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -156,7 +161,10 @@ func (s *ZenaoServer) AddEventToCommunity(
 
 	for _, participant := range participants {
 		if !targetIDs[participant.ID] {
-			s.Chain.AddMemberToCommunity(cmt.CreatorID, req.Msg.CommunityId, participant.ID)
+			if err := s.Chain.AddMemberToCommunity(cmt.CreatorID, req.Msg.CommunityId, participant.ID); err != nil {
+				s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-id", participant.ID))
+				return nil, err
+			}
 		}
 	}
 
