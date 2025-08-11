@@ -69,6 +69,9 @@ const (
 	// ZenaoServiceCreateCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// CreateCommunity RPC.
 	ZenaoServiceCreateCommunityProcedure = "/zenao.v1.ZenaoService/CreateCommunity"
+	// ZenaoServiceJoinCommunityProcedure is the fully-qualified name of the ZenaoService's
+	// JoinCommunity RPC.
+	ZenaoServiceJoinCommunityProcedure = "/zenao.v1.ZenaoService/JoinCommunity"
 	// ZenaoServiceAddEventToCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// AddEventToCommunity RPC.
 	ZenaoServiceAddEventToCommunityProcedure = "/zenao.v1.ZenaoService/AddEventToCommunity"
@@ -106,6 +109,7 @@ type ZenaoServiceClient interface {
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
+	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
@@ -207,6 +211,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("CreateCommunity")),
 			connect.WithClientOptions(opts...),
 		),
+		joinCommunity: connect.NewClient[v1.JoinCommunityRequest, v1.JoinCommunityResponse](
+			httpClient,
+			baseURL+ZenaoServiceJoinCommunityProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("JoinCommunity")),
+			connect.WithClientOptions(opts...),
+		),
 		addEventToCommunity: connect.NewClient[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse](
 			httpClient,
 			baseURL+ZenaoServiceAddEventToCommunityProcedure,
@@ -273,6 +283,7 @@ type zenaoServiceClient struct {
 	checkin             *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
 	exportParticipants  *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
 	createCommunity     *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
+	joinCommunity       *connect.Client[v1.JoinCommunityRequest, v1.JoinCommunityResponse]
 	addEventToCommunity *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
 	createPoll          *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll            *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
@@ -348,6 +359,11 @@ func (c *zenaoServiceClient) CreateCommunity(ctx context.Context, req *connect.R
 	return c.createCommunity.CallUnary(ctx, req)
 }
 
+// JoinCommunity calls zenao.v1.ZenaoService.JoinCommunity.
+func (c *zenaoServiceClient) JoinCommunity(ctx context.Context, req *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error) {
+	return c.joinCommunity.CallUnary(ctx, req)
+}
+
 // AddEventToCommunity calls zenao.v1.ZenaoService.AddEventToCommunity.
 func (c *zenaoServiceClient) AddEventToCommunity(ctx context.Context, req *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error) {
 	return c.addEventToCommunity.CallUnary(ctx, req)
@@ -406,6 +422,7 @@ type ZenaoServiceHandler interface {
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
+	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
@@ -503,6 +520,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("CreateCommunity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceJoinCommunityHandler := connect.NewUnaryHandler(
+		ZenaoServiceJoinCommunityProcedure,
+		svc.JoinCommunity,
+		connect.WithSchema(zenaoServiceMethods.ByName("JoinCommunity")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceAddEventToCommunityHandler := connect.NewUnaryHandler(
 		ZenaoServiceAddEventToCommunityProcedure,
 		svc.AddEventToCommunity,
@@ -579,6 +602,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceExportParticipantsHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreateCommunityProcedure:
 			zenaoServiceCreateCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceJoinCommunityProcedure:
+			zenaoServiceJoinCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceAddEventToCommunityProcedure:
 			zenaoServiceAddEventToCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
@@ -654,6 +679,10 @@ func (UnimplementedZenaoServiceHandler) ExportParticipants(context.Context, *con
 
 func (UnimplementedZenaoServiceHandler) CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreateCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.JoinCommunity is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error) {
