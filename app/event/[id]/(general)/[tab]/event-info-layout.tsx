@@ -10,24 +10,23 @@ import React from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
-import EventLocationSection from "@/components/features/event/event-location-section";
-import EventParticipationInfo from "@/components/features/event/event-participation-info";
-import { UserAvatarWithName } from "@/components/features/user/user";
-import { useEventPassword } from "@/components/providers/event-password-provider";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Separator } from "@/components/shadcn/separator";
+import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import { Web3Image } from "@/components/widgets/images/web3-image";
+import { useEventPassword } from "@/components/providers/event-password-provider";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import { useLocationTimezone } from "@/hooks/use-location-timezone";
+import EventLocationSection from "@/components/features/event/event-location-section";
 import { makeLocationFromEvent } from "@/lib/location";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
-import { zenaoClient } from "@/lib/zenao-client";
+import { UserAvatarWithName } from "@/components/features/user/user";
+import EventParticipationInfo from "@/components/features/event/event-participation-info";
 
 interface EventSectionProps {
   title: string;
@@ -79,26 +78,12 @@ export function EventInfoLayout({
 
   const iconSize = 22;
 
-  const onSubmitSignedOut = async () => {
-    const token = await getToken();
-    zenaoClient.joinCommunity(
-      {
-        communityId: "1",
-      },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-  };
-
   return (
     <div className="flex flex-col w-full sm:h-full gap-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-
-      <button style={{ backgroundColor: "blue" }} onClick={onSubmitSignedOut}>
-        Join Community
-      </button>
 
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
         <div className="flex flex-col w-full sm:w-3/6">
