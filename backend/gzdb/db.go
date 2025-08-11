@@ -1302,6 +1302,43 @@ func (g *gormZenaoDB) AddEventToCommunity(eventID string, communityID string) er
 	return nil
 }
 
+// CommunitiesByEvent implements zeni.DB.
+func (g *gormZenaoDB) CommunitiesByEvent(eventID string) ([]*zeni.Community, error) {
+	eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse event id: %w", err)
+	}
+	var roles []EntityRole
+	if err := g.db.
+		Where("entity_type = ? AND entity_id = ? AND org_type = ?",
+			zeni.EntityTypeEvent, eventIDInt, zeni.EntityTypeCommunity).
+		Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return []*zeni.Community{}, nil
+	}
+
+	communityIDs := make([]uint, 0, len(roles))
+	for _, r := range roles {
+		communityIDs = append(communityIDs, r.OrgID)
+	}
+
+	var communities []Community
+	if err := g.db.Where("id IN ?", communityIDs).Find(&communities).Error; err != nil {
+		return nil, err
+	}
+	result := make([]*zeni.Community, 0, len(communities))
+	for _, c := range communities {
+		zcmt, err := dbCommunityToZeniCommunity(&c)
+		if err != nil {
+			return nil, fmt.Errorf("convert db community to zeni community: %w", err)
+		}
+		result = append(result, zcmt)
+	}
+	return result, nil
+}
+
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	return &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),

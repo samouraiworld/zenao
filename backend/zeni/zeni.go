@@ -225,6 +225,8 @@ type DB interface {
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
 	AddEventToCommunity(eventID string, communityID string) error
+	// returns all communities that contains the event
+	CommunitiesByEvent(eventID string) ([]*Community, error)
 
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
 	GetCommunity(communityID string) (*Community, error)
