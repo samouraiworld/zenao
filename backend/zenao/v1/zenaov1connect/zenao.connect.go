@@ -75,6 +75,9 @@ const (
 	// ZenaoServiceAddEventToCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// AddEventToCommunity RPC.
 	ZenaoServiceAddEventToCommunityProcedure = "/zenao.v1.ZenaoService/AddEventToCommunity"
+	// ZenaoServiceRemoveEventFromCommunityProcedure is the fully-qualified name of the ZenaoService's
+	// RemoveEventFromCommunity RPC.
+	ZenaoServiceRemoveEventFromCommunityProcedure = "/zenao.v1.ZenaoService/RemoveEventFromCommunity"
 	// ZenaoServiceCreatePollProcedure is the fully-qualified name of the ZenaoService's CreatePoll RPC.
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
 	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
@@ -111,6 +114,7 @@ type ZenaoServiceClient interface {
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
+	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -223,6 +227,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("AddEventToCommunity")),
 			connect.WithClientOptions(opts...),
 		),
+		removeEventFromCommunity: connect.NewClient[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse](
+			httpClient,
+			baseURL+ZenaoServiceRemoveEventFromCommunityProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("RemoveEventFromCommunity")),
+			connect.WithClientOptions(opts...),
+		),
 		createPoll: connect.NewClient[v1.CreatePollRequest, v1.CreatePollResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreatePollProcedure,
@@ -270,28 +280,29 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 
 // zenaoServiceClient implements ZenaoServiceClient.
 type zenaoServiceClient struct {
-	editUser            *connect.Client[v1.EditUserRequest, v1.EditUserResponse]
-	getUserAddress      *connect.Client[v1.GetUserAddressRequest, v1.GetUserAddressResponse]
-	createEvent         *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
-	editEvent           *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
-	getEventGatekeepers *connect.Client[v1.GetEventGatekeepersRequest, v1.GetEventGatekeepersResponse]
-	validatePassword    *connect.Client[v1.ValidatePasswordRequest, v1.ValidatePasswordResponse]
-	broadcastEvent      *connect.Client[v1.BroadcastEventRequest, v1.BroadcastEventResponse]
-	participate         *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
-	cancelParticipation *connect.Client[v1.CancelParticipationRequest, v1.CancelParticipationResponse]
-	getEventTickets     *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
-	checkin             *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
-	exportParticipants  *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
-	createCommunity     *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
-	joinCommunity       *connect.Client[v1.JoinCommunityRequest, v1.JoinCommunityResponse]
-	addEventToCommunity *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
-	createPoll          *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
-	votePoll            *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
-	createPost          *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
-	deletePost          *connect.Client[v1.DeletePostRequest, v1.DeletePostResponse]
-	reactPost           *connect.Client[v1.ReactPostRequest, v1.ReactPostResponse]
-	editPost            *connect.Client[v1.EditPostRequest, v1.EditPostResponse]
-	health              *connect.Client[v1.HealthRequest, v1.HealthResponse]
+	editUser                 *connect.Client[v1.EditUserRequest, v1.EditUserResponse]
+	getUserAddress           *connect.Client[v1.GetUserAddressRequest, v1.GetUserAddressResponse]
+	createEvent              *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
+	editEvent                *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
+	getEventGatekeepers      *connect.Client[v1.GetEventGatekeepersRequest, v1.GetEventGatekeepersResponse]
+	validatePassword         *connect.Client[v1.ValidatePasswordRequest, v1.ValidatePasswordResponse]
+	broadcastEvent           *connect.Client[v1.BroadcastEventRequest, v1.BroadcastEventResponse]
+	participate              *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
+	cancelParticipation      *connect.Client[v1.CancelParticipationRequest, v1.CancelParticipationResponse]
+	getEventTickets          *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
+	checkin                  *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
+	exportParticipants       *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
+	createCommunity          *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
+	joinCommunity            *connect.Client[v1.JoinCommunityRequest, v1.JoinCommunityResponse]
+	addEventToCommunity      *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
+	removeEventFromCommunity *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
+	createPoll               *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
+	votePoll                 *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
+	createPost               *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
+	deletePost               *connect.Client[v1.DeletePostRequest, v1.DeletePostResponse]
+	reactPost                *connect.Client[v1.ReactPostRequest, v1.ReactPostResponse]
+	editPost                 *connect.Client[v1.EditPostRequest, v1.EditPostResponse]
+	health                   *connect.Client[v1.HealthRequest, v1.HealthResponse]
 }
 
 // EditUser calls zenao.v1.ZenaoService.EditUser.
@@ -369,6 +380,11 @@ func (c *zenaoServiceClient) AddEventToCommunity(ctx context.Context, req *conne
 	return c.addEventToCommunity.CallUnary(ctx, req)
 }
 
+// RemoveEventFromCommunity calls zenao.v1.ZenaoService.RemoveEventFromCommunity.
+func (c *zenaoServiceClient) RemoveEventFromCommunity(ctx context.Context, req *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error) {
+	return c.removeEventFromCommunity.CallUnary(ctx, req)
+}
+
 // CreatePoll calls zenao.v1.ZenaoService.CreatePoll.
 func (c *zenaoServiceClient) CreatePoll(ctx context.Context, req *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return c.createPoll.CallUnary(ctx, req)
@@ -424,6 +440,7 @@ type ZenaoServiceHandler interface {
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
+	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -532,6 +549,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("AddEventToCommunity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceRemoveEventFromCommunityHandler := connect.NewUnaryHandler(
+		ZenaoServiceRemoveEventFromCommunityProcedure,
+		svc.RemoveEventFromCommunity,
+		connect.WithSchema(zenaoServiceMethods.ByName("RemoveEventFromCommunity")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCreatePollHandler := connect.NewUnaryHandler(
 		ZenaoServiceCreatePollProcedure,
 		svc.CreatePoll,
@@ -606,6 +629,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceJoinCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceAddEventToCommunityProcedure:
 			zenaoServiceAddEventToCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceRemoveEventFromCommunityProcedure:
+			zenaoServiceRemoveEventFromCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
 		case ZenaoServiceVotePollProcedure:
@@ -687,6 +712,10 @@ func (UnimplementedZenaoServiceHandler) JoinCommunity(context.Context, *connect.
 
 func (UnimplementedZenaoServiceHandler) AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.AddEventToCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.RemoveEventFromCommunity is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {

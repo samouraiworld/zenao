@@ -1302,6 +1302,25 @@ func (g *gormZenaoDB) AddEventToCommunity(eventID string, communityID string) er
 	return nil
 }
 
+// RemoveEventFromCommunity implements zeni.DB.
+func (g *gormZenaoDB) RemoveEventFromCommunity(eventID string, communityID string) error {
+	eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse event id: %w", err)
+	}
+	communityIDInt, err := strconv.ParseUint(communityID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse community id: %w", err)
+	}
+	if err := g.db.
+		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND org_id = ?",
+			zeni.EntityTypeEvent, eventIDInt, zeni.EntityTypeCommunity, communityIDInt).
+		Delete(&EntityRole{}).Error; err != nil {
+		return fmt.Errorf("delete event role assignment in db: %w", err)
+	}
+	return nil
+}
+
 // CommunitiesByEvent implements zeni.DB.
 func (g *gormZenaoDB) CommunitiesByEvent(eventID string) ([]*zeni.Community, error) {
 	eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
