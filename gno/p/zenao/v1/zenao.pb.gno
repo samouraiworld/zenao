@@ -289,6 +289,13 @@ type JoinCommunityRequest struct {
 type JoinCommunityResponse struct {
 }
 
+type LeaveCommunityRequest struct {
+	CommunityId string
+}
+
+type LeaveCommunityResponse struct {
+}
+
 type AddEventToCommunityRequest struct {
 	CommunityId string
 	EventId     string

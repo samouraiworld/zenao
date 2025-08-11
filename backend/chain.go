@@ -605,6 +605,60 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 	return nil
 }
 
+// RemoveMemberFromCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID string, userID string) error {
+	callerPkgPath := g.userRealmPkgPath(callerID)
+	communityPkgPath := g.communityPkgPath(communityID)
+	userAddr := g.UserAddress(userID)
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, userAddr),
+			}},
+		},
+	}
+	gasWanted, err := g.estimateRunTxGas(msgRun)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgRun))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("removed member from community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "RemoveMember",
+		Args: []string{
+			communityPkgPath,
+			userAddr,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("removed index member in community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
 // AddEventToCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string, eventID string) error {
 	callerPkgPath := g.userRealmPkgPath(callerID)
@@ -1297,7 +1351,6 @@ func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAd
 `, callerPkgPath, eventPkgPath, "Remove participant in "+eventPkgPath, participantAddr, ticketPubkey)
 }
 
-// XXX: used by gentxs to remove gatekeeper from an event
 func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperAddr string) string {
 	return fmt.Sprintf(`package main
 
@@ -1320,7 +1373,6 @@ func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperA
 `, callerPkgPath, eventPkgPath, "Remove gatekeeper in "+eventPkgPath, gatekeeperAddr)
 }
 
-// XXX: used by gentxs to remove member from a community
 func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr string) string {
 	return fmt.Sprintf(`package main
 
@@ -1387,7 +1439,6 @@ func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr s
 `, callerPkgPath, communityPkgPath, "Add event role in "+communityPkgPath, eventAddr)
 }
 
-// XXX: used by gentxs to remove event from a community
 func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
 	return fmt.Sprintf(`package main
 
