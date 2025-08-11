@@ -817,6 +817,26 @@ func (g *gormZenaoDB) AddMemberToCommunity(communityID string, userID string) er
 	return nil
 }
 
+// RemoveMemberFromCommunity implements zeni.DB.
+func (g *gormZenaoDB) RemoveMemberFromCommunity(communityID string, userID string) error {
+	communityIDInt, err := strconv.ParseUint(communityID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse community id: %w", err)
+	}
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse user id: %w", err)
+	}
+
+	if err := g.db.
+		Model(&EntityRole{}).Where("org_type = ? AND org_id = ? AND entity_type = ? AND entity_id = ? AND role = ?",
+		zeni.EntityTypeCommunity, communityIDInt, zeni.EntityTypeUser, userIDInt, zeni.RoleMember).
+		Delete(&EntityRole{}).Error; err != nil {
+		return fmt.Errorf("delete member role assignment in db: %w", err)
+	}
+	return nil
+}
+
 // GetCommunity implements zeni.DB.
 func (g *gormZenaoDB) GetCommunity(communityID string) (*zeni.Community, error) {
 	cmt, err := g.getDBCommunity(communityID)

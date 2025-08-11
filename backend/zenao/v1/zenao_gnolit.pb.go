@@ -966,6 +966,27 @@ func (j *JoinCommunityResponse) GnoLiteral(typePrefix string, linePrefix string)
 	return buf.String()
 }
 
+func (l *LeaveCommunityRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("LeaveCommunityRequest{\n")
+	if l.CommunityId != "" {
+		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, l.CommunityId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (l *LeaveCommunityResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("LeaveCommunityResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (a *AddEventToCommunityRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
