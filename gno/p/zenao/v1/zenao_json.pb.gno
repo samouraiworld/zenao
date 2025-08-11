@@ -1619,6 +1619,35 @@ func (c *CreateCommunityResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (j *JoinCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if j.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", j.CommunityId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (j *JoinCommunityRequest) FromJSON(node *json.Node) {
+	*j = JoinCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		j.CommunityId = val.MustString()
+	}
+}
+
+func (j *JoinCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (j *JoinCommunityResponse) FromJSON(node *json.Node) {
+	*j = JoinCommunityResponse{}
+}
+
 func (a *AddEventToCommunityRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
