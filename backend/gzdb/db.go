@@ -524,6 +524,36 @@ func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role str
 	return result, nil
 }
 
+// GetOrgUsers implements zeni.DB.
+func (g *gormZenaoDB) GetOrgUsers(orgType string, orgID string) ([]*zeni.User, error) {
+	var roles []EntityRole
+	if err := g.db.
+		Where("org_type = ? AND org_id = ? AND entity_type = ?",
+			orgType, orgID, zeni.EntityTypeUser).
+		Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return []*zeni.User{}, nil
+	}
+
+	userIDs := make([]uint, 0, len(roles))
+	for _, r := range roles {
+		userIDs = append(userIDs, r.EntityID)
+	}
+
+	var users []User
+	if err := g.db.Where("id IN ?", userIDs).Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*zeni.User, 0, len(users))
+	for _, u := range users {
+		result = append(result, dbUserToZeniDBUser(&u))
+	}
+	return result, nil
+}
+
 // GetDeletedOrgUsersWithRole implements zeni.DB.
 func (g *gormZenaoDB) GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*zeni.EntityRole, error) {
 	var roles []EntityRole

@@ -233,6 +233,8 @@ type DB interface {
 
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
 	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
+	// GetOrgUsers returns all users in the org, regardless of their role.
+	GetOrgUsers(orgType string, orgID string) ([]*User, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
 	GetOrgByPostID(postID string) (orgType, orgID string, err error)
 
@@ -270,6 +272,7 @@ type Chain interface {
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
+	AddEventToCommunity(callerID string, communityID string, eventID string) error
 	AddMemberToCommunity(callerID string, communityID string, userID string) error
 
 	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)

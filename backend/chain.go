@@ -605,6 +605,38 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 	return nil
 }
 
+// AddEventToCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string, eventID string) error {
+	callerPkgPath := g.userRealmPkgPath(callerID)
+	communityPkgPath := g.communityPkgPath(communityID)
+	eventAddr := g.EventAddress(eventID)
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr),
+			}},
+		},
+	}
+	gasWanted, err := g.estimateRunTxGas(msgRun)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgRun))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("added event to community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
@@ -1299,6 +1331,28 @@ func genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr
 		})
 	}
 `, callerPkgPath, communityPkgPath, "Add member in community "+communityPkgPath, memberAddr)
+}
+
+func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		community %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/communities"
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+				Title: "Add event",
+				Message: communities.NewAddEventMsg(%q),
+			}),
+		})
+	}
+`, callerPkgPath, communityPkgPath, "Add event role in "+communityPkgPath, eventAddr)
 }
 
 // XXX: used by gentxs to remove event from a community
