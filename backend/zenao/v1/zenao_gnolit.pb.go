@@ -989,3 +989,27 @@ func (a *AddEventToCommunityResponse) GnoLiteral(typePrefix string, linePrefix s
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (r *RemoveEventFromCommunityRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("RemoveEventFromCommunityRequest{\n")
+	if r.CommunityId != "" {
+		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, r.CommunityId)
+	}
+	if r.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, r.EventId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (r *RemoveEventFromCommunityResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("RemoveEventFromCommunityResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}

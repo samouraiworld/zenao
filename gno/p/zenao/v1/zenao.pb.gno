@@ -296,3 +296,11 @@ type AddEventToCommunityRequest struct {
 
 type AddEventToCommunityResponse struct {
 }
+
+type RemoveEventFromCommunityRequest struct {
+	CommunityId string
+	EventId     string
+}
+
+type RemoveEventFromCommunityResponse struct {
+}
