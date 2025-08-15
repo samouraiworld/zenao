@@ -1618,3 +1618,38 @@ func (c *CreateCommunityResponse) FromJSON(node *json.Node) {
 		c.CommunityId = val.MustString()
 	}
 }
+
+func (a *AddEventToCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if a.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", a.CommunityId)
+	}
+	if a.EventId != "" {
+		fields["eventId"] = json.StringNode("", a.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (a *AddEventToCommunityRequest) FromJSON(node *json.Node) {
+	*a = AddEventToCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		a.CommunityId = val.MustString()
+	}
+	if val, ok := fields["eventId"]; ok {
+		a.EventId = val.MustString()
+	}
+}
+
+func (a *AddEventToCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (a *AddEventToCommunityResponse) FromJSON(node *json.Node) {
+	*a = AddEventToCommunityResponse{}
+}

@@ -69,6 +69,9 @@ const (
 	// ZenaoServiceCreateCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// CreateCommunity RPC.
 	ZenaoServiceCreateCommunityProcedure = "/zenao.v1.ZenaoService/CreateCommunity"
+	// ZenaoServiceAddEventToCommunityProcedure is the fully-qualified name of the ZenaoService's
+	// AddEventToCommunity RPC.
+	ZenaoServiceAddEventToCommunityProcedure = "/zenao.v1.ZenaoService/AddEventToCommunity"
 	// ZenaoServiceCreatePollProcedure is the fully-qualified name of the ZenaoService's CreatePoll RPC.
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
 	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
@@ -103,6 +106,7 @@ type ZenaoServiceClient interface {
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
+	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -203,6 +207,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("CreateCommunity")),
 			connect.WithClientOptions(opts...),
 		),
+		addEventToCommunity: connect.NewClient[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse](
+			httpClient,
+			baseURL+ZenaoServiceAddEventToCommunityProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("AddEventToCommunity")),
+			connect.WithClientOptions(opts...),
+		),
 		createPoll: connect.NewClient[v1.CreatePollRequest, v1.CreatePollResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreatePollProcedure,
@@ -263,6 +273,7 @@ type zenaoServiceClient struct {
 	checkin             *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
 	exportParticipants  *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
 	createCommunity     *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
+	addEventToCommunity *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
 	createPoll          *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll            *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 	createPost          *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
@@ -337,6 +348,11 @@ func (c *zenaoServiceClient) CreateCommunity(ctx context.Context, req *connect.R
 	return c.createCommunity.CallUnary(ctx, req)
 }
 
+// AddEventToCommunity calls zenao.v1.ZenaoService.AddEventToCommunity.
+func (c *zenaoServiceClient) AddEventToCommunity(ctx context.Context, req *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error) {
+	return c.addEventToCommunity.CallUnary(ctx, req)
+}
+
 // CreatePoll calls zenao.v1.ZenaoService.CreatePoll.
 func (c *zenaoServiceClient) CreatePoll(ctx context.Context, req *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return c.createPoll.CallUnary(ctx, req)
@@ -390,6 +406,7 @@ type ZenaoServiceHandler interface {
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
+	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -486,6 +503,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("CreateCommunity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceAddEventToCommunityHandler := connect.NewUnaryHandler(
+		ZenaoServiceAddEventToCommunityProcedure,
+		svc.AddEventToCommunity,
+		connect.WithSchema(zenaoServiceMethods.ByName("AddEventToCommunity")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCreatePollHandler := connect.NewUnaryHandler(
 		ZenaoServiceCreatePollProcedure,
 		svc.CreatePoll,
@@ -556,6 +579,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceExportParticipantsHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreateCommunityProcedure:
 			zenaoServiceCreateCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceAddEventToCommunityProcedure:
+			zenaoServiceAddEventToCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
 		case ZenaoServiceVotePollProcedure:
@@ -629,6 +654,10 @@ func (UnimplementedZenaoServiceHandler) ExportParticipants(context.Context, *con
 
 func (UnimplementedZenaoServiceHandler) CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreateCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.AddEventToCommunity is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {

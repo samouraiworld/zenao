@@ -281,3 +281,11 @@ type CreateCommunityRequest struct {
 type CreateCommunityResponse struct {
 	CommunityId string
 }
+
+type AddEventToCommunityRequest struct {
+	CommunityId string
+	EventId     string
+}
+
+type AddEventToCommunityResponse struct {
+}
