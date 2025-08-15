@@ -3,11 +3,11 @@ import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { extractGnoJSONResponse } from "../gno";
 
-const userRolesEnum = z.enum(["organizer", "participant", "gatekeeper"]);
+const eventUserRolesEnum = z.enum(["organizer", "participant", "gatekeeper"]);
 
-export type EventUserRole = z.infer<typeof userRolesEnum>;
+export type EventUserRole = z.infer<typeof eventUserRolesEnum>;
 
-export const eventGetUserRolesSchema = z.array(userRolesEnum);
+export const eventGetUserRolesSchema = z.array(eventUserRolesEnum);
 
 export const eventUserRoles = (
   eventId: string | null | undefined,

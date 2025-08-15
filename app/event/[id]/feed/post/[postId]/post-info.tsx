@@ -4,7 +4,7 @@ import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { PostComments } from "@/components/event-feed-form/post-comments";
 import { StandardPostForm } from "@/components/event-feed-form/standard-post-form";
@@ -136,6 +136,8 @@ export default function PostInfo({
   );
   const { data: post } = useSuspenseQuery(feedPost(postId, userAddress || ""));
 
+  const [editMode, setEditMode] = useState(false);
+
   const form = useForm<FeedPostFormSchemaType>({
     mode: "all",
     defaultValues: {
@@ -151,6 +153,11 @@ export default function PostInfo({
   const { onEditStandardPost, isEditing } = useEventPostEditHandler(feedId);
   const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
   const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
+
+  const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
+    await onEditStandardPost(postId, values);
+    setEditMode(false);
+  };
 
   if (!isStandardPost(post) && !isPollPost(post)) {
     return null;
@@ -168,11 +175,14 @@ export default function PostInfo({
             onReactionChange={async (icon) =>
               await onReactionChange(postId, icon)
             }
+            editMode={editMode}
+            innerEditForm
+            onEditModeChange={setEditMode}
             onDelete={async (parentId) => {
               await onDelete(postId, parentId);
               router.push(`/event/${eventId}/feed`);
             }}
-            onEdit={async (values) => await onEditStandardPost(postId, values)}
+            onEdit={async (values) => await onEdit(postId, values)}
             isDeleting={isDeleting}
             isReacting={isReacting}
             isEditing={isEditing}
