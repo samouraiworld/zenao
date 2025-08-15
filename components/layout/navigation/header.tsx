@@ -8,7 +8,7 @@ import {
   ArrowLeft,
   BookOpenText,
   CompassIcon,
-  LucideProps,
+  LucideIcon,
   Tickets,
 } from "lucide-react";
 import {
@@ -43,9 +43,7 @@ import {
 export type NavItem = {
   key: string;
   to: string | UrlObject;
-  icon: React.ForwardRefExoticComponent<
-    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
-  >;
+  icon: LucideIcon;
   needsAuth: boolean;
   children: React.ReactNode;
 };
