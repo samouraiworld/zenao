@@ -180,5 +180,5 @@ func toAuthUser(clerkUser *clerk.User) *zeni.AuthUser {
 		}
 	}
 
-	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email, Provider: "clerk"}
 }

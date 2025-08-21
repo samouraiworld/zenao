@@ -4,6 +4,8 @@ import (
 	"crypto"
 	"crypto/ed25519"
 	srand "crypto/rand"
+	"crypto/sha256"
+	"encoding/base32"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -12,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
@@ -135,6 +138,21 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 	}
 }
 
+// GetUserID implements ZenaoChain.
+func (g *gnoZenaoChain) GetUserID(provider string, authID string) string {
+	h := sha256.Sum256([]byte(provider + ":" + authID))
+	enc := base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding).EncodeToString(h[:16])
+	return "v1" + enc
+}
+
+// GetEventID implements ZenaoChain.
+func (g *gnoZenaoChain) GetEventID(creatorID string, title string) string {
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	h := sha256.Sum256([]byte(creatorID + ":" + title + ":" + timestamp))
+	enc := base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding).EncodeToString(h[:16])
+	return "v1" + enc
+}
+
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
 	organizersAddr := mapsl.Map(organizersIDs, g.UserAddress)
@@ -196,6 +214,20 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 	g.logger.Info("indexed event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
+}
+
+// GetEvent implements ZenaoChain
+func (g *gnoZenaoChain) GetEvent(evtID string) (*zeni.Event, error) {
+	eventPkgPath := g.eventRealmPkgPath(evtID)
+
+	data, err := checkQueryErr(g.client.QEval(eventPkgPath, "event.GetInfoJSON()"))
+	if err != nil {
+		return nil, err
+	}
+
+	g.logger.Info("retrieved event", zap.String("data", data))
+
+	return nil, errors.New("not implemented yet") // TODO: implement this
 }
 
 // EditEvent implements ZenaoChain.
@@ -315,6 +347,17 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 	g.logger.Info("created user realm", zap.String("pkg-path", userPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
+}
+
+// UserExists implements ZenaoChain.
+func (g *gnoZenaoChain) UserExists(userID string) bool {
+	userPkgPath := g.userRealmPkgPath(userID)
+	queryRes, baseErr := g.client.Query(gnoclient.QueryCfg{
+		Path: "vm/qfile",
+		Data: []byte(userPkgPath),
+	})
+	_, err := checkQueryErr("", queryRes, baseErr)
+	return err == nil
 }
 
 // Participate implements ZenaoChain.
@@ -877,6 +920,16 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 		return nil, fmt.Errorf("%w\n%s", broadcastRes.DeliverTx.Error, broadcastRes.DeliverTx.Log)
 	}
 	return broadcastRes, nil
+}
+
+func checkQueryErr(data string, queryRes *ctypes.ResultABCIQuery, baseErr error) (string, error) {
+	if baseErr != nil {
+		return "", baseErr
+	}
+	if queryRes.Response.Error != nil {
+		return "", fmt.Errorf("%w\n%s", queryRes.Response.Error, queryRes.Response.Log)
+	}
+	return data, nil
 }
 
 func (g *gnoZenaoChain) estimateCallTxGas(msgs ...vm.MsgCall) (int64, error) {

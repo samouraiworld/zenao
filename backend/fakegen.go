@@ -109,7 +109,7 @@ func execFakegen() error {
 	}
 
 	if !fakegenConf.skipChain {
-		if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
+		if err := chain.CreateUser(zUser); err != nil {
 			return err
 		}
 	}

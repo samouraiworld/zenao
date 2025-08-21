@@ -33,6 +33,10 @@ func (s *ZenaoServer) EditEvent(
 		return nil, errors.New("user is banned")
 	}
 
+	if req.Msg.Password != "" {
+		return nil, fmt.Errorf("event with password is not supported yet")
+	}
+
 	authOrgas, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Organizers)
 	if err != nil {
 		return nil, err
@@ -73,27 +77,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	var evt *zeni.Event
-
-	if err := s.DB.Tx(func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("user is not organizer of the event")
-		}
-
-		if evt, err = db.EditEvent(req.Msg.EventId, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	privacy, err := zeni.EventPrivacyFromPasswordHash("")
 	if err != nil {
 		return nil, err
 	}
