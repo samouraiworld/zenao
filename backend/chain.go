@@ -4,6 +4,8 @@ import (
 	"crypto"
 	"crypto/ed25519"
 	srand "crypto/rand"
+	"crypto/sha256"
+	"encoding/base32"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -12,12 +14,14 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/gnovm"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/gnovm/stdlibs/std"
+	"github.com/gnolang/gno/tm2/pkg/bech32"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
@@ -27,6 +31,7 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -135,6 +140,25 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 	}
 }
 
+// GetUserID implements ZenaoChain.
+func (g *gnoZenaoChain) GetUserID(provider string, authID string) (string, error) {
+	h := sha256.Sum256([]byte(provider + ":" + authID))
+	enc, err := bech32.ConvertAndEncode("u", append([]byte{0x01}, h[:20]...))
+	if err != nil {
+		return "", err
+	}
+	return enc, nil
+}
+
+// GetEventID implements ZenaoChain.
+func (g *gnoZenaoChain) GetEventID(creatorID string, title string) string {
+	// use random bytes secure (use crypto/rand)
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	h := sha256.Sum256([]byte(creatorID + ":" + title + ":" + timestamp))
+	enc := base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding).EncodeToString(h[:16])
+	return "v1" + enc
+}
+
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
 	organizersAddr := mapsl.Map(organizersIDs, g.UserAddress)
@@ -196,6 +220,38 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 	g.logger.Info("indexed event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
+}
+
+// GetEvent implements ZenaoChain
+func (g *gnoZenaoChain) GetEvent(evtID string) (*zeni.Event, error) {
+	eventPkgPath := g.eventRealmPkgPath(evtID)
+
+	raw, err := checkQueryErr(g.client.QEval(eventPkgPath, "event.GetInfoJSON()"))
+	if err != nil {
+		return nil, err
+	}
+
+	//TODO: make a generic function for parsing query response
+	g.logger.Info("retrieved event", zap.String("data", raw))
+
+	if len(raw) < 10 || raw[0] != '(' {
+		return nil, fmt.Errorf("unexpected format: %s", raw)
+	}
+	inner := raw[1 : len(raw)-len(" string)")]
+
+	var innerStr string
+	if err := json.Unmarshal([]byte(inner), &innerStr); err != nil {
+		return nil, fmt.Errorf("first unmarshal failed: %w", err)
+	}
+
+	var tmp zenaov1.EventInfo
+	if err := protojson.Unmarshal([]byte(innerStr), &tmp); err != nil {
+		return nil, err
+	}
+
+	g.logger.Info("parsed event", zap.Any("event", tmp))
+
+	return nil, errors.New("not implemented")
 }
 
 // EditEvent implements ZenaoChain.
@@ -315,6 +371,17 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 	g.logger.Info("created user realm", zap.String("pkg-path", userPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
+}
+
+// UserExists implements ZenaoChain.
+func (g *gnoZenaoChain) UserExists(userID string) bool {
+	userPkgPath := g.userRealmPkgPath(userID)
+	queryRes, baseErr := g.client.Query(gnoclient.QueryCfg{
+		Path: "vm/qfile",
+		Data: []byte(userPkgPath),
+	})
+	_, err := checkQueryErr("", queryRes, baseErr)
+	return err == nil
 }
 
 // Participate implements ZenaoChain.
@@ -877,6 +944,16 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 		return nil, fmt.Errorf("%w\n%s", broadcastRes.DeliverTx.Error, broadcastRes.DeliverTx.Log)
 	}
 	return broadcastRes, nil
+}
+
+func checkQueryErr(data string, queryRes *ctypes.ResultABCIQuery, baseErr error) (string, error) {
+	if baseErr != nil {
+		return "", baseErr
+	}
+	if queryRes.Response.Error != nil {
+		return "", fmt.Errorf("%w\n%s", queryRes.Response.Error, queryRes.Response.Log)
+	}
+	return data, nil
 }
 
 func (g *gnoZenaoChain) estimateCallTxGas(msgs ...vm.MsgCall) (int64, error) {

@@ -62,9 +62,10 @@ const (
 )
 
 type AuthUser struct {
-	ID     string
-	Email  string
-	Banned bool
+	ID       string
+	Email    string
+	Banned   bool
+	Provider string
 }
 
 type User struct {
@@ -75,22 +76,6 @@ type User struct {
 	Bio         string
 	AvatarURI   string
 	Plan        Plan
-}
-
-type Event struct {
-	CreatedAt         time.Time
-	ID                string
-	Title             string
-	Description       string
-	StartDate         time.Time
-	EndDate           time.Time
-	ImageURI          string
-	TicketPrice       float64
-	Capacity          uint32
-	CreatorID         string
-	Location          *zenaov1.EventLocation
-	PasswordHash      string
-	ICSSequenceNumber uint32
 }
 
 type Community struct {
@@ -253,13 +238,18 @@ type DB interface {
 }
 
 type Chain interface {
+	GetUserID(provider string, authID string) string
+
 	FillAdminProfile()
+	UserExists(userID string) bool
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserAddress(userID string) string
 	EventAddress(eventID string) string
 
+	GetEventID(creatorID string, title string) string
 	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
+	GetEvent(eventID string) (*Event, error)
 	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
 	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
 	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error

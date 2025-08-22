@@ -22,26 +22,15 @@ func (s *ZenaoServer) EnsureUserExists(
 		return nil, errors.New("user is banned")
 	}
 
-	var zUser *zeni.User
-	var alreadyExists bool
-	if err := s.DB.Tx(func(db zeni.DB) error {
-		var err error
-		if zUser, err = db.GetUser(user.ID); err != nil {
-			return err
-		} else if zUser != nil {
-			alreadyExists = true
-			return nil
-		}
-		if zUser, err = db.CreateUser(user.ID); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
+	userID := s.Chain.GetUserID(user.Provider, user.ID)
+	zUser := &zeni.User{
+		ID: userID,
 	}
+	s.Logger.Info("ensure-user-exists", zap.String("user-id", zUser.ID))
 
+	alreadyExists := s.Chain.UserExists(zUser.ID)
 	if !alreadyExists {
-		if err := s.Chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
+		if err := s.Chain.CreateUser(zUser); err != nil {
 			return nil, err
 		}
 	}

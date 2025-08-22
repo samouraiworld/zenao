@@ -78,18 +78,9 @@ func (s *ZenaoServer) CreateEvent(
 		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
 	}
 
-	evt := (*zeni.Event)(nil)
-	if err := s.DB.Tx(func(db zeni.DB) error {
-		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
-			return err
-		}
-
-		if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
+	evt, err := zeni.NewEvent(zUser.ID, s.Chain.GetEventID(zUser.ID, req.Msg.Title), req.Msg)
+	if err != nil {
+		return nil, fmt.Errorf("create event: %w", err)
 	}
 
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
@@ -112,7 +103,12 @@ func (s *ZenaoServer) CreateEvent(
 		}
 	}
 
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	if evt.PasswordHash != "" {
+		return nil, fmt.Errorf("event with password is not supported yet")
+	}
+
+	// i would need to be able to retrieve the password hash somewhere
+	privacy, err := zeni.EventPrivacyFromPasswordHash("")
 	if err != nil {
 		return nil, err
 	}

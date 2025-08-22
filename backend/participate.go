@@ -45,10 +45,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", buyer.ID), zap.Bool("user-banned", authUser.Banned))
 
-	if len(req.Msg.Password) > zeni.MaxPasswordLen {
-		return nil, errors.New("password too long")
-	}
-
 	authGuests, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Guests)
 	if err != nil {
 		return nil, err
@@ -77,41 +73,10 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
-	evt := (*zeni.Event)(nil)
-
-	needPasswordIfGuarded := true
-
-	if err := s.DB.Tx(func(db zeni.DB) error {
-		// XXX: can't create event with price for now but later we need to check that the event is free
-		buyerRoles, err := db.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if slices.Contains(buyerRoles, zeni.RoleOrganizer) {
-			needPasswordIfGuarded = false
-		}
-
-		for i, ticket := range tickets {
-			// XXX: support batch
-			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
-				return err
-			}
-		}
-
-		evt, err = db.GetEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-
-		if evt == nil {
-			return errors.New("nil event after participate")
-		}
-
-		return nil
-	}); err != nil {
+	evt, err := s.Chain.GetEvent(req.Msg.EventId)
+	if err != nil {
 		return nil, err
 	}
-
 	if s.MailClient != nil {
 		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
 		if err != nil {
@@ -154,12 +119,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	// XXX: there could be race conditions if the db has changed password but the chain did not
 
 	var eventSK ed25519.PrivateKey
-	if needPasswordIfGuarded {
-		if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
-			return nil, err
-		}
-	}
-
 	for i, ticket := range tickets {
 		// XXX: support batch, this might be very very slow
 		// XXX: callerID should be the current user and not creator,

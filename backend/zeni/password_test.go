@@ -1,4 +1,4 @@
-package gzdb
+package zeni
 
 import (
 	"testing"

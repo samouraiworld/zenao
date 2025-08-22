@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -9,6 +10,7 @@ import (
 
 // XXX: rate limit to avoid bruteforce weak passwords
 func (s *ZenaoServer) ValidatePassword(ctx context.Context, req *connect.Request[zenaov1.ValidatePasswordRequest]) (*connect.Response[zenaov1.ValidatePasswordResponse], error) {
+	return nil, fmt.Errorf("validate password is not implemented yet")
 	valid, err := s.DB.ValidatePassword(req.Msg)
 	if err != nil {
 		return nil, err
