@@ -83,7 +83,7 @@ func (d *Core) Propose(proposerID string, req ProposalRequest) uint64 {
 
 	resource := d.Resources.Get(messageType)
 	if resource == nil {
-		panic("message type is not registered as a resource")
+		panic("message type " + messageType + " not registered")
 	}
 
 	prop := d.Proposals.newProposal(proposerID, req, resource.Condition.NewState())

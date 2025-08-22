@@ -36,6 +36,7 @@ type Event struct {
 	DAO                 daokit.DAO
 	participationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
 	checkedIn           uint32 // number of checked-in participants, used for rendering only
+	cancelled           bool   // true if event is cancelled
 }
 
 type Config struct {
@@ -133,6 +134,7 @@ func NewEvent(conf *Config) *Event {
 		location:            conf.Location,
 		participationPubkey: participationPubkey,
 		checkedIn:           0,
+		cancelled:           false,
 		// XXX: set PkgPath?
 	}
 
@@ -150,6 +152,7 @@ func NewEvent(conf *Config) *Event {
 			event.addGatekeeperHandler(),
 			event.removeGatekeeperHandler(),
 			event.editEventHandler(),
+			event.cancelEventHandler(),
 		},
 	}, {
 		cond: daocond.Or(oneOrganizer, oneGatekeeper),
@@ -164,6 +167,32 @@ func NewEvent(conf *Config) *Event {
 	}
 
 	return event
+}
+
+const MsgCancelEventKind = "gno.land/p/zenao/events.CancelEvent"
+
+type MsgCancelEvent struct{}
+
+func (msg *MsgCancelEvent) String() string {
+	return "Cancel event"
+}
+
+func (e *Event) cancelEventHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgCancelEventKind, func(i interface{}) {
+		if e.cancelled {
+			panic("event is already cancelled")
+		}
+		e.cancelled = true
+		e.tickets = *avl.NewTree()
+		members := e.DAOPrivate.Members.GetMembers()
+		for _, member := range members {
+			e.DAOPrivate.Members.RemoveMember(member)
+		}
+	})
+}
+
+func NewCancelEventMsg() daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgCancelEventKind, &MsgCancelEvent{})
 }
 
 const MsgAddParticipantKind = "gno.land/p/zenao/events.AddParticipant"
@@ -194,6 +223,10 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 		msg, ok := i.(*MsgAddParticipant)
 		if !ok {
 			panic(errors.New("invalid payload type"))
+		}
+
+		if e.cancelled {
+			panic("event is cancelled")
 		}
 
 		if e.tickets.Has(msg.TicketPubkey) {
@@ -258,6 +291,10 @@ func (e *Event) removeParticipantHandler() daokit.MessageHandler {
 			panic(errors.New("invalid payload type"))
 		}
 
+		if e.cancelled {
+			panic("event is cancelled")
+		}
+
 		if !e.tickets.Has(msg.TicketPubkey) {
 			panic("ticket does not exists")
 		}
@@ -290,6 +327,9 @@ func (e *Event) addGatekeeperHandler() daokit.MessageHandler {
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
+		if e.cancelled {
+			panic("event is cancelled")
+		}
 		if e.DAOPrivate.Members.CountMemberRoles(gatekeeper) > 0 {
 			e.DAOPrivate.Members.AddRoleToMember(gatekeeper, "gatekeeper")
 		} else {
@@ -309,6 +349,9 @@ func (e *Event) removeGatekeeperHandler() daokit.MessageHandler {
 		gatekeeper, ok := i.(string)
 		if !ok {
 			panic(errors.New("invalid payload type"))
+		}
+		if e.cancelled {
+			panic("event is cancelled")
 		}
 		if !e.DAOPrivate.Members.HasRole(gatekeeper, "gatekeeper") {
 			panic(errors.New("gatekeeper not found"))
@@ -338,6 +381,10 @@ func (e *Event) checkinHandler() daokit.MessageHandler {
 		msg, ok := i.(*MsgCheckin)
 		if !ok {
 			panic("invalid payload type")
+		}
+
+		if e.cancelled {
+			panic("event is cancelled")
 		}
 
 		pubkeyBz, err := base64.RawURLEncoding.DecodeString(msg.TicketPubkey)
@@ -389,6 +436,9 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 		msg, ok := i.(*msgEditEvent)
 		if !ok {
 			panic(errors.New("invalid payload type"))
+		}
+		if e.cancelled {
+			panic("event is cancelled")
 		}
 		if len(msg.organizers) != 0 {
 			e.updateEventUserRoles("organizer", msg.organizers)
@@ -493,6 +543,9 @@ func NewEditEventMsg(organizers []string, gatekeepers []string, title, descripti
 }
 
 func (e *Event) Render(path string) string {
+	if e.cancelled {
+		return md.Blockquote("This event has been cancelled")
+	}
 	s := ""
 	if path == "" {
 		info := e.Info()

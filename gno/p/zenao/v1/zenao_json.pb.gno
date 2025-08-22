@@ -244,6 +244,35 @@ func (c *CreateEventResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (c *CancelEventRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CancelEventRequest) FromJSON(node *json.Node) {
+	*c = CancelEventRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
+	}
+}
+
+func (c *CancelEventResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (c *CancelEventResponse) FromJSON(node *json.Node) {
+	*c = CancelEventResponse{}
+}
+
 func (e *EditEventRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 

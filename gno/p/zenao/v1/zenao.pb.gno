@@ -48,6 +48,13 @@ type CreateEventResponse struct {
 	Id string
 }
 
+type CancelEventRequest struct {
+	EventId string
+}
+
+type CancelEventResponse struct {
+}
+
 type EditEventRequest struct {
 	EventId        string
 	Title          string

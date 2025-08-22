@@ -41,6 +41,40 @@ func TestNewEvent(t *testing.T) {
 	}
 }
 
+func TestCancelEvent(t *testing.T) {
+	var profile mockProfile
+	std.TestSetOriginCaller(alice)
+	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	conf := Config{
+		Organizers:       []string{alice.String()},
+		Title:            "event",
+		Description:      "this is an event",
+		SetProfileString: profile.SetStringField,
+		GetProfileString: profile.GetProfileString,
+	}
+	event := NewEvent(&conf)
+	if event.DAOPrivate.Members.GetMembers()[1] != alice.String() {
+		t.Fatalf("expected %s, got %s", alice.String(), event.DAOPrivate.Members.GetMembers()[1])
+	}
+	if !event.DAOPrivate.Members.HasRole(alice.String(), "organizer") {
+		t.Fatalf("expected user to have organizer role")
+	}
+
+	daokit.InstantExecute(event.DAO, testReq(NewCancelEventMsg()))
+	if !event.cancelled {
+		t.Fatalf("expected event to be cancelled")
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatalf("expected panic, bob is not the organizer")
+		}
+	}()
+
+	std.TestSetOriginCaller(bob)
+	daokit.InstantExecute(event.DAO, testReq(NewCancelEventMsg()))
+}
+
 func TestAddParticipant(t *testing.T) {
 	var profile mockProfile
 	std.TestSetOriginCaller(alice)

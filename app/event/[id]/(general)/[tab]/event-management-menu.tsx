@@ -1,18 +1,19 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { Download } from "lucide-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
+import { CancelEventDialog } from "@/components/dialogs/cancel-event";
+import { GatekeeperManagementDialog } from "@/components/dialogs/gatekeeper-management-dialog";
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
-import { EventUserRole } from "@/lib/queries/event-users";
-import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
-import { zenaoClient } from "@/lib/zenao-client";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
-import { GatekeeperManagementDialog } from "@/components/dialogs/gatekeeper-management-dialog";
+import { EventUserRole } from "@/lib/queries/event-users";
+import { zenaoClient } from "@/lib/zenao-client";
 
 type EventManagementMenuProps = {
   eventId: string;
@@ -41,6 +42,7 @@ function EventManagementMenuOrganizer({
     useState(false);
   const [manageGatekeepersDialogOpen, setManageGatekeepersDialogOpen] =
     useState(false);
+  const [cancelEventDialogOpen, setCancelEventDialogOpen] = useState(false);
 
   const { data: eventInfo } = useSuspenseQuery(eventOptions(eventId));
   const { data: gatekeepers } = useSuspenseQuery(
@@ -64,10 +66,23 @@ function EventManagementMenuOrganizer({
         onOpenChange={setManageGatekeepersDialogOpen}
       />
 
+      <CancelEventDialog
+        eventId={eventId}
+        open={cancelEventDialogOpen}
+        onOpenChange={setCancelEventDialogOpen}
+      />
+
       <div className="flex flex-col">
         <Link href={`/edit/${eventId}`} className="text-main underline">
           {t("edit-button")}
         </Link>
+
+        <p
+          className="text-main underline cursor-pointer"
+          onClick={() => setCancelEventDialogOpen(true)}
+        >
+          {t("cancel-event-button")}
+        </p>
 
         <p
           className="text-main underline cursor-pointer"

@@ -25,6 +25,14 @@ var eventBroadcastMessageTmplHTML *template.Template
 var eventBroadcastMessageTmplTextSrc string
 var eventBroadcastMessageTmplText *template.Template
 
+//go:embed mails/html/event-cancelled.tmpl.html
+var eventCancelledTmplHTMLSrc string
+var eventCancelledTmplHTML *template.Template
+
+//go:embed mails/text/event-cancelled.tmpl.txt
+var eventCancelledTmplTextSrc string
+var eventCancelledTmplText *template.Template
+
 func init() {
 	tmpl, err := template.New("ticketsConfirmationHTML").Parse(ticketsConfirmationTmplHTMLSrc)
 	if err != nil {
@@ -49,6 +57,18 @@ func init() {
 		panic(err)
 	}
 	eventBroadcastMessageTmplText = tmpl
+
+	tmpl, err = template.New("eventCancelledHTML").Parse(eventCancelledTmplHTMLSrc)
+	if err != nil {
+		panic(err)
+	}
+	eventCancelledTmplHTML = tmpl
+
+	tmpl, err = template.New("eventCancelledText").Parse(eventCancelledTmplTextSrc)
+	if err != nil {
+		panic(err)
+	}
+	eventCancelledTmplText = tmpl
 }
 
 type ticketsConfirmation struct {
@@ -120,6 +140,51 @@ func eventBroadcastMailContent(event *zeni.Event, message string) (string, strin
 
 	buf = &strings.Builder{}
 	if err := eventBroadcastMessageTmplText.Execute(buf, data); err != nil {
+		return "", "", err
+	}
+	textContent := buf.String()
+
+	return htmlContent, textContent, nil
+}
+
+type eventCancelled struct {
+	ImageURL        string
+	EventName       string
+	EventStartDate  string
+	EventEndDate    string
+	LocationText    string
+	CalendarIconURL string
+	PinIconURL      string
+}
+
+func eventCancelledMailContent(event *zeni.Event) (string, string, error) {
+	locStr, err := zeni.LocationToString(event.Location)
+	if err != nil {
+		return "", "", err
+	}
+	tz, err := event.Timezone()
+	if err != nil {
+		return "", "", err
+	}
+
+	data := eventCancelled{
+		ImageURL:        web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		EventName:       event.Title,
+		EventStartDate:  event.StartDate.In(tz).Format(time.ANSIC),
+		EventEndDate:    event.EndDate.In(tz).Format(time.ANSIC),
+		LocationText:    locStr,
+		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
+		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
+	}
+
+	buf := &strings.Builder{}
+	if err := eventCancelledTmplHTML.Execute(buf, data); err != nil {
+		return "", "", err
+	}
+	htmlContent := buf.String()
+
+	buf = &strings.Builder{}
+	if err := eventCancelledTmplText.Execute(buf, data); err != nil {
 		return "", "", err
 	}
 	textContent := buf.String()

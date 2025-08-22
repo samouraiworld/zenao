@@ -133,6 +133,33 @@ func UpdateIndex(pkgPath string) {
 	}
 }
 
+func RemoveIndex(pkgPath string) {
+	Ownable.AssertCallerIsOwner()
+
+	evt := mustGetEventByPkgPath(pkgPath)
+
+	eventsByPkgPath.Remove(pkgPath)
+
+	key := unixTimeKey(evt.EndDate) + "/" + pkgPath
+	eventsByEndDate.Remove(key)
+
+	for _, organizer := range evt.Organizers {
+		key = organizer + "/" + unixTimeKey(evt.EndDate) + "/" + pkgPath
+		eventsByOrganizer.Remove(key)
+	}
+
+	startKey := pkgPath + "/"
+	endKey := startKey[:len(startKey)-1] + string('/'+1)
+	participantsByEvent.Iterate(startKey, endKey, func(key string, value interface{}) bool {
+		userID := value.(string)
+
+		key = userID + "/" + unixTimeKey(evt.EndDate) + "/" + pkgPath
+		eventsByParticipant.Remove(key)
+
+		return false
+	})
+}
+
 func AddParticipant(eventPkgPath string, userID string) {
 	Ownable.AssertCallerIsOwner()
 
