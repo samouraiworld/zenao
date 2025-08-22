@@ -77,6 +77,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
+	// FETCH PRIVACY FROM CHAIN
 	privacy, err := zeni.EventPrivacyFromPasswordHash("")
 	if err != nil {
 		return nil, err

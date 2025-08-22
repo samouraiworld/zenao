@@ -21,6 +21,7 @@ import (
 	"github.com/gnolang/gno/gnovm"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/gnovm/stdlibs/std"
+	"github.com/gnolang/gno/tm2/pkg/bech32"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
@@ -30,6 +31,7 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -139,14 +141,18 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 }
 
 // GetUserID implements ZenaoChain.
-func (g *gnoZenaoChain) GetUserID(provider string, authID string) string {
+func (g *gnoZenaoChain) GetUserID(provider string, authID string) (string, error) {
 	h := sha256.Sum256([]byte(provider + ":" + authID))
-	enc := base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding).EncodeToString(h[:16])
-	return "v1" + enc
+	enc, err := bech32.ConvertAndEncode("u", append([]byte{0x01}, h[:20]...))
+	if err != nil {
+		return "", err
+	}
+	return enc, nil
 }
 
 // GetEventID implements ZenaoChain.
 func (g *gnoZenaoChain) GetEventID(creatorID string, title string) string {
+	// use random bytes secure (use crypto/rand)
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	h := sha256.Sum256([]byte(creatorID + ":" + title + ":" + timestamp))
 	enc := base32.NewEncoding("0123456789abcdefghjkmnpqrstvwxyz").WithPadding(base32.NoPadding).EncodeToString(h[:16])
@@ -238,55 +244,14 @@ func (g *gnoZenaoChain) GetEvent(evtID string) (*zeni.Event, error) {
 		return nil, fmt.Errorf("first unmarshal failed: %w", err)
 	}
 
-	type eventInfoJSON struct {
-		Title       string   `json:"title"`
-		Description string   `json:"description"`
-		ImageUri    string   `json:"imageUri"`
-		StartDate   string   `json:"startDate"`
-		EndDate     string   `json:"endDate"`
-		Capacity    uint32   `json:"capacity"`
-		Organizers  []string `json:"organizers"`
-		Location    struct {
-			Geo     *zenaov1.AddressGeo     `json:"geo,omitempty"`
-			Custom  *zenaov1.AddressCustom  `json:"custom,omitempty"`
-			Virtual *zenaov1.AddressVirtual `json:"virtual,omitempty"`
-		} `json:"location"`
-		Privacy *zenaov1.EventPrivacy `json:"privacy"`
-	}
-
-	var tmp eventInfoJSON
-	if err := json.Unmarshal([]byte(innerStr), &tmp); err != nil {
+	var tmp zenaov1.EventInfo
+	if err := protojson.Unmarshal([]byte(innerStr), &tmp); err != nil {
 		return nil, err
 	}
 
-	start, _ := strconv.ParseInt(tmp.StartDate, 10, 64)
-	end, _ := strconv.ParseInt(tmp.EndDate, 10, 64)
+	g.logger.Info("parsed event", zap.Any("event", tmp))
 
-	loc := &zenaov1.EventLocation{}
-	if tmp.Location.Geo != nil {
-		loc.Address = &zenaov1.EventLocation_Geo{Geo: tmp.Location.Geo}
-	}
-	if tmp.Location.Custom != nil {
-		loc.Address = &zenaov1.EventLocation_Custom{Custom: tmp.Location.Custom}
-	}
-	if tmp.Location.Virtual != nil {
-		loc.Address = &zenaov1.EventLocation_Virtual{Virtual: tmp.Location.Virtual}
-	}
-
-	evt := &zeni.Event{
-		ID:          evtID,
-		Title:       tmp.Title,
-		Description: tmp.Description,
-		ImageURI:    tmp.ImageUri,
-		Capacity:    tmp.Capacity,
-		Location:    loc,
-		StartDate:   time.Unix(start, 0),
-		EndDate:     time.Unix(end, 0),
-	}
-
-	g.logger.Info("parsed event", zap.Any("event", evt))
-
-	return evt, nil
+	return nil, errors.New("not implemented")
 }
 
 // EditEvent implements ZenaoChain.
