@@ -10,7 +10,7 @@ import ProfileHeader from "./profile-header";
 import { EventCard } from "@/components/features/event/event-card";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
-import { idFromPkgPath } from "@/lib/queries/event";
+import { eventIdFromPkgPath } from "@/lib/queries/event";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByOrganizerList,
@@ -100,7 +100,7 @@ export function ProfileInfo({
         <EventCardListLayout>
           {upcomingEvents.map((evt) => (
             <EventCard
-              href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
               key={evt.pkgPath}
               evt={evt}
             />
@@ -125,7 +125,7 @@ export function ProfileInfo({
         <EventCardListLayout>
           {pastEvents.map((evt) => (
             <EventCard
-              href={`/event/${idFromPkgPath(evt.pkgPath)}`}
+              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
               key={evt.pkgPath}
               evt={evt}
             />

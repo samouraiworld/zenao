@@ -1,7 +1,6 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { StandardPostForm } from "../event-feed-form/standard-post-form";
 import { PostCardLayout } from "@/components/social-feed/post-card-layout";
@@ -18,6 +17,9 @@ export function StandardPostCard({
   replyHref,
   onEdit,
   isEditing,
+  editMode,
+  innerEditForm,
+  onEditModeChange,
   onReactionChange,
   isReacting,
   onDelete,
@@ -30,6 +32,9 @@ export function StandardPostCard({
   replyHref?: string;
   onEdit?: (values: FeedPostFormSchemaType) => void | Promise<void>;
   isEditing?: boolean;
+  innerEditForm?: boolean;
+  editMode: boolean;
+  onEditModeChange?: (editMode: boolean) => void;
   onReactionChange?: (icon: string) => void | Promise<void>;
   isReacting?: boolean;
   onDelete?: (parentId?: string) => void;
@@ -38,8 +43,6 @@ export function StandardPostCard({
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
   );
-
-  const [editMode, setEditMode] = useState(false);
 
   const standardPost = post.post.post.value;
 
@@ -53,7 +56,6 @@ export function StandardPostCard({
 
   const onSubmit = async (values: FeedPostFormSchemaType) => {
     await onEdit?.(values);
-    setEditMode(false);
   };
 
   return (
@@ -68,13 +70,13 @@ export function StandardPostCard({
         onDelete={onDelete}
         canEdit
         editMode={editMode}
-        onEditModeChange={setEditMode}
+        onEditModeChange={onEditModeChange}
         onReactionChange={onReactionChange}
         isReacting={isReacting}
         isDeleting={isDeleting}
         isOwner={isOwner}
       >
-        {editMode ? (
+        {innerEditForm && editMode ? (
           <StandardPostForm
             feedInputMode="STANDARD_POST"
             form={form}

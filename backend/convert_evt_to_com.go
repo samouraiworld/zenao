@@ -120,21 +120,11 @@ func convertEvtToCom() error {
 		}
 		logger.Info("creating community with request", zap.Any("request", cmtReq))
 
-		organizers, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleOrganizer)
+		users, err := tx.GetOrgUsers(zeni.EntityTypeEvent, evt.ID)
 		if err != nil {
 			return err
 		}
-		gkps, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleGatekeeper)
-		if err != nil {
-			return err
-		}
-		participants, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleParticipant)
-		if err != nil {
-			return err
-		}
-		membersIDs = mapsl.Map(organizers, func(usr *zeni.User) string { return usr.ID })
-		membersIDs = append(membersIDs, mapsl.Map(gkps, func(usr *zeni.User) string { return usr.ID })...)
-		membersIDs = append(membersIDs, mapsl.Map(participants, func(usr *zeni.User) string { return usr.ID })...)
+		membersIDs = mapsl.Map(users, func(usr *zeni.User) string { return usr.ID })
 		cmt, err = tx.CreateCommunity(evt.CreatorID, []string{evt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
 		if err != nil {
 			return err
