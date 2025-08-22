@@ -122,14 +122,14 @@
     "title": "MANIFESTO",
     "means": "means",
     "p1": "Our mission is to allow humans to organize common projects (physical or online) in a resilient, safe, and transparent way, using radically simple tools.",
-    "p2": "We believe this world need powerful open source and decentralized tools to empower humans in their common projects. Time has come to fight back centralized platforms.",
-    "p3": "We, Samouraï Coop crew, commit ourself to build sustainable tools which are made to help people to organize whatever they want, with their friends, families, and communities.",
-    "p4": "We think that an event is something that can change life, and society. As we are french, we want to remind to all that the French Revolution started with a very small group of people, discussing, voting, and creating progressively an entire movement for freedom, equality, fraternity.",
-    "p5": "Zenao is more than a simple event organization platform. It's made to allow you and your tribe to decide together what's the future of your community.",
-    "p6": "Zenao is a machine to create DAOs* in a zen philosophy, powered by",
-    "p6-end": "to enforce a new CoopNation.",
+    "p2": "We believe the world needs powerful, open-source, and decentralized tools to empower humans in their common projects. The time has come to fight back against centralized platforms.",
+    "p3": "We, the Samouraï Coop crew, commit ourselves to building sustainable tools that help people organize whatever they want, with their friends, families, and communities.",
+    "p4": "We believe that an event is something that can change life and society. As we are French, we want to remind everyone that the French Revolution started with a very small group of people, discussing, voting, and gradually creating an entire movement for freedom, equality, and fraternity.",
+    "p5": "Zenao is more than a simple event organization platform. It's designed to let you and your tribe decide together what the future of your community is.",
+    "p6": "Zenao is a machine for creating DAOs* in a zen spirit, powered by",
+    "p6-end": "to build a new CoopNation.",
     "p6-ref": "(*Decentralized Autonomous Organizations)",
-    "p7": "In case of emergency, keep zen, and organize."
+    "p7": "In case of emergency, stay zen and organize."
   },
   "settings": {
     "title": "Settings",
