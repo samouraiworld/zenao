@@ -1,60 +1,55 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import ConfirmationDialog from "./confirmation-dialog";
-import { captureException } from "@/lib/report";
-import { userAddressOptions } from "@/lib/queries/user";
-import { useEventCancelParticipation } from "@/lib/mutations/event-cancel-participation";
 import { useToast } from "@/hooks/use-toast";
+import { useEventCancel } from "@/lib/mutations/event-cancel";
+import { userAddressOptions } from "@/lib/queries/user";
+import { captureException } from "@/lib/report";
 
-type CancelRegistrationConfirmationDialogProps = {
+type CancelEventDialogProps = {
   eventId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function CancelRegistrationConfirmationDialog({
+export function CancelEventDialog({
   eventId,
   open,
   onOpenChange,
-}: CancelRegistrationConfirmationDialogProps) {
+}: CancelEventDialogProps) {
+  const t = useTranslations("cancel-event-confirmation-dialog");
   const { toast } = useToast();
-  const t = useTranslations("cancel-registration-confirmation-dialog");
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { cancelParticipation, isPending } = useEventCancelParticipation();
-  const router = useRouter();
 
-  const onCancel = async () => {
+  const { cancelEvent, isPending } = useEventCancel();
+
+  const onConfirmCancel = async () => {
     try {
-      await cancelParticipation({
+      await cancelEvent({
         eventId,
         getToken,
         userAddress,
       });
 
-      toast({
-        title: t("toast-cancel-participation-success"),
-      });
+      toast({ title: t("toast-cancel-event-success") });
       onOpenChange(false);
-      router.push(`/`);
     } catch (error) {
-      // Known errors
       if (error instanceof Error) {
         let toastMessage = "";
         switch (error.message) {
-          case "[unknown] event already started":
-            toastMessage = t("event-already-started-error");
+          case "[unknown] events already started or starting within 24h cannot be cancelled":
+            toastMessage = t("event-starting-soon-error");
             break;
-          case "[unknown] user already checked-in":
-            toastMessage = t("toast-user-already-checked-in-error");
+          case "[unknown] only organizers can cancel an event":
+            toastMessage = t("toast-only-organizer-can-cancel-error");
             break;
           default:
             captureException(error);
-            toastMessage = t("toast-cancel-participation-error");
+            toastMessage = t("toast-cancel-event-error");
         }
 
         toast({
@@ -71,11 +66,11 @@ export function CancelRegistrationConfirmationDialog({
       onOpenChange={onOpenChange}
       title={t("title")}
       description={t("desc")}
-      confirmText={t("cancel")}
+      confirmText={t("confirm")}
       cancelText={t("go-back")}
-      onConfirm={onCancel}
+      onConfirm={onConfirmCancel}
       isPending={isPending}
-      confirmButtonAriaLabel="cancel participation"
+      confirmButtonAriaLabel="cancel event"
     />
   );
 }

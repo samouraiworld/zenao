@@ -103,7 +103,7 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		return nil, fmt.Errorf("unknown address kind %q", dbevt.LocKind)
 	}
 
-	return &zeni.Event{
+	evt := &zeni.Event{
 		ID:                fmt.Sprintf("%d", dbevt.ID),
 		CreatedAt:         dbevt.CreatedAt,
 		Title:             dbevt.Title,
@@ -117,5 +117,10 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		Location:          loc,
 		PasswordHash:      dbevt.PasswordHash,
 		ICSSequenceNumber: dbevt.ICSSequenceNumber,
-	}, nil
+	}
+
+	if dbevt.DeletedAt.Valid {
+		evt.DeletedAt = dbevt.DeletedAt.Time
+	}
+	return evt, nil
 }
