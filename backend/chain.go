@@ -220,14 +220,73 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 func (g *gnoZenaoChain) GetEvent(evtID string) (*zeni.Event, error) {
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 
-	data, err := checkQueryErr(g.client.QEval(eventPkgPath, "event.GetInfoJSON()"))
+	raw, err := checkQueryErr(g.client.QEval(eventPkgPath, "event.GetInfoJSON()"))
 	if err != nil {
 		return nil, err
 	}
 
-	g.logger.Info("retrieved event", zap.String("data", data))
+	//TODO: make a generic function for parsing query response
+	g.logger.Info("retrieved event", zap.String("data", raw))
 
-	return nil, errors.New("not implemented yet") // TODO: implement this
+	if len(raw) < 10 || raw[0] != '(' {
+		return nil, fmt.Errorf("unexpected format: %s", raw)
+	}
+	inner := raw[1 : len(raw)-len(" string)")]
+
+	var innerStr string
+	if err := json.Unmarshal([]byte(inner), &innerStr); err != nil {
+		return nil, fmt.Errorf("first unmarshal failed: %w", err)
+	}
+
+	type eventInfoJSON struct {
+		Title       string   `json:"title"`
+		Description string   `json:"description"`
+		ImageUri    string   `json:"imageUri"`
+		StartDate   string   `json:"startDate"`
+		EndDate     string   `json:"endDate"`
+		Capacity    uint32   `json:"capacity"`
+		Organizers  []string `json:"organizers"`
+		Location    struct {
+			Geo     *zenaov1.AddressGeo     `json:"geo,omitempty"`
+			Custom  *zenaov1.AddressCustom  `json:"custom,omitempty"`
+			Virtual *zenaov1.AddressVirtual `json:"virtual,omitempty"`
+		} `json:"location"`
+		Privacy *zenaov1.EventPrivacy `json:"privacy"`
+	}
+
+	var tmp eventInfoJSON
+	if err := json.Unmarshal([]byte(innerStr), &tmp); err != nil {
+		return nil, err
+	}
+
+	start, _ := strconv.ParseInt(tmp.StartDate, 10, 64)
+	end, _ := strconv.ParseInt(tmp.EndDate, 10, 64)
+
+	loc := &zenaov1.EventLocation{}
+	if tmp.Location.Geo != nil {
+		loc.Address = &zenaov1.EventLocation_Geo{Geo: tmp.Location.Geo}
+	}
+	if tmp.Location.Custom != nil {
+		loc.Address = &zenaov1.EventLocation_Custom{Custom: tmp.Location.Custom}
+	}
+	if tmp.Location.Virtual != nil {
+		loc.Address = &zenaov1.EventLocation_Virtual{Virtual: tmp.Location.Virtual}
+	}
+
+	evt := &zeni.Event{
+		ID:          evtID,
+		Title:       tmp.Title,
+		Description: tmp.Description,
+		ImageURI:    tmp.ImageUri,
+		Capacity:    tmp.Capacity,
+		Location:    loc,
+		StartDate:   time.Unix(start, 0),
+		EndDate:     time.Unix(end, 0),
+	}
+
+	g.logger.Info("parsed event", zap.Any("event", evt))
+
+	return evt, nil
 }
 
 // EditEvent implements ZenaoChain.
