@@ -1,5 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "../get-query-client";
+import { eventOptions } from "../queries/event";
+import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
+import { eventTickets } from "../queries/ticket";
 import { GetToken } from "../utils";
 import { zenaoClient } from "../zenao-client";
 

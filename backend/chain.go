@@ -211,7 +211,7 @@ func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
 			Name: "main",
 			Files: []*gnovm.MemFile{{
 				Name: "main.gno",
-				Body: genCancelEventMsgRunBody(callerPkgPath, eventPkgPath),
+				Body: genCancelEventMsgRunBody(eventPkgPath, callerPkgPath),
 			}},
 		},
 	}
@@ -997,22 +997,23 @@ func (g *gnoZenaoChain) estimateAddPackageTxGas(msgs ...vm.MsgAddPackage) (int64
 
 func genCancelEventMsgRunBody(eventPkgPath, organizerPkgPath string) string {
 	return fmt.Sprintf(`package main
-import (
-	user %q
-	event %q
-	"gno.land/p/zenao/daokit"
-	"gno.land/p/zenao/events"
-)
 
-func main() {
-	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-		Title: "Cancel event",
-		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+	import (
+		user %q
+		event %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/events"
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Cancel event",
-			Message: interface{},
-		}),
-	})
-}
+			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+				Title: "Cancel event",
+				Message: events.NewCancelEventMsg(),
+			}),
+		})
+	}
 `, organizerPkgPath, eventPkgPath)
 }
 

@@ -1,12 +1,11 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import ConfirmationDialog from "./confirmation-dialog";
-import { captureException } from "@/lib/report";
-import { userAddressOptions } from "@/lib/queries/user";
-import { useEventCancelParticipation } from "@/lib/mutations/event-cancel-participation";
 import { useToast } from "@/hooks/use-toast";
+import { useEventCancelParticipation } from "@/lib/mutations/event-cancel-participation";
+import { userAddressOptions } from "@/lib/queries/user";
+import { captureException } from "@/lib/report";
 
 type CancelRegistrationConfirmationDialogProps = {
   eventId: string;
@@ -26,7 +25,6 @@ export function CancelRegistrationConfirmationDialog({
     userAddressOptions(getToken, userId),
   );
   const { cancelParticipation, isPending } = useEventCancelParticipation();
-  const router = useRouter();
 
   const onCancel = async () => {
     try {
@@ -40,7 +38,6 @@ export function CancelRegistrationConfirmationDialog({
         title: t("toast-cancel-participation-success"),
       });
       onOpenChange(false);
-      router.push(`/`);
     } catch (error) {
       // Known errors
       if (error instanceof Error) {

@@ -1,11 +1,12 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import ConfirmationDialog from "./confirmation-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useEventCancel } from "@/lib/mutations/event-cancel";
-import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
+import { userAddressOptions } from "@/lib/queries/user";
+import { useEventCancel } from "@/lib/mutations/event-cancel";
+import { useToast } from "@/hooks/use-toast";
 
 type CancelEventDialogProps = {
   eventId: string;
@@ -24,6 +25,7 @@ export function CancelEventDialog({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const router = useRouter();
 
   const { cancelEvent, isPending } = useEventCancel();
 
@@ -37,6 +39,7 @@ export function CancelEventDialog({
 
       toast({ title: t("toast-cancel-event-success") });
       onOpenChange(false);
+      router.push(`/`);
     } catch (error) {
       if (error instanceof Error) {
         let toastMessage = "";
@@ -66,7 +69,7 @@ export function CancelEventDialog({
       onOpenChange={onOpenChange}
       title={t("title")}
       description={t("desc")}
-      confirmText={t("confirm")}
+      confirmText={t("cancel")}
       cancelText={t("go-back")}
       onConfirm={onConfirmCancel}
       isPending={isPending}

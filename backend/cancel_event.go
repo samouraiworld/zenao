@@ -92,7 +92,9 @@ func (s *ZenaoServer) CancelEvent(
 		}
 	}
 
-	s.Chain.CancelEvent(evt.ID, zUser.ID)
+	if err := s.Chain.CancelEvent(evt.ID, evt.CreatorID); err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	return connect.NewResponse(&zenaov1.CancelEventResponse{}), nil
 }

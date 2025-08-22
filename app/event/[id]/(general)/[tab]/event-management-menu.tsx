@@ -79,6 +79,13 @@ function EventManagementMenuOrganizer({
 
         <p
           className="text-main underline cursor-pointer"
+          onClick={() => setCancelEventDialogOpen(true)}
+        >
+          {t("cancel-event-button")}
+        </p>
+
+        <p
+          className="text-main underline cursor-pointer"
           onClick={() => setManageGatekeepersDialogOpen(true)}
         >
           {t("manage-gatekeepers-button")} ({gatekeepers.gatekeepers.length + 1}

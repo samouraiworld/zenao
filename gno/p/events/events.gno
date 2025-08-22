@@ -171,6 +171,12 @@ func NewEvent(conf *Config) *Event {
 
 const MsgCancelEventKind = "gno.land/p/zenao/events.CancelEvent"
 
+type MsgCancelEvent struct{}
+
+func (msg *MsgCancelEvent) String() string {
+	return "Cancel event"
+}
+
 func (e *Event) cancelEventHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgCancelEventKind, func(i interface{}) {
 		if e.cancelled {
@@ -183,6 +189,10 @@ func (e *Event) cancelEventHandler() daokit.MessageHandler {
 			e.DAOPrivate.Members.RemoveMember(member)
 		}
 	})
+}
+
+func NewCancelEventMsg() daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgCancelEventKind, &MsgCancelEvent{})
 }
 
 const MsgAddParticipantKind = "gno.land/p/zenao/events.AddParticipant"
