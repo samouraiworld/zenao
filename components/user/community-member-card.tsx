@@ -30,8 +30,8 @@ function CommunityMemberCard({
             {description ?? "No description yet"}
           </Text>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <Text size="sm" className="font-semibold text-primary">Roles:</Text>
+        <div className="flex flex-col gap-2">
+          <Text size="sm" className="font-semibold text-primary">Roles</Text>
           <div className="flex gap-2 flex-wrap">
             {roles.map((role) => (
               <Badge key={role} variant="outline" className="text-sm px-3 py-1">
