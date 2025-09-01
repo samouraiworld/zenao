@@ -24,14 +24,20 @@ function CommunityMemberCard({
 
       <div className="flex flex-col justify-between flex-1 gap-3">
         <div>
-          <Text size="sm" className="font-bold text-primary">{displayName}</Text>
-          <Text size="xs" className="text-secondary-color">{address.substring(0, 10)}</Text>
+          <Text size="sm" className="font-bold text-primary">
+            {displayName}
+          </Text>
+          <Text size="xs" className="text-secondary-color">
+            {address.substring(0, 10)}
+          </Text>
           <Text size="xs" className="text-secondary-color mt-1">
             {description ?? "No description yet"}
           </Text>
         </div>
         <div className="flex flex-col gap-2">
-          <Text size="sm" className="font-semibold text-primary">Roles</Text>
+          <Text size="sm" className="font-semibold text-primary">
+            Roles
+          </Text>
           <div className="flex gap-2 flex-wrap">
             {roles.map((role) => (
               <Badge key={role} variant="outline" className="text-sm px-3 py-1">
