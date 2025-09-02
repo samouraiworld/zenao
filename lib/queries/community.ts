@@ -98,6 +98,61 @@ export const communitiesList = (
   });
 };
 
+export const communitiesListByMember = (
+  memberAddress: string,
+  limit: number,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CommunityInfo[],
+      Error,
+      InfiniteData<CommunityInfo[]>,
+      (string | number)[],
+      number // pageParam type
+    >,
+    | "queryKey"
+    | "queryFn"
+    | "getNextPageParam"
+    | "initialPageParam"
+    | "getPreviousPageParam"
+  >,
+) => {
+  const limitInt = Math.floor(limit);
+
+  return infiniteQueryOptions({
+    initialPageParam: 0,
+    queryKey: ["communitiesByMember", memberAddress, limitInt],
+    queryFn: async ({ pageParam = 0 }) => {
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      console.log(
+        `communitiesToJSON(listCommunitiesByMembers(${JSON.stringify(memberAddress)}, ${limitInt}, ${pageParam * limitInt}))`,
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/communityreg`,
+        `communitiesToJSON(listCommunitiesByMembers(${JSON.stringify(memberAddress)}, ${limitInt}, ${pageParam * limitInt}))`,
+      );
+      const raw = extractGnoJSONResponse(res);
+      const json = communitiesListFromJson(raw);
+
+      return json;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
+    },
+    ...options,
+  });
+};
+
 export const communityUserRoles = (
   communityId: string | null,
   userAddress: string | null,
