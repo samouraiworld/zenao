@@ -33,14 +33,11 @@ export default async function CreateEventPage() {
     );
   }
 
-  // Prefetch communities where user is admin
-  console.log(address);
-  const communitiesPages = await queryClient.fetchInfiniteQuery(
+  // Prefetch communities of logged in user
+  // here we cannot determine yet all communnties where the user is admin
+  queryClient.prefetchInfiniteQuery(
     communitiesListByMember(address, DEFAULT_COMMUNITIES_LIMIT),
   );
-
-  console.log(communitiesPages.pages);
-  // queryClient.prefetchQuery()
 
   return (
     <ScreenContainer isSignedOutModal>
