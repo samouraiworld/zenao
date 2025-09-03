@@ -99,7 +99,7 @@ export const communitiesList = (
 };
 
 export const communitiesListByMember = (
-  memberAddress: string,
+  memberAddress: string | null,
   limit: number,
   options?: Omit<
     UseInfiniteQueryOptions<
@@ -120,13 +120,15 @@ export const communitiesListByMember = (
 
   return infiniteQueryOptions({
     initialPageParam: 0,
-    queryKey: ["communitiesByMember", memberAddress, limitInt],
+    queryKey: ["communitiesByMember", memberAddress ?? "", limitInt],
+    enabled: !!memberAddress,
     queryFn: async ({ pageParam = 0 }) => {
+      if (!memberAddress) {
+        return [] as CommunityInfo[];
+      }
+
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
-      console.log(
-        `communitiesToJSON(listCommunitiesByMembers(${JSON.stringify(memberAddress)}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/communityreg`,
