@@ -105,6 +105,7 @@ type Community struct {
 }
 
 type EntityRole struct {
+	CreatedAt  time.Time
 	DeletedAt  time.Time
 	EntityType string // one of: user, event
 	EntityID   string
@@ -230,7 +231,6 @@ type DB interface {
 	GetAllCommunities() ([]*Community, error)
 
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
-	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
 	GetOrgByPostID(postID string) (orgType, orgID string, err error)
@@ -251,6 +251,7 @@ type DB interface {
 	GetPollByPostID(postID string) (*Poll, error)
 
 	// gentxs specific
+	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
 	GetDeletedEvents() ([]*Event, error)
