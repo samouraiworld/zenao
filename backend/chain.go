@@ -198,6 +198,62 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 	return nil
 }
 
+// CancelEvent implements ZenaoChain.
+func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
+	eventPkgPath := g.eventRealmPkgPath(evtID)
+	callerPkgPath := g.userRealmPkgPath(callerID)
+
+	// TODO: single tx with all messages
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: genCancelEventMsgRunBody(eventPkgPath, callerPkgPath),
+			}},
+		},
+	}
+	gasWanted, err := g.estimateRunTxGas(msgRun)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msgRun))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("cancelled event", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.eventsIndexPkgPath,
+		Func:    "RemoveIndex",
+		Args: []string{
+			eventPkgPath,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("removed event from index", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
 // EditEvent implements ZenaoChain.
 func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
 	orgsAddrLit := stringSliceLit(mapsl.Map(organizersIDs, g.UserAddress))
@@ -937,6 +993,28 @@ func (g *gnoZenaoChain) estimateAddPackageTxGas(msgs ...vm.MsgAddPackage) (int64
 		return 0, err
 	}
 	return int64(float64(gasWanted) + float64(gasWanted)*g.gasSecurityRate), nil
+}
+
+func genCancelEventMsgRunBody(eventPkgPath, organizerPkgPath string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		event %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/events"
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: "Cancel event",
+			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+				Title: "Cancel event",
+				Message: events.NewCancelEventMsg(),
+			}),
+		})
+	}
+`, organizerPkgPath, eventPkgPath)
 }
 
 func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string {
