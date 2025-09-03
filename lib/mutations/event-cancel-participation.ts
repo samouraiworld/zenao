@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "../get-query-client";
-import { GetToken } from "../utils";
-import { eventTickets } from "../queries/ticket";
-import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventOptions } from "../queries/event";
+import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
+import { eventTickets } from "../queries/ticket";
+import { GetToken } from "../utils";
 import { zenaoClient } from "@/lib/zenao-client";
 
 type EventCancelParticipationRequest = {
