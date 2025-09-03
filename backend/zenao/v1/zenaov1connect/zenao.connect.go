@@ -41,6 +41,9 @@ const (
 	// ZenaoServiceCreateEventProcedure is the fully-qualified name of the ZenaoService's CreateEvent
 	// RPC.
 	ZenaoServiceCreateEventProcedure = "/zenao.v1.ZenaoService/CreateEvent"
+	// ZenaoServiceCancelEventProcedure is the fully-qualified name of the ZenaoService's CancelEvent
+	// RPC.
+	ZenaoServiceCancelEventProcedure = "/zenao.v1.ZenaoService/CancelEvent"
 	// ZenaoServiceEditEventProcedure is the fully-qualified name of the ZenaoService's EditEvent RPC.
 	ZenaoServiceEditEventProcedure = "/zenao.v1.ZenaoService/EditEvent"
 	// ZenaoServiceGetEventGatekeepersProcedure is the fully-qualified name of the ZenaoService's
@@ -104,6 +107,7 @@ type ZenaoServiceClient interface {
 	GetUserAddress(context.Context, *connect.Request[v1.GetUserAddressRequest]) (*connect.Response[v1.GetUserAddressResponse], error)
 	// EVENT
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
+	CancelEvent(context.Context, *connect.Request[v1.CancelEventRequest]) (*connect.Response[v1.CancelEventResponse], error)
 	EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error)
 	GetEventGatekeepers(context.Context, *connect.Request[v1.GetEventGatekeepersRequest]) (*connect.Response[v1.GetEventGatekeepersResponse], error)
 	ValidatePassword(context.Context, *connect.Request[v1.ValidatePasswordRequest]) (*connect.Response[v1.ValidatePasswordResponse], error)
@@ -157,6 +161,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceCreateEventProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("CreateEvent")),
+			connect.WithClientOptions(opts...),
+		),
+		cancelEvent: connect.NewClient[v1.CancelEventRequest, v1.CancelEventResponse](
+			httpClient,
+			baseURL+ZenaoServiceCancelEventProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("CancelEvent")),
 			connect.WithClientOptions(opts...),
 		),
 		editEvent: connect.NewClient[v1.EditEventRequest, v1.EditEventResponse](
@@ -293,6 +303,7 @@ type zenaoServiceClient struct {
 	editUser                 *connect.Client[v1.EditUserRequest, v1.EditUserResponse]
 	getUserAddress           *connect.Client[v1.GetUserAddressRequest, v1.GetUserAddressResponse]
 	createEvent              *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
+	cancelEvent              *connect.Client[v1.CancelEventRequest, v1.CancelEventResponse]
 	editEvent                *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
 	getEventGatekeepers      *connect.Client[v1.GetEventGatekeepersRequest, v1.GetEventGatekeepersResponse]
 	validatePassword         *connect.Client[v1.ValidatePasswordRequest, v1.ValidatePasswordResponse]
@@ -329,6 +340,11 @@ func (c *zenaoServiceClient) GetUserAddress(ctx context.Context, req *connect.Re
 // CreateEvent calls zenao.v1.ZenaoService.CreateEvent.
 func (c *zenaoServiceClient) CreateEvent(ctx context.Context, req *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error) {
 	return c.createEvent.CallUnary(ctx, req)
+}
+
+// CancelEvent calls zenao.v1.ZenaoService.CancelEvent.
+func (c *zenaoServiceClient) CancelEvent(ctx context.Context, req *connect.Request[v1.CancelEventRequest]) (*connect.Response[v1.CancelEventResponse], error) {
+	return c.cancelEvent.CallUnary(ctx, req)
 }
 
 // EditEvent calls zenao.v1.ZenaoService.EditEvent.
@@ -443,6 +459,7 @@ type ZenaoServiceHandler interface {
 	GetUserAddress(context.Context, *connect.Request[v1.GetUserAddressRequest]) (*connect.Response[v1.GetUserAddressResponse], error)
 	// EVENT
 	CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error)
+	CancelEvent(context.Context, *connect.Request[v1.CancelEventRequest]) (*connect.Response[v1.CancelEventResponse], error)
 	EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error)
 	GetEventGatekeepers(context.Context, *connect.Request[v1.GetEventGatekeepersRequest]) (*connect.Response[v1.GetEventGatekeepersResponse], error)
 	ValidatePassword(context.Context, *connect.Request[v1.ValidatePasswordRequest]) (*connect.Response[v1.ValidatePasswordResponse], error)
@@ -492,6 +509,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceCreateEventProcedure,
 		svc.CreateEvent,
 		connect.WithSchema(zenaoServiceMethods.ByName("CreateEvent")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceCancelEventHandler := connect.NewUnaryHandler(
+		ZenaoServiceCancelEventProcedure,
+		svc.CancelEvent,
+		connect.WithSchema(zenaoServiceMethods.ByName("CancelEvent")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceEditEventHandler := connect.NewUnaryHandler(
@@ -628,6 +651,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceGetUserAddressHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreateEventProcedure:
 			zenaoServiceCreateEventHandler.ServeHTTP(w, r)
+		case ZenaoServiceCancelEventProcedure:
+			zenaoServiceCancelEventHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditEventProcedure:
 			zenaoServiceEditEventHandler.ServeHTTP(w, r)
 		case ZenaoServiceGetEventGatekeepersProcedure:
@@ -689,6 +714,10 @@ func (UnimplementedZenaoServiceHandler) GetUserAddress(context.Context, *connect
 
 func (UnimplementedZenaoServiceHandler) CreateEvent(context.Context, *connect.Request[v1.CreateEventRequest]) (*connect.Response[v1.CreateEventResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreateEvent is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) CancelEvent(context.Context, *connect.Request[v1.CancelEventRequest]) (*connect.Response[v1.CancelEventResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CancelEvent is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) EditEvent(context.Context, *connect.Request[v1.EditEventRequest]) (*connect.Response[v1.EditEventResponse], error) {

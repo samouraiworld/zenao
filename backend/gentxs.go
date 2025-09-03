@@ -137,6 +137,25 @@ func execGenTxs() error {
 	if err != nil {
 		return err
 	}
+	deletedEvents, err := db.GetDeletedEvents()
+	if err != nil {
+		return err
+	}
+	events = append(events, deletedEvents...)
+	for _, deletedEvent := range deletedEvents {
+		tx, err := createCancelEventTx(chain, deletedEvent, signerInfo.GetAddress())
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("event cancel tx created", zap.String("event-id", deletedEvent.ID))
+		tx, err = createCancelEventRegTx(chain, deletedEvent, signerInfo.GetAddress())
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("event cancel indexed into event registry tx created", zap.String("event-id", deletedEvent.ID))
+	}
 	for _, event := range events {
 		sk, err := zeni.EventSKFromPasswordHash(event.PasswordHash)
 		if err != nil {
@@ -646,6 +665,62 @@ func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoG
 		Tx: eventTx,
 		Metadata: &gnoland.GnoTxMetadata{
 			Timestamp: event.CreatedAt.Unix(),
+		},
+	}, nil
+}
+
+func createCancelEventTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	creatorPkgPath := chain.userRealmPkgPath(event.CreatorID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: caller,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name: "main",
+					Files: []*gnovm.MemFile{{
+						Name: "main.gno",
+						Body: genCancelEventMsgRunBody(eventPkgPath, creatorPkgPath),
+					}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: event.DeletedAt.Unix(),
+		},
+	}, nil
+}
+
+func createCancelEventRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.eventsIndexPkgPath,
+				Func:    "RemoveIndex",
+				Args:    []string{eventPkgPath},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: event.DeletedAt.Unix() + 1, // +1 to avoid collision with cancel event tx.
 		},
 	}, nil
 }

@@ -173,6 +173,15 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, gate
 	return zevt, nil
 }
 
+// CancelEvent implements zeni.DB.
+func (g *gormZenaoDB) CancelEvent(eventID string) error {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return err
+	}
+	return g.db.Delete(&Event{}, evtIDInt).Error
+}
+
 // EditEvent implements zeni.DB.
 func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*zeni.Event, error) {
 	// XXX: validate?
@@ -587,6 +596,23 @@ func (g *gormZenaoDB) GetDeletedTickets(eventID string) ([]*zeni.SoldTicket, err
 		if err != nil {
 			return nil, err
 		}
+	}
+	return res, nil
+}
+
+// GetDeletedEvents implements zeni.DB.
+func (g *gormZenaoDB) GetDeletedEvents() ([]*zeni.Event, error) {
+	var events []Event
+	if err := g.db.Unscoped().Where("deleted_at IS NOT NULL").Find(&events).Error; err != nil {
+		return nil, err
+	}
+	res := make([]*zeni.Event, 0, len(events))
+	for _, e := range events {
+		zevt, err := dbEventToZeniEvent(&e)
+		if err != nil {
+			return nil, fmt.Errorf("convert db event to zeni event: %w", err)
+		}
+		res = append(res, zevt)
 	}
 	return res, nil
 }

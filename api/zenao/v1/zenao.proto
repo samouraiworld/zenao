@@ -12,6 +12,7 @@ service ZenaoService {
 
   // EVENT
   rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+  rpc CancelEvent(CancelEventRequest) returns (CancelEventResponse);
   rpc EditEvent(EditEventRequest) returns (EditEventResponse);
   rpc GetEventGatekeepers(GetEventGatekeepersRequest)
       returns (GetEventGatekeepersResponse);
@@ -79,6 +80,10 @@ message CreateEventRequest {
 }
 
 message CreateEventResponse { string id = 1; }
+
+message CancelEventRequest { string event_id = 1; }
+
+message CancelEventResponse {}
 
 message EditEventRequest {
   string event_id = 1;
