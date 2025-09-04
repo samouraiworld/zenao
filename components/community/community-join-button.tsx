@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth, useUser } from "@clerk/nextjs";
@@ -23,7 +22,7 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   const {
     data: roles,
     isLoading: rolesLoading,
-    isError: rolesError, // TODO handle already join error message
+    isError: rolesError,
   } = useQuery(communityUserRoles(communityId, address));
 
   const {
@@ -60,7 +59,11 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
     }
   };
 
-  if (!isSignedIn || rolesLoading || alreadyMember) return null;
+  if (!isSignedIn || rolesLoading) return null;
+
+  if (alreadyMember || isSuccess) {
+    return null;
+  }
 
   return (
     <div className="mt-4">
@@ -77,7 +80,7 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
       )}
 
       {isSuccess && (
-        <p className="text-green-500 mt-2">You’ve joined the community!</p>
+        <p className="text-green-500 mt-2">You've joined the community!</p>
       )}
     </div>
   );
