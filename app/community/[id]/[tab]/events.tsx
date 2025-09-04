@@ -39,7 +39,7 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
           (elem): elem is UseSuspenseQueryResult<EventInfo, Error> =>
             elem.isSuccess && !!elem.data,
         )
-        .map((elem) => elem.data),
+        .map((elem, idx) => ({ ...elem.data, pkgPath: eventsPkgPaths[idx] })),
   });
 
   return (

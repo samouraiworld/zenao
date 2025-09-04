@@ -527,6 +527,50 @@ describe("main", () => {
     cy.get("button").contains("Events").click();
     cy.get("button").contains("Members").click();
   });
+
+  it("access a community", () => {
+    cy.visit("/");
+
+    // Explore communities
+    cy.get("a").contains("Communities").click();
+    cy.get('a[href^="/community/"]').last().click();
+
+    cy.url().should("contain", "/community/");
+
+    // Check sections
+    cy.get("button")
+      .contains("Chat")
+      .should("have.attr", "aria-selected", "true");
+
+    cy.get("button").contains("Events").click();
+    cy.get("button").contains("Members").click();
+  });
+
+  it("cancel participation", () => {
+    cy.createEvent({ exclusive: false });
+
+    cy.url().then((url) => {
+      cy.visit(url);
+    });
+
+    // Participate to an event
+    cy.get("button").contains("Register").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
+
+    cy.get("button").contains("Cancel my participation").click();
+    cy.get('button[aria-label="cancel participation"').click();
+    cy.wait(2000);
+
+    toastShouldContain("Your participation has been cancelled");
+
+    // Participate again to an event (potential regression)
+    cy.get("button").contains("Register").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
+  });
 });
 
 Cypress.Commands.add(

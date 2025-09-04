@@ -35,10 +35,6 @@ func (s *ZenaoServer) AddEventToCommunity(
 		return nil, errors.New("user is banned")
 	}
 
-	if zUser.Plan != zeni.ProPlan {
-		return nil, errors.New("this feature is only available for pro users")
-	}
-
 	var (
 		targets      []*zeni.User
 		participants []*zeni.User

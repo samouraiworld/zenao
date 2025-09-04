@@ -19,6 +19,10 @@ func (e *Event) Info() *zenaov1.EventInfo {
 		}
 	}
 
+	if e.cancelled {
+		return nil
+	}
+
 	return &zenaov1.EventInfo{
 		Title:        e.getProfileString(std.CurrentRealm().Address(), "DisplayName", ""),
 		Description:  e.getProfileString(std.CurrentRealm().Address(), "Bio", ""),

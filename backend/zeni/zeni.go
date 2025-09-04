@@ -79,6 +79,7 @@ type User struct {
 
 type Event struct {
 	CreatedAt         time.Time
+	DeletedAt         time.Time
 	ID                string
 	Title             string
 	Description       string
@@ -104,6 +105,7 @@ type Community struct {
 }
 
 type EntityRole struct {
+	CreatedAt  time.Time
 	DeletedAt  time.Time
 	EntityType string // one of: user, event
 	EntityID   string
@@ -213,6 +215,7 @@ type DB interface {
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)
+	CancelEvent(eventID string) error
 	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
@@ -236,8 +239,6 @@ type DB interface {
 	GetAllCommunities() ([]*Community, error)
 
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
-	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
-	// GetOrgUsers returns all users in the org, regardless of their role.
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
 	GetOrgByPostID(postID string) (orgType, orgID string, err error)
@@ -258,8 +259,10 @@ type DB interface {
 	GetPollByPostID(postID string) (*Poll, error)
 
 	// gentxs specific
+	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
+	GetDeletedEvents() ([]*Event, error)
 }
 
 type Chain interface {
@@ -270,6 +273,7 @@ type Chain interface {
 	EventAddress(eventID string) string
 
 	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
+	CancelEvent(eventID string, callerID string) error
 	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
 	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
 	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error

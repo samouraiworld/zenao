@@ -137,6 +137,25 @@ func execGenTxs() error {
 	if err != nil {
 		return err
 	}
+	deletedEvents, err := db.GetDeletedEvents()
+	if err != nil {
+		return err
+	}
+	events = append(events, deletedEvents...)
+	for _, deletedEvent := range deletedEvents {
+		tx, err := createCancelEventTx(chain, deletedEvent, signerInfo.GetAddress())
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("event cancel tx created", zap.String("event-id", deletedEvent.ID))
+		tx, err = createCancelEventRegTx(chain, deletedEvent, signerInfo.GetAddress())
+		if err != nil {
+			return err
+		}
+		txs = append(txs, tx)
+		logger.Info("event cancel indexed into event registry tx created", zap.String("event-id", deletedEvent.ID))
+	}
 	for _, event := range events {
 		sk, err := zeni.EventSKFromPasswordHash(event.PasswordHash)
 		if err != nil {
@@ -274,7 +293,7 @@ func execGenTxs() error {
 			administratorsIDs = append(administratorsIDs, admin.ID)
 		}
 
-		members, err := db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleMember)
+		members, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeCommunity, community.ID, zeni.EntityTypeUser, zeni.RoleMember)
 		if err != nil {
 			return err
 		}
@@ -286,13 +305,24 @@ func execGenTxs() error {
 
 		var membersIDs []string
 		for _, member := range members {
-			membersIDs = append(membersIDs, member.ID)
+			membersIDs = append(membersIDs, member.EntityID)
+			tx, err := createCommunityAddMemberRegTx(chain, signerInfo.GetAddress(), community, member.EntityID, member.CreatedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community add member tx created", zap.String("community-id", community.ID), zap.String("member-id", member.EntityID), zap.Time("created-at", member.CreatedAt))
 		}
 
 		// XXX: Add deleted members so we can add their post before deleting them
 		for _, deletedMember := range deletedMembers {
 			membersIDs = append(membersIDs, deletedMember.EntityID)
-			tx, err := createCommunityRemoveMemberTx(chain, signerInfo.GetAddress(), community, deletedMember.EntityID, deletedMember.DeletedAt)
+			tx, err := createCommunityAddMemberRegTx(chain, signerInfo.GetAddress(), community, deletedMember.EntityID, deletedMember.CreatedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			tx, err = createCommunityRemoveMemberTx(chain, signerInfo.GetAddress(), community, deletedMember.EntityID, deletedMember.DeletedAt)
 			if err != nil {
 				return err
 			}
@@ -306,7 +336,7 @@ func execGenTxs() error {
 			logger.Info("community remove member indexed into community registry tx created", zap.String("community-id", community.ID), zap.String("member-id", deletedMember.EntityID), zap.Time("deleted-at", deletedMember.DeletedAt))
 		}
 
-		events, err := db.GetOrgsEventsWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleEvent)
+		events, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeCommunity, community.ID, zeni.EntityTypeEvent, zeni.RoleEvent)
 		if err != nil {
 			return err
 		}
@@ -318,7 +348,7 @@ func execGenTxs() error {
 
 		var eventsIDs []string
 		for _, event := range events {
-			eventsIDs = append(eventsIDs, event.ID)
+			eventsIDs = append(eventsIDs, event.EntityID)
 		}
 
 		// XXX: Add deleted events so we can add their post before deleting them
@@ -650,6 +680,62 @@ func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoG
 	}, nil
 }
 
+func createCancelEventTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	creatorPkgPath := chain.userRealmPkgPath(event.CreatorID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgRun{
+				Caller: caller,
+				Send:   []std.Coin{},
+				Package: &gnovm.MemPackage{
+					Name: "main",
+					Files: []*gnovm.MemFile{{
+						Name: "main.gno",
+						Body: genCancelEventMsgRunBody(eventPkgPath, creatorPkgPath),
+					}},
+				},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: event.DeletedAt.Unix(),
+		},
+	}, nil
+}
+
+func createCancelEventRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	eventPkgPath := chain.eventRealmPkgPath(event.ID)
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.eventsIndexPkgPath,
+				Func:    "RemoveIndex",
+				Args:    []string{eventPkgPath},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: event.DeletedAt.Unix() + 1, // +1 to avoid collision with cancel event tx.
+		},
+	}, nil
+}
+
 func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, ticket *zeni.SoldTicket, participantAddr string) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
 	tx := std.Tx{
@@ -921,6 +1007,30 @@ func createCommunityRegTx(chain *gnoZenaoChain, community *zeni.Community, calle
 		Tx: tx,
 		Metadata: &gnoland.GnoTxMetadata{
 			Timestamp: community.CreatedAt.Unix() + 1, // +1 to avoid collision with community creation
+		},
+	}, nil
+}
+
+func createCommunityAddMemberRegTx(chain *gnoZenaoChain, caller cryptoGno.Address, community *zeni.Community, memberID string, createdAt time.Time) (gnoland.TxWithMetadata, error) {
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.communitiesIndexPkgPath,
+				Func:    "AddMember",
+				Args:    []string{chain.communityPkgPath(community.ID), chain.UserAddress(memberID)},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: createdAt.Unix() + 2, // +2 to avoid collision with community reg index
 		},
 	}, nil
 }
