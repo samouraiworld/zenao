@@ -11,20 +11,24 @@ import { FeedPostFormSchemaType } from "@/types/schemas";
 export function PostsList({
   userAddress,
   posts,
-  onEdit,
+  postInEdition,
+  onEditModeChange,
   onReactionChange,
   onDelete,
   replyHrefFormatter,
   canReply,
   canInteract,
+  onEdit,
   isEditing,
   isReacting,
   isDeleting,
 }: {
   userAddress: string | null;
-  onEdit?: (
+  postInEdition: string | null;
+  onEditModeChange?: (
     postId: string,
-    values: FeedPostFormSchemaType,
+    content: string,
+    editMode: boolean,
   ) => void | Promise<void>;
   onReactionChange?: (postId: string, icon: string) => void | Promise<void>;
   onDelete?: (postId: string, parentId?: string) => void | Promise<void>;
@@ -32,6 +36,11 @@ export function PostsList({
   replyHrefFormatter?: (postId: bigint) => string;
   canReply?: boolean;
   canInteract?: boolean;
+  innerEditMode?: boolean;
+  onEdit?: (
+    postId: string,
+    values: FeedPostFormSchemaType,
+  ) => void | Promise<void>;
   isEditing?: boolean;
   isReacting?: boolean;
   isDeleting?: boolean;
@@ -48,7 +57,6 @@ export function PostsList({
           >
             <StandardPostCard
               post={post.data}
-              onEdit={async (values) => await onEdit?.(postId, values)}
               onReactionChange={async (icon) =>
                 await onReactionChange?.(postId, icon)
               }
@@ -59,6 +67,16 @@ export function PostsList({
               canReply={canReply}
               replyHref={replyHrefFormatter?.(post.data.post.localPostId)}
               canInteract={canInteract}
+              editMode={postInEdition === postId}
+              onEditModeChange={async (editMode) =>
+                await onEditModeChange?.(
+                  postId,
+                  post.data.post.post.value.content,
+                  editMode,
+                )
+              }
+              innerEditForm
+              onEdit={async (values) => await onEdit?.(postId, values)}
               isEditing={isEditing}
               isReacting={isReacting}
               isDeleting={isDeleting}

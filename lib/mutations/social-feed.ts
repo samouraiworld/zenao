@@ -1,6 +1,5 @@
 import { QueryClient, useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "../get-query-client";
-import { derivePkgAddr } from "../gno";
 import {
   DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
   DEFAULT_FEED_POSTS_LIMIT,
@@ -9,6 +8,7 @@ import {
   feedPostsChildren,
   pollInfo,
 } from "../queries/social-feed";
+import { derivePkgAddr } from "../gno";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
   CreatePollRequest,

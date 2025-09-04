@@ -1647,3 +1647,131 @@ func (c *CreateCommunityResponse) FromJSON(node *json.Node) {
 		c.CommunityId = val.MustString()
 	}
 }
+
+func (j *JoinCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if j.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", j.CommunityId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (j *JoinCommunityRequest) FromJSON(node *json.Node) {
+	*j = JoinCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		j.CommunityId = val.MustString()
+	}
+}
+
+func (j *JoinCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (j *JoinCommunityResponse) FromJSON(node *json.Node) {
+	*j = JoinCommunityResponse{}
+}
+
+func (l *LeaveCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if l.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", l.CommunityId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (l *LeaveCommunityRequest) FromJSON(node *json.Node) {
+	*l = LeaveCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		l.CommunityId = val.MustString()
+	}
+}
+
+func (l *LeaveCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (l *LeaveCommunityResponse) FromJSON(node *json.Node) {
+	*l = LeaveCommunityResponse{}
+}
+
+func (a *AddEventToCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if a.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", a.CommunityId)
+	}
+	if a.EventId != "" {
+		fields["eventId"] = json.StringNode("", a.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (a *AddEventToCommunityRequest) FromJSON(node *json.Node) {
+	*a = AddEventToCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		a.CommunityId = val.MustString()
+	}
+	if val, ok := fields["eventId"]; ok {
+		a.EventId = val.MustString()
+	}
+}
+
+func (a *AddEventToCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (a *AddEventToCommunityResponse) FromJSON(node *json.Node) {
+	*a = AddEventToCommunityResponse{}
+}
+
+func (r *RemoveEventFromCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if r.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", r.CommunityId)
+	}
+	if r.EventId != "" {
+		fields["eventId"] = json.StringNode("", r.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *RemoveEventFromCommunityRequest) FromJSON(node *json.Node) {
+	*r = RemoveEventFromCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		r.CommunityId = val.MustString()
+	}
+	if val, ok := fields["eventId"]; ok {
+		r.EventId = val.MustString()
+	}
+}
+
+func (r *RemoveEventFromCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (r *RemoveEventFromCommunityResponse) FromJSON(node *json.Node) {
+	*r = RemoveEventFromCommunityResponse{}
+}

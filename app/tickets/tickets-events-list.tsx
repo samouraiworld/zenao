@@ -11,7 +11,7 @@ import {
 import { FromFilter } from "@/lib/search-params";
 import EmptyEventsList from "@/components/features/event/event-empty-list";
 import { EventCard } from "@/components/features/event/event-card";
-import { idFromPkgPath } from "@/lib/queries/event";
+import { eventIdFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
@@ -84,7 +84,7 @@ export function TicketsEventsList({
                 <EventCard
                   key={evt.pkgPath}
                   evt={evt}
-                  href={`/ticket/${idFromPkgPath(evt.pkgPath)}`}
+                  href={`/ticket/${eventIdFromPkgPath(evt.pkgPath)}`}
                 />
               ))}
             </EventCardListLayout>

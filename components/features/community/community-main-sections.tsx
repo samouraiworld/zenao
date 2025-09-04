@@ -13,9 +13,10 @@ import {
 } from "@/components/shadcn/tabs";
 import { CommunityTabsSchemaType } from "@/types/schemas";
 import CommunityEvents from "@/app/community/[id]/[tab]/events";
-import CommunityPosts from "@/app/community/[id]/[tab]/posts";
+import CommunityChat from "@/app/community/[id]/[tab]/chat";
 import CommunityMembers from "@/app/community/[id]/[tab]/members";
 import CommunityProposals from "@/app/community/[id]/[tab]/proposals";
+import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 
 type CommunityMainSectionsProps = {
   communityId: string;
@@ -35,10 +36,10 @@ function CommunityMainSections({
       <TabsList className="flex w-full bg-transparent p-0 m-0 overflow-auto justify-start">
         <Link href={`/community/${communityId}`}>
           <TabsTrigger
-            value="posts"
+            value="chat"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            {t("posts")}
+            {t("chat")}
           </TabsTrigger>
         </Link>
         <Link href={`/community/${communityId}/events`}>
@@ -57,19 +58,11 @@ function CommunityMainSections({
             {t("members")}
           </TabsTrigger>
         </Link>
-        <Link href={`/community/${communityId}/proposals`}>
-          <TabsTrigger
-            value="proposals"
-            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
-          >
-            {t("proposals")}
-          </TabsTrigger>
-        </Link>
       </TabsList>
       <Separator className="mb-8" />
-      <TabsContent value="posts">
-        <Suspense fallback={<Loader2 className="animate-spin" />}>
-          <CommunityPosts communityId={communityId} />
+      <TabsContent value="chat">
+        <Suspense fallback={<PostCardSkeleton />}>
+          <CommunityChat communityId={communityId} />
         </Suspense>
       </TabsContent>
       <TabsContent value="events">
@@ -79,7 +72,7 @@ function CommunityMainSections({
       </TabsContent>
       <TabsContent value="members">
         <Suspense fallback={<Loader2 className="animate-spin" />}>
-          <CommunityMembers />
+          <CommunityMembers communityId={communityId} />
         </Suspense>
       </TabsContent>
       <TabsContent value="proposals">

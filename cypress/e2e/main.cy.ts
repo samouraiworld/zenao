@@ -509,6 +509,24 @@ describe("main", () => {
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
   });
+
+  it("access a community", () => {
+    cy.visit("/");
+
+    // Explore communities
+    cy.get("a").contains("Communities").click();
+    cy.get('a[href^="/community/"]').last().click();
+
+    cy.url().should("contain", "/community/");
+
+    // Check sections
+    cy.get("button")
+      .contains("Chat")
+      .should("have.attr", "aria-selected", "true");
+
+    cy.get("button").contains("Events").click();
+    cy.get("button").contains("Members").click();
+  });
 });
 
 Cypress.Commands.add(

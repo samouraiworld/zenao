@@ -78,7 +78,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	evt := (*zeni.Event)(nil)
-
+	communities := ([]*zeni.Community)(nil)
 	needPasswordIfGuarded := true
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
@@ -91,10 +91,21 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			needPasswordIfGuarded = false
 		}
 
+		communities, err = db.CommunitiesByEvent(req.Msg.EventId)
+		if err != nil {
+			return err
+		}
+
 		for i, ticket := range tickets {
 			// XXX: support batch
 			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
 				return err
+			}
+
+			for _, cmt := range communities {
+				if err := db.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
+					return err
+				}
 			}
 		}
 
@@ -168,6 +179,12 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
 			// XXX: handle case where db tx pass but chain fail
 			return nil, err
+		}
+
+		for _, cmt := range communities {
+			if err := s.Chain.AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
+				return nil, err
+			}
 		}
 	}
 

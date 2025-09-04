@@ -35,16 +35,17 @@ func newFakegenCmd() *commands.Command {
 var fakegenConf fakegenConfig
 
 type fakegenConfig struct {
-	adminMnemonic   string
-	gnoNamespace    string
-	chainEndpoint   string
-	chainID         string
-	dbPath          string
-	gasSecurityRate float64
-	eventsCount     uint
-	postsCount      uint
-	pollsCount      uint
-	skipChain       bool
+	adminMnemonic    string
+	gnoNamespace     string
+	chainEndpoint    string
+	chainID          string
+	dbPath           string
+	gasSecurityRate  float64
+	communitiesCount uint
+	eventsCount      uint
+	postsCount       uint
+	pollsCount       uint
+	skipChain        bool
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -55,6 +56,7 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.Float64Var(&fakegenConf.gasSecurityRate, "gas-security-rate", 0.2, "margin multiplier for estimated gas wanted to be safe")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
+	flset.UintVar(&fakegenConf.communitiesCount, "communities", 5, "number of fake communities to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
 	flset.UintVar(&fakegenConf.pollsCount, "polls", 13, "number of fake polls to generate")
 	flset.BoolVar(&fakegenConf.skipChain, "skip-chain", false, "skip chain")
@@ -72,6 +74,11 @@ type fakeEvent struct {
 
 type fakePost struct {
 	Content string `faker:"paragraph"`
+}
+
+type fakeCommunity struct {
+	Title       string `faker:"sentence"`
+	Description string `faker:"paragraph"`
 }
 
 type fakePoll struct {
@@ -280,6 +287,34 @@ func execFakegen() error {
 				}
 				poID++
 				pID++
+			}
+		}
+	}
+
+	for range fakegenConf.communitiesCount {
+		c := fakeCommunity{}
+		err := faker.FakeData(&c)
+		if err != nil {
+			return err
+		}
+		creatorID := zUser.ID
+
+		communityReq := &zenaov1.CreateCommunityRequest{
+			DisplayName:    c.Title,
+			Description:    c.Description,
+			AvatarUri:      randomPick(eventImages),
+			BannerUri:      randomPick(eventImages),
+			Administrators: []string{creatorID},
+		}
+
+		zCommunity, err := db.CreateCommunity(creatorID, []string{creatorID}, []string{creatorID}, []string{}, communityReq)
+		if err != nil {
+			return err
+		}
+
+		if !fakegenConf.skipChain {
+			if err = chain.CreateCommunity(zCommunity.ID, []string{creatorID}, []string{creatorID}, []string{}, communityReq); err != nil {
+				return err
 			}
 		}
 	}

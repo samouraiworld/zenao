@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/community/:id",
-        destination: "/community/:id/posts",
+        destination: "/community/:id/chat",
       },
     ];
   },
