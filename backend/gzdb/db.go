@@ -533,37 +533,23 @@ func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role str
 	return result, nil
 }
 
-// GetOrgUsers implements zeni.DB.
-func (g *gormZenaoDB) GetOrgUsers(orgType string, orgID string) ([]*zeni.User, error) {
+// GetOrgEntitiesWithRole implements zeni.DB.
+func (g *gormZenaoDB) GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*zeni.EntityRole, error) {
 	var roles []EntityRole
 	if err := g.db.
-		Where("org_type = ? AND org_id = ? AND entity_type = ?",
-			orgType, orgID, zeni.EntityTypeUser).
+		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ?",
+			orgType, orgID, role, entityType).
 		Find(&roles).Error; err != nil {
 		return nil, err
 	}
-	if len(roles) == 0 {
-		return []*zeni.User{}, nil
-	}
-
-	userIDs := make([]uint, 0, len(roles))
+	result := make([]*zeni.EntityRole, 0, len(roles))
 	for _, r := range roles {
-		userIDs = append(userIDs, r.EntityID)
-	}
-
-	var users []User
-	if err := g.db.Where("id IN ?", userIDs).Find(&users).Error; err != nil {
-		return nil, err
-	}
-
-	result := make([]*zeni.User, 0, len(users))
-	for _, u := range users {
-		result = append(result, dbUserToZeniDBUser(&u))
+		result = append(result, dbEntityRoleToZeniEntityRole(&r))
 	}
 	return result, nil
 }
 
-// GetDeletedOrgUsersWithRole implements zeni.DB.
+// GetDeletedOrgEntitiesWithRole implements zeni.DB.
 func (g *gormZenaoDB) GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*zeni.EntityRole, error) {
 	var roles []EntityRole
 	if err := g.db.
@@ -617,34 +603,28 @@ func (g *gormZenaoDB) GetDeletedEvents() ([]*zeni.Event, error) {
 	return res, nil
 }
 
-func (g *gormZenaoDB) GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*zeni.Event, error) {
+func (g *gormZenaoDB) GetOrgUsers(orgType string, orgID string) ([]*zeni.User, error) {
 	var roles []EntityRole
 	if err := g.db.
-		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ?",
-			orgType, orgID, role, zeni.EntityTypeEvent).
+		Where("org_type = ? AND org_id = ? AND entity_type = ?",
+			orgType, orgID, zeni.EntityTypeUser).
 		Find(&roles).Error; err != nil {
 		return nil, err
 	}
 	if len(roles) == 0 {
-		return []*zeni.Event{}, nil
+		return []*zeni.User{}, nil
 	}
-
-	eventIDs := make([]uint, 0, len(roles))
+	userIDs := make([]uint, 0, len(roles))
 	for _, r := range roles {
-		eventIDs = append(eventIDs, r.EntityID)
+		userIDs = append(userIDs, r.EntityID)
 	}
-
-	var events []Event
-	if err := g.db.Where("id IN ?", eventIDs).Find(&events).Error; err != nil {
+	var users []User
+	if err := g.db.Where("id IN ?", userIDs).Find(&users).Error; err != nil {
 		return nil, err
 	}
-	result := make([]*zeni.Event, 0, len(events))
-	for _, e := range events {
-		zevt, err := dbEventToZeniEvent(&e)
-		if err != nil {
-			return nil, fmt.Errorf("convert db event to zeni event: %w", err)
-		}
-		result = append(result, zevt)
+	result := make([]*zeni.User, 0, len(users))
+	for _, u := range users {
+		result = append(result, dbUserToZeniDBUser(&u))
 	}
 	return result, nil
 }
@@ -1418,6 +1398,7 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 
 func dbEntityRoleToZeniEntityRole(dbrole *EntityRole) *zeni.EntityRole {
 	er := &zeni.EntityRole{
+		CreatedAt:  dbrole.CreatedAt,
 		EntityType: dbrole.EntityType,
 		EntityID:   fmt.Sprintf("%d", dbrole.EntityID),
 		OrgType:    dbrole.OrgType,
