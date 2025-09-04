@@ -58,14 +58,6 @@ function CommunityMainSections({
             {t("members")}
           </TabsTrigger>
         </Link>
-        {/* <Link href={`/community/${communityId}/proposals`}>
-          <TabsTrigger
-            value="proposals"
-            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
-          >
-            {t("proposals")}
-          </TabsTrigger>
-        </Link> */}
       </TabsList>
       <Separator className="mb-8" />
       <TabsContent value="chat">
