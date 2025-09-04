@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
   BookOpenText,
+  BoxesIcon,
   CompassIcon,
   LucideIcon,
   Tickets,
@@ -62,6 +63,13 @@ const HeaderLinks = () => {
         icon: CompassIcon,
         needsAuth: false,
         children: t("discover"),
+      },
+      {
+        key: "communities",
+        to: "/communities",
+        icon: BoxesIcon,
+        needsAuth: false,
+        children: t("communities"),
       },
       {
         key: "tickets",

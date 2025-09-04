@@ -105,6 +105,7 @@ type Community struct {
 }
 
 type EntityRole struct {
+	CreatedAt  time.Time
 	DeletedAt  time.Time
 	EntityType string // one of: user, event
 	EntityID   string
@@ -226,11 +227,18 @@ type DB interface {
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
+	AddEventToCommunity(eventID string, communityID string) error
+	RemoveEventFromCommunity(eventID string, communityID string) error
+	// returns all communities that contains the event
+	CommunitiesByEvent(eventID string) ([]*Community, error)
+
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+	GetCommunity(communityID string) (*Community, error)
+	AddMemberToCommunity(communityID string, userID string) error
+	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)
 
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
-	GetOrgsEventsWithRole(orgType string, orgID string, role string) ([]*Event, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
 	GetOrgByPostID(postID string) (orgType, orgID string, err error)
@@ -251,6 +259,7 @@ type DB interface {
 	GetPollByPostID(postID string) (*Poll, error)
 
 	// gentxs specific
+	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
 	GetDeletedEvents() ([]*Event, error)
@@ -271,6 +280,10 @@ type Chain interface {
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
+	AddEventToCommunity(callerID string, communityID string, eventID string) error
+	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
+	AddMemberToCommunity(callerID string, communityID string, userID string) error
+	RemoveMemberFromCommunity(callerID string, communityID string, userID string) error
 
 	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error

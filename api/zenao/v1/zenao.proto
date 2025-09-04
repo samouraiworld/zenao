@@ -29,6 +29,12 @@ service ZenaoService {
 
   // COMMUNITY
   rpc CreateCommunity(CreateCommunityRequest) returns (CreateCommunityResponse);
+  rpc JoinCommunity(JoinCommunityRequest) returns (JoinCommunityResponse);
+  rpc LeaveCommunity(LeaveCommunityRequest) returns (LeaveCommunityResponse);
+  rpc AddEventToCommunity(AddEventToCommunityRequest)
+      returns (AddEventToCommunityResponse);
+  rpc RemoveEventFromCommunity(RemoveEventFromCommunityRequest)
+      returns (RemoveEventFromCommunityResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
@@ -282,3 +288,24 @@ message CreateCommunityRequest {
 }
 
 message CreateCommunityResponse { string community_id = 1; }
+
+message JoinCommunityRequest { string community_id = 1; }
+
+message JoinCommunityResponse {}
+
+message LeaveCommunityRequest { string community_id = 1; }
+message LeaveCommunityResponse {}
+
+message AddEventToCommunityRequest {
+  string community_id = 1;
+  string event_id = 2;
+}
+
+message AddEventToCommunityResponse {}
+
+message RemoveEventFromCommunityRequest {
+  string community_id = 1;
+  string event_id = 2;
+}
+
+message RemoveEventFromCommunityResponse {}

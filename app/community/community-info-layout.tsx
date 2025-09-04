@@ -1,17 +1,24 @@
 "use client";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Web3Image } from "@/components/widgets/images/web3-image";
+import { communityInfo } from "@/lib/queries/community";
 
 type CommunityInfoLayoutProps = {
+  communityId: string;
   children: React.ReactNode;
 };
 
-function CommunityInfoLayout({ children }: CommunityInfoLayoutProps) {
+function CommunityInfoLayout({
+  communityId,
+  children,
+}: CommunityInfoLayoutProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { data } = useSuspenseQuery(communityInfo(communityId));
 
   return (
     <div className="flex flex-col gap-8 w-full">
@@ -20,7 +27,11 @@ function CommunityInfoLayout({ children }: CommunityInfoLayoutProps) {
           <Web3Image
             className="rounded w-full h-full self-center object-cover"
             alt="Community hero img"
-            src="ipfs://bafybeidrcgelzhfblffpsmo6jukdnzmvae7xhu5zud4nn3os6qzdxbesu4"
+            src={
+              data.bannerUri.length > 0
+                ? data.bannerUri
+                : "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24"
+            }
             priority
             fetchPriority="high"
             fill
@@ -32,8 +43,7 @@ function CommunityInfoLayout({ children }: CommunityInfoLayoutProps) {
           <AspectRatio ratio={1}>
             <Web3Image
               className="rounded h-full self-center object-cover"
-              // TODO use uri
-              src="ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
+              src={data.avatarUri}
               alt="Community profile img"
               priority
               fetchPriority="high"
@@ -50,34 +60,22 @@ function CommunityInfoLayout({ children }: CommunityInfoLayoutProps) {
         <div className="flex justify-between">
           <div className="flex flex-col">
             <Heading level={1} className="text-2xl">
-              HyperHactive
+              {data.displayName}
             </Heading>
-            <Text className="text-secondary-color">@village.tori</Text>
           </div>
 
-          {/* TODO update URL  */}
-          <GnowebButton href={"http://localhost"} className="max-md:hidden" />
+          <GnowebButton
+            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
+            className="max-md:hidden"
+          />
         </div>
 
-        <Text>
-          {`
-            The first Teritori DAO for early community members, built on top of Teritori OS.\n
-This decentralized organization's goal is to experiment an open, fun, and innovative way of governance that could support, encourage, fund, promote, all forms of projects voted by members.\n\n
+        <Text>{data.description}</Text>
 
-Constitution:\n
-#1: Don't be a d%ck.\n
-#2: Everyone is welcome.\n
-#3: One membership for one human.\n
-#4: Have fun.\n
-#5: Build together.\n
-#6: This constitution can be updated using proposals.\n\n
-
-Welcome to the village.\n
-            `}
-        </Text>
-
-        {/* TODO update URL  */}
-        <GnowebButton href={"http://localhost"} className="w-full md:hidden" />
+        <GnowebButton
+          href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
+          className="w-full md:hidden"
+        />
       </div>
 
       {children}

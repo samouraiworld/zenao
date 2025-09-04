@@ -91,7 +91,7 @@ func execE2EInfra() error {
 
 	// run fakegen with --skip-chain
 	{
-		args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--db", dbPath, "--skip-chain"}
+		args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--communities", "5", "--db", dbPath, "--skip-chain"}
 		if err := runCommand(ctx, "fakegen", "#317738", args); err != nil {
 			return err
 		}
