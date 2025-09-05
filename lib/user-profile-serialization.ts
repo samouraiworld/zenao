@@ -24,7 +24,7 @@ export function deserializeUserProfileDetails(
     // If the header is invalid, return a default profile
     return {
       bio: content,
-      socialMediaLinks: {},
+      socialMediaLinks: data.socialMediaLinks || [],
     };
   }
 

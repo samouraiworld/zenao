@@ -16,12 +16,7 @@ import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-chi
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
-import {
-  SocialLinksSchemaType,
-  UserFormSchemaType,
-  UserFormSocialLinksSchemaType,
-  userFormSchema,
-} from "@/types/schemas";
+import { UserFormSchemaType, userFormSchema } from "@/types/schemas";
 import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
 import {
   deserializeUserProfileDetails,
@@ -41,12 +36,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     avatarUri: user?.avatarUri || "",
     displayName: user?.displayName || "",
     bio: profileDetails.bio || "",
-    socialMediaLinks: Object.entries(profileDetails.socialMediaLinks || {}).map(
-      ([name, url]) => ({
-        name: name as UserFormSocialLinksSchemaType["name"],
-        url,
-      }),
-    ),
+    socialMediaLinks: profileDetails.socialMediaLinks,
   };
 
   const { editUser, isPending } = useEditUserProfile();
@@ -68,14 +58,6 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         throw new Error("invalid clerk token");
       }
 
-      const socialMediaLinks =
-        values.socialMediaLinks.reduce<SocialLinksSchemaType>((acc, link) => {
-          if (link.url) {
-            acc[link.name] = link.url;
-          }
-          return acc;
-        }, {});
-
       await editUser({
         address: address || "",
         token,
@@ -83,7 +65,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         displayName: values.displayName,
         bio: serializeUserProfileDetails({
           bio: values.bio,
-          socialMediaLinks,
+          socialMediaLinks: values.socialMediaLinks,
         }),
       });
       toast({
