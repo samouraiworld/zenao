@@ -93,6 +93,7 @@ export const eventFormSchema = z.object({
   exclusive: z.boolean(),
   password: z.string().optional(),
   gatekeepers: z.array(emailSchema),
+  communityId: z.string().optional(),
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
