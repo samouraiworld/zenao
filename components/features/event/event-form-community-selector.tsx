@@ -17,6 +17,7 @@ import {
 import Heading from "@/components/widgets/texts/heading";
 import {
   communitiesListByMember,
+  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -44,9 +45,13 @@ export default function EventFormCommunitySelector({
 
   return (
     <div className="flex flex-col gap-4">
-      <Heading level={3}>Link event to one your community :</Heading>
+      <Heading level={3}>Link event to one your community (optional)</Heading>
 
-      <Select onValueChange={(e) => form.setValue("communityId", e)}>
+      <Select
+        onValueChange={(e) =>
+          form.setValue("communityId", communityIdFromPkgPath(e))
+        }
+      >
         <SelectTrigger>
           <SelectValue placeholder="-- Select a community --" />
         </SelectTrigger>
