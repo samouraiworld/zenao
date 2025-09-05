@@ -1,27 +1,28 @@
 import { useMutation } from "@tanstack/react-query";
-import { zenaoClient } from "@/lib/zenao-client";
 import { getQueryClient } from "../get-query-client";
-import { communityUserRoles, communityInfo, communityUsersWithRoles } from "../queries/community";
+import {
+  communityUserRoles,
+  communityInfo,
+  communityUsersWithRoles,
+} from "../queries/community";
+import { zenaoClient } from "@/lib/zenao-client";
 
 interface JoinCommunityRequest {
   communityId: string;
   token: string;
   userAddress: string | null;
-};
+}
 
 export const useJoinCommunity = () => {
   const queryClient = getQueryClient();
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
-    mutationFn: async ({
-      communityId,
-      token,
-    }: JoinCommunityRequest) => {
+    mutationFn: async ({ communityId, token }: JoinCommunityRequest) => {
       if (!token) throw new Error("Missing auth token");
 
       await zenaoClient.joinCommunity(
         { communityId },
         {
-          headers: { Authorization: "Bearer " + token },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
     },
@@ -37,7 +38,7 @@ export const useJoinCommunity = () => {
       await queryClient.invalidateQueries(usersWithRolesOpts);
     },
   });
-  
+
   return {
     mutateAsync,
     isPending,

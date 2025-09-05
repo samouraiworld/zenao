@@ -70,7 +70,7 @@ async function CommunityPageLayout({
         }}
       >
         <CommunityInfoLayout communityId={communityId}>
-          <CommunityJoinButton communityId={communityId}/>
+          <CommunityJoinButton communityId={communityId} />
           {children}
         </CommunityInfoLayout>
       </ScreenContainer>

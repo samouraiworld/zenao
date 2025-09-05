@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { useToast } from "@/hooks/use-toast";
+import { useTranslations } from "next-intl";
+import { Button } from "../shadcn/button";
 import { useJoinCommunity } from "@/lib/mutations/community-join";
 import { communityUserRoles } from "@/lib/queries/community";
 import { captureException } from "@/lib/report";
-import { Button } from "../shadcn/button";
-import { useTranslations } from "next-intl";
+import { useToast } from "@/hooks/use-toast";
 
 type Props = {
   communityId: string;
@@ -20,11 +20,9 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   const { toast } = useToast();
   const address = user?.publicMetadata?.address as string | null;
 
-  const {
-    data: roles,
-    isLoading: rolesLoading,
-    isError: rolesError,
-  } = useQuery(communityUserRoles(communityId, address));
+  const { data: userRoles } = useSuspenseQuery(
+    communityUserRoles(communityId, address),
+  );
 
   const {
     mutateAsync: joinCommunity,
@@ -33,13 +31,12 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
     isError,
   } = useJoinCommunity();
 
-  const alreadyMember = roles?.includes("member");
+  const alreadyMember = userRoles?.includes("member");
 
   const handleJoin = async () => {
     try {
       const token = await getToken();
-      if (!token)
-        throw new Error("invalid clerk token");
+      if (!token) throw new Error("invalid clerk token");
 
       await joinCommunity({
         communityId,
@@ -71,14 +68,23 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
         variant="outline"
         className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
       >
-      {!isSignedIn ? t("sign-in-to-join-button") : isPending ? t("joining-state") : t("join-community-button")}
+        {!isSignedIn
+          ? t("sign-in-to-join-button")
+          : isPending
+            ? t("joining-state")
+            : t("join-community-button")}
       </Button>
       {isError && (
         <p className="text-red-500 mt-2">An error occurred. Try again.</p>
       )}
       {isSuccess && (
-        <p className="text-green-500 mt-2">You've joined the community!</p>
+        <p className="text-green-500 mt-2">You&apos;ve joined the community!</p>
       )}
+      {!isSignedIn
+        ? t("sign-in-to-join-button")
+        : isPending
+          ? t("joining-state")
+          : t("join-community-button")}
     </div>
   );
 };
