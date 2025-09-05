@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth, useUser } from "@clerk/nextjs";
@@ -6,17 +7,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useJoinCommunity } from "@/lib/mutations/community-join";
 import { communityUserRoles } from "@/lib/queries/community";
 import { captureException } from "@/lib/report";
+import { Button } from "../shadcn/button";
+import { useTranslations } from "next-intl";
 
 type Props = {
   communityId: string;
 };
 
-// JoinCommunityButton or CommunityJoinButton
 export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   const { getToken, isSignedIn } = useAuth();
   const { user } = useUser();
   const { toast } = useToast();
-
   const address = user?.publicMetadata?.address as string | null;
 
   const {
@@ -37,9 +38,9 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   const handleJoin = async () => {
     try {
       const token = await getToken();
-      if (!token) {
+      if (!token)
         throw new Error("invalid clerk token");
-      }
+
       await joinCommunity({
         communityId,
         token,
@@ -58,27 +59,23 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
       });
     }
   };
+  const t = useTranslations("community");
 
-  if (!isSignedIn || rolesLoading) return null;
-
-  if (alreadyMember || isSuccess) {
-    return null;
-  }
+  if (alreadyMember) return null; // TODO check why it still appears
 
   return (
     <div className="mt-4">
-      <button
+      <Button
         onClick={handleJoin}
-        disabled={isPending}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        disabled={!isSignedIn || isPending}
+        variant="outline"
+        className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
       >
-        {isPending ? "Joining..." : "Join Community"}
-      </button>
-
+      {!isSignedIn ? t("sign-in-to-join-button") : isPending ? t("joining-state") : t("join-community-button")}
+      </Button>
       {isError && (
         <p className="text-red-500 mt-2">An error occurred. Try again.</p>
       )}
-
       {isSuccess && (
         <p className="text-green-500 mt-2">You've joined the community!</p>
       )}

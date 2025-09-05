@@ -1,11 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { zenaoClient } from "@/lib/zenao-client";
 import { getQueryClient } from "../get-query-client";
-import {
-  communityUserRoles,
-  communityInfo,
-  communityUsersWithRoles,
-} from "../queries/community";
+import { communityUserRoles, communityInfo, communityUsersWithRoles } from "../queries/community";
 
 type JoinCommunityRequest = {
   communityId: string;
