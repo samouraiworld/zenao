@@ -6,7 +6,7 @@ import { communityUserRoles, communityInfo, communityUsersWithRoles } from "../q
 interface JoinCommunityRequest {
   communityId: string;
   token: string;
-  userAddress: string;
+  userAddress: string | null;
 };
 
 export const useJoinCommunity = () => {
