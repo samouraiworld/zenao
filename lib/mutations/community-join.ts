@@ -3,23 +3,25 @@ import { zenaoClient } from "@/lib/zenao-client";
 import { getQueryClient } from "../get-query-client";
 import { communityUserRoles, communityInfo, communityUsersWithRoles } from "../queries/community";
 
-type JoinCommunityRequest = {
+interface JoinCommunityRequest {
   communityId: string;
   token: string;
-  userAddress: string | null;
+  userAddress: string;
 };
 
 export const useJoinCommunity = () => {
   const queryClient = getQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ communityId, token }: JoinCommunityRequest) => {
+  const { mutateAsync, isPending, isSuccess, isError } = useMutation({
+    mutationFn: async ({
+      communityId,
+      token,
+    }: JoinCommunityRequest) => {
       if (!token) throw new Error("Missing auth token");
 
-      return zenaoClient.joinCommunity(
+      await zenaoClient.joinCommunity(
         { communityId },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: "Bearer " + token },
         },
       );
     },
@@ -35,4 +37,11 @@ export const useJoinCommunity = () => {
       await queryClient.invalidateQueries(usersWithRolesOpts);
     },
   });
+  
+  return {
+    mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
 };
