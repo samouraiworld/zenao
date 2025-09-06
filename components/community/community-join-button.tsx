@@ -2,23 +2,25 @@
 
 import React from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { Button } from "../shadcn/button";
 import { useJoinCommunity } from "@/lib/mutations/community-join";
 import { communityUserRoles } from "@/lib/queries/community";
 import { captureException } from "@/lib/report";
 import { useToast } from "@/hooks/use-toast";
+import { userAddressOptions } from "@/lib/queries/user";
 
 type Props = {
   communityId: string;
 };
 
 export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
-  const { getToken, isSignedIn } = useAuth();
-  const { user } = useUser();
+  const { getToken, userId, isSignedIn } = useAuth();
   const { toast } = useToast();
-  const address = user?.publicMetadata?.address as string | null;
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
 
   const { data: userRoles } = useSuspenseQuery(
     communityUserRoles(communityId, address),

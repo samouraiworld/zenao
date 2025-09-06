@@ -45,6 +45,7 @@ async function CommunityPageLayout({
   const members = await queryClient.fetchQuery(
     communityUsersWithRoles(communityId, ["member"]),
   );
+
   members.forEach((member) =>
     queryClient.prefetchQuery(profileOptions(member.address)),
   );
