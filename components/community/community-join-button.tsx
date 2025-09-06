@@ -26,10 +26,7 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
     communityUserRoles(communityId, address),
   );
 
-  const {
-    mutateAsync: joinCommunity,
-    isPending,
-  } = useJoinCommunity();
+  const { mutateAsync: joinCommunity, isPending } = useJoinCommunity();
 
   const alreadyMember = userRoles?.includes("member");
 
