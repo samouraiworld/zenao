@@ -99,7 +99,6 @@ export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 export const userFormSocialLinkSchema = z.object({
   icon: z.string(),
   url: z.string().url().max(400),
-  name: z.string(),
 });
 
 export type UserFormSocialLinkSchemaType = z.infer<

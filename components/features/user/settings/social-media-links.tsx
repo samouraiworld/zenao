@@ -41,26 +41,17 @@ function SocialMediaLinks({
       // Trigger RHF field control
       field.onChange(value);
 
-      let name = "";
       let icon = "";
 
       try {
         const hostname = new URL(value).hostname;
-        const parts = hostname.split(".");
-        // Get social link name parsed from value
-        name = parts.length > 2 ? parts[1] : parts[0];
         // Get social link icon using google faviconV2 API
         icon = `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${hostname}&size=24`;
       } catch {
-        name = "";
         icon = "";
       }
 
-      // Update RHF fields
-      form.setValue(`socialMediaLinks.${index}.name`, name, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+      // Update RHF field
       form.setValue(`socialMediaLinks.${index}.icon`, icon, {
         shouldDirty: true,
         shouldValidate: true,
@@ -75,21 +66,18 @@ function SocialMediaLinks({
 
       {!!links.length &&
         links.map((link, index) => (
-          <div className="flex items-center justify-between gap-2" key={index}>
-            <div className="flex items-center gap-2">
-              {link.icon && (
-                <Image
-                  src={link.icon}
-                  alt={"Icon " + link.name}
-                  width={24}
-                  height={24}
-                  unoptimized
-                />
-              )}
-              <div>{link.name}</div>
-            </div>
+          <div className="flex items-center justify-between gap-6" key={index}>
+            {link.icon && (
+              <Image
+                src={link.icon}
+                alt={"Icon " + link.url}
+                width={24}
+                height={24}
+                unoptimized
+              />
+            )}
 
-            <div className="flex gap-2 w-full max-w-[550px]">
+            <div className="flex flex-1 gap-2 ">
               <FormItem className="grow">
                 <FormField
                   name={`socialMediaLinks.${index}.url`}
@@ -123,7 +111,7 @@ function SocialMediaLinks({
       <Button
         type="button"
         className="w-fit"
-        onClick={() => appendLink({ name: "", url: "", icon: "" })}
+        onClick={() => appendLink({ url: "", icon: "" })}
       >
         Add link
       </Button>
