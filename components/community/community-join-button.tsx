@@ -60,7 +60,7 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   };
   const t = useTranslations("community");
 
-  if (alreadyMember) return null; // TODO check why it still appears
+  if (alreadyMember) return null;
 
   return (
     <div className="mt-4">
@@ -76,17 +76,6 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
             ? t("joining-state")
             : t("join-community-button")}
       </Button>
-      {isError && (
-        <p className="text-red-500 mt-2">An error occurred. Try again.</p>
-      )}
-      {isSuccess && (
-        <p className="text-green-500 mt-2">You&apos;ve joined the community!</p>
-      )}
-      {!isSignedIn
-        ? t("sign-in-to-join-button")
-        : isPending
-          ? t("joining-state")
-          : t("join-community-button")}
     </div>
   );
 };
