@@ -304,7 +304,13 @@
     "chat": "Chat",
     "events": "Events",
     "members": "Members",
-    "proposals": "Proposals"
+    "proposals": "Proposals",
+    "leave-community-button": "Leave community",
+    "leaving-state": "Leaving...",
+    "leave-success": "You have left the community.",
+    "leave-success-desc": "You're no longer a member.",
+    "leave-failure": "Failed to leave the community",
+    "leave-failure-desc": "Please try again later."
   },
   "empty-list": {
     "title": "Nothing listed",
