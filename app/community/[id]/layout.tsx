@@ -9,7 +9,7 @@ import {
 } from "@/lib/queries/community";
 import { profileOptions } from "@/lib/queries/profile";
 import { eventsPkgPathsByAddrs } from "@/lib/queries/events-list";
-import { CommunityJoinButton } from "@/components/community/community-join-button";
+import { CommunityLeaveButton } from "@/components/community/community-leave-button";
 
 // enable ssg for all events
 export async function generateStaticParams() {
@@ -71,7 +71,7 @@ async function CommunityPageLayout({
         }}
       >
         <CommunityInfoLayout communityId={communityId}>
-          <CommunityJoinButton communityId={communityId} />
+          <CommunityLeaveButton communityId={communityId} />
           {children}
         </CommunityInfoLayout>
       </ScreenContainer>
