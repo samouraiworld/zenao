@@ -56,6 +56,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	participants := []*zeni.User{buyer}
 	for _, authGuest := range authGuests {
+		if authGuest.Banned {
+			return nil, fmt.Errorf("user %s is banned", authGuest.Email)
+		}
 		if authGuest.ID == authUser.ID {
 			return nil, errors.New("guest is buyer")
 		}

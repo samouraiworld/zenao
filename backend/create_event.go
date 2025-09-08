@@ -51,12 +51,15 @@ func (s *ZenaoServer) CreateEvent(
 	var organizersIDs []string
 	organizersIDs = append(organizersIDs, zUser.ID)
 	for _, authOrg := range authOrgas {
+		if authOrg.Banned {
+			return nil, fmt.Errorf("user %s is banned", authOrg.Email)
+		}
 		zOrg, err := s.EnsureUserExists(ctx, authOrg)
 		if err != nil {
 			return nil, err
 		}
 		if slices.Contains(organizersIDs, zOrg.ID) {
-			return nil, fmt.Errorf("duplicate organizer: %s", zOrg.ID)
+			return nil, fmt.Errorf("duplicate organizer: %s", authOrg.Email)
 		}
 		organizersIDs = append(organizersIDs, zOrg.ID)
 	}
@@ -68,12 +71,15 @@ func (s *ZenaoServer) CreateEvent(
 
 	var gatekeepersIDs []string
 	for _, authGkp := range authGkps {
+		if authGkp.Banned {
+			return nil, fmt.Errorf("user %s is banned", authGkp.Email)
+		}
 		zGkp, err := s.EnsureUserExists(ctx, authGkp)
 		if err != nil {
 			return nil, err
 		}
 		if slices.Contains(gatekeepersIDs, zGkp.ID) {
-			return nil, fmt.Errorf("duplicate gatekeeper: %s", zGkp.ID)
+			return nil, fmt.Errorf("duplicate gatekeeper: %s", authGkp.Email)
 		}
 		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
 	}
