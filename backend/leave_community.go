@@ -40,7 +40,7 @@ func (s *ZenaoServer) LeaveCommunity(
 			return errors.New("community not found")
 		}
 
-		if err := tx.RemoveUserFromCommunity(cmt.ID, zUser.ID); err != nil {
+		if err := tx.RemoveMemberFromCommunity(cmt.ID, zUser.ID); err != nil {
 			return err
 		}
 
