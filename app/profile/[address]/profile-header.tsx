@@ -12,6 +12,7 @@ import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
 import { deserializeUserProfileDetails } from "@/lib/user-profile-serialization";
+import { getFaviconUrl } from "@/lib/favicon";
 
 type ProfileHeaderProps = {
   address: string;
@@ -75,23 +76,26 @@ export default function ProfileHeader({
 
           {profileDetails.socialMediaLinks.length > 0 ? (
             <ul className="flex gap-4">
-              {profileDetails.socialMediaLinks.map((link) => (
-                <li key={link.url}>
-                  <Link
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Image
-                      src={link.icon}
-                      alt={"Icon " + link.url}
-                      width={24}
-                      height={24}
-                      unoptimized
-                    />
-                  </Link>
-                </li>
-              ))}
+              {profileDetails.socialMediaLinks.map((link) => {
+                const icon = getFaviconUrl(link.url);
+                return (
+                  <li key={link.url}>
+                    <Link
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Image
+                        src={icon}
+                        alt={"Icon " + link.url}
+                        width={24}
+                        height={24}
+                        unoptimized
+                      />
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <Text>No social links available</Text>

@@ -35,18 +35,17 @@ function SocialMediaLinks({
         const icon = getFaviconUrl(url);
 
         return (
-          <div
-            className="flex items-center justify-between gap-6"
-            key={link.id}
-          >
+          <div className="flex justify-between gap-2" key={link.id}>
             {icon && (
-              <Image
-                src={icon}
-                alt={"Icon " + link.url}
-                width={24}
-                height={24}
-                unoptimized
-              />
+              <div className="size-11 flex items-center justify-center">
+                <Image
+                  src={icon}
+                  alt={"Icon " + link.url}
+                  width={24}
+                  height={24}
+                  unoptimized
+                />
+              </div>
             )}
 
             <div className="flex flex-1 gap-2 ">
@@ -84,7 +83,7 @@ function SocialMediaLinks({
       <Button
         type="button"
         className="w-fit"
-        onClick={() => appendLink({ url: "", icon: "" })}
+        onClick={() => appendLink({ url: "" })}
       >
         Add link
       </Button>

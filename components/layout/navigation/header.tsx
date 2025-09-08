@@ -276,7 +276,7 @@ const Auth = ({
               {t("view-profile")}
             </DropdownMenuItem>
           </Link>
-          <Link href="/edit-profile">
+          <Link href="/settings">
             <DropdownMenuItem className="cursor-pointer">
               {t("edit-profile")}
             </DropdownMenuItem>
