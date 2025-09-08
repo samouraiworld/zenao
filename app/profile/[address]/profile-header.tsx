@@ -84,7 +84,7 @@ export default function ProfileHeader({
                   >
                     <Image
                       src={link.icon}
-                      alt={"Icon " + link.name}
+                      alt={"Icon " + link.url}
                       width={24}
                       height={24}
                       unoptimized
