@@ -10,6 +10,7 @@ import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
+import { deserializeUserProfileDetails } from "@/lib/user-profile-serialization";
 
 type ProfileHeaderProps = {
   address: string;
@@ -28,6 +29,7 @@ export default function ProfileHeader({
   const { data: userLoggedAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const profileDetails = deserializeUserProfileDetails(bio ?? "");
 
   return (
     <>
@@ -64,8 +66,33 @@ export default function ProfileHeader({
           {displayName}
         </Heading>
         <Card>
-          <Text>{bio}</Text>
+          <Text>{profileDetails.bio}</Text>
         </Card>
+
+        <div className="flex flex-col gap-4">
+          <Heading level={2}>Find me here</Heading>
+
+          {profileDetails.socialMediaLinks.length > 0 ? (
+            <ul className="flex flex-col gap-2">
+              {profileDetails.socialMediaLinks.map((link) => {
+                return (
+                  <li key={link.url}>
+                    <Link
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      {link.url}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <Text>No social links available</Text>
+          )}
+        </div>
       </div>
     </>
   );
