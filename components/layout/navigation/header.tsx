@@ -9,7 +9,7 @@ import {
   BookOpenText,
   BoxesIcon,
   CompassIcon,
-  LucideIcon,
+  LucideProps,
   Tickets,
 } from "lucide-react";
 import {
@@ -44,7 +44,9 @@ import {
 export type NavItem = {
   key: string;
   to: string | UrlObject;
-  icon: LucideIcon;
+  icon: React.ForwardRefExoticComponent<
+    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+  >;
   needsAuth: boolean;
   children: React.ReactNode;
 };
@@ -274,7 +276,7 @@ const Auth = ({
               {t("view-profile")}
             </DropdownMenuItem>
           </Link>
-          <Link href="/settings">
+          <Link href="/edit-profile">
             <DropdownMenuItem className="cursor-pointer">
               {t("edit-profile")}
             </DropdownMenuItem>

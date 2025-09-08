@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -24,6 +25,8 @@ import {
 } from "@/lib/user-profile-serialization";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
+  const router = useRouter();
+
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
 
   const { data: address } = useSuspenseQuery(
@@ -68,6 +71,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           socialMediaLinks: values.socialMediaLinks,
         }),
       });
+
+      router.push(`/profile/${address}`);
       toast({
         title: t("toast-success"),
       });

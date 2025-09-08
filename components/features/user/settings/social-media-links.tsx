@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ControllerRenderProps,
-  FieldValues,
-  useFieldArray,
-  UseFormReturn,
-} from "react-hook-form";
-import { useCallback } from "react";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/shadcn/button";
@@ -16,60 +10,38 @@ import { UserFormSchemaType } from "@/types/schemas";
 import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
 import Heading from "@/components/widgets/texts/heading";
 import { cn } from "@/lib/tailwind";
+import { getFaviconUrl } from "@/lib/favicon";
 
 function SocialMediaLinks({
   form,
 }: {
   form: UseFormReturn<UserFormSchemaType>;
 }) {
-  const { append: appendLink, remove: removeLink } = useFieldArray({
+  const {
+    append: appendLink,
+    remove: removeLink,
+    fields: linkFields,
+  } = useFieldArray({
     control: form.control,
     name: "socialMediaLinks",
   });
-  const links = form.watch("socialMediaLinks");
-
-  const onChange = useCallback(
-    (
-      e: React.ChangeEvent<HTMLInputElement>,
-      field: ControllerRenderProps<
-        FieldValues,
-        `socialMediaLinks.${number}.url`
-      >,
-      index: number,
-    ) => {
-      const value = e.target.value;
-      // Trigger RHF field control
-      field.onChange(value);
-
-      let icon = "";
-
-      try {
-        const hostname = new URL(value).hostname;
-        // Get social link icon using google faviconV2 API
-        icon = `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${hostname}&size=24`;
-      } catch {
-        icon = "";
-      }
-
-      // Update RHF field
-      form.setValue(`socialMediaLinks.${index}.icon`, icon, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-    },
-    [form],
-  );
 
   return (
     <div className="flex flex-col gap-4">
       <Heading level={3}>Social links</Heading>
 
-      {!!links.length &&
-        links.map((link, index) => (
-          <div className="flex items-center justify-between gap-6" key={index}>
-            {link.icon && (
+      {linkFields.map((link, index) => {
+        const url = form.watch(`socialMediaLinks.${index}.url`);
+        const icon = getFaviconUrl(url);
+
+        return (
+          <div
+            className="flex items-center justify-between gap-6"
+            key={link.id}
+          >
+            {icon && (
               <Image
-                src={link.icon}
+                src={icon}
                 alt={"Icon " + link.url}
                 width={24}
                 height={24}
@@ -87,7 +59,7 @@ function SocialMediaLinks({
                         type="text"
                         placeholder="Enter URL"
                         value={field.value}
-                        onChange={(e) => onChange(e, field, index)}
+                        onChange={field.onChange}
                       />
                       <FormMessage />
                     </div>
@@ -106,7 +78,8 @@ function SocialMediaLinks({
               </div>
             </div>
           </div>
-        ))}
+        );
+      })}
 
       <Button
         type="button"
