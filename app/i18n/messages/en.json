@@ -304,7 +304,10 @@
     "chat": "Chat",
     "events": "Events",
     "members": "Members",
-    "proposals": "Proposals"
+    "proposals": "Proposals",
+    "sign-in-to-join-button": "Sign in to join",
+    "joining-state": "Joining...",
+    "join-community-button": "Join Community"
   },
   "empty-list": {
     "title": "Nothing listed",
