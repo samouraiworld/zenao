@@ -1,8 +1,6 @@
 package communities
 
 import (
-	"std"
-
 	"gno.land/p/zenao/basedao"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
@@ -145,8 +143,8 @@ func (msg *MsgEditCommunity) String() string {
 	if msg.bannerURI != "" {
 		s += "- Banner URI: " + msg.bannerURI + "\n"
 	}
-	if len(msg.administrators) > 0 {
-		s += "- Administrators: " + std.Join(msg.administrators, ", ") + "\n"
+	for _, admin := range msg.administrators {
+		s += "- Administrator: " + admin + "\n"
 	}
 	return s
 }
