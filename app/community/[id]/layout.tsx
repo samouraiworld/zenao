@@ -69,6 +69,7 @@ async function CommunityPageLayout({
         }}
       >
         <CommunityInfoLayout communityId={communityId}>
+          {/* <EditCommunityButton /> */}
           {children}
         </CommunityInfoLayout>
       </ScreenContainer>
