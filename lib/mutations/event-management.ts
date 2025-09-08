@@ -131,6 +131,10 @@ export const useEditEvent = (getToken: GetToken) => {
           headers: { Authorization: "Bearer " + token },
         },
       );
+
+      // Update community if different
+      // if (data.communityId) {
+      // }
     },
     onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries(eventOptions(variables.eventId));

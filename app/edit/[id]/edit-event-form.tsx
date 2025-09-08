@@ -29,7 +29,11 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     eventGatekeepersEmails(id, getToken),
   );
 
+  // TODO Get communities where event is held and check if user is admin there
+  const communityId = "";
+
   const isOrganizer = roles.includes("organizer");
+
   const router = useRouter();
 
   // Correctly reconstruct location object
@@ -42,6 +46,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     })),
     exclusive: data.privacy?.eventPrivacy.case === "guarded",
     password: "",
+    communityId: communityId || undefined,
   };
 
   const form = useForm<EventFormSchemaType>({
