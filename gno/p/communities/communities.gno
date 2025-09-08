@@ -159,10 +159,10 @@ func (c *Community) editCommunityHandler() daokit.MessageHandler {
 		}
 
 		if msg.displayName != "" {
-			c.DAOPrivate.Core.SetName(msg.displayName)
+			c.setProfileString("DisplayName", msg.displayName)
 		}
 		if msg.description != "" {
-			c.DAOPrivate.Core.SetDescription(msg.description)
+			c.setProfileString("Bio", msg.description)
 		}
 		if msg.avatarURI != "" {
 			c.setProfileString("Avatar", msg.avatarURI)
