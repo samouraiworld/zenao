@@ -289,6 +289,19 @@ type CreateCommunityResponse struct {
 	CommunityId string
 }
 
+type EditCommunityRequest struct {
+	CommunityId    string
+	DisplayName    string
+	Description    string
+	AvatarUri      string
+	BannerUri      string
+	Administrators []string
+}
+
+type EditCommunityResponse struct {
+	CommunityId string
+}
+
 type JoinCommunityRequest struct {
 	CommunityId string
 }
