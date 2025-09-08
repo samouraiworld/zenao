@@ -5,10 +5,11 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userAddressOptions } from "@/lib/queries/user";
-import { GnoProfile, profileOptions } from "@/lib/queries/profile";
+import { profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/widgets/texts/text";
 import { useEditUserProfile } from "@/lib/mutations/profile";
 import { captureException } from "@/lib/report";
@@ -17,20 +18,28 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
 import { UserFormSchemaType, userFormSchema } from "@/types/schemas";
+import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
+import {
+  deserializeUserProfileDetails,
+  serializeUserProfileDetails,
+} from "@/lib/user-profile-serialization";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
+  const router = useRouter();
+
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
 
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
   const { data: user } = useSuspenseQuery(profileOptions(address));
+  const profileDetails = deserializeUserProfileDetails(user?.bio ?? "");
 
-  const defaultValues: GnoProfile = user || {
-    address: address || "",
-    displayName: "",
-    bio: "",
-    avatarUri: "",
+  const defaultValues: UserFormSchemaType = {
+    avatarUri: user?.avatarUri || "",
+    displayName: user?.displayName || "",
+    bio: profileDetails.bio || "",
+    socialMediaLinks: profileDetails.socialMediaLinks,
   };
 
   const { editUser, isPending } = useEditUserProfile();
@@ -53,10 +62,17 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       }
 
       await editUser({
-        ...values,
         address: address || "",
         token,
+        avatarUri: values.avatarUri,
+        displayName: values.displayName,
+        bio: serializeUserProfileDetails({
+          bio: values.bio,
+          socialMediaLinks: values.socialMediaLinks,
+        }),
       });
+
+      router.push(`/profile/${address}`);
       toast({
         title: t("toast-success"),
       });
@@ -99,6 +115,9 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               wordCounter
               maxLength={1000}
             />
+
+            <SocialMediaLinks form={form} />
+
             <div>
               <ButtonWithChildren loading={isPending} type="submit">
                 {t("save-button")}
