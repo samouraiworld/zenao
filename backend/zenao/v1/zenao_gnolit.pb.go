@@ -130,6 +130,9 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
+	if c.Discoverable != false {
+		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, c.Discoverable)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -222,6 +225,9 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if e.Discoverable != false {
+		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, e.Discoverable)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -549,6 +555,9 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	}
 	if e.CheckedIn != 0 {
 		fmt.Fprintf(buf, "%s\tCheckedIn: %d,\n", linePrefix, e.CheckedIn)
+	}
+	if e.Discoverable != false {
+		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, e.Discoverable)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")

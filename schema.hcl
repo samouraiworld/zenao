@@ -81,12 +81,12 @@ table "users" {
   primary_key {
     columns = [column.id]
   }
-  index "idx_users_deleted_at" {
-    columns = [column.deleted_at]
-  }
   index "idx_users_auth_id" {
     unique  = true
     columns = [column.auth_id]
+  }
+  index "idx_users_deleted_at" {
+    columns = [column.deleted_at]
   }
 }
 table "communities" {
@@ -639,19 +639,19 @@ table "sold_tickets" {
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
-  index "idx_sold_tickets_deleted_at" {
-    columns = [column.deleted_at]
-  }
-  index "idx_sold_tickets_pubkey" {
-    unique  = true
-    columns = [column.pubkey]
-  }
   index "idx_sold_tickets_secret" {
     unique  = true
     columns = [column.secret]
   }
   index "idx_sold_tickets_event_id" {
     columns = [column.event_id]
+  }
+  index "idx_sold_tickets_deleted_at" {
+    columns = [column.deleted_at]
+  }
+  index "idx_sold_tickets_pubkey" {
+    unique  = true
+    columns = [column.pubkey]
   }
 }
 table "tags" {

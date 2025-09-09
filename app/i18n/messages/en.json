@@ -298,6 +298,14 @@
     "delete": "Delete",
     "cancel": "Cancel"
   },
+  "toggle-discoverable-dialog": {
+    "title": "Make event {discoverable}",
+    "desc": "Make the event publicly {visible} in Discover.",
+    "confirm": "Confirm",
+    "go-back": "Go back",
+    "toast-toggle-discoverable-success": "Event has been made {discoverable}.",
+    "toast-toggle-discoverable-error": "Error while making the event {discoverable}."
+  },
   "toast-delete-post-success": "Your post has been deleted",
   "toast-delete-post-error": "Error while deleting the post",
   "community": {

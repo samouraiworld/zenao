@@ -254,6 +254,9 @@ func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, li
 		var evt zenaov1.EventInfo
 		switch val := value.(type) {
 		case *zenaov1.EventInfo:
+			if !val.Discoverable {
+				continue
+			}
 			evt = *val
 			evt.PkgPath = key
 		case string:

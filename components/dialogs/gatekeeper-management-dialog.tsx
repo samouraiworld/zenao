@@ -148,6 +148,7 @@ export function GatekeeperManagementDialog({
     })),
     exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
     password: "",
+    discoverable: true,
   };
 
   const form = useForm<EventFormSchemaType>({
