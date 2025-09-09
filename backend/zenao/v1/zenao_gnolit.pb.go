@@ -1003,9 +1003,6 @@ func (e *EditCommunityResponse) GnoLiteral(typePrefix string, linePrefix string)
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("EditCommunityResponse{\n")
-	if e.CommunityId != "" {
-		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, e.CommunityId)
-	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

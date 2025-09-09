@@ -77,9 +77,7 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 		return nil, fmt.Errorf("failed to edit community on chain: %w", err)
 	}
 
-	return connect.NewResponse(&zenaov1.EditCommunityResponse{
-		CommunityId: cmt.ID,
-	}), nil
+	return connect.NewResponse(&zenaov1.EditCommunityResponse{}), nil
 }
 
 func validateCommunity(name, description, avatarURI, bannerURI string) error {

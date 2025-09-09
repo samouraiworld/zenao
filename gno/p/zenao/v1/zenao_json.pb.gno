@@ -1709,20 +1709,11 @@ func (e *EditCommunityRequest) FromJSON(node *json.Node) {
 func (e *EditCommunityResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if e.CommunityId != "" {
-		fields["communityId"] = json.StringNode("", e.CommunityId)
-	}
-
 	return json.ObjectNode("", fields)
 }
 
 func (e *EditCommunityResponse) FromJSON(node *json.Node) {
 	*e = EditCommunityResponse{}
-	fields := node.MustObject()
-
-	if val, ok := fields["communityId"]; ok {
-		e.CommunityId = val.MustString()
-	}
 }
 
 func (j *JoinCommunityRequest) ToJSON() *json.Node {

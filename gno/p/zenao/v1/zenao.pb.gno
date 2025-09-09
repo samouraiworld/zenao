@@ -299,7 +299,6 @@ type EditCommunityRequest struct {
 }
 
 type EditCommunityResponse struct {
-	CommunityId string
 }
 
 type JoinCommunityRequest struct {
