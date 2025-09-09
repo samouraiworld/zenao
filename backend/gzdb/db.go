@@ -212,11 +212,11 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		return nil, err
 	}
 
-	if err := g.updateEventUserRoles(zeni.RoleOrganizer, organizersIDs, eventID, zeni.EntityTypeEvent); err != nil {
+	if err := g.updateUserRoles(zeni.RoleOrganizer, organizersIDs, eventID, zeni.EntityTypeEvent); err != nil {
 		return nil, err
 	}
 
-	if err := g.updateEventUserRoles(zeni.RoleGatekeeper, gatekeepersIDs, eventID, zeni.EntityTypeEvent); err != nil {
+	if err := g.updateUserRoles(zeni.RoleGatekeeper, gatekeepersIDs, eventID, zeni.EntityTypeEvent); err != nil {
 		return nil, err
 	}
 
@@ -811,7 +811,7 @@ func (g *gormZenaoDB) EditCommunity(communityID string, administratorsIDs []stri
 		BannerURI:   req.BannerUri,
 	}
 
-	if err := g.updateEventUserRoles(zeni.RoleAdministrator, administratorsIDs, communityID, zeni.EntityTypeCommunity); err != nil {
+	if err := g.updateUserRoles(zeni.RoleAdministrator, administratorsIDs, communityID, zeni.EntityTypeCommunity); err != nil {
 		return nil, err
 	}
 
@@ -1479,7 +1479,9 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	return ticket, nil
 }
 
-func (g *gormZenaoDB) updateEventUserRoles(role string, userIDs []string, orgID string, orgType string) error {
+// updateUserRoles updates the users having the given role in the given org (orgType and orgID).
+// It adds the role to the users in userIDs that do not have it yet, and removes the role from the users that are not in userIDs.
+func (g *gormZenaoDB) updateUserRoles(role string, userIDs []string, orgID string, orgType string) error {
 	orgIDInt, err := strconv.ParseUint(orgID, 10, 64)
 	if err != nil {
 		return err
