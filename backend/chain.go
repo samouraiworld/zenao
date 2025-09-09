@@ -624,7 +624,6 @@ func (g *gnoZenaoChain) EditCommunity(communityID string, callerID string, admin
 import (
 	user %q
 	community %q
-	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/p/zenao/daokit"
 	"gno.land/p/zenao/communities"
 )

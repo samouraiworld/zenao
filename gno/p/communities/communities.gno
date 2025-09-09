@@ -110,6 +110,10 @@ func NewCommunity(conf *Config) *Community {
 			Condition: oneAdmin,
 			Handler:   community.removeEventHandler(),
 		},
+		{
+			Condition: oneAdmin,
+			Handler:   community.editCommunityHandler(),
+		},
 	}
 
 	for _, res := range resources {

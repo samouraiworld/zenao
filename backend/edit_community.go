@@ -50,7 +50,7 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 			return nil, err
 		}
 		if slices.Contains(adminIDs, zAdmin.ID) {
-			return nil, fmt.Errorf("duplicate administrator: %s", zAdmin.ID)
+			continue
 		}
 		adminIDs = append(adminIDs, zAdmin.ID)
 	}
@@ -74,7 +74,7 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 	}
 
 	if err := s.Chain.EditCommunity(cmt.ID, zUser.ID, adminIDs, req.Msg); err != nil {
-		return nil, errors.New("failed to edit community on chain")
+		return nil, fmt.Errorf("failed to edit community on chain: %w", err)
 	}
 
 	return connect.NewResponse(&zenaov1.EditCommunityResponse{
