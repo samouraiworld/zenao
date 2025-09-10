@@ -56,6 +56,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	participants := []*zeni.User{buyer}
 	for _, authGuest := range authGuests {
+		if authGuest.Banned {
+			return nil, fmt.Errorf("user %s is banned", authGuest.Email)
+		}
 		if authGuest.ID == authUser.ID {
 			return nil, errors.New("guest is buyer")
 		}
@@ -80,6 +83,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	evt := (*zeni.Event)(nil)
 	communities := ([]*zeni.Community)(nil)
 	needPasswordIfGuarded := true
+	rolesByParticipant := make([][]string, len(participants))
 
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
@@ -103,6 +107,14 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			}
 
 			for _, cmt := range communities {
+				roles, err := db.EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
+				if err != nil {
+					return err
+				}
+				rolesByParticipant[i] = roles
+				if slices.Contains(roles, zeni.RoleMember) {
+					continue
+				}
 				if err := db.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
 					return err
 				}
@@ -182,6 +194,10 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 
 		for _, cmt := range communities {
+			// XXX: does the check in the chain instead of using db.
+			if slices.Contains(rolesByParticipant[i], zeni.RoleMember) {
+				continue
+			}
 			if err := s.Chain.AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
 				return nil, err
 			}

@@ -1666,6 +1666,74 @@ func (c *CreateCommunityResponse) FromJSON(node *json.Node) {
 	}
 }
 
+func (e *EditCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", e.CommunityId)
+	}
+	if e.DisplayName != "" {
+		fields["displayName"] = json.StringNode("", e.DisplayName)
+	}
+	if e.Description != "" {
+		fields["description"] = json.StringNode("", e.Description)
+	}
+	if e.AvatarUri != "" {
+		fields["avatarUri"] = json.StringNode("", e.AvatarUri)
+	}
+	if e.BannerUri != "" {
+		fields["bannerUri"] = json.StringNode("", e.BannerUri)
+	}
+	if len(e.Administrators) != 0 {
+		arr := make([]*json.Node, len(e.Administrators))
+		for i, val := range e.Administrators {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["administrators"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EditCommunityRequest) FromJSON(node *json.Node) {
+	*e = EditCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		e.CommunityId = val.MustString()
+	}
+	if val, ok := fields["displayName"]; ok {
+		e.DisplayName = val.MustString()
+	}
+	if val, ok := fields["description"]; ok {
+		e.Description = val.MustString()
+	}
+	if val, ok := fields["avatarUri"]; ok {
+		e.AvatarUri = val.MustString()
+	}
+	if val, ok := fields["bannerUri"]; ok {
+		e.BannerUri = val.MustString()
+	}
+	if val, ok := fields["administrators"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Administrators = arr
+	}
+}
+
+func (e *EditCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func (e *EditCommunityResponse) FromJSON(node *json.Node) {
+	*e = EditCommunityResponse{}
+}
+
 func (j *JoinCommunityRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 

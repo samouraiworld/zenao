@@ -167,17 +167,17 @@ func execGenTxs() error {
 			return err
 		}
 
-		organizers, err := db.GetOrgUsersWithRole(zeni.EntityTypeEvent, event.ID, zeni.RoleOrganizer)
+		organizers, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeEvent, event.ID, zeni.EntityTypeUser, zeni.RoleOrganizer)
 		if err != nil {
 			return err
 		}
 
 		var organizersIDs []string
 		for _, org := range organizers {
-			organizersIDs = append(organizersIDs, org.ID)
+			organizersIDs = append(organizersIDs, org.EntityID)
 		}
 
-		gatekeepers, err := db.GetOrgUsersWithRole(zeni.EntityTypeEvent, event.ID, zeni.RoleGatekeeper)
+		gatekeepers, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeEvent, event.ID, zeni.EntityTypeUser, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}
@@ -189,7 +189,7 @@ func execGenTxs() error {
 
 		var gatekeepersIDs []string
 		for _, gkp := range gatekeepers {
-			gatekeepersIDs = append(gatekeepersIDs, gkp.ID)
+			gatekeepersIDs = append(gatekeepersIDs, gkp.EntityID)
 		}
 
 		for _, deletedGkp := range deletedGatekeepers {
@@ -283,14 +283,14 @@ func execGenTxs() error {
 	}
 
 	for _, community := range communities {
-		administrators, err := db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleAdministrator)
+		administrators, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeCommunity, community.ID, zeni.EntityTypeUser, zeni.RoleAdministrator)
 		if err != nil {
 			return err
 		}
 
 		var administratorsIDs []string
 		for _, admin := range administrators {
-			administratorsIDs = append(administratorsIDs, admin.ID)
+			administratorsIDs = append(administratorsIDs, admin.EntityID)
 		}
 
 		members, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeCommunity, community.ID, zeni.EntityTypeUser, zeni.RoleMember)
@@ -311,7 +311,18 @@ func execGenTxs() error {
 				return err
 			}
 			txs = append(txs, tx)
-			logger.Info("community add member tx created", zap.String("community-id", community.ID), zap.String("member-id", member.EntityID), zap.Time("created-at", member.CreatedAt))
+			logger.Info("community add member reg tx created", zap.String("community-id", community.ID), zap.String("member-id", member.EntityID), zap.Time("created-at", member.CreatedAt))
+		}
+
+		// admin are also members and the community registry does not make the difference
+		for _, admin := range administrators {
+			membersIDs = append(membersIDs, admin.EntityID)
+			tx, err := createCommunityAddMemberRegTx(chain, signerInfo.GetAddress(), community, admin.EntityID, admin.CreatedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community add member reg tx created", zap.String("community-id", community.ID), zap.String("admin-id", admin.EntityID), zap.Time("created-at", admin.CreatedAt))
 		}
 
 		// XXX: Add deleted members so we can add their post before deleting them

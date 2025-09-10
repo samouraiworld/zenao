@@ -97,12 +97,28 @@ export const eventFormSchema = z.object({
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
+export const userFormSocialLinkSchema = z.object({
+  url: z.string().url().max(400),
+});
+
+export type UserFormSocialLinkSchemaType = z.infer<
+  typeof userFormSocialLinkSchema
+>;
+
 export const userFormSchema = z.object({
   bio: z.string().trim().min(2).max(1000),
   displayName: z.string().trim().min(1),
+  socialMediaLinks: z.array(userFormSocialLinkSchema),
   avatarUri: uriSchema,
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
+
+export const gnoProfileDetailsSchema = z.object({
+  bio: z.string().trim().min(2).max(1000),
+  socialMediaLinks: z.array(userFormSocialLinkSchema),
+});
+
+export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
 
 const pollOptionFormSchema = z.object({
   text: z

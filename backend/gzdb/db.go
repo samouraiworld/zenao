@@ -214,11 +214,11 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		return nil, err
 	}
 
-	if err := g.updateEventUserRoles(eventID, zeni.RoleOrganizer, organizersIDs); err != nil {
+	if err := g.updateUserRoles(zeni.RoleOrganizer, organizersIDs, eventID, zeni.EntityTypeEvent); err != nil {
 		return nil, err
 	}
 
-	if err := g.updateEventUserRoles(eventID, zeni.RoleGatekeeper, gatekeepersIDs); err != nil {
+	if err := g.updateUserRoles(zeni.RoleGatekeeper, gatekeepersIDs, eventID, zeni.EntityTypeEvent); err != nil {
 		return nil, err
 	}
 
@@ -799,6 +799,41 @@ func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []stri
 	return zcmt, nil
 }
 
+// EditCommunity implements zeni.DB.
+func (g *gormZenaoDB) EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*zeni.Community, error) {
+	cmtIDInt, err := strconv.ParseUint(communityID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse community id: %w", err)
+	}
+
+	cmt := Community{
+		DisplayName: req.DisplayName,
+		Description: req.Description,
+		AvatarURI:   req.AvatarUri,
+		BannerURI:   req.BannerUri,
+	}
+
+	if err := g.updateUserRoles(zeni.RoleAdministrator, administratorsIDs, communityID, zeni.EntityTypeCommunity); err != nil {
+		return nil, err
+	}
+
+	if err := g.db.Model(&Community{}).Where("id = ?", cmtIDInt).Updates(cmt).Error; err != nil {
+		return nil, fmt.Errorf("update community in db: %w", err)
+	}
+
+	dbcmt, err := g.getDBCommunity(communityID)
+	if err != nil {
+		return nil, fmt.Errorf("get community from db: %w", err)
+	}
+
+	zcmt, err := dbCommunityToZeniCommunity(dbcmt)
+	if err != nil {
+		return nil, fmt.Errorf("convert db community to zeni community: %w", err)
+	}
+
+	return zcmt, nil
+}
+
 // AddMemberToCommunity implements zeni.DB.
 func (g *gormZenaoDB) AddMemberToCommunity(communityID string, userID string) error {
 	communityIDInt, err := strconv.ParseUint(communityID, 10, 64)
@@ -826,6 +861,7 @@ func (g *gormZenaoDB) AddMemberToCommunity(communityID string, userID string) er
 }
 
 // RemoveMemberFromCommunity implements zeni.DB.
+// Remove all roles of the member in the community.
 func (g *gormZenaoDB) RemoveMemberFromCommunity(communityID string, userID string) error {
 	communityIDInt, err := strconv.ParseUint(communityID, 10, 64)
 	if err != nil {
@@ -837,11 +873,12 @@ func (g *gormZenaoDB) RemoveMemberFromCommunity(communityID string, userID strin
 	}
 
 	if err := g.db.
-		Model(&EntityRole{}).Where("org_type = ? AND org_id = ? AND entity_type = ? AND entity_id = ? AND role = ?",
-		zeni.EntityTypeCommunity, communityIDInt, zeni.EntityTypeUser, userIDInt, zeni.RoleMember).
+		Model(&EntityRole{}).Where("org_type = ? AND org_id = ? AND entity_type = ? AND entity_id = ?",
+		zeni.EntityTypeCommunity, communityIDInt, zeni.EntityTypeUser, userIDInt).
 		Delete(&EntityRole{}).Error; err != nil {
 		return fmt.Errorf("delete member role assignment in db: %w", err)
 	}
+
 	return nil
 }
 
@@ -1444,14 +1481,16 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	return ticket, nil
 }
 
-func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs []string) error {
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+// updateUserRoles updates the users having the given role in the given org (orgType and orgID).
+// It adds the role to the users in userIDs that do not have it yet, and removes the role from the users that are not in userIDs.
+func (g *gormZenaoDB) updateUserRoles(role string, userIDs []string, orgID string, orgType string) error {
+	orgIDInt, err := strconv.ParseUint(orgID, 10, 64)
 	if err != nil {
 		return err
 	}
 
 	var currentUsersIDs []string
-	currentUsers, err := g.GetOrgUsersWithRole(zeni.EntityTypeEvent, eventID, role)
+	currentUsers, err := g.GetOrgUsersWithRole(orgType, orgID, role)
 	if err != nil {
 		return fmt.Errorf("get users with role %s: %w", role, err)
 	}
@@ -1468,7 +1507,7 @@ func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs 
 	if len(usersToRemove) > 0 {
 		if err := g.db.
 			Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ? AND entity_id IN ?",
-				zeni.EntityTypeEvent, evtIDInt, role, zeni.EntityTypeUser, usersToRemove).
+				orgType, orgID, role, zeni.EntityTypeUser, usersToRemove).
 			Delete(&EntityRole{}).Error; err != nil {
 			return fmt.Errorf("delete existing %s roles before adding the new ones: %w", role, err)
 		}
@@ -1490,8 +1529,8 @@ func (g *gormZenaoDB) updateEventUserRoles(eventID string, role string, userIDs 
 		entityRole := &EntityRole{
 			EntityType: zeni.EntityTypeUser,
 			EntityID:   uint(userIDInt),
-			OrgType:    zeni.EntityTypeEvent,
-			OrgID:      uint(evtIDInt),
+			OrgType:    orgType,
+			OrgID:      uint(orgIDInt),
 			Role:       role,
 		}
 
