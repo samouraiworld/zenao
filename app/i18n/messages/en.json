@@ -311,6 +311,7 @@
     "leave-success-desc": "You're no longer a member.",
     "leave-failure": "Failed to leave the community",
     "leave-failure-desc": "Please try again later.",
+    "leave-only-admin-error": "You cannot leave this community as you are the only administrator.",
     "sign-in-to-join-button": "Sign in to join",
     "joining-state": "Joining...",
     "join-community-button": "Join Community"
