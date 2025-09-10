@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Download, Eye, EyeOff } from "lucide-react";
+import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -14,7 +14,6 @@ import Text from "@/components/widgets/texts/text";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { EventUserRole } from "@/lib/queries/event-users";
 import { zenaoClient } from "@/lib/zenao-client";
-import { ToggleDiscoverableDialog } from "@/components/dialogs/toggle-discoverable-dialog";
 
 type EventManagementMenuProps = {
   eventId: string;
@@ -44,8 +43,7 @@ function EventManagementMenuOrganizer({
   const [manageGatekeepersDialogOpen, setManageGatekeepersDialogOpen] =
     useState(false);
   const [cancelEventDialogOpen, setCancelEventDialogOpen] = useState(false);
-  const [toggleDiscoverableDialogOpen, setToggleDiscoverableDialogOpen] =
-    useState(false);
+
   const { data: eventInfo } = useSuspenseQuery(eventOptions(eventId));
   const { data: gatekeepers } = useSuspenseQuery(
     eventGatekeepersEmails(eventId, getToken),
@@ -72,13 +70,6 @@ function EventManagementMenuOrganizer({
         eventId={eventId}
         open={cancelEventDialogOpen}
         onOpenChange={setCancelEventDialogOpen}
-      />
-
-      <ToggleDiscoverableDialog
-        eventId={eventId}
-        eventInfo={eventInfo}
-        open={toggleDiscoverableDialogOpen}
-        onOpenChange={setToggleDiscoverableDialogOpen}
       />
 
       <div className="flex flex-col">
@@ -108,7 +99,7 @@ function EventManagementMenuOrganizer({
           {t("send-global-message")}
         </p>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" role="group">
           <p
             className="text-main underline cursor-pointer"
             onClick={onDownloadParticipantList}
@@ -117,24 +108,6 @@ function EventManagementMenuOrganizer({
           </p>
           <Download className="text-main" size={16} />
         </div>
-
-        {/* Includes the event in listEventsInternal (eventreg.gno) if true */}
-        <p
-          className="text-main underline cursor-pointer flex items-center gap-1"
-          onClick={() => setToggleDiscoverableDialogOpen(true)}
-        >
-          {eventInfo?.discoverable ? (
-            <>
-              {"Make event undiscoverable"}
-              <EyeOff className="text-main" size={16} />
-            </>
-          ) : (
-            <>
-              {"Make event discoverable"}
-              <Eye className="text-main" size={16} />
-            </>
-          )}
-        </p>
       </div>
     </>
   );
