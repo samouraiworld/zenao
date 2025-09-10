@@ -607,6 +607,87 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	return nil
 }
 
+// EditCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error {
+	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
+	adminsAddrLit := stringSliceLit(adminsAddr)
+	communityPkgPath := g.communityPkgPath(communityID)
+	userRealmPkgPath := g.userRealmPkgPath(callerID)
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+import (
+	user %q
+	community %q
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/communities"
+)
+
+func main() {
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: %q,
+		Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+			Title: "Edit community",
+			Message: communities.NewEditCommunityMsg(
+				%q,
+				%q,
+				%q,
+				%q,
+				%s,
+			),
+		}),
+	})
+}
+`, userRealmPkgPath, communityPkgPath, "Edit "+communityPkgPath, req.DisplayName, req.Description, req.AvatarUri, req.BannerUri, adminsAddrLit),
+			}},
+		},
+	}
+	gasWanted, err := g.estimateRunTxGas(msgRun)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msgRun))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("edited community", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	// Add new admin to registry but don't remove old one since they still are members of the community
+	for _, adminAddr := range adminsAddr {
+		msgCall := vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: g.communitiesIndexPkgPath,
+			Func:    "AddMember",
+			Args: []string{
+				communityPkgPath,
+				adminAddr,
+			},
+		}
+		gasWanted, err = g.estimateCallTxGas(msgCall)
+		if err != nil {
+			return err
+		}
+		broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+			GasFee:    "10000000ugnot",
+			GasWanted: gasWanted,
+		}, msgCall))
+		if err != nil {
+			return err
+		}
+		g.logger.Info("added admin to community registry", zap.String("admin", adminAddr), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	}
+
+	return nil
+}
+
 // AddMemberToCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string, userID string) error {
 	callerPkgPath := g.userRealmPkgPath(callerID)
