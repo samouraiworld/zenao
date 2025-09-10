@@ -437,6 +437,13 @@ export const EventForm: React.FC<EventFormProps> = ({
             />
           )}
 
+          {/* Includes the event in listEventsInternal (eventreg.gno) if true */}
+          <FormFieldSwitch
+            control={form.control}
+            name="discoverable"
+            label={"Make event discoverable (Visible in Discover)"}
+          />
+
           <ButtonWithChildren loading={isLoading} type="submit">
             {isEditing ? t("edit-event-button") : t("create-event-button")}
           </ButtonWithChildren>

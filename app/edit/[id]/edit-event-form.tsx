@@ -42,7 +42,6 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     })),
     exclusive: data.privacy?.eventPrivacy.case === "guarded",
     password: "",
-    discoverable: true,
   };
 
   const form = useForm<EventFormSchemaType>({

@@ -233,6 +233,10 @@ table "events" {
     null = true
     type = integer
   }
+  column "discoverable" {
+    null = true
+    type = numeric
+  }
   column "password_hash" {
     null = true
     type = text
@@ -524,15 +528,15 @@ table "poll_votes" {
   primary_key {
     columns = [column.poll_result_id, column.user_id]
   }
-  foreign_key "fk_poll_votes_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_poll_votes_poll_result" {
     columns     = [column.poll_result_id]
     ref_columns = [table.poll_results.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_poll_votes_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -639,10 +643,6 @@ table "sold_tickets" {
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
-  index "idx_sold_tickets_secret" {
-    unique  = true
-    columns = [column.secret]
-  }
   index "idx_sold_tickets_event_id" {
     columns = [column.event_id]
   }
@@ -652,6 +652,10 @@ table "sold_tickets" {
   index "idx_sold_tickets_pubkey" {
     unique  = true
     columns = [column.pubkey]
+  }
+  index "idx_sold_tickets_secret" {
+    unique  = true
+    columns = [column.secret]
   }
 }
 table "tags" {

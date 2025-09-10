@@ -108,7 +108,7 @@ function EventManagementMenuOrganizer({
           {t("send-global-message")}
         </p>
 
-        <div className="flex items-center gap-1" role="group">
+        <div className="flex items-center gap-1">
           <p
             className="text-main underline cursor-pointer"
             onClick={onDownloadParticipantList}
@@ -118,10 +118,10 @@ function EventManagementMenuOrganizer({
           <Download className="text-main" size={16} />
         </div>
 
+        {/* Includes the event in listEventsInternal (eventreg.gno) if true */}
         <p
           className="text-main underline cursor-pointer flex items-center gap-1"
           onClick={() => setToggleDiscoverableDialogOpen(true)}
-          role="group"
         >
           {eventInfo?.discoverable ? (
             <>

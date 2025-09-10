@@ -29,7 +29,6 @@ export function ToggleDiscoverableDialog({
   const { data: gatekeepers } = useSuspenseQuery(
     eventGatekeepersEmails(eventId, getToken),
   );
-  console.log("gatekeepersgatekeepers", gatekeepers);
   const location = makeLocationFromEvent(eventInfo.location);
 
   const defaultValues: EventFormSchemaType = {

@@ -117,6 +117,7 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, gate
 		CreatorID:    uint(creatorIDInt),
 		TicketPrice:  req.TicketPrice,
 		Capacity:     req.Capacity,
+		Discoverable: req.Discoverable,
 		PasswordHash: passwordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
@@ -206,6 +207,7 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		EndDate:      time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
 		TicketPrice:  req.TicketPrice,
 		Capacity:     req.Capacity,
+		Discoverable: req.Discoverable,
 		PasswordHash: passwordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
