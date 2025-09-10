@@ -441,7 +441,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           <FormFieldSwitch
             control={form.control}
             name="discoverable"
-            label={"Make event discoverable (Visible in Discover)"}
+            label={t("discoverable-label")}
           />
 
           <ButtonWithChildren loading={isLoading} type="submit">

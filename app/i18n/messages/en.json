@@ -47,6 +47,8 @@
     "no-changes-password-placeholder": "No changes if empty",
     "capacity-label": "Event capacity limit",
     "capacity-placeholder": "Capacity...",
+    "discoverable-label": "Make event discoverable (Visible in Discover)",
+    "exclusive-label": "Exclusive",
     "pick-a-start-date-placeholder": "Pick a start date...",
     "pick-a-end-date-placeholder": "Pick a end date...",
     "from": "From",
@@ -297,14 +299,6 @@
     "desc": "Are you sure you want to delete this post ?",
     "delete": "Delete",
     "cancel": "Cancel"
-  },
-  "toggle-discoverable-dialog": {
-    "title": "Make event {discoverable}",
-    "desc": "Make the event publicly {visible} in Discover.",
-    "confirm": "Confirm",
-    "go-back": "Go back",
-    "toast-toggle-discoverable-success": "Event has been made {discoverable}.",
-    "toast-toggle-discoverable-error": "Error while making the event {discoverable}."
   },
   "toast-delete-post-success": "Your post has been deleted",
   "toast-delete-post-error": "Error while deleting the post",
