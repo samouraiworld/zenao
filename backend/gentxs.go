@@ -1178,9 +1178,9 @@ func createCommunityRemoveMemberRegTx(chain *gnoZenaoChain, community *zeni.Comm
 
 func createCommunityRemoveEventTx(chain *gnoZenaoChain, creator cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
-	eventPkgPath := chain.eventRealmPkgPath(eventID)
+	eventAddr := chain.EventAddress(eventID)
 	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
-	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventPkgPath)
+	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
