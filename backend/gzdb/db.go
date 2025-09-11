@@ -180,7 +180,12 @@ func (g *gormZenaoDB) CancelEvent(eventID string) error {
 	if err != nil {
 		return err
 	}
-	return g.db.Delete(&Event{}, evtIDInt).Error
+	err = g.db.Delete(&Event{}, evtIDInt).Error
+	if err != nil {
+		return err
+	}
+
+	return g.db.Where("entity_type = ? AND entity_id = ? AND org_type = ?", zeni.EntityTypeEvent, evtIDInt, zeni.EntityTypeCommunity).Delete(&EntityRole{}).Error
 }
 
 // EditEvent implements zeni.DB.
