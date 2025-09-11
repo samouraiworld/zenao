@@ -44,8 +44,9 @@ func TestEvents(t *testing.T) {
 		std.TestSetRealm(std.NewCodeRealm(evt.id))
 		getters[evt.id] = func() *zenaov1.EventInfo {
 			return &zenaov1.EventInfo{
-				Organizers: evt.organizers,
-				EndDate:    evt.endDate.Unix(),
+				Organizers:   evt.organizers,
+				EndDate:      evt.endDate.Unix(),
+				Discoverable: true,
 			}
 		}
 		Register(getters[evt.id])
