@@ -255,9 +255,6 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		return nil, err
 	}
 
-	println("------------ evt", evt.Discoverable)
-	println("------------ dbevt", dbevt.Discoverable)
-
 	return dbEventToZeniEvent(dbevt)
 }
 
