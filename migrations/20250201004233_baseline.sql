@@ -5,7 +5,7 @@ CREATE UNIQUE INDEX `idx_users_clerk_id` ON `users` (`clerk_id`);
 -- Create index "idx_users_deleted_at" to table: "users"
 CREATE INDEX `idx_users_deleted_at` ON `users` (`deleted_at`);
 -- Create "events" table
-CREATE TABLE `events` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `title` text NULL, `description` text NULL, `start_date` datetime NULL, `end_date` datetime NULL, `image_uri` text NULL, `ticket_price` real NULL, `capacity` integer NULL, `discoverable` integer DEFAULT 1, `location` text NULL, `creator_id` integer NULL, CONSTRAINT `fk_events_creator` FOREIGN KEY (`creator_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION);
+CREATE TABLE `events` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `title` text NULL, `description` text NULL, `start_date` datetime NULL, `end_date` datetime NULL, `image_uri` text NULL, `ticket_price` real NULL, `capacity` integer NULL, `location` text NULL, `creator_id` integer NULL, CONSTRAINT `fk_events_creator` FOREIGN KEY (`creator_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION);
 -- Create index "idx_events_deleted_at" to table: "events"
 CREATE INDEX `idx_events_deleted_at` ON `events` (`deleted_at`);
 -- Create "sold_tickets" table

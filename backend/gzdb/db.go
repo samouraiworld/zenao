@@ -230,6 +230,13 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		return nil, err
 	}
 
+	// Update db with Discoverable value if changed to false
+	if !req.Discoverable {
+		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("discoverable", false).Error; err != nil {
+			return nil, err
+		}
+	}
+
 	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs
 	// we should rewrite this if db become bottleneck
 	if req.UpdatePassword && req.Password == "" {
@@ -242,6 +249,9 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 	if err != nil {
 		return nil, err
 	}
+
+	println("------------ evt", evt.Discoverable)
+	println("------------ dbevt", dbevt.Discoverable)
 
 	return dbEventToZeniEvent(dbevt)
 }
