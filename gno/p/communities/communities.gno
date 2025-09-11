@@ -244,11 +244,11 @@ func (c *Community) removeMemberHandler() daokit.MessageHandler {
 	return daokit.NewMessageHandler(MsgRemoveMemberKind, func(i interface{}) {
 		msg, ok := i.(*MsgRemoveMember)
 		administrators := c.DAOPrivate.Members.GetMembersWithRole("administrator")
-		if len(administrators) == 1 && administrators[0] == msg.address {
-			panic("cannot remove the only administrator of the community")
-		}
 		if !ok {
 			panic("invalid payload type")
+		}
+		if len(administrators) == 1 && administrators[0] == msg.address {
+			panic("cannot remove the only administrator of the community")
 		}
 		c.DAOPrivate.Members.RemoveMember(msg.address)
 	})
