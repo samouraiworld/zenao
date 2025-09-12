@@ -9,6 +9,7 @@ import { zenaoClient } from "@/lib/zenao-client";
 
 interface EditCommunityRequest {
   token: string;
+  communityId: string;
   displayName: string;
   description: string;
   avatarUri: string;
@@ -16,30 +17,24 @@ interface EditCommunityRequest {
   administrators: string[];
 }
 
-interface EditCommunityResponse {
-  communityId: string;
-}
-
 export const useEditCommunity = () => {
   const queryClient = getQueryClient();
 
-  const { mutateAsync, isPending, isSuccess, isError } = useMutation<
-    EditCommunityResponse,
-    Error,
-    EditCommunityRequest
-  >({
+  const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token,
+      communityId,
       displayName,
       description,
       avatarUri,
       bannerUri,
       administrators,
-    }) => {
+    }: EditCommunityRequest) => {
       if (!token) throw new Error("Missing auth token");
 
-      const response = await zenaoClient.editCommunity( // wait for endpoint
+      await zenaoClient.editCommunity(
         {
+          communityId,
           displayName,
           description,
           avatarUri,
@@ -50,15 +45,9 @@ export const useEditCommunity = () => {
           headers: { Authorization: "Bearer " + token },
         },
       );
-
-      return {
-        communityId: response.communityId, // I assume
-      };
     },
-
-    onSuccess: async ({ communityId }, { administrators }) => {
+    onSuccess: async (_, { communityId, administrators }) => {
       const userAddress = administrators[0];
-
       await queryClient.invalidateQueries(communityInfo(communityId));
       await queryClient.invalidateQueries(
         communityUserRoles(communityId, userAddress),
@@ -70,7 +59,7 @@ export const useEditCommunity = () => {
   });
 
   return {
-    editCommunity: mutateAsync,
+    mutateAsync,
     isPending,
     isSuccess,
     isError,
