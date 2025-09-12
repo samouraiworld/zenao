@@ -59,7 +59,6 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
                 address={profile.address}
                 avatarUri={profile.avatarUri}
                 displayName={profile.displayName}
-                description={profile.bio}
                 roles={["member"]}
               />
             </Link>
