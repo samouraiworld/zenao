@@ -652,13 +652,14 @@ func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoG
 	organizersAddr := mapsl.Map(organizersIDs, chain.UserAddress)
 	gatekeepersAddr := mapsl.Map(gatekeepersIDs, chain.UserAddress)
 	eRealm, err := genEventRealmSource(organizersAddr, gatekeepersAddr, creator.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
-		Title:       event.Title,
-		Description: event.Description,
-		ImageUri:    event.ImageURI,
-		Location:    event.Location,
-		StartDate:   uint64(event.StartDate.Unix()),
-		EndDate:     uint64(event.EndDate.Unix()),
-		Capacity:    event.Capacity,
+		Title:        event.Title,
+		Description:  event.Description,
+		ImageUri:     event.ImageURI,
+		Location:     event.Location,
+		StartDate:    uint64(event.StartDate.Unix()),
+		EndDate:      uint64(event.EndDate.Unix()),
+		Capacity:     event.Capacity,
+		Discoverable: event.Discoverable,
 	}, privacy)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
