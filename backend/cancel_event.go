@@ -31,6 +31,7 @@ func (s *ZenaoServer) CancelEvent(
 	s.Logger.Info("cancel-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	var users []*zeni.User
+	var cmties []*zeni.Community
 	var evt *zeni.Event
 	if err := s.DB.Tx(func(db zeni.DB) error {
 		evt, err = db.GetEvent(req.Msg.EventId)
@@ -50,6 +51,10 @@ func (s *ZenaoServer) CancelEvent(
 		}
 		if !slices.Contains(roles, zeni.RoleOrganizer) {
 			return errors.New("only organizers can cancel an event")
+		}
+		cmties, err = db.CommunitiesByEvent(req.Msg.EventId)
+		if err != nil {
+			return err
 		}
 		return db.CancelEvent(req.Msg.EventId)
 	}); err != nil {
@@ -89,6 +94,12 @@ func (s *ZenaoServer) CancelEvent(
 			}
 			count += len(batch)
 			s.Logger.Info("send-event-cancellation-email", zap.Int("already-sent", count), zap.Int("total", len(requests)))
+		}
+	}
+
+	for _, cmt := range cmties {
+		if err := s.Chain.RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, evt.ID); err != nil {
+			s.Logger.Error("remove-cancelled-event-from-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
 		}
 	}
 
