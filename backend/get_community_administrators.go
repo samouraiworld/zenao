@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"slices"
 
 	"connectrpc.com/connect"
 	"github.com/samouraiworld/zenao/backend/mapsl"
@@ -30,6 +31,13 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 
 	var admins []*zeni.User
 	if err := s.DB.Tx(func(db zeni.DB) error {
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+		if err != nil {
+			return err
+		}
+		if !slices.Contains(roles, zeni.RoleAdministrator) {
+			return errors.New("user is not administrator of the community")
+		}
 		admins, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleAdministrator)
 		if err != nil {
 			return err
