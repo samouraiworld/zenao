@@ -301,6 +301,14 @@ type EditCommunityRequest struct {
 type EditCommunityResponse struct {
 }
 
+type GetCommunityAdministratorsRequest struct {
+	CommunityId string
+}
+
+type GetCommunityAdministratorsResponse struct {
+	Administrators []string
+}
+
 type JoinCommunityRequest struct {
 	CommunityId string
 }

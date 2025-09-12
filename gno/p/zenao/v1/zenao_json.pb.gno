@@ -1716,6 +1716,53 @@ func (e *EditCommunityResponse) FromJSON(node *json.Node) {
 	*e = EditCommunityResponse{}
 }
 
+func (g *GetCommunityAdministratorsRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", g.CommunityId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (g *GetCommunityAdministratorsRequest) FromJSON(node *json.Node) {
+	*g = GetCommunityAdministratorsRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		g.CommunityId = val.MustString()
+	}
+}
+
+func (g *GetCommunityAdministratorsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(g.Administrators) != 0 {
+		arr := make([]*json.Node, len(g.Administrators))
+		for i, val := range g.Administrators {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["administrators"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (g *GetCommunityAdministratorsResponse) FromJSON(node *json.Node) {
+	*g = GetCommunityAdministratorsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["administrators"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		g.Administrators = arr
+	}
+}
+
 func (j *JoinCommunityRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
