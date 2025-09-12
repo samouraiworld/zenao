@@ -81,6 +81,7 @@ message CreateEventRequest {
   string password = 10;
   repeated string organizers = 11;
   repeated string gatekeepers = 12;
+  bool discoverable = 13;
 }
 
 message CreateEventResponse { string id = 1; }
@@ -103,6 +104,7 @@ message EditEventRequest {
   bool update_password = 11;
   repeated string organizers = 12;
   repeated string gatekeepers = 13;
+  bool discoverable = 14;
 }
 
 message EditEventResponse { string id = 1; }
@@ -188,6 +190,7 @@ message EventInfo {
   string pkg_path = 11;
   EventPrivacy privacy = 12;
   uint32 checked_in = 13;
+  bool discoverable = 14;
 }
 
 message BatchProfileField {

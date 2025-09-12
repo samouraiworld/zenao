@@ -35,6 +35,7 @@ func (e *Event) Info() *zenaov1.EventInfo {
 		Location:     e.location,
 		Participants: e.CountParticipants(),
 		CheckedIn:    e.checkedIn,
+		Discoverable: e.discoverable,
 		Privacy:      privacy,
 	}
 }

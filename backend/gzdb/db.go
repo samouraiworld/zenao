@@ -117,6 +117,7 @@ func (g *gormZenaoDB) CreateEvent(creatorID string, organizersIDs []string, gate
 		CreatorID:    uint(creatorIDInt),
 		TicketPrice:  req.TicketPrice,
 		Capacity:     req.Capacity,
+		Discoverable: req.Discoverable,
 		PasswordHash: passwordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
@@ -211,6 +212,7 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 		EndDate:      time.Unix(int64(req.EndDate), 0),   // XXX: overflow?
 		TicketPrice:  req.TicketPrice,
 		Capacity:     req.Capacity,
+		Discoverable: req.Discoverable,
 		PasswordHash: passwordHash,
 	}
 	if err := evt.SetLocation(req.Location); err != nil {
@@ -231,6 +233,13 @@ func (g *gormZenaoDB) EditEvent(eventID string, organizersIDs []string, gatekeep
 
 	if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("ics_sequence_number", gorm.Expr("ics_sequence_number + ?", 1)).Error; err != nil {
 		return nil, err
+	}
+
+	// Update db with Discoverable value if changed to false
+	if !req.Discoverable {
+		if err := g.db.Model(&Event{}).Where("id = ?", evtIDInt).Update("discoverable", false).Error; err != nil {
+			return nil, err
+		}
 	}
 
 	// XXX: this is a hack to allow to disable the guard, since empty values are ignored by db.Updates on structs

@@ -47,6 +47,8 @@
     "no-changes-password-placeholder": "No changes if empty",
     "capacity-label": "Event capacity limit",
     "capacity-placeholder": "Capacity...",
+    "discoverable-label": "Make event discoverable (Visible in Discover)",
+    "exclusive-label": "Exclusive",
     "pick-a-start-date-placeholder": "Pick a start date...",
     "pick-a-end-date-placeholder": "Pick a end date...",
     "from": "From",

@@ -31,6 +31,7 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr:   zenaoAdmin,
 		Location:         &zenaov1.EventLocation{Address: &zenaov1.AddressCustom{Address: "To be disclosed", Timezone: "Europe/Paris"}},
+		Discoverable:     true,
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
