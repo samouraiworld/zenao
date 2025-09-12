@@ -1,6 +1,7 @@
 package eventreg
 
 import (
+	"fmt"
 	"std"
 	"strings"
 	"testing"
@@ -241,24 +242,23 @@ func TestEventsWithNonDiscoverable(t *testing.T) {
 	std.TestSetRealm(std.NewUserRealm(initialOwner))
 
 	organizers := []string{"johnny"}
-	now := time.Now()
-	nextYearUnix := now.Add(time.Hour * 24 * 365).Unix()
-	endDateUnix := now.Add(30 * 24 * time.Hour).Unix()
+	nextYearUnix := time.Now().Add(time.Hour * 24 * 365).Unix()
+	lastYearUnix := time.Now().Add(-time.Hour * 24 * 365).Unix()
+	endDateUnix := time.Now().Add(30 * 24 * time.Hour).Unix()
 
 	getters := map[string]events.InfoGetter{}
 	evts := []*struct {
 		id           string
 		discoverable bool
 	}{
-		{"gno.land/r/zenao/events/1", true},
+		{"gno.land/r/zenao/events/1", false},
 		{"gno.land/r/zenao/events/2", true},
-		{"gno.land/r/zenao/events/3", true},
-		{"gno.land/r/zenao/events/4", false},
+		{"gno.land/r/zenao/events/3", false},
+		{"gno.land/r/zenao/events/4", true},
 		{"gno.land/r/zenao/events/5", false},
 		{"gno.land/r/zenao/events/6", true},
-		{"gno.land/r/zenao/events/7", true},
-		{"gno.land/r/zenao/events/8", false},
-		{"gno.land/r/zenao/events/9", true},
+		{"gno.land/r/zenao/events/7", false},
+		{"gno.land/r/zenao/events/8", true},
 	}
 
 	for _, evt := range evts {
@@ -276,12 +276,27 @@ func TestEventsWithNonDiscoverable(t *testing.T) {
 		IndexEvent(evt.id)
 	}
 
-	// We list by organizer "johnny" to prevent mixing with other tests.
-	// We shift the offset and set a low limit to ensure it is correctly handled with non-discoverable events.
-	events := listEventsByOrganizer("johnny", now.Unix(), nextYearUnix, 3, 3)
+	cases := []struct {
+		limit  uint32
+		offset uint32
+		out    string
+	}{
+		{limit: 3, offset: 2, out: "4, 2"},
+		{limit: 2, offset: 4, out: ""},
+		{limit: 2, offset: 3, out: "1"},
+	}
 
-	// The offset and limit are respected and the non-discoverable events are skipped.
-	urequire.Equal(t, "6, 7, 9", eventsString(events))
+	for _, tc := range cases {
+		t.Run(fmt.Sprintf("offset:%d,limit:%d", tc.offset, tc.limit), func(t *testing.T) {
+			// We list by organizer "johnny" to prevent mixing with other tests.
+			// We shift the offset and set a low limit to ensure it is correctly handled with non-discoverable events.
+			events := listEventsByOrganizer("johnny", nextYearUnix, lastYearUnix, tc.limit, tc.offset)
+
+			// The offset and limit are respected and the non-discoverable events are skipped.
+			urequire.Equal(t, tc.out, eventsString(events))
+		})
+	}
+
 }
 
 func TestEventsToJSON(t *testing.T) {
