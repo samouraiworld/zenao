@@ -281,16 +281,15 @@ func TestEventsWithNonDiscoverable(t *testing.T) {
 		offset uint32
 		out    string
 	}{
-		{limit: 3, offset: 2, out: "4, 2"},
+		{limit: 3, offset: 2, out: "6, 8"},
 		{limit: 2, offset: 4, out: ""},
-		{limit: 2, offset: 3, out: "1"},
+		{limit: 2, offset: 3, out: "8"},
 	}
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("offset:%d,limit:%d", tc.offset, tc.limit), func(t *testing.T) {
 			// We list by organizer "johnny" to prevent mixing with other tests.
-			// We shift the offset and set a low limit to ensure it is correctly handled with non-discoverable events.
-			events := listEventsByOrganizer("johnny", nextYearUnix, lastYearUnix, tc.limit, tc.offset)
+			events := listEventsByOrganizer("johnny", lastYearUnix, nextYearUnix, tc.limit, tc.offset)
 
 			// The offset and limit are respected and the non-discoverable events are skipped.
 			urequire.Equal(t, tc.out, eventsString(events))

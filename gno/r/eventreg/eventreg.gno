@@ -247,24 +247,22 @@ func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, li
 	res := []*zenaov1.EventInfo{}
 	count := uint32(0)
 	it := func(key string, value interface{}) bool {
-		if count < offset {
-			count++
-			return false
-		}
 		var evt zenaov1.EventInfo
 		switch val := value.(type) {
 		case *zenaov1.EventInfo:
-			if !val.Discoverable {
-				return false
-			}
 			evt = *val
 			evt.PkgPath = key
 		case string:
 			evt = *mustGetEventByPkgPath(val)
-			if !evt.Discoverable {
-				return false
-			}
 			evt.PkgPath = val
+		}
+
+		if !evt.Discoverable {
+			return false
+		}
+		if count < offset {
+			count++
+			return false
 		}
 		res = append(res, &evt)
 		return uint32(len(res)) >= limit
