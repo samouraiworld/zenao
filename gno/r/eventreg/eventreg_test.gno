@@ -236,6 +236,54 @@ func TestEvents(t *testing.T) {
 	}
 }
 
+func TestEventsWithNonDiscoverable(t *testing.T) {
+	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
+	std.TestSetRealm(std.NewUserRealm(initialOwner))
+
+	organizers := []string{"johnny"}
+	now := time.Now()
+	nextYearUnix := now.Add(time.Hour * 24 * 365).Unix()
+	endDateUnix := now.Add(30 * 24 * time.Hour).Unix()
+
+	getters := map[string]events.InfoGetter{}
+	evts := []*struct {
+		id           string
+		discoverable bool
+	}{
+		{"gno.land/r/zenao/events/1", true},
+		{"gno.land/r/zenao/events/2", true},
+		{"gno.land/r/zenao/events/3", true},
+		{"gno.land/r/zenao/events/4", false},
+		{"gno.land/r/zenao/events/5", false},
+		{"gno.land/r/zenao/events/6", true},
+		{"gno.land/r/zenao/events/7", true},
+		{"gno.land/r/zenao/events/8", false},
+		{"gno.land/r/zenao/events/9", true},
+	}
+
+	for _, evt := range evts {
+		// XXX: `ev := evt` and using ev in place of evt will cause "gno.land/r/zenao/eventreg: test pkg: panic: unexpected type heapitem"
+		std.TestSetRealm(std.NewCodeRealm(evt.id))
+		getters[evt.id] = func() *zenaov1.EventInfo {
+			return &zenaov1.EventInfo{
+				Discoverable: evt.discoverable,
+				Organizers:   organizers,
+				EndDate:      endDateUnix,
+			}
+		}
+		Register(getters[evt.id])
+		std.TestSetRealm(std.NewUserRealm(initialOwner))
+		IndexEvent(evt.id)
+	}
+
+	// We list by organizer "johnny" to prevent mixing with other tests.
+	// We shift the offset and set a low limit to ensure it is correctly handled with non-discoverable events.
+	events := listEventsByOrganizer("johnny", now.Unix(), nextYearUnix, 3, 3)
+
+	// The offset and limit are respected and the non-discoverable events are skipped.
+	urequire.Equal(t, "6, 7, 9", eventsString(events))
+}
+
 func TestEventsToJSON(t *testing.T) {
 	evts := []*zenaov1.EventInfo{{
 		PkgPath: "foo",
