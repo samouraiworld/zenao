@@ -31,6 +31,8 @@ service ZenaoService {
   rpc CreateCommunity(CreateCommunityRequest)
       returns (CreateCommunityResponse); // NOT IMPLEMENTED YET
   rpc EditCommunity(EditCommunityRequest) returns (EditCommunityResponse);
+  rpc GetCommunityAdministrators(GetCommunityAdministratorsRequest)
+      returns (GetCommunityAdministratorsResponse);
   rpc JoinCommunity(JoinCommunityRequest) returns (JoinCommunityResponse);
   rpc LeaveCommunity(LeaveCommunityRequest) returns (LeaveCommunityResponse);
   rpc AddEventToCommunity(AddEventToCommunityRequest)
@@ -304,6 +306,12 @@ message EditCommunityRequest {
 }
 
 message EditCommunityResponse {}
+
+message GetCommunityAdministratorsRequest { string community_id = 1; }
+
+message GetCommunityAdministratorsResponse {
+  repeated string administrators = 1;
+}
 
 message JoinCommunityRequest { string community_id = 1; }
 

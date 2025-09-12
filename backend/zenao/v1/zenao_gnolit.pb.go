@@ -1017,6 +1017,36 @@ func (e *EditCommunityResponse) GnoLiteral(typePrefix string, linePrefix string)
 	return buf.String()
 }
 
+func (g *GetCommunityAdministratorsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetCommunityAdministratorsRequest{\n")
+	if g.CommunityId != "" {
+		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, g.CommunityId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetCommunityAdministratorsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetCommunityAdministratorsResponse{\n")
+	if len(g.Administrators) != 0 {
+		fmt.Fprintf(buf, "%s\tAdministrators: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range g.Administrators {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (j *JoinCommunityRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
