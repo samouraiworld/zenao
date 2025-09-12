@@ -1,6 +1,7 @@
 package eventreg
 
 import (
+	"fmt"
 	"std"
 	"strings"
 	"testing"
@@ -44,8 +45,9 @@ func TestEvents(t *testing.T) {
 		std.TestSetRealm(std.NewCodeRealm(evt.id))
 		getters[evt.id] = func() *zenaov1.EventInfo {
 			return &zenaov1.EventInfo{
-				Organizers: evt.organizers,
-				EndDate:    evt.endDate.Unix(),
+				Organizers:   evt.organizers,
+				EndDate:      evt.endDate.Unix(),
+				Discoverable: true,
 			}
 		}
 		Register(getters[evt.id])
@@ -233,6 +235,67 @@ func TestEvents(t *testing.T) {
 		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
+}
+
+func TestEventsWithNonDiscoverable(t *testing.T) {
+	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
+	std.TestSetRealm(std.NewUserRealm(initialOwner))
+
+	organizers := []string{"johnny"}
+	nextYearUnix := time.Now().Add(time.Hour * 24 * 365).Unix()
+	lastYearUnix := time.Now().Add(-time.Hour * 24 * 365).Unix()
+	endDateUnix := time.Now().Add(30 * 24 * time.Hour).Unix()
+
+	getters := map[string]events.InfoGetter{}
+	evts := []*struct {
+		id           string
+		discoverable bool
+	}{
+		{"gno.land/r/zenao/events/1", false},
+		{"gno.land/r/zenao/events/2", true},
+		{"gno.land/r/zenao/events/3", false},
+		{"gno.land/r/zenao/events/4", true},
+		{"gno.land/r/zenao/events/5", false},
+		{"gno.land/r/zenao/events/6", true},
+		{"gno.land/r/zenao/events/7", false},
+		{"gno.land/r/zenao/events/8", true},
+	}
+
+	for _, evt := range evts {
+		// XXX: `ev := evt` and using ev in place of evt will cause "gno.land/r/zenao/eventreg: test pkg: panic: unexpected type heapitem"
+		std.TestSetRealm(std.NewCodeRealm(evt.id))
+		getters[evt.id] = func() *zenaov1.EventInfo {
+			return &zenaov1.EventInfo{
+				Discoverable: evt.discoverable,
+				Organizers:   organizers,
+				EndDate:      endDateUnix,
+			}
+		}
+		Register(getters[evt.id])
+		std.TestSetRealm(std.NewUserRealm(initialOwner))
+		IndexEvent(evt.id)
+	}
+
+	cases := []struct {
+		limit  uint32
+		offset uint32
+		out    string
+	}{
+		{limit: 3, offset: 2, out: "6, 8"},
+		{limit: 2, offset: 4, out: ""},
+		{limit: 2, offset: 3, out: "8"},
+	}
+
+	for _, tc := range cases {
+		t.Run(fmt.Sprintf("offset:%d,limit:%d", tc.offset, tc.limit), func(t *testing.T) {
+			// We list by organizer "johnny" to prevent mixing with other tests.
+			events := listEventsByOrganizer("johnny", lastYearUnix, nextYearUnix, tc.limit, tc.offset)
+
+			// The offset and limit are respected and the non-discoverable events are skipped.
+			urequire.Equal(t, tc.out, eventsString(events))
+		})
+	}
+
 }
 
 func TestEventsToJSON(t *testing.T) {
