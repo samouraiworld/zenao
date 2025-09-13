@@ -16,6 +16,7 @@ var (
 	registered           avl.Tree // <communityPkgPath> -> func() communities.Info
 	communityesByMembers avl.Tree // <memberID>/<communityPkgPath> -> communityPkgPath
 	communitiesByPkgPath avl.Tree // <communityPkgPath> -> communities.Info
+	communitiesByEvent   avl.Tree // <eventPkgPath>/<communityID> -> communityID
 
 	ErrCommunityNotFound = errors.New("community not found")
 )
@@ -57,7 +58,7 @@ func mustGetInfo(pkgPath string) *zenaov1.CommunityInfo {
 func IndexCommunity(pkgPath string) {
 	Ownable.AssertCallerIsOwner()
 
-	if prev := getCommunityByPkgPath(pkgPath); prev != nil {
+	if exist := getCommunityByPkgPath(pkgPath); exist != nil {
 		panic("community already indexed: " + pkgPath)
 	}
 
@@ -67,10 +68,7 @@ func IndexCommunity(pkgPath string) {
 
 func AddMember(communityPkgPath string, memberID string) {
 	Ownable.AssertCallerIsOwner()
-
-	if prev := getCommunityByPkgPath(communityPkgPath); prev == nil {
-		panic("community not found: " + communityPkgPath)
-	}
+	mustGetCommunityByPkgPath(communityPkgPath)
 
 	key := memberID + "/" + communityPkgPath
 	communityesByMembers.Set(key, communityPkgPath)
@@ -80,15 +78,26 @@ func AddMember(communityPkgPath string, memberID string) {
 
 func RemoveMember(communityPkgPath string, memberID string) {
 	Ownable.AssertCallerIsOwner()
-
-	if prev := getCommunityByPkgPath(communityPkgPath); prev == nil {
-		panic("community not found: " + communityPkgPath)
-	}
+	mustGetCommunityByPkgPath(communityPkgPath)
 
 	key := memberID + "/" + communityPkgPath
 	communityesByMembers.Remove(key)
 	info := mustGetInfo(communityPkgPath)
 	communitiesByPkgPath.Set(communityPkgPath, info)
+}
+
+func AddEvent(communityPkgPath string, eventID string) {
+	Ownable.AssertCallerIsOwner()
+	mustGetCommunityByPkgPath(communityPkgPath)
+	key := eventID + "/" + communityPkgPath
+	communitiesByEvent.Set(key, communityPkgPath)
+}
+
+func RemoveEvent(communityPkgPath string, eventID string) {
+	Ownable.AssertCallerIsOwner()
+	mustGetCommunityByPkgPath(communityPkgPath)
+	key := eventID + "/" + communityPkgPath
+	communitiesByEvent.Remove(key)
 }
 
 func getCommunityByPkgPath(pkgPath string) *zenaov1.CommunityInfo {
@@ -117,6 +126,14 @@ func listCommunitiesByMembers(memberID string, limit, offset uint32) []*zenaov1.
 	toKey := memberID + "/\xff"
 
 	return listCommunitiesInternal(&communityesByMembers, fromKey, toKey, false, limit, offset)
+}
+
+func listCommunitiesByEvent(eventID string, limit, offset uint32) []*zenaov1.CommunityInfo {
+	// ff is 255 in hex, which is the highest byte value, so it will match all keys that start with eventID.
+	fromKey := eventID + "/"
+	toKey := eventID + "/\xff"
+
+	return listCommunitiesInternal(&communitiesByEvent, fromKey, toKey, false, limit, offset)
 }
 
 func listCommunitiesInternal(at avl.ITree, fromKey string, toKey string, rev bool, limit, offset uint32) []*zenaov1.CommunityInfo {
