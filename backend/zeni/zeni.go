@@ -92,6 +92,7 @@ type Event struct {
 	Location          *zenaov1.EventLocation
 	PasswordHash      string
 	ICSSequenceNumber uint32
+	Discoverable      bool
 }
 
 type Community struct {
@@ -233,6 +234,7 @@ type DB interface {
 	CommunitiesByEvent(eventID string) ([]*Community, error)
 
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+	EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
 	GetCommunity(communityID string) (*Community, error)
 	AddMemberToCommunity(communityID string, userID string) error
 	RemoveMemberFromCommunity(communityID string, userID string) error
@@ -280,6 +282,7 @@ type Chain interface {
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
+	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
 	AddEventToCommunity(callerID string, communityID string, eventID string) error
 	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
 	AddMemberToCommunity(callerID string, communityID string, userID string) error

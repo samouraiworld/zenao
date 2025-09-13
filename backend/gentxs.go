@@ -167,17 +167,17 @@ func execGenTxs() error {
 			return err
 		}
 
-		organizers, err := db.GetOrgUsersWithRole(zeni.EntityTypeEvent, event.ID, zeni.RoleOrganizer)
+		organizers, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeEvent, event.ID, zeni.EntityTypeUser, zeni.RoleOrganizer)
 		if err != nil {
 			return err
 		}
 
 		var organizersIDs []string
 		for _, org := range organizers {
-			organizersIDs = append(organizersIDs, org.ID)
+			organizersIDs = append(organizersIDs, org.EntityID)
 		}
 
-		gatekeepers, err := db.GetOrgUsersWithRole(zeni.EntityTypeEvent, event.ID, zeni.RoleGatekeeper)
+		gatekeepers, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeEvent, event.ID, zeni.EntityTypeUser, zeni.RoleGatekeeper)
 		if err != nil {
 			return err
 		}
@@ -189,7 +189,7 @@ func execGenTxs() error {
 
 		var gatekeepersIDs []string
 		for _, gkp := range gatekeepers {
-			gatekeepersIDs = append(gatekeepersIDs, gkp.ID)
+			gatekeepersIDs = append(gatekeepersIDs, gkp.EntityID)
 		}
 
 		for _, deletedGkp := range deletedGatekeepers {
@@ -283,14 +283,14 @@ func execGenTxs() error {
 	}
 
 	for _, community := range communities {
-		administrators, err := db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, community.ID, zeni.RoleAdministrator)
+		administrators, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeCommunity, community.ID, zeni.EntityTypeUser, zeni.RoleAdministrator)
 		if err != nil {
 			return err
 		}
 
 		var administratorsIDs []string
 		for _, admin := range administrators {
-			administratorsIDs = append(administratorsIDs, admin.ID)
+			administratorsIDs = append(administratorsIDs, admin.EntityID)
 		}
 
 		members, err := db.GetOrgEntitiesWithRole(zeni.EntityTypeCommunity, community.ID, zeni.EntityTypeUser, zeni.RoleMember)
@@ -311,7 +311,18 @@ func execGenTxs() error {
 				return err
 			}
 			txs = append(txs, tx)
-			logger.Info("community add member tx created", zap.String("community-id", community.ID), zap.String("member-id", member.EntityID), zap.Time("created-at", member.CreatedAt))
+			logger.Info("community add member reg tx created", zap.String("community-id", community.ID), zap.String("member-id", member.EntityID), zap.Time("created-at", member.CreatedAt))
+		}
+
+		// admin are also members and the community registry does not make the difference
+		for _, admin := range administrators {
+			membersIDs = append(membersIDs, admin.EntityID)
+			tx, err := createCommunityAddMemberRegTx(chain, signerInfo.GetAddress(), community, admin.EntityID, admin.CreatedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community add member reg tx created", zap.String("community-id", community.ID), zap.String("admin-id", admin.EntityID), zap.Time("created-at", admin.CreatedAt))
 		}
 
 		// XXX: Add deleted members so we can add their post before deleting them
@@ -641,13 +652,14 @@ func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoG
 	organizersAddr := mapsl.Map(organizersIDs, chain.UserAddress)
 	gatekeepersAddr := mapsl.Map(gatekeepersIDs, chain.UserAddress)
 	eRealm, err := genEventRealmSource(organizersAddr, gatekeepersAddr, creator.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
-		Title:       event.Title,
-		Description: event.Description,
-		ImageUri:    event.ImageURI,
-		Location:    event.Location,
-		StartDate:   uint64(event.StartDate.Unix()),
-		EndDate:     uint64(event.EndDate.Unix()),
-		Capacity:    event.Capacity,
+		Title:        event.Title,
+		Description:  event.Description,
+		ImageUri:     event.ImageURI,
+		Location:     event.Location,
+		StartDate:    uint64(event.StartDate.Unix()),
+		EndDate:      uint64(event.EndDate.Unix()),
+		Capacity:     event.Capacity,
+		Discoverable: event.Discoverable,
 	}, privacy)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
@@ -1167,9 +1179,9 @@ func createCommunityRemoveMemberRegTx(chain *gnoZenaoChain, community *zeni.Comm
 
 func createCommunityRemoveEventTx(chain *gnoZenaoChain, creator cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
-	eventPkgPath := chain.eventRealmPkgPath(eventID)
+	eventAddr := chain.EventAddress(eventID)
 	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
-	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventPkgPath)
+	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{

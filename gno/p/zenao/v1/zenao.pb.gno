@@ -31,17 +31,18 @@ type GetUserAddressResponse struct {
 }
 
 type CreateEventRequest struct {
-	Title       string
-	Description string
-	ImageUri    string
-	StartDate   uint64
-	EndDate     uint64
-	TicketPrice float64
-	Capacity    uint32
-	Location    *EventLocation
-	Password    string
-	Organizers  []string
-	Gatekeepers []string
+	Title        string
+	Description  string
+	ImageUri     string
+	StartDate    uint64
+	EndDate      uint64
+	TicketPrice  float64
+	Capacity     uint32
+	Location     *EventLocation
+	Password     string
+	Organizers   []string
+	Gatekeepers  []string
+	Discoverable bool
 }
 
 type CreateEventResponse struct {
@@ -69,6 +70,7 @@ type EditEventRequest struct {
 	UpdatePassword bool
 	Organizers     []string
 	Gatekeepers    []string
+	Discoverable   bool
 }
 
 type EditEventResponse struct {
@@ -166,6 +168,7 @@ type EventInfo struct {
 	PkgPath      string
 	Privacy      *EventPrivacy
 	CheckedIn    uint32
+	Discoverable bool
 }
 
 type BatchProfileField struct {
@@ -287,6 +290,26 @@ type CreateCommunityRequest struct {
 
 type CreateCommunityResponse struct {
 	CommunityId string
+}
+
+type EditCommunityRequest struct {
+	CommunityId    string
+	DisplayName    string
+	Description    string
+	AvatarUri      string
+	BannerUri      string
+	Administrators []string
+}
+
+type EditCommunityResponse struct {
+}
+
+type GetCommunityAdministratorsRequest struct {
+	CommunityId string
+}
+
+type GetCommunityAdministratorsResponse struct {
+	Administrators []string
 }
 
 type JoinCommunityRequest struct {
