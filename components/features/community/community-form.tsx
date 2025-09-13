@@ -1,23 +1,13 @@
-import { UseFormReturn } from "react-hook-form";
-import { z } from "zod";
+"use client";
+
+import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
-
-// TODO: move to @/types/schemas
-const communityFormSchema = z.object({
-  displayName: z.string().min(3, "Name too short"),
-  description: z.string().min(5, "Description too short"),
-  avatarUri: z.string().url().or(z.literal("")),
-  bannerUri: z.string().url().or(z.literal("")),
-  administrators: z
-    .array(z.string().min(1))
-    .min(1, "At least one admin is required"),
-});
-
-type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
+import { cn } from "@/lib/tailwind";
+import { CommunityFormSchemaType } from "@/types/schemas";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -32,46 +22,83 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
   isLoading,
   isEditing = false,
 }) => {
+  const { fields, append, remove } = useFieldArray<CommunityFormSchemaType>({
+    control: form.control,
+    name: "administrators", // TODO: fix
+  });
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 max-w-2xl mx-auto w-full"
+        className="flex w-full flex-col gap-10"
       >
-        <div className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-6">
-            <FormFieldImage
-              name="avatarUri"
-              control={form.control}
-              aspectRatio={1}
-              placeholder="Upload avatar image"
-            />
-            <FormFieldImage
-              name="bannerUri"
-              control={form.control}
-              aspectRatio={3.5}
-              placeholder="Upload banner image"
-            />
-          </div>
-          <FormFieldInputString
+        <div className="grid md:grid-cols-2 gap-6">
+          <FormFieldImage
+            name="avatarUri"
             control={form.control}
-            name="displayName"
-            label="Name"
-            placeholder="Enter community name"
+            aspectRatio={1}
+            placeholder="Upload avatar image"
           />
-          <FormFieldTextArea
+          <FormFieldImage
+            name="bannerUri"
             control={form.control}
-            name="description"
-            label="Description"
-            placeholder="Write a short description..."
-            wordCounter
-            maxLength={5000}
+            aspectRatio={3.5}
+            placeholder="Upload banner image"
           />
-          {/* TODO: admin */}
+        </div>
+
+        <FormFieldInputString
+          control={form.control}
+          name="displayName"
+          label="Name"
+          placeholder="Enter community name"
+        />
+
+        <FormFieldTextArea
+          control={form.control}
+          name="description"
+          label="Description"
+          placeholder="Write a short description..."
+          wordCounter
+          maxLength={5000}
+        />
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Administrators
+          </label>
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex gap-2 mb-2 items-center">
+              <input
+                type="text"
+                {...form.register(`administrators.${index}`)}
+                className={cn(
+                  "input input-bordered flex-grow",
+                  "rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm",
+                )}
+                placeholder="Administrator address"
+              />
+              <button
+                type="button"
+                onClick={() => remove(index)}
+                className="btn btn-error btn-sm"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <ButtonWithChildren
+            type="button"
+            onClick={() => append("")} // TODO: fix
+            className="btn btn-primary btn-sm"
+          >
+            Add Administrator
+          </ButtonWithChildren>
         </div>
 
         <ButtonWithChildren loading={isLoading} type="submit">
-          {isEditing ? "Update Community" : "Create Community"}
+          Update Community
         </ButtonWithChildren>
       </form>
     </Form>
