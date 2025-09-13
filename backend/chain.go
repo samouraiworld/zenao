@@ -605,6 +605,30 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 		g.logger.Info("added member to community registry", zap.String("member", member), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	}
 
+	for _, evtAddr := range eventsAddr {
+		msgCall = vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: g.communitiesIndexPkgPath,
+			Func:    "AddEvent",
+			Args: []string{
+				communityPkgPath,
+				evtAddr,
+			},
+		}
+		gasWanted, err = g.estimateCallTxGas(msgCall)
+		if err != nil {
+			return err
+		}
+		broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+			GasFee:    "10000000ugnot",
+			GasWanted: gasWanted,
+		}, msgCall))
+		if err != nil {
+			return err
+		}
+		g.logger.Info("added event to community registry", zap.String("event", evtAddr), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	}
+
 	return nil
 }
 
@@ -826,6 +850,29 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 	}
 	g.logger.Info("added event to community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "AddEvent",
+		Args: []string{
+			communityPkgPath,
+			eventAddr,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("indexed event in community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
 	return nil
 }
 
@@ -857,6 +904,29 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 		return err
 	}
 	g.logger.Info("removed event from community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "RemoveEvent",
+		Args: []string{
+			communityPkgPath,
+			eventAddr,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("removed index event in community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
