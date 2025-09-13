@@ -34,7 +34,7 @@ func (s *ZenaoServer) EnsureUserExists(
 
 	var zUser *zeni.User
 	var alreadyExists bool
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.EnsureUserExists", func(db zeni.DB) error {
 		var err error
 		if zUser, err = db.GetUser(user.ID); err != nil {
 			return err

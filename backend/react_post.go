@@ -32,7 +32,7 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 	}
 
 	var orgType, orgID string
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.ReactPost", func(db zeni.DB) error {
 		orgType, orgID, err = db.GetOrgByPostID(req.Msg.PostId)
 		if err != nil {
 			return err

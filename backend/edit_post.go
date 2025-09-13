@@ -39,7 +39,7 @@ func (s *ZenaoServer) EditPost(ctx context.Context, req *connect.Request[zenaov1
 	}
 
 	var zpost *zeni.Post
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.EditPost", func(db zeni.DB) error {
 		zpost, err = db.GetPostByID(req.Msg.PostId)
 		if err != nil {
 			return err

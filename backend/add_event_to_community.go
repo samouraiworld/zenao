@@ -43,7 +43,7 @@ func (s *ZenaoServer) AddEventToCommunity(
 		evt          *zeni.Event
 	)
 
-	if err := s.DB.WithContext(ctx).Tx(func(tx zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.AddEventToCommunity", func(tx zeni.DB) error {
 		cmt, err = tx.GetCommunity(req.Msg.CommunityId)
 		if err != nil {
 			return err

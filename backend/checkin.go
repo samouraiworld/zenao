@@ -30,7 +30,7 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 
 	var evt *zeni.Event
 
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.Checkin", func(db zeni.DB) error {
 		evt, err = db.Checkin(req.Msg.TicketPubkey, zUser.ID, req.Msg.Signature)
 		return err
 	}); err != nil {

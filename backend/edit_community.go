@@ -56,7 +56,7 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 	}
 
 	cmt := (*zeni.Community)(nil)
-	if err := s.DB.WithContext(ctx).Tx(func(tx zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.EditCommunity", func(tx zeni.DB) error {
 		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
 			return err

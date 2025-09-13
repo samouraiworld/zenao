@@ -85,7 +85,7 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	evt := (*zeni.Event)(nil)
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
 		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
 		}

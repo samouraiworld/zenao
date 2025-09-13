@@ -43,7 +43,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		}
 	}
 
-	roles, err := s.DB.EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
+	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 	}
 
 	if req.Msg.ParentId != "" {
-		_, err := s.DB.GetPostByID(req.Msg.ParentId)
+		_, err := s.DB.WithContext(ctx).GetPostByID(req.Msg.ParentId)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +75,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 	}
 
 	zpost := (*zeni.Post)(nil)
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.CreatePost", func(db zeni.DB) error {
 		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
 		if err != nil {
 			return err

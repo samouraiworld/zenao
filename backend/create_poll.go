@@ -36,7 +36,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	roles, err := s.DB.EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
+	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 	}
 
 	zpoll := (*zeni.Poll)(nil)
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.CreatePoll", func(db zeni.DB) error {
 		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
 		if err != nil {
 			return err

@@ -48,7 +48,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	evt := (*zeni.Event)(nil)
 	var participants []*zeni.User
 	tickets := make(map[string][]*zeni.SoldTicket)
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.BroadcastEvent", func(db zeni.DB) error {
 		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err

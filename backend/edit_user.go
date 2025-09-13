@@ -31,7 +31,7 @@ func (s *ZenaoServer) EditUser(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.EditUser", func(db zeni.DB) error {
 		if err := db.EditUser(zUser.ID, req.Msg); err != nil {
 			return err
 		}

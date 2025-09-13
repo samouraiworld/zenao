@@ -81,7 +81,7 @@ func (s *ZenaoServer) EditEvent(
 
 	var evt *zeni.Event
 
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.EditEvent", func(db zeni.DB) error {
 		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err

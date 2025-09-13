@@ -33,7 +33,7 @@ func (s *ZenaoServer) CancelEvent(
 	var users []*zeni.User
 	var cmties []*zeni.Community
 	var evt *zeni.Event
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.CancelEvent", func(db zeni.DB) error {
 		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
