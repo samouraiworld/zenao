@@ -406,7 +406,7 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error {
 	ctx, span := g.tracer.Start(
 		g.ctx,
-		"participate",
+		"gzchain.Participate",
 		trace.WithSpanKind(trace.SpanKindClient),
 	)
 	defer span.End()

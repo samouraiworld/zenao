@@ -14,6 +14,8 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/plugin/opentelemetry/tracing"
@@ -94,8 +96,24 @@ type gormZenaoDB struct {
 	db *gorm.DB
 }
 
+// TxWithSpan implements zeni.DB.
+func (g *gormZenaoDB) TxWithSpan(ctx context.Context, label string, cb func(db zeni.DB) error) error {
+	spanCtx, span := otel.Tracer("gzdb").Start(
+		ctx,
+		label,
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	return cb(g.withContext(spanCtx))
+}
+
 // WithContext implements zeni.DB.
 func (g *gormZenaoDB) WithContext(ctx context.Context) zeni.DB {
+	return g.withContext(ctx)
+}
+
+// WithContext implements zeni.DB.
+func (g *gormZenaoDB) withContext(ctx context.Context) *gormZenaoDB {
 	return &gormZenaoDB{db: g.db.WithContext(ctx)}
 }
 
@@ -361,6 +379,14 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 
 // Participate implements zeni.DB.
 func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error {
+	ctx, span := otel.Tracer("gzdb").Start(
+		g.db.Statement.Context,
+		"gzdb.Participate",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	g = g.withContext(ctx)
+
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
 	if err != nil {
 		return err

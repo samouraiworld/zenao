@@ -17,6 +17,8 @@ import (
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -47,6 +49,14 @@ func SetupAuth(clerkSecretKey string, logger *zap.Logger) (zeni.Auth, error) {
 
 // GetUser implements zeni.Auth.
 func (c *clerkZenaoAuth) GetUser(ctx context.Context) *zeni.AuthUser {
+	spanCtx, span := otel.Tracer("czauth").Start(
+		ctx,
+		"czauth.GetUser",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	ctx = spanCtx
+
 	iUser := authn.GetInfo(ctx)
 	if iUser == nil {
 		return nil
@@ -123,6 +133,18 @@ func (c *clerkZenaoAuth) EnsureUserExists(ctx context.Context, email string) (*z
 
 // EnsureUserExists implements zeni.Auth.
 func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string) ([]*zeni.AuthUser, error) {
+	if len(emails) == 0 {
+		return nil, nil
+	}
+
+	spanCtx, span := otel.Tracer("czauth").Start(
+		ctx,
+		"czauth.EnsureUsersExists",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	ctx = spanCtx
+
 	emails = mapsl.Map(emails, strings.ToLower)
 
 	existing, err := c.client.List(ctx, &user.ListParams{EmailAddresses: emails})
@@ -161,6 +183,13 @@ func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string)
 // WithAuth implements zeni.Auth.
 func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 	return authn.NewMiddleware(func(_ context.Context, req *http.Request) (any, error) {
+		ctx, span := otel.Tracer("czauth").Start(
+			req.Context(),
+			"czauth.WithAuth",
+			trace.WithSpanKind(trace.SpanKindClient),
+		)
+		defer span.End()
+
 		authHeader := req.Header.Get("Authorization")
 		if authHeader == "" {
 			return nil, nil
@@ -168,7 +197,7 @@ func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 
 		sessionToken := strings.TrimPrefix(authHeader, "Bearer ")
 
-		claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
+		claims, err := jwt.Verify(ctx, &jwt.VerifyParams{
 			Token:      sessionToken,
 			JWKSClient: c.jwksClient,
 		})
@@ -176,7 +205,7 @@ func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 			return nil, err
 		}
 
-		usr, err := c.client.Get(req.Context(), claims.Subject)
+		usr, err := c.client.Get(ctx, claims.Subject)
 		if err != nil {
 			return nil, err
 		}

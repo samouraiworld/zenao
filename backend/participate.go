@@ -87,9 +87,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	needPasswordIfGuarded := true
 	rolesByParticipant := make([][]string, len(participants))
 
-	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
-		buyerRoles, err := db.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		buyerRoles, err := tx.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -97,19 +97,19 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			needPasswordIfGuarded = false
 		}
 
-		communities, err = db.CommunitiesByEvent(req.Msg.EventId)
+		communities, err = tx.CommunitiesByEvent(req.Msg.EventId)
 		if err != nil {
 			return err
 		}
 
 		for i, ticket := range tickets {
 			// XXX: support batch
-			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
+			if err := tx.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
 				return err
 			}
 
 			for _, cmt := range communities {
-				roles, err := db.EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
+				roles, err := tx.EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
 				if err != nil {
 					return err
 				}
@@ -117,13 +117,13 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				if slices.Contains(roles, zeni.RoleMember) {
 					continue
 				}
-				if err := db.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
+				if err := tx.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
 					return err
 				}
 			}
 		}
 
-		evt, err = db.GetEvent(req.Msg.EventId)
+		evt, err = tx.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
 		}
