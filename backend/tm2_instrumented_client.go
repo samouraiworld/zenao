@@ -15,6 +15,8 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
+// XXX: we need this fork because the client from gno uses a context.Background
+
 const (
 	protoHTTP  = "http"
 	protoHTTPS = "https"
