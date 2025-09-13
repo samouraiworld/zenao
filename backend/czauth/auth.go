@@ -204,7 +204,7 @@ func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 		jwk := c.store.GetJWK()
 		if jwk == nil {
 			// Decode the session JWT to find the key ID.
-			unsafeClaims, err := jwt.Decode(req.Context(), &jwt.DecodeParams{
+			unsafeClaims, err := jwt.Decode(ctx, &jwt.DecodeParams{
 				Token: sessionToken,
 			})
 			if err != nil {
@@ -212,7 +212,7 @@ func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 			}
 
 			// Fetch the JSON Web Key
-			jwk, err = jwt.GetJSONWebKey(req.Context(), &jwt.GetJSONWebKeyParams{
+			jwk, err = jwt.GetJSONWebKey(ctx, &jwt.GetJSONWebKeyParams{
 				KeyID:      unsafeClaims.KeyID,
 				JWKSClient: c.jwksClient,
 			})
