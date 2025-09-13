@@ -121,7 +121,7 @@ func injectStartEnv() {
 
 }
 
-func execStart(ctx context.Context) error {
+func execStart(ctx context.Context) (retErr error) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
@@ -134,7 +134,7 @@ func execStart(ctx context.Context) error {
 		return fmt.Errorf("setup otel: %w", err)
 	}
 	defer func() {
-		err = errors.Join(err, otelShutdown(ctx))
+		retErr = errors.Join(retErr, otelShutdown(ctx))
 	}()
 
 	auth, err := czauth.SetupAuth(conf.clerkSecretKey, logger)
