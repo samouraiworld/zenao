@@ -144,51 +144,59 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			tracer := otel.Tracer("mail")
+			ctx, span := tracer.Start(
+				ctx,
+				"mail.Participate",
+				trace.WithSpanKind(trace.SpanKindClient),
+			)
+			defer span.End()
+
 			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
 			if err != nil {
 				s.Logger.Error("generate-participate-email-content", zap.Error(err))
-			} else {
-				attachments := make([]*resend.Attachment, 0, len(tickets))
+				return
+			}
 
-				func() {
-					tracer := otel.Tracer("gentickets")
-					_, span := tracer.Start(
-						ctx,
-						"generate tickets and ics",
-						trace.WithSpanKind(trace.SpanKindClient),
-					)
-					defer span.End()
-					for i, ticket := range tickets {
-						pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
-						if err != nil {
-							s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
-							continue
-						}
-						attachments = append(attachments, &resend.Attachment{
-							Content:     pdfData,
-							Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
-							ContentType: "application/pdf",
-						})
-						icsData := GenerateICS(evt, s.MailSender, s.Logger)
-						attachments = append(attachments, &resend.Attachment{
-							Content:     icsData,
-							Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
-							ContentType: "text/calendar",
-						})
+			attachments := make([]*resend.Attachment, 0, len(tickets))
+
+			func() {
+				_, span := tracer.Start(
+					ctx,
+					"generate tickets and ics",
+					trace.WithSpanKind(trace.SpanKindClient),
+				)
+				defer span.End()
+				for i, ticket := range tickets {
+					pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
+					if err != nil {
+						s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
+						continue
 					}
-				}()
-
-				// XXX: Replace sender name with organizer name
-				if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
-					From:        fmt.Sprintf("Zenao <%s>", s.MailSender),
-					To:          append(req.Msg.Guests, authUser.Email),
-					Subject:     fmt.Sprintf("%s - Confirmation", evt.Title),
-					Html:        htmlStr,
-					Text:        text,
-					Attachments: attachments,
-				}); err != nil {
-					s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
+					attachments = append(attachments, &resend.Attachment{
+						Content:     pdfData,
+						Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
+						ContentType: "application/pdf",
+					})
+					icsData := GenerateICS(evt, s.MailSender, s.Logger)
+					attachments = append(attachments, &resend.Attachment{
+						Content:     icsData,
+						Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
+						ContentType: "text/calendar",
+					})
 				}
+			}()
+
+			// XXX: Replace sender name with organizer name
+			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
+				From:        fmt.Sprintf("Zenao <%s>", s.MailSender),
+				To:          append(req.Msg.Guests, authUser.Email),
+				Subject:     fmt.Sprintf("%s - Confirmation", evt.Title),
+				Html:        htmlStr,
+				Text:        text,
+				Attachments: attachments,
+			}); err != nil {
+				s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
 			}
 		}()
 	}
