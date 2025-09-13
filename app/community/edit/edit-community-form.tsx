@@ -9,13 +9,9 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
-import { communityInfo, communityAdministrators } from "@/lib/queries/community";
+import { communityInfo } from "@/lib/queries/community";
 import { CommunityForm } from "@/components/features/community/community-form";
-// import { useTranslations } from "next-intl";
-import {
-  communityFormSchema,
-  CommunityFormSchemaType,
-} from "@/types/schemas";
+import { communityFormSchema, CommunityFormSchemaType } from "@/types/schemas";
 
 export const EditCommunityForm: React.FC<{ communityId: string }> = ({
   communityId,
@@ -24,22 +20,23 @@ export const EditCommunityForm: React.FC<{ communityId: string }> = ({
   const router = useRouter();
   const { toast } = useToast();
   const { data: communityData } = useSuspenseQuery(communityInfo(communityId));
-  const { data: administrators } = useSuspenseQuery(
-    communityAdministrators(communityId),
-  );
+
   const defaultValues: CommunityFormSchemaType = {
-    displayName: communityData.displayName ?? "",
-    description: communityData.description ?? "",
-    avatarUri: communityData.avatarUri ?? "",
-    bannerUri: communityData.bannerUri ?? "",
-    administrators: administrators.length > 0 ? administrators : [""],
+    displayName: communityData?.displayName ?? "",
+    description: communityData?.description ?? "",
+    avatarUri: communityData?.avatarUri ?? "",
+    bannerUri: communityData?.bannerUri ?? "",
+    administrators: [{ address: "" }], // TODO: fix email + regex to check if right format
   };
+
   const form = useForm<CommunityFormSchemaType>({
     mode: "all",
     resolver: zodResolver(communityFormSchema),
     defaultValues,
   });
+
   const { mutateAsync: editCommunity, isPending } = useEditCommunity();
+
   const onSubmit = async (values: CommunityFormSchemaType) => {
     try {
       const token = await getToken();
@@ -47,7 +44,11 @@ export const EditCommunityForm: React.FC<{ communityId: string }> = ({
       await editCommunity({
         token,
         communityId,
-        ...values,
+        displayName: values.displayName,
+        description: values.description,
+        avatarUri: values.avatarUri,
+        bannerUri: values.bannerUri,
+        administrators: values.administrators.map((admin) => admin.address),
       });
       toast({ title: "Community updated successfully" });
       router.push(`/community/${communityId}`);
@@ -61,11 +62,6 @@ export const EditCommunityForm: React.FC<{ communityId: string }> = ({
   };
 
   return (
-    <CommunityForm
-      form={form}
-      onSubmit={onSubmit}
-      isLoading={isPending}
-      isEditing
-    />
+    <CommunityForm form={form} onSubmit={onSubmit} isLoading={isPending} />
   );
 };

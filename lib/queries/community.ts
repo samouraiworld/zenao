@@ -171,7 +171,8 @@ export const communityAdministrators = (communityId: string) =>
         `community.GetAdministrators()`,
       );
       const rawAdministrators = extractGnoJSONResponse(res);
-      const administrators = communityAdministratorsSchema.parse(rawAdministrators);
+      const administrators =
+        communityAdministratorsSchema.parse(rawAdministrators);
       return administrators;
-  },
-});
+    },
+  });

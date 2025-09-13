@@ -200,7 +200,8 @@ export const communityFormSchema = z.object({
   avatarUri: z.string().url().or(z.literal("")),
   bannerUri: z.string().url().or(z.literal("")),
   administrators: z
-    .array(z.string().min(1))
+    .array(z.object({address: z.string()
+    .min(1, "Administrator address is required")}))
     .min(1, "At least one admin is required"),
 });
 
