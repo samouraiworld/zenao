@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     env_file:
         - ./backend.env
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - 4242:4242
     container_name: backend
@@ -15,7 +17,7 @@ services:
       context: .
       dockerfile: gno.Dockerfile
       args:
-         ZENAO_ADMIN_ADDR: g1qjkqq0ycmvq0g6f5gyvm60phcj0fpam6z8zvd4
+        ZENAO_ADMIN_ADDR: g1qjkqq0ycmvq0g6f5gyvm60phcj0fpam6z8zvd4
     ports:
       - 8888:8888
       - 26657:26657
@@ -26,3 +28,20 @@ services:
       timeout: 30s
       retries: 50
       start_period: 30s
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.107.0
+    volumes:
+      - ./staging.otelco.yaml:/etc/otelcol/config.yaml
+    depends_on:
+      jaeger:
+        condition: service_healthy
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      JAEGER_PROPAGATION: w3c
+    ports:
+      - 16686:16686 # how to secure this?
+    healthcheck:
+      test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]
