@@ -4,14 +4,13 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file:
-        - ./backend.env
+      - ./backend.env
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - 4242:4242
     container_name: backend
     restart: always
-
   gno:
     build:
       context: .
@@ -28,7 +27,6 @@ services:
       timeout: 30s
       retries: 50
       start_period: 30s
-
   otel-collector:
     image: otel/opentelemetry-collector:0.107.0
     volumes:
@@ -36,7 +34,6 @@ services:
     depends_on:
       jaeger:
         condition: service_healthy
-
   jaeger:
     image: jaegertracing/all-in-one:latest
     environment:
