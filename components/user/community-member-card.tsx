@@ -28,8 +28,6 @@ function CommunityMemberCard({
           <Text size="xs" className="text-secondary-color">
             {address.substring(0, 10)}
           </Text>
-
-          {/* TODO: Show bio properly parsed as markdown */}
         </div>
         <div className="flex flex-col gap-2">
           <Text size="sm" className="font-semibold text-primary">
