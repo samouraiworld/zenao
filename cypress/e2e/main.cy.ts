@@ -110,7 +110,7 @@ describe("main", () => {
     // check that manifesto text is present
     cy.get("p")
       .contains(
-        "commit ourself to build sustainable tools which are made to help people",
+        "commit ourselves to building sustainable tools that help people",
       )
       .should("be.visible");
   });
