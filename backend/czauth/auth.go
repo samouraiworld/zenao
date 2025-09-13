@@ -11,23 +11,37 @@ import (
 
 	"connectrpc.com/authn"
 	"github.com/clerk/clerk-sdk-go/v2"
+	"github.com/clerk/clerk-sdk-go/v2/jwks"
 	"github.com/clerk/clerk-sdk-go/v2/jwt"
 	"github.com/clerk/clerk-sdk-go/v2/user"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 )
 
 // czauth means clerk zenao auth and is a clerk client wrapper implementing the zeni.Auth interface
 
 type clerkZenaoAuth struct {
-	logger *zap.Logger
+	logger     *zap.Logger
+	client     *user.Client
+	jwksClient *jwks.Client
 }
 
 func SetupAuth(clerkSecretKey string, logger *zap.Logger) (zeni.Auth, error) {
-	clerk.SetKey(clerkSecretKey)
+	httpClient := &http.Client{
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
+	}
+
+	config := &clerk.ClientConfig{}
+	config.Key = &clerkSecretKey
+	config.HTTPClient = httpClient
+	client := user.NewClient(config)
+	jwksClient := jwks.NewClient(config)
 	return &clerkZenaoAuth{
-		logger: logger,
+		logger:     logger,
+		client:     client,
+		jwksClient: jwksClient,
 	}, nil
 }
 
@@ -71,7 +85,7 @@ func (c *clerkZenaoAuth) GetUsersFromIDs(ctx context.Context, ids []string) ([]*
 		}
 		params.Limit = clerk.Int64(int64(limit))
 
-		userList, err := user.List(ctx, params)
+		userList, err := c.client.List(ctx, params)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +125,7 @@ func (c *clerkZenaoAuth) EnsureUserExists(ctx context.Context, email string) (*z
 func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string) ([]*zeni.AuthUser, error) {
 	emails = mapsl.Map(emails, strings.ToLower)
 
-	existing, err := user.List(ctx, &user.ListParams{EmailAddresses: emails})
+	existing, err := c.client.List(ctx, &user.ListParams{EmailAddresses: emails})
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +146,7 @@ func (c *clerkZenaoAuth) EnsureUsersExists(ctx context.Context, emails []string)
 		}
 		password := base64.RawURLEncoding.EncodeToString(passwordBz)
 
-		clerkUser, err := user.Create(ctx, &user.CreateParams{
+		clerkUser, err := c.client.Create(ctx, &user.CreateParams{
 			EmailAddresses: &[]string{email},
 			Password:       &password,
 		})
@@ -155,13 +169,14 @@ func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 		sessionToken := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := jwt.Verify(req.Context(), &jwt.VerifyParams{
-			Token: sessionToken,
+			Token:      sessionToken,
+			JWKSClient: c.jwksClient,
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		usr, err := user.Get(req.Context(), claims.Subject)
+		usr, err := c.client.Get(req.Context(), claims.Subject)
 		if err != nil {
 			return nil, err
 		}

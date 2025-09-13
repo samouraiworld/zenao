@@ -31,7 +31,7 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := s.DB.Tx(func(tx zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(tx zeni.DB) error {
 		cmt, err := tx.GetCommunity(req.Msg.CommunityId)
 		if err != nil {
 			return err
@@ -55,7 +55,7 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
+	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
 		return nil, err
 	}
 

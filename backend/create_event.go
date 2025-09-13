@@ -85,7 +85,7 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	evt := (*zeni.Event)(nil)
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
 		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
 		}
@@ -123,7 +123,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+	if err := s.Chain.WithContext(ctx).CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
 		s.Logger.Error("create-event", zap.Error(err))
 		return nil, err
 	}

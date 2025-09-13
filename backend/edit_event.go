@@ -81,7 +81,7 @@ func (s *ZenaoServer) EditEvent(
 
 	var evt *zeni.Event
 
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
 		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
@@ -104,7 +104,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+	if err := s.Chain.WithContext(ctx).EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
 		return nil, err
 	}
 

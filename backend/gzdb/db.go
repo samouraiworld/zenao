@@ -1,6 +1,7 @@
 package gzdb
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"slices"
@@ -15,6 +16,7 @@ import (
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/plugin/opentelemetry/tracing"
 )
 
 type User struct {
@@ -81,11 +83,20 @@ func SetupDB(dsn string) (zeni.DB, error) {
 		return nil, err
 	}
 
+	if err := db.Use(tracing.NewPlugin()); err != nil {
+		return nil, err
+	}
+
 	return &gormZenaoDB{db: db}, nil
 }
 
 type gormZenaoDB struct {
 	db *gorm.DB
+}
+
+// WithContext implements zeni.DB.
+func (g *gormZenaoDB) WithContext(ctx context.Context) zeni.DB {
+	return &gormZenaoDB{db: g.db.WithContext(ctx)}
 }
 
 func (g *gormZenaoDB) Tx(cb func(db zeni.DB) error) error {

@@ -30,7 +30,7 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 	}
 
 	var admins []*zeni.User
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
 		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
 			return err

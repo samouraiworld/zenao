@@ -56,7 +56,7 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 	}
 
 	cmt := (*zeni.Community)(nil)
-	if err := s.DB.Tx(func(tx zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(tx zeni.DB) error {
 		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
 			return err
@@ -73,7 +73,7 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 		return nil, err
 	}
 
-	if err := s.Chain.EditCommunity(cmt.ID, zUser.ID, adminIDs, req.Msg); err != nil {
+	if err := s.Chain.WithContext(ctx).EditCommunity(cmt.ID, zUser.ID, adminIDs, req.Msg); err != nil {
 		return nil, fmt.Errorf("failed to edit community on chain: %w", err)
 	}
 

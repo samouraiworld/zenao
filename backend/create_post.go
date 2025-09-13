@@ -69,13 +69,13 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		},
 	}
 
-	postID, err := s.Chain.CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
+	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
 	if err != nil {
 		return nil, err
 	}
 
 	zpost := (*zeni.Post)(nil)
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
 		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
 		if err != nil {
 			return err

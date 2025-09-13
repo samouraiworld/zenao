@@ -33,7 +33,7 @@ func (s *ZenaoServer) CancelEvent(
 	var users []*zeni.User
 	var cmties []*zeni.Community
 	var evt *zeni.Event
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
 		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
@@ -98,12 +98,12 @@ func (s *ZenaoServer) CancelEvent(
 	}
 
 	for _, cmt := range cmties {
-		if err := s.Chain.RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, evt.ID); err != nil {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, evt.ID); err != nil {
 			s.Logger.Error("remove-cancelled-event-from-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
 		}
 	}
 
-	if err := s.Chain.CancelEvent(evt.ID, evt.CreatorID); err != nil {
+	if err := s.Chain.WithContext(ctx).CancelEvent(evt.ID, evt.CreatorID); err != nil {
 		return nil, err
 	}
 

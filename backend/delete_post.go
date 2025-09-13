@@ -27,7 +27,7 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 
 	s.Logger.Info("delete-post", zap.String("post-id", req.Msg.PostId), zap.String("user-id", zUser.ID))
 
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
 		post, err := db.GetPostByID(req.Msg.PostId)
 		if err != nil {
 			return err
@@ -51,7 +51,7 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 		return nil, err
 	}
 
-	if err := s.Chain.DeletePost(zUser.ID, req.Msg.PostId); err != nil {
+	if err := s.Chain.WithContext(ctx).DeletePost(zUser.ID, req.Msg.PostId); err != nil {
 		return nil, err
 	}
 

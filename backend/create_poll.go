@@ -43,7 +43,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 	if len(roles) == 0 {
 		return nil, errors.New("user is not a member of the organization that owns the feed")
 	}
-	pollID, postID, err := s.Chain.CreatePoll(zUser.ID, req.Msg)
+	pollID, postID, err := s.Chain.WithContext(ctx).CreatePoll(zUser.ID, req.Msg)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 	}
 
 	zpoll := (*zeni.Poll)(nil)
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(db zeni.DB) error {
 		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
 		if err != nil {
 			return err

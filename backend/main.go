@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"slices"
@@ -92,7 +93,7 @@ func newStartCmd() *commands.Command {
 		},
 		&conf,
 		func(ctx context.Context, args []string) error {
-			return execStart()
+			return execStart(ctx)
 		},
 	)
 }
@@ -118,13 +119,21 @@ func injectStartEnv() {
 
 }
 
-func execStart() error {
+func execStart(ctx context.Context) error {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
 	}
 
 	injectStartEnv()
+
+	otelShutdown, err := setupOTelSDK(ctx)
+	if err != nil {
+		return fmt.Errorf("setup otel: %w", err)
+	}
+	defer func() {
+		err = errors.Join(err, otelShutdown(ctx))
+	}()
 
 	auth, err := czauth.SetupAuth(conf.clerkSecretKey, logger)
 	if err != nil {
@@ -174,6 +183,7 @@ func execStart() error {
 		),
 	)
 	mux.Handle(path, middlewares(handler,
+		withTracing(),
 		withConnectCORS(allowedOrigins...),
 		auth.WithAuth(),
 	))

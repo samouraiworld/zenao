@@ -31,7 +31,7 @@ func (s *ZenaoServer) LeaveCommunity(
 	}
 
 	var cmt *zeni.Community
-	if err := s.DB.Tx(func(tx zeni.DB) error {
+	if err := s.DB.WithContext(ctx).Tx(func(tx zeni.DB) error {
 		cmt, err = tx.GetCommunity(req.Msg.CommunityId)
 		if err != nil {
 			return err
@@ -50,7 +50,7 @@ func (s *ZenaoServer) LeaveCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.RemoveMemberFromCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
+	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
 		return nil, errors.New("failed to remove member from community on chain")
 	}
 

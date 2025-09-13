@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto"
 	"crypto/ed25519"
 	srand "crypto/rand"
@@ -26,6 +27,8 @@ import (
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -51,6 +54,8 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 
 	client := gnoclient.Client{Signer: signer, RPCClient: tmClient}
 
+	tracer := otel.Tracer("chain")
+
 	return &gnoZenaoChain{
 		client:                  client,
 		eventsIndexPkgPath:      path.Join("gno.land/r", namespace, "eventreg"),
@@ -59,6 +64,9 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 		logger:                  logger,
 		namespace:               namespace,
 		gasSecurityRate:         gasSecurityRate,
+		chainEndpoint:           chainEndpoint,
+		ctx:                     context.Background(),
+		tracer:                  tracer,
 	}, nil
 }
 
@@ -70,6 +78,26 @@ type gnoZenaoChain struct {
 	logger                  *zap.Logger
 	namespace               string
 	gasSecurityRate         float64
+	chainEndpoint           string
+	ctx                     context.Context
+	tracer                  trace.Tracer
+}
+
+// WithContext implements zeni.Chain.
+func (g *gnoZenaoChain) WithContext(ctx context.Context) zeni.Chain {
+	return g.withContext(ctx)
+}
+
+// WithContext implements zeni.Chain.
+func (g *gnoZenaoChain) withContext(ctx context.Context) *gnoZenaoChain {
+	nc := *g
+	client, err := NewTM2Client(ctx, g.chainEndpoint)
+	if err != nil {
+		panic(err) // XXX: do better
+	}
+	nc.client.RPCClient = tm2client.NewRPCClient(client)
+	nc.ctx = ctx
+	return &nc
 }
 
 const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
@@ -376,6 +404,14 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 
 // Participate implements ZenaoChain.
 func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error {
+	ctx, span := g.tracer.Start(
+		g.ctx,
+		"participate",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	g = g.withContext(ctx) // ugly ugly
+
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
@@ -401,14 +437,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 			}},
 		},
 	}
-	gasWanted, err := g.estimateRunTxGas(msgRun)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
-		GasFee:    "10000000ugnot",
-		GasWanted: gasWanted,
-	}, msgRun))
+	broadcastRes, err := g.run("participate", msgRun)
 	if err != nil {
 		return err
 	}
@@ -424,14 +453,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 			participantAddr,
 		},
 	}
-	gasWanted, err = g.estimateCallTxGas(msgCall)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgCall))
+	broadcastRes, err = g.call(msgCall)
 	if err != nil {
 		return err
 	}
@@ -691,6 +713,14 @@ func main() {
 
 // AddMemberToCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string, userID string) error {
+	ctx, span := g.tracer.Start(
+		g.ctx,
+		"add member to community",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	g = g.withContext(ctx) // ugly ugly
+
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
 	userAddr := g.UserAddress(userID)
@@ -705,14 +735,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			}},
 		},
 	}
-	gasWanted, err := g.estimateRunTxGas(msgRun)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgRun))
+	broadcastRes, err := g.run("add member to community", msgRun)
 	if err != nil {
 		return err
 	}
@@ -727,14 +750,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			userAddr,
 		},
 	}
-	gasWanted, err = g.estimateCallTxGas(msgCall)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgCall))
+	broadcastRes, err = g.call(msgCall)
 	if err != nil {
 		return err
 	}
@@ -1189,7 +1205,33 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
+func (g *gnoZenaoChain) call(msg vm.MsgCall) (*ctypes.ResultBroadcastTxCommit, error) {
+	ctx, span := g.tracer.Start(
+		g.ctx,
+		fmt.Sprintf("call %s.%s", msg.PkgPath, msg.Func),
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	g = g.withContext(ctx) // ugly ugly
+	gasWanted, err := g.estimateCallTxGas(msg)
+	if err != nil {
+		return nil, err
+	}
+	return checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msg))
+}
+
 func (g *gnoZenaoChain) estimateCallTxGas(msgs ...vm.MsgCall) (int64, error) {
+	ctx, span := g.tracer.Start(
+		g.ctx,
+		"estimate call tx gas",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	g = g.withContext(ctx) // ugly ugly
+
 	cfg := gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
 		GasWanted: 300000000,
@@ -1209,7 +1251,33 @@ func (g *gnoZenaoChain) estimateCallTxGas(msgs ...vm.MsgCall) (int64, error) {
 	return int64(float64(gasWanted) + float64(gasWanted)*g.gasSecurityRate), nil
 }
 
+func (g *gnoZenaoChain) run(label string, msg vm.MsgRun) (*ctypes.ResultBroadcastTxCommit, error) {
+	ctx, span := g.tracer.Start(
+		g.ctx,
+		fmt.Sprintf("run %s", label),
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	g = g.withContext(ctx) // ugly ugly
+	gasWanted, err := g.estimateRunTxGas(msg)
+	if err != nil {
+		return nil, err
+	}
+	return checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msg))
+}
+
 func (g *gnoZenaoChain) estimateRunTxGas(msgs ...vm.MsgRun) (int64, error) {
+	ctx, span := g.tracer.Start(
+		g.ctx,
+		"estimate run tx gas",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	g = g.withContext(ctx) // ugly ugly
+
 	cfg := gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
 		GasWanted: 300000000,
