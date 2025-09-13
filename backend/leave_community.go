@@ -40,6 +40,15 @@ func (s *ZenaoServer) LeaveCommunity(
 			return errors.New("community not found")
 		}
 
+		administrators, err := tx.GetOrgEntitiesWithRole(zeni.EntityTypeCommunity, cmt.ID, zeni.EntityTypeUser, zeni.RoleAdministrator)
+		if err != nil {
+			return err
+		}
+
+		if len(administrators) == 1 && administrators[0].EntityID == zUser.ID {
+			return errors.New("user is the only administrator of this community and cannot leave it")
+		}
+
 		if err := tx.RemoveMemberFromCommunity(cmt.ID, zUser.ID); err != nil {
 			return err
 		}
