@@ -129,7 +129,6 @@ func listCommunitiesByMembers(memberID string, limit, offset uint32) []*zenaov1.
 }
 
 func listCommunitiesByEvent(eventID string, limit, offset uint32) []*zenaov1.CommunityInfo {
-	// ff is 255 in hex, which is the highest byte value, so it will match all keys that start with eventID.
 	fromKey := eventID + "/"
 	toKey := eventID + "/\xff"
 
