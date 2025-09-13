@@ -13,6 +13,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+// setup following https://betterstack.com/community/guides/observability/opentelemetry-go
+
 func setupOTelSDK(
 	ctx context.Context,
 ) (shutdown func(context.Context) error, err error) {
