@@ -139,6 +139,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	wg := sync.WaitGroup{}
+	defer wg.Wait()
 
 	if s.MailClient != nil {
 		wg.Add(1)
@@ -230,8 +231,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			}
 		}
 	}
-
-	wg.Wait()
 
 	return connect.NewResponse(&zenaov1.ParticipateResponse{}), nil
 }
