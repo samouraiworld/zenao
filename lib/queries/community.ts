@@ -159,18 +159,18 @@ export function communityIdFromPkgPath(pkgPath: string): string {
   return res?.[1].substring(1) || "";
 }
 
-export const communityAdministrators = (communityId: string) =>
+export const communityAdministratorsQuery = (communityId: string) =>
   queryOptions({
     queryKey: ["community-administrators", communityId],
     queryFn: async () => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
-      const res = await client.evaluateExpression(
+      const expressionResult = await client.evaluateExpression(
         `gno.land/r/zenao/communities/c${communityId}`,
         `community.GetAdministrators()`,
       );
-      const rawAdministrators = extractGnoJSONResponse(res);
+      const rawAdministrators = extractGnoJSONResponse(expressionResult);
       const administrators =
         communityAdministratorsSchema.parse(rawAdministrators);
       return administrators;
