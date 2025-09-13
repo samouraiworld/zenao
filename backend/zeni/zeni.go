@@ -92,6 +92,7 @@ type Event struct {
 	Location          *zenaov1.EventLocation
 	PasswordHash      string
 	ICSSequenceNumber uint32
+	Discoverable      bool
 }
 
 type Community struct {
