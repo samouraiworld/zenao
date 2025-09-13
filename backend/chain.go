@@ -292,13 +292,14 @@ func main() {
 				%d,
 				%d,
 				%d,
+				%t,
 				%s,
 				%s,
 			),
 		}),
 	})
 }
-`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, orgsAddrLit, gkpsAddrLit, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacyStr),
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, orgsAddrLit, gkpsAddrLit, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, req.Discoverable, loc, privacyStr),
 			}},
 		},
 	}
@@ -1685,6 +1686,7 @@ func init() {
 		StartDate: {{.req.StartDate}},
 		EndDate: {{.req.EndDate}},
 		Capacity: {{.req.Capacity}},
+		Discoverable: {{.req.Discoverable}},
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",

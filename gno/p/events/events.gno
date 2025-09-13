@@ -37,6 +37,7 @@ type Event struct {
 	participationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
 	checkedIn           uint32 // number of checked-in participants, used for rendering only
 	cancelled           bool   // true if event is cancelled
+	discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
 }
 
 type Config struct {
@@ -53,6 +54,7 @@ type Config struct {
 	ZenaoAdminAddr      string
 	Location            *zenaov1.EventLocation
 	ParticipationPubkey string // ed25519 pubkey of secret key derived from event password, event is private if set
+	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
 }
 
 type Ticket struct {
@@ -129,6 +131,7 @@ func NewEvent(conf *Config) *Event {
 		capacity:            conf.Capacity,
 		getProfileString:    conf.GetProfileString,
 		setProfileString:    conf.SetProfileString,
+		discoverable:        conf.Discoverable,
 		DAOPrivate:          privdao,
 		DAO:                 pubdao,
 		location:            conf.Location,
@@ -481,20 +484,22 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 				panic("unknown privacy model")
 			}
 		}
+		e.discoverable = msg.discoverable
 	})
 }
 
 type msgEditEvent struct {
-	organizers  []string
-	gatekeepers []string
-	title       string
-	description string
-	imageURI    string
-	startDate   int64
-	endDate     int64
-	capacity    uint32
-	location    *zenaov1.EventLocation
-	privacy     *zenaov1.EventPrivacy
+	organizers   []string
+	gatekeepers  []string
+	title        string
+	description  string
+	imageURI     string
+	startDate    int64
+	endDate      int64
+	capacity     uint32
+	discoverable bool
+	location     *zenaov1.EventLocation
+	privacy      *zenaov1.EventPrivacy
 }
 
 func (msg *msgEditEvent) String() string {
@@ -524,21 +529,23 @@ func (msg *msgEditEvent) String() string {
 	if msg.imageURI != "" {
 		elems = append(elems, "Image: "+msg.imageURI+"\n  "+md.Image("Event presentation", eventImageURL(msg.imageURI)))
 	}
+	elems = append(elems, "Discoverable: "+strconv.FormatBool(msg.discoverable))
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(organizers []string, gatekeepers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
+func NewEditEventMsg(organizers []string, gatekeepers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, discoverable bool, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
-		organizers:  organizers,
-		gatekeepers: gatekeepers,
-		title:       title,
-		description: description,
-		imageURI:    imageURI,
-		startDate:   startDate,
-		endDate:     endDate,
-		capacity:    capacity,
-		location:    loc,
-		privacy:     privacy,
+		organizers:   organizers,
+		gatekeepers:  gatekeepers,
+		title:        title,
+		description:  description,
+		imageURI:     imageURI,
+		startDate:    startDate,
+		endDate:      endDate,
+		capacity:     capacity,
+		location:     loc,
+		privacy:      privacy,
+		discoverable: discoverable,
 	})
 }
 

@@ -130,6 +130,9 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
+	if c.Discoverable != false {
+		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, c.Discoverable)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -222,6 +225,9 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	if e.Discoverable != false {
+		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, e.Discoverable)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -549,6 +555,9 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	}
 	if e.CheckedIn != 0 {
 		fmt.Fprintf(buf, "%s\tCheckedIn: %d,\n", linePrefix, e.CheckedIn)
+	}
+	if e.Discoverable != false {
+		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, e.Discoverable)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -1003,6 +1012,36 @@ func (e *EditCommunityResponse) GnoLiteral(typePrefix string, linePrefix string)
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("EditCommunityResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetCommunityAdministratorsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetCommunityAdministratorsRequest{\n")
+	if g.CommunityId != "" {
+		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, g.CommunityId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetCommunityAdministratorsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetCommunityAdministratorsResponse{\n")
+	if len(g.Administrators) != 0 {
+		fmt.Fprintf(buf, "%s\tAdministrators: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range g.Administrators {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

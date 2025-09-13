@@ -162,6 +162,9 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 		}
 		fields["gatekeepers"] = json.ArrayNode("", arr)
 	}
+	if c.Discoverable != false {
+		fields["discoverable"] = json.BoolNode("", c.Discoverable)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -222,6 +225,9 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 			arr[i] = val.MustString()
 		}
 		c.Gatekeepers = arr
+	}
+	if val, ok := fields["discoverable"]; ok {
+		c.Discoverable = val.MustBool()
 	}
 }
 
@@ -323,6 +329,9 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 		}
 		fields["gatekeepers"] = json.ArrayNode("", arr)
 	}
+	if e.Discoverable != false {
+		fields["discoverable"] = json.BoolNode("", e.Discoverable)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -389,6 +398,9 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 			arr[i] = val.MustString()
 		}
 		e.Gatekeepers = arr
+	}
+	if val, ok := fields["discoverable"]; ok {
+		e.Discoverable = val.MustBool()
 	}
 }
 
@@ -903,6 +915,9 @@ func (e *EventInfo) ToJSON() *json.Node {
 	if e.CheckedIn != 0 {
 		fields["checkedIn"] = json.NumberNode("", float64(e.CheckedIn))
 	}
+	if e.Discoverable != false {
+		fields["discoverable"] = json.BoolNode("", e.Discoverable)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -971,6 +986,9 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["checkedIn"]; ok {
 		e.CheckedIn = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["discoverable"]; ok {
+		e.Discoverable = val.MustBool()
 	}
 }
 
@@ -1714,6 +1732,53 @@ func (e *EditCommunityResponse) ToJSON() *json.Node {
 
 func (e *EditCommunityResponse) FromJSON(node *json.Node) {
 	*e = EditCommunityResponse{}
+}
+
+func (g *GetCommunityAdministratorsRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", g.CommunityId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (g *GetCommunityAdministratorsRequest) FromJSON(node *json.Node) {
+	*g = GetCommunityAdministratorsRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		g.CommunityId = val.MustString()
+	}
+}
+
+func (g *GetCommunityAdministratorsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(g.Administrators) != 0 {
+		arr := make([]*json.Node, len(g.Administrators))
+		for i, val := range g.Administrators {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["administrators"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func (g *GetCommunityAdministratorsResponse) FromJSON(node *json.Node) {
+	*g = GetCommunityAdministratorsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["administrators"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		g.Administrators = arr
+	}
 }
 
 func (j *JoinCommunityRequest) ToJSON() *json.Node {
