@@ -7,7 +7,6 @@ type CommunityMemberCardProps = {
   address: string;
   avatarUri: string;
   displayName: string;
-  description?: string | null;
   roles: string[];
 };
 
@@ -15,7 +14,6 @@ function CommunityMemberCard({
   address,
   avatarUri,
   displayName,
-  description,
   roles,
 }: CommunityMemberCardProps) {
   return (
@@ -29,9 +27,6 @@ function CommunityMemberCard({
           </Text>
           <Text size="xs" className="text-secondary-color">
             {address.substring(0, 10)}
-          </Text>
-          <Text size="xs" className="text-secondary-color mt-1">
-            {description ?? "No description yet"}
           </Text>
         </div>
         <div className="flex flex-col gap-2">

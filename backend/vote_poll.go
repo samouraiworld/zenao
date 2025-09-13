@@ -27,7 +27,7 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 		return nil, errors.New("user is banned")
 	}
 
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.VotePoll", func(db zeni.DB) error {
 		orgType, orgID, err := db.GetOrgByPollID(req.Msg.PollId)
 		if err != nil {
 			return err
@@ -47,7 +47,7 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 		return nil, err
 	}
 
-	if err = s.Chain.VotePoll(zUser.ID, req.Msg); err != nil {
+	if err = s.Chain.WithContext(ctx).VotePoll(zUser.ID, req.Msg); err != nil {
 		return nil, err
 	}
 
