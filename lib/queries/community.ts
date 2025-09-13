@@ -16,6 +16,8 @@ import {
 
 export const DEFAULT_COMMUNITIES_LIMIT = 20;
 
+const communityAdministratorsSchema = z.array(z.string().min(1));
+
 const communityUserRolesEnum = z.enum(["administrator", "member", "event"]);
 
 export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
@@ -156,3 +158,20 @@ export function communityIdFromPkgPath(pkgPath: string): string {
   const res = /(c\d+)$/.exec(pkgPath);
   return res?.[1].substring(1) || "";
 }
+
+export const communityAdministrators = (communityId: string) =>
+  queryOptions({
+    queryKey: ["community-administrators", communityId],
+    queryFn: async () => {
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/communities/c${communityId}`,
+        `community.GetAdministrators()`,
+      );
+      const rawAdministrators = extractGnoJSONResponse(res);
+      const administrators = communityAdministratorsSchema.parse(rawAdministrators);
+      return administrators;
+  },
+});
