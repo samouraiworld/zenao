@@ -9,12 +9,14 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"time"
 
 	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/resend/resend-go/v2"
 	"github.com/rs/cors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -160,7 +162,11 @@ func execStart(ctx context.Context) error {
 	mailClient := (*resend.Client)(nil)
 	if conf.resendSecretKey != "" {
 		logger.Info("resend mail client initialized")
-		mailClient = resend.NewClient(conf.resendSecretKey)
+		mailHTTPClient := &http.Client{
+			Timeout:   time.Minute,
+			Transport: otelhttp.NewTransport(http.DefaultTransport),
+		}
+		mailClient = resend.NewCustomClient(mailHTTPClient, conf.resendSecretKey)
 	}
 
 	zenao := &ZenaoServer{
