@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"sync"
 	"time"
 
 	"connectrpc.com/connect"
@@ -137,8 +138,12 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
+	wg := sync.WaitGroup{}
+
 	if s.MailClient != nil {
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
 			if err != nil {
 				s.Logger.Error("generate-participate-email-content", zap.Error(err))
@@ -217,6 +222,8 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			}
 		}
 	}
+
+	wg.Wait()
 
 	return connect.NewResponse(&zenaov1.ParticipateResponse{}), nil
 }
