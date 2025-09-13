@@ -32,9 +32,9 @@ export function UserAvatar({ address, className }: UserComponentProps) {
               ? profile.avatarUri
               : undefined) ?? "/zenao-profile.png"
           }
-          width={45}
-          height={45}
-          quality={60}
+          width={90}
+          height={90}
+          quality={80}
           alt="Avatar"
           className="w-full h-full object-cover"
         />

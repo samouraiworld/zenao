@@ -17,6 +17,7 @@ import { Label } from "../../shadcn/label";
 import MapCaller from "../../widgets/map/map-lazy-components";
 import { Button } from "../../shadcn/button";
 import { ButtonWithChildren } from "../../widgets/buttons/button-with-children";
+import EventFormCommunitySelector from "./event-form-community-selector";
 import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 import { cn } from "@/lib/tailwind";
@@ -153,6 +154,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             aspectRatio={16 / 9}
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
           />
+          <EventFormCommunitySelector form={form} />
         </div>
 
         <div className="flex flex-col gap-6 w-full">

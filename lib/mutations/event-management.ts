@@ -15,6 +15,7 @@ export const useCreateEvent = () => {
       ...data
     }: EventFormSchemaType & {
       token: string;
+      communityId?: string;
     }) => {
       // Construct location object for the call
       let value = {};
@@ -40,7 +41,7 @@ export const useCreateEvent = () => {
           value = {};
       }
 
-      return await zenaoClient.createEvent(
+      const event = await zenaoClient.createEvent(
         {
           ...data,
           gatekeepers: data.gatekeepers.map((gatekeeper) => gatekeeper.email),
@@ -51,6 +52,20 @@ export const useCreateEvent = () => {
           headers: { Authorization: "Bearer " + token },
         },
       );
+
+      if (data.communityId) {
+        await zenaoClient.addEventToCommunity(
+          {
+            eventId: event.id,
+            communityId: data.communityId,
+          },
+          {
+            headers: { Authorization: "Bearer " + token },
+          },
+        );
+      }
+
+      return event;
     },
   });
 
@@ -116,6 +131,10 @@ export const useEditEvent = (getToken: GetToken) => {
           headers: { Authorization: "Bearer " + token },
         },
       );
+
+      // Update community if different
+      // if (data.communityId) {
+      // }
     },
     onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries(eventOptions(variables.eventId));
