@@ -230,7 +230,10 @@ export default async function RootLayout({
   if (health.maintenance) {
     return (
       <html suppressHydrationWarning lang={locale}>
-        <body className={`${albertSans.variable} antialiased`}>
+        <body
+          suppressHydrationWarning
+          className={`${albertSans.variable} antialiased`}
+        >
           <MaintenanceScreen />
         </body>
       </html>
@@ -239,7 +242,10 @@ export default async function RootLayout({
 
   return (
     <html suppressHydrationWarning lang={locale}>
-      <body className={`${albertSans.variable} antialiased`}>
+      <body
+        suppressHydrationWarning
+        className={`${albertSans.variable} antialiased`}
+      >
         <ClerkProvider>
           <QueryProviders>
             <NuqsAdapter>
