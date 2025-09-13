@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"slices"
@@ -28,6 +29,7 @@ type clerkZenaoAuth struct {
 	logger     *zap.Logger
 	client     *user.Client
 	jwksClient *jwks.Client
+	store      JWKStore
 }
 
 func SetupAuth(clerkSecretKey string, logger *zap.Logger) (zeni.Auth, error) {
@@ -44,6 +46,7 @@ func SetupAuth(clerkSecretKey string, logger *zap.Logger) (zeni.Auth, error) {
 		logger:     logger,
 		client:     client,
 		jwksClient: jwksClient,
+		store:      NewJWKStore(),
 	}, nil
 }
 
@@ -197,9 +200,33 @@ func (c *clerkZenaoAuth) WithAuth() func(http.Handler) http.Handler {
 
 		sessionToken := strings.TrimPrefix(authHeader, "Bearer ")
 
+		// Attempt to get the JSON Web Key from your store.
+		jwk := c.store.GetJWK()
+		if jwk == nil {
+			// Decode the session JWT to find the key ID.
+			unsafeClaims, err := jwt.Decode(req.Context(), &jwt.DecodeParams{
+				Token: sessionToken,
+			})
+			if err != nil {
+				return nil, errors.New("unauthorized")
+			}
+
+			// Fetch the JSON Web Key
+			jwk, err = jwt.GetJSONWebKey(req.Context(), &jwt.GetJSONWebKeyParams{
+				KeyID:      unsafeClaims.KeyID,
+				JWKSClient: c.jwksClient,
+			})
+			if err != nil {
+				return nil, errors.New("unauthorized")
+			}
+		}
+		// Write the JSON Web Key to your store, so that next time
+		// you can use the cached value.
+		c.store.SetJWK(jwk)
+
 		claims, err := jwt.Verify(ctx, &jwt.VerifyParams{
-			Token:      sessionToken,
-			JWKSClient: c.jwksClient,
+			Token: sessionToken,
+			JWK:   jwk,
 		})
 		if err != nil {
 			return nil, err
@@ -225,4 +252,30 @@ func toAuthUser(clerkUser *clerk.User) *zeni.AuthUser {
 	}
 
 	return &zeni.AuthUser{ID: clerkUser.ID, Banned: clerkUser.Banned, Email: email}
+}
+
+// Sample interface for JSON Web Key storage.
+// Implementation may vary.
+type JWKStore interface {
+	GetJWK() *clerk.JSONWebKey
+	SetJWK(*clerk.JSONWebKey)
+}
+
+// Implementation may vary. This can be an
+// in-memory store, database, caching layer, etc.
+// This example uses an in-memory store.
+type InMemoryJWKStore struct {
+	jwk *clerk.JSONWebKey
+}
+
+func (s *InMemoryJWKStore) GetJWK() *clerk.JSONWebKey {
+	return s.jwk
+}
+
+func (s *InMemoryJWKStore) SetJWK(j *clerk.JSONWebKey) {
+	s.jwk = j
+}
+
+func NewJWKStore() JWKStore {
+	return &InMemoryJWKStore{}
 }
