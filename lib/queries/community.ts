@@ -213,3 +213,55 @@ export function communityIdFromPkgPath(pkgPath: string): string {
   const res = /(c\d+)$/.exec(pkgPath);
   return res?.[1].substring(1) || "";
 }
+
+export const communitiesListByEvent = (
+  eventId: string,
+  limit: number,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CommunityInfo[],
+      Error,
+      InfiniteData<CommunityInfo[]>,
+      (string | number)[],
+      number // pageParam type
+    >,
+    | "queryKey"
+    | "queryFn"
+    | "getNextPageParam"
+    | "initialPageParam"
+    | "getPreviousPageParam"
+  >,
+) => {
+  const limitInt = Math.floor(limit);
+
+  return infiniteQueryOptions({
+    initialPageParam: 0,
+    queryKey: ["communitiesByEvent", eventId, limitInt],
+    queryFn: async ({ pageParam = 0 }) => {
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/communityreg`,
+        `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(eventId)}, ${limitInt}, ${pageParam * limitInt}))`,
+      );
+      const raw = extractGnoJSONResponse(res);
+      const json = communitiesListFromJson(raw);
+
+      return json;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
+    },
+    ...options,
+  });
+};
