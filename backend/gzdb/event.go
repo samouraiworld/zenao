@@ -22,6 +22,8 @@ type Event struct {
 	CreatorID   uint
 	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
 
+	Discoverable bool // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
+
 	PasswordHash string // event is guarded if set
 
 	LocVenueName    string
@@ -113,6 +115,7 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		ImageURI:          dbevt.ImageURI,
 		TicketPrice:       dbevt.TicketPrice,
 		Capacity:          dbevt.Capacity,
+		Discoverable:      dbevt.Discoverable,
 		CreatorID:         fmt.Sprintf("%d", dbevt.CreatorID),
 		Location:          loc,
 		PasswordHash:      dbevt.PasswordHash,

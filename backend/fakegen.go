@@ -146,6 +146,7 @@ func execFakegen() error {
 					Timezone: "UTC",
 				}},
 			},
+			Discoverable: true,
 		}
 		creatorID := zUser.ID
 
