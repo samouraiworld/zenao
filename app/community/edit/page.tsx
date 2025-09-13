@@ -9,8 +9,7 @@ export default async function CreateEventPage() {
   return (
     <ScreenContainer isSignedOutModal>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EditCommunityForm communityId="1" />{" "}
-        {/* <- tmp TODO: get community id, put in a [id] folder */}
+        <EditCommunityForm communityId="1" />
       </HydrationBoundary>
     </ScreenContainer>
   );
