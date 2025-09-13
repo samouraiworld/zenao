@@ -360,17 +360,35 @@ func execGenTxs() error {
 		var eventsIDs []string
 		for _, event := range events {
 			eventsIDs = append(eventsIDs, event.EntityID)
+			tx, err := createCommunityAddEventRegTx(chain, signerInfo.GetAddress(), community, event.EntityID, event.CreatedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community add event reg tx created", zap.String("community-id", community.ID), zap.String("event-id", event.EntityID), zap.Time("created-at", event.CreatedAt))
 		}
 
 		// XXX: Add deleted events so we can add their post before deleting them
 		for _, deletedEvent := range deletedEvents {
 			eventsIDs = append(eventsIDs, deletedEvent.EntityID)
-			tx, err := createCommunityRemoveEventTx(chain, signerInfo.GetAddress(), community, deletedEvent.EntityID, deletedEvent.DeletedAt)
+			tx, err := createCommunityAddEventRegTx(chain, signerInfo.GetAddress(), community, deletedEvent.EntityID, deletedEvent.CreatedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community add event reg tx created", zap.String("community-id", community.ID), zap.String("event-id", deletedEvent.EntityID), zap.Time("created-at", deletedEvent.CreatedAt))
+			tx, err = createCommunityRemoveEventTx(chain, signerInfo.GetAddress(), community, deletedEvent.EntityID, deletedEvent.DeletedAt)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
 			logger.Info("community remove event tx created", zap.String("community-id", community.ID), zap.String("event-id", deletedEvent.EntityID), zap.Time("deleted-at", deletedEvent.DeletedAt))
+			tx, err = createCommunityRemoveEventRegTx(chain, signerInfo.GetAddress(), community, deletedEvent.EntityID, deletedEvent.DeletedAt)
+			if err != nil {
+				return err
+			}
+			txs = append(txs, tx)
+			logger.Info("community remove event indexed into community registry tx created", zap.String("community-id", community.ID), zap.String("event-id", deletedEvent.EntityID), zap.Time("deleted-at", deletedEvent.DeletedAt))
 		}
 
 		tx, err := createCommunityRealmTx(chain, community, signerInfo.GetAddress(), administratorsIDs, membersIDs, eventsIDs)
@@ -1043,6 +1061,54 @@ func createCommunityAddMemberRegTx(chain *gnoZenaoChain, caller cryptoGno.Addres
 		Tx: tx,
 		Metadata: &gnoland.GnoTxMetadata{
 			Timestamp: createdAt.Unix() + 2, // +2 to avoid collision with community reg index
+		},
+	}, nil
+}
+
+func createCommunityAddEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Address, community *zeni.Community, eventID string, createdAt time.Time) (gnoland.TxWithMetadata, error) {
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.communitiesIndexPkgPath,
+				Func:    "AddEvent",
+				Args:    []string{chain.communityPkgPath(community.ID), chain.EventAddress(eventID)},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: createdAt.Unix() + 2, // +2 to avoid collision with community reg index
+		},
+	}, nil
+}
+
+func createCommunityRemoveEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
+	tx := std.Tx{
+		Msgs: []std.Msg{
+			vm.MsgCall{
+				Caller:  caller,
+				Send:    []std.Coin{},
+				PkgPath: chain.communitiesIndexPkgPath,
+				Func:    "RemoveEvent",
+				Args:    []string{chain.communityPkgPath(community.ID), chain.EventAddress(eventID)},
+			},
+		},
+		Fee: std.Fee{
+			GasWanted: 10000000,
+			GasFee:    std.NewCoin("ugnot", 1000000),
+		},
+	}
+	return gnoland.TxWithMetadata{
+		Tx: tx,
+		Metadata: &gnoland.GnoTxMetadata{
+			Timestamp: deletedAt.Unix() + 1, // +1 to avoid collision with community reg index
 		},
 	}, nil
 }
