@@ -52,14 +52,6 @@ func SetupAuth(clerkSecretKey string, logger *zap.Logger) (zeni.Auth, error) {
 
 // GetUser implements zeni.Auth.
 func (c *clerkZenaoAuth) GetUser(ctx context.Context) *zeni.AuthUser {
-	spanCtx, span := otel.Tracer("czauth").Start(
-		ctx,
-		"czauth.GetUser",
-		trace.WithSpanKind(trace.SpanKindClient),
-	)
-	defer span.End()
-	ctx = spanCtx
-
 	iUser := authn.GetInfo(ctx)
 	if iUser == nil {
 		return nil
