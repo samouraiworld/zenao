@@ -201,7 +201,8 @@ export const communityFormSchema = z.object({
   bannerUri: z.string().url().or(z.literal("")),
   administrators: z
     .array(z.object({address: z.string()
-    .min(1, "Administrator address is required")}))
+    .email("Administrator must be a valid email address"),
+    }))
     .min(1, "At least one admin is required"),
 });
 
