@@ -88,7 +88,6 @@ func (g *gnoZenaoChain) WithContext(ctx context.Context) zeni.Chain {
 	return g.withContext(ctx)
 }
 
-// WithContext implements zeni.Chain.
 func (g *gnoZenaoChain) withContext(ctx context.Context) *gnoZenaoChain {
 	nc := *g
 	client, err := NewTM2Client(ctx, g.chainEndpoint)

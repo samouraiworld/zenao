@@ -112,7 +112,6 @@ func (g *gormZenaoDB) WithContext(ctx context.Context) zeni.DB {
 	return g.withContext(ctx)
 }
 
-// WithContext implements zeni.DB.
 func (g *gormZenaoDB) withContext(ctx context.Context) *gormZenaoDB {
 	return &gormZenaoDB{db: g.db.WithContext(ctx)}
 }
