@@ -99,5 +99,5 @@ jobs:
           script: |
             set -xe
             cd zenao
-            yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
+            docker compose -f prod.backend.docker-compose.yml up -d --wait otel-collector jaeger
             docker compose -f prod.backend.docker-compose.yml up -d --build backend

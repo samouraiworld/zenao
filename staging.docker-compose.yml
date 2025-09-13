@@ -42,6 +42,6 @@ services:
     environment:
       JAEGER_PROPAGATION: w3c
     ports:
-      - 16686:16686 # how to secure this?
+      - 127.0.0.1:16686:16686 # need to tunnel for now
     healthcheck:
       test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]

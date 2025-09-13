@@ -9,3 +9,20 @@ services:
       - 4242:4242
     container_name: backend
     restart: always
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.107.0
+    volumes:
+      - ./prod.otelco.yaml:/etc/otelcol/config.yaml
+    depends_on:
+      jaeger:
+        condition: service_healthy
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      JAEGER_PROPAGATION: w3c
+    ports:
+      - 127.0.0.1:16686:16686 # need to tunnel for now
+    healthcheck:
+      test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]
