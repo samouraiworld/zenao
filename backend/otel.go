@@ -70,11 +70,6 @@ func withTracing() func(http.Handler) http.Handler {
 			h,
 			"/",
 			otelhttp.WithSpanNameFormatter(httpSpanName),
-			otelhttp.WithFilter(otelReqFilter),
 		)
 	}
-}
-
-func otelReqFilter(req *http.Request) bool {
-	return req.URL.Path != "/zenao.v1.ZenaoService/Health"
 }
