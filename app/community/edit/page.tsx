@@ -3,13 +3,14 @@ import { EditCommunityForm } from "./edit-community-form";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
 
-export default function CreateEventPage() {
+export default async function CreateEventPage() {
   const queryClient = getQueryClient();
 
   return (
     <ScreenContainer isSignedOutModal>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <EditCommunityForm />
+        <EditCommunityForm communityId="1" />{" "}
+        {/* <- tmp TODO: get community id, put in a [id] folder */}
       </HydrationBoundary>
     </ScreenContainer>
   );
