@@ -9,6 +9,7 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Button } from "@/components/shadcn/button";
 import { CommunityFormSchemaType } from "@/types/schemas";
+// TODO: useTranslations
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;

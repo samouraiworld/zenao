@@ -12,6 +12,7 @@ import { captureException } from "@/lib/report";
 import { communityInfo } from "@/lib/queries/community";
 import { CommunityForm } from "@/components/features/community/community-form";
 import { communityFormSchema, CommunityFormSchemaType } from "@/types/schemas";
+// TODO: useTranslations
 
 export const EditCommunityForm: React.FC<{ communityId: string }> = ({
   communityId,
@@ -26,7 +27,7 @@ export const EditCommunityForm: React.FC<{ communityId: string }> = ({
     description: communityData?.description ?? "",
     avatarUri: communityData?.avatarUri ?? "",
     bannerUri: communityData?.bannerUri ?? "",
-    administrators: [{ address: "" }], // TODO: fix email + regex to check if right format
+    administrators: [{ address: "" }],
   };
 
   const form = useForm<CommunityFormSchemaType>({
