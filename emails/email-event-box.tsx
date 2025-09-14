@@ -1,7 +1,7 @@
 import { Column, Img, Row, Section, Text } from "@react-email/components";
-import { FC } from "react";
+import React from "react";
 
-export const EmailEventBox: FC<{
+export const EmailEventBox: React.FC<{
   title: string;
   icon: string;
   iconAlt: string;

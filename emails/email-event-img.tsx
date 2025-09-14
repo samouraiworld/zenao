@@ -1,7 +1,7 @@
 import { Img } from "@react-email/components";
-import { FC } from "react";
+import React from "react";
 
-export const EmailEventImg: FC<{ src: string }> = ({ src }) => {
+export const EmailEventImg: React.FC<{ src: string }> = ({ src }) => {
   return (
     <Img
       alt="Event image"
