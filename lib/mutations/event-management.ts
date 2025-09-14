@@ -87,6 +87,7 @@ export const useEditEvent = (getToken: GetToken) => {
       ...data
     }: EventFormSchemaType & {
       eventId: string;
+      oldCommunityId?: string;
     }) => {
       const token = await getToken();
 
@@ -133,8 +134,29 @@ export const useEditEvent = (getToken: GetToken) => {
       );
 
       // Update community if different
-      // if (data.communityId) {
-      // }
+      if (!!data.oldCommunityId && data.oldCommunityId !== data.communityId) {
+        await zenaoClient.removeEventFromCommunity(
+          {
+            eventId,
+            communityId: data.oldCommunityId,
+          },
+          {
+            headers: { Authorization: "Bearer " + token },
+          },
+        );
+      }
+
+      if (data.oldCommunityId !== data.communityId && data.communityId) {
+        await zenaoClient.addEventToCommunity(
+          {
+            eventId,
+            communityId: data.communityId,
+          },
+          {
+            headers: { Authorization: "Bearer " + token },
+          },
+        );
+      }
     },
     onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries(eventOptions(variables.eventId));

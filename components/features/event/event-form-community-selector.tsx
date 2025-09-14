@@ -5,7 +5,6 @@ import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
   Select,
@@ -22,6 +21,7 @@ import {
 } from "@/lib/queries/community";
 import { userAddressOptions } from "@/lib/queries/user";
 import { EventFormSchemaType } from "@/types/schemas";
+import { FormField } from "@/components/shadcn/form";
 
 export default function EventFormCommunitySelector({
   form,
@@ -36,33 +36,44 @@ export default function EventFormCommunitySelector({
   const { data: userCommunitiesPages } = useSuspenseInfiniteQuery(
     communitiesListByMember(userAddress, DEFAULT_COMMUNITIES_LIMIT),
   );
+
   // Filter only communities where user is administrator
-  const selectableCommunities = useMemo(() => {
-    return (userCommunitiesPages?.pages.flat() ?? []).filter((c) =>
-      c.administrators.includes(userAddress!),
-    );
-  }, [userCommunitiesPages, userAddress]);
+  const selectableCommunities = (
+    userCommunitiesPages?.pages.flat() ?? []
+  ).filter((c) => c.administrators.includes(userAddress!));
 
   return (
     <div className="flex flex-col gap-4">
       <Heading level={3}>Link event to one your community (optional)</Heading>
 
-      <Select
-        onValueChange={(e) =>
-          form.setValue("communityId", communityIdFromPkgPath(e))
-        }
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="-- Select a community --" />
-        </SelectTrigger>
-        <SelectContent>
-          {selectableCommunities.map((community) => (
-            <SelectItem key={community.pkgPath} value={community.pkgPath}>
-              {community.displayName}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <FormField
+        control={form.control}
+        name="communityId"
+        render={({ field }) => {
+          return (
+            <Select
+              name={field.name}
+              onValueChange={field.onChange}
+              defaultValue={field.value}
+              value={field.value}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="-- Select a community --" />
+              </SelectTrigger>
+              <SelectContent>
+                {selectableCommunities.map((community) => (
+                  <SelectItem
+                    key={community.pkgPath}
+                    value={communityIdFromPkgPath(community.pkgPath)}
+                  >
+                    {community.displayName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        }}
+      />
     </div>
   );
 }

@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { fromJson } from "@bufbuild/protobuf";
 import { z } from "zod";
-import { extractGnoJSONResponse } from "../gno";
+import { derivePkgAddr, extractGnoJSONResponse } from "../gno";
 import {
   CommunityInfo,
   CommunityInfoJson,
@@ -215,7 +215,7 @@ export function communityIdFromPkgPath(pkgPath: string): string {
 }
 
 export const communitiesListByEvent = (
-  eventId: string,
+  id: string,
   limit: number,
   options?: Omit<
     UseInfiniteQueryOptions<
@@ -236,14 +236,16 @@ export const communitiesListByEvent = (
 
   return infiniteQueryOptions({
     initialPageParam: 0,
-    queryKey: ["communitiesByEvent", eventId, limitInt],
+    queryKey: ["communitiesByEvent", id, limitInt],
     queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
+      const pkgPath = `gno.land/r/zenao/events/e${id}`;
+      const eventAddr = derivePkgAddr(pkgPath);
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/communityreg`,
-        `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(eventId)}, ${limitInt}, ${pageParam * limitInt}))`,
+        `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(eventAddr)}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       const json = communitiesListFromJson(raw);
