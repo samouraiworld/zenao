@@ -32,7 +32,7 @@ func (s *ZenaoServer) JoinCommunity(
 	}
 
 	var cmt *zeni.Community
-	if err := s.DB.Tx(func(tx zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.JoinCommunity", func(tx zeni.DB) error {
 		cmt, err = tx.GetCommunity(req.Msg.CommunityId)
 		if err != nil {
 			return err
@@ -53,7 +53,7 @@ func (s *ZenaoServer) JoinCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.AddMemberToCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
+	if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
 		return nil, errors.New("failed to add member to community on chain")
 	}
 

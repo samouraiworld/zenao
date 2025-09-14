@@ -35,7 +35,7 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 	s.Logger.Info("export-participants", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
 
 	var tickets []*zeni.SoldTicket
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.ExportParticipants", func(db zeni.DB) error {
 		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err

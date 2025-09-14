@@ -205,6 +205,8 @@ func (e *Event) Timezone() (*time.Location, error) {
 // userID is an internal zenao user id.
 type DB interface {
 	Tx(func(db DB) error) error
+	TxWithSpan(ctx context.Context, label string, cb func(db DB) error) error
+	WithContext(ctx context.Context) DB
 
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
@@ -268,6 +270,8 @@ type DB interface {
 }
 
 type Chain interface {
+	WithContext(ctx context.Context) Chain
+
 	FillAdminProfile()
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
