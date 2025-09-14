@@ -43,6 +43,7 @@ jobs:
           set -xe
           cd zenao
           git fetch
+          git checkout staging.docker-compose.yml
           git checkout ${{ github.sha }}
           yq -iy 'del(.services.backend.command)' staging.docker-compose.yml
           yq -iy '.services.backend |= ({"command": "--maintenance"} + .)' staging.docker-compose.yml

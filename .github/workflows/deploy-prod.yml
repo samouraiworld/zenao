@@ -43,6 +43,7 @@ jobs:
           set -xe
           cd zenao
           git fetch
+          git checkout prod.backend.docker-compose.yml
           git checkout ${{ github.sha }}
           yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
           yq -iy '.services.backend |= ({"command": "--maintenance"} + .)' prod.backend.docker-compose.yml
