@@ -5,18 +5,15 @@ import Text from "../widgets/texts/text";
 
 type CommunityMemberCardProps = {
   address: string;
-  avatarUri: string;
   displayName: string;
   roles: string[];
 };
 
 function CommunityMemberCard({
   address,
-  avatarUri,
   displayName,
   roles,
 }: CommunityMemberCardProps) {
-  console.log(avatarUri);
   return (
     <Card className="flex items-center gap-6 p-6 md:max-w-[600px] bg-secondary/50 hover:bg-secondary/100 transition rounded-xl">
       <UserAvatar address={address} className="w-24 h-24 rounded-full" />
