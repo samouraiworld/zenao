@@ -9,7 +9,6 @@ services:
     depends_on:
       jaeger:
         condition: service_healthy
-
   jaeger:
     container_name: otel-jaeger
     image: jaegertracing/all-in-one:latest
@@ -19,3 +18,32 @@ services:
       - 127.0.0.1:16686:16686
     healthcheck:
       test: [CMD, wget, -q, -S, -O, "-", "localhost:14269"]
+  gno:
+    build:
+      context: .
+      dockerfile: gno.Dockerfile
+      args:
+        ZENAO_ADMIN_ADDR: g1qjkqq0ycmvq0g6f5gyvm60phcj0fpam6z8zvd4
+    ports:
+      - 127.0.0.1:26657:26657
+    restart: always
+    healthcheck:
+      test: curl --fail http://localhost:26657/health || exit 1
+      interval: 10s
+      timeout: 30s
+      retries: 50
+      start_period: 30s
+  gnoweb:
+    build:
+      context: .
+      dockerfile: gnoweb.Dockerfile
+    ports:
+      - 127.0.0.1:8888:8888
+    environment:
+      GNOWEB_REMOTE: http://gno:26657
+      GNOWEB_HELP_REMOTE: http://localhost:8888
+      GNO_CHAIN_ID: dev
+    restart: always
+    depends_on:
+      gno:
+        condition: service_healthy

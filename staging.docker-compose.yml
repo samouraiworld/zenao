@@ -18,7 +18,6 @@ services:
       args:
         ZENAO_ADMIN_ADDR: g1qjkqq0ycmvq0g6f5gyvm60phcj0fpam6z8zvd4
     ports:
-      - 8888:8888
       - 26657:26657
     restart: always
     healthcheck:
@@ -27,6 +26,20 @@ services:
       timeout: 30s
       retries: 50
       start_period: 30s
+  gnoweb:
+    build:
+      context: .
+      dockerfile: gnoweb.Dockerfile
+    ports:
+      - 8888:8888
+    environment:
+      GNOWEB_REMOTE: http://gno:26657
+      GNOWEB_HELP_REMOTE: https://gnoweb.staging.zenao.io
+      GNO_CHAIN_ID: dev
+    restart: always
+    depends_on:
+      gno:
+        condition: service_healthy
   otel-collector:
     image: otel/opentelemetry-collector:0.107.0
     volumes:
