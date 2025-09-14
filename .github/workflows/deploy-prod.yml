@@ -3,103 +3,104 @@ name: Deploy Prod
 on:
   workflow_dispatch:
 
+
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Setup Golang with cache
-        uses: magnetikonline/action-golang-cache@v5
-        with:
-          go-version-file: go.mod
-          cache-key-suffix: deploy-prod
+    - name: Setup Golang with cache
+      uses: magnetikonline/action-golang-cache@v5
+      with:
+        go-version-file: go.mod
+        cache-key-suffix: deploy-prod
 
-      - name: Get go binaries path
-        id: go-bin-path
-        run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
-      - name: Cache atlas
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.go-bin-path.outputs.PATH }}
-          key: ${{ runner.os }}-atlas-bin2-c261f318ac25924555e63fdf005cc53de43fa5db
-      - name: Install atlas
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: make install-atlas
+    - name: Get go binaries path
+      id: go-bin-path
+      run: echo "PATH=$(go env GOPATH)/bin" >> "$GITHUB_OUTPUT"
+    - name: Cache atlas
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.go-bin-path.outputs.PATH }}
+        key: ${{ runner.os }}-atlas-bin2-c261f318ac25924555e63fdf005cc53de43fa5db
+    - name: Install atlas
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: make install-atlas
 
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%s')"
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d-%s')"
 
-      - name: Enable maintenance mode
-        uses: appleboy/ssh-action@v1
-        with:
-          host: 62.210.92.144
-          username: root
-          key: ${{ secrets.PROD_SSH_KEY }}
-          script: |
-            set -xe
-            cd zenao
-            git fetch
-            git checkout ${{ github.sha }}
-            yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
-            yq -iy '.services.backend |= ({"command": "--maintenance"} + .)' prod.backend.docker-compose.yml
-            docker compose -f prod.backend.docker-compose.yml up -d backend
+    - name: Enable maintenance mode
+      uses: appleboy/ssh-action@v1
+      with:
+        host: 62.210.92.144
+        username: root
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          set -xe
+          cd zenao
+          git fetch
+          git checkout ${{ github.sha }}
+          yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
+          yq -iy '.services.backend |= ({"command": "--maintenance"} + .)' prod.backend.docker-compose.yml
+          docker compose -f prod.backend.docker-compose.yml up -d backend
 
-      - name: Backup DB
-        shell: bash
-        run: |
-          RESPONSE=$(curl -s -f -X POST \
-            -H "Authorization: Bearer ${{ secrets.TURSO_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"name": "zenao-prod-backup-${{ steps.date.outputs.date }}", "group": "zenao", "seed": {"type": "database", "name": "zenao-prod"} }' \
-                "https://api.turso.tech/v1/organizations/samourai-coop/databases")
+    - name: Backup DB
+      shell: bash
+      run: |
+        RESPONSE=$(curl -s -f -X POST \
+          -H "Authorization: Bearer ${{ secrets.TURSO_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{"name": "zenao-prod-backup-${{ steps.date.outputs.date }}", "group": "zenao", "seed": {"type": "database", "name": "zenao-prod"} }' \
+              "https://api.turso.tech/v1/organizations/samourai-coop/databases")
 
-          if [ $? -ne 0 ]; then
-            echo "API call failed"
-            exit 1
-          fi
+        if [ $? -ne 0 ]; then
+          echo "API call failed"
+          exit 1
+        fi
 
-      - name: Migrate DB
-        run: TURSO_TOKEN=${{ secrets.PROD_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env prod
+    - name: Migrate DB
+      run: TURSO_TOKEN=${{ secrets.PROD_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env prod
 
-      - name: Create genesis txs
-        run: go run ./backend gentxs -output genesis_txs.jsonl --db "libsql://zenao-prod-samourai-coop.turso.io?authToken=${{ secrets.PROD_TURSO_TOKEN }}" --admin-mnemonic '${{ secrets.PROD_ADMIN_MNEMONIC }}' --chain-id zenao-dev
+    - name: Create genesis txs
+      run: go run ./backend gentxs -output genesis_txs.jsonl --db "libsql://zenao-prod-samourai-coop.turso.io?authToken=${{ secrets.PROD_TURSO_TOKEN }}" --admin-mnemonic '${{ secrets.PROD_ADMIN_MNEMONIC }}' --chain-id zenao-dev
 
-      - name: Copy genesis txs
-        uses: appleboy/scp-action@v1
-        with:
-          host: 62.210.95.61
-          username: root
-          key: ${{ secrets.PROD_SSH_KEY }}
-          source: genesis_txs.jsonl
-          target: /root/zenao
-          overwrite: true
+    - name: Copy genesis txs
+      uses: appleboy/scp-action@v1
+      with:
+        host: 62.210.95.61
+        username: root
+        key: ${{ secrets.PROD_SSH_KEY }}
+        source: genesis_txs.jsonl
+        target: /root/zenao
+        overwrite: true
 
-      - name: Upgrade gno
-        uses: appleboy/ssh-action@v1
-        with:
-          host: 62.210.95.61
-          username: root
-          key: ${{ secrets.PROD_SSH_KEY }}
-          script: |
-            set -xe
-            cd zenao
-            git fetch
-            git checkout ${{ github.sha }}
-            docker compose -f prod.gno.docker-compose.yml up -d --force-recreate --build gno --wait
+    - name: Upgrade gno
+      uses: appleboy/ssh-action@v1
+      with:
+        host: 62.210.95.61
+        username: root
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
+          set -xe
+          cd zenao
+          git fetch
+          git checkout ${{ github.sha }}
+          docker compose -f prod.gno.docker-compose.yml up -d --force-recreate --build gno gnoweb --wait
 
-      - name: Upgrade backend
-        uses: appleboy/ssh-action@v1
-        with:
-          host: 62.210.92.144
-          username: root
-          key: ${{ secrets.PROD_SSH_KEY }}
-          # the yq del is there to disable maintenance mode
-          script: |
-            set -xe
-            cd zenao
-            docker compose -f prod.backend.docker-compose.yml up -d --wait otel-collector jaeger
-            yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
-            docker compose -f prod.backend.docker-compose.yml up -d --build backend
+    - name: Upgrade backend
+      uses: appleboy/ssh-action@v1
+      with:
+        host: 62.210.92.144
+        username: root
+        key: ${{ secrets.PROD_SSH_KEY }}
+        # the yq del is there to disable maintenance mode
+        script: |
+          set -xe
+          cd zenao
+          docker compose -f prod.backend.docker-compose.yml up -d --wait otel-collector jaeger
+          yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
+          docker compose -f prod.backend.docker-compose.yml up -d --build backend
