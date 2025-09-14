@@ -83,4 +83,4 @@ COPY --from=builder /app/gnoland-data /app/gnoland-data
 ENV HOME=/app
 WORKDIR $HOME
 
-ENTRYPOINT exec gnoland start --lazy -skip-genesis-sig-verification
+ENTRYPOINT exec gnoland start --lazy --skip-genesis-sig-verification --skip-failing-genesis-txs
