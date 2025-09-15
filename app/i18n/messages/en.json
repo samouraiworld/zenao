@@ -317,6 +317,22 @@
     "joining-state": "Joining...",
     "join-community-button": "Join Community"
   },
+    "community-edit-form": {
+    "update-success": "Community updated successfully",
+    "update-failure": "Failed to update community",
+    "edit-button": "Edit community",
+    "upload-avatar": "Upload avatar image",
+    "upload-banner": "Upload banner image",
+    "name-label": "Community name",
+    "name-placeholder": "Community name...",
+    "description-label": "Description",
+    "description-placeholder": "Description...",
+    "admin-label": "Administrators",
+    "admin-placeholder": "New administrator email",
+    "remove-admin": "Remove",
+    "add-admin": "Add Administrator",
+    "submit": "Update Community"
+  },
   "empty-list": {
     "title": "Nothing listed",
     "description": "Let's change that!"

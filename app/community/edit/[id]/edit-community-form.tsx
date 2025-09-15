@@ -13,7 +13,7 @@ import { communityInfo } from "@/lib/queries/community";
 import { CommunityForm } from "@/components/features/community/community-form";
 import { communityFormSchema, CommunityFormSchemaType } from "@/types/schemas";
 import { zenaoClient } from "@/lib/zenao-client";
-// TODO: useTranslations
+import { useTranslations } from "next-intl";
 
 export const EditCommunityForm: React.FC<{ communityId: string }> = ({
   communityId,
@@ -51,6 +51,7 @@ export const EditCommunityForm: React.FC<{ communityId: string }> = ({
   });
 
   const { mutateAsync: editCommunity, isPending } = useEditCommunity();
+  const t = useTranslations("community-edit-form");
 
   const onSubmit = async (values: CommunityFormSchemaType) => {
     try {
@@ -65,13 +66,13 @@ export const EditCommunityForm: React.FC<{ communityId: string }> = ({
         bannerUri: values.bannerUri,
         administrators: values.administrators.map((a) => a.address),
       });
-      toast({ title: "Community updated successfully" });
+      toast({ title: t("update-success") });
       router.push(`/community/${communityId}`);
     } catch (err) {
       captureException(err);
       toast({
         variant: "destructive",
-        title: "Failed to update community",
+        title: t("update-failure"),
       });
     }
   };

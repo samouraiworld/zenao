@@ -9,7 +9,7 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Button } from "@/components/shadcn/button";
 import { CommunityFormSchemaType } from "@/types/schemas";
-// TODO: useTranslations
+import { useTranslations } from "next-intl";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -26,6 +26,7 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
     control: form.control,
     name: "administrators",
   });
+  const t = useTranslations("community-edit-form");
 
   return (
     <Form {...form}>
@@ -38,14 +39,14 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
             name="avatarUri"
             control={form.control}
             aspectRatio={1.5}
-            placeholder="Upload avatar image"
+            placeholder={t("upload-avatar")}
             className="w-full"
           />
           <FormFieldImage
             name="bannerUri"
             control={form.control}
             aspectRatio={1.5}
-            placeholder="Upload banner image"
+            placeholder={t("upload-banner")}
             className="w-full"
           />
         </div>
@@ -54,27 +55,27 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
           <FormFieldInputString
             control={form.control}
             name="displayName"
-            label="Community name"
-            placeholder="Community name..."
+            label={t("name-label")}
+            placeholder={t("name-placeholder")}
           />
           <FormFieldTextArea
             control={form.control}
             name="description"
-            label="Description"
-            placeholder="Description..."
+            label={t("description-label")}
+            placeholder={t("description-placeholder")}
             wordCounter
             maxLength={5000}
           />
 
           <div className="flex flex-col gap-4">
-            <label className="block text-sm font-medium">Administrators</label>
+            <label className="block text-sm font-medium">{t("admin-label")}</label>
             <div className="flex flex-col gap-2">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex gap-2 items-center">
                   <FormFieldInputString
                     control={form.control}
                     name={`administrators.${index}.address`}
-                    placeholder="New administrator email"
+                    placeholder={t("admin-placeholder")}
                     className="flex-grow"
                   />
                   <Button
@@ -84,7 +85,7 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
                     onClick={() => remove(index)}
                     aria-label={`Remove administrator ${index + 1}`}
                   >
-                    Remove
+                    {t("remove-admin")}
                   </Button>
                 </div>
               ))}
@@ -94,13 +95,13 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
                 onClick={() => append({ address: "" })}
                 className="w-fit"
               >
-                Add Administrator
+                {t("add-admin")}
               </ButtonWithChildren>
             </div>
           </div>
 
           <ButtonWithChildren loading={isLoading} type="submit">
-            Update Community
+            {t("submit")}
           </ButtonWithChildren>
         </div>
       </form>
