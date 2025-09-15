@@ -133,6 +133,9 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if c.Discoverable != false {
 		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, c.Discoverable)
 	}
+	if c.CommunityId != "" {
+		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, c.CommunityId)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
