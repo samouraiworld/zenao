@@ -17,12 +17,12 @@ import (
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/gnoland"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/gnovm"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/tm2/pkg/amino"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	cryptoGno "github.com/gnolang/gno/tm2/pkg/crypto"
 	"github.com/gnolang/gno/tm2/pkg/std"
+	tm2std "github.com/gnolang/gno/tm2/pkg/std"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -495,7 +495,7 @@ func execGenTxs() error {
 func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
 	orgPkgPath := chain.orgPkgPath(orgType, orgID)
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
+	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
 	gnoLitPost := "&" + post.Post.GnoLiteral("feedsv1.", "\t\t")
 	body := genCreatePostMsgRunBody(userPkgPath, feedID, gnoLitPost)
 
@@ -504,9 +504,9 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addr
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -530,9 +530,9 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addr
 				vm.MsgRun{
 					Caller: creator,
 					Send:   []std.Coin{},
-					Package: &gnovm.MemPackage{
+					Package: &tm2std.MemPackage{
 						Name:  "main",
-						Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+						Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 					},
 				},
 			},
@@ -562,9 +562,9 @@ func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.A
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -590,9 +590,9 @@ func createVoteTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addre
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -613,16 +613,16 @@ func createVoteTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addre
 func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
 	orgPkgPath := chain.orgPkgPath(orgType, orgID)
-	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
+	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
 	body := genCreatePollMsgRunBody(orgPkgPath, userPkgPath, feedID, poll.Question, options, poll.Kind, poll.Duration)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -688,11 +688,11 @@ func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoG
 		Msgs: []std.Msg{
 			vm.MsgAddPackage{
 				Creator: creator,
-				Deposit: []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Send:    []std.Coin{},
+				Package: &tm2std.MemPackage{
 					Name:  "event",
 					Path:  eventPkgPath,
-					Files: []*gnovm.MemFile{{Name: "event.gno", Body: eRealm}},
+					Files: []*tm2std.MemFile{{Name: "event.gno", Body: eRealm}},
 				},
 			},
 		},
@@ -718,9 +718,9 @@ func createCancelEventTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoG
 			vm.MsgRun{
 				Caller: caller,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name: "main",
-					Files: []*gnovm.MemFile{{
+					Files: []*tm2std.MemFile{{
 						Name: "main.gno",
 						Body: genCancelEventMsgRunBody(eventPkgPath, creatorPkgPath),
 					}},
@@ -829,9 +829,9 @@ func createCancelParticipationTx(chain *gnoZenaoChain, event *zeni.Event, creato
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -874,9 +874,9 @@ func createParticipationTx(chain *gnoZenaoChain, creator cryptoGno.Address, even
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -904,9 +904,9 @@ func createCheckinTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zen
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -935,11 +935,11 @@ func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, creator cryptoGno.
 		Msgs: []std.Msg{
 			vm.MsgAddPackage{
 				Creator: creator,
-				Deposit: []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Send:    []std.Coin{},
+				Package: &tm2std.MemPackage{
 					Name:  "user",
 					Path:  userPkgPath,
-					Files: []*gnovm.MemFile{{Name: "user.gno", Body: uRealm}},
+					Files: []*tm2std.MemFile{{Name: "user.gno", Body: uRealm}},
 				},
 			},
 		},
@@ -964,9 +964,9 @@ func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, gen
 			vm.MsgCall{
 				Caller:  addr,
 				Send:    std.NewCoins(std.NewCoin("ugnot", 20_000_000)),
-				PkgPath: "gno.land/r/demo/users",
+				PkgPath: "gno.land/r/gnoland/users/v1",
 				Func:    "Register",
-				Args:    []string{"", "zenaoadm", ""},
+				Args:    []string{"zenaoadm"},
 			},
 		},
 		Fee: std.Fee{
@@ -1132,11 +1132,11 @@ func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, cre
 		Msgs: []std.Msg{
 			vm.MsgAddPackage{
 				Creator: creator,
-				Deposit: []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Send:    []std.Coin{},
+				Package: &tm2std.MemPackage{
 					Name:  "community",
 					Path:  communityPkgPath,
-					Files: []*gnovm.MemFile{{Name: "community.gno", Body: cRealm}},
+					Files: []*tm2std.MemFile{{Name: "community.gno", Body: cRealm}},
 				},
 			},
 		},
@@ -1165,9 +1165,9 @@ func createEventRemoveGatekeeperTx(chain *gnoZenaoChain, creator cryptoGno.Addre
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -1196,9 +1196,9 @@ func createCommunityRemoveMemberTx(chain *gnoZenaoChain, creator cryptoGno.Addre
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},
@@ -1254,9 +1254,9 @@ func createCommunityRemoveEventTx(chain *gnoZenaoChain, creator cryptoGno.Addres
 			vm.MsgRun{
 				Caller: creator,
 				Send:   []std.Coin{},
-				Package: &gnovm.MemPackage{
+				Package: &tm2std.MemPackage{
 					Name:  "main",
-					Files: []*gnovm.MemFile{{Name: "main.gno", Body: body}},
+					Files: []*tm2std.MemFile{{Name: "main.gno", Body: body}},
 				},
 			},
 		},

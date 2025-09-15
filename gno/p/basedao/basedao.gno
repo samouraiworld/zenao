@@ -5,6 +5,7 @@ import (
 	"std"
 
 	"gno.land/p/demo/mux"
+	"gno.land/p/demo/ufmt"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
 )
@@ -35,26 +36,22 @@ type DAOPrivate struct {
 }
 
 type Config struct {
-	Name              string
-	Description       string
-	ImageURI          string
-	Members           *MembersStore
-	NoDefaultHandlers bool
-	NoEvents          bool
-	InitialCondition  daocond.Condition
-	SetProfileString  ProfileStringSetter
-	GetProfileString  ProfileStringGetter
-	NoCreationEvent   bool
+	Name               string
+	Description        string
+	ImageURI           string
+	Members            *MembersStore
+	NoDefaultHandlers  bool
+	NoDefaultRendering bool
+	InitialCondition   daocond.Condition
+	SetProfileString   ProfileStringSetter
+	GetProfileString   ProfileStringGetter
+	NoCreationEvent    bool
 }
 
-type ProfileStringSetter func(field string, value string) bool
+type ProfileStringSetter func(cur realm, field string, value string) bool
 type ProfileStringGetter func(addr std.Address, field string, def string) string
 
 const EventBaseDAOCreated = "BaseDAOCreated"
-
-func emitBaseDAOCreated() {
-	std.Emit(EventBaseDAOCreated)
-}
 
 func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 	// XXX: emit events from memberstore
@@ -69,8 +66,6 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 	}
 
 	core := daokit.NewCore()
-	core.NoEvents = conf.NoEvents
-
 	dao := &DAOPrivate{
 		Core:             core,
 		Members:          members,
@@ -79,10 +74,14 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 	}
 	dao.initRenderingRouter()
 
+	if !conf.NoDefaultRendering {
+		dao.InitDefaultRendering()
+	}
+
 	if conf.SetProfileString != nil {
-		conf.SetProfileString("DisplayName", conf.Name)
-		conf.SetProfileString("Bio", conf.Description)
-		conf.SetProfileString("Avatar", conf.ImageURI)
+		conf.SetProfileString(cross, "DisplayName", conf.Name)
+		conf.SetProfileString(cross, "Bio", conf.Description)
+		conf.SetProfileString(cross, "Avatar", conf.ImageURI)
 	}
 
 	if !conf.NoDefaultHandlers {
@@ -92,24 +91,48 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 
 		if conf.SetProfileString != nil {
 			dao.Core.Resources.Set(&daokit.Resource{
-				Handler:   NewEditProfileHandler(conf.SetProfileString, []string{"DisplayName", "Bio", "Avatar"}),
-				Condition: conf.InitialCondition,
+				Handler:     NewEditProfileHandler(conf.SetProfileString, []string{"DisplayName", "Bio", "Avatar"}),
+				Condition:   conf.InitialCondition,
+				DisplayName: "Edit Profile",
+				Description: "This proposal allows you to edit this DAO profile.",
 			})
 		}
 
-		// register management handlers
-		for _, m := range []daokit.MessageHandler{
-			NewAddMemberHandler(dao),
-			NewRemoveMemberHandler(dao),
-			NewAssignRoleHandler(dao),
-			NewUnassignRoleHandler(dao),
-		} {
-			dao.Core.Resources.Set(&daokit.Resource{Handler: m, Condition: conf.InitialCondition})
+		defaultResources := []daokit.Resource{
+			{
+				Handler:     NewAddMemberHandler(dao),
+				Condition:   conf.InitialCondition,
+				DisplayName: "Add Member",
+				Description: "This proposal allows you to add a new member to the DAO.",
+			},
+			{
+				Handler:     NewRemoveMemberHandler(dao),
+				Condition:   conf.InitialCondition,
+				DisplayName: "Remove Member",
+				Description: "This proposal allows you to remove a member from the DAO.",
+			},
+			{
+				Handler:     NewAssignRoleHandler(dao),
+				Condition:   conf.InitialCondition,
+				DisplayName: "Assign Role",
+				Description: "This proposal allows you to assign a role to a member.",
+			},
+			{
+				Handler:     NewUnassignRoleHandler(dao),
+				Condition:   conf.InitialCondition,
+				DisplayName: "Unassign Role",
+				Description: "This proposal allows you to unassign a role from a member.",
+			},
 		}
+		// register management handlers
+		for _, resource := range defaultResources {
+			dao.Core.Resources.Set(&resource)
+		}
+
 	}
 
 	if !conf.NoCreationEvent {
-		emitBaseDAOCreated()
+		std.Emit(EventBaseDAOCreated)
 	}
 
 	return &daoPublic{impl: dao}, dao
@@ -137,7 +160,7 @@ func (d *DAOPrivate) Propose(req daokit.ProposalRequest) uint64 {
 func (d *DAOPrivate) assertCallerIsMember() string {
 	id := std.PreviousRealm().Address().String()
 	if !d.Members.IsMember(id) {
-		panic(errors.New("caller is not a member"))
+		panic(ufmt.Errorf("caller %v is not a member", std.PreviousRealm()))
 	}
 	return id
 }

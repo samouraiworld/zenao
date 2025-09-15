@@ -5,12 +5,11 @@ import (
 
 	"gno.land/p/demo/avl"
 	"gno.land/p/demo/json"
-	"gno.land/p/zenao/role_manager"
 )
 
 type MembersStore struct {
-	RoleManager *role_manager.RoleManager
-	Members     *avl.Tree // address -> struct{}
+	Roles   *avl.Tree // role name -> *Role
+	Members *avl.Tree // string -> *avl.Tree [roles -> struct{}]
 }
 
 type Member struct {
@@ -18,25 +17,62 @@ type Member struct {
 	Roles   []string
 }
 
+type RoleInfo struct {
+	Name        string
+	Description string
+	Color       string
+}
+
+type Role struct {
+	Name        string
+	Description string
+	Color       string
+	Members     *avl.Tree // string -> struct{}
+}
+
 const EventAddMember = "BaseDAOAddMember"
 const EventRemoveMember = "BaseDAORemoveMember"
 
-func NewMembersStore(initialRoles []role_manager.RoleInfo, initialMembers []Member) *MembersStore {
+func NewMembersStore(initialRoles []RoleInfo, initialMembers []Member) *MembersStore {
 	res := &MembersStore{
-		RoleManager: role_manager.New(),
-		Members:     avl.NewTree(),
+		Roles:   avl.NewTree(),
+		Members: avl.NewTree(),
 	}
 	res.setRoles(initialRoles)
 	res.setMembers(initialMembers)
 	return res
 }
 
-func (m *MembersStore) HasRole(memberId string, role string) bool {
-	return m.RoleManager.HasRole(std.Address(memberId), role)
+func (m *MembersStore) HasRole(member string, role string) bool {
+	rolesRaw, ok := m.Members.Get(member)
+	if !ok {
+		return false
+	}
+	roles, ok := rolesRaw.(*avl.Tree)
+	if !ok {
+		return false
+	}
+	return roles.Has(role)
 }
 
-func (m *MembersStore) IsMember(memberId string) bool {
-	return m.Members.Has(memberId)
+func (m *MembersStore) IsMember(member string) bool {
+	return m.Members.Has(member)
+}
+
+func (m *MembersStore) RoleInfo(role string) RoleInfo {
+	roleDataRaw, ok := m.Roles.Get(role)
+	if !ok {
+		panic("role does not exist")
+	}
+	roleData, ok := roleDataRaw.(*Role)
+	if !ok {
+		panic("a value of memberstore.roles is not a Role, should not happen")
+	}
+	return RoleInfo{
+		Name:        roleData.Name,
+		Description: roleData.Description,
+		Color:       roleData.Color,
+	}
 }
 
 func (m *MembersStore) MembersCount() uint64 {
@@ -53,42 +89,95 @@ func (m *MembersStore) GetMembers() []string {
 }
 
 func (m *MembersStore) GetRoles() []string {
-	return m.RoleManager.GetRoles()
+	i := 0
+	res := make([]string, m.Roles.Size())
+	m.Roles.Iterate("", "", func(key string, value interface{}) bool {
+		res[i] = key
+		i++
+		return false
+	})
+	return res
 }
 
-func (m *MembersStore) GetMemberRoles(memberId string) []string {
-	return m.RoleManager.GetUserRoles(std.Address(memberId))
+func (m *MembersStore) GetMemberRoles(member string) []string {
+	rolesRaw, ok := m.Members.Get(member)
+	if !ok {
+		return []string{}
+	}
+	roles, ok := rolesRaw.(*avl.Tree)
+	if !ok {
+		return []string{}
+	}
+	i := 0
+	res := make([]string, roles.Size())
+	roles.Iterate("", "", func(key string, value interface{}) bool {
+		res[i] = key
+		i++
+		return false
+	})
+	return res
 }
 
-func (m *MembersStore) CountMemberRoles(memberId string) int {
-	return m.RoleManager.CountUserRoles(std.Address(memberId))
+func (m *MembersStore) CountMemberRoles(member string) int {
+	rolesRaw, ok := m.Members.Get(member)
+	if !ok {
+		return 0
+	}
+	roles, ok := rolesRaw.(*avl.Tree)
+	if !ok {
+		return 0
+	}
+	return roles.Size()
 }
 
 func (m *MembersStore) GetMembersWithRole(role string) []string {
-	return m.RoleManager.GetRoleUsers(role)
+	roleDataRaw, ok := m.Roles.Get(role)
+	if !ok {
+		return []string{}
+	}
+	roleData, ok := roleDataRaw.(*Role)
+	if !ok {
+		return []string{}
+	}
+	i := 0
+	res := make([]string, roleData.Members.Size())
+	roleData.Members.Iterate("", "", func(key string, value interface{}) bool {
+		res[i] = key
+		i++
+		return false
+	})
+	return res
 }
 
 func (m *MembersStore) CountMembersWithRole(role string) uint32 {
-	return uint32(m.RoleManager.CountRoleUsers(role))
+	return uint32(len(m.GetMembersWithRole(role)))
 }
 
-func (m *MembersStore) setRoles(roles []role_manager.RoleInfo) {
+func (m *MembersStore) GetMembersWithoutRole() []string {
+	var res []string
+	m.Members.Iterate("", "", func(key string, value interface{}) bool {
+		roles := m.GetMemberRoles(key)
+		if len(roles) == 0 {
+			res = append(res, key)
+		}
+		return false
+	})
+	return res
+}
+
+func (m *MembersStore) CountMembersWithoutRole() uint32 {
+	return uint32(len(m.GetMembersWithoutRole()))
+}
+
+func (m *MembersStore) setRoles(roles []RoleInfo) {
 	for _, role := range roles {
-		m.RoleManager.CreateNewRole(role.Name, role.Description, []string{})
+		m.AddRole(role)
 	}
 }
 
 func (m *MembersStore) setMembers(members []Member) {
 	for _, member := range members {
-		if ok := m.Members.Has(member.Address); !ok {
-			std.Emit(EventAddMember,
-				"address", member.Address,
-			)
-		}
-		m.Members.Set(member.Address, struct{}{})
-		for _, role := range member.Roles {
-			m.RoleManager.AddRoleToUser(std.Address(member.Address), role)
-		}
+		m.AddMember(member.Address, member.Roles)
 	}
 }
 
@@ -96,50 +185,161 @@ func (m *MembersStore) AddMember(member string, roles []string) {
 	if m.IsMember(member) {
 		panic("member already exists")
 	}
+
+	membersRoles := avl.NewTree()
+	for _, role := range roles {
+		if !m.Roles.Has(role) {
+			panic("role: " + role + " does not exist")
+		}
+		membersRoles.Set(role, struct{}{})
+		roleDataRaw, _ := m.Roles.Get(role)
+		roleData := roleDataRaw.(*Role)
+		roleData.Members.Set(member, struct{}{})
+	}
+	m.Members.Set(member, membersRoles)
+
 	std.Emit(EventAddMember,
 		"address", member,
 	)
-	m.Members.Set(member, struct{}{})
-	for _, role := range roles {
-		m.RoleManager.AddRoleToUser(std.Address(member), role)
-	}
 }
 
 func (m *MembersStore) RemoveMember(member string) {
 	if !m.IsMember(member) {
 		panic("member does not exist")
 	}
+
+	memberRolesRaw, ok := m.Members.Get(member)
+	if !ok {
+		panic("should not happen")
+	}
+	memberRoles, ok := memberRolesRaw.(*avl.Tree)
+	if !ok {
+		panic("a value of memberstore.members is not an avl.Tree, should not happen")
+	}
+
+	memberRoles.Iterate("", "", func(key string, value interface{}) bool {
+		roleRaw, ok := m.Roles.Get(key)
+		if !ok {
+			return false
+		}
+		role, ok := roleRaw.(*Role)
+		if !ok {
+			panic("a value of memberstore.roles is not a Role, should not happen")
+		}
+		role.Members.Remove(member)
+		return false
+	})
+	m.Members.Remove(member)
+
 	std.Emit(EventRemoveMember,
 		"address", member,
 	)
-	m.Members.Remove(member)
-	m.RoleManager.RemoveAllRolesFromUser(std.Address(member))
+}
+
+func (m *MembersStore) AddRole(role RoleInfo) {
+	if m.Roles.Has(role.Name) {
+		panic("role already exists")
+	}
+
+	roleData := &Role{
+		Name:        role.Name,
+		Description: role.Description,
+		Color:       role.Color,
+		Members:     avl.NewTree(),
+	}
+
+	m.Roles.Set(role.Name, roleData)
+}
+
+func (m *MembersStore) RemoveRole(role string) {
+	roleDataRaw, ok := m.Roles.Get(role)
+	if !ok {
+		panic("role does not exist")
+	}
+	roleData, ok := roleDataRaw.(*Role)
+	if !ok {
+		panic("a value of memberstore.roles is not a Role, should not happen")
+	}
+
+	roleData.Members.Iterate("", "", func(key string, value interface{}) bool {
+		memberRaw, ok := m.Members.Get(key)
+		if !ok {
+			return false
+		}
+		member, ok := memberRaw.(*avl.Tree)
+		if !ok {
+			panic("a value of memberstore.members is not an avl.Tree, should not happen")
+		}
+		member.Remove(role)
+		return false
+	})
+	m.Roles.Remove(role)
 }
 
 func (m *MembersStore) AddRoleToMember(member string, role string) {
 	if !m.IsMember(member) {
 		panic("member does not exist")
 	}
-	if !m.RoleManager.RoleExists(role) {
+	if !m.Roles.Has(role) {
 		panic("role " + role + " does not exist")
 	}
 	if m.HasRole(member, role) {
 		panic("member already has the role")
 	}
-	m.RoleManager.AddRoleToUser(std.Address(member), role)
+
+	memberRolesRaw, ok := m.Members.Get(member)
+	if !ok {
+		panic("should not happen")
+	}
+	memberRoles, ok := memberRolesRaw.(*avl.Tree)
+	if !ok {
+		panic("a value of memberstore.members is not an avl.Tree, should not happen")
+	}
+
+	roleDataRaw, ok := m.Roles.Get(role)
+	if !ok {
+		panic("should not happen")
+	}
+	roleData, ok := roleDataRaw.(*Role)
+	if !ok {
+		panic("a value of memberstore.roles is not a Role, should not happen")
+	}
+
+	roleData.Members.Set(member, struct{}{})
+	memberRoles.Set(role, struct{}{})
 }
 
 func (m *MembersStore) RemoveRoleFromMember(member string, role string) {
 	if !m.IsMember(member) {
 		panic("member does not exist")
 	}
-	if !m.RoleManager.RoleExists(role) {
+	if !m.Roles.Has(role) {
 		panic("role " + role + " does not exist")
 	}
 	if !m.HasRole(member, role) {
 		panic("member does not have the role")
 	}
-	m.RoleManager.RemoveRoleFromUser(std.Address(member), role)
+
+	memberRolesRaw, ok := m.Members.Get(member)
+	if !ok {
+		panic("should not happen")
+	}
+	memberRoles, ok := memberRolesRaw.(*avl.Tree)
+	if !ok {
+		panic("a value of memberstore.members is not an avl.Tree, should not happen")
+	}
+
+	roleDataRaw, ok := m.Roles.Get(role)
+	if !ok {
+		panic("should not happen")
+	}
+	roleData, ok := roleDataRaw.(*Role)
+	if !ok {
+		panic("a value of memberstore.roles is not a Role, should not happen")
+	}
+
+	memberRoles.Remove(role)
+	roleData.Members.Remove(member)
 }
 
 func (m *MembersStore) GetMembersJSON() string {

@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"gno.land/p/demo/avl"
 	"gno.land/p/demo/testutils"
 	"gno.land/p/demo/urequire"
 	"gno.land/p/zenao/daokit"
+	"gno.land/r/zenao/mockprofile"
 )
 
 var (
@@ -22,9 +22,11 @@ var (
 
 // XXX: Add tests for multiple organizers
 func TestNewEvent(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: std.NewUserRealm(alice),
+	})
+	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -42,9 +44,11 @@ func TestNewEvent(t *testing.T) {
 }
 
 func TestCancelEvent(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: std.NewUserRealm(alice),
+	})
+	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -71,14 +75,16 @@ func TestCancelEvent(t *testing.T) {
 		}
 	}()
 
-	std.TestSetOriginCaller(bob)
+	testing.SetOriginCaller(bob)
 	daokit.InstantExecute(event.DAO, testReq(NewCancelEventMsg()))
 }
 
 func TestAddParticipant(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: std.NewUserRealm(alice),
+	})
+	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -119,14 +125,16 @@ func TestAddParticipant(t *testing.T) {
 		}
 	}()
 
-	std.TestSetOriginCaller(bob)
+	testing.SetOriginCaller(bob)
 	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(carol.String(), testTicket(t), "")))
 }
 
 func TestRemoveParticipant(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: std.NewUserRealm(alice),
+	})
+	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -182,9 +190,11 @@ func TestRemoveParticipant(t *testing.T) {
 }
 
 func TestTicket(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: std.NewUserRealm(alice),
+	})
+	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -214,7 +224,9 @@ func TestTicket(t *testing.T) {
 		t.Fatalf("UsedAt must be nil when ticket is not used")
 	}
 
-	std.TestSetOriginCaller(carol)
+	testing.SetContext(testing.Context{
+		CurrentRealm: std.NewUserRealm(carol),
+	})
 	now := time.Now()
 	daokit.InstantExecute(event.DAO, testReq(NewCheckinMsg(ticketPubkey, ticketSignature)))
 	urequire.Equal(t, bob.String(), ticket.Participant, "invalid participant in ticket after use")
@@ -224,25 +236,9 @@ func TestTicket(t *testing.T) {
 	urequire.Equal(t, now.Format(time.RFC3339Nano), ticket.UsedAt.Format(time.RFC3339Nano), "invalid UsedAt")
 }
 
-type mockProfile struct {
-	fields avl.Tree
-}
-
-func (p *mockProfile) GetProfileString(addr std.Address, field string, def string) string {
-	v, ok := p.fields.Get(field)
-	if !ok {
-		return def
-	}
-	return v.(string)
-}
-
-func (p *mockProfile) SetStringField(field, value string) bool {
-	return p.fields.Set(field, value)
-}
-
-func testReq(msg daokit.ExecutableMessage) daokit.ProposalRequest {
+func testReq(msg daokit.Action) daokit.ProposalRequest {
 	return daokit.ProposalRequest{
-		Message: msg,
+		Action: msg,
 	}
 }
 

@@ -21,16 +21,7 @@ start.gnodev:
 start.gnodev-e2e:
 	$(GNODEV) --unsafe-api --txs-file=$(TXS_FILE)
 
-.PHONY: clone-testing-gno
-clone-testing-gno:
-	rm -fr gnobuild
-	mkdir -p gnobuild
-	cd gnobuild && git clone https://github.com/gnolang/gno.git && cd gno && git checkout $(shell $(CAT) .gnoversion)
-	cp -r ./gno/p ./gnobuild/gno/examples/gno.land/p/zenao
-	cp -r ./gno/r ./gnobuild/gno/examples/gno.land/r/zenao
-
-.PHONY: clone-gno
-clone-gno:
+gnobuild: .gnoversion
 	rm -fr gnobuild
 	mkdir -p gnobuild
 	cd gnobuild && git clone https://github.com/gnolang/gno.git && cd gno && git checkout $(shell $(CAT) .gnoversion)
@@ -39,17 +30,16 @@ clone-gno:
 install-gno:
 	cd gnobuild/gno && make install
 
-.PHONY: build-gno
-build-gno:
+gnobuild/gno/gnovm/build/gno: gnobuild
 	cd gnobuild/gno/gnovm && make build
 
 .PHONY: lint-gno
-lint-gno:
+lint-gno: gnobuild/gno/gnovm/build/gno
 	./gnobuild/gno/gnovm/build/gno tool lint ./gno/. -v
 
 .PHONY: test-gno
-test-gno:
-	./gnobuild/gno/gnovm/build/gno test ./gno/... -v
+test-gno: gnobuild/gno/gnovm/build/gno
+	cd gno && ../gnobuild/gno/gnovm/build/gno test ./... -v
 
 .PHONY: gno-mod-tidy
 gno-mod-tidy:
