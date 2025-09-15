@@ -1,15 +1,15 @@
 "use client";
 
-import React from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import React from "react";
 import { Button } from "../shadcn/button";
+import { useToast } from "@/hooks/use-toast";
 import { useLeaveCommunity } from "@/lib/mutations/community-leave";
 import { communityUserRoles } from "@/lib/queries/community";
-import { captureException } from "@/lib/report";
-import { useToast } from "@/hooks/use-toast";
 import { userAddressOptions } from "@/lib/queries/user";
+import { captureException } from "@/lib/report";
 
 type Props = {
   communityId: string;
@@ -50,10 +50,21 @@ export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
         description: t("leave-success-desc"),
       });
     } catch (err) {
-      captureException(err);
+      if (
+        err instanceof Error &&
+        err.message !==
+          "[unknown] user is the only administrator of this community and cannot leave it"
+      ) {
+        captureException(err);
+      }
       toast({
         variant: "destructive",
-        title: t("leave-failure"),
+        title:
+          err instanceof Error &&
+          err.message ===
+            "[unknown] user is the only administrator of this community and cannot leave it"
+            ? t("leave-only-admin-error")
+            : t("leave-failure"),
         description: t("leave-failure-desc"),
       });
     }
