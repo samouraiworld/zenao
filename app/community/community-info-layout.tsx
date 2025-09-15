@@ -1,6 +1,5 @@
 "use client";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
@@ -8,7 +7,6 @@ import Text from "@/components/widgets/texts/text";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { communityInfo } from "@/lib/queries/community";
-import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 
 type CommunityInfoLayoutProps = {
   communityId: string;
@@ -66,22 +64,10 @@ function CommunityInfoLayout({
             </Heading>
           </div>
 
-          <div className="flex gap-2">
-            <GnowebButton
-              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
-              className="max-md:hidden"
-            />
-            {/* TODO: display only for admin */}
-            <Link href={`/community/edit/${communityId}`}>
-              <ButtonWithChildren
-                type="button"
-                variant="outline"
-                className="flex flex-row w-full md:w-fit justify-start rounded"
-              >
-                <Text className="text-sm">Edit Community</Text>
-              </ButtonWithChildren>
-            </Link>
-          </div>
+          <GnowebButton
+            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
+            className="max-md:hidden"
+          />
         </div>
 
         <Text>{data.description}</Text>
