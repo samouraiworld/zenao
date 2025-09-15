@@ -105,6 +105,7 @@ message EditEventRequest {
   repeated string organizers = 12;
   repeated string gatekeepers = 13;
   bool discoverable = 14;
+  string community_id = 15; // optional
 }
 
 message EditEventResponse { string id = 1; }

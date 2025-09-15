@@ -332,6 +332,9 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Discoverable != false {
 		fields["discoverable"] = json.BoolNode("", e.Discoverable)
 	}
+	if e.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", e.CommunityId)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -401,6 +404,9 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["discoverable"]; ok {
 		e.Discoverable = val.MustBool()
+	}
+	if val, ok := fields["communityId"]; ok {
+		e.CommunityId = val.MustString()
 	}
 }
 
