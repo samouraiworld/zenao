@@ -38,14 +38,14 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
           <FormFieldImage
             name="avatarUri"
             control={form.control}
-            aspectRatio={1.5}
+            aspectRatio={1}
             placeholder={t("upload-avatar")}
             className="w-full"
           />
           <FormFieldImage
             name="bannerUri"
             control={form.control}
-            aspectRatio={1.5}
+            aspectRatio={1.9}
             placeholder={t("upload-banner")}
             className="w-full"
           />
