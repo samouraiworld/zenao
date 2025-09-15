@@ -3,43 +3,41 @@ name: Gno Lint
 on:
   push:
     branches:
-      - main
+    - main
   pull_request:
   merge_group:
+
 
 jobs:
   gno-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Setup Golang with cache
-        uses: magnetikonline/action-golang-cache@v5
-        with:
-          go-version-file: go.mod
-          cache-key-suffix: gno
+    - name: Setup Golang with cache
+      uses: magnetikonline/action-golang-cache@v5
+      with:
+        go-version-file: go.mod
+        cache-key-suffix: gno
 
-      - name: Clean gno
-        run: make clean-gno
+    - name: Clone gno
+      run: make clone-testing-gno
 
-      - name: Clone gno
-        run: make clone-testing-gno
+    - name: Build GnoVM
+      run: make build-gno
 
-      - name: Build GnoVM
-        run: make build-gno
+    - name: Lint gno
+      run: make lint-gno
 
-      - name: Lint gno
-        run: make lint-gno
+    - name: gno mod tidy
+      run: make gno-mod-tidy
 
-      - name: gno mod tidy
-        run: make gno-mod-tidy
-
-      - name: Check that there is no diff
-        run: |
-          mrdiff=$(git status --porcelain)
-          if [[ $mrdiff ]]; then
-              echo 'ERROR: Diff found!'
-              echo $mrdiff
-              git diff
-              exit 1
-          fi
+    - name: Check that there is no diff
+      run: |
+        mrdiff=$(git status --porcelain)
+        if [[ $mrdiff ]]; then
+            echo 'ERROR: Diff found!'
+            echo $mrdiff
+            git diff
+            exit 1
+        fi
