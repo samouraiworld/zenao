@@ -23,9 +23,6 @@ jobs:
     - name: Clone gno
       run: make clone-testing-gno
 
-    - name: Build GnoVM
-      run: make build-gno
-
     - name: Lint gno
       run: make lint-gno
 
