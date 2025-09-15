@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import CommunityInfoLayout from "../community-info-layout";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
@@ -11,6 +12,7 @@ import { profileOptions } from "@/lib/queries/profile";
 import { eventsPkgPathsByAddrs } from "@/lib/queries/events-list";
 import { CommunityLeaveButton } from "@/components/community/community-leave-button";
 import { CommunityJoinButton } from "@/components/community/community-join-button";
+import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 
 // enable ssg for all events
 export async function generateStaticParams() {
@@ -74,6 +76,16 @@ async function CommunityPageLayout({
         <CommunityInfoLayout communityId={communityId}>
           <CommunityLeaveButton communityId={communityId} />
           <CommunityJoinButton communityId={communityId} />
+          {/* tmp button */}
+          <Link passHref href={`edit/${communityId}`}>
+            <ButtonWithChildren
+              variant="outline"
+              size="sm"
+              className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
+            >
+              Edit Community
+            </ButtonWithChildren>
+          </Link>
           {children}
         </CommunityInfoLayout>
       </ScreenContainer>
