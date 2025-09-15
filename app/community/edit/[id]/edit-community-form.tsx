@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/use-toast";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
@@ -13,7 +14,6 @@ import { communityInfo } from "@/lib/queries/community";
 import { CommunityForm } from "@/components/features/community/community-form";
 import { communityFormSchema, CommunityFormSchemaType } from "@/types/schemas";
 import { zenaoClient } from "@/lib/zenao-client";
-import { useTranslations } from "next-intl";
 
 export const EditCommunityForm: React.FC<{ communityId: string }> = ({
   communityId,

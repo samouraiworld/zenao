@@ -2,6 +2,7 @@
 
 import React from "react";
 import { UseFormReturn, useFieldArray } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
@@ -9,7 +10,6 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Button } from "@/components/shadcn/button";
 import { CommunityFormSchemaType } from "@/types/schemas";
-import { useTranslations } from "next-intl";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -68,7 +68,9 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
           />
 
           <div className="flex flex-col gap-4">
-            <label className="block text-sm font-medium">{t("admin-label")}</label>
+            <label className="block text-sm font-medium">
+              {t("admin-label")}
+            </label>
             <div className="flex flex-col gap-2">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex gap-2 items-center">
