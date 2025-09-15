@@ -77,7 +77,7 @@ async function CommunityPageLayout({
           <CommunityLeaveButton communityId={communityId} />
           <CommunityJoinButton communityId={communityId} />
           {/* tmp button */}
-          <Link passHref href={`edit/${communityId}`}>
+          <Link passHref href={`/community/edit/${communityId}`}>
             <ButtonWithChildren
               variant="outline"
               size="sm"
