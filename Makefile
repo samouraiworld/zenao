@@ -49,6 +49,10 @@ lint-gno: gnobuild/gno/gnovm/build/gno
 test-gno: gnobuild/gno/gnovm/build/gno
 	cd gno && ../gnobuild/gno/gnovm/build/gno test ./... -v
 
+.PHONY: test-gno-ci
+test-gno-ci: gnobuild/gno/gnovm/build/gno
+	cd gnobuild/gno/examples && ../gnovm/build/gno test ./... -v
+
 .PHONY: gno-mod-tidy
 gno-mod-tidy:
 	export gno=$$(pwd)/gnobuild/gno/gnovm/build/gno; \
