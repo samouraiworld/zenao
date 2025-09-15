@@ -20,8 +20,5 @@ jobs:
         go-version-file: go.mod
         cache-key-suffix: gno
 
-    - name: Clone gno
-      run: make clone-testing-gno
-
     - name: Test gno
       run: make test-gno-ci

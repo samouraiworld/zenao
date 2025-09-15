@@ -31,7 +31,7 @@ func init() {
 	community = communities.NewCommunity(&conf)
 	daoPrivate = community.DAOPrivate
 	DAO = community.DAO
-	social_feed.NewFeed("main", false, IsMember)
+	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)

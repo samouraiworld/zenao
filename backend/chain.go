@@ -1468,7 +1468,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 		feedID := %q
 		post := %s
 
-		postID := social_feed.NewPost(feedID, post)
+		postID := social_feed.NewPost(crossfeedID, post)
 		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 `, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
@@ -1596,7 +1596,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		p := polls.NewPoll(question, kind, %d, options, org.IsMember)
+		p := polls.NewPoll(cross, question, kind, %d, options, org.IsMember)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
 			panic("multiaddr validation failed")
@@ -1612,7 +1612,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 			},
 		}
 	
-		postID := social_feed.NewPost(feedID, post)
+		postID := social_feed.NewPost(crossfeedID, post)
 		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 	`, orgPkgPath, userRealmPkgPath, question, stringSliceLit(options), kind, duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
@@ -1870,7 +1870,7 @@ func init() {
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
 	eventreg.Register(func() *zenaov1.EventInfo { return event.Info() })
-	social_feed.NewFeed("main", false, IsMember)
+	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)
@@ -1948,7 +1948,7 @@ func init() {
 	daoPrivate = community.DAOPrivate
 	DAO = community.DAO
 	communityreg.Register(func() *zenaov1.CommunityInfo { return community.Info() })
-	social_feed.NewFeed("main", false, IsMember)
+	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)

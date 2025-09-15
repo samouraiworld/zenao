@@ -20,9 +20,6 @@ jobs:
         go-version-file: go.mod
         cache-key-suffix: gno
 
-    - name: Clone gno
-      run: make clone-testing-gno
-
     - name: Lint gno
       run: make lint-gno
 
