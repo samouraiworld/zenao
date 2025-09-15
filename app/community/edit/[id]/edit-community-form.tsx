@@ -12,6 +12,7 @@ import { captureException } from "@/lib/report";
 import { communityInfo } from "@/lib/queries/community";
 import { CommunityForm } from "@/components/features/community/community-form";
 import { communityFormSchema, CommunityFormSchemaType } from "@/types/schemas";
+import { zenaoClient } from "@/lib/zenao-client";
 // TODO: useTranslations
 
 export const EditCommunityForm: React.FC<{ communityId: string }> = ({
@@ -22,12 +23,25 @@ export const EditCommunityForm: React.FC<{ communityId: string }> = ({
   const { toast } = useToast();
   const { data: communityData } = useSuspenseQuery(communityInfo(communityId));
 
+  const { data: adminAddresses } = useSuspenseQuery({
+    queryKey: ["communityAdmins", communityId],
+    queryFn: async () => {
+      const token = await getToken();
+      if (!token) throw new Error("invalid clerk token");
+      const res = await zenaoClient.getCommunityAdministrators(
+        { communityId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return res.administrators;
+    },
+  });
+
   const defaultValues: CommunityFormSchemaType = {
     displayName: communityData?.displayName ?? "",
     description: communityData?.description ?? "",
     avatarUri: communityData?.avatarUri ?? "",
     bannerUri: communityData?.bannerUri ?? "",
-    administrators: [{ address: "" }],
+    administrators: (adminAddresses ?? []).map((address) => ({ address })),
   };
 
   const form = useForm<CommunityFormSchemaType>({
@@ -49,7 +63,7 @@ export const EditCommunityForm: React.FC<{ communityId: string }> = ({
         description: values.description,
         avatarUri: values.avatarUri,
         bannerUri: values.bannerUri,
-        administrators: values.administrators.map((admin) => admin.address),
+        administrators: values.administrators.map((a) => a.address),
       });
       toast({ title: "Community updated successfully" });
       router.push(`/community/${communityId}`);
