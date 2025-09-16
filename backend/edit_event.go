@@ -144,8 +144,6 @@ func (s *ZenaoServer) EditEvent(
 		}
 	}
 
-	s.Logger.Info("event-edited", zap.String("event-id", evt.ID), zap.String("title", evt.Title))
-
 	return connect.NewResponse(&zenaov1.EditEventResponse{
 		Id: req.Msg.EventId,
 	}), nil
