@@ -91,14 +91,13 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
                   </Button>
                 </div>
               ))}
-              <ButtonWithChildren
+              <Button
                 type="button"
-                variant="outline"
                 onClick={() => append({ address: "" })}
                 className="w-fit"
               >
                 {t("add-admin")}
-              </ButtonWithChildren>
+              </Button>
             </div>
           </div>
 
