@@ -38,7 +38,6 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
     !adminInputs?.length || !adminInputs[adminInputs.length - 1]?.address;
 
   const t = useTranslations("community-edit-form");
-  const adminError = form.formState.errors.administrators;
 
   return (
     <Form {...form}>
@@ -99,7 +98,9 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
                     }}
                     className={cn(
                       "hover:cursor-pointer flex items-center justify-center rounded-full size-11 aspect-square",
-                      fields.length > 1 ? "hover:bg-destructive" : "opacity-30 cursor-not-allowed"
+                      fields.length > 1
+                        ? "hover:bg-destructive"
+                        : "opacity-30 cursor-not-allowed",
                     )}
                   >
                     <Trash2Icon className="size-4" />
