@@ -12,7 +12,7 @@ import (
 	"gno.land/r/zenao/social_feed"
 )
 
-var DAO daokit.DAO
+var DAO daokit.CrossingDAO
 var daoPrivate *basedao.DAOPrivate
 var event *events.Event
 

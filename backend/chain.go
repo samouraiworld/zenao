@@ -1844,7 +1844,7 @@ import (
 )
 
 var (
-	DAO daokit.DAO
+	DAO daokit.CrossingDAO
 	daoPrivate *basedao.DAOPrivate
 	event *events.Event
 )
@@ -1878,12 +1878,12 @@ func IsMember(memberId string) bool {
 	return daoPrivate.Members.IsMember(memberId)
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(cur realm, proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(cur, proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(cur realm, proposalID uint64) {
+	DAO.Execute(cur, proposalID)
 }
 
 func Render(path string) string {
