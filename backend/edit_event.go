@@ -133,13 +133,13 @@ func (s *ZenaoServer) EditEvent(
 	}
 
 	if cmt != nil && cmt.ID != req.Msg.CommunityId {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, req.Msg.EventId, cmt.ID); err != nil {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, req.Msg.EventId); err != nil {
 			return nil, err
 		}
 	}
 
 	if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.EventId, req.Msg.CommunityId); err != nil {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
 			return nil, err
 		}
 	}

@@ -1471,7 +1471,7 @@ func (g *gormZenaoDB) AddEventToCommunity(eventID string, communityID string) er
 		Role:       zeni.RoleEvent,
 	}
 
-	if err := g.db.Create(entityRole).Error; err != nil {
+	if err := g.db.Save(entityRole).Error; err != nil {
 		return fmt.Errorf("create event role assignment in db: %w", err)
 	}
 
