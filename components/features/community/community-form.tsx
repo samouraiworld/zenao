@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { UseFormReturn, useFieldArray } from "react-hook-form";
+import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { Trash2Icon } from "lucide-react";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
@@ -10,6 +11,7 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Button } from "@/components/shadcn/button";
 import { CommunityFormSchemaType } from "@/types/schemas";
+import { cn } from "@/lib/tailwind";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -26,7 +28,17 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
     control: form.control,
     name: "administrators",
   });
+
+  const adminInputs = useWatch({
+    control: form.control,
+    name: "administrators",
+  });
+
+  const lastAdminInput =
+    !adminInputs?.length || !adminInputs[adminInputs.length - 1]?.address;
+
   const t = useTranslations("community-edit-form");
+  const adminError = form.formState.errors.administrators;
 
   return (
     <Form {...form}>
@@ -71,6 +83,7 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
             <label className="block text-sm font-medium">
               {t("admin-label")}
             </label>
+
             <div className="flex flex-col gap-2">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex gap-2 items-center">
@@ -80,21 +93,25 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
                     placeholder={t("admin-placeholder")}
                     className="flex-grow"
                   />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => remove(index)}
-                    aria-label={`Remove administrator ${index + 1}`}
+                  <div
+                    onClick={() => {
+                      if (fields.length > 1) remove(index);
+                    }}
+                    className={cn(
+                      "hover:cursor-pointer flex items-center justify-center rounded-full size-11 aspect-square",
+                      fields.length > 1 ? "hover:bg-destructive" : "opacity-30 cursor-not-allowed"
+                    )}
                   >
-                    {t("remove-admin")}
-                  </Button>
+                    <Trash2Icon className="size-4" />
+                  </div>
                 </div>
               ))}
+
               <Button
                 type="button"
                 onClick={() => append({ address: "" })}
                 className="w-fit"
+                disabled={lastAdminInput}
               >
                 {t("add-admin")}
               </Button>
