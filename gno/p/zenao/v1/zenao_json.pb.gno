@@ -165,6 +165,9 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	if c.Discoverable != false {
 		fields["discoverable"] = json.BoolNode("", c.Discoverable)
 	}
+	if c.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", c.CommunityId)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -228,6 +231,9 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["discoverable"]; ok {
 		c.Discoverable = val.MustBool()
+	}
+	if val, ok := fields["communityId"]; ok {
+		c.CommunityId = val.MustString()
 	}
 }
 
@@ -332,6 +338,9 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.Discoverable != false {
 		fields["discoverable"] = json.BoolNode("", e.Discoverable)
 	}
+	if e.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", e.CommunityId)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -401,6 +410,9 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["discoverable"]; ok {
 		e.Discoverable = val.MustBool()
+	}
+	if val, ok := fields["communityId"]; ok {
+		e.CommunityId = val.MustString()
 	}
 }
 
