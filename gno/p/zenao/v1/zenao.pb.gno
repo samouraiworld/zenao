@@ -43,6 +43,7 @@ type CreateEventRequest struct {
 	Organizers   []string
 	Gatekeepers  []string
 	Discoverable bool
+	CommunityId  string
 }
 
 type CreateEventResponse struct {
