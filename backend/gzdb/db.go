@@ -715,6 +715,35 @@ func (g *gormZenaoDB) GetEventTickets(eventID string) ([]*zeni.SoldTicket, error
 	return res, nil
 }
 
+// GetEventCommunity implements zeni.DB.
+func (g *gormZenaoDB) GetEventCommunity(eventID string) (*zeni.Community, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse event id: %w", err)
+	}
+
+	var roles []EntityRole
+	if err := g.db.
+		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND role = ?",
+			zeni.EntityTypeEvent, evtIDInt, zeni.EntityTypeCommunity, zeni.RoleEvent).
+		Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	if len(roles) == 0 {
+		return nil, nil
+	}
+	if len(roles) > 1 {
+		return nil, fmt.Errorf("event %d has multiple communities: %d", evtIDInt, len(roles))
+	}
+
+	cmt, err := g.getDBCommunity(strconv.FormatUint(uint64(roles[0].OrgID), 10))
+	if err != nil {
+		return nil, fmt.Errorf("get community by id %d: %w", roles[0].OrgID, err)
+	}
+
+	return dbCommunityToZeniCommunity(cmt)
+}
+
 // GetEventUserTicket implements zeni.DB.
 func (g *gormZenaoDB) GetEventUserTicket(eventID string, userID string) (*zeni.SoldTicket, error) {
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
@@ -1442,7 +1471,7 @@ func (g *gormZenaoDB) AddEventToCommunity(eventID string, communityID string) er
 		Role:       zeni.RoleEvent,
 	}
 
-	if err := g.db.Create(entityRole).Error; err != nil {
+	if err := g.db.Save(entityRole).Error; err != nil {
 		return fmt.Errorf("create event role assignment in db: %w", err)
 	}
 
