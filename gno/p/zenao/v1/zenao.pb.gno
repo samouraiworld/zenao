@@ -72,6 +72,7 @@ type EditEventRequest struct {
 	Organizers     []string
 	Gatekeepers    []string
 	Discoverable   bool
+	CommunityId    string
 }
 
 type EditEventResponse struct {
