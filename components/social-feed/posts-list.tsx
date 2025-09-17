@@ -7,7 +7,6 @@ import { StandardPostCard } from "@/components/social-feed/standard-post-card";
 import { SocialFeedPost } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
 import { FeedPostFormSchemaType } from "@/types/schemas";
-// import { FeedPostFormSchemaType } from "@/types/schemas";
 
 export function PostsList({
   userAddress,
