@@ -47,23 +47,12 @@ export const useCreateEvent = () => {
           gatekeepers: data.gatekeepers.map((gatekeeper) => gatekeeper.email),
           location: { address: { case: data.location.kind, value } },
           password: exclusive && password ? password : "",
+          communityId: data.communityId || "",
         },
         {
           headers: { Authorization: "Bearer " + token },
         },
       );
-
-      if (data.communityId) {
-        await zenaoClient.addEventToCommunity(
-          {
-            eventId: event.id,
-            communityId: data.communityId,
-          },
-          {
-            headers: { Authorization: "Bearer " + token },
-          },
-        );
-      }
 
       return event;
     },
@@ -127,36 +116,12 @@ export const useEditEvent = (getToken: GetToken) => {
           location: { address: { case: data.location.kind, value } },
           updatePassword: !exclusive || (!!password && password.length > 0),
           password: exclusive && password ? password : "",
+          communityId: data.communityId || "",
         },
         {
           headers: { Authorization: "Bearer " + token },
         },
       );
-
-      // Update community if different
-      if (!!data.oldCommunityId && data.oldCommunityId !== data.communityId) {
-        await zenaoClient.removeEventFromCommunity(
-          {
-            eventId,
-            communityId: data.oldCommunityId,
-          },
-          {
-            headers: { Authorization: "Bearer " + token },
-          },
-        );
-      }
-
-      if (data.oldCommunityId !== data.communityId && data.communityId) {
-        await zenaoClient.addEventToCommunity(
-          {
-            eventId,
-            communityId: data.communityId,
-          },
-          {
-            headers: { Authorization: "Bearer " + token },
-          },
-        );
-      }
     },
     onSuccess: async (_, variables) => {
       await queryClient.invalidateQueries(eventOptions(variables.eventId));
