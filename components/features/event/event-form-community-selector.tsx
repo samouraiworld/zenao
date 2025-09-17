@@ -42,6 +42,10 @@ export default function EventFormCommunitySelector({
     userCommunitiesPages?.pages.flat() ?? []
   ).filter((c) => c.administrators.includes(userAddress!));
 
+  if (selectableCommunities.length === 0) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Heading level={3}>Link event to one your community (optional)</Heading>
