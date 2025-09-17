@@ -19,9 +19,34 @@ XXX: these classnames (rounded-full, overflow-hidden) are already set in the sha
 but the class merging does not seem to work so we need to reset them here
 */
 
-const avatarClassName = "w-6 h-6 rounded-full overflow-hidden inline-block";
+const avatarSmallClassName =
+  "w-6 h-6 rounded-full overflow-hidden inline-block";
 
-export function UserAvatar({ address, className }: UserComponentProps) {
+export function UserAvatarSmall({ address, className }: UserComponentProps) {
+  const { data: profile } = useSuspenseQuery(profileOptions(address));
+  return (
+    <Avatar className={cn(avatarSmallClassName, className)}>
+      <AvatarFallback>
+        <Web3Image
+          src={
+            (profile?.avatarUri && profile.avatarUri !== ""
+              ? profile.avatarUri
+              : undefined) ?? "/zenao-profile.png"
+          }
+          width={45}
+          height={45}
+          quality={60}
+          alt="Avatar"
+          className="w-full h-full object-cover"
+        />
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
+const avatarClassName = "w-24 h-24 rounded-full overflow-hidden inline-block";
+
+export function UserAvatarLarge({ address, className }: UserComponentProps) {
   const { data: profile } = useSuspenseQuery(profileOptions(address));
   return (
     <Avatar className={cn(avatarClassName, className)}>
@@ -51,12 +76,17 @@ export function UserAvatarWithName({
   address,
   className,
   linkToProfile,
-}: UserComponentProps & { linkToProfile?: boolean }) {
+  size = "sm",
+}: UserComponentProps & { linkToProfile?: boolean; size?: "sm" | "lg" }) {
   const { data: profile } = useSuspenseQuery(profileOptions(address));
 
   const content = (
     <div className="flex flex-row gap-2 items-center">
-      <UserAvatar address={profile?.address} />
+      {size === "sm" ? (
+        <UserAvatarSmall address={profile?.address} />
+      ) : (
+        <UserAvatarLarge address={profile?.address} />
+      )}
       <Text size="sm">{profile?.displayName}</Text>
     </div>
   );

@@ -4,7 +4,7 @@ import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode } from "react";
 import { Hash, MapPin, MessageCircle, X } from "lucide-react";
 import Link from "next/link";
-import { UserAvatar } from "../features/user/user";
+import { UserAvatarSmall } from "../features/user/user";
 import { PostMenu } from "./post-menu";
 import PostReactions from "./post-reactions";
 import { Card } from "@/components/widgets/cards/card";
@@ -60,7 +60,7 @@ export function PostCardLayout({
       <div className="flex flex-col sm:flex-row items-start gap-2 relative">
         <div className="w-full flex flex-row items-center gap-3">
           <Link href={`/profile/${post.post.author}`}>
-            <UserAvatar
+            <UserAvatarSmall
               className="flex ring-2 ring-background/80 cursor-pointer hover:scale-110 transition-transform ease-out"
               address={post.post.author}
             />
