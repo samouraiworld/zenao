@@ -5,14 +5,18 @@ import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
+import { Command as CommandPrimitive } from "cmdk";
 import { UseFormReturn } from "react-hook-form";
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import { XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn/select";
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/shadcn/command";
+
 import Heading from "@/components/widgets/texts/heading";
 import {
   communitiesListByMember,
@@ -22,12 +26,15 @@ import {
 import { userAddressOptions } from "@/lib/queries/user";
 import { EventFormSchemaType } from "@/types/schemas";
 import { FormField } from "@/components/shadcn/form";
+import { Button } from "@/components/shadcn/button";
+import { cn } from "@/lib/tailwind";
 
 export default function EventFormCommunitySelector({
   form,
 }: {
   form: UseFormReturn<EventFormSchemaType>;
 }) {
+  const t = useTranslations("eventForm");
   // Community selection
   const { userId, getToken } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -42,6 +49,76 @@ export default function EventFormCommunitySelector({
     userCommunitiesPages?.pages.flat() ?? []
   ).filter((c) => c.administrators.includes(userAddress!));
 
+  const options = selectableCommunities.map((community) => ({
+    label: community.displayName,
+    value: communityIdFromPkgPath(community.pkgPath),
+    id: communityIdFromPkgPath(community.pkgPath),
+  }));
+
+  const [search, setSearch] = useState<string>(() => {
+    const selectedCommunity = options.find(
+      (o) => o.value === form.getValues().communityId,
+    );
+    return selectedCommunity?.label ?? "";
+  });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isOpen, setOpen] = useState(false);
+  const [selected, setSelected] = useState<{
+    value: string;
+    label: string;
+  } | null>(() => {
+    const selectedCommunity = options.find(
+      (o) => o.value === form.getValues().communityId,
+    );
+    if (selectedCommunity) {
+      return { value: selectedCommunity.value, label: selectedCommunity.label };
+    }
+    return null;
+  });
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const input = inputRef.current;
+      if (!input) {
+        return;
+      }
+
+      if (!isOpen) {
+        setOpen(true);
+      }
+
+      if (event.key === "Escape") {
+        input.blur();
+      }
+    },
+    [isOpen],
+  );
+
+  const handleBlur = useCallback(() => {
+    setOpen(false);
+    setSearch(selected?.label ?? "");
+  }, [selected]);
+
+  const handleSelectOption = useCallback(
+    (option: { value: string; label: string }) => {
+      setSelected(option);
+      setSearch(option.label);
+      form.setValue("communityId", option.value);
+      setOpen(false);
+      form.trigger("communityId");
+      inputRef.current?.blur();
+    },
+    [form, inputRef],
+  );
+
+  useEffect(() => {
+    const selectedCommunity = options.find(
+      (o) => o.value === form.getValues().communityId,
+    );
+
+    setSearch(selectedCommunity?.label ?? "");
+  }, [options, form, selectableCommunities]);
+
   if (selectableCommunities.length === 0) {
     return null;
   }
@@ -55,26 +132,70 @@ export default function EventFormCommunitySelector({
         name="communityId"
         render={({ field }) => {
           return (
-            <Select
-              name={field.name}
-              onValueChange={field.onChange}
-              defaultValue={field.value}
-              value={field.value}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="-- Select a community --" />
-              </SelectTrigger>
-              <SelectContent>
-                {selectableCommunities.map((community) => (
-                  <SelectItem
-                    key={community.pkgPath}
-                    value={communityIdFromPkgPath(community.pkgPath)}
+            <CommandPrimitive onKeyDown={handleKeyDown} shouldFilter={false}>
+              <div className="relative">
+                <CommandInput
+                  ref={inputRef}
+                  value={search}
+                  typeof="search"
+                  onValueChange={setSearch}
+                  onBlur={handleBlur}
+                  onFocus={() => setOpen(true)}
+                  placeholder={t("community-selector-placeholder")}
+                  className="!h-12 px-4 text-base rounded bg-custom-input-bg border border-custom-input-border"
+                  containerClassName="border-none p-0"
+                />
+                {!!field.value && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="backdrop-blur-sm self-center absolute top-1/2 -translate-y-1/2 right-1"
+                    onClick={() => {
+                      setSearch("");
+                      setSelected(null);
+                      field.onChange(null);
+                      form.trigger("communityId");
+                    }}
                   >
-                    {community.displayName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    <XIcon className="h-3 w-3" />
+                    <span className="sr-only">Clear</span>
+                  </Button>
+                )}
+              </div>
+              <div className={cn("relative", isOpen && "mt-1")}>
+                <div
+                  className={cn(
+                    "animate-in fade-in-0 zoom-in-95 absolute top-0 z-50 w-full rounded-md bg-popover border text-popover-foreground outline-none",
+                    isOpen ? "block" : "hidden",
+                  )}
+                >
+                  <CommandList className="rounded-lg">
+                    <CommandGroup>
+                      {options.map((option) => {
+                        return (
+                          <CommandItem
+                            key={option.id}
+                            value={option.label}
+                            onMouseDown={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                            }}
+                            onSelect={() => handleSelectOption(option)}
+                            className={cn("flex w-full items-center gap-2")}
+                          >
+                            {option.label}
+                          </CommandItem>
+                        );
+                      })}
+                      <CommandPrimitive.Empty className="select-none rounded-sm px-2 py-3 text-center text-sm">
+                        {t("no-communities-found")}
+                      </CommandPrimitive.Empty>
+                    </CommandGroup>
+                  </CommandList>
+                </div>
+              </div>
+            </CommandPrimitive>
           );
         }}
       />

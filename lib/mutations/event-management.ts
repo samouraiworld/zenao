@@ -15,7 +15,6 @@ export const useCreateEvent = () => {
       ...data
     }: EventFormSchemaType & {
       token: string;
-      communityId?: string;
     }) => {
       // Construct location object for the call
       let value = {};
@@ -76,7 +75,6 @@ export const useEditEvent = (getToken: GetToken) => {
       ...data
     }: EventFormSchemaType & {
       eventId: string;
-      oldCommunityId?: string;
     }) => {
       const token = await getToken();
 

@@ -64,7 +64,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     })),
     exclusive: data.privacy?.eventPrivacy.case === "guarded",
     password: "",
-    communityId: communityId || undefined,
+    communityId: communityId || null,
   };
 
   const form = useForm<EventFormSchemaType>({
@@ -96,7 +96,6 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       await editEvent({
         ...values,
         eventId: id,
-        oldCommunityId: communityId || undefined,
       });
       toast({
         title: t("toast-edit-success"),

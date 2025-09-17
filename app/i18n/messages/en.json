@@ -57,6 +57,8 @@
     "custom-timezone-select": "You choose a custom location, so please select a timezone.",
     "no-timezone-found": "No timezones found.",
     "no-address-found": "No address found.",
+    "no-communities-found": "No communities found.",
+    "community-selector-placeholder": "Select community...",
     "not-organizer-message": "You can't edit this event because you are not one of the organizer.",
     "toast-creation-success": "Event created!",
     "toast-creation-error": "Error on creating event!",
