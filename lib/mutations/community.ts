@@ -9,7 +9,7 @@ type AddEventToCommunityRequest = {
   getToken: GetToken;
 };
 
-export const useEventCancelParticipation = () => {
+export const useEventAddToCommunity = () => {
   const queryClient = getQueryClient();
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
