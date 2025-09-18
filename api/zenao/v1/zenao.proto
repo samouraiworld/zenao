@@ -82,6 +82,7 @@ message CreateEventRequest {
   repeated string organizers = 11;
   repeated string gatekeepers = 12;
   bool discoverable = 13;
+  string community_id = 14; // optional
 }
 
 message CreateEventResponse { string id = 1; }
@@ -105,6 +106,7 @@ message EditEventRequest {
   repeated string organizers = 12;
   repeated string gatekeepers = 13;
   bool discoverable = 14;
+  string community_id = 15; // optional
 }
 
 message EditEventResponse { string id = 1; }
