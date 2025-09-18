@@ -34,8 +34,22 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
     name: "administrators",
   });
 
+  const NameInput = useWatch({
+    control: form.control,
+    name: "displayName",
+  });
+
+  const DescriptionInput = useWatch({
+    control: form.control,
+    name: "description",
+  });
+
   const lastAdminInput =
     !adminInputs?.length || !adminInputs[adminInputs.length - 1]?.address;
+  const isNameValid = NameInput.length >= 2;
+  const isDescriptionValid = DescriptionInput.length >= 10;
+  const isButtonDisabled =
+    lastAdminInput || !isNameValid || !isDescriptionValid;
 
   const t = useTranslations("community-edit-form");
 
@@ -92,6 +106,7 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
                     placeholder={t("admin-placeholder")}
                     className="flex-grow"
                   />
+
                   <div
                     onClick={() => {
                       if (fields.length > 1) remove(index);
@@ -119,7 +134,11 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
             </div>
           </div>
 
-          <ButtonWithChildren loading={isLoading} type="submit">
+          <ButtonWithChildren
+            loading={isLoading}
+            disabled={isButtonDisabled}
+            type="submit"
+          >
             {t("submit")}
           </ButtonWithChildren>
         </div>

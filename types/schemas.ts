@@ -195,8 +195,8 @@ export const communityTabsSchema = z.union([
 export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;
 
 export const communityFormSchema = z.object({
-  displayName: z.string().min(3, "Name too short"),
-  description: z.string().min(5, "Description too short"),
+  displayName: z.string().min(2, "Name too short"),
+  description: z.string().min(10, "Description too short"),
   avatarUri: z.string().url().or(z.literal("")),
   bannerUri: z.string().url().or(z.literal("")),
   administrators: z
