@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "../get-query-client";
 import { GetToken } from "../utils";
 import { zenaoClient } from "../zenao-client";
+import { communityUsersWithRoles } from "../queries/community";
 
 type AddEventToCommunityRequest = {
   communityId: string;
@@ -33,9 +34,12 @@ export const useEventAddToCommunity = () => {
         },
       );
     },
-    onSuccess: (_, _variables, _ctx) => {
-      // TODO Prepare queries invalidation
-      void queryClient;
+    onSuccess: (_, variables) => {
+      const communitiesUsersWithRolesOpts = communityUsersWithRoles(
+        variables.communityId,
+        ["event"],
+      );
+      queryClient.invalidateQueries(communitiesUsersWithRolesOpts);
     },
   });
 
