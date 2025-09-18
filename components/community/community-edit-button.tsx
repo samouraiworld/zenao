@@ -38,10 +38,7 @@ export const CommunityEditAdminButton: React.FC<{ communityId: string }> = ({
         setChecked(true);
       }
     };
-
-    if (userId && user?.emailAddresses[0]?.emailAddress) {
-      checkAdmin();
-    }
+    checkAdmin();
   }, [communityId, getToken, userId, user]);
 
   if (!checked || !isAdmin) return null;
