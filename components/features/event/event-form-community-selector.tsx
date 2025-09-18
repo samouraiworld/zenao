@@ -52,7 +52,6 @@ export default function EventFormCommunitySelector({
   const options = selectableCommunities.map((community) => ({
     label: community.displayName,
     value: communityIdFromPkgPath(community.pkgPath),
-    id: communityIdFromPkgPath(community.pkgPath),
   }));
 
   const [search, setSearch] = useState<string>(() => {
@@ -175,7 +174,7 @@ export default function EventFormCommunitySelector({
                       {options.map((option) => {
                         return (
                           <CommandItem
-                            key={option.id}
+                            key={option.value}
                             value={option.label}
                             onMouseDown={(event) => {
                               event.preventDefault();
