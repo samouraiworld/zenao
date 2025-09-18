@@ -99,7 +99,7 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
 
             <div className="flex flex-col gap-2">
               {fields.map((field, index) => (
-                <div key={field.id} className="flex gap-2 items-center">
+                <div key={field.id} className="flex gap-2 items-start">
                   <FormFieldInputString
                     control={form.control}
                     name={`administrators.${index}.address`}
