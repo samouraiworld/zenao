@@ -10,6 +10,10 @@ import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Button } from "@/components/shadcn/button";
+import { Card } from "@/components/widgets/cards/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
+import Text from "@/components/widgets/texts/text";
 import { CommunityFormSchemaType } from "@/types/schemas";
 import { cn } from "@/lib/tailwind";
 
@@ -34,6 +38,10 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
     name: "administrators",
   });
 
+  const description = form.watch("description");
+  const avatarUri = form.watch("avatarUri");
+  const bannerUri = form.watch("bannerUri");
+
   const lastAdminInput =
     !adminInputs?.length || !adminInputs[adminInputs.length - 1]?.address;
 
@@ -44,40 +52,69 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex w-full gap-10"
+        className="flex w-full flex-col sm:flex-row sm:h-full gap-10"
       >
-        <div className="flex flex-col gap-6 w-1/3">
+        <div className="flex flex-col w-full gap-10 md:gap-4">
           <FormFieldImage
             name="avatarUri"
             control={form.control}
-            aspectRatio={1}
             placeholder={t("upload-avatar")}
-            className="w-full"
+            tooltip={avatarUri ? <Text>{t("change-avatar")}</Text> : null}
+            className="w-40 h-40 overflow-hidden"
           />
           <FormFieldImage
             name="bannerUri"
             control={form.control}
             aspectRatio={1.9}
             placeholder={t("upload-banner")}
-            className="w-full"
+            tooltip={bannerUri ? <Text>{t("change-banner")}</Text> : null}
           />
         </div>
 
-        <div className="flex flex-col gap-6 w-2/3">
-          <FormFieldInputString
-            control={form.control}
-            name="displayName"
-            label={t("name-label")}
-            placeholder={t("name-placeholder")}
-          />
+        <div className="flex flex-col gap-6 w-full">
           <FormFieldTextArea
             control={form.control}
-            name="description"
-            label={t("description-label")}
-            placeholder={t("description-placeholder")}
+            name="displayName"
+            className={cn(
+              "font-semibold text-3xl overflow-hidden bg-transparent",
+              "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+            )}
+            placeholder={t("name-placeholder")}
+            maxLength={140}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+              }
+            }}
             wordCounter
-            maxLength={5000}
           />
+
+          <Card className="rounded px-3 border-custom-input-border">
+            <Tabs defaultValue="write" className="w-full">
+              <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
+                <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
+                <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
+              </TabsList>
+              <TabsContent value="write" tabIndex={-1}>
+                <div className="flex flex-col gap-2 w-full">
+                  <FormFieldTextArea
+                    control={form.control}
+                    name="description"
+                    placeholder={t("description-placeholder")}
+                    className={cn(
+                      "bg-transparent",
+                      "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+                    )}
+                    maxLength={1000}
+                    wordCounter
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="preview">
+                <MarkdownPreview markdownString={description} />
+              </TabsContent>
+            </Tabs>
+          </Card>
 
           <div className="flex flex-col gap-4">
             <label className="block text-sm font-medium">
