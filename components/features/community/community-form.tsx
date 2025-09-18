@@ -34,23 +34,10 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
     name: "administrators",
   });
 
-  const NameInput = useWatch({
-    control: form.control,
-    name: "displayName",
-  });
-
-  const DescriptionInput = useWatch({
-    control: form.control,
-    name: "description",
-  });
-
   const lastAdminInput =
     !adminInputs?.length || !adminInputs[adminInputs.length - 1]?.address;
-  const isNameValid = NameInput.length >= 2;
-  const isDescriptionValid = DescriptionInput.length >= 10;
-  const isButtonDisabled =
-    lastAdminInput || !isNameValid || !isDescriptionValid;
 
+  const isButtonDisabled = !form.formState.isValid || lastAdminInput;
   const t = useTranslations("community-edit-form");
 
   return (
