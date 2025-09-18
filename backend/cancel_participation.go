@@ -30,7 +30,7 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 
 	evt := (*zeni.Event)(nil)
 	ticket := (*zeni.SoldTicket)(nil)
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.CancelParticipation", func(db zeni.DB) error {
 		evt, err = db.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
@@ -54,7 +54,7 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 		return nil, err
 	}
 
-	if err := s.Chain.CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
+	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
 		return nil, err
 	}
 

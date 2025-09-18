@@ -4,16 +4,19 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"slices"
 	"strings"
+	"time"
 
 	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/resend/resend-go/v2"
 	"github.com/rs/cors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -92,7 +95,7 @@ func newStartCmd() *commands.Command {
 		},
 		&conf,
 		func(ctx context.Context, args []string) error {
-			return execStart()
+			return execStart(ctx)
 		},
 	)
 }
@@ -118,13 +121,21 @@ func injectStartEnv() {
 
 }
 
-func execStart() error {
+func execStart(ctx context.Context) (retErr error) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
 	}
 
 	injectStartEnv()
+
+	otelShutdown, err := setupOTelSDK(ctx)
+	if err != nil {
+		return fmt.Errorf("setup otel: %w", err)
+	}
+	defer func() {
+		retErr = errors.Join(retErr, otelShutdown(ctx))
+	}()
 
 	auth, err := czauth.SetupAuth(conf.clerkSecretKey, logger)
 	if err != nil {
@@ -151,7 +162,11 @@ func execStart() error {
 	mailClient := (*resend.Client)(nil)
 	if conf.resendSecretKey != "" {
 		logger.Info("resend mail client initialized")
-		mailClient = resend.NewClient(conf.resendSecretKey)
+		mailHTTPClient := &http.Client{
+			Timeout:   time.Minute,
+			Transport: otelhttp.NewTransport(http.DefaultTransport),
+		}
+		mailClient = resend.NewCustomClient(mailHTTPClient, conf.resendSecretKey)
 	}
 
 	zenao := &ZenaoServer{
@@ -174,6 +189,7 @@ func execStart() error {
 		),
 	)
 	mux.Handle(path, middlewares(handler,
+		withTracing(),
 		withConnectCORS(allowedOrigins...),
 		auth.WithAuth(),
 	))

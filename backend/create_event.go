@@ -85,13 +85,29 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	evt := (*zeni.Event)(nil)
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	cmt := (*zeni.Community)(nil)
+	if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
 		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
 		}
 
 		if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
 			return err
+		}
+
+		if req.Msg.CommunityId != "" {
+			cmt, err = db.GetCommunity(req.Msg.CommunityId)
+			if err != nil {
+				return err
+			}
+			roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
+			if err != nil {
+				return err
+			}
+			if !slices.Contains(roles, zeni.RoleAdministrator) {
+				return errors.New("user is not an admin of the community and cannot add event to it")
+			}
+			return db.AddEventToCommunity(evt.ID, cmt.ID)
 		}
 		return nil
 	}); err != nil {
@@ -123,9 +139,16 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	if err := s.Chain.CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+	if err := s.Chain.WithContext(ctx).CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
 		s.Logger.Error("create-event", zap.Error(err))
 		return nil, err
+	}
+
+	if req.Msg.CommunityId != "" {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
+			s.Logger.Error("add-event-to-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
+			return nil, err
+		}
 	}
 
 	return connect.NewResponse(&zenaov1.CreateEventResponse{

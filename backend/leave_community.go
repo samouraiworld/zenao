@@ -31,13 +31,22 @@ func (s *ZenaoServer) LeaveCommunity(
 	}
 
 	var cmt *zeni.Community
-	if err := s.DB.Tx(func(tx zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.LeaveCommunity", func(tx zeni.DB) error {
 		cmt, err = tx.GetCommunity(req.Msg.CommunityId)
 		if err != nil {
 			return err
 		}
 		if cmt == nil {
 			return errors.New("community not found")
+		}
+
+		administrators, err := tx.GetOrgEntitiesWithRole(zeni.EntityTypeCommunity, cmt.ID, zeni.EntityTypeUser, zeni.RoleAdministrator)
+		if err != nil {
+			return err
+		}
+
+		if len(administrators) == 1 && administrators[0].EntityID == zUser.ID {
+			return errors.New("user is the only administrator of this community and cannot leave it")
 		}
 
 		if err := tx.RemoveMemberFromCommunity(cmt.ID, zUser.ID); err != nil {
@@ -50,7 +59,7 @@ func (s *ZenaoServer) LeaveCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.RemoveMemberFromCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
+	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
 		return nil, errors.New("failed to remove member from community on chain")
 	}
 
