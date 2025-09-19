@@ -37,7 +37,7 @@ import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import {
-  UserAvatarSmall,
+  UserAvatar,
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
 
@@ -261,9 +261,10 @@ const Auth = ({
                     "cursor-pointer hover:scale-110 transition-transform ease-out",
                   )}
                 >
-                  <UserAvatarSmall
+                  <UserAvatar
                     address={userAddress}
                     className={avatarClassName}
+                    size="sm"
                   />
                 </div>
               </SignedIn>

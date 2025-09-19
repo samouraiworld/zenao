@@ -1,4 +1,4 @@
-import { UserAvatarLarge } from "../features/user/user";
+import { UserAvatar } from "../features/user/user";
 import { Badge } from "../shadcn/badge";
 import { Card } from "../widgets/cards/card";
 import Text from "../widgets/texts/text";
@@ -16,7 +16,11 @@ function CommunityMemberCard({
 }: CommunityMemberCardProps) {
   return (
     <Card className="flex items-center gap-6 p-6 md:max-w-[600px] bg-secondary/50 hover:bg-secondary/100 transition rounded-xl">
-      <UserAvatarLarge address={address} className="w-24 h-24 rounded-full" />
+      <UserAvatar
+        address={address}
+        className="w-24 h-24 rounded-full"
+        size="lg"
+      />
 
       <div className="flex flex-col justify-between flex-1 gap-3">
         <div>

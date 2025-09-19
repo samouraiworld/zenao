@@ -1,15 +1,16 @@
 "use client";
 
-import { UserAvatarSmall } from "../features/user/user";
+import { UserAvatar } from "../features/user/user";
 
 function UsersAvatarsPreview({ usersAddresses }: { usersAddresses: string[] }) {
   return (
     <div className="flex -space-x-2 overflow-hidden">
       {usersAddresses.map((address) => (
-        <UserAvatarSmall
+        <UserAvatar
           key={address}
           className="flex ring-2 ring-background/80"
           address={address}
+          size="sm"
         />
       ))}
     </div>
