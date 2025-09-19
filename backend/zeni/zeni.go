@@ -92,6 +92,7 @@ type Event struct {
 	Location          *zenaov1.EventLocation
 	PasswordHash      string
 	ICSSequenceNumber uint32
+	Discoverable      bool
 }
 
 type Community struct {
@@ -204,6 +205,8 @@ func (e *Event) Timezone() (*time.Location, error) {
 // userID is an internal zenao user id.
 type DB interface {
 	Tx(func(db DB) error) error
+	TxWithSpan(ctx context.Context, label string, cb func(db DB) error) error
+	WithContext(ctx context.Context) DB
 
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
@@ -223,6 +226,7 @@ type DB interface {
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
+	GetEventCommunity(eventID string) (*Community, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
@@ -233,6 +237,7 @@ type DB interface {
 	CommunitiesByEvent(eventID string) ([]*Community, error)
 
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+	EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
 	GetCommunity(communityID string) (*Community, error)
 	AddMemberToCommunity(communityID string, userID string) error
 	RemoveMemberFromCommunity(communityID string, userID string) error
@@ -266,6 +271,8 @@ type DB interface {
 }
 
 type Chain interface {
+	WithContext(ctx context.Context) Chain
+
 	FillAdminProfile()
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
@@ -280,6 +287,7 @@ type Chain interface {
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
+	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
 	AddEventToCommunity(callerID string, communityID string, eventID string) error
 	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
 	AddMemberToCommunity(callerID string, communityID string, userID string) error

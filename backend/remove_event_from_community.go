@@ -31,17 +31,21 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := s.DB.Tx(func(tx zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.RemoveEventFromCommunity", func(tx zeni.DB) error {
 		cmt, err := tx.GetCommunity(req.Msg.CommunityId)
 		if err != nil {
 			return err
 		}
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
+		cmtRoles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
 		if err != nil {
 			return err
 		}
-		if !slices.Contains(roles, zeni.RoleAdministrator) {
-			return errors.New("user is not an administrator of this community")
+		evtRoles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		if err != nil {
+			return err
+		}
+		if !slices.Contains(cmtRoles, zeni.RoleAdministrator) && !slices.Contains(evtRoles, zeni.RoleOrganizer) {
+			return errors.New("user is not an administrator of this community and is not an organizer of the event")
 		}
 		if err := tx.RemoveEventFromCommunity(req.Msg.EventId, cmt.ID); err != nil {
 			return err
@@ -51,7 +55,7 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
+	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
 		return nil, err
 	}
 

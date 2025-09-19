@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file zenao/v1/zenao.proto.
  */
 export const file_zenao_v1_zenao: GenFile = /*@__PURE__*/
-  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiDwoNSGVhbHRoUmVxdWVzdCIlCg5IZWFsdGhSZXNwb25zZRITCgttYWludGVuYW5jZRgBIAEoCCJICg9FZGl0VXNlclJlcXVlc3QSFAoMZGlzcGxheV9uYW1lGAEgASgJEgsKA2JpbxgCIAEoCRISCgphdmF0YXJfdXJpGAMgASgJIh4KEEVkaXRVc2VyUmVzcG9uc2USCgoCaWQYASABKAkiFwoVR2V0VXNlckFkZHJlc3NSZXF1ZXN0IikKFkdldFVzZXJBZGRyZXNzUmVzcG9uc2USDwoHYWRkcmVzcxgBIAEoCSL/AQoSQ3JlYXRlRXZlbnRSZXF1ZXN0Eg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhEKCWltYWdlX3VyaRgDIAEoCRISCgpzdGFydF9kYXRlGAQgASgEEhAKCGVuZF9kYXRlGAUgASgEEhQKDHRpY2tldF9wcmljZRgGIAEoARIQCghjYXBhY2l0eRgHIAEoDRIpCghsb2NhdGlvbhgJIAEoCzIXLnplbmFvLnYxLkV2ZW50TG9jYXRpb24SEAoIcGFzc3dvcmQYCiABKAkSEgoKb3JnYW5pemVycxgLIAMoCRITCgtnYXRla2VlcGVycxgMIAMoCSIhChNDcmVhdGVFdmVudFJlc3BvbnNlEgoKAmlkGAEgASgJIiYKEkNhbmNlbEV2ZW50UmVxdWVzdBIQCghldmVudF9pZBgBIAEoCSIVChNDYW5jZWxFdmVudFJlc3BvbnNlIqgCChBFZGl0RXZlbnRSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEg0KBXRpdGxlGAIgASgJEhMKC2Rlc2NyaXB0aW9uGAMgASgJEhEKCWltYWdlX3VyaRgEIAEoCRISCgpzdGFydF9kYXRlGAUgASgEEhAKCGVuZF9kYXRlGAYgASgEEhQKDHRpY2tldF9wcmljZRgHIAEoARIQCghjYXBhY2l0eRgIIAEoDRIpCghsb2NhdGlvbhgJIAEoCzIXLnplbmFvLnYxLkV2ZW50TG9jYXRpb24SEAoIcGFzc3dvcmQYCiABKAkSFwoPdXBkYXRlX3Bhc3N3b3JkGAsgASgIEhIKCm9yZ2FuaXplcnMYDCADKAkSEwoLZ2F0ZWtlZXBlcnMYDSADKAkiHwoRRWRpdEV2ZW50UmVzcG9uc2USCgoCaWQYASABKAkiLgoaR2V0RXZlbnRHYXRla2VlcGVyc1JlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkiMgobR2V0RXZlbnRHYXRla2VlcGVyc1Jlc3BvbnNlEhMKC2dhdGVrZWVwZXJzGAEgAygJIj0KF1ZhbGlkYXRlUGFzc3dvcmRSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEhAKCHBhc3N3b3JkGAIgASgJIikKGFZhbGlkYXRlUGFzc3dvcmRSZXNwb25zZRINCgV2YWxpZBgBIAEoCCJXChJQYXJ0aWNpcGF0ZVJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFZW1haWwYAiABKAkSDgoGZ3Vlc3RzGAMgAygJEhAKCHBhc3N3b3JkGAQgASgJIi4KGkNhbmNlbFBhcnRpY2lwYXRpb25SZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJIh0KG0NhbmNlbFBhcnRpY2lwYXRpb25SZXNwb25zZSIsChNQYXJ0aWNpcGF0ZVJlc3BvbnNlEhUKDXRpY2tldF9zZWNyZXQYASABKAkiUQoVQnJvYWRjYXN0RXZlbnRSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEg8KB21lc3NhZ2UYAiABKAkSFQoNYXR0YWNoX3RpY2tldBgDIAEoCCIYChZCcm9hZGNhc3RFdmVudFJlc3BvbnNlIsEBCg1FdmVudExvY2F0aW9uEhIKCnZlbnVlX25hbWUYASABKAkSFAoMaW5zdHJ1Y3Rpb25zGAIgASgJEiMKA2dlbxgDIAEoCzIULnplbmFvLnYxLkFkZHJlc3NHZW9IABIrCgd2aXJ0dWFsGAQgASgLMhguemVuYW8udjEuQWRkcmVzc1ZpcnR1YWxIABIpCgZjdXN0b20YBSABKAsyFy56ZW5hby52MS5BZGRyZXNzQ3VzdG9tSABCCQoHYWRkcmVzcyIdCg5BZGRyZXNzVmlydHVhbBILCgN1cmkYASABKAkiRQoKQWRkcmVzc0dlbxIPCgdhZGRyZXNzGAEgASgJEgsKA2xhdBgCIAEoAhILCgNsbmcYAyABKAISDAoEc2l6ZRgEIAEoAiIyCg1BZGRyZXNzQ3VzdG9tEg8KB2FkZHJlc3MYASABKAkSEAoIdGltZXpvbmUYAiABKAkigQEKDEV2ZW50UHJpdmFjeRIuCgZwdWJsaWMYASABKAsyHC56ZW5hby52MS5FdmVudFByaXZhY3lQdWJsaWNIABIwCgdndWFyZGVkGAIgASgLMh0uemVuYW8udjEuRXZlbnRQcml2YWN5R3VhcmRlZEgAQg8KDWV2ZW50X3ByaXZhY3kiFAoSRXZlbnRQcml2YWN5UHVibGljIjMKE0V2ZW50UHJpdmFjeUd1YXJkZWQSHAoUcGFydGljaXBhdGlvbl9wdWJrZXkYASABKAkiswIKCUV2ZW50SW5mbxINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglpbWFnZV91cmkYAyABKAkSEgoKb3JnYW5pemVycxgEIAMoCRITCgtnYXRla2VlcGVycxgFIAMoCRISCgpzdGFydF9kYXRlGAYgASgDEhAKCGVuZF9kYXRlGAcgASgDEhAKCGNhcGFjaXR5GAggASgNEikKCGxvY2F0aW9uGAkgASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbhIUCgxwYXJ0aWNpcGFudHMYCiABKA0SEAoIcGtnX3BhdGgYCyABKAkSJwoHcHJpdmFjeRgMIAEoCzIWLnplbmFvLnYxLkV2ZW50UHJpdmFjeRISCgpjaGVja2VkX2luGA0gASgNIi4KEUJhdGNoUHJvZmlsZUZpZWxkEgwKBHR5cGUYASABKAkSCwoDa2V5GAIgASgJIlUKE0JhdGNoUHJvZmlsZVJlcXVlc3QSKwoGZmllbGRzGAEgAygLMhsuemVuYW8udjEuQmF0Y2hQcm9maWxlRmllbGQSEQoJYWRkcmVzc2VzGAIgAygJIowBChFDcmVhdGVQb2xsUmVxdWVzdBIQCghvcmdfdHlwZRgBIAEoCRIOCgZvcmdfaWQYAiABKAkSEAoIcXVlc3Rpb24YAyABKAkSDwoHb3B0aW9ucxgEIAMoCRIQCghkdXJhdGlvbhgFIAEoAxIgCgRraW5kGAYgASgOMhIucG9sbHMudjEuUG9sbEtpbmQiJQoSQ3JlYXRlUG9sbFJlc3BvbnNlEg8KB3Bvc3RfaWQYASABKAkiMgoPVm90ZVBvbGxSZXF1ZXN0Eg8KB3BvbGxfaWQYASABKAkSDgoGb3B0aW9uGAIgASgJIhIKEFZvdGVQb2xsUmVzcG9uc2UiZwoRQ3JlYXRlUG9zdFJlcXVlc3QSEAoIb3JnX3R5cGUYASABKAkSDgoGb3JnX2lkGAIgASgJEg8KB2NvbnRlbnQYAyABKAkSEQoJcGFyZW50X2lkGAQgASgJEgwKBHRhZ3MYBSADKAkiJQoSQ3JlYXRlUG9zdFJlc3BvbnNlEg8KB3Bvc3RfaWQYASABKAkiJAoRRGVsZXRlUG9zdFJlcXVlc3QSDwoHcG9zdF9pZBgBIAEoCSIUChJEZWxldGVQb3N0UmVzcG9uc2UiMQoQUmVhY3RQb3N0UmVxdWVzdBIPCgdwb3N0X2lkGAEgASgJEgwKBGljb24YAiABKAkiEwoRUmVhY3RQb3N0UmVzcG9uc2UiQQoPRWRpdFBvc3RSZXF1ZXN0Eg8KB3Bvc3RfaWQYASABKAkSDwoHY29udGVudBgCIAEoCRIMCgR0YWdzGAMgAygJIiMKEEVkaXRQb3N0UmVzcG9uc2USDwoHcG9zdF9pZBgBIAEoCSIqChZHZXRFdmVudFRpY2tldHNSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJIkUKF0dldEV2ZW50VGlja2V0c1Jlc3BvbnNlEioKDHRpY2tldHNfaW5mbxgBIAMoCzIULnplbmFvLnYxLlRpY2tldEluZm8iNwoKVGlja2V0SW5mbxIVCg10aWNrZXRfc2VjcmV0GAEgASgJEhIKCnVzZXJfZW1haWwYAiABKAkiOgoOQ2hlY2tpblJlcXVlc3QSFQoNdGlja2V0X3B1YmtleRgBIAEoCRIRCglzaWduYXR1cmUYAiABKAkiEQoPQ2hlY2tpblJlc3BvbnNlIi0KGUV4cG9ydFBhcnRpY2lwYW50c1JlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkiUgoaRXhwb3J0UGFydGljaXBhbnRzUmVzcG9uc2USDwoHY29udGVudBgBIAEoCRIQCghmaWxlbmFtZRgCIAEoCRIRCgltaW1lX3R5cGUYAyABKAkiowEKDUNvbW11bml0eUluZm8SFAoMZGlzcGxheV9uYW1lGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhIKCmF2YXRhcl91cmkYAyABKAkSEgoKYmFubmVyX3VyaRgEIAEoCRIWCg5hZG1pbmlzdHJhdG9ycxgFIAMoCRIVCg1jb3VudF9tZW1iZXJzGAYgASgNEhAKCHBrZ19wYXRoGAcgASgJIoMBChZDcmVhdGVDb21tdW5pdHlSZXF1ZXN0EhQKDGRpc3BsYXlfbmFtZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRISCgphdmF0YXJfdXJpGAMgASgJEhIKCmJhbm5lcl91cmkYBCABKAkSFgoOYWRtaW5pc3RyYXRvcnMYBSADKAkiLwoXQ3JlYXRlQ29tbXVuaXR5UmVzcG9uc2USFAoMY29tbXVuaXR5X2lkGAEgASgJIiwKFEpvaW5Db21tdW5pdHlSZXF1ZXN0EhQKDGNvbW11bml0eV9pZBgBIAEoCSIXChVKb2luQ29tbXVuaXR5UmVzcG9uc2UiLQoVTGVhdmVDb21tdW5pdHlSZXF1ZXN0EhQKDGNvbW11bml0eV9pZBgBIAEoCSIYChZMZWF2ZUNvbW11bml0eVJlc3BvbnNlIkQKGkFkZEV2ZW50VG9Db21tdW5pdHlSZXF1ZXN0EhQKDGNvbW11bml0eV9pZBgBIAEoCRIQCghldmVudF9pZBgCIAEoCSIdChtBZGRFdmVudFRvQ29tbXVuaXR5UmVzcG9uc2UiSQofUmVtb3ZlRXZlbnRGcm9tQ29tbXVuaXR5UmVxdWVzdBIUCgxjb21tdW5pdHlfaWQYASABKAkSEAoIZXZlbnRfaWQYAiABKAkiIgogUmVtb3ZlRXZlbnRGcm9tQ29tbXVuaXR5UmVzcG9uc2Uy+w8KDFplbmFvU2VydmljZRJBCghFZGl0VXNlchIZLnplbmFvLnYxLkVkaXRVc2VyUmVxdWVzdBoaLnplbmFvLnYxLkVkaXRVc2VyUmVzcG9uc2USUwoOR2V0VXNlckFkZHJlc3MSHy56ZW5hby52MS5HZXRVc2VyQWRkcmVzc1JlcXVlc3QaIC56ZW5hby52MS5HZXRVc2VyQWRkcmVzc1Jlc3BvbnNlEkoKC0NyZWF0ZUV2ZW50EhwuemVuYW8udjEuQ3JlYXRlRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ3JlYXRlRXZlbnRSZXNwb25zZRJKCgtDYW5jZWxFdmVudBIcLnplbmFvLnYxLkNhbmNlbEV2ZW50UmVxdWVzdBodLnplbmFvLnYxLkNhbmNlbEV2ZW50UmVzcG9uc2USRAoJRWRpdEV2ZW50EhouemVuYW8udjEuRWRpdEV2ZW50UmVxdWVzdBobLnplbmFvLnYxLkVkaXRFdmVudFJlc3BvbnNlEmIKE0dldEV2ZW50R2F0ZWtlZXBlcnMSJC56ZW5hby52MS5HZXRFdmVudEdhdGVrZWVwZXJzUmVxdWVzdBolLnplbmFvLnYxLkdldEV2ZW50R2F0ZWtlZXBlcnNSZXNwb25zZRJZChBWYWxpZGF0ZVBhc3N3b3JkEiEuemVuYW8udjEuVmFsaWRhdGVQYXNzd29yZFJlcXVlc3QaIi56ZW5hby52MS5WYWxpZGF0ZVBhc3N3b3JkUmVzcG9uc2USUwoOQnJvYWRjYXN0RXZlbnQSHy56ZW5hby52MS5Ccm9hZGNhc3RFdmVudFJlcXVlc3QaIC56ZW5hby52MS5Ccm9hZGNhc3RFdmVudFJlc3BvbnNlEkoKC1BhcnRpY2lwYXRlEhwuemVuYW8udjEuUGFydGljaXBhdGVSZXF1ZXN0Gh0uemVuYW8udjEuUGFydGljaXBhdGVSZXNwb25zZRJiChNDYW5jZWxQYXJ0aWNpcGF0aW9uEiQuemVuYW8udjEuQ2FuY2VsUGFydGljaXBhdGlvblJlcXVlc3QaJS56ZW5hby52MS5DYW5jZWxQYXJ0aWNpcGF0aW9uUmVzcG9uc2USVgoPR2V0RXZlbnRUaWNrZXRzEiAuemVuYW8udjEuR2V0RXZlbnRUaWNrZXRzUmVxdWVzdBohLnplbmFvLnYxLkdldEV2ZW50VGlja2V0c1Jlc3BvbnNlEj4KB0NoZWNraW4SGC56ZW5hby52MS5DaGVja2luUmVxdWVzdBoZLnplbmFvLnYxLkNoZWNraW5SZXNwb25zZRJfChJFeHBvcnRQYXJ0aWNpcGFudHMSIy56ZW5hby52MS5FeHBvcnRQYXJ0aWNpcGFudHNSZXF1ZXN0GiQuemVuYW8udjEuRXhwb3J0UGFydGljaXBhbnRzUmVzcG9uc2USVgoPQ3JlYXRlQ29tbXVuaXR5EiAuemVuYW8udjEuQ3JlYXRlQ29tbXVuaXR5UmVxdWVzdBohLnplbmFvLnYxLkNyZWF0ZUNvbW11bml0eVJlc3BvbnNlElAKDUpvaW5Db21tdW5pdHkSHi56ZW5hby52MS5Kb2luQ29tbXVuaXR5UmVxdWVzdBofLnplbmFvLnYxLkpvaW5Db21tdW5pdHlSZXNwb25zZRJTCg5MZWF2ZUNvbW11bml0eRIfLnplbmFvLnYxLkxlYXZlQ29tbXVuaXR5UmVxdWVzdBogLnplbmFvLnYxLkxlYXZlQ29tbXVuaXR5UmVzcG9uc2USYgoTQWRkRXZlbnRUb0NvbW11bml0eRIkLnplbmFvLnYxLkFkZEV2ZW50VG9Db21tdW5pdHlSZXF1ZXN0GiUuemVuYW8udjEuQWRkRXZlbnRUb0NvbW11bml0eVJlc3BvbnNlEnEKGFJlbW92ZUV2ZW50RnJvbUNvbW11bml0eRIpLnplbmFvLnYxLlJlbW92ZUV2ZW50RnJvbUNvbW11bml0eVJlcXVlc3QaKi56ZW5hby52MS5SZW1vdmVFdmVudEZyb21Db21tdW5pdHlSZXNwb25zZRJHCgpDcmVhdGVQb2xsEhsuemVuYW8udjEuQ3JlYXRlUG9sbFJlcXVlc3QaHC56ZW5hby52MS5DcmVhdGVQb2xsUmVzcG9uc2USQQoIVm90ZVBvbGwSGS56ZW5hby52MS5Wb3RlUG9sbFJlcXVlc3QaGi56ZW5hby52MS5Wb3RlUG9sbFJlc3BvbnNlEkcKCkNyZWF0ZVBvc3QSGy56ZW5hby52MS5DcmVhdGVQb3N0UmVxdWVzdBocLnplbmFvLnYxLkNyZWF0ZVBvc3RSZXNwb25zZRJHCgpEZWxldGVQb3N0EhsuemVuYW8udjEuRGVsZXRlUG9zdFJlcXVlc3QaHC56ZW5hby52MS5EZWxldGVQb3N0UmVzcG9uc2USRAoJUmVhY3RQb3N0EhouemVuYW8udjEuUmVhY3RQb3N0UmVxdWVzdBobLnplbmFvLnYxLlJlYWN0UG9zdFJlc3BvbnNlEkEKCEVkaXRQb3N0EhkuemVuYW8udjEuRWRpdFBvc3RSZXF1ZXN0GhouemVuYW8udjEuRWRpdFBvc3RSZXNwb25zZRI7CgZIZWFsdGgSFy56ZW5hby52MS5IZWFsdGhSZXF1ZXN0GhguemVuYW8udjEuSGVhbHRoUmVzcG9uc2VCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvemVuYW8vdjE7emVuYW92MWIGcHJvdG8z", [file_polls_v1_polls]);
+  fileDesc("ChR6ZW5hby92MS96ZW5hby5wcm90bxIIemVuYW8udjEiDwoNSGVhbHRoUmVxdWVzdCIlCg5IZWFsdGhSZXNwb25zZRITCgttYWludGVuYW5jZRgBIAEoCCJICg9FZGl0VXNlclJlcXVlc3QSFAoMZGlzcGxheV9uYW1lGAEgASgJEgsKA2JpbxgCIAEoCRISCgphdmF0YXJfdXJpGAMgASgJIh4KEEVkaXRVc2VyUmVzcG9uc2USCgoCaWQYASABKAkiFwoVR2V0VXNlckFkZHJlc3NSZXF1ZXN0IikKFkdldFVzZXJBZGRyZXNzUmVzcG9uc2USDwoHYWRkcmVzcxgBIAEoCSKrAgoSQ3JlYXRlRXZlbnRSZXF1ZXN0Eg0KBXRpdGxlGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhEKCWltYWdlX3VyaRgDIAEoCRISCgpzdGFydF9kYXRlGAQgASgEEhAKCGVuZF9kYXRlGAUgASgEEhQKDHRpY2tldF9wcmljZRgGIAEoARIQCghjYXBhY2l0eRgHIAEoDRIpCghsb2NhdGlvbhgJIAEoCzIXLnplbmFvLnYxLkV2ZW50TG9jYXRpb24SEAoIcGFzc3dvcmQYCiABKAkSEgoKb3JnYW5pemVycxgLIAMoCRITCgtnYXRla2VlcGVycxgMIAMoCRIUCgxkaXNjb3ZlcmFibGUYDSABKAgSFAoMY29tbXVuaXR5X2lkGA4gASgJIiEKE0NyZWF0ZUV2ZW50UmVzcG9uc2USCgoCaWQYASABKAkiJgoSQ2FuY2VsRXZlbnRSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJIhUKE0NhbmNlbEV2ZW50UmVzcG9uc2Ui1AIKEEVkaXRFdmVudFJlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJEhIKCnN0YXJ0X2RhdGUYBSABKAQSEAoIZW5kX2RhdGUYBiABKAQSFAoMdGlja2V0X3ByaWNlGAcgASgBEhAKCGNhcGFjaXR5GAggASgNEikKCGxvY2F0aW9uGAkgASgLMhcuemVuYW8udjEuRXZlbnRMb2NhdGlvbhIQCghwYXNzd29yZBgKIAEoCRIXCg91cGRhdGVfcGFzc3dvcmQYCyABKAgSEgoKb3JnYW5pemVycxgMIAMoCRITCgtnYXRla2VlcGVycxgNIAMoCRIUCgxkaXNjb3ZlcmFibGUYDiABKAgSFAoMY29tbXVuaXR5X2lkGA8gASgJIh8KEUVkaXRFdmVudFJlc3BvbnNlEgoKAmlkGAEgASgJIi4KGkdldEV2ZW50R2F0ZWtlZXBlcnNSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJIjIKG0dldEV2ZW50R2F0ZWtlZXBlcnNSZXNwb25zZRITCgtnYXRla2VlcGVycxgBIAMoCSI9ChdWYWxpZGF0ZVBhc3N3b3JkUmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRIQCghwYXNzd29yZBgCIAEoCSIpChhWYWxpZGF0ZVBhc3N3b3JkUmVzcG9uc2USDQoFdmFsaWQYASABKAgiVwoSUGFydGljaXBhdGVSZXF1ZXN0EhAKCGV2ZW50X2lkGAEgASgJEg0KBWVtYWlsGAIgASgJEg4KBmd1ZXN0cxgDIAMoCRIQCghwYXNzd29yZBgEIAEoCSIuChpDYW5jZWxQYXJ0aWNpcGF0aW9uUmVxdWVzdBIQCghldmVudF9pZBgBIAEoCSIdChtDYW5jZWxQYXJ0aWNpcGF0aW9uUmVzcG9uc2UiLAoTUGFydGljaXBhdGVSZXNwb25zZRIVCg10aWNrZXRfc2VjcmV0GAEgASgJIlEKFUJyb2FkY2FzdEV2ZW50UmVxdWVzdBIQCghldmVudF9pZBgBIAEoCRIPCgdtZXNzYWdlGAIgASgJEhUKDWF0dGFjaF90aWNrZXQYAyABKAgiGAoWQnJvYWRjYXN0RXZlbnRSZXNwb25zZSLBAQoNRXZlbnRMb2NhdGlvbhISCgp2ZW51ZV9uYW1lGAEgASgJEhQKDGluc3RydWN0aW9ucxgCIAEoCRIjCgNnZW8YAyABKAsyFC56ZW5hby52MS5BZGRyZXNzR2VvSAASKwoHdmlydHVhbBgEIAEoCzIYLnplbmFvLnYxLkFkZHJlc3NWaXJ0dWFsSAASKQoGY3VzdG9tGAUgASgLMhcuemVuYW8udjEuQWRkcmVzc0N1c3RvbUgAQgkKB2FkZHJlc3MiHQoOQWRkcmVzc1ZpcnR1YWwSCwoDdXJpGAEgASgJIkUKCkFkZHJlc3NHZW8SDwoHYWRkcmVzcxgBIAEoCRILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCEgwKBHNpemUYBCABKAIiMgoNQWRkcmVzc0N1c3RvbRIPCgdhZGRyZXNzGAEgASgJEhAKCHRpbWV6b25lGAIgASgJIoEBCgxFdmVudFByaXZhY3kSLgoGcHVibGljGAEgASgLMhwuemVuYW8udjEuRXZlbnRQcml2YWN5UHVibGljSAASMAoHZ3VhcmRlZBgCIAEoCzIdLnplbmFvLnYxLkV2ZW50UHJpdmFjeUd1YXJkZWRIAEIPCg1ldmVudF9wcml2YWN5IhQKEkV2ZW50UHJpdmFjeVB1YmxpYyIzChNFdmVudFByaXZhY3lHdWFyZGVkEhwKFHBhcnRpY2lwYXRpb25fcHVia2V5GAEgASgJIskCCglFdmVudEluZm8SDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJEhIKCm9yZ2FuaXplcnMYBCADKAkSEwoLZ2F0ZWtlZXBlcnMYBSADKAkSEgoKc3RhcnRfZGF0ZRgGIAEoAxIQCghlbmRfZGF0ZRgHIAEoAxIQCghjYXBhY2l0eRgIIAEoDRIpCghsb2NhdGlvbhgJIAEoCzIXLnplbmFvLnYxLkV2ZW50TG9jYXRpb24SFAoMcGFydGljaXBhbnRzGAogASgNEhAKCHBrZ19wYXRoGAsgASgJEicKB3ByaXZhY3kYDCABKAsyFi56ZW5hby52MS5FdmVudFByaXZhY3kSEgoKY2hlY2tlZF9pbhgNIAEoDRIUCgxkaXNjb3ZlcmFibGUYDiABKAgiLgoRQmF0Y2hQcm9maWxlRmllbGQSDAoEdHlwZRgBIAEoCRILCgNrZXkYAiABKAkiVQoTQmF0Y2hQcm9maWxlUmVxdWVzdBIrCgZmaWVsZHMYASADKAsyGy56ZW5hby52MS5CYXRjaFByb2ZpbGVGaWVsZBIRCglhZGRyZXNzZXMYAiADKAkijAEKEUNyZWF0ZVBvbGxSZXF1ZXN0EhAKCG9yZ190eXBlGAEgASgJEg4KBm9yZ19pZBgCIAEoCRIQCghxdWVzdGlvbhgDIAEoCRIPCgdvcHRpb25zGAQgAygJEhAKCGR1cmF0aW9uGAUgASgDEiAKBGtpbmQYBiABKA4yEi5wb2xscy52MS5Qb2xsS2luZCIlChJDcmVhdGVQb2xsUmVzcG9uc2USDwoHcG9zdF9pZBgBIAEoCSIyCg9Wb3RlUG9sbFJlcXVlc3QSDwoHcG9sbF9pZBgBIAEoCRIOCgZvcHRpb24YAiABKAkiEgoQVm90ZVBvbGxSZXNwb25zZSJnChFDcmVhdGVQb3N0UmVxdWVzdBIQCghvcmdfdHlwZRgBIAEoCRIOCgZvcmdfaWQYAiABKAkSDwoHY29udGVudBgDIAEoCRIRCglwYXJlbnRfaWQYBCABKAkSDAoEdGFncxgFIAMoCSIlChJDcmVhdGVQb3N0UmVzcG9uc2USDwoHcG9zdF9pZBgBIAEoCSIkChFEZWxldGVQb3N0UmVxdWVzdBIPCgdwb3N0X2lkGAEgASgJIhQKEkRlbGV0ZVBvc3RSZXNwb25zZSIxChBSZWFjdFBvc3RSZXF1ZXN0Eg8KB3Bvc3RfaWQYASABKAkSDAoEaWNvbhgCIAEoCSITChFSZWFjdFBvc3RSZXNwb25zZSJBCg9FZGl0UG9zdFJlcXVlc3QSDwoHcG9zdF9pZBgBIAEoCRIPCgdjb250ZW50GAIgASgJEgwKBHRhZ3MYAyADKAkiIwoQRWRpdFBvc3RSZXNwb25zZRIPCgdwb3N0X2lkGAEgASgJIioKFkdldEV2ZW50VGlja2V0c1JlcXVlc3QSEAoIZXZlbnRfaWQYASABKAkiRQoXR2V0RXZlbnRUaWNrZXRzUmVzcG9uc2USKgoMdGlja2V0c19pbmZvGAEgAygLMhQuemVuYW8udjEuVGlja2V0SW5mbyI3CgpUaWNrZXRJbmZvEhUKDXRpY2tldF9zZWNyZXQYASABKAkSEgoKdXNlcl9lbWFpbBgCIAEoCSI6Cg5DaGVja2luUmVxdWVzdBIVCg10aWNrZXRfcHVia2V5GAEgASgJEhEKCXNpZ25hdHVyZRgCIAEoCSIRCg9DaGVja2luUmVzcG9uc2UiLQoZRXhwb3J0UGFydGljaXBhbnRzUmVxdWVzdBIQCghldmVudF9pZBgBIAEoCSJSChpFeHBvcnRQYXJ0aWNpcGFudHNSZXNwb25zZRIPCgdjb250ZW50GAEgASgJEhAKCGZpbGVuYW1lGAIgASgJEhEKCW1pbWVfdHlwZRgDIAEoCSKjAQoNQ29tbXVuaXR5SW5mbxIUCgxkaXNwbGF5X25hbWUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEgoKYXZhdGFyX3VyaRgDIAEoCRISCgpiYW5uZXJfdXJpGAQgASgJEhYKDmFkbWluaXN0cmF0b3JzGAUgAygJEhUKDWNvdW50X21lbWJlcnMYBiABKA0SEAoIcGtnX3BhdGgYByABKAkigwEKFkNyZWF0ZUNvbW11bml0eVJlcXVlc3QSFAoMZGlzcGxheV9uYW1lGAEgASgJEhMKC2Rlc2NyaXB0aW9uGAIgASgJEhIKCmF2YXRhcl91cmkYAyABKAkSEgoKYmFubmVyX3VyaRgEIAEoCRIWCg5hZG1pbmlzdHJhdG9ycxgFIAMoCSIvChdDcmVhdGVDb21tdW5pdHlSZXNwb25zZRIUCgxjb21tdW5pdHlfaWQYASABKAkilwEKFEVkaXRDb21tdW5pdHlSZXF1ZXN0EhQKDGNvbW11bml0eV9pZBgBIAEoCRIUCgxkaXNwbGF5X25hbWUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSEgoKYXZhdGFyX3VyaRgEIAEoCRISCgpiYW5uZXJfdXJpGAUgASgJEhYKDmFkbWluaXN0cmF0b3JzGAYgAygJIhcKFUVkaXRDb21tdW5pdHlSZXNwb25zZSI5CiFHZXRDb21tdW5pdHlBZG1pbmlzdHJhdG9yc1JlcXVlc3QSFAoMY29tbXVuaXR5X2lkGAEgASgJIjwKIkdldENvbW11bml0eUFkbWluaXN0cmF0b3JzUmVzcG9uc2USFgoOYWRtaW5pc3RyYXRvcnMYASADKAkiLAoUSm9pbkNvbW11bml0eVJlcXVlc3QSFAoMY29tbXVuaXR5X2lkGAEgASgJIhcKFUpvaW5Db21tdW5pdHlSZXNwb25zZSItChVMZWF2ZUNvbW11bml0eVJlcXVlc3QSFAoMY29tbXVuaXR5X2lkGAEgASgJIhgKFkxlYXZlQ29tbXVuaXR5UmVzcG9uc2UiRAoaQWRkRXZlbnRUb0NvbW11bml0eVJlcXVlc3QSFAoMY29tbXVuaXR5X2lkGAEgASgJEhAKCGV2ZW50X2lkGAIgASgJIh0KG0FkZEV2ZW50VG9Db21tdW5pdHlSZXNwb25zZSJJCh9SZW1vdmVFdmVudEZyb21Db21tdW5pdHlSZXF1ZXN0EhQKDGNvbW11bml0eV9pZBgBIAEoCRIQCghldmVudF9pZBgCIAEoCSIiCiBSZW1vdmVFdmVudEZyb21Db21tdW5pdHlSZXNwb25zZTLGEQoMWmVuYW9TZXJ2aWNlEkEKCEVkaXRVc2VyEhkuemVuYW8udjEuRWRpdFVzZXJSZXF1ZXN0GhouemVuYW8udjEuRWRpdFVzZXJSZXNwb25zZRJTCg5HZXRVc2VyQWRkcmVzcxIfLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVxdWVzdBogLnplbmFvLnYxLkdldFVzZXJBZGRyZXNzUmVzcG9uc2USSgoLQ3JlYXRlRXZlbnQSHC56ZW5hby52MS5DcmVhdGVFdmVudFJlcXVlc3QaHS56ZW5hby52MS5DcmVhdGVFdmVudFJlc3BvbnNlEkoKC0NhbmNlbEV2ZW50EhwuemVuYW8udjEuQ2FuY2VsRXZlbnRSZXF1ZXN0Gh0uemVuYW8udjEuQ2FuY2VsRXZlbnRSZXNwb25zZRJECglFZGl0RXZlbnQSGi56ZW5hby52MS5FZGl0RXZlbnRSZXF1ZXN0GhsuemVuYW8udjEuRWRpdEV2ZW50UmVzcG9uc2USYgoTR2V0RXZlbnRHYXRla2VlcGVycxIkLnplbmFvLnYxLkdldEV2ZW50R2F0ZWtlZXBlcnNSZXF1ZXN0GiUuemVuYW8udjEuR2V0RXZlbnRHYXRla2VlcGVyc1Jlc3BvbnNlElkKEFZhbGlkYXRlUGFzc3dvcmQSIS56ZW5hby52MS5WYWxpZGF0ZVBhc3N3b3JkUmVxdWVzdBoiLnplbmFvLnYxLlZhbGlkYXRlUGFzc3dvcmRSZXNwb25zZRJTCg5Ccm9hZGNhc3RFdmVudBIfLnplbmFvLnYxLkJyb2FkY2FzdEV2ZW50UmVxdWVzdBogLnplbmFvLnYxLkJyb2FkY2FzdEV2ZW50UmVzcG9uc2USSgoLUGFydGljaXBhdGUSHC56ZW5hby52MS5QYXJ0aWNpcGF0ZVJlcXVlc3QaHS56ZW5hby52MS5QYXJ0aWNpcGF0ZVJlc3BvbnNlEmIKE0NhbmNlbFBhcnRpY2lwYXRpb24SJC56ZW5hby52MS5DYW5jZWxQYXJ0aWNpcGF0aW9uUmVxdWVzdBolLnplbmFvLnYxLkNhbmNlbFBhcnRpY2lwYXRpb25SZXNwb25zZRJWCg9HZXRFdmVudFRpY2tldHMSIC56ZW5hby52MS5HZXRFdmVudFRpY2tldHNSZXF1ZXN0GiEuemVuYW8udjEuR2V0RXZlbnRUaWNrZXRzUmVzcG9uc2USPgoHQ2hlY2tpbhIYLnplbmFvLnYxLkNoZWNraW5SZXF1ZXN0GhkuemVuYW8udjEuQ2hlY2tpblJlc3BvbnNlEl8KEkV4cG9ydFBhcnRpY2lwYW50cxIjLnplbmFvLnYxLkV4cG9ydFBhcnRpY2lwYW50c1JlcXVlc3QaJC56ZW5hby52MS5FeHBvcnRQYXJ0aWNpcGFudHNSZXNwb25zZRJWCg9DcmVhdGVDb21tdW5pdHkSIC56ZW5hby52MS5DcmVhdGVDb21tdW5pdHlSZXF1ZXN0GiEuemVuYW8udjEuQ3JlYXRlQ29tbXVuaXR5UmVzcG9uc2USUAoNRWRpdENvbW11bml0eRIeLnplbmFvLnYxLkVkaXRDb21tdW5pdHlSZXF1ZXN0Gh8uemVuYW8udjEuRWRpdENvbW11bml0eVJlc3BvbnNlEncKGkdldENvbW11bml0eUFkbWluaXN0cmF0b3JzEisuemVuYW8udjEuR2V0Q29tbXVuaXR5QWRtaW5pc3RyYXRvcnNSZXF1ZXN0GiwuemVuYW8udjEuR2V0Q29tbXVuaXR5QWRtaW5pc3RyYXRvcnNSZXNwb25zZRJQCg1Kb2luQ29tbXVuaXR5Eh4uemVuYW8udjEuSm9pbkNvbW11bml0eVJlcXVlc3QaHy56ZW5hby52MS5Kb2luQ29tbXVuaXR5UmVzcG9uc2USUwoOTGVhdmVDb21tdW5pdHkSHy56ZW5hby52MS5MZWF2ZUNvbW11bml0eVJlcXVlc3QaIC56ZW5hby52MS5MZWF2ZUNvbW11bml0eVJlc3BvbnNlEmIKE0FkZEV2ZW50VG9Db21tdW5pdHkSJC56ZW5hby52MS5BZGRFdmVudFRvQ29tbXVuaXR5UmVxdWVzdBolLnplbmFvLnYxLkFkZEV2ZW50VG9Db21tdW5pdHlSZXNwb25zZRJxChhSZW1vdmVFdmVudEZyb21Db21tdW5pdHkSKS56ZW5hby52MS5SZW1vdmVFdmVudEZyb21Db21tdW5pdHlSZXF1ZXN0GiouemVuYW8udjEuUmVtb3ZlRXZlbnRGcm9tQ29tbXVuaXR5UmVzcG9uc2USRwoKQ3JlYXRlUG9sbBIbLnplbmFvLnYxLkNyZWF0ZVBvbGxSZXF1ZXN0GhwuemVuYW8udjEuQ3JlYXRlUG9sbFJlc3BvbnNlEkEKCFZvdGVQb2xsEhkuemVuYW8udjEuVm90ZVBvbGxSZXF1ZXN0GhouemVuYW8udjEuVm90ZVBvbGxSZXNwb25zZRJHCgpDcmVhdGVQb3N0EhsuemVuYW8udjEuQ3JlYXRlUG9zdFJlcXVlc3QaHC56ZW5hby52MS5DcmVhdGVQb3N0UmVzcG9uc2USRwoKRGVsZXRlUG9zdBIbLnplbmFvLnYxLkRlbGV0ZVBvc3RSZXF1ZXN0GhwuemVuYW8udjEuRGVsZXRlUG9zdFJlc3BvbnNlEkQKCVJlYWN0UG9zdBIaLnplbmFvLnYxLlJlYWN0UG9zdFJlcXVlc3QaGy56ZW5hby52MS5SZWFjdFBvc3RSZXNwb25zZRJBCghFZGl0UG9zdBIZLnplbmFvLnYxLkVkaXRQb3N0UmVxdWVzdBoaLnplbmFvLnYxLkVkaXRQb3N0UmVzcG9uc2USOwoGSGVhbHRoEhcuemVuYW8udjEuSGVhbHRoUmVxdWVzdBoYLnplbmFvLnYxLkhlYWx0aFJlc3BvbnNlQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL3plbmFvL3YxO3plbmFvdjFiBnByb3RvMw", [file_polls_v1_polls]);
 
 /**
  * @generated from message zenao.v1.HealthRequest
@@ -250,6 +250,18 @@ export type CreateEventRequest = Message<"zenao.v1.CreateEventRequest"> & {
    * @generated from field: repeated string gatekeepers = 12;
    */
   gatekeepers: string[];
+
+  /**
+   * @generated from field: bool discoverable = 13;
+   */
+  discoverable: boolean;
+
+  /**
+   * optional
+   *
+   * @generated from field: string community_id = 14;
+   */
+  communityId: string;
 };
 
 /**
@@ -318,6 +330,18 @@ export type CreateEventRequestJson = {
    * @generated from field: repeated string gatekeepers = 12;
    */
   gatekeepers?: string[];
+
+  /**
+   * @generated from field: bool discoverable = 13;
+   */
+  discoverable?: boolean;
+
+  /**
+   * optional
+   *
+   * @generated from field: string community_id = 14;
+   */
+  communityId?: string;
 };
 
 /**
@@ -476,6 +500,18 @@ export type EditEventRequest = Message<"zenao.v1.EditEventRequest"> & {
    * @generated from field: repeated string gatekeepers = 13;
    */
   gatekeepers: string[];
+
+  /**
+   * @generated from field: bool discoverable = 14;
+   */
+  discoverable: boolean;
+
+  /**
+   * optional
+   *
+   * @generated from field: string community_id = 15;
+   */
+  communityId: string;
 };
 
 /**
@@ -554,6 +590,18 @@ export type EditEventRequestJson = {
    * @generated from field: repeated string gatekeepers = 13;
    */
   gatekeepers?: string[];
+
+  /**
+   * @generated from field: bool discoverable = 14;
+   */
+  discoverable?: boolean;
+
+  /**
+   * optional
+   *
+   * @generated from field: string community_id = 15;
+   */
+  communityId?: string;
 };
 
 /**
@@ -1270,6 +1318,11 @@ export type EventInfo = Message<"zenao.v1.EventInfo"> & {
    * @generated from field: uint32 checked_in = 13;
    */
   checkedIn: number;
+
+  /**
+   * @generated from field: bool discoverable = 14;
+   */
+  discoverable: boolean;
 };
 
 /**
@@ -1344,6 +1397,11 @@ export type EventInfoJson = {
    * @generated from field: uint32 checked_in = 13;
    */
   checkedIn?: number;
+
+  /**
+   * @generated from field: bool discoverable = 14;
+   */
+  discoverable?: boolean;
 };
 
 /**
@@ -2280,6 +2338,156 @@ export const CreateCommunityResponseSchema: GenMessage<CreateCommunityResponse, 
   messageDesc(file_zenao_v1_zenao, 53);
 
 /**
+ * @generated from message zenao.v1.EditCommunityRequest
+ */
+export type EditCommunityRequest = Message<"zenao.v1.EditCommunityRequest"> & {
+  /**
+   * @generated from field: string community_id = 1;
+   */
+  communityId: string;
+
+  /**
+   * @generated from field: string display_name = 2;
+   */
+  displayName: string;
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description: string;
+
+  /**
+   * @generated from field: string avatar_uri = 4;
+   */
+  avatarUri: string;
+
+  /**
+   * @generated from field: string banner_uri = 5;
+   */
+  bannerUri: string;
+
+  /**
+   * @generated from field: repeated string administrators = 6;
+   */
+  administrators: string[];
+};
+
+/**
+ * @generated from message zenao.v1.EditCommunityRequest
+ */
+export type EditCommunityRequestJson = {
+  /**
+   * @generated from field: string community_id = 1;
+   */
+  communityId?: string;
+
+  /**
+   * @generated from field: string display_name = 2;
+   */
+  displayName?: string;
+
+  /**
+   * @generated from field: string description = 3;
+   */
+  description?: string;
+
+  /**
+   * @generated from field: string avatar_uri = 4;
+   */
+  avatarUri?: string;
+
+  /**
+   * @generated from field: string banner_uri = 5;
+   */
+  bannerUri?: string;
+
+  /**
+   * @generated from field: repeated string administrators = 6;
+   */
+  administrators?: string[];
+};
+
+/**
+ * Describes the message zenao.v1.EditCommunityRequest.
+ * Use `create(EditCommunityRequestSchema)` to create a new message.
+ */
+export const EditCommunityRequestSchema: GenMessage<EditCommunityRequest, {jsonType: EditCommunityRequestJson}> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 54);
+
+/**
+ * @generated from message zenao.v1.EditCommunityResponse
+ */
+export type EditCommunityResponse = Message<"zenao.v1.EditCommunityResponse"> & {
+};
+
+/**
+ * @generated from message zenao.v1.EditCommunityResponse
+ */
+export type EditCommunityResponseJson = {
+};
+
+/**
+ * Describes the message zenao.v1.EditCommunityResponse.
+ * Use `create(EditCommunityResponseSchema)` to create a new message.
+ */
+export const EditCommunityResponseSchema: GenMessage<EditCommunityResponse, {jsonType: EditCommunityResponseJson}> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 55);
+
+/**
+ * @generated from message zenao.v1.GetCommunityAdministratorsRequest
+ */
+export type GetCommunityAdministratorsRequest = Message<"zenao.v1.GetCommunityAdministratorsRequest"> & {
+  /**
+   * @generated from field: string community_id = 1;
+   */
+  communityId: string;
+};
+
+/**
+ * @generated from message zenao.v1.GetCommunityAdministratorsRequest
+ */
+export type GetCommunityAdministratorsRequestJson = {
+  /**
+   * @generated from field: string community_id = 1;
+   */
+  communityId?: string;
+};
+
+/**
+ * Describes the message zenao.v1.GetCommunityAdministratorsRequest.
+ * Use `create(GetCommunityAdministratorsRequestSchema)` to create a new message.
+ */
+export const GetCommunityAdministratorsRequestSchema: GenMessage<GetCommunityAdministratorsRequest, {jsonType: GetCommunityAdministratorsRequestJson}> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 56);
+
+/**
+ * @generated from message zenao.v1.GetCommunityAdministratorsResponse
+ */
+export type GetCommunityAdministratorsResponse = Message<"zenao.v1.GetCommunityAdministratorsResponse"> & {
+  /**
+   * @generated from field: repeated string administrators = 1;
+   */
+  administrators: string[];
+};
+
+/**
+ * @generated from message zenao.v1.GetCommunityAdministratorsResponse
+ */
+export type GetCommunityAdministratorsResponseJson = {
+  /**
+   * @generated from field: repeated string administrators = 1;
+   */
+  administrators?: string[];
+};
+
+/**
+ * Describes the message zenao.v1.GetCommunityAdministratorsResponse.
+ * Use `create(GetCommunityAdministratorsResponseSchema)` to create a new message.
+ */
+export const GetCommunityAdministratorsResponseSchema: GenMessage<GetCommunityAdministratorsResponse, {jsonType: GetCommunityAdministratorsResponseJson}> = /*@__PURE__*/
+  messageDesc(file_zenao_v1_zenao, 57);
+
+/**
  * @generated from message zenao.v1.JoinCommunityRequest
  */
 export type JoinCommunityRequest = Message<"zenao.v1.JoinCommunityRequest"> & {
@@ -2304,7 +2512,7 @@ export type JoinCommunityRequestJson = {
  * Use `create(JoinCommunityRequestSchema)` to create a new message.
  */
 export const JoinCommunityRequestSchema: GenMessage<JoinCommunityRequest, {jsonType: JoinCommunityRequestJson}> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 54);
+  messageDesc(file_zenao_v1_zenao, 58);
 
 /**
  * @generated from message zenao.v1.JoinCommunityResponse
@@ -2323,7 +2531,7 @@ export type JoinCommunityResponseJson = {
  * Use `create(JoinCommunityResponseSchema)` to create a new message.
  */
 export const JoinCommunityResponseSchema: GenMessage<JoinCommunityResponse, {jsonType: JoinCommunityResponseJson}> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 55);
+  messageDesc(file_zenao_v1_zenao, 59);
 
 /**
  * @generated from message zenao.v1.LeaveCommunityRequest
@@ -2350,7 +2558,7 @@ export type LeaveCommunityRequestJson = {
  * Use `create(LeaveCommunityRequestSchema)` to create a new message.
  */
 export const LeaveCommunityRequestSchema: GenMessage<LeaveCommunityRequest, {jsonType: LeaveCommunityRequestJson}> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 56);
+  messageDesc(file_zenao_v1_zenao, 60);
 
 /**
  * @generated from message zenao.v1.LeaveCommunityResponse
@@ -2369,7 +2577,7 @@ export type LeaveCommunityResponseJson = {
  * Use `create(LeaveCommunityResponseSchema)` to create a new message.
  */
 export const LeaveCommunityResponseSchema: GenMessage<LeaveCommunityResponse, {jsonType: LeaveCommunityResponseJson}> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 57);
+  messageDesc(file_zenao_v1_zenao, 61);
 
 /**
  * @generated from message zenao.v1.AddEventToCommunityRequest
@@ -2406,7 +2614,7 @@ export type AddEventToCommunityRequestJson = {
  * Use `create(AddEventToCommunityRequestSchema)` to create a new message.
  */
 export const AddEventToCommunityRequestSchema: GenMessage<AddEventToCommunityRequest, {jsonType: AddEventToCommunityRequestJson}> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 58);
+  messageDesc(file_zenao_v1_zenao, 62);
 
 /**
  * @generated from message zenao.v1.AddEventToCommunityResponse
@@ -2425,7 +2633,7 @@ export type AddEventToCommunityResponseJson = {
  * Use `create(AddEventToCommunityResponseSchema)` to create a new message.
  */
 export const AddEventToCommunityResponseSchema: GenMessage<AddEventToCommunityResponse, {jsonType: AddEventToCommunityResponseJson}> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 59);
+  messageDesc(file_zenao_v1_zenao, 63);
 
 /**
  * @generated from message zenao.v1.RemoveEventFromCommunityRequest
@@ -2462,7 +2670,7 @@ export type RemoveEventFromCommunityRequestJson = {
  * Use `create(RemoveEventFromCommunityRequestSchema)` to create a new message.
  */
 export const RemoveEventFromCommunityRequestSchema: GenMessage<RemoveEventFromCommunityRequest, {jsonType: RemoveEventFromCommunityRequestJson}> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 60);
+  messageDesc(file_zenao_v1_zenao, 64);
 
 /**
  * @generated from message zenao.v1.RemoveEventFromCommunityResponse
@@ -2481,7 +2689,7 @@ export type RemoveEventFromCommunityResponseJson = {
  * Use `create(RemoveEventFromCommunityResponseSchema)` to create a new message.
  */
 export const RemoveEventFromCommunityResponseSchema: GenMessage<RemoveEventFromCommunityResponse, {jsonType: RemoveEventFromCommunityResponseJson}> = /*@__PURE__*/
-  messageDesc(file_zenao_v1_zenao, 61);
+  messageDesc(file_zenao_v1_zenao, 65);
 
 /**
  * @generated from service zenao.v1.ZenaoService
@@ -2598,12 +2806,30 @@ export const ZenaoService: GenService<{
   /**
    * COMMUNITY
    *
+   * NOT IMPLEMENTED YET
+   *
    * @generated from rpc zenao.v1.ZenaoService.CreateCommunity
    */
   createCommunity: {
     methodKind: "unary";
     input: typeof CreateCommunityRequestSchema;
     output: typeof CreateCommunityResponseSchema;
+  },
+  /**
+   * @generated from rpc zenao.v1.ZenaoService.EditCommunity
+   */
+  editCommunity: {
+    methodKind: "unary";
+    input: typeof EditCommunityRequestSchema;
+    output: typeof EditCommunityResponseSchema;
+  },
+  /**
+   * @generated from rpc zenao.v1.ZenaoService.GetCommunityAdministrators
+   */
+  getCommunityAdministrators: {
+    methodKind: "unary";
+    input: typeof GetCommunityAdministratorsRequestSchema;
+    output: typeof GetCommunityAdministratorsResponseSchema;
   },
   /**
    * @generated from rpc zenao.v1.ZenaoService.JoinCommunity

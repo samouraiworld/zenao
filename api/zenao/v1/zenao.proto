@@ -28,7 +28,11 @@ service ZenaoService {
       returns (ExportParticipantsResponse);
 
   // COMMUNITY
-  rpc CreateCommunity(CreateCommunityRequest) returns (CreateCommunityResponse);
+  rpc CreateCommunity(CreateCommunityRequest)
+      returns (CreateCommunityResponse); // NOT IMPLEMENTED YET
+  rpc EditCommunity(EditCommunityRequest) returns (EditCommunityResponse);
+  rpc GetCommunityAdministrators(GetCommunityAdministratorsRequest)
+      returns (GetCommunityAdministratorsResponse);
   rpc JoinCommunity(JoinCommunityRequest) returns (JoinCommunityResponse);
   rpc LeaveCommunity(LeaveCommunityRequest) returns (LeaveCommunityResponse);
   rpc AddEventToCommunity(AddEventToCommunityRequest)
@@ -77,6 +81,8 @@ message CreateEventRequest {
   string password = 10;
   repeated string organizers = 11;
   repeated string gatekeepers = 12;
+  bool discoverable = 13;
+  string community_id = 14; // optional
 }
 
 message CreateEventResponse { string id = 1; }
@@ -99,6 +105,8 @@ message EditEventRequest {
   bool update_password = 11;
   repeated string organizers = 12;
   repeated string gatekeepers = 13;
+  bool discoverable = 14;
+  string community_id = 15; // optional
 }
 
 message EditEventResponse { string id = 1; }
@@ -184,6 +192,7 @@ message EventInfo {
   string pkg_path = 11;
   EventPrivacy privacy = 12;
   uint32 checked_in = 13;
+  bool discoverable = 14;
 }
 
 message BatchProfileField {
@@ -288,6 +297,23 @@ message CreateCommunityRequest {
 }
 
 message CreateCommunityResponse { string community_id = 1; }
+
+message EditCommunityRequest {
+  string community_id = 1;
+  string display_name = 2;
+  string description = 3;
+  string avatar_uri = 4;
+  string banner_uri = 5;
+  repeated string administrators = 6;
+}
+
+message EditCommunityResponse {}
+
+message GetCommunityAdministratorsRequest { string community_id = 1; }
+
+message GetCommunityAdministratorsResponse {
+  repeated string administrators = 1;
+}
 
 message JoinCommunityRequest { string community_id = 1; }
 

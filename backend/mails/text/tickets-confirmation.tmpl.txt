@@ -21,9 +21,13 @@ EVENT DETAILS:
 
 DATE AND TIME
 
+
+
 {{.TimeText}}
 
 ADDRESS
+
+
 
 {{.LocationText}}
 

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"sync"
 	"time"
 
 	"connectrpc.com/connect"
@@ -13,6 +14,8 @@ import (
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -56,6 +59,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	participants := []*zeni.User{buyer}
 	for _, authGuest := range authGuests {
+		if authGuest.Banned {
+			return nil, fmt.Errorf("user %s is banned", authGuest.Email)
+		}
 		if authGuest.ID == authUser.ID {
 			return nil, errors.New("guest is buyer")
 		}
@@ -80,10 +86,11 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	evt := (*zeni.Event)(nil)
 	communities := ([]*zeni.Community)(nil)
 	needPasswordIfGuarded := true
+	rolesByParticipant := make([][]string, len(participants))
 
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
-		buyerRoles, err := db.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		buyerRoles, err := tx.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -91,25 +98,33 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			needPasswordIfGuarded = false
 		}
 
-		communities, err = db.CommunitiesByEvent(req.Msg.EventId)
+		communities, err = tx.CommunitiesByEvent(req.Msg.EventId)
 		if err != nil {
 			return err
 		}
 
 		for i, ticket := range tickets {
 			// XXX: support batch
-			if err := db.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
+			if err := tx.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
 				return err
 			}
 
 			for _, cmt := range communities {
-				if err := db.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
+				roles, err := tx.EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
+				if err != nil {
+					return err
+				}
+				rolesByParticipant[i] = roles
+				if slices.Contains(roles, zeni.RoleMember) {
+					continue
+				}
+				if err := tx.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
 					return err
 				}
 			}
 		}
 
-		evt, err = db.GetEvent(req.Msg.EventId)
+		evt, err = tx.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -123,30 +138,55 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
+	wg := sync.WaitGroup{}
+	defer wg.Wait()
+
 	if s.MailClient != nil {
-		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
-		if err != nil {
-			s.Logger.Error("generate-participate-email-content", zap.Error(err))
-		} else {
-			attachments := make([]*resend.Attachment, 0, len(tickets))
-			for i, ticket := range tickets {
-				pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
-				if err != nil {
-					s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
-					continue
-				}
-				attachments = append(attachments, &resend.Attachment{
-					Content:     pdfData,
-					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
-					ContentType: "application/pdf",
-				})
-				icsData := GenerateICS(evt, s.MailSender, s.Logger)
-				attachments = append(attachments, &resend.Attachment{
-					Content:     icsData,
-					Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
-					ContentType: "text/calendar",
-				})
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			tracer := otel.Tracer("mail")
+			ctx, span := tracer.Start(
+				ctx,
+				"mail.Participate",
+				trace.WithSpanKind(trace.SpanKindClient),
+			)
+			defer span.End()
+
+			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
+			if err != nil {
+				s.Logger.Error("generate-participate-email-content", zap.Error(err))
+				return
 			}
+
+			attachments := make([]*resend.Attachment, 0, len(tickets))
+
+			func() {
+				_, span := tracer.Start(
+					ctx,
+					"generate tickets and ics",
+					trace.WithSpanKind(trace.SpanKindClient),
+				)
+				defer span.End()
+				for i, ticket := range tickets {
+					pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
+					if err != nil {
+						s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
+						continue
+					}
+					attachments = append(attachments, &resend.Attachment{
+						Content:     pdfData,
+						Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
+						ContentType: "application/pdf",
+					})
+					icsData := GenerateICS(evt, s.MailSender, s.Logger)
+					attachments = append(attachments, &resend.Attachment{
+						Content:     icsData,
+						Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
+						ContentType: "text/calendar",
+					})
+				}
+			}()
 
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
@@ -159,7 +199,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			}); err != nil {
 				s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
 			}
-		}
+		}()
 	}
 
 	// XXX: there could be race conditions if the db has changed password but the chain did not
@@ -176,13 +216,17 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		// XXX: callerID should be the current user and not creator,
 		//      this could break if the initial creator has the organizer role removed
 		//      also this bypasses password protection on-chain
-		if err := s.Chain.Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
+		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
 			// XXX: handle case where db tx pass but chain fail
 			return nil, err
 		}
 
 		for _, cmt := range communities {
-			if err := s.Chain.AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
+			// XXX: does the check in the chain instead of using db.
+			if slices.Contains(rolesByParticipant[i], zeni.RoleMember) {
+				continue
+			}
+			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
 				return nil, err
 			}
 		}

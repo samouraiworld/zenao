@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto"
 	"crypto/ed25519"
 	srand "crypto/rand"
@@ -26,6 +27,8 @@ import (
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -51,6 +54,8 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 
 	client := gnoclient.Client{Signer: signer, RPCClient: tmClient}
 
+	tracer := otel.Tracer("chain")
+
 	return &gnoZenaoChain{
 		client:                  client,
 		eventsIndexPkgPath:      path.Join("gno.land/r", namespace, "eventreg"),
@@ -59,6 +64,9 @@ func setupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 		logger:                  logger,
 		namespace:               namespace,
 		gasSecurityRate:         gasSecurityRate,
+		chainEndpoint:           chainEndpoint,
+		ctx:                     context.Background(),
+		tracer:                  tracer,
 	}, nil
 }
 
@@ -70,12 +78,34 @@ type gnoZenaoChain struct {
 	logger                  *zap.Logger
 	namespace               string
 	gasSecurityRate         float64
+	chainEndpoint           string
+	ctx                     context.Context
+	tracer                  trace.Tracer
+}
+
+// WithContext implements zeni.Chain.
+func (g *gnoZenaoChain) WithContext(ctx context.Context) zeni.Chain {
+	return g.withContext(ctx)
+}
+
+func (g *gnoZenaoChain) withContext(ctx context.Context) *gnoZenaoChain {
+	nc := *g
+	client, err := NewTM2Client(ctx, g.chainEndpoint)
+	if err != nil {
+		panic(err) // XXX: do better
+	}
+	nc.client.RPCClient = tm2client.NewRPCClient(client)
+	nc.ctx = ctx
+	return &nc
 }
 
 const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
 
 // FillAdminProfile implements zeni.Chain.
 func (g *gnoZenaoChain) FillAdminProfile() {
+	g, span := g.trace("gzchain.FillAdminProfile")
+	defer span.End()
+
 	var minFee int64 = 20 * 1_000_000
 	msg := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
@@ -137,6 +167,9 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
+	g, span := g.trace("gzchain.CreateEvent")
+	defer span.End()
+
 	organizersAddr := mapsl.Map(organizersIDs, g.UserAddress)
 	gatekeepersAddr := mapsl.Map(gatekeepersIDs, g.UserAddress)
 
@@ -200,6 +233,9 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 
 // CancelEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
+	g, span := g.trace("gzchain.CancelEvent")
+	defer span.End()
+
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 
@@ -256,6 +292,9 @@ func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
 
 // EditEvent implements ZenaoChain.
 func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error {
+	g, span := g.trace("gzchain.EditEvent")
+	defer span.End()
+
 	orgsAddrLit := stringSliceLit(mapsl.Map(organizersIDs, g.UserAddress))
 	gkpsAddrLit := stringSliceLit(mapsl.Map(gatekeepersIDs, g.UserAddress))
 	eventPkgPath := g.eventRealmPkgPath(evtID)
@@ -292,13 +331,14 @@ func main() {
 				%d,
 				%d,
 				%d,
+				%t,
 				%s,
 				%s,
 			),
 		}),
 	})
 }
-`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, orgsAddrLit, gkpsAddrLit, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, loc, privacyStr),
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, orgsAddrLit, gkpsAddrLit, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, req.Discoverable, loc, privacyStr),
 			}},
 		},
 	}
@@ -342,6 +382,9 @@ func main() {
 
 // CreateUser implements ZenaoChain.
 func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
+	g, span := g.trace("gzchain.CreateUser")
+	defer span.End()
+
 	userRealmSrc, err := genUserRealmSource(user, g.namespace, g.signerInfo.GetAddress().String())
 	if err != nil {
 		return err
@@ -375,6 +418,9 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 
 // Participate implements ZenaoChain.
 func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error {
+	g, span := g.trace("gzchain.Participate")
+	defer span.End()
+
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
@@ -400,14 +446,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 			}},
 		},
 	}
-	gasWanted, err := g.estimateRunTxGas(msgRun)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
-		GasFee:    "10000000ugnot",
-		GasWanted: gasWanted,
-	}, msgRun))
+	broadcastRes, err := g.run("participate", msgRun)
 	if err != nil {
 		return err
 	}
@@ -423,14 +462,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 			participantAddr,
 		},
 	}
-	gasWanted, err = g.estimateCallTxGas(msgCall)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgCall))
+	broadcastRes, err = g.call(msgCall)
 	if err != nil {
 		return err
 	}
@@ -442,6 +474,9 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 
 // CancelParticipation implements ZenaoChain.
 func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ticketPubkey string) error {
+	g, span := g.trace("gzchain.CancelParticipation")
+	defer span.End()
+
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
@@ -497,6 +532,9 @@ func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ti
 }
 
 func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error {
+	g, span := g.trace("gzchain.Checkin")
+	defer span.End()
+
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	gatekeeperPkgPath := g.userRealmPkgPath(gatekeeperID)
 
@@ -528,6 +566,9 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 
 // CreateCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error {
+	g, span := g.trace("gzchain.CreateCommunity")
+	defer span.End()
+
 	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
 	membersAddr := mapsl.Map(membersIDs, g.UserAddress)
 	eventsAddr := mapsl.Map(eventsIDs, g.EventAddress)
@@ -604,11 +645,122 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 		g.logger.Info("added member to community registry", zap.String("member", member), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	}
 
+	for _, evtAddr := range eventsAddr {
+		msgCall = vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: g.communitiesIndexPkgPath,
+			Func:    "AddEvent",
+			Args: []string{
+				communityPkgPath,
+				evtAddr,
+			},
+		}
+		gasWanted, err = g.estimateCallTxGas(msgCall)
+		if err != nil {
+			return err
+		}
+		broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+			GasFee:    "10000000ugnot",
+			GasWanted: gasWanted,
+		}, msgCall))
+		if err != nil {
+			return err
+		}
+		g.logger.Info("added event to community registry", zap.String("event", evtAddr), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	}
+
+	return nil
+}
+
+// EditCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error {
+	g, span := g.trace("gzchain.EditCommunity")
+	defer span.End()
+
+	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
+	adminsAddrLit := stringSliceLit(adminsAddr)
+	communityPkgPath := g.communityPkgPath(communityID)
+	userRealmPkgPath := g.userRealmPkgPath(callerID)
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: fmt.Sprintf(`package main
+import (
+	user %q
+	community %q
+	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/communities"
+)
+
+func main() {
+	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+		Title: %q,
+		Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+			Title: "Edit community",
+			Message: communities.NewEditCommunityMsg(
+				%q,
+				%q,
+				%q,
+				%q,
+				%s,
+			),
+		}),
+	})
+}
+`, userRealmPkgPath, communityPkgPath, "Edit "+communityPkgPath, req.DisplayName, req.Description, req.AvatarUri, req.BannerUri, adminsAddrLit),
+			}},
+		},
+	}
+	gasWanted, err := g.estimateRunTxGas(msgRun)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msgRun))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("edited community", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	// Add new admin to registry but don't remove old one since they still are members of the community
+	for _, adminAddr := range adminsAddr {
+		msgCall := vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: g.communitiesIndexPkgPath,
+			Func:    "AddMember",
+			Args: []string{
+				communityPkgPath,
+				adminAddr,
+			},
+		}
+		gasWanted, err = g.estimateCallTxGas(msgCall)
+		if err != nil {
+			return err
+		}
+		broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+			GasFee:    "10000000ugnot",
+			GasWanted: gasWanted,
+		}, msgCall))
+		if err != nil {
+			return err
+		}
+		g.logger.Info("added admin to community registry", zap.String("admin", adminAddr), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	}
+
 	return nil
 }
 
 // AddMemberToCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string, userID string) error {
+	g, span := g.trace("gzchain.AddMemberToCommunity")
+	defer span.End()
+
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
 	userAddr := g.UserAddress(userID)
@@ -623,14 +775,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			}},
 		},
 	}
-	gasWanted, err := g.estimateRunTxGas(msgRun)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgRun))
+	broadcastRes, err := g.run("add member to community", msgRun)
 	if err != nil {
 		return err
 	}
@@ -645,14 +790,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			userAddr,
 		},
 	}
-	gasWanted, err = g.estimateCallTxGas(msgCall)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgCall))
+	broadcastRes, err = g.call(msgCall)
 	if err != nil {
 		return err
 	}
@@ -663,6 +801,9 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 
 // RemoveMemberFromCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID string, userID string) error {
+	g, span := g.trace("gzchain.RemoveMemberFromCommunity")
+	defer span.End()
+
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
 	userAddr := g.UserAddress(userID)
@@ -717,6 +858,9 @@ func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID s
 
 // AddEventToCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string, eventID string) error {
+	g, span := g.trace("gzchain.AddEventToCommunity")
+	defer span.End()
+
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
 	eventAddr := g.EventAddress(eventID)
@@ -744,11 +888,37 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 	}
 	g.logger.Info("added event to community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "AddEvent",
+		Args: []string{
+			communityPkgPath,
+			eventAddr,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("indexed event in community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
 	return nil
 }
 
 // RemoveEventFromCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID string, eventID string) error {
+	g, span := g.trace("gzchain.RemoveEventFromCommunity")
+	defer span.End()
+
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
 	eventAddr := g.EventAddress(eventID)
@@ -776,11 +946,37 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 	}
 	g.logger.Info("removed event from community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "RemoveEvent",
+		Args: []string{
+			communityPkgPath,
+			eventAddr,
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+
+	g.logger.Info("removed index event in community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
 	return nil
 }
 
 // EditUser implements ZenaoChain.
 func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) error {
+	g, span := g.trace("gzchain.EditUser")
+	defer span.End()
+
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 
 	msg := vm.MsgRun{
@@ -838,6 +1034,9 @@ func (g *gnoZenaoChain) EventAddress(eventID string) string {
 
 // CreatePost implements ZenaoChain
 func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error) {
+	g, span := g.trace("gzchain.CreatePost")
+	defer span.End()
+
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	orgPkgPath := g.orgPkgPath(orgType, orgID)
 	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
@@ -888,6 +1087,9 @@ func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, 
 
 // EditPost implements ZenaoChain
 func (g *gnoZenaoChain) EditPost(userID string, postID string, post *feedsv1.Post) error {
+	g, span := g.trace("gzchain.EditPost")
+	defer span.End()
+
 	postIDInt, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return err
@@ -924,6 +1126,9 @@ func (g *gnoZenaoChain) EditPost(userID string, postID string, post *feedsv1.Pos
 
 // DeletePost implements ZenaoChain
 func (g *gnoZenaoChain) DeletePost(userID string, postID string) error {
+	g, span := g.trace("gzchain.DeletePost")
+	defer span.End()
+
 	postIDInt, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return err
@@ -957,6 +1162,9 @@ func (g *gnoZenaoChain) DeletePost(userID string, postID string) error {
 
 // ReactPost implements ZenaoChain
 func (g *gnoZenaoChain) ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error {
+	g, span := g.trace("gzchain.ReactPost")
+	defer span.End()
+
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -986,6 +1194,9 @@ func (g *gnoZenaoChain) ReactPost(userID string, orgType string, orgID string, r
 
 // CreatePoll implements ZenaoChain
 func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error) {
+	g, span := g.trace("gzchain.CreatePoll")
+	defer span.End()
+
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	orgPkgPath := g.orgPkgPath(req.OrgType, req.OrgId)
 	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
@@ -1043,6 +1254,9 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 }
 
 func (g *gnoZenaoChain) VotePoll(userID string, req *zenaov1.VotePollRequest) error {
+	g, span := g.trace("gzchain.VotePoll")
+	defer span.End()
+
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 
 	msg := vm.MsgRun{
@@ -1107,7 +1321,34 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
+func (g *gnoZenaoChain) trace(label string) (*gnoZenaoChain, trace.Span) {
+	ctx, span := g.tracer.Start(
+		g.ctx,
+		label,
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	return g.withContext(ctx), span
+}
+
+func (g *gnoZenaoChain) call(msg vm.MsgCall) (*ctypes.ResultBroadcastTxCommit, error) {
+	g, span := g.trace(fmt.Sprintf("call %s.%s", msg.PkgPath, msg.Func))
+	defer span.End()
+
+	gasWanted, err := g.estimateCallTxGas(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msg))
+}
+
 func (g *gnoZenaoChain) estimateCallTxGas(msgs ...vm.MsgCall) (int64, error) {
+	g, span := g.trace("estimate call tx gas")
+	defer span.End()
+
 	cfg := gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
 		GasWanted: 300000000,
@@ -1127,7 +1368,25 @@ func (g *gnoZenaoChain) estimateCallTxGas(msgs ...vm.MsgCall) (int64, error) {
 	return int64(float64(gasWanted) + float64(gasWanted)*g.gasSecurityRate), nil
 }
 
+func (g *gnoZenaoChain) run(label string, msg vm.MsgRun) (*ctypes.ResultBroadcastTxCommit, error) {
+	g, span := g.trace(fmt.Sprintf("run %s", label))
+	defer span.End()
+
+	gasWanted, err := g.estimateRunTxGas(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "10000000ugnot",
+		GasWanted: gasWanted,
+	}, msg))
+}
+
 func (g *gnoZenaoChain) estimateRunTxGas(msgs ...vm.MsgRun) (int64, error) {
+	g, span := g.trace("estimate run tx gas")
+	defer span.End()
+
 	cfg := gnoclient.BaseTxCfg{
 		GasFee:    "10000000ugnot",
 		GasWanted: 300000000,
@@ -1604,6 +1863,7 @@ func init() {
 		StartDate: {{.req.StartDate}},
 		EndDate: {{.req.EndDate}},
 		Capacity: {{.req.Capacity}},
+		Discoverable: {{.req.Discoverable}},
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",

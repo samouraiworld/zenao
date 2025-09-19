@@ -5,6 +5,8 @@ import (
 	"errors"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
 
@@ -12,6 +14,14 @@ func (s *ZenaoServer) EnsureUserExists(
 	ctx context.Context,
 	user *zeni.AuthUser,
 ) (*zeni.User, error) {
+	spanCtx, span := otel.Tracer("zenao-server").Start(
+		ctx,
+		"zs.EnsureUserExists",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer span.End()
+	ctx = spanCtx
+
 	if user == nil {
 		return nil, errors.New("nil user")
 	}
@@ -24,7 +34,7 @@ func (s *ZenaoServer) EnsureUserExists(
 
 	var zUser *zeni.User
 	var alreadyExists bool
-	if err := s.DB.Tx(func(db zeni.DB) error {
+	if err := s.DB.TxWithSpan(ctx, "db.EnsureUserExists", func(db zeni.DB) error {
 		var err error
 		if zUser, err = db.GetUser(user.ID); err != nil {
 			return err
@@ -41,7 +51,7 @@ func (s *ZenaoServer) EnsureUserExists(
 	}
 
 	if !alreadyExists {
-		if err := s.Chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
+		if err := s.Chain.WithContext(ctx).CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
 			return nil, err
 		}
 	}
