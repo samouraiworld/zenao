@@ -229,18 +229,11 @@ func listEvents(from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	return listEventsInternal(&eventsByEndDate, false, fromKey, toKey, from > to, limit, offset)
 }
 
-func listEventsByOrganizer(organizerID string, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
+func listEventsByOrganizer(organizerID string, undiscoverablesOnly bool, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := organizerID + "/" + unixTimeKey(from) + "/"
 	toKey := organizerID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByOrganizer, false, fromKey, toKey, from > to, limit, offset)
-}
-
-func listEventsUndiscoverableByOrganizer(organizerID string, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
-	fromKey := organizerID + "/" + unixTimeKey(from) + "/"
-	toKey := organizerID + "/" + unixTimeKey(to) + "/"
-
-	return listEventsInternal(&eventsByOrganizer, true, fromKey, toKey, from > to, limit, offset)
+	return listEventsInternal(&eventsByOrganizer, undiscoverablesOnly, fromKey, toKey, from > to, limit, offset)
 }
 
 func listEventsByParticipant(participantID string, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {

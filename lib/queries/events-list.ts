@@ -116,7 +116,7 @@ export const eventsUndiscoverablesByOrganizerList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsUndiscoverableByOrganizer(${JSON.stringify(organizer)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, true, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
@@ -155,7 +155,7 @@ export const eventsByOrganizerList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, false, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
