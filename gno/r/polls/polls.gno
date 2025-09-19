@@ -32,7 +32,7 @@ type Poll struct {
 	authFunc func(string) bool
 }
 
-func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []string, authFunc func(string) bool) *Poll {
+func NewPoll(_ realm, question string, kind pollsv1.PollKind, duration int64, options []string, authFunc func(string) bool) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
@@ -75,7 +75,7 @@ func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []s
 	return poll
 }
 
-func Vote(pollID uint64, option string) {
+func Vote(_ realm, pollID uint64, option string) {
 	id := seqid.ID(pollID)
 	pollRaw, ok := polls.Get(id.String())
 	if !ok {

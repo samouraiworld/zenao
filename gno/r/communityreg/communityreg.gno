@@ -27,7 +27,7 @@ func init() {
 
 // XXX: split this package into communityreg and communitiesindex
 
-func Register(infoGetter communities.InfoGetter) {
+func Register(_ realm, infoGetter communities.InfoGetter) {
 	pkgPath := std.PreviousRealm().PkgPath()
 
 	if infoGetter == nil {
@@ -55,8 +55,8 @@ func mustGetInfo(pkgPath string) *zenaov1.CommunityInfo {
 	return info
 }
 
-func IndexCommunity(pkgPath string) {
-	Ownable.AssertCallerIsOwner()
+func IndexCommunity(_ realm, pkgPath string) {
+	Ownable.AssertOwnedByPrevious()
 
 	if exist := getCommunityByPkgPath(pkgPath); exist != nil {
 		panic("community already indexed: " + pkgPath)
@@ -66,8 +66,8 @@ func IndexCommunity(pkgPath string) {
 	communitiesByPkgPath.Set(pkgPath, info)
 }
 
-func AddMember(communityPkgPath string, memberID string) {
-	Ownable.AssertCallerIsOwner()
+func AddMember(_ realm, communityPkgPath string, memberID string) {
+	Ownable.AssertOwnedByPrevious()
 	mustGetCommunityByPkgPath(communityPkgPath)
 
 	key := memberID + "/" + communityPkgPath
@@ -76,8 +76,8 @@ func AddMember(communityPkgPath string, memberID string) {
 	communitiesByPkgPath.Set(communityPkgPath, info)
 }
 
-func RemoveMember(communityPkgPath string, memberID string) {
-	Ownable.AssertCallerIsOwner()
+func RemoveMember(_ realm, communityPkgPath string, memberID string) {
+	Ownable.AssertOwnedByPrevious()
 	mustGetCommunityByPkgPath(communityPkgPath)
 
 	key := memberID + "/" + communityPkgPath
@@ -86,15 +86,15 @@ func RemoveMember(communityPkgPath string, memberID string) {
 	communitiesByPkgPath.Set(communityPkgPath, info)
 }
 
-func AddEvent(communityPkgPath string, eventID string) {
-	Ownable.AssertCallerIsOwner()
+func AddEvent(_ realm, communityPkgPath string, eventID string) {
+	Ownable.AssertOwnedByPrevious()
 	mustGetCommunityByPkgPath(communityPkgPath)
 	key := eventID + "/" + communityPkgPath
 	communitiesByEvent.Set(key, communityPkgPath)
 }
 
-func RemoveEvent(communityPkgPath string, eventID string) {
-	Ownable.AssertCallerIsOwner()
+func RemoveEvent(_ realm, communityPkgPath string, eventID string) {
+	Ownable.AssertOwnedByPrevious()
 	mustGetCommunityByPkgPath(communityPkgPath)
 	key := eventID + "/" + communityPkgPath
 	communitiesByEvent.Remove(key)

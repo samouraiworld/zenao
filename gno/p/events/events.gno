@@ -15,7 +15,6 @@ import (
 	"gno.land/p/zenao/basedao"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
-	"gno.land/p/zenao/role_manager"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 
@@ -76,7 +75,7 @@ func NewEvent(conf *Config) *Event {
 		participationPubkey = participationPubkeyBz
 	}
 
-	roles := []role_manager.RoleInfo{
+	roles := []basedao.RoleInfo{
 		{
 			Name:        "zenao-admin",
 			Description: "Admin responsible for managing the DAO until it becomes self-custodial",
@@ -146,10 +145,10 @@ func NewEvent(conf *Config) *Event {
 
 	resources := []struct {
 		cond     daocond.Condition
-		handlers []daokit.MessageHandler
+		handlers []daokit.ActionHandler
 	}{{
 		cond: oneOrganizer,
-		handlers: []daokit.MessageHandler{
+		handlers: []daokit.ActionHandler{
 			event.addParticipantHandler(), // XXX: remove
 			event.removeParticipantHandler(),
 			event.addGatekeeperHandler(),
@@ -159,7 +158,7 @@ func NewEvent(conf *Config) *Event {
 		},
 	}, {
 		cond: daocond.Or(oneOrganizer, oneGatekeeper),
-		handlers: []daokit.MessageHandler{
+		handlers: []daokit.ActionHandler{
 			event.checkinHandler(),
 		},
 	}}
@@ -180,8 +179,8 @@ func (msg *MsgCancelEvent) String() string {
 	return "Cancel event"
 }
 
-func (e *Event) cancelEventHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgCancelEventKind, func(i interface{}) {
+func (e *Event) cancelEventHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(MsgCancelEventKind, func(i interface{}) {
 		if e.cancelled {
 			panic("event is already cancelled")
 		}
@@ -194,8 +193,8 @@ func (e *Event) cancelEventHandler() daokit.MessageHandler {
 	})
 }
 
-func NewCancelEventMsg() daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgCancelEventKind, &MsgCancelEvent{})
+func NewCancelEventMsg() daokit.Action {
+	return daokit.NewAction(MsgCancelEventKind, &MsgCancelEvent{})
 }
 
 const MsgAddParticipantKind = "gno.land/p/zenao/events.AddParticipant"
@@ -221,8 +220,8 @@ func (msg *MsgAddParticipant) String() string {
 }
 
 // XXX: move to Participate(), allow anyone to use this
-func (e *Event) addParticipantHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgAddParticipantKind, func(i interface{}) {
+func (e *Event) addParticipantHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(MsgAddParticipantKind, func(i interface{}) {
 		msg, ok := i.(*MsgAddParticipant)
 		if !ok {
 			panic(errors.New("invalid payload type"))
@@ -271,8 +270,8 @@ func (e *Event) addParticipantHandler() daokit.MessageHandler {
 	})
 }
 
-func NewAddParticipantMsg(participant string, ticketPubkey string, signature string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey, ParticipationSignature: signature})
+func NewAddParticipantMsg(participant string, ticketPubkey string, signature string) daokit.Action {
+	return daokit.NewAction(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey, ParticipationSignature: signature})
 }
 
 const MsgRemoveParticipantKind = "gno.land/p/zenao/events.RemoveParticipant"
@@ -287,8 +286,8 @@ func (msg *MsgRemoveParticipant) String() string {
 }
 
 // XXX: in future we should ensure that the participant voted yes, a condition that ensure the addr from the msg voted yes
-func (e *Event) removeParticipantHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgRemoveParticipantKind, func(i interface{}) {
+func (e *Event) removeParticipantHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(MsgRemoveParticipantKind, func(i interface{}) {
 		msg, ok := i.(*MsgRemoveParticipant)
 		if !ok {
 			panic(errors.New("invalid payload type"))
@@ -318,14 +317,14 @@ func (e *Event) removeParticipantHandler() daokit.MessageHandler {
 	})
 }
 
-func NewRemoveParticipantMsg(participant string, ticketPubkey string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgRemoveParticipantKind, &MsgRemoveParticipant{Participant: participant, TicketPubkey: ticketPubkey})
+func NewRemoveParticipantMsg(participant string, ticketPubkey string) daokit.Action {
+	return daokit.NewAction(MsgRemoveParticipantKind, &MsgRemoveParticipant{Participant: participant, TicketPubkey: ticketPubkey})
 }
 
 const MsgAddGatekeeperKind = "gno.land/p/zenao/events.AddGatekeeper"
 
-func (e *Event) addGatekeeperHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgAddGatekeeperKind, func(i interface{}) {
+func (e *Event) addGatekeeperHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(MsgAddGatekeeperKind, func(i interface{}) {
 		gatekeeper, ok := i.(string)
 		if !ok {
 			panic(errors.New("invalid payload type"))
@@ -341,14 +340,14 @@ func (e *Event) addGatekeeperHandler() daokit.MessageHandler {
 	})
 }
 
-func NewAddGatekeeperMsg(gatekeeper string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddGatekeeperKind, gatekeeper)
+func NewAddGatekeeperMsg(gatekeeper string) daokit.Action {
+	return daokit.NewAction(MsgAddGatekeeperKind, gatekeeper)
 }
 
 const MsgRemoveGatekeeperKind = "gno.land/p/zenao/events.RemoveGatekeeper"
 
-func (e *Event) removeGatekeeperHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgRemoveGatekeeperKind, func(i interface{}) {
+func (e *Event) removeGatekeeperHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(MsgRemoveGatekeeperKind, func(i interface{}) {
 		gatekeeper, ok := i.(string)
 		if !ok {
 			panic(errors.New("invalid payload type"))
@@ -367,8 +366,8 @@ func (e *Event) removeGatekeeperHandler() daokit.MessageHandler {
 	})
 }
 
-func NewRemoveGatekeeperMsg(gatekeeper string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgRemoveGatekeeperKind, gatekeeper)
+func NewRemoveGatekeeperMsg(gatekeeper string) daokit.Action {
+	return daokit.NewAction(MsgRemoveGatekeeperKind, gatekeeper)
 }
 
 const MsgCheckinKind = "gno.land/p/zenao/events.Checkin"
@@ -379,8 +378,8 @@ type MsgCheckin struct {
 	// XXX: add timestamp in payload to limit signature replay?
 }
 
-func (e *Event) checkinHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgCheckinKind, func(i interface{}) {
+func (e *Event) checkinHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(MsgCheckinKind, func(i interface{}) {
 		msg, ok := i.(*MsgCheckin)
 		if !ok {
 			panic("invalid payload type")
@@ -421,8 +420,8 @@ func (e *Event) checkinHandler() daokit.MessageHandler {
 	})
 }
 
-func NewCheckinMsg(ticketPubkey string, checkinSignature string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgCheckinKind, &MsgCheckin{
+func NewCheckinMsg(ticketPubkey string, checkinSignature string) daokit.Action {
+	return daokit.NewAction(MsgCheckinKind, &MsgCheckin{
 		TicketPubkey:     ticketPubkey,
 		CheckinSignature: checkinSignature,
 	})
@@ -434,8 +433,8 @@ func (e *Event) CountParticipants() uint32 {
 
 const MsgEditEventKind = "gno.land/p/zenao/events.EditEvent"
 
-func (e *Event) editEventHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgEditEventKind, func(i interface{}) {
+func (e *Event) editEventHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(MsgEditEventKind, func(i interface{}) {
 		msg, ok := i.(*msgEditEvent)
 		if !ok {
 			panic(errors.New("invalid payload type"))
@@ -450,13 +449,13 @@ func (e *Event) editEventHandler() daokit.MessageHandler {
 			e.updateEventUserRoles("gatekeeper", msg.gatekeepers)
 		}
 		if msg.title != "" {
-			e.setProfileString("DisplayName", msg.title)
+			e.setProfileString(cross, "DisplayName", msg.title)
 		}
 		if msg.description != "" {
-			e.setProfileString("Bio", msg.description)
+			e.setProfileString(cross, "Bio", msg.description)
 		}
 		if msg.imageURI != "" {
-			e.setProfileString("Avatar", msg.imageURI)
+			e.setProfileString(cross, "Avatar", msg.imageURI)
 		}
 		if msg.startDate != 0 {
 			e.startDate = msg.startDate
@@ -533,8 +532,8 @@ func (msg *msgEditEvent) String() string {
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(organizers []string, gatekeepers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, discoverable bool, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgEditEventKind, &msgEditEvent{
+func NewEditEventMsg(organizers []string, gatekeepers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, discoverable bool, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.Action {
+	return daokit.NewAction(MsgEditEventKind, &msgEditEvent{
 		organizers:   organizers,
 		gatekeepers:  gatekeepers,
 		title:        title,

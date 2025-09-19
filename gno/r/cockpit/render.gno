@@ -6,17 +6,16 @@ import (
 
 	"gno.land/p/demo/mux"
 	"gno.land/p/demo/ufmt"
-	"gno.land/p/demo/users"
 	"gno.land/p/moul/md"
 	"gno.land/r/demo/profile"
-	rusers "gno.land/r/demo/users"
+	rusers "gno.land/r/sys/users"
 )
 
 const (
 	chainId       = "test5"
 	pkgPath       = "r/zenao/cockpit"
 	userSlug      = "u"
-	usersRealm    = "r/demo/users"
+	usersRealm    = "r/gnoland/users/v1"
 	ghLinkHint    = "r/gnoland/ghverify?help&__func=RequestVerification"
 	ghProfileHint = "/r/demo/profile:u/"
 	gatewayDomain = "pinata.zenao.io"
@@ -35,10 +34,21 @@ func renderHome(res *mux.ResponseWriter, req *mux.Request) {
 	res.Write("# Cockpit\n\n")
 	res.Write("See `:" + userSlug + "/{addressOrName}`\n\n")
 	res.Write("Examples:\n")
-	elems := rusers.ListUsersByPrefix("", 20)
-	for _, elem := range elems {
-		res.Write("- [ " + elem + " ](./" + pkgPath + ":" + userSlug + "/@" + elem + ")\n")
-	}
+	elems := rusers.GetReadOnlyNameStore()
+	i := 0
+	elems.Iterate("", "", func(key string, value any) bool {
+		if i == 20 {
+			return true
+		}
+		elem := value.(*rusers.UserData)
+		if elem == nil {
+			return false
+		}
+		name := elem.Name()
+		res.Write("- [ " + name + " ](./" + pkgPath + ":" + userSlug + "/@" + name + ")\n")
+		i++
+		return false
+	})
 }
 
 func renderUser(res *mux.ResponseWriter, req *mux.Request) {
@@ -54,7 +64,7 @@ func renderUser(res *mux.ResponseWriter, req *mux.Request) {
 	res.Write(md.Image("Avatar", pfpURL(profile.GetStringField(addr, profile.Avatar, "Anon"))) + "\n")
 
 	if username != "" {
-		res.Write("- Username: [" + username + "](/" + usersRealm + ":" + username + ")\n")
+		res.Write("- Username: [" + username + "](/u/" + username + ")\n")
 	} else {
 		res.Write("- Username: [Not registered](/" + usersRealm + "?help&__func=Register)\n")
 	}
@@ -66,9 +76,9 @@ func renderUser(res *mux.ResponseWriter, req *mux.Request) {
 }
 
 func resolveUserBasics(aon string) (std.Address, string, bool) {
-	user := rusers.GetUserByAddressOrName(users.AddressOrName(aon))
-	if user != nil {
-		return user.Address, user.Name, true
+	user, ok := rusers.ResolveAny(aon)
+	if ok {
+		return user.Addr(), user.Name(), true
 	}
 
 	addr := std.Address(aon)

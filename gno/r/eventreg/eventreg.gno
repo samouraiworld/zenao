@@ -33,7 +33,7 @@ func init() {
 
 // XXX: split this package into eventreg and eventsindex
 
-func Register(infoGetter events.InfoGetter) {
+func Register(_ realm, infoGetter events.InfoGetter) {
 	pkgPath := std.PreviousRealm().PkgPath()
 
 	if infoGetter == nil {
@@ -64,8 +64,8 @@ func mustGetInfo(pkgPath string) *zenaov1.EventInfo {
 	return info
 }
 
-func IndexEvent(pkgPath string) {
-	Ownable.AssertCallerIsOwner()
+func IndexEvent(_ realm, pkgPath string) {
+	Ownable.AssertOwnedByPrevious()
 
 	if prev := getEventByPkgPath(pkgPath); prev != nil {
 		panic("already added")
@@ -83,8 +83,8 @@ func IndexEvent(pkgPath string) {
 	}
 }
 
-func UpdateIndex(pkgPath string) {
-	Ownable.AssertCallerIsOwner()
+func UpdateIndex(_ realm, pkgPath string) {
+	Ownable.AssertOwnedByPrevious()
 
 	prevInfo := mustGetEventByPkgPath(pkgPath)
 
@@ -133,8 +133,8 @@ func UpdateIndex(pkgPath string) {
 	}
 }
 
-func RemoveIndex(pkgPath string) {
-	Ownable.AssertCallerIsOwner()
+func RemoveIndex(_ realm, pkgPath string) {
+	Ownable.AssertOwnedByPrevious()
 
 	evt := mustGetEventByPkgPath(pkgPath)
 
@@ -160,8 +160,8 @@ func RemoveIndex(pkgPath string) {
 	})
 }
 
-func AddParticipant(eventPkgPath string, userID string) {
-	Ownable.AssertCallerIsOwner()
+func AddParticipant(_ realm, eventPkgPath string, userID string) {
+	Ownable.AssertOwnedByPrevious()
 
 	evt := mustGetEventByPkgPath(eventPkgPath)
 
@@ -175,8 +175,8 @@ func AddParticipant(eventPkgPath string, userID string) {
 	eventsByPkgPath.Set(eventPkgPath, info)
 }
 
-func RemoveParticipant(eventPkgPath string, userID string) {
-	Ownable.AssertCallerIsOwner()
+func RemoveParticipant(_ realm, eventPkgPath string, userID string) {
+	Ownable.AssertOwnedByPrevious()
 
 	evt := mustGetEventByPkgPath(eventPkgPath)
 
