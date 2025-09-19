@@ -19,7 +19,7 @@ import {
 } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import Text from "@/components/widgets/texts/text";
-import { CommunityFormSchemaType } from "@/types/schemas";
+import { CommunityFormSchemaType, communityFormSchema } from "@/types/schemas";
 import { cn } from "@/lib/tailwind";
 
 interface CommunityFormProps {
@@ -47,10 +47,13 @@ export const CommunityForm = ({
   const avatarUri = form.watch("avatarUri");
   const bannerUri = form.watch("bannerUri");
 
-  const lastAdminInput =
-    !adminInputs?.length || !adminInputs[adminInputs.length - 1]?.address;
-
-  const isButtonDisabled = !form.formState.isValid || lastAdminInput;
+  const lastAdmin = adminInputs?.[adminInputs.length - 1];
+  const isLastAdminInvalid =
+    !lastAdmin ||
+    !communityFormSchema.shape.administrators.element.shape.address.safeParse(
+      lastAdmin.address,
+    ).success;
+  const isButtonDisabled = !form.formState.isValid || isLastAdminInvalid;
 
   const t = useTranslations("community-edit-form");
 
@@ -157,7 +160,7 @@ export const CommunityForm = ({
                 type="button"
                 onClick={() => append({ address: "" })}
                 className="w-fit"
-                disabled={lastAdminInput}
+                disabled={isLastAdminInvalid}
               >
                 {t("add-admin")}
               </Button>
