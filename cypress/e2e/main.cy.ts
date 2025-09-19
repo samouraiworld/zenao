@@ -110,7 +110,7 @@ describe("main", () => {
     // check that manifesto text is present
     cy.get("p")
       .contains(
-        "commit ourselves to building sustainable tools that help people organize",
+        "commit ourselves to building sustainable tools that help people",
       )
       .should("be.visible");
   });
@@ -536,6 +536,32 @@ describe("main", () => {
 
     cy.get("button").contains("Events").click();
     cy.get("button").contains("Members").click();
+  });
+
+  it("cancel participation", () => {
+    cy.createEvent({ exclusive: false });
+
+    cy.url().then((url) => {
+      cy.visit(url);
+    });
+
+    // Participate to an event
+    cy.get("button").contains("Register").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
+
+    cy.get("button").contains("Cancel my participation").click();
+    cy.get('button[aria-label="cancel participation"').click();
+    cy.wait(2000);
+
+    toastShouldContain("Your participation has been cancelled");
+
+    // Participate again to an event (potential regression)
+    cy.get("button").contains("Register").click();
+    cy.get("h2")
+      .contains("You're in!", { timeout: 16000 })
+      .should("be.visible");
   });
 });
 

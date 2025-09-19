@@ -57,7 +57,6 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
             >
               <CommunityMemberCard
                 address={profile.address}
-                avatarUri={profile.avatarUri}
                 displayName={profile.displayName}
                 roles={["member"]}
               />

@@ -10,6 +10,7 @@ function UsersAvatarsPreview({ usersAddresses }: { usersAddresses: string[] }) {
           key={address}
           className="flex ring-2 ring-background/80"
           address={address}
+          size="sm"
         />
       ))}
     </div>

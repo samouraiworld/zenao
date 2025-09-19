@@ -7,6 +7,10 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
+import {
+  communitiesListByEvent,
+  DEFAULT_COMMUNITIES_LIMIT,
+} from "@/lib/queries/community";
 
 export default async function EditPage({
   params,
@@ -29,6 +33,9 @@ export default async function EditPage({
     notFound();
   }
 
+  queryClient.prefetchInfiniteQuery(
+    communitiesListByEvent(p.id, DEFAULT_COMMUNITIES_LIMIT),
+  );
   queryClient.prefetchQuery(eventGatekeepersEmails(p.id, getToken));
   queryClient.prefetchQuery(eventUserRoles(p.id, address));
 

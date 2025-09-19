@@ -40,17 +40,20 @@ export const useCreateEvent = () => {
           value = {};
       }
 
-      return await zenaoClient.createEvent(
+      const event = await zenaoClient.createEvent(
         {
           ...data,
           gatekeepers: data.gatekeepers.map((gatekeeper) => gatekeeper.email),
           location: { address: { case: data.location.kind, value } },
           password: exclusive && password ? password : "",
+          communityId: data.communityId || "",
         },
         {
           headers: { Authorization: "Bearer " + token },
         },
       );
+
+      return event;
     },
   });
 
@@ -111,6 +114,7 @@ export const useEditEvent = (getToken: GetToken) => {
           location: { address: { case: data.location.kind, value } },
           updatePassword: !exclusive || (!!password && password.length > 0),
           password: exclusive && password ? password : "",
+          communityId: data.communityId || "",
         },
         {
           headers: { Authorization: "Bearer " + token },
