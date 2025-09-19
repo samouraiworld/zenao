@@ -20,9 +20,13 @@ EVENT DETAILS:
 
 PLANNED DATES
 
+
+
 {{.EventStartDate}} → {{.EventEndDate}}
 
 ADDRESS
+
+
 
 {{.LocationText}}
 

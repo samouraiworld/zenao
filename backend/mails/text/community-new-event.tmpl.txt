@@ -18,9 +18,13 @@ EVENT DETAILS:
 
 DATE AND TIME
 
+
+
 From: {{.EventDate}} To: {{.EventEndDate}}
 
 SPONSORED BY
+
+
 
 {{.CommunityName}}
 
