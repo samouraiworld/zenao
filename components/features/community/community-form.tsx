@@ -69,12 +69,12 @@ export const CommunityForm = ({
             control={form.control}
             placeholder={t("upload-avatar")}
             tooltip={avatarUri ? <Text>{t("change-avatar")}</Text> : null}
-            className="w-40 h-40 overflow-hidden"
+            className="w-56 h-56 overflow-hidden"
           />
           <FormFieldImage
             name="bannerUri"
             control={form.control}
-            aspectRatio={1.9}
+            aspectRatio={2}
             placeholder={t("upload-banner")}
             tooltip={bannerUri ? <Text>{t("change-banner")}</Text> : null}
           />
