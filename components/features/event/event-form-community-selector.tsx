@@ -6,10 +6,10 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { Command as CommandPrimitive } from "cmdk";
-import { UseFormReturn } from "react-hook-form";
-import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import { UseFormReturn } from "react-hook-form";
 import {
   CommandGroup,
   CommandInput,
@@ -17,6 +17,8 @@ import {
   CommandList,
 } from "@/components/shadcn/command";
 
+import { Button } from "@/components/shadcn/button";
+import { FormField } from "@/components/shadcn/form";
 import Heading from "@/components/widgets/texts/heading";
 import {
   communitiesListByMember,
@@ -24,10 +26,8 @@ import {
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { userAddressOptions } from "@/lib/queries/user";
-import { EventFormSchemaType } from "@/types/schemas";
-import { FormField } from "@/components/shadcn/form";
-import { Button } from "@/components/shadcn/button";
 import { cn } from "@/lib/tailwind";
+import { EventFormSchemaType } from "@/types/schemas";
 
 export default function EventFormCommunitySelector({
   form,
@@ -124,7 +124,7 @@ export default function EventFormCommunitySelector({
 
   return (
     <div className="flex flex-col gap-4">
-      <Heading level={3}>Link event to one your community (optional)</Heading>
+      <Heading level={3}>{t("community-selector-label")}</Heading>
 
       <FormField
         control={form.control}
@@ -158,7 +158,9 @@ export default function EventFormCommunitySelector({
                     }}
                   >
                     <XIcon className="h-3 w-3" />
-                    <span className="sr-only">Clear</span>
+                    <span className="sr-only">
+                      {t("community-selector-clear")}
+                    </span>
                   </Button>
                 )}
               </div>
