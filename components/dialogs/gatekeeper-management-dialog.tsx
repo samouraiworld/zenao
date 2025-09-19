@@ -4,6 +4,8 @@ import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { captureException } from "@sentry/nextjs";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -36,6 +38,11 @@ import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
 import { useToast } from "@/hooks/use-toast";
+import {
+  communitiesListByEvent,
+  communityIdFromPkgPath,
+  DEFAULT_COMMUNITIES_LIMIT,
+} from "@/lib/queries/community";
 
 function GatekeeperManagementForm({
   form,
@@ -139,6 +146,19 @@ export function GatekeeperManagementDialog({
   const isStandalone = useMediaQuery("(display-mode: standalone)");
   const t = useTranslations("gatekeeper-management-dialog");
 
+  const { data: communitiesPages } = useSuspenseInfiniteQuery(
+    communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
+  );
+  const communities = useMemo(
+    () => communitiesPages.pages.flat(),
+    [communitiesPages],
+  );
+
+  const communityId =
+    communities.length > 0
+      ? communityIdFromPkgPath(communities[0].pkgPath)
+      : null;
+
   const location = makeLocationFromEvent(eventInfo.location);
   const defaultValues: EventFormSchemaType = {
     ...eventInfo,
@@ -148,6 +168,7 @@ export function GatekeeperManagementDialog({
     })),
     exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
     password: "",
+    communityId: communityId || null,
   };
 
   const form = useForm<EventFormSchemaType>({

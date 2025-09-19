@@ -1,9 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
@@ -17,6 +20,11 @@ import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
 import { captureException } from "@/lib/report";
 import { eventFormSchema, EventFormSchemaType } from "@/types/schemas";
+import {
+  communitiesListByEvent,
+  communityIdFromPkgPath,
+  DEFAULT_COMMUNITIES_LIMIT,
+} from "@/lib/queries/community";
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
@@ -29,7 +37,21 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     eventGatekeepersEmails(id, getToken),
   );
 
+  const { data: communitiesPages } = useSuspenseInfiniteQuery(
+    communitiesListByEvent(id, DEFAULT_COMMUNITIES_LIMIT),
+  );
+  const communities = useMemo(
+    () => communitiesPages.pages.flat(),
+    [communitiesPages],
+  );
+
+  const communityId =
+    communities.length > 0
+      ? communityIdFromPkgPath(communities[0].pkgPath)
+      : null;
+
   const isOrganizer = roles.includes("organizer");
+
   const router = useRouter();
 
   // Correctly reconstruct location object
@@ -42,6 +64,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
     })),
     exclusive: data.privacy?.eventPrivacy.case === "guarded",
     password: "",
+    communityId: communityId || null,
   };
 
   const form = useForm<EventFormSchemaType>({
@@ -70,7 +93,10 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
 
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
-      await editEvent({ ...values, eventId: id });
+      await editEvent({
+        ...values,
+        eventId: id,
+      });
       toast({
         title: t("toast-edit-success"),
       });

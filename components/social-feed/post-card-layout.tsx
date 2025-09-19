@@ -63,6 +63,7 @@ export function PostCardLayout({
             <UserAvatar
               className="flex ring-2 ring-background/80 cursor-pointer hover:scale-110 transition-transform ease-out"
               address={post.post.author}
+              size="sm"
             />
           </Link>
 
