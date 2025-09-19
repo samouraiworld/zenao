@@ -913,6 +913,27 @@ func (g *gormZenaoDB) EditCommunity(communityID string, administratorsIDs []stri
 		return nil, err
 	}
 
+	// NOTE: Administrators are also members of the community (members is like a base role for entity of user type)
+	// Main reason for this is to simplify the registry as a simple list of members, without having to deal with roles.
+	for _, adminID := range administratorsIDs {
+		adminIDInt, err := strconv.ParseUint(adminID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse admin id: %w", err)
+		}
+
+		entityRole := &EntityRole{
+			EntityType: zeni.EntityTypeUser,
+			EntityID:   uint(adminIDInt),
+			OrgType:    zeni.EntityTypeCommunity,
+			OrgID:      uint(cmtIDInt),
+			Role:       zeni.RoleMember,
+		}
+
+		if err := g.db.Save(entityRole).Error; err != nil {
+			return nil, fmt.Errorf("create member role assignment in db: %w", err)
+		}
+	}
+
 	if err := g.db.Model(&Community{}).Where("id = ?", cmtIDInt).Updates(cmt).Error; err != nil {
 		return nil, fmt.Errorf("update community in db: %w", err)
 	}
