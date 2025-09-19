@@ -28,11 +28,11 @@ interface CommunityFormProps {
   isLoading: boolean;
 }
 
-export const CommunityForm: React.FC<CommunityFormProps> = ({
+export const CommunityForm = ({
   form,
   onSubmit,
   isLoading,
-}) => {
+}: CommunityFormProps) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "administrators",
@@ -51,6 +51,7 @@ export const CommunityForm: React.FC<CommunityFormProps> = ({
     !adminInputs?.length || !adminInputs[adminInputs.length - 1]?.address;
 
   const isButtonDisabled = !form.formState.isValid || lastAdminInput;
+
   const t = useTranslations("community-edit-form");
 
   return (

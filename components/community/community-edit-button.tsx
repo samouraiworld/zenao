@@ -7,8 +7,10 @@ import { useTranslations } from "next-intl";
 import { zenaoClient } from "@/lib/zenao-client";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 
-export const CommunityEditAdminButton: React.FC<{ communityId: string }> = ({
+export const CommunityEditAdminButton = ({
   communityId,
+}: {
+  communityId: string;
 }) => {
   const t = useTranslations("community-edit-form");
   const { userId, getToken } = useAuth();

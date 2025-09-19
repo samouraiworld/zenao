@@ -15,9 +15,11 @@ import { CommunityForm } from "@/components/features/community/community-form";
 import { communityFormSchema, CommunityFormSchemaType } from "@/types/schemas";
 import { zenaoClient } from "@/lib/zenao-client";
 
-export const EditCommunityForm: React.FC<{ communityId: string }> = ({
-  communityId,
-}) => {
+interface EditCommunityFormProps {
+  communityId: string;
+}
+
+export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
   const { getToken } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
