@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { zenaoClient } from "@/lib/zenao-client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { communityAdministratorsQuery } from "@/lib/queries/community";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 
 export const CommunityEditAdminButton = ({
@@ -13,37 +13,16 @@ export const CommunityEditAdminButton = ({
   communityId: string;
 }) => {
   const t = useTranslations("community-edit-form");
-  const { userId, getToken } = useAuth();
+  const { getToken } = useAuth();
   const { user } = useUser();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [checked, setChecked] = useState(false);
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const token = await getToken();
-        const email = user?.emailAddresses[0]?.emailAddress;
+  const { data: administrators } = useSuspenseQuery(
+    communityAdministratorsQuery(getToken, communityId),
+  );
+  const email = user?.emailAddresses[0]?.emailAddress;
+  const isAdmin = email && administrators.includes(email);
 
-        if (!token || !userId || !email) return;
-
-        const res = await zenaoClient.getCommunityAdministrators(
-          { communityId },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-
-        if (res.administrators.includes(email)) {
-          setIsAdmin(true);
-        }
-      } catch (err) {
-        console.error("Failed to check admin status", err);
-      } finally {
-        setChecked(true);
-      }
-    };
-    checkAdmin();
-  }, [communityId, getToken, userId, user]);
-
-  if (!checked || !isAdmin) return null;
+  if (!isAdmin) return null;
 
   return (
     <div className="mt-4">
