@@ -234,8 +234,7 @@ export const communityAdministratorsQuery = (
         );
 
         return res.administrators;
-      } catch (error) {
-        console.error("failed to fetch administrators", error);
+      } catch (_) {
         return [];
       }
     },
