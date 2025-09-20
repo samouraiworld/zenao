@@ -224,12 +224,15 @@ export const communityAdministratorsQuery = (
     queryKey: ["community-admins", communityId],
     queryFn: async () => {
       const token = await getToken();
+
       if (!token) throw new Error("invalid clerk token");
+
       try {
         const res = await zenaoClient.getCommunityAdministrators(
           { communityId },
           { headers: { Authorization: "Bearer " + token } },
         );
+
         return res.administrators;
       } catch (error) {
         console.error("failed to fetch administrators", error);
