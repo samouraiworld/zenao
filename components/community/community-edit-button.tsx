@@ -1,11 +1,12 @@
 "use client";
 
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { communityAdministratorsQuery } from "@/lib/queries/community";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
+import { communityUserRoles } from "@/lib/queries/community";
+import { userAddressOptions } from "@/lib/queries/user";
 
 export const CommunityEditAdminButton = ({
   communityId,
@@ -13,17 +14,15 @@ export const CommunityEditAdminButton = ({
   communityId: string;
 }) => {
   const t = useTranslations("community-edit-form");
-  const { getToken } = useAuth();
-  const { user } = useUser();
-
-  const { data: administrators } = useSuspenseQuery(
-    communityAdministratorsQuery(getToken, communityId),
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
   );
-  const email = user?.emailAddresses[0]?.emailAddress;
-  const isAdmin = email && administrators.includes(email);
-
+  const { data: userRoles = [] } = useSuspenseQuery(
+    communityUserRoles(communityId, userAddress),
+  );
+  const isAdmin = userRoles.includes("administrator");
   if (!isAdmin) return null;
-
   return (
     <div className="mt-4">
       <Link passHref href={`/community/edit/${communityId}`}>
