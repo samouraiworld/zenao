@@ -86,6 +86,7 @@ func (s *ZenaoServer) EditEvent(
 		participants []*zeni.User
 		targetIDs    = make(map[string]bool)
 		cmt          *zeni.Community
+		newCmt       *zeni.Community
 		evt          *zeni.Event
 	)
 	if err := s.DB.TxWithSpan(ctx, "db.EditEvent", func(db zeni.DB) error {
@@ -108,6 +109,10 @@ func (s *ZenaoServer) EditEvent(
 		}
 
 		if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) {
+			newCmt, err = db.GetCommunity(req.Msg.CommunityId)
+			if err != nil {
+				return err
+			}
 			entityRoles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
 			if err != nil {
 				return err
@@ -149,8 +154,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) &&
-		time.Now().Add(24*time.Hour).Before(evt.StartDate) && s.MailClient != nil {
+	if newCmt != nil && time.Now().Add(24*time.Hour).Before(evt.StartDate) && s.MailClient != nil {
 		participantsIDS := make(map[string]bool)
 		for _, participant := range participants {
 			participantsIDS[participant.ID] = true
@@ -167,7 +171,7 @@ func (s *ZenaoServer) EditEvent(
 			return nil, err
 		}
 
-		htmlStr, text, err := communityNewEventMailContent(evt, cmt)
+		htmlStr, text, err := communityNewEventMailContent(evt, newCmt)
 		if err != nil {
 			return nil, err
 		}
@@ -181,7 +185,7 @@ func (s *ZenaoServer) EditEvent(
 			requests = append(requests, &resend.SendEmailRequest{
 				From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
 				To:      []string{authTarget.Email},
-				Subject: "New event by " + cmt.DisplayName + "!",
+				Subject: "New event by " + newCmt.DisplayName + "!",
 				Html:    htmlStr,
 				Text:    text,
 			})
@@ -215,14 +219,14 @@ func (s *ZenaoServer) EditEvent(
 		}
 	}
 
-	if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
+	if newCmt != nil {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, newCmt.ID, req.Msg.EventId); err != nil {
 			return nil, err
 		}
 
 		for _, participant := range participants {
 			if !targetIDs[participant.ID] {
-				if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, req.Msg.CommunityId, participant.ID); err != nil {
+				if err := s.Chain.WithContext(ctx).AddMemberToCommunity(newCmt.CreatorID, req.Msg.CommunityId, participant.ID); err != nil {
 					s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-id", participant.ID))
 					return nil, err
 				}
