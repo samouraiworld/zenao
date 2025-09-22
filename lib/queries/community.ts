@@ -7,7 +7,9 @@ import {
 } from "@tanstack/react-query";
 import { fromJson } from "@bufbuild/protobuf";
 import { z } from "zod";
-import { extractGnoJSONResponse } from "../gno";
+import { GetToken } from "@clerk/types";
+import { derivePkgAddr, extractGnoJSONResponse } from "../gno";
+import { zenaoClient } from "@/lib/zenao-client";
 import {
   CommunityInfo,
   CommunityInfoJson,
@@ -98,6 +100,63 @@ export const communitiesList = (
   });
 };
 
+export const communitiesListByMember = (
+  memberAddress: string | null,
+  limit: number,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CommunityInfo[],
+      Error,
+      InfiniteData<CommunityInfo[]>,
+      (string | number)[],
+      number // pageParam type
+    >,
+    | "queryKey"
+    | "queryFn"
+    | "getNextPageParam"
+    | "initialPageParam"
+    | "getPreviousPageParam"
+  >,
+) => {
+  const limitInt = Math.floor(limit);
+
+  return infiniteQueryOptions({
+    initialPageParam: 0,
+    queryKey: ["communitiesByMember", memberAddress ?? "", limitInt],
+    enabled: !!memberAddress,
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!memberAddress) {
+        return [] as CommunityInfo[];
+      }
+
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/communityreg`,
+        `communitiesToJSON(listCommunitiesByMembers(${JSON.stringify(memberAddress)}, ${limitInt}, ${pageParam * limitInt}))`,
+      );
+      const raw = extractGnoJSONResponse(res);
+      const json = communitiesListFromJson(raw);
+
+      return json;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
+    },
+    ...options,
+  });
+};
+
 export const communityUserRoles = (
   communityId: string | null,
   userAddress: string | null,
@@ -156,3 +215,81 @@ export function communityIdFromPkgPath(pkgPath: string): string {
   const res = /(c\d+)$/.exec(pkgPath);
   return res?.[1].substring(1) || "";
 }
+
+export const communityAdministratorsQuery = (
+  getToken: GetToken,
+  communityId: string,
+) =>
+  queryOptions({
+    queryKey: ["community-admins", communityId],
+    queryFn: async () => {
+      const token = await getToken();
+
+      if (!token) throw new Error("invalid clerk token");
+
+      try {
+        const res = await zenaoClient.getCommunityAdministrators(
+          { communityId },
+          { headers: { Authorization: "Bearer " + token } },
+        );
+
+        return res.administrators;
+      } catch (_) {
+        return [];
+      }
+    },
+  });
+
+export const communitiesListByEvent = (
+  id: string,
+  limit: number,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CommunityInfo[],
+      Error,
+      InfiniteData<CommunityInfo[]>,
+      (string | number)[],
+      number // pageParam type
+    >,
+    | "queryKey"
+    | "queryFn"
+    | "getNextPageParam"
+    | "initialPageParam"
+    | "getPreviousPageParam"
+  >,
+) => {
+  const limitInt = Math.floor(limit);
+
+  return infiniteQueryOptions({
+    initialPageParam: 0,
+    queryKey: ["communitiesByEvent", id, limitInt],
+    queryFn: async ({ pageParam = 0 }) => {
+      const client = new GnoJSONRPCProvider(
+        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      );
+      const pkgPath = `gno.land/r/zenao/events/e${id}`;
+      const eventAddr = derivePkgAddr(pkgPath);
+      const res = await client.evaluateExpression(
+        `gno.land/r/zenao/communityreg`,
+        `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(eventAddr)}, ${limitInt}, ${pageParam * limitInt}))`,
+      );
+      const raw = extractGnoJSONResponse(res);
+      const json = communitiesListFromJson(raw);
+
+      return json;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
+    },
+    ...options,
+  });
+};

@@ -5,13 +5,13 @@ import {
   Container,
   Head,
   Html,
-  Img,
   Preview,
   Row,
   Section,
   Text,
 } from "@react-email/components";
 import React from "react";
+import { EmailEventImg } from "./email-event-img";
 
 // To generate an example: make generate && go run ./backend mail > event-edited.html
 
@@ -21,12 +21,7 @@ export const EventBroadcastMessageEmail = () => (
     <Body style={main}>
       <Preview>Message from organizer of {"{{.EventName}}"}</Preview>
       <Container style={container}>
-        <Img
-          alt="Event image"
-          src="{{.ImageURL}}"
-          width={960}
-          height={540}
-        />
+        <EmailEventImg src="{{.ImageURL}}" />
         <Section style={welcome.section}>
           <Text style={welcome.text}>Message from {"{{.EventName}}"}</Text>
         </Section>
@@ -70,8 +65,7 @@ const main = {
 
 const container = {
   margin: "10px auto",
-  width: "600px",
-  maxWidth: "100%",
+  maxWidth: 800,
   border: "1px solid #F5F5F5",
 };
 
@@ -80,6 +74,7 @@ const welcome = {
     padding: "48px 20px",
     height: 220,
     backgroundColor: "#000000",
+    wordBreak: "break-word",
   },
   text: {
     color: "#FFFFFF",

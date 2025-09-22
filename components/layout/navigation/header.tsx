@@ -264,6 +264,7 @@ const Auth = ({
                   <UserAvatar
                     address={userAddress}
                     className={avatarClassName}
+                    size="sm"
                   />
                 </div>
               </SignedIn>

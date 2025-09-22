@@ -2,6 +2,7 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { cva } from "class-variance-authority";
 import { profileOptions } from "@/lib/queries/profile";
 import { cn } from "@/lib/tailwind";
 import { Web3Image } from "@/components/widgets/images/web3-image";
@@ -12,6 +13,7 @@ import Text from "@/components/widgets/texts/text";
 interface UserComponentProps {
   address: string | null | undefined;
   className?: string;
+  size?: "sm" | "md" | "lg";
 }
 
 /*
@@ -19,12 +21,29 @@ XXX: these classnames (rounded-full, overflow-hidden) are already set in the sha
 but the class merging does not seem to work so we need to reset them here
 */
 
-const avatarClassName = "w-6 h-6 rounded-full overflow-hidden inline-block";
+const avatarClassName = cva("rounded-full overflow-hidden inline-block", {
+  variants: {
+    size: {
+      sm: "w-6 h-6",
+      md: `w-12 h-12`,
+      lg: "w-24 h-24",
+    },
+  },
+  defaultVariants: { size: "sm" },
+});
 
-export function UserAvatar({ address, className }: UserComponentProps) {
+export function UserAvatar({
+  address,
+  className,
+  size = "sm",
+}: UserComponentProps) {
   const { data: profile } = useSuspenseQuery(profileOptions(address));
+
+  const imgSize = size === "sm" ? 24 : size === "md" ? 48 : 96;
+  const imgQuality = size === "sm" ? 60 : size === "md" ? 80 : 90;
+
   return (
-    <Avatar className={cn(avatarClassName, className)}>
+    <Avatar className={cn(avatarClassName({ size }), className)}>
       <AvatarFallback>
         <Web3Image
           src={
@@ -32,9 +51,9 @@ export function UserAvatar({ address, className }: UserComponentProps) {
               ? profile.avatarUri
               : undefined) ?? "/zenao-profile.png"
           }
-          width={45}
-          height={45}
-          quality={60}
+          width={imgSize}
+          height={imgSize}
+          quality={imgQuality}
           alt="Avatar"
           className="w-full h-full object-cover"
         />
@@ -51,12 +70,16 @@ export function UserAvatarWithName({
   address,
   className,
   linkToProfile,
-}: UserComponentProps & { linkToProfile?: boolean }) {
+  size = "sm",
+}: UserComponentProps & {
+  linkToProfile?: boolean;
+  size?: "sm" | "md" | "lg";
+}) {
   const { data: profile } = useSuspenseQuery(profileOptions(address));
 
   const content = (
     <div className="flex flex-row gap-2 items-center">
-      <UserAvatar address={profile?.address} />
+      <UserAvatar address={profile?.address} size={size} />
       <Text size="sm">{profile?.displayName}</Text>
     </div>
   );
