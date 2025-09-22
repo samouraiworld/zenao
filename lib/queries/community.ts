@@ -7,7 +7,9 @@ import {
 } from "@tanstack/react-query";
 import { fromJson } from "@bufbuild/protobuf";
 import { z } from "zod";
+import { GetToken } from "@clerk/types";
 import { derivePkgAddr, extractGnoJSONResponse } from "../gno";
+import { zenaoClient } from "@/lib/zenao-client";
 import {
   CommunityInfo,
   CommunityInfoJson,
@@ -213,6 +215,30 @@ export function communityIdFromPkgPath(pkgPath: string): string {
   const res = /(c\d+)$/.exec(pkgPath);
   return res?.[1].substring(1) || "";
 }
+
+export const communityAdministratorsQuery = (
+  getToken: GetToken,
+  communityId: string,
+) =>
+  queryOptions({
+    queryKey: ["community-admins", communityId],
+    queryFn: async () => {
+      const token = await getToken();
+
+      if (!token) throw new Error("invalid clerk token");
+
+      try {
+        const res = await zenaoClient.getCommunityAdministrators(
+          { communityId },
+          { headers: { Authorization: "Bearer " + token } },
+        );
+
+        return res.administrators;
+      } catch (_) {
+        return [];
+      }
+    },
+  });
 
 export const communitiesListByEvent = (
   id: string,
