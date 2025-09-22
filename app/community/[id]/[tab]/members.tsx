@@ -10,8 +10,8 @@ import {
 import Heading from "@/components/widgets/texts/heading";
 import CommunityMemberCard from "@/components/user/community-member-card";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
-import EmptyList from "@/components/widgets/lists/empty-list";
 import { communityUsersWithRoles } from "@/lib/queries/community";
+import EmptyList from "@/components/widgets/lists/empty-list";
 
 type CommunityMembersProps = {
   communityId: string;
