@@ -10,8 +10,8 @@ import {
 import Heading from "@/components/widgets/texts/heading";
 import CommunityMemberCard from "@/components/user/community-member-card";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
-import { communityUsersWithRoles } from "@/lib/queries/community";
 import EmptyList from "@/components/widgets/lists/empty-list";
+import { communityUsersWithRoles } from "@/lib/queries/community";
 
 type CommunityMembersProps = {
   communityId: string;
@@ -19,12 +19,12 @@ type CommunityMembersProps = {
 
 function CommunityMembers({ communityId }: CommunityMembersProps) {
   const t = useTranslations("");
-  const { data: membersAddresses } = useSuspenseQuery(
-    communityUsersWithRoles(communityId, ["member"]),
+  const { data: members = [] } = useSuspenseQuery(
+    communityUsersWithRoles(communityId, ["member", "administrator"]),
   );
 
   const membersProfiles = useSuspenseQueries({
-    queries: membersAddresses.map((m) => profileOptions(m.address)),
+    queries: members.map((m) => profileOptions(m.address)),
     combine: (results) =>
       results
         .filter(
@@ -34,13 +34,18 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
         .map((elem) => elem.data),
   });
 
+  const membersWithRoles = membersProfiles.map((profile, idx) => ({
+    ...profile,
+    roles: members[idx].roles,
+  }));
+
   return (
     <div className="space-y-8">
       <Heading level={2} size="lg">
-        {membersProfiles.length} {t("community.members")}
+        {membersWithRoles.length} {t("community.members")}
       </Heading>
 
-      {membersProfiles.length === 0 ? (
+      {membersWithRoles.length === 0 ? (
         <div className="space-y-4">
           <EmptyList
             title={t("no-members-title")}
@@ -49,16 +54,16 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
         </div>
       ) : (
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-          {membersProfiles.map((profile) => (
+          {membersWithRoles.map((member) => (
             <Link
-              key={profile.address}
-              href={`/profile/${profile.address}`}
+              key={member.address}
+              href={`/profile/${member.address}`}
               className="block"
             >
               <CommunityMemberCard
-                address={profile.address}
-                displayName={profile.displayName}
-                roles={["member"]}
+                address={member.address}
+                displayName={member.displayName}
+                roles={member.roles}
               />
             </Link>
           ))}
