@@ -224,12 +224,17 @@ func (s *ZenaoServer) EditEvent(
 			return nil, err
 		}
 
+		// Use context.Background() since this operation can take some time
+		// and we don't want to block the main operation of editing the event
+		newMembers := make([]string, 0, len(participants))
 		for _, participant := range participants {
 			if !targetIDs[participant.ID] {
-				if err := s.Chain.WithContext(ctx).AddMemberToCommunity(newCmt.CreatorID, req.Msg.CommunityId, participant.ID); err != nil {
-					s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-id", participant.ID))
-					return nil, err
-				}
+				newMembers = append(newMembers, participant.ID)
+			}
+		}
+		if len(newMembers) > 0 {
+			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(newCmt.CreatorID, newCmt.ID, newMembers); err != nil {
+				s.Logger.Error("add-members-to-community", zap.String("community-id", newCmt.ID), zap.Strings("new-members", newMembers), zap.Error(err))
 			}
 		}
 	}

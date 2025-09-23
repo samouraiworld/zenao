@@ -100,6 +100,10 @@ func NewCommunity(conf *Config) *Community {
 		},
 		{
 			Condition: oneAdmin,
+			Handler:   community.addMembersHandler(),
+		},
+		{
+			Condition: oneAdmin,
 			Handler:   community.removeMemberHandler(),
 		},
 		{
@@ -227,6 +231,48 @@ func (c *Community) addMemberHandler() daokit.MessageHandler {
 func NewAddMemberMsg(address string) daokit.ExecutableMessage {
 	return daokit.NewMessage(MsgAddMemberKind, &MsgAddMember{
 		address: address,
+	})
+}
+
+const MsgAddMembersKind = "gno.land/p/zenao/communities.AddMembers"
+
+type MsgAddMembers struct {
+	addresses []string
+}
+
+func (msg *MsgAddMembers) String() string {
+	s := "Add members to community:\n"
+	for _, addr := range msg.addresses {
+		s += "- " + addr + "\n"
+	}
+	return s
+}
+
+// NOTE: skip members that are already part of the community
+func (c *Community) addMembersHandler() daokit.MessageHandler {
+	return daokit.NewMessageHandler(MsgAddMembersKind, func(i interface{}) {
+		msg, ok := i.(*MsgAddMembers)
+		if !ok {
+			panic("invalid payload type")
+		}
+
+		for _, addr := range msg.addresses {
+			if c.DAOPrivate.Members.HasRole(addr, "member") {
+				continue
+			}
+
+			if c.DAOPrivate.Members.CountMemberRoles(addr) > 0 {
+				c.DAOPrivate.Members.AddRoleToMember(addr, "member")
+			} else {
+				c.DAOPrivate.Members.AddMember(addr, []string{"member"})
+			}
+		}
+	})
+}
+
+func NewAddMembersMsg(addresses []string) daokit.ExecutableMessage {
+	return daokit.NewMessage(MsgAddMembersKind, &MsgAddMembers{
+		addresses: addresses,
 	})
 }
 

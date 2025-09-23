@@ -775,7 +775,14 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			}},
 		},
 	}
-	broadcastRes, err := g.run("add member to community", msgRun)
+	gasWanted, err := g.estimateRunTxGas(msgRun)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgRun))
 	if err != nil {
 		return err
 	}
@@ -790,11 +797,75 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			userAddr,
 		},
 	}
-	broadcastRes, err = g.call(msgCall)
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
 	if err != nil {
 		return err
 	}
 	g.logger.Info("indexed member in community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
+// AddMembersToCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID string, userIDs []string) error {
+	g, span := g.trace("gzchain.AddMembersToCommunity")
+	defer span.End()
+
+	callerPkgPath := g.userRealmPkgPath(callerID)
+	communityPkgPath := g.communityPkgPath(communityID)
+	userAddrs := mapsl.Map(userIDs, g.UserAddress)
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath, userAddrs),
+			}},
+		},
+	}
+	gasWanted, err := g.estimateRunTxGas(msgRun)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgRun))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("added members to community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	msgCall := vm.MsgCall{
+		Caller:  g.signerInfo.GetAddress(),
+		PkgPath: g.communitiesIndexPkgPath,
+		Func:    "AddMembers",
+		Args: []string{
+			communityPkgPath,
+			stringSliceLit(userAddrs),
+		},
+	}
+	gasWanted, err = g.estimateCallTxGas(msgCall)
+	if err != nil {
+		return err
+	}
+	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+		GasFee:    "1000000ugnot",
+		GasWanted: gasWanted,
+	}, msgCall))
+	if err != nil {
+		return err
+	}
+	g.logger.Info("indexed members in community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -1752,6 +1823,28 @@ func genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr
 		})
 	}
 `, callerPkgPath, communityPkgPath, "Add member in community "+communityPkgPath, memberAddr)
+}
+
+func genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath string, membersAddr []string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		community %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/communities"
+	)
+		
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+				Title: "Add Members",
+				Message: communities.NewAddMembersMsg(%s),
+			}),
+		})
+	}
+`, callerPkgPath, communityPkgPath, "Add members in community "+communityPkgPath, stringSliceLit(membersAddr))
 }
 
 func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
