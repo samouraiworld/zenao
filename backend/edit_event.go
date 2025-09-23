@@ -224,8 +224,6 @@ func (s *ZenaoServer) EditEvent(
 			return nil, err
 		}
 
-		// Use context.Background() since this operation can take some time
-		// and we don't want to block the main operation of editing the event
 		newMembers := make([]string, 0, len(participants))
 		for _, participant := range participants {
 			if !targetIDs[participant.ID] {
