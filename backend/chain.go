@@ -845,25 +845,27 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 	}
 	g.logger.Info("added members to community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
-	msgCall := vm.MsgCall{
-		Caller:  g.signerInfo.GetAddress(),
-		PkgPath: g.communitiesIndexPkgPath,
-		Func:    "AddMembers",
-		Args: []string{
-			communityPkgPath,
-			stringSliceLit(userAddrs),
-		},
-	}
-	gasWanted, err = g.estimateCallTxGas(msgCall)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgCall))
-	if err != nil {
-		return err
+	for _, userAddr := range userAddrs {
+		msgCall := vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: g.communitiesIndexPkgPath,
+			Func:    "AddMember",
+			Args: []string{
+				communityPkgPath,
+				userAddr,
+			},
+		}
+		gasWanted, err = g.estimateCallTxGas(msgCall)
+		if err != nil {
+			return err
+		}
+		broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
+			GasFee:    "1000000ugnot",
+			GasWanted: gasWanted,
+		}, msgCall))
+		if err != nil {
+			return err
+		}
 	}
 	g.logger.Info("indexed members in community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 

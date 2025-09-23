@@ -76,18 +76,6 @@ func AddMember(communityPkgPath string, memberID string) {
 	communitiesByPkgPath.Set(communityPkgPath, info)
 }
 
-func AddMembers(communityPkgPath string, memberIDs []string) {
-	Ownable.AssertCallerIsOwner()
-	mustGetCommunityByPkgPath(communityPkgPath)
-
-	for _, memberID := range memberIDs {
-		key := memberID + "/" + communityPkgPath
-		communityesByMembers.Set(key, communityPkgPath)
-	}
-	info := mustGetInfo(communityPkgPath)
-	communitiesByPkgPath.Set(communityPkgPath, info)
-}
-
 func RemoveMember(communityPkgPath string, memberID string) {
 	Ownable.AssertCallerIsOwner()
 	mustGetCommunityByPkgPath(communityPkgPath)
