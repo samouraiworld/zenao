@@ -775,14 +775,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			}},
 		},
 	}
-	gasWanted, err := g.estimateRunTxGas(msgRun)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgRun))
+	broadcastRes, err := g.run("add member to community", msgRun)
 	if err != nil {
 		return err
 	}
@@ -797,14 +790,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			userAddr,
 		},
 	}
-	gasWanted, err = g.estimateCallTxGas(msgCall)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgCall))
+	broadcastRes, err = g.call(msgCall)
 	if err != nil {
 		return err
 	}
@@ -832,14 +818,7 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 			}},
 		},
 	}
-	gasWanted, err := g.estimateRunTxGas(msgRun)
-	if err != nil {
-		return err
-	}
-	broadcastRes, err := checkBroadcastErr(g.client.Run(gnoclient.BaseTxCfg{
-		GasFee:    "1000000ugnot",
-		GasWanted: gasWanted,
-	}, msgRun))
+	broadcastRes, err := g.run("add members to community", msgRun)
 	if err != nil {
 		return err
 	}
@@ -855,14 +834,7 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 				userAddr,
 			},
 		}
-		gasWanted, err = g.estimateCallTxGas(msgCall)
-		if err != nil {
-			return err
-		}
-		broadcastRes, err = checkBroadcastErr(g.client.Call(gnoclient.BaseTxCfg{
-			GasFee:    "1000000ugnot",
-			GasWanted: gasWanted,
-		}, msgCall))
+		broadcastRes, err = g.call(msgCall)
 		if err != nil {
 			return err
 		}
