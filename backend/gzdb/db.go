@@ -449,6 +449,7 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 	}
 
 	participant := &EntityRole{
+		CreatedAt:  time.Now(),
 		EntityType: zeni.EntityTypeUser,
 		EntityID:   uint(userIDint),
 		OrgType:    zeni.EntityTypeEvent,
@@ -922,6 +923,7 @@ func (g *gormZenaoDB) EditCommunity(communityID string, administratorsIDs []stri
 		}
 
 		entityRole := &EntityRole{
+			CreatedAt:  time.Now(),
 			EntityType: zeni.EntityTypeUser,
 			EntityID:   uint(adminIDInt),
 			OrgType:    zeni.EntityTypeCommunity,
@@ -963,6 +965,7 @@ func (g *gormZenaoDB) AddMemberToCommunity(communityID string, userID string) er
 	}
 
 	entityRole := &EntityRole{
+		CreatedAt:  time.Now(),
 		EntityType: zeni.EntityTypeUser,
 		EntityID:   uint(userIDInt),
 		OrgType:    zeni.EntityTypeCommunity,
@@ -1485,6 +1488,7 @@ func (g *gormZenaoDB) AddEventToCommunity(eventID string, communityID string) er
 	}
 
 	entityRole := &EntityRole{
+		CreatedAt:  time.Now(),
 		EntityType: zeni.EntityTypeEvent,
 		EntityID:   uint(eventIDInt),
 		OrgType:    zeni.EntityTypeCommunity,
@@ -1662,6 +1666,7 @@ func (g *gormZenaoDB) updateUserRoles(role string, userIDs []string, orgID strin
 		}
 
 		entityRole := &EntityRole{
+			CreatedAt:  time.Now(),
 			EntityType: zeni.EntityTypeUser,
 			EntityID:   uint(userIDInt),
 			OrgType:    orgType,
