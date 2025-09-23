@@ -142,7 +142,7 @@ func (s *ZenaoServer) CreateEvent(
 		}
 	}
 
-	if cmt != nil && len(targets) > 0 && s.MailClient != nil {
+	if cmt != nil && len(targets) > 0 && req.Msg.CommunityEmail && s.MailClient != nil {
 		var authIDs []string
 		for _, target := range targets {
 			authIDs = append(authIDs, target.AuthID)

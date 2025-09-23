@@ -154,7 +154,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	if newCmt != nil && time.Now().Add(24*time.Hour).Before(evt.StartDate) && s.MailClient != nil {
+	if newCmt != nil && time.Now().Add(24*time.Hour).Before(evt.StartDate) && req.Msg.CommunityEmail && s.MailClient != nil {
 		participantsIDS := make(map[string]bool)
 		for _, participant := range participants {
 			participantsIDS[participant.ID] = true
