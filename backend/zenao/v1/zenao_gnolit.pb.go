@@ -136,6 +136,9 @@ func (c *CreateEventRequest) GnoLiteral(typePrefix string, linePrefix string) st
 	if c.CommunityId != "" {
 		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, c.CommunityId)
 	}
+	if c.CommunityEmail != false {
+		fmt.Fprintf(buf, "%s\tCommunityEmail: %t,\n", linePrefix, c.CommunityEmail)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -234,6 +237,9 @@ func (e *EditEventRequest) GnoLiteral(typePrefix string, linePrefix string) stri
 	}
 	if e.CommunityId != "" {
 		fmt.Fprintf(buf, "%s\tCommunityId: %q,\n", linePrefix, e.CommunityId)
+	}
+	if e.CommunityEmail != false {
+		fmt.Fprintf(buf, "%s\tCommunityEmail: %t,\n", linePrefix, e.CommunityEmail)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")

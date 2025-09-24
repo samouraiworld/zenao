@@ -3,8 +3,8 @@ import { getQueryClient } from "../get-query-client";
 import { eventGatekeepersEmails, eventOptions } from "../queries/event";
 import { currentTimezone } from "../time";
 import { GetToken } from "../utils";
-import { zenaoClient } from "@/lib/zenao-client";
 import { EventFormSchemaType } from "@/types/schemas";
+import { zenaoClient } from "@/lib/zenao-client";
 
 export const useCreateEvent = () => {
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
@@ -47,6 +47,7 @@ export const useCreateEvent = () => {
           location: { address: { case: data.location.kind, value } },
           password: exclusive && password ? password : "",
           communityId: data.communityId || "",
+          communityEmail: true,
         },
         {
           headers: { Authorization: "Bearer " + token },
@@ -115,6 +116,7 @@ export const useEditEvent = (getToken: GetToken) => {
           updatePassword: !exclusive || (!!password && password.length > 0),
           password: exclusive && password ? password : "",
           communityId: data.communityId || "",
+          communityEmail: true,
         },
         {
           headers: { Authorization: "Bearer " + token },

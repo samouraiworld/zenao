@@ -291,6 +291,7 @@ type Chain interface {
 	AddEventToCommunity(callerID string, communityID string, eventID string) error
 	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
 	AddMemberToCommunity(callerID string, communityID string, userID string) error
+	AddMembersToCommunity(callerID string, communityID string, userIDs []string) error
 	RemoveMemberFromCommunity(callerID string, communityID string, userID string) error
 
 	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
