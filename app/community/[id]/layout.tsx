@@ -73,7 +73,7 @@ async function CommunityPageLayout({
         }}
       >
         <CommunityInfoLayout communityId={communityId}>
-          <div className="flex flex-wrap items-center gap-2 mb-4">
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-2 mb-4">
             <CommunityLeaveButton communityId={communityId} />
             <CommunityJoinButton communityId={communityId} />
             <CommunityEditAdminButton communityId={communityId} />

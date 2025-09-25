@@ -63,7 +63,7 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
         onClick={handleJoin}
         disabled={!isSignedIn || isPending}
         variant="outline"
-        className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
+        className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
       >
         {!isSignedIn
           ? t("sign-in-to-join-button")
