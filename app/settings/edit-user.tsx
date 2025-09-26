@@ -40,6 +40,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     displayName: user?.displayName || "",
     bio: profileDetails.bio || "",
     socialMediaLinks: profileDetails.socialMediaLinks,
+    shortBio: profileDetails.shortBio || "",
   };
 
   const { editUser, isPending } = useEditUserProfile();
@@ -69,6 +70,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         bio: serializeUserProfileDetails({
           bio: values.bio,
           socialMediaLinks: values.socialMediaLinks,
+          shortBio: values.shortBio,
         }),
       });
 
@@ -106,6 +108,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               name="displayName"
               label={t("name-label")}
               placeholder={t("name-placeholder")}
+            />
+            <FormFieldInputString
+              control={form.control}
+              name="shortBio"
+              label={t("shortbio-label")}
+              placeholder={t("shortbio-placeholder")}
             />
             <FormFieldTextArea
               control={form.control}
