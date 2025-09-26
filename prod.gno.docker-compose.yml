@@ -15,3 +15,17 @@ services:
       timeout: 30s
       retries: 50
       start_period: 30s
+  gnoweb:
+    build:
+      context: .
+      dockerfile: gnoweb.Dockerfile
+    ports:
+      - 8888:8888
+    environment:
+      GNOWEB_REMOTE: http://gno:26657
+      GNOWEB_HELP_REMOTE: https://gnoweb.prod.zenao.io
+      GNO_CHAIN_ID: dev
+    restart: always
+    depends_on:
+      gno:
+        condition: service_healthy
