@@ -65,6 +65,11 @@ export default function ProfileHeader({
         <Heading level={1} size="4xl">
           {displayName}
         </Heading>
+        {profileDetails.location && (
+          <Text className="text-sm text-gray-500">
+            📍 {profileDetails.location}
+          </Text>
+        )}
         <Card>
           <Text>{profileDetails.bio}</Text>
         </Card>
