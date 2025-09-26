@@ -71,7 +71,7 @@ export default function ProfileHeader({
           </Card>
 
           {profileDetails.location && (
-            <Text className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+            <Text className="text-sm text-gray-500 mt-2">
               📍 {profileDetails.location}
             </Text>
           )}
