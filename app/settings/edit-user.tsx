@@ -117,12 +117,11 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               wordCounter
               maxLength={1000}
             />
-
             <FormFieldInputString
               control={form.control}
               name="location"
-              label="location"
-              placeholder="location-placeholder"
+              label={t("location-label")}
+              placeholder={t("location-placeholder")}
             />
 
             <SocialMediaLinks form={form} />
