@@ -1,6 +1,6 @@
 module github.com/samouraiworld/zenao
 
-go 1.23.4
+go 1.24.0
 
 require (
 	ariga.io/atlas-provider-gorm v0.5.0
