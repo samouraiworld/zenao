@@ -66,9 +66,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
             <Text className="text-xs md:text-sm text-secondary-color">
               {t("members", { count: memberAddresses.length })}
             </Text>
-            {memberAddresses.length > 3 && (
-              <UsersNamesPreview usersAddresses={memberAddresses} />
-            )}
+            <UsersNamesPreview usersAddresses={memberAddresses} />
           </div>
         </div>
       </div>
