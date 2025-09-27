@@ -1919,7 +1919,7 @@ import (
 )
 
 var (
-	DAO daokit.CrossingDAO
+	DAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	event *events.Event
 )
