@@ -1944,7 +1944,7 @@ func init() {
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
-	eventreg.Register(func() *zenaov1.EventInfo { return event.Info() })
+	eventreg.Register(cross, func() *zenaov1.EventInfo { return event.Info() })
 	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
@@ -2022,7 +2022,7 @@ func init() {
 	community = communities.NewCommunity(&conf)
 	daoPrivate = community.DAOPrivate
 	DAO = community.DAO
-	communityreg.Register(func() *zenaov1.CommunityInfo { return community.Info() })
+	communityreg.Register(cross, func() *zenaov1.CommunityInfo { return community.Info() })
 	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
