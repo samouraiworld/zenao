@@ -13,7 +13,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/clerk/clerk-sdk-go/v2 v2.3.1
 	github.com/fullstorydev/grpcurl v1.9.2
-	github.com/gnolang/gno v0.0.0-20250904144641-893d643309a4
+	github.com/gnolang/gno v0.0.0-20250922044730-89d8028c2d5e
 	github.com/go-faker/faker/v4 v4.5.0
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/goware/prefixer v0.0.0-20160118172347-395022866408
