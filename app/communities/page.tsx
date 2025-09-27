@@ -34,7 +34,7 @@ function CommunitiesListPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-2">
         {communities.map((community) => {
           const communityId = communityIdFromPkgPath(community.pkgPath);
           return (
