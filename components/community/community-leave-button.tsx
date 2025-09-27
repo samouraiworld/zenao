@@ -71,12 +71,12 @@ export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
   };
 
   return (
-    <div className="mt-4">
+    <div>
       <Button
         onClick={handleLeave}
         disabled={!isSignedIn || isPending}
         variant="outline"
-        className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
+        className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
       >
         {isPending ? t("leaving-state") : t("leave-community-button")}
       </Button>
