@@ -795,6 +795,51 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 	return nil
 }
 
+// AddMembersToCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID string, userIDs []string) error {
+	g, span := g.trace("gzchain.AddMembersToCommunity")
+	defer span.End()
+
+	callerPkgPath := g.userRealmPkgPath(callerID)
+	communityPkgPath := g.communityPkgPath(communityID)
+	userAddrs := mapsl.Map(userIDs, g.UserAddress)
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &gnovm.MemPackage{
+			Name: "main",
+			Files: []*gnovm.MemFile{{
+				Name: "main.gno",
+				Body: genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath, userAddrs),
+			}},
+		},
+	}
+	broadcastRes, err := g.run("add members to community", msgRun)
+	if err != nil {
+		return err
+	}
+	g.logger.Info("added members to community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	for _, userAddr := range userAddrs {
+		msgCall := vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: g.communitiesIndexPkgPath,
+			Func:    "AddMember",
+			Args: []string{
+				communityPkgPath,
+				userAddr,
+			},
+		}
+		broadcastRes, err = g.call(msgCall)
+		if err != nil {
+			return err
+		}
+	}
+	g.logger.Info("indexed members in community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
 // RemoveMemberFromCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID string, userID string) error {
 	g, span := g.trace("gzchain.RemoveMemberFromCommunity")
@@ -1748,6 +1793,28 @@ func genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr
 		})
 	}
 `, callerPkgPath, communityPkgPath, "Add member in community "+communityPkgPath, memberAddr)
+}
+
+func genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath string, membersAddr []string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		community %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/communities"
+	)
+		
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+				Title: "Add Members",
+				Message: communities.NewAddMembersMsg(%s),
+			}),
+		})
+	}
+`, callerPkgPath, communityPkgPath, "Add members in community "+communityPkgPath, stringSliceLit(membersAddr))
 }
 
 func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
