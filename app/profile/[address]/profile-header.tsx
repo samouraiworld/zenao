@@ -70,9 +70,17 @@ export default function ProfileHeader({
             </Text>
           )}
         </Heading>
-        <Card>
-          <Text>{profileDetails.bio}</Text>
-        </Card>
+        <div className="flex flex-col gap-1 w-full">
+          <Card>
+            <Text>{profileDetails.bio}</Text>
+          </Card>
+
+          {profileDetails.location && (
+            <Text className="text-sm text-gray-500 mt-2">
+              📍 {profileDetails.location}
+            </Text>
+          )}
+        </div>
 
         <div className="flex flex-col gap-4">
           <Heading level={2}>Find me here</Heading>

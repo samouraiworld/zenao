@@ -147,6 +147,8 @@
     "name-placeholder": "Name...",
     "bio-label": "Bio",
     "bio-placeholder": "Bio...",
+    "location-label": "Location",
+    "location-placeholder": "Location...",
     "shortbio-label": "Short Bio",
     "shortbio-placeholder": "Short Bio...",
     "save-button": "Save changes",
