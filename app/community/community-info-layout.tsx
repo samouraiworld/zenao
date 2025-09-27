@@ -79,13 +79,13 @@ function CommunityInfoLayout({
 
         <Text>{data.description}</Text>
 
-        <div className="flex flex-col md:hidden gap-2 w-full">
+        <div className="flex flex-col md:hidden gap-2">
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
             className="w-full"
           />
 
-          <div className="flex flex-col gap-2 justify-center w-full">
+          <div className="flex flex-col gap-2 justify-center">
             <CommunityEditAdminButton communityId={communityId} />
             <CommunityJoinButton communityId={communityId} />
             <CommunityLeaveButton communityId={communityId} />
