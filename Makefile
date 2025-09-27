@@ -25,7 +25,7 @@ start.gnodev-e2e: gnobuild/${GNOVERSION}/gnodev
 
 .PHONY: lint-gno
 lint-gno:
-	${GNO} lint ./gno
+	${GNO} lint ./...
 
 .PHONY: test-gno
 test-gno:
