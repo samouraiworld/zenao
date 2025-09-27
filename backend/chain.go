@@ -22,7 +22,6 @@ import (
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	tm2std "github.com/gnolang/gno/tm2/pkg/std"
-	"github.com/n0izn0iz/gno/gnovm"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -807,9 +806,9 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath, userAddrs),
 			}},
