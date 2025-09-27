@@ -1953,12 +1953,12 @@ func IsMember(memberId string) bool {
 	return daoPrivate.Members.IsMember(memberId)
 }
 
-func Vote(cur realm, proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(cur, proposalID, vote)
+func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(proposalID, vote)
 }
 
-func Execute(cur realm, proposalID uint64) {
-	DAO.Execute(cur, proposalID)
+func Execute(_ realm, proposalID uint64) {
+	DAO.Execute(proposalID)
 }
 
 func Render(path string) string {
