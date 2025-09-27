@@ -4,8 +4,8 @@ import (
 	"errors"
 	"std"
 
-	"gno.land/p/demo/json"
-	"gno.land/p/demo/ufmt"
+	"gno.land/p/nt/ufmt"
+	"gno.land/p/onbloc/json"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/r/demo/profile"
 )

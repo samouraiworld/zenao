@@ -16,12 +16,12 @@ import (
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/gnovm"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/gnovm/stdlibs/std"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
+	tm2std "github.com/gnolang/gno/tm2/pkg/std"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -106,17 +106,12 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 	g, span := g.trace("gzchain.FillAdminProfile")
 	defer span.End()
 
-	var minFee int64 = 20 * 1_000_000
 	msg := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
-		Send:    std.CompactCoins([]string{"ugnot"}, []int64{minFee}),
-		PkgPath: "gno.land/r/demo/users",
+		Send:    std.CompactCoins([]string{"ugnot"}, []int64{1_000_000}),
+		PkgPath: "gno.land/r/gnoland/users/v1",
 		Func:    "Register",
-		Args: []string{
-			"",
-			"zenaoadm",
-			"",
-		},
+		Args:    []string{"zenaoadm"},
 	}
 	gasWanted, err := g.estimateCallTxGas(msg)
 	if err != nil {
@@ -186,10 +181,10 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 
 	msgPkg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name:  "event",
 			Path:  eventPkgPath,
-			Files: []*gnovm.MemFile{{Name: "event.gno", Body: eventRealmSrc}},
+			Files: []*tm2std.MemFile{{Name: "event.gno", Body: eventRealmSrc}},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msgPkg)
@@ -243,9 +238,9 @@ func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCancelEventMsgRunBody(eventPkgPath, callerPkgPath),
 			}},
@@ -304,9 +299,9 @@ func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs [
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: fmt.Sprintf(`package main
 import (
@@ -393,10 +388,10 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 	userPkgPath := g.userRealmPkgPath(user.ID)
 	msg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name:  "user",
 			Path:  userPkgPath,
-			Files: []*gnovm.MemFile{{Name: "user.gno", Body: userRealmSrc}},
+			Files: []*tm2std.MemFile{{Name: "user.gno", Body: userRealmSrc}},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msg)
@@ -424,7 +419,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
-	participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+	participantAddr := gnolang.DerivePkgBech32Addr(participantPkgPath).String()
 
 	signature := ""
 	if len(eventSK) != 0 {
@@ -438,9 +433,9 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey, signature),
 			}},
@@ -480,13 +475,13 @@ func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ti
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
-	participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+	participantAddr := gnolang.DerivePkgBech32Addr(participantPkgPath).String()
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey),
 			}},
@@ -540,9 +535,9 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, req.TicketPubkey, req.Signature),
 			}},
@@ -581,10 +576,10 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	// TODO: single tx with all messages
 	msgkg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name:  "community",
 			Path:  communityPkgPath,
-			Files: []*gnovm.MemFile{{Name: "community.gno", Body: cmtRealmSrc}},
+			Files: []*tm2std.MemFile{{Name: "community.gno", Body: cmtRealmSrc}},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msgkg)
@@ -684,9 +679,9 @@ func (g *gnoZenaoChain) EditCommunity(communityID string, callerID string, admin
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: fmt.Sprintf(`package main
 import (
@@ -767,9 +762,9 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, userAddr),
 			}},
@@ -810,9 +805,9 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath, userAddrs),
 			}},
@@ -855,9 +850,9 @@ func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID s
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, userAddr),
 			}},
@@ -912,9 +907,9 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr),
 			}},
@@ -970,9 +965,9 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr),
 			}},
@@ -1026,9 +1021,9 @@ func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) er
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: fmt.Sprintf(`package main
 import (
@@ -1069,12 +1064,12 @@ func main() {
 
 // UserAddress implements ZenaoChain.
 func (g *gnoZenaoChain) UserAddress(userID string) string {
-	return gnolang.DerivePkgAddr(g.userRealmPkgPath(userID)).String()
+	return gnolang.DerivePkgBech32Addr(g.userRealmPkgPath(userID)).String()
 }
 
 // EventAddress implements ZenaoChain.
 func (g *gnoZenaoChain) EventAddress(eventID string) string {
-	return gnolang.DerivePkgAddr(g.eventRealmPkgPath(eventID)).String()
+	return gnolang.DerivePkgBech32Addr(g.eventRealmPkgPath(eventID)).String()
 }
 
 // CreatePost implements ZenaoChain
@@ -1084,14 +1079,14 @@ func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, 
 
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	orgPkgPath := g.orgPkgPath(orgType, orgID)
-	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
+	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
 	gnoLitPost := "&" + post.GnoLiteral("feedsv1.", "\t\t")
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost),
 			}},
@@ -1144,9 +1139,9 @@ func (g *gnoZenaoChain) EditPost(userID string, postID string, post *feedsv1.Pos
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost, postIDInt),
 			}},
@@ -1181,9 +1176,9 @@ func (g *gnoZenaoChain) DeletePost(userID string, postID string) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genDeletePostMsgRunBody(userRealmPkgPath, postIDInt),
 			}},
@@ -1213,9 +1208,9 @@ func (g *gnoZenaoChain) ReactPost(userID string, orgType string, orgID string, r
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genReactPostMsgRunBody(userRealmPkgPath, userID, req.PostId, orgType, orgID, req.Icon),
 			}},
@@ -1244,13 +1239,13 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	orgPkgPath := g.orgPkgPath(req.OrgType, req.OrgId)
-	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
+	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID, req.Question, req.Options, req.Kind, req.Duration),
 			}},
@@ -1306,9 +1301,9 @@ func (g *gnoZenaoChain) VotePoll(userID string, req *zenaov1.VotePollRequest) er
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genVotePollMsgRunBody(userRealmPkgPath, req.PollId, req.Option),
 			}},
@@ -1500,7 +1495,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 		"std"
 
 		"gno.land/p/zenao/daokit"
-		"gno.land/p/demo/ufmt"
+		"gno.land/p/nt/ufmt"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		"gno.land/r/zenao/social_feed"
 		user %q
@@ -1517,7 +1512,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 		feedID := %q
 		post := %s
 
-		postID := social_feed.NewPost(feedID, post)
+		postID := social_feed.NewPost(crossfeedID, post)
 		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 `, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
@@ -1623,7 +1618,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	import (
 		"std"
 	
-		"gno.land/p/demo/ufmt"
+		"gno.land/p/nt/ufmt"
 		"gno.land/p/zenao/daokit"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		pollsv1 "gno.land/p/zenao/polls/v1"
@@ -1645,7 +1640,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		p := polls.NewPoll(question, kind, %d, options, org.IsMember)
+		p := polls.NewPoll(cross, question, kind, %d, options, org.IsMember)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
 			panic("multiaddr validation failed")
@@ -1661,7 +1656,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 			},
 		}
 	
-		postID := social_feed.NewPost(feedID, post)
+		postID := social_feed.NewPost(crossfeedID, post)
 		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 	`, orgPkgPath, userRealmPkgPath, question, stringSliceLit(options), kind, duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
@@ -1915,7 +1910,7 @@ import (
 )
 
 var (
-	DAO daokit.DAO
+	DAO daokit.CrossingDAO
 	daoPrivate *basedao.DAOPrivate
 	event *events.Event
 )
@@ -1941,7 +1936,7 @@ func init() {
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
 	eventreg.Register(func() *zenaov1.EventInfo { return event.Info() })
-	social_feed.NewFeed("main", false, IsMember)
+	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)
@@ -1949,12 +1944,12 @@ func IsMember(memberId string) bool {
 	return daoPrivate.Members.IsMember(memberId)
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(cur realm, proposalID uint64, vote daocond.Vote) {
+	DAO.Vote(cur, proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(cur realm, proposalID uint64) {
+	DAO.Execute(cur, proposalID)
 }
 
 func Render(path string) string {
@@ -2019,7 +2014,7 @@ func init() {
 	daoPrivate = community.DAOPrivate
 	DAO = community.DAO
 	communityreg.Register(func() *zenaov1.CommunityInfo { return community.Info() })
-	social_feed.NewFeed("main", false, IsMember)
+	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)

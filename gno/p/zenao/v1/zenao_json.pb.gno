@@ -6,7 +6,7 @@ import (
 	"errors"
 	"strconv"
 
-	"gno.land/p/demo/json"
+	"gno.land/p/onbloc/json"
 	v1 "gno.land/p/zenao/polls/v1"
 )
 

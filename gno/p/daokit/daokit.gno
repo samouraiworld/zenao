@@ -22,7 +22,6 @@ func InstantExecute(d DAO, req ProposalRequest) uint64 {
 type Core struct {
 	Resources *ResourcesStore
 	Proposals *ProposalsStore
-	NoEvents  bool
 }
 
 func NewCore() *Core {
@@ -42,16 +41,7 @@ func (d *Core) Vote(voterID string, proposalID uint64, vote daocond.Vote) {
 		panic("proposal is not open")
 	}
 
-	if !d.NoEvents {
-		e := &daocond.EventVote{
-			VoterID: voterID,
-			Vote:    daocond.Vote(vote),
-		}
-		proposal.ConditionState.HandleEvent(e, proposal.Votes)
-	}
-
-	proposal.Votes[voterID] = daocond.Vote(vote)
-
+	proposal.Ballot.Vote(voterID, daocond.Vote(vote))
 }
 
 func (d *Core) Execute(proposalID uint64) {
@@ -64,7 +54,7 @@ func (d *Core) Execute(proposalID uint64) {
 		panic("proposal is not open")
 	}
 
-	if !proposal.ConditionState.Eval(proposal.Votes) {
+	if !proposal.Condition.Eval(proposal.Ballot) {
 		panic("proposal condition is not met")
 	}
 
@@ -73,23 +63,27 @@ func (d *Core) Execute(proposalID uint64) {
 		panic("proposal does not meet the condition(s) or is already closed/executed")
 	}
 
-	d.Resources.Get(proposal.Message.Type()).Handler.Execute(proposal.Message)
+	d.Resources.Get(proposal.Action.Type()).Handler.Execute(proposal.Action)
 	proposal.Status = ProposalStatusExecuted
 	proposal.ExecutedAt = time.Now()
 }
 
 func (d *Core) Propose(proposerID string, req ProposalRequest) uint64 {
-	messageType := req.Message.Type()
+	actionType := req.Action.Type()
 
-	resource := d.Resources.Get(messageType)
+	resource := d.Resources.Get(actionType)
 	if resource == nil {
-		panic("message type " + messageType + " not registered")
+		panic("action type is not registered as a resource")
 	}
 
-	prop := d.Proposals.newProposal(proposerID, req, resource.Condition.NewState())
+	prop := d.Proposals.newProposal(proposerID, req, resource.Condition)
 	return uint64(prop.ID)
 }
 
 func (d *Core) ResourcesCount() int {
 	return d.Resources.Tree.Size()
+}
+
+func (d *Core) ProposalsCount() int {
+	return d.Proposals.Tree.Size()
 }

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/nt/ufmt"
 	"gno.land/p/zenao/events"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/r/demo/profile"

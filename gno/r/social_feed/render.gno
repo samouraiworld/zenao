@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	"gno.land/p/demo/mux"
-	"gno.land/p/demo/seqid"
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/nt/mux"
+	"gno.land/p/nt/seqid"
+	"gno.land/p/nt/ufmt"
 	ma "gno.land/p/zenao/multiaddr"
 
 	feedsv1 "gno.land/p/zenao/feeds/v1"

@@ -1,7 +1,7 @@
 package social_feed
 
 import (
-	"gno.land/p/demo/json"
+	"gno.land/p/onbloc/json"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 

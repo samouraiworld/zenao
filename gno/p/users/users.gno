@@ -4,12 +4,11 @@ import (
 	"std"
 	"strings"
 
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/nt/ufmt"
 	"gno.land/p/zenao/basedao"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
-	"gno.land/p/zenao/role_manager"
 )
 
 type User struct {
@@ -27,7 +26,7 @@ type Config struct {
 }
 
 func NewUser(conf *Config) *User {
-	roles := []role_manager.RoleInfo{
+	roles := []basedao.RoleInfo{
 		{
 			Name:        "zenao-admin",
 			Description: "Admin responsible for managing the account until it becomes self-custodial",

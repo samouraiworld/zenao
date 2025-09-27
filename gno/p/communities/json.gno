@@ -1,8 +1,8 @@
 package communities
 
 import (
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/json"
+	"gno.land/p/nt/avl"
+	"gno.land/p/onbloc/json"
 )
 
 func (c *Community) GetUserRolesJSON(addr string) string {

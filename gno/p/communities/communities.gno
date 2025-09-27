@@ -4,7 +4,6 @@ import (
 	"gno.land/p/zenao/basedao"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
-	"gno.land/p/zenao/role_manager"
 )
 
 type Community struct {
@@ -28,7 +27,11 @@ type Config struct {
 }
 
 func NewCommunity(conf *Config) *Community {
-	roles := []role_manager.RoleInfo{
+	if conf.ZenaoAdminAddr == "" {
+		panic("missing ZenaoAdminAddr in config")
+	}
+
+	roles := []basedao.RoleInfo{
 		{
 			Name:        "zenao-admin",
 			Description: "Admin responsible for managing the DAO until it becomes self-custodial",
@@ -82,7 +85,7 @@ func NewCommunity(conf *Config) *Community {
 		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
 		InitialCondition: adminCond,
 	})
-	conf.SetProfileString("Banner", conf.BannerURI)
+	conf.SetProfileString(cross, "Banner", conf.BannerURI)
 
 	community := &Community{
 		getProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
@@ -127,9 +130,9 @@ func NewCommunity(conf *Config) *Community {
 	return community
 }
 
-const MsgEditCommunityKind = "gno.land/p/zenao/communities.EditCommunity"
+const ActionEditCommunityKind = "gno.land/p/zenao/communities.EditCommunity"
 
-type MsgEditCommunity struct {
+type ActionEditCommunity struct {
 	displayName    string
 	description    string
 	avatarURI      string
@@ -137,7 +140,7 @@ type MsgEditCommunity struct {
 	administrators []string
 }
 
-func (msg *MsgEditCommunity) String() string {
+func (msg *ActionEditCommunity) String() string {
 	s := "Edit community:\n"
 	if msg.displayName != "" {
 		s += "- Display Name: " + msg.displayName + "\n"
@@ -157,24 +160,24 @@ func (msg *MsgEditCommunity) String() string {
 	return s
 }
 
-func (c *Community) editCommunityHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgEditCommunityKind, func(i interface{}) {
-		msg, ok := i.(*MsgEditCommunity)
+func (c *Community) editCommunityHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(ActionEditCommunityKind, func(i interface{}) {
+		msg, ok := i.(*ActionEditCommunity)
 		if !ok {
 			panic("invalid payload type")
 		}
 
 		if msg.displayName != "" {
-			c.setProfileString("DisplayName", msg.displayName)
+			c.setProfileString(cross, "DisplayName", msg.displayName)
 		}
 		if msg.description != "" {
-			c.setProfileString("Bio", msg.description)
+			c.setProfileString(cross, "Bio", msg.description)
 		}
 		if msg.avatarURI != "" {
-			c.setProfileString("Avatar", msg.avatarURI)
+			c.setProfileString(cross, "Avatar", msg.avatarURI)
 		}
 		if msg.bannerURI != "" {
-			c.setProfileString("Banner", msg.bannerURI)
+			c.setProfileString(cross, "Banner", msg.bannerURI)
 		}
 		if len(msg.administrators) > 0 {
 			c.updateCommunityUserRoles("administrator", msg.administrators)
@@ -189,8 +192,8 @@ func (c *Community) editCommunityHandler() daokit.MessageHandler {
 	})
 }
 
-func NewEditCommunityMsg(displayName, description, avatarURI, bannerURI string, administrators []string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgEditCommunityKind, &MsgEditCommunity{
+func NewEditCommunityAction(displayName, description, avatarURI, bannerURI string, administrators []string) daokit.Action {
+	return daokit.NewAction(ActionEditCommunityKind, &ActionEditCommunity{
 		displayName:    displayName,
 		description:    description,
 		avatarURI:      avatarURI,
@@ -199,19 +202,19 @@ func NewEditCommunityMsg(displayName, description, avatarURI, bannerURI string, 
 	})
 }
 
-const MsgAddMemberKind = "gno.land/p/zenao/communities.AddMember"
+const ActionAddMemberKind = "gno.land/p/zenao/communities.AddMember"
 
-type MsgAddMember struct {
+type ActionAddMember struct {
 	address string
 }
 
-func (msg *MsgAddMember) String() string {
+func (msg *ActionAddMember) String() string {
 	return "Add " + msg.address + " to community as a member"
 }
 
-func (c *Community) addMemberHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgAddMemberKind, func(i interface{}) {
-		msg, ok := i.(*MsgAddMember)
+func (c *Community) addMemberHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(ActionAddMemberKind, func(i interface{}) {
+		msg, ok := i.(*ActionAddMember)
 		if !ok {
 			panic("invalid payload type")
 		}
@@ -228,19 +231,19 @@ func (c *Community) addMemberHandler() daokit.MessageHandler {
 	})
 }
 
-func NewAddMemberMsg(address string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddMemberKind, &MsgAddMember{
+func NewAddMemberAction(address string) daokit.Action {
+	return daokit.NewAction(ActionAddMemberKind, &ActionAddMember{
 		address: address,
 	})
 }
 
-const MsgAddMembersKind = "gno.land/p/zenao/communities.AddMembers"
+const ActionAddMembersKind = "gno.land/p/zenao/communities.AddMembers"
 
-type MsgAddMembers struct {
+type ActionAddMembers struct {
 	addresses []string
 }
 
-func (msg *MsgAddMembers) String() string {
+func (msg *ActionAddMembers) String() string {
 	s := "Add members to community:\n"
 	for _, addr := range msg.addresses {
 		s += "- " + addr + "\n"
@@ -249,9 +252,9 @@ func (msg *MsgAddMembers) String() string {
 }
 
 // NOTE: skip members that are already part of the community
-func (c *Community) addMembersHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgAddMembersKind, func(i interface{}) {
-		msg, ok := i.(*MsgAddMembers)
+func (c *Community) addMembersHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(ActionAddMembersKind, func(i interface{}) {
+		msg, ok := i.(*ActionAddMembers)
 		if !ok {
 			panic("invalid payload type")
 		}
@@ -270,25 +273,25 @@ func (c *Community) addMembersHandler() daokit.MessageHandler {
 	})
 }
 
-func NewAddMembersMsg(addresses []string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddMembersKind, &MsgAddMembers{
+func NewAddMembersAction(addresses []string) daokit.Action {
+	return daokit.NewAction(ActionAddMembersKind, &ActionAddMembers{
 		addresses: addresses,
 	})
 }
 
-const MsgRemoveMemberKind = "gno.land/p/zenao/communities.RemoveMember"
+const ActionRemoveMemberKind = "gno.land/p/zenao/communities.RemoveMember"
 
-type MsgRemoveMember struct {
+type ActionRemoveMember struct {
 	address string
 }
 
-func (msg *MsgRemoveMember) String() string {
+func (msg *ActionRemoveMember) String() string {
 	return "Remove " + msg.address + " from community"
 }
 
-func (c *Community) removeMemberHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgRemoveMemberKind, func(i interface{}) {
-		msg, ok := i.(*MsgRemoveMember)
+func (c *Community) removeMemberHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(ActionRemoveMemberKind, func(i interface{}) {
+		msg, ok := i.(*ActionRemoveMember)
 		if !ok {
 			panic("invalid payload type")
 		}
@@ -300,25 +303,25 @@ func (c *Community) removeMemberHandler() daokit.MessageHandler {
 	})
 }
 
-func NewRemoveMemberMsg(address string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgRemoveMemberKind, &MsgRemoveMember{
+func NewRemoveMemberAction(address string) daokit.Action {
+	return daokit.NewAction(ActionRemoveMemberKind, &ActionRemoveMember{
 		address: address,
 	})
 }
 
-const MsgAddEventKind = "gno.land/p/zenao/communities.AddEvent"
+const ActionAddEventKind = "gno.land/p/zenao/communities.AddEvent"
 
-type MsgAddEvent struct {
+type ActionAddEvent struct {
 	address string
 }
 
-func (msg *MsgAddEvent) String() string {
+func (msg *ActionAddEvent) String() string {
 	return "Add " + msg.address + " to community as an event"
 }
 
-func (c *Community) addEventHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgAddEventKind, func(i interface{}) {
-		msg, ok := i.(*MsgAddEvent)
+func (c *Community) addEventHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(ActionAddEventKind, func(i interface{}) {
+		msg, ok := i.(*ActionAddEvent)
 		if !ok {
 			panic("invalid payload type")
 		}
@@ -335,25 +338,25 @@ func (c *Community) addEventHandler() daokit.MessageHandler {
 	})
 }
 
-func NewAddEventMsg(address string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgAddEventKind, &MsgAddEvent{
+func NewAddEventAction(address string) daokit.Action {
+	return daokit.NewAction(ActionAddEventKind, &ActionAddEvent{
 		address: address,
 	})
 }
 
-const MsgRemoveEventKind = "gno.land/p/zenao/communities.RemoveEvent"
+const ActionRemoveEventKind = "gno.land/p/zenao/communities.RemoveEvent"
 
-type MsgRemoveEvent struct {
+type ActionRemoveEvent struct {
 	address string
 }
 
-func (msg *MsgRemoveEvent) String() string {
+func (msg *ActionRemoveEvent) String() string {
 	return "Remove " + msg.address + " from community as an event"
 }
 
-func (c *Community) removeEventHandler() daokit.MessageHandler {
-	return daokit.NewMessageHandler(MsgRemoveEventKind, func(i interface{}) {
-		msg, ok := i.(*MsgRemoveEvent)
+func (c *Community) removeEventHandler() daokit.ActionHandler {
+	return daokit.NewActionHandler(ActionRemoveEventKind, func(i interface{}) {
+		msg, ok := i.(*ActionRemoveEvent)
 		if !ok {
 			panic("invalid payload type")
 		}
@@ -370,8 +373,8 @@ func (c *Community) removeEventHandler() daokit.MessageHandler {
 	})
 }
 
-func NewRemoveEventMsg(address string) daokit.ExecutableMessage {
-	return daokit.NewMessage(MsgRemoveEventKind, &MsgRemoveEvent{
+func NewRemoveEventAction(address string) daokit.Action {
+	return daokit.NewAction(ActionRemoveEventKind, &ActionRemoveEvent{
 		address: address,
 	})
 }

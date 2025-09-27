@@ -5,7 +5,7 @@ package pollsv1
 import (
 	"strconv"
 
-	"gno.land/p/demo/json"
+	"gno.land/p/onbloc/json"
 )
 
 func (p *PollResult) ToJSON() *json.Node {
