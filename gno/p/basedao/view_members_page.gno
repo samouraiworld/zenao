@@ -1,7 +1,7 @@
 package basedao
 
 import (
-	"gno.land/p/demo/ufmt"
+	"gno.land/p/nt/ufmt"
 	"gno.land/p/samcrew/piechart"
 )
 

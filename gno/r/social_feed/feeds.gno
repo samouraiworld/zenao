@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/seqid"
+	"gno.land/p/nt/avl"
+	"gno.land/p/nt/seqid"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 

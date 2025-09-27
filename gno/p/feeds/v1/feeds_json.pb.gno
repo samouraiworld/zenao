@@ -6,7 +6,7 @@ import (
 	"errors"
 	"strconv"
 
-	"gno.land/p/demo/json"
+	"gno.land/p/onbloc/json"
 )
 
 func (p *PostGeoLoc) ToJSON() *json.Node {

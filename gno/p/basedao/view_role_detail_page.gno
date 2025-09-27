@@ -1,10 +1,10 @@
 package basedao
 
 import (
-	"gno.land/p/demo/avl"
 	"gno.land/p/demo/svg"
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/nt/avl"
+	"gno.land/p/nt/ufmt"
 )
 
 func (d *DAOPrivate) RoleDetailPageView(path string, name string) string {

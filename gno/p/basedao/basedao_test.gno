@@ -4,8 +4,8 @@ import (
 	"std"
 	"testing"
 
-	"gno.land/p/demo/testutils"
-	"gno.land/p/demo/urequire"
+	"gno.land/p/nt/testutils"
+	"gno.land/p/nt/urequire"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
 )
@@ -223,7 +223,7 @@ func TestVote(t *testing.T) {
 				voter:      dave,
 			},
 			expected: testVoteExpected{
-				panic: "caller UserRealm{ g1v3shve2lta047h6lta047h6lta047h6lel7d9l } is not a member",
+				panic: "caller is not a member",
 			},
 		},
 		"Invalid vote": {

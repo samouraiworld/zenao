@@ -4,8 +4,7 @@ import (
 	"errors"
 	"std"
 
-	"gno.land/p/demo/mux"
-	"gno.land/p/demo/ufmt"
+	"gno.land/p/nt/mux"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
 )
@@ -160,7 +159,7 @@ func (d *DAOPrivate) Propose(req daokit.ProposalRequest) uint64 {
 func (d *DAOPrivate) assertCallerIsMember() string {
 	id := std.PreviousRealm().Address().String()
 	if !d.Members.IsMember(id) {
-		panic(ufmt.Errorf("caller %v is not a member", std.PreviousRealm()))
+		panic(errors.New("caller is not a member"))
 	}
 	return id
 }

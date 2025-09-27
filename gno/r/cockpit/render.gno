@@ -4,9 +4,9 @@ import (
 	"std"
 	"strings"
 
-	"gno.land/p/demo/mux"
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/nt/mux"
+	"gno.land/p/nt/ufmt"
 	"gno.land/r/demo/profile"
 	rusers "gno.land/r/sys/users"
 )

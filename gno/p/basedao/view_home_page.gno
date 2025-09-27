@@ -1,8 +1,8 @@
 package basedao
 
 import (
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/nt/ufmt"
 )
 
 func (d *DAOPrivate) HomePageView() string {

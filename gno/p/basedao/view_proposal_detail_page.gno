@@ -3,10 +3,10 @@ package basedao
 import (
 	"strconv"
 
-	"gno.land/p/demo/seqid"
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
 	"gno.land/p/moul/txlink"
+	"gno.land/p/nt/seqid"
+	"gno.land/p/nt/ufmt"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
 )

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"gno.land/p/demo/testutils"
-	"gno.land/p/demo/urequire"
+	"gno.land/p/nt/testutils"
+	"gno.land/p/nt/urequire"
 	"gno.land/p/zenao/daokit"
 	"gno.land/r/zenao/mockprofile"
 )
@@ -111,7 +111,7 @@ func TestAddMember(t *testing.T) {
 	if !community.DAOPrivate.Members.HasRole(carol.String(), "member") {
 		t.Fatalf("expected carol to have member role")
 	}
-	daokit.InstantExecute(community.DAO, testReq(NewAddMemberMsg(bob.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewAddMemberAction(bob.String())))
 	if len(community.DAOPrivate.Members.GetMembers()) != 5 {
 		t.Fatalf("expected 5 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
@@ -146,7 +146,7 @@ func TestRemoveMember(t *testing.T) {
 	if !community.DAOPrivate.Members.HasRole(dave.String(), "member") {
 		t.Fatalf("expected dave to have member role")
 	}
-	daokit.InstantExecute(community.DAO, testReq(NewRemoveMemberMsg(carol.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewRemoveMemberAction(carol.String())))
 	if len(community.DAOPrivate.Members.GetMembers()) != 3 {
 		t.Fatalf("expected 3 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
@@ -185,7 +185,7 @@ func TestAddEvent(t *testing.T) {
 		t.Fatalf("expected 0 events, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}
 	event := testutils.TestAddress("event1")
-	daokit.InstantExecute(community.DAO, testReq(NewAddEventMsg(event.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewAddEventAction(event.String())))
 	if community.DAOPrivate.Members.CountMembersWithRole("event") != 1 {
 		t.Fatalf("expected 1 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}
@@ -215,14 +215,14 @@ func TestRemoveEvent(t *testing.T) {
 		t.Fatalf("expected 4 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
 	event := testutils.TestAddress("event1")
-	daokit.InstantExecute(community.DAO, testReq(NewAddEventMsg(event.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewAddEventAction(event.String())))
 	if community.DAOPrivate.Members.CountMembersWithRole("event") != 1 {
 		t.Fatalf("expected 1 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}
 	if !community.DAOPrivate.Members.HasRole(event.String(), "event") {
 		t.Fatalf("expected event to have event role")
 	}
-	daokit.InstantExecute(community.DAO, testReq(NewRemoveEventMsg(event.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewRemoveEventAction(event.String())))
 	if community.DAOPrivate.Members.CountMembersWithRole("event") != 0 {
 		t.Fatalf("expected 0 events, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}

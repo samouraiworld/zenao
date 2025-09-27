@@ -25,11 +25,11 @@ start.gnodev-e2e: gnobuild/${GNOVERSION}/gnodev
 
 .PHONY: lint-gno
 lint-gno:
-	cd gno && ${GNO} lint ./gno
+	${GNO} lint ./gno
 
 .PHONY: test-gno
 test-gno:
-	cd gno && ${GNO} test ./... -v
+	${GNO} test ./... -v
 
 .PHONY: gno-mod-tidy
 gno-mod-tidy:

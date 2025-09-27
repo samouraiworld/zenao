@@ -3,7 +3,7 @@ package mockprofile
 import (
 	"std"
 
-	"gno.land/p/demo/avl"
+	"gno.land/p/nt/avl"
 )
 
 type MockProfile struct {

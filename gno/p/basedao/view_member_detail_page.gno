@@ -3,7 +3,7 @@ package basedao
 import (
 	"std"
 
-	"gno.land/p/demo/ufmt"
+	"gno.land/p/nt/ufmt"
 )
 
 func (d *DAOPrivate) MemberDetailPageView(address string) string {

@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gno.land/p/demo/mux"
+	"gno.land/p/nt/mux"
 )
 
 // WELL KNOWN PATHS

@@ -22,6 +22,7 @@ import (
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
 	tm2std "github.com/gnolang/gno/tm2/pkg/std"
+	"github.com/n0izn0iz/gno/gnovm"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -1496,7 +1497,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 		"std"
 
 		"gno.land/p/zenao/daokit"
-		"gno.land/p/demo/ufmt"
+		"gno.land/p/nt/ufmt"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		"gno.land/r/zenao/social_feed"
 		user %q
@@ -1619,7 +1620,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	import (
 		"std"
 	
-		"gno.land/p/demo/ufmt"
+		"gno.land/p/nt/ufmt"
 		"gno.land/p/zenao/daokit"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		pollsv1 "gno.land/p/zenao/polls/v1"

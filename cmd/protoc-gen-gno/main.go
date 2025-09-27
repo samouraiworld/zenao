@@ -115,7 +115,7 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 	g.P("import (")
 	g.P(`	"errors"`)
 	g.P(`	"strconv"`)
-	g.P(`	"gno.land/p/demo/json"`)
+	g.P(`	"gno.land/p/onbloc/json"`)
 	genImportStmts(gen, g, file)
 	g.P(")")
 
