@@ -1,6 +1,8 @@
 CAT := $(if $(filter $(OS),Windows_NT),type,cat)
-GNODEV := gnodev staging --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
+GNODEV := gnobuild/${GNOVERSION}/gnodev staging --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gno.mod -type f -exec dirname {} \;)
 TXS_FILE ?=
+GNOVERSION := $(shell $(CAT) .gnoversion)
+GNO := go run github.com/gnolang/gno/gnovm/cmd/gno@${GNOVERSION}
 
 .PHONY: generate
 generate:
@@ -14,43 +16,24 @@ lint-buf:
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf lint
 
 .PHONY: start.gnodev
-start.gnodev:
+start.gnodev: gnobuild/${GNOVERSION}/gnodev
 	$(GNODEV)
 
 .PHONY: start.gnodev
-start.gnodev-e2e:
+start.gnodev-e2e: gnobuild/${GNOVERSION}/gnodev
 	$(GNODEV) --unsafe-api --txs-file=$(TXS_FILE)
 
-gnobuild: .gnoversion
-	rm -fr gnobuild
-	mkdir -p gnobuild
-	cd gnobuild && git clone https://github.com/gnolang/gno.git && cd gno && git checkout $(shell $(CAT) .gnoversion)
-	cp -r ./gno/p ./gnobuild/gno/examples/gno.land/p/zenao
-	cp -r ./gno/r ./gnobuild/gno/examples/gno.land/r/zenao
-
-.PHONY: install-gno
-install-gno:
-	cd gnobuild/gno && make install
-
-gnobuild/gno/gnovm/build/gno: gnobuild
-	cd gnobuild/gno/gnovm && make build
-
 .PHONY: lint-gno
-lint-gno: gnobuild/gno/gnovm/build/gno
-	./gnobuild/gno/gnovm/build/gno lint ./gno
+lint-gno:
+	cd gno && ${GNO} lint ./gno
 
 .PHONY: test-gno
-test-gno: gnobuild/gno/gnovm/build/gno
-	cd gno && ../gnobuild/gno/gnovm/build/gno test ./... -v
-
-.PHONY: test-gno-ci
-test-gno-ci: gnobuild/gno/gnovm/build/gno
-	cd gnobuild/gno/examples && ../gnovm/build/gno test ./... -v
+test-gno:
+	cd gno && ${GNO} test ./... -v
 
 .PHONY: gno-mod-tidy
 gno-mod-tidy:
-	export gno=$$(pwd)/gnobuild/gno/gnovm/build/gno; \
-	find gno -name gno.mod -type f | xargs -I'{}' sh -c 'cd $$(dirname {}); $$gno mod tidy' \;
+	find gno -name gno.mod -type f | xargs -I'{}' sh -c 'cd $$(dirname {}); ${GNO} mod tidy' \;
 
 .PHONY: clean-gno
 clean-gno:
@@ -77,3 +60,13 @@ install-atlas:
 	cd atlas && git checkout c261f318ac25924555e63fdf005cc53de43fa5db
 	cd atlas/cmd/atlas && go install .
 	rm -fr atlas
+
+# we need this since gnodev cannot be `go run`ed
+gnobuild/${GNOVERSION}/gnodev:
+	rm -fr gnobuild/${GNOVERSION}
+	mkdir -p gnobuild/${GNOVERSION}/gno
+	git clone https://github.com/gnolang/gno.git gnobuild/${GNOVERSION}/gno
+	cd gnobuild/${GNOVERSION}/gno && git checkout ${GNOVERSION}
+	cd gnobuild/${GNOVERSION}/gno/contribs/gnodev && make build
+	cp gnobuild/${GNOVERSION}/gno/contribs/gnodev/build/gnodev gnobuild/${GNOVERSION}/gnodev
+	rm -fr gnobuild/${GNOVERSION}/gno
