@@ -41,6 +41,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     bio: profileDetails.bio || "",
     socialMediaLinks: profileDetails.socialMediaLinks,
     location: profileDetails.location || "",
+    shortBio: profileDetails.shortBio || "",
   };
 
   const { editUser, isPending } = useEditUserProfile();
@@ -71,6 +72,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           bio: values.bio,
           socialMediaLinks: values.socialMediaLinks,
           location: values.location,
+          shortBio: values.shortBio,
         }),
       });
 
@@ -108,6 +110,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               name="displayName"
               label={t("name-label")}
               placeholder={t("name-placeholder")}
+            />
+            <FormFieldInputString
+              control={form.control}
+              name="shortBio"
+              label={t("shortbio-label")}
+              placeholder={t("shortbio-placeholder")}
             />
             <FormFieldTextArea
               control={form.control}

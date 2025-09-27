@@ -112,6 +112,7 @@ export const userFormSchema = z.object({
   socialMediaLinks: z.array(userFormSocialLinkSchema),
   avatarUri: uriSchema,
   location: z.string().trim().max(100).optional().default(""),
+  shortBio: z.string().max(200).optional().default(""),
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
@@ -119,6 +120,7 @@ export const gnoProfileDetailsSchema = z.object({
   bio: z.string().trim().min(2).max(1000),
   socialMediaLinks: z.array(userFormSocialLinkSchema),
   location: z.string().trim().max(100).optional().default(""),
+  shortBio: z.string().max(200).optional().default(""),
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;

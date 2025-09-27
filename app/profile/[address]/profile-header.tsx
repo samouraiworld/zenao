@@ -64,6 +64,11 @@ export default function ProfileHeader({
       <div className="flex flex-col gap-8 sm:gap-12 w-full sm:w-4/5">
         <Heading level={1} size="4xl">
           {displayName}
+          {profileDetails.shortBio && (
+            <Text className=" text-gray-500 mt-2">
+              {profileDetails.shortBio}
+            </Text>
+          )}
         </Heading>
         <div className="flex flex-col gap-1 w-full">
           <Card>
