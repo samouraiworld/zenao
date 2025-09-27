@@ -70,9 +70,11 @@ export default function ProfileHeader({
             </Text>
           )}
         </Heading>
-        <Card>
-          <Text>{profileDetails.bio}</Text>
-        </Card>
+        {profileDetails.bio?.trim() && (
+          <Card>
+            <Text>{profileDetails.bio}</Text>
+          </Card>
+        )}
 
         <div className="flex flex-col gap-4">
           <Heading level={2}>Find me here</Heading>
