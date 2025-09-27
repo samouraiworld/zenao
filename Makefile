@@ -69,4 +69,4 @@ gnobuild/${GNOVERSION}/gnodev:
 	cd gnobuild/${GNOVERSION}/gno && git checkout ${GNOVERSION}
 	cd gnobuild/${GNOVERSION}/gno/contribs/gnodev && make build
 	cp gnobuild/${GNOVERSION}/gno/contribs/gnodev/build/gnodev gnobuild/${GNOVERSION}/gnodev
-	rm -fr gnobuild/${GNOVERSION}/gno
+	touch gnobuild/${GNOVERSION}/gno/gnowork.toml
