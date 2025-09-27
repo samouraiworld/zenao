@@ -42,7 +42,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
               sizes="(max-width: 768px) 100vw,
               (max-width: 1200px) 50vw,
               33vw"
-              className="flex w-full rounded-xl md:rounded self-center object-cover"
+              className="flex w-full rounded self-center object-cover"
             />
           </AspectRatio>
         </div>
