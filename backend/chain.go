@@ -182,9 +182,12 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 	msgPkg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
 		Package: &tm2std.MemPackage{
-			Name:  "event",
-			Path:  eventPkgPath,
-			Files: []*tm2std.MemFile{{Name: "event.gno", Body: eventRealmSrc}},
+			Name: "event",
+			Path: eventPkgPath,
+			Files: []*tm2std.MemFile{
+				{Name: "event.gno", Body: eventRealmSrc},
+				{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", eventPkgPath)},
+			},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msgPkg)
@@ -389,9 +392,12 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 	msg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
 		Package: &tm2std.MemPackage{
-			Name:  "user",
-			Path:  userPkgPath,
-			Files: []*tm2std.MemFile{{Name: "user.gno", Body: userRealmSrc}},
+			Name: "user",
+			Path: userPkgPath,
+			Files: []*tm2std.MemFile{
+				{Name: "user.gno", Body: userRealmSrc},
+				{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", userPkgPath)},
+			},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msg)
@@ -577,9 +583,12 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	msgkg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
 		Package: &tm2std.MemPackage{
-			Name:  "community",
-			Path:  communityPkgPath,
-			Files: []*tm2std.MemFile{{Name: "community.gno", Body: cmtRealmSrc}},
+			Name: "community",
+			Path: communityPkgPath,
+			Files: []*tm2std.MemFile{
+				{Name: "community.gno", Body: cmtRealmSrc},
+				{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", communityPkgPath)},
+			},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msgkg)

@@ -690,9 +690,12 @@ func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoG
 				Creator: creator,
 				Send:    []std.Coin{},
 				Package: &tm2std.MemPackage{
-					Name:  "event",
-					Path:  eventPkgPath,
-					Files: []*tm2std.MemFile{{Name: "event.gno", Body: eRealm}},
+					Name: "event",
+					Path: eventPkgPath,
+					Files: []*tm2std.MemFile{
+						{Name: "event.gno", Body: eRealm},
+						{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", eventPkgPath)},
+					},
 				},
 			},
 		},
@@ -937,9 +940,12 @@ func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, creator cryptoGno.
 				Creator: creator,
 				Send:    []std.Coin{},
 				Package: &tm2std.MemPackage{
-					Name:  "user",
-					Path:  userPkgPath,
-					Files: []*tm2std.MemFile{{Name: "user.gno", Body: uRealm}},
+					Name: "user",
+					Path: userPkgPath,
+					Files: []*tm2std.MemFile{
+						{Name: "user.gno", Body: uRealm},
+						{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", userPkgPath)},
+					},
 				},
 			},
 		},
@@ -1134,9 +1140,12 @@ func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, cre
 				Creator: creator,
 				Send:    []std.Coin{},
 				Package: &tm2std.MemPackage{
-					Name:  "community",
-					Path:  communityPkgPath,
-					Files: []*tm2std.MemFile{{Name: "community.gno", Body: cRealm}},
+					Name: "community",
+					Path: communityPkgPath,
+					Files: []*tm2std.MemFile{
+						{Name: "community.gno", Body: cRealm},
+						{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", communityPkgPath)},
+					},
 				},
 			},
 		},
