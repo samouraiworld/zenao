@@ -963,7 +963,7 @@ func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, gen
 		Msgs: []std.Msg{
 			vm.MsgCall{
 				Caller:  addr,
-				Send:    std.NewCoins(std.NewCoin("ugnot", 20_000_000)),
+				Send:    std.NewCoins(std.NewCoin("ugnot", 1_000_000)),
 				PkgPath: "gno.land/r/gnoland/users/v1",
 				Func:    "Register",
 				Args:    []string{"zenaoadm"},

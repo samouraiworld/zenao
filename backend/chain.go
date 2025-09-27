@@ -106,10 +106,9 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 	g, span := g.trace("gzchain.FillAdminProfile")
 	defer span.End()
 
-	var minFee int64 = 20 * 1_000_000
 	msg := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
-		Send:    std.CompactCoins([]string{"ugnot"}, []int64{minFee}),
+		Send:    std.CompactCoins([]string{"ugnot"}, []int64{1_000_000}),
 		PkgPath: "gno.land/r/gnoland/users/v1",
 		Func:    "Register",
 		Args:    []string{"zenaoadm"},
