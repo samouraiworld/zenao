@@ -71,7 +71,7 @@ export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
   };
 
   return (
-    <div className="mt-4">
+    <div>
       <Button
         onClick={handleLeave}
         disabled={!isSignedIn || isPending}

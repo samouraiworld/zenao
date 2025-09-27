@@ -58,7 +58,7 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   if (alreadyMember) return null;
 
   return (
-    <div className="mt-4">
+    <div>
       <Button
         onClick={handleJoin}
         disabled={!isSignedIn || isPending}
