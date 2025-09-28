@@ -15,7 +15,7 @@ var community *communities.Community
 
 func init() {
 	zenaoAdmin := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94"
-	creator := "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94" // replace w/ address of the user realm
+	creator := "g1jg8mtutu9khhfwc4nxmuhcpftf0pajdhfvsqf5" // replace w/ address of the user realm
 	conf := communities.Config{
 		ZenaoAdminAddr:   zenaoAdmin,
 		Administrators:   []string{creator},
