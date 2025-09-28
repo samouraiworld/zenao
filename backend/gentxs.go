@@ -943,8 +943,8 @@ func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, creator cryptoGno.
 					Name: "user",
 					Path: userPkgPath,
 					Files: []*tm2std.MemFile{
-						{Name: "user.gno", Body: uRealm},
 						{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", userPkgPath)},
+						{Name: "user.gno", Body: uRealm},
 					},
 				},
 			},

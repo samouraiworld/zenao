@@ -1,7 +1,7 @@
 CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 GNOVERSION := $(shell $(CAT) .gnoversion)
 GNODEV := gnobuild/${GNOVERSION}/gnodev staging --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gnomod.toml -type f -exec dirname {} \;)
-TXS_FILE ?=
+TXS_FILE ?= genesis_txs.jsonl
 GNO := go run github.com/gnolang/gno/gnovm/cmd/gno@${GNOVERSION}
 
 .PHONY: generate

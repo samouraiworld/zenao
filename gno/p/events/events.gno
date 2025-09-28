@@ -193,7 +193,7 @@ func (e *Event) cancelEventHandler() daokit.ActionHandler {
 	})
 }
 
-func NewCancelEventMsg() daokit.Action {
+func NewCancelEventAction() daokit.Action {
 	return daokit.NewAction(MsgCancelEventKind, &MsgCancelEvent{})
 }
 
@@ -270,7 +270,7 @@ func (e *Event) addParticipantHandler() daokit.ActionHandler {
 	})
 }
 
-func NewAddParticipantMsg(participant string, ticketPubkey string, signature string) daokit.Action {
+func NewAddParticipantAction(participant string, ticketPubkey string, signature string) daokit.Action {
 	return daokit.NewAction(MsgAddParticipantKind, &MsgAddParticipant{Participant: participant, TicketPubkey: ticketPubkey, ParticipationSignature: signature})
 }
 
@@ -317,7 +317,7 @@ func (e *Event) removeParticipantHandler() daokit.ActionHandler {
 	})
 }
 
-func NewRemoveParticipantMsg(participant string, ticketPubkey string) daokit.Action {
+func NewRemoveParticipantAction(participant string, ticketPubkey string) daokit.Action {
 	return daokit.NewAction(MsgRemoveParticipantKind, &MsgRemoveParticipant{Participant: participant, TicketPubkey: ticketPubkey})
 }
 
@@ -340,7 +340,7 @@ func (e *Event) addGatekeeperHandler() daokit.ActionHandler {
 	})
 }
 
-func NewAddGatekeeperMsg(gatekeeper string) daokit.Action {
+func NewAddGatekeeperAction(gatekeeper string) daokit.Action {
 	return daokit.NewAction(MsgAddGatekeeperKind, gatekeeper)
 }
 
@@ -366,7 +366,7 @@ func (e *Event) removeGatekeeperHandler() daokit.ActionHandler {
 	})
 }
 
-func NewRemoveGatekeeperMsg(gatekeeper string) daokit.Action {
+func NewRemoveGatekeeperAction(gatekeeper string) daokit.Action {
 	return daokit.NewAction(MsgRemoveGatekeeperKind, gatekeeper)
 }
 
@@ -420,7 +420,7 @@ func (e *Event) checkinHandler() daokit.ActionHandler {
 	})
 }
 
-func NewCheckinMsg(ticketPubkey string, checkinSignature string) daokit.Action {
+func NewCheckinAction(ticketPubkey string, checkinSignature string) daokit.Action {
 	return daokit.NewAction(MsgCheckinKind, &MsgCheckin{
 		TicketPubkey:     ticketPubkey,
 		CheckinSignature: checkinSignature,
@@ -532,7 +532,7 @@ func (msg *msgEditEvent) String() string {
 	return md.BulletList(elems)
 }
 
-func NewEditEventMsg(organizers []string, gatekeepers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, discoverable bool, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.Action {
+func NewEditEventAction(organizers []string, gatekeepers []string, title, description, imageURI string, startDate, endDate int64, capacity uint32, discoverable bool, loc *zenaov1.EventLocation, privacy *zenaov1.EventPrivacy) daokit.Action {
 	return daokit.NewAction(MsgEditEventKind, &msgEditEvent{
 		organizers:   organizers,
 		gatekeepers:  gatekeepers,
