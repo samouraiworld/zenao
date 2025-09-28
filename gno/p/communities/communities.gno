@@ -61,7 +61,7 @@ func NewCommunity(conf *Config) *Community {
 					return
 				}
 			}
-			members[idx].roles = append(member.Roles, role)
+			members[idx].Roles = append(member.Roles, role)
 			return
 		}
 		members = append(members, basedao.Member{
