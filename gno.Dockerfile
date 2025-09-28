@@ -56,4 +56,4 @@ COPY genesis_txs.jsonl /genesis_txs.jsonl
 ENV HOME=/app
 WORKDIR $HOME
 
-ENTRYPOINT exec gnodev staging --node-rpc-listener 0.0.0.0:26657 --web-listener 0.0.0.0:8888 --chain-id zenao-dev --balance-file /genesis_balances.txt -txs-file /genesis_txs.jsonl $(find /packages -name gno.mod -type f -exec dirname {} \;)
+ENTRYPOINT exec gnodev staging --node-rpc-listener 0.0.0.0:26657 --web-listener 0.0.0.0:8888 --chain-id zenao-dev --balance-file /genesis_balances.txt -txs-file /genesis_txs.jsonl $(find /packages -name gnomod.toml -type f -exec dirname {} \;)

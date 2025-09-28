@@ -33,7 +33,7 @@ test-gno:
 
 .PHONY: gno-mod-tidy
 gno-mod-tidy:
-	find gno -name gno.mod -type f | xargs -I'{}' sh -c 'cd $$(dirname {}); ${GNO} mod tidy' \;
+	find gno -name gnomod.toml -type f | xargs -I'{}' sh -c 'cd $$(dirname {}); ${GNO} mod tidy' \;
 
 .PHONY: clean-gno
 clean-gno:
