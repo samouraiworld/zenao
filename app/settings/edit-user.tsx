@@ -40,6 +40,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     displayName: user?.displayName || "",
     bio: profileDetails.bio || "",
     socialMediaLinks: profileDetails.socialMediaLinks,
+    location: profileDetails.location || "",
     shortBio: profileDetails.shortBio || "",
   };
 
@@ -70,6 +71,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         bio: serializeUserProfileDetails({
           bio: values.bio,
           socialMediaLinks: values.socialMediaLinks,
+          location: values.location,
           shortBio: values.shortBio,
         }),
       });
@@ -122,6 +124,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               label={t("bio-label")}
               wordCounter
               maxLength={1000}
+            />
+            <FormFieldInputString
+              control={form.control}
+              name="location"
+              label={t("location-label")}
+              placeholder={t("location-placeholder")}
             />
 
             <SocialMediaLinks form={form} />
