@@ -12,9 +12,13 @@ import (
 	"gno.land/r/zenao/social_feed"
 )
 
-var DAO daokit.DAO
-var daoPrivate *basedao.DAOPrivate
-var event *events.Event
+var (
+	DAO daokit.DAO
+
+	localDAO   daokit.DAO
+	daoPrivate *basedao.DAOPrivate
+	event      *events.Event
+)
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
@@ -40,7 +44,8 @@ func init() {
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
-	DAO = daokit.NewCrossing(event.DAO, func(_ realm, cb func()) { cb() })
+	localDAO = event.DAO
+	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)
@@ -48,12 +53,12 @@ func IsMember(memberId string) bool {
 	return daoPrivate.Members.IsMember(memberId)
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
+	localDAO.Vote(proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(_ realm, proposalID uint64) {
+	localDAO.Execute(proposalID)
 }
 
 func Render(path string) string {

@@ -1926,6 +1926,8 @@ import (
 
 var (
 	DAO daokit.DAO
+
+	localDAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	event *events.Event
 )
@@ -1954,7 +1956,8 @@ func init() {
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
-	DAO = daokit.NewCrossing(event.DAO, func(_ realm, cb func()) { cb() })
+	localDAO = event.DAO
+	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
 	eventreg.Register(cross, func() *zenaov1.EventInfo { return event.Info() })
 }
 
@@ -1964,11 +1967,11 @@ func IsMember(memberId string) bool {
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+	localDAO.Vote(proposalID, vote)
 }
 
 func Execute(_ realm, proposalID uint64) {
-	DAO.Execute(proposalID)
+	localDAO.Execute(proposalID)
 }
 
 func Render(path string) string {
@@ -2012,6 +2015,8 @@ import (
 
 var (
 	DAO daokit.DAO
+	
+	localDAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	community *communities.Community
 )
@@ -2036,7 +2041,8 @@ func init() {
 	}
 	community = communities.NewCommunity(&conf)
 	daoPrivate = community.DAOPrivate
-	DAO = daokit.NewCrossing(community.DAO, func(_ realm, cb func()) { cb() })
+	localDAO = community.DAO
+	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
 	communityreg.Register(cross, func() *zenaov1.CommunityInfo { return community.Info() })
 }
 
@@ -2045,12 +2051,12 @@ func IsMember(memberId string) bool {
 	return daoPrivate.Members.IsMember(memberId)
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
+	localDAO.Vote(proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(_ realm, proposalID uint64) {
+	localDAO.Execute(proposalID)
 }
 
 func Render(path string) string {
@@ -2102,6 +2108,8 @@ import (
 
 var (
 	DAO daokit.DAO
+
+	localDAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	user *users.User
 )
@@ -2115,16 +2123,17 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: {{.zenaoAdminAddr}},
 	})
-	DAO = daokit.NewCrossing(user.DAO, func(_ realm, cb func()) { cb() })
+	localDAO = user.DAO
+	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
 	daoPrivate = user.DAOPrivate
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
+	localDAO.Vote(proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(_ realm, proposalID uint64) {
+	localDAO.Execute(proposalID)
 }
 
 func Render(path string) string {

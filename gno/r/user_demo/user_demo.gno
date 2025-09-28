@@ -9,7 +9,9 @@ import (
 )
 
 var (
-	DAO        daokit.DAO
+	DAO daokit.DAO
+
+	localDAO   daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	user       *users.User
 )
@@ -23,16 +25,17 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr:   "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94",
 	})
-	DAO = daokit.NewCrossing(user.DAO, func(_ realm, cb func()) { cb() })
+	localDAO = user.DAO
+	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
 	daoPrivate = user.DAOPrivate
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
+	localDAO.Vote(proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(_ realm, proposalID uint64) {
+	localDAO.Execute(proposalID)
 }
 
 func Render(path string) string {
