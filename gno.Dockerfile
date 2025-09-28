@@ -23,7 +23,7 @@ RUN git clone https://github.com/gnolang/gno.git
 
 WORKDIR /app/gno
 COPY .gnoversion .gnoversion
-RUN git checkout $(cat .gnoversion)
+RUN git fetch && git checkout $(cat .gnoversion)
 
 WORKDIR /app/gno/contribs/gnodev
 RUN --mount=type=cache,target=/root/.cache/go-build \
