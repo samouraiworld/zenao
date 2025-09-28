@@ -52,7 +52,7 @@ func NewCommunity(conf *Config) *Community {
 
 	var members []basedao.Member
 	setRole := func(addr string, role string) {
-		for _, member := range members {
+		for idx, member := range members {
 			if member.Address != addr {
 				continue
 			}
@@ -61,7 +61,7 @@ func NewCommunity(conf *Config) *Community {
 					return
 				}
 			}
-			member.Roles = append(member.Roles, role)
+			members[idx].roles = append(member.Roles, role)
 			return
 		}
 		members = append(members, basedao.Member{
