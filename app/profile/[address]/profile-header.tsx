@@ -71,10 +71,11 @@ export default function ProfileHeader({
           )}
         </Heading>
         <div className="flex flex-col gap-1 w-full">
-          <Card>
-            <Text>{profileDetails.bio}</Text>
-          </Card>
-
+          {profileDetails.bio?.trim() && (
+            <Card>
+              <Text>{profileDetails.bio}</Text>
+            </Card>
+          )}
           {profileDetails.location && (
             <Text className="text-sm text-gray-500 mt-2">
               📍 {profileDetails.location}
