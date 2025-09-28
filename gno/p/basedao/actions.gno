@@ -33,17 +33,7 @@ func NewAddMemberHandler(dao *DAOPrivate) daokit.ActionHandler {
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-		member := payload.Address.String()
-		if !dao.Members.Members.Has(member) {
-			dao.Members.AddMember(member, payload.Roles)
-			return
-		}
-		for _, role := range payload.Roles {
-			if dao.Members.HasRole(member, role) {
-				continue
-			}
-			dao.Members.AddRoleToMember(member, role)
-		}
+		dao.Members.AddMember(payload.Address.String(), payload.Roles)
 	})
 }
 
