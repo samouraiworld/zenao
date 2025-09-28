@@ -1622,7 +1622,7 @@ func genVotePollMsgRunBody(userRealmPkgPath, pollID, option string) string {
 	func voteOnPoll() {
 		pollID := %s
 		option := %q
-		polls.Vote(uint64(pollID), option)
+		polls.Vote(cross, uint64(pollID), option)
 	}
 `, userRealmPkgPath, pollID, option)
 }
