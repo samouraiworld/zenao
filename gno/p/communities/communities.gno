@@ -49,29 +49,36 @@ func NewCommunity(conf *Config) *Community {
 			Description: "Event organized & managed by the community",
 		},
 	}
+
 	var members []basedao.Member
-	for _, admin := range conf.Administrators {
+	setRole := func(addr string, role string) {
+		for _, member := range members {
+			if member.Address != addr {
+				continue
+			}
+			for _, existing := range member.Roles {
+				if existing == role {
+					return
+				}
+			}
+			member.Roles = append(member.Roles, role)
+			return
+		}
 		members = append(members, basedao.Member{
-			Address: admin,
-			Roles:   []string{"administrator"},
+			Address: addr,
+			Roles:   []string{role},
 		})
+	}
+	for _, admin := range conf.Administrators {
+		setRole(admin, "administrator")
 	}
 	for _, member := range conf.Members {
-		members = append(members, basedao.Member{
-			Address: member,
-			Roles:   []string{"member"},
-		})
+		setRole(member, "member")
 	}
 	for _, event := range conf.Events {
-		members = append(members, basedao.Member{
-			Address: event,
-			Roles:   []string{"event"},
-		})
+		setRole(event, "event")
 	}
-	members = append(members, basedao.Member{
-		Address: conf.ZenaoAdminAddr,
-		Roles:   []string{"zenao-admin"},
-	})
+	setRole(conf.ZenaoAdminAddr, "zenao-admin")
 
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
