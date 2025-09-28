@@ -25,7 +25,7 @@ services:
       test: curl --fail http://localhost:26657/status?heightGte=2 || exit 1
       interval: 10s
       timeout: 30s
-      retries: 50
+      retries: 100
       start_period: 30s
   otel-collector:
     image: otel/opentelemetry-collector:0.107.0
