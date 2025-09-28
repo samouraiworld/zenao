@@ -318,9 +318,9 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: %q,
-		Message: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
+		Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 			Title: "Edit event",
-			Message: events.NewEditEventAction(
+			Action: events.NewEditEventAction(
 				%s,
 				%s,
 				%q,
@@ -703,9 +703,9 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: %q,
-		Message: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
+		Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 			Title: "Edit community",
-			Message: communities.NewEditCommunityAction(
+			Action: communities.NewEditCommunityAction(
 				%q,
 				%q,
 				%q,
@@ -1044,7 +1044,7 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "Edit profile",
-		Message: basedao.NewEditProfileAction([][2]string{
+		Action: basedao.NewEditProfileAction([][2]string{
 			{"DisplayName", %q},
 			{"Bio", %q},
 			{"Avatar", %q},
@@ -1488,9 +1488,9 @@ func genCancelEventMsgRunBody(eventPkgPath, organizerPkgPath string) string {
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Cancel event",
-			Message: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Cancel event",
-				Message: events.NewCancelEventAction(),
+				Action: events.NewCancelEventAction(),
 			}),
 		})
 	}
@@ -1513,7 +1513,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Add new post",
-			Message: daokit.NewExecuteLambdaAction(newPost),
+			Action: daokit.NewExecuteLambdaAction(newPost),
 		})
 	}
 
@@ -1540,7 +1540,7 @@ func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Edit post #%d",
-			Message: daokit.NewExecuteLambdaAction(editPost),
+			Action: daokit.NewExecuteLambdaAction(editPost),
 		})
 	}
 
@@ -1565,7 +1565,7 @@ func genDeletePostMsgRunBody(userRealmPkgPath string, postIDInt uint64) string {
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Delete post #%d",
-			Message: daokit.NewExecuteLambdaAction(deletePost),
+			Action: daokit.NewExecuteLambdaAction(deletePost),
 		})
 	}
 
@@ -1587,7 +1587,7 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "User #%s reacts to post #%s in %s #%s.",
-		Message: daokit.NewExecuteLambdaAction(newReaction),
+		Action: daokit.NewExecuteLambdaAction(newReaction),
 	})
 }
 
@@ -1609,7 +1609,7 @@ func genVotePollMsgRunBody(userRealmPkgPath, pollID, option string) string {
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Vote on poll",
-			Message: daokit.NewExecuteLambdaAction(voteOnPoll),
+			Action: daokit.NewExecuteLambdaAction(voteOnPoll),
 		})
 	}
 
@@ -1641,7 +1641,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Add new poll",
-			Message: daokit.NewExecuteLambdaAction(newPoll),
+			Action: daokit.NewExecuteLambdaAction(newPoll),
 		})
 	}
 	
@@ -1684,9 +1684,9 @@ func genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, ticketPubkey, signatu
 	func main() {
 		daokit.InstantExecute(gatekeeper.DAO, daokit.ProposalRequest{
 			Title: "Checkin",
-			Message: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Checkin",
-				Message: events.NewCheckinAction(%q, %q),
+				Action: events.NewCheckinAction(%q, %q),
 			}),
 		})
 	}
@@ -1706,9 +1706,9 @@ func genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, tick
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Add participant",
-				Message: events.NewAddParticipantAction(%q, %q, %q),
+				Action: events.NewAddParticipantAction(%q, %q, %q),
 			}),
 		})
 	}
@@ -1728,9 +1728,9 @@ func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAd
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Remove participant",
-				Message: events.NewRemoveParticipantAction(%q, %q),
+				Action: events.NewRemoveParticipantAction(%q, %q),
 			}),
 		})
 	}
@@ -1750,9 +1750,9 @@ func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperA
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Remove gatekeeper",
-				Message: events.NewRemoveGatekeeperAction(%q),
+				Action: events.NewRemoveGatekeeperAction(%q),
 			}),
 		})
 	}
@@ -1772,9 +1772,9 @@ func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberA
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Remove member",
-				Message: communities.NewRemoveMemberAction(%q),
+				Action: communities.NewRemoveMemberAction(%q),
 			}),
 		})
 	}
@@ -1794,9 +1794,9 @@ func genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Add Member",
-				Message: communities.NewAddMemberAction(%q),
+				Action: communities.NewAddMemberAction(%q),
 			}),
 		})
 	}
@@ -1816,9 +1816,9 @@ func genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath string, me
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Add Members",
-				Message: communities.NewAddMembersAction(%s),
+				Action: communities.NewAddMembersAction(%s),
 			}),
 		})
 	}
@@ -1838,9 +1838,9 @@ func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr s
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Add event",
-				Message: communities.NewAddEventAction(%q),
+				Action: communities.NewAddEventAction(%q),
 			}),
 		})
 	}
@@ -1860,9 +1860,9 @@ func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAdd
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Remove event",
-				Message: communities.NewRemoveEventAction(%q),
+				Action: communities.NewRemoveEventAction(%q),
 			}),
 		})
 	}
