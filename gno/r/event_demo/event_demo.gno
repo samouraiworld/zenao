@@ -40,7 +40,7 @@ func init() {
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
-	DAO = event.DAO
+	DAO = daokit.NewCrossing(event.DAO, func(_ realm, cb func()) { cb() })
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)

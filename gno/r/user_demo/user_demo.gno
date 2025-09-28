@@ -23,7 +23,7 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr:   "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94",
 	})
-	DAO = user.DAO
+	DAO = daokit.NewCrossing(user.DAO, func(_ realm, cb func()) { cb() })
 	daoPrivate = user.DAOPrivate
 }
 

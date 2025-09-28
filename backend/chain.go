@@ -1954,7 +1954,7 @@ func init() {
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
-	DAO = event.DAO
+	DAO = daokit.NewCrossing(event.DAO, func(_ realm, cb func()) { cb() })
 	eventreg.Register(cross, func() *zenaov1.EventInfo { return event.Info() })
 }
 
@@ -2036,7 +2036,7 @@ func init() {
 	}
 	community = communities.NewCommunity(&conf)
 	daoPrivate = community.DAOPrivate
-	DAO = community.DAO
+	DAO = daokit.NewCrossing(community.DAO, func(_ realm, cb func()) { cb() })
 	communityreg.Register(cross, func() *zenaov1.CommunityInfo { return community.Info() })
 }
 
@@ -2115,7 +2115,7 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: {{.zenaoAdminAddr}},
 	})
-	DAO = user.DAO
+	DAO = daokit.NewCrossing(user.DAO, func(_ realm, cb func()) { cb() })
 	daoPrivate = user.DAOPrivate
 }
 

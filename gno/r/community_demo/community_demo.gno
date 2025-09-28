@@ -35,7 +35,7 @@ func init() {
 	}
 	community = communities.NewCommunity(&conf)
 	daoPrivate = community.DAOPrivate
-	DAO = community.DAO
+	DAO = daokit.NewCrossing(community.DAO, func(_ realm, cb func()) { cb() })
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)
