@@ -1114,14 +1114,17 @@ func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, 
 	}
 
 	for _, event := range broadcastRes.DeliverTx.Events {
-		if gnoEvent, ok := event.(std.GnoEvent); ok {
+		switch gnoEvent := event.(type) {
+		case std.GnoEvent:
 			if gnoEvent.Type == gnoEventPostCreate {
 				postID, err = extractEventAttribute(gnoEvent, "postID")
 				if err != nil {
 					return "", err
 				}
 			}
-		} else {
+		case std.StorageDepositEvent:
+		case std.StorageUnlockEvent:
+		default:
 			g.logger.Info("unknown event type", zap.Any("event", event))
 		}
 	}
@@ -1273,7 +1276,8 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 	}
 
 	for _, event := range broadcastRes.DeliverTx.Events {
-		if gnoEvent, ok := event.(std.GnoEvent); ok {
+		switch gnoEvent := event.(type) {
+		case std.GnoEvent:
 			if gnoEvent.Type == gnoEventPollCreate {
 				pollID, err = extractEventAttribute(gnoEvent, "pollID")
 				if err != nil {
@@ -1286,7 +1290,9 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 					return "", "", err
 				}
 			}
-		} else {
+		case std.StorageDepositEvent:
+		case std.StorageUnlockEvent:
+		default:
 			g.logger.Info("unknown event type", zap.Any("event", event))
 		}
 	}
@@ -1521,7 +1527,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 		feedID := %q
 		post := %s
 
-		postID := social_feed.NewPost(crossfeedID, post)
+		postID := social_feed.NewPost(cross, feedID, post)
 		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 `, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
@@ -1665,7 +1671,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 			},
 		}
 	
-		postID := social_feed.NewPost(crossfeedID, post)
+		postID := social_feed.NewPost(cross, feedID, post)
 		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 	`, orgPkgPath, userRealmPkgPath, question, stringSliceLit(options), kind, duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
@@ -1925,6 +1931,11 @@ var (
 )
 
 func init() {
+	// XXX: workaround for "unexpected zero object id" issue
+	social_feed.NewFeed(cross, "main", false, IsMember)
+}
+
+func init() {
 	conf := events.Config{
 		Organizers: {{.organizersAddr}},
 		Gatekeepers: {{.gatekeepersAddr}},
@@ -1945,7 +1956,6 @@ func init() {
 	daoPrivate = event.DAOPrivate
 	DAO = event.DAO
 	eventreg.Register(cross, func() *zenaov1.EventInfo { return event.Info() })
-	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)
@@ -2007,6 +2017,11 @@ var (
 )
 
 func init() {
+	// XXX: workaround for "unexpected zero object id" issue
+	social_feed.NewFeed(cross, "main", false, IsMember)
+}
+
+func init() {
 	conf := communities.Config{
 		ZenaoAdminAddr:   {{.zenaoAdminAddr}},
 		Administrators:   {{.adminsAddr}},
@@ -2023,7 +2038,6 @@ func init() {
 	daoPrivate = community.DAOPrivate
 	DAO = community.DAO
 	communityreg.Register(cross, func() *zenaov1.CommunityInfo { return community.Info() })
-	social_feed.NewFeed(cross, "main", false, IsMember)
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)
