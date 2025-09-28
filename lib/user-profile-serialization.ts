@@ -4,10 +4,14 @@ import { GnoProfileDetails, gnoProfileDetailsSchema } from "@/types/schemas";
 export function serializeUserProfileDetails(
   profileDetails: GnoProfileDetails,
 ): string {
-  const { bio, socialMediaLinks, shortBio } = profileDetails;
+  const { bio, socialMediaLinks, location, shortBio } = profileDetails;
 
   // header containing structured data
-  const header = { socialMediaLinks, shortBio };
+  const header = {
+    socialMediaLinks,
+    location,
+    shortBio,
+  };
 
   return matter.stringify(bio, header);
 }
@@ -25,6 +29,7 @@ export function deserializeUserProfileDetails(
     return {
       bio: content,
       socialMediaLinks: data.socialMediaLinks || [],
+      location: data.location || "",
       shortBio: data.shortBio || "",
     };
   }
@@ -32,6 +37,7 @@ export function deserializeUserProfileDetails(
   return {
     bio: result.data.bio,
     socialMediaLinks: result.data.socialMediaLinks,
+    location: result.data.location,
     shortBio: result.data.shortBio,
   };
 }
