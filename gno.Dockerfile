@@ -32,7 +32,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
   go build \
   -mod=readonly \
   -o /app/build/gnodev \
-  ./cmd/gnodev
+  .
 
 WORKDIR /app
 COPY gno packages
