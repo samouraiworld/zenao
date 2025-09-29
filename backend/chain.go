@@ -1577,7 +1577,7 @@ func genDeletePostMsgRunBody(userRealmPkgPath string, postIDInt uint64) string {
 
 	func deletePost() {
 		postID := uint64(%d)
-		social_feed.DeletePost(postID)
+		social_feed.DeletePost(cross, postID)
 	}
 `, userRealmPkgPath, postIDInt, postIDInt)
 }
