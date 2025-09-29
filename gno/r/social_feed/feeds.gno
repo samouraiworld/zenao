@@ -1,12 +1,12 @@
 package social_feed
 
 import (
-	"std"
+	"chain/runtime"
 	"strconv"
 	"strings"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/seqid"
+	"gno.land/p/nt/avl"
+	"gno.land/p/nt/seqid"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 )
 
@@ -42,8 +42,8 @@ func init() {
 	feedsByPost = avl.NewTree()
 }
 
-func NewFeed(slug string, crossNetwork bool, authFunc func(string) bool) string {
-	creator := std.PreviousRealm()
+func NewFeed(_ realm, slug string, crossNetwork bool, authFunc func(string) bool) string {
+	creator := runtime.PreviousRealm()
 	if crossNetwork && authFunc != nil {
 		panic("crossNetwork feeds cannot have an authFunc")
 	}

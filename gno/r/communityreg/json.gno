@@ -1,7 +1,7 @@
 package communityreg
 
 import (
-	"gno.land/p/demo/json"
+	"gno.land/p/onbloc/json"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
 

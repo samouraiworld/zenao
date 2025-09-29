@@ -2,10 +2,9 @@ package batchprofile
 
 import (
 	"errors"
-	"std"
 
-	"gno.land/p/demo/json"
-	"gno.land/p/demo/ufmt"
+	"gno.land/p/nt/ufmt"
+	"gno.land/p/onbloc/json"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 	"gno.land/r/demo/profile"
 )
@@ -17,11 +16,11 @@ func Query(req *zenaov1.BatchProfileRequest) [][]interface{} {
 		for j, field := range req.Fields {
 			switch field.Type {
 			case "string":
-				res[i][j] = profile.GetStringField(std.Address(addr), field.Key, "")
+				res[i][j] = profile.GetStringField(address(addr), field.Key, "")
 			case "bool":
-				res[i][j] = profile.GetBoolField(std.Address(addr), field.Key, false)
+				res[i][j] = profile.GetBoolField(address(addr), field.Key, false)
 			case "int":
-				res[i][j] = profile.GetIntField(std.Address(addr), field.Key, 0)
+				res[i][j] = profile.GetIntField(address(addr), field.Key, 0)
 			default:
 				panic(ufmt.Errorf("invalid field type %q", field.Type))
 			}

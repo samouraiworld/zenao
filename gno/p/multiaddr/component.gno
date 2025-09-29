@@ -1,10 +1,9 @@
 package multiaddr
 
 import (
-	"bytes"
 	"strings"
 
-	"gno.land/p/demo/ufmt"
+	"gno.land/p/nt/ufmt"
 )
 
 // Component is a single multiaddr Component.
@@ -100,7 +99,7 @@ func validateComponent(c *Component) error {
 	if len(c.bytes) < len(c.protocol.VCode) {
 		return ufmt.Errorf("component size mismatch: %d != %d", len(c.bytes), len(c.protocol.VCode))
 	}
-	if !bytes.Equal([]byte(c.bytes[:len(c.protocol.VCode)]), c.protocol.VCode) {
+	if !bytesEqual([]byte(c.bytes[:len(c.protocol.VCode)]), c.protocol.VCode) {
 		return ufmt.Errorf("component's VCode field is invalid: %v != %v", []byte(c.bytes[:len(c.protocol.VCode)]), c.protocol.VCode)
 	}
 	if c.protocol.Size < 0 {
@@ -137,4 +136,17 @@ func validateComponent(c *Component) error {
 		}
 	}
 	return nil
+}
+
+func bytesEqual(a []byte, b []byte) bool {
+	// workaround for "illegal conversion of readonly or externally stored value" error
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
