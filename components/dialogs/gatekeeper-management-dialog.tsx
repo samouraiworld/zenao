@@ -101,7 +101,7 @@ function GatekeeperManagementForm({
         </div>
         {isAddButtonEnabled && (
           <Text className="text-xs text-muted-foreground -mt-1">
-            Click + to add this gatekeeper
+            {t("click-add-hint")}
           </Text>
         )}
       </form>

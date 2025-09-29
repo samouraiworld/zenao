@@ -124,7 +124,8 @@
     "default": "Default (You)",
     "toast-gatekeeper-management-success": "Gatekeepers successfully updated!",
     "toast-gatekeeper-management-error": "Error while updating gatekeepers!",
-    "done": "Done"
+    "done": "Done",
+    "click-add-hint": "Click + to add this gatekeeper"
   },
   "manifesto": {
     "title": "MANIFESTO",
