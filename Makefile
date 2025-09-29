@@ -9,6 +9,7 @@ generate:
 	npm i
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
 	gno fmt -w ./gno/...
+	${MAKE} gno-mod-tidy
 	npm run mail:build
 
 .PHONY: lint-buf
