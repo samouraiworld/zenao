@@ -69,6 +69,9 @@ function GatekeeperManagementForm({
     internalForm.reset();
   };
 
+  const isAddButtonEnabled =
+    internalForm.formState.isValid && internalForm.formState.isDirty;
+
   return (
     <Form {...internalForm}>
       <form
@@ -87,18 +90,20 @@ function GatekeeperManagementForm({
           <div className="col-span-1">
             <Button
               type="submit"
-              variant="outline"
+              variant={isAddButtonEnabled ? "default" : "outline"}
               aria-label="add gatekeeper"
-              disabled={
-                !internalForm.formState.isValid ||
-                !internalForm.formState.isDirty
-              }
+              disabled={!isAddButtonEnabled}
               className="aspect-square w-full h-12"
             >
               <Plus className="w-4 h-4" />
             </Button>
           </div>
         </div>
+        {isAddButtonEnabled && (
+          <Text className="text-xs text-muted-foreground -mt-1">
+            Click + to add this gatekeeper
+          </Text>
+        )}
       </form>
 
       <ol className="w-full list-decimal">
