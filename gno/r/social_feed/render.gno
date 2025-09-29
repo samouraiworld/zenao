@@ -1,7 +1,7 @@
 package social_feed
 
 import (
-	"std"
+	"chain/runtime"
 	"strconv"
 	"strings"
 
@@ -106,7 +106,7 @@ func DetailPostPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 }
 
 func renderZenaoPost(post *feedsv1.Post) string {
-	pkgPath := std.CurrentRealm().PkgPath()
+	pkgPath := runtime.CurrentRealm().PkgPath()
 	linkPath := getLinkPath(pkgPath)
 	var s string
 	switch ext := post.Post.(type) {

@@ -1,8 +1,8 @@
 package communityreg
 
 import (
+	"chain/runtime"
 	"errors"
-	"std"
 
 	"gno.land/p/nt/avl"
 	"gno.land/p/nt/ownable"
@@ -22,13 +22,13 @@ var (
 )
 
 func init() {
-	Ownable = ownable.NewWithAddress(std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
+	Ownable = ownable.NewWithAddress(address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
 }
 
 // XXX: split this package into communityreg and communitiesindex
 
 func Register(_ realm, infoGetter communities.InfoGetter) {
-	pkgPath := std.PreviousRealm().PkgPath()
+	pkgPath := runtime.PreviousRealm().PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)

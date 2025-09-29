@@ -3,7 +3,6 @@ package events
 import (
 	"encoding/base64"
 	"math/rand"
-	"std"
 	"testing"
 	"time"
 
@@ -24,9 +23,9 @@ var (
 func TestNewEvent(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -46,9 +45,9 @@ func TestNewEvent(t *testing.T) {
 func TestCancelEvent(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -82,9 +81,9 @@ func TestCancelEvent(t *testing.T) {
 func TestAddParticipant(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -132,9 +131,9 @@ func TestAddParticipant(t *testing.T) {
 func TestRemoveParticipant(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -192,9 +191,9 @@ func TestRemoveParticipant(t *testing.T) {
 func TestTicket(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -225,7 +224,7 @@ func TestTicket(t *testing.T) {
 	}
 
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(carol),
+		CurrentRealm: testing.NewUserRealm(carol),
 	})
 	now := time.Now()
 	daokit.InstantExecute(event.DAO, testReq(NewCheckinAction(ticketPubkey, ticketSignature)))

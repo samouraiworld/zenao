@@ -1,7 +1,6 @@
 package social_feed
 
 import (
-	"std"
 	"testing"
 
 	feedsv1 "gno.land/p/zenao/feeds/v1"
@@ -99,7 +98,7 @@ func TestNewFeed(t *testing.T) {
 			}()
 
 			testing.SetContext(testing.Context{
-				CurrentRealm: std.NewUserRealm(alice),
+				CurrentRealm: testing.NewUserRealm(alice),
 			})
 			feedId := NewFeed(cross, test.input.slug, test.input.crossNetwork, test.input.authFunc)
 			if !test.output.panic && feedId != test.output.feedId {
@@ -275,7 +274,7 @@ func TestGetFeedPosts(t *testing.T) {
 	}
 
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
 	//XXX post in reverse order so that the newest post is first
 	for i := len(posts) - 1; i >= 0; i-- {
@@ -395,7 +394,7 @@ func TestGetChildrenPosts(t *testing.T) {
 	}
 
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
 	//XXX post in reverse order so that the newest post is first
 	for i := len(posts) - 1; i >= 0; i-- {

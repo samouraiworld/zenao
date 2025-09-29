@@ -1,7 +1,6 @@
 package cockpit
 
 import (
-	"std"
 	"strings"
 
 	"gno.land/p/moul/md"
@@ -75,13 +74,13 @@ func renderUser(res *mux.ResponseWriter, req *mux.Request) {
 	res.Write("```\n" + profile.GetStringField(addr, profile.Bio, "No bio") + "\n```\n[Full profile / edit](" + ghProfileHint + addr.String() + ")\n")
 }
 
-func resolveUserBasics(aon string) (std.Address, string, bool) {
+func resolveUserBasics(aon string) (address, string, bool) {
 	user, ok := rusers.ResolveAny(aon)
 	if ok {
 		return user.Addr(), user.Name(), true
 	}
 
-	addr := std.Address(aon)
+	addr := address(aon)
 	if addr.IsValid() {
 		return addr, "", true
 	}

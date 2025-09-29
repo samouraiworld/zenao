@@ -1,7 +1,6 @@
 package communityreg
 
 import (
-	"std"
 	"strings"
 
 	"gno.land/p/moul/md"
@@ -38,7 +37,7 @@ func renderSection(buf *strings.Builder, listFn func(uint32, uint32) []*zenaov1.
 func renderCommunity(buf *strings.Builder, community *zenaov1.CommunityInfo) {
 	var admRendered []string
 	for _, adm := range community.Administrators {
-		admin := profile.GetStringField(std.Address(adm), "DisplayName", "")
+		admin := profile.GetStringField(address(adm), "DisplayName", "")
 		if adm == "" {
 			admin = adm
 		}

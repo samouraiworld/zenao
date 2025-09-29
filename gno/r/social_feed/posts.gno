@@ -1,7 +1,7 @@
 package social_feed
 
 import (
-	"std"
+	"chain/runtime"
 	"strconv"
 	"time"
 
@@ -11,7 +11,7 @@ import (
 )
 
 func NewPost(_ realm, feedId string, post *feedsv1.Post) uint64 {
-	creator := std.PreviousRealm().Address().String()
+	creator := runtime.PreviousRealm().Address().String()
 	post.Author = creator
 	post.CreatedAt = time.Now().Unix()
 	post.UpdatedAt = time.Now().Unix()
@@ -52,7 +52,7 @@ func GetPost(localPostId uint64) *feedsv1.Post {
 }
 
 func DeletePost(_ realm, localPostId uint64) {
-	caller := std.PreviousRealm().Address().String()
+	caller := runtime.PreviousRealm().Address().String()
 	localPostIdStr := seqid.ID(localPostId).String()
 	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
@@ -77,7 +77,7 @@ func DeletePost(_ realm, localPostId uint64) {
 }
 
 func EditPost(_ realm, localPostId uint64, newPost *feedsv1.Post) {
-	caller := std.PreviousRealm().Address().String()
+	caller := runtime.PreviousRealm().Address().String()
 	localPostIdStr := seqid.ID(localPostId).String()
 	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
@@ -108,7 +108,7 @@ func EditPost(_ realm, localPostId uint64, newPost *feedsv1.Post) {
 }
 
 func ReactPost(_ realm, localPostId uint64, icon string) {
-	caller := std.PreviousRealm().Address()
+	caller := runtime.PreviousRealm().Address()
 	localPostIdStr := seqid.ID(localPostId).String()
 	userReactId := localPostIdStr + ":" + icon + ":" + caller.String()
 	reactId := localPostIdStr + ":" + icon

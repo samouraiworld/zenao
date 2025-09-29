@@ -1,7 +1,7 @@
 package polls
 
 import (
-	"std"
+	"chain/runtime"
 	"time"
 
 	"gno.land/p/nt/avl"
@@ -27,7 +27,7 @@ type Poll struct {
 	Duration int64
 
 	CreatedAt int64
-	CreatedBy std.Address
+	CreatedBy address
 
 	authFunc func(string) bool
 }
@@ -54,7 +54,7 @@ func NewPoll(_ realm, question string, kind pollsv1.PollKind, duration int64, op
 		Results:   avl.NewTree(),
 		Duration:  duration,
 		CreatedAt: time.Now().Unix(),
-		CreatedBy: std.PreviousRealm().Address(),
+		CreatedBy: runtime.PreviousRealm().Address(),
 		authFunc:  authFunc,
 	}
 	for _, option := range options {
@@ -97,7 +97,7 @@ func GetInfo(pollID uint64, user string) *pollsv1.Poll {
 }
 
 func (p *Poll) Vote(option string) {
-	addr := std.PreviousRealm().Address()
+	addr := runtime.PreviousRealm().Address()
 	if p.authFunc != nil && !p.authFunc(addr.String()) {
 		panic("the user is not allowed to interact with this poll")
 	}

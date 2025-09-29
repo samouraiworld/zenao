@@ -2,7 +2,6 @@ package eventreg
 
 import (
 	"fmt"
-	"std"
 	"strings"
 	"testing"
 	"time"
@@ -14,8 +13,8 @@ import (
 
 // XXX: Add tests for multiple organizers
 func TestEvents(t *testing.T) {
-	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
-	testing.SetRealm(std.NewUserRealm(initialOwner))
+	initialOwner := address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
+	testing.SetRealm(testing.NewUserRealm(initialOwner))
 
 	nextYearUnix := time.Now().Add(time.Hour * 24 * 365).Unix()
 	lastYearUnix := time.Now().Add(-time.Hour * 24 * 365).Unix()
@@ -42,7 +41,7 @@ func TestEvents(t *testing.T) {
 	}
 	for _, evt := range evts {
 		// XXX: `ev := evt` and using ev in place of evt will cause "gno.land/r/zenao/eventreg: test pkg: panic: unexpected type heapitem"
-		testing.SetRealm(std.NewCodeRealm(evt.id))
+		testing.SetRealm(testing.NewCodeRealm(evt.id))
 		getters[evt.id] = func() *zenaov1.EventInfo {
 			return &zenaov1.EventInfo{
 				Organizers:   evt.organizers,
@@ -51,7 +50,7 @@ func TestEvents(t *testing.T) {
 			}
 		}
 		Register(cross, getters[evt.id])
-		testing.SetRealm(std.NewUserRealm(initialOwner))
+		testing.SetRealm(testing.NewUserRealm(initialOwner))
 
 		IndexEvent(cross, evt.id)
 	}
@@ -238,8 +237,8 @@ func TestEvents(t *testing.T) {
 }
 
 func TestEventsWithNonDiscoverable(t *testing.T) {
-	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
-	testing.SetRealm(std.NewUserRealm(initialOwner))
+	initialOwner := address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
+	testing.SetRealm(testing.NewUserRealm(initialOwner))
 
 	organizers := []string{"johnny"}
 	nextYearUnix := time.Now().Add(time.Hour * 24 * 365).Unix()
@@ -263,7 +262,7 @@ func TestEventsWithNonDiscoverable(t *testing.T) {
 
 	for _, evt := range evts {
 		// XXX: `ev := evt` and using ev in place of evt will cause "gno.land/r/zenao/eventreg: test pkg: panic: unexpected type heapitem"
-		testing.SetRealm(std.NewCodeRealm(evt.id))
+		testing.SetRealm(testing.NewCodeRealm(evt.id))
 		getters[evt.id] = func() *zenaov1.EventInfo {
 			return &zenaov1.EventInfo{
 				Discoverable: evt.discoverable,
@@ -272,7 +271,7 @@ func TestEventsWithNonDiscoverable(t *testing.T) {
 			}
 		}
 		Register(cross, getters[evt.id])
-		testing.SetRealm(std.NewUserRealm(initialOwner))
+		testing.SetRealm(testing.NewUserRealm(initialOwner))
 		IndexEvent(cross, evt.id)
 	}
 

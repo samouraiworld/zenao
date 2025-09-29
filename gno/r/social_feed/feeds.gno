@@ -1,7 +1,7 @@
 package social_feed
 
 import (
-	"std"
+	"chain/runtime"
 	"strconv"
 	"strings"
 
@@ -43,7 +43,7 @@ func init() {
 }
 
 func NewFeed(_ realm, slug string, crossNetwork bool, authFunc func(string) bool) string {
-	creator := std.PreviousRealm()
+	creator := runtime.PreviousRealm()
 	if crossNetwork && authFunc != nil {
 		panic("crossNetwork feeds cannot have an authFunc")
 	}

@@ -1,7 +1,6 @@
 package social_feed
 
 import (
-	"std"
 	"testing"
 	"time"
 
@@ -60,7 +59,7 @@ func TestNewPost(t *testing.T) {
 	}
 
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
 	pvFunc := func(string) bool { return false }
 	NewFeed(cross, "private", false, pvFunc)
@@ -130,7 +129,7 @@ func TestGetPost(t *testing.T) {
 	}
 
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
 	NewPost(cross, "public", validPost)
 
@@ -156,7 +155,7 @@ func TestDeletePost(t *testing.T) {
 
 	type input struct {
 		localPostId uint64
-		caller      std.Address
+		caller      address
 	}
 
 	type output struct {
@@ -218,7 +217,7 @@ func TestDeletePost(t *testing.T) {
 	}
 
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
 	NewPost(cross, "public", post)
 
@@ -299,17 +298,17 @@ func TestEditPost(t *testing.T) {
 	}
 
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
 	NewPost(cross, "public", post)
 	NewPost(cross, "public", deletedPost)
 	DeletePost(cross, 2)
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(bob),
+		CurrentRealm: testing.NewUserRealm(bob),
 	})
 	NewPost(cross, "public", bobPost)
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
 
 	tests := testTable{
@@ -445,7 +444,7 @@ func TestReactPost(t *testing.T) {
 	}
 
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
 	NewPost(cross, "public", post)
 	NewPost(cross, "public", post2)
@@ -453,7 +452,7 @@ func TestReactPost(t *testing.T) {
 	ReactPost(cross, 1, "like")
 	ReactPost(cross, 1, "dislike")
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(bob),
+		CurrentRealm: testing.NewUserRealm(bob),
 	})
 	ReactPost(cross, 1, "like")
 	ReactPost(cross, 2, "like")

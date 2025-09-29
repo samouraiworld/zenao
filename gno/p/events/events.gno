@@ -1,10 +1,10 @@
 package events
 
 import (
+	"chain/runtime"
 	"crypto/ed25519"
 	"encoding/base64"
 	"errors"
-	"std"
 	"strconv"
 	"strings"
 	"time"
@@ -244,7 +244,7 @@ func (e *Event) addParticipantHandler() daokit.ActionHandler {
 			panic(errors.New("ticket already added"))
 		}
 
-		callerIsOrganizer := e.DAOPrivate.Members.HasRole(std.PreviousRealm().Address().String(), "organizer")
+		callerIsOrganizer := e.DAOPrivate.Members.HasRole(runtime.PreviousRealm().Address().String(), "organizer")
 
 		// XXX: this dance is not very useful for now since all accounts are managed
 		// but we add this logic as PoC of on-chain password-guarded events
@@ -403,7 +403,7 @@ func (e *Event) checkinHandler() daokit.ActionHandler {
 			panic(err)
 		}
 
-		payloadBz := []byte(std.PreviousRealm().Address().String())
+		payloadBz := []byte(runtime.PreviousRealm().Address().String())
 
 		signatureBz, err := base64.RawURLEncoding.DecodeString(msg.CheckinSignature)
 		if err != nil {
@@ -572,7 +572,7 @@ func (e *Event) Render(path string) string {
 
 		var orgaRenderList []string
 		for _, org := range e.DAOPrivate.Members.GetMembersWithRole("organizer") {
-			orga := e.getProfileString(std.Address(org), "DisplayName", "")
+			orga := e.getProfileString(address(org), "DisplayName", "")
 			if orga == "" {
 				orga = org
 			}

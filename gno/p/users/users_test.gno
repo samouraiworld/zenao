@@ -1,7 +1,6 @@
 package users
 
 import (
-	"std"
 	"testing"
 
 	"gno.land/p/nt/testutils"
@@ -23,7 +22,7 @@ var (
 
 func TestNewUser(t *testing.T) {
 	testing.SetOriginCaller(alice)
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/users/u1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/users/u1"))
 	user := NewUser(&config)
 	if user.DAOPrivate.Members.GetMembers()[0] != alice.String() {
 		t.Fatalf("expected %s, got %s", alice.String(), user.DAOPrivate.Members.GetMembers()[0])

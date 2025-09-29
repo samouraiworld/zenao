@@ -17,7 +17,8 @@ import (
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
-	"github.com/gnolang/gno/gnovm/stdlibs/std"
+	"github.com/gnolang/gno/gnovm/stdlibs/chain"
+	"github.com/gnolang/gno/gnovm/stdlibs/chain/banker"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
@@ -108,7 +109,7 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 
 	msg := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
-		Send:    std.CompactCoins([]string{"ugnot"}, []int64{1_000_000}),
+		Send:    banker.CompactCoins([]string{"ugnot"}, []int64{1_000_000}),
 		PkgPath: "gno.land/r/gnoland/users/v1",
 		Func:    "Register",
 		Args:    []string{"zenaoadm4242"},
@@ -1115,15 +1116,15 @@ func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, 
 
 	for _, event := range broadcastRes.DeliverTx.Events {
 		switch gnoEvent := event.(type) {
-		case std.GnoEvent:
+		case chain.Event:
 			if gnoEvent.Type == gnoEventPostCreate {
 				postID, err = extractEventAttribute(gnoEvent, "postID")
 				if err != nil {
 					return "", err
 				}
 			}
-		case std.StorageDepositEvent:
-		case std.StorageUnlockEvent:
+		case chain.StorageDepositEvent:
+		case chain.StorageUnlockEvent:
 		default:
 			g.logger.Info("unknown event type", zap.Any("event", event))
 		}
@@ -1277,7 +1278,7 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 
 	for _, event := range broadcastRes.DeliverTx.Events {
 		switch gnoEvent := event.(type) {
-		case std.GnoEvent:
+		case chain.Event:
 			if gnoEvent.Type == gnoEventPollCreate {
 				pollID, err = extractEventAttribute(gnoEvent, "pollID")
 				if err != nil {
@@ -1290,8 +1291,8 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 					return "", "", err
 				}
 			}
-		case std.StorageDepositEvent:
-		case std.StorageUnlockEvent:
+		case chain.StorageDepositEvent:
+		case chain.StorageUnlockEvent:
 		default:
 			g.logger.Info("unknown event type", zap.Any("event", event))
 		}
@@ -1507,7 +1508,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 	return fmt.Sprintf(`package main
 
 	import (
-		"std"
+		"chain"
 
 		"gno.land/p/zenao/daokit"
 		"gno.land/p/nt/ufmt"
@@ -1528,7 +1529,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 		post := %s
 
 		postID := social_feed.NewPost(cross, feedID, post)
-		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
+		chain.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 `, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
 }
@@ -1631,7 +1632,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	return fmt.Sprintf(`package main
 
 	import (
-		"std"
+		"chain"
 	
 		"gno.land/p/nt/ufmt"
 		"gno.land/p/zenao/daokit"
@@ -1660,7 +1661,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		if err != nil {
 			panic("multiaddr validation failed")
 		}
-		std.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
+		chain.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
 	
 		feedID := %q
 		post := &feedsv1.Post{
@@ -1672,7 +1673,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		}
 	
 		postID := social_feed.NewPost(cross, feedID, post)
-		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
+		chain.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 	`, orgPkgPath, userRealmPkgPath, question, stringSliceLit(options), kind, duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
 }
@@ -2141,7 +2142,7 @@ func Render(path string) string {
 }
 `
 
-func extractEventAttribute(event std.GnoEvent, key string) (string, error) {
+func extractEventAttribute(event chain.Event, key string) (string, error) {
 	for _, attr := range event.Attributes {
 		if attr.Key == key {
 			return attr.Value, nil

@@ -1,7 +1,6 @@
 package polls
 
 import (
-	"std"
 	"testing"
 	"time"
 
@@ -141,7 +140,7 @@ func TestVote(t *testing.T) {
 	type input struct {
 		id     uint64
 		option string
-		caller std.Address
+		caller address
 	}
 
 	type output struct {
@@ -308,7 +307,7 @@ func TestGetInfo(t *testing.T) {
 	setupTest()
 	type input struct {
 		id   uint64
-		user std.Address
+		user address
 	}
 
 	type output struct {

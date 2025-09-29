@@ -1,7 +1,6 @@
 package communities
 
 import (
-	"std"
 	"strings"
 	"testing"
 
@@ -20,16 +19,16 @@ var (
 	eve   = testutils.TestAddress("eve")
 )
 
-var testUsers = func() map[string]std.Address {
-	res := map[string]std.Address{}
+var testUsers = func() map[string]address {
+	res := map[string]address{}
 	for _, name := range []string{"alice", "bob", "carol", "dave", "eve", "zenaoadm"} {
 		res[name] = testutils.TestAddress(name)
 	}
 	return res
 }()
 
-var testUsersByAddr = func() map[std.Address]string {
-	res := map[std.Address]string{}
+var testUsersByAddr = func() map[address]string {
+	res := map[address]string{}
 	for name, addr := range testUsers {
 		res[addr] = name
 	}
@@ -39,7 +38,7 @@ var testUsersByAddr = func() map[std.Address]string {
 func usersNames(addrs []string) []string {
 	res := make([]string, 0, len(addrs))
 	for _, addr := range addrs {
-		name, ok := testUsersByAddr[std.Address(addr)]
+		name, ok := testUsersByAddr[address(addr)]
 		if !ok {
 			name = addr
 		}
@@ -50,7 +49,7 @@ func usersNames(addrs []string) []string {
 
 func TestNewCommunity(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 
 	conf := Config{
 		Administrators:   []string{alice.String(), bob.String()},
@@ -87,9 +86,9 @@ func TestNewCommunity(t *testing.T) {
 func TestAddMember(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/communities/c1"))
 
 	conf := Config{
 		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
@@ -123,9 +122,9 @@ func TestAddMember(t *testing.T) {
 func TestRemoveMember(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/communities/c1"))
 	conf := Config{
 		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
 		Administrators:   []string{alice.String()},
@@ -158,9 +157,9 @@ func TestRemoveMember(t *testing.T) {
 func TestAddEvent(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/communities/c1"))
 	conf := Config{
 		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
 		Administrators:   []string{alice.String()},
@@ -197,9 +196,9 @@ func TestAddEvent(t *testing.T) {
 func TestRemoveEvent(t *testing.T) {
 	profile := &mockprofile.MockProfile{}
 	testing.SetContext(testing.Context{
-		CurrentRealm: std.NewUserRealm(alice),
+		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	testing.SetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/communities/c1"))
 	conf := Config{
 		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
 		Administrators:   []string{alice.String()},

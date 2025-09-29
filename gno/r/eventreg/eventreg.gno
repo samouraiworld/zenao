@@ -1,8 +1,9 @@
 package eventreg
 
 import (
+	"chain"
+	"chain/runtime"
 	"errors"
-	"std"
 
 	"gno.land/p/nt/avl"
 	"gno.land/p/nt/ownable"
@@ -28,13 +29,13 @@ var (
 )
 
 func init() {
-	Ownable = ownable.NewWithAddress(std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
+	Ownable = ownable.NewWithAddress(address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
 }
 
 // XXX: split this package into eventreg and eventsindex
 
 func Register(_ realm, infoGetter events.InfoGetter) {
-	pkgPath := std.PreviousRealm().PkgPath()
+	pkgPath := runtime.PreviousRealm().PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)
@@ -44,7 +45,7 @@ func Register(_ realm, infoGetter events.InfoGetter) {
 	registered.Set(pkgPath, infoGetter)
 
 	// TODO: Remove this when we have a better way to handle lookup by event address.
-	addr := std.DerivePkgAddr(pkgPath)
+	addr := chain.PackageAddress(pkgPath)
 	eventsPkgPathByAddr.Set(addr.String(), pkgPath)
 }
 

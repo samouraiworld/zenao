@@ -2,7 +2,6 @@ package basedao
 
 import (
 	"errors"
-	"std"
 	"strings"
 
 	"gno.land/p/moul/md"
@@ -15,7 +14,7 @@ import (
 const ActionAddMemberKind = "gno.land/p/zenao/basedao.AddMember"
 
 type ActionAddMember struct {
-	Address std.Address
+	Address address
 	Roles   []string
 }
 
@@ -47,7 +46,7 @@ const ActionRemoveMemberKind = "gno.land/p/zenao/basedao.RemoveMember"
 
 func NewRemoveMemberHandler(dao *DAOPrivate) daokit.ActionHandler {
 	return daokit.NewActionHandler(ActionRemoveMemberKind, func(ipayload interface{}) {
-		addr, ok := ipayload.(std.Address)
+		addr, ok := ipayload.(address)
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
@@ -55,7 +54,7 @@ func NewRemoveMemberHandler(dao *DAOPrivate) daokit.ActionHandler {
 	})
 }
 
-func NewRemoveMemberAction(addr std.Address) daokit.Action {
+func NewRemoveMemberAction(addr address) daokit.Action {
 	return daokit.NewAction(ActionRemoveMemberKind, addr)
 }
 
@@ -64,7 +63,7 @@ func NewRemoveMemberAction(addr std.Address) daokit.Action {
 const ActionAssignRoleKind = "gno.land/p/zenao/basedao.AssignRole"
 
 type ActionAssignRole struct {
-	Address std.Address
+	Address address
 	Role    string
 }
 
@@ -91,7 +90,7 @@ func NewAssignRoleAction(payload *ActionAssignRole) daokit.Action {
 const ActionUnassignRoleKind = "gno.land/p/zenao/basedao.UnassignRole"
 
 type ActionUnassignRole struct {
-	Address std.Address
+	Address address
 	Role    string
 }
 

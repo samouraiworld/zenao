@@ -2,7 +2,6 @@ package eventreg
 
 import (
 	"math"
-	"std"
 	"strings"
 	"time"
 
@@ -59,7 +58,7 @@ func renderEvent(buf *strings.Builder, evt *zenaov1.EventInfo) {
 
 	var orgaRendered []string
 	for _, organizer := range evt.Organizers {
-		orga := profile.GetStringField(std.Address(organizer), "DisplayName", "")
+		orga := profile.GetStringField(address(organizer), "DisplayName", "")
 		if orga == "" {
 			orga = organizer
 		}

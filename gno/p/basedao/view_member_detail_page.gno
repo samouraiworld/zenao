@@ -1,10 +1,6 @@
 package basedao
 
-import (
-	"std"
-
-	"gno.land/p/nt/ufmt"
-)
+import "gno.land/p/nt/ufmt"
 
 func (d *DAOPrivate) MemberDetailPageView(address string) string {
 	return d.MemberDetailHeaderView() +
@@ -19,13 +15,13 @@ func (d *DAOPrivate) MemberDetailHeaderView() string {
 	return s
 }
 
-func (d *DAOPrivate) MemberDetailView(address string) string {
+func (d *DAOPrivate) MemberDetailView(addr string) string {
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
-	roles := d.Members.GetMemberRoles(address)
-	displayName := d.GetProfileString(std.Address(address), "DisplayName", FALLBACK_DISPLAY_NAME)
-	bio := d.GetProfileString(std.Address(address), "Bio", "No bio")
-	pp := d.GetProfileString(std.Address(address), "Avatar", "")
+	roles := d.Members.GetMemberRoles(addr)
+	displayName := d.GetProfileString(address(addr), "DisplayName", FALLBACK_DISPLAY_NAME)
+	bio := d.GetProfileString(address(addr), "Bio", "No bio")
+	pp := d.GetProfileString(address(addr), "Avatar", "")
 	s := ""
 	s += ufmt.Sprintf("## Profile 👤\n\n")
 	s += ufmt.Sprintf("- **Display Name:** %s\n\n", displayName)

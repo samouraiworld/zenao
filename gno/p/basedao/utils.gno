@@ -1,7 +1,6 @@
 package basedao
 
 import (
-	"std"
 	"strings"
 	"time"
 
@@ -133,7 +132,7 @@ func (d *DAOPrivate) RenderMembersTable(path string, members *avl.Tree) string {
 	s += ufmt.Sprintf("|----------|----------------|--------------|-------------|\n")
 
 	for _, item := range page.Items {
-		displayName := d.GetProfileString(std.Address(item.Key), "DisplayName", FALLBACK_DISPLAY_NAME)
+		displayName := d.GetProfileString(address(item.Key), "DisplayName", FALLBACK_DISPLAY_NAME)
 		roles := d.Members.GetMemberRoles(item.Key)
 		rolesStr := strings.Join(roles, ", ")
 

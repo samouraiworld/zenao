@@ -13,7 +13,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/clerk/clerk-sdk-go/v2 v2.3.1
 	github.com/fullstorydev/grpcurl v1.9.2
-	github.com/gnolang/gno v0.0.0-20250928105220-0fbf343a14ca
+	github.com/gnolang/gno v0.0.0-20250929152115-4e80c37e8d18
 	github.com/go-faker/faker/v4 v4.5.0
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/goware/prefixer v0.0.0-20160118172347-395022866408
@@ -32,7 +32,7 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.40.0
 	golang.org/x/net v0.42.0
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/protobuf v1.36.6
 	gorm.io/driver/sqlite v1.5.7
 	gorm.io/gorm v1.30.0
 	gorm.io/plugin/opentelemetry v0.1.16
@@ -123,6 +123,8 @@ require (
 	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
 	github.com/containerd/ttrpc v1.2.7 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
+	github.com/cosmos/gogoproto v1.7.0 // indirect
+	github.com/cosmos/ics23/go v0.11.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.14.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/curioswitch/go-reassign v0.3.0 // indirect
@@ -137,6 +139,7 @@ require (
 	github.com/docker/docker-credential-helpers v0.8.2 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/emicklei/dot v1.6.2 // indirect
 	github.com/envoyproxy/go-control-plane v0.13.1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/ettle/strcase v0.2.0 // indirect
