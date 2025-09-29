@@ -94,22 +94,31 @@ func NewEvent(conf *Config) *Event {
 		},
 	}
 	var members []basedao.Member
-	for _, organizer := range conf.Organizers {
+	setRole := func(addr string, role string) {
+		for idx, member := range members {
+			if member.Address != addr {
+				continue
+			}
+			for _, existing := range member.Roles {
+				if existing == role {
+					return
+				}
+			}
+			members[idx].Roles = append(member.Roles, role)
+			return
+		}
 		members = append(members, basedao.Member{
-			Address: organizer,
-			Roles:   []string{"organizer"},
+			Address: addr,
+			Roles:   []string{role},
 		})
+	}
+	for _, organizer := range conf.Organizers {
+		setRole(organizer, "organizer")
 	}
 	for _, gatekeeper := range conf.Gatekeepers {
-		members = append(members, basedao.Member{
-			Address: gatekeeper,
-			Roles:   []string{"gatekeeper"},
-		})
+		setRole(gatekeeper, "gatekeeper")
 	}
-	members = append(members, basedao.Member{
-		Address: conf.ZenaoAdminAddr,
-		Roles:   []string{"zenao-admin"},
-	})
+	setRole(conf.ZenaoAdminAddr, "zenao-admin")
 
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
