@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2, Lock } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,7 +64,7 @@ export function ExclusiveEventGuard({
   const password = form.watch("password");
   const { toast } = useToast();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setCanAccess(!exclusive || isMember);
     const timeout = setTimeout(() => setIsCheckingAccess(false), 1000);
 

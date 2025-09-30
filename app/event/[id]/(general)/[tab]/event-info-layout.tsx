@@ -1,12 +1,11 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
-import React from "react";
+import React, { Suspense } from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
@@ -22,8 +21,6 @@ import Text from "@/components/widgets/texts/text";
 import EventLocationSection from "@/components/features/event/event-location-section";
 import { makeLocationFromEvent } from "@/lib/location";
 import { eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import EventParticipationInfo from "@/components/features/event/event-participation-info";
@@ -50,13 +47,8 @@ export function EventInfoLayout({
   eventId: string;
   children: React.ReactNode;
 }) {
-  const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { password } = useEventPassword();
   const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
-  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
 
   const location = makeLocationFromEvent(data.location);
   const timezone = useLocationTimezone(location);
@@ -134,11 +126,12 @@ export function EventInfoLayout({
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
           />
-          <EventManagementMenu
-            eventId={eventId}
-            roles={roles}
-            nbParticipants={data.participants}
-          />
+          <Suspense>
+            <EventManagementMenu
+              eventId={eventId}
+              nbParticipants={data.participants}
+            />
+          </Suspense>
         </div>
       </div>
 
@@ -146,7 +139,9 @@ export function EventInfoLayout({
         {/* Host section */}
         <div className="col-span-6 sm:col-span-3">
           <EventSection title={t("hosted-by")}>
-            <UserAvatarWithName linkToProfile address={data.organizers[0]} />
+            <Suspense>
+              <UserAvatarWithName linkToProfile address={data.organizers[0]} />
+            </Suspense>
           </EventSection>
         </div>
 
@@ -159,18 +154,21 @@ export function EventInfoLayout({
                 : t("going", { count: data.participants })
             }
           >
-            <ParticipantsSection id={eventId} />
+            <Suspense>
+              <ParticipantsSection id={eventId} />
+            </Suspense>
           </EventSection>
         </div>
       </div>
 
       {/* Participate Card */}
-      <EventParticipationInfo
-        eventId={eventId}
-        eventData={data}
-        roles={roles}
-        password={password}
-      />
+      <Suspense>
+        <EventParticipationInfo
+          eventId={eventId}
+          eventData={data}
+          password={password}
+        />
+      </Suspense>
 
       {children}
 
