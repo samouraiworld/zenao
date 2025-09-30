@@ -18,12 +18,19 @@ import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import EventLocationSection from "@/components/features/event/event-location-section";
 import { makeLocationFromEvent } from "@/lib/location";
 import { eventOptions } from "@/lib/queries/event";
 import { web2URL } from "@/lib/uris";
-import { UserAvatarWithName } from "@/components/features/user/user";
+import {
+  UserAvatarWithName,
+  UserAvatarWithNameSkeleton,
+} from "@/components/features/user/user";
 import EventParticipationInfo from "@/components/features/event/event-participation-info";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import {
+  EventLocationSection,
+  EventLocationSkeleton,
+} from "@/components/features/event/event-location-section";
 
 interface EventSectionProps {
   title: string;
@@ -39,6 +46,8 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
     </div>
   );
 };
+
+const iconSize = 22;
 
 export function EventInfoLayout({
   eventId,
@@ -67,8 +76,6 @@ export function EventInfoLayout({
     maximumAttendeeCapacity: data.capacity,
     image: web2URL(data.imageUri),
   };
-
-  const iconSize = 22;
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-8">
@@ -171,6 +178,57 @@ export function EventInfoLayout({
       {children}
 
       <GoTopButton />
+    </div>
+  );
+}
+
+export function EventInfoLayoutSkeleton() {
+  const t = useTranslations("event");
+
+  return (
+    <div className="flex flex-col w-full sm:h-full gap-8">
+      <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
+        <div className="flex flex-col w-full sm:w-3/6">
+          <AspectRatio ratio={16 / 9}>
+            <Skeleton style={{ width: "100%", height: "100%" }} />
+          </AspectRatio>
+        </div>
+
+        {/* Right Section */}
+        <div className="flex flex-col gap-4 w-full sm:w-3/6">
+          <Skeleton className="h-[2.5rem] w-60 mb-7" />
+          <div className="flex flex-row gap-4 items-center">
+            <Calendar width={iconSize} height={iconSize} />
+            <div className="flex flex-col">
+              <Skeleton className="h-[1.25rem] my-[0.25rem] w-40" />
+              <div className="flex flex-row text-sm gap-1">
+                <Skeleton className="h-[0.875rem] my-[0.1875rem] w-20" />
+                <Text variant="secondary" size="sm">
+                  -
+                </Text>
+                <Skeleton className="h-[0.875rem] my-[0.1875rem] w-40" />
+              </div>
+            </div>
+          </div>
+
+          {/* Location */}
+          <EventLocationSkeleton />
+
+          <GnowebButton href={""} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-6 gap-10">
+        {/* Host section */}
+        <div className="col-span-6 sm:col-span-3">
+          <EventSection title={t("hosted-by")}>
+            <UserAvatarWithNameSkeleton />
+          </EventSection>
+        </div>
+
+        {/* Participants preview and dialog section */}
+        <div className="col-span-6 sm:col-span-3"></div>
+      </div>
     </div>
   );
 }

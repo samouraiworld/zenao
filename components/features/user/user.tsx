@@ -109,6 +109,19 @@ export function UserAvatarWithName(
   return <div className={props.className}>{content}</div>;
 }
 
+export function UserAvatarWithNameSkeleton(props: {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  return (
+    <div className={props.className}>
+      <div className="flex flex-row gap-2 items-center">
+        <UserAvatarWithNameLoader size={props.size} />{" "}
+      </div>
+    </div>
+  );
+}
+
 function UserAvatarWithNameLoader({
   size = "sm",
 }: {
