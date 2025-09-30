@@ -13,7 +13,7 @@ export const eventOptions = (id: string) =>
   queryOptions({
     queryKey: ["event", id],
     queryFn: async () => {
-      const span = tracer.startSpan("query:event");
+      const span = tracer.startSpan("query:event:" + id);
       try {
         const client = new GnoJSONRPCProvider(
           process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
@@ -28,6 +28,7 @@ export const eventOptions = (id: string) =>
         span.end();
       }
     },
+    staleTime: Infinity,
   });
 
 export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
