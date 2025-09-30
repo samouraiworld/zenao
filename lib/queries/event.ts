@@ -1,24 +1,32 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
+import { trace } from "@opentelemetry/api";
 import { GetToken } from "../utils";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
 import { zenaoClient } from "@/lib/zenao-client";
 
+const tracer = trace.getTracer("custom-tracer");
+
 export const eventOptions = (id: string) =>
   queryOptions({
     queryKey: ["event", id],
     queryFn: async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/events/e${id}`,
-        `event.GetInfoJSON()`,
-      );
-      const event = extractGnoJSONResponse(res) as EventInfoJson;
-      return fromJson(EventInfoSchema, event);
+      const span = tracer.startSpan("query:event");
+      try {
+        const client = new GnoJSONRPCProvider(
+          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        );
+        const res = await client.evaluateExpression(
+          `gno.land/r/zenao/events/e${id}`,
+          `event.GetInfoJSON()`,
+        );
+        const event = extractGnoJSONResponse(res) as EventInfoJson;
+        return fromJson(EventInfoSchema, event);
+      } finally {
+        span.end();
+      }
     },
   });
 
