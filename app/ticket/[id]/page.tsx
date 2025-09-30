@@ -10,7 +10,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { imageWidth, imageHeight } from "@/app/event/[id]/constants";
+import { imageWidth, imageHeight } from "@/components/features/event/constants";
 import { eventTickets } from "@/lib/queries/ticket";
 
 type PageProps = {

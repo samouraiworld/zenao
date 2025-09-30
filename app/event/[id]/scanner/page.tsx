@@ -6,6 +6,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
+import { EventScreenContainer } from "@/components/features/event/event-screen-container";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -39,7 +40,9 @@ export default async function ScannerPage({ params }: Props) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <EventTicketScanner eventId={p.id} eventData={eventData} />
+      <EventScreenContainer id={p.id}>
+        <EventTicketScanner eventId={p.id} eventData={eventData} />
+      </EventScreenContainer>
     </HydrationBoundary>
   );
 }
