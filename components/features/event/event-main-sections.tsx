@@ -15,6 +15,7 @@ import { TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
+import Text from "@/components/widgets/texts/text";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import {
   EventInfoTabsSchemaType,
@@ -75,7 +76,7 @@ export function MainEventSections({
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 min-h-0 pt-4">
-          <Suspense>
+          <Suspense fallback={<Text>TODO</Text>}>
             <MainEventSectionsContent eventId={eventId} section={section} />
           </Suspense>
         </div>
