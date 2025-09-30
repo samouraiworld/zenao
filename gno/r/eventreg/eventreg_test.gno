@@ -247,17 +247,17 @@ func TestEventsWithNonDiscoverable(t *testing.T) {
 
 	getters := map[string]events.InfoGetter{}
 	evts := []*struct {
-		id           string
-		discoverable bool
+		id                 string
+		discoverableFilter zenaov1.DiscoverableFilter
 	}{
-		{"gno.land/r/zenao/events/e1", false},
-		{"gno.land/r/zenao/events/e2", true},
-		{"gno.land/r/zenao/events/e3", false},
-		{"gno.land/r/zenao/events/e4", true},
-		{"gno.land/r/zenao/events/e5", false},
-		{"gno.land/r/zenao/events/e6", true},
-		{"gno.land/r/zenao/events/e7", false},
-		{"gno.land/r/zenao/events/e8", true},
+		{"gno.land/r/zenao/events/e1", zenaov1.DISCOVERABLE_FILTER_UNDISCOVERABLE},
+		{"gno.land/r/zenao/events/e2", zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE},
+		{"gno.land/r/zenao/events/e3", zenaov1.DISCOVERABLE_FILTER_UNDISCOVERABLE},
+		{"gno.land/r/zenao/events/e4", zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE},
+		{"gno.land/r/zenao/events/e5", zenaov1.DISCOVERABLE_FILTER_UNDISCOVERABLE},
+		{"gno.land/r/zenao/events/e6", zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE},
+		{"gno.land/r/zenao/events/e7", zenaov1.DISCOVERABLE_FILTER_UNDISCOVERABLE},
+		{"gno.land/r/zenao/events/e8", zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE},
 	}
 
 	for _, evt := range evts {
@@ -265,7 +265,7 @@ func TestEventsWithNonDiscoverable(t *testing.T) {
 		testing.SetRealm(testing.NewCodeRealm(evt.id))
 		getters[evt.id] = func() *zenaov1.EventInfo {
 			return &zenaov1.EventInfo{
-				Discoverable: evt.discoverable,
+				Discoverable: evt.discoverableFilter == zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE,
 				Organizers:   organizers,
 				EndDate:      endDateUnix,
 			}
