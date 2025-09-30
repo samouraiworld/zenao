@@ -2,7 +2,7 @@
 
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -33,38 +33,8 @@ export function MainEventSections({
   section: EventInfoTabsSchemaType;
   className?: string;
 }) {
-  const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
-  );
-
-  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
-  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
-  const isMember = useMemo(
-    () => isOrganizer || isParticipant,
-    [isOrganizer, isParticipant],
-  );
   const t = useTranslations("event");
-
-  const form = useForm<FeedPostFormSchemaType>({
-    mode: "all",
-    resolver: zodResolver(feedPostFormSchema),
-    defaultValues: {
-      content: "",
-      question: "",
-      options: [{ text: "" }, { text: "" }],
-      allowMultipleOptions: false,
-      duration: {
-        days: 1,
-        hours: 0,
-        minutes: 0,
-      },
-    },
-  });
 
   return (
     <Tabs value={section} className={cn("w-full", className)}>
@@ -105,19 +75,65 @@ export function MainEventSections({
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 min-h-0 pt-4">
-          {section !== "description" && isMember && (
-            <EventFeedForm eventId={eventId} form={form} />
-          )}
-          {/* Social Feed (Discussions) */}
-          <TabsContent value="feed">
-            <EventFeed eventId={eventId} />
-          </TabsContent>
-          {/* Social Feed (Votes) */}
-          <TabsContent value="votes">
-            <EventPolls eventId={eventId} />
-          </TabsContent>
+          <Suspense>
+            <MainEventSectionsContent eventId={eventId} section={section} />
+          </Suspense>
         </div>
       </div>
     </Tabs>
+  );
+}
+
+function MainEventSectionsContent({
+  eventId,
+  section,
+}: {
+  eventId: string;
+  section: EventInfoTabsSchemaType;
+}) {
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userAddress),
+  );
+
+  const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
+  const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
+  const isMember = useMemo(
+    () => isOrganizer || isParticipant,
+    [isOrganizer, isParticipant],
+  );
+  const form = useForm<FeedPostFormSchemaType>({
+    mode: "all",
+    resolver: zodResolver(feedPostFormSchema),
+    defaultValues: {
+      content: "",
+      question: "",
+      options: [{ text: "" }, { text: "" }],
+      allowMultipleOptions: false,
+      duration: {
+        days: 1,
+        hours: 0,
+        minutes: 0,
+      },
+    },
+  });
+
+  return (
+    <>
+      {section !== "description" && isMember && (
+        <EventFeedForm eventId={eventId} form={form} />
+      )}
+      {/* Social Feed (Discussions) */}
+      <TabsContent value="feed">
+        <EventFeed eventId={eventId} />
+      </TabsContent>
+      {/* Social Feed (Votes) */}
+      <TabsContent value="votes">
+        <EventPolls eventId={eventId} />
+      </TabsContent>
+    </>
   );
 }
