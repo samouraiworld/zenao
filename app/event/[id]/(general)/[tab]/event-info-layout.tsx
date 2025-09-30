@@ -133,7 +133,7 @@ export function EventInfoLayout({
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
           />
-          <Suspense fallback={<Text>TODO</Text>}>
+          <Suspense>
             <EventManagementMenu
               eventId={eventId}
               nbParticipants={data.participants}
@@ -159,7 +159,7 @@ export function EventInfoLayout({
                 : t("going", { count: data.participants })
             }
           >
-            <Suspense fallback={<Text>TODO</Text>}>
+            <Suspense>
               <ParticipantsSection id={eventId} />
             </Suspense>
           </EventSection>
@@ -167,7 +167,7 @@ export function EventInfoLayout({
       </div>
 
       {/* Participate Card */}
-      <Suspense fallback={<Text>TODO</Text>}>
+      <Suspense fallback={<Skeleton className="w-full h-28" />}>
         <EventParticipationInfo
           eventId={eventId}
           eventData={data}
@@ -229,6 +229,8 @@ export function EventInfoLayoutSkeleton() {
         {/* Participants preview and dialog section */}
         <div className="col-span-6 sm:col-span-3"></div>
       </div>
+
+      <Skeleton className="w-full h-28" />
     </div>
   );
 }

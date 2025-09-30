@@ -76,7 +76,7 @@ export function MainEventSections({
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 min-h-0 pt-4">
-          <Suspense fallback={<Text>TODO</Text>}>
+          <Suspense>
             <MainEventSectionsContent eventId={eventId} section={section} />
           </Suspense>
         </div>
