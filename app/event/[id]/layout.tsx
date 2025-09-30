@@ -1,23 +1,30 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { cache } from "react";
 import { imageHeight, imageWidth } from "./constants";
 import { ExclusiveEventGuard } from "./event-exclusive-guard";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { web2URL } from "@/lib/uris";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 type Props = {
   params: Promise<{ id: string }>;
   children?: React.ReactNode;
 };
 
-const getEventInfo = cache(async (id: string) => {
-  const queryClient = getQueryClient();
-  return queryClient.fetchQuery(eventOptions(id));
-});
+const eventsInfo: Record<string, Promise<EventInfo> | undefined> = {};
+
+const getEventInfo = (id: string): Promise<EventInfo> => {
+  if (eventsInfo[id] === undefined) {
+    eventsInfo[id] = (async () => {
+      const queryClient = getQueryClient();
+      return queryClient.fetchQuery(eventOptions(id));
+    })();
+  }
+  return eventsInfo[id];
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const id = (await params).id;
