@@ -226,24 +226,24 @@ func listEvents(from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := unixTimeKey(from) + "/"
 	toKey := unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByEndDate, false, fromKey, toKey, from > to, limit, offset)
+	return listEventsInternal(&eventsByEndDate, zenaov1.DISCOVERABLE_FILTER_UNDISCOVERABLE, fromKey, toKey, from > to, limit, offset)
 }
 
-func listEventsByOrganizer(organizerID string, undiscoverablesOnly bool, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
+func listEventsByOrganizer(organizerID string, discoverableFilter zenaov1.DiscoverableFilter, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := organizerID + "/" + unixTimeKey(from) + "/"
 	toKey := organizerID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByOrganizer, undiscoverablesOnly, fromKey, toKey, from > to, limit, offset)
+	return listEventsInternal(&eventsByOrganizer, discoverableFilter, fromKey, toKey, from > to, limit, offset)
 }
 
 func listEventsByParticipant(participantID string, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := participantID + "/" + unixTimeKey(from) + "/"
 	toKey := participantID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByParticipant, false, fromKey, toKey, from > to, limit, offset)
+	return listEventsInternal(&eventsByParticipant, zenaov1.DISCOVERABLE_FILTER_UNDISCOVERABLE, fromKey, toKey, from > to, limit, offset)
 }
 
-func listEventsInternal(at avl.ITree, undiscoverablesOnly bool, fromKey string, toKey string, rev bool, limit, offset uint32) []*zenaov1.EventInfo {
+func listEventsInternal(at avl.ITree, discoverableFilter zenaov1.DiscoverableFilter, fromKey string, toKey string, rev bool, limit, offset uint32) []*zenaov1.EventInfo {
 	res := []*zenaov1.EventInfo{}
 	count := uint32(0)
 	it := func(key string, value interface{}) bool {
@@ -257,7 +257,8 @@ func listEventsInternal(at avl.ITree, undiscoverablesOnly bool, fromKey string, 
 			evt.PkgPath = val
 		}
 
-		if (!evt.Discoverable && !undiscoverablesOnly) || (evt.Discoverable && undiscoverablesOnly) {
+		if (!evt.Discoverable && discoverableFilter == zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE) ||
+			(evt.Discoverable && discoverableFilter == zenaov1.DISCOVERABLE_FILTER_UNDISCOVERABLE) {
 			return false
 		}
 		if count < offset {

@@ -178,6 +178,12 @@ message EventPrivacyPublic {}
 
 message EventPrivacyGuarded { string participation_pubkey = 1; }
 
+enum DiscoverableFilter {
+  DISCOVERABLE_FILTER_UNSPECIFIED = 0;
+  DISCOVERABLE_FILTER_DISCOVERABLE = 1;
+  DISCOVERABLE_FILTER_UNDISCOVERABLE = 2;
+}
+
 message EventInfo {
   string title = 1;
   string description = 2;
