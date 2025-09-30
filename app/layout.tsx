@@ -1,6 +1,7 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
+import { VercelToolbar } from "@vercel/toolbar/next";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { Albert_Sans } from "next/font/google";
@@ -240,6 +241,8 @@ export default async function RootLayout({
     );
   }
 
+  const shouldInjectToolbar = process.env.NODE_ENV === "development";
+
   return (
     <html suppressHydrationWarning lang={locale}>
       <body
@@ -271,6 +274,7 @@ export default async function RootLayout({
           </QueryProviders>
         </ClerkProvider>
         <Toaster />
+        {shouldInjectToolbar && <VercelToolbar />}
       </body>
     </html>
   );
