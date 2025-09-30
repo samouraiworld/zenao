@@ -39,7 +39,6 @@ export function ExclusiveEventGuard({
   eventId,
   title,
   imageUri,
-  exclusive = false,
   children,
 }: ExclusiveEventGuardProps) {
   const { getToken, userId } = useAuth();
@@ -51,7 +50,7 @@ export function ExclusiveEventGuard({
   const [isPending, setIsPending] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState<boolean>(true);
   const isMember = useMemo(() => roles.length > 0, [roles]);
-  const [canAccess, setCanAccess] = useState<boolean>(!exclusive || isMember);
+  const [canAccess, setCanAccess] = useState<boolean>(isMember);
 
   const t = useTranslations("event-protection-guard");
   const form = useForm<EventProtectionFormSchemaType>({
@@ -65,11 +64,11 @@ export function ExclusiveEventGuard({
   const { toast } = useToast();
 
   useLayoutEffect(() => {
-    setCanAccess(!exclusive || isMember);
+    setCanAccess(isMember);
     const timeout = setTimeout(() => setIsCheckingAccess(false), 1000);
 
     return () => clearTimeout(timeout);
-  }, [exclusive, isMember]);
+  }, [isMember]);
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
     // Call the API to check if the password is correct
