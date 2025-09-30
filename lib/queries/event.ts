@@ -1,13 +1,11 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
-import { trace } from "@opentelemetry/api";
-import { GetToken } from "../utils";
+import { GetToken } from "@/lib/utils";
+import { tracer } from "@/lib/tracer";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
 import { zenaoClient } from "@/lib/zenao-client";
-
-const tracer = trace.getTracer("custom-tracer");
 
 export const eventOptions = (id: string) =>
   queryOptions({
@@ -33,22 +31,27 @@ export const eventOptions = (id: string) =>
 
 export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
   queryOptions({
-    queryKey: ["event", eventId, "getkeepers"],
+    queryKey: ["event", eventId, "gatekeepers"],
     queryFn: async () => {
-      const token = await getToken();
+      const span = tracer.startSpan("query:event:" + eventId + ":gatekeepers");
+      try {
+        const token = await getToken();
 
-      if (!token) {
-        throw new Error("not authenticated");
+        if (!token) {
+          throw new Error("not authenticated");
+        }
+
+        const data = await zenaoClient.getEventGatekeepers(
+          {
+            eventId,
+          },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+
+        return data;
+      } finally {
+        span.end();
       }
-
-      const data = await zenaoClient.getEventGatekeepers(
-        {
-          eventId,
-        },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
-      return data;
     },
   });
 

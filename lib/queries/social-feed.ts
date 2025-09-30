@@ -1,6 +1,7 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
+import { tracer } from "../tracer";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import { PostViewJson, PostViewSchema } from "@/app/gen/feeds/v1/feeds_pb";
 import { PollJson, PollSchema } from "@/app/gen/polls/v1/polls_pb";
@@ -12,17 +13,24 @@ export const feedPost = (postId: string, userAddress: string) =>
   queryOptions({
     queryKey: ["feedPost", postId, userAddress],
     queryFn: async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      const span = tracer.startSpan(
+        "query:post:" + postId + ":main:" + userAddress,
       );
+      try {
+        const client = new GnoJSONRPCProvider(
+          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        );
 
-      const res = await client.evaluateExpression(
-        "gno.land/r/zenao/social_feed",
-        `postViewToJSON(GetPostView(${postId}, "${userAddress}"))`,
-      );
-      const raw = extractGnoJSONResponse(res);
+        const res = await client.evaluateExpression(
+          "gno.land/r/zenao/social_feed",
+          `postViewToJSON(GetPostView(${postId}, "${userAddress}"))`,
+        );
+        const raw = extractGnoJSONResponse(res);
 
-      return fromJson(PostViewSchema, raw as PostViewJson);
+        return fromJson(PostViewSchema, raw as PostViewJson);
+      } finally {
+        span.end();
+      }
     },
   });
 
@@ -35,16 +43,23 @@ export const feedPosts = (
   infiniteQueryOptions({
     queryKey: ["feedPosts", feedId, tags, userAddress],
     queryFn: async ({ pageParam = 0 }) => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      const span = tracer.startSpan(
+        "query:feed:" + feedId + ":posts:" + tags + ":" + userAddress,
       );
+      try {
+        const client = new GnoJSONRPCProvider(
+          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        );
 
-      const res = await client.evaluateExpression(
-        "gno.land/r/zenao/social_feed",
-        `postViewsToJSON(GetFeedPosts("${feedId}", ${pageParam * limit}, ${limit}, "${tags}", "${userAddress}"))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-      return postViewsFromJson(raw);
+        const res = await client.evaluateExpression(
+          "gno.land/r/zenao/social_feed",
+          `postViewsToJSON(GetFeedPosts("${feedId}", ${pageParam * limit}, ${limit}, "${tags}", "${userAddress}"))`,
+        );
+        const raw = extractGnoJSONResponse(res);
+        return postViewsFromJson(raw);
+      } finally {
+        span.end();
+      }
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -64,16 +79,23 @@ export const feedPostsChildren = (
   infiniteQueryOptions({
     queryKey: ["feedPostsChildren", parentId, tags, userAddress],
     queryFn: async ({ pageParam = 0 }) => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      const span = tracer.startSpan(
+        "query:post:" + parentId + ":children:" + tags + ":" + userAddress,
       );
-      const res = await client.evaluateExpression(
-        "gno.land/r/zenao/social_feed",
-        `postViewsToJSON(GetChildrenPosts("${parentId}", ${pageParam * limit}, ${limit}, "${tags}", "${userAddress}"))`,
-      );
-      const raw = extractGnoJSONResponse(res);
+      try {
+        const client = new GnoJSONRPCProvider(
+          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        );
+        const res = await client.evaluateExpression(
+          "gno.land/r/zenao/social_feed",
+          `postViewsToJSON(GetChildrenPosts("${parentId}", ${pageParam * limit}, ${limit}, "${tags}", "${userAddress}"))`,
+        );
+        const raw = extractGnoJSONResponse(res);
 
-      return postViewsFromJson(raw);
+        return postViewsFromJson(raw);
+      } finally {
+        span.end();
+      }
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -93,16 +115,21 @@ export const pollInfo = (pollId: string, userAddress: string) =>
   queryOptions({
     queryKey: ["poll", pollId],
     queryFn: async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
+      const span = tracer.startSpan("query:poll:" + pollId + ":" + userAddress);
+      try {
+        const client = new GnoJSONRPCProvider(
+          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        );
 
-      const res = await client.evaluateExpression(
-        "gno.land/r/zenao/polls",
-        `pollToJSON(GetInfo(${parseInt(pollId, 10)}, "${userAddress}"))`,
-      );
+        const res = await client.evaluateExpression(
+          "gno.land/r/zenao/polls",
+          `pollToJSON(GetInfo(${parseInt(pollId, 10)}, "${userAddress}"))`,
+        );
 
-      const raw = extractGnoJSONResponse(res) as PollJson;
-      return fromJson(PollSchema, raw);
+        const raw = extractGnoJSONResponse(res) as PollJson;
+        return fromJson(PollSchema, raw);
+      } finally {
+        span.end();
+      }
     },
   });
