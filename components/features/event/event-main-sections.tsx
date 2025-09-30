@@ -15,7 +15,6 @@ import { TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { userAddressOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
-import Text from "@/components/widgets/texts/text";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import {
   EventInfoTabsSchemaType,
