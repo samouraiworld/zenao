@@ -1,7 +1,6 @@
 package communityreg
 
 import (
-	"std"
 	"testing"
 
 	"gno.land/p/zenao/communities"
@@ -10,8 +9,8 @@ import (
 
 // XXX: add more tests for members
 func TestCommunities(t *testing.T) {
-	initialOwner := std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
-	std.TestSetRealm(std.NewUserRealm(initialOwner))
+	initialOwner := address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94") // zenao-dev-admin
+	testing.SetContext(testing.Context{CurrentRealm: testing.NewUserRealm(initialOwner)})
 
 	// list no communities
 	{
@@ -27,21 +26,21 @@ func TestCommunities(t *testing.T) {
 		pkgPath string
 		name    string
 	}{
-		{"gno.land/r/zenao/communities/1-community", "Community One"},
-		{"gno.land/r/zenao/communities/2-community", "Community Two"},
+		{"gno.land/r/zenao/communities/community_1", "Community One"},
+		{"gno.land/r/zenao/communities/community_2", "Community Two"},
 	}
 	for _, community := range communities {
-		std.TestSetRealm(std.NewCodeRealm(community.pkgPath))
+		testing.SetRealm(testing.NewCodeRealm(community.pkgPath))
 		getters[community.pkgPath] = func() *zenaov1.CommunityInfo {
 			return &zenaov1.CommunityInfo{
 				PkgPath:     community.pkgPath,
 				DisplayName: community.name,
 			}
 		}
-		Register(getters[community.pkgPath])
-		std.TestSetRealm(std.NewUserRealm(initialOwner))
+		Register(cross, getters[community.pkgPath])
+		testing.SetRealm(testing.NewUserRealm(initialOwner))
 
-		IndexCommunity(community.pkgPath)
+		IndexCommunity(cross, community.pkgPath)
 	}
 
 	// list communities

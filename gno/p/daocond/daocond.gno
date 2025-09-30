@@ -1,27 +1,23 @@
 package daocond
 
-import (
-	"gno.land/p/demo/json"
-)
-
-// This model should work pretty good for small and dynamic daos.
-// For daos with a lot of members and active proposals we might need to get rid of change events.
-
-// base interfaces
+// We made conditions stateless to avoid complexity of handling events like (member added, member removed, role assigned, role removed, etc.)
+// This model should work pretty good for small DAOs with few voters.
+// In future, we should probably add a stateful model for large DAOs with many voters.
 
 type Condition interface {
-	NewState() State
+	Eval(ballot Ballot) bool
+	Signal(ballot Ballot) float64
 
 	Render() string
-	RenderJSON() *json.Node
+	RenderWithVotes(ballot Ballot) string
 }
 
-type State interface {
-	Eval(votes map[string]Vote) bool
-	HandleEvent(event Event, votes map[string]Vote)
-	Signal(votes map[string]Vote) float64
+type Ballot interface {
+	Vote(voter string, vote Vote)
+	Get(voter string) Vote
+	Total() int
 
-	RenderJSON(votes map[string]Vote) *json.Node
+	Iterate(fn func(voter string, vote Vote) bool)
 }
 
 type Vote string
@@ -31,35 +27,3 @@ const (
 	VoteNo      = "no"
 	VoteAbstain = "abstain"
 )
-
-type Event interface {
-}
-
-// well known events
-
-type EventVote struct {
-	VoterID string
-	Vote    Vote
-}
-
-type EventMemberAdded struct {
-	MemberID string
-}
-
-type EventMemberRemoved struct {
-	MemberID string
-}
-
-type EventRoleAssigned struct {
-	UserID string
-	Role   string
-}
-
-type EventRoleUnassigned struct {
-	UserID string
-	Role   string
-}
-
-type EventRoleRemoved struct {
-	Role string
-}

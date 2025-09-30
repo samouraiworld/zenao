@@ -31,7 +31,7 @@ type User struct {
 }
 
 type EntityRole struct {
-	CreatedAt time.Time
+	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
@@ -970,7 +970,7 @@ func (g *gormZenaoDB) AddMemberToCommunity(communityID string, userID string) er
 		Role:       zeni.RoleMember,
 	}
 
-	if err := g.db.Create(entityRole).Error; err != nil {
+	if err := g.db.Save(entityRole).Error; err != nil {
 		return fmt.Errorf("create member role assignment in db: %w", err)
 	}
 

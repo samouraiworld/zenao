@@ -1,7 +1,7 @@
 package polls
 
 import (
-	"gno.land/p/demo/json"
+	"gno.land/p/onbloc/json"
 	pollsv1 "gno.land/p/zenao/polls/v1"
 )
 

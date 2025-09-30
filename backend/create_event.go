@@ -86,6 +86,7 @@ func (s *ZenaoServer) CreateEvent(
 
 	evt := (*zeni.Event)(nil)
 	cmt := (*zeni.Community)(nil)
+	targets := []*zeni.User{}
 	if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
 		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
@@ -107,7 +108,14 @@ func (s *ZenaoServer) CreateEvent(
 			if !slices.Contains(roles, zeni.RoleAdministrator) {
 				return errors.New("user is not an admin of the community and cannot add event to it")
 			}
-			return db.AddEventToCommunity(evt.ID, cmt.ID)
+			err = db.AddEventToCommunity(evt.ID, cmt.ID)
+			if err != nil {
+				return err
+			}
+			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}); err != nil {
@@ -131,6 +139,48 @@ func (s *ZenaoServer) CreateEvent(
 			}); err != nil {
 				s.Logger.Error("send-event-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID))
 			}
+		}
+	}
+
+	if cmt != nil && len(targets) > 0 && req.Msg.CommunityEmail && s.MailClient != nil {
+		var authIDs []string
+		for _, target := range targets {
+			authIDs = append(authIDs, target.AuthID)
+		}
+		authTargets, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		htmlStr, text, err := communityNewEventMailContent(evt, cmt)
+		if err != nil {
+			return nil, err
+		}
+
+		var requests []*resend.SendEmailRequest
+		for _, authTarget := range authTargets {
+			if authTarget.Email == "" {
+				s.Logger.Error("create-event", zap.String("target-id", authTarget.ID), zap.String("target-email", authTarget.Email), zap.Error(errors.New("target has no email")))
+				continue
+			}
+			requests = append(requests, &resend.SendEmailRequest{
+				From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
+				To:      []string{authTarget.Email},
+				Subject: "New event by " + cmt.DisplayName + "!",
+				Html:    htmlStr,
+				Text:    text,
+			})
+		}
+		count := 0
+		s.Logger.Info("send-community-new-event-emails", zap.Int("count", len(requests)))
+		for i := 0; i < len(requests); i += 100 {
+			batch := requests[i:min(i+100, len(requests))]
+			if _, err := s.MailClient.Batch.SendWithContext(context.Background(), batch); err != nil {
+				s.Logger.Error("send-community-new-event-emails", zap.Error(err), zap.Int("batch-size", len(batch)))
+				continue
+			}
+			count += len(batch)
+			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
 		}
 	}
 

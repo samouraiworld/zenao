@@ -6,7 +6,7 @@ import (
 	"errors"
 	"strconv"
 
-	"gno.land/p/demo/json"
+	"gno.land/p/onbloc/json"
 	v1 "gno.land/p/zenao/polls/v1"
 )
 
@@ -168,6 +168,9 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	if c.CommunityId != "" {
 		fields["communityId"] = json.StringNode("", c.CommunityId)
 	}
+	if c.CommunityEmail != false {
+		fields["communityEmail"] = json.BoolNode("", c.CommunityEmail)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -234,6 +237,9 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["communityId"]; ok {
 		c.CommunityId = val.MustString()
+	}
+	if val, ok := fields["communityEmail"]; ok {
+		c.CommunityEmail = val.MustBool()
 	}
 }
 
@@ -341,6 +347,9 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	if e.CommunityId != "" {
 		fields["communityId"] = json.StringNode("", e.CommunityId)
 	}
+	if e.CommunityEmail != false {
+		fields["communityEmail"] = json.BoolNode("", e.CommunityEmail)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -413,6 +422,9 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["communityId"]; ok {
 		e.CommunityId = val.MustString()
+	}
+	if val, ok := fields["communityEmail"]; ok {
+		e.CommunityEmail = val.MustBool()
 	}
 }
 

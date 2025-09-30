@@ -3,14 +3,13 @@ package events
 import (
 	"encoding/base64"
 	"math/rand"
-	"std"
 	"testing"
 	"time"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/testutils"
-	"gno.land/p/demo/urequire"
+	"gno.land/p/nt/testutils"
+	"gno.land/p/nt/urequire"
 	"gno.land/p/zenao/daokit"
+	"gno.land/r/zenao/mockprofile"
 )
 
 var (
@@ -22,9 +21,11 @@ var (
 
 // XXX: Add tests for multiple organizers
 func TestNewEvent(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -42,9 +43,11 @@ func TestNewEvent(t *testing.T) {
 }
 
 func TestCancelEvent(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -60,7 +63,7 @@ func TestCancelEvent(t *testing.T) {
 		t.Fatalf("expected user to have organizer role")
 	}
 
-	daokit.InstantExecute(event.DAO, testReq(NewCancelEventMsg()))
+	daokit.InstantExecute(event.DAO, testReq(NewCancelEventAction()))
 	if !event.cancelled {
 		t.Fatalf("expected event to be cancelled")
 	}
@@ -71,14 +74,16 @@ func TestCancelEvent(t *testing.T) {
 		}
 	}()
 
-	std.TestSetOriginCaller(bob)
-	daokit.InstantExecute(event.DAO, testReq(NewCancelEventMsg()))
+	testing.SetOriginCaller(bob)
+	daokit.InstantExecute(event.DAO, testReq(NewCancelEventAction()))
 }
 
 func TestAddParticipant(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -93,7 +98,7 @@ func TestAddParticipant(t *testing.T) {
 	if !event.DAOPrivate.Members.HasRole(alice.String(), "organizer") {
 		t.Fatalf("expected user to have organizer role")
 	}
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String(), testTicket(t), "")))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantAction(bob.String(), testTicket(t), "")))
 	if event.DAOPrivate.Members.GetMembers()[2] != bob.String() {
 		t.Fatalf("expected %s, got %s", bob.String(), event.DAOPrivate.Members.GetMembers()[2])
 	}
@@ -101,8 +106,8 @@ func TestAddParticipant(t *testing.T) {
 		t.Fatalf("expected bob to have participant role")
 	}
 
-	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperMsg(dave.String())))
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String(), testTicket(t), "")))
+	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperAction(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantAction(dave.String(), testTicket(t), "")))
 	if len(event.DAOPrivate.Members.GetMembers()) != 4 {
 		t.Fatalf("expected 4, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
@@ -119,14 +124,16 @@ func TestAddParticipant(t *testing.T) {
 		}
 	}()
 
-	std.TestSetOriginCaller(bob)
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(carol.String(), testTicket(t), "")))
+	testing.SetOriginCaller(bob)
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantAction(carol.String(), testTicket(t), "")))
 }
 
 func TestRemoveParticipant(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -142,14 +149,14 @@ func TestRemoveParticipant(t *testing.T) {
 		t.Fatalf("expected user to have organizer role")
 	}
 	ticket := testTicket(t)
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String(), ticket, "")))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantAction(bob.String(), ticket, "")))
 	if event.DAOPrivate.Members.GetMembers()[2] != bob.String() {
 		t.Fatalf("expected %s, got %s", bob.String(), event.DAOPrivate.Members.GetMembers()[2])
 	}
 	if !event.DAOPrivate.Members.HasRole(bob.String(), "participant") {
 		t.Fatalf("expected bob to have participant role")
 	}
-	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(bob.String(), ticket)))
+	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantAction(bob.String(), ticket)))
 	if len(event.DAOPrivate.Members.GetMembers()) != 2 {
 		t.Fatalf("expected 2 member, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
@@ -157,9 +164,9 @@ func TestRemoveParticipant(t *testing.T) {
 		t.Fatalf("expected bob to not have participant role")
 	}
 	ticket = testTicket(t)
-	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperMsg(dave.String())))
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(dave.String(), ticket, "")))
-	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantMsg(dave.String(), ticket)))
+	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperAction(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantAction(dave.String(), ticket, "")))
+	daokit.InstantExecute(event.DAO, testReq(NewRemoveParticipantAction(dave.String(), ticket)))
 	if len(event.DAOPrivate.Members.GetMembers()) != 3 {
 		t.Fatalf("expected 3 member, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
@@ -169,7 +176,7 @@ func TestRemoveParticipant(t *testing.T) {
 	if !event.DAOPrivate.Members.IsMember(dave.String()) {
 		t.Fatalf("expected dave be a member")
 	}
-	daokit.InstantExecute(event.DAO, testReq(NewRemoveGatekeeperMsg(dave.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewRemoveGatekeeperAction(dave.String())))
 	if len(event.DAOPrivate.Members.GetMembers()) != 2 {
 		t.Fatalf("expected 2 members, got %d", len(event.DAOPrivate.Members.GetMembers()))
 	}
@@ -182,9 +189,11 @@ func TestRemoveParticipant(t *testing.T) {
 }
 
 func TestTicket(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
 	conf := Config{
 		Organizers:       []string{alice.String()},
 		Title:            "event",
@@ -200,9 +209,9 @@ func TestTicket(t *testing.T) {
 	ticketPubkey := "utIh1Wp6OwyGIVaMQH0GYMfT0zzq4zycS1MTwGFQ3Jk"
 	ticketSignature := "BDWVj17wWiwTpIQfYcTw0Gji9xUZG1P07kb9IBzLkYfgx0QkxOtWzbdckzn9xzVoX7kz8q73Z32SZz1medlACA"
 
-	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperMsg(carol.String())))
+	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperAction(carol.String())))
 
-	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantMsg(bob.String(), ticketPubkey, "")))
+	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantAction(bob.String(), ticketPubkey, "")))
 	val, ok := event.tickets.Get(ticketPubkey)
 	urequire.True(t, ok, "ticket must exist")
 	ticket := val.(*Ticket)
@@ -214,9 +223,11 @@ func TestTicket(t *testing.T) {
 		t.Fatalf("UsedAt must be nil when ticket is not used")
 	}
 
-	std.TestSetOriginCaller(carol)
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(carol),
+	})
 	now := time.Now()
-	daokit.InstantExecute(event.DAO, testReq(NewCheckinMsg(ticketPubkey, ticketSignature)))
+	daokit.InstantExecute(event.DAO, testReq(NewCheckinAction(ticketPubkey, ticketSignature)))
 	urequire.Equal(t, bob.String(), ticket.Participant, "invalid participant in ticket after use")
 	if ticket.UsedAt == nil {
 		t.Fatalf("UsedAt must not be nil when ticket is used")
@@ -224,25 +235,9 @@ func TestTicket(t *testing.T) {
 	urequire.Equal(t, now.Format(time.RFC3339Nano), ticket.UsedAt.Format(time.RFC3339Nano), "invalid UsedAt")
 }
 
-type mockProfile struct {
-	fields avl.Tree
-}
-
-func (p *mockProfile) GetProfileString(addr std.Address, field string, def string) string {
-	v, ok := p.fields.Get(field)
-	if !ok {
-		return def
-	}
-	return v.(string)
-}
-
-func (p *mockProfile) SetStringField(field, value string) bool {
-	return p.fields.Set(field, value)
-}
-
-func testReq(msg daokit.ExecutableMessage) daokit.ProposalRequest {
+func testReq(msg daokit.Action) daokit.ProposalRequest {
 	return daokit.ProposalRequest{
-		Message: msg,
+		Action: msg,
 	}
 }
 

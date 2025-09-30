@@ -88,7 +88,7 @@ type fakePoll struct {
 	KindRaw      int32  `faker:"oneof: 0, 1"`
 }
 
-func execFakegen() error {
+func execFakegen() (retErr error) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
 		return err
@@ -121,6 +121,7 @@ func execFakegen() error {
 		}
 	}
 
+	logger.Info("creating events")
 	for eC := range fakegenConf.eventsCount {
 		// Create Event
 		a := fakeEvent{}
@@ -162,6 +163,7 @@ func execFakegen() error {
 		}
 
 		// Create Feed
+		logger.Info("creating feed")
 		zfeed, err := db.CreateFeed(zeni.EntityTypeEvent, zevt.ID, "main")
 		if err != nil {
 			return err
@@ -169,6 +171,8 @@ func execFakegen() error {
 
 		// Create posts/polls only for the last event (to avoid flooding the chain and db)
 		if eC == fakegenConf.eventsCount-1 {
+			logger.Info("creating posts")
+
 			// Create StandardPosts
 			pID := 1 // used only when chain creation is skipped
 			for pC := range fakegenConf.postsCount {
@@ -202,6 +206,7 @@ func execFakegen() error {
 
 				// Create reactions only for the first post (to avoid flooding the chain and db)
 				if pC == 0 {
+					logger.Info("creating reactions")
 					icons := []string{"😀", "🎉", "🔥", "💡", "🍕", "🌟", "🤖", "😎", "💀", "🚀", "🧠", "🛠️", "🎶", "🍀", "🎨", "🧸", "📚", "🕹️", "🏆", "🧬", "🧘", "🍩", "🥑", "📸", "🧃", "🎧", "🪐", "💬"}
 					for rC := range len(icons) {
 						// React to Posts
@@ -225,6 +230,7 @@ func execFakegen() error {
 			}
 
 			// Create Polls
+			logger.Info("creating polls")
 			poID := 1
 			for range fakegenConf.pollsCount {
 				p := fakePoll{}
@@ -291,6 +297,8 @@ func execFakegen() error {
 			}
 		}
 	}
+
+	logger.Info("creating communities")
 
 	for range fakegenConf.communitiesCount {
 		c := fakeCommunity{}

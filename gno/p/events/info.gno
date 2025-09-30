@@ -2,7 +2,6 @@ package events
 
 import (
 	"encoding/base64"
-	"std"
 
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
@@ -23,10 +22,12 @@ func (e *Event) Info() *zenaov1.EventInfo {
 		return nil
 	}
 
+	realmAddr := e.DAOPrivate.Realm.Address()
+
 	return &zenaov1.EventInfo{
-		Title:        e.getProfileString(std.CurrentRealm().Address(), "DisplayName", ""),
-		Description:  e.getProfileString(std.CurrentRealm().Address(), "Bio", ""),
-		ImageUri:     e.getProfileString(std.CurrentRealm().Address(), "Avatar", ""),
+		Title:        e.getProfileString(realmAddr, "DisplayName", ""),
+		Description:  e.getProfileString(realmAddr, "Bio", ""),
+		ImageUri:     e.getProfileString(realmAddr, "Avatar", ""),
 		StartDate:    e.startDate,
 		EndDate:      e.endDate,
 		Capacity:     e.capacity,

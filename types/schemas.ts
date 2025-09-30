@@ -107,16 +107,20 @@ export type UserFormSocialLinkSchemaType = z.infer<
 >;
 
 export const userFormSchema = z.object({
-  bio: z.string().trim().min(2).max(1000),
+  bio: z.string().trim().max(1000).optional().default(""),
   displayName: z.string().trim().min(1),
   socialMediaLinks: z.array(userFormSocialLinkSchema),
   avatarUri: uriSchema,
+  location: z.string().trim().max(100).optional().default(""),
+  shortBio: z.string().max(200).optional().default(""),
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
 export const gnoProfileDetailsSchema = z.object({
-  bio: z.string().trim().min(2).max(1000),
+  bio: z.string().trim().max(1000).optional().default(""),
   socialMediaLinks: z.array(userFormSocialLinkSchema),
+  location: z.string().trim().max(100).optional().default(""),
+  shortBio: z.string().max(200).optional().default(""),
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
@@ -194,3 +198,19 @@ export const communityTabsSchema = z.union([
   z.literal("proposals"),
 ]);
 export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;
+
+export const communityFormSchema = z.object({
+  displayName: z.string().min(2, "Name too short"),
+  description: z.string().min(10, "Description too short"),
+  avatarUri: z.string().url().or(z.literal("")),
+  bannerUri: z.string().url().or(z.literal("")),
+  administrators: z
+    .array(z.object({address: z
+.string()
+    .email("Administrator must be a valid email address"),
+      })
+    )
+    .min(1, "At least one admin is required"),
+});
+
+export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;

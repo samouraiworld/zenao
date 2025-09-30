@@ -67,19 +67,20 @@ type GetUserAddressResponse struct {
 }
 
 type CreateEventRequest struct {
-	Title        string
-	Description  string
-	ImageUri     string
-	StartDate    uint64
-	EndDate      uint64
-	TicketPrice  float64
-	Capacity     uint32
-	Location     *EventLocation
-	Password     string
-	Organizers   []string
-	Gatekeepers  []string
-	Discoverable bool
-	CommunityId  string
+	Title          string
+	Description    string
+	ImageUri       string
+	StartDate      uint64
+	EndDate        uint64
+	TicketPrice    float64
+	Capacity       uint32
+	Location       *EventLocation
+	Password       string
+	Organizers     []string
+	Gatekeepers    []string
+	Discoverable   bool
+	CommunityId    string
+	CommunityEmail bool
 }
 
 type CreateEventResponse struct {
@@ -109,6 +110,7 @@ type EditEventRequest struct {
 	Gatekeepers    []string
 	Discoverable   bool
 	CommunityId    string
+	CommunityEmail bool
 }
 
 type EditEventResponse struct {

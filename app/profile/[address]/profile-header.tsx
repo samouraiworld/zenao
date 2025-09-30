@@ -64,10 +64,24 @@ export default function ProfileHeader({
       <div className="flex flex-col gap-8 sm:gap-12 w-full sm:w-4/5">
         <Heading level={1} size="4xl">
           {displayName}
+          {profileDetails.shortBio && (
+            <Text className=" text-gray-500 mt-2">
+              {profileDetails.shortBio}
+            </Text>
+          )}
         </Heading>
-        <Card>
-          <Text>{profileDetails.bio}</Text>
-        </Card>
+        <div className="flex flex-col gap-1 w-full">
+          {profileDetails.bio?.trim() && (
+            <Card>
+              <Text>{profileDetails.bio}</Text>
+            </Card>
+          )}
+          {profileDetails.location && (
+            <Text className="text-sm text-gray-500 mt-2">
+              📍 {profileDetails.location}
+            </Text>
+          )}
+        </div>
 
         <div className="flex flex-col gap-4">
           <Heading level={2}>Find me here</Heading>

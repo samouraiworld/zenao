@@ -1,12 +1,13 @@
 package eventreg
 
 import (
+	"chain"
+	"chain/runtime"
 	"errors"
-	"std"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/ownable"
-	"gno.land/p/demo/seqid"
+	"gno.land/p/nt/avl"
+	"gno.land/p/nt/ownable"
+	"gno.land/p/nt/seqid"
 	"gno.land/p/zenao/events"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
@@ -28,13 +29,13 @@ var (
 )
 
 func init() {
-	Ownable = ownable.NewWithAddress(std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
+	Ownable = ownable.NewWithAddress(address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
 }
 
 // XXX: split this package into eventreg and eventsindex
 
-func Register(infoGetter events.InfoGetter) {
-	pkgPath := std.PreviousRealm().PkgPath()
+func Register(_ realm, infoGetter events.InfoGetter) {
+	pkgPath := runtime.PreviousRealm().PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)
@@ -44,7 +45,7 @@ func Register(infoGetter events.InfoGetter) {
 	registered.Set(pkgPath, infoGetter)
 
 	// TODO: Remove this when we have a better way to handle lookup by event address.
-	addr := std.DerivePkgAddr(pkgPath)
+	addr := chain.PackageAddress(pkgPath)
 	eventsPkgPathByAddr.Set(addr.String(), pkgPath)
 }
 
@@ -64,8 +65,8 @@ func mustGetInfo(pkgPath string) *zenaov1.EventInfo {
 	return info
 }
 
-func IndexEvent(pkgPath string) {
-	Ownable.AssertCallerIsOwner()
+func IndexEvent(_ realm, pkgPath string) {
+	Ownable.AssertOwnedByPrevious()
 
 	if prev := getEventByPkgPath(pkgPath); prev != nil {
 		panic("already added")
@@ -83,8 +84,8 @@ func IndexEvent(pkgPath string) {
 	}
 }
 
-func UpdateIndex(pkgPath string) {
-	Ownable.AssertCallerIsOwner()
+func UpdateIndex(_ realm, pkgPath string) {
+	Ownable.AssertOwnedByPrevious()
 
 	prevInfo := mustGetEventByPkgPath(pkgPath)
 
@@ -133,8 +134,8 @@ func UpdateIndex(pkgPath string) {
 	}
 }
 
-func RemoveIndex(pkgPath string) {
-	Ownable.AssertCallerIsOwner()
+func RemoveIndex(_ realm, pkgPath string) {
+	Ownable.AssertOwnedByPrevious()
 
 	evt := mustGetEventByPkgPath(pkgPath)
 
@@ -160,8 +161,8 @@ func RemoveIndex(pkgPath string) {
 	})
 }
 
-func AddParticipant(eventPkgPath string, userID string) {
-	Ownable.AssertCallerIsOwner()
+func AddParticipant(_ realm, eventPkgPath string, userID string) {
+	Ownable.AssertOwnedByPrevious()
 
 	evt := mustGetEventByPkgPath(eventPkgPath)
 
@@ -175,8 +176,8 @@ func AddParticipant(eventPkgPath string, userID string) {
 	eventsByPkgPath.Set(eventPkgPath, info)
 }
 
-func RemoveParticipant(eventPkgPath string, userID string) {
-	Ownable.AssertCallerIsOwner()
+func RemoveParticipant(_ realm, eventPkgPath string, userID string) {
+	Ownable.AssertOwnedByPrevious()
 
 	evt := mustGetEventByPkgPath(eventPkgPath)
 

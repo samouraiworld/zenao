@@ -16,12 +16,13 @@ import (
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/gnovm"
 	"github.com/gnolang/gno/gnovm/pkg/gnolang"
-	"github.com/gnolang/gno/gnovm/stdlibs/std"
+	"github.com/gnolang/gno/gnovm/stdlibs/chain"
+	"github.com/gnolang/gno/gnovm/stdlibs/chain/banker"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
 	ctypes "github.com/gnolang/gno/tm2/pkg/bft/rpc/core/types"
 	"github.com/gnolang/gno/tm2/pkg/crypto/keys"
+	tm2std "github.com/gnolang/gno/tm2/pkg/std"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -106,17 +107,12 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 	g, span := g.trace("gzchain.FillAdminProfile")
 	defer span.End()
 
-	var minFee int64 = 20 * 1_000_000
 	msg := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
-		Send:    std.CompactCoins([]string{"ugnot"}, []int64{minFee}),
-		PkgPath: "gno.land/r/demo/users",
+		Send:    banker.CompactCoins([]string{"ugnot"}, []int64{1_000_000}),
+		PkgPath: "gno.land/r/gnoland/users/v1",
 		Func:    "Register",
-		Args: []string{
-			"",
-			"zenaoadm",
-			"",
-		},
+		Args:    []string{"zenaoadm4242"},
 	}
 	gasWanted, err := g.estimateCallTxGas(msg)
 	if err != nil {
@@ -186,10 +182,13 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 
 	msgPkg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
-			Name:  "event",
-			Path:  eventPkgPath,
-			Files: []*gnovm.MemFile{{Name: "event.gno", Body: eventRealmSrc}},
+		Package: &tm2std.MemPackage{
+			Name: "event",
+			Path: eventPkgPath,
+			Files: []*tm2std.MemFile{
+				{Name: "event.gno", Body: eventRealmSrc},
+				{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", eventPkgPath)},
+			},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msgPkg)
@@ -243,9 +242,9 @@ func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCancelEventMsgRunBody(eventPkgPath, callerPkgPath),
 			}},
@@ -304,9 +303,9 @@ func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs [
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: fmt.Sprintf(`package main
 import (
@@ -320,9 +319,9 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: %q,
-		Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+		Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 			Title: "Edit event",
-			Message: events.NewEditEventMsg(
+			Action: events.NewEditEventAction(
 				%s,
 				%s,
 				%q,
@@ -393,10 +392,13 @@ func (g *gnoZenaoChain) CreateUser(user *zeni.User) error {
 	userPkgPath := g.userRealmPkgPath(user.ID)
 	msg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
-			Name:  "user",
-			Path:  userPkgPath,
-			Files: []*gnovm.MemFile{{Name: "user.gno", Body: userRealmSrc}},
+		Package: &tm2std.MemPackage{
+			Name: "user",
+			Path: userPkgPath,
+			Files: []*tm2std.MemFile{
+				{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", userPkgPath)},
+				{Name: "user.gno", Body: userRealmSrc},
+			},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msg)
@@ -424,7 +426,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
-	participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+	participantAddr := gnolang.DerivePkgBech32Addr(participantPkgPath).String()
 
 	signature := ""
 	if len(eventSK) != 0 {
@@ -438,9 +440,9 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey, signature),
 			}},
@@ -480,13 +482,13 @@ func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ti
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
-	participantAddr := gnolang.DerivePkgAddr(participantPkgPath).String()
+	participantAddr := gnolang.DerivePkgBech32Addr(participantPkgPath).String()
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey),
 			}},
@@ -540,9 +542,9 @@ func (g *gnoZenaoChain) Checkin(eventID string, gatekeeperID string, req *zenaov
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, req.TicketPubkey, req.Signature),
 			}},
@@ -581,10 +583,13 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	// TODO: single tx with all messages
 	msgkg := vm.MsgAddPackage{
 		Creator: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
-			Name:  "community",
-			Path:  communityPkgPath,
-			Files: []*gnovm.MemFile{{Name: "community.gno", Body: cmtRealmSrc}},
+		Package: &tm2std.MemPackage{
+			Name: "community",
+			Path: communityPkgPath,
+			Files: []*tm2std.MemFile{
+				{Name: "community.gno", Body: cmtRealmSrc},
+				{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", communityPkgPath)},
+			},
 		},
 	}
 	gasWanted, err := g.estimateAddPackageTxGas(msgkg)
@@ -684,9 +689,9 @@ func (g *gnoZenaoChain) EditCommunity(communityID string, callerID string, admin
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: fmt.Sprintf(`package main
 import (
@@ -699,9 +704,9 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: %q,
-		Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+		Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 			Title: "Edit community",
-			Message: communities.NewEditCommunityMsg(
+			Action: communities.NewEditCommunityAction(
 				%q,
 				%q,
 				%q,
@@ -767,9 +772,9 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, userAddr),
 			}},
@@ -799,6 +804,51 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 	return nil
 }
 
+// AddMembersToCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID string, userIDs []string) error {
+	g, span := g.trace("gzchain.AddMembersToCommunity")
+	defer span.End()
+
+	callerPkgPath := g.userRealmPkgPath(callerID)
+	communityPkgPath := g.communityPkgPath(communityID)
+	userAddrs := mapsl.Map(userIDs, g.UserAddress)
+
+	msgRun := vm.MsgRun{
+		Caller: g.signerInfo.GetAddress(),
+		Package: &tm2std.MemPackage{
+			Name: "main",
+			Files: []*tm2std.MemFile{{
+				Name: "main.gno",
+				Body: genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath, userAddrs),
+			}},
+		},
+	}
+	broadcastRes, err := g.run("add members to community", msgRun)
+	if err != nil {
+		return err
+	}
+	g.logger.Info("added members to community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	for _, userAddr := range userAddrs {
+		msgCall := vm.MsgCall{
+			Caller:  g.signerInfo.GetAddress(),
+			PkgPath: g.communitiesIndexPkgPath,
+			Func:    "AddMember",
+			Args: []string{
+				communityPkgPath,
+				userAddr,
+			},
+		}
+		broadcastRes, err = g.call(msgCall)
+		if err != nil {
+			return err
+		}
+	}
+	g.logger.Info("indexed members in community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+
+	return nil
+}
+
 // RemoveMemberFromCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID string, userID string) error {
 	g, span := g.trace("gzchain.RemoveMemberFromCommunity")
@@ -810,9 +860,9 @@ func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID s
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, userAddr),
 			}},
@@ -867,9 +917,9 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr),
 			}},
@@ -925,9 +975,9 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr),
 			}},
@@ -981,9 +1031,9 @@ func (g *gnoZenaoChain) EditUser(userID string, req *zenaov1.EditUserRequest) er
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: fmt.Sprintf(`package main
 import (
@@ -995,7 +1045,7 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "Edit profile",
-		Message: basedao.NewEditProfileMsg([][2]string{
+		Action: basedao.NewEditProfileAction([][2]string{
 			{"DisplayName", %q},
 			{"Bio", %q},
 			{"Avatar", %q},
@@ -1024,12 +1074,12 @@ func main() {
 
 // UserAddress implements ZenaoChain.
 func (g *gnoZenaoChain) UserAddress(userID string) string {
-	return gnolang.DerivePkgAddr(g.userRealmPkgPath(userID)).String()
+	return gnolang.DerivePkgBech32Addr(g.userRealmPkgPath(userID)).String()
 }
 
 // EventAddress implements ZenaoChain.
 func (g *gnoZenaoChain) EventAddress(eventID string) string {
-	return gnolang.DerivePkgAddr(g.eventRealmPkgPath(eventID)).String()
+	return gnolang.DerivePkgBech32Addr(g.eventRealmPkgPath(eventID)).String()
 }
 
 // CreatePost implements ZenaoChain
@@ -1039,14 +1089,14 @@ func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, 
 
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	orgPkgPath := g.orgPkgPath(orgType, orgID)
-	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
+	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
 	gnoLitPost := "&" + post.GnoLiteral("feedsv1.", "\t\t")
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost),
 			}},
@@ -1065,14 +1115,17 @@ func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, 
 	}
 
 	for _, event := range broadcastRes.DeliverTx.Events {
-		if gnoEvent, ok := event.(std.GnoEvent); ok {
+		switch gnoEvent := event.(type) {
+		case chain.Event:
 			if gnoEvent.Type == gnoEventPostCreate {
 				postID, err = extractEventAttribute(gnoEvent, "postID")
 				if err != nil {
 					return "", err
 				}
 			}
-		} else {
+		case chain.StorageDepositEvent:
+		case chain.StorageUnlockEvent:
+		default:
 			g.logger.Info("unknown event type", zap.Any("event", event))
 		}
 	}
@@ -1099,9 +1152,9 @@ func (g *gnoZenaoChain) EditPost(userID string, postID string, post *feedsv1.Pos
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost, postIDInt),
 			}},
@@ -1136,9 +1189,9 @@ func (g *gnoZenaoChain) DeletePost(userID string, postID string) error {
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genDeletePostMsgRunBody(userRealmPkgPath, postIDInt),
 			}},
@@ -1168,9 +1221,9 @@ func (g *gnoZenaoChain) ReactPost(userID string, orgType string, orgID string, r
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genReactPostMsgRunBody(userRealmPkgPath, userID, req.PostId, orgType, orgID, req.Icon),
 			}},
@@ -1199,13 +1252,13 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	orgPkgPath := g.orgPkgPath(req.OrgType, req.OrgId)
-	feedID := gnolang.DerivePkgAddr(orgPkgPath).String() + ":main"
+	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID, req.Question, req.Options, req.Kind, req.Duration),
 			}},
@@ -1224,7 +1277,8 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 	}
 
 	for _, event := range broadcastRes.DeliverTx.Events {
-		if gnoEvent, ok := event.(std.GnoEvent); ok {
+		switch gnoEvent := event.(type) {
+		case chain.Event:
 			if gnoEvent.Type == gnoEventPollCreate {
 				pollID, err = extractEventAttribute(gnoEvent, "pollID")
 				if err != nil {
@@ -1237,7 +1291,9 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 					return "", "", err
 				}
 			}
-		} else {
+		case chain.StorageDepositEvent:
+		case chain.StorageUnlockEvent:
+		default:
 			g.logger.Info("unknown event type", zap.Any("event", event))
 		}
 	}
@@ -1261,9 +1317,9 @@ func (g *gnoZenaoChain) VotePoll(userID string, req *zenaov1.VotePollRequest) er
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
-		Package: &gnovm.MemPackage{
+		Package: &tm2std.MemPackage{
 			Name: "main",
-			Files: []*gnovm.MemFile{{
+			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
 				Body: genVotePollMsgRunBody(userRealmPkgPath, req.PollId, req.Option),
 			}},
@@ -1439,9 +1495,9 @@ func genCancelEventMsgRunBody(eventPkgPath, organizerPkgPath string) string {
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Cancel event",
-			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Cancel event",
-				Message: events.NewCancelEventMsg(),
+				Action: events.NewCancelEventAction(),
 			}),
 		})
 	}
@@ -1452,10 +1508,10 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 	return fmt.Sprintf(`package main
 
 	import (
-		"std"
+		"chain"
 
 		"gno.land/p/zenao/daokit"
-		"gno.land/p/demo/ufmt"
+		"gno.land/p/nt/ufmt"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		"gno.land/r/zenao/social_feed"
 		user %q
@@ -1464,7 +1520,7 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Add new post",
-			Message: daokit.NewExecuteLambdaMsg(newPost),
+			Action: daokit.NewExecuteLambdaAction(newPost),
 		})
 	}
 
@@ -1472,8 +1528,8 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 		feedID := %q
 		post := %s
 
-		postID := social_feed.NewPost(feedID, post)
-		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
+		postID := social_feed.NewPost(cross, feedID, post)
+		chain.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 `, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
 }
@@ -1491,7 +1547,7 @@ func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Edit post #%d",
-			Message: daokit.NewExecuteLambdaMsg(editPost),
+			Action: daokit.NewExecuteLambdaAction(editPost),
 		})
 	}
 
@@ -1516,13 +1572,13 @@ func genDeletePostMsgRunBody(userRealmPkgPath string, postIDInt uint64) string {
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Delete post #%d",
-			Message: daokit.NewExecuteLambdaMsg(deletePost),
+			Action: daokit.NewExecuteLambdaAction(deletePost),
 		})
 	}
 
 	func deletePost() {
 		postID := uint64(%d)
-		social_feed.DeletePost(postID)
+		social_feed.DeletePost(cross, postID)
 	}
 `, userRealmPkgPath, postIDInt, postIDInt)
 }
@@ -1538,12 +1594,12 @@ import (
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "User #%s reacts to post #%s in %s #%s.",
-		Message: daokit.NewExecuteLambdaMsg(newReaction),
+		Action: daokit.NewExecuteLambdaAction(newReaction),
 	})
 }
 
 func newReaction() {
-	social_feed.ReactPost(%s, %q)
+	social_feed.ReactPost(cross, %s, %q)
 }
 `, userRealmPkgPath, userID, postID, orgType, orgID, postID, icon)
 }
@@ -1560,14 +1616,14 @@ func genVotePollMsgRunBody(userRealmPkgPath, pollID, option string) string {
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Vote on poll",
-			Message: daokit.NewExecuteLambdaMsg(voteOnPoll),
+			Action: daokit.NewExecuteLambdaAction(voteOnPoll),
 		})
 	}
 
 	func voteOnPoll() {
 		pollID := %s
 		option := %q
-		polls.Vote(uint64(pollID), option)
+		polls.Vote(cross, uint64(pollID), option)
 	}
 `, userRealmPkgPath, pollID, option)
 }
@@ -1576,9 +1632,9 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	return fmt.Sprintf(`package main
 
 	import (
-		"std"
+		"chain"
 	
-		"gno.land/p/demo/ufmt"
+		"gno.land/p/nt/ufmt"
 		"gno.land/p/zenao/daokit"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		pollsv1 "gno.land/p/zenao/polls/v1"
@@ -1592,7 +1648,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Add new poll",
-			Message: daokit.NewExecuteLambdaMsg(newPoll),
+			Action: daokit.NewExecuteLambdaAction(newPoll),
 		})
 	}
 	
@@ -1600,12 +1656,12 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		p := polls.NewPoll(question, kind, %d, options, org.IsMember)
+		p := polls.NewPoll(cross, question, kind, %d, options, org.IsMember)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
 			panic("multiaddr validation failed")
 		}
-		std.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
+		chain.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
 	
 		feedID := %q
 		post := &feedsv1.Post{
@@ -1616,8 +1672,8 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 			},
 		}
 	
-		postID := social_feed.NewPost(feedID, post)
-		std.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
+		postID := social_feed.NewPost(cross, feedID, post)
+		chain.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
 	}
 	`, orgPkgPath, userRealmPkgPath, question, stringSliceLit(options), kind, duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
 }
@@ -1635,9 +1691,9 @@ func genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, ticketPubkey, signatu
 	func main() {
 		daokit.InstantExecute(gatekeeper.DAO, daokit.ProposalRequest{
 			Title: "Checkin",
-			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Checkin",
-				Message: events.NewCheckinMsg(%q, %q),
+				Action: events.NewCheckinAction(%q, %q),
 			}),
 		})
 	}
@@ -1657,9 +1713,9 @@ func genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, tick
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Add participant",
-				Message: events.NewAddParticipantMsg(%q, %q, %q),
+				Action: events.NewAddParticipantAction(%q, %q, %q),
 			}),
 		})
 	}
@@ -1679,9 +1735,9 @@ func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAd
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Remove participant",
-				Message: events.NewRemoveParticipantMsg(%q, %q),
+				Action: events.NewRemoveParticipantAction(%q, %q),
 			}),
 		})
 	}
@@ -1701,9 +1757,9 @@ func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperA
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteMsg(event.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
 				Title: "Remove gatekeeper",
-				Message: events.NewRemoveGatekeeperMsg(%q),
+				Action: events.NewRemoveGatekeeperAction(%q),
 			}),
 		})
 	}
@@ -1723,9 +1779,9 @@ func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberA
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Remove member",
-				Message: communities.NewRemoveMemberMsg(%q),
+				Action: communities.NewRemoveMemberAction(%q),
 			}),
 		})
 	}
@@ -1745,13 +1801,35 @@ func genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Add Member",
-				Message: communities.NewAddMemberMsg(%q),
+				Action: communities.NewAddMemberAction(%q),
 			}),
 		})
 	}
 `, callerPkgPath, communityPkgPath, "Add member in community "+communityPkgPath, memberAddr)
+}
+
+func genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath string, membersAddr []string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		community %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/communities"
+	)
+		
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
+				Title: "Add Members",
+				Action: communities.NewAddMembersAction(%s),
+			}),
+		})
+	}
+`, callerPkgPath, communityPkgPath, "Add members in community "+communityPkgPath, stringSliceLit(membersAddr))
 }
 
 func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
@@ -1767,9 +1845,9 @@ func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr s
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Add event",
-				Message: communities.NewAddEventMsg(%q),
+				Action: communities.NewAddEventAction(%q),
 			}),
 		})
 	}
@@ -1789,9 +1867,9 @@ func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAdd
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: %q,
-			Message: daokit.NewInstantExecuteMsg(community.DAO, daokit.ProposalRequest{
+			Action: daokit.NewInstantExecuteAction(community.DAO, daokit.ProposalRequest{
 				Title: "Remove event",
-				Message: communities.NewRemoveEventMsg(%q),
+				Action: communities.NewRemoveEventAction(%q),
 			}),
 		})
 	}
@@ -1849,9 +1927,16 @@ import (
 
 var (
 	DAO daokit.DAO
+
+	localDAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	event *events.Event
 )
+
+func init() {
+	// XXX: workaround for "unexpected zero object id" issue
+	social_feed.NewFeed(cross, "main", false, IsMember)
+}
 
 func init() {
 	conf := events.Config{
@@ -1872,9 +1957,9 @@ func init() {
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
-	DAO = event.DAO
-	eventreg.Register(func() *zenaov1.EventInfo { return event.Info() })
-	social_feed.NewFeed("main", false, IsMember)
+	localDAO = event.DAO
+	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
+	eventreg.Register(cross, func() *zenaov1.EventInfo { return event.Info() })
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)
@@ -1882,12 +1967,12 @@ func IsMember(memberId string) bool {
 	return daoPrivate.Members.IsMember(memberId)
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
+	localDAO.Vote(proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(_ realm, proposalID uint64) {
+	localDAO.Execute(proposalID)
 }
 
 func Render(path string) string {
@@ -1931,9 +2016,16 @@ import (
 
 var (
 	DAO daokit.DAO
+	
+	localDAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	community *communities.Community
 )
+
+func init() {
+	// XXX: workaround for "unexpected zero object id" issue
+	social_feed.NewFeed(cross, "main", false, IsMember)
+}
 
 func init() {
 	conf := communities.Config{
@@ -1950,9 +2042,9 @@ func init() {
 	}
 	community = communities.NewCommunity(&conf)
 	daoPrivate = community.DAOPrivate
-	DAO = community.DAO
-	communityreg.Register(func() *zenaov1.CommunityInfo { return community.Info() })
-	social_feed.NewFeed("main", false, IsMember)
+	localDAO = community.DAO
+	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
+	communityreg.Register(cross, func() *zenaov1.CommunityInfo { return community.Info() })
 }
 
 // Set public to be used as auth layer for external entities (e.g polls)
@@ -1960,12 +2052,12 @@ func IsMember(memberId string) bool {
 	return daoPrivate.Members.IsMember(memberId)
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
+	localDAO.Vote(proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(_ realm, proposalID uint64) {
+	localDAO.Execute(proposalID)
 }
 
 func Render(path string) string {
@@ -2017,6 +2109,8 @@ import (
 
 var (
 	DAO daokit.DAO
+
+	localDAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	user *users.User
 )
@@ -2030,16 +2124,17 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: {{.zenaoAdminAddr}},
 	})
-	DAO = user.DAO
+	localDAO = user.DAO
+	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
 	daoPrivate = user.DAOPrivate
 }
 
-func Vote(proposalID uint64, vote daocond.Vote) {
-	DAO.Vote(proposalID, vote)
+func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
+	localDAO.Vote(proposalID, vote)
 }
 
-func Execute(proposalID uint64) {
-	DAO.Execute(proposalID)
+func Execute(_ realm, proposalID uint64) {
+	localDAO.Execute(proposalID)
 }
 
 func Render(path string) string {
@@ -2047,7 +2142,7 @@ func Render(path string) string {
 }
 `
 
-func extractEventAttribute(event std.GnoEvent, key string) (string, error) {
+func extractEventAttribute(event chain.Event, key string) (string, error) {
 	for _, attr := range event.Attributes {
 		if attr.Key == key {
 			return attr.Value, nil

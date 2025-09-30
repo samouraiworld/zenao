@@ -1,14 +1,16 @@
 package communities
 
 import (
-	"std"
+	"strings"
 	"testing"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/testutils"
+	"gno.land/p/nt/testutils"
+	"gno.land/p/nt/urequire"
 	"gno.land/p/zenao/daokit"
+	"gno.land/r/zenao/mockprofile"
 )
 
+// XXX: remove this
 var (
 	alice = testutils.TestAddress("alice")
 	bob   = testutils.TestAddress("bob")
@@ -17,10 +19,38 @@ var (
 	eve   = testutils.TestAddress("eve")
 )
 
+var testUsers = func() map[string]address {
+	res := map[string]address{}
+	for _, name := range []string{"alice", "bob", "carol", "dave", "eve", "zenaoadm"} {
+		res[name] = testutils.TestAddress(name)
+	}
+	return res
+}()
+
+var testUsersByAddr = func() map[address]string {
+	res := map[address]string{}
+	for name, addr := range testUsers {
+		res[addr] = name
+	}
+	return res
+}()
+
+func usersNames(addrs []string) []string {
+	res := make([]string, 0, len(addrs))
+	for _, addr := range addrs {
+		name, ok := testUsersByAddr[address(addr)]
+		if !ok {
+			name = addr
+		}
+		res = append(res, name)
+	}
+	return res
+}
+
 func TestNewCommunity(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/events/e1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/events/e1"))
+
 	conf := Config{
 		Administrators:   []string{alice.String(), bob.String()},
 		Members:          []string{carol.String(), dave.String(), eve.String()},
@@ -29,6 +59,7 @@ func TestNewCommunity(t *testing.T) {
 		Description:      "this is a community",
 		SetProfileString: profile.SetStringField,
 		GetProfileString: profile.GetProfileString,
+		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
 	}
 	community := NewCommunity(&conf)
 	if len(community.DAOPrivate.Members.GetMembers()) != 6 {
@@ -53,10 +84,14 @@ func TestNewCommunity(t *testing.T) {
 }
 
 func TestAddMember(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+
 	conf := Config{
+		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
 		Administrators:   []string{alice.String()},
 		Members:          []string{carol.String(), dave.String()},
 		Events:           []string{},
@@ -66,13 +101,16 @@ func TestAddMember(t *testing.T) {
 		GetProfileString: profile.GetProfileString,
 	}
 	community := NewCommunity(&conf)
+
 	if len(community.DAOPrivate.Members.GetMembers()) != 4 {
 		t.Fatalf("expected 4 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
+	urequire.Equal(t, "zenaoadm, dave, alice, carol", strings.Join(usersNames(community.DAOPrivate.Members.GetMembers()), ", "))
+
 	if !community.DAOPrivate.Members.HasRole(carol.String(), "member") {
 		t.Fatalf("expected carol to have member role")
 	}
-	daokit.InstantExecute(community.DAO, testReq(NewAddMemberMsg(bob.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewAddMemberAction(bob.String())))
 	if len(community.DAOPrivate.Members.GetMembers()) != 5 {
 		t.Fatalf("expected 5 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
@@ -82,10 +120,13 @@ func TestAddMember(t *testing.T) {
 }
 
 func TestRemoveMember(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/communities/c1"))
 	conf := Config{
+		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
 		Administrators:   []string{alice.String()},
 		Members:          []string{carol.String(), dave.String()},
 		Events:           []string{},
@@ -104,7 +145,7 @@ func TestRemoveMember(t *testing.T) {
 	if !community.DAOPrivate.Members.HasRole(dave.String(), "member") {
 		t.Fatalf("expected dave to have member role")
 	}
-	daokit.InstantExecute(community.DAO, testReq(NewRemoveMemberMsg(carol.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewRemoveMemberAction(carol.String())))
 	if len(community.DAOPrivate.Members.GetMembers()) != 3 {
 		t.Fatalf("expected 3 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
@@ -114,10 +155,13 @@ func TestRemoveMember(t *testing.T) {
 }
 
 func TestAddEvent(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/communities/c1"))
 	conf := Config{
+		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
 		Administrators:   []string{alice.String()},
 		Members:          []string{carol.String(), dave.String()},
 		Events:           []string{},
@@ -140,7 +184,7 @@ func TestAddEvent(t *testing.T) {
 		t.Fatalf("expected 0 events, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}
 	event := testutils.TestAddress("event1")
-	daokit.InstantExecute(community.DAO, testReq(NewAddEventMsg(event.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewAddEventAction(event.String())))
 	if community.DAOPrivate.Members.CountMembersWithRole("event") != 1 {
 		t.Fatalf("expected 1 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}
@@ -150,10 +194,13 @@ func TestAddEvent(t *testing.T) {
 }
 
 func TestRemoveEvent(t *testing.T) {
-	var profile mockProfile
-	std.TestSetOriginCaller(alice)
-	std.TestSetRealm(std.NewCodeRealm("gno.land/r/zenao/communities/c1"))
+	profile := &mockprofile.MockProfile{}
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	testing.SetRealm(testing.NewCodeRealm("gno.land/r/zenao/communities/c1"))
 	conf := Config{
+		ZenaoAdminAddr:   testUsers["zenaoadm"].String(),
 		Administrators:   []string{alice.String()},
 		Members:          []string{carol.String(), dave.String()},
 		Events:           []string{},
@@ -167,14 +214,14 @@ func TestRemoveEvent(t *testing.T) {
 		t.Fatalf("expected 4 members, got %d", len(community.DAOPrivate.Members.GetMembers()))
 	}
 	event := testutils.TestAddress("event1")
-	daokit.InstantExecute(community.DAO, testReq(NewAddEventMsg(event.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewAddEventAction(event.String())))
 	if community.DAOPrivate.Members.CountMembersWithRole("event") != 1 {
 		t.Fatalf("expected 1 event, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}
 	if !community.DAOPrivate.Members.HasRole(event.String(), "event") {
 		t.Fatalf("expected event to have event role")
 	}
-	daokit.InstantExecute(community.DAO, testReq(NewRemoveEventMsg(event.String())))
+	daokit.InstantExecute(community.DAO, testReq(NewRemoveEventAction(event.String())))
 	if community.DAOPrivate.Members.CountMembersWithRole("event") != 0 {
 		t.Fatalf("expected 0 events, got %d", community.DAOPrivate.Members.CountMembersWithRole("event"))
 	}
@@ -183,24 +230,8 @@ func TestRemoveEvent(t *testing.T) {
 	}
 }
 
-type mockProfile struct {
-	fields avl.Tree
-}
-
-func (p *mockProfile) GetProfileString(addr std.Address, field string, def string) string {
-	v, ok := p.fields.Get(field)
-	if !ok {
-		return def
-	}
-	return v.(string)
-}
-
-func (p *mockProfile) SetStringField(field, value string) bool {
-	return p.fields.Set(field, value)
-}
-
-func testReq(msg daokit.ExecutableMessage) daokit.ProposalRequest {
+func testReq(msg daokit.Action) daokit.ProposalRequest {
 	return daokit.ProposalRequest{
-		Message: msg,
+		Action: msg,
 	}
 }

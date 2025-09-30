@@ -1,7 +1,7 @@
 package daokit
 
 import (
-	"gno.land/p/demo/avl"
+	"gno.land/p/nt/avl"
 	"gno.land/p/zenao/daocond"
 )
 
@@ -9,9 +9,12 @@ type ResourcesStore struct {
 	Tree *avl.Tree // string -> daocond.Condition
 }
 
+// XXX: should condition be a pointer?
 type Resource struct {
-	Handler   MessageHandler
-	Condition daocond.Condition
+	Handler     ActionHandler
+	Condition   daocond.Condition
+	DisplayName string
+	Description string
 }
 
 func NewResourcesStore() *ResourcesStore {

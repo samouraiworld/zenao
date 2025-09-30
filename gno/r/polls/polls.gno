@@ -1,11 +1,11 @@
 package polls
 
 import (
-	"std"
+	"chain/runtime"
 	"time"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/seqid"
+	"gno.land/p/nt/avl"
+	"gno.land/p/nt/seqid"
 	pollsv1 "gno.land/p/zenao/polls/v1"
 )
 
@@ -27,12 +27,12 @@ type Poll struct {
 	Duration int64
 
 	CreatedAt int64
-	CreatedBy std.Address
+	CreatedBy address
 
 	authFunc func(string) bool
 }
 
-func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []string, authFunc func(string) bool) *Poll {
+func NewPoll(_ realm, question string, kind pollsv1.PollKind, duration int64, options []string, authFunc func(string) bool) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
@@ -54,7 +54,7 @@ func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []s
 		Results:   avl.NewTree(),
 		Duration:  duration,
 		CreatedAt: time.Now().Unix(),
-		CreatedBy: std.PreviousRealm().Address(),
+		CreatedBy: runtime.PreviousRealm().Address(),
 		authFunc:  authFunc,
 	}
 	for _, option := range options {
@@ -75,7 +75,7 @@ func NewPoll(question string, kind pollsv1.PollKind, duration int64, options []s
 	return poll
 }
 
-func Vote(pollID uint64, option string) {
+func Vote(_ realm, pollID uint64, option string) {
 	id := seqid.ID(pollID)
 	pollRaw, ok := polls.Get(id.String())
 	if !ok {
@@ -97,7 +97,7 @@ func GetInfo(pollID uint64, user string) *pollsv1.Poll {
 }
 
 func (p *Poll) Vote(option string) {
-	addr := std.PreviousRealm().Address()
+	addr := runtime.PreviousRealm().Address()
 	if p.authFunc != nil && !p.authFunc(addr.String()) {
 		panic("the user is not allowed to interact with this poll")
 	}
