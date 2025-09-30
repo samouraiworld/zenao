@@ -139,9 +139,7 @@ export function EventInfoLayout({
         {/* Host section */}
         <div className="col-span-6 sm:col-span-3">
           <EventSection title={t("hosted-by")}>
-            <Suspense>
-              <UserAvatarWithName linkToProfile address={data.organizers[0]} />
-            </Suspense>
+            <UserAvatarWithName linkToProfile address={data.organizers[0]} />
           </EventSection>
         </div>
 

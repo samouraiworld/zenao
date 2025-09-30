@@ -3,6 +3,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { cva } from "class-variance-authority";
+import { Suspense } from "react";
 import { profileOptions } from "@/lib/queries/profile";
 import { cn } from "@/lib/tailwind";
 import { Web3Image } from "@/components/widgets/images/web3-image";
@@ -20,6 +21,17 @@ interface UserComponentProps {
 XXX: these classnames (rounded-full, overflow-hidden) are already set in the shadcn avatar components
 but the class merging does not seem to work so we need to reset them here
 */
+
+const loaderTextClassName = cva("rounded overflow-hidden inline-block", {
+  variants: {
+    size: {
+      sm: "w-40 h-4",
+      md: `w-80 h-8`,
+      lg: "w-160 h-16",
+    },
+  },
+  defaultVariants: { size: "sm" },
+});
 
 const avatarClassName = cva("rounded-full overflow-hidden inline-block", {
   variants: {
@@ -62,38 +74,67 @@ export function UserAvatar({
   );
 }
 
-export function UserAvatarSkeleton({ className }: { className?: string }) {
-  return <Skeleton className={cn(avatarClassName, className)} />;
+export function UserAvatarSkeleton({
+  className,
+  size = "sm",
+}: Omit<UserComponentProps, "address">) {
+  return <Skeleton className={cn(avatarClassName({ size }), className)} />;
 }
 
-export function UserAvatarWithName({
-  address,
-  className,
-  linkToProfile,
-  size = "sm",
-}: UserComponentProps & {
-  linkToProfile?: boolean;
-  size?: "sm" | "md" | "lg";
-}) {
-  const { data: profile } = useSuspenseQuery(profileOptions(address));
-
+export function UserAvatarWithName(
+  props: UserComponentProps & {
+    linkToProfile?: boolean;
+    size?: "sm" | "md" | "lg";
+  },
+) {
   const content = (
     <div className="flex flex-row gap-2 items-center">
-      <UserAvatar address={profile?.address} size={size} />
-      <Text size="sm">{profile?.displayName}</Text>
+      <Suspense fallback={<UserAvatarWithNameLoader size={props.size} />}>
+        <UserAvatarWithNameContent address={props.address} size={props.size} />
+      </Suspense>
     </div>
   );
 
-  if (linkToProfile) {
+  if (props.linkToProfile) {
     return (
       <Link
-        href={`/profile/${profile?.address}`}
-        className={cn("flex w-max", className)}
+        href={`/profile/${props.address}`}
+        className={cn("flex w-max", props.className)}
       >
         {content}
       </Link>
     );
   }
 
-  return <div className={className}>{content}</div>;
+  return <div className={props.className}>{content}</div>;
+}
+
+function UserAvatarWithNameLoader({
+  size = "sm",
+}: {
+  size?: UserComponentProps["size"];
+}) {
+  return (
+    <>
+      <UserAvatarSkeleton size={size} />
+      <Skeleton className={loaderTextClassName({ size })} />
+    </>
+  );
+}
+
+function UserAvatarWithNameContent({
+  address,
+  size = "sm",
+}: {
+  address: string | null | undefined;
+  size?: "sm" | "md" | "lg";
+}) {
+  const { data: profile } = useSuspenseQuery(profileOptions(address));
+
+  return (
+    <>
+      <UserAvatar address={profile?.address} size={size} />
+      <Text size="sm">{profile?.displayName}</Text>
+    </>
+  );
 }
