@@ -110,10 +110,8 @@
   },
   "profile-info": {
     "profile-not-exist": "Profile doesn't exist",
-    "hosting-discoverable-events": "Hosting discoverable events",
-    "past-discoverable-events": "Past discoverable events",
-    "hosting-undiscoverable-events": "Hosting undiscoverable events",
-    "past-undiscoverable-events": "Past undiscoverable events"
+    "hosting-events": "Hosting events",
+    "past-events": "Past events"
   },
   "guest-registration-success-dialog": {
     "registration-title": "You're in !",

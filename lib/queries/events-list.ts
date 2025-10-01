@@ -92,53 +92,9 @@ export const eventsPkgPathsByAddrs = (addresses: string[]) =>
     },
   });
 
-export const eventsUndiscoverablesByOrganizerList = (
-  organizer: string,
-  fromUnixSec: number,
-  toUnixSec: number,
-  limit: number,
-) => {
-  const fromInt = Math.floor(fromUnixSec);
-  const toInt = Math.floor(toUnixSec);
-  const limitInt = Math.floor(limit);
-
-  return infiniteQueryOptions({
-    queryKey: [
-      "eventsUndiscoverablesByOrganizer",
-      organizer,
-      fromInt,
-      toInt,
-      limitInt,
-    ],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam = 0 }) => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${DiscoverableFilter.UNDISCOVERABLE}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-      return eventListFromJson(raw);
-    },
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length;
-    },
-    getPreviousPageParam: (firstPage, pages) => {
-      if (firstPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length - 2;
-    },
-  });
-};
-
 export const eventsByOrganizerList = (
   organizer: string,
+  discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
@@ -156,7 +112,7 @@ export const eventsByOrganizerList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${DiscoverableFilter.DISCOVERABLE}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
