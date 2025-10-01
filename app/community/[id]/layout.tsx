@@ -1,5 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import CommunityInfoLayout from "../community-info-layout";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
@@ -9,22 +10,54 @@ import {
 } from "@/lib/queries/community";
 import { profileOptions } from "@/lib/queries/profile";
 import { eventsPkgPathsByAddrs } from "@/lib/queries/events-list";
+import { web2URL } from "@/lib/uris";
+
+interface PageProps {
+  params: Promise<{ id: string }>;
+  children?: React.ReactNode;
+}
 
 // enable ssg for all events
 export async function generateStaticParams() {
   return [];
 }
 
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { id: communityId } = await params;
+  const queryClient = getQueryClient();
+
+  let communityData;
+
+  try {
+    communityData = await queryClient.fetchQuery(communityInfo(communityId));
+  } catch (_) {
+    notFound();
+  }
+
+  return {
+    title: communityData.displayName,
+    description: communityData.description,
+    openGraph: {
+      title: communityData.displayName,
+      description: communityData.description,
+      images: [
+        {
+          url: web2URL(communityData.avatarUri),
+        },
+        {
+          url: web2URL(communityData.bannerUri),
+        },
+      ],
+    },
+  };
+}
+
 // revalidate every 60 seconds
 export const revalidate = 60;
 
-async function CommunityPageLayout({
-  params,
-  children,
-}: {
-  params: Promise<{ id: string }>;
-  children?: React.ReactNode;
-}) {
+async function CommunityPageLayout({ params, children }: PageProps) {
   const queryClient = getQueryClient();
   const { id: communityId } = await params;
 

@@ -13,9 +13,7 @@ import { ParticipantsSection } from "./event-participants-section";
 import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
-import { Web3Image } from "@/components/widgets/images/web3-image";
 import { useEventPassword } from "@/components/providers/event-password-provider";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
@@ -27,6 +25,7 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import EventParticipationInfo from "@/components/features/event/event-participation-info";
+import { EventImage } from "@/components/features/event/event-image";
 
 interface EventSectionProps {
   title: string;
@@ -87,19 +86,16 @@ export function EventInfoLayout({
 
       <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
         <div className="flex flex-col w-full sm:w-3/6">
-          <AspectRatio ratio={16 / 9}>
-            <Web3Image
-              src={data.imageUri}
-              sizes="(max-width: 768px) 100vw,
+          <EventImage
+            src={data.imageUri}
+            sizes="(max-width: 768px) 100vw,
               (max-width: 1200px) 50vw,
               33vw"
-              fill
-              alt="Event"
-              priority
-              fetchPriority="high"
-              className="flex w-full rounded self-center object-cover"
-            />
-          </AspectRatio>
+            fill
+            alt="Event"
+            priority
+            fetchPriority="high"
+          />
         </div>
         {/* Right Section */}
         <div className="flex flex-col gap-4 w-full sm:w-3/6">
