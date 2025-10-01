@@ -74,24 +74,38 @@ export const FormFieldImage = <T extends FieldValues>(
                   {/* TODO: find a better way */}
                   <Card
                     className={cn(
-                      "border-dashed w-full h-full flex flex-col gap-2 justify-center items-center rounded border-2 border-[#EC7E17]",
+                      "border-dashed w-full h-full flex flex-col gap-2 justify-center items-center rounded border-2 border-[#EC7E17] overflow-hidden",
                       "hover:bg-secondary cursor-pointer",
                     )}
                   >
                     {isValidURL(imageUri, urlPattern) &&
                     !fieldState.error?.message ? (
-                      <Web3Image
-                        src={web2URL(imageUri)}
-                        alt="imageUri"
-                        fill
-                        sizes="(max-width: 768px) 100vw,
+                      <>
+                        <Web3Image
+                          src={web2URL(imageUri)}
+                          alt="imageUri"
+                          fill
+                          sizes="(max-width: 768px) 100vw,
                       (max-width: 1200px) 70vw,
                       33vw"
-                        className={cn(
-                          "flex object-cover rounded self-center cursor-pointer",
-                          "hover:brightness-[60%] transition-all",
-                        )}
-                      />
+                          className={cn(
+                            "flex object-conver rounded self-center cursor-pointer blur",
+                            "hover:brightness-[60%] transition-all",
+                          )}
+                        />
+                        <Web3Image
+                          src={web2URL(imageUri)}
+                          alt="imageUri"
+                          fill
+                          sizes="(max-width: 768px) 100vw,
+                      (max-width: 1200px) 70vw,
+                      33vw"
+                          className={cn(
+                            "flex object-contain rounded self-center cursor-pointer",
+                            "hover:brightness-[60%] transition-all",
+                          )}
+                        />
+                      </>
                     ) : (
                       <>
                         <ImageIcon
