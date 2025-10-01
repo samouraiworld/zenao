@@ -153,6 +153,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             placeholder={t("image-uri-placeholder")}
             aspectRatio={[16, 9]}
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
+            fit="pad"
           />
           <EventFormCommunitySelector form={form} />
         </div>
