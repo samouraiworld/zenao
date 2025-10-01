@@ -89,7 +89,7 @@ export const FormFieldImage = <T extends FieldValues>(
                       (max-width: 1200px) 70vw,
                       33vw"
                           className={cn(
-                            "flex object-conver rounded self-center cursor-pointer blur",
+                            "flex object-cover rounded self-center cursor-pointer blur",
                             "hover:brightness-[60%] transition-all",
                           )}
                         />
