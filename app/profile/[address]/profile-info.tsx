@@ -36,12 +36,10 @@ export function ProfileInfo({
     userAddressOptions(getToken, userId),
   );
   const isOwner = userAddress === address;
-  console.log("isOwnerisOwner", isOwner);
   // The connected user can see his both discoverable and undiscoverable events
   const discoverableFilter = isOwner
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
-  console.log("discoverableFilterdiscoverableFilter", discoverableFilter);
 
   const { data: profile } = useSuspenseQuery(profileOptions(address));
   const {
