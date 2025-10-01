@@ -30,7 +30,6 @@ function CommunityInfoLayout({
     "@type": "Organization",
     name: data.displayName,
     description: data.description,
-    url: `${process.env.NEXT_PUBLIC_BASE_URL}/community/${communityId}`,
     logo: {
       "@type": "ImageObject",
       url: web2URL(data.avatarUri),
