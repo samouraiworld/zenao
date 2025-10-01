@@ -36,11 +36,10 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](https://github.com/nvm-sh/nvm).
 
-Install gno tools if you don't have them:
+Generate and install all the stuff:
 
 ```bash
-make clone-gno
-make install-gno
+make generate
 ```
 
 Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
@@ -95,11 +94,10 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](https://github.com/nvm-sh/nvm).
 
-Install gno tools if you don't have them:
+Generate and install all the stuff:
 
 ```bash
-make clone-gno
-make install-gno
+make generate
 ```
 
 Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
@@ -116,8 +114,6 @@ cp .env.backend-dev .env.local
 Add back the `PINATA_JWT` in `.env.local`
 
 Be careful not to commit the PINATA_JWT or clerk secret!
-
-Make sure `ffmpeg` is installed ! It is required to generate videos of qr code for check-in tests.
 
 Now, run the e2e stack
 ```bash

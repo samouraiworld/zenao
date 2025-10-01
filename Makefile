@@ -20,7 +20,7 @@ lint-buf:
 start.gnodev: gnobuild/${GNOVERSION}/gnodev
 	$(GNODEV)
 
-.PHONY: start.gnodev
+.PHONY: start.gnodev-e2e
 start.gnodev-e2e: gnobuild/${GNOVERSION}/gnodev
 	$(GNODEV) --unsafe-api --txs-file=$(TXS_FILE)
 
