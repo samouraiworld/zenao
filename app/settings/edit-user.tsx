@@ -100,7 +100,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             control={form.control}
             name="avatarUri"
             placeholder={t("avatar-placeholder")}
-            aspectRatio={1 / 1}
+            aspectRatio={[4, 4]}
             className="sm:w-2/5"
             tooltip={<Text size="sm">{t("change-avatar")}</Text>}
           />
