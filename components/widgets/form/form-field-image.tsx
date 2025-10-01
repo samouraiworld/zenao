@@ -22,7 +22,7 @@ import { FormFieldProps, urlPattern } from "@/types/schemas";
 
 export const FormFieldImage = <T extends FieldValues>(
   props: FormFieldProps<T, string> & {
-    aspectRatio?: number;
+    aspectRatio: [number, number];
     tooltip?: React.ReactNode;
   },
 ) => {
@@ -69,7 +69,10 @@ export const FormFieldImage = <T extends FieldValues>(
           <TooltipProvider>
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
-                <AspectRatio ratio={props.aspectRatio} onClick={handleClick}>
+                <AspectRatio
+                  ratio={props.aspectRatio[0] / props.aspectRatio[1]}
+                  onClick={handleClick}
+                >
                   {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
                   {/* TODO: find a better way */}
                   <Card
@@ -126,6 +129,13 @@ export const FormFieldImage = <T extends FieldValues>(
                 </TooltipContent>
               )}
             </Tooltip>
+            <Text>
+              Recommended aspect ratio: {props.aspectRatio[0]}/
+              {props.aspectRatio[1]}
+              <br />
+              Example: {100 * props.aspectRatio[0]}x{100 * props.aspectRatio[1]}
+              px
+            </Text>
           </TooltipProvider>
           <div className="bottom-8 right-2">
             <input
