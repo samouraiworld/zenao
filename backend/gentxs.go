@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
@@ -524,7 +525,11 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addr
 	}}
 
 	if post.Post.DeletedAt != 0 {
-		body := genDeletePostMsgRunBody(userPkgPath, post.Post.LocalPostId)
+		postIDInt, err := strconv.ParseUint(post.ID, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		body := genDeletePostMsgRunBody(userPkgPath, postIDInt)
 		tx := std.Tx{
 			Msgs: []std.Msg{
 				vm.MsgRun{
