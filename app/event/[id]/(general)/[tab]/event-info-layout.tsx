@@ -226,8 +226,6 @@ export function EventInfoLayoutSkeleton() {
         {/* Participants preview and dialog section */}
         <div className="col-span-6 sm:col-span-3"></div>
       </div>
-
-      <Skeleton className="w-full h-28" />
     </div>
   );
 }
