@@ -90,7 +90,16 @@ type PollResult struct {
 	Option string
 	PollID uint
 	Poll   Poll
-	Users  []User `gorm:"many2many:poll_votes;"`
+	Votes  []PollVote
+}
+
+type PollVote struct {
+	PollResultID uint      `gorm:"primaryKey"`
+	UserID       uint      `gorm:"primaryKey"`
+	CreatedAt    time.Time `gorm:"autoCreateTime"`
+
+	PollResult PollResult `gorm:"foreignKey:PollResultID"`
+	User       User       `gorm:"foreignKey:UserID"`
 }
 
 func dbFeedToZeniFeed(feed *Feed) (*zeni.Feed, error) {
@@ -213,16 +222,13 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 	for _, result := range poll.Results {
 		zpoll.Results = append(zpoll.Results, &pollsv1.PollResult{
 			Option:       result.Option,
-			Count:        uint32(len(result.Users)),
+			Count:        uint32(len(result.Votes)),
 			HasUserVoted: false, // TODO: check if user has voted
 		})
-		for _, user := range result.Users {
+		for _, vote := range result.Votes {
 			votes = append(votes, &zeni.Vote{
-				// this hack is to avoid adding a vote before a user is even authorized to vote on the poll
-				// ideally we should keep the CreatedAt of the vote as is, but it requires migration in database and a way
-				// so for now we just set it to the end of the poll duration but we lose the actual time of the vote
-				CreatedAt: time.Unix(poll.CreatedAt.Unix()+poll.Duration-1, 0),
-				UserID:    strconv.FormatUint(uint64(user.ID), 10),
+				CreatedAt: vote.CreatedAt,
+				UserID:    strconv.FormatUint(uint64(vote.UserID), 10),
 				Option:    result.Option,
 			})
 		}

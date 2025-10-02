@@ -1423,7 +1423,7 @@ func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
 	}
 
 	var poll Poll
-	if err := g.db.Where("post_id = ?", postIDint).Preload("Results").Preload("Results.Users").First(&poll).Error; err != nil {
+	if err := g.db.Where("post_id = ?", postIDint).Preload("Results").Preload("Results.Votes").First(&poll).Error; err != nil {
 		return nil, err
 	}
 
