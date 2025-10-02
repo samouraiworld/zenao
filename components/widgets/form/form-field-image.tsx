@@ -33,13 +33,15 @@ const imageVariants = cva("", {
   },
 });
 
-export const FormFieldImage = <T extends FieldValues>(
-  props: FormFieldProps<T, string> & {
-    aspectRatio: [number, number];
-    tooltip?: React.ReactNode;
-    fit?: "cover" | "pad";
-  },
-) => {
+export const FormFieldImage = <T extends FieldValues>({
+  hint = true,
+  ...props
+}: FormFieldProps<T, string> & {
+  aspectRatio: [number, number];
+  tooltip?: React.ReactNode;
+  hint?: boolean;
+  fit?: "cover" | "pad";
+}) => {
   const { toast } = useToast();
   const { field, fieldState } = useController(props);
   const imageUri = useWatch({ control: props.control, name: props.name });
@@ -76,11 +78,6 @@ export const FormFieldImage = <T extends FieldValues>(
   const handleClick = () => {
     hiddenInputRef.current?.click();
   };
-
-  let aspectRatioHint = "1/1";
-  if (props.aspectRatio[0] !== props.aspectRatio[1]) {
-    aspectRatioHint = `${props.aspectRatio[0]}/${props.aspectRatio[1]}`;
-  }
 
   return (
     <FormField
@@ -154,12 +151,16 @@ export const FormFieldImage = <T extends FieldValues>(
                 </TooltipContent>
               )}
             </Tooltip>
-            <Text>
-              Recommended aspect ratio: {aspectRatioHint}
-              <br />
-              Example: {100 * props.aspectRatio[0]}x{100 * props.aspectRatio[1]}
-              px
-            </Text>
+            {hint && (
+              <Text>
+                Recommended aspect ratio:{" "}
+                {getAspectRatioHint(props.aspectRatio)}
+                <br />
+                Example: {100 * props.aspectRatio[0]}x
+                {100 * props.aspectRatio[1]}
+                px
+              </Text>
+            )}
           </TooltipProvider>
           <div className="bottom-8 right-2">
             <input
@@ -177,3 +178,21 @@ export const FormFieldImage = <T extends FieldValues>(
     />
   );
 };
+
+function getAspectRatioHint(aspectRatio: [number, number]) {
+  const gcd = greatestCommonDivisor(aspectRatio[0], aspectRatio[1]);
+  const a = Math.round(aspectRatio[0] / gcd);
+  const b = Math.round(aspectRatio[1] / gcd);
+  return `${a}/${b}`;
+}
+
+function greatestCommonDivisor(a: number, b: number) {
+  a = Math.abs(Math.round(a));
+  b = Math.abs(Math.round(b));
+  for (; b !== 0; ) {
+    const c = a;
+    a = b;
+    b = c % b;
+  }
+  return a;
+}
