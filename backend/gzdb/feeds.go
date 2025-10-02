@@ -3,6 +3,7 @@ package gzdb
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -217,7 +218,10 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 		})
 		for _, user := range result.Users {
 			votes = append(votes, &zeni.Vote{
-				CreatedAt: result.CreatedAt,
+				// this hack is to avoid adding a vote before a user is even authorized to vote on the poll
+				// ideally we should keep the CreatedAt of the vote as is, but it requires migration in database and a way
+				// so for now we just set it to the end of the poll duration but we lose the actual time of the vote
+				CreatedAt: time.Unix(poll.CreatedAt.Unix()+poll.Duration-1, 0),
 				UserID:    strconv.FormatUint(uint64(user.ID), 10),
 				Option:    result.Option,
 			})
