@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import React, { Suspense } from "react";
 import { Event, WithContext } from "schema-dts";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import dynamic from "next/dynamic";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
 import { useLocationTimezone } from "@/hooks/use-location-timezone";
@@ -24,13 +25,17 @@ import {
   UserAvatarWithName,
   UserAvatarWithNameSkeleton,
 } from "@/components/features/user/user";
-import EventParticipationInfo from "@/components/features/event/event-participation-info";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import {
   EventLocationSection,
   EventLocationSkeleton,
 } from "@/components/features/event/event-location-section";
 import { EventImage } from "@/components/features/event/event-image";
+
+const EventParticipationInfo = dynamic(
+  () => import("@/components/features/event/event-participation-info"),
+  { ssr: false },
+);
 
 interface EventSectionProps {
   title: string;
