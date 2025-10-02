@@ -34,7 +34,7 @@ import { EventImage } from "@/components/features/event/event-image";
 
 const EventParticipationInfo = dynamic(
   () => import("@/components/features/event/event-participation-info"),
-  { ssr: false },
+  { ssr: false, loading: () => <Skeleton className="w-full h-28" /> },
 );
 
 interface EventSectionProps {
@@ -169,13 +169,11 @@ export function EventInfoLayout({
       </div>
 
       {/* Participate Card */}
-      <Suspense fallback={<Skeleton className="w-full h-28" />}>
-        <EventParticipationInfo
-          eventId={eventId}
-          eventData={data}
-          password={password}
-        />
-      </Suspense>
+      <EventParticipationInfo
+        eventId={eventId}
+        eventData={data}
+        password={password}
+      />
 
       {children}
 
