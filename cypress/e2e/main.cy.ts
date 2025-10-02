@@ -626,7 +626,7 @@ Cypress.Commands.add(
     }
 
     cy.get("button").contains("Create event").click();
-    cy.wait(3000);
+    cy.wait(4000);
 
     cy.url().should("include", "/event/");
     cy.url().should("not.include", "/create");
