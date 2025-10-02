@@ -8,6 +8,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
+import dynamic from "next/dynamic";
 import EventFeedForm from "../../event-feed-form/event-feed-form";
 import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
@@ -21,8 +22,14 @@ import {
   feedPostFormSchema,
   FeedPostFormSchemaType,
 } from "@/types/schemas";
-import EventFeed from "@/app/event/[id]/(general)/[tab]/feed";
 import EventPolls from "@/app/event/[id]/(general)/[tab]/votes";
+
+// NOTE: we dynamically load the feed to fully disable SSR and prevent hydrations errors
+// TODO: investigate hydration errors
+const EventFeed = dynamic(
+  () => import("@/app/event/[id]/(general)/[tab]/feed"),
+  { ssr: false },
+);
 
 export function MainEventSections({
   className,
