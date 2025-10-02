@@ -4,7 +4,5 @@ declare namespace Cypress {
       exclusive: boolean;
       gatekeepers?: string[];
     }): Chainable<void>; // or whatever type it returns
-
-    generateValidQRVideo(imgSrc: string): Chainable<void>;
   }
 }
