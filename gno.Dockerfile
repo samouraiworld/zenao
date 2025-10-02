@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG GO_VERSION="1.23"
+ARG GO_VERSION="1.24"
 ARG RUNNER_IMAGE="debian:bookworm"
 
 # --------------------------------------------------------
@@ -23,7 +23,7 @@ RUN git clone https://github.com/gnolang/gno.git
 
 WORKDIR /app/gno
 COPY .gnoversion .gnoversion
-RUN git checkout $(cat .gnoversion)
+RUN git fetch && git checkout $(cat .gnoversion)
 
 WORKDIR /app/gno/contribs/gnodev
 RUN --mount=type=cache,target=/root/.cache/go-build \
@@ -32,7 +32,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
   go build \
   -mod=readonly \
   -o /app/build/gnodev \
-  ./cmd/gnodev
+  .
 
 WORKDIR /app
 COPY gno packages
@@ -56,4 +56,4 @@ COPY genesis_txs.jsonl /genesis_txs.jsonl
 ENV HOME=/app
 WORKDIR $HOME
 
-ENTRYPOINT exec gnodev staging --node-rpc-listener 0.0.0.0:26657 --web-listener 0.0.0.0:8888 --chain-id zenao-dev --balance-file /genesis_balances.txt -txs-file /genesis_txs.jsonl $(find /packages -name gno.mod -type f -exec dirname {} \;)
+ENTRYPOINT exec gnodev staging --node-rpc-listener 0.0.0.0:26657 --web-listener 0.0.0.0:8888 --chain-id zenao-dev --balance-file /genesis_balances.txt -txs-file /genesis_txs.jsonl $(find /packages -name gnomod.toml -type f -exec dirname {} \;)

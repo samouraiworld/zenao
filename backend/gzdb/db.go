@@ -31,7 +31,7 @@ type User struct {
 }
 
 type EntityRole struct {
-	CreatedAt time.Time
+	CreatedAt time.Time `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 

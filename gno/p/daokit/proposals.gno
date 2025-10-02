@@ -1,13 +1,13 @@
 package daokit
 
 import (
+	"chain/runtime"
 	"errors"
-	"std"
 	"time"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/json"
-	"gno.land/p/demo/seqid"
+	"gno.land/p/nt/avl"
+	"gno.land/p/nt/seqid"
+	"gno.land/p/onbloc/json"
 	"gno.land/p/zenao/daocond"
 )
 
@@ -33,18 +33,18 @@ func (s ProposalStatus) String() string {
 }
 
 type Proposal struct {
-	ID             seqid.ID
-	Title          string
-	Description    string
-	CreatedAt      time.Time
-	CreatedHeight  int64
-	ProposerID     string
-	ConditionState daocond.State
-	Message        ExecutableMessage
-	Status         ProposalStatus
-	ExecutorID     string
-	ExecutedAt     time.Time
-	Votes          map[string]daocond.Vote
+	ID            seqid.ID
+	Title         string
+	Description   string
+	CreatedAt     time.Time
+	CreatedHeight int64
+	ProposerID    string
+	Condition     daocond.Condition
+	Action        Action
+	Status        ProposalStatus
+	ExecutorID    string
+	ExecutedAt    time.Time
+	Ballot        daocond.Ballot
 }
 
 type ProposalsStore struct {
@@ -55,7 +55,7 @@ type ProposalsStore struct {
 type ProposalRequest struct {
 	Title       string
 	Description string
-	Message     ExecutableMessage
+	Action      Action
 }
 
 func NewProposalsStore() *ProposalsStore {
@@ -64,19 +64,19 @@ func NewProposalsStore() *ProposalsStore {
 	}
 }
 
-func (p *ProposalsStore) newProposal(proposer string, req ProposalRequest, conditionState daocond.State) *Proposal {
+func (p *ProposalsStore) newProposal(proposer string, req ProposalRequest, condition daocond.Condition) *Proposal {
 	id := p.genID.Next()
 	proposal := &Proposal{
-		ID:             id,
-		Title:          req.Title,
-		Description:    req.Description,
-		ProposerID:     proposer,
-		Status:         ProposalStatusOpen,
-		Message:        req.Message,
-		ConditionState: conditionState,
-		Votes:          map[string]daocond.Vote{},
-		CreatedAt:      time.Now(),
-		CreatedHeight:  std.ChainHeight(),
+		ID:            id,
+		Title:         req.Title,
+		Description:   req.Description,
+		ProposerID:    proposer,
+		Status:        ProposalStatusOpen,
+		Action:        req.Action,
+		Condition:     condition,
+		Ballot:        daocond.NewBallot(),
+		CreatedAt:     time.Now(),
+		CreatedHeight: runtime.ChainHeight(),
 	}
 	p.Tree.Set(id.String(), proposal)
 	return proposal
@@ -91,8 +91,24 @@ func (p *ProposalsStore) GetProposal(id uint64) *Proposal {
 	return proposal
 }
 
+func (p *ProposalsStore) GetProposals(filter func(Proposal) bool) *ProposalsStore {
+	proposals := NewProposalsStore()
+	p.Tree.Iterate("", "", func(key string, value interface{}) bool {
+		prop, ok := value.(*Proposal)
+		if !ok {
+			panic(errors.New("unexpected invalid proposal type"))
+		}
+		prop.UpdateStatus()
+		if filter(*prop) {
+			proposals.Tree.Set(key, prop)
+		}
+		return false
+	})
+	return proposals
+}
+
 func (p *Proposal) UpdateStatus() {
-	conditionsAreMet := p.ConditionState.Eval(p.Votes)
+	conditionsAreMet := p.Condition.Eval(p.Ballot)
 	if p.Status == ProposalStatusOpen && conditionsAreMet {
 		p.Status = ProposalStatusPassed
 	}
@@ -114,7 +130,7 @@ func (p *ProposalsStore) GetProposalsJSON() string {
 			"proposer":    json.StringNode("", prop.ProposerID),
 			"status":      json.StringNode("", prop.Status.String()),
 			"startHeight": json.NumberNode("", float64(prop.CreatedHeight)),
-			"signal":      json.NumberNode("", prop.ConditionState.Signal(prop.Votes)),
+			"signal":      json.NumberNode("", prop.Condition.Signal(prop.Ballot)),
 		}))
 		return false
 	})

@@ -24,11 +24,11 @@ export const CommunityEditAdminButton = ({
   const isAdmin = userRoles.includes("administrator");
   if (!isAdmin) return null;
   return (
-    <div className="mt-4">
+    <div>
       <Link passHref href={`/community/edit/${communityId}`}>
         <ButtonWithChildren
           variant="outline"
-          className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
+          className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
         >
           {t("edit-button")}
         </ButtonWithChildren>

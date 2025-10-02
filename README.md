@@ -2,6 +2,13 @@
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Table of Contents
+- [Getting Started (Staging)](#getting-started-staging)
+- [Getting Started (Local)](#getting-started-local)
+- [Run E2E tests locally](#run-e2e-tests-locally)
+- [Edit api](#edit-api)
+- [Update database schema](#update-database-schema)
+
 ## Getting Started (Staging)
 
 First, install [node + npm via nvm](https://github.com/nvm-sh/nvm).
@@ -36,13 +43,6 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](https://github.com/nvm-sh/nvm).
 
-Install gno tools if you don't have them:
-
-```bash
-make clone-gno
-make install-gno
-```
-
 Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
 
 ```bash
@@ -57,6 +57,11 @@ cp .env.backend-dev .env.local
 If you need to test file uploads, add back the `PINATA_JWT` in `.env.local`
 
 Be careful not to commit the PINATA_JWT or clerk secret!
+
+Optionnaly, generate the `genesis_txs.jsonl` file, used to provide TXs to gnodev 
+```bash
+go run ./backend gentxs
+```
 
 Now, start gnodev with the admin account:
 
@@ -74,7 +79,7 @@ go run ./backend start
 
 You can get the clerk testing secret with `vercel env pull`
 
-Optionally, generate fake data:
+Optionally, generate fake data (Users, events, posts, communities etc):
 ```bash
 go run ./backend fakegen
 ```
@@ -95,13 +100,6 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](https://github.com/nvm-sh/nvm).
 
-Install gno tools if you don't have them:
-
-```bash
-make clone-gno
-make install-gno
-```
-
 Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
 
 ```bash
@@ -117,19 +115,21 @@ Add back the `PINATA_JWT` in `.env.local`
 
 Be careful not to commit the PINATA_JWT or clerk secret!
 
-Make sure `ffmpeg` is installed ! It is required to generate videos of qr code for check-in tests.
-
 Now, run the e2e stack
 ```bash
 export ZENAO_CLERK_SECRET_KEY=<clerk-testing-secret-key>
 go run ./backend e2e-infra
 ```
+This command sets the E2E local environment:
+- Applies Atlas migrations on a SQLite temporary DB, and fake data (Users, events, posts, communities etc)
+- Gathers the TXs in a `genesis_txs.jsonl` file for GnoDev
+- Starts GnoDev and the backend in parallel
+- Serves a `http://localhost:4243/reset` http endpoint to reset the stack state. This endpoint is crucial to automate tests. Calls to the reset endpoint will be deduplicated and wait for the current reset to finish if one is ongoing.
+- Prints logs
+- Optional: You can use the `--ci` flag to build/starts the Next.js frontend in background (Used for CI)
+See `backend/e2e_infra.go`
 
 You can get the clerk testing secret with `vercel env pull`
-
-This prepares the local db, starts gnodev as well as the backend, run fakegen and print logs in a single terminal.
-
-It also serves a `http://localhost:4243/reset` http endpoint to reset the stack state. This endpoint is crucial to automate tests. Calls to the reset endpoint will be deduplicated and wait for the current reset to finish if one is ongoing.
 
 In a second terminal, run the development server:
 
@@ -147,14 +147,6 @@ READY   | ----------------------------
 In a third terminal, open cypress in e2e mode
 ```bash
 npm run cypress:e2e
-```
-
-Note: To make sure the test `able to scan a ticket` pass, update this line:
-```sh
-# CI to run
-cy.generateValidQRVideo("cypress/screenshots/main.cy.ts/qrcode.png");
-# Locally
-cy.generateValidQRVideo("cypress/screenshots/qrcode.png");
 ```
 
 Select a test like `main.cy.ts`, this will automatically start runnning the test and when done watch for changes in the test file located at `cypress/e2e/main.cy.ts`.

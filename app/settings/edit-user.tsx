@@ -40,6 +40,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     displayName: user?.displayName || "",
     bio: profileDetails.bio || "",
     socialMediaLinks: profileDetails.socialMediaLinks,
+    location: profileDetails.location || "",
+    shortBio: profileDetails.shortBio || "",
   };
 
   const { editUser, isPending } = useEditUserProfile();
@@ -69,6 +71,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         bio: serializeUserProfileDetails({
           bio: values.bio,
           socialMediaLinks: values.socialMediaLinks,
+          location: values.location,
+          shortBio: values.shortBio,
         }),
       });
 
@@ -96,7 +100,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             control={form.control}
             name="avatarUri"
             placeholder={t("avatar-placeholder")}
-            aspectRatio={1 / 1}
+            aspectRatio={[4, 4]}
             className="sm:w-2/5"
             tooltip={<Text size="sm">{t("change-avatar")}</Text>}
           />
@@ -107,6 +111,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               label={t("name-label")}
               placeholder={t("name-placeholder")}
             />
+            <FormFieldInputString
+              control={form.control}
+              name="shortBio"
+              label={t("shortbio-label")}
+              placeholder={t("shortbio-placeholder")}
+            />
             <FormFieldTextArea
               control={form.control}
               name="bio"
@@ -114,6 +124,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               label={t("bio-label")}
               wordCounter
               maxLength={1000}
+            />
+            <FormFieldInputString
+              control={form.control}
+              name="location"
+              label={t("location-label")}
+              placeholder={t("location-placeholder")}
             />
 
             <SocialMediaLinks form={form} />

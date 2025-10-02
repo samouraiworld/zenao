@@ -5,12 +5,11 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
-import { Web3Image } from "../../widgets/images/web3-image";
 import Heading from "../../widgets/texts/heading";
 import Text from "../../widgets/texts/text";
-import { AspectRatio } from "../../shadcn/aspect-ratio";
 import { Card } from "../../widgets/cards/card";
 import { UserAvatarWithName } from "../user/user";
+import { EventImage } from "./event-image";
 import { makeLocationFromEvent } from "@/lib/location";
 import { determineTimezone } from "@/lib/determine-timezone";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
@@ -46,18 +45,16 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
     <Link href={href} className="group">
       <Card className="flex flex-col w-full overflow-hidden p-0 bg-secondary/50 hover:bg-secondary/100 gap-2">
         <div className="w-full">
-          <AspectRatio ratio={16 / 9}>
-            <Web3Image
-              src={evt.imageUri}
-              sizes="(max-width: 768px) 100vw,
+          <EventImage
+            src={evt.imageUri}
+            sizes="(max-width: 768px) 100vw,
                 (max-width: 1200px) 50vw,
                 33vw"
-              fill
-              alt="Event presentation"
-              className="w-full object-cover self-center group-hover:opacity-80"
-              quality={60}
-            />
-          </AspectRatio>
+            fill
+            alt="Event presentation"
+            className="group-hover:opacity-80"
+            quality={60}
+          />
         </div>
         <div className="py-2 px-4">
           <div className="flex flex-col gap-2">

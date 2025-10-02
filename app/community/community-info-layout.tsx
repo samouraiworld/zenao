@@ -1,5 +1,6 @@
 "use client";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { Organization, WithContext } from "schema-dts";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
@@ -7,6 +8,10 @@ import Text from "@/components/widgets/texts/text";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { communityInfo } from "@/lib/queries/community";
+import { CommunityLeaveButton } from "@/components/community/community-leave-button";
+import { CommunityJoinButton } from "@/components/community/community-join-button";
+import { CommunityEditAdminButton } from "@/components/community/community-edit-button";
+import { web2URL } from "@/lib/uris";
 
 type CommunityInfoLayoutProps = {
   communityId: string;
@@ -20,8 +25,25 @@ function CommunityInfoLayout({
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data } = useSuspenseQuery(communityInfo(communityId));
 
+  const jsonLd: WithContext<Organization> = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: data.displayName,
+    description: data.description,
+    logo: {
+      "@type": "ImageObject",
+      url: web2URL(data.avatarUri),
+    },
+    image: [web2URL(data.bannerUri)],
+  };
+
   return (
     <div className="flex flex-col gap-8 w-full">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <div className="relative w-full">
         <AspectRatio ratio={isDesktop ? 48 / 9 : 21 / 9}>
           <Web3Image
@@ -56,7 +78,7 @@ function CommunityInfoLayout({
         </div>
       </div>
 
-      <div className="mt-16 flex flex-col gap-8">
+      <div className="mt-16 flex flex-col gap-6">
         <div className="flex justify-between">
           <div className="flex flex-col">
             <Heading level={1} className="text-2xl">
@@ -64,18 +86,30 @@ function CommunityInfoLayout({
             </Heading>
           </div>
 
-          <GnowebButton
-            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
-            className="max-md:hidden"
-          />
+          <div className="flex gap-2 max-md:hidden">
+            <GnowebButton
+              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
+            />
+            <CommunityEditAdminButton communityId={communityId} />
+            <CommunityJoinButton communityId={communityId} />
+            <CommunityLeaveButton communityId={communityId} />
+          </div>
         </div>
 
         <Text>{data.description}</Text>
 
-        <GnowebButton
-          href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
-          className="w-full md:hidden"
-        />
+        <div className="flex flex-col md:hidden gap-2">
+          <GnowebButton
+            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
+            className="w-full"
+          />
+
+          <div className="flex flex-col gap-2 justify-center">
+            <CommunityEditAdminButton communityId={communityId} />
+            <CommunityJoinButton communityId={communityId} />
+            <CommunityLeaveButton communityId={communityId} />
+          </div>
+        </div>
       </div>
 
       {children}

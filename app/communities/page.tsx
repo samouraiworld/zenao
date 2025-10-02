@@ -1,7 +1,7 @@
 "use client";
 
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { Suspense, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import {
   communitiesList,
@@ -10,7 +10,6 @@ import {
 } from "@/lib/queries/community";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import Heading from "@/components/widgets/texts/heading";
-import { Skeleton } from "@/components/shadcn/skeleton";
 import CommunityCard from "@/components/community/community-card";
 
 function CommunitiesListPage() {
@@ -35,14 +34,12 @@ function CommunitiesListPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-2">
         {communities.map((community) => {
           const communityId = communityIdFromPkgPath(community.pkgPath);
           return (
             <Link key={communityId} href={`/community/${communityId}`}>
-              <Suspense fallback={<Skeleton className="w-full h-[52px]" />}>
-                <CommunityCard id={communityId} community={community} />
-              </Suspense>
+              <CommunityCard id={communityId} community={community} />
             </Link>
           );
         })}

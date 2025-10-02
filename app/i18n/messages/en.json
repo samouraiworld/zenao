@@ -124,7 +124,8 @@
     "default": "Default (You)",
     "toast-gatekeeper-management-success": "Gatekeepers successfully updated!",
     "toast-gatekeeper-management-error": "Error while updating gatekeepers!",
-    "done": "Done"
+    "done": "Done",
+    "click-add-hint": "Click + to add this gatekeeper"
   },
   "manifesto": {
     "title": "MANIFESTO",
@@ -147,6 +148,10 @@
     "name-placeholder": "Name...",
     "bio-label": "Bio",
     "bio-placeholder": "Bio...",
+    "location-label": "Location",
+    "location-placeholder": "Location...",
+    "shortbio-label": "Short Bio",
+    "shortbio-placeholder": "Short Bio...",
     "save-button": "Save changes",
     "change-avatar": "Change avatar",
     "toast-success": "User correctly edited!",

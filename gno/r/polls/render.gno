@@ -3,10 +3,10 @@ package polls
 import (
 	"time"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/mux"
-	"gno.land/p/demo/ufmt"
 	"gno.land/p/moul/md"
+	"gno.land/p/nt/avl"
+	"gno.land/p/nt/mux"
+	"gno.land/p/nt/ufmt"
 	pollsv1 "gno.land/p/zenao/polls/v1"
 )
 

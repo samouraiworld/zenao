@@ -3,7 +3,8 @@
 import React from "react";
 import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { Trash2Icon } from "lucide-react";
+import { Trash2Icon, Plus } from "lucide-react";
+import { useMediaQuery } from "../../../hooks/use-media-query";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
@@ -18,7 +19,6 @@ import {
   TabsTrigger,
 } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import Text from "@/components/widgets/texts/text";
 import { CommunityFormSchemaType, communityFormSchema } from "@/types/schemas";
 import { cn } from "@/lib/tailwind";
 
@@ -44,8 +44,7 @@ export const CommunityForm = ({
   });
 
   const description = form.watch("description");
-  const avatarUri = form.watch("avatarUri");
-  const bannerUri = form.watch("bannerUri");
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const lastAdmin = adminInputs?.[adminInputs.length - 1];
   const isLastAdminInvalid =
@@ -61,119 +60,122 @@ export const CommunityForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex w-full flex-col sm:flex-row sm:h-full gap-10"
+        className="flex flex-col gap-8 w-full"
       >
-        <div className="flex flex-col w-full gap-10 md:gap-4">
-          <FormFieldImage
-            name="avatarUri"
-            control={form.control}
-            placeholder={t("upload-avatar")}
-            tooltip={avatarUri ? <Text>{t("change-avatar")}</Text> : null}
-            className="w-56 h-56 overflow-hidden"
-          />
+        <div className="relative w-full flex flex-col gap-4">
           <FormFieldImage
             name="bannerUri"
             control={form.control}
-            aspectRatio={2}
+            aspectRatio={isDesktop ? [48, 9] : [21, 9]}
             placeholder={t("upload-banner")}
-            tooltip={bannerUri ? <Text>{t("change-banner")}</Text> : null}
+            className="w-full rounded-xl overflow-hidden"
+            hint={false}
           />
+          <div className="w-[96px] md:w-[128px] absolute -bottom-14 left-4 md:left-10">
+            <FormFieldImage
+              name="avatarUri"
+              control={form.control}
+              aspectRatio={[4, 4]}
+              placeholder={t("upload-avatar")}
+              className="w-full rounded-xl overflow-hidden"
+              hint={false}
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-6 w-full">
-          <FormFieldTextArea
-            control={form.control}
-            name="displayName"
-            className={cn(
-              "font-semibold text-3xl overflow-hidden bg-transparent",
-              "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
-            )}
-            placeholder={t("name-placeholder")}
-            maxLength={140}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-              }
-            }}
-            wordCounter
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-20 w-full">
+          <div className="flex flex-col gap-4 w-full">
+            <Card className="rounded px-3 border-custom-input-border p-4 w-full">
+              <FormFieldTextArea
+                control={form.control}
+                name="displayName"
+                placeholder={t("name-placeholder")}
+                className={cn(
+                  "font-semibold text-2xl resize-none bg-transparent",
+                  "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+                )}
+                maxLength={140}
+                rows={1}
+                onKeyDown={(e) => e.key === "Enter" && e.preventDefault()}
+                wordCounter
+              />
+            </Card>
 
-          <Card className="rounded px-3 border-custom-input-border">
-            <Tabs defaultValue="write" className="w-full">
-              <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
-                <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
-                <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
-              </TabsList>
-              <TabsContent value="write" tabIndex={-1}>
-                <div className="flex flex-col gap-2 w-full">
+            <Card className="rounded px-3 border-custom-input-border p-4 w-full">
+              <Tabs defaultValue="write" className="w-full">
+                <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
+                  <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
+                  <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="write" tabIndex={-1}>
                   <FormFieldTextArea
                     control={form.control}
                     name="description"
                     placeholder={t("description-placeholder")}
                     className={cn(
-                      "bg-transparent",
-                      "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+                      "bg-transparent border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
                     )}
                     maxLength={1000}
                     wordCounter
                   />
-                </div>
-              </TabsContent>
-              <TabsContent value="preview">
-                <MarkdownPreview markdownString={description} />
-              </TabsContent>
-            </Tabs>
-          </Card>
-
-          <div className="flex flex-col gap-4">
-            <label className="block text-sm font-medium">
-              {t("admin-label")}
-            </label>
-
-            <div className="flex flex-col gap-2">
-              {fields.map((field, index) => (
-                <div key={field.id} className="flex gap-2 items-start">
-                  <FormFieldInputString
-                    control={form.control}
-                    name={`administrators.${index}.address`}
-                    placeholder={t("admin-placeholder")}
-                    className="flex-grow"
-                  />
-
-                  <div
-                    onClick={() => {
-                      if (fields.length > 1) remove(index);
-                    }}
-                    className={cn(
-                      "hover:cursor-pointer flex items-center justify-center rounded-full size-11 aspect-square",
-                      fields.length > 1
-                        ? "hover:bg-destructive"
-                        : "opacity-30 cursor-not-allowed",
-                    )}
-                  >
-                    <Trash2Icon className="size-4" />
-                  </div>
-                </div>
-              ))}
-
-              <Button
-                type="button"
-                onClick={() => append({ address: "" })}
-                className="w-fit"
-                disabled={isLastAdminInvalid}
-              >
-                {t("add-admin")}
-              </Button>
-            </div>
+                </TabsContent>
+                <TabsContent value="preview">
+                  <MarkdownPreview markdownString={description} />
+                </TabsContent>
+              </Tabs>
+            </Card>
           </div>
 
-          <ButtonWithChildren
-            loading={isLoading}
-            disabled={isButtonDisabled}
-            type="submit"
-          >
-            {t("submit")}
-          </ButtonWithChildren>
+          <div className="flex flex-col gap-4 w-full">
+            <Card className="p-6">
+              <h3 className="text-lg font-medium mb-4">{t("admin-label")}</h3>
+              <div className="flex flex-col gap-3">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2 items-start">
+                    <FormFieldInputString
+                      control={form.control}
+                      name={`administrators.${index}.address`}
+                      placeholder={t("admin-placeholder")}
+                      className="flex-grow"
+                    />
+                    <div
+                      onClick={() => {
+                        if (fields.length > 1) remove(index);
+                      }}
+                      className={cn(
+                        "hover:cursor-pointer flex items-center justify-center rounded-full size-11 aspect-square",
+                        fields.length > 1
+                          ? "hover:bg-destructive"
+                          : "opacity-30 cursor-not-allowed",
+                      )}
+                    >
+                      <Trash2Icon className="size-4" />
+                    </div>
+                  </div>
+                ))}
+
+                <Button
+                  type="button"
+                  onClick={() => append({ address: "" })}
+                  className="w-fit gap-2 mt-2"
+                  disabled={isLastAdminInvalid}
+                  variant="outline"
+                >
+                  <Plus className="size-4" />
+                  {t("add-admin")}
+                </Button>
+              </div>
+            </Card>
+
+            <ButtonWithChildren
+              loading={isLoading}
+              disabled={isButtonDisabled}
+              type="submit"
+              className="px-8 w-full"
+            >
+              {t("submit")}
+            </ButtonWithChildren>
+          </div>
         </div>
       </form>
     </Form>
