@@ -33,13 +33,44 @@ const imageVariants = cva("", {
   },
 });
 
-export const FormFieldImage = <T extends FieldValues>(
-  props: FormFieldProps<T, string> & {
-    aspectRatio: [number, number];
-    tooltip?: React.ReactNode;
-    fit?: "cover" | "pad";
-  },
-) => {
+const getAspecitRatioHint = (aspectRatio: [number, number]) => {
+  let aspectRatioHint = "1/1";
+  if (aspectRatio[0] !== aspectRatio[1]) {
+    aspectRatioHint = `${aspectRatio[0]}/${aspectRatio[1]}`;
+  }
+  return aspectRatioHint;
+};
+
+const RecommendedAspectRatioHint = ({
+  aspectRatio,
+  variant = "primary",
+}: {
+  aspectRatio: [number, number];
+  variant?: "primary" | "secondary";
+}) => {
+  const aspectRatioHint = getAspecitRatioHint(aspectRatio);
+
+  return (
+    <>
+      <Text variant={variant}>Upload an image</Text>
+      <Text variant={variant}>Recommended aspect ratio: {aspectRatioHint}</Text>
+      <Text variant={variant}>
+        Example: {100 * aspectRatio[0]}x{100 * aspectRatio[1]}
+        px
+      </Text>
+    </>
+  );
+};
+
+export const FormFieldImage = <T extends FieldValues>({
+  hint = true,
+  ...props
+}: FormFieldProps<T, string> & {
+  aspectRatio: [number, number];
+  tooltip?: React.ReactNode;
+  hint?: boolean;
+  fit?: "cover" | "pad";
+}) => {
   const { toast } = useToast();
   const { field, fieldState } = useController(props);
   const imageUri = useWatch({ control: props.control, name: props.name });
@@ -77,11 +108,6 @@ export const FormFieldImage = <T extends FieldValues>(
     hiddenInputRef.current?.click();
   };
 
-  let aspectRatioHint = "1/1";
-  if (props.aspectRatio[0] !== props.aspectRatio[1]) {
-    aspectRatioHint = `${props.aspectRatio[0]}/${props.aspectRatio[1]}`;
-  }
-
   return (
     <FormField
       control={props.control}
@@ -99,7 +125,7 @@ export const FormFieldImage = <T extends FieldValues>(
                   {/* TODO: find a better way */}
                   <Card
                     className={cn(
-                      "border-dashed w-full h-full flex flex-col gap-2 justify-center items-center rounded border-2 border-[#EC7E17] overflow-hidden",
+                      "relative border-dashed w-full h-full flex flex-col gap-2 justify-center items-center rounded border-2 border-[#EC7E17] overflow-hidden",
                       "hover:bg-secondary cursor-pointer",
                     )}
                   >
@@ -133,6 +159,16 @@ export const FormFieldImage = <T extends FieldValues>(
                             imageVariants({ fit }),
                           )}
                         />
+                        <div className="absolute w-full h-full top-0 left-0 hover:bg-black hover:opacity-60 opacity-0 transition-opacity">
+                          <div className="flex flex-col gap-2 justify-center items-center h-full">
+                            {hint && (
+                              <RecommendedAspectRatioHint
+                                aspectRatio={props.aspectRatio}
+                                variant="primary"
+                              />
+                            )}
+                          </div>
+                        </div>
                       </>
                     ) : (
                       <>
@@ -141,7 +177,12 @@ export const FormFieldImage = <T extends FieldValues>(
                           strokeWidth={1}
                           className="w-16 h-16 text-secondary-color"
                         />
-                        <Text variant="secondary">Upload an image</Text>
+                        {hint && (
+                          <RecommendedAspectRatioHint
+                            aspectRatio={props.aspectRatio}
+                            variant="secondary"
+                          />
+                        )}
                         {uploading && <Loader2 className="animate-spin" />}
                       </>
                     )}
@@ -154,12 +195,6 @@ export const FormFieldImage = <T extends FieldValues>(
                 </TooltipContent>
               )}
             </Tooltip>
-            <Text>
-              Recommended aspect ratio: {aspectRatioHint}
-              <br />
-              Example: {100 * props.aspectRatio[0]}x{100 * props.aspectRatio[1]}
-              px
-            </Text>
           </TooltipProvider>
           <div className="bottom-8 right-2">
             <input

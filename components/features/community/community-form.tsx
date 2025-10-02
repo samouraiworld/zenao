@@ -77,6 +77,7 @@ export const CommunityForm = ({
               aspectRatio={[4, 4]}
               placeholder={t("upload-avatar")}
               className="w-full rounded-xl overflow-hidden"
+              hint={false}
             />
           </div>
         </div>
