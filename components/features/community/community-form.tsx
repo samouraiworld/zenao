@@ -66,17 +66,19 @@ export const CommunityForm = ({
           <FormFieldImage
             name="bannerUri"
             control={form.control}
-            aspectRatio={isDesktop ? 48 / 9 : 21 / 9}
+            aspectRatio={isDesktop ? [48, 9] : [21, 9]}
             placeholder={t("upload-banner")}
             className="w-full rounded-xl overflow-hidden"
+            hint={false}
           />
           <div className="w-[96px] md:w-[128px] absolute -bottom-14 left-4 md:left-10">
             <FormFieldImage
               name="avatarUri"
               control={form.control}
-              aspectRatio={1}
+              aspectRatio={[4, 4]}
               placeholder={t("upload-avatar")}
               className="w-full rounded-xl overflow-hidden"
+              hint={false}
             />
           </div>
         </div>
