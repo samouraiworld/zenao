@@ -75,7 +75,7 @@ export function TicketsEventsList({
       {Object.entries(eventsByDay).map(([startOfDay, eventsOfTheDay]) => {
         return (
           <div key={startOfDay} className="flex flex-col gap-4">
-            <Text size="lg" className="font-semibold">
+            <Text suppressHydrationWarning size="lg" className="font-semibold">
               {format(startOfDay, "iiii d  MMM")}
             </Text>
 

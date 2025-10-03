@@ -170,12 +170,6 @@ export function Header() {
     userAddressOptions(getToken, userId),
   );
 
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   return (
     <div className="flex justify-between p-4 w-full items-center">
       {/* Desktop */}
@@ -212,7 +206,7 @@ export function Header() {
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
-        <Auth userAddress={address} className="h-fit" isMounted={isMounted} />
+        <Auth userAddress={address} className="h-fit" />
       </div>
     </div>
   );
@@ -223,11 +217,9 @@ const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 const Auth = ({
   className,
   userAddress,
-  isMounted,
 }: {
   userAddress: string | null;
   className?: string;
-  isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
   const { signOut } = useAuth();
@@ -246,30 +238,28 @@ const Auth = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {/* Loading state */}
-          {isMounted && (
-            <div>
-              <ClerkLoading>
-                <div className={avatarClassName}>
-                  <UserAvatarSkeleton className={avatarClassName} />
-                </div>
-              </ClerkLoading>
-              {/* Signed in state */}
-              <SignedIn>
-                <div
-                  className={cn(
-                    avatarClassName,
-                    "cursor-pointer hover:scale-110 transition-transform ease-out",
-                  )}
-                >
-                  <UserAvatar
-                    address={userAddress}
-                    className={avatarClassName}
-                    size="sm"
-                  />
-                </div>
-              </SignedIn>
-            </div>
-          )}
+          <div>
+            <ClerkLoading>
+              <div className={avatarClassName}>
+                <UserAvatarSkeleton className={avatarClassName} />
+              </div>
+            </ClerkLoading>
+            {/* Signed in state */}
+            <SignedIn>
+              <div
+                className={cn(
+                  avatarClassName,
+                  "cursor-pointer hover:scale-110 transition-transform ease-out",
+                )}
+              >
+                <UserAvatar
+                  address={userAddress}
+                  className={avatarClassName}
+                  size="sm"
+                />
+              </div>
+            </SignedIn>
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
           <Link href={`/profile/${userAddress}`}>

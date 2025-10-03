@@ -44,6 +44,12 @@ describe("main", () => {
     });
   });
 
+  it("set theme", () => {
+    cy.visit("/");
+    cy.get('button[aria-label="theme-dropdown-trigger"]').click();
+    cy.get('div[aria-label="theme-dropdown-item-light"]').click();
+  });
+
   it("participate without login", () => {
     // start from the index page
     cy.visit("/");
