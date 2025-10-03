@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Loader2, Lock } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,15 +40,15 @@ export function ExclusiveEventGuard({
   title,
   imageUri,
   children,
+  exclusive,
 }: ExclusiveEventGuardProps) {
-  const { getToken, userId } = useAuth();
+  const { getToken, userId, isLoaded } = useAuth();
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
 
   const [isPending, setIsPending] = useState(false);
-  const [isCheckingAccess, setIsCheckingAccess] = useState<boolean>(true);
   const isMember = useMemo(() => roles.length > 0, [roles]);
   const [canAccess, setCanAccess] = useState<boolean>(isMember);
 
@@ -62,13 +62,6 @@ export function ExclusiveEventGuard({
   });
   const password = form.watch("password");
   const { toast } = useToast();
-
-  useLayoutEffect(() => {
-    setCanAccess(isMember);
-    const timeout = setTimeout(() => setIsCheckingAccess(false), 1000);
-
-    return () => clearTimeout(timeout);
-  }, [isMember]);
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
     // Call the API to check if the password is correct
@@ -100,7 +93,9 @@ export function ExclusiveEventGuard({
     setIsPending(false);
   };
 
-  if (canAccess) {
+  const pass = isLoaded && (!exclusive || isMember || canAccess);
+
+  if (pass) {
     return (
       <EventPasswordProvider password={password}>
         {children}
@@ -137,7 +132,7 @@ export function ExclusiveEventGuard({
         </Heading>
         <Text className="text-center">{t("description")}</Text>
 
-        {isCheckingAccess ? (
+        {!isLoaded ? (
           <div className="w-full flex justify-center items-center">
             <Loader2 size={24} className="animate-spin" />
           </div>

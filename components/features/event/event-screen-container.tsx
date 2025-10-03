@@ -38,17 +38,14 @@ export async function EventScreenContainer({ id, children }: Props) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {exclusive ? (
-        <ExclusiveEventGuard
-          eventId={id}
-          title={eventData.title}
-          imageUri={eventData.imageUri}
-        >
-          {content}
-        </ExclusiveEventGuard>
-      ) : (
-        content
-      )}
+      <ExclusiveEventGuard
+        eventId={id}
+        title={eventData.title}
+        imageUri={eventData.imageUri}
+        exclusive={exclusive}
+      >
+        {content}
+      </ExclusiveEventGuard>
     </HydrationBoundary>
   );
 }
