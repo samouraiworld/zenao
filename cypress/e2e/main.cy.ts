@@ -236,7 +236,8 @@ describe("main", () => {
       cy.visit(url);
     });
 
-    // Check that we are participating
+    // Participate to an event
+    cy.get("button").contains("Register").click();
     cy.get("h2")
       .contains("You're in!", { timeout: 16000 })
       .should("be.visible");
