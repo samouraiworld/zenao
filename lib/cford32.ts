@@ -1,4 +1,4 @@
-const CROCKFORD32_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+const CROCKFORD32_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz";
 
 export const cford32Encode = (num: bigint, length?: number): string => {
   if (num === BigInt(0)) {
