@@ -3,6 +3,7 @@ package gzdb
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -89,7 +90,16 @@ type PollResult struct {
 	Option string
 	PollID uint
 	Poll   Poll
-	Users  []User `gorm:"many2many:poll_votes;"`
+	Votes  []PollVote
+}
+
+type PollVote struct {
+	PollResultID uint      `gorm:"primaryKey"`
+	UserID       uint      `gorm:"primaryKey"`
+	CreatedAt    time.Time `gorm:"autoCreateTime"`
+
+	PollResult PollResult `gorm:"foreignKey:PollResultID"`
+	User       User       `gorm:"foreignKey:UserID"`
 }
 
 func dbFeedToZeniFeed(feed *Feed) (*zeni.Feed, error) {
@@ -212,13 +222,13 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 	for _, result := range poll.Results {
 		zpoll.Results = append(zpoll.Results, &pollsv1.PollResult{
 			Option:       result.Option,
-			Count:        uint32(len(result.Users)),
+			Count:        uint32(len(result.Votes)),
 			HasUserVoted: false, // TODO: check if user has voted
 		})
-		for _, user := range result.Users {
+		for _, vote := range result.Votes {
 			votes = append(votes, &zeni.Vote{
-				CreatedAt: result.CreatedAt,
-				UserID:    strconv.FormatUint(uint64(user.ID), 10),
+				CreatedAt: vote.CreatedAt,
+				UserID:    strconv.FormatUint(uint64(vote.UserID), 10),
 				Option:    result.Option,
 			})
 		}

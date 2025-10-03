@@ -326,6 +326,14 @@ func execFakegen() (retErr error) {
 				return err
 			}
 		}
+
+		// Create Feed
+		logger.Info("creating feed")
+		_, err = db.CreateFeed(zeni.EntityTypeCommunity, zCommunity.ID, "main")
+		if err != nil {
+			return err
+		}
+
 	}
 
 	return nil
