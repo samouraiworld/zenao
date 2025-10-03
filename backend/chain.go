@@ -1555,7 +1555,7 @@ func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64
 		postID := %d
 		post := %s
 
-		social_feed.EditPost(uint64(postID), post)
+		social_feed.EditPost(cross, uint64(postID), post)
 	}
 `, userRealmPkgPath, postIDint, postIDint, gnoLitPost)
 }
