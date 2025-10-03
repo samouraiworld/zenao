@@ -427,7 +427,7 @@ describe("main", () => {
 
     cy.get("button").contains("Done").click();
 
-    cy.get("p").should("contain", "Manage gatekeepers (2)");
+    cy.get("p").contains("Manage gatekeepers (2)").should("be.visible");
 
     cy.url().then((url) => {
       // Connect with other account
@@ -463,7 +463,7 @@ describe("main", () => {
 
     cy.wait(5000);
 
-    cy.get("p").should("contain", "Manage gatekeepers (1)");
+    cy.get("p").contains("Manage gatekeepers (1)").should("be.visible");
 
     cy.url().should("include", "/event/");
     cy.url().should("not.include", "/edit");
