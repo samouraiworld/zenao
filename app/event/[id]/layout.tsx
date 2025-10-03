@@ -7,7 +7,7 @@ import { ScreenContainer } from "@/components/layout/screen-container";
 
 type Props = {
   params: Promise<{ id: string }>;
-  children?: React.ReactNode;
+  info?: React.ReactNode;
   tabs?: React.ReactNode;
 };
 
@@ -29,11 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function EventLayout({ children, tabs }: Props) {
+export default async function EventLayout({ info, tabs }: Props) {
   return (
     <ScreenContainer>
       <div className="flex flex-col gap-8">
-        <div>{children}</div>
+        <div>{info}</div>
         <div>{tabs}</div>
       </div>
     </ScreenContainer>
