@@ -245,23 +245,6 @@ type DB interface {
 
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
-	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
-	GetOrgByPostID(postID string) (orgType, orgID string, err error)
-
-	CreateFeed(orgType string, orgID string, slug string) (*Feed, error)
-	GetFeed(orgType string, orgID string, slug string) (*Feed, error)
-	GetFeedByID(feedID string) (*Feed, error)
-
-	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
-	DeletePost(postID string) error
-	EditPost(postID string, req *zenaov1.EditPostRequest) error
-	GetPostByID(postID string) (*Post, error)
-	GetAllPosts(getDeleted bool) ([]*Post, error)
-	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
-
-	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
-	GetPollByPostID(postID string) (*Poll, error)
 
 	// gentxs specific
 	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
@@ -297,7 +280,7 @@ type Chain interface {
 	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error
 	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
+	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }

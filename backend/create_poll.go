@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	ma "github.com/multiformats/go-multiaddr"
-	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -43,40 +41,12 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 	if len(roles) == 0 {
 		return nil, errors.New("user is not a member of the organization that owns the feed")
 	}
-	pollID, postID, err := s.Chain.WithContext(ctx).CreatePoll(zUser.ID, req.Msg)
+	_, postID, err := s.Chain.WithContext(ctx).CreatePoll(zUser.ID, req.Msg)
 	if err != nil {
 		return nil, err
 	}
 
-	postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
-	if err != nil {
-		return nil, err
-	}
-
-	post := &feedsv1.Post{
-		Post: &feedsv1.Post_Link{
-			Link: &feedsv1.LinkPost{
-				Uri: postURI.String(),
-			},
-		},
-	}
-
-	zpoll := (*zeni.Poll)(nil)
-	if err := s.DB.TxWithSpan(ctx, "db.CreatePoll", func(db zeni.DB) error {
-		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
-		if err != nil {
-			return err
-		}
-
-		if zpoll, err = db.CreatePoll(zUser.ID, pollID, postID, feed.ID, post, req.Msg); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	return connect.NewResponse(&zenaov1.CreatePollResponse{PostId: zpoll.PostID}), nil
+	return connect.NewResponse(&zenaov1.CreatePollResponse{PostId: postID}), nil
 
 }
 

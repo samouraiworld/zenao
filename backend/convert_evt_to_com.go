@@ -129,10 +129,6 @@ func convertEvtToCom() error {
 		if err != nil {
 			return err
 		}
-
-		if _, err = tx.CreateFeed(zeni.EntityTypeCommunity, cmt.ID, "main"); err != nil {
-			return err
-		}
 		return err
 	}); err != nil {
 		return err

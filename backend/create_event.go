@@ -92,10 +92,6 @@ func (s *ZenaoServer) CreateEvent(
 			return err
 		}
 
-		if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
-			return err
-		}
-
 		if req.Msg.CommunityId != "" {
 			cmt, err = db.GetCommunity(req.Msg.CommunityId)
 			if err != nil {

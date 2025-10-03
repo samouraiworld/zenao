@@ -9,7 +9,6 @@ import (
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
-	ma "github.com/multiformats/go-multiaddr"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -162,13 +161,6 @@ func execFakegen() (retErr error) {
 			}
 		}
 
-		// Create Feed
-		logger.Info("creating feed")
-		zfeed, err := db.CreateFeed(zeni.EntityTypeEvent, zevt.ID, "main")
-		if err != nil {
-			return err
-		}
-
 		// Create posts/polls only for the last event (to avoid flooding the chain and db)
 		if eC == fakegenConf.eventsCount-1 {
 			logger.Info("creating posts")
@@ -200,10 +192,6 @@ func execFakegen() (retErr error) {
 					}
 				}
 
-				if _, err := db.CreatePost(postID, zfeed.ID, zUser.ID, post); err != nil {
-					return err
-				}
-
 				// Create reactions only for the first post (to avoid flooding the chain and db)
 				if pC == 0 {
 					logger.Info("creating reactions")
@@ -215,12 +203,8 @@ func execFakegen() (retErr error) {
 							Icon:   icons[rC],
 						}
 
-						if err = db.ReactPost(creatorID, reactReq); err != nil {
-							return err
-						}
-
 						if !fakegenConf.skipChain {
-							if err = chain.ReactPost(creatorID, zeni.EntityTypeEvent, zevt.ID, reactReq); err != nil {
+							if err = chain.ReactPost(creatorID, reactReq); err != nil {
 								return err
 							}
 						}
@@ -254,38 +238,17 @@ func execFakegen() (retErr error) {
 				}
 
 				pollID := fmt.Sprintf("%d", poID)
-				postID := fmt.Sprintf("%d", pID)
 				if !fakegenConf.skipChain {
-					pollID, postID, err = chain.CreatePoll(creatorID, pollReq)
+					pollID, _, err = chain.CreatePoll(creatorID, pollReq)
 					if err != nil {
 						return err
 					}
-				}
-
-				postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
-				if err != nil {
-					return err
-				}
-
-				pollPost := &feedsv1.Post{
-					Post: &feedsv1.Post_Link{
-						Link: &feedsv1.LinkPost{
-							Uri: postURI.String(),
-						},
-					},
-				}
-
-				if _, err := db.CreatePoll(creatorID, pollID, postID, zfeed.ID, pollPost, pollReq); err != nil {
-					return err
 				}
 
 				//Vote on Polls
 				voteReq := &zenaov1.VotePollRequest{
 					PollId: pollID,
 					Option: options[0],
-				}
-				if err = db.VotePoll(creatorID, voteReq); err != nil {
-					return err
 				}
 				if !fakegenConf.skipChain {
 					if err = chain.VotePoll(creatorID, voteReq); err != nil {
@@ -326,14 +289,6 @@ func execFakegen() (retErr error) {
 				return err
 			}
 		}
-
-		// Create Feed
-		logger.Info("creating feed")
-		_, err = db.CreateFeed(zeni.EntityTypeCommunity, zCommunity.ID, "main")
-		if err != nil {
-			return err
-		}
-
 	}
 
 	return nil
