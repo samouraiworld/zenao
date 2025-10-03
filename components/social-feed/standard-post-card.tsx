@@ -4,9 +4,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { StandardPostForm } from "../event-feed-form/standard-post-form";
 import { PostCardLayout } from "@/components/social-feed/post-card-layout";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
+import { cford32Encode } from "@/lib/cford32";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
-import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
 export function StandardPostCard({
@@ -63,7 +64,7 @@ export function StandardPostCard({
       <PostCardLayout
         post={post}
         createdBy={createdBy}
-        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${post.post.localPostId.toString(32).padStart(7, "0")}`}
+        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${cford32Encode(post.post.localPostId, 7)}`}
         canReply={canReply}
         replyHref={replyHref}
         canInteract={canInteract}
