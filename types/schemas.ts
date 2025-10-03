@@ -204,6 +204,7 @@ export const communityFormSchema = z.object({
   description: z.string().min(10, "Description too short"),
   avatarUri: z.string().url().or(z.literal("")),
   bannerUri: z.string().url().or(z.literal("")),
+  shortDescription: z.string().max(200).optional().default(""),
   administrators: z
     .array(
       z.object({
@@ -218,8 +219,8 @@ export const communityFormSchema = z.object({
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
 
 export const communityDetailsSchema = z.object({
-  shortDesc: z.string().max(200).optional().default(""),
+  shortDescription: z.string().max(200).optional().default(""),
   description: z.string().trim().max(1000).optional().default(""),
 });
 
-export type CommunityDetailsSchemaType = z.infer<typeof communityDetailsSchema>;
+export type CommunityDetails = z.infer<typeof communityDetailsSchema>;

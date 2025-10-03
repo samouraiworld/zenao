@@ -339,6 +339,8 @@
     "name-label": "Community name",
     "name-placeholder": "Community name...",
     "description-label": "Description",
+    "shortDescription-label": "Short Description",
+    "shortDescription-placeholder": "Short Description...",
     "description-placeholder": "Description...",
     "write-tab": "Write",
     "preview-tab": "Preview",
