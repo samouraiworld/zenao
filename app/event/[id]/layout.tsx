@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { web2URL } from "@/lib/uris";
+import { ScreenContainer } from "@/components/layout/screen-container";
 
 type Props = {
   params: Promise<{ id: string }>;
   children?: React.ReactNode;
+  tabs?: React.ReactNode;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -27,6 +29,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function EventLayout({ children }: Props) {
-  return <>{children}</>;
+export default async function EventLayout({ children, tabs }: Props) {
+  return (
+    <ScreenContainer>
+      <div className="flex flex-col gap-8">
+        <div>{children}</div>
+        <div>{tabs}</div>
+      </div>
+    </ScreenContainer>
+  );
 }

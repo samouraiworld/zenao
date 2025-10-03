@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
+import React from "react";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
 import { PollPostView } from "@/lib/social-feed";
@@ -19,10 +20,12 @@ import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
 import { derivePkgAddr } from "@/lib/gno";
 
 type EventPollsProps = {
-  eventId: string;
+  params: Promise<{ id: string }>;
 };
 
-function EventPolls({ eventId }: EventPollsProps) {
+function EventPolls({ params }: EventPollsProps) {
+  const { id: eventId } = React.use(params);
+
   const t = useTranslations();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(

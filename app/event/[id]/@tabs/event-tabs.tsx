@@ -1,52 +1,40 @@
 "use client";
 
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { useTranslations } from "next-intl";
-import { Suspense, useMemo } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import dynamic from "next/dynamic";
-import EventFeedForm from "../../event-feed-form/event-feed-form";
+import { useTranslations } from "next-intl";
+import { useSelectedLayoutSegment } from "next/navigation";
+import EventFeedForm from "../../../../components/event-feed-form/event-feed-form";
 import { Separator } from "@/components/shadcn/separator";
-import { cn } from "@/lib/tailwind";
 import { TabsContent } from "@/components/shadcn/tabs";
-import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { userAddressOptions } from "@/lib/queries/user";
-import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import {
   EventInfoTabsSchemaType,
   feedPostFormSchema,
   FeedPostFormSchemaType,
 } from "@/types/schemas";
-import EventPolls from "@/app/event/[id]/(general)/[tab]/votes";
 
-// NOTE: we dynamically load the feed to fully disable SSR and prevent hydrations errors
-// TODO: investigate hydration errors
-const EventFeed = dynamic(
-  () => import("@/app/event/[id]/(general)/[tab]/feed"),
-  { ssr: false },
-);
-
-export function MainEventSections({
-  className,
+export function EventTabs({
+  children,
   eventId,
-  section,
 }: {
+  children?: React.ReactNode;
   eventId: string;
-  section: EventInfoTabsSchemaType;
-  className?: string;
 }) {
-  const { data } = useSuspenseQuery(eventOptions(eventId));
   const t = useTranslations("event");
 
+  const section = useSelectedLayoutSegment() || "description";
+
   return (
-    <Tabs value={section} className={cn("w-full", className)}>
+    <Tabs value={section} className={"w-full min-h-screen"}>
       <TabsList className="flex w-full bg-transparent p-0 m-0 overflow-auto">
-        <Link href={`/event/${eventId}`}>
+        <Link href={`/event/${eventId}`} scroll={false}>
           <TabsTrigger
             value="description"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
@@ -54,7 +42,7 @@ export function MainEventSections({
             {t("about-event")}
           </TabsTrigger>
         </Link>
-        <Link href={`/event/${eventId}/feed`}>
+        <Link href={`/event/${eventId}/feed`} scroll={false}>
           <TabsTrigger
             value="feed"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
@@ -62,7 +50,7 @@ export function MainEventSections({
             {t("discussion")}
           </TabsTrigger>
         </Link>
-        <Link href={`/event/${eventId}/votes`}>
+        <Link href={`/event/${eventId}/votes`} scroll={false}>
           <TabsTrigger
             value="votes"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
@@ -73,18 +61,16 @@ export function MainEventSections({
       </TabsList>
       <Separator className="mb-3" />
 
-      <TabsContent
-        value="description"
-        className="min-h-1/2 overflow-x-hidden h-fit"
-      >
-        <MarkdownPreview markdownString={data.description} />
-      </TabsContent>
-
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 min-h-0 pt-4">
-          <Suspense>
-            <MainEventSectionsContent eventId={eventId} section={section} />
-          </Suspense>
+          {!!eventId && !!section && (
+            <MainEventSectionsContent
+              eventId={eventId}
+              section={section as unknown as "description" | "feed" | "votes"}
+            >
+              {children}
+            </MainEventSectionsContent>
+          )}
         </div>
       </div>
     </Tabs>
@@ -94,9 +80,11 @@ export function MainEventSections({
 function MainEventSectionsContent({
   eventId,
   section,
+  children,
 }: {
   eventId: string;
   section: EventInfoTabsSchemaType;
+  children: React.ReactNode;
 }) {
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -133,14 +121,7 @@ function MainEventSectionsContent({
       {section !== "description" && isMember && (
         <EventFeedForm eventId={eventId} form={form} />
       )}
-      {/* Social Feed (Discussions) */}
-      <TabsContent value="feed">
-        <EventFeed eventId={eventId} />
-      </TabsContent>
-      {/* Social Feed (Votes) */}
-      <TabsContent value="votes">
-        <EventPolls eventId={eventId} />
-      </TabsContent>
+      <TabsContent value={section}>{children}</TabsContent>
     </>
   );
 }

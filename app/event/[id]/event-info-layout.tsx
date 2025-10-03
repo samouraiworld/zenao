@@ -13,7 +13,6 @@ import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
 import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
-import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import { useEventPassword } from "@/components/providers/event-password-provider";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
@@ -54,13 +53,7 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 
 const iconSize = 22;
 
-export function EventInfoLayout({
-  eventId,
-  children,
-}: {
-  eventId: string;
-  children: React.ReactNode;
-}) {
+export function EventInfoLayout({ eventId }: { eventId: string }) {
   const { password } = useEventPassword();
   const { data } = useSuspenseQuery(eventOptions(eventId));
 
@@ -174,10 +167,6 @@ export function EventInfoLayout({
         eventData={data}
         password={password}
       />
-
-      {children}
-
-      <GoTopButton />
     </div>
   );
 }
