@@ -241,7 +241,7 @@ const Auth = ({
           <div>
             <ClerkLoading>
               <div className={avatarClassName}>
-                <UserAvatarSkeleton className={avatarClassName} />
+                <UserAvatarSkeleton className={avatarClassName} size="sm" />
               </div>
             </ClerkLoading>
             {/* Signed in state */}

@@ -3,7 +3,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { cva } from "class-variance-authority";
-import { Suspense } from "react";
 import { profileOptions } from "@/lib/queries/profile";
 import { cn } from "@/lib/tailwind";
 import { Web3Image } from "@/components/widgets/images/web3-image";
@@ -77,36 +76,43 @@ export function UserAvatar({
 export function UserAvatarSkeleton({
   className,
   size = "sm",
-}: Omit<UserComponentProps, "address">) {
+}: {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}) {
   return <Skeleton className={cn(avatarClassName({ size }), className)} />;
 }
 
-export function UserAvatarWithName(
-  props: UserComponentProps & {
-    linkToProfile?: boolean;
-    size?: "sm" | "md" | "lg";
-  },
-) {
+export function UserAvatarWithName({
+  address,
+  className,
+  linkToProfile,
+  size = "sm",
+}: UserComponentProps & {
+  linkToProfile?: boolean;
+  size?: "sm" | "md" | "lg";
+}) {
+  const { data: profile } = useSuspenseQuery(profileOptions(address));
+
   const content = (
     <div className="flex flex-row gap-2 items-center">
-      <Suspense fallback={<UserAvatarWithNameLoader size={props.size} />}>
-        <UserAvatarWithNameContent address={props.address} size={props.size} />
-      </Suspense>
+      <UserAvatar address={profile?.address} size={size} />
+      <Text size="sm">{profile?.displayName}</Text>
     </div>
   );
 
-  if (props.linkToProfile) {
+  if (linkToProfile) {
     return (
       <Link
-        href={`/profile/${props.address}`}
-        className={cn("flex w-max", props.className)}
+        href={`/profile/${profile?.address}`}
+        className={cn("flex w-max", className)}
       >
         {content}
       </Link>
     );
   }
 
-  return <div className={props.className}>{content}</div>;
+  return <div className={className}>{content}</div>;
 }
 
 export function UserAvatarWithNameSkeleton(props: {
@@ -131,23 +137,6 @@ function UserAvatarWithNameLoader({
     <>
       <UserAvatarSkeleton size={size} />
       <Skeleton className={loaderTextClassName({ size })} />
-    </>
-  );
-}
-
-function UserAvatarWithNameContent({
-  address,
-  size = "sm",
-}: {
-  address: string | null | undefined;
-  size?: "sm" | "md" | "lg";
-}) {
-  const { data: profile } = useSuspenseQuery(profileOptions(address));
-
-  return (
-    <>
-      <UserAvatar address={profile?.address} size={size} />
-      <Text size="sm">{profile?.displayName}</Text>
     </>
   );
 }
