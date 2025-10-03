@@ -9,7 +9,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useSelectedLayoutSegment } from "next/navigation";
-import EventFeedForm from "../../../../../components/event-feed-form/event-feed-form";
+import EventFeedForm from "../../../../components/event-feed-form/event-feed-form";
 import { Separator } from "@/components/shadcn/separator";
 import { TabsContent } from "@/components/shadcn/tabs";
 import { userAddressOptions } from "@/lib/queries/user";
