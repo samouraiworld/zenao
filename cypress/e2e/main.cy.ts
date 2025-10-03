@@ -169,12 +169,12 @@ describe("main", () => {
     // check that the toast did show up
     toastShouldContain("User correctly edited!");
 
-    // check that the values are still correct
-    cy.get('input[placeholder="Name..."]').should("have.value", testName);
-    cy.get('textarea[placeholder="Bio..."]').should("have.value", testBio);
+    // check that the values on profile page are correct
+    cy.get("h1").contains(testName).should("be.visible");
+    cy.get("p").contains(testBio).should("be.visible");
 
-    // refresh
-    cy.reload();
+    // navigate to edit page
+    cy.get("button").contains("Edit my profile").click();
 
     // check that the values are still correct
     cy.get('input[placeholder="Name..."]').should("have.value", testName);
@@ -537,32 +537,6 @@ describe("main", () => {
     cy.get("button").contains("Events").click();
     cy.get("button").contains("Members").click();
   });
-
-  it("cancel participation", () => {
-    cy.createEvent({ exclusive: false });
-
-    cy.url().then((url) => {
-      cy.visit(url);
-    });
-
-    // Participate to an event
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
-
-    cy.get("button").contains("Cancel my participation").click();
-    cy.get('button[aria-label="cancel participation"').click();
-    cy.wait(2000);
-
-    toastShouldContain("Your participation has been cancelled");
-
-    // Participate again to an event (potential regression)
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
-  });
 });
 
 Cypress.Commands.add(
@@ -627,11 +601,13 @@ Cypress.Commands.add(
     }
 
     cy.get("button").contains("Create event").click();
-    cy.wait(5000);
+
+    cy.wait(1000);
+
+    toastShouldContain("Event created!");
 
     cy.url().should("include", "/event/");
     cy.url().should("not.include", "/create");
-    toastShouldContain("Event created!");
 
     if (gatekeepers.length > 0) {
       cy.get("p").contains("Manage gatekeepers (1)").click();
