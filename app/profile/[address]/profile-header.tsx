@@ -10,7 +10,8 @@ import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
-import { deserializeUserProfileDetails } from "@/lib/user-profile-serialization";
+import { GnoProfileDetails, gnoProfileDetailsSchema } from "@/types/schemas";
+import { deserializeWithFrontMatter } from "@/lib/serialization";
 
 type ProfileHeaderProps = {
   address: string;
@@ -29,7 +30,20 @@ export default function ProfileHeader({
   const { data: userLoggedAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const profileDetails = deserializeUserProfileDetails(bio ?? "");
+  const profileDetails = deserializeWithFrontMatter<
+    GnoProfileDetails,
+    typeof gnoProfileDetailsSchema
+  >(
+    bio ?? "",
+    gnoProfileDetailsSchema,
+    {
+      bio: "",
+      socialMediaLinks: [],
+      location: "",
+      shortBio: "",
+    },
+    "bio",
+  );
 
   return (
     <>

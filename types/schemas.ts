@@ -205,12 +205,21 @@ export const communityFormSchema = z.object({
   avatarUri: z.string().url().or(z.literal("")),
   bannerUri: z.string().url().or(z.literal("")),
   administrators: z
-    .array(z.object({address: z
-.string()
-    .email("Administrator must be a valid email address"),
-      })
+    .array(
+      z.object({
+        address: z
+          .string()
+          .email("Administrator must be a valid email address"),
+      }),
     )
     .min(1, "At least one admin is required"),
 });
 
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
+
+export const communityDetailsSchema = z.object({
+  shortDesc: z.string().max(200).optional().default(""),
+  description: z.string().trim().max(1000).optional().default(""),
+});
+
+export type CommunityDetailsSchemaType = z.infer<typeof communityDetailsSchema>;
