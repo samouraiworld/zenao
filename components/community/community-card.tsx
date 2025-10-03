@@ -12,6 +12,8 @@ import UsersAvatarsPreview from "../user/users-avatars-preview";
 import UsersNamesPreview from "../user/users-names-preview";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { communityUsersWithRoles } from "@/lib/queries/community";
+import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { CommunityDetails, communityDetailsSchema } from "@/types/schemas";
 
 type CommunityCardProps = {
   id: string;
@@ -26,6 +28,19 @@ function CommunityCard({ id, community }: CommunityCardProps) {
   const memberAddresses = useMemo(
     () => members.map((m) => m.address),
     [members],
+  );
+
+  const { shortDescription } = deserializeWithFrontMatter<
+    CommunityDetails,
+    typeof communityDetailsSchema
+  >(
+    community.description || "",
+    communityDetailsSchema,
+    {
+      description: "",
+      shortDescription: "",
+    },
+    "description",
   );
 
   return (
@@ -51,7 +66,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
             {community.displayName}
           </Heading>
           <Text className="text-xs md:text-sm text-ellipsis line-clamp-2 text-secondary-color">
-            {community.description}
+            {shortDescription || t("no-description")}
           </Text>
 
           <div className="flex flex-col gap-2">
