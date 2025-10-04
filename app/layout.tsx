@@ -14,6 +14,8 @@ import { Header } from "@/components/layout/navigation/header";
 import { Footer } from "@/components/layout/navigation/footer";
 import PwaBottomBar from "@/components/layout/navigation/pwa-bottom-bar";
 import PwaStateProvider from "@/components/providers/pwa-state-provider";
+import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
+import { zenaoClient } from "@/lib/zenao-client";
 
 const albertSans = Albert_Sans({
   variable: "--font-albert-sans",
@@ -225,7 +227,6 @@ export default async function RootLayout({
   // side is the easiest way to get started
   const messages = await getMessages();
 
-  /*
   const health = await zenaoClient.health({});
   if (health.maintenance) {
     return (
@@ -239,7 +240,6 @@ export default async function RootLayout({
       </html>
     );
   }
-    */
 
   const shouldInjectToolbar = process.env.NODE_ENV === "development";
 
