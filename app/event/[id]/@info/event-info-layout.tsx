@@ -1,5 +1,3 @@
-"use client";
-
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
@@ -7,10 +5,8 @@ import { useTranslations } from "next-intl";
 import React, { Suspense } from "react";
 import { Event, WithContext } from "schema-dts";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import dynamic from "next/dynamic";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
-import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { useEventPassword } from "@/components/providers/event-password-provider";
 import { Separator } from "@/components/shadcn/separator";
@@ -29,11 +25,8 @@ import {
 } from "@/components/features/event/event-location-section";
 import { EventImage } from "@/components/features/event/event-image";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-
-const EventParticipationInfo = dynamic(
-  () => import("@/components/features/event/event-participation-info"),
-  { ssr: false, loading: () => <Skeleton className="w-full h-28" /> },
-);
+import { determineTimezone } from "@/lib/determine-timezone";
+import EventParticipationInfo from "@/components/features/event/event-participation-info";
 
 interface EventSectionProps {
   title: string;
@@ -59,10 +52,8 @@ export function EventInfoLayout({
   eventId: string;
   data: EventInfo;
 }) {
-  const { password } = useEventPassword();
-
   const location = makeLocationFromEvent(data.location);
-  const timezone = useLocationTimezone(location);
+  const timezone = determineTimezone(location);
 
   const t = useTranslations("event");
 
@@ -166,11 +157,7 @@ export function EventInfoLayout({
       </div>
 
       {/* Participate Card */}
-      <EventParticipationInfo
-        eventId={eventId}
-        eventData={data}
-        password={password}
-      />
+      <EventParticipationInfo eventId={eventId} eventData={data} />
     </div>
   );
 }

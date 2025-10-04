@@ -8,18 +8,18 @@ import { Card } from "@/components/widgets/cards/card";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userAddressOptions } from "@/lib/queries/user";
+import { useEventPassword } from "@/components/providers/event-password-provider";
 
 type EventParticipationInfoProps = {
   eventId: string;
   eventData: EventInfo;
-  password: string;
 };
 
 function EventParticipationInfo({
   eventId,
   eventData,
-  password,
 }: EventParticipationInfoProps) {
+  const { password } = useEventPassword();
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data: address } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
