@@ -31,6 +31,7 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient | undefined = undefined;
 
 // cache() is scoped per request, so we don't leak data between requests
+// see: https://tanstack.com/query/v5/docs/framework/react/guides/advanced-ssr#alternative-use-a-single-queryclient-for-prefetching
 export const getQueryClient = cache(() => {
   if (isServer) {
     // Server: always make a new query client
