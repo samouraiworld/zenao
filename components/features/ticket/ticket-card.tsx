@@ -72,15 +72,15 @@ export function TicketCard({
           </Text>
           <div className="flex flex-row gap-2 max-sm:items-center">
             <div className="flex flex-col max-sm:items-center">
-              <Heading level={3} variant="secondary">
+              <Heading level={3} variant="secondary" suppressHydrationWarning>
                 {format(fromUnixTime(Number(event.startDate)), "PPP")}
               </Heading>
               <div className="flex flex-row text-sm gap-1">
-                <Text variant="secondary">
+                <Text variant="secondary" suppressHydrationWarning>
                   {format(fromUnixTime(Number(event.startDate)), "p")}
                 </Text>
                 <Text variant="secondary">-</Text>
-                <Text variant="secondary">
+                <Text variant="secondary" suppressHydrationWarning>
                   {formatTZ(fromUnixTime(Number(event.endDate)), "PPp O", {
                     timeZone: timezone,
                   })}

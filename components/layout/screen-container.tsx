@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { SignedOutDialog } from "../dialogs/signed-out-dialog";
 import { BackgroundImage, BackgroundProps } from "./background-image";

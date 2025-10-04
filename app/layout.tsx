@@ -1,20 +1,21 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
+import { VercelToolbar } from "@vercel/toolbar/next";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { Albert_Sans } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import QueryProviders from "../components/providers/query-providers";
-import { zenaoClient } from "../lib/zenao-client";
 import "./globals.css";
-import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { Toaster } from "@/components/shadcn/toaster";
 import { Header } from "@/components/layout/navigation/header";
 import { Footer } from "@/components/layout/navigation/footer";
 import PwaBottomBar from "@/components/layout/navigation/pwa-bottom-bar";
 import PwaStateProvider from "@/components/providers/pwa-state-provider";
+import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
+import { zenaoClient } from "@/lib/zenao-client";
 
 const albertSans = Albert_Sans({
   variable: "--font-albert-sans",
@@ -240,6 +241,8 @@ export default async function RootLayout({
     );
   }
 
+  const shouldInjectToolbar = process.env.NODE_ENV === "development";
+
   return (
     <html suppressHydrationWarning lang={locale}>
       <body
@@ -271,6 +274,7 @@ export default async function RootLayout({
           </QueryProviders>
         </ClerkProvider>
         <Toaster />
+        {shouldInjectToolbar && <VercelToolbar />}
       </body>
     </html>
   );

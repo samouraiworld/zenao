@@ -1,25 +1,30 @@
 "use client";
 
-import { ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading, useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { EventParticipation } from "./event-participation";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Card } from "@/components/widgets/cards/card";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { EventUserRole } from "@/lib/queries/event-users";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { userAddressOptions } from "@/lib/queries/user";
+import { useEventPassword } from "@/components/providers/event-password-provider";
 
 type EventParticipationInfoProps = {
   eventId: string;
   eventData: EventInfo;
-  roles: EventUserRole[];
-  password: string;
 };
 
 function EventParticipationInfo({
   eventId,
   eventData,
-  roles,
-  password,
 }: EventParticipationInfoProps) {
+  const { password } = useEventPassword();
+  const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+  const { data: address } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
   return (
     <>
       {/* Participate Card */}
@@ -27,7 +32,7 @@ function EventParticipationInfo({
         <Skeleton className="w-full h-28" />
       </ClerkLoading>
       <ClerkLoaded>
-        <Card className="mt-2">
+        <Card>
           <EventParticipation
             eventId={eventId}
             eventData={eventData}

@@ -21,16 +21,10 @@ export const GnowebButton: React.FC<GnowebButtonProps> = ({
 }) => {
   const t = useTranslations("components.buttons");
 
-  return (
-    <Link
-      className={cn(
-        buttonVariants({ variant: "secondary" }),
-        "w-max",
-        className,
-      )}
-      href={href}
-      target="_blank"
-    >
+  const disabled = href === "";
+
+  const content = (
+    <>
       <Text variant="secondary" size="sm">
         {label || t("gnoweb-button")}
       </Text>
@@ -41,6 +35,22 @@ export const GnowebButton: React.FC<GnowebButtonProps> = ({
         height={25}
         className="rounded-[25px]"
       />
+    </>
+  );
+
+  const containerClassName = cn(
+    buttonVariants({ variant: "secondary" }),
+    "w-max",
+    className,
+  );
+
+  if (disabled) {
+    return <div className={containerClassName}>{content}</div>;
+  }
+
+  return (
+    <Link className={containerClassName} href={href} target="_blank">
+      {content}
     </Link>
   );
 };
