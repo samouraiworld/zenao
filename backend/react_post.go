@@ -6,7 +6,6 @@ import (
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -31,30 +30,7 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		return nil, errors.New("icon cannot be empty")
 	}
 
-	var orgType, orgID string
-	if err := s.DB.TxWithSpan(ctx, "db.ReactPost", func(db zeni.DB) error {
-		orgType, orgID, err = db.GetOrgByPostID(req.Msg.PostId)
-		if err != nil {
-			return err
-		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, orgType, orgID)
-		if err != nil {
-			return err
-		}
-		if len(roles) == 0 {
-			return errors.New("user is not a member of the event")
-		}
-
-		if err = db.ReactPost(zUser.ID, req.Msg); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	if err = s.Chain.WithContext(ctx).ReactPost(zUser.ID, orgID, orgID, req.Msg); err != nil {
+	if err = s.Chain.WithContext(ctx).ReactPost(zUser.ID, req.Msg); err != nil {
 		return nil, err
 	}
 
