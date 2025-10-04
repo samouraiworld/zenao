@@ -8,9 +8,7 @@ import { Albert_Sans } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import QueryProviders from "../components/providers/query-providers";
-import { zenaoClient } from "../lib/zenao-client";
 import "./globals.css";
-import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { Toaster } from "@/components/shadcn/toaster";
 import { Header } from "@/components/layout/navigation/header";
 import { Footer } from "@/components/layout/navigation/footer";
@@ -227,6 +225,7 @@ export default async function RootLayout({
   // side is the easiest way to get started
   const messages = await getMessages();
 
+  /*
   const health = await zenaoClient.health({});
   if (health.maintenance) {
     return (
@@ -240,6 +239,7 @@ export default async function RootLayout({
       </html>
     );
   }
+    */
 
   const shouldInjectToolbar = process.env.NODE_ENV === "development";
 
