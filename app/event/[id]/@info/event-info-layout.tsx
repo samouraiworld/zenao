@@ -1,6 +1,5 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
@@ -18,7 +17,6 @@ import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
-import { eventOptions } from "@/lib/queries/event";
 import { web2URL } from "@/lib/uris";
 import {
   UserAvatarWithName,
@@ -30,6 +28,7 @@ import {
   EventLocationSkeleton,
 } from "@/components/features/event/event-location-section";
 import { EventImage } from "@/components/features/event/event-image";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 const EventParticipationInfo = dynamic(
   () => import("@/components/features/event/event-participation-info"),
@@ -53,9 +52,14 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
 
 const iconSize = 22;
 
-export function EventInfoLayout({ eventId }: { eventId: string }) {
+export function EventInfoLayout({
+  eventId,
+  data,
+}: {
+  eventId: string;
+  data: EventInfo;
+}) {
   const { password } = useEventPassword();
-  const { data } = useSuspenseQuery(eventOptions(eventId));
 
   const location = makeLocationFromEvent(data.location);
   const timezone = useLocationTimezone(location);
