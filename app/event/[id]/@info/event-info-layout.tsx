@@ -1,3 +1,5 @@
+"use client";
+
 import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
@@ -5,6 +7,7 @@ import { useTranslations } from "next-intl";
 import React, { Suspense } from "react";
 import { Event, WithContext } from "schema-dts";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import dynamic from "next/dynamic";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
@@ -25,7 +28,11 @@ import {
 import { EventImage } from "@/components/features/event/event-image";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { determineTimezone } from "@/lib/determine-timezone";
-import EventParticipationInfo from "@/components/features/event/event-participation-info";
+
+const EventParticipationInfo = dynamic(
+  () => import("@/components/features/event/event-participation-info"),
+  { ssr: false, loading: () => <Skeleton className="w-full h-28" /> },
+);
 
 interface EventSectionProps {
   title: string;

@@ -32,7 +32,7 @@ function EventParticipationInfo({
         <Skeleton className="w-full h-28" />
       </ClerkLoading>
       <ClerkLoaded>
-        <Card className="mt-2">
+        <Card>
           <EventParticipation
             eventId={eventId}
             eventData={eventData}
