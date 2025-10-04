@@ -40,6 +40,9 @@ func (d *DAOPrivate) InitDefaultRendering() {
 }
 
 func (d *DAOPrivate) Render(path string) string {
+	if d.RenderFn != nil {
+		return d.RenderFn(path, d)
+	}
 	return d.RenderRouter.Render(path)
 }
 

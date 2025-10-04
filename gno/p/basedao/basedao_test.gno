@@ -54,7 +54,7 @@ func TestNewDAO(t *testing.T) {
 		}
 	}
 
-	urequire.Equal(t, 4, dao.Core.ResourcesCount(), "expected 4 resources")
+	urequire.Equal(t, 4, dao.Core.Resources.Tree.Size(), "expected 4 resources")
 	urequire.Equal(t, dao.Realm.PkgPath(), daoRealm.PkgPath())
 
 	// XXX: check realm and profile

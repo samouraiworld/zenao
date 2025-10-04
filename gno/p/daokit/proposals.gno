@@ -98,7 +98,7 @@ func (p *ProposalsStore) GetProposals(filter func(Proposal) bool) *ProposalsStor
 		if !ok {
 			panic(errors.New("unexpected invalid proposal type"))
 		}
-		prop.UpdateStatus()
+		prop.UpdateStatus() // XXX: costly and probably insecure
 		if filter(*prop) {
 			proposals.Tree.Set(key, prop)
 		}
