@@ -1,6 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { EventInfoLayout } from "./event-info-layout";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -12,7 +13,13 @@ type Props = {
 
 export default async function EventPage({ params }: Props) {
   const { id } = await params;
-  return <EventInfoLayout eventId={id} />;
+  const queryClient = getQueryClient();
+  queryClient.prefetchQuery(eventOptions(id));
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <EventInfoLayout eventId={id} />
+    </HydrationBoundary>
+  );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
