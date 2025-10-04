@@ -1,3 +1,3 @@
-export default function Page() {
-  return null;
-}
+import Page from "./description/page";
+
+export default Page;
