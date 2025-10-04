@@ -19,8 +19,8 @@ import {
   SignInButton,
   useAuth,
 } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -166,9 +166,7 @@ const GoBackButton = ({ className }: { className?: string }) => {
 export function Header() {
   const { getToken, userId } = useAuth();
   const t = useTranslations("navigation");
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
+  const { data: address } = useQuery(userAddressOptions(getToken, userId));
   const scrollDirection = useScrollDirection();
 
   return (
@@ -223,7 +221,7 @@ const Auth = ({
   className,
   userAddress,
 }: {
-  userAddress: string | null;
+  userAddress?: string | null;
   className?: string;
 }) => {
   const t = useTranslations("navigation");
