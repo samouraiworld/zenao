@@ -13,6 +13,7 @@ import {
   EventInfo,
   EventInfoJson,
   EventInfoSchema,
+  DiscoverableFilter,
 } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
@@ -93,6 +94,7 @@ export const eventsPkgPathsByAddrs = (addresses: string[]) =>
 
 export const eventsByOrganizerList = (
   organizer: string,
+  discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
@@ -110,7 +112,7 @@ export const eventsByOrganizerList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
