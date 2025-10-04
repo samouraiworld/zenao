@@ -8,7 +8,6 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
-import { useEventPassword } from "@/components/providers/event-password-provider";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
