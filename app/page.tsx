@@ -42,7 +42,9 @@ export default function Home() {
             </ButtonWithChildren>
           </Link>
 
-          <LazyInstallButton />
+          <div className="h-[2.25rem]">
+            <LazyInstallButton />
+          </div>
         </div>
       </div>
     </ScreenContainerCentered>
