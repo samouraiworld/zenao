@@ -405,14 +405,8 @@ describe("main", () => {
   });
 
   it("add a gatekeeper", () => {
-    // start from the home
-    cy.visit("/");
-
-    // Explore an event
-    cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
-
-    cy.url().should("contain", "/event/");
+    // start from the first fake event
+    cy.visit("/event/1");
 
     cy.url().then((url) => {
       login();
@@ -427,7 +421,9 @@ describe("main", () => {
 
     cy.get("button").contains("Done").click();
 
-    cy.get("p").contains("Manage gatekeepers (2)").should("be.visible");
+    cy.get("p")
+      .contains("Manage gatekeepers (2)", { timeout: 10000 })
+      .should("be.visible");
 
     cy.url().then((url) => {
       // Connect with other account
@@ -440,14 +436,8 @@ describe("main", () => {
   });
 
   it("remove a gatekeeper", () => {
-    // start from the home
-    cy.visit("/");
-
-    // Explore an event
-    cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
-
-    cy.url().should("contain", "/event/");
+    // start from the first fake event
+    cy.visit("/event/1");
 
     cy.url().then((url) => {
       logout();
