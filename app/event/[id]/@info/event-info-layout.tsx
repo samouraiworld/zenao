@@ -163,7 +163,9 @@ export function EventInfoLayout({
       </div>
 
       {/* Participate Card */}
-      <EventParticipationInfo eventId={eventId} eventData={data} />
+      <Suspense fallback={<Skeleton className="w-full h-28" />}>
+        <EventParticipationInfo eventId={eventId} eventData={data} />
+      </Suspense>
     </div>
   );
 }
