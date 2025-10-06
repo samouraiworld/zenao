@@ -6,6 +6,7 @@ import (
 	"flag"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
+	"github.com/google/uuid"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -86,7 +87,6 @@ func convertEvtToCom() error {
 	}
 	logger.Info("database initialized")
 
-	var cmt *zeni.Community
 	var membersIDs []string
 	var cmtReq *zenaov1.CreateCommunityRequest
 	var evt *zeni.Event
@@ -125,10 +125,6 @@ func convertEvtToCom() error {
 			return err
 		}
 		membersIDs = mapsl.Map(users, func(usr *zeni.User) string { return usr.ID })
-		cmt, err = tx.CreateCommunity(evt.CreatorID, []string{evt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
-		if err != nil {
-			return err
-		}
 		return err
 	}); err != nil {
 		return err
@@ -136,11 +132,12 @@ func convertEvtToCom() error {
 
 	logger.Info("community persisted successfully in the database")
 
-	err = chain.CreateCommunity(cmt.ID, []string{cmt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
+	id := uuid.New().String()
+	err = chain.CreateCommunity(id, []string{evt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
 	if err != nil {
 		return err
 	}
-	logger.Info("community created on the chain", zap.String("community-pkg-path", chain.communityPkgPath(cmt.ID)))
+	logger.Info("community created on the chain", zap.String("community-pkg-path", chain.communityPkgPath(id)))
 
 	return nil
 }

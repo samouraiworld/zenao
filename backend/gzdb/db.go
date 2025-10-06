@@ -360,20 +360,6 @@ func (g *gormZenaoDB) getDBEvent(id string) (*Event, error) {
 	return &evt, nil
 }
 
-// GetCommunity implements zeni.DB.
-func (g *gormZenaoDB) getDBCommunity(id string) (*Community, error) {
-	cmtIDInt, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	var cmt Community
-	cmt.ID = uint(cmtIDInt)
-	if err := g.db.First(&cmt).Error; err != nil {
-		return nil, err
-	}
-	return &cmt, nil
-}
-
 // CreateUser implements zeni.DB.
 func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 	user := &User{
@@ -715,35 +701,6 @@ func (g *gormZenaoDB) GetEventTickets(eventID string) ([]*zeni.SoldTicket, error
 	return res, nil
 }
 
-// GetEventCommunity implements zeni.DB.
-func (g *gormZenaoDB) GetEventCommunity(eventID string) (*zeni.Community, error) {
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse event id: %w", err)
-	}
-
-	var roles []EntityRole
-	if err := g.db.
-		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND role = ?",
-			zeni.EntityTypeEvent, evtIDInt, zeni.EntityTypeCommunity, zeni.RoleEvent).
-		Find(&roles).Error; err != nil {
-		return nil, err
-	}
-	if len(roles) == 0 {
-		return nil, nil
-	}
-	if len(roles) > 1 {
-		return nil, fmt.Errorf("event %d has multiple communities: %d", evtIDInt, len(roles))
-	}
-
-	cmt, err := g.getDBCommunity(strconv.FormatUint(uint64(roles[0].OrgID), 10))
-	if err != nil {
-		return nil, fmt.Errorf("get community by id %d: %w", roles[0].OrgID, err)
-	}
-
-	return dbCommunityToZeniCommunity(cmt)
-}
-
 // GetEventUserTicket implements zeni.DB.
 func (g *gormZenaoDB) GetEventUserTicket(eventID string, userID string) (*zeni.SoldTicket, error) {
 	userIDint, err := strconv.ParseUint(userID, 10, 64)
@@ -805,152 +762,6 @@ func (g *gormZenaoDB) EntityRoles(entityType string, entityID string, orgType st
 	return res, nil
 }
 
-// CreateCommunity implements zeni.DB.
-func (g *gormZenaoDB) CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*zeni.Community, error) {
-	g, span := g.trace("gzdb.CreateCommunity")
-	defer span.End()
-
-	creatorIDInt, err := strconv.ParseUint(creatorID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse creator id: %w", err)
-	}
-
-	community := &Community{
-		DisplayName: req.DisplayName,
-		Description: req.Description,
-		AvatarURI:   req.AvatarUri,
-		BannerURI:   req.BannerUri,
-		CreatorID:   uint(creatorIDInt),
-	}
-
-	if err := g.db.Create(community).Error; err != nil {
-		return nil, fmt.Errorf("create community in db: %w", err)
-	}
-
-	for _, adminID := range administratorsIDs {
-		adminIDInt, err := strconv.ParseUint(adminID, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("parse admin id: %w", err)
-		}
-
-		entityRole := &EntityRole{
-			EntityType: zeni.EntityTypeUser,
-			EntityID:   uint(adminIDInt),
-			OrgType:    zeni.EntityTypeCommunity,
-			OrgID:      community.ID,
-			Role:       zeni.RoleAdministrator,
-		}
-
-		if err := g.db.Create(entityRole).Error; err != nil {
-			return nil, fmt.Errorf("create administrator role assignment in db: %w", err)
-		}
-	}
-
-	for _, memberID := range membersIDs {
-		memberIDInt, err := strconv.ParseUint(memberID, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("parse member id: %w", err)
-		}
-
-		entityRole := &EntityRole{
-			EntityType: zeni.EntityTypeUser,
-			EntityID:   uint(memberIDInt),
-			OrgType:    zeni.EntityTypeCommunity,
-			OrgID:      community.ID,
-			Role:       zeni.RoleMember,
-		}
-
-		if err := g.db.Create(entityRole).Error; err != nil {
-			return nil, fmt.Errorf("create member role assignment in db: %w", err)
-		}
-	}
-
-	for _, eventID := range eventsIDs {
-		eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("parse event id: %w", err)
-		}
-
-		entityRole := &EntityRole{
-			EntityType: zeni.EntityTypeEvent,
-			EntityID:   uint(eventIDInt),
-			OrgType:    zeni.EntityTypeCommunity,
-			OrgID:      community.ID,
-			Role:       zeni.RoleEvent,
-		}
-
-		if err := g.db.Create(entityRole).Error; err != nil {
-			return nil, fmt.Errorf("create event role assignment in db: %w", err)
-		}
-	}
-
-	zcmt, err := dbCommunityToZeniCommunity(community)
-	if err != nil {
-		return nil, fmt.Errorf("convert db community to zeni community: %w", err)
-	}
-
-	return zcmt, nil
-}
-
-// EditCommunity implements zeni.DB.
-func (g *gormZenaoDB) EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*zeni.Community, error) {
-	g, span := g.trace("gzdb.EditCommunity")
-	defer span.End()
-
-	cmtIDInt, err := strconv.ParseUint(communityID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse community id: %w", err)
-	}
-
-	cmt := Community{
-		DisplayName: req.DisplayName,
-		Description: req.Description,
-		AvatarURI:   req.AvatarUri,
-		BannerURI:   req.BannerUri,
-	}
-
-	if err := g.updateUserRoles(zeni.RoleAdministrator, administratorsIDs, communityID, zeni.EntityTypeCommunity); err != nil {
-		return nil, err
-	}
-
-	// NOTE: Administrators are also members of the community (members is like a base role for entity of user type)
-	// Main reason for this is to simplify the registry as a simple list of members, without having to deal with roles.
-	for _, adminID := range administratorsIDs {
-		adminIDInt, err := strconv.ParseUint(adminID, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("parse admin id: %w", err)
-		}
-
-		entityRole := &EntityRole{
-			EntityType: zeni.EntityTypeUser,
-			EntityID:   uint(adminIDInt),
-			OrgType:    zeni.EntityTypeCommunity,
-			OrgID:      uint(cmtIDInt),
-			Role:       zeni.RoleMember,
-		}
-
-		if err := g.db.Save(entityRole).Error; err != nil {
-			return nil, fmt.Errorf("create member role assignment in db: %w", err)
-		}
-	}
-
-	if err := g.db.Model(&Community{}).Where("id = ?", cmtIDInt).Updates(cmt).Error; err != nil {
-		return nil, fmt.Errorf("update community in db: %w", err)
-	}
-
-	dbcmt, err := g.getDBCommunity(communityID)
-	if err != nil {
-		return nil, fmt.Errorf("get community from db: %w", err)
-	}
-
-	zcmt, err := dbCommunityToZeniCommunity(dbcmt)
-	if err != nil {
-		return nil, fmt.Errorf("convert db community to zeni community: %w", err)
-	}
-
-	return zcmt, nil
-}
-
 // AddMemberToCommunity implements zeni.DB.
 func (g *gormZenaoDB) AddMemberToCommunity(communityID string, userID string) error {
 	communityIDInt, err := strconv.ParseUint(communityID, 10, 64)
@@ -997,32 +808,6 @@ func (g *gormZenaoDB) RemoveMemberFromCommunity(communityID string, userID strin
 	}
 
 	return nil
-}
-
-// GetCommunity implements zeni.DB.
-func (g *gormZenaoDB) GetCommunity(communityID string) (*zeni.Community, error) {
-	cmt, err := g.getDBCommunity(communityID)
-	if err != nil {
-		return nil, err
-	}
-	return dbCommunityToZeniCommunity(cmt)
-}
-
-// GetAllCommunities implements zeni.DB.
-func (g *gormZenaoDB) GetAllCommunities() ([]*zeni.Community, error) {
-	var communities []*Community
-	if err := g.db.Find(&communities).Error; err != nil {
-		return nil, err
-	}
-	res := make([]*zeni.Community, 0, len(communities))
-	for _, c := range communities {
-		zcmt, err := dbCommunityToZeniCommunity(c)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, zcmt)
-	}
-	return res, nil
 }
 
 // CreateFeed implements zeni.DB.
@@ -1516,46 +1301,6 @@ func (g *gormZenaoDB) RemoveEventFromCommunity(eventID string, communityID strin
 		return fmt.Errorf("delete event role assignment in db: %w", err)
 	}
 	return nil
-}
-
-// CommunitiesByEvent implements zeni.DB.
-func (g *gormZenaoDB) CommunitiesByEvent(eventID string) ([]*zeni.Community, error) {
-	g, span := g.trace("gzdb.CommunitiesByEvent")
-	defer span.End()
-
-	eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse event id: %w", err)
-	}
-	var roles []EntityRole
-	if err := g.db.
-		Where("entity_type = ? AND entity_id = ? AND org_type = ?",
-			zeni.EntityTypeEvent, eventIDInt, zeni.EntityTypeCommunity).
-		Find(&roles).Error; err != nil {
-		return nil, err
-	}
-	if len(roles) == 0 {
-		return []*zeni.Community{}, nil
-	}
-
-	communityIDs := make([]uint, 0, len(roles))
-	for _, r := range roles {
-		communityIDs = append(communityIDs, r.OrgID)
-	}
-
-	var communities []Community
-	if err := g.db.Where("id IN ?", communityIDs).Find(&communities).Error; err != nil {
-		return nil, err
-	}
-	result := make([]*zeni.Community, 0, len(communities))
-	for _, c := range communities {
-		zcmt, err := dbCommunityToZeniCommunity(&c)
-		if err != nil {
-			return nil, fmt.Errorf("convert db community to zeni community: %w", err)
-		}
-		result = append(result, zcmt)
-	}
-	return result, nil
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {

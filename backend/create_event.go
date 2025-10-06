@@ -91,28 +91,6 @@ func (s *ZenaoServer) CreateEvent(
 		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
 		}
-
-		if req.Msg.CommunityId != "" {
-			cmt, err = db.GetCommunity(req.Msg.CommunityId)
-			if err != nil {
-				return err
-			}
-			roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
-			if err != nil {
-				return err
-			}
-			if !slices.Contains(roles, zeni.RoleAdministrator) {
-				return errors.New("user is not an admin of the community and cannot add event to it")
-			}
-			err = db.AddEventToCommunity(evt.ID, cmt.ID)
-			if err != nil {
-				return err
-			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
-			if err != nil {
-				return err
-			}
-		}
 		return nil
 	}); err != nil {
 		return nil, err

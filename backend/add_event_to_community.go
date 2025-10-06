@@ -36,31 +36,17 @@ func (s *ZenaoServer) AddEventToCommunity(
 	}
 
 	var (
-		targets      []*zeni.User
 		participants []*zeni.User
 		targetIDs    = make(map[string]bool)
-		cmt          *zeni.Community
 		evt          *zeni.Event
 	)
 
 	if err := s.DB.TxWithSpan(ctx, "db.AddEventToCommunity", func(tx zeni.DB) error {
-		cmt, err = tx.GetCommunity(req.Msg.CommunityId)
-		if err != nil {
-			return err
-		}
 		evt, err = tx.GetEvent(req.Msg.EventId)
 		if err != nil {
 			return err
 		}
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleAdministrator) {
-			return errors.New("you must be an administrator of the community to add an event")
-		}
-
-		roles, err = tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -68,37 +54,9 @@ func (s *ZenaoServer) AddEventToCommunity(
 			return errors.New("you must be an organizer of the event to add it to a community")
 		}
 
-		roles, err = tx.EntityRoles(zeni.EntityTypeEvent, req.Msg.EventId, zeni.EntityTypeCommunity, req.Msg.CommunityId)
-		if err != nil {
-			return err
-		}
-		if slices.Contains(roles, zeni.RoleEvent) {
-			return errors.New("event is already added to the community")
-		}
-
-		if err := tx.AddEventToCommunity(req.Msg.EventId, req.Msg.CommunityId); err != nil {
-			return err
-		}
-
-		targets, err = tx.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
-		if err != nil {
-			return err
-		}
 		participants, err = tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
 		if err != nil {
 			return err
-		}
-
-		for _, target := range targets {
-			targetIDs[target.ID] = true
-		}
-
-		for _, participant := range participants {
-			if !targetIDs[participant.ID] {
-				if err := tx.AddMemberToCommunity(req.Msg.CommunityId, participant.ID); err != nil {
-					return err
-				}
-			}
 		}
 		return nil
 	}); err != nil {
@@ -162,7 +120,8 @@ func (s *ZenaoServer) AddEventToCommunity(
 
 	for _, participant := range participants {
 		if !targetIDs[participant.ID] {
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, req.Msg.CommunityId, participant.ID); err != nil {
+			//TODO: ensure administrator can add anyone to the community
+			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(zUser.ID, req.Msg.CommunityId, participant.ID); err != nil {
 				s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-id", participant.ID))
 				return nil, err
 			}

@@ -84,7 +84,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	evt := (*zeni.Event)(nil)
-	communities := ([]*zeni.Community)(nil)
 	needPasswordIfGuarded := true
 	rolesByParticipant := make([][]string, len(participants))
 
@@ -98,29 +97,10 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			needPasswordIfGuarded = false
 		}
 
-		communities, err = tx.CommunitiesByEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-
 		for i, ticket := range tickets {
 			// XXX: support batch
 			if err := tx.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
 				return err
-			}
-
-			for _, cmt := range communities {
-				roles, err := tx.EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
-				if err != nil {
-					return err
-				}
-				rolesByParticipant[i] = roles
-				if slices.Contains(roles, zeni.RoleMember) {
-					continue
-				}
-				if err := tx.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
-					return err
-				}
 			}
 		}
 
@@ -221,11 +201,13 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return nil, err
 		}
 
+		// TODO: We should retrieve the communities from the chain
 		for _, cmt := range communities {
 			// XXX: does the check in the chain instead of using db.
 			if slices.Contains(rolesByParticipant[i], zeni.RoleMember) {
 				continue
 			}
+			// TODO: change so everyone can add anyone to an event community
 			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
 				return nil, err
 			}

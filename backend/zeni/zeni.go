@@ -201,6 +201,17 @@ func (e *Event) Timezone() (*time.Location, error) {
 	}
 }
 
+type UserStore interface {
+	Tx(func(db UserStore) error) error
+	TxWithSpan(ctx context.Context, label string, cb func(db UserStore) error) error
+	WithContext(ctx context.Context) UserStore
+
+	CreateUser(authID string) (*User, error)
+	GetUser(authID string) (*User, error)
+	PromoteUser(authID string, plan Plan) error
+	RemoveUser(authID string) error
+}
+
 // authID is the user id coming from the auth system.
 // userID is an internal zenao user id.
 type DB interface {
@@ -226,25 +237,24 @@ type DB interface {
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
-	GetEventCommunity(eventID string) (*Community, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
-	AddEventToCommunity(eventID string, communityID string) error
-	RemoveEventFromCommunity(eventID string, communityID string) error
-	// returns all communities that contains the event
-	CommunitiesByEvent(eventID string) ([]*Community, error)
-
-	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
-	EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
-	GetCommunity(communityID string) (*Community, error)
-	AddMemberToCommunity(communityID string, userID string) error
-	RemoveMemberFromCommunity(communityID string, userID string) error
-	GetAllCommunities() ([]*Community, error)
-
 	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
+
+	// COMMUNITIES
+	// GetEventCommunity(eventID string) (*Community, error)
+	// AddEventToCommunity(eventID string, communityID string) error
+	// RemoveEventFromCommunity(eventID string, communityID string) error
+	// CommunitiesByEvent(eventID string) ([]*Community, error)
+	// CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
+	// EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
+	// GetCommunity(communityID string) (*Community, error)
+	// AddMemberToCommunity(communityID string, userID string) error
+	// RemoveMemberFromCommunity(communityID string, userID string) error
+	// GetAllCommunities() ([]*Community, error)
 
 	// TO DELETE FOR SoT
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
