@@ -85,7 +85,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	evt := (*zeni.Event)(nil)
 	needPasswordIfGuarded := true
-	rolesByParticipant := make([][]string, len(participants))
 
 	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
 		// XXX: can't create event with price for now but later we need to check that the event is free
@@ -202,16 +201,11 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 
 		// TODO: We should retrieve the communities from the chain
-		for _, cmt := range communities {
-			// XXX: does the check in the chain instead of using db.
-			if slices.Contains(rolesByParticipant[i], zeni.RoleMember) {
-				continue
-			}
-			// TODO: change so everyone can add anyone to an event community
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
-				return nil, err
-			}
-		}
+		// for _, cmt := range communities {
+		// 	if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
+		// 		return nil, err
+		// 	}
+		// }
 	}
 
 	return connect.NewResponse(&zenaov1.ParticipateResponse{}), nil

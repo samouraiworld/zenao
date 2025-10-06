@@ -75,6 +75,9 @@ type User struct {
 	Bio         string
 	AvatarURI   string
 	Plan        Plan
+
+	// TODO: if we don't want to store address we need to get the pkg path from chain & parse it to get the id
+	Address string
 }
 
 type Event struct {

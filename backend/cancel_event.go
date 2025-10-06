@@ -92,12 +92,13 @@ func (s *ZenaoServer) CancelEvent(
 		}
 	}
 
-	for _, cmt := range cmties {
-		// TODO: find a way to remove the event from the community on chain without being administrator but need to be organizer of the event
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
-			s.Logger.Error("remove-cancelled-event-from-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
-		}
-	}
+	// TODO: retrieve communities from chain
+	// for _, cmt := range cmties {
+	// 	// TODO: find a way to remove the event from the community on chain without being administrator but need to be organizer of the event
+	// 	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
+	// 		s.Logger.Error("remove-cancelled-event-from-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
+	// 	}
+	// }
 
 	if err := s.Chain.WithContext(ctx).CancelEvent(evt.ID, evt.CreatorID); err != nil {
 		return nil, err
