@@ -153,7 +153,7 @@ export const FormFieldImage = <T extends FieldValues>({
             </Tooltip>
             {hint && (
               <Text size="xs" className="text-right">
-                Optimal ratio: {getAspectRatioHint(props.aspectRatio)}
+                Optimal aspect ratio: {getAspectRatioHint(props.aspectRatio)}
                 <br />
                 <span className="inline-block text-gray-500 whitespace-nowrap">
                   e.g. {100 * props.aspectRatio[0]}x{100 * props.aspectRatio[1]}
