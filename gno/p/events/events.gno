@@ -58,7 +58,7 @@ type Config struct {
 	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
 	CrossFn             daokit.CrossFn
 	PrivateVarName      string
-	SetImplemFn         daokit.SetImplemFn
+	SetImplemFn         basedao.SetImplemRaw
 	FeedId              string
 }
 
