@@ -22,7 +22,7 @@ services:
       - 26657:26657
     restart: always
     healthcheck:
-      test: curl --fail http://localhost:26657/health || exit 1
+      test: ["CMD", "curl", "-f", "http://localhost:26657/status?heightGte=2"]
       interval: 10s
       timeout: 30s
       retries: 50

@@ -55,4 +55,3 @@ genesis_txs.jsonl
 
 # Sentry Config File
 .env.sentry-build-plugin
-gnowork.toml

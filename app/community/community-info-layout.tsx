@@ -1,15 +1,19 @@
 "use client";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { Organization, WithContext } from "schema-dts";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
-import Text from "@/components/widgets/texts/text";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { communityInfo } from "@/lib/queries/community";
 import { CommunityLeaveButton } from "@/components/community/community-leave-button";
 import { CommunityJoinButton } from "@/components/community/community-join-button";
 import { CommunityEditAdminButton } from "@/components/community/community-edit-button";
+import { web2URL } from "@/lib/uris";
+import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { communityDetailsSchema } from "@/types/schemas";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 
 type CommunityInfoLayoutProps = {
   communityId: string;
@@ -23,8 +27,35 @@ function CommunityInfoLayout({
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data } = useSuspenseQuery(communityInfo(communityId));
 
+  const { description, shortDescription } = deserializeWithFrontMatter({
+    serialized: data.description || "",
+    schema: communityDetailsSchema,
+    defaultValue: {
+      description: "",
+      shortDescription: "",
+    },
+    contentFieldName: "description",
+  });
+
+  const jsonLd: WithContext<Organization> = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: data.displayName,
+    description: shortDescription || description || "",
+    logo: {
+      "@type": "ImageObject",
+      url: web2URL(data.avatarUri),
+    },
+    image: [web2URL(data.bannerUri)],
+  };
+
   return (
     <div className="flex flex-col gap-8 w-full">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <div className="relative w-full">
         <AspectRatio ratio={isDesktop ? 48 / 9 : 21 / 9}>
           <Web3Image
@@ -77,7 +108,7 @@ function CommunityInfoLayout({
           </div>
         </div>
 
-        <Text>{data.description}</Text>
+        <MarkdownPreview markdownString={description} />
 
         <div className="flex flex-col md:hidden gap-2">
           <GnowebButton

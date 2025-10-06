@@ -66,7 +66,7 @@ export const CommunityForm = ({
           <FormFieldImage
             name="bannerUri"
             control={form.control}
-            aspectRatio={isDesktop ? 48 / 9 : 21 / 9}
+            aspectRatio={isDesktop ? [48, 9] : [21, 9]}
             placeholder={t("upload-banner")}
             className="w-full rounded-xl overflow-hidden"
           />
@@ -74,7 +74,7 @@ export const CommunityForm = ({
             <FormFieldImage
               name="avatarUri"
               control={form.control}
-              aspectRatio={1}
+              aspectRatio={[4, 4]}
               placeholder={t("upload-avatar")}
               className="w-full rounded-xl overflow-hidden"
             />
@@ -100,6 +100,14 @@ export const CommunityForm = ({
             </Card>
 
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
+              <FormFieldInputString
+                control={form.control}
+                name="shortDescription"
+                label={t("shortDescription-label")}
+                placeholder={t("shortDescription-placeholder")}
+                className="mb-4"
+              />
+
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
                   <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>

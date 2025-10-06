@@ -1,10 +1,9 @@
 package daokit
 
 import (
-	"std"
 	"testing"
 
-	"gno.land/p/demo/testutils"
+	"gno.land/p/nt/testutils"
 )
 
 var (
@@ -15,7 +14,7 @@ var (
 )
 
 func TestNewDAO(t *testing.T) {
-	std.TestSetOriginCaller(alice)
+	testing.SetOriginCaller(alice)
 	dao := NewCore()
 
 	resourcesLen := dao.Resources.Tree.Size()

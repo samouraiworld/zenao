@@ -411,15 +411,15 @@ table "posts" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_feed" {
     columns     = [column.feed_id]
     ref_columns = [table.feeds.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -525,18 +525,22 @@ table "poll_votes" {
     null = true
     type = integer
   }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
   primary_key {
     columns = [column.poll_result_id, column.user_id]
+  }
+  foreign_key "fk_poll_results_votes" {
+    columns     = [column.poll_result_id]
+    ref_columns = [table.poll_results.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
   }
   foreign_key "fk_poll_votes_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
-  foreign_key "fk_poll_votes_poll_result" {
-    columns     = [column.poll_result_id]
-    ref_columns = [table.poll_results.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }

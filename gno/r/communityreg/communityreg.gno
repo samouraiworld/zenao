@@ -1,11 +1,11 @@
 package communityreg
 
 import (
+	"chain/runtime"
 	"errors"
-	"std"
 
-	"gno.land/p/demo/avl"
-	"gno.land/p/demo/ownable"
+	"gno.land/p/nt/avl"
+	"gno.land/p/nt/ownable"
 	"gno.land/p/zenao/communities"
 	zenaov1 "gno.land/p/zenao/zenao/v1"
 )
@@ -22,13 +22,13 @@ var (
 )
 
 func init() {
-	Ownable = ownable.NewWithAddress(std.Address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
+	Ownable = ownable.NewWithAddress(address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
 }
 
 // XXX: split this package into communityreg and communitiesindex
 
-func Register(infoGetter communities.InfoGetter) {
-	pkgPath := std.PreviousRealm().PkgPath()
+func Register(_ realm, infoGetter communities.InfoGetter) {
+	pkgPath := runtime.PreviousRealm().PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)
@@ -55,8 +55,8 @@ func mustGetInfo(pkgPath string) *zenaov1.CommunityInfo {
 	return info
 }
 
-func IndexCommunity(pkgPath string) {
-	Ownable.AssertCallerIsOwner()
+func IndexCommunity(_ realm, pkgPath string) {
+	Ownable.AssertOwnedByPrevious()
 
 	if exist := getCommunityByPkgPath(pkgPath); exist != nil {
 		panic("community already indexed: " + pkgPath)
@@ -66,8 +66,8 @@ func IndexCommunity(pkgPath string) {
 	communitiesByPkgPath.Set(pkgPath, info)
 }
 
-func AddMember(communityPkgPath string, memberID string) {
-	Ownable.AssertCallerIsOwner()
+func AddMember(_ realm, communityPkgPath string, memberID string) {
+	Ownable.AssertOwnedByPrevious()
 	mustGetCommunityByPkgPath(communityPkgPath)
 
 	key := memberID + "/" + communityPkgPath
@@ -76,8 +76,8 @@ func AddMember(communityPkgPath string, memberID string) {
 	communitiesByPkgPath.Set(communityPkgPath, info)
 }
 
-func RemoveMember(communityPkgPath string, memberID string) {
-	Ownable.AssertCallerIsOwner()
+func RemoveMember(_ realm, communityPkgPath string, memberID string) {
+	Ownable.AssertOwnedByPrevious()
 	mustGetCommunityByPkgPath(communityPkgPath)
 
 	key := memberID + "/" + communityPkgPath
@@ -86,15 +86,15 @@ func RemoveMember(communityPkgPath string, memberID string) {
 	communitiesByPkgPath.Set(communityPkgPath, info)
 }
 
-func AddEvent(communityPkgPath string, eventID string) {
-	Ownable.AssertCallerIsOwner()
+func AddEvent(_ realm, communityPkgPath string, eventID string) {
+	Ownable.AssertOwnedByPrevious()
 	mustGetCommunityByPkgPath(communityPkgPath)
 	key := eventID + "/" + communityPkgPath
 	communitiesByEvent.Set(key, communityPkgPath)
 }
 
-func RemoveEvent(communityPkgPath string, eventID string) {
-	Ownable.AssertCallerIsOwner()
+func RemoveEvent(_ realm, communityPkgPath string, eventID string) {
+	Ownable.AssertOwnedByPrevious()
 	mustGetCommunityByPkgPath(communityPkgPath)
 	key := eventID + "/" + communityPkgPath
 	communitiesByEvent.Remove(key)

@@ -86,7 +86,7 @@ export function ParticipantsSection({ id }: { id: string }) {
                 : participantsAddresses
             }
           />
-          <UsersAvatarsPreview usersAddresses={participantsAddresses} />
+          <UsersNamesPreview usersAddresses={participantsAddresses} />
         </div>
       </DrawerTrigger>
 
