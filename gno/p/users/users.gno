@@ -14,6 +14,8 @@ import (
 type User struct {
 	DAO        daokit.DAO
 	DAOPrivate *basedao.DAOPrivate
+
+	Config *Config // to get initial data during upgrade
 }
 
 type Config struct {
@@ -23,6 +25,9 @@ type Config struct {
 	ZenaoAdminAddr   string
 	GetProfileString basedao.ProfileStringGetter
 	SetProfileString basedao.ProfileStringSetter
+	CrossFn          daokit.CrossFn
+	SetImplemFn      basedao.SetImplemRaw
+	PrivateVarName   string
 }
 
 func NewUser(conf *Config) *User {
@@ -42,6 +47,8 @@ func NewUser(conf *Config) *User {
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminVetoCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
 
+	var user *User
+
 	// Don't pass the message handlers, since they are by default in the user privdao
 	pubdao, privdao := basedao.New(&basedao.Config{
 		Name:             conf.Name,
@@ -52,6 +59,13 @@ func NewUser(conf *Config) *User {
 		GetProfileString: conf.GetProfileString,
 		InitialCondition: adminVetoCond,
 		NoCreationEvent:  true, // don't list users in dao registries
+		CrossFn:          conf.CrossFn,
+		SetImplemFn:      conf.SetImplemFn,
+		RenderFn: func(path string, dao *basedao.DAOPrivate) string {
+			return user.Render(path)
+		},
+		MigrationParamsFn: func() []any { return []any{user} },
+		PrivateVarName:    conf.PrivateVarName + ".DAOPrivate",
 	})
 
 	privdao.Core.Resources.Set(&daokit.Resource{
@@ -64,9 +78,10 @@ func NewUser(conf *Config) *User {
 		Handler:   daokit.NewInstantExecuteHandler(),
 	})
 
-	user := &User{
+	user = &User{
 		DAO:        pubdao,
 		DAOPrivate: privdao,
+		Config:     conf,
 	}
 
 	return user
@@ -77,12 +92,12 @@ func (u *User) Render(path string) string {
 	s := ""
 	if path == "" {
 		s += md.H1(u.DAOPrivate.GetProfileString(addr, "DisplayName", "Anon"))
-		s += md.Image("Avatar", pfpURL(u.DAOPrivate.GetProfileString(addr, "Avatar", "")))
+		s += md.Paragraph(md.Image("Avatar", pfpURL(u.DAOPrivate.GetProfileString(addr, "Avatar", ""))))
 		s += md.Paragraph(u.DAOPrivate.GetProfileString(addr, "Bio", "No bio"))
 		s += md.HorizontalRule()
 		path = "noprofile"
 	}
-	s += u.DAOPrivate.Render(path)
+	s += u.DAOPrivate.RenderRouter.Render(path)
 	return s
 }
 
