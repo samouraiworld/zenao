@@ -30,7 +30,9 @@ function SocialMediaLinks({
   });
 
   const lastUrl = socialMediaLinks?.at(-1)?.url ?? "";
+
   const isLastLinkInvalid =
+    socialMediaLinks?.length > 0 &&
     !userFormSocialLinkSchema.shape.url.safeParse(lastUrl).success;
 
   return (
