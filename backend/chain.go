@@ -1657,7 +1657,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		isMember := basedao.MustGetMembersViewExtension(user.DAO).IsMember
+		isMember := basedao.MustGetMembersViewExtension(org.DAO).IsMember
 		p := polls.NewPoll(cross, question, kind, %d, options, isMember)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
