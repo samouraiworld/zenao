@@ -33,15 +33,15 @@ function CommunityCard({ id, community }: CommunityCardProps) {
   const { shortDescription } = deserializeWithFrontMatter<
     CommunityDetails,
     typeof communityDetailsSchema
-  >(
-    community.description || "",
-    communityDetailsSchema,
-    {
+  >({
+    serialized: community.description || "",
+    schema: communityDetailsSchema,
+    defaultValue: {
       description: "",
       shortDescription: "",
     },
-    "description",
-  );
+    contentFieldName: "description",
+  });
 
   return (
     <Card className="flex flex-col gap-2 bg-secondary/50 hover:bg-secondary/100">

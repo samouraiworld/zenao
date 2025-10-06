@@ -34,17 +34,17 @@ export default function ProfileHeader({
   const profileDetails = deserializeWithFrontMatter<
     GnoProfileDetails,
     typeof gnoProfileDetailsSchema
-  >(
-    bio,
-    gnoProfileDetailsSchema,
-    {
+  >({
+    serialized: bio,
+    schema: gnoProfileDetailsSchema,
+    defaultValue: {
       bio: "",
       socialMediaLinks: [],
       location: "",
       shortBio: "",
     },
-    "bio",
-  );
+    contentFieldName: "bio",
+  });
 
   return (
     <>

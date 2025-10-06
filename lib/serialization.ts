@@ -13,12 +13,17 @@ export function serializeWithFrontMatter<T extends object>(
 export function deserializeWithFrontMatter<
   T extends object,
   U extends ZodSchema,
->(
-  serialized: string,
-  schema: U,
-  defaultValue?: T,
+>({
+  serialized,
+  schema,
+  defaultValue,
   contentFieldName = "content",
-): T {
+}: {
+  serialized: string;
+  schema: U;
+  defaultValue?: T;
+  contentFieldName?: string;
+}): T {
   const { content, data } = matter(serialized);
   const result = schema.safeParse({ [contentFieldName]: content, ...data });
 

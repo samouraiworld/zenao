@@ -41,17 +41,17 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const profileDetails = deserializeWithFrontMatter<
     GnoProfileDetails,
     typeof gnoProfileDetailsSchema
-  >(
-    user?.bio ?? "",
-    gnoProfileDetailsSchema,
-    {
+  >({
+    serialized: user?.bio ?? "",
+    schema: gnoProfileDetailsSchema,
+    defaultValue: {
       bio: "",
       socialMediaLinks: [],
       location: "",
       shortBio: "",
     },
-    "bio",
-  );
+    contentFieldName: "bio",
+  });
 
   const defaultValues: UserFormSchemaType = {
     avatarUri: user?.avatarUri || "",

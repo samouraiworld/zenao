@@ -50,15 +50,15 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
   const communityDetails = deserializeWithFrontMatter<
     CommunityDetails,
     typeof communityDetailsSchema
-  >(
-    communityData.description || "",
-    communityDetailsSchema,
-    {
+  >({
+    serialized: communityData.description || "",
+    schema: communityDetailsSchema,
+    defaultValue: {
       description: communityData.description || "",
       shortDescription: "",
     },
-    "description",
-  );
+    contentFieldName: "description",
+  });
 
   const defaultValues: CommunityFormSchemaType = {
     displayName: communityData.displayName ?? "",

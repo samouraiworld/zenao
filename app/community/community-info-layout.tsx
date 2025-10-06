@@ -30,15 +30,15 @@ function CommunityInfoLayout({
   const { description, shortDescription } = deserializeWithFrontMatter<
     CommunityDetails,
     typeof communityDetailsSchema
-  >(
-    data.description || "",
-    communityDetailsSchema,
-    {
+  >({
+    serialized: data.description || "",
+    schema: communityDetailsSchema,
+    defaultValue: {
       description: "",
       shortDescription: "",
     },
-    "description",
-  );
+    contentFieldName: "description",
+  });
 
   const jsonLd: WithContext<Organization> = {
     "@context": "https://schema.org",
