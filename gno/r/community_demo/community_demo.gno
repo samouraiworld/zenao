@@ -10,16 +10,15 @@ import (
 )
 
 var (
-	DAO daokit.DAO
+	DAO      daokit.DAO
+	localDAO daokit.DAO
 
-	localDAO   daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	community  *communities.Community
-	feedId     string
+	community *communities.Community // XXX: needed for backward compatibility with frontend queries
+	feedId    string                 // XXX: workaround for "unexpected zero object id" issue
 )
 
 func init() {
-	feedId = social_feed.NewFeed(cross, "main", false, isMember)
+	feedId = social_feed.NewFeed(cross, "main", false, isMember) // XXX: workaround for "unexpected zero object id" issue
 }
 
 func init() {
@@ -41,9 +40,7 @@ func init() {
 		FeedId:           feedId,
 	}
 	community = communities.NewCommunity(&conf)
-	daoPrivate = community.DAOPrivate
-	localDAO = community.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
+	setImplem(community.DAO)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {

@@ -13,12 +13,11 @@ import (
 )
 
 var (
-	DAO daokit.DAO
+	DAO      daokit.DAO
+	localDAO daokit.DAO
 
-	localDAO   daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	event      *events.Event
-	feedId     string
+	event  *events.Event // XXX: needed for backward compatibility with frontend queries
+	feedId string        // XXX: workaround for "unexpected zero object id" issue
 )
 
 func init() {
@@ -47,9 +46,7 @@ func init() {
 		FeedId:           feedId,
 	}
 	event = events.NewEvent(&conf)
-	daoPrivate = event.DAOPrivate
-	localDAO = event.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
+	setImplem(event.DAO)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {

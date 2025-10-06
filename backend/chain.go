@@ -1926,12 +1926,11 @@ import (
 )
 
 var (
-	DAO daokit.DAO
-
+	DAO      daokit.DAO
 	localDAO daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	event *events.Event
-	feedId string
+
+	event  *events.Event // XXX: needed for backward compatibility with frontend queries
+	feedId string        // XXX: workaround for "unexpected zero object id" issue
 )
 
 func init() {
@@ -1960,9 +1959,7 @@ func init() {
 		FeedId: feedId,
 	}
 	event = events.NewEvent(&conf)
-	daoPrivate = event.DAOPrivate
-	localDAO = event.DAO
-	DAO = daokit.NewCrossing(localDAO, crossFn)
+	setImplem(event.DAO)
 	eventreg.Register(cross, func() *zenaov1.EventInfo { return event.Info() })
 }
 
@@ -1975,7 +1972,7 @@ func Execute(_ realm, proposalID uint64) {
 }
 
 func Render(path string) string {
-	return event.Render(path)
+	return localDAO.Render(path)
 }
 
 func isMember(memberId string) bool {
@@ -2027,12 +2024,11 @@ import (
 )
 
 var (
-	DAO daokit.DAO
-	
+	DAO      daokit.DAO
 	localDAO daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	community *communities.Community
-	feedId string
+
+	community *communities.Community // XXX: needed for backward compatibility with frontend queries
+	feedId    string                 // XXX: workaround for "unexpected zero object id" issue
 )
 
 func init() {
@@ -2057,9 +2053,7 @@ func init() {
 		FeedId: feedId,
 	}
 	community = communities.NewCommunity(&conf)
-	daoPrivate = community.DAOPrivate
-	localDAO = community.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
+	setImplem(community.DAO)
 	communityreg.Register(cross, func() *zenaov1.CommunityInfo { return community.Info() })
 }
 
@@ -2072,7 +2066,7 @@ func Execute(_ realm, proposalID uint64) {
 }
 
 func Render(path string) string {
-	return community.Render(path)
+	return localDAO.Render(path)
 }
 
 func isMember(memberId string) bool {
@@ -2132,11 +2126,10 @@ import (
 )
 
 var (
-	DAO daokit.DAO
-
+	DAO      daokit.DAO
 	localDAO daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	user *users.User
+
+	user *users.User // XXX: needed for backward compatibility with frontend queries
 )
 
 func init() {
@@ -2150,9 +2143,7 @@ func init() {
 		CrossFn: crossFn,
 		SetImplemFn: setImplem,
 	})
-	localDAO = user.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
-	daoPrivate = user.DAOPrivate
+	setImplem(user.DAO)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
@@ -2164,7 +2155,7 @@ func Execute(_ realm, proposalID uint64) {
 }
 
 func Render(path string) string {
-	return user.Render(path)
+	return localDAO.Render(path)
 }
 
 func crossFn(_ realm, cb func()) {

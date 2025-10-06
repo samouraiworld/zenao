@@ -1,7 +1,6 @@
 package user_demo
 
 import (
-	"gno.land/p/zenao/basedao"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
 	"gno.land/p/zenao/users"
@@ -9,11 +8,10 @@ import (
 )
 
 var (
-	DAO daokit.DAO
+	DAO      daokit.DAO
+	localDAO daokit.DAO
 
-	localDAO   daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	user       *users.User
+	user *users.User // XXX: needed for backward compatibility with frontend queries
 )
 
 func init() {
@@ -27,9 +25,7 @@ func init() {
 		CrossFn:          crossFn,
 		SetImplemFn:      setImplem,
 	})
-	localDAO = user.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
-	daoPrivate = user.DAOPrivate
+	setImplem(user.DAO)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
