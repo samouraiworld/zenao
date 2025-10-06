@@ -7,10 +7,12 @@ import (
 )
 
 type Community struct {
-	getProfileString basedao.ProfileStringGetter
-	setProfileString basedao.ProfileStringSetter
+	GetProfileString basedao.ProfileStringGetter
+	SetProfileString basedao.ProfileStringSetter
 	DAOPrivate       *basedao.DAOPrivate
 	DAO              daokit.DAO
+
+	Config *Config // to get initial data during upgrade
 }
 
 type Config struct {
@@ -24,6 +26,10 @@ type Config struct {
 	GetProfileString basedao.ProfileStringGetter
 	SetProfileString basedao.ProfileStringSetter
 	ZenaoAdminAddr   string
+	CrossFn          daokit.CrossFn
+	SetImplemFn      basedao.SetImplemRaw
+	FeedId           string
+	PrivateVarName   string
 }
 
 func NewCommunity(conf *Config) *Community {
@@ -83,22 +89,29 @@ func NewCommunity(conf *Config) *Community {
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
 
+	var community *Community
+
 	pubdao, privdao := basedao.New(&basedao.Config{
-		Name:             conf.DisplayName,
-		Description:      conf.Description,
-		ImageURI:         conf.AvatarURI,
-		Members:          memberStore,
-		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
-		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
-		InitialCondition: adminCond,
+		Name:              conf.DisplayName,
+		Description:       conf.Description,
+		ImageURI:          conf.AvatarURI,
+		Members:           memberStore,
+		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
+		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
+		InitialCondition:  adminCond,
+		CrossFn:           conf.CrossFn,
+		SetImplemFn:       conf.SetImplemFn,
+		MigrationParamsFn: func() []any { return []any{community} },
+		PrivateVarName:    conf.PrivateVarName + ".DAOPrivate",
 	})
 	conf.SetProfileString(cross, "Banner", conf.BannerURI)
 
-	community := &Community{
-		getProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
-		setProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
+	community = &Community{
+		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
+		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
 		DAOPrivate:       privdao,
 		DAO:              pubdao,
+		Config:           conf,
 	}
 
 	oneAdmin := daocond.RoleCount(1, "administrator", memberStore.HasRole)
@@ -175,16 +188,16 @@ func (c *Community) editCommunityHandler() daokit.ActionHandler {
 		}
 
 		if msg.displayName != "" {
-			c.setProfileString(cross, "DisplayName", msg.displayName)
+			c.SetProfileString(cross, "DisplayName", msg.displayName)
 		}
 		if msg.description != "" {
-			c.setProfileString(cross, "Bio", msg.description)
+			c.SetProfileString(cross, "Bio", msg.description)
 		}
 		if msg.avatarURI != "" {
-			c.setProfileString(cross, "Avatar", msg.avatarURI)
+			c.SetProfileString(cross, "Avatar", msg.avatarURI)
 		}
 		if msg.bannerURI != "" {
-			c.setProfileString(cross, "Banner", msg.bannerURI)
+			c.SetProfileString(cross, "Banner", msg.bannerURI)
 		}
 		if len(msg.administrators) > 0 {
 			c.updateCommunityUserRoles("administrator", msg.administrators)
@@ -384,28 +397,6 @@ func NewRemoveEventAction(address string) daokit.Action {
 	return daokit.NewAction(ActionRemoveEventKind, &ActionRemoveEvent{
 		address: address,
 	})
-}
-
-// TODO: Improve render avoid double rendering on member with multiple roles
-func (c *Community) Render(path string) string {
-	info := c.Info()
-	s := "# Community: " + info.DisplayName + "\n"
-	s += "## Description\n" + info.Description + "\n"
-	s += "---"
-	s += "\n## Members\n"
-	for _, member := range info.Administrators {
-		s += "- " + member + " (Administrator)\n"
-	}
-	for _, member := range c.DAOPrivate.Members.GetMembersWithRole("member") {
-		s += "- " + member + " (Member)\n"
-	}
-	for _, event := range c.DAOPrivate.Members.GetMembersWithRole("event") {
-		s += "- " + event + " (Event)\n"
-	}
-	s += "- " + c.DAOPrivate.Members.GetMembersWithRole("zenao-admin")[0] + " (Zenao Admin)\n"
-	s += "---"
-	return s
-
 }
 
 func (c *Community) updateCommunityUserRoles(role string, usersAddr []string) {

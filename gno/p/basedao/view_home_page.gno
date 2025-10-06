@@ -5,10 +5,10 @@ import (
 	"gno.land/p/nt/ufmt"
 )
 
-func (d *DAOPrivate) HomePageView() string {
+func (d *DAOPrivate) HomePageView(path string) string {
 	pkgPath := d.Realm.PkgPath()
 	linkPath := getLinkPath(pkgPath)
-	return d.HomeProfileHeaderView(false) +
+	return d.HomeProfileHeaderView(path == HOME_NO_PROFILE_PATH) +
 		md.Link("> Go to Members", linkPath+":"+MEMBERS_PATH) + "\n\n" +
 		md.Link("> Go to Proposals", linkPath+":"+PROPOSALS_PATH) + "\n"
 }
