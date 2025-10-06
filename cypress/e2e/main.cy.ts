@@ -148,7 +148,7 @@ describe("main", () => {
     );
 
     // change values
-    cy.get("input[type=file]").selectFile(
+    cy.get("input[name={name}]").selectFile(
       "cypress/fixtures/alice-tester.webp",
       { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
     );
