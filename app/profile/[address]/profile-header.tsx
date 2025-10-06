@@ -15,9 +15,9 @@ import { deserializeWithFrontMatter } from "@/lib/serialization";
 
 type ProfileHeaderProps = {
   address: string;
-  displayName?: string;
-  avatarUri?: string;
-  bio?: string;
+  displayName: string;
+  avatarUri: string;
+  bio: string;
 };
 
 export default function ProfileHeader({
@@ -30,11 +30,12 @@ export default function ProfileHeader({
   const { data: userLoggedAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+
   const profileDetails = deserializeWithFrontMatter<
     GnoProfileDetails,
     typeof gnoProfileDetailsSchema
   >(
-    bio ?? "",
+    bio,
     gnoProfileDetailsSchema,
     {
       bio: "",

@@ -142,7 +142,10 @@ describe("main", () => {
       "have.value",
       "Zenao user #1",
     );
-    cy.get('textarea[placeholder="Bio..."]').should("have.value", "");
+    cy.get('textarea[placeholder="Bio..."]').should(
+      "have.value",
+      "Zenao managed user",
+    );
 
     // change values
     cy.get("input[type=file]").selectFile(
