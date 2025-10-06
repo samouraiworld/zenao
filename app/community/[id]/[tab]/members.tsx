@@ -63,6 +63,7 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
               <CommunityMemberCard
                 address={member.address}
                 displayName={member.displayName}
+                bio={member.bio}
                 roles={member.roles}
               />
             </Link>

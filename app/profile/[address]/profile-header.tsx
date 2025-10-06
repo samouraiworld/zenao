@@ -1,6 +1,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Card } from "@/components/widgets/cards/card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
@@ -10,13 +11,14 @@ import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
-import { deserializeUserProfileDetails } from "@/lib/user-profile-serialization";
+import { gnoProfileDetailsSchema } from "@/types/schemas";
+import { deserializeWithFrontMatter } from "@/lib/serialization";
 
 type ProfileHeaderProps = {
   address: string;
-  displayName?: string;
-  avatarUri?: string;
-  bio?: string;
+  displayName: string;
+  avatarUri: string;
+  bio: string;
 };
 
 export default function ProfileHeader({
@@ -29,85 +31,120 @@ export default function ProfileHeader({
   const { data: userLoggedAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const profileDetails = deserializeUserProfileDetails(bio ?? "");
+
+  const profileDetails = deserializeWithFrontMatter({
+    serialized: bio,
+    schema: gnoProfileDetailsSchema,
+    defaultValue: {
+      bio: "",
+      socialMediaLinks: [],
+      location: "",
+      shortBio: "",
+      bannerUri: "",
+    },
+    contentFieldName: "bio",
+  });
 
   return (
-    <>
-      <div className="flex flex-col gap-4 w-full sm:w-1/5">
-        {avatarUri ? (
-          <AspectRatio ratio={1 / 1}>
+    <div className="flex flex-col w-full">
+      <div className="relative w-full">
+        {profileDetails.bannerUri ? (
+          <AspectRatio ratio={4 / 1}>
             <Web3Image
-              src={avatarUri}
-              alt="Profile picture"
+              src={profileDetails.bannerUri}
+              alt="Profile banner"
               priority
-              fetchPriority="high"
               fill
-              sizes="(max-width: 768px) 100vw,
-              (max-width: 1200px) 50vw,
-              33vw"
-              className="flex w-full rounded-xl self-center object-cover"
+              className="w-full h-full object-cover"
             />
           </AspectRatio>
         ) : (
-          <Skeleton className="flex w-full rounded-xl self-center" />
+          <Skeleton className="w-full h-32 sm:h-48" />
         )}
-        <GnowebButton
-          href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${address}`}
-          className="w-full"
-        />
-        {userLoggedAddress === address && (
-          <Link href="/settings">
-            <Button className="w-full">Edit my profile</Button>
-          </Link>
-        )}
-      </div>
-      <div className="flex flex-col gap-8 sm:gap-12 w-full sm:w-4/5">
-        <Heading level={1} size="4xl">
-          {displayName}
-          {profileDetails.shortBio && (
-            <Text className=" text-gray-500 mt-2">
-              {profileDetails.shortBio}
-            </Text>
+
+        <div className="absolute -bottom-14 left-6">
+          {avatarUri ? (
+            <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-xl self-center overflow-hidden">
+              <Web3Image
+                src={avatarUri}
+                alt="Profile picture"
+                priority
+                fetchPriority="high"
+                fill
+                sizes="(max-width: 768px) 100vw,
+                (max-width: 1200px) 50vw,
+                33vw"
+                className="flex w-full rounded-xl self-center object-cover"
+              />
+            </div>
+          ) : (
+            <Skeleton className="flex w-full rounded-xl self-center" />
           )}
-        </Heading>
-        <div className="flex flex-col gap-1 w-full">
+        </div>
+      </div>
+
+      <div className="mt-16 px-6 flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <Heading level={1} size="4xl">
+              {displayName}
+            </Heading>
+            {profileDetails.shortBio && (
+              <Text className="text-gray-500 mt-1">
+                {profileDetails.shortBio}
+              </Text>
+            )}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <GnowebButton
+              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${address}`}
+              className="w-full sm:w-auto"
+            />
+            {userLoggedAddress === address && (
+              <Link href="/settings" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto">Edit my profile</Button>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
           {profileDetails.bio?.trim() && (
             <Card>
               <Text>{profileDetails.bio}</Text>
             </Card>
           )}
           {profileDetails.location && (
-            <Text className="text-sm text-gray-500 mt-2">
-              📍 {profileDetails.location}
-            </Text>
+            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <MapPin size={16} />
+              <Text className="text-sm">{profileDetails.location}</Text>
+            </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-4">
-          <Heading level={2}>Find me here</Heading>
-
-          {profileDetails.socialMediaLinks.length > 0 ? (
-            <ul className="flex flex-col gap-2">
-              {profileDetails.socialMediaLinks.map((link) => {
-                return (
-                  <li key={link.url}>
-                    <Link
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      {link.url}
-                    </Link>
-                  </li>
-                );
-              })}
+        {profileDetails.socialMediaLinks?.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <Heading level={2} size="lg">
+              Find me here
+            </Heading>
+            <ul className="flex flex-wrap gap-2">
+              {profileDetails.socialMediaLinks.map((link) => (
+                <li key={link.url}>
+                  <Link
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline text-blue-600 hover:text-blue-800"
+                  >
+                    {link.url}
+                  </Link>
+                </li>
+              ))}
             </ul>
-          ) : (
-            <Text>No social links available</Text>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }

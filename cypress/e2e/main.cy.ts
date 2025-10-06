@@ -148,7 +148,7 @@ describe("main", () => {
     );
 
     // change values
-    cy.get("input[type=file]").selectFile(
+    cy.get('input[name="avatarUri"]').selectFile(
       "cypress/fixtures/alice-tester.webp",
       { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
     );
@@ -405,14 +405,8 @@ describe("main", () => {
   });
 
   it("add a gatekeeper", () => {
-    // start from the home
-    cy.visit("/");
-
-    // Explore an event
-    cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
-
-    cy.url().should("contain", "/event/");
+    // start from the first fake event
+    cy.visit("/event/1");
 
     cy.url().then((url) => {
       login();
@@ -427,7 +421,9 @@ describe("main", () => {
 
     cy.get("button").contains("Done").click();
 
-    cy.get("p").should("contain", "Manage gatekeepers (2)");
+    cy.get("p")
+      .contains("Manage gatekeepers (2)", { timeout: 10000 })
+      .should("be.visible");
 
     cy.url().then((url) => {
       // Connect with other account
@@ -440,14 +436,8 @@ describe("main", () => {
   });
 
   it("remove a gatekeeper", () => {
-    // start from the home
-    cy.visit("/");
-
-    // Explore an event
-    cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
-
-    cy.url().should("contain", "/event/");
+    // start from the first fake event
+    cy.visit("/event/1");
 
     cy.url().then((url) => {
       logout();
@@ -463,7 +453,7 @@ describe("main", () => {
 
     cy.wait(5000);
 
-    cy.get("p").should("contain", "Manage gatekeepers (1)");
+    cy.get("p").contains("Manage gatekeepers (1)").should("be.visible");
 
     cy.url().should("include", "/event/");
     cy.url().should("not.include", "/edit");

@@ -42,7 +42,10 @@ export default function Home() {
             </ButtonWithChildren>
           </Link>
 
-          <LazyInstallButton />
+          {/* we need this div because the button is causing a layout shift otherwise */}
+          <div className="h-[2.25rem]">
+            <LazyInstallButton />
+          </div>
         </div>
       </div>
     </ScreenContainerCentered>

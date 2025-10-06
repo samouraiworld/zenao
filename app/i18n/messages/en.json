@@ -3,7 +3,8 @@
     "maintenance": "Zenao is under maintenance, try again in few minutes..."
   },
   "community-card": {
-    "members": "{count, plural, =0 {no members yet} =1 {1 member} other {# members}}"
+    "members": "{count, plural, =0 {no members yet} =1 {1 member} other {# members}}",
+    "no-description": "No description yet"
   },
   "navigation": {
     "zenao": "ZENAO",
@@ -151,6 +152,7 @@
     "avatar-placeholder": "Avatar URI...",
     "name-label": "Name",
     "name-placeholder": "Name...",
+    "banner-placeholder": "Banner...",
     "bio-label": "Bio",
     "bio-placeholder": "Bio...",
     "location-label": "Location",
@@ -159,6 +161,7 @@
     "shortbio-placeholder": "Short Bio...",
     "save-button": "Save changes",
     "change-avatar": "Change avatar",
+    "change-banner": "Change banner",
     "toast-success": "User correctly edited!",
     "toast-error": "Error on editing user!",
     "sign-out": "Sign out"
@@ -344,6 +347,8 @@
     "name-label": "Community name",
     "name-placeholder": "Community name...",
     "description-label": "Description",
+    "shortDescription-label": "Short Description",
+    "shortDescription-placeholder": "Short Description...",
     "description-placeholder": "Description...",
     "write-tab": "Write",
     "preview-tab": "Preview",
