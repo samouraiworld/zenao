@@ -135,7 +135,7 @@ export default function ProfileHeader({
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline text-blue-600 hover:text-blue-800"
+                    className="px-3 py-1 rounded-full bg-muted hover:bg-muted/70 text-blue-600 hover:text-blue-800 transition text-sm"
                   >
                     {link.url}
                   </Link>
