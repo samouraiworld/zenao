@@ -59,6 +59,7 @@ type Config struct {
 	CrossFn             daokit.CrossFn
 	PrivateVarName      string
 	SetImplemFn         daokit.SetImplemFn
+	FeedId              string
 }
 
 type Ticket struct {

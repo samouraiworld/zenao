@@ -18,11 +18,12 @@ var (
 	localDAO   daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	event      *events.Event
+	feedId     string
 )
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	social_feed.NewFeed(cross, "main", false, isMember)
+	feedId = social_feed.NewFeed(cross, "main", false, isMember)
 }
 
 func init() {
@@ -43,6 +44,7 @@ func init() {
 		Discoverable:     true,
 		CrossFn:          crossFn,
 		SetImplemFn:      setImplem,
+		FeedId:           feedId,
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate

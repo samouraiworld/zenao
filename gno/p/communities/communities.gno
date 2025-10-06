@@ -28,6 +28,7 @@ type Config struct {
 	ZenaoAdminAddr   string
 	CrossFn          daokit.CrossFn
 	SetImplemFn      daokit.SetImplemFn
+	FeedId           string
 }
 
 func NewCommunity(conf *Config) *Community {

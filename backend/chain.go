@@ -1931,11 +1931,12 @@ var (
 	localDAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	event *events.Event
+	feedId string
 )
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	social_feed.NewFeed(cross, "main", false, isMember)
+	feedId = social_feed.NewFeed(cross, "main", false, isMember)
 }
 
 func init() {
@@ -1956,6 +1957,7 @@ func init() {
 		ParticipationPubkey: {{.participationPubkey}},
 		CrossFn: crossFn,
 		SetImplemFn: setImplem,
+		FeedId: feedId,
 	}
 	event = events.NewEvent(&conf)
 	daoPrivate = event.DAOPrivate
@@ -2030,11 +2032,12 @@ var (
 	localDAO daokit.DAO
 	daoPrivate *basedao.DAOPrivate
 	community *communities.Community
+	feedId string
 )
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	social_feed.NewFeed(cross, "main", false, isMember)
+	feedId = social_feed.NewFeed(cross, "main", false, isMember)
 }
 
 func init() {
@@ -2051,6 +2054,7 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		CrossFn: crossFn,
 		SetImplemFn: setImplem,
+		FeedId: feedId,
 	}
 	community = communities.NewCommunity(&conf)
 	daoPrivate = community.DAOPrivate
