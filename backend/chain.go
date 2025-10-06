@@ -1636,6 +1636,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	
 		"gno.land/p/nt/ufmt"
 		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/basedao"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		pollsv1 "gno.land/p/zenao/polls/v1"
 		org %q
@@ -1656,7 +1657,8 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		p := polls.NewPoll(cross, question, kind, %d, options, org.IsMember)
+		isMember := basedao.MustGetMembersViewExtension(user.DAO).IsMember
+		p := polls.NewPoll(cross, question, kind, %d, options, isMember)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
 			panic("multiaddr validation failed")
