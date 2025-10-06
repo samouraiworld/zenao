@@ -102,6 +102,14 @@ export const CommunityForm = ({
             </Card>
 
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
+              <FormFieldInputString
+                control={form.control}
+                name="shortDescription"
+                label={t("shortDescription-label")}
+                placeholder={t("shortDescription-placeholder")}
+                className="mb-4"
+              />
+
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
                   <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>

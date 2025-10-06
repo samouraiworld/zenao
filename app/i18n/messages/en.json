@@ -3,7 +3,8 @@
     "maintenance": "Zenao is under maintenance, try again in few minutes..."
   },
   "community-card": {
-    "members": "{count, plural, =0 {no members yet} =1 {1 member} other {# members}}"
+    "members": "{count, plural, =0 {no members yet} =1 {1 member} other {# members}}",
+    "no-description": "No description yet"
   },
   "navigation": {
     "zenao": "ZENAO",
@@ -339,6 +340,8 @@
     "name-label": "Community name",
     "name-placeholder": "Community name...",
     "description-label": "Description",
+    "shortDescription-label": "Short Description",
+    "shortDescription-placeholder": "Short Description...",
     "description-placeholder": "Description...",
     "write-tab": "Write",
     "preview-tab": "Preview",
