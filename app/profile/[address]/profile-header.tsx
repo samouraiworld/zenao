@@ -123,6 +123,22 @@ export default function ProfileHeader({
           )}
         </div>
 
+        <div className="flex flex-col gap-2 mt-4">
+          <Heading level={2} size="lg">
+            Skills
+          </Heading>
+          <div className="flex flex-wrap gap-2">
+            {["React", "TypeScript", "Next.js", "Gno"].map((skill) => (
+              <span
+                key={skill}
+                className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded-full"
+              >
+                {skill}
+              </span>
+            ))}
+          </div>
+        </div>
+
         {profileDetails.socialMediaLinks?.length > 0 && (
           <div className="flex flex-col gap-2">
             <Heading level={2} size="lg">
