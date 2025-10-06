@@ -38,10 +38,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     userAddressOptions(getToken, userId),
   );
   const { data: user } = useSuspenseQuery(profileOptions(address));
-  const profileDetails = deserializeWithFrontMatter<
-    GnoProfileDetails,
-    typeof gnoProfileDetailsSchema
-  >({
+  const profileDetails = deserializeWithFrontMatter({
     serialized: user?.bio ?? "",
     schema: gnoProfileDetailsSchema,
     defaultValue: {

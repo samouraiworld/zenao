@@ -12,7 +12,7 @@ import { CommunityJoinButton } from "@/components/community/community-join-butto
 import { CommunityEditAdminButton } from "@/components/community/community-edit-button";
 import { web2URL } from "@/lib/uris";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
-import { CommunityDetails, communityDetailsSchema } from "@/types/schemas";
+import { communityDetailsSchema } from "@/types/schemas";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 
 type CommunityInfoLayoutProps = {
@@ -27,10 +27,7 @@ function CommunityInfoLayout({
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data } = useSuspenseQuery(communityInfo(communityId));
 
-  const { description, shortDescription } = deserializeWithFrontMatter<
-    CommunityDetails,
-    typeof communityDetailsSchema
-  >({
+  const { description, shortDescription } = deserializeWithFrontMatter({
     serialized: data.description || "",
     schema: communityDetailsSchema,
     defaultValue: {

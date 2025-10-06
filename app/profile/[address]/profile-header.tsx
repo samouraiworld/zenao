@@ -10,7 +10,7 @@ import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
-import { GnoProfileDetails, gnoProfileDetailsSchema } from "@/types/schemas";
+import { gnoProfileDetailsSchema } from "@/types/schemas";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
 
 type ProfileHeaderProps = {
@@ -31,10 +31,7 @@ export default function ProfileHeader({
     userAddressOptions(getToken, userId),
   );
 
-  const profileDetails = deserializeWithFrontMatter<
-    GnoProfileDetails,
-    typeof gnoProfileDetailsSchema
-  >({
+  const profileDetails = deserializeWithFrontMatter({
     serialized: bio,
     schema: gnoProfileDetailsSchema,
     defaultValue: {

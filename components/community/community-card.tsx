@@ -13,7 +13,7 @@ import UsersNamesPreview from "../user/users-names-preview";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { communityUsersWithRoles } from "@/lib/queries/community";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
-import { CommunityDetails, communityDetailsSchema } from "@/types/schemas";
+import { communityDetailsSchema } from "@/types/schemas";
 
 type CommunityCardProps = {
   id: string;
@@ -30,10 +30,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
     [members],
   );
 
-  const { shortDescription } = deserializeWithFrontMatter<
-    CommunityDetails,
-    typeof communityDetailsSchema
-  >({
+  const { shortDescription } = deserializeWithFrontMatter({
     serialized: community.description || "",
     schema: communityDetailsSchema,
     defaultValue: {

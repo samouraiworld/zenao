@@ -47,10 +47,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
     },
   });
 
-  const communityDetails = deserializeWithFrontMatter<
-    CommunityDetails,
-    typeof communityDetailsSchema
-  >({
+  const communityDetails = deserializeWithFrontMatter({
     serialized: communityData.description || "",
     schema: communityDetailsSchema,
     defaultValue: {
