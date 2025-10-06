@@ -86,7 +86,7 @@ func (u *User) Render(path string) string {
 	s := ""
 	if path == "" {
 		s += md.H1(u.DAOPrivate.GetProfileString(addr, "DisplayName", "Anon"))
-		s += md.Image("Avatar", pfpURL(u.DAOPrivate.GetProfileString(addr, "Avatar", "")))
+		s += md.Paragraph(md.Image("Avatar", pfpURL(u.DAOPrivate.GetProfileString(addr, "Avatar", ""))))
 		s += md.Paragraph(u.DAOPrivate.GetProfileString(addr, "Bio", "No bio"))
 		s += md.HorizontalRule()
 		path = "noprofile"
