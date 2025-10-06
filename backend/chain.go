@@ -2122,7 +2122,6 @@ const userRealmSourceTemplate = `package user
 import (
 	"gno.land/p/{{.namespace}}/users"
 	"gno.land/r/demo/profile"
-	"gno.land/p/{{.namespace}}/basedao"
 	"gno.land/p/{{.namespace}}/daokit"
 	"gno.land/p/{{.namespace}}/daocond"
 )
