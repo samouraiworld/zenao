@@ -139,7 +139,7 @@ func NewEvent(conf *Config) *Event {
 		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
 		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
 		InitialCondition: adminCond,
-		PrivateVarName:   conf.PrivateVarName,
+		PrivateVarName:   conf.PrivateVarName + ".DAOPrivate",
 		CrossFn:          conf.CrossFn,
 		SetImplemFn:      conf.SetImplemFn,
 		RenderFn: func(path string, dao *basedao.DAOPrivate) string {

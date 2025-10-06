@@ -1957,6 +1957,7 @@ func init() {
 		CrossFn: crossFn,
 		SetImplemFn: setImplem,
 		FeedId: feedId,
+		PrivateVarName: "event",
 	}
 	event = events.NewEvent(&conf)
 	setImplem(event.DAO)
@@ -2051,6 +2052,7 @@ func init() {
 		CrossFn: crossFn,
 		SetImplemFn: setImplem,
 		FeedId: feedId,
+		PrivateVarName: "community",
 	}
 	community = communities.NewCommunity(&conf)
 	setImplem(community.DAO)
@@ -2142,6 +2144,7 @@ func init() {
 		ZenaoAdminAddr: {{.zenaoAdminAddr}},
 		CrossFn: crossFn,
 		SetImplemFn: setImplem,
+		PrivateVarName: "user",
 	})
 	setImplem(user.DAO)
 }

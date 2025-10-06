@@ -29,6 +29,7 @@ type Config struct {
 	CrossFn          daokit.CrossFn
 	SetImplemFn      daokit.SetImplemFn
 	FeedId           string
+	PrivateVarName   string
 }
 
 func NewCommunity(conf *Config) *Community {
@@ -101,6 +102,7 @@ func NewCommunity(conf *Config) *Community {
 		CrossFn:           conf.CrossFn,
 		SetImplemFn:       conf.SetImplemFn,
 		MigrationParamsFn: func() []any { return []any{community} },
+		PrivateVarName:    conf.PrivateVarName + ".DAOPrivate",
 	})
 	conf.SetProfileString(cross, "Banner", conf.BannerURI)
 

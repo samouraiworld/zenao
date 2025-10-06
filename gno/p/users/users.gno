@@ -27,6 +27,7 @@ type Config struct {
 	SetProfileString basedao.ProfileStringSetter
 	CrossFn          daokit.CrossFn
 	SetImplemFn      daokit.SetImplemFn
+	PrivateVarName   string
 }
 
 func NewUser(conf *Config) *User {
@@ -64,6 +65,7 @@ func NewUser(conf *Config) *User {
 			return user.Render(path)
 		},
 		MigrationParamsFn: func() []any { return []any{user} },
+		PrivateVarName:    conf.PrivateVarName + ".DAOPrivate",
 	})
 
 	privdao.Core.Resources.Set(&daokit.Resource{

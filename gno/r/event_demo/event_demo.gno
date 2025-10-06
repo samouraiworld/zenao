@@ -44,6 +44,7 @@ func init() {
 		CrossFn:          crossFn,
 		SetImplemFn:      setImplem,
 		FeedId:           feedId,
+		PrivateVarName:   "event",
 	}
 	event = events.NewEvent(&conf)
 	setImplem(event.DAO)

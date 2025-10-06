@@ -38,6 +38,7 @@ func init() {
 		CrossFn:          crossFn,
 		SetImplemFn:      setImplem,
 		FeedId:           feedId,
+		PrivateVarName:   "community",
 	}
 	community = communities.NewCommunity(&conf)
 	setImplem(community.DAO)

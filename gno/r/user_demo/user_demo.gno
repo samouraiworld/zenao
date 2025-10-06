@@ -24,6 +24,7 @@ func init() {
 		ZenaoAdminAddr:   "g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94",
 		CrossFn:          crossFn,
 		SetImplemFn:      setImplem,
+		PrivateVarName:   "user",
 	})
 	setImplem(user.DAO)
 }
