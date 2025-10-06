@@ -49,7 +49,7 @@ func (d *DAOPrivate) Render(path string) string {
 // DEFAULT_HANDLERS
 
 func (d *DAOPrivate) MuxHomePage(res *mux.ResponseWriter, req *mux.Request) {
-	res.Write(d.HomePageView())
+	res.Write(d.HomePageView(req.RawPath))
 }
 
 func (d *DAOPrivate) MuxMembersPage(res *mux.ResponseWriter, req *mux.Request) {

@@ -591,7 +591,7 @@ func (e *Event) Render(path string) string {
 		}
 
 		s += md.H1(info.Title)
-		s += md.Image("Event presentation", eventImageURL(info.ImageUri))
+		s += md.Paragraph(md.Image("Event presentation", eventImageURL(info.ImageUri)))
 		s += md.Paragraph(info.Description)
 		s += md.BulletList([]string{
 			ufmt.Sprintf("📍 Location: %s", locStr),
@@ -603,7 +603,7 @@ func (e *Event) Render(path string) string {
 		s += md.HorizontalRule()
 		path = "noprofile"
 	}
-	s += e.DAOPrivate.Render(path)
+	s += e.DAOPrivate.RenderRouter.Render(path)
 	return s
 }
 

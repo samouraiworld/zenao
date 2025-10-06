@@ -107,7 +107,7 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 
 	dao.Core.Extensions.Set(&membersViewExtension{
 		getStore:  func() *MembersStore { return dao.Members },
-		queryPath: dao.Realm.PkgPath() + "." + conf.PrivateVarName + ".Members", // XXX: take varname as input
+		queryPath: dao.Realm.PkgPath() + "." + conf.PrivateVarName + ".Members",
 	})
 
 	dao.initRenderingRouter()

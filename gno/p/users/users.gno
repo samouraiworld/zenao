@@ -91,7 +91,7 @@ func (u *User) Render(path string) string {
 		s += md.HorizontalRule()
 		path = "noprofile"
 	}
-	s += u.DAOPrivate.Render(path)
+	s += u.DAOPrivate.RenderRouter.Render(path)
 	return s
 }
 
