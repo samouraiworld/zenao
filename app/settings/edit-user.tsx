@@ -17,12 +17,17 @@ import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-chi
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
-import { UserFormSchemaType, userFormSchema } from "@/types/schemas";
+import {
+  GnoProfileDetails,
+  UserFormSchemaType,
+  gnoProfileDetailsSchema,
+  userFormSchema,
+} from "@/types/schemas";
 import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
 import {
-  deserializeUserProfileDetails,
-  serializeUserProfileDetails,
-} from "@/lib/user-profile-serialization";
+  deserializeWithFrontMatter,
+  serializeWithFrontMatter,
+} from "@/lib/serialization";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
@@ -33,7 +38,18 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     userAddressOptions(getToken, userId),
   );
   const { data: user } = useSuspenseQuery(profileOptions(address));
-  const profileDetails = deserializeUserProfileDetails(user?.bio ?? "");
+  const profileDetails = deserializeWithFrontMatter({
+    serialized: user?.bio ?? "",
+    schema: gnoProfileDetailsSchema,
+    defaultValue: {
+      bio: "",
+      socialMediaLinks: [],
+      location: "",
+      shortBio: "",
+      bannerUri: "",
+    },
+    contentFieldName: "bio",
+  });
 
   const defaultValues: UserFormSchemaType = {
     avatarUri: user?.avatarUri || "",
@@ -69,13 +85,15 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         token,
         avatarUri: values.avatarUri,
         displayName: values.displayName,
-        bio: serializeUserProfileDetails({
-          bio: values.bio,
-          socialMediaLinks: values.socialMediaLinks,
-          location: values.location,
-          shortBio: values.shortBio,
-          bannerUri: values.bannerUri,
-        }),
+        bio: serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
+          values.bio,
+          {
+            socialMediaLinks: values.socialMediaLinks,
+            location: values.location,
+            shortBio: values.shortBio,
+            bannerUri: values.bannerUri,
+          },
+        ),
       });
 
       router.push(`/profile/${address}`);
