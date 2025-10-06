@@ -111,6 +111,7 @@ func NewCommunity(conf *Config) *Community {
 		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
 		DAOPrivate:       privdao,
 		DAO:              pubdao,
+		Config:           conf,
 	}
 
 	oneAdmin := daocond.RoleCount(1, "administrator", memberStore.HasRole)

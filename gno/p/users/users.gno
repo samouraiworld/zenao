@@ -81,6 +81,7 @@ func NewUser(conf *Config) *User {
 	user = &User{
 		DAO:        pubdao,
 		DAOPrivate: privdao,
+		Config:     conf,
 	}
 
 	return user

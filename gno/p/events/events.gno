@@ -161,6 +161,7 @@ func NewEvent(conf *Config) *Event {
 		ParticipationPubkey: participationPubkey,
 		CheckedIn:           0,
 		Cancelled:           false,
+		Config:              conf,
 	}
 
 	oneOrganizer := daocond.RoleCount(1, "organizer", memberStore.HasRole)
