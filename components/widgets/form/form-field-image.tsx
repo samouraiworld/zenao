@@ -152,7 +152,7 @@ export const FormFieldImage = <T extends FieldValues>({
               )}
             </Tooltip>
             {hint && (
-              <Text>
+              <Text size="xs" className="text-end">
                 Recommended aspect ratio:{" "}
                 {getAspectRatioHint(props.aspectRatio)}
                 <br />

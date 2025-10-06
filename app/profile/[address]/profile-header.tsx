@@ -49,7 +49,7 @@ export default function ProfileHeader({
           <Skeleton className="w-full h-32 sm:h-48" />
         )}
 
-        <div className="absolute -bottom-14 left-6 sm:left-10">
+        <div className="absolute -bottom-14 left-6">
           {avatarUri ? (
             <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-xl self-center overflow-hidden">
               <Web3Image
