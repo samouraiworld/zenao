@@ -40,6 +40,7 @@ export default function ProfileHeader({
       socialMediaLinks: [],
       location: "",
       shortBio: "",
+      bannerUri: "",
     },
     contentFieldName: "bio",
   });
