@@ -677,6 +677,37 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	return nil
 }
 
+// GetCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) GetCommunity(communityID string) (*zeni.Community, error) {
+	g, span := g.trace("gzchain.GetCommunity")
+	defer span.End()
+
+	// execute a query to get the community info
+	queryCfg := gnoclient.QueryCfg{
+		Data: []byte("gno.land/r/" + g.namespace + "/c" + communityID + ".community.Info().ToJSON().String()"),
+	}
+
+	queryRes, err := g.client.Query(queryCfg)
+	if err != nil {
+		return nil, err
+	}
+	if queryRes.Response.Error != nil {
+		return nil, fmt.Errorf("%w\n%s", queryRes.Response.Error, queryRes.Response.Log)
+	}
+	// TODO: use the query to get the community
+	return nil, nil
+}
+
+// GetCommunityMembers implements ZenaoChain.
+func (g *gnoZenaoChain) GetCommunityMembers(communityID string) ([]string, error) {
+	g, span := g.trace("gzchain.GetCommunityMembers")
+	defer span.End()
+
+	// TODO: fetch members addr
+
+	return []string{}, nil
+}
+
 // EditCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error {
 	g, span := g.trace("gzchain.EditCommunity")

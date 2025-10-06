@@ -11,6 +11,7 @@ type ZenaoServer struct {
 	Auth         zeni.Auth
 	Chain        zeni.Chain
 	DB           zeni.DB
+	Userstore    zeni.UserStore
 	MailClient   *resend.Client
 	MailSender   string
 	DiscordToken string

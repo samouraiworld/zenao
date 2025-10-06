@@ -37,7 +37,6 @@ func (s *ZenaoServer) AddEventToCommunity(
 
 	var (
 		participants []*zeni.User
-		targetIDs    = make(map[string]bool)
 		evt          *zeni.Event
 	)
 
@@ -62,6 +61,33 @@ func (s *ZenaoServer) AddEventToCommunity(
 	}); err != nil {
 		return nil, err
 	}
+
+	cmt, err := s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.Chain.WithContext(ctx).AddEventToCommunity(cmt.CreatorID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
+		s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("event-id", req.Msg.EventId))
+		return nil, err
+	}
+
+	// 1. retrieve member of the community
+	members, err := s.Chain.WithContext(ctx).GetCommunityMembers(req.Msg.CommunityId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, participant := range participants {
+		if !targetIDs[participant.ID] {
+			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, req.Msg.CommunityId, participant.ID); err != nil {
+				s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-id", participant.ID))
+				return nil, err
+			}
+		}
+	}
+
+	// 1.
 
 	// If the event start in more than 24h, we send an email to all community members that does not participate to the event.
 	if time.Now().Add(24*time.Hour).Before(evt.StartDate) && s.MailClient != nil {
@@ -110,21 +136,6 @@ func (s *ZenaoServer) AddEventToCommunity(
 			}
 			count += len(batch)
 			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
-		}
-	}
-
-	if err := s.Chain.WithContext(ctx).AddEventToCommunity(cmt.CreatorID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
-		s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("event-id", req.Msg.EventId))
-		return nil, err
-	}
-
-	for _, participant := range participants {
-		if !targetIDs[participant.ID] {
-			//TODO: ensure administrator can add anyone to the community
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(zUser.ID, req.Msg.CommunityId, participant.ID); err != nil {
-				s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-id", participant.ID))
-				return nil, err
-			}
 		}
 	}
 

@@ -201,6 +201,7 @@ func (e *Event) Timezone() (*time.Location, error) {
 	}
 }
 
+// TODO: rename it to db at the end of transition
 type UserStore interface {
 	Tx(func(db UserStore) error) error
 	TxWithSpan(ctx context.Context, label string, cb func(db UserStore) error) error
@@ -298,6 +299,8 @@ type Chain interface {
 	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
 
 	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
+	GetCommunity(communityID string) (*Community, error)
+	GetCommunityMembers(communityID string) ([]string, error)
 	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
 	AddEventToCommunity(callerID string, communityID string, eventID string) error
 	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
