@@ -7,10 +7,12 @@ import (
 )
 
 type Community struct {
-	getProfileString basedao.ProfileStringGetter
-	setProfileString basedao.ProfileStringSetter
+	GetProfileString basedao.ProfileStringGetter
+	SetProfileString basedao.ProfileStringSetter
 	DAOPrivate       *basedao.DAOPrivate
 	DAO              daokit.DAO
+
+	Config *Config // to get initial data during upgrade
 }
 
 type Config struct {
@@ -102,8 +104,8 @@ func NewCommunity(conf *Config) *Community {
 	conf.SetProfileString(cross, "Banner", conf.BannerURI)
 
 	community = &Community{
-		getProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
-		setProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
+		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
+		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
 		DAOPrivate:       privdao,
 		DAO:              pubdao,
 	}
@@ -182,16 +184,16 @@ func (c *Community) editCommunityHandler() daokit.ActionHandler {
 		}
 
 		if msg.displayName != "" {
-			c.setProfileString(cross, "DisplayName", msg.displayName)
+			c.SetProfileString(cross, "DisplayName", msg.displayName)
 		}
 		if msg.description != "" {
-			c.setProfileString(cross, "Bio", msg.description)
+			c.SetProfileString(cross, "Bio", msg.description)
 		}
 		if msg.avatarURI != "" {
-			c.setProfileString(cross, "Avatar", msg.avatarURI)
+			c.SetProfileString(cross, "Avatar", msg.avatarURI)
 		}
 		if msg.bannerURI != "" {
-			c.setProfileString(cross, "Banner", msg.bannerURI)
+			c.SetProfileString(cross, "Banner", msg.bannerURI)
 		}
 		if len(msg.administrators) > 0 {
 			c.updateCommunityUserRoles("administrator", msg.administrators)

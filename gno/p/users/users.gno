@@ -14,6 +14,8 @@ import (
 type User struct {
 	DAO        daokit.DAO
 	DAOPrivate *basedao.DAOPrivate
+
+	Config *Config // to get initial data during upgrade
 }
 
 type Config struct {

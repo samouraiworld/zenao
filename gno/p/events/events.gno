@@ -24,19 +24,21 @@ const gatewayDomain = "pinata.zenao.io"
 
 // Event cannot be exposed
 type Event struct {
-	startDate           int64
-	endDate             int64
-	capacity            uint32
-	tickets             avl.Tree // ticketHash -> *Ticket
-	location            *zenaov1.EventLocation
-	getProfileString    basedao.ProfileStringGetter
-	setProfileString    basedao.ProfileStringSetter
+	StartDate           int64
+	EndDate             int64
+	Capacity            uint32
+	Tickets             avl.Tree // ticketHash -> *Ticket
+	Location            *zenaov1.EventLocation
+	GetProfileString    basedao.ProfileStringGetter
+	SetProfileString    basedao.ProfileStringSetter
 	DAOPrivate          *basedao.DAOPrivate
 	DAO                 daokit.DAO
-	participationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
-	checkedIn           uint32 // number of checked-in participants, used for rendering only
-	cancelled           bool   // true if event is cancelled
-	discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
+	ParticipationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
+	CheckedIn           uint32 // number of checked-in participants, used for rendering only
+	Cancelled           bool   // true if event is cancelled
+	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
+
+	Config *Config // to get initial data during upgrade
 }
 
 type Config struct {
@@ -146,18 +148,18 @@ func NewEvent(conf *Config) *Event {
 	})
 
 	event = &Event{
-		startDate:           conf.StartDate,
-		endDate:             conf.EndDate,
-		capacity:            conf.Capacity,
-		getProfileString:    conf.GetProfileString,
-		setProfileString:    conf.SetProfileString,
-		discoverable:        conf.Discoverable,
+		StartDate:           conf.StartDate,
+		EndDate:             conf.EndDate,
+		Capacity:            conf.Capacity,
+		GetProfileString:    conf.GetProfileString,
+		SetProfileString:    conf.SetProfileString,
+		Discoverable:        conf.Discoverable,
 		DAOPrivate:          privdao,
 		DAO:                 pubdao,
-		location:            conf.Location,
-		participationPubkey: participationPubkey,
-		checkedIn:           0,
-		cancelled:           false,
+		Location:            conf.Location,
+		ParticipationPubkey: participationPubkey,
+		CheckedIn:           0,
+		Cancelled:           false,
 	}
 
 	oneOrganizer := daocond.RoleCount(1, "organizer", memberStore.HasRole)
@@ -201,11 +203,11 @@ func (msg *MsgCancelEvent) String() string {
 
 func (e *Event) cancelEventHandler() daokit.ActionHandler {
 	return daokit.NewActionHandler(MsgCancelEventKind, func(i interface{}) {
-		if e.cancelled {
+		if e.Cancelled {
 			panic("event is already cancelled")
 		}
-		e.cancelled = true
-		e.tickets = *avl.NewTree()
+		e.Cancelled = true
+		e.Tickets = *avl.NewTree()
 		members := e.DAOPrivate.Members.GetMembers()
 		for _, member := range members {
 			e.DAOPrivate.Members.RemoveMember(member)
@@ -247,11 +249,11 @@ func (e *Event) addParticipantHandler() daokit.ActionHandler {
 			panic(errors.New("invalid payload type"))
 		}
 
-		if e.cancelled {
+		if e.Cancelled {
 			panic("event is cancelled")
 		}
 
-		if e.tickets.Has(msg.TicketPubkey) {
+		if e.Tickets.Has(msg.TicketPubkey) {
 			panic(errors.New("ticket already added"))
 		}
 
@@ -259,7 +261,7 @@ func (e *Event) addParticipantHandler() daokit.ActionHandler {
 
 		// XXX: this dance is not very useful for now since all accounts are managed
 		// but we add this logic as PoC of on-chain password-guarded events
-		if !callerIsOrganizer && len(e.participationPubkey) != 0 {
+		if !callerIsOrganizer && len(e.ParticipationPubkey) != 0 {
 			signatureBz, err := base64.RawURLEncoding.DecodeString(msg.ParticipationSignature)
 			if err != nil {
 				panic(err)
@@ -267,12 +269,12 @@ func (e *Event) addParticipantHandler() daokit.ActionHandler {
 
 			payloadBz := []byte(msg.TicketPubkey)
 
-			if !ed25519.Verify(e.participationPubkey, payloadBz, signatureBz) {
+			if !ed25519.Verify(e.ParticipationPubkey, payloadBz, signatureBz) {
 				panic("invalid participation signature")
 			}
 		}
 
-		_ = e.tickets.Set(msg.TicketPubkey, &Ticket{
+		_ = e.Tickets.Set(msg.TicketPubkey, &Ticket{
 			Participant: msg.Participant,
 			UsedAt:      nil,
 		})
@@ -313,11 +315,11 @@ func (e *Event) removeParticipantHandler() daokit.ActionHandler {
 			panic(errors.New("invalid payload type"))
 		}
 
-		if e.cancelled {
+		if e.Cancelled {
 			panic("event is cancelled")
 		}
 
-		if !e.tickets.Has(msg.TicketPubkey) {
+		if !e.Tickets.Has(msg.TicketPubkey) {
 			panic("ticket does not exists")
 		}
 
@@ -325,7 +327,7 @@ func (e *Event) removeParticipantHandler() daokit.ActionHandler {
 			panic("user does not have the role participant")
 		}
 
-		_, ok = e.tickets.Remove(msg.TicketPubkey)
+		_, ok = e.Tickets.Remove(msg.TicketPubkey)
 		if !ok {
 			panic("an error occured when removing ticket from avl.tree")
 		}
@@ -349,7 +351,7 @@ func (e *Event) addGatekeeperHandler() daokit.ActionHandler {
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-		if e.cancelled {
+		if e.Cancelled {
 			panic("event is cancelled")
 		}
 		if e.DAOPrivate.Members.CountMemberRoles(gatekeeper) > 0 {
@@ -372,7 +374,7 @@ func (e *Event) removeGatekeeperHandler() daokit.ActionHandler {
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-		if e.cancelled {
+		if e.Cancelled {
 			panic("event is cancelled")
 		}
 		if !e.DAOPrivate.Members.HasRole(gatekeeper, "gatekeeper") {
@@ -405,7 +407,7 @@ func (e *Event) checkinHandler() daokit.ActionHandler {
 			panic("invalid payload type")
 		}
 
-		if e.cancelled {
+		if e.Cancelled {
 			panic("event is cancelled")
 		}
 
@@ -425,7 +427,7 @@ func (e *Event) checkinHandler() daokit.ActionHandler {
 			panic("invalid signature")
 		}
 
-		val, ok := e.tickets.Get(msg.TicketPubkey)
+		val, ok := e.Tickets.Get(msg.TicketPubkey)
 		if !ok {
 			panic("no such ticket")
 		}
@@ -436,7 +438,7 @@ func (e *Event) checkinHandler() daokit.ActionHandler {
 
 		now := time.Now()
 		ticket.UsedAt = &now
-		e.checkedIn += 1
+		e.CheckedIn += 1
 	})
 }
 
@@ -459,7 +461,7 @@ func (e *Event) editEventHandler() daokit.ActionHandler {
 		if !ok {
 			panic(errors.New("invalid payload type"))
 		}
-		if e.cancelled {
+		if e.Cancelled {
 			panic("event is cancelled")
 		}
 		if len(msg.organizers) != 0 {
@@ -469,41 +471,41 @@ func (e *Event) editEventHandler() daokit.ActionHandler {
 			e.updateEventUserRoles("gatekeeper", msg.gatekeepers)
 		}
 		if msg.title != "" {
-			e.setProfileString(cross, "DisplayName", msg.title)
+			e.SetProfileString(cross, "DisplayName", msg.title)
 		}
 		if msg.description != "" {
-			e.setProfileString(cross, "Bio", msg.description)
+			e.SetProfileString(cross, "Bio", msg.description)
 		}
 		if msg.imageURI != "" {
-			e.setProfileString(cross, "Avatar", msg.imageURI)
+			e.SetProfileString(cross, "Avatar", msg.imageURI)
 		}
 		if msg.startDate != 0 {
-			e.startDate = msg.startDate
+			e.StartDate = msg.startDate
 		}
 		if msg.endDate != 0 {
-			e.endDate = msg.endDate
+			e.EndDate = msg.endDate
 		}
 		if msg.capacity != 0 {
-			e.capacity = msg.capacity
+			e.Capacity = msg.capacity
 		}
 		if msg.location != nil {
-			e.location = msg.location
+			e.Location = msg.location
 		}
 		if msg.privacy != nil {
 			switch val := msg.privacy.EventPrivacy.(type) {
 			case *zenaov1.EventPrivacyPublic:
-				e.participationPubkey = nil
+				e.ParticipationPubkey = nil
 			case *zenaov1.EventPrivacyGuarded:
 				participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
 				if err != nil {
 					panic(err)
 				}
-				e.participationPubkey = participationPubkeyBz
+				e.ParticipationPubkey = participationPubkeyBz
 			default:
 				panic("unknown privacy model")
 			}
 		}
-		e.discoverable = msg.discoverable
+		e.Discoverable = msg.discoverable
 	})
 }
 
@@ -569,21 +571,21 @@ func NewEditEventAction(organizers []string, gatekeepers []string, title, descri
 }
 
 func (e *Event) Render(path string) string {
-	if e.cancelled {
+	if e.Cancelled {
 		return md.Blockquote("This event has been cancelled")
 	}
 	s := ""
 	if path == "" {
 		info := e.Info()
 
-		locStr, err := LocationString(e.location)
+		locStr, err := LocationString(e.Location)
 		if err != nil {
 			locStr = "Error: " + err.Error()
 		}
 
 		var orgaRenderList []string
 		for _, org := range e.DAOPrivate.Members.GetMembersWithRole("organizer") {
-			orga := e.getProfileString(address(org), "DisplayName", "")
+			orga := e.GetProfileString(address(org), "DisplayName", "")
 			if orga == "" {
 				orga = org
 			}
@@ -597,7 +599,7 @@ func (e *Event) Render(path string) string {
 		s += md.BulletList([]string{
 			ufmt.Sprintf("📍 Location: %s", locStr),
 			ufmt.Sprintf("🕓 Time: From %s to %s", time.Unix(info.StartDate, 0).Format(time.DateTime), time.Unix(info.EndDate, 0).Format(time.DateTime)),
-			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.capacity),
+			ufmt.Sprintf("🎫 Capacity: %d/%d", e.CountParticipants(), e.Capacity),
 			"👤 Organizers: ",
 		}) + "\n"
 		s += md.Nested(md.BulletList(orgaRenderList), "\t")
