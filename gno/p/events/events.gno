@@ -142,6 +142,7 @@ func NewEvent(conf *Config) *Event {
 		RenderFn: func(path string, dao *basedao.DAOPrivate) string {
 			return event.Render(path)
 		},
+		MigrationParamsFn: func() []any { return []any{event} },
 	})
 
 	event = &Event{

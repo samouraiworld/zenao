@@ -9,7 +9,9 @@ import (
 // making this action name extra explicit
 const ActionChangeDAOImplementationKind = "gno.land/p/zenao/basedao.ChangeDAOImplementation"
 
-type MigrateFn = func(prev *DAOPrivate) daokit.DAO
+type MigrateFn = func(prev *DAOPrivate, params []any) daokit.DAO
+
+type MigrationParamsFn = func() []any
 
 type actionChangeDAOImplementation struct {
 	migrate MigrateFn
@@ -19,14 +21,17 @@ func (a *actionChangeDAOImplementation) String() string {
 	return "WARNING: thoroughly check the migration code before approving this"
 }
 
-func NewChangeDAOImplementationHandler(dao *DAOPrivate, setImplem daokit.SetImplemFn) daokit.ActionHandler {
+func NewChangeDAOImplementationHandler(dao *DAOPrivate, setImplem daokit.SetImplemFn, paramsFn MigrationParamsFn) daokit.ActionHandler {
+	if dao == nil || setImplem == nil || paramsFn == nil {
+		panic("nil arg")
+	}
 	return daokit.NewActionHandler(ActionChangeDAOImplementationKind, func(i interface{}) {
 		action, ok := i.(*actionChangeDAOImplementation)
 		if !ok {
 			panic(errors.New("invalid action type"))
 		}
 
-		migrated := action.migrate(dao)
+		migrated := action.migrate(dao, paramsFn())
 		setImplem(migrated)
 	})
 }

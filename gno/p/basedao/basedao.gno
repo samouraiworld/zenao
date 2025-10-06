@@ -73,6 +73,7 @@ type Config struct {
 	GetProfileString   ProfileStringGetter
 	NoCreationEvent    bool
 	SetImplemFn        daokit.SetImplemFn
+	MigrationParamsFn  MigrationParamsFn
 	RenderFn           RenderFn
 	CrossFn            daokit.CrossFn
 	PrivateVarName     string
@@ -137,8 +138,11 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		}
 
 		if conf.SetImplemFn != nil {
+			if conf.MigrationParamsFn == nil {
+				conf.MigrationParamsFn = func() []any { return nil }
+			}
 			dao.Core.Resources.Set(&daokit.Resource{
-				Handler:     NewChangeDAOImplementationHandler(dao, conf.SetImplemFn),
+				Handler:     NewChangeDAOImplementationHandler(dao, conf.SetImplemFn, conf.MigrationParamsFn),
 				Condition:   conf.InitialCondition,
 				DisplayName: "Change DAO Implementation",
 				Description: "Change the underlying DAO implementation.",

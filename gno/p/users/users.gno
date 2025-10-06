@@ -61,6 +61,7 @@ func NewUser(conf *Config) *User {
 		RenderFn: func(path string, dao *basedao.DAOPrivate) string {
 			return user.Render(path)
 		},
+		MigrationParamsFn: func() []any { return []any{user} },
 	})
 
 	privdao.Core.Resources.Set(&daokit.Resource{

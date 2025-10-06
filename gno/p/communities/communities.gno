@@ -88,15 +88,16 @@ func NewCommunity(conf *Config) *Community {
 	var community *Community
 
 	pubdao, privdao := basedao.New(&basedao.Config{
-		Name:             conf.DisplayName,
-		Description:      conf.Description,
-		ImageURI:         conf.AvatarURI,
-		Members:          memberStore,
-		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
-		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
-		InitialCondition: adminCond,
-		CrossFn:          conf.CrossFn,
-		SetImplemFn:      conf.SetImplemFn,
+		Name:              conf.DisplayName,
+		Description:       conf.Description,
+		ImageURI:          conf.AvatarURI,
+		Members:           memberStore,
+		SetProfileString:  basedao.ProfileStringSetter(conf.SetProfileString),
+		GetProfileString:  basedao.ProfileStringGetter(conf.GetProfileString),
+		InitialCondition:  adminCond,
+		CrossFn:           conf.CrossFn,
+		SetImplemFn:       conf.SetImplemFn,
+		MigrationParamsFn: func() []any { return []any{community} },
 	})
 	conf.SetProfileString(cross, "Banner", conf.BannerURI)
 
