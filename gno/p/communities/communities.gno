@@ -27,7 +27,7 @@ type Config struct {
 	SetProfileString basedao.ProfileStringSetter
 	ZenaoAdminAddr   string
 	CrossFn          daokit.CrossFn
-	SetImplemFn      daokit.SetImplemFn
+	SetImplemFn      basedao.SetImplemRaw
 	FeedId           string
 	PrivateVarName   string
 }

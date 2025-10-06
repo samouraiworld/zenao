@@ -47,7 +47,6 @@ func init() {
 		PrivateVarName:   "event",
 	}
 	event = events.NewEvent(&conf)
-	setImplem(event.DAO)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {

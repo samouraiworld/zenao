@@ -26,7 +26,7 @@ type Config struct {
 	GetProfileString basedao.ProfileStringGetter
 	SetProfileString basedao.ProfileStringSetter
 	CrossFn          daokit.CrossFn
-	SetImplemFn      daokit.SetImplemFn
+	SetImplemFn      basedao.SetImplemRaw
 	PrivateVarName   string
 }
 

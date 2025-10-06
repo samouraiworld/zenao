@@ -26,7 +26,6 @@ func init() {
 		SetImplemFn:      setImplem,
 		PrivateVarName:   "user",
 	})
-	setImplem(user.DAO)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
@@ -45,7 +44,6 @@ func crossFn(_ realm, cb func()) {
 	cb()
 }
 
-func setImplem(dao daokit.DAO) {
-	localDAO = dao
-	DAO = daokit.NewCrossing(dao, crossFn)
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }

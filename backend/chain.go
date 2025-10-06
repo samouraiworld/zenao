@@ -1962,7 +1962,6 @@ func init() {
 		PrivateVarName: "event",
 	}
 	event = events.NewEvent(&conf)
-	setImplem(event.DAO)
 	eventreg.Register(cross, func() *zenaov1.EventInfo { return event.Info() })
 }
 
@@ -1986,9 +1985,8 @@ func crossFn(_ realm, cb func()) {
 	cb()
 }
 
-func setImplem(dao daokit.DAO) {
-	localDAO = dao
-	DAO = daokit.NewCrossing(dao, crossFn)
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }
 `
 
@@ -2057,7 +2055,6 @@ func init() {
 		PrivateVarName: "community",
 	}
 	community = communities.NewCommunity(&conf)
-	setImplem(community.DAO)
 	communityreg.Register(cross, func() *zenaov1.CommunityInfo { return community.Info() })
 }
 
@@ -2081,9 +2078,8 @@ func crossFn(_ realm, cb func()) {
 	cb()
 }
 
-func setImplem(dao daokit.DAO) {
-	localDAO = dao
-	DAO = daokit.NewCrossing(dao, crossFn)
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }
 `
 
@@ -2147,7 +2143,6 @@ func init() {
 		SetImplemFn: setImplem,
 		PrivateVarName: "user",
 	})
-	setImplem(user.DAO)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
@@ -2166,9 +2161,8 @@ func crossFn(_ realm, cb func()) {
 	cb()
 }
 
-func setImplem(dao daokit.DAO) {
-	localDAO = dao
-	DAO = daokit.NewCrossing(dao, crossFn)
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }
 `
 

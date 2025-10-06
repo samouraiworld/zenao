@@ -14,6 +14,10 @@ type daoPublic struct {
 	impl *DAOPrivate
 }
 
+type SetImplemRaw func(newLocalDAO daokit.DAO, newDAO daokit.DAO)
+
+type RenderFn func(path string, dao *DAOPrivate) string
+
 // Extension implements daokit.DAO.
 func (d *daoPublic) Extension(path string) daokit.Extension {
 	ext, ok := d.impl.Core.Extensions.Get(path)
@@ -59,8 +63,6 @@ type DAOPrivate struct {
 	InitialConfig *Config // mostly there in case we need this data during upgrade
 }
 
-type RenderFn func(path string, dao *DAOPrivate) string
-
 type Config struct {
 	Name               string
 	Description        string
@@ -72,7 +74,7 @@ type Config struct {
 	SetProfileString   ProfileStringSetter
 	GetProfileString   ProfileStringGetter
 	NoCreationEvent    bool
-	SetImplemFn        daokit.SetImplemFn
+	SetImplemFn        SetImplemRaw
 	MigrationParamsFn  MigrationParamsFn
 	RenderFn           RenderFn
 	CrossFn            daokit.CrossFn
@@ -106,6 +108,8 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		InitialConfig:    conf,
 	}
 
+	pubdao := &daoPublic{impl: dao}
+
 	dao.Core.Extensions.Set(&membersViewExtension{
 		getStore:  func() *MembersStore { return dao.Members },
 		queryPath: dao.Realm.PkgPath() + "." + conf.PrivateVarName + ".Members",
@@ -138,11 +142,22 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		}
 
 		if conf.SetImplemFn != nil {
+			if conf.CrossFn == nil {
+				panic("nil cross function")
+			}
+
+			setImplemFn := func(dao daokit.DAO) {
+				crossingDAO := daokit.NewCrossing(dao, conf.CrossFn)
+				conf.SetImplemFn(dao, crossingDAO)
+			}
+			setImplemFn(pubdao)
+
 			if conf.MigrationParamsFn == nil {
 				conf.MigrationParamsFn = func() []any { return nil }
 			}
+
 			dao.Core.Resources.Set(&daokit.Resource{
-				Handler:     NewChangeDAOImplementationHandler(dao, conf.SetImplemFn, conf.MigrationParamsFn),
+				Handler:     NewChangeDAOImplementationHandler(dao, setImplemFn, conf.MigrationParamsFn),
 				Condition:   conf.InitialCondition,
 				DisplayName: "Change DAO Implementation",
 				Description: "Change the underlying DAO implementation.",
@@ -186,7 +201,7 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		chain.Emit(EventBaseDAOCreated)
 	}
 
-	return &daoPublic{impl: dao}, dao
+	return pubdao, dao
 }
 
 func (d *DAOPrivate) Vote(proposalID uint64, vote daocond.Vote) {
