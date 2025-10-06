@@ -46,12 +46,14 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       socialMediaLinks: [],
       location: "",
       shortBio: "",
+      bannerUri: "",
     },
     contentFieldName: "bio",
   });
 
   const defaultValues: UserFormSchemaType = {
     avatarUri: user?.avatarUri || "",
+    bannerUri: profileDetails.bannerUri || "",
     displayName: user?.displayName || "",
     bio: profileDetails.bio || "",
     socialMediaLinks: profileDetails.socialMediaLinks,
@@ -89,6 +91,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             socialMediaLinks: values.socialMediaLinks,
             location: values.location,
             shortBio: values.shortBio,
+            bannerUri: values.bannerUri,
           },
         ),
       });
@@ -110,18 +113,31 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="items-center sm:h-full"
+        className="flex flex-col gap-8 w-full"
       >
-        <div className="flex flex-col sm:flex-row w-full gap-10">
+        <div className="relative w-full flex flex-col gap-4">
           <FormFieldImage
             control={form.control}
-            name="avatarUri"
-            placeholder={t("avatar-placeholder")}
-            aspectRatio={[4, 4]}
-            className="sm:w-2/5"
-            tooltip={<Text size="sm">{t("change-avatar")}</Text>}
+            name="bannerUri"
+            placeholder={t("banner-placeholder")}
+            aspectRatio={[4, 1]}
+            className="w-full rounded-xl overflow-hidden"
+            tooltip={<Text size="sm">{t("change-banner")}</Text>}
           />
-          <div className="flex flex-col gap-4 w-full sm:w-3/5">
+          <div className="w-[96px] md:w-[128px] absolute -bottom-20 left-6">
+            <FormFieldImage
+              control={form.control}
+              name="avatarUri"
+              placeholder={t("avatar-placeholder")}
+              aspectRatio={[4, 4]}
+              className="w-full rounded-xl overflow-hidden"
+              tooltip={<Text size="sm">{t("change-avatar")}</Text>}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-20 w-full">
+          <div className="flex flex-col gap-4 w-full">
             <FormFieldInputString
               control={form.control}
               name="displayName"
@@ -142,6 +158,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               wordCounter
               maxLength={1000}
             />
+          </div>
+          <div className="flex flex-col gap-4 w-full">
             <FormFieldInputString
               control={form.control}
               name="location"
@@ -151,11 +169,13 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
 
             <SocialMediaLinks form={form} />
 
-            <div>
-              <ButtonWithChildren loading={isPending} type="submit">
-                {t("save-button")}
-              </ButtonWithChildren>
-            </div>
+            <ButtonWithChildren
+              loading={isPending}
+              type="submit"
+              className="w-full"
+            >
+              {t("save-button")}
+            </ButtonWithChildren>
           </div>
         </div>
       </form>

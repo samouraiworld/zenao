@@ -111,6 +111,7 @@ export const userFormSchema = z.object({
   displayName: z.string().trim().min(1),
   socialMediaLinks: z.array(userFormSocialLinkSchema),
   avatarUri: uriSchema,
+  bannerUri: z.string().optional().default(""),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
 });
@@ -121,6 +122,7 @@ export const gnoProfileDetailsSchema = z.object({
   socialMediaLinks: z.array(userFormSocialLinkSchema).default([]),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
+  bannerUri: z.string().optional().default("")
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
