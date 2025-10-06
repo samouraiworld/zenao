@@ -37,6 +37,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
 
   const defaultValues: UserFormSchemaType = {
     avatarUri: user?.avatarUri || "",
+    bannerUri: profileDetails.bannerUri || "",
     displayName: user?.displayName || "",
     bio: profileDetails.bio || "",
     socialMediaLinks: profileDetails.socialMediaLinks,
@@ -73,6 +74,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           socialMediaLinks: values.socialMediaLinks,
           location: values.location,
           shortBio: values.shortBio,
+          bannerUri: values.bannerUri,
         }),
       });
 
@@ -103,6 +105,13 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             aspectRatio={[4, 4]}
             className="sm:w-2/5"
             tooltip={<Text size="sm">{t("change-avatar")}</Text>}
+          />
+          <FormFieldImage
+            control={form.control}
+            name="bannerUri"
+            placeholder={t("banner-placeholder")}
+            aspectRatio={[16, 4]}
+            tooltip={<Text size="sm">{t("change-banner")}</Text>}
           />
           <div className="flex flex-col gap-4 w-full sm:w-3/5">
             <FormFieldInputString

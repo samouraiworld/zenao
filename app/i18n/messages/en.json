@@ -146,6 +146,7 @@
     "avatar-placeholder": "Avatar URI...",
     "name-label": "Name",
     "name-placeholder": "Name...",
+    "banner-placeholder": "Banner...",
     "bio-label": "Bio",
     "bio-placeholder": "Bio...",
     "location-label": "Location",
@@ -154,6 +155,7 @@
     "shortbio-placeholder": "Short Bio...",
     "save-button": "Save changes",
     "change-avatar": "Change avatar",
+    "change-banner": "Change banner",
     "toast-success": "User correctly edited!",
     "toast-error": "Error on editing user!",
     "sign-out": "Sign out"
