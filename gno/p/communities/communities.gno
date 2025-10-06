@@ -24,6 +24,8 @@ type Config struct {
 	GetProfileString basedao.ProfileStringGetter
 	SetProfileString basedao.ProfileStringSetter
 	ZenaoAdminAddr   string
+	CrossFn          daokit.CrossFn
+	SetImplemFn      daokit.SetImplemFn
 }
 
 func NewCommunity(conf *Config) *Community {
@@ -83,6 +85,8 @@ func NewCommunity(conf *Config) *Community {
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
 
+	var community *Community
+
 	pubdao, privdao := basedao.New(&basedao.Config{
 		Name:             conf.DisplayName,
 		Description:      conf.Description,
@@ -91,10 +95,15 @@ func NewCommunity(conf *Config) *Community {
 		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
 		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
 		InitialCondition: adminCond,
+		CrossFn:          conf.CrossFn,
+		SetImplemFn:      conf.SetImplemFn,
+		RenderFn: func(path string, dao *basedao.DAOPrivate) string {
+			return community.Render(path)
+		},
 	})
 	conf.SetProfileString(cross, "Banner", conf.BannerURI)
 
-	community := &Community{
+	community = &Community{
 		getProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
 		setProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
 		DAOPrivate:       privdao,

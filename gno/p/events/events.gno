@@ -54,6 +54,9 @@ type Config struct {
 	Location            *zenaov1.EventLocation
 	ParticipationPubkey string // ed25519 pubkey of secret key derived from event password, event is private if set
 	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
+	CrossFn             daokit.CrossFn
+	PrivateVarName      string
+	SetImplemFn         daokit.SetImplemFn
 }
 
 type Ticket struct {
@@ -123,6 +126,8 @@ func NewEvent(conf *Config) *Event {
 	memberStore := basedao.NewMembersStore(roles, members)
 	adminCond := daocond.RoleCount(1, "zenao-admin", memberStore.HasRole)
 
+	var event *Event
+
 	pubdao, privdao := basedao.New(&basedao.Config{
 		Name:             conf.Title,
 		Description:      conf.Description,
@@ -131,9 +136,15 @@ func NewEvent(conf *Config) *Event {
 		SetProfileString: basedao.ProfileStringSetter(conf.SetProfileString),
 		GetProfileString: basedao.ProfileStringGetter(conf.GetProfileString),
 		InitialCondition: adminCond,
+		PrivateVarName:   conf.PrivateVarName,
+		CrossFn:          conf.CrossFn,
+		SetImplemFn:      conf.SetImplemFn,
+		RenderFn: func(path string, dao *basedao.DAOPrivate) string {
+			return event.Render(path)
+		},
 	})
 
-	event := &Event{
+	event = &Event{
 		startDate:           conf.StartDate,
 		endDate:             conf.EndDate,
 		capacity:            conf.Capacity,
@@ -146,7 +157,6 @@ func NewEvent(conf *Config) *Event {
 		participationPubkey: participationPubkey,
 		checkedIn:           0,
 		cancelled:           false,
-		// XXX: set PkgPath?
 	}
 
 	oneOrganizer := daocond.RoleCount(1, "organizer", memberStore.HasRole)
