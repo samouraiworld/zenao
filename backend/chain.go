@@ -1636,6 +1636,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	
 		"gno.land/p/nt/ufmt"
 		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/basedao"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		pollsv1 "gno.land/p/zenao/polls/v1"
 		org %q
@@ -1656,7 +1657,8 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		p := polls.NewPoll(cross, question, kind, %d, options, org.IsMember)
+		isMember := basedao.MustGetMembersViewExtension(org.DAO).IsMember
+		p := polls.NewPoll(cross, question, kind, %d, options, isMember)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
 			panic("multiaddr validation failed")
@@ -1926,16 +1928,16 @@ import (
 )
 
 var (
-	DAO daokit.DAO
-
+	DAO      daokit.DAO
 	localDAO daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	event *events.Event
+
+	event  *events.Event // XXX: needed for backward compatibility with frontend queries
+	feedId string        // XXX: workaround for "unexpected zero object id" issue
 )
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	social_feed.NewFeed(cross, "main", false, IsMember)
+	feedId = social_feed.NewFeed(cross, "main", false, isMember)
 }
 
 func init() {
@@ -1954,17 +1956,13 @@ func init() {
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
 		Location: {{.location}},
 		ParticipationPubkey: {{.participationPubkey}},
+		CrossFn: crossFn,
+		SetImplemFn: setImplem,
+		FeedId: feedId,
+		PrivateVarName: "event",
 	}
 	event = events.NewEvent(&conf)
-	daoPrivate = event.DAOPrivate
-	localDAO = event.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
 	eventreg.Register(cross, func() *zenaov1.EventInfo { return event.Info() })
-}
-
-// Set public to be used as auth layer for external entities (e.g polls)
-func IsMember(memberId string) bool {
-	return daoPrivate.Members.IsMember(memberId)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
@@ -1976,7 +1974,19 @@ func Execute(_ realm, proposalID uint64) {
 }
 
 func Render(path string) string {
-	return event.Render(path)
+	return localDAO.Render(path)
+}
+
+func isMember(memberId string) bool {
+	return basedao.MustGetMembersViewExtension(localDAO).IsMember(memberId)
+}
+
+func crossFn(_ realm, cb func()) {
+	cb()
+}
+
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }
 `
 
@@ -2015,16 +2025,16 @@ import (
 )
 
 var (
-	DAO daokit.DAO
-	
+	DAO      daokit.DAO
 	localDAO daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	community *communities.Community
+
+	community *communities.Community // XXX: needed for backward compatibility with frontend queries
+	feedId    string                 // XXX: workaround for "unexpected zero object id" issue
 )
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	social_feed.NewFeed(cross, "main", false, IsMember)
+	feedId = social_feed.NewFeed(cross, "main", false, isMember)
 }
 
 func init() {
@@ -2039,17 +2049,13 @@ func init() {
 		BannerURI:        {{.bannerURI}},
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
+		CrossFn: crossFn,
+		SetImplemFn: setImplem,
+		FeedId: feedId,
+		PrivateVarName: "community",
 	}
 	community = communities.NewCommunity(&conf)
-	daoPrivate = community.DAOPrivate
-	localDAO = community.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
 	communityreg.Register(cross, func() *zenaov1.CommunityInfo { return community.Info() })
-}
-
-// Set public to be used as auth layer for external entities (e.g polls)
-func IsMember(memberId string) bool {
-	return daoPrivate.Members.IsMember(memberId)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
@@ -2061,7 +2067,19 @@ func Execute(_ realm, proposalID uint64) {
 }
 
 func Render(path string) string {
-	return community.Render(path)
+	return localDAO.Render(path)
+}
+
+func isMember(memberId string) bool {
+	return basedao.MustGetMembersViewExtension(localDAO).IsMember(memberId)
+}
+
+func crossFn(_ realm, cb func()) {
+	cb()
+}
+
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }
 `
 
@@ -2102,17 +2120,15 @@ const userRealmSourceTemplate = `package user
 import (
 	"gno.land/p/{{.namespace}}/users"
 	"gno.land/r/demo/profile"
-	"gno.land/p/{{.namespace}}/basedao"
 	"gno.land/p/{{.namespace}}/daokit"
 	"gno.land/p/{{.namespace}}/daocond"
 )
 
 var (
-	DAO daokit.DAO
-
+	DAO      daokit.DAO
 	localDAO daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	user *users.User
+
+	user *users.User // XXX: needed for backward compatibility with frontend queries
 )
 
 func init() {
@@ -2123,10 +2139,10 @@ func init() {
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: {{.zenaoAdminAddr}},
+		CrossFn: crossFn,
+		SetImplemFn: setImplem,
+		PrivateVarName: "user",
 	})
-	localDAO = user.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
-	daoPrivate = user.DAOPrivate
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
@@ -2138,7 +2154,15 @@ func Execute(_ realm, proposalID uint64) {
 }
 
 func Render(path string) string {
-	return user.Render(path)
+	return localDAO.Render(path)
+}
+
+func crossFn(_ realm, cb func()) {
+	cb()
+}
+
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }
 `
 

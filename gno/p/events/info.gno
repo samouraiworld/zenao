@@ -10,33 +10,33 @@ type InfoGetter func() *zenaov1.EventInfo
 
 func (e *Event) Info() *zenaov1.EventInfo {
 	privacy := &zenaov1.EventPrivacy{}
-	if len(e.participationPubkey) == 0 {
+	if len(e.ParticipationPubkey) == 0 {
 		privacy.EventPrivacy = &zenaov1.EventPrivacyPublic{}
 	} else {
 		privacy.EventPrivacy = &zenaov1.EventPrivacyGuarded{
-			ParticipationPubkey: base64.RawURLEncoding.EncodeToString(e.participationPubkey),
+			ParticipationPubkey: base64.RawURLEncoding.EncodeToString(e.ParticipationPubkey),
 		}
 	}
 
-	if e.cancelled {
+	if e.Cancelled {
 		return nil
 	}
 
 	realmAddr := e.DAOPrivate.Realm.Address()
 
 	return &zenaov1.EventInfo{
-		Title:        e.getProfileString(realmAddr, "DisplayName", ""),
-		Description:  e.getProfileString(realmAddr, "Bio", ""),
-		ImageUri:     e.getProfileString(realmAddr, "Avatar", ""),
-		StartDate:    e.startDate,
-		EndDate:      e.endDate,
-		Capacity:     e.capacity,
+		Title:        e.GetProfileString(realmAddr, "DisplayName", ""),
+		Description:  e.GetProfileString(realmAddr, "Bio", ""),
+		ImageUri:     e.GetProfileString(realmAddr, "Avatar", ""),
+		StartDate:    e.StartDate,
+		EndDate:      e.EndDate,
+		Capacity:     e.Capacity,
 		Organizers:   e.DAOPrivate.Members.GetMembersWithRole("organizer"),
 		Gatekeepers:  e.DAOPrivate.Members.GetMembersWithRole("gatekeeper"),
-		Location:     e.location,
+		Location:     e.Location,
 		Participants: e.CountParticipants(),
-		CheckedIn:    e.checkedIn,
-		Discoverable: e.discoverable,
+		CheckedIn:    e.CheckedIn,
+		Discoverable: e.Discoverable,
 		Privacy:      privacy,
 	}
 }

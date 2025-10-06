@@ -64,7 +64,7 @@ func TestCancelEvent(t *testing.T) {
 	}
 
 	daokit.InstantExecute(event.DAO, testReq(NewCancelEventAction()))
-	if !event.cancelled {
+	if !event.Cancelled {
 		t.Fatalf("expected event to be cancelled")
 	}
 
@@ -212,7 +212,7 @@ func TestTicket(t *testing.T) {
 	daokit.InstantExecute(event.DAO, testReq(NewAddGatekeeperAction(carol.String())))
 
 	daokit.InstantExecute(event.DAO, testReq(NewAddParticipantAction(bob.String(), ticketPubkey, "")))
-	val, ok := event.tickets.Get(ticketPubkey)
+	val, ok := event.Tickets.Get(ticketPubkey)
 	urequire.True(t, ok, "ticket must exist")
 	ticket := val.(*Ticket)
 	if ticket == nil {
