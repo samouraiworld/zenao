@@ -28,7 +28,7 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 	s.Logger.Info("checkin", zap.String("gatekeeper", zUser.ID), zap.String("pubkey", req.Msg.TicketPubkey))
 
 	// TODO: I added event_id in the request to avoid to search on-chain the event based on the ticket pubkey
-	evt, err := s.Chain.WithContext(ctx).GetEvent("")
+	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
 	if err != nil {
 		return nil, err
 	}
