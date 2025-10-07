@@ -34,28 +34,20 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 
 	s.Logger.Info("export-participants", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
 
-	// var tickets []*zeni.SoldTicket
-	// if err := s.DB.TxWithSpan(ctx, "db.ExportParticipants", func(db zeni.DB) error {
-	// 	roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if !slices.Contains(roles, zeni.RoleOrganizer) {
-	// 		return errors.New("user is not organizer of the event")
-	// 	}
-	// 	tickets, err = db.GetEventTickets(req.Msg.EventId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }); err != nil {
-	// 	return nil, err
-	// }
+	roles, err := s.Chain.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	if !slices.Contains(roles, zeni.RoleOrganizer) {
+		return nil, errors.New("user is not organizer of the event")
+	}
 
-	// TODO:
-	// 1. Retrieve the participants from chain & get their emails and export it
+	participants, err := s.Chain.WithContext(ctx).GetEventParticipants(req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
 
-	idsList := mapsl.Map(tickets, func(t *zeni.SoldTicket) string { return t.User.AuthID })
+	idsList := mapsl.Map(participants, func(u *zeni.User) string { return u.AuthID })
 	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
 	if err != nil {
 		return nil, err
@@ -66,36 +58,36 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 		mailMap[p.ID] = p.Email
 	}
 
-	type ticketData struct {
+	type participantData struct {
 		email       string
 		displayName string
 		createdAt   time.Time
 	}
 
-	var ticketDataList []ticketData
-	for _, t := range tickets {
-		email := mailMap[t.User.AuthID]
+	var participantDataList []participantData
+	for _, p := range participants {
+		email := mailMap[p.AuthID]
 		if email == "" {
 			s.Logger.Warn("export-participants-fail-to-retrieve-auth-user",
 				zap.String("event-id", req.Msg.EventId),
-				zap.String("user-id", zUser.ID),
-				zap.String("auth-user-id", t.User.AuthID))
+				zap.String("user-id", p.ID),
+				zap.String("auth-user-id", p.AuthID))
 			continue
 		}
 
-		displayName := t.User.DisplayName
+		displayName := p.DisplayName
 		if displayName == "" {
-			displayName = fmt.Sprintf("Zenao User #%s", t.User.ID)
+			displayName = fmt.Sprintf("Zenao User #%s", p.ID)
 		}
 
-		ticketDataList = append(ticketDataList, ticketData{
+		participantDataList = append(participantDataList, participantData{
 			email:       email,
 			displayName: displayName,
-			createdAt:   t.CreatedAt,
+			createdAt:   p.CreatedAt,
 		})
 	}
 
-	slices.SortFunc(ticketDataList, func(a, b ticketData) int {
+	slices.SortFunc(participantDataList, func(a, b participantData) int {
 		return strings.Compare(a.email, b.email)
 	})
 
@@ -105,7 +97,7 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 	if err := writer.Write([]string{"Email", "Name", "Ticket CreatedAt"}); err != nil {
 		return nil, err
 	}
-	for _, data := range ticketDataList {
+	for _, data := range participantDataList {
 		if err := writer.Write([]string{
 			data.email,
 			data.displayName,
