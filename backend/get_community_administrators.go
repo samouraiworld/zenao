@@ -28,26 +28,10 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 		return nil, errors.New("user is banned")
 	}
 
-	// var admins []*zeni.User
-	// if err := s.DB.TxWithSpan(ctx, "db.GetCommunityAdministrators", func(db zeni.DB) error {
-	// 	roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if !slices.Contains(roles, zeni.RoleAdministrator) {
-	// 		return errors.New("user is not administrator of the community")
-	// 	}
-	// 	admins, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleAdministrator)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }); err != nil {
-	// 	return nil, err
-	// }
-
-	// TODO:
-	// 1. Retrieve the admins from the chain
+	admins, err := s.Chain.WithContext(ctx).GetCommunityAdministrators(req.Msg.CommunityId)
+	if err != nil {
+		return nil, err
+	}
 
 	admIDs := mapsl.Map(admins, func(adm *zeni.User) string {
 		return adm.AuthID

@@ -289,6 +289,7 @@ type Chain interface {
 
 	GetCommunity(communityID string) (*Community, error)
 	GetCommunityMembers(communityID string) ([]*User, error)
+	GetCommunityAdministrators(communityID string) ([]*User, error)
 
 	// Write operations (Transactions)
 	FillAdminProfile()

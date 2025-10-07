@@ -754,6 +754,14 @@ func (g *gnoZenaoChain) GetCommunityMembers(communityID string) ([]*zeni.User, e
 	return nil, nil
 }
 
+// GetCommunityAdministrators implements ZenaoChain.
+func (g *gnoZenaoChain) GetCommunityAdministrators(communityID string) ([]*zeni.User, error) {
+	g, span := g.trace("gzchain.GetCommunityAdministrators")
+	defer span.End()
+
+	return nil, nil
+}
+
 // EditCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error {
 	g, span := g.trace("gzchain.EditCommunity")
