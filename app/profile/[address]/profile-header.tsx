@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { MapPin, Link2 } from "lucide-react";
+import { MapPin, Link2, ExternalLink } from "lucide-react";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Card } from "@/components/widgets/cards/card";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
@@ -64,7 +64,7 @@ export default function ProfileHeader({
 
         <div className="absolute -bottom-16 left-4">
           {avatarUri ? (
-            <div className="relative w-24 h-24 sm:w-40 sm:h-40 rounded-full ring-4 ring-background ring-offset-4 ring-offset-muted/40 shadow-md overflow-hidden">
+            <div className="relative w-24 h-24 sm:w-40 sm:h-40 rounded-full ring-4 ring-background shadow-md overflow-hidden">
               <Web3Image
                 src={avatarUri}
                 alt="Profile picture"
@@ -125,10 +125,10 @@ export default function ProfileHeader({
         </div>
 
         {profileDetails.socialMediaLinks?.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <Heading level={2} size="lg" className="flex items-center gap-2">
               <Link2 size={18} className="text-primary" />
-              Find me here
+              Links
             </Heading>
             <ul className="flex flex-wrap gap-2">
               {profileDetails.socialMediaLinks.map((link) => (
@@ -137,9 +137,13 @@ export default function ProfileHeader({
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-3 py-1 rounded-full bg-muted hover:bg-muted/70 text-blue-600 hover:text-blue-800 transition text-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 hover:bg-muted border hover:border-blue-400/50 transition text-sm"
                   >
-                    {link.url}
+                    <span className="text-blue-500">{link.url}</span>
+                    <ExternalLink
+                      size={14}
+                      className="flex-shrink-0 text-blue-400"
+                    />
                   </Link>
                 </li>
               ))}
