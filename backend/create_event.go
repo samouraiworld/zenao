@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"net/url"
 	"slices"
+	"strings"
 	"time"
 	_ "time/tzdata"
 
 	"connectrpc.com/connect"
+	"github.com/google/uuid"
 	"github.com/resend/resend-go/v2"
 	"github.com/samouraiworld/zenao/backend/webhook"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -128,6 +130,28 @@ func (s *ZenaoServer) CreateEvent(
 	// 3. Read the event from on-chain after creation ? (to double confirm creation ? or useless ?)
 	// 4. Execute webhook then send email
 
+	// TODO: find a way to have better ids ?
+	uuid := uuid.New().String()
+	evtID := strings.ReplaceAll(uuid, "-", "_")
+
+	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: should we do it in one tx on-chain ?
+	if err := s.Chain.WithContext(ctx).CreateEvent(evtID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+		s.Logger.Error("create-event", zap.Error(err))
+		return nil, err
+	}
+
+	if req.Msg.CommunityId != "" {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
+			s.Logger.Error("add-event-to-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
+			return nil, err
+		}
+	}
+
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
 
 	if s.MailClient != nil {
@@ -187,23 +211,6 @@ func (s *ZenaoServer) CreateEvent(
 			}
 			count += len(batch)
 			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
-		}
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		s.Logger.Error("create-event", zap.Error(err))
-		return nil, err
-	}
-
-	if req.Msg.CommunityId != "" {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
-			s.Logger.Error("add-event-to-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
-			return nil, err
 		}
 	}
 

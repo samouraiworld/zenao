@@ -1,4 +1,4 @@
-package main
+package gzchain
 
 import (
 	"context"
@@ -38,7 +38,7 @@ const (
 	gnoEventPostCreate = "zenao-post-create"
 )
 
-func setupChain(adminMnemonic string, namespace string, chainID string, chainEndpoint string, gasSecurityRate float64, logger *zap.Logger) (*gnoZenaoChain, error) {
+func SetupChain(adminMnemonic string, namespace string, chainID string, chainEndpoint string, gasSecurityRate float64, logger *zap.Logger) (*gnoZenaoChain, error) {
 	signer, err := gnoclient.SignerFromBip39(adminMnemonic, chainID, "", 0, 0)
 	if err != nil {
 		return nil, err
