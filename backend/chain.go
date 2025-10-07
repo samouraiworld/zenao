@@ -161,6 +161,14 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 	}
 }
 
+// EntityRoles implements zeni.Chain.
+func (g *gnoZenaoChain) EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error) {
+	g, span := g.trace("gzchain.EntityRoles")
+	defer span.End()
+
+	return nil, nil
+}
+
 // CreateEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error {
 	g, span := g.trace("gzchain.CreateEvent")
@@ -251,6 +259,14 @@ func (g *gnoZenaoChain) GetEvent(evtID string) (*zeni.Event, error) {
 // GetEventParticipants implements ZenaoChain.
 func (g *gnoZenaoChain) GetEventParticipants(evtID string) ([]*zeni.User, error) {
 	g, span := g.trace("gzchain.GetEventParticipants")
+	defer span.End()
+
+	return nil, nil
+}
+
+// GetEventTickets implements ZenaoChain.
+func (g *gnoZenaoChain) GetEventTickets(evtID string) ([]*zeni.SoldTicket, error) {
+	g, span := g.trace("gzchain.GetEventTickets")
 	defer span.End()
 
 	return nil, nil

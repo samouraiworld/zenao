@@ -277,8 +277,11 @@ type Chain interface {
 	EventAddress(eventID string) string
 
 	// Read operations (Query)
+	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
+
 	GetEvent(eventID string) (*Event, error)
 	GetEventParticipants(eventID string) ([]*User, error)
+	GetEventTickets(eventID string) ([]*SoldTicket, error)
 
 	GetCommunity(communityID string) (*Community, error)
 	GetCommunityMembers(communityID string) ([]*User, error)
