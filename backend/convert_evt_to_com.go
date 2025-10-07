@@ -118,7 +118,7 @@ func convertEvtToCom() error {
 	if err != nil {
 		return err
 	}
-	logger.Info("community created on the chain", zap.String("community-pkg-path", chain.communityPkgPath(cmtID)))
+	logger.Info("community created on the chain")
 
 	return nil
 }

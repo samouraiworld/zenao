@@ -1,4 +1,4 @@
-package gzchain
+package zeni
 
 import (
 	"bytes"
@@ -19,7 +19,7 @@ type argon2Params struct {
 	KeyLength  uint32
 }
 
-func newPasswordHash(password string) (string, error) {
+func NewPasswordHash(password string) (string, error) {
 	if password == "" {
 		return "", nil
 	}
