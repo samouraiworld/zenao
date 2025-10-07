@@ -282,12 +282,14 @@ type Chain interface {
 	// Read operations (Query)
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
 
+	// TODO: what happens if event not found ? should i just return empty cmt & empty err or err handle it ?
 	GetEvent(eventID string) (*Event, error)
 	GetEventParticipants(eventID string) ([]*User, error)
 	GetEventGatekeepers(evtID string) ([]*User, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventCommunity(eventID string) (*Community, error)
 
+	// TODO: what happens if community not found ? should i just return empty cmt & empty err or err handle it ?
 	GetCommunity(communityID string) (*Community, error)
 	GetCommunityMembers(communityID string) ([]*User, error)
 	GetCommunityAdministrators(communityID string) ([]*User, error)
