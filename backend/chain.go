@@ -230,6 +230,32 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 	return nil
 }
 
+// GetEvent implements ZenaoChain.
+func (g *gnoZenaoChain) GetEvent(evtID string) (*zeni.Event, error) {
+	g, span := g.trace("gzchain.GetEvent")
+	defer span.End()
+
+	// TODO:
+	// 1. Get the pkgpath
+	// 2. Query
+	// eventPkgPath := g.eventRealmPkgPath(evtID)
+	// queryCfg := gnoclient.QueryCfg{
+	// 	Data: []byte{eventPkgPath+".event.Info().ToJSON().String()"},
+	// }
+
+	// queryRes, err := g.ClientQuery
+
+	return nil, nil
+}
+
+// GetEventParticipants implements ZenaoChain.
+func (g *gnoZenaoChain) GetEventParticipants(evtID string) ([]*zeni.User, error) {
+	g, span := g.trace("gzchain.GetEventParticipants")
+	defer span.End()
+
+	return nil, nil
+}
+
 // CancelEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
 	g, span := g.trace("gzchain.CancelEvent")
@@ -675,6 +701,22 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	}
 
 	return nil
+}
+
+// GetCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) GetCommunity(communityID string) (*zeni.Community, error) {
+	g, span := g.trace("gzchain.GetCommunity")
+	defer span.End()
+
+	return nil, nil
+}
+
+// GetCommunityMembers implements ZenaoChain.
+func (g *gnoZenaoChain) GetCommunityMembers(communityID string) ([]*zeni.User, error) {
+	g, span := g.trace("gzchain.GetCommunityMembers")
+	defer span.End()
+
+	return nil, nil
 }
 
 // EditCommunity implements ZenaoChain.

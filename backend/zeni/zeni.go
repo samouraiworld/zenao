@@ -272,11 +272,21 @@ type DB interface {
 type Chain interface {
 	WithContext(ctx context.Context) Chain
 
+	// Off-chain operations
+	UserAddress(userID string) string
+	EventAddress(eventID string) string
+
+	// Read operations (Query)
+	GetEvent(eventID string) (*Event, error)
+	GetEventParticipants(eventID string) ([]*User, error)
+
+	GetCommunity(communityID string) (*Community, error)
+	GetCommunityMembers(communityID string) ([]*User, error)
+
+	// Write operations (Transactions)
 	FillAdminProfile()
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
-	UserAddress(userID string) string
-	EventAddress(eventID string) string
 
 	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
 	CancelEvent(eventID string, callerID string) error
