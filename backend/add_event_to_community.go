@@ -55,6 +55,15 @@ func (s *ZenaoServer) AddEventToCommunity(
 		memberIDs[m.ID] = true
 	}
 
+	// TODO: do this check on chain side
+	cmt, err = s.Chain.WithContext(ctx).GetEventCommunity(req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	if cmt != nil {
+		return nil, errors.New("event is already part of a community")
+	}
+
 	if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
 		s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("event-id", req.Msg.EventId))
 		return nil, err

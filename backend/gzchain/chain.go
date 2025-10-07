@@ -283,6 +283,14 @@ func (g *gnoZenaoChain) GetEventUserTicket(eventID string, userID string) (*zeni
 	return nil, nil
 }
 
+// GetEventCommunity implements ZenaoChain.
+func (g *gnoZenaoChain) GetEventCommunity(eventID string) (*zeni.Community, error) {
+	g, span := g.trace("gzchain.GetEventCommunity")
+	defer span.End()
+
+	return nil, nil
+}
+
 // CancelEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
 	g, span := g.trace("gzchain.CancelEvent")
