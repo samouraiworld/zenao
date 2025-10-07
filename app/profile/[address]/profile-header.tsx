@@ -137,7 +137,7 @@ export default function ProfileHeader({
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 hover:bg-muted border hover:border-blue-400/50 transition text-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 hover:bg-muted border hover:border-blue-600/50 transition text-sm"
                   >
                     <span className="text-blue-500">{link.url}</span>
                     <ExternalLink
