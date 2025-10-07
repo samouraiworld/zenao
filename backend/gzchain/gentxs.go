@@ -1,4 +1,4 @@
-package main
+package gzchain
 
 import (
 	"context"
@@ -31,7 +31,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func newGenTxsCmd() *commands.Command {
+// TODO: REMOVE WHEN SOT TRANSITION IS DONE
+
+func NewGenTxsCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
 			Name:       "gentxs",
@@ -560,7 +562,7 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addr
 
 func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, orgType, orgID, reaction.Icon)
+	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, reaction.Icon)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{

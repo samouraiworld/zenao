@@ -8,6 +8,7 @@ import (
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/google/uuid"
+	"github.com/samouraiworld/zenao/backend/gzchain"
 	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -75,11 +76,10 @@ func convertEvtToCom() error {
 		return errors.New("evt-id is required")
 	}
 
-	chain, err := setupChain(evtToComConf.adminMnemonic, evtToComConf.gnoNamespace, evtToComConf.chainID, evtToComConf.chainEndpoint, evtToComConf.gasSecurityRate, logger)
+	chain, err := gzchain.SetupChain(evtToComConf.adminMnemonic, evtToComConf.gnoNamespace, evtToComConf.chainID, evtToComConf.chainEndpoint, evtToComConf.gasSecurityRate, logger)
 	if err != nil {
 		return err
 	}
-	logger.Info("Signer initialized", zap.String("address", chain.signerInfo.GetAddress().String()))
 
 	evt, err := chain.GetEvent(evtToComConf.evtID)
 	if err != nil {

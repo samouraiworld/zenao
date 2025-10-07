@@ -11,6 +11,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	ma "github.com/multiformats/go-multiaddr"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	"github.com/samouraiworld/zenao/backend/gzchain"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -94,7 +95,7 @@ func execFakegen() (retErr error) {
 		return err
 	}
 
-	chain, err := setupChain(fakegenConf.adminMnemonic, fakegenConf.gnoNamespace, fakegenConf.chainID, fakegenConf.chainEndpoint, fakegenConf.gasSecurityRate, logger)
+	chain, err := gzchain.SetupChain(fakegenConf.adminMnemonic, fakegenConf.gnoNamespace, fakegenConf.chainID, fakegenConf.chainEndpoint, fakegenConf.gasSecurityRate, logger)
 	if err != nil {
 		return err
 	}
@@ -220,7 +221,7 @@ func execFakegen() (retErr error) {
 						}
 
 						if !fakegenConf.skipChain {
-							if err = chain.ReactPost(creatorID, zeni.EntityTypeEvent, zevt.ID, reactReq); err != nil {
+							if err = chain.ReactPost(creatorID, reactReq); err != nil {
 								return err
 							}
 						}

@@ -71,6 +71,17 @@ func SetupChain(adminMnemonic string, namespace string, chainID string, chainEnd
 	}, nil
 }
 
+// TODO: remove it when we delete gentxs
+func SetupChainGentxs(signerInfo keys.Info, namespace string, logger *zap.Logger) *gnoZenaoChain {
+	return &gnoZenaoChain{
+		eventsIndexPkgPath:      path.Join("gno.land/r", namespace, "eventreg"),
+		communitiesIndexPkgPath: path.Join("gno.land/r", namespace, "communityreg"),
+		signerInfo:              signerInfo,
+		logger:                  logger,
+		namespace:               namespace,
+	}
+}
+
 type gnoZenaoChain struct {
 	client                  gnoclient.Client
 	eventsIndexPkgPath      string
