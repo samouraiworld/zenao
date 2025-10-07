@@ -264,9 +264,9 @@ func (g *gnoZenaoChain) GetEventParticipants(evtID string) ([]*zeni.User, error)
 	return nil, nil
 }
 
-// GetEventTickets implements ZenaoChain.
-func (g *gnoZenaoChain) GetEventTickets(evtID string) ([]*zeni.SoldTicket, error) {
-	g, span := g.trace("gzchain.GetEventTickets")
+// GetEventUserTicket implements ZenaoChain.
+func (g *gnoZenaoChain) GetEventUserTicket(eventID string, userID string) (*zeni.SoldTicket, error) {
+	g, span := g.trace("gzchain.GetEventUserTicket")
 	defer span.End()
 
 	return nil, nil

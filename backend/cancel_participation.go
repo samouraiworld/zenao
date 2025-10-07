@@ -26,34 +26,14 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 
 	s.Logger.Info("cancel-participation", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
 
-	// evt := (*zeni.Event)(nil)
-	// ticket := (*zeni.SoldTicket)(nil)
-	// if err := s.DB.TxWithSpan(ctx, "db.CancelParticipation", func(db zeni.DB) error {
-	// 	evt, err = db.GetEvent(req.Msg.EventId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if time.Now().After(evt.StartDate) {
-	// 		return errors.New("event already started")
-	// 	}
-	// 	ticket, err = db.GetEventUserTicket(req.Msg.EventId, zUser.ID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if ticket.Checkin != nil {
-	// 		return errors.New("user already checked-in")
-	// 	}
-	// 	err = db.CancelParticipation(evt.ID, zUser.ID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }); err != nil {
-	// 	return nil, err
-	// }
-
-	// 1. Retrieve event and his creator
-	// 2. Run the chain action
+	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	ticket, err := s.Chain.WithContext(ctx).GetEventUserTicket(req.Msg.EventId, zUser.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
 		return nil, err
