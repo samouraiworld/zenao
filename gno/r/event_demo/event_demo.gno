@@ -13,16 +13,16 @@ import (
 )
 
 var (
-	DAO daokit.DAO
+	DAO      daokit.DAO
+	localDAO daokit.DAO
 
-	localDAO   daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	event      *events.Event
+	event  *events.Event // XXX: needed for backward compatibility with frontend queries
+	feedId string        // XXX: workaround for "unexpected zero object id" issue
 )
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	social_feed.NewFeed(cross, "main", false, IsMember)
+	feedId = social_feed.NewFeed(cross, "main", false, isMember)
 }
 
 func init() {
@@ -41,16 +41,12 @@ func init() {
 		ZenaoAdminAddr:   zenaoAdmin,
 		Location:         &zenaov1.EventLocation{Address: &zenaov1.AddressCustom{Address: "To be disclosed", Timezone: "Europe/Paris"}},
 		Discoverable:     true,
+		CrossFn:          crossFn,
+		SetImplemFn:      setImplem,
+		FeedId:           feedId,
+		PrivateVarName:   "event",
 	}
 	event = events.NewEvent(&conf)
-	daoPrivate = event.DAOPrivate
-	localDAO = event.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
-}
-
-// Set public to be used as auth layer for external entities (e.g polls)
-func IsMember(memberId string) bool {
-	return daoPrivate.Members.IsMember(memberId)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
@@ -62,5 +58,17 @@ func Execute(_ realm, proposalID uint64) {
 }
 
 func Render(path string) string {
-	return event.Render(path)
+	return localDAO.Render(path)
+}
+
+func isMember(memberId string) bool {
+	return basedao.MustGetMembersViewExtension(localDAO).IsMember(memberId)
+}
+
+func crossFn(_ realm, cb func()) {
+	cb()
+}
+
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }

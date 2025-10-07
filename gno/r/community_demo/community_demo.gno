@@ -10,16 +10,15 @@ import (
 )
 
 var (
-	DAO daokit.DAO
+	DAO      daokit.DAO
+	localDAO daokit.DAO
 
-	localDAO   daokit.DAO
-	daoPrivate *basedao.DAOPrivate
-	community  *communities.Community
+	community *communities.Community // XXX: needed for backward compatibility with frontend queries
+	feedId    string                 // XXX: workaround for "unexpected zero object id" issue
 )
 
 func init() {
-	// XXX: workaround for "unexpected zero object id" issue
-	social_feed.NewFeed(cross, "main", false, IsMember)
+	feedId = social_feed.NewFeed(cross, "main", false, isMember) // XXX: workaround for "unexpected zero object id" issue
 }
 
 func init() {
@@ -36,16 +35,12 @@ func init() {
 		BannerURI:        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Wiki-IMG_20200904_200004436.jpg/640px-Wiki-IMG_20200904_200004436.jpg",
 		GetProfileString: profile.GetStringField,
 		SetProfileString: profile.SetStringField,
+		CrossFn:          crossFn,
+		SetImplemFn:      setImplem,
+		FeedId:           feedId,
+		PrivateVarName:   "community",
 	}
 	community = communities.NewCommunity(&conf)
-	daoPrivate = community.DAOPrivate
-	localDAO = community.DAO
-	DAO = daokit.NewCrossing(localDAO, func(_ realm, cb func()) { cb() })
-}
-
-// Set public to be used as auth layer for external entities (e.g polls)
-func IsMember(memberId string) bool {
-	return daoPrivate.Members.IsMember(memberId)
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
@@ -57,5 +52,17 @@ func Execute(_ realm, proposalID uint64) {
 }
 
 func Render(path string) string {
-	return community.Render(path)
+	return localDAO.Render(path)
+}
+
+func isMember(memberId string) bool {
+	return basedao.MustGetMembersViewExtension(localDAO).IsMember(memberId)
+}
+
+func crossFn(_ realm, cb func()) {
+	cb()
+}
+
+func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
+	localDAO, DAO = newLocalDAO, newDAO
 }

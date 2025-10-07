@@ -26,6 +26,7 @@ function CommunityMemberCard({
       socialMediaLinks: [],
       location: "",
       shortBio: "",
+      bannerUri: "",
     },
     contentFieldName: "bio",
   });
