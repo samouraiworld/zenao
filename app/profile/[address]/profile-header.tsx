@@ -13,6 +13,7 @@ import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
 import { gnoProfileDetailsSchema } from "@/types/schemas";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 
 type ProfileHeaderProps = {
   address: string;
@@ -112,7 +113,7 @@ export default function ProfileHeader({
         <div className="flex flex-col gap-3">
           {profileDetails.bio?.trim() && (
             <Card>
-              <Text>{profileDetails.bio}</Text>
+              <MarkdownPreview markdownString={profileDetails.bio} />
             </Card>
           )}
           {profileDetails.location && (
