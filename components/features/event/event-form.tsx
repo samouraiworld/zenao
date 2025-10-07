@@ -8,7 +8,7 @@ import {
   isSameDay,
   minutesToSeconds,
 } from "date-fns";
-import { AudioWaveformIcon, ImageIcon } from "lucide-react";
+import { AudioWaveformIcon, Eye, EyeOff, ImageIcon } from "lucide-react";
 import { Card } from "../../widgets/cards/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../shadcn/tabs";
 import { MarkdownPreview } from "../../widgets/markdown-preview";
@@ -61,6 +61,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   const endDate = form.watch("endDate");
   const imageUri = form.watch("imageUri");
   const exclusive = form.watch("exclusive");
+  const discoverable = form.watch("discoverable");
   const t = useTranslations("eventForm");
 
   const [isVirtual, setIsVirtual] = useState<boolean>(
@@ -441,11 +442,18 @@ export const EventForm: React.FC<EventFormProps> = ({
           )}
 
           {/* Includes the event in listEventsInternal (eventreg.gno) if true */}
-          <FormFieldSwitch
-            control={form.control}
-            name="discoverable"
-            label={t("discoverable-label")}
-          />
+          <div className="flex items-center gap-2">
+            <FormFieldSwitch
+              control={form.control}
+              name="discoverable"
+              label={t("discoverable-label")}
+            />
+            {discoverable ? (
+              <Eye className="size-5" />
+            ) : (
+              <EyeOff className="size-5" />
+            )}
+          </div>
 
           <ButtonWithChildren loading={isLoading} type="submit">
             {isEditing ? t("edit-event-button") : t("create-event-button")}
