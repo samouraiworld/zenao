@@ -4,13 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -30,36 +27,42 @@ func (s *ZenaoServer) CancelEvent(
 
 	s.Logger.Info("cancel-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
-	var users []*zeni.User
-	var cmties []*zeni.Community
-	var evt *zeni.Event
-	if err := s.DB.TxWithSpan(ctx, "db.CancelEvent", func(db zeni.DB) error {
-		evt, err = db.GetEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		users, err = db.GetOrgUsers(zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if time.Now().Add(24 * time.Hour).After(evt.StartDate) {
-			return errors.New("events already started or starting within 24h cannot be cancelled")
-		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("only organizers can cancel an event")
-		}
-		cmties, err = db.CommunitiesByEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		return db.CancelEvent(req.Msg.EventId)
-	}); err != nil {
-		return nil, err
-	}
+	// var users []*zeni.User
+	// var cmties []*zeni.Community
+	// var evt *zeni.Event
+	// if err := s.DB.TxWithSpan(ctx, "db.CancelEvent", func(db zeni.DB) error {
+	// 	evt, err = db.GetEvent(req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	users, err = db.GetOrgUsers(zeni.EntityTypeEvent, req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if time.Now().Add(24 * time.Hour).After(evt.StartDate) {
+	// 		return errors.New("events already started or starting within 24h cannot be cancelled")
+	// 	}
+	// 	roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !slices.Contains(roles, zeni.RoleOrganizer) {
+	// 		return errors.New("only organizers can cancel an event")
+	// 	}
+	// 	cmties, err = db.CommunitiesByEvent(req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return db.CancelEvent(req.Msg.EventId)
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	//TODO:
+	// 1. Retrieve participants of the events from chain
+	// 2. Get their emails from database and them email
+	// 3. What should be done first ? email or chain action ?
+	// 4. Anyway get the creator id of the event & execute the chain action
 
 	if s.MailClient != nil {
 		idsList := make([]string, 0, len(users))

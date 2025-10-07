@@ -7,9 +7,6 @@ import (
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/samouraiworld/zenao/backend/gzdb"
-	"github.com/samouraiworld/zenao/backend/mapsl"
-	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -86,57 +83,63 @@ func convertEvtToCom() error {
 	}
 	logger.Info("database initialized")
 
-	var cmt *zeni.Community
-	var membersIDs []string
-	var cmtReq *zenaov1.CreateCommunityRequest
-	var evt *zeni.Event
-	if err := db.Tx(func(tx zeni.DB) error {
-		evt, err = tx.GetEvent(evtToComConf.evtID)
-		if err != nil {
-			return err
-		}
-		if evt == nil {
-			return errors.New("event not found")
-		}
-		logger.Info("event found", zap.String("event-id", evt.ID), zap.String("title", evt.Title))
+	// var cmt *zeni.Community
+	// var membersIDs []string
+	// var cmtReq *zenaov1.CreateCommunityRequest
+	// var evt *zeni.Event
+	// if err := db.Tx(func(tx zeni.DB) error {
+	// 	evt, err = tx.GetEvent(evtToComConf.evtID)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if evt == nil {
+	// 		return errors.New("event not found")
+	// 	}
+	// 	logger.Info("event found", zap.String("event-id", evt.ID), zap.String("title", evt.Title))
 
-		cmtReq = &zenaov1.CreateCommunityRequest{
-			DisplayName: evt.Title,
-			Description: evt.Description,
-			AvatarUri:   evt.ImageURI,
-			BannerUri:   "",
-		}
-		if evtToComConf.displayName != "" {
-			cmtReq.DisplayName = evtToComConf.displayName
-		}
-		if evtToComConf.description != "" {
-			cmtReq.Description = evtToComConf.description
-		}
-		if evtToComConf.avatarURI != "" {
-			cmtReq.AvatarUri = evtToComConf.avatarURI
-		}
-		if evtToComConf.bannerURI != "" {
-			cmtReq.BannerUri = evtToComConf.bannerURI
-		}
-		logger.Info("creating community with request", zap.Any("request", cmtReq))
+	// 	cmtReq = &zenaov1.CreateCommunityRequest{
+	// 		DisplayName: evt.Title,
+	// 		Description: evt.Description,
+	// 		AvatarUri:   evt.ImageURI,
+	// 		BannerUri:   "",
+	// 	}
+	// 	if evtToComConf.displayName != "" {
+	// 		cmtReq.DisplayName = evtToComConf.displayName
+	// 	}
+	// 	if evtToComConf.description != "" {
+	// 		cmtReq.Description = evtToComConf.description
+	// 	}
+	// 	if evtToComConf.avatarURI != "" {
+	// 		cmtReq.AvatarUri = evtToComConf.avatarURI
+	// 	}
+	// 	if evtToComConf.bannerURI != "" {
+	// 		cmtReq.BannerUri = evtToComConf.bannerURI
+	// 	}
+	// 	logger.Info("creating community with request", zap.Any("request", cmtReq))
 
-		users, err := tx.GetOrgUsers(zeni.EntityTypeEvent, evt.ID)
-		if err != nil {
-			return err
-		}
-		membersIDs = mapsl.Map(users, func(usr *zeni.User) string { return usr.ID })
-		cmt, err = tx.CreateCommunity(evt.CreatorID, []string{evt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
-		if err != nil {
-			return err
-		}
+	// 	users, err := tx.GetOrgUsers(zeni.EntityTypeEvent, evt.ID)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	membersIDs = mapsl.Map(users, func(usr *zeni.User) string { return usr.ID })
+	// 	cmt, err = tx.CreateCommunity(evt.CreatorID, []string{evt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		if _, err = tx.CreateFeed(zeni.EntityTypeCommunity, cmt.ID, "main"); err != nil {
-			return err
-		}
-		return err
-	}); err != nil {
-		return err
-	}
+	// 	if _, err = tx.CreateFeed(zeni.EntityTypeCommunity, cmt.ID, "main"); err != nil {
+	// 		return err
+	// 	}
+	// 	return err
+	// }); err != nil {
+	// 	return err
+	// }
+
+	// TODO:
+	// 1. Retrieve event from chain
+	// 2. Build the community request from this
+	// 3. Retrieve the participants of the event and the creator
+	// 4. Execute the on-chain action
 
 	logger.Info("community persisted successfully in the database")
 

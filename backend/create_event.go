@@ -84,43 +84,49 @@ func (s *ZenaoServer) CreateEvent(
 		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
 	}
 
-	evt := (*zeni.Event)(nil)
-	cmt := (*zeni.Community)(nil)
-	targets := []*zeni.User{}
-	if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
-		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
-			return err
-		}
+	// evt := (*zeni.Event)(nil)
+	// cmt := (*zeni.Community)(nil)
+	// targets := []*zeni.User{}
+	// if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
+	// 	if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
+	// 		return err
+	// 	}
 
-		if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
-			return err
-		}
+	// 	if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
+	// 		return err
+	// 	}
 
-		if req.Msg.CommunityId != "" {
-			cmt, err = db.GetCommunity(req.Msg.CommunityId)
-			if err != nil {
-				return err
-			}
-			roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
-			if err != nil {
-				return err
-			}
-			if !slices.Contains(roles, zeni.RoleAdministrator) {
-				return errors.New("user is not an admin of the community and cannot add event to it")
-			}
-			err = db.AddEventToCommunity(evt.ID, cmt.ID)
-			if err != nil {
-				return err
-			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// 	if req.Msg.CommunityId != "" {
+	// 		cmt, err = db.GetCommunity(req.Msg.CommunityId)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		if !slices.Contains(roles, zeni.RoleAdministrator) {
+	// 			return errors.New("user is not an admin of the community and cannot add event to it")
+	// 		}
+	// 		err = db.AddEventToCommunity(evt.ID, cmt.ID)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Execute the webhook and the mail after the chain creation ?
+	// 2. Execute the create event from request info
+	// 3. Read the event from on-chain after creation ? (to double confirm creation ? or useless ?)
+	// 4. Execute webhook then send email
 
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
 

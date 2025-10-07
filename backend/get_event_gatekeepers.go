@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"slices"
 
 	"connectrpc.com/connect"
 	"github.com/samouraiworld/zenao/backend/mapsl"
@@ -29,23 +28,26 @@ func (s *ZenaoServer) GetEventGatekeepers(ctx context.Context, req *connect.Requ
 		return nil, errors.New("user is banned")
 	}
 
-	var gatekeepers []*zeni.User
-	if err := s.DB.TxWithSpan(ctx, "db.GetEventGatekeepers", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("user is not organizer of the event")
-		}
-		gatekeepers, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleGatekeeper)
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// var gatekeepers []*zeni.User
+	// if err := s.DB.TxWithSpan(ctx, "db.GetEventGatekeepers", func(db zeni.DB) error {
+	// 	roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !slices.Contains(roles, zeni.RoleOrganizer) {
+	// 		return errors.New("user is not organizer of the event")
+	// 	}
+	// 	gatekeepers, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleGatekeeper)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Retrieve the gatekeepers from on-chain
 
 	gkpsIDs := mapsl.Map(gatekeepers, func(gk *zeni.User) string {
 		return gk.AuthID

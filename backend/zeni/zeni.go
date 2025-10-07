@@ -212,7 +212,6 @@ type DB interface {
 	GetUser(authID string) (*User, error)
 	// XXX: add EnsureUsersExist
 
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
 	GetAllUsers() ([]*User, error)
@@ -297,7 +296,7 @@ type Chain interface {
 	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
 	DeletePost(userID string, postID string) error
 	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
+	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }

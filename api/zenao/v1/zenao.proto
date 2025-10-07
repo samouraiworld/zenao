@@ -252,7 +252,7 @@ message EditPostRequest {
   repeated string tags = 3;
 }
 
-message EditPostResponse { string post_id = 1; }
+message EditPostResponse {}
 
 message GetEventTicketsRequest { string event_id = 1; }
 

@@ -31,10 +31,13 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, errors.New("user is banned")
 	}
 
-	tickets, err := s.DB.WithContext(ctx).GetEventUserOrBuyerTickets(req.Msg.EventId, zUser.ID)
-	if err != nil {
-		return nil, err
-	}
+	// tickets, err := s.DB.WithContext(ctx).GetEventUserOrBuyerTickets(req.Msg.EventId, zUser.ID)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Retrieve tickets for each user
 
 	userIDs := []string{}
 	ticketsWithUser := []*zeni.SoldTicket{}

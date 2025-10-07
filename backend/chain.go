@@ -1214,7 +1214,7 @@ func (g *gnoZenaoChain) DeletePost(userID string, postID string) error {
 }
 
 // ReactPost implements ZenaoChain
-func (g *gnoZenaoChain) ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error {
+func (g *gnoZenaoChain) ReactPost(userID string, req *zenaov1.ReactPostRequest) error {
 	g, span := g.trace("gzchain.ReactPost")
 	defer span.End()
 
@@ -1225,7 +1225,7 @@ func (g *gnoZenaoChain) ReactPost(userID string, orgType string, orgID string, r
 			Name: "main",
 			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
-				Body: genReactPostMsgRunBody(userRealmPkgPath, userID, req.PostId, orgType, orgID, req.Icon),
+				Body: genReactPostMsgRunBody(userRealmPkgPath, userID, req.PostId, req.Icon),
 			}},
 		},
 	}
@@ -1583,7 +1583,7 @@ func genDeletePostMsgRunBody(userRealmPkgPath string, postIDInt uint64) string {
 `, userRealmPkgPath, postIDInt, postIDInt)
 }
 
-func genReactPostMsgRunBody(userRealmPkgPath, userID, postID, orgType, orgID, icon string) string {
+func genReactPostMsgRunBody(userRealmPkgPath, userID, postID, icon string) string {
 	return fmt.Sprintf(`package main
 import (
 	"gno.land/p/zenao/daokit"
@@ -1593,7 +1593,7 @@ import (
 	
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-		Title: "User #%s reacts to post #%s in %s #%s.",
+		Title: "User #%s reacts to post #%s",
 		Action: daokit.NewExecuteLambdaAction(newReaction),
 	})
 }
@@ -1601,7 +1601,7 @@ func main() {
 func newReaction() {
 	social_feed.ReactPost(cross, %s, %q)
 }
-`, userRealmPkgPath, userID, postID, orgType, orgID, postID, icon)
+`, userRealmPkgPath, userID, postID, postID, icon)
 }
 
 func genVotePollMsgRunBody(userRealmPkgPath, pollID, option string) string {

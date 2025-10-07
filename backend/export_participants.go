@@ -34,23 +34,26 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 
 	s.Logger.Info("export-participants", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
 
-	var tickets []*zeni.SoldTicket
-	if err := s.DB.TxWithSpan(ctx, "db.ExportParticipants", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("user is not organizer of the event")
-		}
-		tickets, err = db.GetEventTickets(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// var tickets []*zeni.SoldTicket
+	// if err := s.DB.TxWithSpan(ctx, "db.ExportParticipants", func(db zeni.DB) error {
+	// 	roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !slices.Contains(roles, zeni.RoleOrganizer) {
+	// 		return errors.New("user is not organizer of the event")
+	// 	}
+	// 	tickets, err = db.GetEventTickets(req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Retrieve the participants from chain & get their emails and export it
 
 	idsList := mapsl.Map(tickets, func(t *zeni.SoldTicket) string { return t.User.AuthID })
 	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)

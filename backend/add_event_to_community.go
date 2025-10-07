@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"time"
 
 	"connectrpc.com/connect"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
 func (s *ZenaoServer) AddEventToCommunity(
@@ -35,75 +33,80 @@ func (s *ZenaoServer) AddEventToCommunity(
 		return nil, errors.New("user is banned")
 	}
 
-	var (
-		targets      []*zeni.User
-		participants []*zeni.User
-		targetIDs    = make(map[string]bool)
-		cmt          *zeni.Community
-		evt          *zeni.Event
-	)
+	// var (
+	// 	targets      []*zeni.User
+	// 	participants []*zeni.User
+	// 	targetIDs    = make(map[string]bool)
+	// 	cmt          *zeni.Community
+	// 	evt          *zeni.Event
+	// )
 
-	if err := s.DB.TxWithSpan(ctx, "db.AddEventToCommunity", func(tx zeni.DB) error {
-		cmt, err = tx.GetCommunity(req.Msg.CommunityId)
-		if err != nil {
-			return err
-		}
-		evt, err = tx.GetEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleAdministrator) {
-			return errors.New("you must be an administrator of the community to add an event")
-		}
+	// if err := s.DB.TxWithSpan(ctx, "db.AddEventToCommunity", func(tx zeni.DB) error {
+	// 	cmt, err = tx.GetCommunity(req.Msg.CommunityId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	evt, err = tx.GetEvent(req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !slices.Contains(roles, zeni.RoleAdministrator) {
+	// 		return errors.New("you must be an administrator of the community to add an event")
+	// 	}
 
-		roles, err = tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("you must be an organizer of the event to add it to a community")
-		}
+	// 	roles, err = tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !slices.Contains(roles, zeni.RoleOrganizer) {
+	// 		return errors.New("you must be an organizer of the event to add it to a community")
+	// 	}
 
-		roles, err = tx.EntityRoles(zeni.EntityTypeEvent, req.Msg.EventId, zeni.EntityTypeCommunity, req.Msg.CommunityId)
-		if err != nil {
-			return err
-		}
-		if slices.Contains(roles, zeni.RoleEvent) {
-			return errors.New("event is already added to the community")
-		}
+	// 	roles, err = tx.EntityRoles(zeni.EntityTypeEvent, req.Msg.EventId, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if slices.Contains(roles, zeni.RoleEvent) {
+	// 		return errors.New("event is already added to the community")
+	// 	}
 
-		if err := tx.AddEventToCommunity(req.Msg.EventId, req.Msg.CommunityId); err != nil {
-			return err
-		}
+	// 	if err := tx.AddEventToCommunity(req.Msg.EventId, req.Msg.CommunityId); err != nil {
+	// 		return err
+	// 	}
 
-		targets, err = tx.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
-		if err != nil {
-			return err
-		}
-		participants, err = tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
-		if err != nil {
-			return err
-		}
+	// 	targets, err = tx.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	participants, err = tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		for _, target := range targets {
-			targetIDs[target.ID] = true
-		}
+	// 	for _, target := range targets {
+	// 		targetIDs[target.ID] = true
+	// 	}
 
-		for _, participant := range participants {
-			if !targetIDs[participant.ID] {
-				if err := tx.AddMemberToCommunity(req.Msg.CommunityId, participant.ID); err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// 	for _, participant := range participants {
+	// 		if !targetIDs[participant.ID] {
+	// 			if err := tx.AddMemberToCommunity(req.Msg.CommunityId, participant.ID); err != nil {
+	// 				return err
+	// 			}
+	// 		}
+	// 	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Retrieve event from chain
+	// 2. Retrieve participants from chain
+	// 3. Retrieve community from chain
 
 	// If the event start in more than 24h, we send an email to all community members that does not participate to the event.
 	if time.Now().Add(24*time.Hour).Before(evt.StartDate) && s.MailClient != nil {

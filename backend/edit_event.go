@@ -81,78 +81,86 @@ func (s *ZenaoServer) EditEvent(
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	var (
-		targets      []*zeni.User
-		participants []*zeni.User
-		targetIDs    = make(map[string]bool)
-		cmt          *zeni.Community
-		newCmt       *zeni.Community
-		evt          *zeni.Event
-	)
-	if err := s.DB.TxWithSpan(ctx, "db.EditEvent", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("user is not organizer of the event")
-		}
+	// var (
+	// 	targets      []*zeni.User
+	// 	participants []*zeni.User
+	// 	targetIDs    = make(map[string]bool)
+	// 	cmt          *zeni.Community
+	// 	newCmt       *zeni.Community
+	// 	evt          *zeni.Event
+	// )
+	// if err := s.DB.TxWithSpan(ctx, "db.EditEvent", func(db zeni.DB) error {
+	// 	roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !slices.Contains(roles, zeni.RoleOrganizer) {
+	// 		return errors.New("user is not organizer of the event")
+	// 	}
 
-		if cmt, err = db.GetEventCommunity(req.Msg.EventId); err != nil {
-			return err
-		}
+	// 	if cmt, err = db.GetEventCommunity(req.Msg.EventId); err != nil {
+	// 		return err
+	// 	}
 
-		if cmt != nil && cmt.ID != req.Msg.CommunityId {
-			if err = db.RemoveEventFromCommunity(req.Msg.EventId, cmt.ID); err != nil {
-				return err
-			}
-		}
+	// 	if cmt != nil && cmt.ID != req.Msg.CommunityId {
+	// 		if err = db.RemoveEventFromCommunity(req.Msg.EventId, cmt.ID); err != nil {
+	// 			return err
+	// 		}
+	// 	}
 
-		if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) {
-			newCmt, err = db.GetCommunity(req.Msg.CommunityId)
-			if err != nil {
-				return err
-			}
-			entityRoles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
-			if err != nil {
-				return err
-			}
-			if !slices.Contains(entityRoles, zeni.RoleAdministrator) {
-				return errors.New("user is not administrator of the community")
-			}
-			if err = db.AddEventToCommunity(req.Msg.EventId, req.Msg.CommunityId); err != nil {
-				return err
-			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
-			if err != nil {
-				return err
-			}
-			participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
-			if err != nil {
-				return err
-			}
+	// 	if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) {
+	// 		newCmt, err = db.GetCommunity(req.Msg.CommunityId)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		entityRoles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		if !slices.Contains(entityRoles, zeni.RoleAdministrator) {
+	// 			return errors.New("user is not administrator of the community")
+	// 		}
+	// 		if err = db.AddEventToCommunity(req.Msg.EventId, req.Msg.CommunityId); err != nil {
+	// 			return err
+	// 		}
+	// 		targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
+	// 		if err != nil {
+	// 			return err
+	// 		}
 
-			for _, target := range targets {
-				targetIDs[target.ID] = true
-			}
+	// 		for _, target := range targets {
+	// 			targetIDs[target.ID] = true
+	// 		}
 
-			for _, participant := range participants {
-				if !targetIDs[participant.ID] {
-					if err := db.AddMemberToCommunity(req.Msg.CommunityId, participant.ID); err != nil {
-						return err
-					}
-				}
-			}
-		}
+	// 		for _, participant := range participants {
+	// 			if !targetIDs[participant.ID] {
+	// 				if err := db.AddMemberToCommunity(req.Msg.CommunityId, participant.ID); err != nil {
+	// 					return err
+	// 				}
+	// 			}
+	// 		}
+	// 	}
 
-		if evt, err = db.EditEvent(req.Msg.EventId, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
-			return err
-		}
+	// 	if evt, err = db.EditEvent(req.Msg.EventId, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
+	// 		return err
+	// 	}
 
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Retrieve the event from the chain
+	// 2. Retrieve the community linked to the event on chain
+	// 3. Move the mail below chain execution
+	// 4. In case community change retrieve participants of the events and members of the community.
+	// 5. Add to the com. participants that are not members yet
+	// 6. Send email
 
 	if newCmt != nil && time.Now().Add(24*time.Hour).Before(evt.StartDate) && req.Msg.CommunityEmail && s.MailClient != nil {
 		participantsIDS := make(map[string]bool)

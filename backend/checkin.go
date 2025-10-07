@@ -6,7 +6,6 @@ import (
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -28,14 +27,17 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 
 	s.Logger.Info("checkin", zap.String("gatekeeper", zUser.ID), zap.String("pubkey", req.Msg.TicketPubkey))
 
-	var evt *zeni.Event
+	// var evt *zeni.Event
 
-	if err := s.DB.TxWithSpan(ctx, "db.Checkin", func(db zeni.DB) error {
-		evt, err = db.Checkin(req.Msg.TicketPubkey, zUser.ID, req.Msg.Signature)
-		return err
-	}); err != nil {
-		return nil, err
-	}
+	// if err := s.DB.TxWithSpan(ctx, "db.Checkin", func(db zeni.DB) error {
+	// 	evt, err = db.Checkin(req.Msg.TicketPubkey, zUser.ID, req.Msg.Signature)
+	// 	return err
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Retrieve the event on chain
 
 	if evt != nil {
 		if err := s.Chain.WithContext(ctx).Checkin(evt.ID, zUser.ID, req.Msg); err != nil {

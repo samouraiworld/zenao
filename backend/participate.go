@@ -83,60 +83,67 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
-	evt := (*zeni.Event)(nil)
-	communities := ([]*zeni.Community)(nil)
-	needPasswordIfGuarded := true
-	rolesByParticipant := make([][]string, len(participants))
+	// evt := (*zeni.Event)(nil)
+	// communities := ([]*zeni.Community)(nil)
+	// needPasswordIfGuarded := true
+	// rolesByParticipant := make([][]string, len(participants))
 
-	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
-		// XXX: can't create event with price for now but later we need to check that the event is free
-		buyerRoles, err := tx.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if slices.Contains(buyerRoles, zeni.RoleOrganizer) {
-			needPasswordIfGuarded = false
-		}
+	// if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
+	// 	// XXX: can't create event with price for now but later we need to check that the event is free
+	// 	buyerRoles, err := tx.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if slices.Contains(buyerRoles, zeni.RoleOrganizer) {
+	// 		needPasswordIfGuarded = false
+	// 	}
 
-		communities, err = tx.CommunitiesByEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
+	// 	communities, err = tx.CommunitiesByEvent(req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		for i, ticket := range tickets {
-			// XXX: support batch
-			if err := tx.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
-				return err
-			}
+	// 	for i, ticket := range tickets {
+	// 		// XXX: support batch
+	// 		if err := tx.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
+	// 			return err
+	// 		}
 
-			for _, cmt := range communities {
-				roles, err := tx.EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
-				if err != nil {
-					return err
-				}
-				rolesByParticipant[i] = roles
-				if slices.Contains(roles, zeni.RoleMember) {
-					continue
-				}
-				if err := tx.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
-					return err
-				}
-			}
-		}
+	// 		for _, cmt := range communities {
+	// 			roles, err := tx.EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
+	// 			if err != nil {
+	// 				return err
+	// 			}
+	// 			rolesByParticipant[i] = roles
+	// 			if slices.Contains(roles, zeni.RoleMember) {
+	// 				continue
+	// 			}
+	// 			if err := tx.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
+	// 				return err
+	// 			}
+	// 		}
+	// 	}
 
-		evt, err = tx.GetEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
+	// 	evt, err = tx.GetEvent(req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		if evt == nil {
-			return errors.New("nil event after participate")
-		}
+	// 	if evt == nil {
+	// 		return errors.New("nil event after participate")
+	// 	}
 
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Place the mail send below the chain execution
+	// 2. Retrieve event from on-chain
+	// 3. If user is organizer he does not password even if guarded
+	// 4. Fetch all the communities linked to the event & add the user to these communities
+	// 5. Check if user is not already in the communities before
 
 	wg := sync.WaitGroup{}
 	defer wg.Wait()

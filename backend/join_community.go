@@ -3,11 +3,9 @@ package main
 import (
 	"context"
 	"errors"
-	"slices"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -31,27 +29,30 @@ func (s *ZenaoServer) JoinCommunity(
 		return nil, errors.New("user is banned")
 	}
 
-	var cmt *zeni.Community
-	if err := s.DB.TxWithSpan(ctx, "db.JoinCommunity", func(tx zeni.DB) error {
-		cmt, err = tx.GetCommunity(req.Msg.CommunityId)
-		if err != nil {
-			return err
-		}
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
-		if err != nil {
-			return err
-		}
-		if slices.Contains(roles, zeni.RoleMember) {
-			return errors.New("user is already a member of this community")
-		}
-		if err := tx.AddMemberToCommunity(cmt.ID, zUser.ID); err != nil {
-			return err
-		}
-		s.Logger.Info("user joined community", zap.String("community-id", cmt.ID), zap.String("user-id", zUser.ID))
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// var cmt *zeni.Community
+	// if err := s.DB.TxWithSpan(ctx, "db.JoinCommunity", func(tx zeni.DB) error {
+	// 	cmt, err = tx.GetCommunity(req.Msg.CommunityId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if slices.Contains(roles, zeni.RoleMember) {
+	// 		return errors.New("user is already a member of this community")
+	// 	}
+	// 	if err := tx.AddMemberToCommunity(cmt.ID, zUser.ID); err != nil {
+	// 		return err
+	// 	}
+	// 	s.Logger.Info("user joined community", zap.String("community-id", cmt.ID), zap.String("user-id", zUser.ID))
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Retrieve community & creator from on-chain
 
 	if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
 		return nil, errors.New("failed to add member to community on chain")

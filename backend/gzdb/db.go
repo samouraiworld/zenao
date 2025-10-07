@@ -22,12 +22,9 @@ import (
 )
 
 type User struct {
-	gorm.Model         // this ID should be used for any database related logic (like querying)
-	AuthID      string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
-	DisplayName string
-	Bio         string
-	AvatarURI   string
-	Plan        string `gorm:"default:'free'"`
+	gorm.Model        // this ID should be used for any database related logic (like querying)
+	AuthID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
+	Plan       string `gorm:"default:'free'"`
 }
 
 type EntityRole struct {
@@ -485,19 +482,6 @@ func (g *gormZenaoDB) CancelParticipation(eventID string, userID string) error {
 	}
 
 	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evtIDInt, userIDInt).Delete(&SoldTicket{}).Error; err != nil {
-		return err
-	}
-	return nil
-}
-
-// EditUser implements zeni.DB.
-func (g *gormZenaoDB) EditUser(userID string, req *zenaov1.EditUserRequest) error {
-	// XXX: validate?
-	if err := g.db.Model(&User{}).Where("id = ?", userID).Updates(User{
-		DisplayName: req.DisplayName,
-		Bio:         req.Bio,
-		AvatarURI:   req.AvatarUri,
-	}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -1560,13 +1544,10 @@ func (g *gormZenaoDB) CommunitiesByEvent(eventID string) ([]*zeni.Community, err
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	return &zeni.User{
-		ID:          fmt.Sprintf("%d", dbuser.ID),
-		CreatedAt:   dbuser.CreatedAt,
-		DisplayName: dbuser.DisplayName,
-		Bio:         dbuser.Bio,
-		AvatarURI:   dbuser.AvatarURI,
-		AuthID:      dbuser.AuthID,
-		Plan:        zeni.Plan(dbuser.Plan),
+		ID:        fmt.Sprintf("%d", dbuser.ID),
+		CreatedAt: dbuser.CreatedAt,
+		AuthID:    dbuser.AuthID,
+		Plan:      zeni.Plan(dbuser.Plan),
 	}
 }
 

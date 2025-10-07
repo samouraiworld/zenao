@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
@@ -45,37 +44,43 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, errors.New("zenao mail client is not initialized")
 	}
 
-	evt := (*zeni.Event)(nil)
-	var participants []*zeni.User
-	tickets := make(map[string][]*zeni.SoldTicket)
-	if err := s.DB.TxWithSpan(ctx, "db.BroadcastEvent", func(db zeni.DB) error {
-		evt, err = db.GetEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
-		if err != nil {
-			return err
-		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("user is not organizer of the event")
-		}
-		if req.Msg.AttachTicket {
-			for _, participant := range participants {
-				tickets[participant.AuthID], err = db.GetEventUserOrBuyerTickets(req.Msg.EventId, participant.ID)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// evt := (*zeni.Event)(nil)
+	// var participants []*zeni.User
+	// tickets := make(map[string][]*zeni.SoldTicket)
+	// if err := s.DB.TxWithSpan(ctx, "db.BroadcastEvent", func(db zeni.DB) error {
+	// 	evt, err = db.GetEvent(req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !slices.Contains(roles, zeni.RoleOrganizer) {
+	// 		return errors.New("user is not organizer of the event")
+	// 	}
+	// 	if req.Msg.AttachTicket {
+	// 		for _, participant := range participants {
+	// 			tickets[participant.AuthID], err = db.GetEventUserOrBuyerTickets(req.Msg.EventId, participant.ID)
+	// 			if err != nil {
+	// 				return err
+	// 			}
+	// 		}
+	// 	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Retrieve the event from chain
+	// 2. Ensure the user is an organizer of the event
+	// 3. Retrieve participants and get their email
+	// 4. Send them email
 
 	if len(participants) == 0 {
 		return nil, errors.New("a broadcast message cannot be sent to an event without any participants")

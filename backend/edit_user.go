@@ -6,7 +6,6 @@ import (
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -31,14 +30,17 @@ func (s *ZenaoServer) EditUser(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := s.DB.TxWithSpan(ctx, "db.EditUser", func(db zeni.DB) error {
-		if err := db.EditUser(zUser.ID, req.Msg); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// if err := s.DB.TxWithSpan(ctx, "db.EditUser", func(db zeni.DB) error {
+	// 	if err := db.EditUser(zUser.ID, req.Msg); err != nil {
+	// 		return err
+	// 	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
+
+	// TODO:
+	// 1. Remove the commented code should be enough
 
 	if err := s.Chain.WithContext(ctx).EditUser(zUser.ID, req.Msg); err != nil {
 		return nil, err

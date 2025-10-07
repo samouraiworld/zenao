@@ -43,20 +43,23 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		}
 	}
 
-	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
-	if err != nil {
-		return nil, err
-	}
-	if len(roles) == 0 {
-		return nil, errors.New("user is not a member of the event")
-	}
+	// TODO:
+	// 1. Remove the commented code should be enough
 
-	if req.Msg.ParentId != "" {
-		_, err := s.DB.WithContext(ctx).GetPostByID(req.Msg.ParentId)
-		if err != nil {
-			return nil, err
-		}
-	}
+	// roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if len(roles) == 0 {
+	// 	return nil, errors.New("user is not a member of the event")
+	// }
+
+	// if req.Msg.ParentId != "" {
+	// 	_, err := s.DB.WithContext(ctx).GetPostByID(req.Msg.ParentId)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
 	post := &feedsv1.Post{
 		Loc:       nil,
@@ -74,21 +77,21 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		return nil, err
 	}
 
-	zpost := (*zeni.Post)(nil)
-	if err := s.DB.TxWithSpan(ctx, "db.CreatePost", func(db zeni.DB) error {
-		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
-		if err != nil {
-			return err
-		}
+	// zpost := (*zeni.Post)(nil)
+	// if err := s.DB.TxWithSpan(ctx, "db.CreatePost", func(db zeni.DB) error {
+	// 	feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		if zpost, err = db.CreatePost(postID, feed.ID, zUser.ID, post); err != nil {
-			return err
-		}
+	// 	if zpost, err = db.CreatePost(postID, feed.ID, zUser.ID, post); err != nil {
+	// 		return err
+	// 	}
 
-		return nil
-	}); err != nil {
-		return nil, err
-	}
+	// 	return nil
+	// }); err != nil {
+	// 	return nil, err
+	// }
 
-	return connect.NewResponse(&zenaov1.CreatePostResponse{PostId: zpost.ID}), nil
+	return connect.NewResponse(&zenaov1.CreatePostResponse{PostId: postID}), nil
 }
