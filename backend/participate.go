@@ -83,67 +83,53 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
-	// evt := (*zeni.Event)(nil)
-	// communities := ([]*zeni.Community)(nil)
-	// needPasswordIfGuarded := true
-	// rolesByParticipant := make([][]string, len(participants))
+	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	cmt, err := s.Chain.WithContext(ctx).GetEventCommunity(req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
+	userRoles, err := s.Chain.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
 
-	// if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
-	// 	// XXX: can't create event with price for now but later we need to check that the event is free
-	// 	buyerRoles, err := tx.EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if slices.Contains(buyerRoles, zeni.RoleOrganizer) {
-	// 		needPasswordIfGuarded = false
-	// 	}
+	needPasswordIfGuarded := true
+	if slices.Contains(userRoles, zeni.RoleOrganizer) {
+		needPasswordIfGuarded = false
+	}
 
-	// 	communities, err = tx.CommunitiesByEvent(req.Msg.EventId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
+	var eventSK ed25519.PrivateKey
+	if needPasswordIfGuarded {
+		if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
+			return nil, err
+		}
+	}
 
-	// 	for i, ticket := range tickets {
-	// 		// XXX: support batch
-	// 		if err := tx.Participate(req.Msg.EventId, buyer.ID, participants[i].ID, ticket.Secret(), req.Msg.Password, needPasswordIfGuarded); err != nil {
-	// 			return err
-	// 		}
+	for i, ticket := range tickets {
+		// XXX: support batch, this might be very very slow
+		// XXX: callerID should be the current user and not creator,
+		//      this could break if the initial creator has the organizer role removed
+		//      also this bypasses password protection on-chain
+		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
+			return nil, err
+		}
 
-	// 		for _, cmt := range communities {
-	// 			roles, err := tx.EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
-	// 			if err != nil {
-	// 				return err
-	// 			}
-	// 			rolesByParticipant[i] = roles
-	// 			if slices.Contains(roles, zeni.RoleMember) {
-	// 				continue
-	// 			}
-	// 			if err := tx.AddMemberToCommunity(cmt.ID, participants[i].ID); err != nil {
-	// 				return err
-	// 			}
-	// 		}
-	// 	}
-
-	// 	evt, err = tx.GetEvent(req.Msg.EventId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	if evt == nil {
-	// 		return errors.New("nil event after participate")
-	// 	}
-
-	// 	return nil
-	// }); err != nil {
-	// 	return nil, err
-	// }
-
-	// TODO:
-	// 1. Place the mail send below the chain execution
-	// 2. Retrieve event from on-chain
-	// 3. If user is organizer he does not password even if guarded
-	// 4. Fetch all the communities linked to the event & add the user to these communities
-	// 5. Check if user is not already in the communities before
+		if cmt != nil {
+			roles, err := s.Chain.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
+			if err != nil {
+				return nil, err
+			}
+			if slices.Contains(roles, zeni.RoleMember) {
+				continue
+			}
+			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
+				return nil, err
+			}
+		}
+	}
 
 	wg := sync.WaitGroup{}
 	defer wg.Wait()
@@ -207,36 +193,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
 			}
 		}()
-	}
-
-	// XXX: there could be race conditions if the db has changed password but the chain did not
-
-	var eventSK ed25519.PrivateKey
-	if needPasswordIfGuarded {
-		if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
-			return nil, err
-		}
-	}
-
-	for i, ticket := range tickets {
-		// XXX: support batch, this might be very very slow
-		// XXX: callerID should be the current user and not creator,
-		//      this could break if the initial creator has the organizer role removed
-		//      also this bypasses password protection on-chain
-		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
-			// XXX: handle case where db tx pass but chain fail
-			return nil, err
-		}
-
-		for _, cmt := range communities {
-			// XXX: does the check in the chain instead of using db.
-			if slices.Contains(rolesByParticipant[i], zeni.RoleMember) {
-				continue
-			}
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
-				return nil, err
-			}
-		}
 	}
 
 	return connect.NewResponse(&zenaov1.ParticipateResponse{}), nil
