@@ -3,7 +3,7 @@
 import React from "react";
 import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { Trash2Icon, Plus } from "lucide-react";
+import { Trash2Icon, Plus, Info } from "lucide-react";
 import { useMediaQuery } from "../../../hooks/use-media-query";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
@@ -21,6 +21,12 @@ import {
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { CommunityFormSchemaType, communityFormSchema } from "@/types/schemas";
 import { cn } from "@/lib/tailwind";
+import Heading from "@/components/widgets/texts/heading";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -100,13 +106,22 @@ export const CommunityForm = ({
             </Card>
 
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
-              <FormFieldInputString
-                control={form.control}
-                name="shortDescription"
-                label={t("shortDescription-label")}
-                placeholder={t("shortDescription-placeholder")}
-                className="mb-4"
-              />
+              <div className="flex gap-2 items-center mb-4">
+                <Heading level={3}>{t("description-label")}</Heading>
+
+                <Tooltip delayDuration={500}>
+                  <TooltipTrigger
+                    type="button"
+                    className="group cursor-pointer"
+                  >
+                    <Info
+                      size={16}
+                      className="text-muted-foreground transition-colors"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("description-tooltip")}</TooltipContent>
+                </Tooltip>
+              </div>
 
               <Tabs defaultValue="write" className="w-full">
                 <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
@@ -129,6 +144,34 @@ export const CommunityForm = ({
                   <MarkdownPreview markdownString={description} />
                 </TabsContent>
               </Tabs>
+
+              <div className="transition-all">
+                <div className="flex gap-2 items-center mt-4">
+                  <Heading level={3}>{t("shortDescription-label")}</Heading>
+
+                  <Tooltip delayDuration={500}>
+                    <TooltipTrigger
+                      type="button"
+                      className="group cursor-pointer"
+                    >
+                      <Info
+                        size={16}
+                        className="text-muted-foreground transition-colors"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("shortDescription-tooltip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <FormFieldInputString
+                  control={form.control}
+                  name="shortDescription"
+                  // label={t("shortDescription-label")}
+                  placeholder={t("shortDescription-placeholder")}
+                  className="mt-4"
+                />
+              </div>
             </Card>
           </div>
 
