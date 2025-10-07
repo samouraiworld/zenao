@@ -300,6 +300,14 @@ func (g *gnoZenaoChain) GetEventCommunity(eventID string) (*zeni.Community, erro
 	return nil, nil
 }
 
+// ValidatePassword implements ZenaoChain.
+func (g *gnoZenaoChain) ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error) {
+	g, span := g.trace("gzchain.ValidatePassword")
+	defer span.End()
+
+	return false, nil
+}
+
 // CancelEvent implements ZenaoChain.
 func (g *gnoZenaoChain) CancelEvent(evtID string, callerID string) error {
 	g, span := g.trace("gzchain.CancelEvent")

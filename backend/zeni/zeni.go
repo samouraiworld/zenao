@@ -288,6 +288,7 @@ type Chain interface {
 	GetEventGatekeepers(evtID string) ([]*User, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventCommunity(eventID string) (*Community, error)
+	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 
 	// TODO: what happens if community not found ? should i just return empty cmt & empty err or err handle it ?
 	GetCommunity(communityID string) (*Community, error)
