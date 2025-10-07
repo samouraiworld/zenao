@@ -266,6 +266,7 @@ message TicketInfo {
 message CheckinRequest {
   string ticket_pubkey = 1;
   string signature = 2;
+  string event_id = 3;
 }
 
 message CheckinResponse {}

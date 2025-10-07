@@ -36,8 +36,11 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 	// 	return nil, err
 	// }
 
-	// TODO:
-	// 1. Retrieve the event on chain
+	// TODO: I added event_id in the request to avoid to search on-chain the event based on the ticket pubkey
+	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	if err != nil {
+		return nil, err
+	}
 
 	if evt != nil {
 		if err := s.Chain.WithContext(ctx).Checkin(evt.ID, zUser.ID, req.Msg); err != nil {
