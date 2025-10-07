@@ -42,7 +42,7 @@ func main() {
 		newFakegenCmd(),
 		newMailCmd(),
 		newPromoteUserCmd(),
-		newRealmsrcCmd(),
+		gzchain.NewRealmsrcCmd(),
 		newE2EInfraCmd(),
 		newGenticketCmd(),
 		newGenPdfTicketCmd(),

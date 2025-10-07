@@ -1,4 +1,4 @@
-package main
+package gzchain
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
-func newRealmsrcCmd() *commands.Command {
+func NewRealmsrcCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
 			Name:       "realmsrc",
