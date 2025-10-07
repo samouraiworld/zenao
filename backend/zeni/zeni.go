@@ -93,6 +93,9 @@ type Event struct {
 	PasswordHash      string
 	ICSSequenceNumber uint32
 	Discoverable      bool
+
+	// Optional: can be empty & limited to one for now (but can be more later)
+	CommunityID string
 }
 
 type Community struct {
