@@ -34,48 +34,10 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	// TODO:
-	// R1. emove commented code should be enough
-
-	// roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// if len(roles) == 0 {
-	// 	return nil, errors.New("user is not a member of the organization that owns the feed")
-	// }
 	_, postID, err := s.Chain.WithContext(ctx).CreatePoll(zUser.ID, req.Msg)
 	if err != nil {
 		return nil, err
 	}
-
-	// postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// post := &feedsv1.Post{
-	// 	Post: &feedsv1.Post_Link{
-	// 		Link: &feedsv1.LinkPost{
-	// 			Uri: postURI.String(),
-	// 		},
-	// 	},
-	// }
-
-	// zpoll := (*zeni.Poll)(nil)
-	// if err := s.DB.TxWithSpan(ctx, "db.CreatePoll", func(db zeni.DB) error {
-	// 	feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
-	// 	if err != nil {
-	// 		return err
-	// 	}
-
-	// 	if zpoll, err = db.CreatePoll(zUser.ID, pollID, postID, feed.ID, post, req.Msg); err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }); err != nil {
-	// 	return nil, err
-	// }
 
 	return connect.NewResponse(&zenaov1.CreatePollResponse{PostId: postID}), nil
 
