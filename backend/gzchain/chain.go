@@ -268,8 +268,17 @@ func (g *gnoZenaoChain) GetEvent(evtID string) (*zeni.Event, error) {
 }
 
 // GetEventParticipants implements ZenaoChain.
+// XXX: refacto in GetEventUsersByRole ?
 func (g *gnoZenaoChain) GetEventParticipants(evtID string) ([]*zeni.User, error) {
 	g, span := g.trace("gzchain.GetEventParticipants")
+	defer span.End()
+
+	return nil, nil
+}
+
+// GetEventGatekeepers implements ZenaoChain.
+func (g *gnoZenaoChain) GetEventGatekeepers(evtID string) ([]*zeni.User, error) {
+	g, span := g.trace("gzchain.GetEventGatekeepers")
 	defer span.End()
 
 	return nil, nil

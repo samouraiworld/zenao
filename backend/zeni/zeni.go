@@ -284,6 +284,7 @@ type Chain interface {
 
 	GetEvent(eventID string) (*Event, error)
 	GetEventParticipants(eventID string) ([]*User, error)
+	GetEventGatekeepers(evtID string) ([]*User, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventCommunity(eventID string) (*Community, error)
 
