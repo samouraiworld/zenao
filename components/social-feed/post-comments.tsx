@@ -4,8 +4,8 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { PostCardLayout } from "./post-card-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { profileOptions } from "@/lib/queries/profile";
 import {
@@ -15,9 +15,8 @@ import {
 import { userAddressOptions } from "@/lib/queries/user";
 import { isStandardPost, StandardPostView } from "@/lib/social-feed";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
-import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-import { derivePkgAddr } from "@/lib/gno";
+import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
+import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 
 function PostComment({
   eventId,
@@ -79,9 +78,11 @@ function PostComment({
 export function PostComments({
   eventId,
   parentId,
+  feedId,
 }: {
   eventId: string;
   parentId: string;
+  feedId: string;
 }) {
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -107,14 +108,11 @@ export function PostComments({
     });
   }, [commentsPages]);
 
-  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
-
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
     feedId,
     parentId,
   );
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(eventId);
 
   return (
     <div className="space-y-1">

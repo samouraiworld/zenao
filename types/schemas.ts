@@ -122,7 +122,7 @@ export const gnoProfileDetailsSchema = z.object({
   socialMediaLinks: z.array(userFormSocialLinkSchema).default([]),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
-  bannerUri: z.string().optional().default("")
+  bannerUri: z.string().optional().default(""),
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
@@ -195,6 +195,7 @@ export type EventInfoTabsSchemaType = z.infer<typeof eventInfoTabsSchema>;
 
 export const communityTabsSchema = z.union([
   z.literal("chat"),
+  z.literal("votes"),
   z.literal("events"),
   z.literal("members"),
   z.literal("proposals"),

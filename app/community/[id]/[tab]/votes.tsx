@@ -1,29 +1,29 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import EmptyList from "@/components/widgets/lists/empty-list";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo } from "react";
 import { userAddressOptions } from "@/lib/queries/user";
-import { derivePkgAddr } from "@/lib/gno";
+import { PollPostView } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
-import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
+import { PollsList } from "@/components/social-feed/polls-list";
+import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import { PostsList } from "@/components/social-feed/posts-list";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
+import { derivePkgAddr } from "@/lib/gno";
 import { communityUserRoles } from "@/lib/queries/community";
 import { usePwaContext } from "@/components/providers/pwa-state-provider";
 
-type CommunityChatProps = {
+type CommunityPollsProps = {
   communityId: string;
 };
 
-function CommunityChat({ communityId }: CommunityChatProps) {
+function CommunityPolls({ communityId }: CommunityPollsProps) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -35,43 +35,27 @@ function CommunityChat({ communityId }: CommunityChatProps) {
 
   const { onDisplayBottomBarChange } = usePwaContext();
 
-  const [postInEdition, setPostInEdition] = useState<{
-    postId: string;
-    content: string;
-  } | null>(null);
-
   const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
   const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
   const {
-    data: postsPages,
+    data: pollsPages,
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userAddress || ""),
   );
-  const posts = useMemo(
+
+  const polls = useMemo(
     () =>
-      postsPages.pages.flat().map<SocialFeedPost>((post) => {
-        if (isPollPost(post)) {
-          return {
-            postType: "poll",
-            data: post,
-          };
-        } else if (isStandardPost(post)) {
-          return {
-            postType: "standard",
-            data: post,
-          };
-        }
-        return {
-          postType: "unknown",
-          data: post,
-        };
+      pollsPages.pages.flat().filter((post): post is PollPostView => {
+        return (
+          post.post?.post.case === "link" && post.post?.tags?.includes("poll")
+        );
       }),
-    [postsPages],
+    [pollsPages],
   );
 
   const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
@@ -88,16 +72,16 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   }, [onDisplayBottomBarChange, userRoles]);
 
   return (
-    <div className="relative space-y-8">
-      {posts.length === 0 ? (
-        <EmptyList
-          title={t("no-posts-title")}
-          description={t("no-posts-description")}
-        />
-      ) : (
-        <div className="space-y-4">
-          <PostsList
-            posts={posts}
+    <>
+      <div className="space-y-4">
+        {!polls.length ? (
+          <EmptyList
+            title={t("feed.no-polls-title")}
+            description={t("feed.no-polls-description")}
+          />
+        ) : (
+          <PollsList
+            polls={polls}
             userAddress={userAddress}
             onReactionChange={onReactionChange}
             canInteract={
@@ -105,32 +89,24 @@ function CommunityChat({ communityId }: CommunityChatProps) {
               userRoles.includes("administrator")
             }
             onDelete={onDelete}
-            postInEdition={postInEdition?.postId ?? null}
-            onEditModeChange={(postId, content, editMode) => {
-              if (!editMode) {
-                setPostInEdition(null);
-                return;
-              }
-              setPostInEdition({ postId, content });
-            }}
+            canReply
             isReacting={isReacting}
             isDeleting={isDeleting}
           />
-        </div>
-      )}
-
+        )}
+      </div>
       <div className="py-4">
         <LoaderMoreButton
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetching={isFetching}
           isFetchingNextPage={isFetchingNextPage}
-          page={posts}
-          noMoreLabel={""}
+          page={polls}
+          noMoreLabel={t("no-more-posts")}
         />
       </div>
-    </div>
+    </>
   );
 }
 
-export default CommunityChat;
+export default CommunityPolls;

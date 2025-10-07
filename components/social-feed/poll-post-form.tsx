@@ -28,12 +28,14 @@ import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
 export function PollPostForm({
-  eventId,
+  orgType,
+  orgId,
   feedInputMode,
   setFeedInputMode,
   form,
 }: {
-  eventId: string;
+  orgType: string;
+  orgId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
   form: UseFormReturn<FeedPostFormSchemaType>;
@@ -43,7 +45,7 @@ export function PollPostForm({
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const t = useTranslations("event-feed.poll-form");
+  const t = useTranslations("social-feed.poll-form");
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const { createPoll, isPending } = useCreatePoll(queryClient);
@@ -93,8 +95,8 @@ export function PollPostForm({
       );
 
       await createPoll({
-        orgType: "event",
-        orgId: eventId,
+        orgType,
+        orgId,
         question: values.question,
         duration,
         options: values.options.map((option) => option.text),

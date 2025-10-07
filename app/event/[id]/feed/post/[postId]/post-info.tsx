@@ -6,15 +6,13 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { PostComments } from "@/components/event-feed-form/post-comments";
-import { StandardPostForm } from "@/components/event-feed-form/standard-post-form";
 import { PollPost } from "@/components/social-feed/poll-post";
 import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 import { StandardPostCard } from "@/components/social-feed/standard-post-card";
 import Heading from "@/components/widgets/texts/heading";
-import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
-import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
+import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
+import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
+import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import { useToast } from "@/hooks/use-toast";
 import { derivePkgAddr } from "@/lib/gno";
 import { parsePollUri } from "@/lib/multiaddr";
@@ -25,6 +23,8 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { FeedPostFormSchemaType } from "@/types/schemas";
+import { StandardPostForm } from "@/components/social-feed/standard-post-form";
+import { PostComments } from "@/components/social-feed/post-comments";
 
 function PostCommentForm({
   eventId,
@@ -38,7 +38,7 @@ function PostCommentForm({
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const { toast } = useToast();
-  const t = useTranslations("event-feed.standard-post-form");
+  const t = useTranslations("social-feed.standard-post-form");
 
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
@@ -150,9 +150,9 @@ export default function PostInfo({
   const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
   const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
-  const { onEditStandardPost, isEditing } = useEventPostEditHandler(feedId);
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
+  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
   const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
     await onEditStandardPost(postId, values);
@@ -227,6 +227,7 @@ export default function PostInfo({
             <PostComments
               eventId={eventId}
               parentId={post.post.localPostId.toString()}
+              feedId={feedId}
             />
           </Suspense>
         </div>

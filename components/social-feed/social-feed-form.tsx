@@ -13,14 +13,13 @@ import { userAddressOptions } from "@/lib/queries/user";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/hooks/use-toast";
 
-const _eventTabs = ["description", "discussion", "votes"] as const;
-export type EventTab = (typeof _eventTabs)[number];
-
-const EventFeedForm = ({
-  eventId,
+const SocialFeedForm = ({
+  orgType,
+  orgId,
   form,
 }: {
-  eventId: string;
+  orgType: string;
+  orgId: string;
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) => {
   const { toast } = useToast();
@@ -31,7 +30,7 @@ const EventFeedForm = ({
     userAddressOptions(getToken, userId),
   );
 
-  const t = useTranslations("event-feed.standard-post-form");
+  const t = useTranslations("social-feed.standard-post-form");
 
   const formContainerRef = useRef<HTMLDivElement>(null);
   const [feedInputMode, setFeedInputMode] =
@@ -57,8 +56,8 @@ const EventFeedForm = ({
       }
 
       await createStandardPost({
-        orgType: "event",
-        orgId: eventId,
+        orgType,
+        orgId,
         content: values.content,
         parentId: values.parentPostId?.toString() ?? "",
         token,
@@ -89,7 +88,8 @@ const EventFeedForm = ({
       <div className="w-full">
         {feedInputMode === "POLL" ? (
           <PollPostForm
-            eventId={eventId}
+            orgType={orgType}
+            orgId={orgId}
             feedInputMode={feedInputMode}
             setFeedInputMode={setFeedInputMode}
             form={form}
@@ -108,4 +108,4 @@ const EventFeedForm = ({
   );
 };
 
-export default EventFeedForm;
+export default SocialFeedForm;

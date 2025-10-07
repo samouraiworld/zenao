@@ -230,7 +230,7 @@
   "no-posts-title": "No posts to show.",
   "no-posts-description": "You have no posts. Why not create one?",
   "no-more-posts": "No more to show for now.",
-  "event-feed": {
+  "social-feed": {
     "global-feed": "Global feed",
     "polls-feed": "Polls",
     "no-polls-title": "No polls to show.",
@@ -317,6 +317,7 @@
   "toast-delete-post-error": "Error while deleting the post",
   "community": {
     "chat": "Chat",
+    "votes": "Votes",
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals",

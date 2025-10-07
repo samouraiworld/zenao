@@ -14,8 +14,8 @@ import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { PollsList } from "@/components/social-feed/polls-list";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
-import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
+import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
+import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import { derivePkgAddr } from "@/lib/gno";
 
 type EventPollsProps = {
@@ -56,16 +56,16 @@ function EventPolls({ eventId }: EventPollsProps) {
     [pollsPages],
   );
 
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
   return (
     <>
       <div className="space-y-4">
         {!polls.length ? (
           <EmptyList
-            title={t("event-feed.no-polls-title")}
-            description={t("event-feed.no-polls-description")}
+            title={t("feed.no-polls-title")}
+            description={t("feed.no-polls-description")}
           />
         ) : (
           <PollsList

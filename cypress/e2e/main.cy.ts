@@ -224,7 +224,7 @@ describe("main", () => {
     // Go Description tab
     cy.get("button").contains("Discussions").click();
 
-    // EventFeedForm should not exist
+    // SocialFeedForm should not exist
     cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
       "not.exist",
     );
@@ -245,7 +245,7 @@ describe("main", () => {
     // Go to feed tab
     cy.get("button").contains("Discussions").click();
 
-    // EventFeedForm should exist
+    // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
       .type(testStandardPost, { delay: 1 });
@@ -267,7 +267,7 @@ describe("main", () => {
 
     cy.url().should("contain", "/event/");
 
-    // EventFeedForm should not exist
+    // SocialFeedForm should not exist
     cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
       "not.exist",
     );
@@ -341,7 +341,7 @@ describe("main", () => {
     // Go Description tab
     cy.get("button").contains("Discussions").click();
 
-    // EventFeedForm should exist
+    // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
       .type(testStandardPost, { delay: 1 });

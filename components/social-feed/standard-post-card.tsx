@@ -2,8 +2,8 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { StandardPostForm } from "../event-feed-form/standard-post-form";
-import { PostCardLayout } from "@/components/social-feed/post-card-layout";
+import { PostCardLayout } from "./post-card-layout";
+import { StandardPostForm } from "./standard-post-form";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { cford32Encode } from "@/lib/cford32";
 import { profileOptions } from "@/lib/queries/profile";
