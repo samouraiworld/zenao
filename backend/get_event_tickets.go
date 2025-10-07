@@ -31,19 +31,19 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, errors.New("user is banned")
 	}
 
-	// tickets, err := s.DB.WithContext(ctx).GetEventUserOrBuyerTickets(req.Msg.EventId, zUser.ID)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// TODO:
-	// 1. Retrieve tickets for each user
+	// TODO: since user can register others people, we need to get all tickets where user is buyer too
+	// XXX: before with the DB as SoT, we request GetEventUserOrBuyerTickets to get all tickets where user is buyer or user
+	ticket, err := s.Chain.WithContext(ctx).GetEventUserTicket(req.Msg.EventId, zUser.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	userIDs := []string{}
 	ticketsWithUser := []*zeni.SoldTicket{}
 	ticketsWithoutUser := []*zeni.SoldTicket{}
 
-	for _, tk := range tickets {
+	// TODO: change to iterate on all tickets bought/created by the user
+	for _, tk := range []*zeni.SoldTicket{ticket} {
 		if tk.User == nil {
 			ticketsWithoutUser = append(ticketsWithoutUser, tk)
 			continue
