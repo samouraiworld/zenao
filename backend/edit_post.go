@@ -37,34 +37,6 @@ func (s *ZenaoServer) EditPost(ctx context.Context, req *connect.Request[zenaov1
 		}
 	}
 
-	// var zpost *zeni.Post
-	// if err := s.DB.TxWithSpan(ctx, "db.EditPost", func(db zeni.DB) error {
-	// 	zpost, err = db.GetPostByID(req.Msg.PostId)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if zpost.UserID != zUser.ID {
-	// 		return errors.New("user is not the author of the post")
-	// 	}
-	// 	feed, err := db.GetFeedByID(zpost.FeedID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, feed.OrgType, feed.OrgID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if len(roles) == 0 {
-	// 		return errors.New("user is not a member of the event")
-	// 	}
-	// 	return db.EditPost(req.Msg.PostId, req.Msg)
-	// }); err != nil {
-	// 	return nil, err
-	// }
-
-	// TODO:
-	// 1. Remove the commented code should be enough
-
 	post := &feedsv1.Post{
 		Tags: req.Msg.Tags,
 
