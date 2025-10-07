@@ -1380,20 +1380,11 @@ func (e *EditPostRequest) FromJSON(node *json.Node) {
 func (e *EditPostResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if e.PostId != "" {
-		fields["postId"] = json.StringNode("", e.PostId)
-	}
-
 	return json.ObjectNode("", fields)
 }
 
 func (e *EditPostResponse) FromJSON(node *json.Node) {
 	*e = EditPostResponse{}
-	fields := node.MustObject()
-
-	if val, ok := fields["postId"]; ok {
-		e.PostId = val.MustString()
-	}
 }
 
 func (g *GetEventTicketsRequest) ToJSON() *json.Node {
@@ -1479,6 +1470,9 @@ func (c *CheckinRequest) ToJSON() *json.Node {
 	if c.Signature != "" {
 		fields["signature"] = json.StringNode("", c.Signature)
 	}
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -1492,6 +1486,9 @@ func (c *CheckinRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["signature"]; ok {
 		c.Signature = val.MustString()
+	}
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
 	}
 }
 
