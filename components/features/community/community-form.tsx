@@ -28,6 +28,8 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import SettingsSection from "@/components/layout/settings-section";
+import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
+import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -158,28 +160,14 @@ export const CommunityForm = ({
               </div>
 
               <Tabs defaultValue="write" className="w-full">
-                <TabsList
+                <TabsIconsList
+                  tabs={getMarkdownEditorTabs({
+                    writeLabel: t("write-tab"),
+                    previewLabel: t("preview-tab"),
+                  })}
                   className="absolute right-2 rounded p-0 h-fit"
-                  tabIndex={-1}
                   style={{ top: "0.75rem" }}
-                >
-                  <Tooltip>
-                    <TooltipTrigger type="button">
-                      <TabsTrigger value="write">
-                        <SquarePen className="size-4" />
-                      </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("write-tab")}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger type="button">
-                      <TabsTrigger value="preview">
-                        <Columns2 className="size-4" />
-                      </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("preview-tab")}</TooltipContent>
-                  </Tooltip>
-                </TabsList>
+                />
 
                 <TabsContent value="write" tabIndex={-1}>
                   <FormFieldTextArea
