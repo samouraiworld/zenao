@@ -19,8 +19,8 @@ import {
   SignInButton,
   useAuth,
 } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
@@ -166,53 +166,50 @@ const GoBackButton = ({ className }: { className?: string }) => {
 export function Header() {
   const { getToken, userId } = useAuth();
   const t = useTranslations("navigation");
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
-
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const { data: address } = useQuery(userAddressOptions(getToken, userId));
+  const scrollDirection = useScrollDirection();
 
   return (
-    <div className="flex justify-between p-4 w-full items-center">
-      {/* Desktop */}
-      <div className="flex max-[450px]:gap-4 gap-6 items-center">
-        <div className="flex items-center gap-2">
-          <GoBackButton className="hidden standalone:flex" />
-          <Link href="/" className="flex gap-2 items-center">
-            <Web3Image
-              src="/zenao-logo.png"
-              alt="zenao logo"
-              width={28}
-              height={28}
-              className="max-[450px]:w-6 max-[450px]:h-6"
-              priority
-            />
-            <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
-          </Link>
+    <div
+      className={`sticky ${scrollDirection === "down" ? "-top-24" : "top-0"} bg-background z-50 transition-all duration-500`}
+    >
+      <div className="flex justify-between p-4 w-full items-center">
+        {/* Desktop */}
+        <div className="flex max-[450px]:gap-4 gap-6 items-center">
+          <div className="flex items-center gap-2">
+            <GoBackButton className="hidden standalone:flex" />
+            <Link href="/" className="flex gap-2 items-center">
+              <Web3Image
+                src="/zenao-logo.png"
+                alt="zenao logo"
+                width={28}
+                height={28}
+                className="max-[450px]:w-6 max-[450px]:h-6"
+                priority
+              />
+              <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
+            </Link>
+          </div>
+          <div className="flex standalone:hidden standalone:md:flex flex-row gap-4">
+            <HeaderLinks />
+          </div>
         </div>
-        <div className="flex standalone:hidden standalone:md:flex flex-row gap-4">
-          <HeaderLinks />
-        </div>
-      </div>
 
-      <div className="flex gap-2 items-center">
-        <Link passHref href="/create">
-          <ButtonWithChildren
-            variant="outline"
-            size="sm"
-            className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
-          >
-            {t("create-event")}
-          </ButtonWithChildren>
-        </Link>
-        <div className="max-md:hidden">
-          <ToggleThemeButton />
+        <div className="flex gap-2 items-center">
+          <Link passHref href="/create">
+            <ButtonWithChildren
+              variant="outline"
+              size="sm"
+              className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
+            >
+              {t("create-event")}
+            </ButtonWithChildren>
+          </Link>
+          <div className="max-md:hidden">
+            <ToggleThemeButton />
+          </div>
+          <Auth userAddress={address} className="h-fit" />
         </div>
-        <Auth userAddress={address} className="h-fit" isMounted={isMounted} />
       </div>
     </div>
   );
@@ -223,11 +220,9 @@ const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 const Auth = ({
   className,
   userAddress,
-  isMounted,
 }: {
-  userAddress: string | null;
+  userAddress?: string | null;
   className?: string;
-  isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
   const { signOut } = useAuth();
@@ -246,30 +241,28 @@ const Auth = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           {/* Loading state */}
-          {isMounted && (
-            <div>
-              <ClerkLoading>
-                <div className={avatarClassName}>
-                  <UserAvatarSkeleton className={avatarClassName} />
-                </div>
-              </ClerkLoading>
-              {/* Signed in state */}
-              <SignedIn>
-                <div
-                  className={cn(
-                    avatarClassName,
-                    "cursor-pointer hover:scale-110 transition-transform ease-out",
-                  )}
-                >
-                  <UserAvatar
-                    address={userAddress}
-                    className={avatarClassName}
-                    size="sm"
-                  />
-                </div>
-              </SignedIn>
-            </div>
-          )}
+          <div>
+            <ClerkLoading>
+              <div className={avatarClassName}>
+                <UserAvatarSkeleton className={avatarClassName} size="sm" />
+              </div>
+            </ClerkLoading>
+            {/* Signed in state */}
+            <SignedIn>
+              <div
+                className={cn(
+                  avatarClassName,
+                  "cursor-pointer hover:scale-110 transition-transform ease-out",
+                )}
+              >
+                <UserAvatar
+                  address={userAddress}
+                  className={avatarClassName}
+                  size="sm"
+                />
+              </div>
+            </SignedIn>
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
           <Link href={`/profile/${userAddress}`}>
@@ -296,3 +289,33 @@ const Auth = ({
     </div>
   );
 };
+
+function useScrollDirection() {
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down" | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let lastScrollY = window.pageYOffset;
+
+    const min = 5;
+
+    const updateScrollDirection = () => {
+      const scrollY = window.pageYOffset;
+      const direction = scrollY > lastScrollY ? "down" : "up";
+      if (
+        direction !== scrollDirection &&
+        (scrollY - lastScrollY > min || scrollY - lastScrollY < -min)
+      ) {
+        setScrollDirection(direction);
+      }
+      lastScrollY = scrollY > 0 ? scrollY : 0;
+    };
+    window.addEventListener("scroll", updateScrollDirection); // add event listener
+    return () => {
+      window.removeEventListener("scroll", updateScrollDirection); // clean up
+    };
+  }, [scrollDirection]);
+
+  return scrollDirection;
+}

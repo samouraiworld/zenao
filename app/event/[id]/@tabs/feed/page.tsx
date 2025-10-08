@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { useMemo, useState } from "react";
+import React from "react";
 import { userAddressOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
@@ -16,16 +17,17 @@ import { PostsList } from "@/components/social-feed/posts-list";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-// import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 import { derivePkgAddr } from "@/lib/gno";
 import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
 type EventFeedProps = {
-  eventId: string;
+  params: Promise<{ id: string }>;
 };
 
-function EventFeed({ eventId }: EventFeedProps) {
+function EventFeed({ params }: EventFeedProps) {
+  const { id: eventId } = React.use(params);
+
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
     userAddressOptions(getToken, userId),

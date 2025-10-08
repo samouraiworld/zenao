@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
+import { tracer } from "../tracer";
 import { zenaoClient } from "@/lib/zenao-client";
 
 type GetToken = ReturnType<typeof useAuth>["getToken"];
@@ -15,15 +16,20 @@ export const userAddressOptions = (
       if (!userId || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
         return null;
       }
-      const authToken = await getToken();
-      if (authToken == null) {
-        return null;
+      const span = tracer.startSpan("query:user:" + userId + ":address");
+      try {
+        const authToken = await getToken();
+        if (authToken == null) {
+          return null;
+        }
+        const { address } = await zenaoClient.getUserAddress(
+          {},
+          { headers: { Authorization: "Bearer " + authToken } },
+        );
+        return address;
+      } finally {
+        span.end();
       }
-      const { address } = await zenaoClient.getUserAddress(
-        {},
-        { headers: { Authorization: "Bearer " + authToken } },
-      );
-      return address;
     },
     enabled: !!userId,
   });

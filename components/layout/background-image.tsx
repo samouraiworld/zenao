@@ -17,7 +17,7 @@ export function BackgroundImage(props: BackgroundProps) {
       height={props.height}
       priority
       fetchPriority="high"
-      className="absolute pointer-events-none w-full h-full top-0 blur-[8rem] opacity-25 sm:opacity-15"
+      className="absolute pointer-events-none w-full h-full top-0 blur-[8rem] opacity-25 sm:opacity-15 transition-opacity"
     />
   );
 }
