@@ -14,6 +14,27 @@ type daoPublic struct {
 	impl *DAOPrivate
 }
 
+type SetImplemRaw func(newLocalDAO daokit.DAO, newDAO daokit.DAO)
+
+type RenderFn func(path string, dao *DAOPrivate) string
+
+// Extension implements daokit.DAO.
+func (d *daoPublic) Extension(path string) daokit.Extension {
+	ext, ok := d.impl.Core.Extensions.Get(path)
+	if !ok {
+		return nil
+	}
+	if ext.Info().Private && runtime.CurrentRealm().PkgPath() != d.impl.Realm.PkgPath() {
+		panic("attempt to get private extension outside of DAO realm")
+	}
+	return ext
+}
+
+// ExtensionsList implements daokit.DAO.
+func (d *daoPublic) ExtensionsList() daokit.ExtensionsList {
+	return d.impl.Core.Extensions.List()
+}
+
 func (d *daoPublic) Propose(req daokit.ProposalRequest) uint64 {
 	return d.impl.Propose(req)
 }
@@ -26,6 +47,10 @@ func (d *daoPublic) Vote(id uint64, vote daocond.Vote) {
 	d.impl.Vote(id, vote)
 }
 
+func (d *daoPublic) Render(path string) string {
+	return d.impl.Render(path)
+}
+
 // DAO is meant for internal realm usage and should not be exposed
 type DAOPrivate struct {
 	Core             *daokit.Core
@@ -33,6 +58,9 @@ type DAOPrivate struct {
 	RenderRouter     *mux.Router
 	GetProfileString ProfileStringGetter
 	Realm            runtime.Realm
+	RenderFn         func(path string, dao *DAOPrivate) string
+
+	InitialConfig *Config // mostly there in case we need this data during upgrade
 }
 
 type Config struct {
@@ -46,6 +74,11 @@ type Config struct {
 	SetProfileString   ProfileStringSetter
 	GetProfileString   ProfileStringGetter
 	NoCreationEvent    bool
+	SetImplemFn        SetImplemRaw
+	MigrationParamsFn  MigrationParamsFn
+	RenderFn           RenderFn
+	CrossFn            daokit.CrossFn
+	PrivateVarName     string
 }
 
 type ProfileStringSetter func(cur realm, field string, value string) bool
@@ -71,7 +104,17 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		Members:          members,
 		GetProfileString: conf.GetProfileString,
 		Realm:            runtime.CurrentRealm(),
+		RenderFn:         conf.RenderFn,
+		InitialConfig:    conf,
 	}
+
+	pubdao := &daoPublic{impl: dao}
+
+	dao.Core.Extensions.Set(&membersViewExtension{
+		getStore:  func() *MembersStore { return dao.Members },
+		queryPath: dao.Realm.PkgPath() + "." + conf.PrivateVarName + ".Members",
+	})
+
 	dao.initRenderingRouter()
 
 	if !conf.NoDefaultRendering {
@@ -95,6 +138,29 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 				Condition:   conf.InitialCondition,
 				DisplayName: "Edit Profile",
 				Description: "This proposal allows you to edit this DAO profile.",
+			})
+		}
+
+		if conf.SetImplemFn != nil {
+			if conf.CrossFn == nil {
+				panic("nil cross function")
+			}
+
+			setImplemFn := func(dao daokit.DAO) {
+				crossingDAO := daokit.NewCrossing(dao, conf.CrossFn)
+				conf.SetImplemFn(dao, crossingDAO)
+			}
+			setImplemFn(pubdao)
+
+			if conf.MigrationParamsFn == nil {
+				conf.MigrationParamsFn = func() []any { return nil }
+			}
+
+			dao.Core.Resources.Set(&daokit.Resource{
+				Handler:     NewChangeDAOImplementationHandler(dao, setImplemFn, conf.MigrationParamsFn),
+				Condition:   conf.InitialCondition,
+				DisplayName: "Change DAO Implementation",
+				Description: "Change the underlying DAO implementation.",
 			})
 		}
 
@@ -135,7 +201,7 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		chain.Emit(EventBaseDAOCreated)
 	}
 
-	return &daoPublic{impl: dao}, dao
+	return pubdao, dao
 }
 
 func (d *DAOPrivate) Vote(proposalID uint64, vote daocond.Vote) {
