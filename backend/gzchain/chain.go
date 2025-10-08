@@ -270,12 +270,12 @@ func (g *gnoZenaoChain) GetEvent(evtID string) (*zenaov1.EventInfo, error) {
 		return nil, fmt.Errorf("first unmarshal failed: %w", err)
 	}
 
-	var res *zenaov1.EventInfo
-	if err := protojson.Unmarshal([]byte(innerStr), res); err != nil {
+	var res zenaov1.EventInfo
+	if err := protojson.Unmarshal([]byte(innerStr), &res); err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return &res, nil
 }
 
 // GetEventParticipants implements ZenaoChain.
