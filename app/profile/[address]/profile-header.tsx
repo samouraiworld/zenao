@@ -48,19 +48,15 @@ export default function ProfileHeader({
   return (
     <div className="flex flex-col w-full">
       <div className="relative w-full">
-        {profileDetails.bannerUri ? (
           <AspectRatio ratio={4 / 1}>
             <Web3Image
-              src={profileDetails.bannerUri}
+              src={profileDetails?.bannerUri || "/zenao-banner.png"}
               alt="Profile banner"
               priority
               fill
               className="w-full h-full object-cover"
             />
           </AspectRatio>
-        ) : (
-          <Skeleton className="w-full h-32 sm:h-48" />
-        )}
 
         <div className="absolute -bottom-14 left-6">
           {avatarUri ? (
