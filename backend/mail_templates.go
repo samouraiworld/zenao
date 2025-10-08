@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
@@ -101,23 +102,23 @@ type ticketsConfirmation struct {
 	WelcomeText     string
 }
 
-func ticketsConfirmationMailContent(event *zeni.Event, welcomeText string) (string, string, error) {
+func ticketsConfirmationMailContent(evtID string, event *zenaov1.EventInfo, welcomeText string) (string, string, error) {
 	locStr, err := zeni.LocationToString(event.Location)
 	if err != nil {
 		return "", "", err
 	}
-	tz, err := event.Timezone()
+	tz, err := zeni.EventTimezone(event.Location)
 	if err != nil {
 		return "", "", err
 	}
 	data := ticketsConfirmation{
-		ImageURL:        web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		ImageURL:        web2URL(event.ImageUri) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
 		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
 		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),
 		EventName:       event.Title,
-		TimeText:        event.StartDate.In(tz).Format(time.ANSIC) + " - " + event.EndDate.In(tz).Format(time.ANSIC),
+		TimeText:        time.Unix(int64(event.StartDate), 0).In(tz).Format(time.ANSIC) + " - " + time.Unix(int64(event.EndDate), 0).In(tz).Format(time.ANSIC),
 		LocationText:    locStr,
-		EventURL:        eventPublicURL(event.ID),
+		EventURL:        eventPublicURL(evtID),
 		WelcomeText:     welcomeText,
 	}
 
@@ -143,12 +144,12 @@ type eventBroadcast struct {
 	EventURL  string
 }
 
-func eventBroadcastMailContent(event *zeni.Event, message string) (string, string, error) {
+func eventBroadcastMailContent(evtID string, event *zenaov1.EventInfo, message string) (string, string, error) {
 	data := eventBroadcast{
-		ImageURL:  web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		ImageURL:  web2URL(event.ImageUri) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
 		EventName: event.Title,
 		Message:   message,
-		EventURL:  eventPublicURL(event.ID),
+		EventURL:  eventPublicURL(evtID),
 	}
 
 	buf := &strings.Builder{}
@@ -177,13 +178,13 @@ type communityNewEvent struct {
 	CalendarIconURL string
 }
 
-func communityNewEventMailContent(event *zeni.Event, community *zeni.Community) (string, string, error) {
+func communityNewEventMailContent(evtID string, event *zenaov1.EventInfo, community *zeni.Community) (string, string, error) {
 	data := communityNewEvent{
 		EventName:       event.Title,
-		EventImage:      web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
-		EventDate:       event.StartDate.Format(time.ANSIC),
-		EventEndDate:    event.EndDate.Format(time.ANSIC),
-		EventURL:        eventPublicURL(event.ID),
+		EventImage:      web2URL(event.ImageUri) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		EventDate:       time.Unix(int64(event.StartDate), 0).In(time.UTC).Format(time.ANSIC),
+		EventEndDate:    time.Unix(int64(event.EndDate), 0).In(time.UTC).Format(time.ANSIC),
+		EventURL:        eventPublicURL(evtID),
 		CommunityName:   community.DisplayName,
 		CommunityImage:  web2URL(community.AvatarURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
 		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
@@ -215,21 +216,21 @@ type eventCancelled struct {
 	PinIconURL      string
 }
 
-func eventCancelledMailContent(event *zeni.Event) (string, string, error) {
+func eventCancelledMailContent(event *zenaov1.EventInfo) (string, string, error) {
 	locStr, err := zeni.LocationToString(event.Location)
 	if err != nil {
 		return "", "", err
 	}
-	tz, err := event.Timezone()
+	tz, err := zeni.EventTimezone(event.Location)
 	if err != nil {
 		return "", "", err
 	}
 
 	data := eventCancelled{
-		ImageURL:        web2URL(event.ImageURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		ImageURL:        web2URL(event.ImageUri) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
 		EventName:       event.Title,
-		EventStartDate:  event.StartDate.In(tz).Format(time.ANSIC),
-		EventEndDate:    event.EndDate.In(tz).Format(time.ANSIC),
+		EventStartDate:  time.Unix(int64(event.StartDate), 0).In(tz).Format(time.ANSIC),
+		EventEndDate:    time.Unix(int64(event.EndDate), 0).In(tz).Format(time.ANSIC),
 		LocationText:    locStr,
 		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
 		PinIconURL:      web2URL("ipfs://bafkreidfskfo2ld3i75s3d2uf6asiena3jletbz5cy7ostihwoyjclceqa"),

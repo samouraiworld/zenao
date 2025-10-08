@@ -91,7 +91,8 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	// TODO: handle password hash
+	privacy, err := zeni.EventPrivacyFromPasswordHash("")
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +147,8 @@ func (s *ZenaoServer) EditEvent(
 		}
 	}
 
-	if newCmt != nil && time.Now().Add(24*time.Hour).Before(evt.StartDate) && req.Msg.CommunityEmail && s.MailClient != nil {
+	startDate := time.Unix(evt.StartDate, 0).In(time.UTC)
+	if newCmt != nil && time.Now().Add(24*time.Hour).Before(startDate) && req.Msg.CommunityEmail && s.MailClient != nil {
 		participantsIDS := make(map[string]bool)
 		for _, participant := range participants {
 			participantsIDS[participant.ID] = true
@@ -163,7 +165,7 @@ func (s *ZenaoServer) EditEvent(
 			return nil, err
 		}
 
-		htmlStr, text, err := communityNewEventMailContent(evt, newCmt)
+		htmlStr, text, err := communityNewEventMailContent(req.Msg.EventId, evt, newCmt)
 		if err != nil {
 			return nil, err
 		}

@@ -35,7 +35,8 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
+	// TODO: handle creatorID since it not an id anymore, either retrieve ID from address or change the chain method
+	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.Organizers[0], zUser.ID, ticket.Ticket.Pubkey()); err != nil {
 		return nil, err
 	}
 

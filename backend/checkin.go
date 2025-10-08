@@ -34,7 +34,7 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 	}
 
 	if evt != nil {
-		if err := s.Chain.WithContext(ctx).Checkin(evt.ID, zUser.ID, req.Msg); err != nil {
+		if err := s.Chain.WithContext(ctx).Checkin(req.Msg.EventId, zUser.ID, req.Msg); err != nil {
 			s.Logger.Error("failed to checkin on-chain, ignoring to prevent entrance brick")
 		}
 	}

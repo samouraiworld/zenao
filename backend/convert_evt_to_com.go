@@ -94,7 +94,7 @@ func convertEvtToCom() error {
 	cmtReq := &zenaov1.CreateCommunityRequest{
 		DisplayName: evt.Title,
 		Description: evt.Description,
-		AvatarUri:   evt.ImageURI,
+		AvatarUri:   evt.ImageUri,
 		BannerUri:   "",
 	}
 	if evtToComConf.displayName != "" {
@@ -114,7 +114,8 @@ func convertEvtToCom() error {
 	// TODO: find a way to have better ids ?
 	uuid := uuid.New().String()
 	cmtID := strings.ReplaceAll(uuid, "-", "_")
-	err = chain.CreateCommunity(cmtID, []string{evt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
+	// TODO: handle that creatorIDs is not an id anymore, either retrieve ID from address or change the chain method
+	err = chain.CreateCommunity(cmtID, evt.Organizers, membersIDs, []string{evtToComConf.evtID}, cmtReq)
 	if err != nil {
 		return err
 	}

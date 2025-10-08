@@ -2,9 +2,7 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"embed"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,8 +10,7 @@ import (
 	"time"
 
 	"codeberg.org/go-pdf/fpdf"
-	"github.com/gnolang/gno/tm2/pkg/commands"
-	"github.com/samouraiworld/zenao/backend/gzdb"
+	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"github.com/skip2/go-qrcode"
 	"go.uber.org/zap"
@@ -22,73 +19,11 @@ import (
 //go:embed images/logo.png
 var logoFile embed.FS
 
-type genPdfTicketConfig struct {
-	eventID      string
-	ticketSecret string
-	dbPath       string
-	output       string
-}
-
-func (conf *genPdfTicketConfig) RegisterFlags(flset *flag.FlagSet) {
-	flset.StringVar(&conf.eventID, "event-id", "", "Event ID")
-	flset.StringVar(&conf.ticketSecret, "ticket-secret", "", "Ticket secret")
-	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
-	flset.StringVar(&conf.output, "output", "", "Output path")
-}
-
-func newGenPdfTicketCmd() *commands.Command {
-	var genPdfTicketConf genPdfTicketConfig
-	return commands.NewCommand(
-		commands.Metadata{
-			Name:       "gen-pdf-ticket",
-			ShortUsage: "gen-pdf-ticket",
-			ShortHelp:  "generate a PDF ticket",
-		},
-		&genPdfTicketConf,
-		func(ctx context.Context, args []string) error {
-			return execGenPdfTicket(&genPdfTicketConf)
-		},
-	)
-}
-
-func execGenPdfTicket(genPdfTicketConf *genPdfTicketConfig) error {
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		return err
-	}
-
-	db, err := gzdb.SetupDB(genPdfTicketConf.dbPath)
-	if err != nil {
-		return err
-	}
-
-	event, err := db.GetEvent(genPdfTicketConf.eventID)
-	if err != nil {
-		return err
-	}
-
-	pdf, err := GeneratePDFTicket(event, genPdfTicketConf.ticketSecret, "John Doe", "john.doe@example.com", time.Now(), logger)
-	if err != nil {
-		return err
-	}
-
-	outputPath := genPdfTicketConf.output
-	if outputPath == "" {
-		outputPath = fmt.Sprintf("%s.pdf", event.Title)
-	}
-	err = os.WriteFile(outputPath, pdf, 0644)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName string, email string, purchaseDate time.Time, logger *zap.Logger) ([]byte, error) {
+func GeneratePDFTicket(evtID string, event *zenaov1.EventInfo, ticketSecret string, DisplayName string, email string, purchaseDate time.Time, logger *zap.Logger) ([]byte, error) {
 	pdf := fpdf.New("P", "mm", "A4", "")
 	tr := pdf.UnicodeTranslatorFromDescriptor("cp1252")
 
-	pdf.SetTitle(fmt.Sprintf("Ticket - %s", event.ID), true)
+	pdf.SetTitle(fmt.Sprintf("Ticket - %s", evtID), true)
 	pdf.SetAuthor("Zenao", true)
 	pdf.SetCreationDate(time.Now())
 	pdf.AddPage()
@@ -109,8 +44,8 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 	imgX := 10.0
 	imgY := pageHeight/2 - imgHeight/2
 
-	if event.ImageURI != "" {
-		imageURL := web2URL(event.ImageURI)
+	if event.ImageUri != "" {
+		imageURL := web2URL(event.ImageUri)
 		if err := embedImageURL(pdf, imageURL, imgX, imgY, imgWidth, imgHeight); err != nil {
 			logger.Error("failed to embed image", zap.Error(err))
 			drawImagePlaceholder(pdf, imgX, imgY, imgWidth, imgHeight)
@@ -121,7 +56,7 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 
 	infoY := imgY - 58.0
 
-	tz, err := event.Timezone()
+	tz, err := zeni.EventTimezone(event.Location)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get timezone: %w", err)
 	}
@@ -132,9 +67,10 @@ func GeneratePDFTicket(event *zeni.Event, ticketSecret string, DisplayName strin
 	pdf.SetFont("Helvetica", "B", 10)
 	pdf.SetTextColor(51, 51, 51)
 	pdf.SetXY(widthMargin, infoY+8)
-	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("From: %s", event.StartDate.In(tz).Format("Monday, January 2, 2006 15:04"))))
+	// event is uint not time adapt it
+	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("From: %s", time.Unix(int64(event.StartDate), 0).In(tz).Format("Monday, January 2, 2006 15:04"))))
 	pdf.SetXY(widthMargin, infoY+15)
-	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("To: %s", event.EndDate.In(tz).Format("Monday, January 2, 2006 15:04"))))
+	pdf.Cell(maxTextWidth, 5, tr(fmt.Sprintf("To: %s", time.Unix(int64(event.EndDate), 0).In(tz).Format("Monday, January 2, 2006 15:04"))))
 
 	pdf.SetFont("Helvetica", "B", 12)
 	pdf.SetTextColor(0, 0, 0)

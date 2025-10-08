@@ -44,7 +44,6 @@ func main() {
 		newPromoteUserCmd(),
 		newE2EInfraCmd(),
 		newGenticketCmd(),
-		newGenPdfTicketCmd(),
 		newConvertEvtToComCmd(),
 		gzchain.NewRealmsrcCmd(),
 		gzchain.NewGenTxsCmd(), // TODO: remove when SOT transition is done

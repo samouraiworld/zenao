@@ -102,8 +102,9 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	var eventSK ed25519.PrivateKey
+	// TODO: Handle password change
 	if needPasswordIfGuarded {
-		if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
+		if eventSK, err = zeni.EventSKFromPasswordHash(""); err != nil {
 			return nil, err
 		}
 	}
@@ -113,7 +114,8 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		// XXX: callerID should be the current user and not creator,
 		//      this could break if the initial creator has the organizer role removed
 		//      also this bypasses password protection on-chain
-		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
+		// TODO: handle that creatorID is not just an ID but the address now
+		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.Organizers[0], participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
 			return nil, err
 		}
 
@@ -146,7 +148,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			)
 			defer span.End()
 
-			htmlStr, text, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets are attached to this email.")
+			htmlStr, text, err := ticketsConfirmationMailContent(req.Msg.EventId, evt, "Welcome! Tickets are attached to this email.")
 			if err != nil {
 				s.Logger.Error("generate-participate-email-content", zap.Error(err))
 				return
@@ -162,20 +164,20 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				)
 				defer span.End()
 				for i, ticket := range tickets {
-					pdfData, err := GeneratePDFTicket(evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
+					pdfData, err := GeneratePDFTicket(req.Msg.EventId, evt, ticket.Secret(), buyer.DisplayName, authUser.Email, time.Now(), s.Logger)
 					if err != nil {
 						s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Secret()))
 						continue
 					}
 					attachments = append(attachments, &resend.Attachment{
 						Content:     pdfData,
-						Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, evt.ID, i),
+						Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", buyer.ID, req.Msg.EventId, i),
 						ContentType: "application/pdf",
 					})
-					icsData := GenerateICS(evt, s.MailSender, s.Logger)
+					icsData := GenerateICS(req.Msg.EventId, evt, s.MailSender, s.Logger)
 					attachments = append(attachments, &resend.Attachment{
 						Content:     icsData,
-						Filename:    fmt.Sprintf("zenao_events_%s.ics", evt.ID),
+						Filename:    fmt.Sprintf("zenao_events_%s.ics", req.Msg.EventId),
 						ContentType: "text/calendar",
 					})
 				}
@@ -190,7 +192,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				Text:        text,
 				Attachments: attachments,
 			}); err != nil {
-				s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
+				s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("event-id", req.Msg.EventId), zap.String("buyer-id", buyer.ID))
 			}
 		}()
 	}

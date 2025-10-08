@@ -75,7 +75,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	if err != nil {
 		return nil, err
 	}
-	htmlStr, text, err := eventBroadcastMailContent(evt, req.Msg.Message)
+	htmlStr, text, err := eventBroadcastMailContent(req.Msg.EventId, evt, req.Msg.Message)
 	if err != nil {
 		return nil, err
 	}
@@ -88,14 +88,14 @@ func (s *ZenaoServer) BroadcastEvent(
 		attachments := make([]*resend.Attachment, 0, len(tickets))
 		if req.Msg.AttachTicket {
 			for i, ticket := range tickets[authParticipant.ID] {
-				pdfData, err := GeneratePDFTicket(evt, ticket.Ticket.Secret(), ticket.User.DisplayName, authParticipant.Email, ticket.CreatedAt, s.Logger)
+				pdfData, err := GeneratePDFTicket(req.Msg.EventId, evt, ticket.Ticket.Secret(), ticket.User.DisplayName, authParticipant.Email, ticket.CreatedAt, s.Logger)
 				if err != nil {
 					s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Ticket.Secret()))
 					return nil, err
 				}
 				attachments = append(attachments, &resend.Attachment{
 					Content:     pdfData,
-					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", ticket.BuyerID, evt.ID, i),
+					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", ticket.BuyerID, req.Msg.EventId, i),
 					ContentType: "application/pdf",
 				})
 			}

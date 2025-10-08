@@ -79,7 +79,8 @@ func (s *ZenaoServer) AddEventToCommunity(
 	}
 
 	// If the event start in more than 24h, we send an email to all community members that does not participate to the event.
-	if time.Now().Add(24*time.Hour).Before(evt.StartDate) && s.MailClient != nil {
+	startDate := time.Unix(int64(evt.StartDate), 0).In(time.UTC)
+	if time.Now().Add(24*time.Hour).Before(startDate) && s.MailClient != nil {
 		participantsIDS := make(map[string]bool)
 		for _, participant := range participants {
 			participantsIDS[participant.ID] = true
@@ -96,7 +97,7 @@ func (s *ZenaoServer) AddEventToCommunity(
 			return nil, err
 		}
 
-		htmlStr, text, err := communityNewEventMailContent(evt, cmt)
+		htmlStr, text, err := communityNewEventMailContent(req.Msg.EventId, evt, cmt)
 		if err != nil {
 			return nil, err
 		}

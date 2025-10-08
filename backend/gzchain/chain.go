@@ -31,6 +31,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const (
@@ -250,21 +251,31 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 }
 
 // GetEvent implements ZenaoChain.
-func (g *gnoZenaoChain) GetEvent(evtID string) (*zeni.Event, error) {
+func (g *gnoZenaoChain) GetEvent(evtID string) (*zenaov1.EventInfo, error) {
 	g, span := g.trace("gzchain.GetEvent")
 	defer span.End()
 
-	// TODO:
-	// 1. Get the pkgpath
-	// 2. Query
-	// eventPkgPath := g.eventRealmPkgPath(evtID)
-	// queryCfg := gnoclient.QueryCfg{
-	// 	Data: []byte{eventPkgPath+".event.Info().ToJSON().String()"},
-	// }
+	eventPkgPath := g.eventRealmPkgPath(evtID)
+	raw, err := checkQueryErr(g.client.QEval(eventPkgPath, "event.Info().ToJSON().String()"))
+	if err != nil {
+		return nil, err
+	}
+	if len(raw) < 10 || raw[0] != '(' {
+		return nil, fmt.Errorf("unexpected format: %s", raw)
+	}
+	inner := raw[1 : len(raw)-len(" string)")]
 
-	// queryRes, err := g.ClientQuery
+	var innerStr string
+	if err := json.Unmarshal([]byte(inner), &innerStr); err != nil {
+		return nil, fmt.Errorf("first unmarshal failed: %w", err)
+	}
 
-	return nil, nil
+	var res *zenaov1.EventInfo
+	if err := protojson.Unmarshal([]byte(innerStr), res); err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 // GetEventParticipants implements ZenaoChain.
@@ -1477,6 +1488,16 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 		return nil, fmt.Errorf("%w\n%s", broadcastRes.DeliverTx.Error, broadcastRes.DeliverTx.Log)
 	}
 	return broadcastRes, nil
+}
+
+func checkQueryErr(data string, queryRes *ctypes.ResultABCIQuery, baseErr error) (string, error) {
+	if baseErr != nil {
+		return "", baseErr
+	}
+	if queryRes.Response.Error != nil {
+		return "", fmt.Errorf("%w\n%s", queryRes.Response.Error, queryRes.Response.Log)
+	}
+	return data, nil
 }
 
 func (g *gnoZenaoChain) trace(label string) (*gnoZenaoChain, trace.Span) {

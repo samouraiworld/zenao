@@ -93,9 +93,6 @@ type Event struct {
 	PasswordHash      string
 	ICSSequenceNumber uint32
 	Discoverable      bool
-
-	// Optional: can be empty & limited to one for now (but can be more later)
-	CommunityID string
 }
 
 type Community struct {
@@ -187,6 +184,7 @@ func init() {
 	}
 }
 
+// TODO: DELETE THIS
 func (e *Event) Timezone() (*time.Location, error) {
 	switch val := e.Location.GetAddress().(type) {
 	case *zenaov1.EventLocation_Virtual:
@@ -199,6 +197,22 @@ func (e *Event) Timezone() (*time.Location, error) {
 		name := tzFinder.GetTimezoneName(float64(val.Geo.Lng), float64(val.Geo.Lat))
 		return time.LoadLocation(name)
 
+	default:
+		return nil, errors.New("unknown location kind")
+	}
+}
+
+func EventTimezone(location *zenaov1.EventLocation) (*time.Location, error) {
+	switch val := location.GetAddress().(type) {
+	case *zenaov1.EventLocation_Virtual:
+		return time.UTC, nil
+
+	case *zenaov1.EventLocation_Custom:
+		return time.LoadLocation(val.Custom.GetTimezone())
+
+	case *zenaov1.EventLocation_Geo:
+		name := tzFinder.GetTimezoneName(float64(val.Geo.Lng), float64(val.Geo.Lat))
+		return time.LoadLocation(name)
 	default:
 		return nil, errors.New("unknown location kind")
 	}
@@ -283,7 +297,7 @@ type Chain interface {
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
 
 	// TODO: what happens if event not found ? should i just return empty cmt & empty err or err handle it ?
-	GetEvent(eventID string) (*Event, error)
+	GetEvent(eventID string) (*zenaov1.EventInfo, error)
 	GetEventParticipants(eventID string) ([]*User, error)
 	GetEventGatekeepers(evtID string) ([]*User, error)
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
