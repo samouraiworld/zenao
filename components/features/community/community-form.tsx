@@ -3,7 +3,7 @@
 import React from "react";
 import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { Trash2Icon, Plus, Info } from "lucide-react";
+import { Trash2Icon, Plus, Info, SquarePen, Columns2 } from "lucide-react";
 import { useMediaQuery } from "../../../hooks/use-media-query";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
@@ -106,47 +106,8 @@ export const CommunityForm = ({
             </Card>
 
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
-              <div className="flex gap-2 items-center mb-4">
-                <Heading level={3}>{t("description-label")}</Heading>
-
-                <Tooltip delayDuration={500}>
-                  <TooltipTrigger
-                    type="button"
-                    className="group cursor-pointer"
-                  >
-                    <Info
-                      size={16}
-                      className="text-muted-foreground transition-colors"
-                    />
-                  </TooltipTrigger>
-                  <TooltipContent>{t("description-tooltip")}</TooltipContent>
-                </Tooltip>
-              </div>
-
-              <Tabs defaultValue="write" className="w-full">
-                <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
-                  <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
-                  <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
-                </TabsList>
-                <TabsContent value="write" tabIndex={-1}>
-                  <FormFieldTextArea
-                    control={form.control}
-                    name="description"
-                    placeholder={t("description-placeholder")}
-                    className={cn(
-                      "bg-transparent border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
-                    )}
-                    maxLength={1000}
-                    wordCounter
-                  />
-                </TabsContent>
-                <TabsContent value="preview">
-                  <MarkdownPreview markdownString={description} />
-                </TabsContent>
-              </Tabs>
-
               <div className="transition-all">
-                <div className="flex gap-2 items-center mt-4">
+                <div className="flex gap-2 items-center">
                   <Heading level={3}>{t("shortDescription-label")}</Heading>
 
                   <Tooltip delayDuration={500}>
@@ -167,11 +128,71 @@ export const CommunityForm = ({
                 <FormFieldInputString
                   control={form.control}
                   name="shortDescription"
-                  // label={t("shortDescription-label")}
                   placeholder={t("shortDescription-placeholder")}
                   className="mt-4"
                 />
               </div>
+            </Card>
+
+            <Card className="rounded px-3 border-custom-input-border p-4 w-full relative">
+              <div className="flex gap-2 items-center mb-4">
+                <Heading level={3}>{t("description-label")}</Heading>
+
+                <Tooltip delayDuration={500}>
+                  <TooltipTrigger
+                    type="button"
+                    className="group cursor-pointer"
+                  >
+                    <Info
+                      size={16}
+                      className="text-muted-foreground transition-colors"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("description-tooltip")}</TooltipContent>
+                </Tooltip>
+              </div>
+
+              <Tabs defaultValue="write" className="w-full">
+                {/* TODO Create new TabList with icons */}
+
+                <TabsList
+                  className="absolute right-2 rounded p-0 h-fit"
+                  tabIndex={-1}
+                  style={{ top: "0.75rem" }}
+                >
+                  <Tooltip>
+                    <TooltipTrigger type="button">
+                      <TabsTrigger value="write">
+                        <SquarePen className="size-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("write-tab")}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger type="button">
+                      <TabsTrigger value="preview">
+                        <Columns2 className="size-4" />
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>{t("preview-tab")}</TooltipContent>
+                  </Tooltip>
+                </TabsList>
+                <TabsContent value="write" tabIndex={-1}>
+                  <FormFieldTextArea
+                    control={form.control}
+                    name="description"
+                    placeholder={t("description-placeholder")}
+                    className={cn(
+                      "bg-transparent border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+                    )}
+                    maxLength={1000}
+                    wordCounter
+                  />
+                </TabsContent>
+                <TabsContent value="preview">
+                  <MarkdownPreview markdownString={description} />
+                </TabsContent>
+              </Tabs>
             </Card>
           </div>
 
