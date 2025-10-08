@@ -178,7 +178,7 @@ type communityNewEvent struct {
 	CalendarIconURL string
 }
 
-func communityNewEventMailContent(evtID string, event *zenaov1.EventInfo, community *zeni.Community) (string, string, error) {
+func communityNewEventMailContent(evtID string, event *zenaov1.EventInfo, cmtID string, community *zenaov1.CommunityInfo) (string, string, error) {
 	data := communityNewEvent{
 		EventName:       event.Title,
 		EventImage:      web2URL(event.ImageUri) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
@@ -186,7 +186,7 @@ func communityNewEventMailContent(evtID string, event *zenaov1.EventInfo, commun
 		EventEndDate:    time.Unix(int64(event.EndDate), 0).In(time.UTC).Format(time.ANSIC),
 		EventURL:        eventPublicURL(evtID),
 		CommunityName:   community.DisplayName,
-		CommunityImage:  web2URL(community.AvatarURI) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
+		CommunityImage:  web2URL(community.AvatarUri) + "?img-width=960&img-height=540&img-fit=cover&dpr=2",
 		CalendarIconURL: web2URL("ipfs://bafkreiaknq3mxzx5ulryv5tnikjkntmckvz3h4mhjyjle4zbtqkwhyb5xa"),
 	}
 

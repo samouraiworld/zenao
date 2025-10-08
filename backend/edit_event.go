@@ -119,7 +119,7 @@ func (s *ZenaoServer) EditEvent(
 		}
 	}
 
-	var newCmt *zeni.Community
+	var newCmt *zenaov1.CommunityInfo
 	if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) {
 		newCmt, err = s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
 		if err != nil {
@@ -130,7 +130,7 @@ func (s *ZenaoServer) EditEvent(
 			memberIDs[m.ID] = true
 		}
 
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, newCmt.ID, req.Msg.EventId); err != nil {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
 			return nil, err
 		}
 
@@ -141,8 +141,8 @@ func (s *ZenaoServer) EditEvent(
 			}
 		}
 		if len(newMembers) > 0 {
-			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(zUser.ID, newCmt.ID, newMembers); err != nil {
-				s.Logger.Error("add-members-to-community", zap.String("community-id", newCmt.ID), zap.Strings("new-members", newMembers), zap.Error(err))
+			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(zUser.ID, req.Msg.CommunityId, newMembers); err != nil {
+				s.Logger.Error("add-members-to-community", zap.String("community-id", req.Msg.CommunityId), zap.Strings("new-members", newMembers), zap.Error(err))
 			}
 		}
 	}
@@ -165,7 +165,7 @@ func (s *ZenaoServer) EditEvent(
 			return nil, err
 		}
 
-		htmlStr, text, err := communityNewEventMailContent(req.Msg.EventId, evt, newCmt)
+		htmlStr, text, err := communityNewEventMailContent(req.Msg.EventId, evt, req.Msg.CommunityId, newCmt)
 		if err != nil {
 			return nil, err
 		}

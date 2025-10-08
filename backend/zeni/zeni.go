@@ -305,7 +305,7 @@ type Chain interface {
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 
 	// TODO: what happens if community not found ? should i just return empty cmt & empty err or err handle it ?
-	GetCommunity(communityID string) (*Community, error)
+	GetCommunity(communityID string) (*zenaov1.CommunityInfo, error)
 	GetCommunityMembers(communityID string) ([]*User, error)
 	GetCommunityAdministrators(communityID string) ([]*User, error)
 

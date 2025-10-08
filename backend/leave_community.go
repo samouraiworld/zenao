@@ -34,7 +34,8 @@ func (s *ZenaoServer) LeaveCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
+	// TODO: change to handle address instead of creatorID
+	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.Administrators[0], req.Msg.CommunityId, zUser.ID); err != nil {
 		return nil, errors.New("failed to remove member from community on chain")
 	}
 

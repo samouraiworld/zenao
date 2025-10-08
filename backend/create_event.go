@@ -115,9 +115,10 @@ func (s *ZenaoServer) CreateEvent(
 		}
 	}
 
-	var cmt *zeni.Community
+	var cmt *zenaov1.CommunityInfo
 	var members []*zeni.User
 
+	// TODO: test event with community creation
 	if req.Msg.CommunityId != "" {
 		cmt, err = s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
 		if err != nil {
@@ -160,7 +161,7 @@ func (s *ZenaoServer) CreateEvent(
 			return nil, err
 		}
 
-		htmlStr, text, err := communityNewEventMailContent(evtID, evt, cmt)
+		htmlStr, text, err := communityNewEventMailContent(evtID, evt, req.Msg.CommunityId, cmt)
 		if err != nil {
 			return nil, err
 		}

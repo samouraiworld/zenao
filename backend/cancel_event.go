@@ -40,13 +40,13 @@ func (s *ZenaoServer) CancelEvent(
 		return nil, err
 	}
 	// TODO: handle this
-	cmt, err := s.Chain.WithContext(ctx).GetCommunity("changeme")
+	_, err = s.Chain.WithContext(ctx).GetCommunity("changeme")
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: what happens if the user is not administrator anymore but was before ?
-	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, cmt.ID, req.Msg.EventId); err != nil {
+	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, "changeme", req.Msg.EventId); err != nil {
 		return nil, err
 	}
 

@@ -260,18 +260,13 @@ func (g *gnoZenaoChain) GetEvent(evtID string) (*zenaov1.EventInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(raw) < 10 || raw[0] != '(' {
-		return nil, fmt.Errorf("unexpected format: %s", raw)
-	}
-	inner := raw[1 : len(raw)-len(" string)")]
-
-	var innerStr string
-	if err := json.Unmarshal([]byte(inner), &innerStr); err != nil {
-		return nil, fmt.Errorf("first unmarshal failed: %w", err)
+	parsedRaw, err := parseQEvalResponseData(raw)
+	if err != nil {
+		return nil, err
 	}
 
 	var res zenaov1.EventInfo
-	if err := protojson.Unmarshal([]byte(innerStr), &res); err != nil {
+	if err := protojson.Unmarshal([]byte(parsedRaw), &res); err != nil {
 		return nil, err
 	}
 
@@ -771,7 +766,22 @@ func (g *gnoZenaoChain) GetCommunity(communityID string) (*zeni.Community, error
 	g, span := g.trace("gzchain.GetCommunity")
 	defer span.End()
 
-	return nil, nil
+	eventPkgPath := g.eventRealmPkgPath(communityID)
+	raw, err := checkQueryErr(g.client.QEval(eventPkgPath, "event.Info().ToJSON().String()"))
+	if err != nil {
+		return nil, err
+	}
+	parsedRaw, err := parseQEvalResponseData(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	var res zenaov1.EventInfo
+	if err := protojson.Unmarshal([]byte(parsedRaw), &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 // GetCommunityMembers implements ZenaoChain.
@@ -1488,6 +1498,19 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 		return nil, fmt.Errorf("%w\n%s", broadcastRes.DeliverTx.Error, broadcastRes.DeliverTx.Log)
 	}
 	return broadcastRes, nil
+}
+
+func parseQEvalResponseData(raw string) (string, error) {
+	if len(raw) < 10 || raw[0] != '(' {
+		return "", fmt.Errorf("unexpected format: %s", raw)
+	}
+	inner := raw[1 : len(raw)-len(" string)")]
+
+	var innerStr string
+	if err := json.Unmarshal([]byte(inner), &innerStr); err != nil {
+		return "", fmt.Errorf("first unmarshal failed: %w", err)
+	}
+	return innerStr, nil
 }
 
 func checkQueryErr(data string, queryRes *ctypes.ResultABCIQuery, baseErr error) (string, error) {

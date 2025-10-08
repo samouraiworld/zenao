@@ -3,13 +3,9 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
-	"time"
 
 	"connectrpc.com/connect"
-	"go.uber.org/zap"
 
-	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
@@ -22,112 +18,114 @@ func (s *ZenaoServer) AddEventToCommunity(
 		return nil, errors.New("unauthorized")
 	}
 
-	zUser, err := s.EnsureUserExists(ctx, user)
-	if err != nil {
-		return nil, err
-	}
+	return nil, errors.New("feature locked for now and not used in the UI")
 
-	s.Logger.Info("add-event-to-community", zap.String("event-id", req.Msg.EventId), zap.String("community-id", req.Msg.CommunityId), zap.String("user-id", zUser.ID))
+	// zUser, err := s.EnsureUserExists(ctx, user)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	// s.Logger.Info("add-event-to-community", zap.String("event-id", req.Msg.EventId), zap.String("community-id", req.Msg.CommunityId), zap.String("user-id", zUser.ID))
 
-	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
-	if err != nil {
-		return nil, err
-	}
-	participants, err := s.Chain.WithContext(ctx).GetEventParticipants(req.Msg.EventId)
-	if err != nil {
-		return nil, err
-	}
-	cmt, err := s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
-	if err != nil {
-		return nil, err
-	}
-	members, err := s.Chain.WithContext(ctx).GetCommunityMembers(req.Msg.CommunityId)
-	if err != nil {
-		return nil, err
-	}
+	// if user.Banned {
+	// 	return nil, errors.New("user is banned")
+	// }
 
-	memberIDs := make(map[string]bool)
-	for _, m := range members {
-		memberIDs[m.ID] = true
-	}
+	// evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// participants, err := s.Chain.WithContext(ctx).GetEventParticipants(req.Msg.EventId)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// cmt, err := s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// members, err := s.Chain.WithContext(ctx).GetCommunityMembers(req.Msg.CommunityId)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	// TODO: do this check on chain side
-	cmt, err = s.Chain.WithContext(ctx).GetEventCommunity(req.Msg.EventId)
-	if err != nil {
-		return nil, err
-	}
-	if cmt != nil {
-		return nil, errors.New("event is already part of a community")
-	}
+	// memberIDs := make(map[string]bool)
+	// for _, m := range members {
+	// 	memberIDs[m.ID] = true
+	// }
 
-	if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
-		s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("event-id", req.Msg.EventId))
-		return nil, err
-	}
+	// // TODO: do this check on chain side
+	// existingCmt, err := s.Chain.WithContext(ctx).GetEventCommunity(req.Msg.EventId)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if existingCmt != nil {
+	// 	return nil, errors.New("event is already part of a community")
+	// }
 
-	for _, participant := range participants {
-		if !memberIDs[participant.ID] {
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(zUser.ID, req.Msg.CommunityId, participant.ID); err != nil {
-				s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-id", participant.ID))
-				return nil, err
-			}
-		}
-	}
+	// if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
+	// 	s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("event-id", req.Msg.EventId))
+	// 	return nil, err
+	// }
 
-	// If the event start in more than 24h, we send an email to all community members that does not participate to the event.
-	startDate := time.Unix(int64(evt.StartDate), 0).In(time.UTC)
-	if time.Now().Add(24*time.Hour).Before(startDate) && s.MailClient != nil {
-		participantsIDS := make(map[string]bool)
-		for _, participant := range participants {
-			participantsIDS[participant.ID] = true
-		}
+	// for _, participant := range participants {
+	// 	if !memberIDs[participant.ID] {
+	// 		if err := s.Chain.WithContext(ctx).AddMemberToCommunity(zUser.ID, req.Msg.CommunityId, participant.ID); err != nil {
+	// 			s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-id", participant.ID))
+	// 			return nil, err
+	// 		}
+	// 	}
+	// }
 
-		var authIDs []string
-		for _, member := range members {
-			if !participantsIDS[member.ID] {
-				authIDs = append(authIDs, member.AuthID)
-			}
-		}
-		authTargets, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
-		if err != nil {
-			return nil, err
-		}
+	// // If the event start in more than 24h, we send an email to all community members that does not participate to the event.
+	// startDate := time.Unix(int64(evt.StartDate), 0).In(time.UTC)
+	// if time.Now().Add(24*time.Hour).Before(startDate) && s.MailClient != nil {
+	// 	participantsIDS := make(map[string]bool)
+	// 	for _, participant := range participants {
+	// 		participantsIDS[participant.ID] = true
+	// 	}
 
-		htmlStr, text, err := communityNewEventMailContent(req.Msg.EventId, evt, cmt)
-		if err != nil {
-			return nil, err
-		}
+	// 	var authIDs []string
+	// 	for _, member := range members {
+	// 		if !participantsIDS[member.ID] {
+	// 			authIDs = append(authIDs, member.AuthID)
+	// 		}
+	// 	}
+	// 	authTargets, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
 
-		var requests []*resend.SendEmailRequest
-		for _, authTarget := range authTargets {
-			if authTarget.Email == "" {
-				s.Logger.Error("add-event-to-community", zap.String("target-id", authTarget.ID), zap.String("target-email", authTarget.Email), zap.Error(errors.New("target has no email")))
-				continue
-			}
-			requests = append(requests, &resend.SendEmailRequest{
-				From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
-				To:      []string{authTarget.Email},
-				Subject: "New event by " + cmt.DisplayName + "!",
-				Html:    htmlStr,
-				Text:    text,
-			})
-		}
-		count := 0
-		s.Logger.Info("send-community-new-event-emails", zap.Int("count", len(requests)))
-		for i := 0; i < len(requests); i += 100 {
-			batch := requests[i:min(i+100, len(requests))]
-			if _, err := s.MailClient.Batch.SendWithContext(context.Background(), batch); err != nil {
-				s.Logger.Error("send-community-new-event-emails", zap.Error(err), zap.Int("batch-size", len(batch)))
-				continue
-			}
-			count += len(batch)
-			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
-		}
-	}
+	// 	htmlStr, text, err := communityNewEventMailContent(req.Msg.EventId, evt, req.Msg.CommunityId, cmt)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
 
-	return connect.NewResponse(&zenaov1.AddEventToCommunityResponse{}), nil
+	// 	var requests []*resend.SendEmailRequest
+	// 	for _, authTarget := range authTargets {
+	// 		if authTarget.Email == "" {
+	// 			s.Logger.Error("add-event-to-community", zap.String("target-id", authTarget.ID), zap.String("target-email", authTarget.Email), zap.Error(errors.New("target has no email")))
+	// 			continue
+	// 		}
+	// 		requests = append(requests, &resend.SendEmailRequest{
+	// 			From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
+	// 			To:      []string{authTarget.Email},
+	// 			Subject: "New event by " + cmt.DisplayName + "!",
+	// 			Html:    htmlStr,
+	// 			Text:    text,
+	// 		})
+	// 	}
+	// 	count := 0
+	// 	s.Logger.Info("send-community-new-event-emails", zap.Int("count", len(requests)))
+	// 	for i := 0; i < len(requests); i += 100 {
+	// 		batch := requests[i:min(i+100, len(requests))]
+	// 		if _, err := s.MailClient.Batch.SendWithContext(context.Background(), batch); err != nil {
+	// 			s.Logger.Error("send-community-new-event-emails", zap.Error(err), zap.Int("batch-size", len(batch)))
+	// 			continue
+	// 		}
+	// 		count += len(batch)
+	// 		s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
+	// 	}
+	// }
+
+	// return connect.NewResponse(&zenaov1.AddEventToCommunityResponse{}), nil
 }
