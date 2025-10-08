@@ -27,6 +27,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
+import SettingsSection from "@/components/layout/settings-section";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -74,6 +75,7 @@ export const CommunityForm = ({
             control={form.control}
             aspectRatio={isDesktop ? [48, 9] : [21, 9]}
             placeholder={t("upload-banner")}
+            hint={false}
             className="w-full rounded-xl overflow-hidden"
           />
           <div className="w-[96px] md:w-[128px] absolute -bottom-14 left-4 md:left-10">
@@ -82,20 +84,21 @@ export const CommunityForm = ({
               control={form.control}
               aspectRatio={[4, 4]}
               placeholder={t("upload-avatar")}
+              hint={false}
               className="w-full rounded-xl overflow-hidden"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-20 w-full">
-          <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-6 mt-20 w-full">
+          <SettingsSection title="Name of the community">
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
               <FormFieldTextArea
                 control={form.control}
                 name="displayName"
                 placeholder={t("name-placeholder")}
                 className={cn(
-                  "font-semibold text-2xl resize-none bg-transparent",
+                  "font-semibold text-xl resize-none bg-transparent",
                   "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
                 )}
                 maxLength={140}
@@ -104,7 +107,9 @@ export const CommunityForm = ({
                 wordCounter
               />
             </Card>
+          </SettingsSection>
 
+          <SettingsSection title="About your community">
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
               <div className="transition-all">
                 <div className="flex gap-2 items-center">
@@ -153,8 +158,6 @@ export const CommunityForm = ({
               </div>
 
               <Tabs defaultValue="write" className="w-full">
-                {/* TODO Create new TabList with icons */}
-
                 <TabsList
                   className="absolute right-2 rounded p-0 h-fit"
                   tabIndex={-1}
@@ -177,6 +180,7 @@ export const CommunityForm = ({
                     <TooltipContent>{t("preview-tab")}</TooltipContent>
                   </Tooltip>
                 </TabsList>
+
                 <TabsContent value="write" tabIndex={-1}>
                   <FormFieldTextArea
                     control={form.control}
@@ -194,11 +198,10 @@ export const CommunityForm = ({
                 </TabsContent>
               </Tabs>
             </Card>
-          </div>
+          </SettingsSection>
 
-          <div className="flex flex-col gap-4 w-full">
+          <SettingsSection title={t("admin-label")}>
             <Card className="p-6">
-              <h3 className="text-lg font-medium mb-4">{t("admin-label")}</h3>
               <div className="flex flex-col gap-3">
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex gap-2 items-start">
@@ -236,17 +239,19 @@ export const CommunityForm = ({
                 </Button>
               </div>
             </Card>
-
-            <ButtonWithChildren
-              loading={isLoading}
-              disabled={isButtonDisabled}
-              type="submit"
-              className="px-8 w-full"
-            >
-              {t("submit")}
-            </ButtonWithChildren>
-          </div>
+          </SettingsSection>
         </div>
+
+        <SettingsSection title="">
+          <ButtonWithChildren
+            loading={isLoading}
+            disabled={isButtonDisabled}
+            type="submit"
+            className="px-8 w-full"
+          >
+            {t("submit")}
+          </ButtonWithChildren>
+        </SettingsSection>
       </form>
     </Form>
   );
