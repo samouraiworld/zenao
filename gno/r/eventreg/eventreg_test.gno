@@ -69,17 +69,17 @@ func TestEvents(t *testing.T) {
 	// list events by organizer
 	{
 		// from future to past
-		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10, 0)
+		events := listEventsByOrganizer("alice", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `future_event_month_1, past_event_hour_3, past_event_month_5`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByOrganizer("bob", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `event_will_change_6, past_event_day_4, future_event_day_2`, eventsString(events))
 	}
 	{
 		// none
-		events := listEventsByOrganizer("eve", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByOrganizer("eve", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 
@@ -149,12 +149,12 @@ func TestEvents(t *testing.T) {
 	// list events by organizer
 	{
 		// from future to past
-		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10, 0)
+		events := listEventsByOrganizer("alice", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `future_event_month_1, past_event_hour_3, past_event_month_5`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByOrganizer("bob", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `past_event_day_4, future_event_day_2, event_will_change_6`, eventsString(events))
 	}
 
@@ -199,22 +199,22 @@ func TestEvents(t *testing.T) {
 	// list events by organizer
 	{
 		// from future to past
-		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10, 0)
+		events := listEventsByOrganizer("alice", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `event_will_change_6, future_event_month_1, past_event_hour_3, past_event_month_5`, eventsString(events))
 	}
 	{
 		// from future to past with offset 2
-		events := listEventsByOrganizer("alice", nextYearUnix, lastYearUnix, 10, 2)
+		events := listEventsByOrganizer("alice", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 2)
 		urequire.Equal(t, `past_event_hour_3, past_event_month_5`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByOrganizer("bob", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `past_event_day_4, future_event_day_2`, eventsString(events))
 	}
 	{
 		// from past to future with offset 2
-		events := listEventsByOrganizer("bob", lastYearUnix, nextYearUnix, 10, 2)
+		events := listEventsByOrganizer("bob", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 2)
 		urequire.Equal(t, 0, len(events))
 	}
 
@@ -288,7 +288,7 @@ func TestEventsWithNonDiscoverable(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("offset:%d,limit:%d", tc.offset, tc.limit), func(t *testing.T) {
 			// We list by organizer "johnny" to prevent mixing with other tests.
-			events := listEventsByOrganizer("johnny", lastYearUnix, nextYearUnix, tc.limit, tc.offset)
+			events := listEventsByOrganizer("johnny", zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE, lastYearUnix, nextYearUnix, tc.limit, tc.offset)
 
 			// The offset and limit are respected and the non-discoverable events are skipped.
 			urequire.Equal(t, tc.out, eventsString(events))
