@@ -3,7 +3,7 @@
 import React from "react";
 import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { Trash2Icon, Plus, Info, SquarePen, Columns2 } from "lucide-react";
+import { Trash2Icon, Plus, Info } from "lucide-react";
 import { useMediaQuery } from "../../../hooks/use-media-query";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
@@ -12,12 +12,7 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Button } from "@/components/shadcn/button";
 import { Card } from "@/components/widgets/cards/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/shadcn/tabs";
+import { Tabs, TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { CommunityFormSchemaType, communityFormSchema } from "@/types/schemas";
 import { cn } from "@/lib/tailwind";
