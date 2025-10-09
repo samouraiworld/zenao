@@ -52,8 +52,12 @@ export function EventInfoLayout({
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { password } = useEventPassword();
   const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: address } = useSuspenseQuery(userInfoOptions(getToken, userId));
-  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userInfo?.realmId),
+  );
 
   const location = makeLocationFromEvent(data.location);
   const timezone = useLocationTimezone(location);

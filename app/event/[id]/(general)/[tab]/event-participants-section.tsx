@@ -24,7 +24,7 @@ import UsersNamesPreview from "@/components/user/users-names-preview";
 
 export function ParticipantsSection({ id }: { id: string }) {
   const [open, setOpen] = useState(false);
-  const { data: participantsAddresses } = useSuspenseQuery(
+  const { data: participants } = useSuspenseQuery(
     eventUsersWithRole(id, "participant"),
   );
   const t = useTranslations("event");
@@ -43,13 +43,13 @@ export function ParticipantsSection({ id }: { id: string }) {
             <div className="flex flex-col gap-2">
               {/* 6 because we decide to show the first 6 participants avatars as preview */}
               <UsersAvatarsPreview
-                usersAddresses={
-                  participantsAddresses.length > 6
-                    ? participantsAddresses.slice(0, 6)
-                    : participantsAddresses
+                users={
+                  participants.length > 6
+                    ? participants.slice(0, 6)
+                    : participants
                 }
               />
-              <UsersNamesPreview usersAddresses={participantsAddresses} />
+              <UsersNamesPreview usersAddresses={participants} />
             </div>
           </DialogTrigger>
           <DialogContent className="max-h-screen overflow-auto">
@@ -57,11 +57,11 @@ export function ParticipantsSection({ id }: { id: string }) {
               <DialogTitle>{t("participants-list")}</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-2">
-              {participantsAddresses.map((address) => {
+              {participants.map((realmId) => {
                 return (
                   <UserAvatarWithName
-                    key={address}
-                    realmId={address}
+                    key={realmId}
+                    realmId={realmId}
                     className="h-10"
                     linkToProfile
                   />
@@ -80,13 +80,11 @@ export function ParticipantsSection({ id }: { id: string }) {
         <div className="flex flex-col gap-2">
           {/* 6 because we decide to show the first 6 participants avatars as preview */}
           <UsersAvatarsPreview
-            usersAddresses={
-              participantsAddresses.length > 6
-                ? participantsAddresses.slice(0, 6)
-                : participantsAddresses
+            users={
+              participants.length > 6 ? participants.slice(0, 6) : participants
             }
           />
-          <UsersNamesPreview usersAddresses={participantsAddresses} />
+          <UsersNamesPreview usersAddresses={participants} />
         </div>
       </DrawerTrigger>
 
@@ -96,7 +94,7 @@ export function ParticipantsSection({ id }: { id: string }) {
         </DrawerHeader>
 
         <div className="flex flex-col gap-2 px-4 pb-4 max-h-full overflow-auto">
-          {participantsAddresses.map((address) => {
+          {participants.map((address) => {
             return (
               <UserAvatarWithName
                 key={address}

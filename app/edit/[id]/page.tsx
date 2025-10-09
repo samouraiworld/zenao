@@ -20,9 +20,10 @@ export default async function EditPage({
   const p = await params;
   const { getToken, userId } = await auth();
   const queryClient = getQueryClient();
-  const address = await queryClient.fetchQuery(
+  const userInfo = await queryClient.fetchQuery(
     userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
 
   try {
     await queryClient.fetchQuery({
@@ -37,7 +38,7 @@ export default async function EditPage({
     communitiesListByEvent(p.id, DEFAULT_COMMUNITIES_LIMIT),
   );
   queryClient.prefetchQuery(eventGatekeepersEmails(p.id, getToken));
-  queryClient.prefetchQuery(eventUserRoles(p.id, address));
+  queryClient.prefetchQuery(eventUserRoles(p.id, userRealmId));
 
   return (
     <ScreenContainer isSignedOutModal={!userId}>
