@@ -82,7 +82,7 @@ type Config struct {
 	MigrationParamsFn  MigrationParamsFn
 	RenderFn           RenderFn
 	CrossFn            daokit.CrossFn
-	CallerKeyFn        CallerIDFn
+	CallerID           CallerIDFn
 	PrivateVarName     string
 }
 
@@ -103,8 +103,8 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		panic(errors.New("GetProfileString is required"))
 	}
 
-	if conf.CallerKeyFn == nil {
-		conf.CallerKeyFn = realmid.Previous
+	if conf.CallerID == nil {
+		conf.CallerID = realmid.Previous
 	}
 
 	core := daokit.NewCore()
@@ -114,7 +114,7 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		GetProfileString: conf.GetProfileString,
 		Realm:            runtime.CurrentRealm(),
 		RenderFn:         conf.RenderFn,
-		CallerID:         conf.CallerKeyFn,
+		CallerID:         conf.CallerID,
 		InitialConfig:    conf,
 	}
 
