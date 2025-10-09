@@ -1642,6 +1642,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		"gno.land/r/zenao/social_feed"
 		user %q
 		ma "gno.land/p/zenao/multiaddr"
+		"gno.land/p/zenao/realmid"
 	)
 	
 	func main() {
