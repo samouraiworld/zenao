@@ -91,7 +91,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	if err != nil {
 		return nil, err
 	}
-	userRoles, err := s.Chain.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	userRoles, err := s.Chain.WithContext(ctx).EntityRoles(buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 
 		if cmt != nil {
-			roles, err := s.Chain.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, participants[i].ID, zeni.EntityTypeCommunity, cmt.ID)
+			roles, err := s.Chain.WithContext(ctx).EntityRoles(participants[i].ID, zeni.EntityTypeCommunity, "changeme")
 			if err != nil {
 				return nil, err
 			}

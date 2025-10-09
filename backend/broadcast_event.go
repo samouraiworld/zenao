@@ -49,7 +49,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	if err != nil {
 		return nil, err
 	}
-	roles, err := s.Chain.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	roles, err := s.Chain.WithContext(ctx).EntityRoles(zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
 	if err != nil {
 		return nil, err
 	}
