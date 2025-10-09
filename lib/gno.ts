@@ -19,10 +19,22 @@ export function extractGnoStringResponse(res: string): string {
   return jsonStringContent;
 }
 
-export const derivePkgAddr = (pkgPath: string): string => {
+export function derivePkgAddr(pkgPath: string): string {
   const h = shajs("sha256")
     .update("pkgPath:" + pkgPath)
     .digest()
     .subarray(0, 20);
   return bech32.encode("g", bech32.toWords(h));
-};
+}
+
+export function addressFromRealmId<T extends string | null | undefined>(
+  realmId: T,
+) {
+  if (typeof realmId !== "string") {
+    return realmId;
+  }
+  if (realmId.includes(".")) {
+    return derivePkgAddr(realmId);
+  }
+  return realmId;
+}

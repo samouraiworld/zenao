@@ -40,6 +40,7 @@ import {
   UserAvatar,
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
+import { addressFromRealmId } from "@/lib/gno";
 
 export type NavItem = {
   key: string;
@@ -164,11 +165,7 @@ const GoBackButton = ({ className }: { className?: string }) => {
 };
 
 export function Header() {
-  const { getToken, userId } = useAuth();
   const t = useTranslations("navigation");
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -212,7 +209,7 @@ export function Header() {
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
-        <Auth userAddress={address} className="h-fit" isMounted={isMounted} />
+        <Auth className="h-fit" isMounted={isMounted} />
       </div>
     </div>
   );
@@ -222,15 +219,18 @@ const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
 const Auth = ({
   className,
-  userAddress,
   isMounted,
 }: {
-  userAddress: string | null;
   className?: string;
   isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
-  const { signOut } = useAuth();
+  const { signOut, getToken, userId } = useAuth();
+  const { data: userRealmId } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+
+  const userAddress = addressFromRealmId(userRealmId);
 
   return (
     <div className={className}>
