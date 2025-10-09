@@ -20,7 +20,7 @@ import { parsePollUri } from "@/lib/multiaddr";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
 import { feedPost } from "@/lib/queries/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { FeedPostFormSchemaType } from "@/types/schemas";
@@ -40,9 +40,10 @@ function PostCommentForm({
   const t = useTranslations("event-feed.standard-post-form");
 
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { createStandardPost, isPending } = useCreateStandardPost();
 
   const onSubmit = async (values: FeedPostFormSchemaType) => {
@@ -62,7 +63,7 @@ function PostCommentForm({
         content: values.content,
         parentId: parentId.toString(),
         token,
-        userAddress: userAddress ?? "",
+        userRealmId,
         tags: [],
       });
 
@@ -127,13 +128,14 @@ export default function PostInfo({
 }) {
   const router = useRouter();
   const { userId, getToken } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
+    eventUserRoles(eventId, userRealmId),
   );
-  const { data: post } = useSuspenseQuery(feedPost(postId, userAddress || ""));
+  const { data: post } = useSuspenseQuery(feedPost(postId, userRealmId || ""));
 
   const [editMode, setEditMode] = useState(false);
 
@@ -192,7 +194,7 @@ export default function PostInfo({
       {isPollPost(post) && (
         <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
           <PollPost
-            userAddress={userAddress}
+            userRealmId={userRealmId}
             pollId={parsePollUri(post.post.post.value.uri).pollId}
             pollPost={post}
             onReactionChange={async (icon) =>

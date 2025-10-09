@@ -32,7 +32,7 @@ export type EventRegistrationFormSchemaType = z.infer<
 type EventRegistrationFormProps = {
   eventId: string;
   eventPassword: string;
-  userAddress: string | null;
+  userRealmId: string | null;
   onGuestRegistrationSuccess?: (email: string) => void;
 };
 
@@ -44,7 +44,7 @@ export type SubmitStatusInvitee = Record<
 export function EventRegistrationForm({
   eventId,
   eventPassword,
-  userAddress,
+  userRealmId,
   onGuestRegistrationSuccess,
 }: EventRegistrationFormProps) {
   const { getToken, userId } = useAuth();
@@ -83,7 +83,7 @@ export function EventRegistrationForm({
         if (!token) {
           throw new Error("invalid clerk token");
         }
-        if (!userId || !userAddress) {
+        if (!userId || !userRealmId) {
           throw new Error("missing user id or user address");
         }
 
@@ -91,7 +91,7 @@ export function EventRegistrationForm({
           eventId,
           token,
           userId: userId,
-          userAddress: userAddress,
+          userRealmId: userRealmId,
           guests,
           password: eventPassword,
         });
@@ -101,7 +101,7 @@ export function EventRegistrationForm({
           eventId,
           email: data.email!,
           guests,
-          userAddress,
+          userRealmId,
           password: eventPassword,
         });
         onGuestRegistrationSuccess?.(data.email!);

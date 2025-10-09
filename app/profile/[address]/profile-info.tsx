@@ -21,7 +21,7 @@ import { profileOptions } from "@/lib/queries/profile";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
 
 export function ProfileInfo({
@@ -33,11 +33,11 @@ export function ProfileInfo({
 }) {
   const t = useTranslations("profile-info");
   const { getToken, userId } = useAuth();
-  const { data: userRealmId } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
-  const userAddress = addressFromRealmId(userRealmId);
-  const isOwner = userAddress === address;
+  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
+  const isOwner = loggedUserAddress === address;
   // The connected user can see his both discoverable and undiscoverable events
   const discoverableFilter = isOwner
     ? DiscoverableFilter.UNSPECIFIED

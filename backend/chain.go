@@ -1070,9 +1070,8 @@ func main() {
 	return nil
 }
 
-// UserAddress implements ZenaoChain.
-// XXX: rename to UserRealmID
-func (g *gnoZenaoChain) UserAddress(userID string) string {
+// UserRealmID implements ZenaoChain.
+func (g *gnoZenaoChain) UserRealmID(userID string) string {
 	return g.userRealmPkgPath(userID)
 }
 

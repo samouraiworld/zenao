@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import ConfirmationDialog from "./confirmation-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useEventCancelParticipation } from "@/lib/mutations/event-cancel-participation";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 
 type CancelRegistrationConfirmationDialogProps = {
@@ -21,9 +21,10 @@ export function CancelRegistrationConfirmationDialog({
   const { toast } = useToast();
   const t = useTranslations("cancel-registration-confirmation-dialog");
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { cancelParticipation, isPending } = useEventCancelParticipation();
 
   const onCancel = async () => {
@@ -31,7 +32,7 @@ export function CancelRegistrationConfirmationDialog({
       await cancelParticipation({
         eventId,
         getToken,
-        userAddress,
+        userRealmId,
       });
 
       toast({

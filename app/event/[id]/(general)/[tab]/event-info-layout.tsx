@@ -21,7 +21,7 @@ import EventLocationSection from "@/components/features/event/event-location-sec
 import { makeLocationFromEvent } from "@/lib/location";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import EventParticipationInfo from "@/components/features/event/event-participation-info";
@@ -52,9 +52,7 @@ export function EventInfoLayout({
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { password } = useEventPassword();
   const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
+  const { data: address } = useSuspenseQuery(userInfoOptions(getToken, userId));
   const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
 
   const location = makeLocationFromEvent(data.location);

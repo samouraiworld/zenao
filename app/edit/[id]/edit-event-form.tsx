@@ -14,7 +14,7 @@ import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { EventForm } from "@/components/features/event/event-form";
 import { useToast } from "@/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import Text from "@/components/widgets/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
@@ -29,9 +29,7 @@ import {
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
+  const { data: address } = useSuspenseQuery(userInfoOptions(getToken, userId));
   const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
   const { data: gatekeepers } = useSuspenseQuery(
     eventGatekeepersEmails(id, getToken),

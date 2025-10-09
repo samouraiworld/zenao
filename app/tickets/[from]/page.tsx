@@ -8,7 +8,7 @@ import {
   ScreenContainer,
   ScreenContainerCentered,
 } from "@/components/layout/screen-container";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/features/event/events-list-layout";
 
@@ -32,7 +32,7 @@ export default async function TicketsPage({ params }: PageProps) {
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const userAddrOpts = userAddressOptions(getToken, userId);
+  const userAddrOpts = userInfoOptions(getToken, userId);
   const address = await queryClient.fetchQuery(userAddrOpts);
 
   if (!token || !address) {

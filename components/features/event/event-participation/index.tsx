@@ -6,7 +6,7 @@ import { createContext, useContext, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { EventRegistrationForm } from "../event-registration";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { EventUserRole } from "@/lib/queries/event-users";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
@@ -57,9 +57,7 @@ export const EventParticipation = ({
   password: string;
 }) => {
   const { getToken, userId } = useAuth();
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
+  const { data: address } = useSuspenseQuery(userInfoOptions(getToken, userId));
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(eventData.startDate) * 1000;
   const isSoldOut = eventData.capacity - eventData.participants <= 0;
@@ -111,7 +109,7 @@ EventParticipation.Registration = function EventParticipationRegistration() {
         <Text className="my-4">{t("join-desc")}</Text>
         <EventRegistrationForm
           eventId={eventId}
-          userAddress={address}
+          userRealmId={address}
           eventPassword={password}
           onGuestRegistrationSuccess={(email) => {
             setGuestEmail(email);

@@ -19,7 +19,7 @@ interface CreatePollRequestMutation
   extends Required<Omit<CreatePollRequest, "$typeName" | "$unknown">> {
   duration: bigint;
   token: string | null;
-  userAddress: string;
+  userRealmId: string;
 }
 
 export const useCreatePoll = (queryClient: QueryClient) => {
@@ -40,13 +40,13 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPollsOpts = feedPosts(
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const previousFeedPosts = queryClient.getQueryData(
@@ -69,13 +69,13 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPollsOpts = feedPosts(
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       queryClient.invalidateQueries(feedPostsOpts);
@@ -92,14 +92,14 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const feedPollsOpts = feedPosts(
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       queryClient.setQueryData(
@@ -123,7 +123,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
 
 interface VotePollRequestMutation extends Omit<VotePollRequest, "$typeName"> {
   token: string | null;
-  userAddress: string;
+  userRealmId: string;
 }
 
 export const useVotePoll = (queryClient: QueryClient) => {
@@ -140,17 +140,17 @@ export const useVotePoll = (queryClient: QueryClient) => {
       );
     },
     onMutate: async (variables) => {
-      const pollInfoOpts = pollInfo(variables.pollId, variables.userAddress);
+      const pollInfoOpts = pollInfo(variables.pollId, variables.userRealmId);
       const previousPollPost = queryClient.getQueryData(pollInfoOpts.queryKey);
 
       return { previousPollPost };
     },
     onSuccess: (_, variables) => {
-      const pollInfoOpts = pollInfo(variables.pollId, variables.userAddress);
+      const pollInfoOpts = pollInfo(variables.pollId, variables.userRealmId);
       queryClient.invalidateQueries(pollInfoOpts);
     },
     onError: (_, variables, context) => {
-      const pollInfoOpts = pollInfo(variables.pollId, variables.userAddress);
+      const pollInfoOpts = pollInfo(variables.pollId, variables.userRealmId);
       queryClient.setQueryData(
         pollInfoOpts.queryKey,
         context?.previousPollPost,
@@ -169,7 +169,7 @@ export const useVotePoll = (queryClient: QueryClient) => {
 interface CreateStandardPostRequestMutation
   extends Omit<CreatePostRequest, "$typeName"> {
   token: string | null;
-  userAddress: string;
+  userRealmId: string;
 }
 
 export const useCreateStandardPost = () => {
@@ -195,12 +195,12 @@ export const useCreateStandardPost = () => {
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const parentPostOpts = feedPost(
         variables.parentId,
-        variables.userAddress,
+        variables.userRealmId,
       );
       const previousParentPost = queryClient.getQueryData(
         parentPostOpts.queryKey,
@@ -210,7 +210,7 @@ export const useCreateStandardPost = () => {
         variables.parentId,
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const previousFeedPosts = queryClient.getQueryData(
@@ -238,19 +238,19 @@ export const useCreateStandardPost = () => {
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const feedPostsChildrenOpts = feedPostsChildren(
         variables.parentId,
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const parentPostOpts = feedPost(
         variables.parentId,
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       queryClient.invalidateQueries(parentPostOpts);
@@ -268,19 +268,19 @@ export const useCreateStandardPost = () => {
         feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const feedPostsChildrenOpts = feedPostsChildren(
         variables.parentId,
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const parentPostOpts = feedPost(
         variables.parentId,
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       queryClient.setQueryData(
@@ -311,7 +311,7 @@ export const useCreateStandardPost = () => {
 interface ReactPostRequestMutation {
   token: string | null;
   parentId: string; // Required for reloading comments
-  userAddress: string;
+  userRealmId: string;
   postId: string;
   icon: string;
   feedId: string;
@@ -322,7 +322,7 @@ export const useReactPost = () => {
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token: token,
-      userAddress: _addr,
+      userRealmId: _addr,
       ...request
     }: ReactPostRequestMutation) => {
       await zenaoClient.reactPost(request, {
@@ -334,19 +334,19 @@ export const useReactPost = () => {
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPostsChildrenOpts = feedPostsChildren(
         variables.parentId,
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPollsOpts = feedPosts(
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       const previousFeedPosts = queryClient.getQueryData(
@@ -368,24 +368,24 @@ export const useReactPost = () => {
       };
     },
     onSuccess: (_, variables) => {
-      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
+      const feedPostOpts = feedPost(variables.postId, variables.userRealmId);
       const feedPostsOpts = feedPosts(
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPostsChildrenOpts = feedPostsChildren(
         variables.parentId,
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPollsOpts = feedPosts(
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       queryClient.invalidateQueries(feedPostsChildrenOpts);
@@ -398,19 +398,19 @@ export const useReactPost = () => {
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPollsOpts = feedPosts(
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPostsChildrenOpts = feedPostsChildren(
         variables.parentId,
         DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       queryClient.setQueryData(
@@ -439,7 +439,7 @@ export const useReactPost = () => {
 type EditStandardPostRequestMutation = {
   feedId: string;
   postId: string;
-  userAddress: string;
+  userRealmId: string;
   token: string | null;
   content: string;
   tags: string[];
@@ -469,14 +469,14 @@ export const useEditStandardPost = () => {
       );
     },
     onSuccess: (_, variables) => {
-      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
+      const feedPostOpts = feedPost(variables.postId, variables.userRealmId);
       queryClient.invalidateQueries(feedPostOpts);
 
       const feedPostsOpts = feedPosts(
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       queryClient.invalidateQueries(feedPostsOpts);
 
@@ -485,7 +485,7 @@ export const useEditStandardPost = () => {
           variables.parentId,
           DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
           "",
-          variables.userAddress,
+          variables.userRealmId,
         );
 
         queryClient.invalidateQueries(feedPostsChildrenOpts);
@@ -505,7 +505,7 @@ type DeletePostRequestMutation = {
   feedId: string;
   postId: string;
   parentId?: string;
-  userAddress: string;
+  userRealmId: string;
   token: string | null;
 };
 
@@ -525,7 +525,7 @@ export const useDeletePost = () => {
       );
     },
     onSuccess: (_, variables) => {
-      const feedPostOpts = feedPost(variables.postId, variables.userAddress);
+      const feedPostOpts = feedPost(variables.postId, variables.userRealmId);
       queryClient.invalidateQueries(feedPostOpts);
 
       if (variables.parentId) {
@@ -533,11 +533,11 @@ export const useDeletePost = () => {
           variables.parentId,
           DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
           "",
-          variables.userAddress,
+          variables.userRealmId,
         );
         const feedParentPostOpts = feedPost(
           variables.parentId,
-          variables.userAddress,
+          variables.userRealmId,
         );
 
         queryClient.invalidateQueries(feedPostsChildrenOpts);
@@ -547,13 +547,13 @@ export const useDeletePost = () => {
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "",
-        variables.userAddress,
+        variables.userRealmId,
       );
       const feedPollsOpts = feedPosts(
         variables.feedId,
         DEFAULT_FEED_POSTS_LIMIT,
         "poll",
-        variables.userAddress,
+        variables.userRealmId,
       );
 
       queryClient.invalidateQueries(feedPostsOpts);

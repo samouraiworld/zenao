@@ -6,7 +6,7 @@ import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,
@@ -21,7 +21,7 @@ export default async function EditPage({
   const { getToken, userId } = await auth();
   const queryClient = getQueryClient();
   const address = await queryClient.fetchQuery(
-    userAddressOptions(getToken, userId),
+    userInfoOptions(getToken, userId),
   );
 
   try {

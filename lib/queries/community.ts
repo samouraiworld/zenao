@@ -159,12 +159,12 @@ export const communitiesListByMember = (
 
 export const communityUserRoles = (
   communityId: string | null,
-  userAddress: string | null,
+  userRealmId: string | null,
 ) =>
   queryOptions({
-    queryKey: ["communityUserRoles", communityId, userAddress],
+    queryKey: ["communityUserRoles", communityId, userRealmId],
     queryFn: async () => {
-      if (!communityId || !userAddress) {
+      if (!communityId || !userRealmId) {
         return [];
       }
 
@@ -173,7 +173,7 @@ export const communityUserRoles = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/communities/c${communityId}`,
-        `community.GetUserRolesJSON(${JSON.stringify(userAddress)})`,
+        `community.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
       );
       const roles = extractGnoJSONResponse(res);
       return communityGetUserRolesSchema.parse(roles);

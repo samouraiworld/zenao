@@ -23,7 +23,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
 import {
   DropdownMenu,
@@ -226,11 +226,11 @@ const Auth = ({
 }) => {
   const t = useTranslations("navigation");
   const { signOut, getToken, userId } = useAuth();
-  const { data: userRealmId } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
 
-  const userAddress = addressFromRealmId(userRealmId);
+  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
 
   return (
     <div className={className}>
@@ -262,7 +262,7 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    realmId={userAddress}
+                    realmId={loggedUserAddress}
                     className={avatarClassName}
                     size="sm"
                   />
@@ -272,7 +272,7 @@ const Auth = ({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <Link href={`/profile/${userAddress}`}>
+          <Link href={`/profile/${loggedUserAddress}`}>
             <DropdownMenuItem className="cursor-pointer">
               {t("view-profile")}
             </DropdownMenuItem>

@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/widgets/texts/text";
 import { useEditUserProfile } from "@/lib/mutations/profile";
@@ -35,9 +35,10 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
 
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
 
-  const { data: userRealmId } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { data: user } = useSuspenseQuery(profileOptions(userRealmId));
   const profileDetails = deserializeWithFrontMatter({
     serialized: user?.bio ?? "",

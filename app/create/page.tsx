@@ -7,7 +7,7 @@ import {
   ScreenContainer,
   ScreenContainerCentered,
 } from "@/components/layout/screen-container";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import {
   communitiesListByMember,
   DEFAULT_COMMUNITIES_LIMIT,
@@ -22,7 +22,7 @@ export default async function CreateEventPage() {
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const userAddrOpts = userAddressOptions(getToken, userId);
+  const userAddrOpts = userInfoOptions(getToken, userId);
   const address = await queryClient.fetchQuery(userAddrOpts);
 
   if (!token || !address) {

@@ -14,7 +14,7 @@ import { Form } from "@/components/shadcn/form";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { useToast } from "@/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { EventPasswordProvider } from "@/components/providers/event-password-provider";
 import { zenaoClient } from "@/lib/zenao-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
@@ -43,9 +43,7 @@ export function ExclusiveEventGuard({
   children,
 }: ExclusiveEventGuardProps) {
   const { getToken, userId } = useAuth();
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
+  const { data: address } = useSuspenseQuery(userInfoOptions(getToken, userId));
   const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
 
   const [isPending, setIsPending] = useState(false);

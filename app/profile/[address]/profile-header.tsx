@@ -10,7 +10,7 @@ import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Button } from "@/components/shadcn/button";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { gnoProfileDetailsSchema } from "@/types/schemas";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
 import { addressFromRealmId } from "@/lib/gno";
@@ -30,7 +30,7 @@ export default function ProfileHeader({
 }: ProfileHeaderProps) {
   const { userId, getToken } = useAuth();
   const { data: userLoggedRealmId } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+    userInfoOptions(getToken, userId),
   );
   const userLoggedAddress = addressFromRealmId(userLoggedRealmId);
 

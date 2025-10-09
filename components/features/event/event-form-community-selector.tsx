@@ -25,7 +25,7 @@ import {
   communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
 import { EventFormSchemaType } from "@/types/schemas";
 
@@ -37,17 +37,19 @@ export default function EventFormCommunitySelector({
   const t = useTranslations("eventForm");
   // Community selection
   const { userId, getToken } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
+
   const { data: userCommunitiesPages } = useSuspenseInfiniteQuery(
-    communitiesListByMember(userAddress, DEFAULT_COMMUNITIES_LIMIT),
+    communitiesListByMember(userRealmId, DEFAULT_COMMUNITIES_LIMIT),
   );
 
   // Filter only communities where user is administrator
   const selectableCommunities = (
     userCommunitiesPages?.pages.flat() ?? []
-  ).filter((c) => c.administrators.includes(userAddress!));
+  ).filter((c) => c.administrators.includes(userRealmId!));
 
   const options = selectableCommunities.map((community) => ({
     label: community.displayName,
