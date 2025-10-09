@@ -10,8 +10,9 @@ export default async function SettingsPage() {
   const queryClient = getQueryClient();
   const { getToken, userId } = await auth();
   const userAddrOpts = userInfoOptions(getToken, userId);
-  const address = await queryClient.fetchQuery(userAddrOpts);
-  void queryClient.prefetchQuery(profileOptions(address));
+  const userInfo = await queryClient.fetchQuery(userAddrOpts);
+  const userRealmId = userInfo?.realmId;
+  void queryClient.prefetchQuery(profileOptions(userRealmId));
 
   return (
     <ScreenContainer isSignedOutModal={!userId}>

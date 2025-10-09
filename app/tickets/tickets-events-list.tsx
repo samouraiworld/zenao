@@ -19,11 +19,11 @@ import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button"
 export function TicketsEventsList({
   now,
   from,
-  address,
+  userRealmId,
 }: {
   now: number;
   from: FromFilter;
-  address: string;
+  userRealmId: string;
 }) {
   const {
     data: eventsPages,
@@ -34,12 +34,12 @@ export function TicketsEventsList({
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(
-          address,
+          userRealmId,
           now,
           Number.MAX_SAFE_INTEGER,
           DEFAULT_EVENTS_LIMIT,
         )
-      : eventsByParticipantList(address, now - 1, 0, DEFAULT_EVENTS_LIMIT),
+      : eventsByParticipantList(userRealmId, now - 1, 0, DEFAULT_EVENTS_LIMIT),
   );
 
   const events = useMemo(() => eventsPages.pages.flat(), [eventsPages]);
