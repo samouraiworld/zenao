@@ -8,7 +8,6 @@ import {
   feedPostsChildren,
   pollInfo,
 } from "../queries/social-feed";
-import { derivePkgAddr } from "../gno";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
   CreatePollRequest,
@@ -35,7 +34,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         variables.orgType === "event"
           ? `gno.land/r/zenao/events/e${variables.orgId}`
           : `gno.land/r/zenao/communities/c${variables.orgId}`;
-      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+      const feedId = `${pkgPath}:main`;
 
       const feedPostsOpts = feedPosts(
         feedId,
@@ -64,7 +63,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         variables.orgType === "event"
           ? `gno.land/r/zenao/events/e${variables.orgId}`
           : `gno.land/r/zenao/communities/c${variables.orgId}`;
-      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+      const feedId = `${pkgPath}:main`;
 
       const feedPostsOpts = feedPosts(
         feedId,
@@ -87,7 +86,7 @@ export const useCreatePoll = (queryClient: QueryClient) => {
         variables.orgType === "event"
           ? `gno.land/r/zenao/events/e${variables.orgId}`
           : `gno.land/r/zenao/communities/c${variables.orgId}`;
-      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+      const feedId = `${pkgPath}:main`;
 
       const feedPostsOpts = feedPosts(
         feedId,
@@ -190,7 +189,7 @@ export const useCreateStandardPost = () => {
         variables.orgType === "event"
           ? `gno.land/r/zenao/events/e${variables.orgId}`
           : `gno.land/r/zenao/communities/c${variables.orgId}`;
-      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+      const feedId = `${pkgPath}:main`;
 
       const feedPostsOpts = feedPosts(
         feedId,
@@ -233,7 +232,7 @@ export const useCreateStandardPost = () => {
         variables.orgType === "event"
           ? `gno.land/r/zenao/events/e${variables.orgId}`
           : `gno.land/r/zenao/communities/c${variables.orgId}`;
-      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+      const feedId = `${pkgPath}:main`;
 
       const feedPostsOpts = feedPosts(
         feedId,
@@ -263,7 +262,7 @@ export const useCreateStandardPost = () => {
         variables.orgType === "event"
           ? `gno.land/r/zenao/events/e${variables.orgId}`
           : `gno.land/r/zenao/communities/c${variables.orgId}`;
-      const feedId = `${derivePkgAddr(pkgPath)}:main`;
+      const feedId = `${pkgPath}:main`;
 
       const feedPostsOpts = feedPosts(
         feedId,

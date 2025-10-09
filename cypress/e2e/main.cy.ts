@@ -212,14 +212,10 @@ describe("main", () => {
   });
 
   it("send feed standard post", () => {
-    // start from the home
-    cy.visit("/");
+    // start from the event we just created
+    cy.visit("/event/11");
 
-    // Explore an event
-    cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
-
-    cy.url().should("contain", "/event/");
+    logout();
 
     // Go Description tab
     cy.get("button").contains("Discussions").click();
@@ -229,18 +225,7 @@ describe("main", () => {
       "not.exist",
     );
 
-    cy.url().should("contain", "/event/");
-
-    cy.url().then((url) => {
-      login();
-      cy.visit(url);
-    });
-
-    // Participate to an event
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
+    login();
 
     // Go to feed tab
     cy.get("button").contains("Discussions").click();
@@ -258,24 +243,10 @@ describe("main", () => {
   });
 
   it("send feed poll post", () => {
-    // start from the home
-    cy.visit("/");
+    // start from the event we just created
+    cy.visit("/event/11");
 
-    // Explore an event
-    cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
-
-    cy.url().should("contain", "/event/");
-
-    // EventFeedForm should not exist
-    cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
-      "not.exist",
-    );
-
-    cy.url().then((url) => {
-      login();
-      cy.visit(url);
-    });
+    login();
 
     // Go to feed tab
     cy.get("button").contains("Discussions").click();
@@ -324,19 +295,10 @@ describe("main", () => {
   });
 
   it("send a comment on a post", () => {
-    // start from the home
-    cy.visit("/");
+    // start from the event we just created
+    cy.visit("/event/11");
 
-    // Explore an event
-    cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
-
-    cy.url().should("contain", "/event/");
-
-    cy.url().then((url) => {
-      login();
-      cy.visit(url);
-    });
+    login();
 
     // Go Description tab
     cy.get("button").contains("Discussions").click();

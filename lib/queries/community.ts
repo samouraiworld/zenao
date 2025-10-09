@@ -8,7 +8,7 @@ import {
 import { fromJson } from "@bufbuild/protobuf";
 import { z } from "zod";
 import { GetToken } from "@clerk/types";
-import { derivePkgAddr, extractGnoJSONResponse } from "../gno";
+import { extractGnoJSONResponse } from "../gno";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
   CommunityInfo,
@@ -268,10 +268,9 @@ export const communitiesListByEvent = (
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const pkgPath = `gno.land/r/zenao/events/e${id}`;
-      const eventAddr = derivePkgAddr(pkgPath);
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/communityreg`,
-        `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(eventAddr)}, ${limitInt}, ${pageParam * limitInt}))`,
+        `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(pkgPath)}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       const json = communitiesListFromJson(raw);

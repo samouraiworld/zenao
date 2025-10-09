@@ -16,8 +16,6 @@ import { PostsList } from "@/components/social-feed/posts-list";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-// import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
-import { derivePkgAddr } from "@/lib/gno";
 import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
@@ -44,7 +42,7 @@ function EventFeed({ eventId }: EventFeedProps) {
 
   // Event's social feed posts
   const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const {
     data: postsPages,

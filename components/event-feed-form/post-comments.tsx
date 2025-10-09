@@ -17,7 +17,6 @@ import { isStandardPost, StandardPostView } from "@/lib/social-feed";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-import { derivePkgAddr } from "@/lib/gno";
 
 function PostComment({
   eventId,
@@ -108,7 +107,7 @@ export function PostComments({
   }, [commentsPages]);
 
   const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const { onReactionChange, isReacting } = useEventPostReactionHandler(
     feedId,

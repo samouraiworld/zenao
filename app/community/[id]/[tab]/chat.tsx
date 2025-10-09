@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-query";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { userAddressOptions } from "@/lib/queries/user";
-import { derivePkgAddr } from "@/lib/gno";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
@@ -44,7 +43,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   } | null>(null);
 
   const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const {
     data: postsPages,

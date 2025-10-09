@@ -16,7 +16,6 @@ import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-import { derivePkgAddr } from "@/lib/gno";
 
 type EventPollsProps = {
   eventId: string;
@@ -34,7 +33,7 @@ function EventPolls({ eventId }: EventPollsProps) {
   );
 
   const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const {
     data: pollsPages,
