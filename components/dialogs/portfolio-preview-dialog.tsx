@@ -15,6 +15,7 @@ import { cn } from "@/lib/tailwind";
 
 interface PortfolioPreviewDialogProps {
   isOpen: boolean;
+  isAdmin?: boolean;
   onOpenChange: (open: boolean) => void;
   item: PortfolioItem;
   onDelete?: (item: PortfolioItem) => void | Promise<void>;
@@ -26,6 +27,7 @@ export default function PortfolioPreviewDialog({
   onOpenChange,
   onDelete,
   item,
+  isAdmin = false,
   isDeleting = false,
 }: PortfolioPreviewDialogProps) {
   const [confirmDialogOpen, setConfirmDialogOpen] = React.useState(false);
@@ -86,15 +88,17 @@ export default function PortfolioPreviewDialog({
             </div>
           </AspectRatio>
 
-          <div className="flex gap-2 items-center">
-            <Button
-              variant="link"
-              onClick={() => setConfirmDialogOpen(true)}
-              className="text-main px-0"
-            >
-              Delete image
-            </Button>
-          </div>
+          {isAdmin && (
+            <div className="flex gap-2 items-center">
+              <Button
+                variant="link"
+                onClick={() => setConfirmDialogOpen(true)}
+                className="text-main px-0"
+              >
+                Delete image
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>

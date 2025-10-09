@@ -337,7 +337,17 @@
     "joining-state": "Joining...",
     "join-community-button": "Join Community"
   },
-    "community-edit-form": {
+  "community-portfolio": { 
+    "error-file-uploading": "Error while uploading file",
+    "error-file-deleting": "Error while deleting file",
+    "delete-file-success": "Item deleted successfully",
+    "upload-file-success": "File uploaded successfully",
+    "recent-media-uploaded": "Recent media uploaded",
+    "upload-file-btn": "Upload file",
+    "upload-first-file-btn": "Upload your first file",
+    "no-media-uploaded": "No media uploaded yet."
+  },
+  "community-edit-form": {
     "update-success": "Community updated successfully",
     "update-failure": "Failed to update community",
     "edit-button": "Edit community",

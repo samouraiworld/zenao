@@ -73,7 +73,7 @@ export default function CommunityPortfolio({
 
   const isAdmin = userRoles.includes("administrator");
 
-  // const t = useTranslations("");
+  const t = useTranslations("community-portfolio");
 
   const { portfolio, ...otherDetails } = deserializeWithFrontMatter({
     contentFieldName: "description",
@@ -127,13 +127,13 @@ export default function CommunityPortfolio({
       setLocalPortfolio((prev) => [newItem, ...prev]);
 
       toast({
-        title: "File uploaded successfully",
+        title: t("upload-file-success"),
       });
     } catch (error) {
       captureException(error);
       console.error("Upload failed", error);
       toast({
-        title: "Error while uploading file",
+        title: t("error-file-uploading"),
         variant: "destructive",
       });
     } finally {
@@ -174,14 +174,14 @@ export default function CommunityPortfolio({
       });
       setLocalPortfolio(updatedPortfolio);
       toast({
-        title: "Item deleted successfully",
+        title: t("delete-file-success"),
       });
       setPreviewDialogState({ isOpen: false, item: {} as never });
     } catch (error) {
       captureException(error);
       console.error("Delete failed", error);
       toast({
-        title: "Error while deleting item",
+        title: t("error-file-deleting"),
         variant: "destructive",
       });
     } finally {
@@ -204,7 +204,7 @@ export default function CommunityPortfolio({
 
       <div className="flex items-center">
         <Heading level={3}>
-          Recent media uploaded ({localPortfolio.length})
+          {t("recent-media-uploaded")} ({localPortfolio.length})
         </Heading>
         {isAdmin && localPortfolio.length > 0 && (
           <Button
@@ -212,7 +212,7 @@ export default function CommunityPortfolio({
             className="text-main"
             onClick={() => fileInputRef.current?.click()}
           >
-            Upload file
+            {t("upload-file-btn")}
             <Upload />
           </Button>
         )}
@@ -234,7 +234,7 @@ export default function CommunityPortfolio({
       >
         {localPortfolio.length === 0 && !isUploading && (
           <div className="flex flex-col justify-center text-muted-foreground">
-            <p className="text-center">No media uploaded yet.</p>
+            <p className="text-center">{t("no-media-uploaded")}</p>
             {isAdmin && (
               <Button
                 variant="link"
@@ -242,7 +242,7 @@ export default function CommunityPortfolio({
                 disabled={isUploading}
                 onClick={() => fileInputRef.current?.click()}
               >
-                Upload your first file
+                {t("upload-first-file-btn")}
                 <Upload />
               </Button>
             )}
@@ -257,10 +257,6 @@ export default function CommunityPortfolio({
               </div>
             </AspectRatio>
           </div>
-        )}
-
-        {localPortfolio.length > 0 && (
-          <div className="absolute top-0 right-0"></div>
         )}
 
         {localPortfolio.map((item, index) => (
