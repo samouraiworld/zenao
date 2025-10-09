@@ -25,6 +25,7 @@ type User struct {
 	gorm.Model        // this ID should be used for any database related logic (like querying)
 	AuthID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
 	Plan       string `gorm:"default:'free'"`
+	Address    string `gorm:"uniqueIndex;default:null"` // blockchain address for on-chain interactions, later replace it by storing it on-chain with multiaddr format
 }
 
 type EntityRole struct {
@@ -380,6 +381,25 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 		return nil, err
 	}
 	return dbUserToZeniDBUser(user), nil
+}
+
+// AddAddressToUser implements zeni.DB.
+func (g *gormZenaoDB) AddAddressToUser(userID string, address string) error {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	return g.db.Model(&User{}).Where("id = ?", userIDInt).Update("address", address).Error
+}
+
+// GetUserByAddress implements zeni.DB.
+func (g *gormZenaoDB) GetUserByAddress(address string) (*zeni.User, error) {
+	var user User
+	if err := g.db.Where("address = ?", address).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return dbUserToZeniDBUser(&user), nil
 }
 
 // Participate implements zeni.DB.
@@ -1548,6 +1568,7 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		CreatedAt: dbuser.CreatedAt,
 		AuthID:    dbuser.AuthID,
 		Plan:      zeni.Plan(dbuser.Plan),
+		Address:   dbuser.Address,
 	}
 }
 

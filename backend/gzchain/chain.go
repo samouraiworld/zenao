@@ -762,12 +762,12 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 }
 
 // GetCommunity implements ZenaoChain.
-func (g *gnoZenaoChain) GetCommunity(communityID string) (*zeni.Community, error) {
+func (g *gnoZenaoChain) GetCommunity(communityID string) (*zenaov1.CommunityInfo, error) {
 	g, span := g.trace("gzchain.GetCommunity")
 	defer span.End()
 
-	eventPkgPath := g.eventRealmPkgPath(communityID)
-	raw, err := checkQueryErr(g.client.QEval(eventPkgPath, "event.Info().ToJSON().String()"))
+	communityPkgPath := g.communityPkgPath(communityID)
+	raw, err := checkQueryErr(g.client.QEval(communityPkgPath, "community.Info().ToJSON().String()"))
 	if err != nil {
 		return nil, err
 	}
@@ -776,7 +776,7 @@ func (g *gnoZenaoChain) GetCommunity(communityID string) (*zeni.Community, error
 		return nil, err
 	}
 
-	var res zenaov1.EventInfo
+	var res zenaov1.CommunityInfo
 	if err := protojson.Unmarshal([]byte(parsedRaw), &res); err != nil {
 		return nil, err
 	}

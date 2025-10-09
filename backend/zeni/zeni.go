@@ -67,6 +67,7 @@ type AuthUser struct {
 	Banned bool
 }
 
+// TODO: what we do with this
 type User struct {
 	CreatedAt   time.Time
 	ID          string
@@ -74,6 +75,7 @@ type User struct {
 	DisplayName string
 	Bio         string
 	AvatarURI   string
+	Address     string // blockchain address for on-chain interactions, later replace it by storing it on-chain with multiaddr format
 	Plan        Plan
 }
 
@@ -228,6 +230,10 @@ type DB interface {
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
 	// XXX: add EnsureUsersExist
+
+	// TMP: REMOVE IT WHEN MULTIADDR IMPLEMENTED IN DAO ON CHAIN
+	AddAddressToUser(userID string, address string) error
+	GetUserByAddress(address string) (*User, error)
 
 	PromoteUser(userID string, plan Plan) error
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
