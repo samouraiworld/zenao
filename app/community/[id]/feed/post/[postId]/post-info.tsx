@@ -225,6 +225,7 @@ export default function PostInfo({
         <div className="pl-6">
           <Suspense fallback={<PostCardSkeleton />}>
             <PostComments
+              orgType="community"
               orgId={communityId}
               parentId={post.post.localPostId.toString()}
               feedId={feedId}

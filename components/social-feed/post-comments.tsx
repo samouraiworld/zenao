@@ -20,6 +20,7 @@ import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import { communityUserRoles } from "@/lib/queries/community";
 
 function PostComment({
+  orgType,
   orgId,
   parentId,
   comment,
@@ -28,6 +29,7 @@ function PostComment({
   isReacting,
   isDeleting,
 }: {
+  orgType: string;
   orgId: string;
   parentId: string;
   comment: StandardPostView;
@@ -48,41 +50,47 @@ function PostComment({
   );
   const [editMode, setEditMode] = useState(false);
 
-  // XXX We can't call one time useSuspenseQuery conditionnaly because communityUserRoles and eventUserRoles are too differents
-  const { data: _ } = useSuspenseQuery(eventUserRoles(orgId, userAddress));
-  const { data: __ } = useSuspenseQuery(communityUserRoles(orgId, userAddress));
-
   const standardPost = comment.post.post.value;
 
   return (
-    <PostCardLayout
-      key={comment.post.localPostId}
-      post={comment}
-      createdBy={createdBy}
-      parentId={parentId}
-      editMode={editMode}
-      onEditModeChange={setEditMode}
-      onReactionChange={async (icon) =>
-        await onReactionChange(comment.post.localPostId.toString(10), icon)
-      }
-      isReacting={isReacting}
-      canInteract
-      isOwner={userAddress === comment.post.author}
-      onDelete={async (parentId) =>
-        await onDelete(comment.post.localPostId.toString(10), parentId)
-      }
-      isDeleting={isDeleting}
-    >
-      <MarkdownPreview markdownString={standardPost.content} />
-    </PostCardLayout>
+    <>
+      {orgType === "event" ? (
+        <EventRoles orgId={orgId} userAddress={userAddress} />
+      ) : (
+        <CommunityRoles orgId={orgId} userAddress={userAddress} />
+      )}
+
+      <PostCardLayout
+        key={comment.post.localPostId}
+        post={comment}
+        createdBy={createdBy}
+        parentId={parentId}
+        editMode={editMode}
+        onEditModeChange={setEditMode}
+        onReactionChange={async (icon) =>
+          await onReactionChange(comment.post.localPostId.toString(10), icon)
+        }
+        isReacting={isReacting}
+        canInteract
+        isOwner={userAddress === comment.post.author}
+        onDelete={async (parentId) =>
+          await onDelete(comment.post.localPostId.toString(10), parentId)
+        }
+        isDeleting={isDeleting}
+      >
+        <MarkdownPreview markdownString={standardPost.content} />
+      </PostCardLayout>
+    </>
   );
 }
 
 export function PostComments({
+  orgType,
   orgId,
   parentId,
   feedId,
 }: {
+  orgType: string;
   orgId: string;
   parentId: string;
   feedId: string;
@@ -123,6 +131,7 @@ export function PostComments({
         return (
           <PostComment
             key={comment.post.localPostId}
+            orgType={orgType}
             orgId={orgId}
             parentId={parentId}
             comment={comment}
@@ -143,4 +152,27 @@ export function PostComments({
       />
     </div>
   );
+}
+
+// EventRoles and CommunityRoles are used to fetch and cache user roles conditionally, depending on orgType, in PostComment
+function EventRoles({
+  orgId,
+  userAddress,
+}: {
+  orgId: string;
+  userAddress: string | null;
+}) {
+  useSuspenseQuery(eventUserRoles(orgId, userAddress));
+  return null;
+}
+
+function CommunityRoles({
+  orgId,
+  userAddress,
+}: {
+  orgId: string;
+  userAddress: string | null;
+}) {
+  useSuspenseQuery(communityUserRoles(orgId, userAddress));
+  return null;
 }
