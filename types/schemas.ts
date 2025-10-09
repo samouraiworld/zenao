@@ -122,7 +122,7 @@ export const gnoProfileDetailsSchema = z.object({
   socialMediaLinks: z.array(userFormSocialLinkSchema).default([]),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
-  bannerUri: z.string().optional().default("")
+  bannerUri: z.string().optional().default(""),
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
@@ -197,6 +197,7 @@ export const communityTabsSchema = z.union([
   z.literal("chat"),
   z.literal("events"),
   z.literal("members"),
+  z.literal("portfolio"),
   z.literal("proposals"),
 ]);
 export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;
@@ -220,9 +221,18 @@ export const communityFormSchema = z.object({
 
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
 
+export const portfolioItemSchema = z.object({
+  uploadedAt: z.coerce.date(),
+  uri: uriSchema,
+  name: z.string().min(1).max(100),
+});
+
+export type PortfolioItem = z.infer<typeof portfolioItemSchema>;
+
 export const communityDetailsSchema = z.object({
   shortDescription: z.string().max(200).optional().default(""),
   description: z.string().trim().max(1000).optional().default(""),
+  portfolio: z.array(portfolioItemSchema).default([]),
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;

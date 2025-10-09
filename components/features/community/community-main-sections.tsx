@@ -17,6 +17,7 @@ import CommunityChat from "@/app/community/[id]/[tab]/chat";
 import CommunityMembers from "@/app/community/[id]/[tab]/members";
 import CommunityProposals from "@/app/community/[id]/[tab]/proposals";
 import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
+import CommunityPortfolio from "@/app/community/[id]/[tab]/portfolio";
 
 type CommunityMainSectionsProps = {
   communityId: string;
@@ -58,6 +59,14 @@ function CommunityMainSections({
             {t("members")}
           </TabsTrigger>
         </Link>
+        <Link href={`/community/${communityId}/portfolio`}>
+          <TabsTrigger
+            value="portfolio"
+            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
+          >
+            {t("portfolio")}
+          </TabsTrigger>
+        </Link>
       </TabsList>
       <Separator className="mb-8" />
       <TabsContent value="chat">
@@ -73,6 +82,11 @@ function CommunityMainSections({
       <TabsContent value="members">
         <Suspense fallback={<Loader2 className="animate-spin" />}>
           <CommunityMembers communityId={communityId} />
+        </Suspense>
+      </TabsContent>
+      <TabsContent value="portfolio">
+        <Suspense fallback={<Loader2 className="animate-spin" />}>
+          <CommunityPortfolio communityId={communityId} />
         </Suspense>
       </TabsContent>
       <TabsContent value="proposals">
