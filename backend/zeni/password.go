@@ -76,6 +76,7 @@ func encodeHash(hash []byte, salt []byte, params *argon2Params) string {
 	)
 }
 
+// TODO: DELETE
 func decodeHash(hash string) ([]byte, []byte, *argon2Params, error) {
 	parts := strings.Split(hash, "$")
 	if len(parts) != 6 {

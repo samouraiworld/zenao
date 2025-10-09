@@ -102,9 +102,12 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	var eventSK ed25519.PrivateKey
-	// TODO: Handle password change
 	if needPasswordIfGuarded {
-		if eventSK, err = zeni.EventSKFromPasswordHash(""); err != nil {
+		hash, err := zeni.NewPasswordHash(req.Msg.Password)
+		if err != nil {
+			return nil, err
+		}
+		if eventSK, err = zeni.EventSKFromPasswordHash(hash); err != nil {
 			return nil, err
 		}
 	}
