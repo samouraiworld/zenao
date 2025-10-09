@@ -29,8 +29,11 @@ import {
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { data } = useSuspenseQuery(eventOptions(id));
-  const { data: address } = useSuspenseQuery(userInfoOptions(getToken, userId));
-  const { data: roles } = useSuspenseQuery(eventUserRoles(id, address));
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+  const userRealmId = userInfo?.realmId || "";
+  const { data: roles } = useSuspenseQuery(eventUserRoles(id, userRealmId));
   const { data: gatekeepers } = useSuspenseQuery(
     eventGatekeepersEmails(id, getToken),
   );
