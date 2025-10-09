@@ -41,6 +41,7 @@ export default function ProfileHeader({
       location: "",
       shortBio: "",
       bannerUri: "",
+      skills: [],
     },
     contentFieldName: "bio",
   });
@@ -124,21 +125,23 @@ export default function ProfileHeader({
           )}
         </div>
 
-        <div className="flex flex-col gap-2 mt-4">
-          <Heading level={2} size="lg">
-            Skills
-          </Heading>
-          <div className="flex flex-wrap gap-2">
-            {["React", "TypeScript", "Next.js", "Gno"].map((skill) => (
-              <span
-                key={skill}
-                className="bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded-full"
-              >
-                {skill}
-              </span>
-            ))}
+        {profileDetails.skills?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              Skills
+            </Heading>
+            <div className="flex flex-wrap gap-2">
+              {profileDetails.skills.map((skill) => (
+                <span
+                  key={skill}
+                  className="bg-primary text-primary-foreground hover:bg-primary/80 text-sm font-medium px-3 py-1 rounded-full transition"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {profileDetails.socialMediaLinks?.length > 0 && (
           <div className="flex flex-col gap-3">
