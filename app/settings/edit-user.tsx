@@ -28,16 +28,17 @@ import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
 } from "@/lib/serialization";
+import { addressFromRealmId } from "@/lib/gno";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
 
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
 
-  const { data: address } = useSuspenseQuery(
+  const { data: userRealmId } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
-  const { data: user } = useSuspenseQuery(profileOptions(address));
+  const { data: user } = useSuspenseQuery(profileOptions(userRealmId));
   const profileDetails = deserializeWithFrontMatter({
     serialized: user?.bio ?? "",
     schema: gnoProfileDetailsSchema,
@@ -79,9 +80,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
+      if (!userRealmId) {
+        throw new Error("no user realm id");
+      }
 
       await editUser({
-        address: address || "",
+        realmId: userRealmId,
         token,
         avatarUri: values.avatarUri,
         displayName: values.displayName,
@@ -95,6 +99,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           },
         ),
       });
+
+      const address = addressFromRealmId(userRealmId);
 
       router.push(`/profile/${address}`);
       toast({

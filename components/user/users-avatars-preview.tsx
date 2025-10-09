@@ -9,7 +9,7 @@ function UsersAvatarsPreview({ usersAddresses }: { usersAddresses: string[] }) {
         <UserAvatar
           key={address}
           className="flex ring-2 ring-background/80"
-          address={address}
+          realmId={address}
           size="sm"
         />
       ))}

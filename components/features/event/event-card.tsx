@@ -82,7 +82,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
             <div className="flex flex-row gap-2 items-center">
               {/* XXX: Display all organizers */}
               {t("hosted-by")}{" "}
-              <UserAvatarWithName address={evt.organizers[0]} />
+              <UserAvatarWithName realmId={evt.organizers[0]} />
             </div>
           </div>
         </div>

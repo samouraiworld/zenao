@@ -262,7 +262,7 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    address={userAddress}
+                    realmId={userAddress}
                     className={avatarClassName}
                     size="sm"
                   />

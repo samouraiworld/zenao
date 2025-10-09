@@ -13,6 +13,7 @@ import { Button } from "@/components/shadcn/button";
 import { userAddressOptions } from "@/lib/queries/user";
 import { gnoProfileDetailsSchema } from "@/types/schemas";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { addressFromRealmId } from "@/lib/gno";
 
 type ProfileHeaderProps = {
   address: string;
@@ -28,9 +29,10 @@ export default function ProfileHeader({
   bio,
 }: ProfileHeaderProps) {
   const { userId, getToken } = useAuth();
-  const { data: userLoggedAddress } = useSuspenseQuery(
+  const { data: userLoggedRealmId } = useSuspenseQuery(
     userAddressOptions(getToken, userId),
   );
+  const userLoggedAddress = addressFromRealmId(userLoggedRealmId);
 
   const profileDetails = deserializeWithFrontMatter({
     serialized: bio,

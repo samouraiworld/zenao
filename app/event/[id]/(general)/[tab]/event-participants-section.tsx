@@ -61,7 +61,7 @@ export function ParticipantsSection({ id }: { id: string }) {
                 return (
                   <UserAvatarWithName
                     key={address}
-                    address={address}
+                    realmId={address}
                     className="h-10"
                     linkToProfile
                   />
@@ -100,7 +100,7 @@ export function ParticipantsSection({ id }: { id: string }) {
             return (
               <UserAvatarWithName
                 key={address}
-                address={address}
+                realmId={address}
                 className="h-10 py-1"
                 linkToProfile
               />

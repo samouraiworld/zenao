@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/shadcn/avatar";
 import Text from "@/components/widgets/texts/text";
 
 interface UserComponentProps {
-  address: string | null | undefined;
+  realmId: string | null | undefined;
   className?: string;
   size?: "sm" | "md" | "lg";
 }
@@ -33,11 +33,11 @@ const avatarClassName = cva("rounded-full overflow-hidden inline-block", {
 });
 
 export function UserAvatar({
-  address,
+  realmId,
   className,
   size = "sm",
 }: UserComponentProps) {
-  const { data: profile } = useSuspenseQuery(profileOptions(address));
+  const { data: profile } = useSuspenseQuery(profileOptions(realmId));
 
   const imgSize = size === "sm" ? 24 : size === "md" ? 48 : 96;
   const imgQuality = size === "sm" ? 60 : size === "md" ? 80 : 90;
@@ -67,7 +67,7 @@ export function UserAvatarSkeleton({ className }: { className?: string }) {
 }
 
 export function UserAvatarWithName({
-  address,
+  realmId,
   className,
   linkToProfile,
   size = "sm",
@@ -75,11 +75,11 @@ export function UserAvatarWithName({
   linkToProfile?: boolean;
   size?: "sm" | "md" | "lg";
 }) {
-  const { data: profile } = useSuspenseQuery(profileOptions(address));
+  const { data: profile } = useSuspenseQuery(profileOptions(realmId));
 
   const content = (
     <div className="flex flex-row gap-2 items-center">
-      <UserAvatar address={profile?.address} size={size} />
+      <UserAvatar realmId={profile?.address} size={size} />
       <Text size="sm">{profile?.displayName}</Text>
     </div>
   );
