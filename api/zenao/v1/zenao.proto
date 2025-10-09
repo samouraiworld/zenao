@@ -8,6 +8,8 @@ import "polls/v1/polls.proto";
 service ZenaoService {
   // USER
   rpc EditUser(EditUserRequest) returns (EditUserResponse);
+
+  // XXX: rename to GetUserRealmID
   rpc GetUserAddress(GetUserAddressRequest) returns (GetUserAddressResponse);
 
   // EVENT

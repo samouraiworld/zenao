@@ -1071,8 +1071,9 @@ func main() {
 }
 
 // UserAddress implements ZenaoChain.
+// XXX: rename to UserRealmID
 func (g *gnoZenaoChain) UserAddress(userID string) string {
-	return gnolang.DerivePkgBech32Addr(g.userRealmPkgPath(userID)).String()
+	return g.userRealmPkgPath(userID)
 }
 
 // EventAddress implements ZenaoChain.
