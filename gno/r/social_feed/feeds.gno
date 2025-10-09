@@ -11,25 +11,8 @@ import (
 )
 
 type Feed struct {
-	owner        string
 	crossNetwork bool
 	authFunc     AuthFn
-}
-
-func (f *Feed) SetAuth(_ realm, authFn AuthFn) {
-	f.onlyOwner()
-	f.authFunc = authFn
-}
-
-func (f *Feed) SetOwner(_ realm, newOwner string) {
-	f.onlyOwner()
-	f.owner = newOwner
-}
-
-func (f *Feed) onlyOwner() {
-	if realmid.Previous() != f.owner {
-		panic("only owner")
-	}
 }
 
 func (f *Feed) auth() string {
@@ -82,7 +65,6 @@ func NewFeed(_ realm, slug string, crossNetwork bool, authFunc AuthFn) string {
 	feed := &Feed{
 		crossNetwork: crossNetwork,
 		authFunc:     authFunc,
-		owner:        creator,
 	}
 	feedId := creator + ":" + slug
 	if feeds.Has(feedId) {
