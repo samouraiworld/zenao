@@ -174,11 +174,42 @@ func (g *gnoZenaoChain) FillAdminProfile() {
 }
 
 // EntityRoles implements zeni.Chain.
-func (g *gnoZenaoChain) EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error) {
+func (g *gnoZenaoChain) EntityRoles(entityID string, orgType string, orgID string) ([]string, error) {
 	g, span := g.trace("gzchain.EntityRoles")
 	defer span.End()
 
-	return nil, nil
+	if orgType != zeni.EntityTypeCommunity && orgType != zeni.EntityTypeEvent {
+		return nil, fmt.Errorf("unsupported org type: %s", orgType)
+	}
+
+	orgPkgPath := g.orgPkgPath(orgType, orgID)
+	memberId, err := g.EntityAddress(zeni.EntityTypeUser, entityID)
+	if err != nil {
+		return nil, err
+	}
+	var expr string
+	if orgType == zeni.EntityTypeCommunity {
+		expr = "community.DAOPrivate.Members.GetMemberRoles(\"" + g.UserAddress(memberId) + "\").ToJSON().String()"
+	}
+	if orgType == zeni.EntityTypeEvent {
+		expr = "event.DAOPrivate.Members.GetMemberRoles(\"" + g.UserAddress(memberId) + "\").ToJSON().String()"
+	}
+	raw, err := checkQueryErr(g.client.QEval(orgPkgPath, expr))
+	if err != nil {
+		return nil, err
+	}
+
+	parsedRaw, err := parseQEvalResponseData(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	var roles []string
+	if err := json.Unmarshal([]byte(parsedRaw), &roles); err != nil {
+		return nil, err
+	}
+
+	return roles, nil
 }
 
 // CreateEvent implements ZenaoChain.
@@ -1234,6 +1265,16 @@ func (g *gnoZenaoChain) UserAddress(userID string) string {
 // EventAddress implements ZenaoChain.
 func (g *gnoZenaoChain) EventAddress(eventID string) string {
 	return gnolang.DerivePkgBech32Addr(g.eventRealmPkgPath(eventID)).String()
+}
+
+// EntityAddress implements ZenaoChain.
+func (g *gnoZenaoChain) EntityAddress(entityType string, entityID string) (string, error) {
+	if entityType == zeni.EntityTypeUser {
+		return g.UserAddress(entityID), nil
+	} else if entityType == zeni.EntityTypeEvent {
+		return g.EventAddress(entityID), nil
+	}
+	return "", fmt.Errorf("unknown entity type: %q", entityType)
 }
 
 // CreatePost implements ZenaoChain

@@ -127,7 +127,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			if slices.Contains(roles, zeni.RoleMember) {
 				continue
 			}
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
+			if err := s.Chain.WithContext(ctx).AddMemberToCommunity("changeme", "changeme", participants[i].ID); err != nil {
 				return nil, err
 			}
 		}

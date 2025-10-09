@@ -298,9 +298,11 @@ type Chain interface {
 	// Off-chain operations
 	UserAddress(userID string) string
 	EventAddress(eventID string) string
+	EntityAddress(entityType string, entityID string) (string, error)
 
 	// Read operations (Query)
-	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
+	// TODO: change ID for pkg path ? and remove the orgType ?
+	EntityRoles(entityID string, orgType string, orgID string) ([]string, error)
 
 	// TODO: what happens if event not found ? should i just return empty cmt & empty err or err handle it ?
 	GetEvent(eventID string) (*zenaov1.EventInfo, error)
