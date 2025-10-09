@@ -102,8 +102,10 @@ func (s *ZenaoServer) EditEvent(
 	}
 
 	// TODO: what happens if the user is not administrator anymore but was before ?
-	if cmt != nil && cmt.ID != req.Msg.CommunityId {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, cmt.ID, req.Msg.EventId); err != nil {
+	// TODO: use the norman implementation to get pkg path
+	// TODO: look for all changeme in the codebase
+	if cmt != nil && "changeme" != req.Msg.CommunityId {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, "changeme", req.Msg.EventId); err != nil {
 			return nil, err
 		}
 	}
@@ -120,7 +122,7 @@ func (s *ZenaoServer) EditEvent(
 	}
 
 	var newCmt *zenaov1.CommunityInfo
-	if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) {
+	if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != "changeme") {
 		newCmt, err = s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
 		if err != nil {
 			return nil, err

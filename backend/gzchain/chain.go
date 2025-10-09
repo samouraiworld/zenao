@@ -299,11 +299,42 @@ func (g *gnoZenaoChain) GetEventUserTicket(eventID string, userID string) (*zeni
 }
 
 // GetEventCommunity implements ZenaoChain.
-func (g *gnoZenaoChain) GetEventCommunity(eventID string) (*zeni.Community, error) {
+func (g *gnoZenaoChain) GetEventCommunity(eventID string) (*zenaov1.CommunityInfo, error) {
 	g, span := g.trace("gzchain.GetEventCommunity")
 	defer span.End()
 
-	return nil, nil
+	raw, err := checkQueryErr(g.client.QEval(g.communitiesIndexPkgPath, "communitiesToJSON(listCommunitiesByEvent(\""+g.eventRealmPkgPath(eventID)+"\", 1, 0))"))
+	if err != nil {
+		return nil, err
+	}
+	parsedRaw, err := parseQEvalResponseData(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	// protojson expects a single protobuf message so i parse them into a list of raw json msg first
+	var rawList []json.RawMessage
+	if err := json.Unmarshal([]byte(parsedRaw), &rawList); err != nil {
+		return nil, err
+	}
+
+	list := make([]*zenaov1.CommunityInfo, 0, len(rawList))
+	for _, elem := range rawList {
+		var info zenaov1.CommunityInfo
+		if err := protojson.Unmarshal(elem, &info); err != nil {
+			return nil, err
+		}
+		list = append(list, &info)
+	}
+
+	if len(list) == 0 {
+		return nil, nil
+	}
+	if len(list) > 1 {
+		return nil, errors.New("there is multiple communities for this event, should not happen for now")
+	}
+
+	return list[0], nil
 }
 
 // ValidatePassword implements ZenaoChain.
