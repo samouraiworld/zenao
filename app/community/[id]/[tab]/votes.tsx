@@ -6,7 +6,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { userAddressOptions } from "@/lib/queries/user";
 import { PollPostView } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
@@ -17,7 +17,6 @@ import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import { derivePkgAddr } from "@/lib/gno";
 import { communityUserRoles } from "@/lib/queries/community";
-import { usePwaContext } from "@/components/providers/pwa-state-provider";
 
 type CommunityPollsProps = {
   communityId: string;
@@ -32,8 +31,6 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
   const { data: userRoles } = useSuspenseQuery(
     communityUserRoles(communityId, userAddress),
   );
-
-  const { onDisplayBottomBarChange } = usePwaContext();
 
   const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
   const feedId = `${derivePkgAddr(pkgPath)}:main`;
@@ -61,16 +58,6 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
   const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
   const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
-  useEffect(() => {
-    if (userRoles.includes("member") || userRoles.includes("administrator")) {
-      onDisplayBottomBarChange(false);
-    }
-
-    return () => {
-      onDisplayBottomBarChange(true);
-    };
-  }, [onDisplayBottomBarChange, userRoles]);
-
   return (
     <>
       <div className="space-y-4">
@@ -89,6 +76,9 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
               userRoles.includes("administrator")
             }
             onDelete={onDelete}
+            replyHrefFormatter={(postId) =>
+              `/community/${communityId}/feed/post/${postId}`
+            }
             canReply
             isReacting={isReacting}
             isDeleting={isDeleting}

@@ -211,7 +211,7 @@ describe("main", () => {
     cy.get('a[href^="/ticket/"]').contains(testEventName).should("be.visible");
   });
 
-  it("send feed standard post", () => {
+  it("send event feed standard post", () => {
     // start from the home
     cy.visit("/");
 
@@ -257,7 +257,7 @@ describe("main", () => {
     cy.get("p").contains(testStandardPost).should("be.visible");
   });
 
-  it("send feed poll post", () => {
+  it("send event feed poll post", () => {
     // start from the home
     cy.visit("/");
 
@@ -323,7 +323,7 @@ describe("main", () => {
     cy.get('img[alt="grinning"]').first().click();
   });
 
-  it("send a comment on a post", () => {
+  it("send a comment on a event post", () => {
     // start from the home
     cy.visit("/");
 
@@ -524,8 +524,163 @@ describe("main", () => {
       .contains("Chat")
       .should("have.attr", "aria-selected", "true");
 
+    cy.get("button").contains("Votes").click();
     cy.get("button").contains("Events").click();
     cy.get("button").contains("Members").click();
+  });
+
+  it("send community feed standard post", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore a community
+    cy.get("a").contains("Communities").click();
+    cy.get('a[href^="/community/"]').last().click();
+
+    cy.url().should("contain", "/community/");
+
+    // SocialFeedForm should not exist
+    cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
+      "not.exist",
+    );
+
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
+
+    // Go to chat tab
+    cy.get("button").contains("Chat").click();
+
+    // SocialFeedForm should exist
+    cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
+      .should("exist")
+      .type(testStandardPost, { delay: 1 });
+
+    // Submit post
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Check post exists
+    cy.get("p").contains(testStandardPost).should("be.visible");
+  });
+
+  it("send community feed poll post", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore a community
+    cy.get("a").contains("Communities").click();
+    cy.get('a[href^="/community/"]').last().click();
+
+    cy.url().should("contain", "/community/");
+
+    // SocialFeedForm should not exist
+    cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
+      "not.exist",
+    );
+
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
+
+    // Go to chat tab
+    cy.get("button").contains("Chat").click();
+
+    // Channge type of post
+    cy.get('button[aria-label="set type post"]').click();
+
+    // Enter question
+    cy.get(
+      `textarea[placeholder="What do you wanna ask to the community ?"]`,
+    ).type(testStandardPost, { delay: 1 });
+
+    // Enter answers
+    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
+    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 1 });
+
+    // Add another answer
+    cy.get("p").contains("Add another answer").click();
+
+    // Check if delete answer button is displayed
+    cy.get(".lucide-trash2").should("have.length", 3);
+
+    // Add last answer
+    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 1 });
+
+    // Submit poll
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Views polls
+    cy.get("button").contains("Votes").click();
+
+    cy.get("p").contains(testStandardPost).should("be.visible");
+    cy.get("p").contains("Answer 1").should("be.visible");
+    cy.get("p").contains("Answer 2").should("be.visible");
+    cy.get("p").contains("Answer 3").should("be.visible");
+
+    // Select one answer
+    cy.get("p").contains("Answer 3").click();
+
+    toastShouldContain("Vote submitted !");
+
+    // Add reaction to post
+    cy.get(".reaction-btn").first().click();
+    // Select emoji
+    cy.get('img[alt="grinning"]').first().click();
+  });
+
+  it("send a comment on a community post", () => {
+    // start from the home
+    cy.visit("/");
+
+    // Explore a community
+    cy.get("a").contains("Communities").click();
+    cy.get('a[href^="/community/"]').last().click();
+
+    cy.url().should("contain", "/community/");
+
+    cy.url().then((url) => {
+      login();
+      cy.visit(url);
+    });
+
+    // cy.get("a").contains("Edit community").should("be.visible");
+    // cy.get("a").contains("Leave community").should("be.visible");
+
+    // Go to chat tab
+    cy.get("button").contains("Chat").click();
+
+    // SocialFeedForm should exist
+    cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
+      .should("exist")
+      .type(testStandardPost, { delay: 1 });
+
+    // Submit post
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Check post exists
+    cy.get("p").contains(testStandardPost).should("be.visible");
+
+    // check that no comment exists
+    cy.get('button[title="Show replies"]')
+      .contains("0")
+      .should("be.visible")
+      .parent()
+      .click();
+
+    cy.url().should("include", "/post/");
+
+    // Type comment
+    cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
+      .should("exist")
+      .type(testComment, { delay: 1 });
+
+    // Submit comment
+    cy.get('button[aria-label="submit post"]').click();
+
+    // Assert comment exists
+    cy.get("p").contains(testComment).should("be.visible");
   });
 });
 

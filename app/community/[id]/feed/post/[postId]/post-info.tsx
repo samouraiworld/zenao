@@ -17,7 +17,6 @@ import { useToast } from "@/hooks/use-toast";
 import { derivePkgAddr } from "@/lib/gno";
 import { parsePollUri } from "@/lib/multiaddr";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
-import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
 import { feedPost } from "@/lib/queries/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
@@ -25,16 +24,17 @@ import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { StandardPostForm } from "@/components/social-feed/standard-post-form";
 import { PostComments } from "@/components/social-feed/post-comments";
+import { CommunityUserRole, communityUserRoles } from "@/lib/queries/community";
 
 function PostCommentForm({
-  eventId,
+  communityId,
   parentId,
   userRoles,
   form,
 }: {
-  eventId: string;
+  communityId: string;
   parentId: bigint;
-  userRoles: EventUserRole[];
+  userRoles: CommunityUserRole[];
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
   const { toast } = useToast();
@@ -58,8 +58,8 @@ function PostCommentForm({
       }
 
       await createStandardPost({
-        orgType: "event",
-        orgId: eventId,
+        orgType: "community",
+        orgId: communityId,
         content: values.content,
         parentId: parentId.toString(),
         token,
@@ -92,8 +92,8 @@ function PostCommentForm({
         </div>
       </SignedOut>
       <SignedIn>
-        {!userRoles.includes("organizer") &&
-        !userRoles.includes("participant") ? (
+        {!userRoles.includes("administrator") &&
+        !userRoles.includes("member") ? (
           <div className="flex justify-center w-full">
             <div className="w-full">
               You must be a participant to submit a comment.
@@ -120,10 +120,10 @@ function PostCommentForm({
 }
 
 export default function PostInfo({
-  eventId,
+  communityId,
   postId,
 }: {
-  eventId: string;
+  communityId: string;
   postId: string;
 }) {
   const router = useRouter();
@@ -132,7 +132,7 @@ export default function PostInfo({
     userAddressOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
+    communityUserRoles(communityId, userAddress),
   );
   const { data: post } = useSuspenseQuery(feedPost(postId, userAddress || ""));
 
@@ -147,7 +147,7 @@ export default function PostInfo({
     },
   });
 
-  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
+  const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
   const feedId = `${derivePkgAddr(pkgPath)}:main`;
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
@@ -170,7 +170,7 @@ export default function PostInfo({
           <StandardPostCard
             post={post}
             isOwner={
-              roles.includes("organizer") || roles.includes("participant")
+              roles.includes("administrator") || roles.includes("member")
             }
             onReactionChange={async (icon) =>
               await onReactionChange(postId, icon)
@@ -180,7 +180,7 @@ export default function PostInfo({
             onEditModeChange={setEditMode}
             onDelete={async (parentId) => {
               await onDelete(postId, parentId);
-              router.push(`/event/${eventId}/feed`);
+              router.push(`/community/${communityId}`);
             }}
             onEdit={async (values) => await onEdit(postId, values)}
             isDeleting={isDeleting}
@@ -201,12 +201,12 @@ export default function PostInfo({
             }
             onDelete={async (parentId) => {
               await onDelete(postId, parentId);
-              router.push(`/event/${eventId}/feed`);
+              router.push(`/community/${communityId}`);
             }}
             isDeleting={isDeleting}
             isReacting={isReacting}
             isOwner={
-              roles.includes("organizer") || roles.includes("participant")
+              roles.includes("administrator") || roles.includes("member")
             }
             canInteract
           />
@@ -216,7 +216,7 @@ export default function PostInfo({
       <div className="flex flex-col gap-4">
         <Heading level={2}>Comments ({post.childrenCount})</Heading>
         <PostCommentForm
-          eventId={eventId}
+          communityId={communityId}
           parentId={post.post.localPostId}
           userRoles={roles}
           form={form}
@@ -225,7 +225,7 @@ export default function PostInfo({
         <div className="pl-6">
           <Suspense fallback={<PostCardSkeleton />}>
             <PostComments
-              orgId={eventId}
+              orgId={communityId}
               parentId={post.post.localPostId.toString()}
               feedId={feedId}
             />

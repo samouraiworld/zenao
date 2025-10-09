@@ -17,9 +17,10 @@ import { isStandardPost, StandardPostView } from "@/lib/social-feed";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
+import { communityUserRoles } from "@/lib/queries/community";
 
 function PostComment({
-  eventId,
+  orgId,
   parentId,
   comment,
   onReactionChange,
@@ -27,7 +28,7 @@ function PostComment({
   isReacting,
   isDeleting,
 }: {
-  eventId: string;
+  orgId: string;
   parentId: string;
   comment: StandardPostView;
   onReactionChange: (
@@ -47,7 +48,9 @@ function PostComment({
   );
   const [editMode, setEditMode] = useState(false);
 
-  const { data: _ } = useSuspenseQuery(eventUserRoles(eventId, userAddress));
+  // XXX We can't call one time useSuspenseQuery conditionnaly because communityUserRoles and eventUserRoles are too differents
+  const { data: _ } = useSuspenseQuery(eventUserRoles(orgId, userAddress));
+  const { data: __ } = useSuspenseQuery(communityUserRoles(orgId, userAddress));
 
   const standardPost = comment.post.post.value;
 
@@ -76,11 +79,11 @@ function PostComment({
 }
 
 export function PostComments({
-  eventId,
+  orgId,
   parentId,
   feedId,
 }: {
-  eventId: string;
+  orgId: string;
   parentId: string;
   feedId: string;
 }) {
@@ -112,7 +115,7 @@ export function PostComments({
     feedId,
     parentId,
   );
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(eventId);
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
   return (
     <div className="space-y-1">
@@ -120,7 +123,7 @@ export function PostComments({
         return (
           <PostComment
             key={comment.post.localPostId}
-            eventId={eventId}
+            orgId={orgId}
             parentId={parentId}
             comment={comment}
             onReactionChange={onReactionChange}
