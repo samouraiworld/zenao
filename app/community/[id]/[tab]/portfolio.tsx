@@ -5,15 +5,27 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Loader2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/widgets/texts/heading";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { communityInfo } from "@/lib/queries/community";
-import { deserializeWithFrontMatter } from "@/lib/serialization";
-import { communityDetailsSchema, PortfolioItem } from "@/types/schemas";
+import {
+  deserializeWithFrontMatter,
+  serializeWithFrontMatter,
+} from "@/lib/serialization";
+import {
+  CommunityDetails,
+  communityDetailsSchema,
+  PortfolioItem,
+} from "@/types/schemas";
 import { Button } from "@/components/shadcn/button";
 import { useToast } from "@/hooks/use-toast";
 import { web2URL } from "@/lib/uris";
 import { cn } from "@/lib/tailwind";
+import { uploadFile } from "@/lib/files";
+import { useEditCommunity } from "@/lib/mutations/community-edit";
+import { captureException } from "@/lib/report";
+import { zenaoClient } from "@/lib/zenao-client";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -23,12 +35,26 @@ export default function CommunityPortfolio({
   communityId,
 }: CommunityPortfolioProps) {
   const { toast } = useToast();
+  const { getToken } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { data: community } = useSuspenseQuery(communityInfo(communityId));
+  const { data: administrators } = useSuspenseQuery({
+    queryKey: ["communityAdmins", communityId],
+    queryFn: async () => {
+      const token = await getToken();
+      if (!token) throw new Error("invalid clerk token");
+      const res = await zenaoClient.getCommunityAdministrators(
+        { communityId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return res.administrators;
+    },
+  });
+
   // const t = useTranslations("");
 
-  const { portfolio } = deserializeWithFrontMatter({
+  const { portfolio, ...otherDetails } = deserializeWithFrontMatter({
     contentFieldName: "description",
     schema: communityDetailsSchema,
     serialized: community?.description ?? "",
@@ -38,14 +64,10 @@ export default function CommunityPortfolio({
       portfolio: [],
     },
   });
+  const { mutateAsync: editCommunity } = useEditCommunity();
 
-  const [localPortfolio, setLocalPortfolio] = useState<PortfolioItem[]>([
-    {
-      name: "Sample Media 1",
-      uri: "ipfs://bafkreib3jepmhoh2szfq4m2xsixwwucv4uwtvkkq2zotuqamvvn3i2vmhm",
-      uploadedAt: new Date(),
-    },
-  ]);
+  const [localPortfolio, setLocalPortfolio] =
+    useState<PortfolioItem[]>(portfolio);
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -54,15 +76,39 @@ export default function CommunityPortfolio({
     }
 
     try {
+      const token = await getToken();
+      if (!token) throw new Error("invalid clerk token");
+
       setIsUploading(true);
 
-      // Simulate upload process
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const uri = await uploadFile(files[0]);
+      const newItem: PortfolioItem = {
+        name: files[0].name,
+        uri,
+        uploadedAt: new Date(),
+      };
+
+      const description = serializeWithFrontMatter<
+        Omit<CommunityDetails, "description">
+      >(otherDetails.description, {
+        shortDescription: otherDetails.shortDescription,
+        portfolio: [newItem, ...localPortfolio],
+      });
+
+      await editCommunity({
+        ...community,
+        communityId,
+        administrators,
+        token,
+        description,
+      });
+      setLocalPortfolio((prev) => [newItem, ...prev]);
 
       toast({
         title: "File uploaded successfully",
       });
     } catch (error) {
+      captureException(error);
       console.error("Upload failed", error);
       toast({
         title: "Error while uploading file",
@@ -79,7 +125,9 @@ export default function CommunityPortfolio({
   return (
     <div className="space-y-8 relative">
       <div className="flex items-center">
-        <Heading>Recent media uploaded ({localPortfolio.length})</Heading>
+        <Heading level={3}>
+          Recent media uploaded ({localPortfolio.length})
+        </Heading>
         {localPortfolio.length > 0 && (
           <Button
             variant="link"
@@ -102,7 +150,7 @@ export default function CommunityPortfolio({
       <div
         className="grid gap-4"
         style={{
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
           maxWidth: "100%",
         }}
       >
@@ -112,6 +160,7 @@ export default function CommunityPortfolio({
             <Button
               variant="link"
               className="text-main"
+              disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
             >
               Upload your first file
@@ -139,9 +188,7 @@ export default function CommunityPortfolio({
             <AspectRatio ratio={16 / 9}>
               <div className="h-full border rounded border-muted overflow-hidden">
                 <Web3Image
-                  src={web2URL(
-                    "ipfs://bafkreib3jepmhoh2szfq4m2xsixwwucv4uwtvkkq2zotuqamvvn3i2vmhm",
-                  )}
+                  src={web2URL(item.uri)}
                   alt={`${item.name}-bg`}
                   fill
                   sizes="(max-width: 768px) 100vw,
@@ -153,9 +200,7 @@ export default function CommunityPortfolio({
                   )}
                 />
                 <Web3Image
-                  src={web2URL(
-                    "ipfs://bafkreib3jepmhoh2szfq4m2xsixwwucv4uwtvkkq2zotuqamvvn3i2vmhm",
-                  )}
+                  src={web2URL(item.uri)}
                   alt={item.name}
                   fill
                   sizes="(max-width: 768px) 100vw,
