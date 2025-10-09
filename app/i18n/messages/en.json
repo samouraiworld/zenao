@@ -236,8 +236,6 @@
   "no-posts-description": "You have no posts. Why not create one?",
   "no-more-posts": "No more to show for now.",
   "social-feed": {
-    "global-feed": "Global feed",
-    "polls-feed": "Polls",
     "no-polls-title": "No polls to show.",
     "no-polls-description": "You have no polls. Why not create one?",
     "poll-form": {
