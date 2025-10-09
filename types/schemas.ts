@@ -222,6 +222,7 @@ export const communityFormSchema = z.object({
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
 
 export const portfolioItemSchema = z.object({
+  id: z.string().uuid(),
   uploadedAt: z.coerce.date(),
   uri: uriSchema,
   name: z.string().min(1).max(100),

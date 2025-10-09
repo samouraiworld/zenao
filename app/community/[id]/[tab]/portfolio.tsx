@@ -26,6 +26,7 @@ import { uploadFile } from "@/lib/files";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
 import { zenaoClient } from "@/lib/zenao-client";
+import PortfolioPreviewDialog from "@/components/dialogs/portfolio-preview-dialog";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -36,8 +37,17 @@ export default function CommunityPortfolio({
 }: CommunityPortfolioProps) {
   const { toast } = useToast();
   const { getToken } = useAuth();
-  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [previewDialogState, setPreviewDialogState] = useState<{
+    isOpen: boolean;
+    item: PortfolioItem;
+  }>({
+    isOpen: false,
+    item: {} as never,
+  });
+
   const { data: community } = useSuspenseQuery(communityInfo(communityId));
   const { data: administrators } = useSuspenseQuery({
     queryKey: ["communityAdmins", communityId],
@@ -86,6 +96,7 @@ export default function CommunityPortfolio({
         name: files[0].name,
         uri,
         uploadedAt: new Date(),
+        id: crypto.randomUUID(),
       };
 
       const description = serializeWithFrontMatter<
@@ -122,8 +133,61 @@ export default function CommunityPortfolio({
     }
   };
 
+  const onPreview = (item: PortfolioItem) => {
+    setPreviewDialogState({ isOpen: true, item });
+  };
+
+  const onDelete = async (item: PortfolioItem) => {
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("invalid clerk token");
+
+      setIsDeleting(true);
+      const updatedPortfolio = localPortfolio.filter((p) => p.id !== item.id);
+
+      const description = serializeWithFrontMatter<
+        Omit<CommunityDetails, "description">
+      >(otherDetails.description, {
+        shortDescription: otherDetails.shortDescription,
+        portfolio: updatedPortfolio,
+      });
+
+      await editCommunity({
+        ...community,
+        communityId,
+        administrators,
+        token,
+        description,
+      });
+      setLocalPortfolio(updatedPortfolio);
+      toast({
+        title: "Item deleted successfully",
+      });
+      setPreviewDialogState({ isOpen: false, item: {} as never });
+    } catch (error) {
+      captureException(error);
+      console.error("Delete failed", error);
+      toast({
+        title: "Error while deleting item",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-8 relative">
+      <PortfolioPreviewDialog
+        isOpen={previewDialogState.isOpen}
+        onOpenChange={(open) =>
+          setPreviewDialogState(() => ({ isOpen: open, item: {} as never }))
+        }
+        item={previewDialogState.item}
+        onDelete={onDelete}
+        isDeleting={isDeleting}
+      />
+
       <div className="flex items-center">
         <Heading level={3}>
           Recent media uploaded ({localPortfolio.length})
@@ -184,8 +248,8 @@ export default function CommunityPortfolio({
         )}
 
         {localPortfolio.map((item, index) => (
-          <div className="max-w-[350px] w-full" key={index}>
-            <AspectRatio ratio={16 / 9}>
+          <div className="w-full" key={index}>
+            <AspectRatio ratio={16 / 9} onClick={() => onPreview(item)}>
               <div className="h-full border rounded border-muted overflow-hidden">
                 <Web3Image
                   src={web2URL(item.uri)}
