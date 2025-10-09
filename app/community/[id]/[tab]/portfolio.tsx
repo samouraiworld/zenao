@@ -8,7 +8,7 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/widgets/texts/heading";
 import { Web3Image } from "@/components/widgets/images/web3-image";
-import { communityInfo } from "@/lib/queries/community";
+import { communityInfo, communityUserRoles } from "@/lib/queries/community";
 import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
@@ -27,6 +27,7 @@ import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
 import { zenaoClient } from "@/lib/zenao-client";
 import PortfolioPreviewDialog from "@/components/dialogs/portfolio-preview-dialog";
+import { userAddressOptions } from "@/lib/queries/user";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -36,7 +37,14 @@ export default function CommunityPortfolio({
   communityId,
 }: CommunityPortfolioProps) {
   const { toast } = useToast();
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
+  const { data: userAddress } = useSuspenseQuery(
+    userAddressOptions(getToken, userId),
+  );
+  const { data: userRoles = [] } = useSuspenseQuery(
+    communityUserRoles(communityId, userAddress),
+  );
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -60,7 +68,10 @@ export default function CommunityPortfolio({
       );
       return res.administrators;
     },
+    initialData: [],
   });
+
+  const isAdmin = userRoles.includes("administrator");
 
   // const t = useTranslations("");
 
@@ -138,6 +149,8 @@ export default function CommunityPortfolio({
   };
 
   const onDelete = async (item: PortfolioItem) => {
+    if (!isAdmin) return;
+
     try {
       const token = await getToken();
       if (!token) throw new Error("invalid clerk token");
@@ -186,13 +199,14 @@ export default function CommunityPortfolio({
         item={previewDialogState.item}
         onDelete={onDelete}
         isDeleting={isDeleting}
+        isAdmin={isAdmin}
       />
 
       <div className="flex items-center">
         <Heading level={3}>
           Recent media uploaded ({localPortfolio.length})
         </Heading>
-        {localPortfolio.length > 0 && (
+        {isAdmin && localPortfolio.length > 0 && (
           <Button
             variant="link"
             className="text-main"
@@ -221,15 +235,17 @@ export default function CommunityPortfolio({
         {localPortfolio.length === 0 && !isUploading && (
           <div className="flex flex-col justify-center text-muted-foreground">
             <p className="text-center">No media uploaded yet.</p>
-            <Button
-              variant="link"
-              className="text-main"
-              disabled={isUploading}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              Upload your first file
-              <Upload />
-            </Button>
+            {isAdmin && (
+              <Button
+                variant="link"
+                className="text-main"
+                disabled={isUploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Upload your first file
+                <Upload />
+              </Button>
+            )}
           </div>
         )}
 
