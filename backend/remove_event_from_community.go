@@ -6,7 +6,6 @@ import (
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"go.uber.org/zap"
 )
 
 func (s *ZenaoServer) RemoveEventFromCommunity(
@@ -18,20 +17,22 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 		return nil, errors.New("unauthorized")
 	}
 
-	zUser, err := s.EnsureUserExists(ctx, user)
-	if err != nil {
-		return nil, err
-	}
+	return nil, errors.New("feature locked for now and not used in the UI")
 
-	s.Logger.Info("remove-event-from-community", zap.String("event-id", req.Msg.EventId), zap.String("community-id", req.Msg.CommunityId), zap.String("user-id", zUser.ID))
+	// zUser, err := s.EnsureUserExists(ctx, user)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	// s.Logger.Info("remove-event-from-community", zap.String("event-id", req.Msg.EventId), zap.String("community-id", req.Msg.CommunityId), zap.String("user-id", zUser.ID))
 
-	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
-		return nil, err
-	}
+	// if user.Banned {
+	// 	return nil, errors.New("user is banned")
+	// }
+
+	// if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
+	// 	return nil, err
+	// }
 
 	return connect.NewResponse(&zenaov1.RemoveEventFromCommunityResponse{}), nil
 }

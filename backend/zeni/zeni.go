@@ -72,13 +72,13 @@ type User struct {
 	CreatedAt   time.Time
 	ID          string
 	AuthID      string
-	DisplayName string
-	Bio         string
-	AvatarURI   string
-	Address     string // blockchain address for on-chain interactions, later replace it by storing it on-chain with multiaddr format
+	DisplayName string //TODO: to remove
+	Bio         string //TODO: to remove
+	AvatarURI   string //TODO: to remove
 	Plan        Plan
 }
 
+// TODO: TO DELETE
 type Event struct {
 	CreatedAt         time.Time
 	DeletedAt         time.Time
@@ -97,6 +97,7 @@ type Event struct {
 	Discoverable      bool
 }
 
+// TODO: TO DELETE
 type Community struct {
 	CreatedAt   time.Time
 	ID          string
@@ -107,6 +108,7 @@ type Community struct {
 	CreatorID   string
 }
 
+// TODO: TO DELETE
 type EntityRole struct {
 	CreatedAt  time.Time
 	DeletedAt  time.Time
@@ -117,6 +119,7 @@ type EntityRole struct {
 	Role       string // one of: organizer, gatekeeper, participant, administrator, member,
 }
 
+// TODO: TO DELETE
 type Feed struct {
 	CreatedAt time.Time
 	ID        string
@@ -125,6 +128,7 @@ type Feed struct {
 	OrgID     string
 }
 
+// TODO: TO DELETE
 type Post struct {
 	CreatedAt time.Time
 	ID        string
@@ -134,6 +138,7 @@ type Post struct {
 	Reactions []*Reaction
 }
 
+// TODO: TO DELETE
 type Poll struct {
 	CreatedAt time.Time
 	ID        string
@@ -145,6 +150,7 @@ type Poll struct {
 	Votes     []*Vote
 }
 
+// TODO: TO DELETE
 type Vote struct {
 	CreatedAt time.Time
 	ID        string
@@ -152,6 +158,7 @@ type Vote struct {
 	Option    string
 }
 
+// TODO: TO DELETE
 type Reaction struct {
 	CreatedAt time.Time
 	ID        string
@@ -160,6 +167,7 @@ type Reaction struct {
 	Icon      string
 }
 
+// TODO: TO DELETE
 type SoldTicket struct {
 	DeletedAt time.Time
 	CreatedAt time.Time
@@ -170,6 +178,7 @@ type SoldTicket struct {
 	Checkin   *Checkin
 }
 
+// TODO: TO DELETE
 type Checkin struct {
 	At           time.Time
 	GatekeeperID string
@@ -230,10 +239,6 @@ type DB interface {
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
 	// XXX: add EnsureUsersExist
-
-	// TMP: REMOVE IT WHEN MULTIADDR IMPLEMENTED IN DAO ON CHAIN
-	AddAddressToUser(userID string, address string) error
-	GetUserByAddress(address string) (*User, error)
 
 	PromoteUser(userID string, plan Plan) error
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
