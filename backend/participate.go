@@ -83,15 +83,17 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
-	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	evtRealmID := s.Chain.EventRealmID(req.Msg.EventId)
+	buyerRealmID := s.Chain.UserRealmID(buyer.ID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
 	if err != nil {
 		return nil, err
 	}
-	cmt, err := s.Chain.WithContext(ctx).GetEventCommunity(req.Msg.EventId)
+	cmt, err := s.Chain.WithContext(ctx).GetEventCommunity(evtRealmID)
 	if err != nil {
 		return nil, err
 	}
-	userRoles, err := s.Chain.WithContext(ctx).EntityRoles(buyer.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	userRoles, err := s.Chain.WithContext(ctx).EntityRoles(buyerRealmID, evtRealmID, zeni.EntityTypeEvent)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +119,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		// XXX: callerID should be the current user and not creator,
 		//      this could break if the initial creator has the organizer role removed
 		//      also this bypasses password protection on-chain
-		if err := s.Chain.WithContext(ctx).Participate(s.Chain.EventRealmID(req.Msg.EventId), evt.Organizers[0], s.Chain.UserRealmID(participants[i].ID), ticket.Pubkey(), eventSK); err != nil {
+		if err := s.Chain.WithContext(ctx).Participate(evtRealmID, evt.Organizers[0], s.Chain.UserRealmID(participants[i].ID), ticket.Pubkey(), eventSK); err != nil {
 			return nil, err
 		}
 

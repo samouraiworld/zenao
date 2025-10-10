@@ -183,10 +183,10 @@ func (g *gnoZenaoChain) EntityRoles(entityRealmID string, orgRealmID string, org
 
 	var expr string
 	if orgType == zeni.EntityTypeCommunity {
-		expr = "community.DAOPrivate.Members.GetMemberRoles(\"" + g.UserRealmID(entityRealmID) + "\").ToJSON().String()"
+		expr = "community.GetUserRolesJSON(\"" + g.UserRealmID(entityRealmID) + "\")"
 	}
 	if orgType == zeni.EntityTypeEvent {
-		expr = "event.DAOPrivate.Members.GetMemberRoles(\"" + g.UserRealmID(entityRealmID) + "\").ToJSON().String()"
+		expr = "event.GetUserRolesJSON(\"" + g.UserRealmID(entityRealmID) + "\")"
 	}
 	raw, err := checkQueryErr(g.client.QEval(orgRealmID, expr))
 	if err != nil {

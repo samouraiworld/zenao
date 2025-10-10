@@ -13,6 +13,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/google/uuid"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	"github.com/samouraiworld/zenao/backend/webhook"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -89,6 +90,7 @@ func (s *ZenaoServer) CreateEvent(
 	// TODO: find a way to have better ids ?
 	uuid := uuid.New().String()
 	evtID := strings.ReplaceAll(uuid, "-", "_")
+	evtRealmID := s.Chain.EventRealmID(evtID)
 
 	passwordHash, err := zeni.NewPasswordHash(req.Msg.Password)
 	if err != nil {
@@ -100,17 +102,17 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	// TODO: should we do it in one tx on-chain ?
-	if err := s.Chain.WithContext(ctx).CreateEvent(evtID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+	if err := s.Chain.WithContext(ctx).CreateEvent(evtRealmID, mapsl.Map(organizersIDs, s.Chain.UserRealmID), mapsl.Map(gatekeepersIDs, s.Chain.UserRealmID), req.Msg, privacy); err != nil {
 		return nil, err
 	}
 
-	evt, err := s.Chain.WithContext(ctx).GetEvent(evtID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
 	if err != nil {
 		return nil, err
 	}
 
 	if req.Msg.CommunityId != "" {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.CommunityId, evtID); err != nil {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, s.Chain.CommunityRealmID(req.Msg.CommunityId), evtRealmID); err != nil {
 			return nil, err
 		}
 	}
@@ -120,11 +122,11 @@ func (s *ZenaoServer) CreateEvent(
 
 	// TODO: test event with community creation
 	if req.Msg.CommunityId != "" {
-		cmt, err = s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
+		cmt, err = s.Chain.WithContext(ctx).GetCommunity(s.Chain.CommunityRealmID(req.Msg.CommunityId))
 		if err != nil {
 			return nil, err
 		}
-		members, err = s.Chain.WithContext(ctx).GetCommunityMembers(req.Msg.CommunityId)
+		members, err = s.Chain.WithContext(ctx).GetCommunityMembers(s.Chain.CommunityRealmID(req.Msg.CommunityId))
 		if err != nil {
 			return nil, err
 		}
