@@ -35,7 +35,11 @@ func init() {
 // XXX: split this package into eventreg and eventsindex
 
 func Register(_ realm, infoGetter events.InfoGetter) {
-	pkgPath := runtime.PreviousRealm().PkgPath()
+	caller := runtime.PreviousRealm()
+	if caller.IsUser() {
+		panic("can't register user")
+	}
+	pkgPath := caller.PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)

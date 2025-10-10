@@ -9,17 +9,17 @@ type EventParticipateLoggedInRequest = {
   token: string;
   guests: string[];
   userId: string;
-  userAddress: string;
+  userRealmId: string;
   password: string;
 };
 
 export const getRelatedQueriesOptions = (variables: {
   eventId: string;
-  userAddress: string | null;
+  userRealmId: string | null;
 }) => {
   const eventUserRolesOpts = eventUserRoles(
     variables.eventId,
-    variables.userAddress,
+    variables.userRealmId,
   );
   const eventOptionsOpts = eventOptions(variables.eventId);
   const eventUsersWithRoleOpts = eventUsersWithRole(
@@ -116,7 +116,7 @@ type EventParticipateGuestRequest = {
   eventId: string;
   email: string;
   guests: string[];
-  userAddress: string | null;
+  userRealmId: string | null;
   password: string;
 };
 
@@ -135,7 +135,7 @@ export const useEventParticipateGuest = () => {
       const { eventOptionsOpts, eventUserRolesOpts, eventUsersWithRoleOpts } =
         getRelatedQueriesOptions({
           eventId: variables.eventId,
-          userAddress: variables.userAddress,
+          userRealmId: variables.userRealmId,
         });
 
       // Invalidate queries

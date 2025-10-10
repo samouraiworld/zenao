@@ -9,7 +9,7 @@ import { zenaoClient } from "@/lib/zenao-client";
 type EventCancelParticipationRequest = {
   eventId: string;
   getToken: GetToken;
-  userAddress: string | null;
+  userRealmId: string | null;
 };
 
 export const useEventCancelParticipation = () => {
@@ -42,7 +42,7 @@ export const useEventCancelParticipation = () => {
       const eventInfoOpts = eventOptions(variables.eventId);
       const eventUserRolesOpts = eventUserRoles(
         variables.eventId,
-        variables.userAddress,
+        variables.userRealmId,
       );
       const eventUsersWithRoleOpts = eventUsersWithRole(
         variables.eventId,

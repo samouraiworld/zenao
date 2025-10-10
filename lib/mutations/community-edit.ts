@@ -47,10 +47,10 @@ export const useEditCommunity = () => {
       );
     },
     onSuccess: async (_, { communityId, administrators }) => {
-      const userAddress = administrators[0];
+      const userRealmId = administrators[0];
       await queryClient.invalidateQueries(communityInfo(communityId));
       await queryClient.invalidateQueries(
-        communityUserRoles(communityId, userAddress),
+        communityUserRoles(communityId, userRealmId),
       );
       await queryClient.invalidateQueries(
         communityUsersWithRoles(communityId, ["administrator", "member"]),

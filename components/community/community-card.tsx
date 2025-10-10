@@ -69,7 +69,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
           <div className="flex flex-col gap-2">
             {/* 6 because we decide to show the first 6 participants avatars as preview */}
             <UsersAvatarsPreview
-              usersAddresses={
+              users={
                 memberAddresses.length > 6
                   ? memberAddresses.slice(0, 6)
                   : memberAddresses

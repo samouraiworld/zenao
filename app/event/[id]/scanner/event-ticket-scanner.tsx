@@ -11,7 +11,7 @@ import { Loader2, RefreshCcw } from "lucide-react";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { cn } from "@/lib/tailwind";
@@ -42,9 +42,10 @@ export function EventTicketScanner({
     isFetching,
     refetch,
   } = useSuspenseQuery(eventOptions(eventId));
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const [isLoading, setIsLoading] = useState(false);
   const [lastSignature, setLastSignature] = useState<string | null>(null);
   const { checkIn } = useEventCheckIn();
@@ -67,14 +68,14 @@ export function EventTicketScanner({
 
     try {
       const token = await getToken();
-      if (!userAddress || !token) {
+      if (!userRealmId || !token) {
         throw new Error("not authenticated !");
       }
 
       const b64 = value.replaceAll("_", "/").replaceAll("-", "+");
       const ticket = ticketSecretSchema.parse(b64);
       const signature = Buffer.from(
-        await ed.signAsync(Buffer.from(userAddress), ticket),
+        await ed.signAsync(Buffer.from(userRealmId), ticket),
       )
         .toString("base64")
         .replaceAll("=", "")
