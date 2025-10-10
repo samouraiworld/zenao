@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { EventTicketScanner } from "./event-ticket-scanner";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
 
 type Props = {
@@ -18,8 +18,9 @@ export default async function ScannerPage({ params }: Props) {
   const queryClient = getQueryClient();
 
   const { getToken, userId } = await auth();
-  const userAddrOpts = userAddressOptions(getToken, userId);
-  const address = await queryClient.fetchQuery(userAddrOpts);
+  const userAddrOpts = userInfoOptions(getToken, userId);
+  const userInfo = await queryClient.fetchQuery(userAddrOpts);
+  const userRealmId = userInfo?.realmId;
 
   let eventData;
   try {
@@ -31,7 +32,7 @@ export default async function ScannerPage({ params }: Props) {
     notFound();
   }
 
-  const roles = await queryClient.fetchQuery(eventUserRoles(p.id, address));
+  const roles = await queryClient.fetchQuery(eventUserRoles(p.id, userRealmId));
 
   if (!roles.includes("gatekeeper") && !roles.includes("organizer")) {
     redirect(`/event/${p.id}`, RedirectType.replace);

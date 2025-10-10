@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import ConfirmationDialog from "./confirmation-dialog";
 import { captureException } from "@/lib/report";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { useEventCancel } from "@/lib/mutations/event-cancel";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,9 +22,10 @@ export function CancelEventDialog({
   const t = useTranslations("cancel-event-confirmation-dialog");
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const router = useRouter();
 
   const { cancelEvent, isPending } = useEventCancel();
@@ -34,7 +35,7 @@ export function CancelEventDialog({
       await cancelEvent({
         eventId,
         getToken,
-        userAddress,
+        userRealmId,
       });
 
       toast({ title: t("toast-cancel-event-success") });

@@ -62,7 +62,7 @@ export function PostCardLayout({
           <Link href={`/profile/${post.post.author}`}>
             <UserAvatar
               className="flex ring-2 ring-background/80 cursor-pointer hover:scale-110 transition-transform ease-out"
-              address={post.post.author}
+              realmId={post.post.author}
               size="sm"
             />
           </Link>

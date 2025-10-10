@@ -8,7 +8,7 @@ import {
   ScreenContainer,
   ScreenContainerCentered,
 } from "@/components/layout/screen-container";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/features/event/events-list-layout";
 
@@ -32,10 +32,11 @@ export default async function TicketsPage({ params }: PageProps) {
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const userAddrOpts = userAddressOptions(getToken, userId);
-  const address = await queryClient.fetchQuery(userAddrOpts);
+  const userAddrOpts = userInfoOptions(getToken, userId);
+  const userInfo = await queryClient.fetchQuery(userAddrOpts);
+  const userRealmId = userInfo?.realmId;
 
-  if (!token || !address) {
+  if (!token || !userRealmId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("log-in")}
@@ -45,8 +46,8 @@ export default async function TicketsPage({ params }: PageProps) {
 
   queryClient.prefetchInfiniteQuery(
     from === "upcoming"
-      ? eventsByParticipantList(address, now, Number.MAX_SAFE_INTEGER, 20)
-      : eventsByParticipantList(address, now - 1, 0, 20),
+      ? eventsByParticipantList(userRealmId, now, Number.MAX_SAFE_INTEGER, 20)
+      : eventsByParticipantList(userRealmId, now - 1, 0, 20),
   );
 
   return (
@@ -58,7 +59,7 @@ export default async function TicketsPage({ params }: PageProps) {
           description={t("description")}
           tabLinks={{ upcoming: "/tickets", past: "/tickets/past" }}
         >
-          <TicketsEventsList address={address} from={from} now={now} />
+          <TicketsEventsList userRealmId={userRealmId} from={from} now={now} />
         </EventsListLayout>
       </ScreenContainer>
     </HydrationBoundary>

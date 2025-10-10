@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { useMemo, useState } from "react";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import EmptyList from "@/components/widgets/lists/empty-list";
@@ -16,8 +16,6 @@ import { PostsList } from "@/components/social-feed/posts-list";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-// import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
-import { derivePkgAddr } from "@/lib/gno";
 import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
@@ -27,13 +25,15 @@ type EventFeedProps = {
 
 function EventFeed({ eventId }: EventFeedProps) {
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
 
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
+    eventUserRoles(eventId, userInfo?.realmId),
   );
+
+  const userRealmId = userInfo?.realmId || "";
 
   const [postInEdition, setPostInEdition] = useState<{
     postId: string;
@@ -44,7 +44,7 @@ function EventFeed({ eventId }: EventFeedProps) {
 
   // Event's social feed posts
   const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const {
     data: postsPages,
@@ -53,7 +53,7 @@ function EventFeed({ eventId }: EventFeedProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
   );
   const posts = useMemo(
     () =>
@@ -97,7 +97,7 @@ function EventFeed({ eventId }: EventFeedProps) {
         ) : (
           <PostsList
             posts={posts}
-            userAddress={userAddress}
+            userRealmId={userRealmId}
             onReactionChange={onReactionChange}
             canInteract={
               roles.includes("organizer") || roles.includes("participant")

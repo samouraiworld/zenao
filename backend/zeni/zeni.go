@@ -301,9 +301,9 @@ type Chain interface {
 	WithContext(ctx context.Context) Chain
 
 	// Off-chain operations
-	UserAddress(userID string) string
-	EventAddress(eventID string) string
-	EntityAddress(entityType string, entityID string) (string, error)
+	UserRealmID(userID string) string
+	EventRealmID(eventID string) string
+	EntityRealmID(entityType string, entityID string) (string, error)
 
 	// Read operations (Query)
 	// TODO: change ID for pkg path ? and remove the orgType ?

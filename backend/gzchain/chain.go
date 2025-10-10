@@ -16,7 +16,6 @@ import (
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/gnovm/stdlibs/chain"
 	"github.com/gnolang/gno/gnovm/stdlibs/chain/banker"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
@@ -183,16 +182,16 @@ func (g *gnoZenaoChain) EntityRoles(entityID string, orgType string, orgID strin
 	}
 
 	orgPkgPath := g.orgPkgPath(orgType, orgID)
-	memberId, err := g.EntityAddress(zeni.EntityTypeUser, entityID)
+	memberId, err := g.EntityRealmID(zeni.EntityTypeUser, entityID)
 	if err != nil {
 		return nil, err
 	}
 	var expr string
 	if orgType == zeni.EntityTypeCommunity {
-		expr = "community.DAOPrivate.Members.GetMemberRoles(\"" + g.UserAddress(memberId) + "\").ToJSON().String()"
+		expr = "community.DAOPrivate.Members.GetMemberRoles(\"" + g.UserRealmID(memberId) + "\").ToJSON().String()"
 	}
 	if orgType == zeni.EntityTypeEvent {
-		expr = "event.DAOPrivate.Members.GetMemberRoles(\"" + g.UserAddress(memberId) + "\").ToJSON().String()"
+		expr = "event.DAOPrivate.Members.GetMemberRoles(\"" + g.UserRealmID(memberId) + "\").ToJSON().String()"
 	}
 	raw, err := checkQueryErr(g.client.QEval(orgPkgPath, expr))
 	if err != nil {
@@ -217,10 +216,10 @@ func (g *gnoZenaoChain) CreateEvent(evtID string, organizersIDs []string, gateke
 	g, span := g.trace("gzchain.CreateEvent")
 	defer span.End()
 
-	organizersAddr := mapsl.Map(organizersIDs, g.UserAddress)
-	gatekeepersAddr := mapsl.Map(gatekeepersIDs, g.UserAddress)
+	organizers := mapsl.Map(organizersIDs, g.userRealmPkgPath)
+	gatekeepers := mapsl.Map(gatekeepersIDs, g.userRealmPkgPath)
 
-	eventRealmSrc, err := genEventRealmSource(organizersAddr, gatekeepersAddr, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
+	eventRealmSrc, err := genEventRealmSource(organizers, gatekeepers, g.signerInfo.GetAddress().String(), g.namespace, req, privacy)
 	if err != nil {
 		return err
 	}
@@ -440,8 +439,8 @@ func (g *gnoZenaoChain) EditEvent(evtID string, callerID string, organizersIDs [
 	g, span := g.trace("gzchain.EditEvent")
 	defer span.End()
 
-	orgsAddrLit := stringSliceLit(mapsl.Map(organizersIDs, g.UserAddress))
-	gkpsAddrLit := stringSliceLit(mapsl.Map(gatekeepersIDs, g.UserAddress))
+	organizersLit := stringSliceLit(mapsl.Map(organizersIDs, g.userRealmPkgPath))
+	gatekeepersLit := stringSliceLit(mapsl.Map(gatekeepersIDs, g.userRealmPkgPath))
 	eventPkgPath := g.eventRealmPkgPath(evtID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
 	loc := "&" + req.Location.GnoLiteral("zenaov1.", "\t\t")
@@ -483,7 +482,7 @@ func main() {
 		}),
 	})
 }
-`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, orgsAddrLit, gkpsAddrLit, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, req.Discoverable, loc, privacyStr),
+`, userRealmPkgPath, eventPkgPath, "Edit "+eventPkgPath, organizersLit, gatekeepersLit, req.Title, req.Description, req.ImageUri, req.StartDate, req.EndDate, req.Capacity, req.Discoverable, loc, privacyStr),
 			}},
 		},
 	}
@@ -572,7 +571,6 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
-	participantAddr := gnolang.DerivePkgBech32Addr(participantPkgPath).String()
 
 	signature := ""
 	if len(eventSK) != 0 {
@@ -590,7 +588,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 			Name: "main",
 			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
-				Body: genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey, signature),
+				Body: genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantPkgPath, ticketPubkey, signature),
 			}},
 		},
 	}
@@ -607,7 +605,7 @@ func (g *gnoZenaoChain) Participate(eventID, callerID, participantID string, tic
 		Func:    "AddParticipant",
 		Args: []string{
 			eventPkgPath,
-			participantAddr,
+			participantPkgPath,
 		},
 	}
 	broadcastRes, err = g.call(msgCall)
@@ -628,7 +626,6 @@ func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ti
 	eventPkgPath := g.eventRealmPkgPath(eventID)
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	participantPkgPath := g.userRealmPkgPath(participantID)
-	participantAddr := gnolang.DerivePkgBech32Addr(participantPkgPath).String()
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -636,7 +633,7 @@ func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ti
 			Name: "main",
 			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
-				Body: genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey),
+				Body: genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantPkgPath, ticketPubkey),
 			}},
 		},
 	}
@@ -659,7 +656,7 @@ func (g *gnoZenaoChain) CancelParticipation(eventID, callerID, participantID, ti
 		Func:    "RemoveParticipant",
 		Args: []string{
 			eventPkgPath,
-			participantAddr,
+			participantPkgPath,
 		},
 	}
 	gasWanted, err = g.estimateCallTxGas(msgCall)
@@ -717,11 +714,11 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	g, span := g.trace("gzchain.CreateCommunity")
 	defer span.End()
 
-	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
-	membersAddr := mapsl.Map(membersIDs, g.UserAddress)
-	eventsAddr := mapsl.Map(eventsIDs, g.EventAddress)
+	admins := mapsl.Map(administratorsIDs, g.userRealmPkgPath)
+	members := mapsl.Map(membersIDs, g.userRealmPkgPath)
+	events := mapsl.Map(eventsIDs, g.eventRealmPkgPath)
 	communityPkgPath := g.communityPkgPath(communityID)
-	cmtRealmSrc, err := genCommunityRealmSource(adminsAddr, membersAddr, eventsAddr, g.signerInfo.GetAddress().String(), g.namespace, req)
+	cmtRealmSrc, err := genCommunityRealmSource(admins, members, events, g.signerInfo.GetAddress().String(), g.namespace, req)
 	if err != nil {
 		return err
 	}
@@ -772,7 +769,7 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 	}
 	g.logger.Info("indexed community", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
-	for _, member := range membersAddr {
+	for _, member := range members {
 		msgCall = vm.MsgCall{
 			Caller:  g.signerInfo.GetAddress(),
 			PkgPath: g.communitiesIndexPkgPath,
@@ -796,14 +793,14 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 		g.logger.Info("added member to community registry", zap.String("member", member), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	}
 
-	for _, evtAddr := range eventsAddr {
+	for _, evt := range events {
 		msgCall = vm.MsgCall{
 			Caller:  g.signerInfo.GetAddress(),
 			PkgPath: g.communitiesIndexPkgPath,
 			Func:    "AddEvent",
 			Args: []string{
 				communityPkgPath,
-				evtAddr,
+				evt,
 			},
 		}
 		gasWanted, err = g.estimateCallTxGas(msgCall)
@@ -817,7 +814,7 @@ func (g *gnoZenaoChain) CreateCommunity(communityID string, administratorsIDs []
 		if err != nil {
 			return err
 		}
-		g.logger.Info("added event to community registry", zap.String("event", evtAddr), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+		g.logger.Info("added event to community registry", zap.String("event", evt), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	}
 
 	return nil
@@ -867,8 +864,8 @@ func (g *gnoZenaoChain) EditCommunity(communityID string, callerID string, admin
 	g, span := g.trace("gzchain.EditCommunity")
 	defer span.End()
 
-	adminsAddr := mapsl.Map(administratorsIDs, g.UserAddress)
-	adminsAddrLit := stringSliceLit(adminsAddr)
+	admins := mapsl.Map(administratorsIDs, g.userRealmPkgPath)
+	adminsLit := stringSliceLit(admins)
 	communityPkgPath := g.communityPkgPath(communityID)
 	userRealmPkgPath := g.userRealmPkgPath(callerID)
 
@@ -901,7 +898,7 @@ func main() {
 		}),
 	})
 }
-`, userRealmPkgPath, communityPkgPath, "Edit "+communityPkgPath, req.DisplayName, req.Description, req.AvatarUri, req.BannerUri, adminsAddrLit),
+`, userRealmPkgPath, communityPkgPath, "Edit "+communityPkgPath, req.DisplayName, req.Description, req.AvatarUri, req.BannerUri, adminsLit),
 			}},
 		},
 	}
@@ -919,14 +916,14 @@ func main() {
 	g.logger.Info("edited community", zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	// Add new admin to registry but don't remove old one since they still are members of the community
-	for _, adminAddr := range adminsAddr {
+	for _, admin := range admins {
 		msgCall := vm.MsgCall{
 			Caller:  g.signerInfo.GetAddress(),
 			PkgPath: g.communitiesIndexPkgPath,
 			Func:    "AddMember",
 			Args: []string{
 				communityPkgPath,
-				adminAddr,
+				admin,
 			},
 		}
 		gasWanted, err = g.estimateCallTxGas(msgCall)
@@ -940,7 +937,7 @@ func main() {
 		if err != nil {
 			return err
 		}
-		g.logger.Info("added admin to community registry", zap.String("admin", adminAddr), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+		g.logger.Info("added admin to community registry", zap.String("admin", admin), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 	}
 
 	return nil
@@ -953,7 +950,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
-	userAddr := g.UserAddress(userID)
+	userPkgPath := g.userRealmPkgPath(userID)
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -961,7 +958,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 			Name: "main",
 			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
-				Body: genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, userAddr),
+				Body: genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, userPkgPath),
 			}},
 		},
 	}
@@ -969,7 +966,7 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 	if err != nil {
 		return err
 	}
-	g.logger.Info("added member to community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("added member to community", zap.String("user", userPkgPath), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	msgCall := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
@@ -977,14 +974,14 @@ func (g *gnoZenaoChain) AddMemberToCommunity(callerID string, communityID string
 		Func:    "AddMember",
 		Args: []string{
 			communityPkgPath,
-			userAddr,
+			userPkgPath,
 		},
 	}
 	broadcastRes, err = g.call(msgCall)
 	if err != nil {
 		return err
 	}
-	g.logger.Info("indexed member in community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("indexed member in community", zap.String("user", userPkgPath), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -996,7 +993,7 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
-	userAddrs := mapsl.Map(userIDs, g.UserAddress)
+	users := mapsl.Map(userIDs, g.userRealmPkgPath)
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -1004,7 +1001,7 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 			Name: "main",
 			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
-				Body: genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath, userAddrs),
+				Body: genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath, users),
 			}},
 		},
 	}
@@ -1012,16 +1009,16 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 	if err != nil {
 		return err
 	}
-	g.logger.Info("added members to community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("added members to community", zap.Strings("users", users), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
-	for _, userAddr := range userAddrs {
+	for _, user := range users {
 		msgCall := vm.MsgCall{
 			Caller:  g.signerInfo.GetAddress(),
 			PkgPath: g.communitiesIndexPkgPath,
 			Func:    "AddMember",
 			Args: []string{
 				communityPkgPath,
-				userAddr,
+				user,
 			},
 		}
 		broadcastRes, err = g.call(msgCall)
@@ -1029,7 +1026,7 @@ func (g *gnoZenaoChain) AddMembersToCommunity(callerID string, communityID strin
 			return err
 		}
 	}
-	g.logger.Info("indexed members in community", zap.Strings("users", userAddrs), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("indexed members in community", zap.Strings("users", users), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -1041,7 +1038,7 @@ func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID s
 
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
-	userAddr := g.UserAddress(userID)
+	user := g.userRealmPkgPath(userID)
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -1049,7 +1046,7 @@ func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID s
 			Name: "main",
 			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
-				Body: genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, userAddr),
+				Body: genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, user),
 			}},
 		},
 	}
@@ -1064,7 +1061,7 @@ func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID s
 	if err != nil {
 		return err
 	}
-	g.logger.Info("removed member from community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("removed member from community", zap.String("user", user), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	msgCall := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
@@ -1072,7 +1069,7 @@ func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID s
 		Func:    "RemoveMember",
 		Args: []string{
 			communityPkgPath,
-			userAddr,
+			user,
 		},
 	}
 	gasWanted, err = g.estimateCallTxGas(msgCall)
@@ -1086,7 +1083,7 @@ func (g *gnoZenaoChain) RemoveMemberFromCommunity(callerID string, communityID s
 	if err != nil {
 		return err
 	}
-	g.logger.Info("removed index member in community", zap.String("user", userAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("removed index member in community", zap.String("user", user), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -1098,7 +1095,7 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
-	eventAddr := g.EventAddress(eventID)
+	event := g.eventRealmPkgPath(eventID)
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -1106,7 +1103,7 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 			Name: "main",
 			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
-				Body: genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr),
+				Body: genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, event),
 			}},
 		},
 	}
@@ -1121,7 +1118,7 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 	if err != nil {
 		return err
 	}
-	g.logger.Info("added event to community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("added event to community", zap.String("event", event), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	msgCall := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
@@ -1129,7 +1126,7 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 		Func:    "AddEvent",
 		Args: []string{
 			communityPkgPath,
-			eventAddr,
+			event,
 		},
 	}
 	gasWanted, err = g.estimateCallTxGas(msgCall)
@@ -1144,7 +1141,7 @@ func (g *gnoZenaoChain) AddEventToCommunity(callerID string, communityID string,
 		return err
 	}
 
-	g.logger.Info("indexed event in community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("indexed event in community", zap.String("event", event), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -1156,7 +1153,7 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 
 	callerPkgPath := g.userRealmPkgPath(callerID)
 	communityPkgPath := g.communityPkgPath(communityID)
-	eventAddr := g.EventAddress(eventID)
+	event := g.eventRealmPkgPath(eventID)
 
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -1164,7 +1161,7 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 			Name: "main",
 			Files: []*tm2std.MemFile{{
 				Name: "main.gno",
-				Body: genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr),
+				Body: genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, event),
 			}},
 		},
 	}
@@ -1179,7 +1176,7 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 	if err != nil {
 		return err
 	}
-	g.logger.Info("removed event from community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("removed event from community", zap.String("event", event), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	msgCall := vm.MsgCall{
 		Caller:  g.signerInfo.GetAddress(),
@@ -1187,7 +1184,7 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 		Func:    "RemoveEvent",
 		Args: []string{
 			communityPkgPath,
-			eventAddr,
+			event,
 		},
 	}
 	gasWanted, err = g.estimateCallTxGas(msgCall)
@@ -1202,7 +1199,7 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerID string, communityID st
 		return err
 	}
 
-	g.logger.Info("removed index event in community", zap.String("event", eventAddr), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
+	g.logger.Info("removed index event in community", zap.String("event", event), zap.String("community", communityPkgPath), zap.String("hash", base64.RawURLEncoding.EncodeToString(broadcastRes.Hash)))
 
 	return nil
 }
@@ -1257,22 +1254,22 @@ func main() {
 	return nil
 }
 
-// UserAddress implements ZenaoChain.
-func (g *gnoZenaoChain) UserAddress(userID string) string {
-	return gnolang.DerivePkgBech32Addr(g.userRealmPkgPath(userID)).String()
+// UserRealmID implements ZenaoChain.
+func (g *gnoZenaoChain) UserRealmID(userID string) string {
+	return g.userRealmPkgPath(userID)
 }
 
 // EventAddress implements ZenaoChain.
-func (g *gnoZenaoChain) EventAddress(eventID string) string {
-	return gnolang.DerivePkgBech32Addr(g.eventRealmPkgPath(eventID)).String()
+func (g *gnoZenaoChain) EventRealmID(eventID string) string {
+	return g.eventRealmPkgPath(eventID)
 }
 
 // EntityAddress implements ZenaoChain.
-func (g *gnoZenaoChain) EntityAddress(entityType string, entityID string) (string, error) {
+func (g *gnoZenaoChain) EntityRealmID(entityType string, entityID string) (string, error) {
 	if entityType == zeni.EntityTypeUser {
-		return g.UserAddress(entityID), nil
+		return g.UserRealmID(entityID), nil
 	} else if entityType == zeni.EntityTypeEvent {
-		return g.EventAddress(entityID), nil
+		return g.EventRealmID(entityID), nil
 	}
 	return "", fmt.Errorf("unknown entity type: %q", entityType)
 }
@@ -1284,7 +1281,7 @@ func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, 
 
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	orgPkgPath := g.orgPkgPath(orgType, orgID)
-	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
+	feedID := orgPkgPath + ":main"
 	gnoLitPost := "&" + post.GnoLiteral("feedsv1.", "\t\t")
 
 	msg := vm.MsgRun{
@@ -1447,7 +1444,7 @@ func (g *gnoZenaoChain) CreatePoll(userID string, req *zenaov1.CreatePollRequest
 
 	userRealmPkgPath := g.userRealmPkgPath(userID)
 	orgPkgPath := g.orgPkgPath(req.OrgType, req.OrgId)
-	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
+	feedID := orgPkgPath + ":main"
 
 	msg := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
@@ -1862,6 +1859,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		"gno.land/r/zenao/social_feed"
 		user %q
 		ma "gno.land/p/zenao/multiaddr"
+		"gno.land/p/zenao/realmid"
 	)
 	
 	func main() {
@@ -1875,8 +1873,11 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		isMember := basedao.MustGetMembersViewExtension(org.DAO).IsMember
-		p := polls.NewPoll(cross, question, kind, %d, options, isMember)
+		authFn := func() (string, bool) {
+			caller := realmid.Previous() // XXX: this should be upgradable
+			return caller, basedao.MustGetMembersViewExtension(org.DAO).IsMember(caller)
+		}
+		p := polls.NewPoll(cross, question, kind, %d, options, authFn)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
 			panic("multiaddr validation failed")
@@ -1920,7 +1921,7 @@ func genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, ticketPubkey, signatu
 	`, eventPkgPath, gatekeeperPkgPath, ticketPubkey, signature)
 }
 
-func genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey, signature string) string {
+func genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participant, ticketPubkey, signature string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -1939,10 +1940,10 @@ func genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, tick
 			}),
 		})
 	}
-`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participantAddr, ticketPubkey, signature)
+`, callerPkgPath, eventPkgPath, "Add participant in "+eventPkgPath, participant, ticketPubkey, signature)
 }
 
-func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticketPubkey string) string {
+func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participant, ticketPubkey string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -1961,10 +1962,10 @@ func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAd
 			}),
 		})
 	}
-`, callerPkgPath, eventPkgPath, "Remove participant in "+eventPkgPath, participantAddr, ticketPubkey)
+`, callerPkgPath, eventPkgPath, "Remove participant in "+eventPkgPath, participant, ticketPubkey)
 }
 
-func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperAddr string) string {
+func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeper string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -1983,10 +1984,10 @@ func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperA
 			}),
 		})
 	}
-`, callerPkgPath, eventPkgPath, "Remove gatekeeper in "+eventPkgPath, gatekeeperAddr)
+`, callerPkgPath, eventPkgPath, "Remove gatekeeper in "+eventPkgPath, gatekeeper)
 }
 
-func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr string) string {
+func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, member string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -2005,10 +2006,10 @@ func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberA
 			}),
 		})
 	}
-`, callerPkgPath, communityPkgPath, "Remove member role from: "+memberAddr+" within "+communityPkgPath, memberAddr)
+`, callerPkgPath, communityPkgPath, "Remove member role from: "+member+" within "+communityPkgPath, member)
 }
 
-func genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr string) string {
+func genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, member string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -2027,10 +2028,10 @@ func genCommunityAddMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr
 			}),
 		})
 	}
-`, callerPkgPath, communityPkgPath, "Add member in community "+communityPkgPath, memberAddr)
+`, callerPkgPath, communityPkgPath, "Add member in community "+communityPkgPath, member)
 }
 
-func genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath string, membersAddr []string) string {
+func genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath string, members []string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -2049,10 +2050,10 @@ func genCommunityAddMembersMsgRunBody(callerPkgPath, communityPkgPath string, me
 			}),
 		})
 	}
-`, callerPkgPath, communityPkgPath, "Add members in community "+communityPkgPath, stringSliceLit(membersAddr))
+`, callerPkgPath, communityPkgPath, "Add members in community "+communityPkgPath, stringSliceLit(members))
 }
 
-func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
+func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, event string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -2071,10 +2072,10 @@ func genCommunityAddEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr s
 			}),
 		})
 	}
-`, callerPkgPath, communityPkgPath, "Add event role in "+communityPkgPath, eventAddr)
+`, callerPkgPath, communityPkgPath, "Add event role in "+communityPkgPath, event)
 }
 
-func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr string) string {
+func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, event string) string {
 	return fmt.Sprintf(`package main
 
 	import (
@@ -2093,17 +2094,17 @@ func genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAdd
 			}),
 		})
 	}
-`, callerPkgPath, communityPkgPath, "Remove event role from: "+eventAddr+" within "+communityPkgPath, eventAddr)
+`, callerPkgPath, communityPkgPath, "Remove event role from: "+event+" within "+communityPkgPath, event)
 }
 
-func genEventRealmSource(organizersAddr []string, gatekeepersAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
+func genEventRealmSource(organizers []string, gatekeepers []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) (string, error) {
 	m := map[string]any{
-		"organizersAddr":  stringSliceLit(organizersAddr),
-		"gatekeepersAddr": stringSliceLit(gatekeepersAddr),
-		"req":             req,
-		"zenaoAdminAddr":  zenaoAdminAddr,
-		"namespace":       gnoNamespace,
-		"location":        "&" + req.Location.GnoLiteral("zenaov1.", "\t\t"),
+		"organizers":     stringSliceLit(organizers),
+		"gatekeepers":    stringSliceLit(gatekeepers),
+		"req":            req,
+		"zenaoAdminAddr": zenaoAdminAddr,
+		"namespace":      gnoNamespace,
+		"location":       "&" + req.Location.GnoLiteral("zenaov1.", "\t\t"),
 	}
 
 	participationPubkey := ""
@@ -2155,13 +2156,13 @@ var (
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	feedId = social_feed.NewFeed(cross, "main", false, isMember)
+	feedId = social_feed.NewFeed(cross, "main", false, feedAuth)
 }
 
 func init() {
 	conf := events.Config{
-		Organizers: {{.organizersAddr}},
-		Gatekeepers: {{.gatekeepersAddr}},
+		Organizers: {{.organizers}},
+		Gatekeepers: {{.gatekeepers}},
 		Title: {{.title}},
 		Description: {{.description}},
 		ImageURI: {{.imageURI}},
@@ -2195,8 +2196,9 @@ func Render(path string) string {
 	return localDAO.Render(path)
 }
 
-func isMember(memberId string) bool {
-	return basedao.MustGetMembersViewExtension(localDAO).IsMember(memberId)
+func feedAuth() (string, bool) {
+	caller := event.DAOPrivate.CallerID() // XXX: this should be upgradable
+	return caller, basedao.MustGetMembersViewExtension(localDAO).IsMember(caller)
 }
 
 func crossFn(_ realm, cb func()) {
@@ -2208,11 +2210,11 @@ func setImplem(newLocalDAO daokit.DAO, newDAO daokit.DAO) {
 }
 `
 
-func genCommunityRealmSource(adminsAddr []string, membersAddr []string, eventsAddr []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateCommunityRequest) (string, error) {
+func genCommunityRealmSource(admins []string, members []string, events []string, zenaoAdminAddr string, gnoNamespace string, req *zenaov1.CreateCommunityRequest) (string, error) {
 	m := map[string]string{
-		"adminsAddr":     stringSliceLit(adminsAddr),
-		"membersAddr":    stringSliceLit(membersAddr),
-		"eventsAddr":     stringSliceLit(eventsAddr),
+		"admins":         stringSliceLit(admins),
+		"members":        stringSliceLit(members),
+		"events":         stringSliceLit(events),
 		"displayName":    strconv.Quote(req.DisplayName),
 		"description":    strconv.Quote(req.Description),
 		"avatarURI":      strconv.Quote(req.AvatarUri),
@@ -2252,15 +2254,15 @@ var (
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	feedId = social_feed.NewFeed(cross, "main", false, isMember)
+	feedId = social_feed.NewFeed(cross, "main", false, feedAuth)
 }
 
 func init() {
 	conf := communities.Config{
 		ZenaoAdminAddr:   {{.zenaoAdminAddr}},
-		Administrators:   {{.adminsAddr}},
-		Members:          {{.membersAddr}},
-		Events:           {{.eventsAddr}},
+		Administrators:   {{.admins}},
+		Members:          {{.members}},
+		Events:           {{.events}},
 		DisplayName:      {{.displayName}},
 		Description:      {{.description}},
 		AvatarURI:        {{.avatarURI}},
@@ -2288,8 +2290,9 @@ func Render(path string) string {
 	return localDAO.Render(path)
 }
 
-func isMember(memberId string) bool {
-	return basedao.MustGetMembersViewExtension(localDAO).IsMember(memberId)
+func feedAuth() (string, bool) {
+	caller := community.DAOPrivate.CallerID() // XXX: this should be upgradable
+	return caller, basedao.MustGetMembersViewExtension(localDAO).IsMember(caller)
 }
 
 func crossFn(_ realm, cb func()) {

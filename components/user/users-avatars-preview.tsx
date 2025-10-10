@@ -2,14 +2,14 @@
 
 import { UserAvatar } from "../features/user/user";
 
-function UsersAvatarsPreview({ usersAddresses }: { usersAddresses: string[] }) {
+function UsersAvatarsPreview({ users }: { users: string[] }) {
   return (
     <div className="flex -space-x-2 overflow-hidden">
-      {usersAddresses.map((address) => (
+      {users.map((realmId) => (
         <UserAvatar
-          key={address}
+          key={realmId}
           className="flex ring-2 ring-background/80"
-          address={address}
+          realmId={realmId}
           size="sm"
         />
       ))}

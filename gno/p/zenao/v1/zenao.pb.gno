@@ -59,11 +59,12 @@ type EditUserResponse struct {
 	Id string
 }
 
-type GetUserAddressRequest struct {
+type GetUserInfoRequest struct {
 }
 
-type GetUserAddressResponse struct {
-	Address string
+type GetUserInfoResponse struct {
+	RealmId string
+	Plan    string
 }
 
 type CreateEventRequest struct {

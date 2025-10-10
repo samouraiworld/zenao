@@ -19,6 +19,7 @@ import { captureException } from "@/lib/report";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { emailSchema } from "@/types/schemas";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
+import { userInfoOptions } from "@/lib/queries/user";
 
 const eventRegistrationFormSchema = z.object({
   email: z.string().email().optional(),
@@ -32,7 +33,6 @@ export type EventRegistrationFormSchemaType = z.infer<
 type EventRegistrationFormProps = {
   eventId: string;
   eventPassword: string;
-  userAddress: string | null;
   onGuestRegistrationSuccess?: (email: string) => void;
 };
 
@@ -44,11 +44,14 @@ export type SubmitStatusInvitee = Record<
 export function EventRegistrationForm({
   eventId,
   eventPassword,
-  userAddress,
   onGuestRegistrationSuccess,
 }: EventRegistrationFormProps) {
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(eventId));
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+  const userRealmId = userInfo?.realmId || "";
   const { toast } = useToast();
 
   const [isPending, setIsPending] = useState(false);
@@ -83,7 +86,7 @@ export function EventRegistrationForm({
         if (!token) {
           throw new Error("invalid clerk token");
         }
-        if (!userId || !userAddress) {
+        if (!userId || !userRealmId) {
           throw new Error("missing user id or user address");
         }
 
@@ -91,7 +94,7 @@ export function EventRegistrationForm({
           eventId,
           token,
           userId: userId,
-          userAddress: userAddress,
+          userRealmId: userRealmId,
           guests,
           password: eventPassword,
         });
@@ -101,7 +104,7 @@ export function EventRegistrationForm({
           eventId,
           email: data.email!,
           guests,
-          userAddress,
+          userRealmId,
           password: eventPassword,
         });
         onGuestRegistrationSuccess?.(data.email!);

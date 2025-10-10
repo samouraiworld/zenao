@@ -1,33 +1,34 @@
 package social_feed
 
 import (
-	"chain/runtime"
 	"strconv"
 	"time"
 
 	"gno.land/p/nt/seqid"
 
 	feedsv1 "gno.land/p/zenao/feeds/v1"
+	"gno.land/p/zenao/realmid"
 )
 
 func NewPost(_ realm, feedId string, post *feedsv1.Post) uint64 {
-	creator := runtime.PreviousRealm().Address().String()
+	localPostId := id.Next()
+
+	var creator string
+	if feedRaw, ok := feeds.Get(feedId); ok {
+		// local feed, can be protected
+		feed := feedRaw.(*Feed)
+		creator = feed.auth()
+		feedsByPost.Set(localPostId.String(), feed)
+	} else {
+		creator = realmid.Previous()
+	}
+
 	post.Author = creator
 	post.CreatedAt = time.Now().Unix()
 	post.UpdatedAt = time.Now().Unix()
 	post.DeletedAt = 0
-
-	localPostId := id.Next()
-	feedRaw, ok := feeds.Get(feedId)
-	if ok {
-		feed := feedRaw.(*Feed)
-		if feed.authFunc != nil && !feed.authFunc(creator) {
-			panic("this is a private feed and you are not authorized to post on it")
-		}
-		feedsByPost.Set(localPostId.String(), feed)
-	}
-
 	post.LocalPostId = uint64(localPostId)
+
 	feedKey := feedId + ":" + localPostId.String()
 	posts.Set(localPostId.String(), post)
 	postsByFeed.Set(feedKey, post)
@@ -52,19 +53,19 @@ func GetPost(localPostId uint64) *feedsv1.Post {
 }
 
 func DeletePost(_ realm, localPostId uint64) {
-	caller := runtime.PreviousRealm().Address().String()
 	localPostIdStr := seqid.ID(localPostId).String()
 	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
-	feedRaw, ok := feedsByPost.Get(localPostIdStr)
-	if ok {
-		feed := feedRaw.(*Feed)
-		if feed.authFunc != nil && !feed.authFunc(caller) {
-			panic("this is a private feed and you are not authorized to delete posts on it")
-		}
+
+	var caller string
+	if feedRaw, ok := feedsByPost.Get(localPostIdStr); ok {
+		caller = feedRaw.(*Feed).auth()
+	} else {
+		caller = realmid.Previous()
 	}
+
 	post := postRaw.(*feedsv1.Post)
 	if post.Author != caller {
 		panic("you are not the author of this post")
@@ -77,19 +78,19 @@ func DeletePost(_ realm, localPostId uint64) {
 }
 
 func EditPost(_ realm, localPostId uint64, newPost *feedsv1.Post) {
-	caller := runtime.PreviousRealm().Address().String()
 	localPostIdStr := seqid.ID(localPostId).String()
 	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
 		panic("post not found")
 	}
-	feedRaw, ok := feedsByPost.Get(localPostIdStr)
-	if ok {
-		feed := feedRaw.(*Feed)
-		if feed.authFunc != nil && !feed.authFunc(caller) {
-			panic("this is a private feed and you are not authorized to edit posts on it")
-		}
+
+	var caller string
+	if feedRaw, ok := feedsByPost.Get(localPostIdStr); ok {
+		caller = feedRaw.(*Feed).auth()
+	} else {
+		caller = realmid.Previous()
 	}
+
 	post := postRaw.(*feedsv1.Post)
 	if post.Author != caller {
 		panic("you are not the author of this post")
@@ -108,9 +109,16 @@ func EditPost(_ realm, localPostId uint64, newPost *feedsv1.Post) {
 }
 
 func ReactPost(_ realm, localPostId uint64, icon string) {
-	caller := runtime.PreviousRealm().Address()
 	localPostIdStr := seqid.ID(localPostId).String()
-	userReactId := localPostIdStr + ":" + icon + ":" + caller.String()
+
+	var caller string
+	if feedRaw, ok := feedsByPost.Get(localPostIdStr); ok {
+		caller = feedRaw.(*Feed).auth()
+	} else {
+		caller = realmid.Previous()
+	}
+
+	userReactId := localPostIdStr + ":" + icon + ":" + caller
 	reactId := localPostIdStr + ":" + icon
 
 	if userReactions.Has(userReactId) {
