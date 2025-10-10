@@ -19,6 +19,7 @@ import { captureException } from "@/lib/report";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { emailSchema } from "@/types/schemas";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
+import { userInfoOptions } from "@/lib/queries/user";
 
 const eventRegistrationFormSchema = z.object({
   email: z.string().email().optional(),
@@ -32,7 +33,6 @@ export type EventRegistrationFormSchemaType = z.infer<
 type EventRegistrationFormProps = {
   eventId: string;
   eventPassword: string;
-  userRealmId: string | null;
   onGuestRegistrationSuccess?: (email: string) => void;
 };
 
@@ -44,11 +44,14 @@ export type SubmitStatusInvitee = Record<
 export function EventRegistrationForm({
   eventId,
   eventPassword,
-  userRealmId,
   onGuestRegistrationSuccess,
 }: EventRegistrationFormProps) {
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(eventId));
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+  const userRealmId = userInfo?.realmId || "";
   const { toast } = useToast();
 
   const [isPending, setIsPending] = useState(false);
