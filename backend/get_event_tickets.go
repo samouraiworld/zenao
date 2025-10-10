@@ -5,9 +5,7 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
-	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -31,40 +29,42 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, errors.New("user is banned")
 	}
 
+	return nil, errors.New("not implemented yet")
+
 	// TODO: since user can register others people, we need to get all tickets where user is buyer too
 	// XXX: before with the DB as SoT, we request GetEventUserOrBuyerTickets to get all tickets where user is buyer or user
-	ticket, err := s.Chain.WithContext(ctx).GetEventUserTicket(req.Msg.EventId, zUser.ID)
-	if err != nil {
-		return nil, err
-	}
+	// ticket, err := s.Chain.WithContext(ctx).GetEventUserTicket(req.Msg.EventId, zUser.ID)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	userIDs := []string{}
-	ticketsWithUser := []*zeni.SoldTicket{}
-	ticketsWithoutUser := []*zeni.SoldTicket{}
+	// userIDs := []string{}
+	// ticketsWithUser := []*zeni.SoldTicket{}
+	// ticketsWithoutUser := []*zeni.SoldTicket{}
 
-	// TODO: change to iterate on all tickets bought/created by the user
-	for _, tk := range []*zeni.SoldTicket{ticket} {
-		if tk.User == nil {
-			ticketsWithoutUser = append(ticketsWithoutUser, tk)
-			continue
-		}
-		userIDs = append(userIDs, tk.User.AuthID)
-		ticketsWithUser = append(ticketsWithUser, tk)
-	}
+	// // TODO: change to iterate on all tickets bought/created by the user
+	// for _, tk := range []*zeni.SoldTicket{ticket} {
+	// 	if tk.User == nil {
+	// 		ticketsWithoutUser = append(ticketsWithoutUser, tk)
+	// 		continue
+	// 	}
+	// 	userIDs = append(userIDs, tk.User.AuthID)
+	// 	ticketsWithUser = append(ticketsWithUser, tk)
+	// }
 
-	users, err := s.Auth.GetUsersFromIDs(ctx, userIDs)
-	if err != nil {
-		return nil, err
-	}
+	// users, err := s.Auth.GetUsersFromIDs(ctx, userIDs)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	ticketsInfo := mapsl.MapIndex(ticketsWithUser, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
-		return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret(), UserEmail: users[i].Email}
-	})
-	ticketsInfo = append(ticketsInfo, mapsl.Map(ticketsWithoutUser, func(tk *zeni.SoldTicket) *zenaov1.TicketInfo {
-		return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret()}
-	})...)
+	// ticketsInfo := mapsl.MapIndex(ticketsWithUser, func(i int, tk *zeni.SoldTicket) *zenaov1.TicketInfo {
+	// 	return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret(), UserEmail: users[i].Email}
+	// })
+	// ticketsInfo = append(ticketsInfo, mapsl.Map(ticketsWithoutUser, func(tk *zeni.SoldTicket) *zenaov1.TicketInfo {
+	// 	return &zenaov1.TicketInfo{TicketSecret: tk.Ticket.Secret()}
+	// })...)
 
-	return connect.NewResponse(&zenaov1.GetEventTicketsResponse{
-		TicketsInfo: ticketsInfo,
-	}), nil
+	// return connect.NewResponse(&zenaov1.GetEventTicketsResponse{
+	// 	TicketsInfo: ticketsInfo,
+	// }), nil
 }

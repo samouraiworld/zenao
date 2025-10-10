@@ -26,17 +26,19 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 
 	s.Logger.Info("cancel-participation", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
 
-	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	evtRealmID := s.Chain.EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
 	if err != nil {
 		return nil, err
 	}
-	ticket, err := s.Chain.WithContext(ctx).GetEventUserTicket(req.Msg.EventId, zUser.ID)
+	ticketPK, err := s.Chain.WithContext(ctx).GetEventUserTicketPK(evtRealmID, userRealmID)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: handle creatorID since it not an id anymore, either retrieve ID from address or change the chain method
-	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.Organizers[0], zUser.ID, ticket.Ticket.Pubkey()); err != nil {
+	if err := s.Chain.WithContext(ctx).CancelParticipation(evtRealmID, evt.Organizers[0], userRealmID, ticketPK); err != nil {
 		return nil, err
 	}
 
