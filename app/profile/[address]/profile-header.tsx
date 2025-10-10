@@ -1,19 +1,19 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { ExternalLink, Link2, MapPin } from "lucide-react";
 import Link from "next/link";
-import { MapPin, Link2, ExternalLink } from "lucide-react";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Button } from "@/components/shadcn/button";
+import { Skeleton } from "@/components/shadcn/skeleton";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Card } from "@/components/widgets/cards/card";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Skeleton } from "@/components/shadcn/skeleton";
+import { Web3Image } from "@/components/widgets/images/web3-image";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import { Web3Image } from "@/components/widgets/images/web3-image";
-import { Button } from "@/components/shadcn/button";
-import { userInfoOptions } from "@/lib/queries/user";
-import { gnoProfileDetailsSchema } from "@/types/schemas";
-import { deserializeWithFrontMatter } from "@/lib/serialization";
 import { addressFromRealmId } from "@/lib/gno";
+import { userInfoOptions } from "@/lib/queries/user";
+import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { gnoProfileDetailsSchema } from "@/types/schemas";
 
 type ProfileHeaderProps = {
   address: string;
@@ -29,10 +29,9 @@ export default function ProfileHeader({
   bio,
 }: ProfileHeaderProps) {
   const { userId, getToken } = useAuth();
-  const { data: userLoggedRealmId } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const userLoggedAddress = addressFromRealmId(userLoggedRealmId);
+  const { data: info } = useSuspenseQuery(userInfoOptions(getToken, userId));
+  const realmId = info?.realmId;
+  const userLoggedAddress = addressFromRealmId(realmId);
 
   const profileDetails = deserializeWithFrontMatter({
     serialized: bio,
