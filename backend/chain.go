@@ -16,7 +16,6 @@ import (
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/gnovm/stdlibs/chain"
 	"github.com/gnolang/gno/gnovm/stdlibs/chain/banker"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
@@ -1073,11 +1072,6 @@ func main() {
 // UserRealmID implements ZenaoChain.
 func (g *gnoZenaoChain) UserRealmID(userID string) string {
 	return g.userRealmPkgPath(userID)
-}
-
-// EventAddress implements ZenaoChain.
-func (g *gnoZenaoChain) EventAddress(eventID string) string {
-	return gnolang.DerivePkgBech32Addr(g.eventRealmPkgPath(eventID)).String()
 }
 
 // CreatePost implements ZenaoChain
