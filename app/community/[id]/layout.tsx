@@ -9,7 +9,6 @@ import {
   communityUsersWithRoles,
 } from "@/lib/queries/community";
 import { profileOptions } from "@/lib/queries/profile";
-import { eventsPkgPathsByAddrs } from "@/lib/queries/events-list";
 import { web2URL } from "@/lib/uris";
 
 interface PageProps {
@@ -82,12 +81,8 @@ async function CommunityPageLayout({ params, children }: PageProps) {
     queryClient.prefetchQuery(profileOptions(member.address)),
   );
 
-  const events = await queryClient.fetchQuery(
+  await queryClient.prefetchQuery(
     communityUsersWithRoles(communityId, ["event"]),
-  );
-
-  queryClient.prefetchQuery(
-    eventsPkgPathsByAddrs(events.map((e) => e.address)),
   );
 
   return (
