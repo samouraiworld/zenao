@@ -115,7 +115,7 @@
     "past-events": "Past events"
   },
   "guest-registration-success-dialog": {
-    "registration-title": "You're in !",
+    "registration-title": "You're in!",
     "thank-you": "Thank you for joining {title} !",
     "tickets-explanation": "A confirmation and your ticket have been sent to:",
     "view-on-account": "You can also view it by logging into your account.",
@@ -336,7 +336,7 @@
     "joining-state": "Joining...",
     "join-community-button": "Join Community"
   },
-    "community-edit-form": {
+  "community-edit-form": {
     "update-success": "Community updated successfully",
     "update-failure": "Failed to update community",
     "edit-button": "Edit community",
