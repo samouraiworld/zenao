@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
@@ -54,7 +55,11 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		},
 	}
 
-	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
+	entityRealmID, err := s.Chain.WithContext(ctx).EntityRealmID(req.Msg.OrgType, req.Msg.OrgId)
+	if err != nil {
+		return nil, fmt.Errorf("invalid org: %w", err)
+	}
+	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, entityRealmID, post)
 	if err != nil {
 		return nil, err
 	}

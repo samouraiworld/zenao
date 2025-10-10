@@ -117,19 +117,19 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		// XXX: callerID should be the current user and not creator,
 		//      this could break if the initial creator has the organizer role removed
 		//      also this bypasses password protection on-chain
-		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.Organizers[0], participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
+		if err := s.Chain.WithContext(ctx).Participate(s.Chain.EventRealmID(req.Msg.EventId), evt.Organizers[0], s.Chain.UserRealmID(participants[i].ID), ticket.Pubkey(), eventSK); err != nil {
 			return nil, err
 		}
 
 		if cmt != nil {
-			roles, err := s.Chain.WithContext(ctx).EntityRoles(participants[i].ID, zeni.EntityTypeCommunity, "changeme")
+			roles, err := s.Chain.WithContext(ctx).EntityRoles(s.Chain.UserRealmID(participants[i].ID), zeni.EntityTypeCommunity, cmt.PkgPath)
 			if err != nil {
 				return nil, err
 			}
 			if slices.Contains(roles, zeni.RoleMember) {
 				continue
 			}
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity("changeme", "changeme", participants[i].ID); err != nil {
+			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.Administrators[0], cmt.PkgPath, s.Chain.UserRealmID(participants[i].ID)); err != nil {
 				return nil, err
 			}
 		}

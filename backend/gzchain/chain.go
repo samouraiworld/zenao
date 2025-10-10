@@ -1212,6 +1212,8 @@ func (g *gnoZenaoChain) EntityRealmID(entityType string, entityID string) (strin
 		return g.UserRealmID(entityID), nil
 	case zeni.EntityTypeEvent:
 		return g.EventRealmID(entityID), nil
+	case zeni.EntityTypeCommunity:
+		return g.CommunityRealmID(entityID), nil
 	}
 	return "", fmt.Errorf("unknown entity type: %q", entityType)
 }

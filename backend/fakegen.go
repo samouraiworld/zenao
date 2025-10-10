@@ -195,7 +195,11 @@ func execFakegen() (retErr error) {
 
 				postID := fmt.Sprintf("%d", pID)
 				if !fakegenConf.skipChain {
-					postID, err = chain.CreatePost(creatorID, zeni.EntityTypeEvent, zevt.ID, post)
+					entityRealmID, err := chain.EntityRealmID(zeni.EntityTypeEvent, zevt.ID)
+					if err != nil {
+						return fmt.Errorf("invalid org: %w", err)
+					}
+					postID, err = chain.CreatePost(creatorID, entityRealmID, post)
 					if err != nil {
 						return err
 					}
@@ -257,7 +261,11 @@ func execFakegen() (retErr error) {
 				pollID := fmt.Sprintf("%d", poID)
 				postID := fmt.Sprintf("%d", pID)
 				if !fakegenConf.skipChain {
-					pollID, postID, err = chain.CreatePoll(creatorID, pollReq)
+					entityRealmID, err := chain.EntityRealmID(pollReq.OrgType, pollReq.OrgId)
+					if err != nil {
+						return fmt.Errorf("invalid org: %w", err)
+					}
+					pollID, postID, err = chain.CreatePoll(creatorID, entityRealmID, pollReq)
 					if err != nil {
 						return err
 					}
