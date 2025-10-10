@@ -303,51 +303,50 @@ type Chain interface {
 	// Off-chain operations
 	UserRealmID(userID string) string
 	EventRealmID(eventID string) string
+	CommunityRealmID(communityID string) string
 	EntityRealmID(entityType string, entityID string) (string, error)
 
 	// Read operations (Query)
-	// TODO: change ID for pkg path ? and remove the orgType ?
-	EntityRoles(entityID string, orgType string, orgID string) ([]string, error)
+	EntityRoles(entityRealmID string, orgRealmID string, orgType string) ([]string, error)
 
 	// TODO: what happens if event not found ? should i just return empty cmt & empty err or err handle it ?
-	GetEvent(eventID string) (*zenaov1.EventInfo, error)
-	GetEventParticipants(eventID string) ([]*User, error)
-	GetEventGatekeepers(evtID string) ([]*User, error)
-	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
-	GetEventCommunity(eventID string) (*zenaov1.CommunityInfo, error)
-	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
+	GetEvent(eventRealmID string) (*zenaov1.EventInfo, error)
+	GetEventParticipants(eventRealmID string) ([]*User, error)
+	GetEventGatekeepers(eventRealmID string) ([]*User, error)
+	GetEventUserTicket(eventRealmID string, userRealmID string) (*SoldTicket, error)
+	GetEventCommunity(eventRealmID string) (*zenaov1.CommunityInfo, error)
 
 	// TODO: what happens if community not found ? should i just return empty cmt & empty err or err handle it ?
-	GetCommunity(communityID string) (*zenaov1.CommunityInfo, error)
-	GetCommunityMembers(communityID string) ([]*User, error)
-	GetCommunityAdministrators(communityID string) ([]*User, error)
+	GetCommunity(communityRealmID string) (*zenaov1.CommunityInfo, error)
+	GetCommunityMembers(communityRealmID string) ([]*User, error)
+	GetCommunityAdministrators(communityRealmID string) ([]*User, error)
 
 	// Write operations (Transactions)
 	FillAdminProfile()
 	CreateUser(user *User) error
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	EditUser(userRealmID string, req *zenaov1.EditUserRequest) error
 
-	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
-	CancelEvent(eventID string, callerID string) error
-	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
-	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
-	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
-	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
+	CreateEvent(eventRealmID string, organizersRealmIDs []string, gatekeepersRealmIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
+	CancelEvent(eventRealmID string, callerRealmID string) error
+	EditEvent(eventRealmID string, callerRealmID string, organizersRealmIDs []string, gatekeepersRealmIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
+	Participate(eventRealmID string, callerRealmID string, participantRealmID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
+	CancelParticipation(eventRealmID string, callerRealmID string, participantRealmID string, ticketPubkey string) error
+	Checkin(eventRealmID string, gatekeeperRealmID string, req *zenaov1.CheckinRequest) error
 
-	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
-	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
-	AddEventToCommunity(callerID string, communityID string, eventID string) error
-	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
-	AddMemberToCommunity(callerID string, communityID string, userID string) error
-	AddMembersToCommunity(callerID string, communityID string, userIDs []string) error
-	RemoveMemberFromCommunity(callerID string, communityID string, userID string) error
+	CreateCommunity(communityRealmID string, administratorsRealmIDs []string, membersRealmIDs []string, eventsRealmIDs []string, req *zenaov1.CreateCommunityRequest) error
+	EditCommunity(communityRealmID string, callerRealmID string, administratorsRealmIDs []string, req *zenaov1.EditCommunityRequest) error
+	AddEventToCommunity(callerRealmID string, communityRealmID string, eventRealmID string) error
+	RemoveEventFromCommunity(callerRealmID string, communityRealmID string, eventRealmID string) error
+	AddMemberToCommunity(callerRealmID string, communityRealmID string, userRealmID string) error
+	AddMembersToCommunity(callerRealmID string, communityRealmID string, userRealmIDs []string) error
+	RemoveMemberFromCommunity(callerRealmID string, communityRealmID string, userRealmID string) error
 
-	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
-	DeletePost(userID string, postID string) error
-	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+	CreatePost(userRealmID string, orgRealmID string, post *feedsv1.Post) (postID string, err error)
+	DeletePost(userRealmID string, postID string) error
+	EditPost(userRealmID string, postID string, post *feedsv1.Post) error
+	ReactPost(userRealmID string, req *zenaov1.ReactPostRequest) error
+	CreatePoll(userRealmID string, orgRealmID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
+	VotePoll(userRealmID string, req *zenaov1.VotePollRequest) error
 }
 
 type Auth interface {

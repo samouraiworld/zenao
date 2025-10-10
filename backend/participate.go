@@ -117,7 +117,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		// XXX: callerID should be the current user and not creator,
 		//      this could break if the initial creator has the organizer role removed
 		//      also this bypasses password protection on-chain
-		// TODO: handle that creatorID is not just an ID but the address now
 		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.Organizers[0], participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
 			return nil, err
 		}

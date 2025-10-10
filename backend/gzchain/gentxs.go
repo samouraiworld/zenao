@@ -561,8 +561,8 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, caller cryptoGno.Addre
 }
 
 func createReactionTx(chain *gnoZenaoChain, authorID string, caller cryptoGno.Address, orgType string, orgID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
-	userPkgPath := chain.userRealmPkgPath(authorID)
-	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, reaction.Icon)
+	userRealmID := chain.UserRealmID(authorID)
+	body := genReactPostMsgRunBody(userRealmID, reaction.PostID, reaction.Icon)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
@@ -1086,7 +1086,7 @@ func createCommunityAddEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Address
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "AddEvent",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.EventAddress(eventID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.EventRealmID(eventID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1110,7 +1110,7 @@ func createCommunityRemoveEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Addr
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "RemoveEvent",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.EventAddress(eventID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.EventRealmID(eventID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1129,7 +1129,7 @@ func createCommunityRemoveEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Addr
 func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, caller cryptoGno.Address, administratorsIDs []string, membersIDs []string, eventsIDs []string) (gnoland.TxWithMetadata, error) {
 	administratorsAddrs := mapsl.Map(administratorsIDs, chain.userRealmPkgPath)
 	membersAddrs := mapsl.Map(membersIDs, chain.userRealmPkgPath)
-	eventsAddrs := mapsl.Map(eventsIDs, chain.EventAddress)
+	eventsAddrs := mapsl.Map(eventsIDs, chain.eventRealmPkgPath)
 	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, eventsAddrs, caller.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
 		DisplayName: community.DisplayName,
 		Description: community.Description,
@@ -1261,7 +1261,7 @@ func createCommunityRemoveMemberRegTx(chain *gnoZenaoChain, community *zeni.Comm
 
 func createCommunityRemoveEventTx(chain *gnoZenaoChain, caller cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
-	eventAddr := chain.EventAddress(eventID)
+	eventAddr := chain.EventRealmID(eventID)
 	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
 	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr)
 
