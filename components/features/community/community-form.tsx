@@ -72,7 +72,6 @@ export const CommunityForm = ({
             control={form.control}
             aspectRatio={isDesktop ? [48, 9] : [21, 9]}
             placeholder={t("upload-banner")}
-            hint={false}
             className="w-full rounded-xl overflow-hidden"
           />
           <div className="w-[96px] md:w-[128px] absolute -bottom-14 left-4 md:left-10">
@@ -81,14 +80,13 @@ export const CommunityForm = ({
               control={form.control}
               aspectRatio={[4, 4]}
               placeholder={t("upload-avatar")}
-              hint={false}
               className="w-full rounded-xl overflow-hidden"
             />
           </div>
         </div>
 
         <div className="flex flex-col gap-6 mt-20 w-full">
-          <SettingsSection title="Name of the community">
+          <SettingsSection title={t("community-name-section")}>
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
               <FormFieldTextArea
                 control={form.control}
@@ -106,7 +104,7 @@ export const CommunityForm = ({
             </Card>
           </SettingsSection>
 
-          <SettingsSection title="About your community">
+          <SettingsSection title={t("about-section")}>
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
               <div className="transition-all">
                 <div className="flex gap-2 items-center">
