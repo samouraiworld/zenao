@@ -1,31 +1,31 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { Loader2, Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Loader2, Lock } from "lucide-react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/nextjs";
 import { imageHeight, imageWidth } from "./constants";
-import Heading from "@/components/widgets/texts/heading";
-import Text from "@/components/widgets/texts/text";
+import { ScreenContainer } from "@/components/layout/screen-container";
+import { EventPasswordProvider } from "@/components/providers/event-password-provider";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Form } from "@/components/shadcn/form";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
+import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
+import { Web3Image } from "@/components/widgets/images/web3-image";
+import Heading from "@/components/widgets/texts/heading";
+import Text from "@/components/widgets/texts/text";
 import { useToast } from "@/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userInfoOptions } from "@/lib/queries/user";
-import { EventPasswordProvider } from "@/components/providers/event-password-provider";
-import { zenaoClient } from "@/lib/zenao-client";
-import { ScreenContainer } from "@/components/layout/screen-container";
-import { AspectRatio } from "@/components/shadcn/aspect-ratio";
-import { Web3Image } from "@/components/widgets/images/web3-image";
 import { captureException } from "@/lib/report";
+import { zenaoClient } from "@/lib/zenao-client";
 import {
   eventProtectionFormSchema,
   EventProtectionFormSchemaType,
 } from "@/types/schemas";
-import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 
 type ExclusiveEventGuardProps = {
   eventId: string;
@@ -43,8 +43,9 @@ export function ExclusiveEventGuard({
   children,
 }: ExclusiveEventGuardProps) {
   const { getToken, userId } = useAuth();
-  const { data: address } = useSuspenseQuery(userInfoOptions(getToken, userId));
-  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
+  const { data: info } = useSuspenseQuery(userInfoOptions(getToken, userId));
+  const realmId = info?.realmId;
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, realmId));
 
   const [isPending, setIsPending] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState<boolean>(true);
