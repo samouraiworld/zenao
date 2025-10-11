@@ -29,6 +29,7 @@ import {
   serializeWithFrontMatter,
 } from "@/lib/serialization";
 import { addressFromRealmId } from "@/lib/gno";
+import ExperiencesForm from "@/components/features/user/settings/experiences-form";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
@@ -178,15 +179,19 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             />
 
             <SocialMediaLinks form={form} />
-
-            <ButtonWithChildren
-              loading={isPending}
-              type="submit"
-              className="w-full"
-            >
-              {t("save-button")}
-            </ButtonWithChildren>
           </div>
+
+          <div className="flex flex-coll gap-4 w-full lg:col-span-2">
+            <ExperiencesForm form={form} />
+          </div>
+
+          <ButtonWithChildren
+            loading={isPending}
+            type="submit"
+            className="w-full"
+          >
+            {t("save-button")}
+          </ButtonWithChildren>
         </div>
       </form>
     </Form>
