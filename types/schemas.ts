@@ -232,6 +232,33 @@ export const portfolioItemSchema = z.object({
 
 export type PortfolioItem = z.infer<typeof portfolioItemSchema>;
 
+export const portfolioUploadVideoSchema = z
+  .object({
+    origin: z.union([z.literal("youtube"), z.literal("vimeo")]),
+    uri: uriSchema,
+  })
+  .refine(
+    (data) => {
+      if (
+        (data.origin === "youtube" &&
+          !/^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]{11}(&.*)?$/.test(
+            data.uri,
+          ) &&
+          !/^https?:\/\/youtu\.be\/[\w-]{11}(&.*)?$/.test(data.uri)) ||
+        (data.origin === "vimeo" &&
+          !/^https?:\/\/(www\.)?vimeo\.com\/\d+(&.*)?$/.test(data.uri))
+      ) {
+        return false;
+      }
+      return true;
+    },
+    { message: "Video URL is not valid", path: ["uri"] },
+  );
+
+export type PortfolioUploadVideoSchemaType = z.infer<
+  typeof portfolioUploadVideoSchema
+>;
+
 export const communityDetailsSchema = z.object({
   shortDescription: z.string().max(200).optional().default(""),
   description: z.string().trim().max(1000).optional().default(""),

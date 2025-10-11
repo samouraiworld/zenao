@@ -17,6 +17,7 @@ import {
   CommunityDetails,
   communityDetailsSchema,
   PortfolioItem,
+  PortfolioUploadVideoSchemaType,
 } from "@/types/schemas";
 import { Button } from "@/components/shadcn/button";
 import { useToast } from "@/hooks/use-toast";
@@ -28,12 +29,12 @@ import { captureException } from "@/lib/report";
 import { zenaoClient } from "@/lib/zenao-client";
 import PortfolioPreviewDialog from "@/components/dialogs/portfolio-preview-dialog";
 import { userInfoOptions } from "@/lib/queries/user";
-import Text from "@/components/widgets/texts/text";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
+import PortfolioUploadVideoDialog from "@/components/dialogs/portfolio-upload-video-dialog";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -98,7 +99,10 @@ export default function CommunityPortfolio({
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
 
-  const onUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onUpload = async (
+    fileType: "image" | "audio",
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
       return;
@@ -112,6 +116,7 @@ export default function CommunityPortfolio({
 
       const uri = await uploadFile(files[0]);
       const newItem: PortfolioItem = {
+        type: fileType,
         name: files[0].name,
         uri,
         uploadedAt: new Date(),
@@ -149,7 +154,16 @@ export default function CommunityPortfolio({
       if (imageFileInputRef.current) {
         imageFileInputRef.current.value = "";
       }
+
+      if (audioFileInputRef.current) {
+        audioFileInputRef.current.value = "";
+      }
     }
+  };
+
+  const handleVideoAdded = async (data: PortfolioUploadVideoSchemaType) => {
+    // TODO: handle adding video to portfolio
+    console.log("data", data);
   };
 
   const onPreview = (item: PortfolioItem) => {
@@ -210,12 +224,12 @@ export default function CommunityPortfolio({
         isAdmin={isAdmin}
       />
 
-      {/* <PortfolioUploadVideoDialog 
+      <PortfolioUploadVideoDialog
         isOpen={videoDialogOpen}
         onOpenChange={setVideoDialogOpen}
-        onSubmit={onAddingVideo}
+        onVideoAdded={handleVideoAdded}
       />
- */}
+
       <div className="flex items-center">
         <Heading level={3}>
           {t("recent-media-uploaded")} ({localPortfolio.length})
@@ -237,10 +251,15 @@ export default function CommunityPortfolio({
         ref={imageFileInputRef}
         type="file"
         className="hidden"
-        onChange={(e) => onUploadImage(e)}
+        onChange={(e) => onUpload("image", e)}
       />
 
-      <input ref={audioFileInputRef} type="file" className="hidden" />
+      <input
+        ref={audioFileInputRef}
+        type="file"
+        className="hidden"
+        onChange={(e) => onUpload("audio", e)}
+      />
 
       <div
         className="grid gap-4"
@@ -290,7 +309,7 @@ export default function CommunityPortfolio({
                         variant="outline"
                         className="text-main bg-transparent border-none"
                         disabled={isUploading}
-                        // onClick={() => fileInputRef.current?.click()}
+                        onClick={() => setVideoDialogOpen(true)}
                       >
                         <Video className="w-5 h-5 md:!h-6 md:!w-6" />
                       </Button>
