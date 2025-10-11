@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Loader2, Upload } from "lucide-react";
+import { AudioWaveform, ImageIcon, Loader2, Upload, Video } from "lucide-react";
 import { useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
@@ -28,6 +28,12 @@ import { captureException } from "@/lib/report";
 import { zenaoClient } from "@/lib/zenao-client";
 import PortfolioPreviewDialog from "@/components/dialogs/portfolio-preview-dialog";
 import { userInfoOptions } from "@/lib/queries/user";
+import Text from "@/components/widgets/texts/text";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -45,9 +51,11 @@ export default function CommunityPortfolio({
     communityUserRoles(communityId, userAddress?.realmId),
   );
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
+  const audioFileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
   const [previewDialogState, setPreviewDialogState] = useState<{
     isOpen: boolean;
     item: PortfolioItem;
@@ -90,7 +98,7 @@ export default function CommunityPortfolio({
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
 
-  const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
       return;
@@ -138,8 +146,8 @@ export default function CommunityPortfolio({
       });
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      if (imageFileInputRef.current) {
+        imageFileInputRef.current.value = "";
       }
     }
   };
@@ -202,6 +210,12 @@ export default function CommunityPortfolio({
         isAdmin={isAdmin}
       />
 
+      {/* <PortfolioUploadVideoDialog 
+        isOpen={videoDialogOpen}
+        onOpenChange={setVideoDialogOpen}
+        onSubmit={onAddingVideo}
+      />
+ */}
       <div className="flex items-center">
         <Heading level={3}>
           {t("recent-media-uploaded")} ({localPortfolio.length})
@@ -210,7 +224,7 @@ export default function CommunityPortfolio({
           <Button
             variant="link"
             className="text-main"
-            onClick={() => fileInputRef.current?.click()}
+            // onClick={() => fileInputRef.current?.click()}
           >
             {t("upload-file-btn")}
             <Upload />
@@ -218,12 +232,15 @@ export default function CommunityPortfolio({
         )}
       </div>
 
+      {/* Image upload */}
       <input
-        ref={fileInputRef}
+        ref={imageFileInputRef}
         type="file"
         className="hidden"
-        onChange={(e) => onUpload(e)}
+        onChange={(e) => onUploadImage(e)}
       />
+
+      <input ref={audioFileInputRef} type="file" className="hidden" />
 
       <div
         className="grid gap-4"
@@ -234,17 +251,54 @@ export default function CommunityPortfolio({
       >
         {localPortfolio.length === 0 && !isUploading && (
           <div className="flex flex-col justify-center text-muted-foreground">
-            <p className="text-center">{t("no-media-uploaded")}</p>
+            <p className="text-center">
+              {t("no-media-uploaded")}{" "}
+              {isAdmin && `${t("upload-first-file-btn")} ?`}
+            </p>
             {isAdmin && (
-              <Button
-                variant="link"
-                className="text-main"
-                disabled={isUploading}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {t("upload-first-file-btn")}
-                <Upload />
-              </Button>
+              <div className="flex justify-center mt-4">
+                <div className="flex gap-4">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="text-main bg-transparent border-none"
+                        disabled={isUploading}
+                        onClick={() => imageFileInputRef.current?.click()}
+                      >
+                        <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Upload image</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="text-main bg-transparent border-none"
+                        disabled={isUploading}
+                        onClick={() => audioFileInputRef.current?.click()}
+                      >
+                        <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Upload audio</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="text-main bg-transparent border-none"
+                        disabled={isUploading}
+                        // onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Video className="w-5 h-5 md:!h-6 md:!w-6" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Add video</TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
             )}
           </div>
         )}

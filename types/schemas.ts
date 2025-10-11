@@ -224,6 +224,7 @@ export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
 
 export const portfolioItemSchema = z.object({
   id: z.string().uuid(),
+  type: z.enum(["image", "video", "audio"]),
   uploadedAt: z.coerce.date(),
   uri: uriSchema,
   name: z.string().min(1).max(100),
