@@ -35,6 +35,7 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import PortfolioUploadVideoDialog from "@/components/dialogs/portfolio-upload-video-dialog";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -348,35 +349,60 @@ export default function CommunityPortfolio({
         )}
 
         {localPortfolio.map((item, index) => (
-          <div className="w-full" key={index}>
-            <AspectRatio ratio={16 / 9} onClick={() => onPreview(item)}>
-              <div className="h-full border rounded border-muted overflow-hidden">
-                <Web3Image
-                  src={web2URL(item.uri)}
-                  alt={`${item.name}-bg`}
-                  fill
-                  sizes="(max-width: 768px) 100vw,
+          <div
+            className={cn(
+              "w-full",
+              localPortfolio.length < 3 && "max-w-[400px]",
+            )}
+            key={index}
+          >
+            {item.type === "image" && (
+              <AspectRatio ratio={16 / 9} onClick={() => onPreview(item)}>
+                <div className="h-full border rounded border-muted overflow-hidden">
+                  <Web3Image
+                    src={web2URL(item.uri)}
+                    alt={`${item.name}-bg`}
+                    fill
+                    sizes="(max-width: 768px) 100vw,
                       (max-width: 1200px) 70vw,
                       33vw"
-                  className={cn(
-                    "flex object-cover rounded self-center cursor-pointer blur overflow-hidden brightness-[75%]",
-                    "hover:brightness-[60%] transition-all",
-                  )}
-                />
-                <Web3Image
-                  src={web2URL(item.uri)}
-                  alt={item.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw,
+                    className={cn(
+                      "flex object-cover rounded self-center cursor-pointer blur overflow-hidden brightness-[75%]",
+                      "hover:brightness-[60%] transition-all",
+                    )}
+                  />
+                  <Web3Image
+                    src={web2URL(item.uri)}
+                    alt={item.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw,
                       (max-width: 1200px) 70vw,
                       33vw"
-                  className={cn(
-                    "flex object-contain rounded self-center cursor-pointer",
-                    "hover:brightness-[60%] transition-all",
-                  )}
-                />
-              </div>
-            </AspectRatio>
+                    className={cn(
+                      "flex object-contain rounded self-center cursor-pointer",
+                      "hover:brightness-[60%] transition-all",
+                    )}
+                  />
+                </div>
+              </AspectRatio>
+            )}
+            {item.type === "audio" && (
+              <AspectRatio ratio={16 / 9} onClick={() => onPreview(item)}>
+                <div className="h-full border rounded border-muted overflow-hidden flex items-center justify-center bg-muted cursor-pointer hover:brightness-90 transition">
+                  <AudioWaveform className="w-16 h-16 text-main" />
+                </div>
+              </AspectRatio>
+            )}
+            {item.type === "video" && (
+              <AspectRatio ratio={16 / 9} onClick={() => onPreview(item)}>
+                <div className="h-full w-full border rounded border-muted overflow-hidden flex items-center justify-center bg-muted cursor-pointer hover:brightness-90 transition">
+                  <MarkdownPreview
+                    className="w-full pointer-events-none"
+                    markdownString={item.uri}
+                  />
+                </div>
+              </AspectRatio>
+            )}
           </div>
         ))}
       </div>
