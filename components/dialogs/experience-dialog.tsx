@@ -6,6 +6,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../shadcn/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "../shadcn/drawer";
+import ExperienceForm from "../features/user/settings/experience-form";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { UserExperienceSchemaType } from "@/types/schemas";
 
@@ -71,7 +78,8 @@ export default function ExperienceDialog({
             </DialogTitle>
           </DialogHeader>
 
-          {/* <ExperienceForm
+          <ExperienceForm
+            form={form}
             experience={experience}
             onSubmit={(data) => {
               if (experience) {
@@ -80,11 +88,21 @@ export default function ExperienceDialog({
                 onAdd(data);
               }
             }}
-          /> */}
+          />
         </DialogContent>
       </Dialog>
     );
   }
 
-  return null;
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="pb-6">
+        <DrawerHeader className="text-left">
+          <DrawerTitle>
+            {experience ? "Edit Experience" : "Add Experience"}
+          </DrawerTitle>
+        </DrawerHeader>
+      </DrawerContent>
+    </Drawer>
+  );
 }

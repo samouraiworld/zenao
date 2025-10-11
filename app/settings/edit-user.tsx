@@ -29,7 +29,7 @@ import {
   serializeWithFrontMatter,
 } from "@/lib/serialization";
 import { addressFromRealmId } from "@/lib/gno";
-import ExperiencesForm from "@/components/features/user/settings/experiences-form";
+import UserExperiences from "@/components/features/user/settings/user-experiences";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
@@ -182,7 +182,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
 
           <div className="flex flex-coll gap-4 w-full lg:col-span-2">
-            <ExperiencesForm form={form} />
+            <UserExperiences form={form} />
           </div>
 
           <ButtonWithChildren

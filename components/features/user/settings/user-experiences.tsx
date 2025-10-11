@@ -5,11 +5,11 @@ import Heading from "@/components/widgets/texts/heading";
 import { Button } from "@/components/shadcn/button";
 import ExperienceDialog from "@/components/dialogs/experience-dialog";
 
-interface ExperiencesFormProps {
+interface UserExperiencesProps {
   form: UseFormReturn<UserFormSchemaType>;
 }
 
-export default function ExperiencesForm({ form }: ExperiencesFormProps) {
+export default function UserExperiences({ form }: UserExperiencesProps) {
   const [experienceDialogState, setExperienceDialogState] = React.useState<{
     open: boolean;
     experienceIndexToEdit: number | null;
@@ -18,6 +18,7 @@ export default function ExperiencesForm({ form }: ExperiencesFormProps) {
   const {
     append: appendExperience,
     remove: removeExperience,
+    update: updateExperience,
     fields: experienceFields,
   } = useFieldArray({
     control: form.control,
@@ -43,8 +44,8 @@ export default function ExperiencesForm({ form }: ExperiencesFormProps) {
         }
         onEdit={(experience) => {
           if (experienceDialogState.experienceIndexToEdit === null) return;
-          form.setValue(
-            `experiences.${experienceDialogState.experienceIndexToEdit}`,
+          updateExperience(
+            experienceDialogState.experienceIndexToEdit,
             experience,
           );
           setExperienceDialogState({
