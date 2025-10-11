@@ -135,7 +135,7 @@ export default function PostInfo({
   const { data: roles } = useSuspenseQuery(
     eventUserRoles(eventId, userRealmId),
   );
-  const { data: post } = useSuspenseQuery(feedPost(postId, userRealmId));
+  const { data: post } = useSuspenseQuery(feedPost(postId, userRealmId || ""));
 
   const [editMode, setEditMode] = useState(false);
 

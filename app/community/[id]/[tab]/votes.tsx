@@ -15,7 +15,6 @@ import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
-import { derivePkgAddr } from "@/lib/gno";
 import { communityUserRoles } from "@/lib/queries/community";
 
 type CommunityPollsProps = {
@@ -34,7 +33,7 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
   );
 
   const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const {
     data: pollsPages,
