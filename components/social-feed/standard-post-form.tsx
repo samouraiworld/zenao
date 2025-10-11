@@ -51,7 +51,7 @@ export function StandardPostForm({
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const content = form.watch("content");
   const parentPostId = form.watch("parentPostId");
-  const t = useTranslations("event-feed.standard-post-form");
+  const t = useTranslations("social-feed.standard-post-form");
 
   const textareaMaxLength =
     standardPostFormSchema.shape.content._def.checks.find(

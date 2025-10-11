@@ -4,8 +4,8 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { PostCardLayout } from "./post-card-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { profileOptions } from "@/lib/queries/profile";
 import {
@@ -15,11 +15,14 @@ import {
 import { userInfoOptions } from "@/lib/queries/user";
 import { isStandardPost, StandardPostView } from "@/lib/social-feed";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
-import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
+import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
+import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
+import { communityUserRoles } from "@/lib/queries/community";
+import { OrgType } from "@/lib/organization";
 
 function PostComment({
-  eventId,
+  orgType,
+  orgId,
   parentId,
   comment,
   onReactionChange,
@@ -27,7 +30,8 @@ function PostComment({
   isReacting,
   isDeleting,
 }: {
-  eventId: string;
+  orgType: OrgType;
+  orgId: string;
   parentId: string;
   comment: StandardPostView;
   onReactionChange: (
@@ -48,40 +52,49 @@ function PostComment({
   );
   const [editMode, setEditMode] = useState(false);
 
-  const { data: _ } = useSuspenseQuery(eventUserRoles(eventId, userRealmId));
-
   const standardPost = comment.post.post.value;
 
   return (
-    <PostCardLayout
-      key={comment.post.localPostId}
-      post={comment}
-      createdBy={createdBy}
-      parentId={parentId}
-      editMode={editMode}
-      onEditModeChange={setEditMode}
-      onReactionChange={async (icon) =>
-        await onReactionChange(comment.post.localPostId.toString(10), icon)
-      }
-      isReacting={isReacting}
-      canInteract
-      isOwner={userRealmId === comment.post.author}
-      onDelete={async (parentId) =>
-        await onDelete(comment.post.localPostId.toString(10), parentId)
-      }
-      isDeleting={isDeleting}
-    >
-      <MarkdownPreview markdownString={standardPost.content} />
-    </PostCardLayout>
+    <>
+      {orgType === "event" ? (
+        <EventRoles orgId={orgId} userRealmId={userRealmId} />
+      ) : (
+        <CommunityRoles orgId={orgId} userRealmId={userRealmId} />
+      )}
+      <PostCardLayout
+        key={comment.post.localPostId}
+        post={comment}
+        createdBy={createdBy}
+        parentId={parentId}
+        editMode={editMode}
+        onEditModeChange={setEditMode}
+        onReactionChange={async (icon) =>
+          await onReactionChange(comment.post.localPostId.toString(10), icon)
+        }
+        isReacting={isReacting}
+        canInteract
+        isOwner={userRealmId === comment.post.author}
+        onDelete={async (parentId) =>
+          await onDelete(comment.post.localPostId.toString(10), parentId)
+        }
+        isDeleting={isDeleting}
+      >
+        <MarkdownPreview markdownString={standardPost.content} />
+      </PostCardLayout>
+    </>
   );
 }
 
 export function PostComments({
-  eventId,
+  orgType,
+  orgId,
   parentId,
+  feedId,
 }: {
-  eventId: string;
+  orgType: OrgType;
+  orgId: string;
   parentId: string;
+  feedId: string;
 }) {
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
@@ -108,14 +121,11 @@ export function PostComments({
     });
   }, [commentsPages]);
 
-  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${pkgPath}:main`;
-
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
     feedId,
     parentId,
   );
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(eventId);
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
   return (
     <div className="space-y-1">
@@ -123,7 +133,8 @@ export function PostComments({
         return (
           <PostComment
             key={comment.post.localPostId}
-            eventId={eventId}
+            orgType={orgType}
+            orgId={orgId}
             parentId={parentId}
             comment={comment}
             onReactionChange={onReactionChange}
@@ -143,4 +154,27 @@ export function PostComments({
       />
     </div>
   );
+}
+
+// EventRoles and CommunityRoles are used to fetch and cache user roles conditionally, depending on orgType, in PostComment
+function EventRoles({
+  orgId,
+  userRealmId,
+}: {
+  orgId: string;
+  userRealmId: string;
+}) {
+  useSuspenseQuery(eventUserRoles(orgId, userRealmId));
+  return null;
+}
+
+function CommunityRoles({
+  orgId,
+  userRealmId,
+}: {
+  orgId: string;
+  userRealmId: string;
+}) {
+  useSuspenseQuery(communityUserRoles(orgId, userRealmId));
+  return null;
 }
