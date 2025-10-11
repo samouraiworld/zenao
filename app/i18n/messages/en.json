@@ -255,7 +255,9 @@
       "message-placeholder-sm": "Say something...",
       "message-placeholder-lg": "Don't be shy, say something!",
       "toast-post-creation-success": "Post created !",
-      "toast-post-creation-error": "Error on creating post !"
+      "toast-post-creation-error": "Error on creating post !",
+      "comment-restricted-to-members": "You must be a member to submit a comment.",
+      "comment-restricted-to-participants": "You must be a participant to submit a comment."
     },
     "vote": {
       "toast-vote-success": "Vote submitted !",

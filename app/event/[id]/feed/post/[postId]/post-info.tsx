@@ -87,7 +87,7 @@ function PostCommentForm({
       <SignedOut>
         <div className="flex justify-center w-full">
           <div className="w-full">
-            You must be a participant to submit a comment.
+            {t("comment-restricted-to-participants")}
           </div>
         </div>
       </SignedOut>
@@ -96,7 +96,7 @@ function PostCommentForm({
         !userRoles.includes("participant") ? (
           <div className="flex justify-center w-full">
             <div className="w-full">
-              You must be a participant to submit a comment.
+              {t("comment-restricted-to-participants")}
             </div>
           </div>
         ) : (
