@@ -42,6 +42,7 @@ export default function ProfileHeader({
       location: "",
       shortBio: "",
       bannerUri: "",
+      experiences: [],
     },
     contentFieldName: "bio",
   });

@@ -106,6 +106,25 @@ export type UserFormSocialLinkSchemaType = z.infer<
   typeof userFormSocialLinkSchema
 >;
 
+export const userExperienceSchema = z.object({
+  title: z.string().trim().min(3).max(100),
+  description: z.string().trim().min(3).max(1000),
+  start: z.object({
+    month: z.coerce.number().min(1).max(12),
+    year: z.coerce.number().min(1900).max(2200),
+  }),
+  end: z
+    .object({
+      month: z.coerce.number().min(1).max(12),
+      year: z.coerce.number().min(1900).max(2200),
+    })
+    .optional(),
+  current: z.boolean().default(false),
+  organization: z.string().trim().min(1).max(100).optional(),
+});
+
+export type UserExperienceSchemaType = z.infer<typeof userExperienceSchema>;
+
 export const userFormSchema = z.object({
   bio: z.string().trim().max(1000).optional().default(""),
   displayName: z.string().trim().min(1),
@@ -114,6 +133,7 @@ export const userFormSchema = z.object({
   bannerUri: z.string().optional().default(""),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
+  experiences: z.array(userExperienceSchema).default([]),
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
@@ -122,7 +142,8 @@ export const gnoProfileDetailsSchema = z.object({
   socialMediaLinks: z.array(userFormSocialLinkSchema).default([]),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
-  bannerUri: z.string().optional().default("")
+  bannerUri: z.string().optional().default(""),
+  experiences: z.array(userExperienceSchema).default([]),
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
