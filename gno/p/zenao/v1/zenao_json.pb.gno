@@ -89,32 +89,38 @@ func (e *EditUserResponse) FromJSON(node *json.Node) {
 	}
 }
 
-func (g *GetUserAddressRequest) ToJSON() *json.Node {
+func (g *GetUserInfoRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetUserAddressRequest) FromJSON(node *json.Node) {
-	*g = GetUserAddressRequest{}
+func (g *GetUserInfoRequest) FromJSON(node *json.Node) {
+	*g = GetUserInfoRequest{}
 }
 
-func (g *GetUserAddressResponse) ToJSON() *json.Node {
+func (g *GetUserInfoResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if g.Address != "" {
-		fields["address"] = json.StringNode("", g.Address)
+	if g.RealmId != "" {
+		fields["realmId"] = json.StringNode("", g.RealmId)
+	}
+	if g.Plan != "" {
+		fields["plan"] = json.StringNode("", g.Plan)
 	}
 
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetUserAddressResponse) FromJSON(node *json.Node) {
-	*g = GetUserAddressResponse{}
+func (g *GetUserInfoResponse) FromJSON(node *json.Node) {
+	*g = GetUserInfoResponse{}
 	fields := node.MustObject()
 
-	if val, ok := fields["address"]; ok {
-		g.Address = val.MustString()
+	if val, ok := fields["realmId"]; ok {
+		g.RealmId = val.MustString()
+	}
+	if val, ok := fields["plan"]; ok {
+		g.Plan = val.MustString()
 	}
 }
 

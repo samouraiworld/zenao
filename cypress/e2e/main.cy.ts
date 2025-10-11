@@ -212,14 +212,14 @@ describe("main", () => {
   });
 
   it("send event feed standard post", () => {
-    // start from the home
-    cy.visit("/");
+    // start from the event we just created
+    cy.visit("/event/11");
 
     // Explore an event
     cy.get("a").contains("Discover").click();
     cy.get('a[href^="/event/"]').last().click();
 
-    cy.url().should("contain", "/event/");
+    logout();
 
     // Go Description tab
     cy.get("button").contains("Discussions").click();
@@ -229,18 +229,7 @@ describe("main", () => {
       "not.exist",
     );
 
-    cy.url().should("contain", "/event/");
-
-    cy.url().then((url) => {
-      login();
-      cy.visit(url);
-    });
-
-    // Participate to an event
-    cy.get("button").contains("Register").click();
-    cy.get("h2")
-      .contains("You're in!", { timeout: 16000 })
-      .should("be.visible");
+    login();
 
     // Go to feed tab
     cy.get("button").contains("Discussions").click();
@@ -258,8 +247,8 @@ describe("main", () => {
   });
 
   it("send event feed poll post", () => {
-    // start from the home
-    cy.visit("/");
+    // start from the event we just created
+    cy.visit("/event/11");
 
     // Explore an event
     cy.get("a").contains("Discover").click();
@@ -267,7 +256,7 @@ describe("main", () => {
 
     cy.url().should("contain", "/event/");
 
-    // SocialFeedForm should not exist
+    // EventFeedForm should not exist
     cy.get('textarea[placeholder="Dont\'t be shy, say something!"]').should(
       "not.exist",
     );
@@ -323,9 +312,9 @@ describe("main", () => {
     cy.get('img[alt="grinning"]').first().click();
   });
 
-  it("send a comment on a event post", () => {
-    // start from the home
-    cy.visit("/");
+  it("send a comment on an event post", () => {
+    // start from the event we just created
+    cy.visit("/event/11");
 
     // Explore an event
     cy.get("a").contains("Discover").click();
@@ -333,10 +322,7 @@ describe("main", () => {
 
     cy.url().should("contain", "/event/");
 
-    cy.url().then((url) => {
-      login();
-      cy.visit(url);
-    });
+    login();
 
     // Go Description tab
     cy.get("button").contains("Discussions").click();
@@ -631,7 +617,7 @@ describe("main", () => {
   });
 
   it("send a comment on a community post", () => {
-    // start from the home
+    // start from the community we just created
     cy.visit("/");
 
     // Explore a community

@@ -21,7 +21,7 @@ import { profileOptions } from "@/lib/queries/profile";
 export function PollPostCard({
   pollId,
   pollPost,
-  userAddress,
+  userRealmId,
   canReply,
   canInteract,
   onDelete,
@@ -33,7 +33,7 @@ export function PollPostCard({
 }: {
   pollId: string;
   pollPost: PollPostViewInfo;
-  userAddress: string;
+  userRealmId: string;
   canReply?: boolean;
   canInteract?: boolean;
   isOwner?: boolean;
@@ -78,7 +78,7 @@ export function PollPostCard({
         token,
         pollId,
         option,
-        userAddress,
+        userRealmId,
       });
       toast({
         title: t("vote.toast-vote-success"),

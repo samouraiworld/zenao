@@ -23,7 +23,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
 import {
   DropdownMenu,
@@ -40,6 +40,7 @@ import {
   UserAvatar,
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
+import { addressFromRealmId } from "@/lib/gno";
 
 export type NavItem = {
   key: string;
@@ -164,11 +165,7 @@ const GoBackButton = ({ className }: { className?: string }) => {
 };
 
 export function Header() {
-  const { getToken, userId } = useAuth();
   const t = useTranslations("navigation");
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -212,7 +209,7 @@ export function Header() {
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
-        <Auth userAddress={address} className="h-fit" isMounted={isMounted} />
+        <Auth className="h-fit" isMounted={isMounted} />
       </div>
     </div>
   );
@@ -222,15 +219,18 @@ const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
 const Auth = ({
   className,
-  userAddress,
   isMounted,
 }: {
-  userAddress: string | null;
   className?: string;
   isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
-  const { signOut } = useAuth();
+  const { signOut, getToken, userId } = useAuth();
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+
+  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
 
   return (
     <div className={className}>
@@ -262,7 +262,7 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    address={userAddress}
+                    realmId={loggedUserAddress}
                     className={avatarClassName}
                     size="sm"
                   />
@@ -272,7 +272,7 @@ const Auth = ({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <Link href={`/profile/${userAddress}`}>
+          <Link href={`/profile/${loggedUserAddress}`}>
             <DropdownMenuItem className="cursor-pointer">
               {t("view-profile")}
             </DropdownMenuItem>

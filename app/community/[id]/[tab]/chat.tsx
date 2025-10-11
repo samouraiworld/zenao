@@ -8,8 +8,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import EmptyList from "@/components/widgets/lists/empty-list";
-import { userAddressOptions } from "@/lib/queries/user";
-import { derivePkgAddr } from "@/lib/gno";
+import { userInfoOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
@@ -27,11 +26,12 @@ type CommunityChatProps = {
 function CommunityChat({ communityId }: CommunityChatProps) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userAddress),
+    communityUserRoles(communityId, userRealmId),
   );
 
   const [postInEdition, setPostInEdition] = useState<{
@@ -40,7 +40,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   } | null>(null);
 
   const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const {
     data: postsPages,
@@ -49,7 +49,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userAddress || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
   );
   const posts = useMemo(
     () =>
@@ -93,7 +93,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
         <div className="space-y-4">
           <PostsList
             posts={posts}
-            userAddress={userAddress}
+            userRealmId={userRealmId}
             onReactionChange={onReactionChange}
             canInteract={
               userRoles.includes("member") ||

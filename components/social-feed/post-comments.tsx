@@ -12,7 +12,7 @@ import {
   DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
   feedPostsChildren,
 } from "@/lib/queries/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { isStandardPost, StandardPostView } from "@/lib/social-feed";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
@@ -43,9 +43,10 @@ function PostComment({
   isDeleting: boolean;
 }) {
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(comment.post.author),
   );
@@ -56,11 +57,10 @@ function PostComment({
   return (
     <>
       {orgType === "event" ? (
-        <EventRoles orgId={orgId} userAddress={userAddress} />
+        <EventRoles orgId={orgId} userRealmId={userRealmId} />
       ) : (
-        <CommunityRoles orgId={orgId} userAddress={userAddress} />
+        <CommunityRoles orgId={orgId} userRealmId={userRealmId} />
       )}
-
       <PostCardLayout
         key={comment.post.localPostId}
         post={comment}
@@ -73,7 +73,7 @@ function PostComment({
         }
         isReacting={isReacting}
         canInteract
-        isOwner={userAddress === comment.post.author}
+        isOwner={userRealmId === comment.post.author}
         onDelete={async (parentId) =>
           await onDelete(comment.post.localPostId.toString(10), parentId)
         }
@@ -97,9 +97,10 @@ export function PostComments({
   feedId: string;
 }) {
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const {
     data: commentsPages,
     isFetchingNextPage,
@@ -111,7 +112,7 @@ export function PostComments({
       parentId,
       DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
       "",
-      userAddress || "",
+      userRealmId,
     ),
   );
   const comments = useMemo(() => {
@@ -158,22 +159,22 @@ export function PostComments({
 // EventRoles and CommunityRoles are used to fetch and cache user roles conditionally, depending on orgType, in PostComment
 function EventRoles({
   orgId,
-  userAddress,
+  userRealmId,
 }: {
   orgId: string;
-  userAddress: string | null;
+  userRealmId: string;
 }) {
-  useSuspenseQuery(eventUserRoles(orgId, userAddress));
+  useSuspenseQuery(eventUserRoles(orgId, userRealmId));
   return null;
 }
 
 function CommunityRoles({
   orgId,
-  userAddress,
+  userRealmId,
 }: {
   orgId: string;
-  userAddress: string | null;
+  userRealmId: string;
 }) {
-  useSuspenseQuery(communityUserRoles(orgId, userAddress));
+  useSuspenseQuery(communityUserRoles(orgId, userRealmId));
   return null;
 }

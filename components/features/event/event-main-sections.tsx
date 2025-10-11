@@ -16,7 +16,7 @@ import {
 import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import {
@@ -39,11 +39,13 @@ export function MainEventSections({
 }) {
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
+
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
+    eventUserRoles(eventId, userRealmId),
   );
 
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);

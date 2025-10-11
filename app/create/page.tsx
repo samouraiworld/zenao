@@ -7,7 +7,7 @@ import {
   ScreenContainer,
   ScreenContainerCentered,
 } from "@/components/layout/screen-container";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import {
   communitiesListByMember,
   DEFAULT_COMMUNITIES_LIMIT,
@@ -22,10 +22,11 @@ export default async function CreateEventPage() {
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const userAddrOpts = userAddressOptions(getToken, userId);
-  const address = await queryClient.fetchQuery(userAddrOpts);
+  const userAddrOpts = userInfoOptions(getToken, userId);
+  const userInfo = await queryClient.fetchQuery(userAddrOpts);
+  const userRealmId = userInfo?.realmId;
 
-  if (!token || !address) {
+  if (!token || !userRealmId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("log-in")}
@@ -36,7 +37,7 @@ export default async function CreateEventPage() {
   // Prefetch communities of logged in user
   // here we cannot determine yet all communnties where the user is admin
   queryClient.prefetchInfiniteQuery(
-    communitiesListByMember(address, DEFAULT_COMMUNITIES_LIMIT),
+    communitiesListByMember(userRealmId, DEFAULT_COMMUNITIES_LIMIT),
   );
 
   return (

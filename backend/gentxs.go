@@ -18,7 +18,6 @@ import (
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/gnoland"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
-	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/tm2/pkg/amino"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	cryptoGno "github.com/gnolang/gno/tm2/pkg/crypto"
@@ -86,6 +85,7 @@ func execGenTxs() error {
 	if err != nil {
 		return err
 	}
+	zenaoAdmin := signerInfo.GetAddress()
 	signerFromKeybase, ok := signer.(*gnoclient.SignerFromKeybase)
 	if !ok {
 		return errors.New("signer is not a SignerFromKeybase")
@@ -102,7 +102,7 @@ func execGenTxs() error {
 		logger:                  logger,
 		namespace:               genTxsConf.name,
 	}
-	logger.Info("Signer initialized", zap.String("address", signerInfo.GetAddress().String()))
+	logger.Info("Signer initialized", zap.String("address", zenaoAdmin.String()))
 
 	db, err := gzdb.SetupDB(genTxsConf.dbPath)
 	if err != nil {
@@ -114,7 +114,7 @@ func execGenTxs() error {
 	if err != nil {
 		return err
 	}
-	txs, err := createAdminProfileGenesisTx(logger, signerInfo.GetAddress(), genesisTime)
+	txs, err := createAdminProfileGenesisTx(logger, zenaoAdmin, genesisTime)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func execGenTxs() error {
 	}
 
 	for _, user := range users {
-		tx, err := createUserRealmTx(chain, user, signerInfo.GetAddress())
+		tx, err := createUserRealmTx(chain, user, zenaoAdmin)
 		if err != nil {
 			return err
 		}
@@ -144,13 +144,13 @@ func execGenTxs() error {
 	}
 	events = append(events, deletedEvents...)
 	for _, deletedEvent := range deletedEvents {
-		tx, err := createCancelEventTx(chain, deletedEvent, signerInfo.GetAddress())
+		tx, err := createCancelEventTx(chain, deletedEvent, zenaoAdmin)
 		if err != nil {
 			return err
 		}
 		txs = append(txs, tx)
 		logger.Info("event cancel tx created", zap.String("event-id", deletedEvent.ID))
-		tx, err = createCancelEventRegTx(chain, deletedEvent, signerInfo.GetAddress())
+		tx, err = createCancelEventRegTx(chain, deletedEvent, zenaoAdmin)
 		if err != nil {
 			return err
 		}
@@ -195,7 +195,7 @@ func execGenTxs() error {
 
 		for _, deletedGkp := range deletedGatekeepers {
 			gatekeepersIDs = append(gatekeepersIDs, deletedGkp.EntityID)
-			tx, err := createEventRemoveGatekeeperTx(chain, signerInfo.GetAddress(), event, deletedGkp.EntityID, deletedGkp.DeletedAt)
+			tx, err := createEventRemoveGatekeeperTx(chain, zenaoAdmin, event, deletedGkp.EntityID, deletedGkp.DeletedAt)
 			logger.Info("event remove gatekeeper tx created", zap.String("event-id", event.ID), zap.String("gatekeeper-id", deletedGkp.EntityID), zap.Time("deleted-at", deletedGkp.DeletedAt))
 			if err != nil {
 				return err
@@ -203,13 +203,13 @@ func execGenTxs() error {
 			txs = append(txs, tx)
 		}
 
-		tx, err := createEventRealmTx(chain, event, signerInfo.GetAddress(), organizersIDs, gatekeepersIDs, privacy)
+		tx, err := createEventRealmTx(chain, event, zenaoAdmin, organizersIDs, gatekeepersIDs, privacy)
 		if err != nil {
 			return err
 		}
 		txs = append(txs, tx)
 		logger.Info("event realm tx created", zap.String("event-id", event.ID))
-		tx, err = createEventRegTx(chain, event, signerInfo.GetAddress())
+		tx, err = createEventRegTx(chain, event, zenaoAdmin)
 		if err != nil {
 			return err
 		}
@@ -220,14 +220,14 @@ func execGenTxs() error {
 			return err
 		}
 		for _, ticket := range tickets {
-			tx, err := createParticipationTx(chain, signerInfo.GetAddress(), event, ticket, sk)
+			tx, err := createParticipationTx(chain, zenaoAdmin, event, ticket, sk)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
 			logger.Info("participation tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 			if ticket.UserID != "" {
-				tx, err = createParticipationRegTx(chain, event, signerInfo.GetAddress(), ticket, chain.UserAddress(ticket.UserID))
+				tx, err = createParticipationRegTx(chain, event, zenaoAdmin, ticket, chain.userRealmPkgPath(ticket.UserID))
 				if err != nil {
 					return err
 				}
@@ -235,7 +235,7 @@ func execGenTxs() error {
 				logger.Info("participation indexed into event registry tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 			}
 			if ticket.Checkin != nil {
-				tx, err := createCheckinTx(chain, signerInfo.GetAddress(), event, ticket, sk)
+				tx, err := createCheckinTx(chain, zenaoAdmin, event, ticket, sk)
 				if err != nil {
 					return err
 				}
@@ -248,26 +248,26 @@ func execGenTxs() error {
 			return err
 		}
 		for _, ticket := range deletedTickets {
-			tx, err := createParticipationTx(chain, signerInfo.GetAddress(), event, ticket, sk)
+			tx, err := createParticipationTx(chain, zenaoAdmin, event, ticket, sk)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
 			logger.Info("participation tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
-			tx, err = createCancelParticipationTx(chain, event, signerInfo.GetAddress(), ticket)
+			tx, err = createCancelParticipationTx(chain, event, zenaoAdmin, ticket)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
 			logger.Info("cancel participation tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
 			if ticket.UserID != "" {
-				tx, err = createParticipationRegTx(chain, event, signerInfo.GetAddress(), ticket, chain.UserAddress(ticket.UserID))
+				tx, err = createParticipationRegTx(chain, event, zenaoAdmin, ticket, chain.userRealmPkgPath(ticket.UserID))
 				if err != nil {
 					return err
 				}
 				txs = append(txs, tx)
 				logger.Info("participation indexed into event registry tx created", zap.String("event-id", event.ID), zap.String("user-id", ticket.UserID), zap.String("ticket-pubkey", ticket.Ticket.Pubkey()))
-				tx, err = createCancelParticipationRegTx(chain, event, signerInfo.GetAddress(), ticket, chain.UserAddress(ticket.UserID))
+				tx, err = createCancelParticipationRegTx(chain, event, zenaoAdmin, ticket, chain.userRealmPkgPath(ticket.UserID))
 				if err != nil {
 					return err
 				}
@@ -307,7 +307,7 @@ func execGenTxs() error {
 		var membersIDs []string
 		for _, member := range members {
 			membersIDs = append(membersIDs, member.EntityID)
-			tx, err := createCommunityAddMemberRegTx(chain, signerInfo.GetAddress(), community, member.EntityID, member.CreatedAt)
+			tx, err := createCommunityAddMemberRegTx(chain, zenaoAdmin, community, member.EntityID, member.CreatedAt)
 			if err != nil {
 				return err
 			}
@@ -318,7 +318,7 @@ func execGenTxs() error {
 		// admin are also members and the community registry does not make the difference
 		for _, admin := range administrators {
 			membersIDs = append(membersIDs, admin.EntityID)
-			tx, err := createCommunityAddMemberRegTx(chain, signerInfo.GetAddress(), community, admin.EntityID, admin.CreatedAt)
+			tx, err := createCommunityAddMemberRegTx(chain, zenaoAdmin, community, admin.EntityID, admin.CreatedAt)
 			if err != nil {
 				return err
 			}
@@ -329,18 +329,18 @@ func execGenTxs() error {
 		// XXX: Add deleted members so we can add their post before deleting them
 		for _, deletedMember := range deletedMembers {
 			membersIDs = append(membersIDs, deletedMember.EntityID)
-			tx, err := createCommunityAddMemberRegTx(chain, signerInfo.GetAddress(), community, deletedMember.EntityID, deletedMember.CreatedAt)
+			tx, err := createCommunityAddMemberRegTx(chain, zenaoAdmin, community, deletedMember.EntityID, deletedMember.CreatedAt)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
-			tx, err = createCommunityRemoveMemberTx(chain, signerInfo.GetAddress(), community, deletedMember.EntityID, deletedMember.DeletedAt)
+			tx, err = createCommunityRemoveMemberTx(chain, zenaoAdmin, community, deletedMember.EntityID, deletedMember.DeletedAt)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
 			logger.Info("community remove member tx created", zap.String("community-id", community.ID), zap.String("member-id", deletedMember.EntityID), zap.Time("deleted-at", deletedMember.DeletedAt))
-			tx, err = createCommunityRemoveMemberRegTx(chain, community, signerInfo.GetAddress(), deletedMember.EntityID, deletedMember.DeletedAt)
+			tx, err = createCommunityRemoveMemberRegTx(chain, community, zenaoAdmin, deletedMember.EntityID, deletedMember.DeletedAt)
 			if err != nil {
 				return err
 			}
@@ -361,7 +361,7 @@ func execGenTxs() error {
 		var eventsIDs []string
 		for _, event := range events {
 			eventsIDs = append(eventsIDs, event.EntityID)
-			tx, err := createCommunityAddEventRegTx(chain, signerInfo.GetAddress(), community, event.EntityID, event.CreatedAt)
+			tx, err := createCommunityAddEventRegTx(chain, zenaoAdmin, community, event.EntityID, event.CreatedAt)
 			if err != nil {
 				return err
 			}
@@ -372,19 +372,19 @@ func execGenTxs() error {
 		// XXX: Add deleted events so we can add their post before deleting them
 		for _, deletedEvent := range deletedEvents {
 			eventsIDs = append(eventsIDs, deletedEvent.EntityID)
-			tx, err := createCommunityAddEventRegTx(chain, signerInfo.GetAddress(), community, deletedEvent.EntityID, deletedEvent.CreatedAt)
+			tx, err := createCommunityAddEventRegTx(chain, zenaoAdmin, community, deletedEvent.EntityID, deletedEvent.CreatedAt)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
 			logger.Info("community add event reg tx created", zap.String("community-id", community.ID), zap.String("event-id", deletedEvent.EntityID), zap.Time("created-at", deletedEvent.CreatedAt))
-			tx, err = createCommunityRemoveEventTx(chain, signerInfo.GetAddress(), community, deletedEvent.EntityID, deletedEvent.DeletedAt)
+			tx, err = createCommunityRemoveEventTx(chain, zenaoAdmin, community, deletedEvent.EntityID, deletedEvent.DeletedAt)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
 			logger.Info("community remove event tx created", zap.String("community-id", community.ID), zap.String("event-id", deletedEvent.EntityID), zap.Time("deleted-at", deletedEvent.DeletedAt))
-			tx, err = createCommunityRemoveEventRegTx(chain, signerInfo.GetAddress(), community, deletedEvent.EntityID, deletedEvent.DeletedAt)
+			tx, err = createCommunityRemoveEventRegTx(chain, zenaoAdmin, community, deletedEvent.EntityID, deletedEvent.DeletedAt)
 			if err != nil {
 				return err
 			}
@@ -392,13 +392,13 @@ func execGenTxs() error {
 			logger.Info("community remove event indexed into community registry tx created", zap.String("community-id", community.ID), zap.String("event-id", deletedEvent.EntityID), zap.Time("deleted-at", deletedEvent.DeletedAt))
 		}
 
-		tx, err := createCommunityRealmTx(chain, community, signerInfo.GetAddress(), administratorsIDs, membersIDs, eventsIDs)
+		tx, err := createCommunityRealmTx(chain, community, zenaoAdmin, administratorsIDs, membersIDs, eventsIDs)
 		if err != nil {
 			return err
 		}
 		txs = append(txs, tx)
 		logger.Info("community realm tx created", zap.String("community-id", community.ID))
-		tx, err = createCommunityRegTx(chain, community, signerInfo.GetAddress())
+		tx, err = createCommunityRegTx(chain, community, zenaoAdmin)
 		if err != nil {
 			return err
 		}
@@ -427,14 +427,14 @@ func execGenTxs() error {
 				options = append(options, res.Option)
 			}
 
-			tx, err := createPollTx(chain, post.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, poll, options)
+			tx, err := createPollTx(chain, post.UserID, zenaoAdmin, feed.OrgType, feed.OrgID, poll, options)
 			if err != nil {
 				return err
 			}
 			txs = append(txs, tx)
 			logger.Info("poll tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", post.UserID))
 			for _, vote := range poll.Votes {
-				tx, err := createVoteTx(chain, vote.UserID, signerInfo.GetAddress(), poll.ID, vote)
+				tx, err := createVoteTx(chain, vote.UserID, zenaoAdmin, poll.ID, vote)
 				if err != nil {
 					return err
 				}
@@ -442,7 +442,7 @@ func execGenTxs() error {
 				logger.Info("vote tx created", zap.String("poll-id", poll.ID), zap.String("post-id", post.ID), zap.String("org-type", feed.OrgType), zap.String("org-id", feed.OrgID), zap.String("user-id", vote.UserID), zap.String("vote-option", vote.Option))
 			}
 		} else {
-			cptxs, err := createPostTxs(chain, post.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, post)
+			cptxs, err := createPostTxs(chain, post.UserID, zenaoAdmin, feed.OrgType, feed.OrgID, post)
 			if err != nil {
 				return err
 			}
@@ -451,7 +451,7 @@ func execGenTxs() error {
 		}
 
 		for _, reaction := range post.Reactions {
-			tx, err := createReactionTx(chain, reaction.UserID, signerInfo.GetAddress(), feed.OrgType, feed.OrgID, reaction)
+			tx, err := createReactionTx(chain, reaction.UserID, zenaoAdmin, feed.OrgType, feed.OrgID, reaction)
 			if err != nil {
 				return err
 			}
@@ -493,17 +493,17 @@ func execGenTxs() error {
 	return nil
 }
 
-func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
+func createPostTxs(chain *gnoZenaoChain, authorID string, caller cryptoGno.Address, orgType string, orgID string, post *zeni.Post) ([]gnoland.TxWithMetadata, error) {
 	orgPkgPath := chain.orgPkgPath(orgType, orgID)
 	userPkgPath := chain.userRealmPkgPath(authorID)
-	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
+	feedID := orgPkgPath + ":main"
 	gnoLitPost := "&" + post.Post.GnoLiteral("feedsv1.", "\t\t")
 	body := genCreatePostMsgRunBody(userPkgPath, feedID, gnoLitPost)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -533,7 +533,7 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addr
 		tx := std.Tx{
 			Msgs: []std.Msg{
 				vm.MsgRun{
-					Caller: creator,
+					Caller: caller,
 					Send:   []std.Coin{},
 					Package: &tm2std.MemPackage{
 						Name:  "main",
@@ -558,14 +558,14 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addr
 	return txs, nil
 }
 
-func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
+func createReactionTx(chain *gnoZenaoChain, authorID string, caller cryptoGno.Address, orgType string, orgID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
 	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, orgType, orgID, reaction.Icon)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -587,13 +587,13 @@ func createReactionTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.A
 	}, nil
 }
 
-func createVoteTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, pollID string, vote *zeni.Vote) (gnoland.TxWithMetadata, error) {
+func createVoteTx(chain *gnoZenaoChain, authorID string, caller cryptoGno.Address, pollID string, vote *zeni.Vote) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
 	body := genVotePollMsgRunBody(userPkgPath, pollID, vote.Option)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -615,15 +615,15 @@ func createVoteTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Addre
 	}, nil
 }
 
-func createPollTx(chain *gnoZenaoChain, authorID string, creator cryptoGno.Address, orgType string, orgID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
+func createPollTx(chain *gnoZenaoChain, authorID string, caller cryptoGno.Address, orgType string, orgID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
 	userPkgPath := chain.userRealmPkgPath(authorID)
 	orgPkgPath := chain.orgPkgPath(orgType, orgID)
-	feedID := gnolang.DerivePkgBech32Addr(orgPkgPath).String() + ":main"
+	feedID := orgPkgPath + ":main"
 	body := genCreatePollMsgRunBody(orgPkgPath, userPkgPath, feedID, poll.Question, options, poll.Kind, poll.Duration)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -671,10 +671,10 @@ func createEventRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.
 	}, nil
 }
 
-func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, organizersIDs []string, gatekeepersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
-	organizersAddr := mapsl.Map(organizersIDs, chain.UserAddress)
-	gatekeepersAddr := mapsl.Map(gatekeepersIDs, chain.UserAddress)
-	eRealm, err := genEventRealmSource(organizersAddr, gatekeepersAddr, creator.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
+func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, organizersIDs []string, gatekeepersIDs []string, privacy *zenaov1.EventPrivacy) (gnoland.TxWithMetadata, error) {
+	organizers := mapsl.Map(organizersIDs, chain.userRealmPkgPath)
+	gatekeepers := mapsl.Map(gatekeepersIDs, chain.userRealmPkgPath)
+	eRealm, err := genEventRealmSource(organizers, gatekeepers, caller.String(), genTxsConf.name, &zenaov1.CreateEventRequest{
 		Title:        event.Title,
 		Description:  event.Description,
 		ImageUri:     event.ImageURI,
@@ -692,7 +692,7 @@ func createEventRealmTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoG
 	eventTx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgAddPackage{
-				Creator: creator,
+				Creator: caller,
 				Send:    []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name: "event",
@@ -774,7 +774,7 @@ func createCancelEventRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryp
 	}, nil
 }
 
-func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, ticket *zeni.SoldTicket, participantAddr string) (gnoland.TxWithMetadata, error) {
+func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, ticket *zeni.SoldTicket, participant string) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
 	tx := std.Tx{
 		Msgs: []std.Msg{
@@ -783,7 +783,7 @@ func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cr
 				Send:    []std.Coin{},
 				PkgPath: chain.eventsIndexPkgPath,
 				Func:    "AddParticipant",
-				Args:    []string{eventPkgPath, participantAddr},
+				Args:    []string{eventPkgPath, participant},
 			},
 		},
 		Fee: std.Fee{
@@ -800,7 +800,7 @@ func createParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cr
 	}, nil
 }
 
-func createCancelParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, ticket *zeni.SoldTicket, participantAddr string) (gnoland.TxWithMetadata, error) {
+func createCancelParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, ticket *zeni.SoldTicket, participant string) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
 	tx := std.Tx{
 		Msgs: []std.Msg{
@@ -809,7 +809,7 @@ func createCancelParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, cal
 				Send:    []std.Coin{},
 				PkgPath: chain.eventsIndexPkgPath,
 				Func:    "RemoveParticipant",
-				Args:    []string{eventPkgPath, participantAddr},
+				Args:    []string{eventPkgPath, participant},
 			},
 		},
 		Fee: std.Fee{
@@ -826,16 +826,16 @@ func createCancelParticipationRegTx(chain *gnoZenaoChain, event *zeni.Event, cal
 	}, nil
 }
 
-func createCancelParticipationTx(chain *gnoZenaoChain, event *zeni.Event, creator cryptoGno.Address, ticket *zeni.SoldTicket) (gnoland.TxWithMetadata, error) {
+func createCancelParticipationTx(chain *gnoZenaoChain, event *zeni.Event, caller cryptoGno.Address, ticket *zeni.SoldTicket) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
 	callerPkgPath := chain.userRealmPkgPath(event.CreatorID)
-	participantAddr := chain.UserAddress(ticket.UserID)
-	body := genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticket.Ticket.Pubkey())
+	participant := chain.userRealmPkgPath(ticket.UserID)
+	body := genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participant, ticket.Ticket.Pubkey())
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -857,12 +857,12 @@ func createCancelParticipationTx(chain *gnoZenaoChain, event *zeni.Event, creato
 	}, nil
 }
 
-func createParticipationTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zeni.Event, ticket *zeni.SoldTicket, sk ed25519.PrivateKey) (gnoland.TxWithMetadata, error) {
+func createParticipationTx(chain *gnoZenaoChain, caller cryptoGno.Address, event *zeni.Event, ticket *zeni.SoldTicket, sk ed25519.PrivateKey) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
 	callerPkgPath := chain.userRealmPkgPath(event.CreatorID)
-	var participantAddr string
+	var participant string
 	if ticket.UserID != "" {
-		participantAddr = chain.UserAddress(ticket.UserID)
+		participant = chain.userRealmPkgPath(ticket.UserID)
 	}
 
 	signature := ""
@@ -875,12 +875,12 @@ func createParticipationTx(chain *gnoZenaoChain, creator cryptoGno.Address, even
 		signature = base64.RawURLEncoding.EncodeToString(sigBz)
 	}
 
-	body := genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participantAddr, ticket.Ticket.Pubkey(), signature)
+	body := genParticipateMsgRunBody(callerPkgPath, eventPkgPath, participant, ticket.Ticket.Pubkey(), signature)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -902,7 +902,7 @@ func createParticipationTx(chain *gnoZenaoChain, creator cryptoGno.Address, even
 	}, nil
 }
 
-func createCheckinTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zeni.Event, ticket *zeni.SoldTicket, sk ed25519.PrivateKey) (gnoland.TxWithMetadata, error) {
+func createCheckinTx(chain *gnoZenaoChain, caller cryptoGno.Address, event *zeni.Event, ticket *zeni.SoldTicket, sk ed25519.PrivateKey) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
 	gatekeeperPkgPath := chain.userRealmPkgPath(ticket.Checkin.GatekeeperID)
 	body := genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, ticket.Ticket.Pubkey(), ticket.Checkin.Signature)
@@ -910,7 +910,7 @@ func createCheckinTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zen
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -932,8 +932,8 @@ func createCheckinTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zen
 	}, nil
 }
 
-func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, creator cryptoGno.Address) (gnoland.TxWithMetadata, error) {
-	uRealm, err := genUserRealmSource(user, genTxsConf.name, creator.String())
+func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+	uRealm, err := genUserRealmSource(user, genTxsConf.name, caller.String())
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
 	}
@@ -942,7 +942,7 @@ func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, creator cryptoGno.
 	userTx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgAddPackage{
-				Creator: creator,
+				Creator: caller,
 				Send:    []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name: "user",
@@ -968,12 +968,12 @@ func createUserRealmTx(chain *gnoZenaoChain, user *zeni.User, creator cryptoGno.
 	}, nil
 }
 
-func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, genesisTime time.Time) ([]gnoland.TxWithMetadata, error) {
+func createAdminProfileGenesisTx(logger *zap.Logger, admin cryptoGno.Address, genesisTime time.Time) ([]gnoland.TxWithMetadata, error) {
 	txs := make([]gnoland.TxWithMetadata, 0)
 	registerTx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgCall{
-				Caller:  addr,
+				Caller:  admin,
 				Send:    std.NewCoins(std.NewCoin("ugnot", 1_000_000)),
 				PkgPath: "gno.land/r/gnoland/users/v1",
 				Func:    "Register",
@@ -1003,7 +1003,7 @@ func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, gen
 		setFieldTx := std.Tx{
 			Msgs: []std.Msg{
 				vm.MsgCall{
-					Caller:  addr,
+					Caller:  admin,
 					PkgPath: "gno.land/r/demo/profile",
 					Func:    "SetStringField",
 					Args:    []string{field[0], field[1]},
@@ -1026,12 +1026,12 @@ func createAdminProfileGenesisTx(logger *zap.Logger, addr cryptoGno.Address, gen
 	return txs, nil
 }
 
-func createCommunityRegTx(chain *gnoZenaoChain, community *zeni.Community, caller cryptoGno.Address) (gnoland.TxWithMetadata, error) {
+func createCommunityRegTx(chain *gnoZenaoChain, community *zeni.Community, admin cryptoGno.Address) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgCall{
-				Caller:  caller,
+				Caller:  admin,
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "IndexCommunity",
@@ -1060,7 +1060,7 @@ func createCommunityAddMemberRegTx(chain *gnoZenaoChain, caller cryptoGno.Addres
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "AddMember",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.UserAddress(memberID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.userRealmPkgPath(memberID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1084,7 +1084,7 @@ func createCommunityAddEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Address
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "AddEvent",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.EventAddress(eventID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.eventRealmPkgPath(eventID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1108,7 +1108,7 @@ func createCommunityRemoveEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Addr
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "RemoveEvent",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.EventAddress(eventID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.eventRealmPkgPath(eventID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1124,11 +1124,11 @@ func createCommunityRemoveEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Addr
 	}, nil
 }
 
-func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, creator cryptoGno.Address, administratorsIDs []string, membersIDs []string, eventsIDs []string) (gnoland.TxWithMetadata, error) {
-	administratorsAddrs := mapsl.Map(administratorsIDs, chain.UserAddress)
-	membersAddrs := mapsl.Map(membersIDs, chain.UserAddress)
-	eventsAddrs := mapsl.Map(eventsIDs, chain.EventAddress)
-	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, eventsAddrs, creator.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
+func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, caller cryptoGno.Address, administratorsIDs []string, membersIDs []string, eventsIDs []string) (gnoland.TxWithMetadata, error) {
+	administratorsAddrs := mapsl.Map(administratorsIDs, chain.userRealmPkgPath)
+	membersAddrs := mapsl.Map(membersIDs, chain.userRealmPkgPath)
+	eventsAddrs := mapsl.Map(eventsIDs, chain.eventRealmPkgPath)
+	cRealm, err := genCommunityRealmSource(administratorsAddrs, membersAddrs, eventsAddrs, caller.String(), genTxsConf.name, &zenaov1.CreateCommunityRequest{
 		DisplayName: community.DisplayName,
 		Description: community.Description,
 		AvatarUri:   community.AvatarURI,
@@ -1142,7 +1142,7 @@ func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, cre
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgAddPackage{
-				Creator: creator,
+				Creator: caller,
 				Send:    []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name: "community",
@@ -1168,16 +1168,16 @@ func createCommunityRealmTx(chain *gnoZenaoChain, community *zeni.Community, cre
 	}, nil
 }
 
-func createEventRemoveGatekeeperTx(chain *gnoZenaoChain, creator cryptoGno.Address, event *zeni.Event, gatekeeperID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
+func createEventRemoveGatekeeperTx(chain *gnoZenaoChain, caller cryptoGno.Address, event *zeni.Event, gatekeeperID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	eventPkgPath := chain.eventRealmPkgPath(event.ID)
-	gatekeeperAddr := chain.UserAddress(gatekeeperID)
+	gatekeeper := chain.userRealmPkgPath(gatekeeperID)
 	callerPkgPath := chain.userRealmPkgPath(event.CreatorID)
-	body := genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeperAddr)
+	body := genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeper)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -1199,16 +1199,16 @@ func createEventRemoveGatekeeperTx(chain *gnoZenaoChain, creator cryptoGno.Addre
 	}, nil
 }
 
-func createCommunityRemoveMemberTx(chain *gnoZenaoChain, creator cryptoGno.Address, community *zeni.Community, memberID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
+func createCommunityRemoveMemberTx(chain *gnoZenaoChain, caller cryptoGno.Address, community *zeni.Community, memberID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
 	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
-	memberAddr := chain.UserAddress(memberID)
+	memberAddr := chain.userRealmPkgPath(memberID)
 	body := genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, memberAddr)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",
@@ -1232,7 +1232,7 @@ func createCommunityRemoveMemberTx(chain *gnoZenaoChain, creator cryptoGno.Addre
 
 func createCommunityRemoveMemberRegTx(chain *gnoZenaoChain, community *zeni.Community, caller cryptoGno.Address, memberID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
-	userAddr := chain.UserAddress(memberID)
+	userAddr := chain.userRealmPkgPath(memberID)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgCall{
@@ -1257,16 +1257,16 @@ func createCommunityRemoveMemberRegTx(chain *gnoZenaoChain, community *zeni.Comm
 	}, nil
 }
 
-func createCommunityRemoveEventTx(chain *gnoZenaoChain, creator cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
+func createCommunityRemoveEventTx(chain *gnoZenaoChain, caller cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
-	eventAddr := chain.EventAddress(eventID)
+	eventAddr := chain.eventRealmPkgPath(eventID)
 	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
 	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
-				Caller: creator,
+				Caller: caller,
 				Send:   []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name:  "main",

@@ -14,12 +14,11 @@ import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import { useToast } from "@/hooks/use-toast";
-import { derivePkgAddr } from "@/lib/gno";
 import { parsePollUri } from "@/lib/multiaddr";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
 import { feedPost } from "@/lib/queries/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { FeedPostFormSchemaType } from "@/types/schemas";
@@ -41,9 +40,10 @@ function PostCommentForm({
   const t = useTranslations("social-feed.standard-post-form");
 
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { createStandardPost, isPending } = useCreateStandardPost();
 
   const onSubmit = async (values: FeedPostFormSchemaType) => {
@@ -63,7 +63,7 @@ function PostCommentForm({
         content: values.content,
         parentId: parentId.toString(),
         token,
-        userAddress: userAddress ?? "",
+        userRealmId,
         tags: [],
       });
 
@@ -128,13 +128,14 @@ export default function PostInfo({
 }) {
   const router = useRouter();
   const { userId, getToken } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
+    eventUserRoles(eventId, userRealmId),
   );
-  const { data: post } = useSuspenseQuery(feedPost(postId, userAddress || ""));
+  const { data: post } = useSuspenseQuery(feedPost(postId, userRealmId || ""));
 
   const [editMode, setEditMode] = useState(false);
 
@@ -148,7 +149,7 @@ export default function PostInfo({
   });
 
   const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
   const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
@@ -193,7 +194,7 @@ export default function PostInfo({
       {isPollPost(post) && (
         <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
           <PollPost
-            userAddress={userAddress}
+            userRealmId={userRealmId}
             pollId={parsePollUri(post.post.post.value.uri).pollId}
             pollPost={post}
             onReactionChange={async (icon) =>

@@ -3,11 +3,8 @@ import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import {
   InfiniteData,
   infiniteQueryOptions,
-  queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
-import { z } from "zod";
-import { goStringSliceLiteral } from "./community";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import {
   EventInfo,
@@ -74,23 +71,6 @@ export const eventsList = (
     ...options,
   });
 };
-
-export const eventsPkgPathsByAddrs = (addresses: string[]) =>
-  queryOptions({
-    queryKey: ["eventPkgPath", ...addresses],
-    queryFn: async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/eventreg`,
-        `stringArrayToJSON(listEventsPkgPathByAddrs(${goStringSliceLiteral(addresses)}))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-
-      return await z.string().array().parseAsync(raw);
-    },
-  });
 
 export const eventsByOrganizerList = (
   organizer: string,

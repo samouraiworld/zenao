@@ -8,9 +8,9 @@ import { PollJson, PollSchema } from "@/app/gen/polls/v1/polls_pb";
 export const DEFAULT_FEED_POSTS_LIMIT = 30;
 export const DEFAULT_FEED_POSTS_COMMENTS_LIMIT = 10;
 
-export const feedPost = (postId: string, userAddress: string) =>
+export const feedPost = (postId: string, userRealmId: string) =>
   queryOptions({
-    queryKey: ["feedPost", postId, userAddress],
+    queryKey: ["feedPost", postId, userRealmId],
     queryFn: async () => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
@@ -18,7 +18,7 @@ export const feedPost = (postId: string, userAddress: string) =>
 
       const res = await client.evaluateExpression(
         "gno.land/r/zenao/social_feed",
-        `postViewToJSON(GetPostView(${postId}, "${userAddress}"))`,
+        `postViewToJSON(GetPostView(${postId}, "${userRealmId}"))`,
       );
       const raw = extractGnoJSONResponse(res);
 
@@ -30,10 +30,10 @@ export const feedPosts = (
   feedId: string,
   limit: number,
   tags: string,
-  userAddress: string,
+  userRealmId: string,
 ) =>
   infiniteQueryOptions({
-    queryKey: ["feedPosts", feedId, tags, userAddress],
+    queryKey: ["feedPosts", feedId, tags, userRealmId],
     queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
@@ -41,7 +41,7 @@ export const feedPosts = (
 
       const res = await client.evaluateExpression(
         "gno.land/r/zenao/social_feed",
-        `postViewsToJSON(GetFeedPosts("${feedId}", ${pageParam * limit}, ${limit}, "${tags}", "${userAddress}"))`,
+        `postViewsToJSON(GetFeedPosts("${feedId}", ${pageParam * limit}, ${limit}, "${tags}", "${userRealmId}"))`,
       );
       const raw = extractGnoJSONResponse(res);
       return postViewsFromJson(raw);
@@ -59,17 +59,17 @@ export const feedPostsChildren = (
   parentId: string,
   limit: number,
   tags: string,
-  userAddress: string,
+  userRealmId: string,
 ) =>
   infiniteQueryOptions({
-    queryKey: ["feedPostsChildren", parentId, tags, userAddress],
+    queryKey: ["feedPostsChildren", parentId, tags, userRealmId],
     queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const res = await client.evaluateExpression(
         "gno.land/r/zenao/social_feed",
-        `postViewsToJSON(GetChildrenPosts("${parentId}", ${pageParam * limit}, ${limit}, "${tags}", "${userAddress}"))`,
+        `postViewsToJSON(GetChildrenPosts("${parentId}", ${pageParam * limit}, ${limit}, "${tags}", "${userRealmId}"))`,
       );
       const raw = extractGnoJSONResponse(res);
 
@@ -89,7 +89,7 @@ function postViewsFromJson(raw: unknown) {
   return list.map((elem) => fromJson(PostViewSchema, elem as PostViewJson));
 }
 
-export const pollInfo = (pollId: string, userAddress: string) =>
+export const pollInfo = (pollId: string, userRealmId: string) =>
   queryOptions({
     queryKey: ["poll", pollId],
     queryFn: async () => {
@@ -99,7 +99,7 @@ export const pollInfo = (pollId: string, userAddress: string) =>
 
       const res = await client.evaluateExpression(
         "gno.land/r/zenao/polls",
-        `pollToJSON(GetInfo(${parseInt(pollId, 10)}, "${userAddress}"))`,
+        `pollToJSON(GetInfo(${parseInt(pollId, 10)}, "${userRealmId}"))`,
       );
 
       const raw = extractGnoJSONResponse(res) as PollJson;

@@ -61,7 +61,7 @@ func TestNewPost(t *testing.T) {
 	testing.SetContext(testing.Context{
 		CurrentRealm: testing.NewUserRealm(alice),
 	})
-	pvFunc := func(string) bool { return false }
+	pvFunc := func() (string, bool) { return "", false }
 	NewFeed(cross, "private", false, pvFunc)
 
 	for name, tc := range tests {

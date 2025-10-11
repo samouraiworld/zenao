@@ -8,7 +8,7 @@ import { Button } from "../shadcn/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLeaveCommunity } from "@/lib/mutations/community-leave";
 import { communityUserRoles } from "@/lib/queries/community";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 
 type Props = {
@@ -20,12 +20,13 @@ export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
   const { toast } = useToast();
   const t = useTranslations("community");
 
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
 
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, address),
+    communityUserRoles(communityId, userRealmId),
   );
 
   const { mutateAsync: leaveCommunity, isPending } = useLeaveCommunity();
@@ -42,7 +43,7 @@ export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
       await leaveCommunity({
         communityId,
         token,
-        userAddress: address,
+        userRealmId,
       });
 
       toast({

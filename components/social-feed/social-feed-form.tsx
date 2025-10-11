@@ -9,7 +9,7 @@ import { PollPostForm } from "./poll-post-form";
 import { FeedInputMode, StandardPostForm } from "./standard-post-form";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/hooks/use-toast";
 import { OrgType } from "@/lib/organization";
@@ -27,9 +27,10 @@ const SocialFeedForm = ({
 
   const { createStandardPost, isPending } = useCreateStandardPost();
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
 
   const t = useTranslations("social-feed.standard-post-form");
 
@@ -62,7 +63,7 @@ const SocialFeedForm = ({
         content: values.content,
         parentId: values.parentPostId?.toString() ?? "",
         token,
-        userAddress: userAddress ?? "",
+        userRealmId: userRealmId ?? "",
         tags: [],
       });
 

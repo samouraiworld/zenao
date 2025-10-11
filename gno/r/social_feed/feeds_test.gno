@@ -10,7 +10,7 @@ func TestNewFeed(t *testing.T) {
 	type input struct {
 		slug         string
 		crossNetwork bool
-		authFunc     func(string) bool
+		authFunc     func() (string, bool)
 	}
 
 	type output struct {
@@ -52,7 +52,7 @@ func TestNewFeed(t *testing.T) {
 			input: input{
 				slug:         "public3",
 				crossNetwork: false,
-				authFunc:     func(string) bool { return false },
+				authFunc:     func() (string, bool) { return "", false },
 			},
 			output: output{
 				feedId: alice.String() + ":public3",

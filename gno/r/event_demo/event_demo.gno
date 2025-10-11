@@ -22,7 +22,7 @@ var (
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	feedId = social_feed.NewFeed(cross, "main", false, isMember)
+	feedId = social_feed.NewFeed(cross, "main", false, feedAuth)
 }
 
 func init() {
@@ -61,8 +61,9 @@ func Render(path string) string {
 	return localDAO.Render(path)
 }
 
-func isMember(memberId string) bool {
-	return basedao.MustGetMembersViewExtension(localDAO).IsMember(memberId)
+func feedAuth() (string, bool) {
+	caller := event.DAOPrivate.CallerID() // XXX: this should be upgradable
+	return caller, basedao.MustGetMembersViewExtension(localDAO).IsMember(caller)
 }
 
 func crossFn(_ realm, cb func()) {
