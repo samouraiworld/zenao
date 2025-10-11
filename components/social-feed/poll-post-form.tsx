@@ -24,16 +24,19 @@ import { useCreatePoll } from "@/lib/mutations/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
+import { OrgType } from "@/lib/organization";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
 export function PollPostForm({
-  eventId,
+  orgType,
+  orgId,
   feedInputMode,
   setFeedInputMode,
   form,
 }: {
-  eventId: string;
+  orgType: OrgType;
+  orgId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
   form: UseFormReturn<FeedPostFormSchemaType>;
@@ -44,7 +47,7 @@ export function PollPostForm({
     userInfoOptions(getToken, userId),
   );
   const userRealmId = userInfo?.realmId || "";
-  const t = useTranslations("event-feed.poll-form");
+  const t = useTranslations("social-feed.poll-form");
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
   const { createPoll, isPending } = useCreatePoll(queryClient);
@@ -94,8 +97,8 @@ export function PollPostForm({
       );
 
       await createPoll({
-        orgType: "event",
-        orgId: eventId,
+        orgType,
+        orgId,
         question: values.question,
         duration,
         options: values.options.map((option) => option.text),

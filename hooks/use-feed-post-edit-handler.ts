@@ -5,7 +5,7 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
 
-function useEventPostEditHandler(feedId: string) {
+function useFeedPostEditHandler(feedId: string) {
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -45,4 +45,4 @@ function useEventPostEditHandler(feedId: string) {
   };
 }
 
-export default useEventPostEditHandler;
+export default useFeedPostEditHandler;

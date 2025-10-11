@@ -7,7 +7,6 @@ import {
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { eventUserRoles } from "@/lib/queries/event-users";
 import { userInfoOptions } from "@/lib/queries/user";
 import { PollPostView } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
@@ -16,24 +15,24 @@ import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
+import { communityUserRoles } from "@/lib/queries/community";
 
-type EventPollsProps = {
-  eventId: string;
+type CommunityPollsProps = {
+  communityId: string;
 };
 
-function EventPolls({ eventId }: EventPollsProps) {
+function CommunityPolls({ communityId }: CommunityPollsProps) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
   const userRealmId = userInfo?.realmId || "";
-
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userRealmId),
+  const { data: userRoles } = useSuspenseQuery(
+    communityUserRoles(communityId, userRealmId),
   );
 
-  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
+  const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
   const feedId = `${pkgPath}:main`;
 
   const {
@@ -73,11 +72,12 @@ function EventPolls({ eventId }: EventPollsProps) {
             userRealmId={userRealmId}
             onReactionChange={onReactionChange}
             canInteract={
-              roles.includes("organizer") || roles.includes("participant")
+              userRoles.includes("member") ||
+              userRoles.includes("administrator")
             }
             onDelete={onDelete}
             replyHrefFormatter={(postId) =>
-              `/event/${eventId}/feed/post/${postId}`
+              `/community/${communityId}/feed/post/${postId}`
             }
             canReply
             isReacting={isReacting}
@@ -99,4 +99,4 @@ function EventPolls({ eventId }: EventPollsProps) {
   );
 }
 
-export default EventPolls;
+export default CommunityPolls;
