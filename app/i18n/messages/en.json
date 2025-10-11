@@ -346,7 +346,8 @@
     "recent-media-uploaded": "Recent media uploaded",
     "upload-file-btn": "Upload file",
     "upload-first-file-btn": "Upload your first file",
-    "no-media-uploaded": "No media uploaded yet."
+    "no-media-uploaded": "No media uploaded yet.",
+    "error-saving-portfolio": "Error while saving portfolio"
   },
   "community-edit-form": {
     "update-success": "Community updated successfully",

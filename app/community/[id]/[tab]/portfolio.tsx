@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AudioWaveform, ImageIcon, Loader2, Upload, Video } from "lucide-react";
+import { AudioWaveform, ImageIcon, Loader2, Video } from "lucide-react";
 import { useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
@@ -99,6 +99,40 @@ export default function CommunityPortfolio({
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
 
+  const onSave = async (newPortfolio: PortfolioItem[]) => {
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("invalid clerk token");
+
+      const description = serializeWithFrontMatter<
+        Omit<CommunityDetails, "description">
+      >(otherDetails.description, {
+        shortDescription: otherDetails.shortDescription,
+        portfolio: newPortfolio,
+      });
+
+      await editCommunity({
+        ...community,
+        bannerUri:
+          community.bannerUri.length > 0
+            ? community.bannerUri
+            : "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24",
+        communityId,
+        administrators,
+        token,
+        description,
+      });
+      setLocalPortfolio(newPortfolio);
+    } catch (error) {
+      captureException(error);
+      console.error("Save portfolio failed", error);
+      toast({
+        title: t("error-saving-portfolio"),
+        variant: "destructive",
+      });
+    }
+  };
+
   const onUpload = async (
     fileType: "image" | "audio",
     e: React.ChangeEvent<HTMLInputElement>,
@@ -123,21 +157,8 @@ export default function CommunityPortfolio({
         id: crypto.randomUUID(),
       };
 
-      const description = serializeWithFrontMatter<
-        Omit<CommunityDetails, "description">
-      >(otherDetails.description, {
-        shortDescription: otherDetails.shortDescription,
-        portfolio: [newItem, ...localPortfolio],
-      });
-
-      await editCommunity({
-        ...community,
-        communityId,
-        administrators,
-        token,
-        description,
-      });
-      setLocalPortfolio((prev) => [newItem, ...prev]);
+      const newPortfolio = [newItem, ...localPortfolio];
+      await onSave(newPortfolio);
 
       toast({
         title: t("upload-file-success"),
@@ -162,8 +183,16 @@ export default function CommunityPortfolio({
   };
 
   const handleVideoAdded = async (data: PortfolioUploadVideoSchemaType) => {
-    // TODO: handle adding video to portfolio
-    console.log("data", data);
+    const newItem: PortfolioItem = {
+      type: "video",
+      name: data.uri,
+      uri: data.uri,
+      uploadedAt: new Date(),
+      id: crypto.randomUUID(),
+    };
+
+    const newPortfolio = [newItem, ...localPortfolio];
+    await onSave(newPortfolio);
   };
 
   const onPreview = (item: PortfolioItem) => {
@@ -179,22 +208,8 @@ export default function CommunityPortfolio({
 
       setIsDeleting(true);
       const updatedPortfolio = localPortfolio.filter((p) => p.id !== item.id);
+      await onSave(updatedPortfolio);
 
-      const description = serializeWithFrontMatter<
-        Omit<CommunityDetails, "description">
-      >(otherDetails.description, {
-        shortDescription: otherDetails.shortDescription,
-        portfolio: updatedPortfolio,
-      });
-
-      await editCommunity({
-        ...community,
-        communityId,
-        administrators,
-        token,
-        description,
-      });
-      setLocalPortfolio(updatedPortfolio);
       toast({
         title: t("delete-file-success"),
       });
@@ -234,7 +249,7 @@ export default function CommunityPortfolio({
         <Heading level={3}>
           {t("recent-media-uploaded")} ({localPortfolio.length})
         </Heading>
-        {isAdmin && localPortfolio.length > 0 && (
+        {/* {isAdmin && localPortfolio.length > 0 && (
           <Button
             variant="link"
             className="text-main"
@@ -243,7 +258,7 @@ export default function CommunityPortfolio({
             {t("upload-file-btn")}
             <Upload />
           </Button>
-        )}
+        )} */}
       </div>
 
       {/* Image upload */}
