@@ -246,20 +246,61 @@ export default function CommunityPortfolio({
         onVideoAdded={handleVideoAdded}
       />
 
-      <div className="flex items-center">
+      <div className="flex flex-col md:flex-row gap-4 md:items-center">
         <Heading level={3}>
           {t("recent-media-uploaded")} ({localPortfolio.length})
         </Heading>
-        {/* {isAdmin && localPortfolio.length > 0 && (
-          <Button
-            variant="link"
-            className="text-main"
-            // onClick={() => fileInputRef.current?.click()}
-          >
-            {t("upload-file-btn")}
-            <Upload />
-          </Button>
-        )} */}
+
+        {isAdmin && localPortfolio.length > 0 && (
+          <div className="flex gap-4 items-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="text-main bg-transparent border-none"
+                  disabled={isUploading}
+                  onClick={() => imageFileInputRef.current?.click()}
+                >
+                  <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
+                  <span className="max-md:hidden">Upload image</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="md:hidden">
+                Upload image
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="text-main bg-transparent border-none"
+                  disabled={isUploading}
+                  onClick={() => audioFileInputRef.current?.click()}
+                >
+                  <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
+                  <span className="max-md:hidden">Upload audio</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="md:hidden">
+                Upload audio
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="text-main bg-transparent border-none"
+                  disabled={isUploading}
+                  onClick={() => setVideoDialogOpen(true)}
+                >
+                  <Video className="w-5 h-5 md:!h-6 md:!w-6" />
+                  <span className="max-md:hidden">Add video</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="md:hidden">Add video</TooltipContent>
+            </Tooltip>
+          </div>
+        )}
       </div>
 
       {/* Image upload */}
@@ -270,6 +311,7 @@ export default function CommunityPortfolio({
         onChange={(e) => onUpload("image", e)}
       />
 
+      {/* Audio upload */}
       <input
         ref={audioFileInputRef}
         type="file"

@@ -24,7 +24,6 @@ import {
   FormMessage,
 } from "../shadcn/form";
 import { FormFieldInputString } from "../widgets/form/form-field-input-string";
-import { Button } from "../shadcn/button";
 import {
   Drawer,
   DrawerContent,
@@ -33,6 +32,7 @@ import {
   DrawerTitle,
 } from "../shadcn/drawer";
 import { MarkdownPreview } from "../widgets/markdown-preview";
+import { ButtonWithChildren } from "../widgets/buttons/button-with-children";
 import {
   portfolioUploadVideoSchema,
   PortfolioUploadVideoSchemaType,
@@ -75,6 +75,7 @@ export default function PortfolioUploadVideoDialog({
     await onVideoAdded(data);
     form.reset({ origin: "youtube", uri: "" });
     setIsLoading(false);
+    onOpenChange(false);
   };
 
   if (isDesktop) {
@@ -89,7 +90,11 @@ export default function PortfolioUploadVideoDialog({
           </DialogHeader>
 
           <Form {...form}>
-            <PortfolioUploadVideoForm form={form} onSubmit={onSubmit} />
+            <PortfolioUploadVideoForm
+              form={form}
+              isLoading={isLoading}
+              onSubmit={onSubmit}
+            />
           </Form>
         </DialogContent>
       </Dialog>
@@ -106,7 +111,11 @@ export default function PortfolioUploadVideoDialog({
           </DrawerDescription>
         </DrawerHeader>
         <Form {...form}>
-          <PortfolioUploadVideoForm form={form} onSubmit={onSubmit} />
+          <PortfolioUploadVideoForm
+            form={form}
+            isLoading={isLoading}
+            onSubmit={onSubmit}
+          />
         </Form>
       </DrawerContent>
     </Drawer>
@@ -115,9 +124,11 @@ export default function PortfolioUploadVideoDialog({
 
 function PortfolioUploadVideoForm({
   form,
+  isLoading = false,
   onSubmit,
 }: {
   form: UseFormReturn<PortfolioUploadVideoSchemaType>;
+  isLoading?: boolean;
   onSubmit: (data: PortfolioUploadVideoSchemaType) => Promise<void> | void;
 }) {
   const origin = form.watch("origin");
@@ -171,13 +182,14 @@ function PortfolioUploadVideoForm({
         )}
 
         <div className="w-full">
-          <Button
+          <ButtonWithChildren
             type="submit"
             className="w-full"
             disabled={form.formState.isSubmitting || !form.formState.isValid}
+            loading={isLoading}
           >
             Add video
-          </Button>
+          </ButtonWithChildren>
         </div>
       </div>
     </form>
