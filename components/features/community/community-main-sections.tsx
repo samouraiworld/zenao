@@ -26,7 +26,7 @@ import CommunityMembers from "@/app/community/[id]/[tab]/members";
 import CommunityProposals from "@/app/community/[id]/[tab]/proposals";
 import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 import CommunityPolls from "@/app/community/[id]/[tab]/votes";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { communityUserRoles } from "@/lib/queries/community";
 import SocialFeedForm from "@/components/social-feed/social-feed-form";
 
@@ -44,11 +44,12 @@ function CommunityMainSections({
   const t = useTranslations("community");
 
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userAddress),
+    communityUserRoles(communityId, userRealmId),
   );
   const isMember = useMemo(
     () => userRoles.includes("member") || userRoles.includes("administrator"),

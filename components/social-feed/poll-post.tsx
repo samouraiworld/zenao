@@ -20,7 +20,7 @@ export function PollPost({
   isOwner,
 }: {
   pollId: string;
-  userRealmId: string | null;
+  userRealmId: string;
   pollPost: PollPostView;
   canReply?: boolean;
   replyHref?: string;
@@ -31,7 +31,7 @@ export function PollPost({
   isOwner?: boolean;
   canInteract?: boolean;
 }) {
-  const { data } = useSuspenseQuery(pollInfo(pollId, userRealmId || ""));
+  const { data } = useSuspenseQuery(pollInfo(pollId, userRealmId));
 
   const combined: PollPostViewInfo = useMemo(() => {
     return {
@@ -44,7 +44,7 @@ export function PollPost({
     <PollPostCard
       pollId={pollId}
       pollPost={combined}
-      userRealmId={userRealmId || ""}
+      userRealmId={userRealmId}
       onDelete={onDelete}
       onReactionChange={onReactionChange}
       isDeleting={isDeleting}

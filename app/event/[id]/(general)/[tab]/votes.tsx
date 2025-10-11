@@ -43,7 +43,7 @@ function EventPolls({ eventId }: EventPollsProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userRealmId || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userRealmId),
   );
 
   const polls = useMemo(

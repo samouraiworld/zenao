@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { PollPostView } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { PollsList } from "@/components/social-feed/polls-list";
@@ -25,11 +25,12 @@ type CommunityPollsProps = {
 function CommunityPolls({ communityId }: CommunityPollsProps) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userAddress),
+    communityUserRoles(communityId, userRealmId),
   );
 
   const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
@@ -42,7 +43,7 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userAddress || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userRealmId),
   );
 
   const polls = useMemo(
@@ -69,7 +70,7 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
         ) : (
           <PollsList
             polls={polls}
-            userAddress={userAddress}
+            userRealmId={userRealmId}
             onReactionChange={onReactionChange}
             canInteract={
               userRoles.includes("member") ||
