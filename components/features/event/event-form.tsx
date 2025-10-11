@@ -10,7 +10,7 @@ import {
 } from "date-fns";
 import { AudioWaveformIcon, Eye, EyeOff, ImageIcon } from "lucide-react";
 import { Card } from "../../widgets/cards/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../shadcn/tabs";
+import { Tabs, TabsContent } from "../../shadcn/tabs";
 import { MarkdownPreview } from "../../widgets/markdown-preview";
 import { Switch } from "../../shadcn/switch";
 import { Label } from "../../shadcn/label";
@@ -34,6 +34,8 @@ import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea
 import { TimeZonesPopover } from "@/components/widgets/form/time-zones-popover";
 import Text from "@/components/widgets/texts/text";
 import { EventFormSchemaType } from "@/types/schemas";
+import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
+import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -177,13 +179,22 @@ export const EventForm: React.FC<EventFormProps> = ({
             }}
             wordCounter
           />
-          <Card className="rounded px-3 border-custom-input-border">
+          <Card className="rounded px-3 border-custom-input-border relative">
             <Tabs defaultValue="write" className="w-full">
-              <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
-                <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
-                <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
-              </TabsList>
-              <TabsContent value="write" tabIndex={-1}>
+              <TabsIconsList
+                tabs={getMarkdownEditorTabs({
+                  writeLabel: t("write-tab"),
+                  previewLabel: t("preview-tab"),
+                })}
+                className="absolute right-2 rounded p-0 h-fit"
+                style={{ top: "0.75rem" }}
+              />
+
+              <TabsContent
+                value="write"
+                tabIndex={-1}
+                style={{ paddingTop: "28px" }}
+              >
                 <div className="flex flex-col gap-2 w-full">
                   <FormFieldTextArea
                     ref={descriptionRef}

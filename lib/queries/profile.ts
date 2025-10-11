@@ -6,7 +6,7 @@ import {
   keyResolver,
 } from "@yornaath/batshit";
 import { MessageInitShape } from "@bufbuild/protobuf";
-import { extractGnoJSONResponse } from "../gno";
+import { addressFromRealmId, extractGnoJSONResponse } from "../gno";
 import { BatchProfileRequestSchema } from "@/app/gen/zenao/v1/zenao_pb";
 
 export type GnoProfile = {
@@ -16,8 +16,9 @@ export type GnoProfile = {
   avatarUri: string;
 };
 
-export const profileOptions = (addr: string | null | undefined) =>
-  queryOptions({
+export const profileOptions = (realmId: string | null | undefined) => {
+  const addr = addressFromRealmId(realmId);
+  return queryOptions({
     queryKey: ["profile", addr],
     queryFn: async () => {
       if (!addr || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
@@ -27,7 +28,7 @@ export const profileOptions = (addr: string | null | undefined) =>
       return profiles.fetch(addr);
     },
   });
-
+};
 export const profiles = createBatcher({
   fetcher: async (addrs: string[]) => {
     if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || addrs.length === 0) {

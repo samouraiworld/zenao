@@ -27,7 +27,7 @@ import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
 import { zenaoClient } from "@/lib/zenao-client";
 import PortfolioPreviewDialog from "@/components/dialogs/portfolio-preview-dialog";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -39,10 +39,10 @@ export default function CommunityPortfolio({
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
   const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+    userInfoOptions(getToken, userId),
   );
   const { data: userRoles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userAddress),
+    communityUserRoles(communityId, userAddress?.realmId),
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);

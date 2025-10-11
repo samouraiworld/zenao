@@ -195,6 +195,7 @@ export type EventInfoTabsSchemaType = z.infer<typeof eventInfoTabsSchema>;
 
 export const communityTabsSchema = z.union([
   z.literal("chat"),
+  z.literal("votes"),
   z.literal("events"),
   z.literal("members"),
   z.literal("portfolio"),

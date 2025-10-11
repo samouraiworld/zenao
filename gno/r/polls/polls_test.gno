@@ -8,6 +8,7 @@ import (
 	"gno.land/p/nt/seqid"
 	"gno.land/p/nt/testutils"
 	pollsv1 "gno.land/p/zenao/polls/v1"
+	"gno.land/p/zenao/realmid"
 )
 
 var (
@@ -156,12 +157,12 @@ func TestVote(t *testing.T) {
 
 	type testTable = map[string]test
 
-	pvFunc := func(addr string) bool {
-		if addr == bob.String() {
-			return true
+	pvFunc := func() (string, bool) {
+		callerID := realmid.Previous()
+		if callerID == bob.String() {
+			return callerID, true
 		}
-		return false
-
+		return callerID, false
 	}
 	_ = NewPoll(cross, "What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour)/int64(time.Second), []string{"red", "blue", "green"}, nil)
 	_ = NewPoll(cross, "What is your favorite color?", pollsv1.POLL_KIND_MULTIPLE_CHOICE, int64(time.Hour)/int64(time.Second), []string{"red", "blue", "green"}, pvFunc)
@@ -347,7 +348,7 @@ func TestGetInfo(t *testing.T) {
 					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
 					Duration:  int64(time.Hour) / int64(time.Second),
 					CreatedAt: poll.CreatedAt,
-					CreatedBy: poll.CreatedBy.String(),
+					CreatedBy: poll.CreatedBy,
 				},
 			},
 		},
@@ -367,7 +368,7 @@ func TestGetInfo(t *testing.T) {
 					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
 					Duration:  int64(time.Hour) / int64(time.Second),
 					CreatedAt: poll.CreatedAt,
-					CreatedBy: poll.CreatedBy.String(),
+					CreatedBy: poll.CreatedBy,
 				},
 			},
 		},
@@ -387,7 +388,7 @@ func TestGetInfo(t *testing.T) {
 					Kind:      pollsv1.POLL_KIND_MULTIPLE_CHOICE,
 					Duration:  int64(time.Hour) / int64(time.Second),
 					CreatedAt: emptyPoll.CreatedAt,
-					CreatedBy: emptyPoll.CreatedBy.String(),
+					CreatedBy: emptyPoll.CreatedBy,
 				},
 			},
 		},
