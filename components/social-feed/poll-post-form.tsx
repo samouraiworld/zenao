@@ -24,6 +24,7 @@ import { useCreatePoll } from "@/lib/mutations/social-feed";
 import { userAddressOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
+import { OrgType } from "@/lib/organization";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -34,7 +35,7 @@ export function PollPostForm({
   setFeedInputMode,
   form,
 }: {
-  orgType: string;
+  orgType: OrgType;
   orgId: string;
   feedInputMode: FeedInputMode;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;

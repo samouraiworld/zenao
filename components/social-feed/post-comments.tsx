@@ -18,6 +18,7 @@ import { eventUserRoles } from "@/lib/queries/event-users";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import { communityUserRoles } from "@/lib/queries/community";
+import { OrgType } from "@/lib/organization";
 
 function PostComment({
   orgType,
@@ -29,7 +30,7 @@ function PostComment({
   isReacting,
   isDeleting,
 }: {
-  orgType: string;
+  orgType: OrgType;
   orgId: string;
   parentId: string;
   comment: StandardPostView;
@@ -90,7 +91,7 @@ export function PostComments({
   parentId,
   feedId,
 }: {
-  orgType: string;
+  orgType: OrgType;
   orgId: string;
   parentId: string;
   feedId: string;

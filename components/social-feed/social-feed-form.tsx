@@ -12,13 +12,14 @@ import { captureException } from "@/lib/report";
 import { userAddressOptions } from "@/lib/queries/user";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/hooks/use-toast";
+import { OrgType } from "@/lib/organization";
 
 const SocialFeedForm = ({
   orgType,
   orgId,
   form,
 }: {
-  orgType: string;
+  orgType: OrgType;
   orgId: string;
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) => {
