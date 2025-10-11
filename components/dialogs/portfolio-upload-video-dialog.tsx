@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ export default function PortfolioUploadVideoDialog({
   onOpenChange,
   onVideoAdded,
 }: PortfolioUploadVideoDialogProps) {
+  const t = useTranslations("community-portfolio");
   const [isLoading, setIsLoading] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -83,9 +85,9 @@ export default function PortfolioUploadVideoDialog({
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-lg p-6">
           <DialogHeader>
-            <DialogTitle>Add video</DialogTitle>
+            <DialogTitle>{t("add-video")}</DialogTitle>
             <DialogDescription className="hidden">
-              Add a video to your portfolio from YouTube or Vimeo.
+              {t("add-video-description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -105,9 +107,9 @@ export default function PortfolioUploadVideoDialog({
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent className="px-4 pb-6">
         <DrawerHeader className="px-0 text-left">
-          <DrawerTitle>Add video</DrawerTitle>
+          <DrawerTitle>{t("add-video")}</DrawerTitle>
           <DrawerDescription className="hidden">
-            Add a video to your portfolio from YouTube or Vimeo.
+            {t("add-video-description")}
           </DrawerDescription>
         </DrawerHeader>
         <Form {...form}>
@@ -131,6 +133,8 @@ function PortfolioUploadVideoForm({
   isLoading?: boolean;
   onSubmit: (data: PortfolioUploadVideoSchemaType) => Promise<void> | void;
 }) {
+  const t = useTranslations("community-portfolio");
+
   const origin = form.watch("origin");
   const uri = form.watch("uri");
 
@@ -142,7 +146,7 @@ function PortfolioUploadVideoForm({
           name="origin"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Origin of the video</FormLabel>
+              <FormLabel>{t("video-origin-label")}</FormLabel>
               <FormControl>
                 <Select
                   onValueChange={(v) => {
@@ -153,7 +157,7 @@ function PortfolioUploadVideoForm({
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue
-                      placeholder="Video source"
+                      placeholder={t("video-origin-placeholder")}
                       defaultValue={field.value}
                     />
                   </SelectTrigger>
@@ -188,7 +192,7 @@ function PortfolioUploadVideoForm({
             disabled={form.formState.isSubmitting || !form.formState.isValid}
             loading={isLoading}
           >
-            Add video
+            {t("add-video")}
           </ButtonWithChildren>
         </div>
       </div>

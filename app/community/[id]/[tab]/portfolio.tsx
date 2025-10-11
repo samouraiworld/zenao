@@ -262,11 +262,11 @@ export default function CommunityPortfolio({
                   onClick={() => imageFileInputRef.current?.click()}
                 >
                   <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
-                  <span className="max-md:hidden">Upload image</span>
+                  <span className="max-md:hidden">{t("upload-image")}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="md:hidden">
-                Upload image
+                {t("upload-image")}
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -278,11 +278,11 @@ export default function CommunityPortfolio({
                   onClick={() => audioFileInputRef.current?.click()}
                 >
                   <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
-                  <span className="max-md:hidden">Upload audio</span>
+                  <span className="max-md:hidden">{t("upload-audio")}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="md:hidden">
-                Upload audio
+                {t("upload-audio")}
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -294,10 +294,12 @@ export default function CommunityPortfolio({
                   onClick={() => setVideoDialogOpen(true)}
                 >
                   <Video className="w-5 h-5 md:!h-6 md:!w-6" />
-                  <span className="max-md:hidden">Add video</span>
+                  <span className="max-md:hidden">{t("add-video")}</span>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent className="md:hidden">Add video</TooltipContent>
+              <TooltipContent className="md:hidden">
+                {t("add-video")}
+              </TooltipContent>
             </Tooltip>
           </div>
         )}
@@ -359,7 +361,7 @@ export default function CommunityPortfolio({
                         <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Upload audio</TooltipContent>
+                    <TooltipContent>{t("upload-audio")}</TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -372,7 +374,7 @@ export default function CommunityPortfolio({
                         <Video className="w-5 h-5 md:!h-6 md:!w-6" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Add video</TooltipContent>
+                    <TooltipContent>{t("add-video")}</TooltipContent>
                   </Tooltip>
                 </div>
               </div>

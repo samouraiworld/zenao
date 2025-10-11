@@ -1,5 +1,6 @@
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,7 @@ export default function PortfolioPreviewDialog({
   isAdmin = false,
   isDeleting = false,
 }: PortfolioPreviewDialogProps) {
+  const t = useTranslations("community-portfolio");
   const [confirmDialogOpen, setConfirmDialogOpen] = React.useState(false);
 
   const onConfirmDelete = async () => {
@@ -45,10 +47,10 @@ export default function PortfolioPreviewDialog({
   return (
     <>
       <ConfirmationDialog
-        title="Are your sure you want to delete this image?"
-        description="This action cannot be undone."
-        confirmText="Yes, delete it"
-        cancelText="Cancel"
+        title={t("confirm-delete-title")}
+        description={t("confirm-delete-desc")}
+        confirmText={t("confirm-delete-confirm")}
+        cancelText={t("confirm-delete-cancel")}
         open={confirmDialogOpen}
         isPending={isDeleting}
         onOpenChange={setConfirmDialogOpen}
@@ -110,7 +112,7 @@ export default function PortfolioPreviewDialog({
                 onClick={() => setConfirmDialogOpen(true)}
                 className="text-main px-0"
               >
-                Delete
+                {t("delete")}
               </Button>
             </div>
           )}
