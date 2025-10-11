@@ -30,7 +30,7 @@ export default function TabsIconsList({
         if (tab.tooltip) {
           return (
             <Tooltip key={tab.id}>
-              <TooltipTrigger type="button">
+              <TooltipTrigger type="button" asChild>
                 <TabsTrigger
                   value={tab.id}
                   onClick={() => onValueChange?.(tab.id)}

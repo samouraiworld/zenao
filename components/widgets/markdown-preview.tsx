@@ -10,6 +10,7 @@ import { Web3Image } from "./images/web3-image";
 import { Web3Audio } from "./audio/web3-audio";
 import { cn } from "@/lib/tailwind";
 import remarkAudioDirective from "@/lib/remark-audio-directive-plugin";
+import remarkVimeoEmbed from "@/lib/remark-vimeo-plugin";
 
 export function MarkdownPreview({
   markdownString,
@@ -36,6 +37,8 @@ export function MarkdownPreview({
         [remarkGfm, { singleTilde: false }],
         // support embed player for youtube videos
         // to support directives like `::audio`
+        // Vimeo and other oembed providers
+        remarkVimeoEmbed,
         remarkDirective,
         remarkAudioDirective,
         remarkYoutube,

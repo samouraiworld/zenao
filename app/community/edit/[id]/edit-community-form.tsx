@@ -53,6 +53,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
     defaultValue: {
       description: communityData.description || "",
       shortDescription: "",
+      portfolio: [],
     },
     contentFieldName: "description",
   });
@@ -84,6 +85,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
         Omit<CommunityDetails, "description">
       >(values.description, {
         shortDescription: values.shortDescription,
+        portfolio: communityDetails.portfolio,
       });
 
       await editCommunity({
