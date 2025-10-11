@@ -68,7 +68,9 @@ export default function PortfolioPreviewDialog({
                 <MarkdownPreview
                   className="w-full"
                   markdownString={
-                    item.type === "video" ? item.uri : `::audio[${item.uri}]`
+                    item.type === "video"
+                      ? item.uri
+                      : `::audio[${item.name}]{url="${item.uri}"}`
                   }
                 />
               </div>

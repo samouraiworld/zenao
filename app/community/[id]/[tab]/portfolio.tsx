@@ -395,8 +395,8 @@ export default function CommunityPortfolio({
         {localPortfolio.map((item, index) => (
           <div
             className={cn(
-              "w-full",
-              localPortfolio.length < 3 && "max-w-[400px]",
+              "w-full max-w-full",
+              localPortfolio.length < 2 && "max-w-[400px]",
             )}
             key={index}
           >
