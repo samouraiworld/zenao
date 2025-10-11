@@ -22,6 +22,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 
 	"github.com/samouraiworld/zenao/backend/czauth"
+	"github.com/samouraiworld/zenao/backend/gzchain"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	"github.com/samouraiworld/zenao/backend/zenao/v1/zenaov1connect"
 )
@@ -41,12 +42,11 @@ func main() {
 		newFakegenCmd(),
 		newMailCmd(),
 		newPromoteUserCmd(),
-		newRealmsrcCmd(),
 		newE2EInfraCmd(),
 		newGenticketCmd(),
-		newGenPdfTicketCmd(),
-		newGenTxsCmd(),
 		newConvertEvtToComCmd(),
+		gzchain.NewRealmsrcCmd(),
+		gzchain.NewGenTxsCmd(), // TODO: remove when SOT transition is done
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
@@ -142,7 +142,7 @@ func execStart(ctx context.Context) (retErr error) {
 		return err
 	}
 
-	chain, err := setupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, conf.gasSecurityRate, logger)
+	chain, err := gzchain.SetupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, conf.gasSecurityRate, logger)
 	if err != nil {
 		return err
 	}

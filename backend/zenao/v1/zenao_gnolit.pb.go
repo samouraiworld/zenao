@@ -805,9 +805,6 @@ func (e *EditPostResponse) GnoLiteral(typePrefix string, linePrefix string) stri
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("EditPostResponse{\n")
-	if e.PostId != "" {
-		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, e.PostId)
-	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -867,6 +864,9 @@ func (c *CheckinRequest) GnoLiteral(typePrefix string, linePrefix string) string
 	}
 	if c.Signature != "" {
 		fmt.Fprintf(buf, "%s\tSignature: %q,\n", linePrefix, c.Signature)
+	}
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")

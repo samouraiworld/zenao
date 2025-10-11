@@ -67,16 +67,18 @@ type AuthUser struct {
 	Banned bool
 }
 
+// TODO: what we do with this
 type User struct {
 	CreatedAt   time.Time
 	ID          string
 	AuthID      string
-	DisplayName string
-	Bio         string
-	AvatarURI   string
+	DisplayName string //TODO: to remove
+	Bio         string //TODO: to remove
+	AvatarURI   string //TODO: to remove
 	Plan        Plan
 }
 
+// TODO: TO DELETE
 type Event struct {
 	CreatedAt         time.Time
 	DeletedAt         time.Time
@@ -95,6 +97,7 @@ type Event struct {
 	Discoverable      bool
 }
 
+// TODO: TO DELETE
 type Community struct {
 	CreatedAt   time.Time
 	ID          string
@@ -105,6 +108,7 @@ type Community struct {
 	CreatorID   string
 }
 
+// TODO: TO DELETE
 type EntityRole struct {
 	CreatedAt  time.Time
 	DeletedAt  time.Time
@@ -115,6 +119,7 @@ type EntityRole struct {
 	Role       string // one of: organizer, gatekeeper, participant, administrator, member,
 }
 
+// TODO: TO DELETE
 type Feed struct {
 	CreatedAt time.Time
 	ID        string
@@ -123,6 +128,7 @@ type Feed struct {
 	OrgID     string
 }
 
+// TODO: TO DELETE
 type Post struct {
 	CreatedAt time.Time
 	ID        string
@@ -132,6 +138,7 @@ type Post struct {
 	Reactions []*Reaction
 }
 
+// TODO: TO DELETE
 type Poll struct {
 	CreatedAt time.Time
 	ID        string
@@ -143,6 +150,7 @@ type Poll struct {
 	Votes     []*Vote
 }
 
+// TODO: TO DELETE
 type Vote struct {
 	CreatedAt time.Time
 	ID        string
@@ -150,6 +158,7 @@ type Vote struct {
 	Option    string
 }
 
+// TODO: TO DELETE
 type Reaction struct {
 	CreatedAt time.Time
 	ID        string
@@ -158,6 +167,7 @@ type Reaction struct {
 	Icon      string
 }
 
+// TODO: TO DELETE
 type SoldTicket struct {
 	DeletedAt time.Time
 	CreatedAt time.Time
@@ -168,6 +178,7 @@ type SoldTicket struct {
 	Checkin   *Checkin
 }
 
+// TODO: TO DELETE
 type Checkin struct {
 	At           time.Time
 	GatekeeperID string
@@ -184,6 +195,7 @@ func init() {
 	}
 }
 
+// TODO: DELETE THIS
 func (e *Event) Timezone() (*time.Location, error) {
 	switch val := e.Location.GetAddress().(type) {
 	case *zenaov1.EventLocation_Virtual:
@@ -201,6 +213,22 @@ func (e *Event) Timezone() (*time.Location, error) {
 	}
 }
 
+func EventTimezone(location *zenaov1.EventLocation) (*time.Location, error) {
+	switch val := location.GetAddress().(type) {
+	case *zenaov1.EventLocation_Virtual:
+		return time.UTC, nil
+
+	case *zenaov1.EventLocation_Custom:
+		return time.LoadLocation(val.Custom.GetTimezone())
+
+	case *zenaov1.EventLocation_Geo:
+		name := tzFinder.GetTimezoneName(float64(val.Geo.Lng), float64(val.Geo.Lat))
+		return time.LoadLocation(name)
+	default:
+		return nil, errors.New("unknown location kind")
+	}
+}
+
 // authID is the user id coming from the auth system.
 // userID is an internal zenao user id.
 type DB interface {
@@ -212,7 +240,6 @@ type DB interface {
 	GetUser(authID string) (*User, error)
 	// XXX: add EnsureUsersExist
 
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
 	GetAllUsers() ([]*User, error)
@@ -273,32 +300,53 @@ type DB interface {
 type Chain interface {
 	WithContext(ctx context.Context) Chain
 
+	// Off-chain operations
+	UserRealmID(userID string) string
+	EventRealmID(eventID string) string
+	CommunityRealmID(communityID string) string
+	EntityRealmID(entityType string, entityID string) (string, error)
+
+	// Read operations (Query)
+	EntityRoles(entityRealmID string, orgRealmID string, orgType string) ([]string, error)
+
+	// TODO: what happens if event not found ? should i just return empty cmt & empty err or err handle it ?
+	GetEvent(eventRealmID string) (*zenaov1.EventInfo, error)
+	GetEventParticipants(eventRealmID string) ([]*User, error)
+	GetEventGatekeepers(eventRealmID string) ([]*User, error)
+	GetEventUserTicketPK(eventRealmID string, userRealmID string) (string, error)
+	GetEventCommunity(eventRealmID string) (*zenaov1.CommunityInfo, error)
+
+	// TODO: what happens if community not found ? should i just return empty cmt & empty err or err handle it ?
+	GetCommunity(communityRealmID string) (*zenaov1.CommunityInfo, error)
+	GetCommunityMembers(communityRealmID string) ([]*User, error)
+	GetCommunityAdministrators(communityRealmID string) ([]*User, error)
+
+	// Write operations (Transactions)
 	FillAdminProfile()
 	CreateUser(user *User) error
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
-	UserRealmID(userID string) string
+	EditUser(userRealmID string, req *zenaov1.EditUserRequest) error
 
-	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
-	CancelEvent(eventID string, callerID string) error
-	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
-	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
-	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
-	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
+	CreateEvent(eventRealmID string, organizersRealmIDs []string, gatekeepersRealmIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
+	CancelEvent(eventRealmID string, callerRealmID string) error
+	EditEvent(eventRealmID string, callerRealmID string, organizersRealmIDs []string, gatekeepersRealmIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
+	Participate(eventRealmID string, callerRealmID string, participantRealmID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
+	CancelParticipation(eventRealmID string, callerRealmID string, participantRealmID string, ticketPubkey string) error
+	Checkin(eventRealmID string, gatekeeperRealmID string, req *zenaov1.CheckinRequest) error
 
-	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
-	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
-	AddEventToCommunity(callerID string, communityID string, eventID string) error
-	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
-	AddMemberToCommunity(callerID string, communityID string, userID string) error
-	AddMembersToCommunity(callerID string, communityID string, userIDs []string) error
-	RemoveMemberFromCommunity(callerID string, communityID string, userID string) error
+	CreateCommunity(communityRealmID string, administratorsRealmIDs []string, membersRealmIDs []string, eventsRealmIDs []string, req *zenaov1.CreateCommunityRequest) error
+	EditCommunity(communityRealmID string, callerRealmID string, administratorsRealmIDs []string, req *zenaov1.EditCommunityRequest) error
+	AddEventToCommunity(callerRealmID string, communityRealmID string, eventRealmID string) error
+	RemoveEventFromCommunity(callerRealmID string, communityRealmID string, eventRealmID string) error
+	AddMemberToCommunity(callerRealmID string, communityRealmID string, userRealmID string) error
+	AddMembersToCommunity(callerRealmID string, communityRealmID string, userRealmIDs []string) error
+	RemoveMemberFromCommunity(callerRealmID string, communityRealmID string, userRealmID string) error
 
-	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
-	DeletePost(userID string, postID string) error
-	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+	CreatePost(userRealmID string, orgRealmID string, post *feedsv1.Post) (postID string, err error)
+	DeletePost(userRealmID string, postID string) error
+	EditPost(userRealmID string, postID string, post *feedsv1.Post) error
+	ReactPost(userRealmID string, req *zenaov1.ReactPostRequest) error
+	CreatePoll(userRealmID string, orgRealmID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
+	VotePoll(userRealmID string, req *zenaov1.VotePollRequest) error
 }
 
 type Auth interface {

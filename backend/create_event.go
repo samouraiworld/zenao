@@ -6,11 +6,14 @@ import (
 	"fmt"
 	"net/url"
 	"slices"
+	"strings"
 	"time"
 	_ "time/tzdata"
 
 	"connectrpc.com/connect"
+	"github.com/google/uuid"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	"github.com/samouraiworld/zenao/backend/webhook"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -84,50 +87,58 @@ func (s *ZenaoServer) CreateEvent(
 		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
 	}
 
-	evt := (*zeni.Event)(nil)
-	cmt := (*zeni.Community)(nil)
-	targets := []*zeni.User{}
-	if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
-		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
-			return err
-		}
+	// TODO: find a way to have better ids ?
+	uuid := uuid.New().String()
+	evtID := strings.ReplaceAll(uuid, "-", "_")
+	evtRealmID := s.Chain.EventRealmID(evtID)
 
-		if _, err = db.CreateFeed(zeni.EntityTypeEvent, evt.ID, "main"); err != nil {
-			return err
-		}
-
-		if req.Msg.CommunityId != "" {
-			cmt, err = db.GetCommunity(req.Msg.CommunityId)
-			if err != nil {
-				return err
-			}
-			roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
-			if err != nil {
-				return err
-			}
-			if !slices.Contains(roles, zeni.RoleAdministrator) {
-				return errors.New("user is not an admin of the community and cannot add event to it")
-			}
-			err = db.AddEventToCommunity(evt.ID, cmt.ID)
-			if err != nil {
-				return err
-			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	}); err != nil {
+	passwordHash, err := zeni.NewPasswordHash(req.Msg.Password)
+	if err != nil {
+		return nil, err
+	}
+	privacy, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
+	if err != nil {
 		return nil, err
 	}
 
-	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evt)
+	// TODO: should we do it in one tx on-chain ?
+	if err := s.Chain.WithContext(ctx).CreateEvent(evtRealmID, mapsl.Map(organizersIDs, s.Chain.UserRealmID), mapsl.Map(gatekeepersIDs, s.Chain.UserRealmID), req.Msg, privacy); err != nil {
+		return nil, err
+	}
+
+	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Msg.CommunityId != "" {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, s.Chain.CommunityRealmID(req.Msg.CommunityId), evtRealmID); err != nil {
+			return nil, err
+		}
+	}
+
+	var cmt *zenaov1.CommunityInfo
+	var members []*zeni.User
+
+	// TODO: test event with community creation
+	if req.Msg.CommunityId != "" {
+		cmt, err = s.Chain.WithContext(ctx).GetCommunity(s.Chain.CommunityRealmID(req.Msg.CommunityId))
+		if err != nil {
+			return nil, err
+		}
+		members, err = s.Chain.WithContext(ctx).GetCommunityMembers(s.Chain.CommunityRealmID(req.Msg.CommunityId))
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evtID, evt)
 
 	if s.MailClient != nil {
-		htmlStr, text, err := ticketsConfirmationMailContent(evt, "Event created!")
+		htmlStr, text, err := ticketsConfirmationMailContent(evtID, evt, "Event created!")
 		if err != nil {
-			s.Logger.Error("generate-event-email-content", zap.Error(err), zap.String("event-id", evt.ID))
+			s.Logger.Error("generate-event-email-content", zap.Error(err), zap.String("event-id", evtID))
 		} else {
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
@@ -137,35 +148,35 @@ func (s *ZenaoServer) CreateEvent(
 				Html:    htmlStr,
 				Text:    text,
 			}); err != nil {
-				s.Logger.Error("send-event-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID))
+				s.Logger.Error("send-event-confirmation-email", zap.Error(err), zap.String("event-id", evtID))
 			}
 		}
 	}
 
-	if cmt != nil && len(targets) > 0 && req.Msg.CommunityEmail && s.MailClient != nil {
+	if cmt != nil && len(members) > 0 && req.Msg.CommunityEmail && s.MailClient != nil {
 		var authIDs []string
-		for _, target := range targets {
-			authIDs = append(authIDs, target.AuthID)
+		for _, member := range members {
+			authIDs = append(authIDs, member.AuthID)
 		}
-		authTargets, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
+		authMembers, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 		if err != nil {
 			return nil, err
 		}
 
-		htmlStr, text, err := communityNewEventMailContent(evt, cmt)
+		htmlStr, text, err := communityNewEventMailContent(evtID, evt, req.Msg.CommunityId, cmt)
 		if err != nil {
 			return nil, err
 		}
 
 		var requests []*resend.SendEmailRequest
-		for _, authTarget := range authTargets {
-			if authTarget.Email == "" {
-				s.Logger.Error("create-event", zap.String("target-id", authTarget.ID), zap.String("target-email", authTarget.Email), zap.Error(errors.New("target has no email")))
+		for _, authMember := range authMembers {
+			if authMember.Email == "" {
+				s.Logger.Error("create-event", zap.String("target-id", authMember.ID), zap.String("target-email", authMember.Email), zap.Error(errors.New("target has no email")))
 				continue
 			}
 			requests = append(requests, &resend.SendEmailRequest{
 				From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
-				To:      []string{authTarget.Email},
+				To:      []string{authMember.Email},
 				Subject: "New event by " + cmt.DisplayName + "!",
 				Html:    htmlStr,
 				Text:    text,
@@ -184,25 +195,8 @@ func (s *ZenaoServer) CreateEvent(
 		}
 	}
 
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		s.Logger.Error("create-event", zap.Error(err))
-		return nil, err
-	}
-
-	if req.Msg.CommunityId != "" {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
-			s.Logger.Error("add-event-to-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
-			return nil, err
-		}
-	}
-
 	return connect.NewResponse(&zenaov1.CreateEventResponse{
-		Id: evt.ID,
+		Id: evtID,
 	}), nil
 }
 

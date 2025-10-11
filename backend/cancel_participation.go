@@ -3,11 +3,9 @@ package main
 import (
 	"context"
 	"errors"
-	"time"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -28,33 +26,19 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 
 	s.Logger.Info("cancel-participation", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
 
-	evt := (*zeni.Event)(nil)
-	ticket := (*zeni.SoldTicket)(nil)
-	if err := s.DB.TxWithSpan(ctx, "db.CancelParticipation", func(db zeni.DB) error {
-		evt, err = db.GetEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if time.Now().After(evt.StartDate) {
-			return errors.New("event already started")
-		}
-		ticket, err = db.GetEventUserTicket(req.Msg.EventId, zUser.ID)
-		if err != nil {
-			return err
-		}
-		if ticket.Checkin != nil {
-			return errors.New("user already checked-in")
-		}
-		err = db.CancelParticipation(evt.ID, zUser.ID)
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
+	evtRealmID := s.Chain.EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
+	if err != nil {
+		return nil, err
+	}
+	ticketPK, err := s.Chain.WithContext(ctx).GetEventUserTicketPK(evtRealmID, userRealmID)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
+	// TODO: handle creatorID since it not an id anymore, either retrieve ID from address or change the chain method
+	if err := s.Chain.WithContext(ctx).CancelParticipation(evtRealmID, evt.Organizers[0], userRealmID, ticketPK); err != nil {
 		return nil, err
 	}
 

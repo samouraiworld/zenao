@@ -261,7 +261,7 @@ message EditPostRequest {
   repeated string tags = 3;
 }
 
-message EditPostResponse { string post_id = 1; }
+message EditPostResponse {}
 
 message GetEventTicketsRequest { string event_id = 1; }
 
@@ -275,6 +275,7 @@ message TicketInfo {
 message CheckinRequest {
   string ticket_pubkey = 1;
   string signature = 2;
+  string event_id = 3;
 }
 
 message CheckinResponse {}

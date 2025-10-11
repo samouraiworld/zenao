@@ -184,12 +184,14 @@ export const useEventCheckIn = () => {
   const queryClient = getQueryClient();
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
+      eventId,
       signature,
       ticketPubkey,
       token,
     }: EventCheckInRequest) => {
       await zenaoClient.checkin(
         {
+          eventId,
           signature,
           ticketPubkey,
         },

@@ -1,4 +1,4 @@
-package main
+package gzchain
 
 import (
 	"context"
@@ -30,7 +30,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func newGenTxsCmd() *commands.Command {
+// TODO: REMOVE WHEN SOT TRANSITION IS DONE
+
+func NewGenTxsCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
 			Name:       "gentxs",
@@ -559,8 +561,8 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, caller cryptoGno.Addre
 }
 
 func createReactionTx(chain *gnoZenaoChain, authorID string, caller cryptoGno.Address, orgType string, orgID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
-	userPkgPath := chain.userRealmPkgPath(authorID)
-	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, orgType, orgID, reaction.Icon)
+	userRealmID := chain.UserRealmID(authorID)
+	body := genReactPostMsgRunBody(userRealmID, reaction.PostID, reaction.Icon)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
@@ -1084,7 +1086,7 @@ func createCommunityAddEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Address
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "AddEvent",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.eventRealmPkgPath(eventID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.EventRealmID(eventID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1108,7 +1110,7 @@ func createCommunityRemoveEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Addr
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "RemoveEvent",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.eventRealmPkgPath(eventID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.EventRealmID(eventID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1259,7 +1261,7 @@ func createCommunityRemoveMemberRegTx(chain *gnoZenaoChain, community *zeni.Comm
 
 func createCommunityRemoveEventTx(chain *gnoZenaoChain, caller cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
-	eventAddr := chain.eventRealmPkgPath(eventID)
+	eventAddr := chain.EventRealmID(eventID)
 	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
 	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr)
 

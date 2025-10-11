@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
@@ -43,21 +44,6 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		}
 	}
 
-	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
-	if err != nil {
-		return nil, err
-	}
-	if len(roles) == 0 {
-		return nil, errors.New("user is not a member of the event")
-	}
-
-	if req.Msg.ParentId != "" {
-		_, err := s.DB.WithContext(ctx).GetPostByID(req.Msg.ParentId)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	post := &feedsv1.Post{
 		Loc:       nil,
 		Tags:      req.Msg.Tags,
@@ -69,26 +55,14 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		},
 	}
 
-	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
+	entityRealmID, err := s.Chain.WithContext(ctx).EntityRealmID(req.Msg.OrgType, req.Msg.OrgId)
+	if err != nil {
+		return nil, fmt.Errorf("invalid org: %w", err)
+	}
+	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, entityRealmID, post)
 	if err != nil {
 		return nil, err
 	}
 
-	zpost := (*zeni.Post)(nil)
-	if err := s.DB.TxWithSpan(ctx, "db.CreatePost", func(db zeni.DB) error {
-		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
-		if err != nil {
-			return err
-		}
-
-		if zpost, err = db.CreatePost(postID, feed.ID, zUser.ID, post); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	return connect.NewResponse(&zenaov1.CreatePostResponse{PostId: zpost.ID}), nil
+	return connect.NewResponse(&zenaov1.CreatePostResponse{PostId: postID}), nil
 }
