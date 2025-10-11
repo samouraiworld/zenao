@@ -23,7 +23,7 @@ export function PostsList({
   isReacting,
   isDeleting,
 }: {
-  userRealmId: string;
+  userRealmId: string | null;
   postInEdition: string | null;
   onEditModeChange?: (
     postId: string,

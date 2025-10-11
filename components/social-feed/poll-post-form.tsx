@@ -104,7 +104,7 @@ export function PollPostForm({
         options: values.options.map((option) => option.text),
         kind: pollKind,
         token: await getToken(),
-        userRealmId,
+        userRealmId: userRealmId || "",
       });
 
       form.resetField("question", {
