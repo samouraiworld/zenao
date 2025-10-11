@@ -9,7 +9,7 @@ import {
 import EmptyList from "@/components/widgets/lists/empty-list";
 import Heading from "@/components/widgets/texts/heading";
 import { communityUsersWithRoles } from "@/lib/queries/community";
-import { eventsPkgPathsByAddrs } from "@/lib/queries/events-list";
+
 import { eventIdFromPkgPath, eventOptions } from "@/lib/queries/event";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
@@ -22,16 +22,13 @@ type CommunityEventsProps = {
 
 function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
   const t = useTranslations();
-  const { data: eventsAddresses } = useSuspenseQuery(
+  const { data: eventsRoles } = useSuspenseQuery(
     communityUsersWithRoles(communityId, ["event"]),
-  );
-  const { data: eventsPkgPaths } = useSuspenseQuery(
-    eventsPkgPathsByAddrs(eventsAddresses.map((e) => e.address)),
   );
 
   const events = useSuspenseQueries({
-    queries: eventsPkgPaths.map((pkgPath) =>
-      eventOptions(eventIdFromPkgPath(pkgPath)),
+    queries: eventsRoles.map(
+      (role) => eventOptions(eventIdFromPkgPath(role.address)), // XXX: rename address -> realm id
     ),
     combine: (results) =>
       results
@@ -39,7 +36,10 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
           (elem): elem is UseSuspenseQueryResult<EventInfo, Error> =>
             elem.isSuccess && !!elem.data,
         )
-        .map((elem, idx) => ({ ...elem.data, pkgPath: eventsPkgPaths[idx] })),
+        .map((elem, idx) => ({
+          ...elem.data,
+          pkgPath: eventsRoles[idx].address,
+        })),
   });
 
   return (

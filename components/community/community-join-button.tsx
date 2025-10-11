@@ -9,7 +9,7 @@ import { useJoinCommunity } from "@/lib/mutations/community-join";
 import { communityUserRoles } from "@/lib/queries/community";
 import { captureException } from "@/lib/report";
 import { useToast } from "@/hooks/use-toast";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 
 type Props = {
   communityId: string;
@@ -18,12 +18,13 @@ type Props = {
 export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   const { getToken, userId, isSignedIn } = useAuth();
   const { toast } = useToast();
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
 
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, address),
+    communityUserRoles(communityId, userRealmId),
   );
 
   const { mutateAsync: joinCommunity, isPending } = useJoinCommunity();
@@ -38,7 +39,7 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
       await joinCommunity({
         communityId,
         token,
-        userAddress: address,
+        userRealmId,
       });
 
       toast({

@@ -31,7 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import useMarkdownUpload from "@/hooks/use-markdown-upload";
 import { captureException } from "@/lib/report";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 
 type FeedPostFormProps = {
   orgId: string;
@@ -57,9 +57,10 @@ const FeedPostForm = ({
 }: FeedPostFormProps) => {
   const { createStandardPost, isPending } = useCreateStandardPost();
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { toast } = useToast();
   const t = useTranslations("event-feed.standard-post-form");
   const form = useForm<FeedPostFormSchemaType>({
@@ -139,7 +140,7 @@ const FeedPostForm = ({
         content: values.content,
         parentId: values.parentPostId?.toString() ?? "",
         token,
-        userAddress: userAddress ?? "",
+        userRealmId: userRealmId ?? "",
         tags: [],
       });
 

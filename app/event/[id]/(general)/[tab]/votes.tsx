@@ -8,7 +8,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { PollPostView } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { PollsList } from "@/components/social-feed/polls-list";
@@ -16,7 +16,6 @@ import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-import { derivePkgAddr } from "@/lib/gno";
 
 type EventPollsProps = {
   eventId: string;
@@ -25,16 +24,17 @@ type EventPollsProps = {
 function EventPolls({ eventId }: EventPollsProps) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
 
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
+    eventUserRoles(eventId, userRealmId),
   );
 
   const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const {
     data: pollsPages,
@@ -43,7 +43,7 @@ function EventPolls({ eventId }: EventPollsProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userAddress || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userRealmId || ""),
   );
 
   const polls = useMemo(
@@ -70,7 +70,7 @@ function EventPolls({ eventId }: EventPollsProps) {
         ) : (
           <PollsList
             polls={polls}
-            userAddress={userAddress}
+            userRealmId={userRealmId}
             onReactionChange={onReactionChange}
             canInteract={
               roles.includes("organizer") || roles.includes("participant")

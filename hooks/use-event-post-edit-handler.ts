@@ -1,15 +1,16 @@
 import { useAuth } from "@clerk/clerk-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useEditStandardPost } from "@/lib/mutations/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
 
 function useEventPostEditHandler(feedId: string) {
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { editPost, isPending: isEditing } = useEditStandardPost();
 
   const onEditStandardPost = async (
@@ -31,7 +32,7 @@ function useEventPostEditHandler(feedId: string) {
         tags: [],
         postId,
         token,
-        userAddress: userAddress || "",
+        userRealmId: userRealmId || "",
       });
     } catch (error) {
       captureException(error);

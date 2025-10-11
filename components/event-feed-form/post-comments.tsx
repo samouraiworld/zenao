@@ -12,12 +12,11 @@ import {
   DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
   feedPostsChildren,
 } from "@/lib/queries/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { isStandardPost, StandardPostView } from "@/lib/social-feed";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
 import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-import { derivePkgAddr } from "@/lib/gno";
 
 function PostComment({
   eventId,
@@ -40,15 +39,16 @@ function PostComment({
   isDeleting: boolean;
 }) {
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(comment.post.author),
   );
   const [editMode, setEditMode] = useState(false);
 
-  const { data: _ } = useSuspenseQuery(eventUserRoles(eventId, userAddress));
+  const { data: _ } = useSuspenseQuery(eventUserRoles(eventId, userRealmId));
 
   const standardPost = comment.post.post.value;
 
@@ -65,7 +65,7 @@ function PostComment({
       }
       isReacting={isReacting}
       canInteract
-      isOwner={userAddress === comment.post.author}
+      isOwner={userRealmId === comment.post.author}
       onDelete={async (parentId) =>
         await onDelete(comment.post.localPostId.toString(10), parentId)
       }
@@ -84,9 +84,10 @@ export function PostComments({
   parentId: string;
 }) {
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const {
     data: commentsPages,
     isFetchingNextPage,
@@ -98,7 +99,7 @@ export function PostComments({
       parentId,
       DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
       "",
-      userAddress || "",
+      userRealmId,
     ),
   );
   const comments = useMemo(() => {
@@ -108,7 +109,7 @@ export function PostComments({
   }, [commentsPages]);
 
   const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${derivePkgAddr(pkgPath)}:main`;
+  const feedId = `${pkgPath}:main`;
 
   const { onReactionChange, isReacting } = useEventPostReactionHandler(
     feedId,

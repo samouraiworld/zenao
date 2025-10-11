@@ -11,14 +11,14 @@ export const eventGetUserRolesSchema = z.array(eventUserRolesEnum);
 
 export const eventUserRoles = (
   eventId: string | null | undefined,
-  userAddress: string | null | undefined,
+  userRealmId: string | null | undefined,
 ) =>
   queryOptions({
-    queryKey: ["eventUserRoles", eventId, userAddress],
+    queryKey: ["eventUserRoles", eventId, userRealmId],
     queryFn: async () => {
       if (
         !eventId ||
-        !userAddress ||
+        !userRealmId ||
         !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT
       ) {
         return [];
@@ -28,7 +28,7 @@ export const eventUserRoles = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/events/e${eventId}`,
-        `event.GetUserRolesJSON(${JSON.stringify(userAddress)})`,
+        `event.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
       );
       const roles = extractGnoJSONResponse(res);
       return eventGetUserRolesSchema.parse(roles);

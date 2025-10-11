@@ -21,7 +21,7 @@ import { Textarea } from "@/components/shadcn/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { getQueryClient } from "@/lib/get-query-client";
 import { useCreatePoll } from "@/lib/mutations/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
 
@@ -40,9 +40,10 @@ export function PollPostForm({
 }) {
   const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const t = useTranslations("event-feed.poll-form");
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
@@ -100,7 +101,7 @@ export function PollPostForm({
         options: values.options.map((option) => option.text),
         kind: pollKind,
         token: await getToken(),
-        userAddress: userAddress || "",
+        userRealmId: userRealmId || "",
       });
 
       form.resetField("question", {
