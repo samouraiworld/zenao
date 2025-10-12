@@ -235,9 +235,7 @@
   "no-posts-title": "No posts to show.",
   "no-posts-description": "You have no posts. Why not create one?",
   "no-more-posts": "No more to show for now.",
-  "event-feed": {
-    "global-feed": "Global feed",
-    "polls-feed": "Polls",
+  "social-feed": {
     "no-polls-title": "No polls to show.",
     "no-polls-description": "You have no polls. Why not create one?",
     "poll-form": {
@@ -257,7 +255,9 @@
       "message-placeholder-sm": "Say something...",
       "message-placeholder-lg": "Don't be shy, say something!",
       "toast-post-creation-success": "Post created !",
-      "toast-post-creation-error": "Error on creating post !"
+      "toast-post-creation-error": "Error on creating post !",
+      "comment-restricted-to-members": "You must be a member to submit a comment.",
+      "comment-restricted-to-participants": "You must be a participant to submit a comment."
     },
     "vote": {
       "toast-vote-success": "Vote submitted !",
@@ -322,9 +322,11 @@
   "toast-delete-post-error": "Error while deleting the post",
   "community": {
     "chat": "Chat",
+    "votes": "Votes",
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals",
+    "portfolio": "Portfolio",
     "leave-community-button": "Leave community",
     "leaving-state": "Leaving...",
     "leave-success": "You have left the community.",
@@ -336,6 +338,29 @@
     "joining-state": "Joining...",
     "join-community-button": "Join Community"
   },
+  "community-portfolio": { 
+    "error-file-uploading": "Error while uploading file",
+    "error-file-deleting": "Error while deleting file",
+    "delete-file-success": "Item deleted successfully",
+    "upload-file-success": "File uploaded successfully",
+    "recent-media-uploaded": "Recent media uploaded",
+    "upload-file-btn": "Upload file",
+    "upload-first-file-btn": "Upload your first file",
+    "no-media-uploaded": "No media uploaded yet.",
+    "error-saving-portfolio": "Error while saving portfolio",
+    "upload-audio": "Upload audio",
+    "upload-image": "Upload image",
+    "upload-video": "Upload video",
+    "add-video": "Add video",
+    "add-video-description": "Add a video from YouTube, Vimeo",
+    "video-origin-label": "Origin of the video",
+    "video-origin-placeholder": "Video source",
+    "delete": "Delete",
+    "confirm-delete-title": "Are you sure you want to delete this item?",
+    "confirm-delete-desc": "This action cannot be undone.",
+    "confirm-delete-cancel": "Cancel",
+    "confirm-delete-confirm": "Yes, delete it"
+  },
   "community-edit-form": {
     "update-success": "Community updated successfully",
     "update-failure": "Failed to update community",
@@ -345,9 +370,13 @@
     "change-avatar": "Change avatar",
     "change-banner": "Change banner",
     "name-label": "Community name",
+    "community-name-section": "Name of the community",
+    "about-section": "About your community",
     "name-placeholder": "Community name...",
     "description-label": "Description",
-    "shortDescription-label": "Short Description",
+    "shortDescription-tooltip": "A brief summary of your community (max 100 characters). Will be shown in listings.",
+    "description-tooltip": "Tell us more about your community, its purpose, and what members can expect. Markdown is supported!",
+    "shortDescription-label": "Brief summary",
     "shortDescription-placeholder": "Short Description...",
     "description-placeholder": "Description...",
     "write-tab": "Write",
