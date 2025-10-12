@@ -36,6 +36,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
     defaultValue: {
       description: "",
       shortDescription: "",
+      portfolio: [],
     },
     contentFieldName: "description",
   });
