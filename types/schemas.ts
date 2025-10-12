@@ -198,6 +198,7 @@ export const communityTabsSchema = z.union([
   z.literal("votes"),
   z.literal("events"),
   z.literal("members"),
+  z.literal("portfolio"),
   z.literal("proposals"),
 ]);
 export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;
@@ -221,9 +222,47 @@ export const communityFormSchema = z.object({
 
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
 
+export const portfolioItemSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(["image", "video", "audio"]),
+  uploadedAt: z.coerce.date(),
+  uri: uriSchema,
+  name: z.string().min(1).max(100),
+});
+
+export type PortfolioItem = z.infer<typeof portfolioItemSchema>;
+
+export const portfolioUploadVideoSchema = z
+  .object({
+    origin: z.union([z.literal("youtube"), z.literal("vimeo")]),
+    uri: uriSchema,
+  })
+  .refine(
+    (data) => {
+      if (
+        (data.origin === "youtube" &&
+          !/^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]{11}(&.*)?$/.test(
+            data.uri,
+          ) &&
+          !/^https?:\/\/youtu\.be\/[\w-]{11}(&.*)?$/.test(data.uri)) ||
+        (data.origin === "vimeo" &&
+          !/^https?:\/\/(www\.)?vimeo\.com\/\d+(&.*)?$/.test(data.uri))
+      ) {
+        return false;
+      }
+      return true;
+    },
+    { message: "Video URL is not valid", path: ["uri"] },
+  );
+
+export type PortfolioUploadVideoSchemaType = z.infer<
+  typeof portfolioUploadVideoSchema
+>;
+
 export const communityDetailsSchema = z.object({
   shortDescription: z.string().max(200).optional().default(""),
   description: z.string().trim().max(1000).optional().default(""),
+  portfolio: z.array(portfolioItemSchema).default([]),
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
