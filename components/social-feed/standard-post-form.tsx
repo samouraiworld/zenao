@@ -81,17 +81,25 @@ export function StandardPostForm({
       return;
     }
 
-    await uploadMdFile(
-      file,
-      "image",
-      (text) => {
-        form.setValue("content", text);
-      },
-      (text) => {
-        form.setValue("content", text);
-        textareaRef.current?.focus();
-      },
-    );
+    try {
+      await uploadMdFile(
+        file,
+        "image",
+        (text) => {
+          form.setValue("content", text);
+        },
+        (text) => {
+          form.setValue("content", text);
+          textareaRef.current?.focus();
+        },
+      );
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    } finally {
+      if (hiddenImgInputRef.current) {
+        hiddenImgInputRef.current.value = "";
+      }
+    }
   };
 
   const handleAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,17 +112,25 @@ export function StandardPostForm({
       return;
     }
 
-    await uploadMdFile(
-      file,
-      "audio",
-      (text) => {
-        form.setValue("content", text);
-      },
-      (text) => {
-        form.setValue("content", text);
-        textareaRef.current?.focus();
-      },
-    );
+    try {
+      await uploadMdFile(
+        file,
+        "audio",
+        (text) => {
+          form.setValue("content", text);
+        },
+        (text) => {
+          form.setValue("content", text);
+          textareaRef.current?.focus();
+        },
+      );
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+    } finally {
+      if (hiddenAudioInputRef.current) {
+        hiddenAudioInputRef.current.value = "";
+      }
+    }
   };
 
   useEffect(() => {
