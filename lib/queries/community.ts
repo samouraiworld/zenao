@@ -47,6 +47,7 @@ export const communityInfo = (communityId: string) =>
       const community = extractGnoJSONResponse(res) as CommunityInfoJson;
       return fromJson(CommunityInfoSchema, community);
     },
+    staleTime: 0,
   });
 
 export const communitiesList = (
