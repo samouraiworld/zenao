@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AudioWaveform, ImageIcon, Loader2, Video } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/widgets/texts/heading";
@@ -99,6 +99,10 @@ export default function CommunityPortfolio({
 
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
+
+  useEffect(() => {
+    console.log("RENDER");
+  });
 
   const onSave = async (newPortfolio: PortfolioItem[]) => {
     try {
