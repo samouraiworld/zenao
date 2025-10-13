@@ -452,8 +452,8 @@ func (g *gormZenaoDB) PromoteUser(userID string, plan zeni.Plan) error {
 	return g.db.Model(&User{}).Where("id = ?", userIDInt).Update("plan", string(plan)).Error
 }
 
-// UserExists implements zeni.DB.
-func (g *gormZenaoDB) GetUser(authID string) (*zeni.User, error) {
+// GetUserFromAuthID implements zeni.DB.
+func (g *gormZenaoDB) GetUserFromAuthID(authID string) (*zeni.User, error) {
 	var user User
 	if err := g.db.Where("auth_id = ?", authID).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -462,6 +462,49 @@ func (g *gormZenaoDB) GetUser(authID string) (*zeni.User, error) {
 		return nil, err
 	}
 	return dbUserToZeniDBUser(&user), nil
+}
+
+// GetUserFromID implements zeni.DB.
+func (g *gormZenaoDB) GetUserFromID(userID string) (*zeni.User, error) {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	var user User
+	if err := g.db.Where("id = ?", userIDInt).First(&user).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return dbUserToZeniDBUser(&user), nil
+}
+
+// GetUsersFromIDs implements zeni.DB.
+func (g *gormZenaoDB) GetUsersFromIDs(userIDs []string) ([]*zeni.User, error) {
+	if len(userIDs) == 0 {
+		return []*zeni.User{}, nil
+	}
+
+	userIDInts := make([]uint64, 0, len(userIDs))
+	for _, userID := range userIDs {
+		userIDInt, err := strconv.ParseUint(userID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse user id: %w", err)
+		}
+		userIDInts = append(userIDInts, userIDInt)
+	}
+
+	var users []User
+	if err := g.db.Where("id IN ?", userIDInts).Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*zeni.User, 0, len(users))
+	for _, u := range users {
+		result = append(result, dbUserToZeniDBUser(&u))
+	}
+	return result, nil
 }
 
 // GetAllUsers implements zeni.DB.

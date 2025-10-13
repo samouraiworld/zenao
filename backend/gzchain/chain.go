@@ -292,21 +292,26 @@ func (g *gnoZenaoChain) GetEvent(eventRealmID string) (*zenaov1.EventInfo, error
 	return &res, nil
 }
 
-// GetEventParticipants implements ZenaoChain.
-// XXX: refacto in GetEventUsersByRole ?
-func (g *gnoZenaoChain) GetEventParticipants(eventRealmID string) ([]*zeni.User, error) {
-	g, span := g.trace("gzchain.GetEventParticipants")
+// GetEventUsersByRole implements ZenaoChain.
+func (g *gnoZenaoChain) GetEventUsersByRole(eventRealmID string, role string) ([]string, error) {
+	g, span := g.trace("gzchain.GetEventUsersByRole")
 	defer span.End()
 
-	return nil, nil
-}
+	raw, err := checkQueryErr(g.client.QEval(eventRealmID, "event.GetUsersWithRoleJSON(\""+role+"\")"))
+	if err != nil {
+		return nil, err
+	}
+	parsedRaw, err := parseQEvalResponseData(raw)
+	if err != nil {
+		return nil, err
+	}
 
-// GetEventGatekeepers implements ZenaoChain.
-func (g *gnoZenaoChain) GetEventGatekeepers(eventRealmID string) ([]*zeni.User, error) {
-	g, span := g.trace("gzchain.GetEventGatekeepers")
-	defer span.End()
+	var userRealmIDs []string
+	if err := json.Unmarshal([]byte(parsedRaw), &userRealmIDs); err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	return userRealmIDs, nil
 }
 
 // GetEventCommunity implements ZenaoChain.
@@ -796,20 +801,26 @@ func (g *gnoZenaoChain) GetCommunity(communityRealmID string) (*zenaov1.Communit
 	return &res, nil
 }
 
-// GetCommunityMembers implements ZenaoChain.
-func (g *gnoZenaoChain) GetCommunityMembers(communityRealmID string) ([]*zeni.User, error) {
-	g, span := g.trace("gzchain.GetCommunityMembers")
+// GetCommunityUsersByRole implements ZenaoChain.
+func (g *gnoZenaoChain) GetCommunityUsersByRole(communityRealmID string, role string) ([]string, error) {
+	g, span := g.trace("gzchain.GetCommunityUsersByRole")
 	defer span.End()
 
-	return nil, nil
-}
+	raw, err := checkQueryErr(g.client.QEval(communityRealmID, "community.GetUsersWithRoleJSON(\""+role+"\")"))
+	if err != nil {
+		return nil, err
+	}
+	parsedRaw, err := parseQEvalResponseData(raw)
+	if err != nil {
+		return nil, err
+	}
 
-// GetCommunityAdministrators implements ZenaoChain.
-func (g *gnoZenaoChain) GetCommunityAdministrators(communityRealmID string) ([]*zeni.User, error) {
-	g, span := g.trace("gzchain.GetCommunityAdministrators")
-	defer span.End()
+	var userRealmIDs []string
+	if err := json.Unmarshal([]byte(parsedRaw), &userRealmIDs); err != nil {
+		return nil, err
+	}
 
-	return nil, nil
+	return userRealmIDs, nil
 }
 
 // EditCommunity implements ZenaoChain.
@@ -1208,6 +1219,20 @@ func (g *gnoZenaoChain) EntityRealmID(entityType string, entityID string) (strin
 		return g.CommunityRealmID(entityID), nil
 	}
 	return "", fmt.Errorf("unknown entity type: %q", entityType)
+}
+
+// FromRealmIDToID implements ZenaoChain.
+func (g *gnoZenaoChain) FromRealmIDToID(realmID string, prefix string) (string, error) {
+	parts := strings.Split(realmID, "/")
+	// take the last part
+	if len(parts) < 4 {
+		return "", fmt.Errorf("invalid realm ID: %q", realmID)
+	}
+	idPart := parts[len(parts)-1]
+	if !strings.HasPrefix(idPart, prefix) {
+		return "", fmt.Errorf("invalid realm ID prefix: %q", realmID)
+	}
+	return strings.TrimPrefix(idPart, prefix), nil
 }
 
 // CreatePost implements ZenaoChain

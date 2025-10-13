@@ -56,7 +56,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	if !slices.Contains(roles, zeni.RoleOrganizer) {
 		return nil, errors.New("user is not organizer of the event")
 	}
-	participants, err := s.Chain.WithContext(ctx).GetEventParticipants(req.Msg.EventId)
+	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(req.Msg.EventId, zeni.RoleParticipant)
 	if err != nil {
 		return nil, err
 	}
@@ -68,9 +68,10 @@ func (s *ZenaoServer) BroadcastEvent(
 	}
 
 	idsList := make([]string, len(participants))
-	for i, participant := range participants {
-		idsList[i] = participant.AuthID
-	}
+	// TODO: fix
+	// for i, participant := range participants {
+	// 	idsList[i] = participant.AuthID
+	// }
 	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
 	if err != nil {
 		return nil, err

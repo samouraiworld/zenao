@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -42,13 +41,14 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 		return nil, errors.New("user is not organizer of the event")
 	}
 
-	participants, err := s.Chain.WithContext(ctx).GetEventParticipants(req.Msg.EventId)
-	if err != nil {
-		return nil, err
-	}
+	// participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(req.Msg.EventId, zeni.RoleParticipant)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	idsList := mapsl.Map(participants, func(u *zeni.User) string { return u.AuthID })
-	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
+	// idsList := mapsl.Map(participants, func(u *zeni.User) string { return u.AuthID })
+	// TODO: fix it
+	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, []string{})
 	if err != nil {
 		return nil, err
 	}
@@ -65,27 +65,27 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 	}
 
 	var participantDataList []participantData
-	for _, p := range participants {
-		email := mailMap[p.AuthID]
-		if email == "" {
-			s.Logger.Warn("export-participants-fail-to-retrieve-auth-user",
-				zap.String("event-id", req.Msg.EventId),
-				zap.String("user-id", p.ID),
-				zap.String("auth-user-id", p.AuthID))
-			continue
-		}
+	// for _, p := range participants {
+	// 	email := mailMap[p.AuthID]
+	// 	if email == "" {
+	// 		s.Logger.Warn("export-participants-fail-to-retrieve-auth-user",
+	// 			zap.String("event-id", req.Msg.EventId),
+	// 			zap.String("user-id", p.ID),
+	// 			zap.String("auth-user-id", p.AuthID))
+	// 		continue
+	// 	}
 
-		displayName := p.DisplayName
-		if displayName == "" {
-			displayName = fmt.Sprintf("Zenao User #%s", p.ID)
-		}
+	// 	displayName := p.DisplayName
+	// 	if displayName == "" {
+	// 		displayName = fmt.Sprintf("Zenao User #%s", p.ID)
+	// 	}
 
-		participantDataList = append(participantDataList, participantData{
-			email:       email,
-			displayName: displayName,
-			createdAt:   p.CreatedAt,
-		})
-	}
+	// 	participantDataList = append(participantDataList, participantData{
+	// 		email:       email,
+	// 		displayName: displayName,
+	// 		createdAt:   p.CreatedAt,
+	// 	})
+	// }
 
 	slices.SortFunc(participantDataList, func(a, b participantData) int {
 		return strings.Compare(a.email, b.email)

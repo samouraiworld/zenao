@@ -28,16 +28,31 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 		return nil, errors.New("user is banned")
 	}
 
-	admins, err := s.Chain.WithContext(ctx).GetCommunityAdministrators(req.Msg.CommunityId)
+	administrators, err := s.Chain.WithContext(ctx).GetCommunityUsersByRole(req.Msg.CommunityId, zeni.RoleAdministrator)
 	if err != nil {
 		return nil, err
 	}
 
-	admIDs := mapsl.Map(admins, func(adm *zeni.User) string {
-		return adm.AuthID
+	var admIDs []string
+	for _, admin := range administrators {
+		// TODO: actually in future an event could be admin of communities
+		id, err := s.Chain.WithContext(ctx).FromRealmIDToID(admin, "u")
+		if err != nil {
+			return nil, err
+		}
+		admIDs = append(admIDs, id)
+	}
+
+	admins, err := s.DB.GetUsersFromIDs(admIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	adminsAuthIDs := mapsl.Map(admins, func(u *zeni.User) string {
+		return u.AuthID
 	})
 
-	users, err := s.Auth.GetUsersFromIDs(ctx, admIDs)
+	users, err := s.Auth.GetUsersFromIDs(ctx, adminsAuthIDs)
 	if err != nil {
 		return nil, err
 	}

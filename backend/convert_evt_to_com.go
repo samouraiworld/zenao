@@ -9,7 +9,6 @@ import (
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/google/uuid"
 	"github.com/samouraiworld/zenao/backend/gzchain"
-	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -85,11 +84,10 @@ func convertEvtToCom() error {
 	if err != nil {
 		return err
 	}
-	participants, err := chain.GetEventParticipants(evtToComConf.evtID)
+	membersIDs, err := chain.GetEventUsersByRole(evtToComConf.evtID, zeni.RoleParticipant)
 	if err != nil {
 		return err
 	}
-	membersIDs := mapsl.Map(participants, func(usr *zeni.User) string { return usr.ID })
 
 	cmtReq := &zenaov1.CreateCommunityRequest{
 		DisplayName: evt.Title,

@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
 
@@ -35,7 +36,7 @@ func (s *ZenaoServer) CancelEvent(
 	if err != nil {
 		return nil, err
 	}
-	participants, err := s.Chain.WithContext(ctx).GetEventParticipants(req.Msg.EventId)
+	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(req.Msg.EventId, zeni.RoleParticipant)
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +57,10 @@ func (s *ZenaoServer) CancelEvent(
 
 	if s.MailClient != nil {
 		idsList := make([]string, 0, len(participants))
-		for _, u := range participants {
-			idsList = append(idsList, u.AuthID)
-		}
+		// TODO: fix
+		// for _, u := range participants {
+		// 	idsList = append(idsList, u.AuthID)
+		// }
 		authUsers, err := s.Auth.GetUsersFromIDs(ctx, idsList)
 		if err != nil {
 			return nil, err

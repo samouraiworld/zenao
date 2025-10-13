@@ -28,16 +28,31 @@ func (s *ZenaoServer) GetEventGatekeepers(ctx context.Context, req *connect.Requ
 		return nil, errors.New("user is banned")
 	}
 
-	gatekeepers, err := s.Chain.WithContext(ctx).GetEventGatekeepers(req.Msg.EventId)
+	gatekeepers, err := s.Chain.WithContext(ctx).GetEventUsersByRole(req.Msg.EventId, zeni.RoleGatekeeper)
 	if err != nil {
 		return nil, err
 	}
 
-	gkpsIDs := mapsl.Map(gatekeepers, func(gk *zeni.User) string {
-		return gk.AuthID
+	var gkpsIDs []string
+	for _, gk := range gatekeepers {
+		// TODO: actually in future we are not sure a gatekeeper is always a user
+		id, err := s.Chain.WithContext(ctx).FromRealmIDToID(gk, "u")
+		if err != nil {
+			return nil, err
+		}
+		gkpsIDs = append(gkpsIDs, id)
+	}
+
+	gkps, err := s.DB.GetUsersFromIDs(gkpsIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	gkpsAuthIDs := mapsl.Map(gkps, func(u *zeni.User) string {
+		return u.AuthID
 	})
 
-	users, err := s.Auth.GetUsersFromIDs(ctx, gkpsIDs)
+	users, err := s.Auth.GetUsersFromIDs(ctx, gkpsAuthIDs)
 	if err != nil {
 		return nil, err
 	}

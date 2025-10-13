@@ -237,7 +237,9 @@ type DB interface {
 	WithContext(ctx context.Context) DB
 
 	CreateUser(authID string) (*User, error)
-	GetUser(authID string) (*User, error)
+	GetUserFromAuthID(authID string) (*User, error)
+	GetUserFromID(userID string) (*User, error)
+	GetUsersFromIDs(userIDs []string) ([]*User, error)
 	// XXX: add EnsureUsersExist
 
 	PromoteUser(userID string, plan Plan) error
@@ -305,20 +307,19 @@ type Chain interface {
 	EventRealmID(eventID string) string
 	CommunityRealmID(communityID string) string
 	EntityRealmID(entityType string, entityID string) (string, error)
+	FromRealmIDToID(realmID string, prefix string) (string, error)
 
 	// Read operations (Query)
 	EntityRoles(entityRealmID string, orgRealmID string, orgType string) ([]string, error)
 
 	// TODO: what happens if event not found ? should i just return empty cmt & empty err or err handle it ?
 	GetEvent(eventRealmID string) (*zenaov1.EventInfo, error)
-	GetEventParticipants(eventRealmID string) ([]*User, error)
-	GetEventGatekeepers(eventRealmID string) ([]*User, error)
+	GetEventUsersByRole(eventRealmID string, role string) ([]string, error)
 	GetEventCommunity(eventRealmID string) (*zenaov1.CommunityInfo, error)
 
 	// TODO: what happens if community not found ? should i just return empty cmt & empty err or err handle it ?
 	GetCommunity(communityRealmID string) (*zenaov1.CommunityInfo, error)
-	GetCommunityMembers(communityRealmID string) ([]*User, error)
-	GetCommunityAdministrators(communityRealmID string) ([]*User, error)
+	GetCommunityUsersByRole(communityRealmID string, role string) ([]string, error)
 
 	// Write operations (Transactions)
 	FillAdminProfile()

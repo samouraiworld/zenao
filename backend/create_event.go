@@ -126,11 +126,20 @@ func (s *ZenaoServer) CreateEvent(
 		if err != nil {
 			return nil, err
 		}
-		members, err = s.Chain.WithContext(ctx).GetCommunityMembers(s.Chain.CommunityRealmID(req.Msg.CommunityId))
+		membersRealmIDs, err := s.Chain.WithContext(ctx).GetCommunityUsersByRole(s.Chain.CommunityRealmID(req.Msg.CommunityId), zeni.RoleMember)
 		if err != nil {
 			return nil, err
 		}
-
+		var memberIDs []string
+		for _, memberRealmID := range membersRealmIDs {
+			id, err := s.Chain.FromRealmIDToID(memberRealmID, "u")
+			if err != nil {
+				// TODO: skip non user members for now
+				continue
+			}
+			memberIDs = append(memberIDs, id)
+		}
+		members, err = s.DB.GetUsersFromIDs(memberIDs)
 	}
 
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evtID, evt)

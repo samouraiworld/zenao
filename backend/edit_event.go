@@ -41,8 +41,8 @@ func (s *ZenaoServer) EditEvent(
 	}
 
 	//XXX: refactor the logic to avoid duplicate w/ gkps ?
-	var organizersIDs []string
-	organizersIDs = append(organizersIDs, zUser.ID)
+	var organizersRealmIDs []string
+	organizersRealmIDs = append(organizersRealmIDs, s.Chain.UserRealmID(zUser.ID))
 	for _, authOrg := range authOrgas {
 		if authOrg.Banned {
 			return nil, fmt.Errorf("user %s is banned", authOrg.Email)
@@ -51,10 +51,11 @@ func (s *ZenaoServer) EditEvent(
 		if err != nil {
 			return nil, err
 		}
-		if slices.Contains(organizersIDs, zOrg.ID) {
+		orgRealmID := s.Chain.UserRealmID(zOrg.ID)
+		if slices.Contains(organizersRealmIDs, orgRealmID) {
 			return nil, fmt.Errorf("duplicate organizer: %s", authOrg.Email)
 		}
-		organizersIDs = append(organizersIDs, zOrg.ID)
+		organizersRealmIDs = append(organizersRealmIDs, orgRealmID)
 	}
 
 	authGkps, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Gatekeepers)
@@ -62,7 +63,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	var gatekeepersIDs []string
+	var gatekeepersRealmIDs []string
 	for _, authGkp := range authGkps {
 		if authGkp.Banned {
 			return nil, fmt.Errorf("user %s is banned", authGkp.Email)
@@ -71,59 +72,80 @@ func (s *ZenaoServer) EditEvent(
 		if err != nil {
 			return nil, err
 		}
-		if slices.Contains(gatekeepersIDs, zGkp.ID) {
+		gkpRealmID := s.Chain.UserRealmID(zGkp.ID)
+		if slices.Contains(gatekeepersRealmIDs, gkpRealmID) {
 			return nil, fmt.Errorf("duplicate gatekeeper: %s", authGkp.Email)
 		}
-		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
+		gatekeepersRealmIDs = append(gatekeepersRealmIDs, gkpRealmID)
 	}
 
 	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	eventRealmID := s.Chain.EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	cmtRealmID := s.Chain.CommunityRealmID(req.Msg.CommunityId)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(eventRealmID)
 	if err != nil {
 		return nil, err
 	}
 
-	cmt, err := s.Chain.WithContext(ctx).GetEventCommunity(req.Msg.EventId)
+	cmt, err := s.Chain.WithContext(ctx).GetEventCommunity(eventRealmID)
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: handle password hash
-	privacy, err := zeni.EventPrivacyFromPasswordHash("")
+	passwordHash, err := zeni.NewPasswordHash(req.Msg.Password)
+	if err != nil {
+		return nil, err
+	}
+	privacy, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+	if err := s.Chain.WithContext(ctx).EditEvent(eventRealmID, userRealmID, organizersRealmIDs, gatekeepersRealmIDs, req.Msg, privacy); err != nil {
 		return nil, err
 	}
 
 	// TODO: what happens if the user is not administrator anymore but was before ?
 	// TODO: use the norman implementation to get pkg path
 	// TODO: look for all changeme in the codebase
-	if cmt != nil && "changeme" != req.Msg.CommunityId {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, "changeme", req.Msg.EventId); err != nil {
+	if cmt != nil && cmt.PkgPath != cmtRealmID {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, cmt.PkgPath, req.Msg.EventId); err != nil {
 			return nil, err
 		}
 	}
-	participants, err := s.Chain.WithContext(ctx).GetEventParticipants(req.Msg.EventId)
+	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(eventRealmID, zeni.RoleParticipant)
 	if err != nil {
 		return nil, err
 	}
 	var members []*zeni.User
 	if req.Msg.CommunityId != "" {
-		members, err = s.Chain.WithContext(ctx).GetCommunityMembers(req.Msg.CommunityId)
+		membersRealmIDs, err := s.Chain.WithContext(ctx).GetCommunityUsersByRole(cmtRealmID, zeni.RoleMember)
+		if err != nil {
+			return nil, err
+		}
+		var memberIDs []string
+		for _, realmID := range membersRealmIDs {
+			// TODO: actually member of a realm could not be users but we want to send mail to users only
+			id, err := s.Chain.FromRealmIDToID(realmID, "u")
+			if err != nil {
+				// XXX: skip non user members for now
+				continue
+			}
+			memberIDs = append(memberIDs, id)
+		}
+		members, err = s.DB.GetUsersFromIDs(memberIDs)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	var newCmt *zenaov1.CommunityInfo
-	if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != "changeme") {
-		newCmt, err = s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
+	if req.Msg.CommunityId != "" && (cmt == nil || cmt.PkgPath != cmtRealmID) {
+		newCmt, err = s.Chain.WithContext(ctx).GetCommunity(cmtRealmID)
 		if err != nil {
 			return nil, err
 		}
@@ -132,18 +154,18 @@ func (s *ZenaoServer) EditEvent(
 			memberIDs[m.ID] = true
 		}
 
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(userRealmID, cmtRealmID, eventRealmID); err != nil {
 			return nil, err
 		}
 
 		newMembers := make([]string, 0, len(participants))
 		for _, participant := range participants {
-			if !memberIDs[participant.ID] {
-				newMembers = append(newMembers, participant.ID)
+			if !memberIDs[participant] {
+				newMembers = append(newMembers, participant)
 			}
 		}
 		if len(newMembers) > 0 {
-			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(zUser.ID, req.Msg.CommunityId, newMembers); err != nil {
+			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(userRealmID, cmtRealmID, newMembers); err != nil {
 				s.Logger.Error("add-members-to-community", zap.String("community-id", req.Msg.CommunityId), zap.Strings("new-members", newMembers), zap.Error(err))
 			}
 		}
@@ -153,7 +175,7 @@ func (s *ZenaoServer) EditEvent(
 	if newCmt != nil && time.Now().Add(24*time.Hour).Before(startDate) && req.Msg.CommunityEmail && s.MailClient != nil {
 		participantsIDS := make(map[string]bool)
 		for _, participant := range participants {
-			participantsIDS[participant.ID] = true
+			participantsIDS[participant] = true
 		}
 
 		var authIDs []string
