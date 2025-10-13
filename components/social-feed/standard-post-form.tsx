@@ -28,6 +28,7 @@ import {
   FeedPostFormSchemaType,
   standardPostFormSchema,
 } from "@/types/schemas";
+import { captureException } from "@/lib/report";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -95,6 +96,11 @@ export function StandardPostForm({
       );
     } catch (error) {
       console.error("Error uploading image:", error);
+      captureException(error);
+      toast({
+        variant: "destructive",
+        title: "Error uploading image.",
+      });
     } finally {
       if (hiddenImgInputRef.current) {
         hiddenImgInputRef.current.value = "";
@@ -126,6 +132,11 @@ export function StandardPostForm({
       );
     } catch (error) {
       console.error("Error uploading audio:", error);
+      captureException(error);
+      toast({
+        variant: "destructive",
+        title: "Error uploading audio.",
+      });
     } finally {
       if (hiddenAudioInputRef.current) {
         hiddenAudioInputRef.current.value = "";
