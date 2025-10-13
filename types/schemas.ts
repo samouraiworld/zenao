@@ -124,7 +124,7 @@ export const userFormSchema = z.object({
   bannerUri: z.string().optional().default(""),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
-  skills: z.array(userFormSkillSchema), // TODO: fix schema
+  skills: z.array(userFormSkillSchema),
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
