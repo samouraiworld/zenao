@@ -28,7 +28,8 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 		return nil, errors.New("user is banned")
 	}
 
-	administrators, err := s.Chain.WithContext(ctx).GetCommunityUsersByRole(req.Msg.CommunityId, zeni.RoleAdministrator)
+	communityRealmID := s.Chain.WithContext(ctx).CommunityRealmID(req.Msg.CommunityId)
+	administrators, err := s.Chain.WithContext(ctx).GetCommunityUsersByRole(communityRealmID, zeni.RoleAdministrator)
 	if err != nil {
 		return nil, err
 	}

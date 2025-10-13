@@ -28,7 +28,8 @@ func (s *ZenaoServer) GetEventGatekeepers(ctx context.Context, req *connect.Requ
 		return nil, errors.New("user is banned")
 	}
 
-	gatekeepers, err := s.Chain.WithContext(ctx).GetEventUsersByRole(req.Msg.EventId, zeni.RoleGatekeeper)
+	eventRealmID := s.Chain.WithContext(ctx).EventRealmID(req.Msg.EventId)
+	gatekeepers, err := s.Chain.WithContext(ctx).GetEventUsersByRole(eventRealmID, zeni.RoleGatekeeper)
 	if err != nil {
 		return nil, err
 	}

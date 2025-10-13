@@ -7,6 +7,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -32,36 +33,48 @@ func (s *ZenaoServer) CancelEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	eventRealmID := s.Chain.WithContext(ctx).EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.WithContext(ctx).UserRealmID(zUser.ID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(eventRealmID)
 	if err != nil {
 		return nil, err
 	}
-	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(req.Msg.EventId, zeni.RoleParticipant)
+	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(eventRealmID, zeni.RoleParticipant)
 	if err != nil {
 		return nil, err
 	}
-	// TODO: handle this
-	_, err = s.Chain.WithContext(ctx).GetCommunity("changeme")
+	community, err := s.Chain.WithContext(ctx).GetEventCommunity(eventRealmID)
 	if err != nil {
 		return nil, err
+	}
+	if community != nil {
+		// TODO: what happens if the user is not administrator anymore but was before ?
+		// Option: fetch administrators of the community and use the first one as the one who remove the event from the community
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(userRealmID, community.PkgPath, req.Msg.EventId); err != nil {
+			return nil, err
+		}
 	}
 
-	// TODO: what happens if the user is not administrator anymore but was before ?
-	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, "changeme", req.Msg.EventId); err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).CancelEvent(req.Msg.EventId, zUser.ID); err != nil {
+	if err := s.Chain.WithContext(ctx).CancelEvent(eventRealmID, userRealmID); err != nil {
 		return nil, err
 	}
 
 	if s.MailClient != nil {
-		idsList := make([]string, 0, len(participants))
-		// TODO: fix
-		// for _, u := range participants {
-		// 	idsList = append(idsList, u.AuthID)
-		// }
-		authUsers, err := s.Auth.GetUsersFromIDs(ctx, idsList)
+		participantsIDs := make([]string, 0, len(participants))
+		for _, p := range participants {
+			id, err := s.Chain.WithContext(ctx).FromRealmIDToID(p, "u")
+			if err != nil {
+				// XXX: skip non user participants (should not happen tho isn't ?)
+				continue
+			}
+			participantsIDs = append(participantsIDs, id)
+		}
+		participantsFromDB, err := s.DB.GetUsersFromIDs(participantsIDs)
+		if err != nil {
+			return nil, err
+		}
+		authIDs := mapsl.Map(participantsFromDB, func(u *zeni.User) string { return u.AuthID })
+		authUsers, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 		if err != nil {
 			return nil, err
 		}
