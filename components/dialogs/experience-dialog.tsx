@@ -1,20 +1,26 @@
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "../shadcn/dialog";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
 } from "../shadcn/drawer";
 import ExperienceForm from "../features/user/settings/experience-form";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { UserExperienceSchemaType } from "@/types/schemas";
+import {
+  userExperienceSchema,
+  UserExperienceSchemaType,
+} from "@/types/schemas";
 
 interface ExperienceDialogProps {
   open: boolean;
@@ -35,6 +41,7 @@ export default function ExperienceDialog({
 
   const form = useForm<UserExperienceSchemaType>({
     mode: "all",
+    resolver: zodResolver(userExperienceSchema),
     defaultValues: experience || {
       title: "",
       description: "",
@@ -76,6 +83,9 @@ export default function ExperienceDialog({
             <DialogTitle>
               {experience ? "Edit Experience" : "Add Experience"}
             </DialogTitle>
+            <DialogDescription className="hidden">
+              {experience ? "Edit Experience" : "Add Experience"}
+            </DialogDescription>
           </DialogHeader>
 
           <ExperienceForm
@@ -101,6 +111,9 @@ export default function ExperienceDialog({
           <DrawerTitle>
             {experience ? "Edit Experience" : "Add Experience"}
           </DrawerTitle>
+          <DrawerDescription className="hidden">
+            {experience ? "Edit Experience" : "Add Experience"}
+          </DrawerDescription>
         </DrawerHeader>
       </DrawerContent>
     </Drawer>

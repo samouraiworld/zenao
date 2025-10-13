@@ -106,22 +106,57 @@ export type UserFormSocialLinkSchemaType = z.infer<
   typeof userFormSocialLinkSchema
 >;
 
-export const userExperienceSchema = z.object({
-  title: z.string().trim().min(3).max(100),
-  description: z.string().trim().min(3).max(1000),
-  start: z.object({
-    month: z.coerce.number().min(1).max(12),
-    year: z.coerce.number().min(1900).max(2200),
-  }),
-  end: z
-    .object({
+export const userExperienceSchema = z
+  .object({
+    title: z
+      .string()
+      .trim()
+      .min(3, "Title is too short (3 characters min)")
+      .max(100, "Title is too long (100 characters max)"),
+    description: z
+      .string()
+      .trim()
+      .min(3, "Description is too short (3 characters min)")
+      .max(1000, "Description is too long (1000 characters max)"),
+    start: z.object({
       month: z.coerce.number().min(1).max(12),
       year: z.coerce.number().min(1900).max(2200),
-    })
-    .optional(),
-  current: z.boolean().default(false),
-  organization: z.string().trim().min(1).max(100).optional(),
-});
+    }),
+    end: z
+      .object({
+        month: z.coerce.number().int().min(1).max(12),
+        year: z.coerce.number().int().min(1900).max(2200),
+      })
+      .optional(),
+    current: z.boolean().default(false),
+    organization: z
+      .string()
+      .trim()
+      .max(100, "Organization name is too long (100 characters max)")
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.current && !data.end) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End date is required if not ongoing",
+        path: ["end"],
+      });
+    }
+
+    if (data.end) {
+      const startDate = new Date(data.start.year, data.start.month - 1);
+      const endDate = new Date(data.end.year, data.end.month - 1);
+
+      if (endDate < startDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "End date cannot be before start date",
+          path: ["end"],
+        });
+      }
+    }
+  });
 
 export type UserExperienceSchemaType = z.infer<typeof userExperienceSchema>;
 
