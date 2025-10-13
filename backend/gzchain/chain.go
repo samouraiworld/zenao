@@ -309,27 +309,6 @@ func (g *gnoZenaoChain) GetEventGatekeepers(eventRealmID string) ([]*zeni.User, 
 	return nil, nil
 }
 
-// GetEventUserTicket implements ZenaoChain.
-func (g *gnoZenaoChain) GetEventUserTicketPK(eventRealmID string, userRealmID string) (string, error) {
-	g, span := g.trace("gzchain.GetEventUserTicket")
-	defer span.End()
-
-	raw, err := checkQueryErr(g.client.QEval(eventRealmID, "event.GetParticipantTicketPubkey(\""+g.UserRealmID(userRealmID)+"\")"))
-	if err != nil {
-		return "", err
-	}
-	parsedRaw, err := parseQEvalResponseData(raw)
-	if err != nil {
-		return "", err
-	}
-
-	if parsedRaw == "" {
-		return "", errors.New("no ticket found for this user")
-	}
-
-	return parsedRaw, nil
-}
-
 // GetEventCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) GetEventCommunity(eventRealmID string) (*zenaov1.CommunityInfo, error) {
 	g, span := g.trace("gzchain.GetEventCommunity")

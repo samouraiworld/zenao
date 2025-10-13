@@ -249,12 +249,12 @@ type DB interface {
 	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
-	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
+	Participate(eventRealmID string, buyerID string, userRealmID string, ticketSecret string, password string, needPassword bool) error
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
 	GetEventCommunity(eventID string) (*Community, error)
-	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
+	GetEventUserTicket(eventRealmID string, userRealmID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
@@ -313,7 +313,6 @@ type Chain interface {
 	GetEvent(eventRealmID string) (*zenaov1.EventInfo, error)
 	GetEventParticipants(eventRealmID string) ([]*User, error)
 	GetEventGatekeepers(eventRealmID string) ([]*User, error)
-	GetEventUserTicketPK(eventRealmID string, userRealmID string) (string, error)
 	GetEventCommunity(eventRealmID string) (*zenaov1.CommunityInfo, error)
 
 	// TODO: what happens if community not found ? should i just return empty cmt & empty err or err handle it ?

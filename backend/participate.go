@@ -85,6 +85,21 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	evtRealmID := s.Chain.EventRealmID(req.Msg.EventId)
 	buyerRealmID := s.Chain.UserRealmID(buyer.ID)
+
+	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
+		for i, ticket := range tickets {
+			// XXX: support batch
+			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
+			// TODO: see for password
+			if err := tx.Participate(evtRealmID, buyer.ID, participantRealmID, ticket.Secret(), "", false); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
 	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
 	if err != nil {
 		return nil, err

@@ -38,9 +38,6 @@ type Event struct {
 	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
 
 	Config *Config // to get initial data during upgrade
-
-	// TODO: how to do better ?
-	TicketsByParticipant avl.Tree // participant address -> ticketHash
 }
 
 type Config struct {
@@ -197,15 +194,6 @@ func NewEvent(conf *Config) *Event {
 	return event
 }
 
-// TODO: how to handle this better ?
-func (e *Event) GetParticipantTicketPubkey(participant string) string {
-	val, ok := e.TicketsByParticipant.Get(participant)
-	if !ok {
-		return ""
-	}
-	return val.(string)
-}
-
 const MsgCancelEventKind = "gno.land/p/zenao/events.CancelEvent"
 
 type MsgCancelEvent struct{}
@@ -292,8 +280,6 @@ func (e *Event) addParticipantHandler() daokit.ActionHandler {
 			UsedAt:      nil,
 		})
 
-		_ = e.TicketsByParticipant.Set(msg.Participant, msg.TicketPubkey)
-
 		if msg.Participant == "" {
 			// anonymous ticket, don't add member or role to the org
 			return
@@ -343,7 +329,6 @@ func (e *Event) removeParticipantHandler() daokit.ActionHandler {
 		}
 
 		_, ok = e.Tickets.Remove(msg.TicketPubkey)
-		_, ok = e.TicketsByParticipant.Remove(msg.Participant)
 		if !ok {
 			panic("an error occured when removing ticket from avl.tree")
 		}

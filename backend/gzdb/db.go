@@ -43,14 +43,15 @@ type EntityRole struct {
 
 type SoldTicket struct {
 	gorm.Model
-	EventID uint `gorm:"index"`
+
+	EventRealmID string         `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
+	UserRealmID  string         `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
+	DeletedAt    gorm.DeletedAt `gorm:"uniqueIndex:idx_event_user_deleted"`
+
 	BuyerID uint
-	UserID  uint
-	User    *User
 	Price   float64
 	Secret  string `gorm:"uniqueIndex;not null"`
 	Pubkey  string `gorm:"uniqueIndex;not null"`
-	Checkin *Checkin
 }
 
 type Checkin struct {
@@ -383,16 +384,11 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error {
+func (g *gormZenaoDB) Participate(eventRealmID string, buyerID string, userRealmID string, ticketSecret string, password string, needPassword bool) error {
 	g, span := g.trace("gzdb.Participate")
 	defer span.End()
 
 	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
-	if err != nil {
-		return err
-	}
-
-	userIDint, err := strconv.ParseUint(userID, 10, 32)
 	if err != nil {
 		return err
 	}
@@ -402,58 +398,29 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return err
 	}
 
-	evt, err := g.getDBEvent(eventID)
-	if err != nil {
-		return err
-	}
+	// TODO: How i validate password ?
+	// evt, err := g.getDBEvent(eventID)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if needPassword {
-		validPass, err := validatePassword(password, evt.PasswordHash)
-		if err != nil {
-			return err
-		}
-		if !validPass {
-			return errors.New("invalid password")
-		}
-	}
+	// if needPassword {
+	// 	validPass, err := validatePassword(password, evt.PasswordHash)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if !validPass {
+	// 		return errors.New("invalid password")
+	// 	}
+	// }
 
-	var participantsCount int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ?", evt.ID).Count(&participantsCount).Error; err != nil {
-		return err
-	}
-
-	remaining := int64(evt.Capacity) - participantsCount
-	if remaining <= 0 {
-		return errors.New("sold out")
-	}
-
-	var count int64
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evt.ID, userIDint).Count(&count).Error; err != nil {
-		return err
-	}
-	if count != 0 {
-		return errors.New("user is already participant for this event")
-	}
-
-	if err := g.db.Create(&SoldTicket{
-		EventID: evt.ID,
-		BuyerID: uint(buyerIDint),
-		UserID:  uint(userIDint),
-		Secret:  ticket.Secret(),
-		Pubkey:  ticket.Pubkey(),
+	if err := g.db.Save(&SoldTicket{
+		EventRealmID: eventRealmID,
+		UserRealmID:  userRealmID,
+		BuyerID:      uint(buyerIDint),
+		Secret:       ticket.Secret(),
+		Pubkey:       ticket.Pubkey(),
 	}).Error; err != nil {
-		return err
-	}
-
-	participant := &EntityRole{
-		EntityType: zeni.EntityTypeUser,
-		EntityID:   uint(userIDint),
-		OrgType:    zeni.EntityTypeEvent,
-		OrgID:      evt.ID,
-		Role:       zeni.RoleParticipant,
-	}
-
-	if err := g.db.Save(participant).Error; err != nil {
 		return err
 	}
 
@@ -461,27 +428,11 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 }
 
 // CancelParticipation implements zeni.DB.
-func (g *gormZenaoDB) CancelParticipation(eventID string, userID string) error {
+func (g *gormZenaoDB) CancelParticipation(eventRealmID string, userRealmID string) error {
 	g, span := g.trace("gzdb.CancelParticipation")
 	defer span.End()
 
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
-	if err != nil {
-		return err
-	}
-	userIDInt, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	if err := g.db.
-		Model(&EntityRole{}).Where("org_type = ? AND org_id = ? AND entity_type = ? AND entity_id = ? AND role = ?",
-		zeni.EntityTypeEvent, evtIDInt, zeni.EntityTypeUser, userIDInt, zeni.RoleParticipant).
-		Delete(&EntityRole{}).Error; err != nil {
-		return err
-	}
-
-	if err := g.db.Model(&SoldTicket{}).Where("event_id = ? AND user_id = ?", evtIDInt, userIDInt).Delete(&SoldTicket{}).Error; err != nil {
+	if err := g.db.Model(&SoldTicket{}).Where("event_realm_id = ? AND user_realm_id = ?", eventRealmID, userRealmID).Delete(&SoldTicket{}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -729,14 +680,9 @@ func (g *gormZenaoDB) GetEventCommunity(eventID string) (*zeni.Community, error)
 }
 
 // GetEventUserTicket implements zeni.DB.
-func (g *gormZenaoDB) GetEventUserTicket(eventID string, userID string) (*zeni.SoldTicket, error) {
-	userIDint, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse user id: %w", err)
-	}
-
+func (g *gormZenaoDB) GetEventUserTicket(eventRealmID string, userRealmID string) (*zeni.SoldTicket, error) {
 	var ticket *SoldTicket
-	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Where("event_id = ? AND user_id = ?", eventID, userIDint).First(&ticket).Error
+	err := g.db.Model(&SoldTicket{}).Where("event_realm_id = ? AND user_realm_id = ?", eventRealmID, userRealmID).First(&ticket).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1419,10 +1365,10 @@ func (g *gormZenaoDB) Checkin(pubkey string, gatekeeperID string, signature stri
 	g, span := g.trace("gzdb.Checkin")
 	defer span.End()
 
-	gatekeeperIDint, err := strconv.ParseUint(gatekeeperID, 10, 64)
-	if err != nil {
-		return nil, err
-	}
+	// gatekeeperIDint, err := strconv.ParseUint(gatekeeperID, 10, 64)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	tickets := []*SoldTicket{}
 	if err := g.db.Model(&SoldTicket{}).Preload("Checkin").Limit(1).Find(&tickets, "pubkey = ?", pubkey).Error; err != nil {
@@ -1433,28 +1379,20 @@ func (g *gormZenaoDB) Checkin(pubkey string, gatekeeperID string, signature stri
 	}
 	dbTicket := tickets[0]
 
-	if dbTicket.Checkin != nil {
-		return nil, errors.New("ticket already checked-in")
-	}
+	// if dbTicket.Checkin != nil {
+	// 	return nil, errors.New("ticket already checked-in")
+	// }
 
-	roles, err := g.EntityRoles(zeni.EntityTypeUser, fmt.Sprintf("%d", dbTicket.UserID), zeni.EntityTypeEvent, fmt.Sprint(dbTicket.EventID))
-	if err != nil {
-		return nil, err
-	}
-	if !slices.Contains(roles, zeni.RoleGatekeeper) && !slices.Contains(roles, zeni.RoleOrganizer) {
-		return nil, errors.New("user is not gatekeeper or organizer for this event")
-	}
-
-	dbTicket.Checkin = &Checkin{
-		GatekeeperID: uint(gatekeeperIDint),
-		Signature:    signature,
-	}
+	// dbTicket.Checkin = &Checkin{
+	// 	GatekeeperID: uint(gatekeeperIDint),
+	// 	Signature:    signature,
+	// }
 
 	if err := g.db.Save(dbTicket).Error; err != nil {
 		return nil, err
 	}
 
-	return g.GetEvent(fmt.Sprint(dbTicket.EventID))
+	return nil, nil
 }
 
 // AddEventToCommunity implements zeni.DB.
@@ -1572,23 +1510,17 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		return nil, err
 	}
 	var checkin *zeni.Checkin
-	if dbtick.Checkin != nil {
-		checkin = &zeni.Checkin{
-			At:           dbtick.Checkin.CreatedAt,
-			GatekeeperID: fmt.Sprint(dbtick.Checkin.GatekeeperID),
-			Signature:    dbtick.Checkin.Signature,
-		}
-	}
-	var user *zeni.User
-	if dbtick.User != nil {
-		user = dbUserToZeniDBUser(dbtick.User)
-	}
+	// if dbtick.Checkin != nil {
+	// 	checkin = &zeni.Checkin{
+	// 		At:           dbtick.Checkin.CreatedAt,
+	// 		GatekeeperID: fmt.Sprint(dbtick.Checkin.GatekeeperID),
+	// 		Signature:    dbtick.Checkin.Signature,
+	// 	}
+	// }
 	ticket := &zeni.SoldTicket{
 		Ticket:    tickobj,
 		BuyerID:   fmt.Sprint(dbtick.BuyerID),
-		UserID:    fmt.Sprint(dbtick.UserID),
 		Checkin:   checkin,
-		User:      user,
 		CreatedAt: dbtick.CreatedAt,
 	}
 	if dbtick.DeletedAt.Valid {

@@ -28,12 +28,6 @@ table "checkins" {
   primary_key {
     columns = [column.sold_ticket_id]
   }
-  foreign_key "fk_sold_tickets_checkin" {
-    columns     = [column.sold_ticket_id]
-    ref_columns = [table.sold_tickets.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   index "idx_checkins_deleted_at" {
     columns = [column.deleted_at]
   }
@@ -58,18 +52,6 @@ table "users" {
     type = datetime
   }
   column "auth_id" {
-    null = true
-    type = text
-  }
-  column "display_name" {
-    null = true
-    type = text
-  }
-  column "bio" {
-    null = true
-    type = text
-  }
-  column "avatar_uri" {
     null = true
     type = text
   }
@@ -579,15 +561,15 @@ table "reactions" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_reactions" {
-    columns     = [column.post_id]
-    ref_columns = [table.posts.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_reactions_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_reactions" {
+    columns     = [column.post_id]
+    ref_columns = [table.posts.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -614,15 +596,15 @@ table "sold_tickets" {
     null = true
     type = datetime
   }
-  column "event_id" {
-    null = true
-    type = integer
+  column "event_realm_id" {
+    null = false
+    type = text
+  }
+  column "user_realm_id" {
+    null = false
+    type = text
   }
   column "buyer_id" {
-    null = true
-    type = integer
-  }
-  column "user_id" {
     null = true
     type = integer
   }
@@ -641,12 +623,6 @@ table "sold_tickets" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_sold_tickets_user" {
-    columns     = [column.user_id]
-    ref_columns = [table.users.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   index "idx_sold_tickets_pubkey" {
     unique  = true
     columns = [column.pubkey]
@@ -655,8 +631,9 @@ table "sold_tickets" {
     unique  = true
     columns = [column.secret]
   }
-  index "idx_sold_tickets_event_id" {
-    columns = [column.event_id]
+  index "idx_event_user_deleted" {
+    unique  = true
+    columns = [column.event_realm_id, column.user_realm_id, column.deleted_at]
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]
