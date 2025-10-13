@@ -1,12 +1,12 @@
 package polls
 
 import (
-	"chain/runtime"
 	"time"
 
 	"gno.land/p/nt/avl"
 	"gno.land/p/nt/seqid"
 	pollsv1 "gno.land/p/zenao/polls/v1"
+	"gno.land/p/zenao/realmid"
 )
 
 var (
@@ -18,21 +18,23 @@ func init() {
 	polls = avl.NewTree()
 }
 
+type AuthFn func() (userID string, authorized bool)
+
 type Poll struct {
 	ID       seqid.ID
 	Question string
 	Kind     pollsv1.PollKind
-	Results  *avl.Tree // string (options) -> avl.Tree of string (address of users) -> struct{}
+	Results  *avl.Tree // string (options) -> avl.Tree of string (realmid of users) -> struct{}
 
 	Duration int64
 
 	CreatedAt int64
-	CreatedBy address
+	CreatedBy string
 
-	authFunc func(string) bool
+	authFunc AuthFn
 }
 
-func NewPoll(_ realm, question string, kind pollsv1.PollKind, duration int64, options []string, authFunc func(string) bool) *Poll {
+func NewPoll(_ realm, question string, kind pollsv1.PollKind, duration int64, options []string, authFunc AuthFn) *Poll {
 	if len(options) < 2 {
 		panic("poll must have at least 2 options")
 	}
@@ -54,7 +56,7 @@ func NewPoll(_ realm, question string, kind pollsv1.PollKind, duration int64, op
 		Results:   avl.NewTree(),
 		Duration:  duration,
 		CreatedAt: time.Now().Unix(),
-		CreatedBy: runtime.PreviousRealm().Address(),
+		CreatedBy: realmid.Previous(),
 		authFunc:  authFunc,
 	}
 	for _, option := range options {
@@ -75,7 +77,7 @@ func NewPoll(_ realm, question string, kind pollsv1.PollKind, duration int64, op
 	return poll
 }
 
-func Vote(_ realm, pollID uint64, option string) {
+func Vote(cur realm, pollID uint64, option string) {
 	id := seqid.ID(pollID)
 	pollRaw, ok := polls.Get(id.String())
 	if !ok {
@@ -83,7 +85,7 @@ func Vote(_ realm, pollID uint64, option string) {
 	}
 
 	poll := pollRaw.(*Poll)
-	poll.Vote(option)
+	poll.Vote(cur, option)
 }
 
 func GetInfo(pollID uint64, user string) *pollsv1.Poll {
@@ -96,11 +98,9 @@ func GetInfo(pollID uint64, user string) *pollsv1.Poll {
 	return poll.GetInfo(user)
 }
 
-func (p *Poll) Vote(option string) {
-	addr := runtime.PreviousRealm().Address()
-	if p.authFunc != nil && !p.authFunc(addr.String()) {
-		panic("the user is not allowed to interact with this poll")
-	}
+func (p *Poll) Vote(_ realm, option string) {
+	callerID := p.auth()
+
 	optionRaw, ok := p.Results.Get(option)
 	if !ok {
 		panic("invalid option")
@@ -114,8 +114,8 @@ func (p *Poll) Vote(option string) {
 	if p.Kind != pollsv1.POLL_KIND_MULTIPLE_CHOICE {
 		p.Results.Iterate("", "", func(key string, value interface{}) bool {
 			choices := value.(*avl.Tree)
-			if choices.Has(addr.String()) {
-				choices.Remove(addr.String())
+			if choices.Has(callerID) {
+				choices.Remove(callerID)
 				return true
 			}
 			return false
@@ -123,10 +123,10 @@ func (p *Poll) Vote(option string) {
 	}
 
 	choices := optionRaw.(*avl.Tree)
-	if choices.Has(addr.String()) {
-		choices.Remove(addr.String())
+	if choices.Has(callerID) {
+		choices.Remove(callerID)
 	} else {
-		choices.Set(addr.String(), struct{}{})
+		choices.Set(callerID, struct{}{})
 	}
 }
 
@@ -137,7 +137,7 @@ func (p *Poll) GetInfo(user string) *pollsv1.Poll {
 		Kind:      p.Kind,
 		Duration:  p.Duration,
 		CreatedAt: p.CreatedAt,
-		CreatedBy: p.CreatedBy.String(),
+		CreatedBy: p.CreatedBy,
 	}
 	p.Results.Iterate("", "", func(key string, value interface{}) bool {
 		count := value.(*avl.Tree)
@@ -153,4 +153,16 @@ func (p *Poll) GetInfo(user string) *pollsv1.Poll {
 
 func (p *Poll) IsRunning() bool {
 	return time.Now().Unix() < p.CreatedAt+p.Duration
+}
+
+func (p *Poll) auth() string {
+	if p.authFunc == nil {
+		return realmid.Previous()
+	}
+
+	id, ok := p.authFunc()
+	if !ok {
+		panic("the user is not allowed to interact with this poll")
+	}
+	return id
 }

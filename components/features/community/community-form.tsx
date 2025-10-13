@@ -3,7 +3,7 @@
 import React from "react";
 import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { Trash2Icon, Plus } from "lucide-react";
+import { Trash2Icon, Plus, Info } from "lucide-react";
 import { useMediaQuery } from "../../../hooks/use-media-query";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
@@ -12,15 +12,19 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Button } from "@/components/shadcn/button";
 import { Card } from "@/components/widgets/cards/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/shadcn/tabs";
+import { Tabs, TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { CommunityFormSchemaType, communityFormSchema } from "@/types/schemas";
 import { cn } from "@/lib/tailwind";
+import Heading from "@/components/widgets/texts/heading";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+import SettingsSection from "@/components/layout/settings-section";
+import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
+import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -81,15 +85,15 @@ export const CommunityForm = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-20 w-full">
-          <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-6 mt-20 w-full">
+          <SettingsSection title={t("community-name-section")}>
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
               <FormFieldTextArea
                 control={form.control}
                 name="displayName"
                 placeholder={t("name-placeholder")}
                 className={cn(
-                  "font-semibold text-2xl resize-none bg-transparent",
+                  "font-semibold text-xl resize-none bg-transparent",
                   "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
                 )}
                 maxLength={140}
@@ -98,21 +102,66 @@ export const CommunityForm = ({
                 wordCounter
               />
             </Card>
+          </SettingsSection>
 
+          <SettingsSection title={t("about-section")}>
             <Card className="rounded px-3 border-custom-input-border p-4 w-full">
-              <FormFieldInputString
-                control={form.control}
-                name="shortDescription"
-                label={t("shortDescription-label")}
-                placeholder={t("shortDescription-placeholder")}
-                className="mb-4"
-              />
+              <div className="transition-all">
+                <div className="flex gap-2 items-center">
+                  <Heading level={3}>{t("shortDescription-label")}</Heading>
+
+                  <Tooltip delayDuration={500}>
+                    <TooltipTrigger
+                      type="button"
+                      className="group cursor-pointer"
+                    >
+                      <Info
+                        size={16}
+                        className="text-muted-foreground transition-colors"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {t("shortDescription-tooltip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <FormFieldInputString
+                  control={form.control}
+                  name="shortDescription"
+                  placeholder={t("shortDescription-placeholder")}
+                  className="mt-4"
+                />
+              </div>
+            </Card>
+
+            <Card className="rounded px-3 border-custom-input-border p-4 w-full relative">
+              <div className="flex gap-2 items-center mb-4">
+                <Heading level={3}>{t("description-label")}</Heading>
+
+                <Tooltip delayDuration={500}>
+                  <TooltipTrigger
+                    type="button"
+                    className="group cursor-pointer"
+                  >
+                    <Info
+                      size={16}
+                      className="text-muted-foreground transition-colors"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>{t("description-tooltip")}</TooltipContent>
+                </Tooltip>
+              </div>
 
               <Tabs defaultValue="write" className="w-full">
-                <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
-                  <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
-                  <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
-                </TabsList>
+                <TabsIconsList
+                  tabs={getMarkdownEditorTabs({
+                    writeLabel: t("write-tab"),
+                    previewLabel: t("preview-tab"),
+                  })}
+                  className="absolute right-2 rounded p-0 h-fit"
+                  style={{ top: "0.75rem" }}
+                />
+
                 <TabsContent value="write" tabIndex={-1}>
                   <FormFieldTextArea
                     control={form.control}
@@ -130,11 +179,10 @@ export const CommunityForm = ({
                 </TabsContent>
               </Tabs>
             </Card>
-          </div>
+          </SettingsSection>
 
-          <div className="flex flex-col gap-4 w-full">
+          <SettingsSection title={t("admin-label")}>
             <Card className="p-6">
-              <h3 className="text-lg font-medium mb-4">{t("admin-label")}</h3>
               <div className="flex flex-col gap-3">
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex gap-2 items-start">
@@ -172,17 +220,19 @@ export const CommunityForm = ({
                 </Button>
               </div>
             </Card>
-
-            <ButtonWithChildren
-              loading={isLoading}
-              disabled={isButtonDisabled}
-              type="submit"
-              className="px-8 w-full"
-            >
-              {t("submit")}
-            </ButtonWithChildren>
-          </div>
+          </SettingsSection>
         </div>
+
+        <SettingsSection title="">
+          <ButtonWithChildren
+            loading={isLoading}
+            disabled={isButtonDisabled}
+            type="submit"
+            className="px-8 w-full"
+          >
+            {t("submit")}
+          </ButtonWithChildren>
+        </SettingsSection>
       </form>
     </Form>
   );

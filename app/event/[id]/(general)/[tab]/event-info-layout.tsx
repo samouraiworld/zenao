@@ -21,7 +21,7 @@ import EventLocationSection from "@/components/features/event/event-location-sec
 import { makeLocationFromEvent } from "@/lib/location";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import EventParticipationInfo from "@/components/features/event/event-participation-info";
@@ -52,10 +52,12 @@ export function EventInfoLayout({
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { password } = useEventPassword();
   const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
-  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userInfo?.realmId),
+  );
 
   const location = makeLocationFromEvent(data.location);
   const timezone = useLocationTimezone(location);
@@ -142,7 +144,7 @@ export function EventInfoLayout({
         {/* Host section */}
         <div className="col-span-6 sm:col-span-3">
           <EventSection title={t("hosted-by")}>
-            <UserAvatarWithName linkToProfile address={data.organizers[0]} />
+            <UserAvatarWithName linkToProfile realmId={data.organizers[0]} />
           </EventSection>
         </div>
 

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { communityUserRoles } from "@/lib/queries/community";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 
 export const CommunityEditAdminButton = ({
   communityId,
@@ -15,11 +15,11 @@ export const CommunityEditAdminButton = ({
 }) => {
   const t = useTranslations("community-edit-form");
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
   const { data: userRoles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userAddress),
+    communityUserRoles(communityId, userInfo?.realmId || ""),
   );
   const isAdmin = userRoles.includes("administrator");
   if (!isAdmin) return null;

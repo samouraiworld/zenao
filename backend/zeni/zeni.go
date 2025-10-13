@@ -276,8 +276,7 @@ type Chain interface {
 	FillAdminProfile()
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
-	UserAddress(userID string) string
-	EventAddress(eventID string) string
+	UserRealmID(userID string) string
 
 	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
 	CancelEvent(eventID string, callerID string) error

@@ -1,6 +1,5 @@
 "use client";
 
-import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
@@ -8,12 +7,16 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import EventFeedForm from "../../event-feed-form/event-feed-form";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn/tabs";
 import { Separator } from "@/components/shadcn/separator";
 import { cn } from "@/lib/tailwind";
-import { TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import {
@@ -23,6 +26,7 @@ import {
 } from "@/types/schemas";
 import EventFeed from "@/app/event/[id]/(general)/[tab]/feed";
 import EventPolls from "@/app/event/[id]/(general)/[tab]/votes";
+import SocialFeedForm from "@/components/social-feed/social-feed-form";
 
 export function MainEventSections({
   className,
@@ -35,11 +39,13 @@ export function MainEventSections({
 }) {
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
+
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userAddress),
+    eventUserRoles(eventId, userRealmId),
   );
 
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);
@@ -68,7 +74,7 @@ export function MainEventSections({
 
   return (
     <Tabs value={section} className={cn("w-full", className)}>
-      <TabsList className="flex w-full bg-transparent p-0 m-0 overflow-auto">
+      <TabsList className="flex w-full bg-transparent p-0 m-0 overflow-auto justify-start">
         <Link href={`/event/${eventId}`}>
           <TabsTrigger
             value="description"
@@ -106,7 +112,7 @@ export function MainEventSections({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 min-h-0 pt-4">
           {section !== "description" && isMember && (
-            <EventFeedForm eventId={eventId} form={form} />
+            <SocialFeedForm orgType="event" orgId={eventId} form={form} />
           )}
           {/* Social Feed (Discussions) */}
           <TabsContent value="feed">

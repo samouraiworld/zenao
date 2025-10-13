@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/widgets/texts/text";
 import { useEditUserProfile } from "@/lib/mutations/profile";
@@ -29,16 +29,18 @@ import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
 } from "@/lib/serialization";
+import { addressFromRealmId } from "@/lib/gno";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
 
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
 
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
-  const { data: user } = useSuspenseQuery(profileOptions(address));
+  const userRealmId = userInfo?.realmId || "";
+  const { data: user } = useSuspenseQuery(profileOptions(userRealmId));
   const profileDetails = deserializeWithFrontMatter({
     serialized: user?.bio ?? "",
     schema: gnoProfileDetailsSchema,
@@ -82,9 +84,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
+      if (!userRealmId) {
+        throw new Error("no user realm id");
+      }
 
       await editUser({
-        address: address || "",
+        realmId: userRealmId,
         token,
         avatarUri: values.avatarUri,
         displayName: values.displayName,
@@ -99,6 +104,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           },
         ),
       });
+
+      const address = addressFromRealmId(userRealmId);
 
       router.push(`/profile/${address}`);
       toast({

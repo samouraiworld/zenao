@@ -8,7 +8,7 @@ import {
 import { fromJson } from "@bufbuild/protobuf";
 import { z } from "zod";
 import { GetToken } from "@clerk/types";
-import { derivePkgAddr, extractGnoJSONResponse } from "../gno";
+import { extractGnoJSONResponse } from "../gno";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
   CommunityInfo,
@@ -158,13 +158,13 @@ export const communitiesListByMember = (
 };
 
 export const communityUserRoles = (
-  communityId: string | null,
-  userAddress: string | null,
+  communityId: string | null | undefined,
+  userRealmId: string | null | undefined,
 ) =>
   queryOptions({
-    queryKey: ["communityUserRoles", communityId, userAddress],
+    queryKey: ["communityUserRoles", communityId, userRealmId],
     queryFn: async () => {
-      if (!communityId || !userAddress) {
+      if (!communityId || !userRealmId) {
         return [];
       }
 
@@ -173,11 +173,12 @@ export const communityUserRoles = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/communities/c${communityId}`,
-        `community.GetUserRolesJSON(${JSON.stringify(userAddress)})`,
+        `community.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
       );
       const roles = extractGnoJSONResponse(res);
       return communityGetUserRolesSchema.parse(roles);
     },
+    enabled: !!communityId && !!userRealmId,
   });
 
 export const communityUsersWithRoles = (
@@ -268,10 +269,9 @@ export const communitiesListByEvent = (
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
       );
       const pkgPath = `gno.land/r/zenao/events/e${id}`;
-      const eventAddr = derivePkgAddr(pkgPath);
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/communityreg`,
-        `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(eventAddr)}, ${limitInt}, ${pageParam * limitInt}))`,
+        `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(pkgPath)}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       const json = communitiesListFromJson(raw);
