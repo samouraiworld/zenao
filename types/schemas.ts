@@ -106,11 +106,13 @@ export type UserFormSocialLinkSchemaType = z.infer<
   typeof userFormSocialLinkSchema
 >;
 
-export const userFormSkillSchema = z
-  .string()
-  .trim()
-  .min(1, "Skill cannot be empty")
-  .max(20, "Skill name too long");
+export const userFormSkillSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Skill cannot be empty")
+    .max(20, "Skill name too long"),
+});
 
 export type UserFormSkillSchemaType = z.infer<typeof userFormSkillSchema>;
 
@@ -122,7 +124,7 @@ export const userFormSchema = z.object({
   bannerUri: z.string().optional().default(""),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
-  skills: z.array(userFormSkillSchema).default([]), // TODO: fix schema
+  skills: z.array(userFormSkillSchema), // TODO: fix schema
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 

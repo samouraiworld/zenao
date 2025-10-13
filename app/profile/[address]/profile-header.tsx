@@ -133,10 +133,10 @@ export default function ProfileHeader({
             <div className="flex flex-wrap gap-2">
               {profileDetails.skills.map((skill) => (
                 <span
-                  key={skill}
+                  key={skill.name}
                   className="bg-primary text-primary-foreground hover:bg-primary/80 text-sm font-medium px-3 py-1 rounded-full transition"
                 >
-                  {skill}
+                  {skill.name}
                 </span>
               ))}
             </div>

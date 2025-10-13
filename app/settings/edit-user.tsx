@@ -61,7 +61,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     socialMediaLinks: profileDetails.socialMediaLinks,
     location: profileDetails.location || "",
     shortBio: profileDetails.shortBio || "",
-    skills: profileDetails.skills || [],
+    skills: profileDetails.skills,
   };
 
   const { editUser, isPending } = useEditUserProfile();
