@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AudioWaveform, ImageIcon, Loader2, Video } from "lucide-react";
-import { memo, useMemo, useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/widgets/texts/heading";
@@ -107,14 +107,6 @@ export default function CommunityPortfolio({
 
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
-
-  const gridStyle = useMemo(
-    () => ({
-      gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-      maxWidth: "100%",
-    }),
-    [],
-  );
 
   const onSave = async (newPortfolio: PortfolioItem[]) => {
     try {
@@ -337,7 +329,13 @@ export default function CommunityPortfolio({
         onChange={(e) => onUpload("audio", e)}
       />
 
-      <div className="grid gap-4" style={gridStyle}>
+      <div
+        className="grid gap-4"
+        style={{
+          gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
+          maxWidth: "100%",
+        }}
+      >
         {localPortfolio.length === 0 && !isUploading && (
           <div className="flex flex-col justify-center text-muted-foreground">
             <p className="text-center">
