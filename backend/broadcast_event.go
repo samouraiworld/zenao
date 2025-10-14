@@ -45,18 +45,20 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, errors.New("zenao mail client is not initialized")
 	}
 
-	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
+	evtRealmID := s.Chain.WithContext(ctx).EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.WithContext(ctx).UserRealmID(zUser.ID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
 	if err != nil {
 		return nil, err
 	}
-	roles, err := s.Chain.WithContext(ctx).EntityRoles(zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+	roles, err := s.Chain.WithContext(ctx).EntityRoles(userRealmID, zeni.EntityTypeEvent, evtRealmID)
 	if err != nil {
 		return nil, err
 	}
 	if !slices.Contains(roles, zeni.RoleOrganizer) {
 		return nil, errors.New("user is not organizer of the event")
 	}
-	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(req.Msg.EventId, zeni.RoleParticipant)
+	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(evtRealmID, zeni.RoleParticipant)
 	if err != nil {
 		return nil, err
 	}
