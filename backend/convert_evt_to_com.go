@@ -110,8 +110,8 @@ func convertEvtToCom() error {
 	// TODO: find a way to have better ids ?
 	uuid := uuid.New().String()
 	cmtID := strings.ReplaceAll(uuid, "-", "_")
-	// TODO: handle that creatorIDs is not an id anymore, either retrieve ID from address or change the chain method
-	err = chain.CreateCommunity(cmtID, evt.Organizers, membersIDs, []string{evtToComConf.evtPkgPath}, cmtReq)
+	cmtRealmID := chain.CommunityRealmID(cmtID)
+	err = chain.CreateCommunity(cmtRealmID, evt.Organizers, membersIDs, []string{evtToComConf.evtPkgPath}, cmtReq)
 	if err != nil {
 		return err
 	}

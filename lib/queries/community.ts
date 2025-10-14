@@ -1,3 +1,5 @@
+import { fromJson } from "@bufbuild/protobuf";
+import { GetToken } from "@clerk/types";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import {
   InfiniteData,
@@ -5,9 +7,7 @@ import {
   queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
-import { fromJson } from "@bufbuild/protobuf";
 import { z } from "zod";
-import { GetToken } from "@clerk/types";
 import { extractGnoJSONResponse } from "../gno";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
@@ -213,7 +213,7 @@ export function goStringSliceLiteral(arr: string[]): string {
 }
 
 export function communityIdFromPkgPath(pkgPath: string): string {
-  const res = /(c\d+)$/.exec(pkgPath);
+  const res = /(c[\w]+)$/.exec(pkgPath);
   return res?.[1].substring(1) || "";
 }
 

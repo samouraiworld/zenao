@@ -29,13 +29,15 @@ func (s *ZenaoServer) LeaveCommunity(
 		return nil, errors.New("user is banned")
 	}
 
-	cmt, err := s.Chain.WithContext(ctx).GetCommunity(req.Msg.CommunityId)
+	cmtRealmID := s.Chain.CommunityRealmID(req.Msg.CommunityId)
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	cmt, err := s.Chain.WithContext(ctx).GetCommunity(cmtRealmID)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: change to handle address instead of creatorID
-	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.Administrators[0], req.Msg.CommunityId, zUser.ID); err != nil {
+	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.Administrators[0], cmtRealmID, userRealmID); err != nil {
 		return nil, errors.New("failed to remove member from community on chain")
 	}
 
