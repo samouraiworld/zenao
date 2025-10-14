@@ -1,7 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { useEffect } from "react";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
-import { UserExperienceSchemaType } from "@/types/schemas";
 import { Form, FormField } from "@/components/shadcn/form";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
 import { FormFieldCheckbox } from "@/components/widgets/form/form-field-checkbox";
@@ -10,11 +9,12 @@ import FormFieldYearSelector from "@/components/widgets/form/form-field-year-sel
 import FormFieldMonthSelector from "@/components/widgets/form/form-field-month-selector";
 import { Button } from "@/components/shadcn/button";
 import { cn } from "@/lib/tailwind";
+import { UserExperienceSchemaFormType } from "@/types/schemas";
 
 interface ExperienceFormProps {
-  form: UseFormReturn<UserExperienceSchemaType>;
-  experience?: UserExperienceSchemaType;
-  onSubmit: (data: UserExperienceSchemaType) => void;
+  form: UseFormReturn<UserExperienceSchemaFormType>;
+  experience?: UserExperienceSchemaFormType;
+  onSubmit: (data: UserExperienceSchemaFormType) => void;
 }
 
 export default function ExperienceForm({

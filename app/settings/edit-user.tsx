@@ -34,7 +34,7 @@ import UserExperiences from "@/components/features/user/settings/user-experience
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
 
-  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+  const { getToken } = useAuth();
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -88,21 +88,23 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         throw new Error("no user realm id");
       }
 
+      const bio = serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
+        values.bio,
+        {
+          socialMediaLinks: values.socialMediaLinks,
+          location: values.location,
+          shortBio: values.shortBio,
+          bannerUri: values.bannerUri,
+          experiences: values.experiences,
+        },
+      );
+
       await editUser({
         realmId: userRealmId,
         token,
         avatarUri: values.avatarUri,
         displayName: values.displayName,
-        bio: serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
-          values.bio,
-          {
-            socialMediaLinks: values.socialMediaLinks,
-            location: values.location,
-            shortBio: values.shortBio,
-            bannerUri: values.bannerUri,
-            experiences: values.experiences,
-          },
-        ),
+        bio,
       });
 
       const address = addressFromRealmId(userRealmId);

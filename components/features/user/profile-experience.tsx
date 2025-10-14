@@ -1,10 +1,10 @@
 import { PencilIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import Text from "@/components/widgets/texts/text";
-import { UserExperienceSchemaType } from "@/types/schemas";
+import { UserExperienceSchemaFormType } from "@/types/schemas";
 
 interface ProfileExperienceProps {
-  experience: UserExperienceSchemaType;
+  experience: UserExperienceSchemaFormType;
   onEdit?: () => void;
   onDelete?: () => void;
 }
