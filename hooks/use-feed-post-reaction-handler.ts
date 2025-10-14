@@ -4,7 +4,7 @@ import { useReactPost } from "@/lib/mutations/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 
-function useEventPostReactionHandler(feedId: string, parentId: string = "") {
+function useFeedPostReactionHandler(feedId: string, parentId: string = "") {
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -40,4 +40,4 @@ function useEventPostReactionHandler(feedId: string, parentId: string = "") {
   };
 }
 
-export default useEventPostReactionHandler;
+export default useFeedPostReactionHandler;

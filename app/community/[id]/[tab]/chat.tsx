@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import {
   useSuspenseInfiniteQuery,
@@ -12,14 +12,12 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import FeedPostForm from "@/components/social-feed/feed-post-form";
 import { PostsList } from "@/components/social-feed/posts-list";
-import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
-import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
-import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
+import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
+import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import { communityUserRoles } from "@/lib/queries/community";
+import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
 import { FeedPostFormSchemaType } from "@/types/schemas";
-import { usePwaContext } from "@/components/providers/pwa-state-provider";
 
 type CommunityChatProps = {
   communityId: string;
@@ -35,8 +33,6 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   const { data: userRoles } = useSuspenseQuery(
     communityUserRoles(communityId, userRealmId),
   );
-
-  const { onDisplayBottomBarChange } = usePwaContext();
 
   const [postInEdition, setPostInEdition] = useState<{
     postId: string;
@@ -77,24 +73,14 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     [postsPages],
   );
 
-  const { onEditStandardPost, isEditing } = useEventPostEditHandler(feedId);
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
+  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
   const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
     await onEditStandardPost(postId, values);
     setPostInEdition(null);
   };
-
-  useEffect(() => {
-    if (userRoles.includes("member") || userRoles.includes("administrator")) {
-      onDisplayBottomBarChange(false);
-    }
-
-    return () => {
-      onDisplayBottomBarChange(true);
-    };
-  }, [onDisplayBottomBarChange, userRoles]);
 
   return (
     <div className="relative space-y-8">
@@ -122,8 +108,15 @@ function CommunityChat({ communityId }: CommunityChatProps) {
               }
               setPostInEdition({ postId, content });
             }}
+            replyHrefFormatter={(postId) =>
+              `/community/${communityId}/feed/post/${postId}`
+            }
+            canReply
+            innerEditMode
+            onEdit={onEdit}
             isReacting={isReacting}
             isDeleting={isDeleting}
+            isEditing={isEditing}
           />
         </div>
       )}
@@ -138,19 +131,6 @@ function CommunityChat({ communityId }: CommunityChatProps) {
           noMoreLabel={""}
         />
       </div>
-
-      {(userRoles.includes("member") ||
-        userRoles.includes("administrator")) && (
-        <FeedPostForm
-          orgId={communityId}
-          orgType="community"
-          editMode={!!postInEdition}
-          postInEdition={postInEdition}
-          onEdit={onEdit}
-          onCancelEdit={() => setPostInEdition(null)}
-          isEditing={isEditing}
-        />
-      )}
     </div>
   );
 }

@@ -14,9 +14,9 @@ import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { PostsList } from "@/components/social-feed/posts-list";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import useEventPostReactionHandler from "@/hooks/use-event-post-reaction-handler";
-import useEventPostDeleteHandler from "@/hooks/use-event-post-delete-handler";
-import useEventPostEditHandler from "@/hooks/use-event-post-edit-handler";
+import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
+import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
+import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
 type EventFeedProps = {
@@ -77,9 +77,9 @@ function EventFeed({ eventId }: EventFeedProps) {
     [postsPages],
   );
 
-  const { onEditStandardPost, isEditing } = useEventPostEditHandler(feedId);
-  const { onReactionChange, isReacting } = useEventPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useEventPostDeleteHandler(feedId);
+  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
   const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
     await onEditStandardPost(postId, values);

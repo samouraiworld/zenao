@@ -15,6 +15,7 @@ import { Header } from "@/components/layout/navigation/header";
 import { Footer } from "@/components/layout/navigation/footer";
 import PwaBottomBar from "@/components/layout/navigation/pwa-bottom-bar";
 import PwaStateProvider from "@/components/providers/pwa-state-provider";
+import { TooltipProvider } from "@/components/shadcn/tooltip";
 
 const albertSans = Albert_Sans({
   variable: "--font-albert-sans",
@@ -256,15 +257,17 @@ export default async function RootLayout({
                   enableSystem
                   disableTransitionOnChange
                 >
-                  <NextIntlClientProvider messages={messages}>
-                    <NextTopLoader showSpinner={false} color="#EC7E17" />
-                    <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
-                      <Header />
-                      {children}
-                      <Footer />
-                      <PwaBottomBar />
-                    </div>
-                  </NextIntlClientProvider>
+                  <TooltipProvider>
+                    <NextIntlClientProvider messages={messages}>
+                      <NextTopLoader showSpinner={false} color="#EC7E17" />
+                      <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
+                        <Header />
+                        {children}
+                        <Footer />
+                        <PwaBottomBar />
+                      </div>
+                    </NextIntlClientProvider>
+                  </TooltipProvider>
                 </ThemeProvider>
               </PwaStateProvider>
             </NuqsAdapter>
