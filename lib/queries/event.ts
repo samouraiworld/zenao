@@ -1,10 +1,10 @@
-import { queryOptions } from "@tanstack/react-query";
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
+import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
+import { queryOptions } from "@tanstack/react-query";
 import { GetToken } from "../utils";
+import { zenaoClient } from "@/lib/zenao-client";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
-import { zenaoClient } from "@/lib/zenao-client";
 
 export const eventOptions = (id: string) =>
   queryOptions({
@@ -44,6 +44,6 @@ export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
   });
 
 export function eventIdFromPkgPath(pkgPath: string): string {
-  const res = /(e\d+)$/.exec(pkgPath);
+  const res = /(e[\w]+)$/.exec(pkgPath);
   return res?.[1].substring(1) || "";
 }
