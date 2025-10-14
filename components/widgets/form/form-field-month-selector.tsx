@@ -1,6 +1,11 @@
 import { FieldValues } from "react-hook-form";
 import { FormFieldProps } from "@/types/schemas";
-import { FormField, FormItem, FormLabel, FormMessage } from "@/components/shadcn/form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/shadcn/form";
 import {
   Select,
   SelectContent,
@@ -41,13 +46,16 @@ export default function FormFieldMonthSelector<T extends FieldValues>({
             <SelectContent className="max-h-60 overflow-y-auto">
               {Array.from({ length: 12 }, (_, i) => {
                 const month = i + 1;
+                const monthName = new Date(1, i).toLocaleString("default", {
+                  month: "long",
+                });
                 return (
                   <SelectItem
                     key={month}
                     value={month.toString()}
                     onSelect={() => field.onChange(month)}
                   >
-                    {month}
+                    {monthName}
                   </SelectItem>
                 );
               })}

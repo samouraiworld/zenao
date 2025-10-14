@@ -29,9 +29,13 @@ export default function ProfileExperience({
           <Text>{experience.title}</Text>
           <Text variant="secondary">{experience.organization}</Text>
           <Text variant="secondary">
-            {experience.start.month} {experience.start.year} -{" "}
+            {new Date(
+              experience.start.year,
+              experience.start.month - 1,
+            ).toLocaleString("default", { month: "long" })}{" "}
+            {experience.start.year} -{" "}
             {experience.end
-              ? `${experience.end.month} ${experience.end.year}`
+              ? `${new Date(experience.end.year, experience.end.month - 1).toLocaleString("default", { month: "long" })} ${experience.end.year}`
               : "Present"}
           </Text>
         </div>

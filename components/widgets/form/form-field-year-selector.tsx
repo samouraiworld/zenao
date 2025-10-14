@@ -2,7 +2,12 @@
 
 import { FieldValues } from "react-hook-form";
 import { FormFieldProps } from "@/types/schemas";
-import { FormField, FormItem, FormLabel, FormMessage } from "@/components/shadcn/form";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/shadcn/form";
 import {
   Select,
   SelectContent,
