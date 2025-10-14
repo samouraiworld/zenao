@@ -1,9 +1,11 @@
 import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
 import React from "react";
+import ProfileExperience from "../profile-experience";
 import { UserFormSchemaType } from "@/types/schemas";
 import Heading from "@/components/widgets/texts/heading";
 import { Button } from "@/components/shadcn/button";
 import ExperienceDialog from "@/components/dialogs/experience-dialog";
+import Text from "@/components/widgets/texts/text";
 
 interface UserExperiencesProps {
   form: UseFormReturn<UserFormSchemaType>;
@@ -63,6 +65,30 @@ export default function UserExperiences({ form }: UserExperiencesProps) {
       />
 
       <Heading level={3}>Experiences</Heading>
+
+      {/* Display experiences */}
+
+      <div className="flex flex-col gap-4">
+        {experienceFields.length === 0 && (
+          <Text variant="secondary">No experiences added yet.</Text>
+        )}
+
+        {experienceFields.map((field, index) => (
+          <ProfileExperience
+            key={field.id}
+            experience={experiences[index]}
+            onEdit={() => {
+              setExperienceDialogState({
+                open: true,
+                experienceIndexToEdit: index,
+              });
+            }}
+            onDelete={() => {
+              removeExperience(index);
+            }}
+          />
+        ))}
+      </div>
 
       <Button
         type="button"
