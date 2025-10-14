@@ -34,9 +34,9 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, errors.New("user is banned")
 	}
 
-	if zUser.Plan != zeni.ProPlan {
-		return nil, errors.New("broadcast feature is only available for pro users")
-	}
+	// if zUser.Plan != zeni.ProPlan {
+	// 	return nil, errors.New("broadcast feature is only available for pro users")
+	// }
 
 	if len(req.Msg.Message) < 30 || len(req.Msg.Message) > 5000 {
 		return nil, errors.New("a broadcast message must contains between 30 and 5000 characters")
@@ -52,7 +52,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	if err != nil {
 		return nil, err
 	}
-	roles, err := s.Chain.WithContext(ctx).EntityRoles(userRealmID, zeni.EntityTypeEvent, evtRealmID)
+	roles, err := s.Chain.WithContext(ctx).EntityRoles(userRealmID, evtRealmID, zeni.EntityTypeEvent)
 	if err != nil {
 		return nil, err
 	}
@@ -70,6 +70,7 @@ func (s *ZenaoServer) BroadcastEvent(
 
 	participantsIDs := make([]string, 0, len(participants))
 	for _, p := range participants {
+		//TODO: TO CHANGE
 		id, err := s.Chain.WithContext(ctx).FromRealmIDToID(p, "u")
 		if err != nil {
 			// XXX: skip non user participants (should not happen tho isn't ?)

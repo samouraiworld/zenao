@@ -167,7 +167,6 @@ type Reaction struct {
 	Icon      string
 }
 
-// TODO: TO DELETE
 type SoldTicket struct {
 	DeletedAt    time.Time
 	CreatedAt    time.Time

@@ -1534,9 +1534,14 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		return nil, err
 	}
 	ticket := &zeni.SoldTicket{
-		Ticket:    tickobj,
+		Ticket: tickobj,
+		//TODO: TO DELETE
 		BuyerID:   fmt.Sprint(dbtick.BuyerID),
 		CreatedAt: dbtick.CreatedAt,
+
+		BuyerRealmID: dbtick.BuyerRealmID,
+		UserRealmID:  dbtick.UserRealmID,
+		EventRealmID: dbtick.EventRealmID,
 	}
 	if dbtick.DeletedAt.Valid {
 		ticket.DeletedAt = dbtick.DeletedAt.Time

@@ -184,10 +184,10 @@ func (g *gnoZenaoChain) EntityRoles(entityRealmID string, orgRealmID string, org
 
 	var expr string
 	if orgType == zeni.EntityTypeCommunity {
-		expr = "community.GetUserRolesJSON(\"" + g.UserRealmID(entityRealmID) + "\")"
+		expr = "community.GetUserRolesJSON(\"" + entityRealmID + "\")"
 	}
 	if orgType == zeni.EntityTypeEvent {
-		expr = "event.GetUserRolesJSON(\"" + g.UserRealmID(entityRealmID) + "\")"
+		expr = "event.GetUserRolesJSON(\"" + entityRealmID + "\")"
 	}
 	raw, err := checkQueryErr(g.client.QEval(orgRealmID, expr))
 	if err != nil {
@@ -214,7 +214,7 @@ func (g *gnoZenaoChain) GetUser(userRealmID string) (displayName string, Bio str
 
 	// TODO: change to use the getter defined in the user realm
 	addr := gnolang.DerivePkgBech32Addr(userRealmID).String()
-	raw, err := checkQueryErr(g.client.QEval("gno.land/r/"+g.namespace+"/demo/profile", "GetStringField(\""+addr+"\", \"DisplayName\", \"\")"))
+	raw, err := checkQueryErr(g.client.QEval("gno.land/r/demo/profile", "GetStringField(\""+addr+"\", \"DisplayName\", \"\")"))
 	if err != nil {
 		return "", "", "", err
 	}
@@ -222,7 +222,7 @@ func (g *gnoZenaoChain) GetUser(userRealmID string) (displayName string, Bio str
 	if err != nil {
 		return "", "", "", err
 	}
-	raw, err = checkQueryErr(g.client.QEval("gno.land/r/"+g.namespace+"/demo/profile", "GetStringField(\""+addr+"\", \"Bio\", \"\")"))
+	raw, err = checkQueryErr(g.client.QEval("gno.land/r/demo/profile", "GetStringField(\""+addr+"\", \"Bio\", \"\")"))
 	if err != nil {
 		return "", "", "", err
 	}
@@ -230,7 +230,7 @@ func (g *gnoZenaoChain) GetUser(userRealmID string) (displayName string, Bio str
 	if err != nil {
 		return "", "", "", err
 	}
-	raw, err = checkQueryErr(g.client.QEval("gno.land/r/"+g.namespace+"/demo/profile", "GetStringField(\""+addr+"\", \"Avatar\", \"\")"))
+	raw, err = checkQueryErr(g.client.QEval("gno.land/r/demo/profile", "GetStringField(\""+addr+"\", \"Avatar\", \"\")"))
 	if err != nil {
 		return "", "", "", err
 	}
