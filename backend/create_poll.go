@@ -34,11 +34,12 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
 	entityRealmID, err := s.Chain.WithContext(ctx).EntityRealmID(req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, fmt.Errorf("invalid org: %w", err)
 	}
-	_, postID, err := s.Chain.WithContext(ctx).CreatePoll(zUser.ID, entityRealmID, req.Msg)
+	_, postID, err := s.Chain.WithContext(ctx).CreatePoll(userRealmID, entityRealmID, req.Msg)
 	if err != nil {
 		return nil, err
 	}

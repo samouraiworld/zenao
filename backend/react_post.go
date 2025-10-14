@@ -30,7 +30,8 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		return nil, errors.New("icon cannot be empty")
 	}
 
-	if err = s.Chain.WithContext(ctx).ReactPost(zUser.ID, req.Msg); err != nil {
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	if err = s.Chain.WithContext(ctx).ReactPost(userRealmID, req.Msg); err != nil {
 		return nil, err
 	}
 

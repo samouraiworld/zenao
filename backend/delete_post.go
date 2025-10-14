@@ -23,7 +23,8 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).DeletePost(zUser.ID, req.Msg.PostId); err != nil {
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	if err := s.Chain.WithContext(ctx).DeletePost(userRealmID, req.Msg.PostId); err != nil {
 		return nil, err
 	}
 

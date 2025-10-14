@@ -47,7 +47,8 @@ func (s *ZenaoServer) EditPost(ctx context.Context, req *connect.Request[zenaov1
 		},
 	}
 
-	if err := s.Chain.WithContext(ctx).EditPost(zUser.ID, req.Msg.PostId, post); err != nil {
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	if err := s.Chain.WithContext(ctx).EditPost(userRealmID, req.Msg.PostId, post); err != nil {
 		return nil, err
 	}
 

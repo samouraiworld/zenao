@@ -55,11 +55,12 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		},
 	}
 
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
 	entityRealmID, err := s.Chain.WithContext(ctx).EntityRealmID(req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, fmt.Errorf("invalid org: %w", err)
 	}
-	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, entityRealmID, post)
+	postID, err := s.Chain.WithContext(ctx).CreatePost(userRealmID, entityRealmID, post)
 	if err != nil {
 		return nil, err
 	}
