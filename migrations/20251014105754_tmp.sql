@@ -22,18 +22,10 @@ ALTER TABLE `new_users` RENAME TO `users`;
 CREATE UNIQUE INDEX `idx_users_auth_id` ON `users` (`auth_id`);
 -- Create index "idx_users_deleted_at" to table: "users"
 CREATE INDEX `idx_users_deleted_at` ON `users` (`deleted_at`);
--- Create "new_checkins" table
-CREATE TABLE `new_checkins` (`created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `sold_ticket_id` integer NOT NULL PRIMARY KEY AUTOINCREMENT, `gatekeeper_id` integer NULL, `signature` text NULL);
--- Copy rows from old table "checkins" to new temporary table "new_checkins"
-INSERT INTO `new_checkins` (`created_at`, `updated_at`, `deleted_at`, `sold_ticket_id`, `gatekeeper_id`, `signature`) SELECT `created_at`, `updated_at`, `deleted_at`, `sold_ticket_id`, `gatekeeper_id`, `signature` FROM `checkins`;
--- Drop "checkins" table after copying rows
+-- Drop "checkins" table
 DROP TABLE `checkins`;
--- Rename temporary table "new_checkins" to "checkins"
-ALTER TABLE `new_checkins` RENAME TO `checkins`;
--- Create index "idx_checkins_deleted_at" to table: "checkins"
-CREATE INDEX `idx_checkins_deleted_at` ON `checkins` (`deleted_at`);
 -- Create "new_sold_tickets" table
-CREATE TABLE `new_sold_tickets` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `event_realm_id` text NOT NULL, `user_realm_id` text NOT NULL, `buyer_id` integer NULL, `price` real NULL, `secret` text NOT NULL, `pubkey` text NOT NULL);
+CREATE TABLE `new_sold_tickets` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `event_realm_id` text NOT NULL, `user_realm_id` text NOT NULL, `buyer_realm_id` text NOT NULL, `buyer_id` integer NULL, `price` real NULL, `secret` text NOT NULL, `pubkey` text NOT NULL);
 -- Copy rows from old table "sold_tickets" to new temporary table "new_sold_tickets"
 INSERT INTO `new_sold_tickets` (`id`, `created_at`, `updated_at`, `deleted_at`, `buyer_id`, `price`, `secret`, `pubkey`) SELECT `id`, `created_at`, `updated_at`, `deleted_at`, `buyer_id`, `price`, `secret`, `pubkey` FROM `sold_tickets`;
 -- Drop "sold_tickets" table after copying rows
