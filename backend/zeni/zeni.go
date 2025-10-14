@@ -251,13 +251,13 @@ type DB interface {
 	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
-	Participate(eventRealmID string, buyerID string, userRealmID string, ticketSecret string, password string, needPassword bool) error
+	Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string, password string, needPassword bool) error
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
 	GetEventCommunity(eventID string) (*Community, error)
 	GetEventUserTicket(eventRealmID string, userRealmID string) (*SoldTicket, error)
-	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
+	GetEventUserOrBuyerTickets(eventRealmID string, userRealmID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
 	AddEventToCommunity(eventID string, communityID string) error

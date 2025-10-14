@@ -8,6 +8,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -62,19 +63,40 @@ func (s *ZenaoServer) BroadcastEvent(
 	if err != nil {
 		return nil, err
 	}
-	// TODO: retrieve only if req.Msg.AttachTicket but how to retrieve ticket from chain efficiently ?
-	tickets := make(map[string][]*zeni.SoldTicket)
 
 	if len(participants) == 0 {
 		return nil, errors.New("a broadcast message cannot be sent to an event without any participants")
 	}
 
-	idsList := make([]string, len(participants))
-	// TODO: fix
-	// for i, participant := range participants {
-	// 	idsList[i] = participant.AuthID
-	// }
-	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
+	participantsIDs := make([]string, 0, len(participants))
+	for _, p := range participants {
+		id, err := s.Chain.WithContext(ctx).FromRealmIDToID(p, "u")
+		if err != nil {
+			// XXX: skip non user participants (should not happen tho isn't ?)
+			continue
+		}
+		participantsIDs = append(participantsIDs, id)
+	}
+	tickets := make(map[string][]*zeni.SoldTicket)
+	participantsFromDB := make([]*zeni.User, 0, len(participantsIDs))
+	if err := s.DB.TxWithSpan(ctx, "db.BroadcastEvent", func(db zeni.DB) error {
+		participantsFromDB, err = s.DB.GetUsersFromIDs(participantsIDs)
+		if err != nil {
+			return err
+		}
+		for _, p := range participantsFromDB {
+			ticket, err := db.GetEventUserOrBuyerTickets(evtRealmID, s.Chain.UserRealmID(p.ID))
+			if err != nil {
+				return err
+			}
+			tickets[p.AuthID] = ticket
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	authIDs := mapsl.Map(participantsFromDB, func(u *zeni.User) string { return u.AuthID })
+	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 	if err != nil {
 		return nil, err
 	}

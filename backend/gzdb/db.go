@@ -44,8 +44,10 @@ type EntityRole struct {
 type SoldTicket struct {
 	gorm.Model
 
-	EventRealmID string         `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
+	EventRealmID string `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
+	// TODO: don't make a unique index if we want to allow multiple tickets per user or anonymous tickets
 	UserRealmID  string         `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
+	BuyerRealmID string         `gorm:"not null"`
 	DeletedAt    gorm.DeletedAt `gorm:"uniqueIndex:idx_event_user_deleted"`
 
 	BuyerID uint
@@ -384,14 +386,9 @@ func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventRealmID string, buyerID string, userRealmID string, ticketSecret string, password string, needPassword bool) error {
+func (g *gormZenaoDB) Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string, password string, needPassword bool) error {
 	g, span := g.trace("gzdb.Participate")
 	defer span.End()
-
-	buyerIDint, err := strconv.ParseUint(buyerID, 10, 32)
-	if err != nil {
-		return err
-	}
 
 	ticket, err := zeni.NewTicketFromSecret(ticketSecret)
 	if err != nil {
@@ -417,7 +414,7 @@ func (g *gormZenaoDB) Participate(eventRealmID string, buyerID string, userRealm
 	if err := g.db.Save(&SoldTicket{
 		EventRealmID: eventRealmID,
 		UserRealmID:  userRealmID,
-		BuyerID:      uint(buyerIDint),
+		BuyerRealmID: buyerRealmID,
 		Secret:       ticket.Secret(),
 		Pubkey:       ticket.Pubkey(),
 	}).Error; err != nil {
@@ -737,14 +734,9 @@ func (g *gormZenaoDB) GetEventUserTicket(eventRealmID string, userRealmID string
 }
 
 // GetEventUserOrBuyerTickets implements zeni.DB.
-func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventID string, userID string) ([]*zeni.SoldTicket, error) {
-	userIDint, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse buyer or user id: %w", err)
-	}
-
+func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventRealmID string, userRealmID string) ([]*zeni.SoldTicket, error) {
 	tickets := []*SoldTicket{}
-	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_id = ? AND (buyer_id = ? OR user_id = ?)", eventID, userIDint, userIDint).Error
+	err := g.db.Model(&SoldTicket{}).Find(&tickets, "event_realm_id = ? AND (buyer_realm_id = ? OR user_realm_id = ?)", eventRealmID, userRealmID, userRealmID).Error
 	if err != nil {
 		return nil, err
 	}
