@@ -130,8 +130,8 @@ func execE2EInfra() error {
 			args := []string{"go", "run", "./backend", "start", "--db", dbCopyPath}
 			wg.Add(1)
 			go func() {
-				defer os.Remove(dbCopyPath)
 				defer func() { wg.Done(); backendDone <- struct{}{} }()
+				defer os.Remove(dbCopyPath)
 				if err := runCommand(backendCtx, "backend", "#C2675E", args); err != nil {
 					fmt.Printf("%-10s | backend: %v\n", "RUN_ERR", err)
 				}
