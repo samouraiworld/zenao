@@ -101,7 +101,7 @@ func promoteUser() error {
 
 	if err := db.Tx(func(txdb zeni.DB) error {
 		logger.Info("fetching user from database", zap.String("clerk-id", promoteUserConf.clerkID))
-		user, err := txdb.GetUserFromAuthID(promoteUserConf.clerkID)
+		user, err := txdb.GetUserByAuthID(promoteUserConf.clerkID)
 		if err != nil {
 			return err
 		}

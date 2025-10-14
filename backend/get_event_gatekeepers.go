@@ -44,7 +44,7 @@ func (s *ZenaoServer) GetEventGatekeepers(ctx context.Context, req *connect.Requ
 		gkpsIDs = append(gkpsIDs, id)
 	}
 
-	gkps, err := s.DB.GetUsersFromIDs(gkpsIDs)
+	gkps, err := s.DB.GetUsersByIDs(gkpsIDs)
 	if err != nil {
 		return nil, err
 	}

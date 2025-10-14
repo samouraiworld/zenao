@@ -80,7 +80,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	tickets := make(map[string][]*zeni.SoldTicket)
 	participantsFromDB := make([]*zeni.User, 0, len(participantsIDs))
 	if err := s.DB.TxWithSpan(ctx, "db.BroadcastEvent", func(db zeni.DB) error {
-		participantsFromDB, err = s.DB.GetUsersFromIDs(participantsIDs)
+		participantsFromDB, err = s.DB.GetUsersByIDs(participantsIDs)
 		if err != nil {
 			return err
 		}
@@ -113,14 +113,18 @@ func (s *ZenaoServer) BroadcastEvent(
 		attachments := make([]*resend.Attachment, 0, len(tickets))
 		if req.Msg.AttachTicket {
 			for i, ticket := range tickets[authParticipant.ID] {
-				pdfData, err := GeneratePDFTicket(req.Msg.EventId, evt, ticket.Ticket.Secret(), ticket.User.DisplayName, authParticipant.Email, ticket.CreatedAt, s.Logger)
+				displayName, _, _, err := s.Chain.WithContext(ctx).GetUser(ticket.UserRealmID)
+				if err != nil {
+					return nil, err
+				}
+				pdfData, err := GeneratePDFTicket(req.Msg.EventId, evt, ticket.Ticket.Secret(), displayName, authParticipant.Email, ticket.CreatedAt, s.Logger)
 				if err != nil {
 					s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Ticket.Secret()))
 					return nil, err
 				}
 				attachments = append(attachments, &resend.Attachment{
 					Content:     pdfData,
-					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", ticket.BuyerID, req.Msg.EventId, i),
+					Filename:    fmt.Sprintf("ticket_%s_%d.pdf", req.Msg.EventId, i),
 					ContentType: "application/pdf",
 				})
 			}

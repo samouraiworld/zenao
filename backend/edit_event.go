@@ -137,7 +137,7 @@ func (s *ZenaoServer) EditEvent(
 			}
 			memberIDs = append(memberIDs, id)
 		}
-		members, err = s.DB.GetUsersFromIDs(memberIDs)
+		members, err = s.DB.GetUsersByIDs(memberIDs)
 		if err != nil {
 			return nil, err
 		}

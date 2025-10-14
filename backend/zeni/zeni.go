@@ -169,13 +169,17 @@ type Reaction struct {
 
 // TODO: TO DELETE
 type SoldTicket struct {
-	DeletedAt time.Time
-	CreatedAt time.Time
-	Ticket    *Ticket
-	BuyerID   string
-	UserID    string
-	User      *User
-	Checkin   *Checkin
+	DeletedAt    time.Time
+	CreatedAt    time.Time
+	Ticket       *Ticket
+	EventRealmID string
+	BuyerRealmID string
+	UserRealmID  string
+
+	//TODO: TO DELETE
+	Checkin *Checkin
+	BuyerID string
+	UserID  string
 }
 
 // TODO: TO DELETE
@@ -237,9 +241,9 @@ type DB interface {
 	WithContext(ctx context.Context) DB
 
 	CreateUser(authID string) (*User, error)
-	GetUserFromAuthID(authID string) (*User, error)
-	GetUserFromID(userID string) (*User, error)
-	GetUsersFromIDs(userIDs []string) ([]*User, error)
+	GetUserByAuthID(authID string) (*User, error)
+	GetUserByID(userID string) (*User, error)
+	GetUsersByIDs(userIDs []string) ([]*User, error)
 	// XXX: add EnsureUsersExist
 
 	PromoteUser(userID string, plan Plan) error
@@ -311,6 +315,8 @@ type Chain interface {
 
 	// Read operations (Query)
 	EntityRoles(entityRealmID string, orgRealmID string, orgType string) ([]string, error)
+
+	GetUser(userRealmID string) (displayName string, Bio string, ImageUri string, err error)
 
 	// TODO: what happens if event not found ? should i just return empty cmt & empty err or err handle it ?
 	GetEvent(eventRealmID string) (*zenaov1.EventInfo, error)

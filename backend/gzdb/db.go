@@ -56,17 +56,6 @@ type SoldTicket struct {
 	Pubkey  string `gorm:"uniqueIndex;not null"`
 }
 
-type Checkin struct {
-	// gorm.Model without ID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-
-	SoldTicketID uint `gorm:"primaryKey;not null"`
-	GatekeeperID uint
-	Signature    string
-}
-
 func SetupDB(dsn string) (zeni.DB, error) {
 	var (
 		db  *gorm.DB
@@ -450,7 +439,7 @@ func (g *gormZenaoDB) PromoteUser(userID string, plan zeni.Plan) error {
 }
 
 // GetUserFromAuthID implements zeni.DB.
-func (g *gormZenaoDB) GetUserFromAuthID(authID string) (*zeni.User, error) {
+func (g *gormZenaoDB) GetUserByAuthID(authID string) (*zeni.User, error) {
 	var user User
 	if err := g.db.Where("auth_id = ?", authID).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -462,7 +451,7 @@ func (g *gormZenaoDB) GetUserFromAuthID(authID string) (*zeni.User, error) {
 }
 
 // GetUserFromID implements zeni.DB.
-func (g *gormZenaoDB) GetUserFromID(userID string) (*zeni.User, error) {
+func (g *gormZenaoDB) GetUserByID(userID string) (*zeni.User, error) {
 	userIDInt, err := strconv.ParseUint(userID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -478,7 +467,7 @@ func (g *gormZenaoDB) GetUserFromID(userID string) (*zeni.User, error) {
 }
 
 // GetUsersFromIDs implements zeni.DB.
-func (g *gormZenaoDB) GetUsersFromIDs(userIDs []string) ([]*zeni.User, error) {
+func (g *gormZenaoDB) GetUsersByIDs(userIDs []string) ([]*zeni.User, error) {
 	if len(userIDs) == 0 {
 		return []*zeni.User{}, nil
 	}
@@ -1544,18 +1533,9 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	if err != nil {
 		return nil, err
 	}
-	var checkin *zeni.Checkin
-	// if dbtick.Checkin != nil {
-	// 	checkin = &zeni.Checkin{
-	// 		At:           dbtick.Checkin.CreatedAt,
-	// 		GatekeeperID: fmt.Sprint(dbtick.Checkin.GatekeeperID),
-	// 		Signature:    dbtick.Checkin.Signature,
-	// 	}
-	// }
 	ticket := &zeni.SoldTicket{
 		Ticket:    tickobj,
 		BuyerID:   fmt.Sprint(dbtick.BuyerID),
-		Checkin:   checkin,
 		CreatedAt: dbtick.CreatedAt,
 	}
 	if dbtick.DeletedAt.Valid {

@@ -139,7 +139,7 @@ func (s *ZenaoServer) CreateEvent(
 			}
 			memberIDs = append(memberIDs, id)
 		}
-		members, err = s.DB.GetUsersFromIDs(memberIDs)
+		members, err = s.DB.GetUsersByIDs(memberIDs)
 	}
 
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evtID, evt)

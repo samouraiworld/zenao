@@ -69,7 +69,7 @@ func (s *ZenaoServer) CancelEvent(
 			}
 			participantsIDs = append(participantsIDs, id)
 		}
-		participantsFromDB, err := s.DB.GetUsersFromIDs(participantsIDs)
+		participantsFromDB, err := s.DB.GetUsersByIDs(participantsIDs)
 		if err != nil {
 			return nil, err
 		}

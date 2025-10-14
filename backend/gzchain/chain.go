@@ -16,6 +16,7 @@ import (
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoclient"
 	"github.com/gnolang/gno/gno.land/pkg/sdk/vm"
+	"github.com/gnolang/gno/gnovm/pkg/gnolang"
 	"github.com/gnolang/gno/gnovm/stdlibs/chain"
 	"github.com/gnolang/gno/gnovm/stdlibs/chain/banker"
 	tm2client "github.com/gnolang/gno/tm2/pkg/bft/rpc/client"
@@ -204,6 +205,40 @@ func (g *gnoZenaoChain) EntityRoles(entityRealmID string, orgRealmID string, org
 	}
 
 	return roles, nil
+}
+
+// GetUser implements zeni.Chain.
+func (g *gnoZenaoChain) GetUser(userRealmID string) (displayName string, Bio string, ImageUri string, err error) {
+	g, span := g.trace("gzchain.GetUser")
+	defer span.End()
+
+	// TODO: change to use the getter defined in the user realm
+	addr := gnolang.DerivePkgBech32Addr(userRealmID).String()
+	raw, err := checkQueryErr(g.client.QEval("gno.land/r/"+g.namespace+"/demo/profile", "GetStringField(\""+addr+"\", \"DisplayName\", \"\")"))
+	if err != nil {
+		return "", "", "", err
+	}
+	displayName, err = parseQEvalResponseData(raw)
+	if err != nil {
+		return "", "", "", err
+	}
+	raw, err = checkQueryErr(g.client.QEval("gno.land/r/"+g.namespace+"/demo/profile", "GetStringField(\""+addr+"\", \"Bio\", \"\")"))
+	if err != nil {
+		return "", "", "", err
+	}
+	Bio, err = parseQEvalResponseData(raw)
+	if err != nil {
+		return "", "", "", err
+	}
+	raw, err = checkQueryErr(g.client.QEval("gno.land/r/"+g.namespace+"/demo/profile", "GetStringField(\""+addr+"\", \"Avatar\", \"\")"))
+	if err != nil {
+		return "", "", "", err
+	}
+	ImageUri, err = parseQEvalResponseData(raw)
+	if err != nil {
+		return "", "", "", err
+	}
+	return displayName, Bio, ImageUri, nil
 }
 
 // CreateEvent implements ZenaoChain.

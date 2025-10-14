@@ -44,7 +44,7 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 		admIDs = append(admIDs, id)
 	}
 
-	admins, err := s.DB.GetUsersFromIDs(admIDs)
+	admins, err := s.DB.GetUsersByIDs(admIDs)
 	if err != nil {
 		return nil, err
 	}

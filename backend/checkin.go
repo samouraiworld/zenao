@@ -28,15 +28,10 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 	s.Logger.Info("checkin", zap.String("gatekeeper", zUser.ID), zap.String("pubkey", req.Msg.TicketPubkey))
 
 	// TODO: I added event_id in the request to avoid to search on-chain the event based on the ticket pubkey
-	evt, err := s.Chain.WithContext(ctx).GetEvent(req.Msg.EventId)
-	if err != nil {
+	evtRealmID := s.Chain.WithContext(ctx).EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.WithContext(ctx).UserRealmID(zUser.ID)
+	if err := s.Chain.WithContext(ctx).Checkin(evtRealmID, userRealmID, req.Msg); err != nil {
 		return nil, err
-	}
-
-	if evt != nil {
-		if err := s.Chain.WithContext(ctx).Checkin(req.Msg.EventId, zUser.ID, req.Msg); err != nil {
-			s.Logger.Error("failed to checkin on-chain, ignoring to prevent entrance brick")
-		}
 	}
 
 	return connect.NewResponse(&zenaov1.CheckinResponse{}), nil
