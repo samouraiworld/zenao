@@ -1,21 +1,29 @@
 import { PencilIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import Text from "@/components/widgets/texts/text";
-import { UserExperienceSchemaFormType } from "@/types/schemas";
+import { UserExperienceSchemaType } from "@/types/schemas";
+import { cn } from "@/lib/tailwind";
 
 interface ProfileExperienceProps {
-  experience: UserExperienceSchemaFormType;
+  unique?: boolean;
+  experience: UserExperienceSchemaType;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
 export default function ProfileExperience({
+  unique = false,
   experience,
   onEdit,
   onDelete,
 }: ProfileExperienceProps) {
   return (
-    <div className="flex flex-row items-center border-b pb-4 gap-2">
+    <div
+      className={cn(
+        "flex flex-row items-center pb-4 gap-2",
+        !unique && "border-b",
+      )}
+    >
       <div className="grow flex flex-col gap-4">
         <div className="flex flex-col">
           <Text>{experience.title}</Text>

@@ -76,6 +76,7 @@ export default function UserExperiences({ form }: UserExperiencesProps) {
         {experienceFields.map((field, index) => (
           <ProfileExperience
             key={field.id}
+            unique={experienceFields.length === 1}
             experience={field}
             onEdit={() => {
               setExperienceDialogState({
