@@ -1,33 +1,49 @@
 "use client";
 
-import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
+import {
+  ArrayPath,
+  Control,
+  FieldArray,
+  FieldValues,
+  useFieldArray,
+} from "react-hook-form";
 import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 
-import { UserFormSchemaType, userFormSocialLinkSchema } from "@/types/schemas";
+import { userFormSocialLinkSchema } from "@/types/schemas";
 import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
 import Heading from "@/components/widgets/texts/heading";
 import { cn } from "@/lib/tailwind";
 
-function SocialMediaLinks({
-  form,
-}: {
-  form: UseFormReturn<UserFormSchemaType>;
-}) {
+type SocialLinkItem = { url: string };
+
+interface SocialMediaLinksProps<
+  T extends FieldValues,
+  TName extends ArrayPath<T> = ArrayPath<T>,
+> {
+  control: Control<T>;
+  name: TName;
+}
+
+function SocialMediaLinks<
+  T extends FieldValues,
+  TName extends ArrayPath<T> = ArrayPath<T>,
+>({ control, name }: SocialMediaLinksProps<T, TName>) {
   const {
+    fields,
     append: appendLink,
     remove: removeLink,
-    fields: linkFields,
-  } = useFieldArray({
-    control: form.control,
-    name: "socialMediaLinks",
+  } = useFieldArray<T, TName, "id">({
+    control,
+    name,
   });
 
-  const socialMediaLinks = useWatch({
-    control: form.control,
-    name: "socialMediaLinks",
-  });
+  console.log(fields);
+
+  const socialMediaLinks = fields as (FieldArray<T, TName> & {
+    id: string;
+  } & SocialLinkItem)[];
 
   const lastUrl = socialMediaLinks?.at(-1)?.url ?? "";
 
@@ -39,12 +55,12 @@ function SocialMediaLinks({
     <div className="flex flex-col gap-4">
       <Heading level={3}>Social links</Heading>
 
-      {linkFields.map((link, index) => {
+      {socialMediaLinks.map((link, index) => {
         return (
           <div className="flex items-start gap-2" key={link.id}>
             <FormItem className="grow">
               <FormField
-                name={`socialMediaLinks.${index}.url`}
+                name={`${name}.${index}.url`}
                 render={({ field }) => (
                   <div className="flex flex-col gap-2">
                     <Input
@@ -75,7 +91,7 @@ function SocialMediaLinks({
       <Button
         type="button"
         className="w-fit"
-        onClick={() => appendLink({ url: "" })}
+        onClick={() => appendLink({ url: "" } as FieldArray<T, TName>)}
         disabled={isLastLinkInvalid}
       >
         Add link
