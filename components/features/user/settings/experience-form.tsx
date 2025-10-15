@@ -9,12 +9,12 @@ import FormFieldYearSelector from "@/components/widgets/form/form-field-year-sel
 import FormFieldMonthSelector from "@/components/widgets/form/form-field-month-selector";
 import { Button } from "@/components/shadcn/button";
 import { cn } from "@/lib/tailwind";
-import { UserExperienceSchemaFormType } from "@/types/schemas";
+import { UserExperienceSchemaType } from "@/types/schemas";
 
 interface ExperienceFormProps {
-  form: UseFormReturn<UserExperienceSchemaFormType>;
-  experience?: UserExperienceSchemaFormType;
-  onSubmit: (data: UserExperienceSchemaFormType) => void;
+  form: UseFormReturn<UserExperienceSchemaType>;
+  experience?: UserExperienceSchemaType;
+  onSubmit: (data: UserExperienceSchemaType) => void;
 }
 
 export default function ExperienceForm({
