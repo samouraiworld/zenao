@@ -6,8 +6,6 @@ import {
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 
-export const revalidate = 120;
-
 type CommunitiesLayoutProps = {
   children: React.ReactNode;
 };
