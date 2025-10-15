@@ -388,6 +388,9 @@
     "preview-tab": "Preview",
     "admin-label": "Administrators",
     "admin-placeholder": "New administrator email",
+    "visibility-section": "Visibility",
+    "socialLinks": "Social Links",
+    "socialLinks-description": "Add links to your community's social media profiles to enhance visibility",
     "remove-admin": "Remove",
     "add-admin": "Add Administrator",
     "submit": "Update Community"

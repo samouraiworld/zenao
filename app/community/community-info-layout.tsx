@@ -1,6 +1,8 @@
 "use client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Organization, WithContext } from "schema-dts";
+import { ExternalLink, Link2 } from "lucide-react";
+import Link from "next/link";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
@@ -27,16 +29,18 @@ function CommunityInfoLayout({
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data } = useSuspenseQuery(communityInfo(communityId));
 
-  const { description, shortDescription } = deserializeWithFrontMatter({
-    serialized: data.description || "",
-    schema: communityDetailsSchema,
-    defaultValue: {
-      description: "",
-      shortDescription: "",
-      portfolio: [],
-    },
-    contentFieldName: "description",
-  });
+  const { description, shortDescription, socialMediaLinks } =
+    deserializeWithFrontMatter({
+      serialized: data.description || "",
+      schema: communityDetailsSchema,
+      defaultValue: {
+        description: "",
+        shortDescription: "",
+        socialMediaLinks: [],
+        portfolio: [],
+      },
+      contentFieldName: "description",
+    });
 
   const jsonLd: WithContext<Organization> = {
     "@context": "https://schema.org",
@@ -110,6 +114,33 @@ function CommunityInfoLayout({
         </div>
 
         <MarkdownPreview markdownString={description} />
+
+        {socialMediaLinks.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              <Link2 size={18} className="text-primary" />
+              Links
+            </Heading>
+            <ul className="flex flex-wrap gap-2">
+              {socialMediaLinks.map((link) => (
+                <li key={link.url}>
+                  <Link
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 hover:bg-muted border hover:border-blue-600/50 transition text-sm"
+                  >
+                    <span className="text-blue-500">{link.url}</span>
+                    <ExternalLink
+                      size={14}
+                      className="flex-shrink-0 text-blue-400"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="flex flex-col md:hidden gap-2">
           <GnowebButton
