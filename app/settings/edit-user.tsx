@@ -29,7 +29,14 @@ import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
 } from "@/lib/serialization";
+import { Card } from "@/components/widgets/cards/card";
+import { Tabs, TabsContent } from "@/components/shadcn/tabs";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
+import { cn } from "@/lib/tailwind";
+import Heading from "@/components/widgets/texts/heading";
 import { addressFromRealmId } from "@/lib/gno";
+import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
+import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
@@ -74,6 +81,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   });
   const { toast } = useToast();
   const t = useTranslations("settings");
+
+  const bio = form.watch("bio");
 
   const onSubmit = async (values: UserFormSchemaType) => {
     try {
@@ -155,20 +164,50 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               label={t("name-label")}
               placeholder={t("name-placeholder")}
             />
-            <FormFieldInputString
-              control={form.control}
-              name="shortBio"
-              label={t("shortbio-label")}
-              placeholder={t("shortbio-placeholder")}
-            />
-            <FormFieldTextArea
-              control={form.control}
-              name="bio"
-              placeholder={t("bio-placeholder")}
-              label={t("bio-label")}
-              wordCounter
-              maxLength={1000}
-            />
+
+            <Card className="rounded px-3 border-custom-input-border p-4 w-full">
+              <div className="mb-4 flex items-center gap-2">
+                <Heading level={3}>{t("shortbio-label")}</Heading>
+              </div>
+              <FormFieldInputString
+                control={form.control}
+                name="shortBio"
+                placeholder={t("shortbio-placeholder")}
+                className="mb-4"
+              />
+
+              <div className="flex flex-col gap-4 relative">
+                <div className="mb-4 flex items-center gap-2">
+                  <Heading level={3}>{t("bio-label")}</Heading>
+                </div>
+
+                <Tabs defaultValue="write" className="w-full">
+                  <TabsIconsList
+                    tabs={getMarkdownEditorTabs({
+                      writeLabel: t("write-tab"),
+                      previewLabel: t("preview-tab"),
+                    })}
+                    className="absolute top-0 right-0 rounded p-0 h-fit"
+                  />
+
+                  <TabsContent value="write" tabIndex={-1}>
+                    <FormFieldTextArea
+                      control={form.control}
+                      name="bio"
+                      placeholder={t("bio-placeholder")}
+                      className={cn(
+                        "bg-transparent border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+                      )}
+                      maxLength={1000}
+                      wordCounter
+                    />
+                  </TabsContent>
+                  <TabsContent value="preview">
+                    <MarkdownPreview markdownString={bio} />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </Card>
           </div>
           <div className="flex flex-col gap-4 w-full">
             <FormFieldInputString

@@ -29,17 +29,18 @@ export default function TabsIconsList({
       {tabs.map((tab) => {
         if (tab.tooltip) {
           return (
-            <Tooltip key={tab.id}>
-              <TooltipTrigger type="button" asChild>
-                <TabsTrigger
-                  value={tab.id}
-                  onClick={() => onValueChange?.(tab.id)}
-                >
+            <TabsTrigger
+              key={tab.id}
+              value={tab.id}
+              onClick={() => onValueChange?.(tab.id)}
+            >
+              <Tooltip key={tab.id}>
+                <TooltipTrigger type="button" asChild>
                   {tab.icon}
-                </TabsTrigger>
-              </TooltipTrigger>
-              <TooltipContent>{tab.tooltip}</TooltipContent>
-            </Tooltip>
+                </TooltipTrigger>
+                <TooltipContent>{tab.tooltip}</TooltipContent>
+              </Tooltip>
+            </TabsTrigger>
           );
         }
 
