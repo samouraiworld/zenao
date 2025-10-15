@@ -841,7 +841,7 @@ func (g *gnoZenaoChain) GetCommunityUsersByRole(communityRealmID string, role st
 	g, span := g.trace("gzchain.GetCommunityUsersByRole")
 	defer span.End()
 
-	raw, err := checkQueryErr(g.client.QEval(communityRealmID, "community.GetUsersWithRoleJSON(\""+role+"\")"))
+	raw, err := checkQueryErr(g.client.QEval(communityRealmID, "community.GetMembersWithRoleJSON(\""+role+"\")"))
 	if err != nil {
 		return nil, err
 	}

@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	"connectrpc.com/connect"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"go.uber.org/zap"
 )
@@ -54,7 +55,12 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 		adminIDs = append(adminIDs, zAdmin.ID)
 	}
 
-	if err := s.Chain.WithContext(ctx).EditCommunity(req.Msg.CommunityId, zUser.ID, adminIDs, req.Msg); err != nil {
+	adminRealmIDs := mapsl.Map(adminIDs, func(id string) string {
+		return s.Chain.UserRealmID(id)
+	})
+	cmtRealmID := s.Chain.CommunityRealmID(req.Msg.CommunityId)
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	if err := s.Chain.WithContext(ctx).EditCommunity(cmtRealmID, userRealmID, adminRealmIDs, req.Msg); err != nil {
 		return nil, fmt.Errorf("failed to edit community on chain: %w", err)
 	}
 

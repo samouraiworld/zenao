@@ -37,6 +37,7 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 	var admIDs []string
 	for _, admin := range administrators {
 		// TODO: actually in future an event could be admin of communities
+		// TODO: Change this
 		id, err := s.Chain.WithContext(ctx).FromRealmIDToID(admin, "u")
 		if err != nil {
 			return nil, err
