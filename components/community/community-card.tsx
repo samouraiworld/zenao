@@ -69,6 +69,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
 
 function MembersPreview({ id }: { id: string }) {
   const t = useTranslations("community-card");
+  // NOTE: we useQuery instead of useSuspenseQuery here to ensure this is fetched on the client
   const { data: members } = useQuery(communityUsersWithRoles(id, ["member"]));
   const memberAddresses = members?.map((m) => m.address);
   if (!memberAddresses) {
@@ -95,7 +96,6 @@ function MembersPreview({ id }: { id: string }) {
 function MembersPreviewFallback() {
   return (
     <div className="flex flex-col gap-2">
-      {/* 6 because we decide to show the first 6 participants avatars as preview */}
       <Skeleton className="w-24 h-6" />
       <Skeleton className="w-20 h-[1rem] md:h-[1.25rem]" />
       <Skeleton className="w-36 h-[1.25rem]" />
