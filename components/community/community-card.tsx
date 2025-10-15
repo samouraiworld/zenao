@@ -54,10 +54,10 @@ function CommunityCard({ id, community }: CommunityCardProps) {
           </AspectRatio>
         </div>
         <div className="flex flex-col gap-2">
-          <Heading level={3} className="text-lg sm:text-2xl">
+          <Heading level={3} className="text-lg sm:text-2xl break-all">
             {community.displayName}
           </Heading>
-          <Text className="text-xs md:text-sm text-ellipsis line-clamp-2 text-secondary-color">
+          <Text className="text-xs md:text-sm text-ellipsis line-clamp-2 text-secondary-color break-all">
             {shortDescription || t("no-description")}
           </Text>
 
@@ -77,7 +77,7 @@ function MembersPreview({ id }: { id: string }) {
     return <MembersPreviewFallback />;
   }
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 ">
       {/* 6 because we decide to show the first 6 participants avatars as preview */}
       <UsersAvatarsPreview
         users={
