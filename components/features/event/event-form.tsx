@@ -36,6 +36,7 @@ import Text from "@/components/widgets/texts/text";
 import { EventFormSchemaType } from "@/types/schemas";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
+import Heading from "@/components/widgets/texts/heading";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -179,103 +180,109 @@ export const EventForm: React.FC<EventFormProps> = ({
             }}
             wordCounter
           />
-          <Card className="rounded px-3 border-custom-input-border relative">
-            <Tabs defaultValue="write" className="w-full">
-              <TabsIconsList
-                tabs={getMarkdownEditorTabs({
-                  writeLabel: t("write-tab"),
-                  previewLabel: t("preview-tab"),
-                })}
-                className="absolute right-2 rounded p-0 h-fit"
-                style={{ top: "0.75rem" }}
-              />
+          <Card className="rounded px-3 border-custom-input-border">
+            <div className="flex flex-col gap-4 relative">
+              <div className="mb-2 flex items-center gap-2">
+                <Heading level={3}>{t("description-label")}</Heading>
+              </div>
 
-              <TabsContent
-                value="write"
-                tabIndex={-1}
-                style={{ paddingTop: "28px" }}
-              >
-                <div className="flex flex-col gap-2 w-full">
-                  <FormFieldTextArea
-                    ref={descriptionRef}
-                    control={form.control}
-                    name="description"
-                    placeholder={t("description-placeholder")}
-                    className={cn(
-                      "bg-transparent",
-                      "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
-                    )}
-                    maxLength={10000}
-                    wordCounter
-                  />
-                  {/* Upload image buttons */}
-                  <div className="flex flex-row gap-2 self-end">
-                    <Button
-                      variant="ghost"
+              <Tabs defaultValue="write" className="w-full">
+                <TabsIconsList
+                  tabs={getMarkdownEditorTabs({
+                    writeLabel: t("write-tab"),
+                    previewLabel: t("preview-tab"),
+                  })}
+                  className="absolute top-0 right-0 rounded p-0 h-fit"
+                />
+
+                <TabsContent value="write" tabIndex={-1}>
+                  <div className="flex flex-col gap-2 w-full">
+                    <FormFieldTextArea
+                      ref={descriptionRef}
+                      control={form.control}
+                      name="description"
+                      placeholder={t("description-placeholder")}
                       className={cn(
-                        "w-fit flex items-center justify-center cursor-pointer",
-                        "hover:bg-neutral-700",
+                        "bg-transparent",
+                        "border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
                       )}
-                      title="Add image"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (uploading) return;
-
-                        setCursor(
-                          descriptionRef.current?.selectionStart ??
-                            descriptionRef.current?.textLength ??
-                            0,
-                        );
-                        hiddenImgInputRef.current?.click();
-                      }}
-                      aria-label="Add image"
-                    >
-                      <ImageIcon className="!h-4 !w-4" />
-                    </Button>
-                    <input
-                      type="file"
-                      onChange={handleImageChange}
-                      ref={hiddenImgInputRef}
-                      className="hidden"
-                      disabled={uploading}
+                      maxLength={10000}
+                      wordCounter
                     />
+                    {/* Upload image buttons */}
+                    <div className="flex flex-row gap-2 self-end">
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-fit flex items-center justify-center cursor-pointer",
+                          "hover:bg-neutral-700",
+                        )}
+                        title="Add image"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (uploading) return;
 
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "w-fit flex px-4 items-center justify-center cursor-pointer",
-                        "hover:bg-neutral-700",
-                      )}
-                      title="Add audio"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (uploading) return;
+                          setCursor(
+                            descriptionRef.current?.selectionStart ??
+                              descriptionRef.current?.textLength ??
+                              0,
+                          );
+                          hiddenImgInputRef.current?.click();
+                        }}
+                        aria-label="Add image"
+                      >
+                        <ImageIcon className="!h-4 !w-4" />
+                      </Button>
+                      <input
+                        type="file"
+                        onChange={handleImageChange}
+                        ref={hiddenImgInputRef}
+                        className="hidden"
+                        disabled={uploading}
+                      />
 
-                        setCursor(
-                          descriptionRef.current?.selectionStart ??
-                            descriptionRef.current?.textLength ??
-                            0,
-                        );
-                        hiddenAudioInputRef.current?.click();
-                      }}
-                      aria-label="Add audio"
-                    >
-                      <AudioWaveformIcon className="!h-4 !w-4" />
-                    </Button>
-                    <input
-                      type="file"
-                      onChange={handleAudioChange}
-                      ref={hiddenAudioInputRef}
-                      className="hidden"
-                      disabled={uploading}
-                    />
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-fit flex px-4 items-center justify-center cursor-pointer",
+                          "hover:bg-neutral-700",
+                        )}
+                        title="Add audio"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (uploading) return;
+
+                          setCursor(
+                            descriptionRef.current?.selectionStart ??
+                              descriptionRef.current?.textLength ??
+                              0,
+                          );
+                          hiddenAudioInputRef.current?.click();
+                        }}
+                        aria-label="Add audio"
+                      >
+                        <AudioWaveformIcon className="!h-4 !w-4" />
+                      </Button>
+                      <input
+                        type="file"
+                        onChange={handleAudioChange}
+                        ref={hiddenAudioInputRef}
+                        className="hidden"
+                        disabled={uploading}
+                      />
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="preview">
-                <MarkdownPreview markdownString={description} />
-              </TabsContent>
-            </Tabs>
+                </TabsContent>
+                <TabsContent value="preview">
+                  {description.trim() === "" ? (
+                    <div className="w-full h-32 flex items-center justify-center text-sm text-muted-foreground">
+                      {t("preview-empty")}
+                    </div>
+                  ) : null}
+                  <MarkdownPreview markdownString={description} />
+                </TabsContent>
+              </Tabs>
+            </div>
           </Card>
           <div className="flex items-center gap-2">
             <Switch
