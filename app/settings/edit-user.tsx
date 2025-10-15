@@ -6,7 +6,6 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -35,12 +34,11 @@ import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { cn } from "@/lib/tailwind";
 import Heading from "@/components/widgets/texts/heading";
 import { addressFromRealmId } from "@/lib/gno";
-import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
+import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
-  const [bioTab, setBioTab] = useState<"write" | "preview">("write");
 
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
 
@@ -174,17 +172,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
                 className="mb-4"
               />
 
-              <div className="flex flex-col relative">
+              <div className="flex flex-col gap-4 relative">
                 <div className="mb-4 flex items-center gap-2">
                   <Heading level={3}>{t("bio-label")}</Heading>
                 </div>
 
-                <Tabs
-                  defaultValue="write"
-                  className="w-full"
-                  value={bioTab}
-                  onValueChange={(v) => setBioTab(v as "write" | "preview")}
-                >
+                <Tabs defaultValue="write" className="w-full">
                   <TabsIconsList
                     tabs={getMarkdownEditorTabs({
                       writeLabel: t("write-tab"),
@@ -192,6 +185,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
                     })}
                     className="absolute top-0 right-0 rounded p-0 h-fit"
                   />
+
                   <TabsContent value="write" tabIndex={-1}>
                     <FormFieldTextArea
                       control={form.control}
