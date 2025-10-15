@@ -207,6 +207,11 @@ func (g *gnoZenaoChain) EntityRoles(entityRealmID string, orgRealmID string, org
 	return roles, nil
 }
 
+// SignerAddress implements zeni.Chain.
+func (g *gnoZenaoChain) SignerAddress() string {
+	return g.signerInfo.GetAddress().String()
+}
+
 // GetUser implements zeni.Chain.
 func (g *gnoZenaoChain) GetUser(userRealmID string) (displayName string, Bio string, ImageUri string, err error) {
 	g, span := g.trace("gzchain.GetUser")

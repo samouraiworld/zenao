@@ -306,6 +306,7 @@ type Chain interface {
 	WithContext(ctx context.Context) Chain
 
 	// Off-chain operations
+	SignerAddress() string
 	UserRealmID(userID string) string
 	EventRealmID(eventID string) string
 	CommunityRealmID(communityID string) string

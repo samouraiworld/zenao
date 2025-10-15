@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gnolang/gno/gno.land/pkg/gnoland"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
 	"github.com/google/uuid"
@@ -47,6 +48,10 @@ type fakegenConfig struct {
 	eventsCount      uint
 	postsCount       uint
 	pollsCount       uint
+	gentxs           bool
+	gentime          string
+	gentxsfile       string
+	verbose          bool
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -55,6 +60,10 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&fakegenConf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
 	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
+	flset.BoolVar(&fakegenConf.gentxs, "gentxs", false, "generate gentxs for the created users/events and save them to a file")
+	flset.BoolVar(&fakegenConf.verbose, "v", false, "Enable verbose logging")
+	flset.StringVar(&fakegenConf.gentime, "gentime", "2025-01-15T00:00:00Z", "genesis time formatted as RFC3339: 2006-01-02T15:04:05Z | if - gentxs is enabled")
+	flset.StringVar(&fakegenConf.gentxsfile, "txs-file", "genesis_txs.jsonl", "file to save the generated gentxs to | if - gentxs is enabled")
 	flset.Float64Var(&fakegenConf.gasSecurityRate, "gas-security-rate", 0.2, "margin multiplier for estimated gas wanted to be safe")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.communitiesCount, "communities", 5, "number of fake communities to generate")
@@ -89,9 +98,15 @@ type fakePoll struct {
 }
 
 func execFakegen() (retErr error) {
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		return err
+	var logger *zap.Logger
+	if fakegenConf.verbose {
+		var err error
+		logger, err = zap.NewDevelopment()
+		if err != nil {
+			return err
+		}
+	} else {
+		logger = zap.NewNop()
 	}
 
 	chain, err := gzchain.SetupChain(fakegenConf.adminMnemonic, fakegenConf.gnoNamespace, fakegenConf.chainID, fakegenConf.chainEndpoint, fakegenConf.gasSecurityRate, logger)
@@ -99,15 +114,29 @@ func execFakegen() (retErr error) {
 		return err
 	}
 
+	logger.Info("chain connected", zap.String("chain-id", fakegenConf.chainID), zap.String("gno-namespace", fakegenConf.gnoNamespace), zap.String("chain-endpoint", fakegenConf.chainEndpoint))
+
+	var (
+		txs         []gnoland.TxWithMetadata
+		genesisTime time.Time
+	)
+	if fakegenConf.gentxs {
+		genesisTime, err = time.Parse(time.RFC3339, fakegenConf.gentime)
+		if err != nil {
+			return fmt.Errorf("invalid genesis time: %w", err)
+		}
+		txs, err = gzchain.GentxAdminProfile(chain.SignerAddress(), genesisTime)
+		if err != nil {
+			return fmt.Errorf("failed to create admin profile gentx: %w", err)
+		}
+	}
+
 	db, err := gzdb.SetupDB(fakegenConf.dbPath)
 	if err != nil {
 		return err
 	}
 
-	err = RegisterMultiAddrProtocols()
-	if err != nil {
-		return err
-	}
+	logger.Info("db connected with path", zap.String("path", fakegenConf.dbPath))
 
 	// Create user
 	zUser, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
@@ -115,8 +144,20 @@ func execFakegen() (retErr error) {
 		return err
 	}
 
-	if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
-		return err
+	logger.Info("succesful db creation user", zap.String("id", zUser.ID))
+
+	if fakegenConf.gentxs {
+		tx, err := gzchain.GentxUserRealm(chain, zUser, chain.SignerAddress())
+		if err != nil {
+			return fmt.Errorf("failed to create user gentx: %w", err)
+		}
+		txs = append(txs, tx)
+		logger.Info("succesful generation of user realm tx", zap.String("id", zUser.ID))
+	} else {
+		if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
+			return err
+		}
+		logger.Info("succesful chain creation user", zap.String("id", zUser.ID))
 	}
 
 	logger.Info("creating events")
@@ -151,8 +192,24 @@ func execFakegen() (retErr error) {
 		uuid := uuid.New().String()
 		evtID := strings.ReplaceAll(uuid, "-", "_")
 		evtRealmID := chain.EventRealmID(evtID)
-		if err := chain.CreateEvent(evtRealmID, []string{creatorRealmID}, []string{}, evtReq, nil); err != nil {
-			return err
+		if fakegenConf.gentxs {
+			tx, err := gzchain.GentxEventRealm(chain, evtRealmID, evtReq, chain.SignerAddress(), []string{creatorRealmID}, []string{}, nil, genesisTime.Unix()+1)
+			if err != nil {
+				return fmt.Errorf("failed to create event gentx: %w", err)
+			}
+			txs = append(txs, tx)
+			logger.Info("succesful generation of event realm tx", zap.String("id", evtID), zap.String("title", evtReq.Title))
+			tx, err = gzchain.GentxEventReg(chain, evtID, chain.SignerAddress(), genesisTime.Unix()+2)
+			if err != nil {
+				return fmt.Errorf("failed to create event registry gentx: %w", err)
+			}
+			txs = append(txs, tx)
+			logger.Info("succesful generation of event registry tx", zap.String("id", evtID), zap.String("title", evtReq.Title))
+		} else {
+			if err := chain.CreateEvent(evtRealmID, []string{creatorRealmID}, []string{}, evtReq, nil); err != nil {
+				return err
+			}
+			logger.Info("succesful chain creation of event", zap.String("id", evtID), zap.String("title", evtReq.Title))
 		}
 
 		// Create posts/polls only for the last event (to avoid flooding the chain and db)
@@ -160,7 +217,7 @@ func execFakegen() (retErr error) {
 			logger.Info("creating posts")
 
 			// Create StandardPosts
-			pID := 1 // used only when chain creation is skipped
+			pID := 1 // used only when gentxs is true
 			for pC := range fakegenConf.postsCount {
 				p := fakePost{}
 				err := faker.FakeData(&p)
@@ -178,13 +235,25 @@ func execFakegen() (retErr error) {
 					},
 				}
 
+				var postID string
 				entityRealmID, err := chain.EntityRealmID(zeni.EntityTypeEvent, evtRealmID)
 				if err != nil {
 					return fmt.Errorf("invalid org: %w", err)
 				}
-				postID, err := chain.CreatePost(creatorRealmID, entityRealmID, post)
-				if err != nil {
-					return err
+				if fakegenConf.gentxs {
+					postID = fmt.Sprintf("%d", pID)
+					tx, err := gzchain.GentxNewPost(chain, creatorRealmID, chain.SignerAddress(), entityRealmID, post)
+					if err != nil {
+						return err
+					}
+					txs = append(txs, tx)
+					logger.Info("succesful generation of new post tx", zap.String("post-id", postID), zap.String("event-id", evtID))
+				} else {
+					postID, err = chain.CreatePost(creatorRealmID, entityRealmID, post)
+					if err != nil {
+						return err
+					}
+					logger.Info("succesful chain creation of new post", zap.String("post-id", postID), zap.String("event-id", evtID))
 				}
 
 				// Create reactions only for the first post (to avoid flooding the chain and db)
@@ -197,8 +266,18 @@ func execFakegen() (retErr error) {
 							PostId: postID,
 							Icon:   icons[rC],
 						}
-						if err = chain.ReactPost(creatorRealmID, reactReq); err != nil {
-							return err
+						if fakegenConf.gentxs {
+							tx, err := gzchain.GentxReactPost(chain, creatorRealmID, chain.SignerAddress(), entityRealmID, reactReq, genesisTime.Unix()+int64(3+pID))
+							if err != nil {
+								return err
+							}
+							txs = append(txs, tx)
+							logger.Info("succesful generation of react post tx", zap.String("post-id", postID), zap.String("event-id", evtID), zap.String("icon", reactReq.Icon))
+						} else {
+							if err = chain.ReactPost(creatorRealmID, reactReq); err != nil {
+								return err
+							}
+							logger.Info("succesful chain reaction to post", zap.String("post-id", postID), zap.String("event-id", evtID), zap.String("icon", reactReq.Icon))
 						}
 					}
 				}
@@ -233,9 +312,21 @@ func execFakegen() (retErr error) {
 				if err != nil {
 					return fmt.Errorf("invalid org: %w", err)
 				}
-				pollID, _, err := chain.CreatePoll(creatorRealmID, entityRealmID, pollReq)
-				if err != nil {
-					return err
+				var pollID string
+				if fakegenConf.gentxs {
+					pollID = fmt.Sprintf("%d", poID)
+					tx, err := gzchain.GentxNewPoll(chain, creatorRealmID, chain.SignerAddress(), pollReq.OrgType, pollReq.OrgId, pollReq, genesisTime.Unix()+int64(3+pID+poID))
+					if err != nil {
+						return err
+					}
+					txs = append(txs, tx)
+					logger.Info("succesful generation of new poll tx", zap.String("poll-id", pollID), zap.String("event-id", evtID))
+				} else {
+					pollID, _, err = chain.CreatePoll(creatorRealmID, entityRealmID, pollReq)
+					if err != nil {
+						return err
+					}
+					logger.Info("succesful chain creation of new poll", zap.String("poll-id", pollID), zap.String("event-id", evtID))
 				}
 
 				//Vote on Polls
@@ -243,8 +334,18 @@ func execFakegen() (retErr error) {
 					PollId: pollID,
 					Option: options[0],
 				}
-				if err = chain.VotePoll(creatorRealmID, voteReq); err != nil {
-					return err
+				if fakegenConf.gentxs {
+					tx, err := gzchain.GentxPollVote(chain, creatorRealmID, chain.SignerAddress(), pollID, voteReq, genesisTime.Unix()+int64(4+pID+poID))
+					if err != nil {
+						return err
+					}
+					txs = append(txs, tx)
+					logger.Info("succesful generation of vote poll tx", zap.String("poll-id", pollID), zap.String("event-id", evtID), zap.String("option", voteReq.Option))
+				} else {
+					if err = chain.VotePoll(creatorRealmID, voteReq); err != nil {
+						return err
+					}
+					logger.Info("succesful chain vote on poll", zap.String("poll-id", pollID), zap.String("event-id", evtID), zap.String("option", voteReq.Option))
 				}
 				poID++
 				pID++
@@ -273,9 +374,32 @@ func execFakegen() (retErr error) {
 			Administrators: []string{creatorRealmID},
 		}
 
-		if err = chain.CreateCommunity(cmtRealmID, []string{creatorRealmID}, []string{creatorRealmID}, []string{}, communityReq); err != nil {
-			return err
+		if fakegenConf.gentxs {
+			tx, err := gzchain.GentxCommunityRealm(chain, creatorRealmID, cmtRealmID, communityReq, []string{creatorRealmID}, []string{creatorRealmID}, nil, genesisTime.Unix()+int64(5+fakegenConf.eventsCount+fakegenConf.postsCount+fakegenConf.pollsCount))
+			if err != nil {
+				return fmt.Errorf("failed to create community gentx: %w", err)
+			}
+			txs = append(txs, tx)
+			logger.Info("succesful generation of community realm tx", zap.String("id", cmtID), zap.String("title", communityReq.DisplayName))
+			tx, err = gzchain.GentxCommunityReg(chain, cmtID, chain.SignerAddress(), genesisTime.Unix()+int64(6+fakegenConf.eventsCount+fakegenConf.postsCount+fakegenConf.pollsCount))
+			if err != nil {
+				return fmt.Errorf("failed to create community registry gentx: %w", err)
+			}
+			txs = append(txs, tx)
+			logger.Info("succesful generation of community registry tx", zap.String("id", cmtID), zap.String("title", communityReq.DisplayName))
+		} else {
+			if err = chain.CreateCommunity(cmtRealmID, []string{creatorRealmID}, []string{creatorRealmID}, []string{}, communityReq); err != nil {
+				return err
+			}
 		}
+	}
+
+	if fakegenConf.gentxs {
+		err = gzchain.SaveTxsToFile(chain, fakegenConf.adminMnemonic, fakegenConf.chainID, txs, fakegenConf.gentxsfile)
+		if err != nil {
+			return fmt.Errorf("failed to save gentxs to file: %w", err)
+		}
+		logger.Info("all gentxs saved to file", zap.String("file", fakegenConf.gentxsfile), zap.Int("txs", len(txs)), zap.Time("genesis-time", genesisTime))
 	}
 
 	return nil

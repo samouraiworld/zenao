@@ -46,7 +46,6 @@ func main() {
 		newGenticketCmd(),
 		newConvertEvtToComCmd(),
 		gzchain.NewRealmsrcCmd(),
-		gzchain.NewGenTxsCmd(), // TODO: remove when SOT transition is done
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
@@ -148,11 +147,6 @@ func execStart(ctx context.Context) (retErr error) {
 	}
 
 	db, err := gzdb.SetupDB(conf.dbPath)
-	if err != nil {
-		return err
-	}
-
-	err = RegisterMultiAddrProtocols()
 	if err != nil {
 		return err
 	}
