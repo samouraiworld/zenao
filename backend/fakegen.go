@@ -5,11 +5,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
-	ma "github.com/multiformats/go-multiaddr"
+	"github.com/google/uuid"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/gzchain"
 	"github.com/samouraiworld/zenao/backend/gzdb"
@@ -46,7 +47,6 @@ type fakegenConfig struct {
 	eventsCount      uint
 	postsCount       uint
 	pollsCount       uint
-	skipChain        bool
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
@@ -60,7 +60,6 @@ func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.UintVar(&fakegenConf.communitiesCount, "communities", 5, "number of fake communities to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
 	flset.UintVar(&fakegenConf.pollsCount, "polls", 13, "number of fake polls to generate")
-	flset.BoolVar(&fakegenConf.skipChain, "skip-chain", false, "skip chain")
 }
 
 type fakeEvent struct {
@@ -116,10 +115,8 @@ func execFakegen() (retErr error) {
 		return err
 	}
 
-	if !fakegenConf.skipChain {
-		if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
-			return err
-		}
+	if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
+		return err
 	}
 
 	logger.Info("creating events")
@@ -150,23 +147,11 @@ func execFakegen() (retErr error) {
 			},
 			Discoverable: true,
 		}
-		creatorID := zUser.ID
-
-		zevt, err := db.CreateEvent(creatorID, []string{creatorID}, []string{}, evtReq)
-		if err != nil {
-			return err
-		}
-
-		if !fakegenConf.skipChain {
-			if err := chain.CreateEvent(zevt.ID, []string{creatorID}, []string{}, evtReq, nil); err != nil {
-				return err
-			}
-		}
-
-		// Create Feed
-		logger.Info("creating feed")
-		zfeed, err := db.CreateFeed(zeni.EntityTypeEvent, zevt.ID, "main")
-		if err != nil {
+		creatorRealmID := chain.UserRealmID(zUser.ID)
+		uuid := uuid.New().String()
+		evtID := strings.ReplaceAll(uuid, "-", "_")
+		evtRealmID := chain.EventRealmID(evtID)
+		if err := chain.CreateEvent(evtRealmID, []string{creatorRealmID}, []string{}, evtReq, nil); err != nil {
 			return err
 		}
 
@@ -184,7 +169,7 @@ func execFakegen() (retErr error) {
 				}
 
 				post := &feedsv1.Post{
-					Author:    creatorID,
+					Author:    creatorRealmID,
 					CreatedAt: startDate.Add(-time.Duration(pC) * time.Hour).Unix(), //One post per hour (FIXME: Doesn't work),
 					Post: &feedsv1.Post_Standard{
 						Standard: &feedsv1.StandardPost{
@@ -194,18 +179,12 @@ func execFakegen() (retErr error) {
 				}
 
 				postID := fmt.Sprintf("%d", pID)
-				if !fakegenConf.skipChain {
-					entityRealmID, err := chain.EntityRealmID(zeni.EntityTypeEvent, zevt.ID)
-					if err != nil {
-						return fmt.Errorf("invalid org: %w", err)
-					}
-					postID, err = chain.CreatePost(creatorID, entityRealmID, post)
-					if err != nil {
-						return err
-					}
+				entityRealmID, err := chain.EntityRealmID(zeni.EntityTypeEvent, evtRealmID)
+				if err != nil {
+					return fmt.Errorf("invalid org: %w", err)
 				}
-
-				if _, err := db.CreatePost(postID, zfeed.ID, zUser.ID, post); err != nil {
+				postID, err = chain.CreatePost(creatorRealmID, entityRealmID, post)
+				if err != nil {
 					return err
 				}
 
@@ -219,15 +198,8 @@ func execFakegen() (retErr error) {
 							PostId: postID,
 							Icon:   icons[rC],
 						}
-
-						if err = db.ReactPost(creatorID, reactReq); err != nil {
+						if err = chain.ReactPost(creatorRealmID, reactReq); err != nil {
 							return err
-						}
-
-						if !fakegenConf.skipChain {
-							if err = chain.ReactPost(creatorID, reactReq); err != nil {
-								return err
-							}
 						}
 					}
 				}
@@ -251,7 +223,7 @@ func execFakegen() (retErr error) {
 
 				pollReq := &zenaov1.CreatePollRequest{
 					OrgType:  zeni.EntityTypeEvent,
-					OrgId:    zevt.ID,
+					OrgId:    uuid,
 					Question: p.Question,
 					Options:  options,
 					Duration: int64(p.DaysDuration * 24 * 60 * 60),
@@ -259,32 +231,12 @@ func execFakegen() (retErr error) {
 				}
 
 				pollID := fmt.Sprintf("%d", poID)
-				postID := fmt.Sprintf("%d", pID)
-				if !fakegenConf.skipChain {
-					entityRealmID, err := chain.EntityRealmID(pollReq.OrgType, pollReq.OrgId)
-					if err != nil {
-						return fmt.Errorf("invalid org: %w", err)
-					}
-					pollID, postID, err = chain.CreatePoll(creatorID, entityRealmID, pollReq)
-					if err != nil {
-						return err
-					}
-				}
-
-				postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
+				entityRealmID, err := chain.EntityRealmID(pollReq.OrgType, pollReq.OrgId)
 				if err != nil {
-					return err
+					return fmt.Errorf("invalid org: %w", err)
 				}
-
-				pollPost := &feedsv1.Post{
-					Post: &feedsv1.Post_Link{
-						Link: &feedsv1.LinkPost{
-							Uri: postURI.String(),
-						},
-					},
-				}
-
-				if _, err := db.CreatePoll(creatorID, pollID, postID, zfeed.ID, pollPost, pollReq); err != nil {
+				pollID, _, err = chain.CreatePoll(creatorRealmID, entityRealmID, pollReq)
+				if err != nil {
 					return err
 				}
 
@@ -293,13 +245,11 @@ func execFakegen() (retErr error) {
 					PollId: pollID,
 					Option: options[0],
 				}
-				if err = db.VotePoll(creatorID, voteReq); err != nil {
+				if err = db.VotePoll(creatorRealmID, voteReq); err != nil {
 					return err
 				}
-				if !fakegenConf.skipChain {
-					if err = chain.VotePoll(creatorID, voteReq); err != nil {
-						return err
-					}
+				if err = chain.VotePoll(creatorRealmID, voteReq); err != nil {
+					return err
 				}
 				poID++
 				pID++
@@ -310,39 +260,27 @@ func execFakegen() (retErr error) {
 	logger.Info("creating communities")
 
 	for range fakegenConf.communitiesCount {
+		uuid := uuid.New().String()
+		cmtID := strings.ReplaceAll(uuid, "-", "_")
+		cmtRealmID := chain.EventRealmID(cmtID)
 		c := fakeCommunity{}
 		err := faker.FakeData(&c)
 		if err != nil {
 			return err
 		}
-		creatorID := zUser.ID
+		creatorRealmID := chain.UserRealmID(zUser.ID)
 
 		communityReq := &zenaov1.CreateCommunityRequest{
 			DisplayName:    c.Title,
 			Description:    c.Description,
 			AvatarUri:      randomPick(eventImages),
 			BannerUri:      randomPick(eventImages),
-			Administrators: []string{creatorID},
+			Administrators: []string{creatorRealmID},
 		}
 
-		zCommunity, err := db.CreateCommunity(creatorID, []string{creatorID}, []string{creatorID}, []string{}, communityReq)
-		if err != nil {
+		if err = chain.CreateCommunity(cmtRealmID, []string{creatorRealmID}, []string{creatorRealmID}, []string{}, communityReq); err != nil {
 			return err
 		}
-
-		if !fakegenConf.skipChain {
-			if err = chain.CreateCommunity(zCommunity.ID, []string{creatorID}, []string{creatorID}, []string{}, communityReq); err != nil {
-				return err
-			}
-		}
-
-		// Create Feed
-		logger.Info("creating feed")
-		_, err = db.CreateFeed(zeni.EntityTypeCommunity, zCommunity.ID, "main")
-		if err != nil {
-			return err
-		}
-
 	}
 
 	return nil
