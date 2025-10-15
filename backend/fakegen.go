@@ -243,9 +243,6 @@ func execFakegen() (retErr error) {
 					PollId: pollID,
 					Option: options[0],
 				}
-				if err = db.VotePoll(creatorRealmID, voteReq); err != nil {
-					return err
-				}
 				if err = chain.VotePoll(creatorRealmID, voteReq); err != nil {
 					return err
 				}
