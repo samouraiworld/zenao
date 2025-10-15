@@ -223,7 +223,7 @@ func execFakegen() (retErr error) {
 
 				pollReq := &zenaov1.CreatePollRequest{
 					OrgType:  zeni.EntityTypeEvent,
-					OrgId:    uuid,
+					OrgId:    evtID,
 					Question: p.Question,
 					Options:  options,
 					Duration: int64(p.DaysDuration * 24 * 60 * 60),
