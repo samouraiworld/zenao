@@ -5,8 +5,8 @@ import { useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { PostCardLayout } from "./post-card-layout";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
-import { PostCardLayout } from "@/components/social-feed/post-card-layout";
 import Text from "@/components/widgets/texts/text";
 import { PollPostViewInfo } from "@/lib/social-feed";
 import { cn } from "@/lib/tailwind";
@@ -21,7 +21,7 @@ import { profileOptions } from "@/lib/queries/profile";
 export function PollPostCard({
   pollId,
   pollPost,
-  userAddress,
+  userRealmId,
   canReply,
   canInteract,
   onDelete,
@@ -33,7 +33,7 @@ export function PollPostCard({
 }: {
   pollId: string;
   pollPost: PollPostViewInfo;
-  userAddress: string;
+  userRealmId: string;
   canReply?: boolean;
   canInteract?: boolean;
   isOwner?: boolean;
@@ -43,7 +43,7 @@ export function PollPostCard({
   isDeleting?: boolean;
   isReacting?: boolean;
 }) {
-  const t = useTranslations("event-feed");
+  const t = useTranslations("social-feed");
   const queryClient = getQueryClient();
   const { getToken } = useAuth();
   const { toast } = useToast();
@@ -78,7 +78,7 @@ export function PollPostCard({
         token,
         pollId,
         option,
-        userAddress,
+        userRealmId,
       });
       toast({
         title: t("vote.toast-vote-success"),
@@ -148,7 +148,7 @@ function PollResultItem({
   onCheckedChange: (checked: boolean) => void;
   pollKind: PollKind;
 }) {
-  const t = useTranslations("event-feed");
+  const t = useTranslations("social-feed");
   const percent =
     totalVotesCount > 0
       ? Math.round((pollResult.count * 100) / totalVotesCount)

@@ -9,7 +9,7 @@ import { parsePollUri } from "@/lib/multiaddr";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 
 export function PostsList({
-  userAddress,
+  userRealmId,
   posts,
   postInEdition,
   onEditModeChange,
@@ -23,7 +23,7 @@ export function PostsList({
   isReacting,
   isDeleting,
 }: {
-  userAddress: string | null;
+  userRealmId: string | null;
   postInEdition: string | null;
   onEditModeChange?: (
     postId: string,
@@ -63,7 +63,7 @@ export function PostsList({
               onDelete={async (parentId) => {
                 await onDelete?.(postId, parentId);
               }}
-              isOwner={post.data.post.author === userAddress}
+              isOwner={post.data.post.author === userRealmId}
               canReply={canReply}
               replyHref={replyHrefFormatter?.(post.data.post.localPostId)}
               canInteract={canInteract}
@@ -92,7 +92,7 @@ export function PostsList({
             key={post.data.post.localPostId}
           >
             <PollPost
-              userAddress={userAddress}
+              userRealmId={userRealmId}
               pollId={pollId}
               pollPost={post.data}
               onDelete={async (parentId) => {
@@ -101,7 +101,7 @@ export function PostsList({
               onReactionChange={async (icon) =>
                 await onReactionChange?.(postId, icon)
               }
-              isOwner={post.data.post.author === userAddress}
+              isOwner={post.data.post.author === userRealmId}
               replyHref={replyHrefFormatter?.(post.data.post.localPostId)}
               canReply={canReply}
               canInteract={canInteract}

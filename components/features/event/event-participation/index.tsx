@@ -1,12 +1,10 @@
 "use client";
 
-import { SignedIn, SignedOut, SignInButton, useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { createContext, useContext, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { EventRegistrationForm } from "../event-registration";
-import { userAddressOptions } from "@/lib/queries/user";
 import { EventUserRole } from "@/lib/queries/event-users";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
@@ -23,7 +21,6 @@ type EventParticipationContextType = {
   isParticipant: boolean;
   isStarted: boolean;
   isSoldOut: boolean;
-  address: string | null;
 };
 
 const defaultValue: EventParticipationContextType = {
@@ -34,7 +31,6 @@ const defaultValue: EventParticipationContextType = {
   isParticipant: false, // Default to false
   isStarted: false, // Default to false
   isSoldOut: false, // Default to false
-  address: null, // Default to null
 };
 
 const EventParticipationContext =
@@ -56,10 +52,6 @@ export const EventParticipation = ({
   roles: EventUserRole[];
   password: string;
 }) => {
-  const { getToken, userId } = useAuth();
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
-  );
   const isParticipant = useMemo(() => roles.includes("participant"), [roles]);
   const isStarted = Date.now() > Number(eventData.startDate) * 1000;
   const isSoldOut = eventData.capacity - eventData.participants <= 0;
@@ -74,7 +66,6 @@ export const EventParticipation = ({
         isParticipant,
         isStarted,
         isSoldOut,
-        address,
       }}
     >
       {children}
@@ -83,7 +74,7 @@ export const EventParticipation = ({
 };
 
 EventParticipation.Registration = function EventParticipationRegistration() {
-  const { eventId, address, eventData, isParticipant, isStarted, password } =
+  const { eventId, eventData, isParticipant, isStarted, password } =
     useEventParticipation();
   const [guestEmail, setGuestEmail] = useState<string>("");
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
@@ -111,7 +102,6 @@ EventParticipation.Registration = function EventParticipationRegistration() {
         <Text className="my-4">{t("join-desc")}</Text>
         <EventRegistrationForm
           eventId={eventId}
-          userAddress={address}
           eventPassword={password}
           onGuestRegistrationSuccess={(email) => {
             setGuestEmail(email);

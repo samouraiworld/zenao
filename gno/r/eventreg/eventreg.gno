@@ -1,7 +1,6 @@
 package eventreg
 
 import (
-	"chain"
 	"chain/runtime"
 	"errors"
 
@@ -23,9 +22,6 @@ var (
 	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	eventsByOrganizer   avl.Tree // <organizerID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	participantsByEvent avl.Tree // <eventPkgPath>/<participantID> -> participantID
-
-	// TODO: Remove this when we have a better way to handle lookup by event address.
-	eventsPkgPathByAddr avl.Tree // <eventAddr> -> pkgPath
 )
 
 func init() {
@@ -35,7 +31,11 @@ func init() {
 // XXX: split this package into eventreg and eventsindex
 
 func Register(_ realm, infoGetter events.InfoGetter) {
-	pkgPath := runtime.PreviousRealm().PkgPath()
+	caller := runtime.PreviousRealm()
+	if caller.IsUser() {
+		panic("can't register user")
+	}
+	pkgPath := caller.PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)
@@ -43,10 +43,6 @@ func Register(_ realm, infoGetter events.InfoGetter) {
 		return
 	}
 	registered.Set(pkgPath, infoGetter)
-
-	// TODO: Remove this when we have a better way to handle lookup by event address.
-	addr := chain.PackageAddress(pkgPath)
-	eventsPkgPathByAddr.Set(addr.String(), pkgPath)
 }
 
 func getInfo(pkgPath string) (*zenaov1.EventInfo, bool) {
@@ -208,19 +204,6 @@ func mustGetEventByPkgPath(pkgPath string) *zenaov1.EventInfo {
 		panic(ErrEventNotFound)
 	}
 	return evt
-}
-
-// TODO: Remove this when we have a better way to handle lookup by event address.
-func listEventsPkgPathByAddrs(addresses []string) []string {
-	res := make([]string, 0, len(addresses))
-	for _, addr := range addresses {
-		if pkgPath, ok := eventsPkgPathByAddr.Get(addr); ok {
-			res = append(res, pkgPath.(string))
-		} else {
-			panic("event not found for address: " + addr)
-		}
-	}
-	return res
 }
 
 func listEvents(from, to int64, limit, offset uint32) []*zenaov1.EventInfo {

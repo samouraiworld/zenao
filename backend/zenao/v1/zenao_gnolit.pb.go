@@ -60,21 +60,24 @@ func (e *EditUserResponse) GnoLiteral(typePrefix string, linePrefix string) stri
 	return buf.String()
 }
 
-func (g *GetUserAddressRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+func (g *GetUserInfoRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("GetUserAddressRequest{\n")
+	buf.WriteString("GetUserInfoRequest{\n")
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
 }
 
-func (g *GetUserAddressResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+func (g *GetUserInfoResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("GetUserAddressResponse{\n")
-	if g.Address != "" {
-		fmt.Fprintf(buf, "%s\tAddress: %q,\n", linePrefix, g.Address)
+	buf.WriteString("GetUserInfoResponse{\n")
+	if g.RealmId != "" {
+		fmt.Fprintf(buf, "%s\tRealmId: %q,\n", linePrefix, g.RealmId)
+	}
+	if g.Plan != "" {
+		fmt.Fprintf(buf, "%s\tPlan: %q,\n", linePrefix, g.Plan)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
