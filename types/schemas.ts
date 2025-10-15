@@ -98,13 +98,11 @@ export const eventFormSchema = z.object({
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
-export const userFormSocialLinkSchema = z.object({
+export const socialLinkSchema = z.object({
   url: z.string().url().max(400),
 });
 
-export type UserFormSocialLinkSchemaType = z.infer<
-  typeof userFormSocialLinkSchema
->;
+export type socialLinkSchemaType = z.infer<typeof socialLinkSchema>;
 
 export const userExperienceSchema = z
   .object({
@@ -172,7 +170,7 @@ export type UserFormSkillSchemaType = z.infer<typeof userFormSkillSchema>;
 export const userFormSchema = z.object({
   bio: z.string().trim().max(1000).optional().default(""),
   displayName: z.string().trim().min(1),
-  socialMediaLinks: z.array(userFormSocialLinkSchema),
+  socialMediaLinks: z.array(socialLinkSchema),
   avatarUri: uriSchema,
   bannerUri: z.string().optional().default(""),
   location: z.string().trim().max(100).optional().default(""),
@@ -184,7 +182,7 @@ export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
 export const gnoProfileDetailsSchema = z.object({
   bio: z.string().trim().max(1000).optional().default(""),
-  socialMediaLinks: z.array(userFormSocialLinkSchema).default([]),
+  socialMediaLinks: z.array(socialLinkSchema).default([]),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
   bannerUri: z.string().optional().default(""),
@@ -276,6 +274,7 @@ export const communityFormSchema = z.object({
   avatarUri: z.string().url().or(z.literal("")),
   bannerUri: z.string().url().or(z.literal("")),
   shortDescription: z.string().max(200).optional().default(""),
+  socialMediaLinks: z.array(socialLinkSchema).default([]),
   administrators: z
     .array(
       z.object({
@@ -330,6 +329,7 @@ export const communityDetailsSchema = z.object({
   shortDescription: z.string().max(200).optional().default(""),
   description: z.string().trim().max(1000).optional().default(""),
   portfolio: z.array(portfolioItemSchema).default([]),
+  socialMediaLinks: z.array(socialLinkSchema).default([]),
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
