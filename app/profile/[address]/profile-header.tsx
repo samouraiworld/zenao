@@ -13,6 +13,7 @@ import Text from "@/components/widgets/texts/text";
 import { addressFromRealmId } from "@/lib/gno";
 import { userInfoOptions } from "@/lib/queries/user";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { gnoProfileDetailsSchema } from "@/types/schemas";
 
 type ProfileHeaderProps = {
@@ -121,7 +122,7 @@ export default function ProfileHeader({
         <div className="flex flex-col gap-3">
           {profileDetails.bio?.trim() && (
             <Card>
-              <Text>{profileDetails.bio}</Text>
+              <MarkdownPreview markdownString={profileDetails.bio} />
             </Card>
           )}
         </div>
