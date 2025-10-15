@@ -51,7 +51,10 @@ export default function ProfileHeader({
       <div className="relative w-full">
         <AspectRatio ratio={4 / 1}>
           <Web3Image
-            src={profileDetails.bannerUri || "ipfs://bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny"}
+            src={
+              profileDetails.bannerUri ||
+              "ipfs://bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny"
+            }
             alt="Profile banner"
             priority
             fill

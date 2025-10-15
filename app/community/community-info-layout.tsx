@@ -63,9 +63,8 @@ function CommunityInfoLayout({
             className="rounded w-full h-full self-center object-cover"
             alt="Community hero img"
             src={
-              data.bannerUri.length > 0
-                ? data.bannerUri
-                : "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24"
+              data?.bannerUri ||
+              "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24"
             }
             priority
             fetchPriority="high"
