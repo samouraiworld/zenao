@@ -51,19 +51,18 @@ export default function ProfileHeader({
   return (
     <div className="flex flex-col w-full">
       <div className="relative w-full">
-        {profileDetails.bannerUri ? (
-          <AspectRatio ratio={4 / 1}>
-            <Web3Image
-              src={profileDetails.bannerUri}
-              alt="Profile banner"
-              priority
-              fill
-              className="w-full h-full object-cover rounded-b-2xl"
-            />
-          </AspectRatio>
-        ) : (
-          <Skeleton className="w-full h-32 sm:h-48" />
-        )}
+        <AspectRatio ratio={4 / 1}>
+          <Web3Image
+            src={
+              profileDetails.bannerUri ||
+              "ipfs://bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny"
+            }
+            alt="Profile banner"
+            priority
+            fill
+            className="w-full h-full object-cover rounded-b-2xl"
+          />
+        </AspectRatio>
 
         <div className="absolute -bottom-16 left-4">
           {avatarUri ? (
