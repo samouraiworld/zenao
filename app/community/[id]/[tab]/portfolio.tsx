@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AudioWaveform, ImageIcon, Loader2, Video } from "lucide-react";
-import { useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/widgets/texts/heading";
@@ -40,6 +40,14 @@ import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 type CommunityPortfolioProps = {
   communityId: string;
 };
+
+const MemoizedVideoPreview = memo(({ uri }: { uri: string }) => (
+  <MarkdownPreview
+    className="w-full pointer-events-none"
+    markdownString={uri}
+  />
+));
+MemoizedVideoPreview.displayName = "MemoizedVideoPreview";
 
 export default function CommunityPortfolio({
   communityId,
@@ -392,13 +400,13 @@ export default function CommunityPortfolio({
           </div>
         )}
 
-        {localPortfolio.map((item, index) => (
+        {localPortfolio.map((item) => (
           <div
             className={cn(
               "w-full max-w-full",
               localPortfolio.length < 2 && "max-w-[400px]",
             )}
-            key={index}
+            key={item.id}
           >
             {item.type === "image" && (
               <AspectRatio ratio={16 / 9} onClick={() => onPreview(item)}>
@@ -440,10 +448,7 @@ export default function CommunityPortfolio({
             {item.type === "video" && (
               <AspectRatio ratio={16 / 9} onClick={() => onPreview(item)}>
                 <div className="h-full w-full border rounded border-muted overflow-hidden flex items-center justify-center bg-muted cursor-pointer hover:brightness-90 transition">
-                  <MarkdownPreview
-                    className="w-full pointer-events-none"
-                    markdownString={item.uri}
-                  />
+                  <MemoizedVideoPreview uri={item.uri} />
                 </div>
               </AspectRatio>
             )}
