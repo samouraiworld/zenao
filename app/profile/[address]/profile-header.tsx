@@ -42,6 +42,7 @@ export default function ProfileHeader({
       location: "",
       shortBio: "",
       bannerUri: "",
+      skills: [],
     },
     contentFieldName: "bio",
   });
@@ -124,6 +125,24 @@ export default function ProfileHeader({
             </Card>
           )}
         </div>
+
+        {profileDetails.skills?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              Skills
+            </Heading>
+            <div className="flex flex-wrap gap-2">
+              {profileDetails.skills.map((skill) => (
+                <span
+                  key={skill.name}
+                  className="bg-primary text-primary-foreground hover:bg-primary/80 text-sm font-medium px-3 py-1 rounded-full transition"
+                >
+                  {skill.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {profileDetails.socialMediaLinks?.length > 0 && (
           <div className="flex flex-col gap-3">
