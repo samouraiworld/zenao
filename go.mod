@@ -16,6 +16,7 @@ require (
 	github.com/gnolang/gno v0.0.0-20250929152115-4e80c37e8d18
 	github.com/go-faker/faker/v4 v4.5.0
 	github.com/golangci/golangci-lint v1.64.8
+	github.com/google/uuid v1.6.0
 	github.com/goware/prefixer v0.0.0-20160118172347-395022866408
 	github.com/multiformats/go-multiaddr v0.15.0
 	github.com/resend/resend-go/v2 v2.14.0
@@ -189,7 +190,6 @@ require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-containerregistry v0.20.2 // indirect
 	github.com/google/pprof v0.0.0-20241210010833-40e02aabc2ad // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/gordonklaus/ineffassign v0.1.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
