@@ -9,10 +9,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func (s *ZenaoServer) GetUserAddress(
+func (s *ZenaoServer) GetUserInfo(
 	ctx context.Context,
-	req *connect.Request[zenaov1.GetUserAddressRequest],
-) (*connect.Response[zenaov1.GetUserAddressResponse], error) {
+	req *connect.Request[zenaov1.GetUserInfoRequest],
+) (*connect.Response[zenaov1.GetUserInfoResponse], error) {
 	user := s.Auth.GetUser(ctx)
 	if user == nil {
 		return nil, errors.New("unauthorized")
@@ -23,15 +23,16 @@ func (s *ZenaoServer) GetUserAddress(
 		return nil, err
 	}
 
-	s.Logger.Info("get-user-address", zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("get-user-info", zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
 	}
 
-	userAddr := s.Chain.WithContext(ctx).UserAddress(zUser.ID)
+	userAddr := s.Chain.WithContext(ctx).UserRealmID(zUser.ID)
 
-	return connect.NewResponse(&zenaov1.GetUserAddressResponse{
-		Address: userAddr,
+	return connect.NewResponse(&zenaov1.GetUserInfoResponse{
+		RealmId: userAddr,
+		Plan:    zUser.Plan.String(),
 	}), nil
 }

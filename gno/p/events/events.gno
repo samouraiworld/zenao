@@ -1,7 +1,6 @@
 package events
 
 import (
-	"chain/runtime"
 	"crypto/ed25519"
 	"encoding/base64"
 	"errors"
@@ -259,7 +258,7 @@ func (e *Event) addParticipantHandler() daokit.ActionHandler {
 			panic(errors.New("ticket already added"))
 		}
 
-		callerIsOrganizer := e.DAOPrivate.Members.HasRole(runtime.PreviousRealm().Address().String(), "organizer")
+		callerIsOrganizer := e.DAOPrivate.Members.HasRole(e.DAOPrivate.CallerID(), "organizer")
 
 		// XXX: this dance is not very useful for now since all accounts are managed
 		// but we add this logic as PoC of on-chain password-guarded events
@@ -418,7 +417,7 @@ func (e *Event) checkinHandler() daokit.ActionHandler {
 			panic(err)
 		}
 
-		payloadBz := []byte(runtime.PreviousRealm().Address().String())
+		payloadBz := []byte(e.DAOPrivate.CallerID())
 
 		signatureBz, err := base64.RawURLEncoding.DecodeString(msg.CheckinSignature)
 		if err != nil {

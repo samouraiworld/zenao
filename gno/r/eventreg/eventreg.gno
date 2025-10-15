@@ -1,7 +1,6 @@
 package eventreg
 
 import (
-	"chain"
 	"chain/runtime"
 	"errors"
 
@@ -23,9 +22,6 @@ var (
 	eventsByParticipant avl.Tree // <participantID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	eventsByOrganizer   avl.Tree // <organizerID>/<endDateUnixSeconds>/<eventPkgPath> -> eventPkgPath
 	participantsByEvent avl.Tree // <eventPkgPath>/<participantID> -> participantID
-
-	// TODO: Remove this when we have a better way to handle lookup by event address.
-	eventsPkgPathByAddr avl.Tree // <eventAddr> -> pkgPath
 )
 
 func init() {
@@ -35,7 +31,11 @@ func init() {
 // XXX: split this package into eventreg and eventsindex
 
 func Register(_ realm, infoGetter events.InfoGetter) {
-	pkgPath := runtime.PreviousRealm().PkgPath()
+	caller := runtime.PreviousRealm()
+	if caller.IsUser() {
+		panic("can't register user")
+	}
+	pkgPath := caller.PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)
@@ -43,10 +43,6 @@ func Register(_ realm, infoGetter events.InfoGetter) {
 		return
 	}
 	registered.Set(pkgPath, infoGetter)
-
-	// TODO: Remove this when we have a better way to handle lookup by event address.
-	addr := chain.PackageAddress(pkgPath)
-	eventsPkgPathByAddr.Set(addr.String(), pkgPath)
 }
 
 func getInfo(pkgPath string) (*zenaov1.EventInfo, bool) {
@@ -210,41 +206,28 @@ func mustGetEventByPkgPath(pkgPath string) *zenaov1.EventInfo {
 	return evt
 }
 
-// TODO: Remove this when we have a better way to handle lookup by event address.
-func listEventsPkgPathByAddrs(addresses []string) []string {
-	res := make([]string, 0, len(addresses))
-	for _, addr := range addresses {
-		if pkgPath, ok := eventsPkgPathByAddr.Get(addr); ok {
-			res = append(res, pkgPath.(string))
-		} else {
-			panic("event not found for address: " + addr)
-		}
-	}
-	return res
-}
-
 func listEvents(from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := unixTimeKey(from) + "/"
 	toKey := unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByEndDate, fromKey, toKey, from > to, limit, offset)
+	return listEventsInternal(&eventsByEndDate, zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE, fromKey, toKey, from > to, limit, offset)
 }
 
-func listEventsByOrganizer(organizerID string, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
+func listEventsByOrganizer(organizerID string, discoverableFilter zenaov1.DiscoverableFilter, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := organizerID + "/" + unixTimeKey(from) + "/"
 	toKey := organizerID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByOrganizer, fromKey, toKey, from > to, limit, offset)
+	return listEventsInternal(&eventsByOrganizer, discoverableFilter, fromKey, toKey, from > to, limit, offset)
 }
 
 func listEventsByParticipant(participantID string, from, to int64, limit, offset uint32) []*zenaov1.EventInfo {
 	fromKey := participantID + "/" + unixTimeKey(from) + "/"
 	toKey := participantID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByParticipant, fromKey, toKey, from > to, limit, offset)
+	return listEventsInternal(&eventsByParticipant, zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE, fromKey, toKey, from > to, limit, offset)
 }
 
-func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, limit, offset uint32) []*zenaov1.EventInfo {
+func listEventsInternal(at avl.ITree, discoverableFilter zenaov1.DiscoverableFilter, fromKey string, toKey string, rev bool, limit, offset uint32) []*zenaov1.EventInfo {
 	res := []*zenaov1.EventInfo{}
 	count := uint32(0)
 	it := func(key string, value interface{}) bool {
@@ -258,7 +241,8 @@ func listEventsInternal(at avl.ITree, fromKey string, toKey string, rev bool, li
 			evt.PkgPath = val
 		}
 
-		if !evt.Discoverable {
+		if (!evt.Discoverable && discoverableFilter == zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE) ||
+			(evt.Discoverable && discoverableFilter == zenaov1.DISCOVERABLE_FILTER_UNDISCOVERABLE) {
 			return false
 		}
 		if count < offset {

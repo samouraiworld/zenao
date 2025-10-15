@@ -1,19 +1,33 @@
 package social_feed
 
 import (
-	"chain/runtime"
 	"strconv"
 	"strings"
 
 	"gno.land/p/nt/avl"
 	"gno.land/p/nt/seqid"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
+	"gno.land/p/zenao/realmid"
 )
 
 type Feed struct {
 	crossNetwork bool
-	authFunc     func(string) bool // func(address) -> bool
+	authFunc     AuthFn
 }
+
+func (f *Feed) auth() string {
+	if f.authFunc == nil {
+		return realmid.Previous()
+	}
+
+	id, ok := f.authFunc()
+	if !ok {
+		panic("the user is not allowed to interact with this feed")
+	}
+	return id
+}
+
+type AuthFn func() (userID string, authorized bool)
 
 var (
 	id seqid.ID
@@ -42,8 +56,8 @@ func init() {
 	feedsByPost = avl.NewTree()
 }
 
-func NewFeed(_ realm, slug string, crossNetwork bool, authFunc func(string) bool) string {
-	creator := runtime.PreviousRealm()
+func NewFeed(_ realm, slug string, crossNetwork bool, authFunc AuthFn) string {
+	creator := realmid.Previous()
 	if crossNetwork && authFunc != nil {
 		panic("crossNetwork feeds cannot have an authFunc")
 	}
@@ -52,7 +66,7 @@ func NewFeed(_ realm, slug string, crossNetwork bool, authFunc func(string) bool
 		crossNetwork: crossNetwork,
 		authFunc:     authFunc,
 	}
-	feedId := creator.Address().String() + ":" + slug
+	feedId := creator + ":" + slug
 	if feeds.Has(feedId) {
 		panic("feed already exists")
 	}

@@ -3,16 +3,14 @@ import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import {
   InfiniteData,
   infiniteQueryOptions,
-  queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
-import { z } from "zod";
-import { goStringSliceLiteral } from "./community";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import {
   EventInfo,
   EventInfoJson,
   EventInfoSchema,
+  DiscoverableFilter,
 } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
@@ -74,25 +72,9 @@ export const eventsList = (
   });
 };
 
-export const eventsPkgPathsByAddrs = (addresses: string[]) =>
-  queryOptions({
-    queryKey: ["eventPkgPath", ...addresses],
-    queryFn: async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/eventreg`,
-        `stringArrayToJSON(listEventsPkgPathByAddrs(${goStringSliceLiteral(addresses)}))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-
-      return await z.string().array().parseAsync(raw);
-    },
-  });
-
 export const eventsByOrganizerList = (
   organizer: string,
+  discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
@@ -110,7 +92,7 @@ export const eventsByOrganizerList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);

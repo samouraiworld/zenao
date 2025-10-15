@@ -28,7 +28,11 @@ func init() {
 // XXX: split this package into communityreg and communitiesindex
 
 func Register(_ realm, infoGetter communities.InfoGetter) {
-	pkgPath := runtime.PreviousRealm().PkgPath()
+	caller := runtime.PreviousRealm()
+	if caller.IsUser() {
+		panic("can't register user")
+	}
+	pkgPath := caller.PkgPath()
 
 	if infoGetter == nil {
 		registered.Remove(pkgPath)

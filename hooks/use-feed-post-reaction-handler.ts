@@ -1,14 +1,15 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useReactPost } from "@/lib/mutations/social-feed";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 
-function useEventPostReactionHandler(feedId: string, parentId: string = "") {
+function useFeedPostReactionHandler(feedId: string, parentId: string = "") {
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { reactPost, isPending: isReacting } = useReactPost();
 
   const onReactionChange = async (postId: string, icon: string) => {
@@ -20,7 +21,7 @@ function useEventPostReactionHandler(feedId: string, parentId: string = "") {
       }
       await reactPost({
         token,
-        userAddress: userAddress || "",
+        userRealmId: userRealmId || "",
         postId,
         icon,
         feedId,
@@ -39,4 +40,4 @@ function useEventPostReactionHandler(feedId: string, parentId: string = "") {
   };
 }
 
-export default useEventPostReactionHandler;
+export default useFeedPostReactionHandler;

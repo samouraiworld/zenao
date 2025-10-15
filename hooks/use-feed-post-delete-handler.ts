@@ -2,24 +2,25 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useToast } from "./use-toast";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { useDeletePost } from "@/lib/mutations/social-feed";
 import { captureException } from "@/lib/report";
 
-function useEventPostDeleteHandler(feedId: string) {
+function useFeedPostDeleteHandler(feedId: string) {
   const t = useTranslations();
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
-  const { data: userAddress } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
+  const userRealmId = userInfo?.realmId || "";
   const { deletePost, isPending: isDeleting } = useDeletePost();
 
   const onDelete = async (postId: string, parentId?: string) => {
     const token = await getToken();
 
     try {
-      if (!token || !userAddress) {
+      if (!token || !userRealmId) {
         throw new Error("not authenticated");
       }
 
@@ -28,7 +29,7 @@ function useEventPostDeleteHandler(feedId: string) {
         postId,
         parentId,
         token,
-        userAddress,
+        userRealmId,
       });
 
       toast({
@@ -51,4 +52,4 @@ function useEventPostDeleteHandler(feedId: string) {
   };
 }
 
-export default useEventPostDeleteHandler;
+export default useFeedPostDeleteHandler;

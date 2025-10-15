@@ -6,9 +6,10 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
-import { userAddressOptions } from "@/lib/queries/user";
+import { userInfoOptions } from "@/lib/queries/user";
 import { profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/widgets/texts/text";
 import { useEditUserProfile } from "@/lib/mutations/profile";
@@ -29,25 +30,25 @@ import {
   serializeWithFrontMatter,
 } from "@/lib/serialization";
 import { Card } from "@/components/widgets/cards/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/shadcn/tabs";
+import { Tabs, TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { cn } from "@/lib/tailwind";
 import Heading from "@/components/widgets/texts/heading";
+import { addressFromRealmId } from "@/lib/gno";
+import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
+import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
+  const [bioTab, setBioTab] = useState<"write" | "preview">("write");
 
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
 
-  const { data: address } = useSuspenseQuery(
-    userAddressOptions(getToken, userId),
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
   );
-  const { data: user } = useSuspenseQuery(profileOptions(address));
+  const userRealmId = userInfo?.realmId || "";
+  const { data: user } = useSuspenseQuery(profileOptions(userRealmId));
   const profileDetails = deserializeWithFrontMatter({
     serialized: user?.bio ?? "",
     schema: gnoProfileDetailsSchema,
@@ -91,9 +92,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
+      if (!userRealmId) {
+        throw new Error("no user realm id");
+      }
 
       await editUser({
-        address: address || "",
+        realmId: userRealmId,
         token,
         avatarUri: values.avatarUri,
         displayName: values.displayName,
@@ -107,6 +111,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           },
         ),
       });
+
+      const address = addressFromRealmId(userRealmId);
 
       router.push(`/profile/${address}`);
       toast({
@@ -168,31 +174,41 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
                 className="mb-4"
               />
 
-              <div className="mb-4 flex items-center gap-2">
-                <Heading level={3}>{t("bio-label")}</Heading>
-              </div>
+              <div className="flex flex-col relative">
+                <div className="mb-4 flex items-center gap-2">
+                  <Heading level={3}>{t("bio-label")}</Heading>
+                </div>
 
-              <Tabs defaultValue="write" className="w-full">
-                <TabsList className="grid w-full grid-cols-2" tabIndex={-1}>
-                  <TabsTrigger value="write">{t("write-tab")}</TabsTrigger>
-                  <TabsTrigger value="preview">{t("preview-tab")}</TabsTrigger>
-                </TabsList>
-                <TabsContent value="write" tabIndex={-1}>
-                  <FormFieldTextArea
-                    control={form.control}
-                    name="bio"
-                    placeholder={t("bio-placeholder")}
-                    className={cn(
-                      "bg-transparent border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
-                    )}
-                    maxLength={1000}
-                    wordCounter
+                <Tabs
+                  defaultValue="write"
+                  className="w-full"
+                  value={bioTab}
+                  onValueChange={(v) => setBioTab(v as "write" | "preview")}
+                >
+                  <TabsIconsList
+                    tabs={getMarkdownEditorTabs({
+                      writeLabel: t("write-tab"),
+                      previewLabel: t("preview-tab"),
+                    })}
+                    className="absolute top-0 right-0 rounded p-0 h-fit"
                   />
-                </TabsContent>
-                <TabsContent value="preview">
-                  <MarkdownPreview markdownString={bio} />
-                </TabsContent>
-              </Tabs>
+                  <TabsContent value="write" tabIndex={-1}>
+                    <FormFieldTextArea
+                      control={form.control}
+                      name="bio"
+                      placeholder={t("bio-placeholder")}
+                      className={cn(
+                        "bg-transparent border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
+                      )}
+                      maxLength={1000}
+                      wordCounter
+                    />
+                  </TabsContent>
+                  <TabsContent value="preview">
+                    <MarkdownPreview markdownString={bio} />
+                  </TabsContent>
+                </Tabs>
+              </div>
             </Card>
           </div>
           <div className="flex flex-col gap-4 w-full">

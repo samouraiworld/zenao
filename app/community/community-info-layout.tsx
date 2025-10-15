@@ -33,6 +33,7 @@ function CommunityInfoLayout({
     defaultValue: {
       description: "",
       shortDescription: "",
+      portfolio: [],
     },
     contentFieldName: "description",
   });

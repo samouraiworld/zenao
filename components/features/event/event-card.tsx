@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Users } from "lucide-react";
+import { Eye, EyeOff, MapPin, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
@@ -58,7 +58,14 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
         </div>
         <div className="py-2 px-4">
           <div className="flex flex-col gap-2">
-            <EventDateTime startDate={evt.startDate} timezone={timezone} />
+            <div className="flex items-center justify-between">
+              <EventDateTime startDate={evt.startDate} timezone={timezone} />
+              {evt.discoverable ? (
+                <Eye className="size-5" />
+              ) : (
+                <EyeOff className="size-5" />
+              )}
+            </div>
             <div className="flex flex-row gap-2 items-baseline">
               <Heading level={1} size="xl" className="mb-1 line-clamp-3">
                 {evt.title}
@@ -75,7 +82,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
             <div className="flex flex-row gap-2 items-center">
               {/* XXX: Display all organizers */}
               {t("hosted-by")}{" "}
-              <UserAvatarWithName address={evt.organizers[0]} />
+              <UserAvatarWithName realmId={evt.organizers[0]} />
             </div>
           </div>
         </div>

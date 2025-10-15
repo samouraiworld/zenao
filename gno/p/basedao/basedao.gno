@@ -8,6 +8,7 @@ import (
 	"gno.land/p/nt/mux"
 	"gno.land/p/zenao/daocond"
 	"gno.land/p/zenao/daokit"
+	"gno.land/p/zenao/realmid"
 )
 
 type daoPublic struct {
@@ -59,9 +60,12 @@ type DAOPrivate struct {
 	GetProfileString ProfileStringGetter
 	Realm            runtime.Realm
 	RenderFn         func(path string, dao *DAOPrivate) string
+	CallerID         CallerIDFn
 
 	InitialConfig *Config // mostly there in case we need this data during upgrade
 }
+
+type CallerIDFn func() string
 
 type Config struct {
 	Name               string
@@ -78,6 +82,7 @@ type Config struct {
 	MigrationParamsFn  MigrationParamsFn
 	RenderFn           RenderFn
 	CrossFn            daokit.CrossFn
+	CallerID           CallerIDFn
 	PrivateVarName     string
 }
 
@@ -98,6 +103,10 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		panic(errors.New("GetProfileString is required"))
 	}
 
+	if conf.CallerID == nil {
+		conf.CallerID = realmid.Previous
+	}
+
 	core := daokit.NewCore()
 	dao := &DAOPrivate{
 		Core:             core,
@@ -105,6 +114,7 @@ func New(conf *Config) (daokit.DAO, *DAOPrivate) {
 		GetProfileString: conf.GetProfileString,
 		Realm:            runtime.CurrentRealm(),
 		RenderFn:         conf.RenderFn,
+		CallerID:         conf.CallerID,
 		InitialConfig:    conf,
 	}
 
@@ -224,7 +234,7 @@ func (d *DAOPrivate) Propose(req daokit.ProposalRequest) uint64 {
 }
 
 func (d *DAOPrivate) assertCallerIsMember() string {
-	id := runtime.PreviousRealm().Address().String()
+	id := d.CallerID()
 	if !d.Members.IsMember(id) {
 		panic(errors.New("caller is not a member"))
 	}

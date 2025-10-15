@@ -17,7 +17,7 @@ export function PollFields({
 }: {
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
-  const t = useTranslations("event-feed.poll-form");
+  const t = useTranslations("social-feed.poll-form");
   const {
     fields: optionFields,
     append: appendOption,
@@ -86,7 +86,7 @@ function PollOptionItem({
   onClickRemove: () => void;
   canRemove: boolean;
 }) {
-  const t = useTranslations("event-feed.poll-form");
+  const t = useTranslations("social-feed.poll-form");
 
   return (
     <div className="flex flex-row items-baseline gap-2 w-full">
@@ -102,7 +102,7 @@ function PollOptionItem({
 }
 
 function AddOptionButton({ onClick }: { onClick: () => void }) {
-  const t = useTranslations("event-feed.poll-form");
+  const t = useTranslations("social-feed.poll-form");
 
   return (
     <div onClick={onClick}>
@@ -145,7 +145,7 @@ function PollFormDuration({
 }: {
   form: UseFormReturn<FeedPostFormSchemaType>;
 }) {
-  const t = useTranslations("event-feed.poll-form");
+  const t = useTranslations("social-feed.poll-form");
 
   const minutesMin =
     pollFormSchema.shape.duration.shape.minutes._def.checks.find(

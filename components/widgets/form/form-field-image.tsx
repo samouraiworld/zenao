@@ -13,7 +13,6 @@ import Text from "@/components/widgets/texts/text";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
 import { Card } from "@/components/widgets/cards/card";
@@ -85,38 +84,24 @@ export const FormFieldImage = <T extends FieldValues>({
       name={props.name}
       render={() => (
         <FormItem className={cn("flex flex-col w-full", props.className)}>
-          <TooltipProvider>
-            <Tooltip delayDuration={200}>
-              <TooltipTrigger asChild>
-                <AspectRatio
-                  ratio={props.aspectRatio[0] / props.aspectRatio[1]}
-                  onClick={handleClick}
+          <Tooltip delayDuration={200}>
+            <TooltipTrigger asChild>
+              <AspectRatio
+                ratio={props.aspectRatio[0] / props.aspectRatio[1]}
+                onClick={handleClick}
+              >
+                {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
+                {/* TODO: find a better way */}
+                <Card
+                  className={cn(
+                    "border-dashed w-full h-full flex flex-col gap-2 justify-center items-center rounded border-2 border-[#EC7E17] overflow-hidden",
+                    "hover:bg-secondary cursor-pointer",
+                  )}
                 >
-                  {/* We have to check if the URL is valid here because the error message is updated after the value and Image cannot take a wrong URL (throw an error instead) */}
-                  {/* TODO: find a better way */}
-                  <Card
-                    className={cn(
-                      "border-dashed w-full h-full flex flex-col gap-2 justify-center items-center rounded border-2 border-[#EC7E17] overflow-hidden",
-                      "hover:bg-secondary cursor-pointer",
-                    )}
-                  >
-                    {isValidURL(imageUri, urlPattern) &&
-                    !fieldState.error?.message ? (
-                      <>
-                        {(!props.fit || props.fit === "pad") && (
-                          <Web3Image
-                            src={web2URL(imageUri)}
-                            alt="imageUri"
-                            fill
-                            sizes="(max-width: 768px) 100vw,
-                      (max-width: 1200px) 70vw,
-                      33vw"
-                            className={cn(
-                              "flex object-cover rounded self-center cursor-pointer blur",
-                              "hover:brightness-[60%] transition-all",
-                            )}
-                          />
-                        )}
+                  {isValidURL(imageUri, urlPattern) &&
+                  !fieldState.error?.message ? (
+                    <>
+                      {(!props.fit || props.fit === "pad") && (
                         <Web3Image
                           src={web2URL(imageUri)}
                           alt="imageUri"
@@ -125,43 +110,55 @@ export const FormFieldImage = <T extends FieldValues>({
                       (max-width: 1200px) 70vw,
                       33vw"
                           className={cn(
-                            "flex object-contain rounded self-center cursor-pointer",
+                            "flex object-cover rounded self-center cursor-pointer blur",
                             "hover:brightness-[60%] transition-all",
-                            imageVariants({ fit }),
                           )}
                         />
-                      </>
-                    ) : (
-                      <>
-                        <ImageIcon
-                          onClick={handleClick}
-                          strokeWidth={1}
-                          className="w-16 h-16 text-secondary-color"
-                        />
-                        <Text variant="secondary">Upload an image</Text>
-                        {uploading && <Loader2 className="animate-spin" />}
-                      </>
-                    )}
-                  </Card>
-                </AspectRatio>
-              </TooltipTrigger>
-              {props.tooltip && (
-                <TooltipContent className="bg-secondary" side="bottom">
-                  {props.tooltip}
-                </TooltipContent>
-              )}
-            </Tooltip>
-            {hint && (
-              <Text size="xs" className="text-right">
-                Optimal aspect ratio: {getAspectRatioHint(props.aspectRatio)}
-                <br />
-                <span className="inline-block text-gray-500 whitespace-nowrap">
-                  e.g. {100 * props.aspectRatio[0]}x{100 * props.aspectRatio[1]}
-                  px
-                </span>
-              </Text>
+                      )}
+                      <Web3Image
+                        src={web2URL(imageUri)}
+                        alt="imageUri"
+                        fill
+                        sizes="(max-width: 768px) 100vw,
+                      (max-width: 1200px) 70vw,
+                      33vw"
+                        className={cn(
+                          "flex object-contain rounded self-center cursor-pointer",
+                          "hover:brightness-[60%] transition-all",
+                          imageVariants({ fit }),
+                        )}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon
+                        onClick={handleClick}
+                        strokeWidth={1}
+                        className="w-16 h-16 text-secondary-color"
+                      />
+                      <Text variant="secondary">Upload an image</Text>
+                      {uploading && <Loader2 className="animate-spin" />}
+                    </>
+                  )}
+                </Card>
+              </AspectRatio>
+            </TooltipTrigger>
+            {props.tooltip && (
+              <TooltipContent className="bg-secondary" side="bottom">
+                {props.tooltip}
+              </TooltipContent>
             )}
-          </TooltipProvider>
+          </Tooltip>
+          {hint && (
+            <Text size="xs" className="text-right">
+              Optimal aspect ratio: {getAspectRatioHint(props.aspectRatio)}
+              <br />
+              <span className="inline-block text-gray-500 whitespace-nowrap">
+                e.g. {100 * props.aspectRatio[0]}x{100 * props.aspectRatio[1]}
+                px
+              </span>
+            </Text>
+          )}
           <div className="bottom-8 right-2">
             <input
               type="file"

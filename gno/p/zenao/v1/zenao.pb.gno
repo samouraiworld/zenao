@@ -3,8 +3,44 @@
 package zenaov1
 
 import (
+	"errors"
+
 	v1 "gno.land/p/zenao/polls/v1"
 )
+
+type DiscoverableFilter uint32
+
+const (
+	DISCOVERABLE_FILTER_UNSPECIFIED    = DiscoverableFilter(0)
+	DISCOVERABLE_FILTER_DISCOVERABLE   = DiscoverableFilter(1)
+	DISCOVERABLE_FILTER_UNDISCOVERABLE = DiscoverableFilter(2)
+)
+
+func DiscoverableFilterFromString(str string) DiscoverableFilter {
+	switch str {
+	case "DISCOVERABLE_FILTER_UNSPECIFIED":
+		return DISCOVERABLE_FILTER_UNSPECIFIED
+	case "DISCOVERABLE_FILTER_DISCOVERABLE":
+		return DISCOVERABLE_FILTER_DISCOVERABLE
+	case "DISCOVERABLE_FILTER_UNDISCOVERABLE":
+		return DISCOVERABLE_FILTER_UNDISCOVERABLE
+	default:
+		panic(errors.New("unknown variant " + str))
+	}
+}
+
+func (e DiscoverableFilter) ToString() string {
+	switch e {
+	case DISCOVERABLE_FILTER_UNSPECIFIED:
+		return "DISCOVERABLE_FILTER_UNSPECIFIED"
+	case DISCOVERABLE_FILTER_DISCOVERABLE:
+		return "DISCOVERABLE_FILTER_DISCOVERABLE"
+	case DISCOVERABLE_FILTER_UNDISCOVERABLE:
+		return "DISCOVERABLE_FILTER_UNDISCOVERABLE"
+	default:
+		panic(errors.New("unknown variant"))
+	}
+}
 
 type HealthRequest struct {
 }
@@ -23,11 +59,12 @@ type EditUserResponse struct {
 	Id string
 }
 
-type GetUserAddressRequest struct {
+type GetUserInfoRequest struct {
 }
 
-type GetUserAddressResponse struct {
-	Address string
+type GetUserInfoResponse struct {
+	RealmId string
+	Plan    string
 }
 
 type CreateEventRequest struct {
