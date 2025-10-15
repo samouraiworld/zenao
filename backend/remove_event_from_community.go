@@ -34,5 +34,5 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 	// 	return nil, err
 	// }
 
-	return connect.NewResponse(&zenaov1.RemoveEventFromCommunityResponse{}), nil
+	//return connect.NewResponse(&zenaov1.RemoveEventFromCommunityResponse{}), nil
 }
