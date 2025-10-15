@@ -1131,6 +1131,8 @@ func (g *gnoZenaoChain) RemoveEventFromCommunity(callerRealmID string, community
 	g, span := g.trace("gzchain.RemoveEventFromCommunity")
 	defer span.End()
 
+	g.logger.Info("removing event from community", zap.String("event", eventRealmID), zap.String("community", communityRealmID))
+
 	msgRun := vm.MsgRun{
 		Caller: g.signerInfo.GetAddress(),
 		Package: &tm2std.MemPackage{

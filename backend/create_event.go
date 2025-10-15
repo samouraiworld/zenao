@@ -91,6 +91,7 @@ func (s *ZenaoServer) CreateEvent(
 	uuid := uuid.New().String()
 	evtID := strings.ReplaceAll(uuid, "-", "_")
 	evtRealmID := s.Chain.EventRealmID(evtID)
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
 
 	passwordHash, err := zeni.NewPasswordHash(req.Msg.Password)
 	if err != nil {
@@ -112,7 +113,7 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	if req.Msg.CommunityId != "" {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, s.Chain.CommunityRealmID(req.Msg.CommunityId), evtRealmID); err != nil {
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(userRealmID, s.Chain.CommunityRealmID(req.Msg.CommunityId), evtRealmID); err != nil {
 			return nil, err
 		}
 	}

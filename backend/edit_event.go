@@ -113,7 +113,7 @@ func (s *ZenaoServer) EditEvent(
 	// TODO: use the norman implementation to get pkg path
 	// TODO: look for all changeme in the codebase
 	if cmt != nil && cmt.PkgPath != cmtRealmID {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, cmt.PkgPath, req.Msg.EventId); err != nil {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(userRealmID, cmt.PkgPath, eventRealmID); err != nil {
 			return nil, err
 		}
 	}
