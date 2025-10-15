@@ -141,6 +141,9 @@ func (s *ZenaoServer) CreateEvent(
 			memberIDs = append(memberIDs, id)
 		}
 		members, err = s.DB.GetUsersByIDs(memberIDs)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	webhook.TrySendDiscordMessage(s.Logger, s.DiscordToken, evtID, evt)
