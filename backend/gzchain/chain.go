@@ -1958,28 +1958,6 @@ func genCancelParticipationMsgRunBody(callerPkgPath, eventPkgPath, participant, 
 `, callerPkgPath, eventPkgPath, "Remove participant in "+eventPkgPath, participant, ticketPubkey)
 }
 
-func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeper string) string {
-	return fmt.Sprintf(`package main
-
-	import (
-		user %q
-		event %q
-		"gno.land/p/zenao/daokit"
-		"gno.land/p/zenao/events"
-	)
-
-	func main() {
-		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
-			Title: %q,
-			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
-				Title: "Remove gatekeeper",
-				Action: events.NewRemoveGatekeeperAction(%q),
-			}),
-		})
-	}
-`, callerPkgPath, eventPkgPath, "Remove gatekeeper in "+eventPkgPath, gatekeeper)
-}
-
 func genCommunityRemoveMemberMsgRunBody(callerPkgPath, communityPkgPath, member string) string {
 	return fmt.Sprintf(`package main
 
