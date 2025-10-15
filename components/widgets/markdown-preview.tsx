@@ -37,11 +37,11 @@ export function MarkdownPreview({
         [remarkGfm, { singleTilde: false }],
         // support embed player for youtube videos
         // to support directives like `::audio`
-        // Vimeo and other oembed providers
-        remarkVimeoEmbed,
         remarkDirective,
         remarkAudioDirective,
         remarkYoutube,
+        // Vimeo and other oembed providers
+        remarkVimeoEmbed,
         // It’s a shortcut for .use(remarkRehype).use(rehypeSanitize).use(rehypeStringify) needed to compiles markdown to HTML
         remarkHtml,
       ]}

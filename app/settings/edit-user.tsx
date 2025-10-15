@@ -24,6 +24,7 @@ import {
   userFormSchema,
 } from "@/types/schemas";
 import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
+import SkillsList from "@/components/features/user/settings/skills-list";
 import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
@@ -49,6 +50,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       location: "",
       shortBio: "",
       bannerUri: "",
+      skills: [],
     },
     contentFieldName: "bio",
   });
@@ -61,6 +63,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     socialMediaLinks: profileDetails.socialMediaLinks,
     location: profileDetails.location || "",
     shortBio: profileDetails.shortBio || "",
+    skills: profileDetails.skills,
   };
 
   const { editUser, isPending } = useEditUserProfile();
@@ -97,6 +100,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             location: values.location,
             shortBio: values.shortBio,
             bannerUri: values.bannerUri,
+            skills: values.skills,
           },
         ),
       });
@@ -174,6 +178,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               placeholder={t("location-placeholder")}
             />
 
+            <SkillsList form={form} />
             <SocialMediaLinks form={form} />
 
             <ButtonWithChildren
