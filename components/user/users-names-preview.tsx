@@ -32,7 +32,7 @@ function UsersNamesPreview({ usersAddresses }: { usersAddresses: string[] }) {
             )} and ${users.length - numNames} other${users.length == numNames + 1 ? "" : "s"}`}</Text>
         </>
       ) : (
-        <Text size="sm">
+        <Text size="sm" className="break-all">
           {users.map((user) => user?.displayName).join(", ")}
         </Text>
       )}
