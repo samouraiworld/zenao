@@ -63,7 +63,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
           <Heading level={3} className="text-lg sm:text-2xl">
             {community.displayName}
           </Heading>
-          <Text className="text-xs md:text-sm text-ellipsis line-clamp-2 text-secondary-color">
+          <Text className="text-xs md:text-sm text-ellipsis line-clamp-2 text-secondary-color break-all">
             {shortDescription || t("no-description")}
           </Text>
 
