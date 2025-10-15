@@ -217,8 +217,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               placeholder={t("location-placeholder")}
             />
 
+            <SocialMediaLinks control={form.control} name="socialMediaLinks" />
             <SkillsList form={form} />
-            <SocialMediaLinks form={form} />
 
             <ButtonWithChildren
               loading={isPending}
