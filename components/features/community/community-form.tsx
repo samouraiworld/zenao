@@ -183,7 +183,7 @@ export const CommunityForm = ({
           </SettingsSection>
 
           <SettingsSection
-            title={t("socialLinks")}
+            title={t("visibility-section")}
             description={t("socialLinks-description")}
           >
             <Card className="p-6">
