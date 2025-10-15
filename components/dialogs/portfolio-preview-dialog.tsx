@@ -42,8 +42,6 @@ export default function PortfolioPreviewDialog({
     onOpenChange(false);
   };
 
-  if (!isOpen) return null;
-
   return (
     <>
       <ConfirmationDialog
@@ -64,7 +62,7 @@ export default function PortfolioPreviewDialog({
         <DialogContent className="lg:max-w-5xl flex flex-col gap-4">
           {(item.type === "video" || item.type === "audio") && (
             <AspectRatio ratio={16 / 9}>
-              <div className="h-full w-full border rounded border-muted overflow-hidden flex items-center justify-center bg-muted cursor-pointer hover:brightness-90 transition">
+              <div className="h-full w-full border rounded border-muted overflow-hidden flex items-center justify-center bg-muted transition">
                 <MarkdownPreview
                   className="w-full"
                   markdownString={
