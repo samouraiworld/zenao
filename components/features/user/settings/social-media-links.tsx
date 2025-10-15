@@ -5,16 +5,18 @@ import {
   Control,
   FieldArray,
   FieldValues,
+  Path,
   useFieldArray,
+  useWatch,
 } from "react-hook-form";
 import { Trash2Icon } from "lucide-react";
+import { useMemo } from "react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
-
-import { userFormSocialLinkSchema } from "@/types/schemas";
 import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
 import Heading from "@/components/widgets/texts/heading";
 import { cn } from "@/lib/tailwind";
+import { socialLinkSchema } from "@/types/schemas";
 
 type SocialLinkItem = { url: string };
 
@@ -39,17 +41,24 @@ function SocialMediaLinks<
     name,
   });
 
-  console.log(fields);
+  const lastLink = useWatch({
+    control,
+    name: `${name}.${fields.length - 1}` as Path<T>,
+  });
 
-  const socialMediaLinks = fields as (FieldArray<T, TName> & {
-    id: string;
-  } & SocialLinkItem)[];
-
-  const lastUrl = socialMediaLinks?.at(-1)?.url ?? "";
-
-  const isLastLinkInvalid =
-    socialMediaLinks?.length > 0 &&
-    !userFormSocialLinkSchema.shape.url.safeParse(lastUrl).success;
+  const socialMediaLinks = useMemo(
+    () =>
+      fields as (FieldArray<T, TName> & {
+        id: string;
+      } & SocialLinkItem)[],
+    [fields],
+  );
+  const isLastLinkInvalid = useMemo(
+    () =>
+      socialMediaLinks?.length > 0 &&
+      !socialLinkSchema.shape.url.safeParse(lastLink?.url ?? "").success,
+    [socialMediaLinks, lastLink],
+  );
 
   return (
     <div className="flex flex-col gap-4">

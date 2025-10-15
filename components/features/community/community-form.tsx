@@ -5,6 +5,7 @@ import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Trash2Icon, Plus, Info } from "lucide-react";
 import { useMediaQuery } from "../../../hooks/use-media-query";
+import SocialMediaLinks from "../user/settings/social-media-links";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
@@ -178,6 +179,20 @@ export const CommunityForm = ({
                   <MarkdownPreview markdownString={description} />
                 </TabsContent>
               </Tabs>
+            </Card>
+          </SettingsSection>
+
+          <SettingsSection
+            title={t("socialLinks")}
+            description={t("socialLinks-description")}
+          >
+            <Card className="p-6">
+              <div className="flex flex-col gap-3">
+                <SocialMediaLinks
+                  control={form.control}
+                  name="socialMediaLinks"
+                />
+              </div>
             </Card>
           </SettingsSection>
 
