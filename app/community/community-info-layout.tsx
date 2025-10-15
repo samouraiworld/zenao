@@ -67,8 +67,8 @@ function CommunityInfoLayout({
               "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24"
             }
             priority
-            fetchPriority="high"
             fill
+            fetchPriority="high"
             quality={70}
           />
         </AspectRatio>
