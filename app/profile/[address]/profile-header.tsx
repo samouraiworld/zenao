@@ -13,6 +13,7 @@ import Text from "@/components/widgets/texts/text";
 import { addressFromRealmId } from "@/lib/gno";
 import { userInfoOptions } from "@/lib/queries/user";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { gnoProfileDetailsSchema } from "@/types/schemas";
 
 type ProfileHeaderProps = {
@@ -50,19 +51,18 @@ export default function ProfileHeader({
   return (
     <div className="flex flex-col w-full">
       <div className="relative w-full">
-        {profileDetails.bannerUri ? (
-          <AspectRatio ratio={4 / 1}>
-            <Web3Image
-              src={profileDetails.bannerUri}
-              alt="Profile banner"
-              priority
-              fill
-              className="w-full h-full object-cover rounded-b-2xl"
-            />
-          </AspectRatio>
-        ) : (
-          <Skeleton className="w-full h-32 sm:h-48" />
-        )}
+        <AspectRatio ratio={4 / 1}>
+          <Web3Image
+            src={
+              profileDetails.bannerUri ||
+              "ipfs://bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny"
+            }
+            alt="Profile banner"
+            priority
+            fill
+            className="w-full h-full object-cover rounded-b-2xl"
+          />
+        </AspectRatio>
 
         <div className="absolute -bottom-16 left-4">
           {avatarUri ? (
@@ -121,7 +121,7 @@ export default function ProfileHeader({
         <div className="flex flex-col gap-3">
           {profileDetails.bio?.trim() && (
             <Card>
-              <Text>{profileDetails.bio}</Text>
+              <MarkdownPreview markdownString={profileDetails.bio} />
             </Card>
           )}
         </div>
