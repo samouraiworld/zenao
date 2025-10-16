@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ExternalLink, Link2, MapPin } from "lucide-react";
+import { ExternalLink, Link2, List, MapPin } from "lucide-react";
 import Link from "next/link";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Button } from "@/components/shadcn/button";
@@ -15,6 +15,7 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { gnoProfileDetailsSchema } from "@/types/schemas";
+import ProfileExperience from "@/components/features/user/profile-experience";
 
 type ProfileHeaderProps = {
   address: string;
@@ -43,6 +44,7 @@ export default function ProfileHeader({
       location: "",
       shortBio: "",
       bannerUri: "",
+      experiences: [],
       skills: [],
     },
     contentFieldName: "bio",
@@ -165,6 +167,26 @@ export default function ProfileHeader({
                       className="flex-shrink-0 text-blue-400"
                     />
                   </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {profileDetails.experiences?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              <List size={18} className="text-primary" />
+              Experiences
+            </Heading>
+
+            <ul className="flex flex-col gap-4">
+              {profileDetails.experiences.map((exp, index) => (
+                <li key={index}>
+                  <ProfileExperience
+                    experience={exp}
+                    unique={profileDetails.experiences.length === 1}
+                  />
                 </li>
               ))}
             </ul>
