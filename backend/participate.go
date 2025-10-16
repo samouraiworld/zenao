@@ -87,19 +87,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	buyerRealmID := s.Chain.UserRealmID(buyer.ID)
 	needPasswordIfGuarded := true
 
-	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
-		for i, ticket := range tickets {
-			// XXX: support batch
-			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
-			if err := tx.Participate(evtRealmID, buyerRealmID, participantRealmID, ticket.Secret(), req.Msg.Password, false); err != nil {
-				return err
-			}
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
 	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
 	if err != nil {
 		return nil, err
@@ -112,20 +99,45 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	if err != nil {
 		return nil, err
 	}
-
 	if slices.Contains(userRoles, zeni.RoleOrganizer) {
 		needPasswordIfGuarded = false
 	}
 
 	var eventSK ed25519.PrivateKey
+	// TODO: check password before DB operation
 	if needPasswordIfGuarded {
 		hash, err := zeni.NewPasswordHash(req.Msg.Password)
 		if err != nil {
 			return nil, err
 		}
-		if eventSK, err = zeni.EventSKFromPasswordHash(hash); err != nil {
+		eventSK, err := zeni.EventSKFromPasswordHash(hash)
+		if err != nil {
 			return nil, err
 		}
+		pk, err := zeni.EventPKFromSK(eventSK)
+		if err != nil {
+			return nil, err
+		}
+		valid, err := s.Chain.WithContext(ctx).ValidatePassword(evtRealmID, pk)
+		if err != nil {
+			return nil, err
+		}
+		if !valid {
+			return nil, errors.New("invalid password")
+		}
+	}
+
+	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
+		for i, ticket := range tickets {
+			// XXX: support batch
+			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
+			if err := tx.Participate(evtRealmID, buyerRealmID, participantRealmID, ticket.Secret()); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
 	for i, ticket := range tickets {

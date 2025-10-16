@@ -255,7 +255,7 @@ type DB interface {
 	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
-	Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string, password string, needPassword bool) error
+	Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)

@@ -405,7 +405,7 @@ func (g *gormZenaoDB) CreateUser(authID string, realmIDPrefix string) (*zeni.Use
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string, password string, needPassword bool) error {
+func (g *gormZenaoDB) Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error {
 	g, span := g.trace("gzdb.Participate")
 	defer span.End()
 
@@ -413,22 +413,6 @@ func (g *gormZenaoDB) Participate(eventRealmID string, buyerRealmID string, user
 	if err != nil {
 		return err
 	}
-
-	// TODO: How i validate password ?
-	// evt, err := g.getDBEvent(eventID)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if needPassword {
-	// 	validPass, err := validatePassword(password, evt.PasswordHash)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	if !validPass {
-	// 		return errors.New("invalid password")
-	// 	}
-	// }
 
 	if err := g.db.Save(&SoldTicket{
 		EventRealmID: eventRealmID,
