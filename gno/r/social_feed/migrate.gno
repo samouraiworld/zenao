@@ -8,7 +8,6 @@ import (
 var (
 	Ownable = ownable.NewWithAddress(address("g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94")) // zenao-dev-admin
 	Paused  = false
-	Frozen  = false
 )
 
 func Pause(_ realm) {
@@ -27,22 +26,7 @@ func Unpause(_ realm) {
 	Paused = false
 }
 
-func Freeze(_ realm) {
-	Ownable.AssertOwnedByPrevious()
-	if Frozen {
-		panic("already stopped")
-	}
-	Frozen = true
-}
-
-func assertNotFrozen() {
-	if Frozen {
-		panic("frozen")
-	}
-}
-
 func assertActive() {
-	assertNotFrozen()
 	if Paused {
 		panic("paused")
 	}
