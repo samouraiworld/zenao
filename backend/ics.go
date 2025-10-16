@@ -35,8 +35,7 @@ func GenerateICS(evtID string, evt *zenaov1.EventInfo, zenaoEmail string, logger
 	event.SetURL(eventURL)
 	event.SetLocation(location)
 	event.SetStatus(ics.ObjectStatusConfirmed)
-	// TODO: handle the ICS on-chain
-	//event.SetSequence(int(evt.ICSSequenceNumber))
+	event.SetSequence(int(evt.IcsSeqNumber))
 	// XXX: We could set the display name of the organizer if not empty
 	event.SetOrganizer(zenaoEmail, ics.WithCN("Zenao"))
 

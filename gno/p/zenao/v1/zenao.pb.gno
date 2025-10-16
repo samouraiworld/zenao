@@ -210,6 +210,7 @@ type EventInfo struct {
 	Privacy      *EventPrivacy
 	CheckedIn    uint32
 	Discoverable bool
+	IcsSeqNumber uint32
 }
 
 type BatchProfileField struct {

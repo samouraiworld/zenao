@@ -204,6 +204,7 @@ message EventInfo {
   EventPrivacy privacy = 12;
   uint32 checked_in = 13;
   bool discoverable = 14;
+  uint32 ics_seq_number = 15;
 }
 
 message BatchProfileField {

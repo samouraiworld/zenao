@@ -36,6 +36,7 @@ type Event struct {
 	CheckedIn           uint32 // number of checked-in participants, used for rendering only
 	Cancelled           bool   // true if event is cancelled
 	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
+	ICSSeqNumber        uint32 // incremented at each edit, used for ics feed generation
 
 	Config *Config // to get initial data during upgrade
 }
@@ -160,6 +161,7 @@ func NewEvent(conf *Config) *Event {
 		ParticipationPubkey: participationPubkey,
 		CheckedIn:           0,
 		Cancelled:           false,
+		ICSSeqNumber:        0,
 		Config:              conf,
 	}
 
@@ -506,6 +508,7 @@ func (e *Event) editEventHandler() daokit.ActionHandler {
 				panic("unknown privacy model")
 			}
 		}
+		e.ICSSeqNumber += 1
 		e.Discoverable = msg.discoverable
 	})
 }

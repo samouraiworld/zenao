@@ -574,6 +574,9 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	if e.Discoverable != false {
 		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, e.Discoverable)
 	}
+	if e.IcsSeqNumber != 0 {
+		fmt.Fprintf(buf, "%s\tIcsSeqNumber: %d,\n", linePrefix, e.IcsSeqNumber)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()

@@ -948,6 +948,9 @@ func (e *EventInfo) ToJSON() *json.Node {
 	if e.Discoverable != false {
 		fields["discoverable"] = json.BoolNode("", e.Discoverable)
 	}
+	if e.IcsSeqNumber != 0 {
+		fields["icsSeqNumber"] = json.NumberNode("", float64(e.IcsSeqNumber))
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -1019,6 +1022,9 @@ func EventInfoFromJSON(e *EventInfo, node *json.Node) {
 	}
 	if val, ok := fields["discoverable"]; ok {
 		e.Discoverable = val.MustBool()
+	}
+	if val, ok := fields["icsSeqNumber"]; ok {
+		e.IcsSeqNumber = uint32(val.MustNumeric())
 	}
 }
 
