@@ -35,13 +35,14 @@ import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { cn } from "@/lib/tailwind";
 import Heading from "@/components/widgets/texts/heading";
 import { addressFromRealmId } from "@/lib/gno";
+import UserExperiences from "@/components/features/user/settings/user-experiences";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
 
-  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+  const { getToken } = useAuth();
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -57,6 +58,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       location: "",
       shortBio: "",
       bannerUri: "",
+      experiences: [],
       skills: [],
     },
     contentFieldName: "bio",
@@ -70,6 +72,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     socialMediaLinks: profileDetails.socialMediaLinks,
     location: profileDetails.location || "",
     shortBio: profileDetails.shortBio || "",
+    experiences: profileDetails.experiences || [],
     skills: profileDetails.skills,
   };
 
@@ -97,21 +100,24 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         throw new Error("no user realm id");
       }
 
+      const bio = serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
+        values.bio,
+        {
+          socialMediaLinks: values.socialMediaLinks,
+          location: values.location,
+          shortBio: values.shortBio,
+          bannerUri: values.bannerUri,
+          experiences: values.experiences,
+          skills: values.skills,
+        },
+      );
+
       await editUser({
         realmId: userRealmId,
         token,
         avatarUri: values.avatarUri,
         displayName: values.displayName,
-        bio: serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
-          values.bio,
-          {
-            socialMediaLinks: values.socialMediaLinks,
-            location: values.location,
-            shortBio: values.shortBio,
-            bannerUri: values.bannerUri,
-            skills: values.skills,
-          },
-        ),
+        bio,
       });
 
       const address = addressFromRealmId(userRealmId);
@@ -219,15 +225,19 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
 
             <SocialMediaLinks control={form.control} name="socialMediaLinks" />
             <SkillsList form={form} />
-
-            <ButtonWithChildren
-              loading={isPending}
-              type="submit"
-              className="w-full"
-            >
-              {t("save-button")}
-            </ButtonWithChildren>
           </div>
+
+          <div className="flex flex-coll gap-4 w-full lg:col-span-2">
+            <UserExperiences form={form} />
+          </div>
+
+          <ButtonWithChildren
+            loading={isPending}
+            type="submit"
+            className="w-full"
+          >
+            {t("save-button")}
+          </ButtonWithChildren>
         </div>
       </form>
     </Form>

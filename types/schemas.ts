@@ -104,6 +104,59 @@ export const socialLinkSchema = z.object({
 
 export type socialLinkSchemaType = z.infer<typeof socialLinkSchema>;
 
+export const userExperienceSchema = z
+  .object({
+    title: z
+      .string()
+      .trim()
+      .min(3, "Title is too short (3 characters min)")
+      .max(100, "Title is too long (100 characters max)"),
+    description: z
+      .string()
+      .trim()
+      .min(3, "Description is too short (3 characters min)")
+      .max(1000, "Description is too long (1000 characters max)"),
+    start: z.object({
+      month: z.coerce.number().min(1).max(12),
+      year: z.coerce.number().min(1900).max(2200),
+    }),
+    end: z
+      .object({
+        month: z.coerce.number().int().min(1).max(12),
+        year: z.coerce.number().int().min(1900).max(2200),
+      })
+      .optional(),
+    current: z.boolean().default(false),
+    organization: z
+      .string()
+      .trim()
+      .max(100, "Organization name is too long (100 characters max)")
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.current && !data.end) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End date is required if not ongoing",
+        path: ["end"],
+      });
+    }
+
+    if (data.end) {
+      const startDate = new Date(data.start.year, data.start.month - 1);
+      const endDate = new Date(data.end.year, data.end.month - 1);
+
+      if (endDate < startDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "End date cannot be before start date",
+          path: ["end"],
+        });
+      }
+    }
+  });
+
+export type UserExperienceSchemaType = z.infer<typeof userExperienceSchema>;
 export const userFormSkillSchema = z.object({
   name: z
     .string()
@@ -122,6 +175,7 @@ export const userFormSchema = z.object({
   bannerUri: z.string().optional().default(""),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
+  experiences: z.array(userExperienceSchema).default([]),
   skills: z.array(userFormSkillSchema),
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
@@ -132,6 +186,7 @@ export const gnoProfileDetailsSchema = z.object({
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
   bannerUri: z.string().optional().default(""),
+  experiences: z.array(userExperienceSchema).default([]),
   skills: z.array(userFormSkillSchema).default([]),
 });
 
