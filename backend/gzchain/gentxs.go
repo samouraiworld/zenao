@@ -19,8 +19,6 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-// TODO: REMOVE WHEN SOT TRANSITION IS DONE
-
 func GentxNewPost(chain *gnoZenaoChain, authorRealmID string, caller string, orgRealmID string, post *feedsv1.Post) (gnoland.TxWithMetadata, error) {
 	callerAddr, err := cryptoGno.AddressFromString(caller)
 	if err != nil {

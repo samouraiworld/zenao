@@ -46,12 +46,7 @@ func (s *ZenaoServer) GetEventTickets(
 			ticketsWithoutUser = append(ticketsWithoutUser, tk)
 			continue
 		}
-		// TODO: remove this
-		id, err := s.Chain.FromRealmIDToID(tk.UserRealmID, "u")
-		if err != nil {
-			return nil, err
-		}
-		user, err := s.DB.WithContext(ctx).GetUserByID(id)
+		user, err := s.DB.WithContext(ctx).GetUserByRealmID(tk.UserRealmID)
 		if err != nil {
 			return nil, err
 		}

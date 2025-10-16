@@ -36,7 +36,6 @@ func (s *ZenaoServer) JoinCommunity(
 		return nil, err
 	}
 
-	// TODO: change to handle address instead of creatorID
 	if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.Administrators[0], cmtRealmID, userRealmID); err != nil {
 		return nil, errors.New("failed to add member to community on chain")
 	}

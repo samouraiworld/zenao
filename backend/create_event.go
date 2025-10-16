@@ -102,7 +102,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	// TODO: should we do it in one tx on-chain ?
+	// XXX: how to have atomicity on these operations ?
 	if err := s.Chain.WithContext(ctx).CreateEvent(evtRealmID, mapsl.Map(organizersIDs, s.Chain.UserRealmID), mapsl.Map(gatekeepersIDs, s.Chain.UserRealmID), req.Msg, privacy); err != nil {
 		return nil, err
 	}
@@ -121,7 +121,6 @@ func (s *ZenaoServer) CreateEvent(
 	var cmt *zenaov1.CommunityInfo
 	var members []*zeni.User
 
-	// TODO: test event with community creation
 	if req.Msg.CommunityId != "" {
 		cmt, err = s.Chain.WithContext(ctx).GetCommunity(s.Chain.CommunityRealmID(req.Msg.CommunityId))
 		if err != nil {

@@ -36,7 +36,6 @@ func (s *ZenaoServer) LeaveCommunity(
 		return nil, err
 	}
 
-	// TODO: change to handle address instead of creatorID
 	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.Administrators[0], cmtRealmID, userRealmID); err != nil {
 		return nil, errors.New("failed to remove member from community on chain")
 	}

@@ -105,15 +105,13 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
+	// XXX: how to have atomicity on these operations ?
 	if err := s.Chain.WithContext(ctx).EditEvent(eventRealmID, userRealmID, organizersRealmIDs, gatekeepersRealmIDs, req.Msg, privacy); err != nil {
 		return nil, err
 	}
 
-	// TODO: what happens if the user is not administrator anymore but was before ?
-	// TODO: use the norman implementation to get pkg path
-	// TODO: look for all changeme in the codebase
 	if cmt != nil && cmt.PkgPath != cmtRealmID {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(userRealmID, cmt.PkgPath, eventRealmID); err != nil {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.Administrators[0], cmt.PkgPath, eventRealmID); err != nil {
 			return nil, err
 		}
 	}

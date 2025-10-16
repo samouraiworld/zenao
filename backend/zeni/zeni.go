@@ -242,7 +242,7 @@ type DB interface {
 
 	CreateUser(authID string, realmIDPrefix string) (*User, error)
 	GetUserByAuthID(authID string) (*User, error)
-	GetUserByID(userID string) (*User, error)
+	GetUserByRealmID(realmID string) (*User, error)
 	GetUsersByRealmIDs(realmIDs []string) ([]*User, error)
 	// XXX: add EnsureUsersExist
 

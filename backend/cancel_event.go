@@ -47,14 +47,13 @@ func (s *ZenaoServer) CancelEvent(
 	if err != nil {
 		return nil, err
 	}
+
+	// XXX: how to have atomicity on these operations ?
 	if community != nil {
-		// TODO: what happens if the user is not administrator anymore but was before ?
-		// Option: fetch administrators of the community and use the first one as the one who remove the event from the community
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(userRealmID, community.PkgPath, req.Msg.EventId); err != nil {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(community.Administrators[0], community.PkgPath, req.Msg.EventId); err != nil {
 			return nil, err
 		}
 	}
-
 	if err := s.Chain.WithContext(ctx).CancelEvent(eventRealmID, userRealmID); err != nil {
 		return nil, err
 	}

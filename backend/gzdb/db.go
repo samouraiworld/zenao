@@ -457,14 +457,10 @@ func (g *gormZenaoDB) GetUserByAuthID(authID string) (*zeni.User, error) {
 	return dbUserToZeniDBUser(&user), nil
 }
 
-// GetUserFromID implements zeni.DB.
-func (g *gormZenaoDB) GetUserByID(userID string) (*zeni.User, error) {
-	userIDInt, err := strconv.ParseUint(userID, 10, 64)
-	if err != nil {
-		return nil, err
-	}
+// GetUserByRealmID implements zeni.DB.
+func (g *gormZenaoDB) GetUserByRealmID(userRealmID string) (*zeni.User, error) {
 	var user User
-	if err := g.db.Where("id = ?", userIDInt).First(&user).Error; err != nil {
+	if err := g.db.Where("realm_id = ?", userRealmID).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
