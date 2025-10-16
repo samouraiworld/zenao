@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"gno.land/p/nt/avl"
+	"gno.land/p/nt/avl/rotree"
 	"gno.land/p/nt/seqid"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 	"gno.land/p/zenao/realmid"
@@ -54,6 +55,18 @@ func init() {
 	postsByParent = avl.NewTree()
 	feeds = avl.NewTree()
 	feedsByPost = avl.NewTree()
+}
+
+func ReactionsTree() rotree.IReadOnlyTree {
+	return rotree.Wrap(reactions, nil)
+}
+
+func UserReactionsTree() rotree.IReadOnlyTree {
+	return rotree.Wrap(userReactions, nil)
+}
+
+func PostsTree() rotree.IReadOnlyTree {
+	return rotree.Wrap(posts, nil)
 }
 
 func NewFeed(_ realm, slug string, crossNetwork bool, authFunc AuthFn) string {

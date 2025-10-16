@@ -150,6 +150,60 @@ func TestGetPost(t *testing.T) {
 	}
 }
 
+func TestGetPostExternalMutation(t *testing.T) {
+	setupTest()
+
+	type input struct {
+		localPostId uint64
+	}
+
+	type test struct {
+		input
+		mutate func(post *feedsv1.Post)
+	}
+
+	type testTable = map[string]test
+
+	validPost := &feedsv1.Post{
+		Author:    alice.String(),
+		DeletedAt: 0,
+		Post:      &feedsv1.StandardPost{},
+	}
+
+	tests := testTable{
+		"valid post": {
+			input: input{
+				localPostId: 1,
+			},
+			mutate: func(post *feedsv1.Post) {
+				post.Author = "eve"
+			},
+		},
+		/*
+			"invalid post": {
+				input: input{
+					localPostId: 2,
+				},
+				output: output{
+					panic: true,
+				},
+			},
+		*/
+	}
+
+	testing.SetContext(testing.Context{
+		CurrentRealm: testing.NewUserRealm(alice),
+	})
+	NewPost(cross, "public", validPost)
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := GetPost(tc.input.localPostId)
+			tc.mutate(got)
+		})
+	}
+}
+
 func TestDeletePost(t *testing.T) {
 	setupTest()
 

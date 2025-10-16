@@ -16,7 +16,7 @@ func (h *HealthRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (h *HealthRequest) FromJSON(node *json.Node) {
+func HealthRequestFromJSON(h *HealthRequest, node *json.Node) {
 	*h = HealthRequest{}
 }
 
@@ -30,7 +30,7 @@ func (h *HealthResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (h *HealthResponse) FromJSON(node *json.Node) {
+func HealthResponseFromJSON(h *HealthResponse, node *json.Node) {
 	*h = HealthResponse{}
 	fields := node.MustObject()
 
@@ -55,7 +55,7 @@ func (e *EditUserRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EditUserRequest) FromJSON(node *json.Node) {
+func EditUserRequestFromJSON(e *EditUserRequest, node *json.Node) {
 	*e = EditUserRequest{}
 	fields := node.MustObject()
 
@@ -80,7 +80,7 @@ func (e *EditUserResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EditUserResponse) FromJSON(node *json.Node) {
+func EditUserResponseFromJSON(e *EditUserResponse, node *json.Node) {
 	*e = EditUserResponse{}
 	fields := node.MustObject()
 
@@ -95,7 +95,7 @@ func (g *GetUserInfoRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetUserInfoRequest) FromJSON(node *json.Node) {
+func GetUserInfoRequestFromJSON(g *GetUserInfoRequest, node *json.Node) {
 	*g = GetUserInfoRequest{}
 }
 
@@ -112,7 +112,7 @@ func (g *GetUserInfoResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetUserInfoResponse) FromJSON(node *json.Node) {
+func GetUserInfoResponseFromJSON(g *GetUserInfoResponse, node *json.Node) {
 	*g = GetUserInfoResponse{}
 	fields := node.MustObject()
 
@@ -181,7 +181,7 @@ func (c *CreateEventRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreateEventRequest) FromJSON(node *json.Node) {
+func CreateEventRequestFromJSON(c *CreateEventRequest, node *json.Node) {
 	*c = CreateEventRequest{}
 	fields := node.MustObject()
 
@@ -216,7 +216,7 @@ func (c *CreateEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["location"]; ok {
 		fv := &EventLocation{}
-		fv.FromJSON(val)
+		EventLocationFromJSON(fv, val)
 		c.Location = fv
 	}
 	if val, ok := fields["password"]; ok {
@@ -259,7 +259,7 @@ func (c *CreateEventResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreateEventResponse) FromJSON(node *json.Node) {
+func CreateEventResponseFromJSON(c *CreateEventResponse, node *json.Node) {
 	*c = CreateEventResponse{}
 	fields := node.MustObject()
 
@@ -278,7 +278,7 @@ func (c *CancelEventRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CancelEventRequest) FromJSON(node *json.Node) {
+func CancelEventRequestFromJSON(c *CancelEventRequest, node *json.Node) {
 	*c = CancelEventRequest{}
 	fields := node.MustObject()
 
@@ -293,7 +293,7 @@ func (c *CancelEventResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CancelEventResponse) FromJSON(node *json.Node) {
+func CancelEventResponseFromJSON(c *CancelEventResponse, node *json.Node) {
 	*c = CancelEventResponse{}
 }
 
@@ -360,7 +360,7 @@ func (e *EditEventRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EditEventRequest) FromJSON(node *json.Node) {
+func EditEventRequestFromJSON(e *EditEventRequest, node *json.Node) {
 	*e = EditEventRequest{}
 	fields := node.MustObject()
 
@@ -398,7 +398,7 @@ func (e *EditEventRequest) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["location"]; ok {
 		fv := &EventLocation{}
-		fv.FromJSON(val)
+		EventLocationFromJSON(fv, val)
 		e.Location = fv
 	}
 	if val, ok := fields["password"]; ok {
@@ -444,7 +444,7 @@ func (e *EditEventResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EditEventResponse) FromJSON(node *json.Node) {
+func EditEventResponseFromJSON(e *EditEventResponse, node *json.Node) {
 	*e = EditEventResponse{}
 	fields := node.MustObject()
 
@@ -463,7 +463,7 @@ func (g *GetEventGatekeepersRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetEventGatekeepersRequest) FromJSON(node *json.Node) {
+func GetEventGatekeepersRequestFromJSON(g *GetEventGatekeepersRequest, node *json.Node) {
 	*g = GetEventGatekeepersRequest{}
 	fields := node.MustObject()
 
@@ -486,7 +486,7 @@ func (g *GetEventGatekeepersResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetEventGatekeepersResponse) FromJSON(node *json.Node) {
+func GetEventGatekeepersResponseFromJSON(g *GetEventGatekeepersResponse, node *json.Node) {
 	*g = GetEventGatekeepersResponse{}
 	fields := node.MustObject()
 
@@ -513,7 +513,7 @@ func (v *ValidatePasswordRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (v *ValidatePasswordRequest) FromJSON(node *json.Node) {
+func ValidatePasswordRequestFromJSON(v *ValidatePasswordRequest, node *json.Node) {
 	*v = ValidatePasswordRequest{}
 	fields := node.MustObject()
 
@@ -535,7 +535,7 @@ func (v *ValidatePasswordResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (v *ValidatePasswordResponse) FromJSON(node *json.Node) {
+func ValidatePasswordResponseFromJSON(v *ValidatePasswordResponse, node *json.Node) {
 	*v = ValidatePasswordResponse{}
 	fields := node.MustObject()
 
@@ -567,7 +567,7 @@ func (p *ParticipateRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (p *ParticipateRequest) FromJSON(node *json.Node) {
+func ParticipateRequestFromJSON(p *ParticipateRequest, node *json.Node) {
 	*p = ParticipateRequest{}
 	fields := node.MustObject()
 
@@ -600,7 +600,7 @@ func (c *CancelParticipationRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CancelParticipationRequest) FromJSON(node *json.Node) {
+func CancelParticipationRequestFromJSON(c *CancelParticipationRequest, node *json.Node) {
 	*c = CancelParticipationRequest{}
 	fields := node.MustObject()
 
@@ -615,7 +615,7 @@ func (c *CancelParticipationResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CancelParticipationResponse) FromJSON(node *json.Node) {
+func CancelParticipationResponseFromJSON(c *CancelParticipationResponse, node *json.Node) {
 	*c = CancelParticipationResponse{}
 }
 
@@ -629,7 +629,7 @@ func (p *ParticipateResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (p *ParticipateResponse) FromJSON(node *json.Node) {
+func ParticipateResponseFromJSON(p *ParticipateResponse, node *json.Node) {
 	*p = ParticipateResponse{}
 	fields := node.MustObject()
 
@@ -654,7 +654,7 @@ func (b *BroadcastEventRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (b *BroadcastEventRequest) FromJSON(node *json.Node) {
+func BroadcastEventRequestFromJSON(b *BroadcastEventRequest, node *json.Node) {
 	*b = BroadcastEventRequest{}
 	fields := node.MustObject()
 
@@ -675,7 +675,7 @@ func (b *BroadcastEventResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (b *BroadcastEventResponse) FromJSON(node *json.Node) {
+func BroadcastEventResponseFromJSON(b *BroadcastEventResponse, node *json.Node) {
 	*b = BroadcastEventResponse{}
 }
 
@@ -703,7 +703,7 @@ func (e *EventLocation) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EventLocation) FromJSON(node *json.Node) {
+func EventLocationFromJSON(e *EventLocation, node *json.Node) {
 	*e = EventLocation{}
 	fields := node.MustObject()
 
@@ -727,15 +727,15 @@ func (e *EventLocation) FromJSON(node *json.Node) {
 	switch selectedVariantName {
 	case "geo":
 		n := &AddressGeo{}
-		n.FromJSON(selectedVariant)
+		AddressGeoFromJSON(n, selectedVariant)
 		e.Address = n
 	case "virtual":
 		n := &AddressVirtual{}
-		n.FromJSON(selectedVariant)
+		AddressVirtualFromJSON(n, selectedVariant)
 		e.Address = n
 	case "custom":
 		n := &AddressCustom{}
-		n.FromJSON(selectedVariant)
+		AddressCustomFromJSON(n, selectedVariant)
 		e.Address = n
 	default:
 		panic(errors.New("address variant not found"))
@@ -752,7 +752,7 @@ func (a *AddressVirtual) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (a *AddressVirtual) FromJSON(node *json.Node) {
+func AddressVirtualFromJSON(a *AddressVirtual, node *json.Node) {
 	*a = AddressVirtual{}
 	fields := node.MustObject()
 
@@ -780,7 +780,7 @@ func (a *AddressGeo) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (a *AddressGeo) FromJSON(node *json.Node) {
+func AddressGeoFromJSON(a *AddressGeo, node *json.Node) {
 	*a = AddressGeo{}
 	fields := node.MustObject()
 
@@ -811,7 +811,7 @@ func (a *AddressCustom) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (a *AddressCustom) FromJSON(node *json.Node) {
+func AddressCustomFromJSON(a *AddressCustom, node *json.Node) {
 	*a = AddressCustom{}
 	fields := node.MustObject()
 
@@ -838,7 +838,7 @@ func (e *EventPrivacy) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EventPrivacy) FromJSON(node *json.Node) {
+func EventPrivacyFromJSON(e *EventPrivacy, node *json.Node) {
 	*e = EventPrivacy{}
 	fields := node.MustObject()
 
@@ -855,11 +855,11 @@ func (e *EventPrivacy) FromJSON(node *json.Node) {
 	switch selectedVariantName {
 	case "public":
 		n := &EventPrivacyPublic{}
-		n.FromJSON(selectedVariant)
+		EventPrivacyPublicFromJSON(n, selectedVariant)
 		e.EventPrivacy = n
 	case "guarded":
 		n := &EventPrivacyGuarded{}
-		n.FromJSON(selectedVariant)
+		EventPrivacyGuardedFromJSON(n, selectedVariant)
 		e.EventPrivacy = n
 	default:
 		panic(errors.New("eventPrivacy variant not found"))
@@ -872,7 +872,7 @@ func (e *EventPrivacyPublic) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EventPrivacyPublic) FromJSON(node *json.Node) {
+func EventPrivacyPublicFromJSON(e *EventPrivacyPublic, node *json.Node) {
 	*e = EventPrivacyPublic{}
 }
 
@@ -886,7 +886,7 @@ func (e *EventPrivacyGuarded) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EventPrivacyGuarded) FromJSON(node *json.Node) {
+func EventPrivacyGuardedFromJSON(e *EventPrivacyGuarded, node *json.Node) {
 	*e = EventPrivacyGuarded{}
 	fields := node.MustObject()
 
@@ -952,7 +952,7 @@ func (e *EventInfo) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EventInfo) FromJSON(node *json.Node) {
+func EventInfoFromJSON(e *EventInfo, node *json.Node) {
 	*e = EventInfo{}
 	fields := node.MustObject()
 
@@ -1000,7 +1000,7 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["location"]; ok {
 		fv := &EventLocation{}
-		fv.FromJSON(val)
+		EventLocationFromJSON(fv, val)
 		e.Location = fv
 	}
 	if val, ok := fields["participants"]; ok {
@@ -1011,7 +1011,7 @@ func (e *EventInfo) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["privacy"]; ok {
 		fv := &EventPrivacy{}
-		fv.FromJSON(val)
+		EventPrivacyFromJSON(fv, val)
 		e.Privacy = fv
 	}
 	if val, ok := fields["checkedIn"]; ok {
@@ -1035,7 +1035,7 @@ func (b *BatchProfileField) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (b *BatchProfileField) FromJSON(node *json.Node) {
+func BatchProfileFieldFromJSON(b *BatchProfileField, node *json.Node) {
 	*b = BatchProfileField{}
 	fields := node.MustObject()
 
@@ -1068,7 +1068,7 @@ func (b *BatchProfileRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (b *BatchProfileRequest) FromJSON(node *json.Node) {
+func BatchProfileRequestFromJSON(b *BatchProfileRequest, node *json.Node) {
 	*b = BatchProfileRequest{}
 	fields := node.MustObject()
 
@@ -1077,7 +1077,7 @@ func (b *BatchProfileRequest) FromJSON(node *json.Node) {
 		arr := make([]*BatchProfileField, len(jarr))
 		for i, val := range jarr {
 			fv := &BatchProfileField{}
-			fv.FromJSON(val)
+			BatchProfileFieldFromJSON(fv, val)
 			arr[i] = fv
 		}
 		b.Fields = arr
@@ -1121,7 +1121,7 @@ func (c *CreatePollRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreatePollRequest) FromJSON(node *json.Node) {
+func CreatePollRequestFromJSON(c *CreatePollRequest, node *json.Node) {
 	*c = CreatePollRequest{}
 	fields := node.MustObject()
 
@@ -1164,7 +1164,7 @@ func (c *CreatePollResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreatePollResponse) FromJSON(node *json.Node) {
+func CreatePollResponseFromJSON(c *CreatePollResponse, node *json.Node) {
 	*c = CreatePollResponse{}
 	fields := node.MustObject()
 
@@ -1186,7 +1186,7 @@ func (v *VotePollRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (v *VotePollRequest) FromJSON(node *json.Node) {
+func VotePollRequestFromJSON(v *VotePollRequest, node *json.Node) {
 	*v = VotePollRequest{}
 	fields := node.MustObject()
 
@@ -1204,7 +1204,7 @@ func (v *VotePollResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (v *VotePollResponse) FromJSON(node *json.Node) {
+func VotePollResponseFromJSON(v *VotePollResponse, node *json.Node) {
 	*v = VotePollResponse{}
 }
 
@@ -1234,7 +1234,7 @@ func (c *CreatePostRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreatePostRequest) FromJSON(node *json.Node) {
+func CreatePostRequestFromJSON(c *CreatePostRequest, node *json.Node) {
 	*c = CreatePostRequest{}
 	fields := node.MustObject()
 
@@ -1270,7 +1270,7 @@ func (c *CreatePostResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreatePostResponse) FromJSON(node *json.Node) {
+func CreatePostResponseFromJSON(c *CreatePostResponse, node *json.Node) {
 	*c = CreatePostResponse{}
 	fields := node.MustObject()
 
@@ -1289,7 +1289,7 @@ func (d *DeletePostRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (d *DeletePostRequest) FromJSON(node *json.Node) {
+func DeletePostRequestFromJSON(d *DeletePostRequest, node *json.Node) {
 	*d = DeletePostRequest{}
 	fields := node.MustObject()
 
@@ -1304,7 +1304,7 @@ func (d *DeletePostResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (d *DeletePostResponse) FromJSON(node *json.Node) {
+func DeletePostResponseFromJSON(d *DeletePostResponse, node *json.Node) {
 	*d = DeletePostResponse{}
 }
 
@@ -1321,7 +1321,7 @@ func (r *ReactPostRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (r *ReactPostRequest) FromJSON(node *json.Node) {
+func ReactPostRequestFromJSON(r *ReactPostRequest, node *json.Node) {
 	*r = ReactPostRequest{}
 	fields := node.MustObject()
 
@@ -1339,7 +1339,7 @@ func (r *ReactPostResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (r *ReactPostResponse) FromJSON(node *json.Node) {
+func ReactPostResponseFromJSON(r *ReactPostResponse, node *json.Node) {
 	*r = ReactPostResponse{}
 }
 
@@ -1363,7 +1363,7 @@ func (e *EditPostRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EditPostRequest) FromJSON(node *json.Node) {
+func EditPostRequestFromJSON(e *EditPostRequest, node *json.Node) {
 	*e = EditPostRequest{}
 	fields := node.MustObject()
 
@@ -1393,7 +1393,7 @@ func (e *EditPostResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EditPostResponse) FromJSON(node *json.Node) {
+func EditPostResponseFromJSON(e *EditPostResponse, node *json.Node) {
 	*e = EditPostResponse{}
 	fields := node.MustObject()
 
@@ -1412,7 +1412,7 @@ func (g *GetEventTicketsRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetEventTicketsRequest) FromJSON(node *json.Node) {
+func GetEventTicketsRequestFromJSON(g *GetEventTicketsRequest, node *json.Node) {
 	*g = GetEventTicketsRequest{}
 	fields := node.MustObject()
 
@@ -1435,7 +1435,7 @@ func (g *GetEventTicketsResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetEventTicketsResponse) FromJSON(node *json.Node) {
+func GetEventTicketsResponseFromJSON(g *GetEventTicketsResponse, node *json.Node) {
 	*g = GetEventTicketsResponse{}
 	fields := node.MustObject()
 
@@ -1444,7 +1444,7 @@ func (g *GetEventTicketsResponse) FromJSON(node *json.Node) {
 		arr := make([]*TicketInfo, len(jarr))
 		for i, val := range jarr {
 			fv := &TicketInfo{}
-			fv.FromJSON(val)
+			TicketInfoFromJSON(fv, val)
 			arr[i] = fv
 		}
 		g.TicketsInfo = arr
@@ -1464,7 +1464,7 @@ func (t *TicketInfo) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (t *TicketInfo) FromJSON(node *json.Node) {
+func TicketInfoFromJSON(t *TicketInfo, node *json.Node) {
 	*t = TicketInfo{}
 	fields := node.MustObject()
 
@@ -1489,7 +1489,7 @@ func (c *CheckinRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CheckinRequest) FromJSON(node *json.Node) {
+func CheckinRequestFromJSON(c *CheckinRequest, node *json.Node) {
 	*c = CheckinRequest{}
 	fields := node.MustObject()
 
@@ -1507,7 +1507,7 @@ func (c *CheckinResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CheckinResponse) FromJSON(node *json.Node) {
+func CheckinResponseFromJSON(c *CheckinResponse, node *json.Node) {
 	*c = CheckinResponse{}
 }
 
@@ -1521,7 +1521,7 @@ func (e *ExportParticipantsRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *ExportParticipantsRequest) FromJSON(node *json.Node) {
+func ExportParticipantsRequestFromJSON(e *ExportParticipantsRequest, node *json.Node) {
 	*e = ExportParticipantsRequest{}
 	fields := node.MustObject()
 
@@ -1546,7 +1546,7 @@ func (e *ExportParticipantsResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *ExportParticipantsResponse) FromJSON(node *json.Node) {
+func ExportParticipantsResponseFromJSON(e *ExportParticipantsResponse, node *json.Node) {
 	*e = ExportParticipantsResponse{}
 	fields := node.MustObject()
 
@@ -1593,7 +1593,7 @@ func (c *CommunityInfo) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CommunityInfo) FromJSON(node *json.Node) {
+func CommunityInfoFromJSON(c *CommunityInfo, node *json.Node) {
 	*c = CommunityInfo{}
 	fields := node.MustObject()
 
@@ -1651,7 +1651,7 @@ func (c *CreateCommunityRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreateCommunityRequest) FromJSON(node *json.Node) {
+func CreateCommunityRequestFromJSON(c *CreateCommunityRequest, node *json.Node) {
 	*c = CreateCommunityRequest{}
 	fields := node.MustObject()
 
@@ -1687,7 +1687,7 @@ func (c *CreateCommunityResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (c *CreateCommunityResponse) FromJSON(node *json.Node) {
+func CreateCommunityResponseFromJSON(c *CreateCommunityResponse, node *json.Node) {
 	*c = CreateCommunityResponse{}
 	fields := node.MustObject()
 
@@ -1725,7 +1725,7 @@ func (e *EditCommunityRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EditCommunityRequest) FromJSON(node *json.Node) {
+func EditCommunityRequestFromJSON(e *EditCommunityRequest, node *json.Node) {
 	*e = EditCommunityRequest{}
 	fields := node.MustObject()
 
@@ -1760,7 +1760,7 @@ func (e *EditCommunityResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (e *EditCommunityResponse) FromJSON(node *json.Node) {
+func EditCommunityResponseFromJSON(e *EditCommunityResponse, node *json.Node) {
 	*e = EditCommunityResponse{}
 }
 
@@ -1774,7 +1774,7 @@ func (g *GetCommunityAdministratorsRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetCommunityAdministratorsRequest) FromJSON(node *json.Node) {
+func GetCommunityAdministratorsRequestFromJSON(g *GetCommunityAdministratorsRequest, node *json.Node) {
 	*g = GetCommunityAdministratorsRequest{}
 	fields := node.MustObject()
 
@@ -1797,7 +1797,7 @@ func (g *GetCommunityAdministratorsResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (g *GetCommunityAdministratorsResponse) FromJSON(node *json.Node) {
+func GetCommunityAdministratorsResponseFromJSON(g *GetCommunityAdministratorsResponse, node *json.Node) {
 	*g = GetCommunityAdministratorsResponse{}
 	fields := node.MustObject()
 
@@ -1821,7 +1821,7 @@ func (j *JoinCommunityRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (j *JoinCommunityRequest) FromJSON(node *json.Node) {
+func JoinCommunityRequestFromJSON(j *JoinCommunityRequest, node *json.Node) {
 	*j = JoinCommunityRequest{}
 	fields := node.MustObject()
 
@@ -1836,7 +1836,7 @@ func (j *JoinCommunityResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (j *JoinCommunityResponse) FromJSON(node *json.Node) {
+func JoinCommunityResponseFromJSON(j *JoinCommunityResponse, node *json.Node) {
 	*j = JoinCommunityResponse{}
 }
 
@@ -1850,7 +1850,7 @@ func (l *LeaveCommunityRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (l *LeaveCommunityRequest) FromJSON(node *json.Node) {
+func LeaveCommunityRequestFromJSON(l *LeaveCommunityRequest, node *json.Node) {
 	*l = LeaveCommunityRequest{}
 	fields := node.MustObject()
 
@@ -1865,7 +1865,7 @@ func (l *LeaveCommunityResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (l *LeaveCommunityResponse) FromJSON(node *json.Node) {
+func LeaveCommunityResponseFromJSON(l *LeaveCommunityResponse, node *json.Node) {
 	*l = LeaveCommunityResponse{}
 }
 
@@ -1882,7 +1882,7 @@ func (a *AddEventToCommunityRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (a *AddEventToCommunityRequest) FromJSON(node *json.Node) {
+func AddEventToCommunityRequestFromJSON(a *AddEventToCommunityRequest, node *json.Node) {
 	*a = AddEventToCommunityRequest{}
 	fields := node.MustObject()
 
@@ -1900,7 +1900,7 @@ func (a *AddEventToCommunityResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (a *AddEventToCommunityResponse) FromJSON(node *json.Node) {
+func AddEventToCommunityResponseFromJSON(a *AddEventToCommunityResponse, node *json.Node) {
 	*a = AddEventToCommunityResponse{}
 }
 
@@ -1917,7 +1917,7 @@ func (r *RemoveEventFromCommunityRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (r *RemoveEventFromCommunityRequest) FromJSON(node *json.Node) {
+func RemoveEventFromCommunityRequestFromJSON(r *RemoveEventFromCommunityRequest, node *json.Node) {
 	*r = RemoveEventFromCommunityRequest{}
 	fields := node.MustObject()
 
@@ -1935,6 +1935,6 @@ func (r *RemoveEventFromCommunityResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (r *RemoveEventFromCommunityResponse) FromJSON(node *json.Node) {
+func RemoveEventFromCommunityResponseFromJSON(r *RemoveEventFromCommunityResponse, node *json.Node) {
 	*r = RemoveEventFromCommunityResponse{}
 }

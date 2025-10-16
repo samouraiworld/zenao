@@ -143,7 +143,7 @@ func generateJSONUtils(gen *protogen.Plugin, file *protogen.File) {
 
 		g.P()
 
-		g.P("func (", receiver, " *", typeName, ") FromJSON(node *json.Node) {")
+		g.P("func ", typeName, "FromJSON(", receiver, " *", typeName, ", node *json.Node) {")
 		fmt.Fprintf(g, "	*%s = %s{}\n", receiver, typeName)
 		if len(m.Fields) != 0 || len(m.Oneofs) != 0 {
 			fmt.Fprintf(g, "	fields := node.MustObject()\n")
