@@ -27,6 +27,8 @@ function CommunityMemberCard({
       location: "",
       shortBio: "",
       bannerUri: "",
+      skills: [],
+      experiences: [],
     },
     contentFieldName: "bio",
   });

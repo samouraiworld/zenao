@@ -98,31 +98,96 @@ export const eventFormSchema = z.object({
 });
 export type EventFormSchemaType = z.infer<typeof eventFormSchema>;
 
-export const userFormSocialLinkSchema = z.object({
+export const socialLinkSchema = z.object({
   url: z.string().url().max(400),
 });
 
-export type UserFormSocialLinkSchemaType = z.infer<
-  typeof userFormSocialLinkSchema
->;
+export type socialLinkSchemaType = z.infer<typeof socialLinkSchema>;
+
+export const userExperienceSchema = z
+  .object({
+    title: z
+      .string()
+      .trim()
+      .min(3, "Title is too short (3 characters min)")
+      .max(100, "Title is too long (100 characters max)"),
+    description: z
+      .string()
+      .trim()
+      .min(3, "Description is too short (3 characters min)")
+      .max(1000, "Description is too long (1000 characters max)"),
+    start: z.object({
+      month: z.coerce.number().min(1).max(12),
+      year: z.coerce.number().min(1900).max(2200),
+    }),
+    end: z
+      .object({
+        month: z.coerce.number().int().min(1).max(12),
+        year: z.coerce.number().int().min(1900).max(2200),
+      })
+      .optional(),
+    current: z.boolean().default(false),
+    organization: z
+      .string()
+      .trim()
+      .max(100, "Organization name is too long (100 characters max)")
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.current && !data.end) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End date is required if not ongoing",
+        path: ["end"],
+      });
+    }
+
+    if (data.end) {
+      const startDate = new Date(data.start.year, data.start.month - 1);
+      const endDate = new Date(data.end.year, data.end.month - 1);
+
+      if (endDate < startDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "End date cannot be before start date",
+          path: ["end"],
+        });
+      }
+    }
+  });
+
+export type UserExperienceSchemaType = z.infer<typeof userExperienceSchema>;
+export const userFormSkillSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Skill cannot be empty")
+    .max(20, "Skill name too long"),
+});
+
+export type UserFormSkillSchemaType = z.infer<typeof userFormSkillSchema>;
 
 export const userFormSchema = z.object({
   bio: z.string().trim().max(1000).optional().default(""),
   displayName: z.string().trim().min(1),
-  socialMediaLinks: z.array(userFormSocialLinkSchema),
+  socialMediaLinks: z.array(socialLinkSchema),
   avatarUri: uriSchema,
   bannerUri: z.string().optional().default(""),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
+  experiences: z.array(userExperienceSchema).default([]),
+  skills: z.array(userFormSkillSchema),
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
 export const gnoProfileDetailsSchema = z.object({
   bio: z.string().trim().max(1000).optional().default(""),
-  socialMediaLinks: z.array(userFormSocialLinkSchema).default([]),
+  socialMediaLinks: z.array(socialLinkSchema).default([]),
   location: z.string().trim().max(100).optional().default(""),
   shortBio: z.string().max(200).optional().default(""),
-  bannerUri: z.string().optional().default("")
+  bannerUri: z.string().optional().default(""),
+  experiences: z.array(userExperienceSchema).default([]),
+  skills: z.array(userFormSkillSchema).default([]),
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
@@ -195,8 +260,10 @@ export type EventInfoTabsSchemaType = z.infer<typeof eventInfoTabsSchema>;
 
 export const communityTabsSchema = z.union([
   z.literal("chat"),
+  z.literal("votes"),
   z.literal("events"),
   z.literal("members"),
+  z.literal("portfolio"),
   z.literal("proposals"),
 ]);
 export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;
@@ -207,6 +274,7 @@ export const communityFormSchema = z.object({
   avatarUri: z.string().url().or(z.literal("")),
   bannerUri: z.string().url().or(z.literal("")),
   shortDescription: z.string().max(200).optional().default(""),
+  socialMediaLinks: z.array(socialLinkSchema).default([]),
   administrators: z
     .array(
       z.object({
@@ -220,9 +288,48 @@ export const communityFormSchema = z.object({
 
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
 
+export const portfolioItemSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(["image", "video", "audio"]),
+  uploadedAt: z.coerce.date(),
+  uri: uriSchema,
+  name: z.string().min(1).max(100),
+});
+
+export type PortfolioItem = z.infer<typeof portfolioItemSchema>;
+
+export const portfolioUploadVideoSchema = z
+  .object({
+    origin: z.union([z.literal("youtube"), z.literal("vimeo")]),
+    uri: uriSchema,
+  })
+  .refine(
+    (data) => {
+      if (
+        (data.origin === "youtube" &&
+          !/^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]{11}(&.*)?$/.test(
+            data.uri,
+          ) &&
+          !/^https?:\/\/youtu\.be\/[\w-]{11}(&.*)?$/.test(data.uri)) ||
+        (data.origin === "vimeo" &&
+          !/^https?:\/\/(www\.)?vimeo\.com\/\d+(&.*)?$/.test(data.uri))
+      ) {
+        return false;
+      }
+      return true;
+    },
+    { message: "Video URL is not valid", path: ["uri"] },
+  );
+
+export type PortfolioUploadVideoSchemaType = z.infer<
+  typeof portfolioUploadVideoSchema
+>;
+
 export const communityDetailsSchema = z.object({
   shortDescription: z.string().max(200).optional().default(""),
   description: z.string().trim().max(1000).optional().default(""),
+  portfolio: z.array(portfolioItemSchema).default([]),
+  socialMediaLinks: z.array(socialLinkSchema).default([]),
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;

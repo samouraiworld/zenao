@@ -1,7 +1,6 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Card } from "../widgets/cards/card";
 import { AspectRatio } from "../shadcn/aspect-ratio";
@@ -10,6 +9,7 @@ import Heading from "../widgets/texts/heading";
 import Text from "../widgets/texts/text";
 import UsersAvatarsPreview from "../user/users-avatars-preview";
 import UsersNamesPreview from "../user/users-names-preview";
+import { Skeleton } from "../shadcn/skeleton";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { communityUsersWithRoles } from "@/lib/queries/community";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
@@ -22,13 +22,6 @@ type CommunityCardProps = {
 
 function CommunityCard({ id, community }: CommunityCardProps) {
   const t = useTranslations("community-card");
-  const { data: members } = useSuspenseQuery(
-    communityUsersWithRoles(id, ["member"]),
-  );
-  const memberAddresses = useMemo(
-    () => members.map((m) => m.address),
-    [members],
-  );
 
   const { shortDescription } = deserializeWithFrontMatter({
     serialized: community.description || "",
@@ -36,6 +29,8 @@ function CommunityCard({ id, community }: CommunityCardProps) {
     defaultValue: {
       description: "",
       shortDescription: "",
+      portfolio: [],
+      socialMediaLinks: [],
     },
     contentFieldName: "description",
   });
@@ -59,30 +54,53 @@ function CommunityCard({ id, community }: CommunityCardProps) {
           </AspectRatio>
         </div>
         <div className="flex flex-col gap-2">
-          <Heading level={3} className="text-lg sm:text-2xl">
+          <Heading level={3} className="text-lg sm:text-2xl break-all">
             {community.displayName}
           </Heading>
-          <Text className="text-xs md:text-sm text-ellipsis line-clamp-2 text-secondary-color">
+          <Text className="text-xs md:text-sm text-ellipsis line-clamp-2 text-secondary-color break-all">
             {shortDescription || t("no-description")}
           </Text>
 
-          <div className="flex flex-col gap-2">
-            {/* 6 because we decide to show the first 6 participants avatars as preview */}
-            <UsersAvatarsPreview
-              users={
-                memberAddresses.length > 6
-                  ? memberAddresses.slice(0, 6)
-                  : memberAddresses
-              }
-            />
-            <Text className="text-xs md:text-sm text-secondary-color">
-              {t("members", { count: memberAddresses.length })}
-            </Text>
-            <UsersNamesPreview usersAddresses={memberAddresses} />
-          </div>
+          <MembersPreview id={id} />
         </div>
       </div>
     </Card>
+  );
+}
+
+function MembersPreview({ id }: { id: string }) {
+  const t = useTranslations("community-card");
+  // NOTE: we useQuery instead of useSuspenseQuery here to ensure this is fetched on the client
+  const { data: members } = useQuery(communityUsersWithRoles(id, ["member"]));
+  const memberAddresses = members?.map((m) => m.address);
+  if (!memberAddresses) {
+    return <MembersPreviewFallback />;
+  }
+  return (
+    <div className="flex flex-col gap-2 ">
+      {/* 6 because we decide to show the first 6 participants avatars as preview */}
+      <UsersAvatarsPreview
+        users={
+          memberAddresses.length > 6
+            ? memberAddresses.slice(0, 6)
+            : memberAddresses
+        }
+      />
+      <Text className="text-xs md:text-sm text-secondary-color">
+        {t("members", { count: memberAddresses.length })}
+      </Text>
+      <UsersNamesPreview usersAddresses={memberAddresses} />
+    </div>
+  );
+}
+
+function MembersPreviewFallback() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Skeleton className="w-24 h-6" />
+      <Skeleton className="w-20 h-[1rem] md:h-[1.25rem]" />
+      <Skeleton className="w-36 h-[1.25rem]" />
+    </div>
   );
 }
 

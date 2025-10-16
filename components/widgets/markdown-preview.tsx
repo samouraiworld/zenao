@@ -10,6 +10,7 @@ import { Web3Image } from "./images/web3-image";
 import { Web3Audio } from "./audio/web3-audio";
 import { cn } from "@/lib/tailwind";
 import remarkAudioDirective from "@/lib/remark-audio-directive-plugin";
+import remarkVimeoEmbed from "@/lib/remark-vimeo-plugin";
 
 export function MarkdownPreview({
   markdownString,
@@ -39,6 +40,8 @@ export function MarkdownPreview({
         remarkDirective,
         remarkAudioDirective,
         remarkYoutube,
+        // Vimeo and other oembed providers
+        remarkVimeoEmbed,
         // It’s a shortcut for .use(remarkRehype).use(rehypeSanitize).use(rehypeStringify) needed to compiles markdown to HTML
         remarkHtml,
       ]}

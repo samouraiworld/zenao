@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ExternalLink, Link2, MapPin } from "lucide-react";
+import { ExternalLink, Link2, List, MapPin } from "lucide-react";
 import Link from "next/link";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Button } from "@/components/shadcn/button";
@@ -13,7 +13,9 @@ import Text from "@/components/widgets/texts/text";
 import { addressFromRealmId } from "@/lib/gno";
 import { userInfoOptions } from "@/lib/queries/user";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { gnoProfileDetailsSchema } from "@/types/schemas";
+import ProfileExperience from "@/components/features/user/profile-experience";
 
 type ProfileHeaderProps = {
   address: string;
@@ -42,6 +44,8 @@ export default function ProfileHeader({
       location: "",
       shortBio: "",
       bannerUri: "",
+      experiences: [],
+      skills: [],
     },
     contentFieldName: "bio",
   });
@@ -49,19 +53,18 @@ export default function ProfileHeader({
   return (
     <div className="flex flex-col w-full">
       <div className="relative w-full">
-        {profileDetails.bannerUri ? (
-          <AspectRatio ratio={4 / 1}>
-            <Web3Image
-              src={profileDetails.bannerUri}
-              alt="Profile banner"
-              priority
-              fill
-              className="w-full h-full object-cover rounded-b-2xl"
-            />
-          </AspectRatio>
-        ) : (
-          <Skeleton className="w-full h-32 sm:h-48" />
-        )}
+        <AspectRatio ratio={4 / 1}>
+          <Web3Image
+            src={
+              profileDetails.bannerUri ||
+              "ipfs://bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny"
+            }
+            alt="Profile banner"
+            priority
+            fill
+            className="w-full h-full object-cover rounded-b-2xl"
+          />
+        </AspectRatio>
 
         <div className="absolute -bottom-16 left-4">
           {avatarUri ? (
@@ -120,10 +123,28 @@ export default function ProfileHeader({
         <div className="flex flex-col gap-3">
           {profileDetails.bio?.trim() && (
             <Card>
-              <Text>{profileDetails.bio}</Text>
+              <MarkdownPreview markdownString={profileDetails.bio} />
             </Card>
           )}
         </div>
+
+        {profileDetails.skills?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              Skills
+            </Heading>
+            <div className="flex flex-wrap gap-2">
+              {profileDetails.skills.map((skill) => (
+                <span
+                  key={skill.name}
+                  className="bg-primary text-primary-foreground hover:bg-primary/80 text-sm font-medium px-3 py-1 rounded-full transition"
+                >
+                  {skill.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {profileDetails.socialMediaLinks?.length > 0 && (
           <div className="flex flex-col gap-3">
@@ -146,6 +167,26 @@ export default function ProfileHeader({
                       className="flex-shrink-0 text-blue-400"
                     />
                   </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {profileDetails.experiences?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              <List size={18} className="text-primary" />
+              Experiences
+            </Heading>
+
+            <ul className="flex flex-col gap-4">
+              {profileDetails.experiences.map((exp, index) => (
+                <li key={index}>
+                  <ProfileExperience
+                    experience={exp}
+                    unique={profileDetails.experiences.length === 1}
+                  />
                 </li>
               ))}
             </ul>

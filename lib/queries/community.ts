@@ -158,8 +158,8 @@ export const communitiesListByMember = (
 };
 
 export const communityUserRoles = (
-  communityId: string | null,
-  userRealmId: string | null,
+  communityId: string | null | undefined,
+  userRealmId: string | null | undefined,
 ) =>
   queryOptions({
     queryKey: ["communityUserRoles", communityId, userRealmId],
@@ -178,6 +178,7 @@ export const communityUserRoles = (
       const roles = extractGnoJSONResponse(res);
       return communityGetUserRolesSchema.parse(roles);
     },
+    enabled: !!communityId && !!userRealmId,
   });
 
 export const communityUsersWithRoles = (

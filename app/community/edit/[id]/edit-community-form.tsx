@@ -53,6 +53,8 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
     defaultValue: {
       description: communityData.description || "",
       shortDescription: "",
+      portfolio: [],
+      socialMediaLinks: [],
     },
     contentFieldName: "description",
   });
@@ -64,6 +66,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
     avatarUri: communityData.avatarUri ?? "",
     bannerUri: communityData.bannerUri ?? "",
     administrators: (adminAddresses ?? []).map((address) => ({ address })),
+    socialMediaLinks: communityDetails.socialMediaLinks,
   };
 
   const form = useForm<CommunityFormSchemaType>({
@@ -84,6 +87,8 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
         Omit<CommunityDetails, "description">
       >(values.description, {
         shortDescription: values.shortDescription,
+        portfolio: communityDetails.portfolio,
+        socialMediaLinks: values.socialMediaLinks,
       });
 
       await editCommunity({
