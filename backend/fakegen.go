@@ -5,13 +5,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/gnolang/gno/gno.land/pkg/gnoland"
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
-	"github.com/google/uuid"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/gzchain"
 	"github.com/samouraiworld/zenao/backend/gzdb"
@@ -190,8 +188,7 @@ func execFakegen() (retErr error) {
 			Discoverable: true,
 		}
 		creatorRealmID := chain.UserRealmID(zUser.ID)
-		uuid := uuid.New().String()
-		evtID := strings.ReplaceAll(uuid, "-", "_")
+		evtID := fmt.Sprintf("%d", eC+1)
 		evtRealmID := chain.EventRealmID(evtID)
 		if fakegenConf.gentxs {
 			tx, err := gzchain.GentxEventRealm(chain, evtRealmID, evtReq, chain.SignerAddress(), []string{creatorRealmID}, []string{}, nil, genesisTime.Unix()+3)
@@ -360,9 +357,8 @@ func execFakegen() (retErr error) {
 
 	logger.Info("creating communities")
 
-	for range fakegenConf.communitiesCount {
-		uuid := uuid.New().String()
-		cmtID := strings.ReplaceAll(uuid, "-", "_")
+	for cC := range fakegenConf.communitiesCount {
+		cmtID := fmt.Sprintf("%d", cC+1)
 		cmtRealmID := chain.CommunityRealmID(cmtID)
 		c := fakeCommunity{}
 		err := faker.FakeData(&c)
