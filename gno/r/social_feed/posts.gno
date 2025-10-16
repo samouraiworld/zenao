@@ -11,6 +11,8 @@ import (
 )
 
 func NewPost(_ realm, feedId string, post *feedsv1.Post) uint64 {
+	assertActive()
+
 	localPostId := id.Next()
 
 	var creator string
@@ -53,6 +55,8 @@ func GetPost(localPostId uint64) *feedsv1.Post {
 }
 
 func DeletePost(_ realm, localPostId uint64) {
+	assertActive()
+
 	localPostIdStr := seqid.ID(localPostId).String()
 	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
@@ -78,6 +82,8 @@ func DeletePost(_ realm, localPostId uint64) {
 }
 
 func EditPost(_ realm, localPostId uint64, newPost *feedsv1.Post) {
+	assertActive()
+
 	localPostIdStr := seqid.ID(localPostId).String()
 	postRaw, ok := posts.Get(localPostIdStr)
 	if !ok {
@@ -109,6 +115,8 @@ func EditPost(_ realm, localPostId uint64, newPost *feedsv1.Post) {
 }
 
 func ReactPost(_ realm, localPostId uint64, icon string) {
+	assertActive()
+
 	localPostIdStr := seqid.ID(localPostId).String()
 
 	var caller string

@@ -5,23 +5,22 @@ import (
 	"strings"
 
 	"gno.land/p/nt/avl"
-	"gno.land/p/nt/avl/rotree"
 	"gno.land/p/nt/seqid"
 	feedsv1 "gno.land/p/zenao/feeds/v1"
 	"gno.land/p/zenao/realmid"
 )
 
 type Feed struct {
-	crossNetwork bool
-	authFunc     AuthFn
+	CrossNetwork bool
+	AuthFunc     AuthFn
 }
 
 func (f *Feed) auth() string {
-	if f.authFunc == nil {
+	if f.AuthFunc == nil {
 		return realmid.Previous()
 	}
 
-	id, ok := f.authFunc()
+	id, ok := f.AuthFunc()
 	if !ok {
 		panic("the user is not allowed to interact with this feed")
 	}
@@ -57,27 +56,17 @@ func init() {
 	feedsByPost = avl.NewTree()
 }
 
-func ReactionsTree() rotree.IReadOnlyTree {
-	return rotree.Wrap(reactions, nil)
-}
-
-func UserReactionsTree() rotree.IReadOnlyTree {
-	return rotree.Wrap(userReactions, nil)
-}
-
-func PostsTree() rotree.IReadOnlyTree {
-	return rotree.Wrap(posts, nil)
-}
-
 func NewFeed(_ realm, slug string, crossNetwork bool, authFunc AuthFn) string {
+	assertActive()
+
 	creator := realmid.Previous()
 	if crossNetwork && authFunc != nil {
 		panic("crossNetwork feeds cannot have an authFunc")
 	}
 
 	feed := &Feed{
-		crossNetwork: crossNetwork,
-		authFunc:     authFunc,
+		CrossNetwork: crossNetwork,
+		AuthFunc:     authFunc,
 	}
 	feedId := creator + ":" + slug
 	if feeds.Has(feedId) {

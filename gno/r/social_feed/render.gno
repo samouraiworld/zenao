@@ -56,12 +56,12 @@ func DetailSocialFeedPageHandler(res *mux.ResponseWriter, req *mux.Request) {
 	}
 	feed := feedRaw.(*Feed)
 	res.Write(md.H1(id))
-	if feed.crossNetwork {
+	if feed.CrossNetwork {
 		res.Write(md.Paragraph("Cross network feed ✅"))
 	} else {
 		res.Write(md.Paragraph("Local feed ✅"))
 	}
-	if feed.authFunc != nil {
+	if feed.AuthFunc != nil {
 		res.Write(md.Paragraph("This feed is private 🔒"))
 	} else {
 		res.Write(md.Paragraph("This feed is public 🔓"))
