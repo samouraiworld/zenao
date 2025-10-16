@@ -1534,15 +1534,6 @@ func (g *gnoZenaoChain) communityPkgPath(communityID string) string {
 	return fmt.Sprintf("gno.land/r/%s/communities/c%s", g.namespace, communityID)
 }
 
-func (g *gnoZenaoChain) orgPkgPath(orgType string, orgID string) string {
-	if orgType == zeni.EntityTypeEvent {
-		return g.eventRealmPkgPath(orgID)
-	} else if orgType == zeni.EntityTypeCommunity {
-		return g.communityPkgPath(orgID)
-	}
-	return ""
-}
-
 func (g *gnoZenaoChain) userRealmPkgPath(userID string) string {
 	return fmt.Sprintf("gno.land/r/%s/users/u%s", g.namespace, userID)
 }
