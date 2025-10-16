@@ -127,6 +127,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 	}
 
+	// TODO: use chain as SoT then use DB after chain operations
 	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
 		for i, ticket := range tickets {
 			// XXX: support batch
