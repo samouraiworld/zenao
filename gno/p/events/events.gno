@@ -467,47 +467,51 @@ func (e *Event) editEventHandler() daokit.ActionHandler {
 		if e.Cancelled {
 			panic("event is cancelled")
 		}
-		if len(msg.organizers) != 0 {
-			e.updateEventUserRoles("organizer", msg.organizers)
+
+		if len(msg.organizers) == 0 {
+			panic("at least one organizer is required")
 		}
-		if len(msg.gatekeepers) != 0 {
-			e.updateEventUserRoles("gatekeeper", msg.gatekeepers)
+		if len(msg.title) < 3 {
+			panic("title must be at least 3 characters long")
 		}
-		if msg.title != "" {
-			e.SetProfileString(cross, "DisplayName", msg.title)
+		if msg.imageURI == "" {
+			panic("image URI is required")
 		}
-		if msg.description != "" {
-			e.SetProfileString(cross, "Bio", msg.description)
+		if msg.startDate != 0 && msg.endDate != 0 && msg.endDate <= msg.startDate {
+			panic("end date must be after start date and both must be non-zero")
 		}
-		if msg.imageURI != "" {
-			e.SetProfileString(cross, "Avatar", msg.imageURI)
+		if msg.capacity != 0 && msg.capacity < e.CountParticipants() {
+			panic("capacity can't be lower than the number of current participants and must be non-zero")
 		}
-		if msg.startDate != 0 {
-			e.StartDate = msg.startDate
+		if msg.location == nil {
+			panic("location is required")
 		}
-		if msg.endDate != 0 {
-			e.EndDate = msg.endDate
+		if msg.privacy == nil {
+			panic("privacy is required")
 		}
-		if msg.capacity != 0 {
-			e.Capacity = msg.capacity
-		}
-		if msg.location != nil {
-			e.Location = msg.location
-		}
-		if msg.privacy != nil {
-			switch val := msg.privacy.EventPrivacy.(type) {
-			case *zenaov1.EventPrivacyPublic:
-				e.ParticipationPubkey = nil
-			case *zenaov1.EventPrivacyGuarded:
-				participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
-				if err != nil {
-					panic(err)
-				}
-				e.ParticipationPubkey = participationPubkeyBz
-			default:
-				panic("unknown privacy model")
+		e.updateEventUserRoles("organizer", msg.organizers)
+		e.updateEventUserRoles("gatekeeper", msg.gatekeepers)
+		e.SetProfileString(cross, "DisplayName", msg.title)
+		e.SetProfileString(cross, "Bio", msg.description)
+		e.SetProfileString(cross, "Avatar", msg.imageURI)
+		e.StartDate = msg.startDate
+		e.EndDate = msg.endDate
+		e.Capacity = msg.capacity
+		e.Location = msg.location
+
+		switch val := msg.privacy.EventPrivacy.(type) {
+		case *zenaov1.EventPrivacyPublic:
+			e.ParticipationPubkey = nil
+		case *zenaov1.EventPrivacyGuarded:
+			participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
+			if err != nil {
+				panic(err)
 			}
+			e.ParticipationPubkey = participationPubkeyBz
+		default:
+			panic("unknown privacy model")
 		}
+
 		e.ICSSeqNumber += 1
 		e.Discoverable = msg.discoverable
 	})
