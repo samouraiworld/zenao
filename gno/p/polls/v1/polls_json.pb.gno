@@ -24,7 +24,7 @@ func (p *PollResult) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (p *PollResult) FromJSON(node *json.Node) {
+func PollResultFromJSON(p *PollResult, node *json.Node) {
 	*p = PollResult{}
 	fields := node.MustObject()
 
@@ -68,7 +68,7 @@ func (p *Poll) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (p *Poll) FromJSON(node *json.Node) {
+func PollFromJSON(p *Poll, node *json.Node) {
 	*p = Poll{}
 	fields := node.MustObject()
 
@@ -80,7 +80,7 @@ func (p *Poll) FromJSON(node *json.Node) {
 		arr := make([]*PollResult, len(jarr))
 		for i, val := range jarr {
 			fv := &PollResult{}
-			fv.FromJSON(val)
+			PollResultFromJSON(fv, val)
 			arr[i] = fv
 		}
 		p.Results = arr
