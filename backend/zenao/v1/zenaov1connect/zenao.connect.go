@@ -84,6 +84,12 @@ const (
 	// ZenaoServiceLeaveCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// LeaveCommunity RPC.
 	ZenaoServiceLeaveCommunityProcedure = "/zenao.v1.ZenaoService/LeaveCommunity"
+	// ZenaoServiceAddEventToCommunityProcedure is the fully-qualified name of the ZenaoService's
+	// AddEventToCommunity RPC.
+	ZenaoServiceAddEventToCommunityProcedure = "/zenao.v1.ZenaoService/AddEventToCommunity"
+	// ZenaoServiceRemoveEventFromCommunityProcedure is the fully-qualified name of the ZenaoService's
+	// RemoveEventFromCommunity RPC.
+	ZenaoServiceRemoveEventFromCommunityProcedure = "/zenao.v1.ZenaoService/RemoveEventFromCommunity"
 	// ZenaoServiceCreatePollProcedure is the fully-qualified name of the ZenaoService's CreatePoll RPC.
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
 	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
@@ -123,6 +129,8 @@ type ZenaoServiceClient interface {
 	GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
+	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
+	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -253,6 +261,18 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("LeaveCommunity")),
 			connect.WithClientOptions(opts...),
 		),
+		addEventToCommunity: connect.NewClient[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse](
+			httpClient,
+			baseURL+ZenaoServiceAddEventToCommunityProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("AddEventToCommunity")),
+			connect.WithClientOptions(opts...),
+		),
+		removeEventFromCommunity: connect.NewClient[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse](
+			httpClient,
+			baseURL+ZenaoServiceRemoveEventFromCommunityProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("RemoveEventFromCommunity")),
+			connect.WithClientOptions(opts...),
+		),
 		createPoll: connect.NewClient[v1.CreatePollRequest, v1.CreatePollResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreatePollProcedure,
@@ -318,6 +338,8 @@ type zenaoServiceClient struct {
 	getCommunityAdministrators *connect.Client[v1.GetCommunityAdministratorsRequest, v1.GetCommunityAdministratorsResponse]
 	joinCommunity              *connect.Client[v1.JoinCommunityRequest, v1.JoinCommunityResponse]
 	leaveCommunity             *connect.Client[v1.LeaveCommunityRequest, v1.LeaveCommunityResponse]
+	addEventToCommunity        *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
+	removeEventFromCommunity   *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
 	createPoll                 *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll                   *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 	createPost                 *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
@@ -417,6 +439,16 @@ func (c *zenaoServiceClient) LeaveCommunity(ctx context.Context, req *connect.Re
 	return c.leaveCommunity.CallUnary(ctx, req)
 }
 
+// AddEventToCommunity calls zenao.v1.ZenaoService.AddEventToCommunity.
+func (c *zenaoServiceClient) AddEventToCommunity(ctx context.Context, req *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error) {
+	return c.addEventToCommunity.CallUnary(ctx, req)
+}
+
+// RemoveEventFromCommunity calls zenao.v1.ZenaoService.RemoveEventFromCommunity.
+func (c *zenaoServiceClient) RemoveEventFromCommunity(ctx context.Context, req *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error) {
+	return c.removeEventFromCommunity.CallUnary(ctx, req)
+}
+
 // CreatePoll calls zenao.v1.ZenaoService.CreatePoll.
 func (c *zenaoServiceClient) CreatePoll(ctx context.Context, req *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return c.createPoll.CallUnary(ctx, req)
@@ -475,6 +507,8 @@ type ZenaoServiceHandler interface {
 	GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
+	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
+	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -601,6 +635,18 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("LeaveCommunity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceAddEventToCommunityHandler := connect.NewUnaryHandler(
+		ZenaoServiceAddEventToCommunityProcedure,
+		svc.AddEventToCommunity,
+		connect.WithSchema(zenaoServiceMethods.ByName("AddEventToCommunity")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceRemoveEventFromCommunityHandler := connect.NewUnaryHandler(
+		ZenaoServiceRemoveEventFromCommunityProcedure,
+		svc.RemoveEventFromCommunity,
+		connect.WithSchema(zenaoServiceMethods.ByName("RemoveEventFromCommunity")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCreatePollHandler := connect.NewUnaryHandler(
 		ZenaoServiceCreatePollProcedure,
 		svc.CreatePoll,
@@ -681,6 +727,10 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceJoinCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceLeaveCommunityProcedure:
 			zenaoServiceLeaveCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceAddEventToCommunityProcedure:
+			zenaoServiceAddEventToCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceRemoveEventFromCommunityProcedure:
+			zenaoServiceRemoveEventFromCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
 		case ZenaoServiceVotePollProcedure:
@@ -774,6 +824,14 @@ func (UnimplementedZenaoServiceHandler) JoinCommunity(context.Context, *connect.
 
 func (UnimplementedZenaoServiceHandler) LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.LeaveCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.AddEventToCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.RemoveEventFromCommunity is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {

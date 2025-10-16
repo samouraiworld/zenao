@@ -35,6 +35,10 @@ service ZenaoService {
       returns (GetCommunityAdministratorsResponse);
   rpc JoinCommunity(JoinCommunityRequest) returns (JoinCommunityResponse);
   rpc LeaveCommunity(LeaveCommunityRequest) returns (LeaveCommunityResponse);
+  rpc AddEventToCommunity(AddEventToCommunityRequest)
+      returns (AddEventToCommunityResponse);
+  rpc RemoveEventFromCommunity(RemoveEventFromCommunityRequest)
+      returns (RemoveEventFromCommunityResponse);
 
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
