@@ -701,6 +701,28 @@ func (g *gnoZenaoChain) Checkin(eventRealmID string, gatekeeperRealmID string, r
 	return nil
 }
 
+// ValidatePassword implements ZenaoChain.
+func (g *gnoZenaoChain) ValidatePassword(eventRealmID string, derivedPK string) (bool, error) {
+	g, span := g.trace("gzchain.ValidatePassword")
+	defer span.End()
+
+	raw, err := checkQueryErr(g.client.QEval(eventRealmID, "event.ValidatePassword(\""+derivedPK+"\")"))
+	if err != nil {
+		return false, err
+	}
+	parsedRaw, err := parseQEvalResponseData(raw)
+	if err != nil {
+		return false, err
+	}
+
+	res, err := strconv.ParseBool(strings.TrimSpace(parsedRaw))
+	if err != nil {
+		return false, err
+	}
+
+	return res, nil
+}
+
 // CreateCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) CreateCommunity(communityRealmID string, administratorsRealmIDs []string, membersRealmIDs []string, eventsRealmIDs []string, req *zenaov1.CreateCommunityRequest) error {
 	g, span := g.trace("gzchain.CreateCommunity")

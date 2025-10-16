@@ -41,3 +41,12 @@ func EventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, e
 	}
 	return EventPrivacyFromSK(sk)
 }
+
+func EventPKFromSK(sk ed25519.PrivateKey) (string, error) {
+	if len(sk) == 0 {
+		return "", nil
+	}
+	pkBz := []byte(sk.Public().(ed25519.PublicKey))
+	pk := base64.RawURLEncoding.EncodeToString(pkBz)
+	return pk, nil
+}

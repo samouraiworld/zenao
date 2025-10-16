@@ -85,13 +85,13 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	evtRealmID := s.Chain.EventRealmID(req.Msg.EventId)
 	buyerRealmID := s.Chain.UserRealmID(buyer.ID)
+	needPasswordIfGuarded := true
 
 	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
 		for i, ticket := range tickets {
 			// XXX: support batch
 			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
-			// TODO: see for password
-			if err := tx.Participate(evtRealmID, buyerRealmID, participantRealmID, ticket.Secret(), "", false); err != nil {
+			if err := tx.Participate(evtRealmID, buyerRealmID, participantRealmID, ticket.Secret(), req.Msg.Password, false); err != nil {
 				return err
 			}
 		}
@@ -113,7 +113,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		return nil, err
 	}
 
-	needPasswordIfGuarded := true
 	if slices.Contains(userRoles, zeni.RoleOrganizer) {
 		needPasswordIfGuarded = false
 	}
