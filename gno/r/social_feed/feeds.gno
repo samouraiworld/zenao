@@ -40,7 +40,7 @@ var (
 
 	// XXX: add feed index into the composite key to ensure reply are in the same feed ?
 	postsByParent *avl.Tree // parent_id:local_post_id -> *Post // for search with parent_id
-	feeds         *avl.Tree // slug -> Feed
+	feeds         *avl.Tree // slug -> *Feed
 
 	feedsByPost *avl.Tree // post_id -> feed_id
 )
