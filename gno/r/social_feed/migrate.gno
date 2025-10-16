@@ -10,6 +10,10 @@ var (
 	Paused  = false
 )
 
+func ID() uint64 {
+	return uint64(id)
+}
+
 func Pause(_ realm) {
 	Ownable.AssertOwnedByPrevious()
 	if Paused {
