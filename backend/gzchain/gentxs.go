@@ -15,23 +15,21 @@ import (
 	"github.com/gnolang/gno/tm2/pkg/std"
 	tm2std "github.com/gnolang/gno/tm2/pkg/std"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
-	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
 // TODO: REMOVE WHEN SOT TRANSITION IS DONE
 
-func GentxNewPost(chain *gnoZenaoChain, authorID string, caller string, orgRealmID string, post *feedsv1.Post) (gnoland.TxWithMetadata, error) {
+func GentxNewPost(chain *gnoZenaoChain, authorRealmID string, caller string, orgRealmID string, post *feedsv1.Post) (gnoland.TxWithMetadata, error) {
 	callerAddr, err := cryptoGno.AddressFromString(caller)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
 	}
 
-	userPkgPath := chain.userRealmPkgPath(authorID)
 	feedID := orgRealmID + ":main"
 	gnoLitPost := "&" + post.GnoLiteral("feedsv1.", "\t\t")
-	body := genCreatePostMsgRunBody(userPkgPath, feedID, gnoLitPost)
+	body := genCreatePostMsgRunBody(authorRealmID, feedID, gnoLitPost)
 
 	stdtx := std.Tx{
 		Msgs: []std.Msg{
@@ -60,14 +58,12 @@ func GentxNewPost(chain *gnoZenaoChain, authorID string, caller string, orgRealm
 	return tx, nil
 }
 
-func GentxReactPost(chain *gnoZenaoChain, authorID string, caller string, orgRealmID string, reaction *zenaov1.ReactPostRequest, timestamp int64) (gnoland.TxWithMetadata, error) {
+func GentxReactPost(chain *gnoZenaoChain, authorRealmID string, caller string, orgRealmID string, reaction *zenaov1.ReactPostRequest, timestamp int64) (gnoland.TxWithMetadata, error) {
 	callerAddr, err := cryptoGno.AddressFromString(caller)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
 	}
-	userRealmID := chain.UserRealmID(authorID)
-	body := genReactPostMsgRunBody(userRealmID, reaction.PostId, reaction.Icon)
-
+	body := genReactPostMsgRunBody(authorRealmID, reaction.PostId, reaction.Icon)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
@@ -93,13 +89,12 @@ func GentxReactPost(chain *gnoZenaoChain, authorID string, caller string, orgRea
 	}, nil
 }
 
-func GentxPollVote(chain *gnoZenaoChain, authorID string, caller string, pollID string, vote *zenaov1.VotePollRequest, timestamp int64) (gnoland.TxWithMetadata, error) {
+func GentxPollVote(chain *gnoZenaoChain, authorRealmID string, caller string, pollID string, vote *zenaov1.VotePollRequest, timestamp int64) (gnoland.TxWithMetadata, error) {
 	callerAddr, err := cryptoGno.AddressFromString(caller)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
 	}
-	userPkgPath := chain.userRealmPkgPath(authorID)
-	body := genVotePollMsgRunBody(userPkgPath, pollID, vote.Option)
+	body := genVotePollMsgRunBody(authorRealmID, pollID, vote.Option)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
@@ -125,15 +120,13 @@ func GentxPollVote(chain *gnoZenaoChain, authorID string, caller string, pollID 
 	}, nil
 }
 
-func GentxNewPoll(chain *gnoZenaoChain, authorID string, caller string, orgType string, orgID string, poll *zenaov1.CreatePollRequest, timestamp int64) (gnoland.TxWithMetadata, error) {
+func GentxNewPoll(chain *gnoZenaoChain, authorRealmID string, caller string, orgRealmID string, poll *zenaov1.CreatePollRequest, timestamp int64) (gnoland.TxWithMetadata, error) {
 	callerAddr, err := cryptoGno.AddressFromString(caller)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
 	}
-	userPkgPath := chain.userRealmPkgPath(authorID)
-	orgPkgPath := chain.orgPkgPath(orgType, orgID)
-	feedID := orgPkgPath + ":main"
-	body := genCreatePollMsgRunBody(orgPkgPath, userPkgPath, feedID, poll.Question, poll.Options, poll.Kind, poll.Duration)
+	feedID := orgRealmID + ":main"
+	body := genCreatePollMsgRunBody(orgRealmID, authorRealmID, feedID, poll.Question, poll.Options, poll.Kind, poll.Duration)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgRun{
@@ -164,7 +157,6 @@ func GentxEventReg(chain *gnoZenaoChain, evtRealmID string, caller string, times
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
 	}
-	eventPkgPath := chain.eventRealmPkgPath(evtRealmID)
 	tx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgCall{
@@ -172,7 +164,7 @@ func GentxEventReg(chain *gnoZenaoChain, evtRealmID string, caller string, times
 				Send:    []std.Coin{},
 				PkgPath: chain.eventsIndexPkgPath,
 				Func:    "IndexEvent",
-				Args:    []string{eventPkgPath},
+				Args:    []string{evtRealmID},
 			},
 		},
 		Fee: std.Fee{
@@ -189,14 +181,12 @@ func GentxEventReg(chain *gnoZenaoChain, evtRealmID string, caller string, times
 	}, nil
 }
 
-func GentxEventRealm(chain *gnoZenaoChain, eventRealmID string, eventReq *zenaov1.CreateEventRequest, caller string, organizersIDs []string, gatekeepersIDs []string, privacy *zenaov1.EventPrivacy, timestamp int64) (gnoland.TxWithMetadata, error) {
+func GentxEventRealm(chain *gnoZenaoChain, eventRealmID string, eventReq *zenaov1.CreateEventRequest, caller string, organizersRealmIDs []string, gatekeepersRealmIDs []string, privacy *zenaov1.EventPrivacy, timestamp int64) (gnoland.TxWithMetadata, error) {
 	callerAddr, err := cryptoGno.AddressFromString(caller)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
 	}
-	organizers := mapsl.Map(organizersIDs, chain.userRealmPkgPath)
-	gatekeepers := mapsl.Map(gatekeepersIDs, chain.userRealmPkgPath)
-	eRealm, err := genEventRealmSource(organizers, gatekeepers, caller, chain.namespace, &zenaov1.CreateEventRequest{
+	eRealm, err := genEventRealmSource(organizersRealmIDs, gatekeepersRealmIDs, caller, chain.namespace, &zenaov1.CreateEventRequest{
 		Title:        eventReq.Title,
 		Description:  eventReq.Description,
 		ImageUri:     eventReq.ImageUri,
@@ -210,7 +200,6 @@ func GentxEventRealm(chain *gnoZenaoChain, eventRealmID string, eventReq *zenaov
 		return gnoland.TxWithMetadata{}, err
 	}
 
-	eventPkgPath := chain.eventRealmPkgPath(eventRealmID)
 	eventTx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgAddPackage{
@@ -218,10 +207,10 @@ func GentxEventRealm(chain *gnoZenaoChain, eventRealmID string, eventReq *zenaov
 				Send:    []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name: "event",
-					Path: eventPkgPath,
+					Path: eventRealmID,
 					Files: []*tm2std.MemFile{
 						{Name: "event.gno", Body: eRealm},
-						{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", eventPkgPath)},
+						{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", eventRealmID)},
 					},
 				},
 			},
@@ -240,7 +229,7 @@ func GentxEventRealm(chain *gnoZenaoChain, eventRealmID string, eventReq *zenaov
 	}, nil
 }
 
-func GentxUserRealm(chain *gnoZenaoChain, user *zeni.User, caller string) (gnoland.TxWithMetadata, error) {
+func GentxUserRealm(chain *gnoZenaoChain, userRealmID string, user *zeni.User, caller string, timestamp int64) (gnoland.TxWithMetadata, error) {
 	callerAddr, err := cryptoGno.AddressFromString(caller)
 	if err != nil {
 		return gnoland.TxWithMetadata{}, err
@@ -250,7 +239,6 @@ func GentxUserRealm(chain *gnoZenaoChain, user *zeni.User, caller string) (gnola
 		return gnoland.TxWithMetadata{}, err
 	}
 
-	userPkgPath := chain.userRealmPkgPath(user.ID)
 	userTx := std.Tx{
 		Msgs: []std.Msg{
 			vm.MsgAddPackage{
@@ -258,9 +246,9 @@ func GentxUserRealm(chain *gnoZenaoChain, user *zeni.User, caller string) (gnola
 				Send:    []std.Coin{},
 				Package: &tm2std.MemPackage{
 					Name: "user",
-					Path: userPkgPath,
+					Path: userRealmID,
 					Files: []*tm2std.MemFile{
-						{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", userPkgPath)},
+						{Name: "gnomod.toml", Body: fmt.Sprintf("module = %q\ngno = \"0.9\"\n", userRealmID)},
 						{Name: "user.gno", Body: uRealm},
 					},
 				},
@@ -275,7 +263,7 @@ func GentxUserRealm(chain *gnoZenaoChain, user *zeni.User, caller string) (gnola
 	return gnoland.TxWithMetadata{
 		Tx: userTx,
 		Metadata: &gnoland.GnoTxMetadata{
-			Timestamp: user.CreatedAt.Unix(),
+			Timestamp: timestamp,
 		},
 	}, nil
 }

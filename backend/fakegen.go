@@ -147,7 +147,8 @@ func execFakegen() (retErr error) {
 	logger.Info("succesful db creation user", zap.String("id", zUser.ID))
 
 	if fakegenConf.gentxs {
-		tx, err := gzchain.GentxUserRealm(chain, zUser, chain.SignerAddress())
+		userRealmID := chain.UserRealmID(zUser.ID)
+		tx, err := gzchain.GentxUserRealm(chain, userRealmID, zUser, chain.SignerAddress(), genesisTime.Unix()+2)
 		if err != nil {
 			return fmt.Errorf("failed to create user gentx: %w", err)
 		}
@@ -193,13 +194,13 @@ func execFakegen() (retErr error) {
 		evtID := strings.ReplaceAll(uuid, "-", "_")
 		evtRealmID := chain.EventRealmID(evtID)
 		if fakegenConf.gentxs {
-			tx, err := gzchain.GentxEventRealm(chain, evtRealmID, evtReq, chain.SignerAddress(), []string{creatorRealmID}, []string{}, nil, genesisTime.Unix()+1)
+			tx, err := gzchain.GentxEventRealm(chain, evtRealmID, evtReq, chain.SignerAddress(), []string{creatorRealmID}, []string{}, nil, genesisTime.Unix()+3)
 			if err != nil {
 				return fmt.Errorf("failed to create event gentx: %w", err)
 			}
 			txs = append(txs, tx)
 			logger.Info("succesful generation of event realm tx", zap.String("id", evtID), zap.String("title", evtReq.Title))
-			tx, err = gzchain.GentxEventReg(chain, evtID, chain.SignerAddress(), genesisTime.Unix()+2)
+			tx, err = gzchain.GentxEventReg(chain, evtRealmID, chain.SignerAddress(), genesisTime.Unix()+4)
 			if err != nil {
 				return fmt.Errorf("failed to create event registry gentx: %w", err)
 			}
@@ -236,7 +237,7 @@ func execFakegen() (retErr error) {
 				}
 
 				var postID string
-				entityRealmID, err := chain.EntityRealmID(zeni.EntityTypeEvent, evtRealmID)
+				entityRealmID, err := chain.EntityRealmID(zeni.EntityTypeEvent, evtID)
 				if err != nil {
 					return fmt.Errorf("invalid org: %w", err)
 				}
@@ -315,7 +316,11 @@ func execFakegen() (retErr error) {
 				var pollID string
 				if fakegenConf.gentxs {
 					pollID = fmt.Sprintf("%d", poID)
-					tx, err := gzchain.GentxNewPoll(chain, creatorRealmID, chain.SignerAddress(), pollReq.OrgType, pollReq.OrgId, pollReq, genesisTime.Unix()+int64(3+pID+poID))
+					orgRealmID, err := chain.EntityRealmID(pollReq.OrgType, pollReq.OrgId)
+					if err != nil {
+						return fmt.Errorf("invalid org: %w", err)
+					}
+					tx, err := gzchain.GentxNewPoll(chain, creatorRealmID, chain.SignerAddress(), orgRealmID, pollReq, genesisTime.Unix()+int64(3+pID+poID))
 					if err != nil {
 						return err
 					}
@@ -358,7 +363,7 @@ func execFakegen() (retErr error) {
 	for range fakegenConf.communitiesCount {
 		uuid := uuid.New().String()
 		cmtID := strings.ReplaceAll(uuid, "-", "_")
-		cmtRealmID := chain.EventRealmID(cmtID)
+		cmtRealmID := chain.CommunityRealmID(cmtID)
 		c := fakeCommunity{}
 		err := faker.FakeData(&c)
 		if err != nil {
@@ -375,13 +380,13 @@ func execFakegen() (retErr error) {
 		}
 
 		if fakegenConf.gentxs {
-			tx, err := gzchain.GentxCommunityRealm(chain, creatorRealmID, cmtRealmID, communityReq, []string{creatorRealmID}, []string{creatorRealmID}, nil, genesisTime.Unix()+int64(5+fakegenConf.eventsCount+fakegenConf.postsCount+fakegenConf.pollsCount))
+			tx, err := gzchain.GentxCommunityRealm(chain, chain.SignerAddress(), cmtRealmID, communityReq, []string{creatorRealmID}, []string{creatorRealmID}, []string{}, genesisTime.Unix()+int64(5+fakegenConf.eventsCount+fakegenConf.postsCount+fakegenConf.pollsCount))
 			if err != nil {
 				return fmt.Errorf("failed to create community gentx: %w", err)
 			}
 			txs = append(txs, tx)
 			logger.Info("succesful generation of community realm tx", zap.String("id", cmtID), zap.String("title", communityReq.DisplayName))
-			tx, err = gzchain.GentxCommunityReg(chain, cmtID, chain.SignerAddress(), genesisTime.Unix()+int64(6+fakegenConf.eventsCount+fakegenConf.postsCount+fakegenConf.pollsCount))
+			tx, err = gzchain.GentxCommunityReg(chain, chain.SignerAddress(), cmtRealmID, genesisTime.Unix()+int64(6+fakegenConf.eventsCount+fakegenConf.postsCount+fakegenConf.pollsCount))
 			if err != nil {
 				return fmt.Errorf("failed to create community registry gentx: %w", err)
 			}
