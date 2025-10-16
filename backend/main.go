@@ -46,6 +46,7 @@ func main() {
 		newGenticketCmd(),
 		newConvertEvtToComCmd(),
 		gzchain.NewRealmsrcCmd(),
+		gzchain.NewGenTxsCmd(), // TODO: remove when SOT transition is done
 	)
 
 	cmd.Execute(context.Background(), os.Args[1:])
