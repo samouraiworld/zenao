@@ -213,7 +213,7 @@ func fieldFromJSON(prefix string, g *protogen.GeneratedFile, field *protogen.Fie
 	case protoreflect.BytesKind:
 		panic("bytes not supported")
 	case protoreflect.MessageKind, protoreflect.GroupKind:
-		printField("fv := &"+g.QualifiedGoIdent(field.Message.GoIdent)+"{}\nfv.FromJSON(val)", "fv")
+		printField("fv := &"+g.QualifiedGoIdent(field.Message.GoIdent)+"{}\n"+field.Message.GoIdent.GoName+"FromJSON(fv, val)", "fv")
 	default:
 		panic(fmt.Errorf("unexpected field type %q", field.Desc.Kind().String()))
 	}
@@ -278,7 +278,7 @@ func oneOfFromJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFil
 			panic(errors.New("only message supported in oneof field fromjson"))
 		}
 		g.P(prefix, `	n := &`, g.QualifiedGoIdent(f.Message.GoIdent), `{}`)
-		g.P(prefix, `	n.FromJSON(selectedVariant)`)
+		g.P(prefix, `	`, f.Message.GoIdent.GoName, `FromJSON(n, selectedVariant)`)
 		g.P(prefix, `	`, receiver, " = n")
 	}
 	g.P(prefix, "default:")

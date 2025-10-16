@@ -11,16 +11,16 @@ import (
 )
 
 type Feed struct {
-	crossNetwork bool
-	authFunc     AuthFn
+	CrossNetwork bool
+	AuthFunc     AuthFn
 }
 
 func (f *Feed) auth() string {
-	if f.authFunc == nil {
+	if f.AuthFunc == nil {
 		return realmid.Previous()
 	}
 
-	id, ok := f.authFunc()
+	id, ok := f.AuthFunc()
 	if !ok {
 		panic("the user is not allowed to interact with this feed")
 	}
@@ -40,7 +40,7 @@ var (
 
 	// XXX: add feed index into the composite key to ensure reply are in the same feed ?
 	postsByParent *avl.Tree // parent_id:local_post_id -> *Post // for search with parent_id
-	feeds         *avl.Tree // slug -> Feed
+	feeds         *avl.Tree // slug -> *Feed
 
 	feedsByPost *avl.Tree // post_id -> feed_id
 )
@@ -57,14 +57,16 @@ func init() {
 }
 
 func NewFeed(_ realm, slug string, crossNetwork bool, authFunc AuthFn) string {
+	assertActive()
+
 	creator := realmid.Previous()
 	if crossNetwork && authFunc != nil {
 		panic("crossNetwork feeds cannot have an authFunc")
 	}
 
 	feed := &Feed{
-		crossNetwork: crossNetwork,
-		authFunc:     authFunc,
+		CrossNetwork: crossNetwork,
+		AuthFunc:     authFunc,
 	}
 	feedId := creator + ":" + slug
 	if feeds.Has(feedId) {

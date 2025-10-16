@@ -35,7 +35,7 @@ func queryJSON(reqJSON string) string {
 		panic(err)
 	}
 	req := &zenaov1.BatchProfileRequest{}
-	req.FromJSON(j)
+	zenaov1.BatchProfileRequestFromJSON(req, j)
 
 	res := Query(req)
 	elems := make([]*json.Node, len(res))

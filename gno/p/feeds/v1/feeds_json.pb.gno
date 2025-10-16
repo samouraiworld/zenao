@@ -22,7 +22,7 @@ func (p *PostGeoLoc) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (p *PostGeoLoc) FromJSON(node *json.Node) {
+func PostGeoLocFromJSON(p *PostGeoLoc, node *json.Node) {
 	*p = PostGeoLoc{}
 	fields := node.MustObject()
 
@@ -44,7 +44,7 @@ func (s *StandardPost) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (s *StandardPost) FromJSON(node *json.Node) {
+func StandardPostFromJSON(s *StandardPost, node *json.Node) {
 	*s = StandardPost{}
 	fields := node.MustObject()
 
@@ -72,7 +72,7 @@ func (a *ArticlePost) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (a *ArticlePost) FromJSON(node *json.Node) {
+func ArticlePostFromJSON(a *ArticlePost, node *json.Node) {
 	*a = ArticlePost{}
 	fields := node.MustObject()
 
@@ -100,7 +100,7 @@ func (l *LinkPost) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (l *LinkPost) FromJSON(node *json.Node) {
+func LinkPostFromJSON(l *LinkPost, node *json.Node) {
 	*l = LinkPost{}
 	fields := node.MustObject()
 
@@ -125,7 +125,7 @@ func (i *ImagePost) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (i *ImagePost) FromJSON(node *json.Node) {
+func ImagePostFromJSON(i *ImagePost, node *json.Node) {
 	*i = ImagePost{}
 	fields := node.MustObject()
 
@@ -159,7 +159,7 @@ func (a *AudioPost) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (a *AudioPost) FromJSON(node *json.Node) {
+func AudioPostFromJSON(a *AudioPost, node *json.Node) {
 	*a = AudioPost{}
 	fields := node.MustObject()
 
@@ -196,7 +196,7 @@ func (v *VideoPost) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (v *VideoPost) FromJSON(node *json.Node) {
+func VideoPostFromJSON(v *VideoPost, node *json.Node) {
 	*v = VideoPost{}
 	fields := node.MustObject()
 
@@ -230,7 +230,7 @@ func (r *Reaction) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (r *Reaction) FromJSON(node *json.Node) {
+func ReactionFromJSON(r *Reaction, node *json.Node) {
 	*r = Reaction{}
 	fields := node.MustObject()
 
@@ -261,7 +261,7 @@ func (t *Tip) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (t *Tip) FromJSON(node *json.Node) {
+func TipFromJSON(t *Tip, node *json.Node) {
 	*t = Tip{}
 	fields := node.MustObject()
 
@@ -332,7 +332,7 @@ func (p *Post) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (p *Post) FromJSON(node *json.Node) {
+func PostFromJSON(p *Post, node *json.Node) {
 	*p = Post{}
 	fields := node.MustObject()
 
@@ -351,7 +351,7 @@ func (p *Post) FromJSON(node *json.Node) {
 	}
 	if val, ok := fields["loc"]; ok {
 		fv := &PostGeoLoc{}
-		fv.FromJSON(val)
+		PostGeoLocFromJSON(fv, val)
 		p.Loc = fv
 	}
 	if val, ok := fields["createdAt"]; ok {
@@ -397,27 +397,27 @@ func (p *Post) FromJSON(node *json.Node) {
 	switch selectedVariantName {
 	case "standard":
 		n := &StandardPost{}
-		n.FromJSON(selectedVariant)
+		StandardPostFromJSON(n, selectedVariant)
 		p.Post = n
 	case "article":
 		n := &ArticlePost{}
-		n.FromJSON(selectedVariant)
+		ArticlePostFromJSON(n, selectedVariant)
 		p.Post = n
 	case "link":
 		n := &LinkPost{}
-		n.FromJSON(selectedVariant)
+		LinkPostFromJSON(n, selectedVariant)
 		p.Post = n
 	case "image":
 		n := &ImagePost{}
-		n.FromJSON(selectedVariant)
+		ImagePostFromJSON(n, selectedVariant)
 		p.Post = n
 	case "video":
 		n := &VideoPost{}
-		n.FromJSON(selectedVariant)
+		VideoPostFromJSON(n, selectedVariant)
 		p.Post = n
 	case "audio":
 		n := &AudioPost{}
-		n.FromJSON(selectedVariant)
+		AudioPostFromJSON(n, selectedVariant)
 		p.Post = n
 	default:
 		panic(errors.New("post variant not found"))
@@ -444,13 +444,13 @@ func (p *PostView) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (p *PostView) FromJSON(node *json.Node) {
+func PostViewFromJSON(p *PostView, node *json.Node) {
 	*p = PostView{}
 	fields := node.MustObject()
 
 	if val, ok := fields["post"]; ok {
 		fv := &Post{}
-		fv.FromJSON(val)
+		PostFromJSON(fv, val)
 		p.Post = fv
 	}
 	if val, ok := fields["childrenCount"]; ok {
@@ -465,7 +465,7 @@ func (p *PostView) FromJSON(node *json.Node) {
 		arr := make([]*ReactionView, len(jarr))
 		for i, val := range jarr {
 			fv := &ReactionView{}
-			fv.FromJSON(val)
+			ReactionViewFromJSON(fv, val)
 			arr[i] = fv
 		}
 		p.Reactions = arr
@@ -488,7 +488,7 @@ func (r *ReactionView) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func (r *ReactionView) FromJSON(node *json.Node) {
+func ReactionViewFromJSON(r *ReactionView, node *json.Node) {
 	*r = ReactionView{}
 	fields := node.MustObject()
 
