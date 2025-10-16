@@ -183,7 +183,7 @@ func (g *gnoZenaoChain) EntityRoles(entityRealmID string, orgRealmID string, org
 		return nil, err
 	}
 
-	parsedRaw, err := parseQEvalResponseData(raw)
+	parsedRaw, err := parseQEvalStringResponseData(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +212,7 @@ func (g *gnoZenaoChain) GetUser(userRealmID string) (displayName string, Bio str
 	if err != nil {
 		return "", "", "", err
 	}
-	displayName, err = parseQEvalResponseData(raw)
+	displayName, err = parseQEvalStringResponseData(raw)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -220,7 +220,7 @@ func (g *gnoZenaoChain) GetUser(userRealmID string) (displayName string, Bio str
 	if err != nil {
 		return "", "", "", err
 	}
-	Bio, err = parseQEvalResponseData(raw)
+	Bio, err = parseQEvalStringResponseData(raw)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -228,7 +228,7 @@ func (g *gnoZenaoChain) GetUser(userRealmID string) (displayName string, Bio str
 	if err != nil {
 		return "", "", "", err
 	}
-	ImageUri, err = parseQEvalResponseData(raw)
+	ImageUri, err = parseQEvalStringResponseData(raw)
 	if err != nil {
 		return "", "", "", err
 	}
@@ -308,7 +308,7 @@ func (g *gnoZenaoChain) GetEvent(eventRealmID string) (*zenaov1.EventInfo, error
 	if err != nil {
 		return nil, err
 	}
-	parsedRaw, err := parseQEvalResponseData(raw)
+	parsedRaw, err := parseQEvalStringResponseData(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +330,7 @@ func (g *gnoZenaoChain) GetEventUsersByRole(eventRealmID string, role string) ([
 	if err != nil {
 		return nil, err
 	}
-	parsedRaw, err := parseQEvalResponseData(raw)
+	parsedRaw, err := parseQEvalStringResponseData(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -352,7 +352,7 @@ func (g *gnoZenaoChain) GetEventCommunity(eventRealmID string) (*zenaov1.Communi
 	if err != nil {
 		return nil, err
 	}
-	parsedRaw, err := parseQEvalResponseData(raw)
+	parsedRaw, err := parseQEvalStringResponseData(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -706,20 +706,16 @@ func (g *gnoZenaoChain) ValidatePassword(eventRealmID string, derivedPK string) 
 	g, span := g.trace("gzchain.ValidatePassword")
 	defer span.End()
 
+	g.logger.Info("validating password", zap.String("event", eventRealmID), zap.String("derived-pk", derivedPK))
 	raw, err := checkQueryErr(g.client.QEval(eventRealmID, "event.ValidatePassword(\""+derivedPK+"\")"))
 	if err != nil {
 		return false, err
 	}
-	parsedRaw, err := parseQEvalResponseData(raw)
+	g.logger.Info("raw response", zap.String("raw", raw))
+	res, err := parseQEvalBoolResponseData(raw)
 	if err != nil {
 		return false, err
 	}
-
-	res, err := strconv.ParseBool(strings.TrimSpace(parsedRaw))
-	if err != nil {
-		return false, err
-	}
-
 	return res, nil
 }
 
@@ -839,7 +835,7 @@ func (g *gnoZenaoChain) GetCommunity(communityRealmID string) (*zenaov1.Communit
 	if err != nil {
 		return nil, err
 	}
-	parsedRaw, err := parseQEvalResponseData(raw)
+	parsedRaw, err := parseQEvalStringResponseData(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -861,7 +857,7 @@ func (g *gnoZenaoChain) GetCommunityUsersByRole(communityRealmID string, role st
 	if err != nil {
 		return nil, err
 	}
-	parsedRaw, err := parseQEvalResponseData(raw)
+	parsedRaw, err := parseQEvalStringResponseData(raw)
 	if err != nil {
 		return nil, err
 	}
@@ -1564,7 +1560,7 @@ func checkBroadcastErr(broadcastRes *ctypes.ResultBroadcastTxCommit, baseErr err
 	return broadcastRes, nil
 }
 
-func parseQEvalResponseData(raw string) (string, error) {
+func parseQEvalStringResponseData(raw string) (string, error) {
 	if len(raw) < 10 || raw[0] != '(' {
 		return "", fmt.Errorf("unexpected format: %s", raw)
 	}
@@ -1575,6 +1571,22 @@ func parseQEvalResponseData(raw string) (string, error) {
 		return "", fmt.Errorf("first unmarshal failed: %w", err)
 	}
 	return innerStr, nil
+}
+
+func parseQEvalBoolResponseData(raw string) (bool, error) {
+	if len(raw) < 8 || raw[0] != '(' || !strings.HasSuffix(raw, " bool)") {
+		return false, fmt.Errorf("unexpected format: %s", raw)
+	}
+
+	valueStr := strings.TrimSuffix(strings.TrimPrefix(raw, "("), " bool)")
+	switch strings.TrimSpace(valueStr) {
+	case "true":
+		return true, nil
+	case "false":
+		return false, nil
+	default:
+		return false, fmt.Errorf("unexpected bool value: %s", valueStr)
+	}
 }
 
 func checkQueryErr(data string, queryRes *ctypes.ResultABCIQuery, baseErr error) (string, error) {

@@ -104,30 +104,31 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	}
 
 	var eventSK ed25519.PrivateKey
-	// TODO: check password before DB operation
+	// XXX: does not work, need to sync with team to decide the right approach
 	if needPasswordIfGuarded {
 		hash, err := zeni.NewPasswordHash(req.Msg.Password)
 		if err != nil {
 			return nil, err
 		}
-		eventSK, err := zeni.EventSKFromPasswordHash(hash)
+		eventSK, err = zeni.EventSKFromPasswordHash(hash)
 		if err != nil {
 			return nil, err
 		}
-		pk, err := zeni.EventPKFromSK(eventSK)
-		if err != nil {
-			return nil, err
-		}
-		valid, err := s.Chain.WithContext(ctx).ValidatePassword(evtRealmID, pk)
-		if err != nil {
-			return nil, err
-		}
-		if !valid {
-			return nil, errors.New("invalid password")
-		}
+		// pk, err := zeni.EventPKFromSK(eventSK)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// // XXX: validate password here since for now it's bypassed in Chain.Participate
+		// valid, err := s.Chain.WithContext(ctx).ValidatePassword(evtRealmID, pk)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// if !valid {
+		// 	return nil, errors.New("invalid password")
+		// }
 	}
 
-	// TODO: use chain as SoT then use DB after chain operations
+	// XXX: should i do operations in db after tx since chain should be the source of truth?
 	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
 		for i, ticket := range tickets {
 			// XXX: support batch
