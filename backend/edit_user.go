@@ -30,7 +30,8 @@ func (s *ZenaoServer) EditUser(
 		return nil, errors.New("user is banned")
 	}
 
-	if err := s.Chain.WithContext(ctx).EditUser(zUser.ID, req.Msg); err != nil {
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	if err := s.Chain.WithContext(ctx).EditUser(userRealmID, req.Msg); err != nil {
 		return nil, err
 	}
 
