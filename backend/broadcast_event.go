@@ -68,24 +68,14 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, errors.New("a broadcast message cannot be sent to an event without any participants")
 	}
 
-	participantsIDs := make([]string, 0, len(participants))
-	for _, p := range participants {
-		//TODO: TO CHANGE
-		id, err := s.Chain.WithContext(ctx).FromRealmIDToID(p, "u")
-		if err != nil {
-			// XXX: skip non user participants (should not happen tho isn't ?)
-			continue
-		}
-		participantsIDs = append(participantsIDs, id)
-	}
 	tickets := make(map[string][]*zeni.SoldTicket)
-	participantsFromDB := make([]*zeni.User, 0, len(participantsIDs))
+	zParticipants := make([]*zeni.User, 0, len(participants))
 	if err := s.DB.TxWithSpan(ctx, "db.BroadcastEvent", func(db zeni.DB) error {
-		participantsFromDB, err = s.DB.GetUsersByIDs(participantsIDs)
+		zParticipants, err = s.DB.GetUsersByRealmIDs(participants)
 		if err != nil {
 			return err
 		}
-		for _, p := range participantsFromDB {
+		for _, p := range zParticipants {
 			ticket, err := db.GetEventUserOrBuyerTickets(evtRealmID, s.Chain.UserRealmID(p.ID))
 			if err != nil {
 				return err
@@ -96,7 +86,7 @@ func (s *ZenaoServer) BroadcastEvent(
 	}); err != nil {
 		return nil, err
 	}
-	authIDs := mapsl.Map(participantsFromDB, func(u *zeni.User) string { return u.AuthID })
+	authIDs := mapsl.Map(zParticipants, func(u *zeni.User) string { return u.AuthID })
 	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 	if err != nil {
 		return nil, err

@@ -131,16 +131,7 @@ func (s *ZenaoServer) CreateEvent(
 		if err != nil {
 			return nil, err
 		}
-		var memberIDs []string
-		for _, memberRealmID := range membersRealmIDs {
-			id, err := s.Chain.FromRealmIDToID(memberRealmID, "u")
-			if err != nil {
-				// TODO: skip non user members for now
-				continue
-			}
-			memberIDs = append(memberIDs, id)
-		}
-		members, err = s.DB.GetUsersByIDs(memberIDs)
+		members, err = s.DB.GetUsersByRealmIDs(membersRealmIDs)
 		if err != nil {
 			return nil, err
 		}

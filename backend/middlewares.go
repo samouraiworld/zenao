@@ -42,7 +42,7 @@ func (s *ZenaoServer) EnsureUserExists(
 			alreadyExists = true
 			return nil
 		}
-		if zUser, err = db.CreateUser(user.ID); err != nil {
+		if zUser, err = db.CreateUser(user.ID, s.Chain.UserRealmID("")); err != nil {
 			return err
 		}
 		return nil

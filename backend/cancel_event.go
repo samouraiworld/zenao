@@ -60,20 +60,11 @@ func (s *ZenaoServer) CancelEvent(
 	}
 
 	if s.MailClient != nil {
-		participantsIDs := make([]string, 0, len(participants))
-		for _, p := range participants {
-			id, err := s.Chain.WithContext(ctx).FromRealmIDToID(p, "u")
-			if err != nil {
-				// XXX: skip non user participants (should not happen tho isn't ?)
-				continue
-			}
-			participantsIDs = append(participantsIDs, id)
-		}
-		participantsFromDB, err := s.DB.GetUsersByIDs(participantsIDs)
+		zParticipants, err := s.DB.GetUsersByRealmIDs(participants)
 		if err != nil {
 			return nil, err
 		}
-		authIDs := mapsl.Map(participantsFromDB, func(u *zeni.User) string { return u.AuthID })
+		authIDs := mapsl.Map(zParticipants, func(u *zeni.User) string { return u.AuthID })
 		authUsers, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 		if err != nil {
 			return nil, err

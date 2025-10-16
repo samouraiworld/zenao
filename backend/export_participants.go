@@ -49,19 +49,7 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 		return nil, err
 	}
 
-	var participantsIDs []string
-	for _, p := range participantsRealmIDs {
-		//TODO: change it
-		id, err := s.Chain.FromRealmIDToID(p, "u")
-		if err != nil {
-			// XXX: Skip invalid user ID (in case it's not a user)
-			s.Logger.Error("export-participants-fail-to-parse-user-id-from-realm-id",
-				zap.String("user-id", p))
-			continue
-		}
-		participantsIDs = append(participantsIDs, id)
-	}
-	participants, err := s.DB.WithContext(ctx).GetUsersByIDs(participantsIDs)
+	participants, err := s.DB.WithContext(ctx).GetUsersByRealmIDs(participantsRealmIDs)
 	if err != nil {
 		return nil, err
 	}

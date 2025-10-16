@@ -34,22 +34,12 @@ func (s *ZenaoServer) GetEventGatekeepers(ctx context.Context, req *connect.Requ
 		return nil, err
 	}
 
-	var gkpsIDs []string
-	for _, gk := range gatekeepers {
-		// TODO: actually in future we are not sure a gatekeeper is always a user
-		id, err := s.Chain.WithContext(ctx).FromRealmIDToID(gk, "u")
-		if err != nil {
-			return nil, err
-		}
-		gkpsIDs = append(gkpsIDs, id)
-	}
-
-	gkps, err := s.DB.GetUsersByIDs(gkpsIDs)
+	zGatekeepers, err := s.DB.GetUsersByRealmIDs(gatekeepers)
 	if err != nil {
 		return nil, err
 	}
 
-	gkpsAuthIDs := mapsl.Map(gkps, func(u *zeni.User) string {
+	gkpsAuthIDs := mapsl.Map(zGatekeepers, func(u *zeni.User) string {
 		return u.AuthID
 	})
 

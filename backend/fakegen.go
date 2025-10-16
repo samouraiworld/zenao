@@ -137,7 +137,7 @@ func execFakegen() (retErr error) {
 	logger.Info("db connected with path", zap.String("path", fakegenConf.dbPath))
 
 	// Create user
-	zUser, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
+	zUser, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05", chain.UserRealmID("")) // alice+clerk_test@example.com
 	if err != nil {
 		return err
 	}

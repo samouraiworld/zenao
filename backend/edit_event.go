@@ -127,17 +127,7 @@ func (s *ZenaoServer) EditEvent(
 		if err != nil {
 			return nil, err
 		}
-		var memberIDs []string
-		for _, realmID := range membersRealmIDs {
-			// TODO: actually member of a realm could not be users but we want to send mail to users only
-			id, err := s.Chain.FromRealmIDToID(realmID, "u")
-			if err != nil {
-				// XXX: skip non user members for now
-				continue
-			}
-			memberIDs = append(memberIDs, id)
-		}
-		members, err = s.DB.GetUsersByIDs(memberIDs)
+		members, err = s.DB.GetUsersByRealmIDs(membersRealmIDs)
 		if err != nil {
 			return nil, err
 		}

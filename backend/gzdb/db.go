@@ -25,6 +25,7 @@ type User struct {
 	gorm.Model        // this ID should be used for any database related logic (like querying)
 	AuthID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
 	Plan       string `gorm:"default:'free'"`
+	RealmID    string `gorm:"uniqueIndex"`
 }
 
 type EntityRole struct {
@@ -364,13 +365,19 @@ func (g *gormZenaoDB) getDBCommunity(id string) (*Community, error) {
 }
 
 // CreateUser implements zeni.DB.
-func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
+func (g *gormZenaoDB) CreateUser(authID string, realmIDPrefix string) (*zeni.User, error) {
 	user := &User{
 		AuthID: authID,
 	}
 	if err := g.db.Create(user).Error; err != nil {
 		return nil, err
 	}
+
+	user.RealmID = fmt.Sprintf("%s%d", realmIDPrefix, user.ID)
+	if err := g.db.Model(user).Update("realm_id", user.RealmID).Error; err != nil {
+		return nil, err
+	}
+
 	return dbUserToZeniDBUser(user), nil
 }
 
@@ -466,23 +473,14 @@ func (g *gormZenaoDB) GetUserByID(userID string) (*zeni.User, error) {
 	return dbUserToZeniDBUser(&user), nil
 }
 
-// GetUsersFromIDs implements zeni.DB.
-func (g *gormZenaoDB) GetUsersByIDs(userIDs []string) ([]*zeni.User, error) {
-	if len(userIDs) == 0 {
+// GetUsersByRealmIDs implements zeni.DB.
+func (g *gormZenaoDB) GetUsersByRealmIDs(userRealmIDs []string) ([]*zeni.User, error) {
+	if len(userRealmIDs) == 0 {
 		return []*zeni.User{}, nil
 	}
 
-	userIDInts := make([]uint64, 0, len(userIDs))
-	for _, userID := range userIDs {
-		userIDInt, err := strconv.ParseUint(userID, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("parse user id: %w", err)
-		}
-		userIDInts = append(userIDInts, userIDInt)
-	}
-
 	var users []User
-	if err := g.db.Where("id IN ?", userIDInts).Find(&users).Error; err != nil {
+	if err := g.db.Where("realm_id IN ?", userRealmIDs).Find(&users).Error; err != nil {
 		return nil, err
 	}
 
@@ -1510,6 +1508,7 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		CreatedAt: dbuser.CreatedAt,
 		AuthID:    dbuser.AuthID,
 		Plan:      zeni.Plan(dbuser.Plan),
+		RealmID:   dbuser.RealmID,
 	}
 }
 

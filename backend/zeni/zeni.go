@@ -72,6 +72,7 @@ type User struct {
 	CreatedAt   time.Time
 	ID          string
 	AuthID      string
+	RealmID     string
 	DisplayName string //TODO: to remove
 	Bio         string //TODO: to remove
 	AvatarURI   string //TODO: to remove
@@ -239,10 +240,10 @@ type DB interface {
 	TxWithSpan(ctx context.Context, label string, cb func(db DB) error) error
 	WithContext(ctx context.Context) DB
 
-	CreateUser(authID string) (*User, error)
+	CreateUser(authID string, realmIDPrefix string) (*User, error)
 	GetUserByAuthID(authID string) (*User, error)
 	GetUserByID(userID string) (*User, error)
-	GetUsersByIDs(userIDs []string) ([]*User, error)
+	GetUsersByRealmIDs(realmIDs []string) ([]*User, error)
 	// XXX: add EnsureUsersExist
 
 	PromoteUser(userID string, plan Plan) error

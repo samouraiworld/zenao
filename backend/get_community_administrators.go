@@ -34,23 +34,12 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 		return nil, err
 	}
 
-	var admIDs []string
-	for _, admin := range administrators {
-		// TODO: actually in future an event could be admin of communities
-		// TODO: Change this
-		id, err := s.Chain.WithContext(ctx).FromRealmIDToID(admin, "u")
-		if err != nil {
-			return nil, err
-		}
-		admIDs = append(admIDs, id)
-	}
-
-	admins, err := s.DB.GetUsersByIDs(admIDs)
+	zAdministrators, err := s.DB.GetUsersByRealmIDs(administrators)
 	if err != nil {
 		return nil, err
 	}
 
-	adminsAuthIDs := mapsl.Map(admins, func(u *zeni.User) string {
+	adminsAuthIDs := mapsl.Map(zAdministrators, func(u *zeni.User) string {
 		return u.AuthID
 	})
 
