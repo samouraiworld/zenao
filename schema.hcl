@@ -1,3 +1,43 @@
+table "checkins" {
+  schema = schema.main
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "sold_ticket_id" {
+    null           = false
+    type           = integer
+    auto_increment = true
+  }
+  column "gatekeeper_id" {
+    null = true
+    type = integer
+  }
+  column "signature" {
+    null = true
+    type = text
+  }
+  primary_key {
+    columns = [column.sold_ticket_id]
+  }
+  foreign_key "fk_sold_tickets_checkin" {
+    columns     = [column.sold_ticket_id]
+    ref_columns = [table.sold_tickets.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_checkins_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
 table "users" {
   schema = schema.main
   column "id" {
@@ -26,8 +66,28 @@ table "users" {
     type    = text
     default = "free"
   }
+  column "realm_id" {
+    null = true
+    type = text
+  }
+  column "display_name" {
+    null = true
+    type = text
+  }
+  column "bio" {
+    null = true
+    type = text
+  }
+  column "avatar_uri" {
+    null = true
+    type = text
+  }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_users_realm_id" {
+    unique  = true
+    columns = [column.realm_id]
   }
   index "idx_users_auth_id" {
     unique  = true
@@ -574,10 +634,6 @@ table "sold_tickets" {
     null = false
     type = text
   }
-  column "buyer_id" {
-    null = true
-    type = integer
-  }
   column "price" {
     null = true
     type = real
@@ -590,8 +646,22 @@ table "sold_tickets" {
     null = false
     type = text
   }
+  column "user_id" {
+    null = true
+    type = integer
+  }
+  column "buyer_id" {
+    null = true
+    type = integer
+  }
   primary_key {
     columns = [column.id]
+  }
+  foreign_key "fk_sold_tickets_user" {
+    columns     = [column.user_id]
+    ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
   }
   index "idx_sold_tickets_pubkey" {
     unique  = true

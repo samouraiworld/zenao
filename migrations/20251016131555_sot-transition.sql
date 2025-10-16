@@ -11,23 +11,23 @@ ALTER TABLE `new_events` RENAME TO `events`;
 -- Create index "idx_events_deleted_at" to table: "events"
 CREATE INDEX `idx_events_deleted_at` ON `events` (`deleted_at`);
 -- Create "new_users" table
-CREATE TABLE `new_users` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `auth_id` text NULL, `plan` text NULL DEFAULT 'free');
+CREATE TABLE `new_users` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `auth_id` text NULL, `plan` text NULL DEFAULT 'free', `realm_id` text NULL, `display_name` text NULL, `bio` text NULL, `avatar_uri` text NULL);
 -- Copy rows from old table "users" to new temporary table "new_users"
-INSERT INTO `new_users` (`id`, `created_at`, `updated_at`, `deleted_at`, `auth_id`, `plan`) SELECT `id`, `created_at`, `updated_at`, `deleted_at`, `auth_id`, `plan` FROM `users`;
+INSERT INTO `new_users` (`id`, `created_at`, `updated_at`, `deleted_at`, `auth_id`, `plan`, `display_name`, `bio`, `avatar_uri`) SELECT `id`, `created_at`, `updated_at`, `deleted_at`, `auth_id`, `plan`, `display_name`, `bio`, `avatar_uri` FROM `users`;
 -- Drop "users" table after copying rows
 DROP TABLE `users`;
 -- Rename temporary table "new_users" to "users"
 ALTER TABLE `new_users` RENAME TO `users`;
+-- Create index "idx_users_realm_id" to table: "users"
+CREATE UNIQUE INDEX `idx_users_realm_id` ON `users` (`realm_id`);
 -- Create index "idx_users_auth_id" to table: "users"
 CREATE UNIQUE INDEX `idx_users_auth_id` ON `users` (`auth_id`);
 -- Create index "idx_users_deleted_at" to table: "users"
 CREATE INDEX `idx_users_deleted_at` ON `users` (`deleted_at`);
--- Drop "checkins" table
-DROP TABLE `checkins`;
 -- Create "new_sold_tickets" table
-CREATE TABLE `new_sold_tickets` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `event_realm_id` text NOT NULL, `user_realm_id` text NOT NULL, `buyer_realm_id` text NOT NULL, `buyer_id` integer NULL, `price` real NULL, `secret` text NOT NULL, `pubkey` text NOT NULL);
+CREATE TABLE `new_sold_tickets` (`id` integer NULL PRIMARY KEY AUTOINCREMENT, `created_at` datetime NULL, `updated_at` datetime NULL, `deleted_at` datetime NULL, `event_realm_id` text NOT NULL, `user_realm_id` text NOT NULL, `buyer_realm_id` text NOT NULL, `price` real NULL, `secret` text NOT NULL, `pubkey` text NOT NULL, `user_id` integer NULL, `buyer_id` integer NULL, CONSTRAINT `fk_sold_tickets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION);
 -- Copy rows from old table "sold_tickets" to new temporary table "new_sold_tickets"
-INSERT INTO `new_sold_tickets` (`id`, `created_at`, `updated_at`, `deleted_at`, `buyer_id`, `price`, `secret`, `pubkey`) SELECT `id`, `created_at`, `updated_at`, `deleted_at`, `buyer_id`, `price`, `secret`, `pubkey` FROM `sold_tickets`;
+INSERT INTO `new_sold_tickets` (`id`, `created_at`, `updated_at`, `deleted_at`, `price`, `secret`, `pubkey`, `user_id`, `buyer_id`) SELECT `id`, `created_at`, `updated_at`, `deleted_at`, `price`, `secret`, `pubkey`, `user_id`, `buyer_id` FROM `sold_tickets`;
 -- Drop "sold_tickets" table after copying rows
 DROP TABLE `sold_tickets`;
 -- Rename temporary table "new_sold_tickets" to "sold_tickets"

@@ -26,6 +26,11 @@ type User struct {
 	AuthID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
 	Plan       string `gorm:"default:'free'"`
 	RealmID    string `gorm:"uniqueIndex"`
+
+	// TODO: TO DELETE
+	DisplayName string
+	Bio         string
+	AvatarURI   string
 }
 
 type EntityRole struct {
@@ -45,16 +50,34 @@ type EntityRole struct {
 type SoldTicket struct {
 	gorm.Model
 
-	EventRealmID string `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
 	// TODO: don't make a unique index if we want to allow multiple tickets per user or anonymous tickets
+	EventRealmID string         `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
 	UserRealmID  string         `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
-	BuyerRealmID string         `gorm:"not null"`
 	DeletedAt    gorm.DeletedAt `gorm:"uniqueIndex:idx_event_user_deleted"`
 
+	BuyerRealmID string `gorm:"not null"`
+
+	Price  float64
+	Secret string `gorm:"uniqueIndex;not null"`
+	Pubkey string `gorm:"uniqueIndex;not null"`
+
+	//TODO: TO DELETE
+	UserID  uint
+	User    *User
+	Checkin *Checkin
 	BuyerID uint
-	Price   float64
-	Secret  string `gorm:"uniqueIndex;not null"`
-	Pubkey  string `gorm:"uniqueIndex;not null"`
+}
+
+// TODO: TO DELETE
+type Checkin struct {
+	// gorm.Model without ID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	SoldTicketID uint `gorm:"primaryKey;not null"`
+	GatekeeperID uint
+	Signature    string
 }
 
 func SetupDB(dsn string) (zeni.DB, error) {
