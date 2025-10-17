@@ -1,6 +1,7 @@
 package zeni
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -29,14 +30,17 @@ func TestPassword(t *testing.T) {
 
 	encodedHash := encodeHash(hash, salt, hashParams)
 	encodedHashParams := encodeHashParams(salt, hashParams)
-	privacy, sk, err := EventPrivacyFromPasswordHash(password)
+	fmt.Printf("encodedHash: %s\n", encodedHash)
+	privacy, sk, err := EventPrivacyFromPasswordHash(encodedHash)
 	require.NoError(t, err)
 	require.NotNil(t, sk)
 	require.NotNil(t, privacy)
 	require.NotNil(t, privacy.GetGuarded())
+	fmt.Printf("pubk: %s\n", privacy.GetGuarded().ParticipationPubkey)
 	require.Equal(t, "$argon2id$v=19$m=19456,t=2,p=1$c2FsdA$9QyfT5o7Sa27GSMOCN2GzdqaNwYMX8RmDMyUUqwHjfY", encodedHash)
 
 	_, decodedSalt, decodedParams, err := decodeHash(encodedHash)
+	fmt.Printf("decodedSalt: %x, decodedParams: %+v\n", decodedSalt, decodedParams)
 	require.NoError(t, err)
 	require.Equal(t, salt, decodedSalt)
 	require.Equal(t, hashParams, decodedParams)

@@ -1,6 +1,7 @@
 package zeni
 
 import (
+	"crypto/ed25519"
 	srand "crypto/rand"
 	"encoding/base64"
 	"errors"
@@ -18,12 +19,12 @@ type argon2Params struct {
 	KeyLength  uint32
 }
 
-func ValidatePassword(password string, encodedHashParams string, derivedPK string) (bool, error) {
-	if derivedPK == "" && password == "" {
+func ValidatePassword(password string, encodedHashParams string, expectedPK string) (bool, error) {
+	if expectedPK == "" && password == "" {
 		return true, nil
 	}
 
-	if derivedPK == "" && password != "" {
+	if expectedPK == "" && password != "" {
 		return false, errors.New("event is not guarded")
 	}
 
@@ -33,8 +34,14 @@ func ValidatePassword(password string, encodedHashParams string, derivedPK strin
 	}
 
 	hashBz := hashPass(password, saltBz, params)
-	computedPK := base64.RawURLEncoding.EncodeToString(hashBz)
-	if computedPK != derivedPK {
+	encodedHash := encodeHash(hashBz, saltBz, params)
+	sk, err := EventSKFromPasswordHash(encodedHash)
+	if err != nil {
+		return false, err
+	}
+	pkBz := []byte(sk.Public().(ed25519.PublicKey))
+	pk := base64.RawURLEncoding.EncodeToString(pkBz)
+	if pk != expectedPK {
 		return false, nil
 	}
 
@@ -69,14 +76,14 @@ func hashPass(password string, salt []byte, params *argon2Params) []byte {
 	return argon2.IDKey([]byte(password), salt, params.TimeCost, params.MemoryCost, params.Threads, params.KeyLength)
 }
 
-func encodeHashParams(sale []byte, params *argon2Params) string {
+func encodeHashParams(salt []byte, params *argon2Params) string {
 	return fmt.Sprintf(
 		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s",
 		argon2.Version,
 		params.MemoryCost,
 		params.TimeCost,
 		params.Threads,
-		base64.RawStdEncoding.EncodeToString(sale),
+		base64.RawStdEncoding.EncodeToString(salt),
 	)
 }
 
@@ -105,7 +112,9 @@ func decodeHashParams(encodedHashParams string) ([]byte, *argon2Params, error) {
 		return nil, nil, errors.New("unexpected params count")
 	}
 
-	params := argon2Params{}
+	params := argon2Params{
+		KeyLength: 32, // XXX: store it in the encoded params?
+	}
 	for _, param := range paramsParts {
 		kv := strings.Split(param, "=")
 		if len(kv) != 2 {
