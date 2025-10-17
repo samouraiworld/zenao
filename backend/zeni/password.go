@@ -86,7 +86,7 @@ func encodeHash(hash []byte, salt []byte, params *argon2Params) string {
 
 func decodeHashParams(encodedHashParams string) ([]byte, *argon2Params, error) {
 	parts := strings.Split(encodedHashParams, "$")
-	if len(parts) != 5 {
+	if len(parts) < 5 {
 		return nil, nil, errors.New("malformed hash params")
 	}
 
