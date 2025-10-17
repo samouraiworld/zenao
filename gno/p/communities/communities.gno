@@ -187,21 +187,27 @@ func (c *Community) editCommunityHandler() daokit.ActionHandler {
 			panic("invalid payload type")
 		}
 
-		if msg.displayName != "" {
-			c.SetProfileString(cross, "DisplayName", msg.displayName)
+		if len(msg.administrators) == 0 {
+			panic("at least one administrator is required")
 		}
-		if msg.description != "" {
-			c.SetProfileString(cross, "Bio", msg.description)
+		if len(msg.displayName) < 2 {
+			panic("display name must be at least 2 characters long")
 		}
-		if msg.avatarURI != "" {
-			c.SetProfileString(cross, "Avatar", msg.avatarURI)
+		if len(msg.description) < 10 {
+			panic("description must be at least 10 characters long")
 		}
-		if msg.bannerURI != "" {
-			c.SetProfileString(cross, "Banner", msg.bannerURI)
+		if msg.avatarURI == "" {
+			panic("avatar URI is required")
 		}
-		if len(msg.administrators) > 0 {
-			c.updateCommunityUserRoles("administrator", msg.administrators)
+		if msg.bannerURI == "" {
+			panic("banner URI is required")
 		}
+
+		c.SetProfileString(cross, "DisplayName", msg.displayName)
+		c.SetProfileString(cross, "Bio", msg.description)
+		c.SetProfileString(cross, "Avatar", msg.avatarURI)
+		c.SetProfileString(cross, "Banner", msg.bannerURI)
+		c.updateCommunityUserRoles("administrator", msg.administrators)
 
 		// XXX: ensure all admins are also members of the community
 		for _, admin := range msg.administrators {

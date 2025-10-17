@@ -61,6 +61,15 @@ table "users" {
     null = true
     type = text
   }
+  column "plan" {
+    null    = true
+    type    = text
+    default = "free"
+  }
+  column "realm_id" {
+    null = true
+    type = text
+  }
   column "display_name" {
     null = true
     type = text
@@ -73,13 +82,12 @@ table "users" {
     null = true
     type = text
   }
-  column "plan" {
-    null    = true
-    type    = text
-    default = "free"
-  }
   primary_key {
     columns = [column.id]
+  }
+  index "idx_users_realm_id" {
+    unique  = true
+    columns = [column.realm_id]
   }
   index "idx_users_auth_id" {
     unique  = true
@@ -614,17 +622,17 @@ table "sold_tickets" {
     null = true
     type = datetime
   }
-  column "event_id" {
-    null = true
-    type = integer
+  column "event_realm_id" {
+    null = false
+    type = text
   }
-  column "buyer_id" {
-    null = true
-    type = integer
+  column "user_realm_id" {
+    null = false
+    type = text
   }
-  column "user_id" {
-    null = true
-    type = integer
+  column "buyer_realm_id" {
+    null = false
+    type = text
   }
   column "price" {
     null = true
@@ -637,6 +645,14 @@ table "sold_tickets" {
   column "pubkey" {
     null = false
     type = text
+  }
+  column "user_id" {
+    null = true
+    type = integer
+  }
+  column "buyer_id" {
+    null = true
+    type = integer
   }
   primary_key {
     columns = [column.id]
@@ -655,8 +671,9 @@ table "sold_tickets" {
     unique  = true
     columns = [column.secret]
   }
-  index "idx_sold_tickets_event_id" {
-    columns = [column.event_id]
+  index "idx_event_user_deleted" {
+    unique  = true
+    columns = [column.event_realm_id, column.user_realm_id, column.deleted_at]
   }
   index "idx_sold_tickets_deleted_at" {
     columns = [column.deleted_at]
