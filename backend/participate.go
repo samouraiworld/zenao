@@ -99,33 +99,25 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	if err != nil {
 		return nil, err
 	}
-	if slices.Contains(userRoles, zeni.RoleOrganizer) {
+	if slices.Contains(userRoles, zeni.RoleOrganizer) || evt.Privacy.GetPublic() != nil {
 		needPasswordIfGuarded = false
 	}
 
 	var eventSK ed25519.PrivateKey
-	// XXX: does not work, need to sync with team to decide the right approach
 	if needPasswordIfGuarded {
-		hash, err := zeni.NewPasswordHash(req.Msg.Password)
-		if err != nil {
+		valid := true
+		if guarded := evt.Privacy.GetGuarded(); guarded != nil {
+			valid, err = zeni.ValidatePassword(req.Msg.Password, guarded.PasswordHash)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if !valid {
+			return nil, errors.New("invalid event password")
+		}
+		if eventSK, err = zeni.EventSKFromPasswordHash(req.Msg.Password); err != nil {
 			return nil, err
 		}
-		eventSK, err = zeni.EventSKFromPasswordHash(hash)
-		if err != nil {
-			return nil, err
-		}
-		// pk, err := zeni.EventPKFromSK(eventSK)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// // XXX: validate password here since for now it's bypassed in Chain.Participate
-		// valid, err := s.Chain.WithContext(ctx).ValidatePassword(evtRealmID, pk)
-		// if err != nil {
-		// 	return nil, err
-		// }
-		// if !valid {
-		// 	return nil, errors.New("invalid password")
-		// }
 	}
 
 	// XXX: should i do operations in db after tx since chain should be the source of truth?

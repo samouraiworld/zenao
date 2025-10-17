@@ -21,9 +21,13 @@ func EventSKFromPasswordHash(passwordHash string) (ed25519.PrivateKey, error) {
 	return sk, nil
 }
 
-func EventPrivacyFromSK(sk ed25519.PrivateKey) (*zenaov1.EventPrivacy, error) {
+func EventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, ed25519.PrivateKey, error) {
+	sk, err := EventSKFromPasswordHash(passwordHash)
+	if err != nil {
+		return nil, nil, err
+	}
 	if len(sk) == 0 {
-		return &zenaov1.EventPrivacy{EventPrivacy: &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}}, nil
+		return &zenaov1.EventPrivacy{EventPrivacy: &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}}, sk, nil
 	}
 
 	pkBz := []byte(sk.Public().(ed25519.PublicKey))
@@ -31,22 +35,6 @@ func EventPrivacyFromSK(sk ed25519.PrivateKey) (*zenaov1.EventPrivacy, error) {
 
 	return &zenaov1.EventPrivacy{EventPrivacy: &zenaov1.EventPrivacy_Guarded{Guarded: &zenaov1.EventPrivacyGuarded{
 		ParticipationPubkey: pk,
-	}}}, nil
-}
-
-func EventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, error) {
-	sk, err := EventSKFromPasswordHash(passwordHash)
-	if err != nil {
-		return nil, err
-	}
-	return EventPrivacyFromSK(sk)
-}
-
-func EventPKFromSK(sk ed25519.PrivateKey) (string, error) {
-	if len(sk) == 0 {
-		return "", nil
-	}
-	pkBz := []byte(sk.Public().(ed25519.PublicKey))
-	pk := base64.RawURLEncoding.EncodeToString(pkBz)
-	return pk, nil
+		PasswordHash:        passwordHash,
+	}}}, sk, nil
 }

@@ -19,6 +19,23 @@ type argon2Params struct {
 	KeyLength  uint32
 }
 
+func ValidatePassword(password string, hash string) (bool, error) {
+	if hash == "" && password == "" {
+		return true, nil
+	}
+	if hash == "" && password != "" {
+		return false, errors.New("event is not guarded")
+	}
+
+	hashBz, saltBz, params, err := decodeHash(hash)
+	if err != nil {
+		return false, err
+	}
+
+	valid := bytes.Equal(hashPass(password, saltBz, params), hashBz)
+	return valid, nil
+}
+
 func NewPasswordHash(password string) (string, error) {
 	if password == "" {
 		return "", nil
@@ -43,23 +60,6 @@ func NewPasswordHash(password string) (string, error) {
 	return encodeHash(hashBz, saltBz, hashParams), nil
 }
 
-func validatePassword(password string, hash string) (bool, error) {
-	if hash == "" && password == "" {
-		return true, nil
-	}
-	if hash == "" && password != "" {
-		return false, errors.New("event is not guarded")
-	}
-
-	hashBz, saltBz, params, err := decodeHash(hash)
-	if err != nil {
-		return false, err
-	}
-
-	valid := bytes.Equal(hashPass(password, saltBz, params), hashBz)
-	return valid, nil
-}
-
 func hashPass(password string, salt []byte, params *argon2Params) []byte {
 	return argon2.IDKey([]byte(password), salt, params.TimeCost, params.MemoryCost, params.Threads, params.KeyLength)
 }
@@ -76,7 +76,6 @@ func encodeHash(hash []byte, salt []byte, params *argon2Params) string {
 	)
 }
 
-// TODO: DELETE
 func decodeHash(hash string) ([]byte, []byte, *argon2Params, error) {
 	parts := strings.Split(hash, "$")
 	if len(parts) != 6 {

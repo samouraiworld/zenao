@@ -701,24 +701,6 @@ func (g *gnoZenaoChain) Checkin(eventRealmID string, gatekeeperRealmID string, r
 	return nil
 }
 
-// ValidatePassword implements ZenaoChain.
-func (g *gnoZenaoChain) ValidatePassword(eventRealmID string, derivedPK string) (bool, error) {
-	g, span := g.trace("gzchain.ValidatePassword")
-	defer span.End()
-
-	g.logger.Info("validating password", zap.String("event", eventRealmID), zap.String("derived-pk", derivedPK))
-	raw, err := checkQueryErr(g.client.QEval(eventRealmID, "event.ValidatePassword(\""+derivedPK+"\")"))
-	if err != nil {
-		return false, err
-	}
-	g.logger.Info("raw response", zap.String("raw", raw))
-	res, err := parseQEvalBoolResponseData(raw)
-	if err != nil {
-		return false, err
-	}
-	return res, nil
-}
-
 // CreateCommunity implements ZenaoChain.
 func (g *gnoZenaoChain) CreateCommunity(communityRealmID string, administratorsRealmIDs []string, membersRealmIDs []string, eventsRealmIDs []string, req *zenaov1.CreateCommunityRequest) error {
 	g, span := g.trace("gzchain.CreateCommunity")
@@ -2093,8 +2075,10 @@ func genEventRealmSource(organizers []string, gatekeepers []string, zenaoAdminAd
 	}
 
 	participationPubkey := ""
+	passwordHash := ""
 	if guarded := privacy.GetGuarded(); guarded != nil {
 		participationPubkey = guarded.GetParticipationPubkey()
+		passwordHash = guarded.GetPasswordHash()
 	}
 
 	toMarshal := map[string]any{
@@ -2102,6 +2086,7 @@ func genEventRealmSource(organizers []string, gatekeepers []string, zenaoAdminAd
 		"description":         req.Description,
 		"imageURI":            req.ImageUri,
 		"participationPubkey": participationPubkey,
+		"passwordHash":        passwordHash,
 	}
 	for key, val := range toMarshal {
 		bz, err := json.Marshal(val)
@@ -2159,6 +2144,7 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
 		Location: {{.location}},
+		PasswordHash: {{.passwordHash}},
 		ParticipationPubkey: {{.participationPubkey}},
 		CrossFn: crossFn,
 		SetImplemFn: setImplem,

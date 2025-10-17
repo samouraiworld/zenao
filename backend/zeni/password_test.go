@@ -7,11 +7,11 @@ import (
 )
 
 func TestPassword(t *testing.T) {
-	valid, err := validatePassword("", "")
+	valid, err := ValidatePassword("", "")
 	require.NoError(t, err)
 	require.True(t, valid)
 
-	valid, err = validatePassword("password", "")
+	valid, err = ValidatePassword("password", "")
 	require.ErrorContains(t, err, "event is not guarded")
 	require.False(t, valid)
 
@@ -35,15 +35,15 @@ func TestPassword(t *testing.T) {
 	require.Equal(t, salt, decodedSalt)
 	require.Equal(t, hashParams, decodedParams)
 
-	valid, err = validatePassword(password, encodedHash)
+	valid, err = ValidatePassword(password, encodedHash)
 	require.NoError(t, err)
 	require.True(t, valid)
 
-	valid, err = validatePassword("", encodedHash)
+	valid, err = ValidatePassword("", encodedHash)
 	require.NoError(t, err)
 	require.False(t, valid)
 
-	valid, err = validatePassword("nimda", encodedHash)
+	valid, err = ValidatePassword("nimda", encodedHash)
 	require.NoError(t, err)
 	require.False(t, valid)
 }

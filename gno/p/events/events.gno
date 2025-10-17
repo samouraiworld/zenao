@@ -32,6 +32,7 @@ type Event struct {
 	SetProfileString    basedao.ProfileStringSetter
 	DAOPrivate          *basedao.DAOPrivate
 	DAO                 daokit.DAO
+	PasswordHash        string // sha256 hash of event password, used for deriving participation key
 	ParticipationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
 	CheckedIn           uint32 // number of checked-in participants, used for rendering only
 	Cancelled           bool   // true if event is cancelled
@@ -54,6 +55,7 @@ type Config struct {
 	SetProfileString    basedao.ProfileStringSetter
 	ZenaoAdminAddr      string
 	Location            *zenaov1.EventLocation
+	PasswordHash        string // sha256 hash of event password, used for deriving participation key
 	ParticipationPubkey string // ed25519 pubkey of secret key derived from event password, event is private if set
 	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
 	CrossFn             daokit.CrossFn
@@ -158,6 +160,7 @@ func NewEvent(conf *Config) *Event {
 		DAOPrivate:          privdao,
 		DAO:                 pubdao,
 		Location:            conf.Location,
+		PasswordHash:        conf.PasswordHash,
 		ParticipationPubkey: participationPubkey,
 		CheckedIn:           0,
 		Cancelled:           false,
@@ -502,12 +505,14 @@ func (e *Event) editEventHandler() daokit.ActionHandler {
 		switch val := msg.privacy.EventPrivacy.(type) {
 		case *zenaov1.EventPrivacyPublic:
 			e.ParticipationPubkey = nil
+			e.PasswordHash = ""
 		case *zenaov1.EventPrivacyGuarded:
 			participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
 			if err != nil {
 				panic(err)
 			}
 			e.ParticipationPubkey = participationPubkeyBz
+			e.PasswordHash = val.PasswordHash
 		default:
 			panic("unknown privacy model")
 		}

@@ -100,7 +100,7 @@ func (s *ZenaoServer) EditEvent(
 	if err != nil {
 		return nil, err
 	}
-	privacy, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
+	privacy, _, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
 	if err != nil {
 		return nil, err
 	}

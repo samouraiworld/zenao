@@ -339,7 +339,6 @@ type Chain interface {
 	Participate(eventRealmID string, callerRealmID string, participantRealmID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
 	CancelParticipation(eventRealmID string, callerRealmID string, participantRealmID string, ticketPubkey string) error
 	Checkin(eventRealmID string, gatekeeperRealmID string, req *zenaov1.CheckinRequest) error
-	ValidatePassword(eventRealmID string, derivedPK string) (bool, error)
 
 	CreateCommunity(communityRealmID string, administratorsRealmIDs []string, membersRealmIDs []string, eventsRealmIDs []string, req *zenaov1.CreateCommunityRequest) error
 	EditCommunity(communityRealmID string, callerRealmID string, administratorsRealmIDs []string, req *zenaov1.EditCommunityRequest) error
