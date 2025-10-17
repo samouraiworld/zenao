@@ -1555,22 +1555,6 @@ func parseQEvalStringResponseData(raw string) (string, error) {
 	return innerStr, nil
 }
 
-func parseQEvalBoolResponseData(raw string) (bool, error) {
-	if len(raw) < 8 || raw[0] != '(' || !strings.HasSuffix(raw, " bool)") {
-		return false, fmt.Errorf("unexpected format: %s", raw)
-	}
-
-	valueStr := strings.TrimSuffix(strings.TrimPrefix(raw, "("), " bool)")
-	switch strings.TrimSpace(valueStr) {
-	case "true":
-		return true, nil
-	case "false":
-		return false, nil
-	default:
-		return false, fmt.Errorf("unexpected bool value: %s", valueStr)
-	}
-}
-
 func checkQueryErr(data string, queryRes *ctypes.ResultABCIQuery, baseErr error) (string, error) {
 	if baseErr != nil {
 		return "", baseErr
