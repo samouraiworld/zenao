@@ -4,6 +4,7 @@ import React from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
+import { SignInButton } from "@clerk/nextjs";
 import { Button } from "../shadcn/button";
 import { useJoinCommunity } from "@/lib/mutations/community-join";
 import { communityUserRoles } from "@/lib/queries/community";
@@ -60,18 +61,25 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
 
   return (
     <div>
-      <Button
-        onClick={handleJoin}
-        disabled={!isSignedIn || isPending}
-        variant="outline"
-        className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
-      >
-        {!isSignedIn
-          ? t("sign-in-to-join-button")
-          : isPending
-            ? t("joining-state")
-            : t("join-community-button")}
-      </Button>
+      {!isSignedIn ? (
+        <SignInButton>
+          <Button
+            variant="outline"
+            className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
+          >
+            {t("sign-in-to-join-button")}
+          </Button>
+        </SignInButton>
+      ) : (
+        <Button
+          onClick={handleJoin}
+          disabled={isPending}
+          variant="outline"
+          className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
+        >
+          {isPending ? t("joining-state") : t("join-community-button")}
+        </Button>
+      )}
     </div>
   );
 };
