@@ -15,13 +15,16 @@ func (s *ZenaoServer) ValidatePassword(ctx context.Context, req *connect.Request
 	if err != nil {
 		return nil, err
 	}
-	valid := true
-	if guarded := evt.Privacy.GetGuarded(); guarded != nil {
-		var err error
-		valid, err = zeni.ValidatePassword(req.Msg.Password, guarded.PasswordHash)
-		if err != nil {
-			return nil, err
-		}
+
+	guarded := evt.Privacy.GetGuarded()
+	if guarded == nil {
+		return nil, nil // public event, no password needed
 	}
+
+	valid, err := zeni.ValidatePassword(req.Msg.Password, guarded.HashParams, guarded.ParticipationPubkey)
+	if err != nil {
+		return nil, err
+	}
+
 	return connect.NewResponse(&zenaov1.ValidatePasswordResponse{Valid: valid}), nil
 }

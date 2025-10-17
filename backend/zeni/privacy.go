@@ -3,6 +3,7 @@ package zeni
 import (
 	"crypto/ed25519"
 	"encoding/base64"
+	"fmt"
 
 	"golang.org/x/crypto/sha3"
 
@@ -22,6 +23,12 @@ func EventSKFromPasswordHash(passwordHash string) (ed25519.PrivateKey, error) {
 }
 
 func EventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, ed25519.PrivateKey, error) {
+	saltBz, params, err := decodeHashParams(passwordHash)
+	if err != nil {
+		return nil, nil, fmt.Errorf("decode password hash: %w", err)
+	}
+	encodedHashParams := encodeHashParams(saltBz, params)
+
 	sk, err := EventSKFromPasswordHash(passwordHash)
 	if err != nil {
 		return nil, nil, err
@@ -35,6 +42,6 @@ func EventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, e
 
 	return &zenaov1.EventPrivacy{EventPrivacy: &zenaov1.EventPrivacy_Guarded{Guarded: &zenaov1.EventPrivacyGuarded{
 		ParticipationPubkey: pk,
-		PasswordHash:        passwordHash,
+		HashParams:          encodedHashParams,
 	}}}, sk, nil
 }

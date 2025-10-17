@@ -107,7 +107,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 	if needPasswordIfGuarded {
 		valid := true
 		if guarded := evt.Privacy.GetGuarded(); guarded != nil {
-			valid, err = zeni.ValidatePassword(req.Msg.Password, guarded.PasswordHash)
+			valid, err = zeni.ValidatePassword(req.Msg.Password, guarded.HashParams, guarded.ParticipationPubkey)
 			if err != nil {
 				return nil, err
 			}
