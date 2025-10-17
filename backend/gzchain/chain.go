@@ -1252,20 +1252,6 @@ func (g *gnoZenaoChain) EntityRealmID(entityType string, entityID string) (strin
 	return "", fmt.Errorf("unknown entity type: %q", entityType)
 }
 
-// FromRealmIDToID implements ZenaoChain.
-func (g *gnoZenaoChain) FromRealmIDToID(realmID string, prefix string) (string, error) {
-	parts := strings.Split(realmID, "/")
-	// take the last part
-	if len(parts) < 4 {
-		return "", fmt.Errorf("invalid realm ID: %q", realmID)
-	}
-	idPart := parts[len(parts)-1]
-	if !strings.HasPrefix(idPart, prefix) {
-		return "", fmt.Errorf("invalid realm ID prefix: %q", realmID)
-	}
-	return strings.TrimPrefix(idPart, prefix), nil
-}
-
 // CreatePost implements ZenaoChain
 func (g *gnoZenaoChain) CreatePost(userRealmID string, orgRealmID string, post *feedsv1.Post) (postID string, err error) {
 	g, span := g.trace("gzchain.CreatePost")

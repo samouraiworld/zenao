@@ -244,59 +244,22 @@ type DB interface {
 	GetUserByAuthID(authID string) (*User, error)
 	GetUserByRealmID(realmID string) (*User, error)
 	GetUsersByRealmIDs(realmIDs []string) ([]*User, error)
-	// XXX: add EnsureUsersExist
 
 	PromoteUser(userID string, plan Plan) error
-	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
-	GetAllUsers() ([]*User, error)
 
-	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)
-	CancelEvent(eventID string) error
-	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
-	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
-	GetEvent(eventID string) (*Event, error)
 	Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error
 	CancelParticipation(eventID string, userID string) error
-	GetAllEvents() ([]*Event, error)
-	GetEventTickets(eventID string) ([]*SoldTicket, error)
-	GetEventCommunity(eventID string) (*Community, error)
 	GetEventUserTicket(eventRealmID string, userRealmID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventRealmID string, userRealmID string) ([]*SoldTicket, error)
-	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
-	AddEventToCommunity(eventID string, communityID string) error
-	RemoveEventFromCommunity(eventID string, communityID string) error
-	// returns all communities that contains the event
-	CommunitiesByEvent(eventID string) ([]*Community, error)
-
-	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
-	EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
-	GetCommunity(communityID string) (*Community, error)
-	AddMemberToCommunity(communityID string, userID string) error
-	RemoveMemberFromCommunity(communityID string, userID string) error
+	// TODO: GENTXS SPECIFIC METHODS TO DELETE LATER
+	GetAllEvents() ([]*Event, error)
+	GetEventTickets(eventID string) ([]*SoldTicket, error)
+	GetAllUsers() ([]*User, error)
 	GetAllCommunities() ([]*Community, error)
-
-	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
-	GetOrgUsers(orgType string, orgID string) ([]*User, error)
-	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
-	GetOrgByPostID(postID string) (orgType, orgID string, err error)
-
-	CreateFeed(orgType string, orgID string, slug string) (*Feed, error)
-	GetFeed(orgType string, orgID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
-
-	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
-	DeletePost(postID string) error
-	EditPost(postID string, req *zenaov1.EditPostRequest) error
-	GetPostByID(postID string) (*Post, error)
 	GetAllPosts(getDeleted bool) ([]*Post, error)
-	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
-
-	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
-
-	// gentxs specific
 	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
@@ -312,7 +275,6 @@ type Chain interface {
 	EventRealmID(eventID string) string
 	CommunityRealmID(communityID string) string
 	EntityRealmID(entityType string, entityID string) (string, error)
-	FromRealmIDToID(realmID string, prefix string) (string, error)
 
 	// Read operations (Query)
 	EntityRoles(entityRealmID string, orgRealmID string, orgType string) ([]string, error)
