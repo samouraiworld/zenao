@@ -45,7 +45,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
 
   return (
     <Link href={href} className="group">
-      <Card className="flex flex-col w-full overflow-hidden p-0 bg-secondary/50 hover:bg-secondary/100 gap-2">
+      <Card className="flex flex-col w-full overflow-hidden p-0 bg-secondary/50 hover:bg-secondary gap-2">
         <div className="w-full">
           <EventImage
             src={evt.imageUri}

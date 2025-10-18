@@ -143,7 +143,7 @@ export default function EventFormCommunitySelector({
                   onBlur={handleBlur}
                   onFocus={() => setOpen(true)}
                   placeholder={t("community-selector-placeholder")}
-                  className="!h-12 px-4 text-base rounded bg-custom-input-bg border border-custom-input-border"
+                  className="h-12! px-4 text-base rounded bg-custom-input-bg border border-custom-input-border"
                   containerClassName="border-none p-0"
                 />
                 {!!field.value && (

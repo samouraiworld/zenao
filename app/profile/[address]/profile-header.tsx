@@ -164,7 +164,7 @@ export default function ProfileHeader({
                     <span className="text-blue-500">{link.url}</span>
                     <ExternalLink
                       size={14}
-                      className="flex-shrink-0 text-blue-400"
+                      className="shrink-0 text-blue-400"
                     />
                   </Link>
                 </li>

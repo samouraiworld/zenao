@@ -36,7 +36,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
   });
 
   return (
-    <Card className="flex flex-col gap-2 bg-secondary/50 hover:bg-secondary/100">
+    <Card className="flex flex-col gap-2 bg-secondary/50 hover:bg-secondary">
       <div className="flex gap-4">
         <div className="min-w-[128px]">
           <AspectRatio ratio={1 / 1}>
@@ -98,8 +98,8 @@ function MembersPreviewFallback() {
   return (
     <div className="flex flex-col gap-2">
       <Skeleton className="w-24 h-6" />
-      <Skeleton className="w-20 h-[1rem] md:h-[1.25rem]" />
-      <Skeleton className="w-36 h-[1.25rem]" />
+      <Skeleton className="w-20 h-4 md:h-5" />
+      <Skeleton className="w-36 h-5" />
     </div>
   );
 }

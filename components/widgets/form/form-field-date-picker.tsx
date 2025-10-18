@@ -232,7 +232,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <ScrollArea className="h-[15rem]">
+                      <ScrollArea className="h-60">
                         {Array.from({ length: 96 }).map((_, i) => {
                           const hour = Math.floor(i / 4)
                             .toString()

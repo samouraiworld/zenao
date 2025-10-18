@@ -271,7 +271,7 @@ export default function CommunityPortfolio({
                   disabled={isUploading}
                   onClick={() => imageFileInputRef.current?.click()}
                 >
-                  <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
+                  <ImageIcon className="w-5 h-5 md:h-6! md:w-6!" />
                   <span className="max-md:hidden">{t("upload-image")}</span>
                 </Button>
               </TooltipTrigger>
@@ -287,7 +287,7 @@ export default function CommunityPortfolio({
                   disabled={isUploading}
                   onClick={() => audioFileInputRef.current?.click()}
                 >
-                  <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
+                  <AudioWaveform className="w-5 h-5 md:h-6! md:w-6!" />
                   <span className="max-md:hidden">{t("upload-audio")}</span>
                 </Button>
               </TooltipTrigger>
@@ -303,7 +303,7 @@ export default function CommunityPortfolio({
                   disabled={isUploading}
                   onClick={() => setVideoDialogOpen(true)}
                 >
-                  <Video className="w-5 h-5 md:!h-6 md:!w-6" />
+                  <Video className="w-5 h-5 md:h-6! md:w-6!" />
                   <span className="max-md:hidden">{t("add-video")}</span>
                 </Button>
               </TooltipTrigger>
@@ -355,7 +355,7 @@ export default function CommunityPortfolio({
                         disabled={isUploading}
                         onClick={() => imageFileInputRef.current?.click()}
                       >
-                        <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
+                        <ImageIcon className="w-5 h-5 md:h-6! md:w-6!" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Upload image</TooltipContent>
@@ -368,7 +368,7 @@ export default function CommunityPortfolio({
                         disabled={isUploading}
                         onClick={() => audioFileInputRef.current?.click()}
                       >
-                        <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
+                        <AudioWaveform className="w-5 h-5 md:h-6! md:w-6!" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>{t("upload-audio")}</TooltipContent>
@@ -381,7 +381,7 @@ export default function CommunityPortfolio({
                         disabled={isUploading}
                         onClick={() => setVideoDialogOpen(true)}
                       >
-                        <Video className="w-5 h-5 md:!h-6 md:!w-6" />
+                        <Video className="w-5 h-5 md:h-6! md:w-6!" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>{t("add-video")}</TooltipContent>
@@ -421,8 +421,8 @@ export default function CommunityPortfolio({
                       (max-width: 1200px) 70vw,
                       33vw"
                     className={cn(
-                      "flex object-cover rounded self-center cursor-pointer blur overflow-hidden brightness-[75%]",
-                      "hover:brightness-[60%] transition-all",
+                      "flex object-cover rounded self-center cursor-pointer blur overflow-hidden brightness-75",
+                      "hover:brightness-60 transition-all",
                     )}
                   />
                   <Web3Image
@@ -434,7 +434,7 @@ export default function CommunityPortfolio({
                       33vw"
                     className={cn(
                       "flex object-contain rounded self-center cursor-pointer",
-                      "hover:brightness-[60%] transition-all",
+                      "hover:brightness-60 transition-all",
                     )}
                   />
                 </div>

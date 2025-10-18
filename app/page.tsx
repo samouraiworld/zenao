@@ -43,7 +43,7 @@ export default function Home() {
           </Link>
 
           {/* we need this div because the button is causing a layout shift otherwise */}
-          <div className="h-[2.25rem]">
+          <div className="h-9">
             <LazyInstallButton />
           </div>
         </div>

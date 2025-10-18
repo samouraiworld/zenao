@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
 body {
   font-family: 'Albert Sans', Arial, Helvetica, sans-serif;
@@ -39,9 +38,10 @@ body {
     /* Custom input variables */
     --input-bg: 255, 255, 255, 1;
     --input-border: #EC7E17;
-    
+
     --main: #EC7E17;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -81,6 +81,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

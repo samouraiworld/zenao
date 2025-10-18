@@ -233,7 +233,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                         }}
                         aria-label="Add image"
                       >
-                        <ImageIcon className="!h-4 !w-4" />
+                        <ImageIcon className="h-4! w-4!" />
                       </Button>
                       <input
                         type="file"
@@ -263,7 +263,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                         }}
                         aria-label="Add audio"
                       >
-                        <AudioWaveformIcon className="!h-4 !w-4" />
+                        <AudioWaveformIcon className="h-4! w-4!" />
                       </Button>
                       <input
                         type="file"

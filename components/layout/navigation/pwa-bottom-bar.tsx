@@ -53,7 +53,7 @@ function PwaBottomBar() {
   }
 
   return (
-    <div className="hidden standalone:flex w-full h-bottom-bar fixed bottom-0 left-0 right-0 z-[100] items-center justify-between bg-main px-8 pointer-events-auto shadow-md md:hidden">
+    <div className="hidden standalone:flex w-full h-bottom-bar fixed bottom-0 left-0 right-0 z-100 items-center justify-between bg-main px-8 pointer-events-auto shadow-md md:hidden">
       {navItems.map((item) => {
         return <PwaNavLink key={item.key} item={item} pathname={pathname} />;
       })}

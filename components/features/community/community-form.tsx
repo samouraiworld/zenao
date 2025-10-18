@@ -205,7 +205,7 @@ export const CommunityForm = ({
                       control={form.control}
                       name={`administrators.${index}.address`}
                       placeholder={t("admin-placeholder")}
-                      className="flex-grow"
+                      className="grow"
                     />
                     <div
                       onClick={() => {

@@ -40,7 +40,7 @@ export function FeedInputButtons({
         >
           <VoteIcon
             className={cn(
-              "w-5 h-5 md:!h-6 md:!w-6",
+              "w-5 h-5 md:h-6! md:w-6!",
               feedInputMode === "POLL"
                 ? "dark:text-black text-white"
                 : "dark:text-white text-black",
@@ -59,9 +59,9 @@ export function FeedInputButtons({
         disabled={isLoading}
       >
         {isEditing ? (
-          <Save className="w-5 h-5 md:!h-6 md:!w-6 dark:text-white" />
+          <Save className="w-5 h-5 md:h-6! md:w-6! dark:text-white" />
         ) : (
-          <SendHorizonalIcon className="w-5 h-5 md:!h-6 md:!w-6 dark:text-white" />
+          <SendHorizonalIcon className="w-5 h-5 md:h-6! md:w-6! dark:text-white" />
         )}
       </ButtonBase>
     </>

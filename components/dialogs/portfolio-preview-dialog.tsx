@@ -85,7 +85,7 @@ export default function PortfolioPreviewDialog({
                       (max-width: 1200px) 70vw,
                       33vw"
                   className={cn(
-                    "flex object-cover rounded self-center cursor-pointer blur overflow-hidden brightness-[75%]",
+                    "flex object-cover rounded self-center cursor-pointer blur overflow-hidden brightness-75",
                     "transition-all",
                   )}
                 />

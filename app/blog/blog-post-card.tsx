@@ -33,7 +33,7 @@ export default function BlogPostCard({
   return (
     <Link href={`/blog/${slug}`} className="w-full max-w-md h-full">
       <Card className="flex flex-col h-full gap-8 hover:bg-secondary/60 transition-colors">
-        <div className="flex relative aspect-[16/7] justify-center items-center bg-background rounded-lg">
+        <div className="flex relative aspect-16/7 justify-center items-center bg-background rounded-lg">
           <Web3Image alt={alt} width={800} height={800} {...imageProps} />
         </div>
         <div className="flex flex-col h-full gap-4">

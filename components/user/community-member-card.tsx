@@ -37,7 +37,7 @@ function CommunityMemberCard({
     shortBio.length > 100 ? shortBio.substring(0, 100) + "..." : shortBio;
 
   return (
-    <Card className="flex items-center gap-6 p-6 md:max-w-[600px] bg-secondary/50 hover:bg-secondary/100 transition rounded-xl">
+    <Card className="flex items-center gap-6 p-6 md:max-w-[600px] bg-secondary/50 hover:bg-secondary transition rounded-xl">
       <UserAvatar
         realmId={address}
         className="w-24 h-24 rounded-full"

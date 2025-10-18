@@ -191,7 +191,7 @@ export function StandardPostForm({
                   }}
                   aria-label="upload image"
                 >
-                  <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
+                  <ImageIcon className="w-5 h-5 md:h-6! md:w-6!" />
                 </ButtonBase>
                 <input
                   type="file"
@@ -221,7 +221,7 @@ export function StandardPostForm({
                   }}
                   aria-label="upload audio"
                 >
-                  <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
+                  <AudioWaveform className="w-5 h-5 md:h-6! md:w-6!" />
                 </ButtonBase>
                 <input
                   type="file"
@@ -264,7 +264,7 @@ export function StandardPostForm({
                 )}
               />
             </TabsContent>
-            <TabsContent value="preview" className={`!min-h-[70px]`}>
+            <TabsContent value="preview" className={`min-h-[70px]!`}>
               {content.trim().length === 0 ? (
                 <Text>Nothing to preview</Text>
               ) : (
