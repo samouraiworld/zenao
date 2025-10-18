@@ -18,7 +18,7 @@ require (
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/goware/prefixer v0.0.0-20160118172347-395022866408
 	github.com/multiformats/go-multiaddr v0.15.0
-	github.com/resend/resend-go/v2 v2.14.0
+	github.com/resend/resend-go/v2 v2.27.0
 	github.com/ringsaturn/tzf v0.16.1
 	github.com/rs/cors v1.11.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
