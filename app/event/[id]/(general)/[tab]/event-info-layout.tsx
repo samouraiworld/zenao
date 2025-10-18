@@ -9,7 +9,6 @@ import React from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
-import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import { useEventPassword } from "@/components/providers/event-password-provider";
@@ -25,6 +24,7 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import EventParticipationInfo from "@/components/features/event/event-participation-info";
 import { EventImage } from "@/components/features/event/event-image";
+import { locationTimezone } from "@/lib/determine-timezone";
 
 interface EventSectionProps {
   title: string;
@@ -60,7 +60,7 @@ export function EventInfoLayout({
   );
 
   const location = makeLocationFromEvent(data.location);
-  const timezone = useLocationTimezone(location);
+  const timezone = locationTimezone(location);
 
   const t = useTranslations("event");
 
