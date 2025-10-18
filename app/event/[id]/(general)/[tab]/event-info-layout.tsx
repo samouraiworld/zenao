@@ -3,12 +3,14 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { fromUnixTime } from "date-fns";
+import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import React from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
+import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import { useEventPassword } from "@/components/providers/event-password-provider";
@@ -24,7 +26,6 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import EventParticipationInfo from "@/components/features/event/event-participation-info";
 import { EventImage } from "@/components/features/event/event-image";
-import { useLocationTimezone } from "@/hooks/use-location-timezone";
 
 interface EventSectionProps {
   title: string;
@@ -48,7 +49,6 @@ export function EventInfoLayout({
   eventId: string;
   children: React.ReactNode;
 }) {
-  const format = useFormatter();
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { password } = useEventPassword();
   const { data } = useSuspenseQuery(eventOptions(eventId));
@@ -108,19 +108,13 @@ export function EventInfoLayout({
             <Calendar width={iconSize} height={iconSize} />
             <div className="flex flex-col">
               <Heading level={2} size="xl">
-                {format.dateTime(fromUnixTime(Number(data.startDate)), {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  weekday: "long",
+                {formatTZ(fromUnixTime(Number(data.startDate)), "PPP", {
                   timeZone: timezone,
                 })}
               </Heading>
               <div className="flex flex-row text-sm gap-1">
                 <Text variant="secondary" size="sm">
-                  {format.dateTime(fromUnixTime(Number(data.startDate)), {
-                    hour: "numeric",
-                    minute: "2-digit",
+                  {formatTZ(fromUnixTime(Number(data.startDate)), "p", {
                     timeZone: timezone,
                   })}
                 </Text>
@@ -128,14 +122,7 @@ export function EventInfoLayout({
                   -
                 </Text>
                 <Text variant="secondary" size="sm">
-                  {format.dateTime(fromUnixTime(Number(data.endDate)), {
-                    month: "short",
-                    day: "numeric",
-                    weekday: "short",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                    timeZoneName: "short",
+                  {formatTZ(fromUnixTime(Number(data.endDate)), "PPp O", {
                     timeZone: timezone,
                   })}
                 </Text>
