@@ -11,7 +11,6 @@ import { Card } from "../../widgets/cards/card";
 import { UserAvatarWithName } from "../user/user";
 import { EventImage } from "./event-image";
 import { makeLocationFromEvent } from "@/lib/location";
-import { determineTimezone } from "@/lib/determine-timezone";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { useLocationTimezone } from "@/hooks/use-location-timezone";
 
