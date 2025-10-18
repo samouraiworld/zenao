@@ -11,8 +11,9 @@ import { Card } from "../../widgets/cards/card";
 import { UserAvatarWithName } from "../user/user";
 import { EventImage } from "./event-image";
 import { makeLocationFromEvent } from "@/lib/location";
-import { determineTimezone } from "@/lib/determine-timezone";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
+import { locationTimezone } from "@/lib/event-location";
 
 const EventDateTime = ({
   startDate,
@@ -33,7 +34,8 @@ const EventDateTime = ({
 export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
   const location = makeLocationFromEvent(evt.location);
-  const timezone = determineTimezone(location);
+  const eventTimezone = locationTimezone(location);
+  const timezone = useLayoutTimezone(eventTimezone);
   const t = useTranslations("event");
 
   const locationString =

@@ -3,7 +3,6 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import {
   Carousel,
   CarouselContent,
@@ -17,6 +16,8 @@ import { makeLocationFromEvent } from "@/lib/location";
 import { eventOptions } from "@/lib/queries/event";
 import { eventTickets } from "@/lib/queries/ticket";
 import { TicketCard } from "@/components/features/ticket/ticket-card";
+import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
+import { locationTimezone } from "@/lib/event-location";
 
 type TicketsInfoProps = {
   id: string;
@@ -28,7 +29,8 @@ export function TicketsInfo({ id }: TicketsInfoProps) {
   const { data: tickets } = useSuspenseQuery(eventTickets(id, getToken));
 
   const location = makeLocationFromEvent(event.location);
-  const timezone = useLocationTimezone(location);
+  const eventTimezone = locationTimezone(location);
+  const timezone = useLayoutTimezone(eventTimezone);
 
   const t = useTranslations("tickets");
 

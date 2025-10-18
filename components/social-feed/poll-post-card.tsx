@@ -1,10 +1,10 @@
 "use client";
 
-import { formatDistanceToNowStrict, fromUnixTime, isAfter } from "date-fns";
+import { formatDistanceStrict, fromUnixTime, isAfter } from "date-fns";
 import { useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
+import { useNow, useTranslations } from "next-intl";
 import { PostCardLayout } from "./post-card-layout";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import Text from "@/components/widgets/texts/text";
@@ -55,7 +55,7 @@ export function PollPostCard({
   const { votePoll, isPending } = useVotePoll(queryClient);
   // const { reactPost, isPending: isReacting } = useReactPost();
 
-  const now = new Date();
+  const now = useNow();
   const endTime =
     Number(pollPost.poll.createdAt) + Number(pollPost.poll.duration);
   const isPollEnded = isAfter(now, new Date(endTime * 1000));
@@ -65,7 +65,7 @@ export function PollPostCard({
   );
   const remainingTimeText = isPollEnded
     ? "Ended"
-    : `${formatDistanceToNowStrict(fromUnixTime(Number(endTime)))} remaining`;
+    : `${formatDistanceStrict(now, fromUnixTime(Number(endTime)))} remaining`;
 
   const onVote = async (option: string) => {
     try {
