@@ -2,10 +2,9 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { format, fromUnixTime } from "date-fns";
-import { format as formatTZ } from "date-fns-tz";
+import { fromUnixTime } from "date-fns";
 import { Calendar } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import React from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
@@ -49,6 +48,7 @@ export function EventInfoLayout({
   eventId: string;
   children: React.ReactNode;
 }) {
+  const format = useFormatter();
   const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { password } = useEventPassword();
   const { data } = useSuspenseQuery(eventOptions(eventId));
@@ -108,17 +108,34 @@ export function EventInfoLayout({
             <Calendar width={iconSize} height={iconSize} />
             <div className="flex flex-col">
               <Heading level={2} size="xl">
-                {format(fromUnixTime(Number(data.startDate)), "PPP")}
+                {format.dateTime(fromUnixTime(Number(data.startDate)), {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  weekday: "long",
+                  timeZone: timezone,
+                })}
               </Heading>
               <div className="flex flex-row text-sm gap-1">
                 <Text variant="secondary" size="sm">
-                  {format(fromUnixTime(Number(data.startDate)), "p")}
+                  {format.dateTime(fromUnixTime(Number(data.startDate)), {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    timeZone: timezone,
+                  })}
                 </Text>
                 <Text variant="secondary" size="sm">
                   -
                 </Text>
                 <Text variant="secondary" size="sm">
-                  {formatTZ(fromUnixTime(Number(data.endDate)), "PPp O", {
+                  {format.dateTime(fromUnixTime(Number(data.endDate)), {
+                    month: "short",
+                    day: "numeric",
+                    weekday: "short",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    timeZoneName: "short",
                     timeZone: timezone,
                   })}
                 </Text>
