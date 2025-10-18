@@ -1,11 +1,8 @@
 import { notFound } from "next/navigation";
-import { format as formatTZ } from "date-fns-tz";
-import { useTranslations } from "next-intl";
+import { PostPublishedAt } from "./post-published-at";
 import { getPostContent, getPostsMetadata } from "@/lib/blog";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import Text from "@/components/widgets/texts/text";
-import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -28,18 +25,6 @@ export async function generateMetadata({ params }: Props) {
     description: post?.data.description,
   };
 }
-
-const PostPublishedAt = ({ publishedAt }: { publishedAt: Date }) => {
-  const t = useTranslations("blog");
-  const timeZone = useLayoutTimezone();
-
-  return (
-    <Text className="self-start text-gray-500">
-      {t("publishedAt")}:{" "}
-      {formatTZ(new Date(publishedAt), "dd-MM-yyyy", { timeZone })}
-    </Text>
-  );
-};
 
 export default async function Post({ params }: Props) {
   const { slug } = await params;
