@@ -15,5 +15,5 @@ export const useLocationTimezone = (
     setClientTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   }, [eventTimezone]);
 
-  return eventTimezone || clientTimezone;
+  return eventTimezone || clientTimezone || "UTC";
 };

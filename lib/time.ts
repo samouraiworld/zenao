@@ -3,7 +3,8 @@ export function dateToUnixSeconds(d: Date) {
 }
 
 /**
- * @deprecated this is a source of hydration mismatch use next-intl utilities instead
+ * Returns the context's timezone, on the client it will be the browser timezone, on the server, the server's timezone.
+ * This is a common source of hydration mismatch, it should only be used on the client side aka NOT during SSR.
  */
 export function currentTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;

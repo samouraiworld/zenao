@@ -13,6 +13,7 @@ import { EventImage } from "./event-image";
 import { makeLocationFromEvent } from "@/lib/location";
 import { determineTimezone } from "@/lib/determine-timezone";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { useLocationTimezone } from "@/hooks/use-location-timezone";
 
 const EventDateTime = ({
   startDate,
@@ -33,7 +34,7 @@ const EventDateTime = ({
 export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const iconSize = 16;
   const location = makeLocationFromEvent(evt.location);
-  const timezone = determineTimezone(location);
+  const timezone = useLocationTimezone(location);
   const t = useTranslations("event");
 
   const locationString =
