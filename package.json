@@ -96,6 +96,7 @@
     "@clerk/testing": "^1.13.7",
     "@eslint/eslintrc": "^3",
     "@react-email/preview-server": "^4.3.1",
+    "@tailwindcss/postcss": "^4.1.14",
     "@types/geobuf": "^3.0.4",
     "@types/leaflet": "^1.9.16",
     "@types/node": "^24.8.1",
