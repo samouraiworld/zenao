@@ -192,7 +192,7 @@ describe("main", () => {
     cy.get("p")
       .contains("Don’t miss out—RSVP now and bring your testing A-game!")
       .should("be.visible"); // desc
-    cy.get("h2").contains(" 13th, ").should("be.visible"); // start date
+    cy.get("h2").contains(" 13, ").should("be.visible"); // start date
     cy.get("p").contains(" 14, ").should("be.visible"); // end date
 
     cy.get("button").contains("Register").should("be.visible");
