@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from "react";
-import { locationTimezone } from "@/lib/determine-timezone";
+import { locationTimezone } from "@/lib/event-location";
 import { EventFormSchemaType } from "@/types/schemas";
 
 export const useLocationTimezone = (
@@ -15,5 +15,5 @@ export const useLocationTimezone = (
     setClientTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   }, [eventTimezone]);
 
-  return eventTimezone || clientTimezone || "UTC";
+  return eventTimezone || clientTimezone || "Etc/UTC";
 };

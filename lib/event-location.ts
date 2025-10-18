@@ -1,7 +1,6 @@
 import GeoTZFind from "tz-lookup";
 import { EventFormSchemaType } from "@/types/schemas";
 
-// use this to conditionally pass timezone in next-intl formatter and ensure no hydration mismatch
 export const locationTimezone = (location: EventFormSchemaType["location"]) => {
   switch (location.kind) {
     case "custom":
