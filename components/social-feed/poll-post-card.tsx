@@ -4,7 +4,7 @@ import { formatDistanceStrict, fromUnixTime, isAfter } from "date-fns";
 import { useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useNow, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { PostCardLayout } from "./post-card-layout";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";
 import Text from "@/components/widgets/texts/text";
@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useVotePoll } from "@/lib/mutations/social-feed";
 import { Button } from "@/components/shadcn/button";
 import { profileOptions } from "@/lib/queries/profile";
+import { useLayoutNow } from "@/hooks/use-layout-now";
 
 export function PollPostCard({
   pollId,
@@ -55,7 +56,7 @@ export function PollPostCard({
   const { votePoll, isPending } = useVotePoll(queryClient);
   // const { reactPost, isPending: isReacting } = useReactPost();
 
-  const now = useNow();
+  const now = useLayoutNow();
   const endTime =
     Number(pollPost.poll.createdAt) + Number(pollPost.poll.duration);
   const isPollEnded = isAfter(now, new Date(endTime * 1000));
