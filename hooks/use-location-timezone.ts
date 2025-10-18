@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
-import { determineTimezone } from "@/lib/determine-timezone";
-import { currentTimezone } from "@/lib/time";
+import { useLayoutEffect, useState } from "react";
+import { locationTimezone } from "@/lib/determine-timezone";
 import { EventFormSchemaType } from "@/types/schemas";
 
 export const useLocationTimezone = (
   location: EventFormSchemaType["location"],
 ) => {
-  const [timezone, setTimezone] = useState<string>(currentTimezone());
+  const eventTimezone = locationTimezone(location);
+  const [clientTimezone, setClientTimezone] = useState<string>();
 
-  useEffect(() => {
-    setTimezone(determineTimezone(location));
-  }, [location]);
+  useLayoutEffect(() => {
+    if (eventTimezone) {
+      return;
+    }
+    setClientTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  }, [eventTimezone]);
 
-  return timezone;
+  return eventTimezone || clientTimezone;
 };

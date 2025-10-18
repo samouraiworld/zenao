@@ -24,7 +24,7 @@ import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import EventParticipationInfo from "@/components/features/event/event-participation-info";
 import { EventImage } from "@/components/features/event/event-image";
-import { locationTimezone } from "@/lib/determine-timezone";
+import { useLocationTimezone } from "@/hooks/use-location-timezone";
 
 interface EventSectionProps {
   title: string;
@@ -60,7 +60,7 @@ export function EventInfoLayout({
   );
 
   const location = makeLocationFromEvent(data.location);
-  const timezone = locationTimezone(location);
+  const timezone = useLocationTimezone(location);
 
   const t = useTranslations("event");
 
