@@ -227,6 +227,10 @@ export default async function RootLayout({
   // side is the easiest way to get started
   const messages = await getMessages();
 
+  // this is used to ensure next-intl's `useNow` returns the same value on server and client
+  // to update the client to latest now, use `useLayoutNow`
+  const contextNow = new Date();
+
   const health = await zenaoClient.health({});
   if (health.maintenance) {
     return (
@@ -258,7 +262,10 @@ export default async function RootLayout({
                   disableTransitionOnChange
                 >
                   <TooltipProvider>
-                    <NextIntlClientProvider messages={messages}>
+                    <NextIntlClientProvider
+                      messages={messages}
+                      now={contextNow}
+                    >
                       <NextTopLoader showSpinner={false} color="#EC7E17" />
                       <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
                         <Header />

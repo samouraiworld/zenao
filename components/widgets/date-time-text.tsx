@@ -3,9 +3,9 @@
 import { fromUnixTime, formatDistanceStrict } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import React, { useState } from "react";
-import { useNow } from "next-intl";
 import Text, { type TextProps } from "@/components/widgets/texts/text";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
+import { useLayoutNow } from "@/hooks/use-layout-now";
 
 interface DateTimeTextProps extends Omit<TextProps, "children"> {
   datetime: bigint;
@@ -15,7 +15,7 @@ interface DateTimeTextProps extends Omit<TextProps, "children"> {
 export function DateTimeText({ datetime, ...textProps }: DateTimeTextProps) {
   const [isFullDatetime, setIsFullDatetime] = useState(false);
   const timeZone = useLayoutTimezone();
-  const now = useNow();
+  const now = useLayoutNow();
   return (
     <div
       className="cursor-pointer hover:opacity-50"
