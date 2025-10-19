@@ -387,4 +387,4 @@ require (
 )
 
 // we use a forked version of protojson to match protoc-gen-es types
-replace google.golang.org/protobuf => github.com/samouraiworld/protobuf-go v0.0.0-20250213010339-3121799f7de8
+replace google.golang.org/protobuf => github.com/samouraiworld/protobuf-go v0.0.0-20251019102754-003ac92f26ee
