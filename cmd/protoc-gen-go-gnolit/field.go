@@ -14,10 +14,6 @@ import (
 //
 // Ported from protogen
 func fieldToLit(prefix string, g *protogen.GeneratedFile, field *protogen.Field) {
-	if field.Desc.IsWeak() {
-		panic("weak fields not supported")
-	}
-
 	parentTypeName := field.Parent.Desc.Name()
 	parentReceiver := strings.ToLower(string(parentTypeName[0]))
 	receiver := parentReceiver + "." + field.GoName
@@ -127,10 +123,6 @@ func isASCIILower(c byte) bool {
 //
 // Ported from protogen
 func fieldGnoType(g *protogen.GeneratedFile, field *protogen.Field) (goType string, pointer bool) {
-	if field.Desc.IsWeak() {
-		return "struct{}", false
-	}
-
 	pointer = field.Desc.HasPresence()
 	switch field.Desc.Kind() {
 	case protoreflect.BoolKind:

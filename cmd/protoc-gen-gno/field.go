@@ -16,10 +16,6 @@ import (
 //
 // Ported from protogen
 func fieldGnoType(g *protogen.GeneratedFile, field *protogen.Field) (goType string, pointer bool) {
-	if field.Desc.IsWeak() {
-		return "struct{}", false
-	}
-
 	pointer = field.Desc.HasPresence()
 	switch field.Desc.Kind() {
 	case protoreflect.BoolKind:
@@ -71,9 +67,6 @@ func fieldToJSON(fieldsObjName string, prefix string, g *protogen.GeneratedFile,
 		return
 	}
 
-	if field.Desc.IsWeak() {
-		panic("weak fields not supported")
-	}
 	if field.Desc.IsMap() {
 		panic("map not supported")
 	}
@@ -146,9 +139,6 @@ func fieldFromJSON(prefix string, g *protogen.GeneratedFile, field *protogen.Fie
 		return
 	}
 
-	if field.Desc.IsWeak() {
-		panic("weak fields not supported")
-	}
 	if field.Desc.IsMap() {
 		panic("map not supported")
 		/*
