@@ -26,9 +26,9 @@ function extractVimeoId(url: string): string | null {
   try {
     url = url.trim();
 
-    // If the value is just digits, assume it's the ID
+    // If the value is just digits, don't assume it's the ID
     const justDigits = url.match(/^\d+$/);
-    if (justDigits) return justDigits[0];
+    if (justDigits) return null;
 
     // Capture Vimeo ID from common URL forms:
     // - https://vimeo.com/12345678
@@ -78,6 +78,7 @@ export const remarkVimeoEmbed: Plugin<[RemarkVimeoEmbedOptions?], Root> = (
       if (!url) return;
 
       const id = extractVimeoId(url);
+
       if (!id) return;
 
       const src = `https://player.vimeo.com/video/${id}`;
