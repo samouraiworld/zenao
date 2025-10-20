@@ -60,6 +60,7 @@ function GatekeeperManagementForm({
   const t = useTranslations("gatekeeper-management-dialog");
   const internalForm = useForm<EmailSchemaType>({
     mode: "all",
+    reValidateMode: "onChange",
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "" },
   });
@@ -69,8 +70,10 @@ function GatekeeperManagementForm({
     internalForm.reset();
   };
 
-  const isAddButtonEnabled =
-    internalForm.formState.isValid && internalForm.formState.isDirty;
+  const isAddButtonEnabled = useMemo(
+    () => internalForm.formState.isValid && internalForm.formState.isDirty,
+    [internalForm.formState.isValid, internalForm.formState.isDirty],
+  );
 
   return (
     <Form {...internalForm}>
