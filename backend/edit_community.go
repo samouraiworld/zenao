@@ -95,11 +95,13 @@ func validateCommunity(name, description, avatarURI, bannerURI string) error {
 	if _, err := url.Parse(avatarURI); err != nil {
 		return fmt.Errorf("invalid avatar URI: %w", err)
 	}
-	if len(bannerURI) == 0 || len(bannerURI) > 400 {
-		return errors.New("banner URI must be length 1 to 400")
+	if len(bannerURI) > 400 {
+		return errors.New("banner URI must be length lte 400")
 	}
-	if _, err := url.Parse(bannerURI); err != nil {
-		return fmt.Errorf("invalid banner URI: %w", err)
+	if len(bannerURI) > 0 {
+		if _, err := url.Parse(bannerURI); err != nil {
+			return fmt.Errorf("invalid banner URI: %w", err)
+		}
 	}
 	return nil
 }
