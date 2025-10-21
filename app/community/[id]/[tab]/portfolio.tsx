@@ -124,10 +124,6 @@ export default function CommunityPortfolio({
 
       await editCommunity({
         ...community,
-        bannerUri:
-          community.bannerUri.length > 0
-            ? community.bannerUri
-            : "ipfs://bafybeib2gyk2yagrcdrnhpgbaj6an6ghk2liwx2mshhoa6d54y2mheny24",
         communityId,
         administrators,
         token,
