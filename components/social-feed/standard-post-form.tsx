@@ -236,6 +236,7 @@ export function StandardPostForm({
                   isEditing={!!isEditing}
                   setFeedInputMode={setFeedInputMode}
                   isLoading={isLoading}
+                  isDisabled={uploading || isLoading}
                 />
               </div>
             </div>
