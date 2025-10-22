@@ -1,12 +1,16 @@
 import { useAuth } from "@clerk/clerk-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { useToast } from "./use-toast";
 import { useEditStandardPost } from "@/lib/mutations/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
 import { FeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
 
 function useFeedPostEditHandler(feedId: string) {
+  const t = useTranslations();
   const { getToken, userId } = useAuth();
+  const { toast } = useToast();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -36,6 +40,10 @@ function useFeedPostEditHandler(feedId: string) {
       });
     } catch (error) {
       captureException(error);
+      toast({
+        variant: "destructive",
+        title: t("toast-post-edit-error"),
+      });
     }
   };
 
