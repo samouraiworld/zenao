@@ -23,6 +23,9 @@ func EventSKFromPasswordHash(passwordHash string) (ed25519.PrivateKey, error) {
 }
 
 func EventPrivacyFromPasswordHash(passwordHash string) (*zenaov1.EventPrivacy, ed25519.PrivateKey, error) {
+	if passwordHash == "" {
+		return &zenaov1.EventPrivacy{EventPrivacy: &zenaov1.EventPrivacy_Public{Public: &zenaov1.EventPrivacyPublic{}}}, nil, nil
+	}
 	saltBz, params, err := decodeHashParams(passwordHash)
 	if err != nil {
 		return nil, nil, fmt.Errorf("decode password hash: %w", err)
