@@ -1,23 +1,23 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-import * as ed from "@noble/ed25519";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Scanner } from "@yudiel/react-qr-scanner";
-import { Loader2, RefreshCcw } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { z } from "zod";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/nextjs";
+import * as ed from "@noble/ed25519";
+import { useTranslations } from "next-intl";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { Loader2, RefreshCcw } from "lucide-react";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
-import { Button } from "@/components/shadcn/button";
-import { Skeleton } from "@/components/shadcn/skeleton";
+import { useEventCheckIn } from "@/lib/mutations/event-management";
+import { userInfoOptions } from "@/lib/queries/user";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import { useEventCheckIn } from "@/lib/mutations/event-management";
-import { eventOptions } from "@/lib/queries/event";
-import { userInfoOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
+import { eventOptions } from "@/lib/queries/event";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { Button } from "@/components/shadcn/button";
 
 type EventTicketScannerProps = {
   eventId: string;
