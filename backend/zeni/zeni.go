@@ -251,19 +251,6 @@ type DB interface {
 	CancelParticipation(eventID string, userID string) error
 	GetEventUserTicket(eventRealmID string, userRealmID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventRealmID string, userRealmID string) ([]*SoldTicket, error)
-
-	// TODO: GENTXS SPECIFIC METHODS TO DELETE LATER
-	GetAllEvents() ([]*Event, error)
-	GetEventTickets(eventID string) ([]*SoldTicket, error)
-	GetAllUsers() ([]*User, error)
-	GetAllCommunities() ([]*Community, error)
-	GetFeedByID(feedID string) (*Feed, error)
-	GetAllPosts(getDeleted bool) ([]*Post, error)
-	GetPollByPostID(postID string) (*Poll, error)
-	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
-	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
-	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
-	GetDeletedEvents() ([]*Event, error)
 }
 
 type Chain interface {

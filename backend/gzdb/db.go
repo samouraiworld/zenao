@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/samouraiworld/zenao/backend/zeni"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
@@ -21,26 +20,7 @@ type User struct {
 	gorm.Model        // this ID should be used for any database related logic (like querying)
 	AuthID     string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
 	Plan       string `gorm:"default:'free'"`
-	RealmID    string `gorm:"uniqueIndex"`
-
-	// TODO: TO DELETE
-	DisplayName string
-	Bio         string
-	AvatarURI   string
-}
-
-type EntityRole struct {
-	CreatedAt time.Time `gorm:"<-:create"`
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-
-	EntityType string `gorm:"primaryKey"` // e.g. "user", "event"
-	EntityID   uint   `gorm:"primaryKey;autoIncrement:false"`
-
-	OrgType string `gorm:"primaryKey"` // e.g. "event", "community"
-	OrgID   uint   `gorm:"primaryKey;autoIncrement:false"`
-
-	Role string `gorm:"primaryKey"`
+	RealmID    string `gorm:"uniqueIndex"` // this is the on-chain realm ID
 }
 
 type SoldTicket struct {
@@ -50,30 +30,10 @@ type SoldTicket struct {
 	EventRealmID string         `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
 	UserRealmID  string         `gorm:"not null;uniqueIndex:idx_event_user_deleted"`
 	DeletedAt    gorm.DeletedAt `gorm:"uniqueIndex:idx_event_user_deleted"`
-
-	BuyerRealmID string `gorm:"not null"`
-
-	Price  float64
-	Secret string `gorm:"uniqueIndex;not null"`
-	Pubkey string `gorm:"uniqueIndex;not null"`
-
-	//TODO: TO DELETE
-	UserID  uint
-	User    *User
-	Checkin *Checkin
-	BuyerID uint
-}
-
-// TODO: TO DELETE
-type Checkin struct {
-	// gorm.Model without ID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-
-	SoldTicketID uint `gorm:"primaryKey;not null"`
-	GatekeeperID uint
-	Signature    string
+	BuyerRealmID string         `gorm:"not null"`
+	Price        float64
+	Secret       string `gorm:"uniqueIndex;not null"`
+	Pubkey       string `gorm:"uniqueIndex;not null"`
 }
 
 func SetupDB(dsn string) (zeni.DB, error) {
@@ -238,129 +198,6 @@ func (g *gormZenaoDB) GetUsersByRealmIDs(userRealmIDs []string) ([]*zeni.User, e
 	return result, nil
 }
 
-// GetAllUsers implements zeni.DB.
-func (g *gormZenaoDB) GetAllUsers() ([]*zeni.User, error) {
-	var users []*User
-	if err := g.db.Find(&users).Error; err != nil {
-		return nil, err
-	}
-	res := make([]*zeni.User, 0, len(users))
-	for _, u := range users {
-		res = append(res, dbUserToZeniDBUser(u))
-	}
-	return res, nil
-}
-
-// GetAllEvents implements zeni.DB.
-func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
-	var events []*Event
-	if err := g.db.Find(&events).Error; err != nil {
-		return nil, err
-	}
-	res := make([]*zeni.Event, 0, len(events))
-	for _, e := range events {
-		zevt, err := dbEventToZeniEvent(e)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, zevt)
-	}
-	return res, nil
-}
-
-// GetOrgEntitiesWithRole implements zeni.DB.
-func (g *gormZenaoDB) GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*zeni.EntityRole, error) {
-	var roles []EntityRole
-	if err := g.db.
-		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ?",
-			orgType, orgID, role, entityType).
-		Find(&roles).Error; err != nil {
-		return nil, err
-	}
-	result := make([]*zeni.EntityRole, 0, len(roles))
-	for _, r := range roles {
-		result = append(result, dbEntityRoleToZeniEntityRole(&r))
-	}
-	return result, nil
-}
-
-// GetDeletedOrgEntitiesWithRole implements zeni.DB.
-func (g *gormZenaoDB) GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*zeni.EntityRole, error) {
-	var roles []EntityRole
-	if err := g.db.
-		Unscoped().
-		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ? AND deleted_at IS NOT NULL",
-			orgType, orgID, role, entityType).
-		Find(&roles).Error; err != nil {
-		return nil, err
-	}
-	result := make([]*zeni.EntityRole, 0, len(roles))
-	for _, r := range roles {
-		result = append(result, dbEntityRoleToZeniEntityRole(&r))
-	}
-	return result, nil
-}
-
-// GetDeletedTickets implements zeni.DB.
-func (g *gormZenaoDB) GetDeletedTickets(eventID string) ([]*zeni.SoldTicket, error) {
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse event id: %w", err)
-	}
-	var tickets []SoldTicket
-	if err := g.db.Unscoped().Where("event_id = ? AND deleted_at IS NOT NULL", evtIDInt).Find(&tickets).Error; err != nil {
-		return nil, err
-	}
-	res := make([]*zeni.SoldTicket, len(tickets))
-	for i, ticket := range tickets {
-		res[i], err = dbSoldTicketToZeniSoldTicket(&ticket)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-// GetDeletedEvents implements zeni.DB.
-func (g *gormZenaoDB) GetDeletedEvents() ([]*zeni.Event, error) {
-	var events []Event
-	if err := g.db.Unscoped().Where("deleted_at IS NOT NULL").Find(&events).Error; err != nil {
-		return nil, err
-	}
-	res := make([]*zeni.Event, 0, len(events))
-	for _, e := range events {
-		zevt, err := dbEventToZeniEvent(&e)
-		if err != nil {
-			return nil, fmt.Errorf("convert db event to zeni event: %w", err)
-		}
-		res = append(res, zevt)
-	}
-	return res, nil
-}
-
-// GetEventTickets implements zeni.DB.
-func (g *gormZenaoDB) GetEventTickets(eventID string) ([]*zeni.SoldTicket, error) {
-	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse event id: %w", err)
-	}
-
-	tickets := []*SoldTicket{}
-	if err := g.db.Preload("Checkin").Preload("User").Find(&tickets, "event_id = ?", evtIDInt).Error; err != nil {
-		return nil, err
-	}
-
-	res := make([]*zeni.SoldTicket, len(tickets))
-	for i, ticket := range tickets {
-		res[i], err = dbSoldTicketToZeniSoldTicket(ticket)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return res, nil
-}
-
 // GetEventUserTicket implements zeni.DB.
 func (g *gormZenaoDB) GetEventUserTicket(eventRealmID string, userRealmID string) (*zeni.SoldTicket, error) {
 	var ticket *SoldTicket
@@ -394,93 +231,6 @@ func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventRealmID string, userRealmI
 	return res, nil
 }
 
-func (g *gormZenaoDB) EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error) {
-	var roles []EntityRole
-
-	if err := g.db.
-		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND org_id = ?",
-			entityType, entityID, orgType, orgID).
-		Find(&roles).Error; err != nil {
-		return nil, err
-	}
-
-	res := make([]string, 0, len(roles))
-	for _, role := range roles {
-		res = append(res, role.Role)
-	}
-
-	return res, nil
-}
-
-// GetAllCommunities implements zeni.DB.
-func (g *gormZenaoDB) GetAllCommunities() ([]*zeni.Community, error) {
-	var communities []*Community
-	if err := g.db.Find(&communities).Error; err != nil {
-		return nil, err
-	}
-	res := make([]*zeni.Community, 0, len(communities))
-	for _, c := range communities {
-		zcmt, err := dbCommunityToZeniCommunity(c)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, zcmt)
-	}
-	return res, nil
-}
-
-// GetFeedByID implements zeni.DB.
-func (g *gormZenaoDB) GetFeedByID(feedID string) (*zeni.Feed, error) {
-	var feed Feed
-	if err := g.db.Where("id = ?", feedID).First(&feed).Error; err != nil {
-		return nil, err
-	}
-
-	zfeed, err := dbFeedToZeniFeed(&feed)
-	if err != nil {
-		return nil, err
-	}
-	return zfeed, nil
-}
-
-// GetAllPosts implements zeni.DB.
-func (g *gormZenaoDB) GetAllPosts(getDeleted bool) ([]*zeni.Post, error) {
-	db := g.db
-	if getDeleted {
-		db = db.Unscoped()
-	}
-
-	var posts []*Post
-	if err := db.Preload("Reactions").Preload("Tags").Find(&posts).Error; err != nil {
-		return nil, err
-	}
-
-	res := make([]*zeni.Post, 0, len(posts))
-	for _, p := range posts {
-		zpost, err := dbPostToZeniPost(p)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, zpost)
-	}
-
-	return res, nil
-}
-
-func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
-	postIDint, err := strconv.ParseUint(postID, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-
-	var poll Poll
-	if err := g.db.Where("post_id = ?", postIDint).Preload("Results").Preload("Results.Votes").First(&poll).Error; err != nil {
-		return nil, err
-	}
-
-	return dbPollToZeniPoll(&poll)
-}
-
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	return &zeni.User{
 		ID:        fmt.Sprintf("%d", dbuser.ID),
@@ -491,32 +241,14 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 	}
 }
 
-func dbEntityRoleToZeniEntityRole(dbrole *EntityRole) *zeni.EntityRole {
-	er := &zeni.EntityRole{
-		CreatedAt:  dbrole.CreatedAt,
-		EntityType: dbrole.EntityType,
-		EntityID:   fmt.Sprintf("%d", dbrole.EntityID),
-		OrgType:    dbrole.OrgType,
-		OrgID:      fmt.Sprintf("%d", dbrole.OrgID),
-		Role:       dbrole.Role,
-	}
-	if dbrole.DeletedAt.Valid {
-		er.DeletedAt = dbrole.DeletedAt.Time
-	}
-	return er
-}
-
 func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) {
 	tickobj, err := zeni.NewTicketFromSecret(dbtick.Secret)
 	if err != nil {
 		return nil, err
 	}
 	ticket := &zeni.SoldTicket{
-		Ticket: tickobj,
-		//TODO: TO DELETE
-		BuyerID:   fmt.Sprint(dbtick.BuyerID),
-		CreatedAt: dbtick.CreatedAt,
-
+		Ticket:       tickobj,
+		CreatedAt:    dbtick.CreatedAt,
 		BuyerRealmID: dbtick.BuyerRealmID,
 		UserRealmID:  dbtick.UserRealmID,
 		EventRealmID: dbtick.EventRealmID,
