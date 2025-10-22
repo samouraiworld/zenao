@@ -375,10 +375,6 @@ func (g *gnoZenaoChain) GetEventCommunity(eventRealmID string) (*zenaov1.Communi
 	if len(list) == 0 {
 		return nil, nil
 	}
-	if len(list) > 1 {
-		return nil, errors.New("there is multiple communities for this event, should not happen for now")
-	}
-
 	return list[0], nil
 }
 
