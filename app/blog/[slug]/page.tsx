@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
-import { format } from "date-fns";
-import { useTranslations } from "next-intl";
+import { PostPublishedAt } from "./post-published-at";
 import { getPostContent, getPostsMetadata } from "@/lib/blog";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import Text from "@/components/widgets/texts/text";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -27,16 +25,6 @@ export async function generateMetadata({ params }: Props) {
     description: post?.data.description,
   };
 }
-
-const PostPublishedAt = ({ publishedAt }: { publishedAt: Date }) => {
-  const t = useTranslations("blog");
-
-  return (
-    <Text className="self-start text-gray-500">
-      {t("publishedAt")}: {format(new Date(publishedAt), "dd-MM-yyyy")}
-    </Text>
-  );
-};
 
 export default async function Post({ params }: Props) {
   const { slug } = await params;

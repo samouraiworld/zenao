@@ -21,7 +21,6 @@ import EventFormCommunitySelector from "./event-form-community-selector";
 import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 import { cn } from "@/lib/tailwind";
-import { useLocationTimezone } from "@/hooks/use-location-timezone";
 import { useToast } from "@/hooks/use-toast";
 import useMarkdownUpload from "@/hooks/use-markdown-upload";
 import { FormFieldDatePicker } from "@/components/widgets/form/form-field-date-picker";
@@ -37,6 +36,8 @@ import { EventFormSchemaType } from "@/types/schemas";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import Heading from "@/components/widgets/texts/heading";
+import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
+import { locationTimezone } from "@/lib/event-location";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -74,7 +75,8 @@ export const EventForm: React.FC<EventFormProps> = ({
     null,
   );
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
-  const timeZone = useLocationTimezone(location);
+  const eventTimezone = locationTimezone(location);
+  const timeZone = useLayoutTimezone(eventTimezone);
 
   // Upload
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
