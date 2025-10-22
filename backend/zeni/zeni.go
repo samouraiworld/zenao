@@ -67,7 +67,6 @@ type AuthUser struct {
 	Banned bool
 }
 
-// TODO: what we do with this
 type User struct {
 	CreatedAt   time.Time
 	ID          string
@@ -281,12 +280,10 @@ type Chain interface {
 
 	GetUser(userRealmID string) (displayName string, Bio string, ImageUri string, err error)
 
-	// TODO: what happens if event not found ? should i just return empty cmt & empty err or err handle it ?
 	GetEvent(eventRealmID string) (*zenaov1.EventInfo, error)
 	GetEventUsersByRole(eventRealmID string, role string) ([]string, error)
 	GetEventCommunity(eventRealmID string) (*zenaov1.CommunityInfo, error)
 
-	// TODO: what happens if community not found ? should i just return empty cmt & empty err or err handle it ?
 	GetCommunity(communityRealmID string) (*zenaov1.CommunityInfo, error)
 	GetCommunityUsersByRole(communityRealmID string, role string) ([]string, error)
 

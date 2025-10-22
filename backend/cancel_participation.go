@@ -31,13 +31,8 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 	userRealmID := s.Chain.UserRealmID(zUser.ID)
 
 	var ticket *zeni.SoldTicket
-	if err := s.DB.TxWithSpan(ctx, "db.CancelParticipation", func(tx zeni.DB) error {
-		ticket, err = tx.GetEventUserTicket(evtRealmID, userRealmID)
-		if err != nil {
-			return err
-		}
-		return tx.CancelParticipation(evtRealmID, userRealmID)
-	}); err != nil {
+	ticket, err = s.DB.GetEventUserTicket(evtRealmID, userRealmID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -46,8 +41,11 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 		return nil, err
 	}
 
-	// TODO: how to handle if chain fail but not db already deleted the ticket ?????
 	if err := s.Chain.WithContext(ctx).CancelParticipation(evtRealmID, evt.Organizers[0], userRealmID, ticket.Ticket.Pubkey()); err != nil {
+		return nil, err
+	}
+
+	if err := s.DB.CancelParticipation(evtRealmID, userRealmID); err != nil {
 		return nil, err
 	}
 

@@ -120,20 +120,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 	}
 
-	// XXX: should i do operations in db after tx since chain should be the source of truth?
-	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
-		for i, ticket := range tickets {
-			// XXX: support batch
-			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
-			if err := tx.Participate(evtRealmID, buyerRealmID, participantRealmID, ticket.Secret()); err != nil {
-				return err
-			}
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
 	for i, ticket := range tickets {
 		// XXX: support batch, this might be very very slow
 		// XXX: callerID should be the current user and not creator,
@@ -155,6 +141,19 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				return nil, err
 			}
 		}
+	}
+
+	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
+		for i, ticket := range tickets {
+			// XXX: support batch
+			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
+			if err := tx.Participate(evtRealmID, buyerRealmID, participantRealmID, ticket.Secret()); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
 	wg := sync.WaitGroup{}
