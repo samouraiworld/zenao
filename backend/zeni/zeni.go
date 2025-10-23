@@ -246,7 +246,7 @@ type DB interface {
 
 	PromoteUser(userID string, plan Plan) error
 
-	Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error
+	Participate(buyerID string, userID string, eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error
 	CancelParticipation(eventID string, userID string) error
 	GetEventUserTicket(eventRealmID string, userRealmID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventRealmID string, userRealmID string) ([]*SoldTicket, error)

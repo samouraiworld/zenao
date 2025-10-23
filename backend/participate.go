@@ -147,7 +147,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		for i, ticket := range tickets {
 			// XXX: support batch
 			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
-			if err := tx.Participate(evtRealmID, buyerRealmID, participantRealmID, ticket.Secret()); err != nil {
+			if err := tx.Participate(buyer.ID, participants[i].ID, evtRealmID, buyerRealmID, participantRealmID, ticket.Secret()); err != nil {
 				return err
 			}
 		}

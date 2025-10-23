@@ -150,7 +150,15 @@ func (g *gormZenaoDB) CreateUser(authID string, realmIDPrefix string) (*zeni.Use
 }
 
 // Participate implements zeni.DB.
-func (g *gormZenaoDB) Participate(eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error {
+func (g *gormZenaoDB) Participate(buyerID string, userID string, eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error {
+	buyerIDInt, err := strconv.ParseUint(buyerID, 10, 64)
+	if err != nil {
+		return err
+	}
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return err
+	}
 	g, span := g.trace("gzdb.Participate")
 	defer span.End()
 
@@ -165,6 +173,8 @@ func (g *gormZenaoDB) Participate(eventRealmID string, buyerRealmID string, user
 		BuyerRealmID: buyerRealmID,
 		Secret:       ticket.Secret(),
 		Pubkey:       ticket.Pubkey(),
+		UserID:       uint(userIDInt),
+		BuyerID:      uint(buyerIDInt),
 	}).Error; err != nil {
 		return err
 	}
