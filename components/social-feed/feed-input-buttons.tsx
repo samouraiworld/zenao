@@ -12,12 +12,14 @@ export function FeedInputButtons({
   isLoading = false,
   isReplying = false,
   isEditing = false,
+  isDisabled = false,
 }: {
   feedInputMode: FeedInputMode;
   isReplying: boolean;
   setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
   isLoading?: boolean;
   isEditing?: boolean;
+  isDisabled?: boolean;
 }) {
   return (
     <>
@@ -56,7 +58,7 @@ export function FeedInputButtons({
         )}
         aria-label="submit post"
         loading={isLoading}
-        disabled={isLoading}
+        disabled={isDisabled}
       >
         {isEditing ? (
           <Save className="w-5 h-5 md:!h-6 md:!w-6 dark:text-white" />
