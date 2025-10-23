@@ -646,6 +646,10 @@ table "sold_tickets" {
     null = false
     type = text
   }
+  column "event_id" {
+    null = true
+    type = integer
+  }
   column "user_id" {
     null = true
     type = integer
@@ -662,6 +666,9 @@ table "sold_tickets" {
     ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
+  }
+  index "idx_sold_tickets_event_id" {
+    columns = [column.event_id]
   }
   index "idx_sold_tickets_pubkey" {
     unique  = true

@@ -58,6 +58,7 @@ type SoldTicket struct {
 	Pubkey string `gorm:"uniqueIndex;not null"`
 
 	//TODO: TO DELETE
+	EventID uint `gorm:"index"`
 	UserID  uint
 	User    *User
 	Checkin *Checkin

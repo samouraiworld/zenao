@@ -143,6 +143,7 @@ CREATE TABLE `new_sold_tickets` (
     `price` real NULL,
     `secret` text NOT NULL,
     `pubkey` text NOT NULL,
+    `event_id` integer NULL,
     `user_id` integer NULL,
     `buyer_id` integer NULL,
     CONSTRAINT `fk_sold_tickets_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION
@@ -154,9 +155,13 @@ INSERT INTO
         `created_at`,
         `updated_at`,
         `deleted_at`,
+        `event_realm_id`,
+        `user_realm_id`,
+        `buyer_realm_id`,
         `price`,
         `secret`,
         `pubkey`,
+        `event_id`,
         `user_id`,
         `buyer_id`
     )
@@ -165,9 +170,13 @@ SELECT
     `created_at`,
     `updated_at`,
     `deleted_at`,
+    '' AS `event_realm_id`,
+    '' AS `user_realm_id`,
+    '' AS `buyer_realm_id`,
     `price`,
     `secret`,
     `pubkey`,
+    `event_id`,
     `user_id`,
     `buyer_id`
 FROM `sold_tickets`;
@@ -175,6 +184,8 @@ FROM `sold_tickets`;
 DROP TABLE `sold_tickets`;
 -- Rename temporary table "new_sold_tickets" to "sold_tickets"
 ALTER TABLE `new_sold_tickets` RENAME TO `sold_tickets`;
+-- Create index "idx_sold_tickets_event_id" to table: "sold_tickets"
+CREATE INDEX `idx_sold_tickets_event_id` ON `sold_tickets` (`event_id`);
 -- Create index "idx_sold_tickets_pubkey" to table: "sold_tickets"
 CREATE UNIQUE INDEX `idx_sold_tickets_pubkey` ON `sold_tickets` (`pubkey`);
 -- Create index "idx_sold_tickets_secret" to table: "sold_tickets"
