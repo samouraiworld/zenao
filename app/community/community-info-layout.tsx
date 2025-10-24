@@ -3,7 +3,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Organization, WithContext } from "schema-dts";
 import { ExternalLink, Link2 } from "lucide-react";
 import Link from "next/link";
-import { useMediaQuery } from "../../hooks/use-media-query";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
@@ -26,7 +25,6 @@ function CommunityInfoLayout({
   communityId,
   children,
 }: CommunityInfoLayoutProps) {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data } = useSuspenseQuery(communityInfo(communityId));
 
   const { description, shortDescription, socialMediaLinks } =
