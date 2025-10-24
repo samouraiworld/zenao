@@ -1,5 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/widgets/cards/card";
 import { communityInfo } from "@/lib/queries/community";
 import { cn } from "@/lib/tailwind";
@@ -15,6 +16,7 @@ export default function EventCommunitySection({
   communityId,
 }: EventCommunitySectionProps) {
   const { data: community } = useSuspenseQuery(communityInfo(communityId));
+  const t = useTranslations("event-community-section");
 
   return (
     <Link href={`/community/${communityId}`}>
@@ -36,7 +38,7 @@ export default function EventCommunitySection({
 
         <div className="flex flex-col">
           <Text variant="secondary" size="sm">
-            Sponsored by community
+            {t("sponsored-by")}
           </Text>
           <Text size="lg" className="font-medium">
             {community.displayName}
