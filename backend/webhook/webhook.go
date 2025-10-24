@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
+	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
 )
@@ -51,7 +53,7 @@ func SendDiscordWebhook(logger *zap.Logger, token, eventName, eventStart, eventE
 	return nil
 }
 
-func TrySendDiscordMessage(logger *zap.Logger, token string, evt *zeni.Event) {
+func TrySendDiscordMessage(logger *zap.Logger, token string, evtID string, evt *zenaov1.EventInfo) {
 	if token == "" {
 		return
 	}
@@ -62,13 +64,13 @@ func TrySendDiscordMessage(logger *zap.Logger, token string, evt *zeni.Event) {
 		return
 	}
 
-	eventURL := fmt.Sprintf("https://zenao.io/event/%s", evt.ID)
+	eventURL := fmt.Sprintf("https://zenao.io/event/%s", evtID)
 	err = SendDiscordWebhook(
 		logger,
 		token,
 		evt.Title,
-		evt.StartDate.Format("2006-01-02 15:04:05"),
-		evt.EndDate.Format("2006-01-02 15:04:05"),
+		time.Unix(int64(evt.StartDate), 0).Format("2006-01-02 15:04:05"),
+		time.Unix(int64(evt.EndDate), 0).Format("2006-01-02 15:04:05"),
 		locationStr,
 		eventURL,
 	)

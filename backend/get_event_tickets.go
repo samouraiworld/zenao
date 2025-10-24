@@ -30,8 +30,9 @@ func (s *ZenaoServer) GetEventTickets(
 	if user.Banned {
 		return nil, errors.New("user is banned")
 	}
-
-	tickets, err := s.DB.WithContext(ctx).GetEventUserOrBuyerTickets(req.Msg.EventId, zUser.ID)
+	evtRealmID := s.Chain.WithContext(ctx).EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.WithContext(ctx).UserRealmID(zUser.ID)
+	tickets, err := s.DB.WithContext(ctx).GetEventUserOrBuyerTickets(evtRealmID, userRealmID)
 	if err != nil {
 		return nil, err
 	}
@@ -41,11 +42,15 @@ func (s *ZenaoServer) GetEventTickets(
 	ticketsWithoutUser := []*zeni.SoldTicket{}
 
 	for _, tk := range tickets {
-		if tk.User == nil {
+		if tk.UserRealmID == "" {
 			ticketsWithoutUser = append(ticketsWithoutUser, tk)
 			continue
 		}
-		userIDs = append(userIDs, tk.User.AuthID)
+		user, err := s.DB.WithContext(ctx).GetUserByRealmID(tk.UserRealmID)
+		if err != nil {
+			return nil, err
+		}
+		userIDs = append(userIDs, user.AuthID)
 		ticketsWithUser = append(ticketsWithUser, tk)
 	}
 

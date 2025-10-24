@@ -882,6 +882,9 @@ func (e *EventPrivacyGuarded) ToJSON() *json.Node {
 	if e.ParticipationPubkey != "" {
 		fields["participationPubkey"] = json.StringNode("", e.ParticipationPubkey)
 	}
+	if e.HashParams != "" {
+		fields["hashParams"] = json.StringNode("", e.HashParams)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -892,6 +895,9 @@ func EventPrivacyGuardedFromJSON(e *EventPrivacyGuarded, node *json.Node) {
 
 	if val, ok := fields["participationPubkey"]; ok {
 		e.ParticipationPubkey = val.MustString()
+	}
+	if val, ok := fields["hashParams"]; ok {
+		e.HashParams = val.MustString()
 	}
 }
 
@@ -947,6 +953,9 @@ func (e *EventInfo) ToJSON() *json.Node {
 	}
 	if e.Discoverable != false {
 		fields["discoverable"] = json.BoolNode("", e.Discoverable)
+	}
+	if e.IcsSeqNumber != 0 {
+		fields["icsSeqNumber"] = json.NumberNode("", float64(e.IcsSeqNumber))
 	}
 
 	return json.ObjectNode("", fields)
@@ -1019,6 +1028,9 @@ func EventInfoFromJSON(e *EventInfo, node *json.Node) {
 	}
 	if val, ok := fields["discoverable"]; ok {
 		e.Discoverable = val.MustBool()
+	}
+	if val, ok := fields["icsSeqNumber"]; ok {
+		e.IcsSeqNumber = uint32(val.MustNumeric())
 	}
 }
 
@@ -1386,20 +1398,11 @@ func EditPostRequestFromJSON(e *EditPostRequest, node *json.Node) {
 func (e *EditPostResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if e.PostId != "" {
-		fields["postId"] = json.StringNode("", e.PostId)
-	}
-
 	return json.ObjectNode("", fields)
 }
 
 func EditPostResponseFromJSON(e *EditPostResponse, node *json.Node) {
 	*e = EditPostResponse{}
-	fields := node.MustObject()
-
-	if val, ok := fields["postId"]; ok {
-		e.PostId = val.MustString()
-	}
 }
 
 func (g *GetEventTicketsRequest) ToJSON() *json.Node {
@@ -1485,6 +1488,9 @@ func (c *CheckinRequest) ToJSON() *json.Node {
 	if c.Signature != "" {
 		fields["signature"] = json.StringNode("", c.Signature)
 	}
+	if c.EventId != "" {
+		fields["eventId"] = json.StringNode("", c.EventId)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -1498,6 +1504,9 @@ func CheckinRequestFromJSON(c *CheckinRequest, node *json.Node) {
 	}
 	if val, ok := fields["signature"]; ok {
 		c.Signature = val.MustString()
+	}
+	if val, ok := fields["eventId"]; ok {
+		c.EventId = val.MustString()
 	}
 }
 

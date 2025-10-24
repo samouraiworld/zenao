@@ -89,18 +89,10 @@ func execE2EInfra() error {
 		}
 	}
 
-	// run fakegen with --skip-chain
+	// run fakegen with --gentxs
 	{
-		args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--communities", "5", "--db", dbPath, "--skip-chain"}
+		args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--communities", "5", "--db", dbPath, "--gentxs", "--txs-file", txsPath}
 		if err := runCommand(ctx, "fakegen", "#317738", args); err != nil {
-			return err
-		}
-	}
-
-	// run gentxs
-	{
-		args := []string{"go", "run", "./backend", "gentxs", "--db", dbPath, "--output", txsPath}
-		if err := runCommand(ctx, "gentxs", "#317738", args); err != nil {
 			return err
 		}
 	}
