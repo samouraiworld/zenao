@@ -62,7 +62,7 @@ function CommunityInfoLayout({
       />
 
       <div className="relative w-full">
-        <AspectRatio ratio={isDesktop ? 48 / 9 : 21 / 9}>
+        <AspectRatio ratio={4 / 1}>
           <Web3Image
             className="rounded w-full h-full self-center object-cover"
             alt="Community hero img"
