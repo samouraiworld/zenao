@@ -84,11 +84,12 @@ export const FormFieldImage = <T extends FieldValues>({
         });
       }
     } finally {
+      setUploading(false);
+
       if (hiddenInputRef.current) {
         hiddenInputRef.current.value = "";
       }
     }
-    setUploading(false);
   };
 
   const handleClick = () => {
