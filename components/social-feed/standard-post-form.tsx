@@ -93,14 +93,25 @@ export function StandardPostForm({
           form.setValue("content", text);
           textareaRef.current?.focus();
         },
+        4 * 1024 * 1024, // 4 MB limit
       );
     } catch (error) {
-      console.error("Error uploading image:", error);
       captureException(error);
-      toast({
-        variant: "destructive",
-        title: "Error uploading image.",
-      });
+      console.error("Error uploading image:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: "Image file size exceeds limit of 4 MB.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error uploading image.",
+        });
+      }
     } finally {
       if (hiddenImgInputRef.current) {
         hiddenImgInputRef.current.value = "";
@@ -117,7 +128,6 @@ export function StandardPostForm({
       });
       return;
     }
-
     try {
       await uploadMdFile(
         file,
@@ -129,14 +139,25 @@ export function StandardPostForm({
           form.setValue("content", text);
           textareaRef.current?.focus();
         },
+        4 * 1024 * 1024, // 4 MB limit
       );
     } catch (error) {
-      console.error("Error uploading audio:", error);
       captureException(error);
-      toast({
-        variant: "destructive",
-        title: "Error uploading audio.",
-      });
+      console.error("Error uploading audio:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: "Audio file size exceeds limit of 4 MB.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error uploading audio.",
+        });
+      }
     } finally {
       if (hiddenAudioInputRef.current) {
         hiddenAudioInputRef.current.value = "";
