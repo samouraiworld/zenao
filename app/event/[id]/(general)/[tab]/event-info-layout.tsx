@@ -1,12 +1,15 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
-import React from "react";
+import React, { useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
 import { EventManagementMenu } from "./event-management-menu";
 import { ParticipantsSection } from "./event-participants-section";
@@ -27,6 +30,12 @@ import EventParticipationInfo from "@/components/features/event/event-participat
 import { EventImage } from "@/components/features/event/event-image";
 import { locationTimezone } from "@/lib/event-location";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
+import {
+  communitiesListByEvent,
+  communityIdFromPkgPath,
+  DEFAULT_COMMUNITIES_LIMIT,
+} from "@/lib/queries/community";
+import EventCommunitySection from "@/components/features/event/event-community-section";
 
 interface EventSectionProps {
   title: string;
@@ -59,6 +68,19 @@ export function EventInfoLayout({
   const { data: roles } = useSuspenseQuery(
     eventUserRoles(eventId, userInfo?.realmId),
   );
+
+  const { data: communitiesPages } = useSuspenseInfiniteQuery(
+    communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
+  );
+  const communities = useMemo(
+    () => communitiesPages.pages.flat(),
+    [communitiesPages],
+  );
+
+  const communityId =
+    communities.length > 0
+      ? communityIdFromPkgPath(communities[0].pkgPath)
+      : null;
 
   const location = makeLocationFromEvent(data.location);
   const eventTimezone = locationTimezone(location);
@@ -134,6 +156,9 @@ export function EventInfoLayout({
 
           {/* Location */}
           <EventLocationSection location={location} />
+
+          {/* Community */}
+          {communityId && <EventCommunitySection communityId={communityId} />}
 
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
