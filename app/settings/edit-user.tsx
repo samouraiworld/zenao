@@ -157,6 +157,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               name="avatarUri"
               placeholder={t("avatar-placeholder")}
               aspectRatio={[4, 4]}
+              fileSizeLimit={4 * 1024 * 1024}
               className="w-full rounded-xl overflow-hidden"
               tooltip={<Text size="sm">{t("change-avatar")}</Text>}
             />
