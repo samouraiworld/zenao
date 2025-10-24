@@ -296,6 +296,9 @@
     "toast-email-sent-error": "Error while trying to send the email",
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
   },
+  "event-community-section": {
+    "sponsored-by": "Sponsored by community"
+  },
   "event-scanner": {
     "check-in-confirmation-dialog": {
       "title-success": "Ticket verified",
