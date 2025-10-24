@@ -38,6 +38,7 @@ import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import Heading from "@/components/widgets/texts/heading";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 import { locationTimezone } from "@/lib/event-location";
+import { captureException } from "@/lib/report";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -87,49 +88,97 @@ export const EventForm: React.FC<EventFormProps> = ({
     useMarkdownUpload(descriptionRef);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target?.files?.[0];
-    if (!file) {
-      toast({
-        variant: "destructive",
-        title: "No file selected.",
-      });
-      return;
-    }
+    try {
+      const file = e.target?.files?.[0];
+      if (!file) {
+        toast({
+          variant: "destructive",
+          title: "No file selected.",
+        });
+        return;
+      }
 
-    await uploadMdFile(
-      file,
-      "image",
-      (text) => {
-        form.setValue("description", text);
-      },
-      (text) => {
-        form.setValue("description", text);
-        descriptionRef.current?.focus();
-      },
-    );
+      await uploadMdFile(
+        file,
+        "image",
+        (text) => {
+          form.setValue("description", text);
+        },
+        (text) => {
+          form.setValue("description", text);
+          descriptionRef.current?.focus();
+        },
+        4 * 1024 * 1024, // 4 MB limit
+      );
+    } catch (error) {
+      captureException(error);
+      console.error("Error uploading image:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: t("error-filesize-exceeds-limit", { size: 4 }),
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: t("error-file-uploading-img"),
+        });
+      }
+    } finally {
+      if (hiddenImgInputRef.current) {
+        hiddenImgInputRef.current.value = "";
+      }
+    }
   };
 
   const handleAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target?.files?.[0];
-    if (!file) {
-      toast({
-        variant: "destructive",
-        title: "No file selected.",
-      });
-      return;
-    }
+    try {
+      const file = e.target?.files?.[0];
+      if (!file) {
+        toast({
+          variant: "destructive",
+          title: "No file selected.",
+        });
+        return;
+      }
 
-    await uploadMdFile(
-      file,
-      "audio",
-      (text) => {
-        form.setValue("description", text);
-      },
-      (text) => {
-        form.setValue("description", text);
-        descriptionRef.current?.focus();
-      },
-    );
+      await uploadMdFile(
+        file,
+        "audio",
+        (text) => {
+          form.setValue("description", text);
+        },
+        (text) => {
+          form.setValue("description", text);
+          descriptionRef.current?.focus();
+        },
+        4 * 1024 * 1024, // 4 MB limit
+      );
+    } catch (error) {
+      captureException(error);
+      console.error("Error uploading audio:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: t("error-filesize-exceeds-limit", { size: 4 }),
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: t("error-file-uploading-audio"),
+        });
+      }
+    } finally {
+      if (hiddenAudioInputRef.current) {
+        hiddenAudioInputRef.current.value = "";
+      }
+    }
   };
 
   useEffect(() => {
