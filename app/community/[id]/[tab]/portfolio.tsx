@@ -155,7 +155,7 @@ export default function CommunityPortfolio({
 
       setIsUploading(true);
 
-      const uri = await uploadFile(files[0], 10 * 1024 * 1024); // 10 MB limit
+      const uri = await uploadFile(files[0], 4 * 1024 * 1024); // 10 MB limit
       const newItem: PortfolioItem = {
         type: fileType,
         name: files[0].name,
@@ -173,10 +173,21 @@ export default function CommunityPortfolio({
     } catch (error) {
       captureException(error);
       console.error("Upload failed", error);
-      toast({
-        title: t("error-file-uploading"),
-        variant: "destructive",
-      });
+
+      if (
+        error instanceof Error &&
+        error.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: "Image file size exceeds limit of 4 MB.",
+        });
+      } else {
+        toast({
+          title: t("error-file-uploading"),
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsUploading(false);
       if (imageFileInputRef.current) {
