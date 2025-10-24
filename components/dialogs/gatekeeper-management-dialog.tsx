@@ -58,30 +58,41 @@ function GatekeeperManagementForm({
     name: "gatekeepers",
   });
   const t = useTranslations("gatekeeper-management-dialog");
-  const internalForm = useForm<EmailSchemaType>({
+  const {
+    control,
+    reset,
+    handleSubmit,
+    formState: { isValid, isDirty, ...formState },
+    ...rest
+  } = useForm<EmailSchemaType>({
     mode: "all",
+    reValidateMode: "onChange",
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "" },
   });
 
   const onSubmit = ({ email }: EmailSchemaType) => {
     appendOption({ email });
-    internalForm.reset();
+    reset();
   };
 
-  const isAddButtonEnabled =
-    internalForm.formState.isValid && internalForm.formState.isDirty;
+  const isAddButtonEnabled = isValid && isDirty;
 
   return (
-    <Form {...internalForm}>
-      <form
-        onSubmit={internalForm.handleSubmit(onSubmit)}
-        className="flex flex-col gap-2"
-      >
+    <Form
+      {...{
+        control,
+        reset,
+        handleSubmit,
+        formState: { isDirty, isValid, ...formState },
+        ...rest,
+      }}
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
         <div className="w-full grid grid-cols-10 gap-2">
           <div className="col-span-9">
             <FormFieldInputString
-              control={internalForm.control}
+              control={control}
               name="email"
               className="w-full"
               placeholder={t("input-placeholder")}
