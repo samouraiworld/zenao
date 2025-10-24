@@ -3,7 +3,6 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Organization, WithContext } from "schema-dts";
 import { ExternalLink, Link2 } from "lucide-react";
 import Link from "next/link";
-import { useMediaQuery } from "../../hooks/use-media-query";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
@@ -26,7 +25,6 @@ function CommunityInfoLayout({
   communityId,
   children,
 }: CommunityInfoLayoutProps) {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
   const { data } = useSuspenseQuery(communityInfo(communityId));
 
   const { description, shortDescription, socialMediaLinks } =
@@ -62,7 +60,7 @@ function CommunityInfoLayout({
       />
 
       <div className="relative w-full">
-        <AspectRatio ratio={isDesktop ? 48 / 9 : 21 / 9}>
+        <AspectRatio ratio={4 / 1}>
           <Web3Image
             className="rounded w-full h-full self-center object-cover"
             alt="Community hero img"
