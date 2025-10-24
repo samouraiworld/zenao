@@ -128,6 +128,7 @@ export const FormFieldImage = <T extends FieldValues>({
                           imageVariants({ fit }),
                         )}
                       />
+                      {uploading && <Loader2 className="animate-spin" />}
                     </>
                   ) : (
                     <>
