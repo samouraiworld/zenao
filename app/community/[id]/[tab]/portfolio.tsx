@@ -180,7 +180,7 @@ export default function CommunityPortfolio({
       ) {
         toast({
           variant: "destructive",
-          title: "Image file size exceeds limit of 4 MB.",
+          title: t("error-filesize-exceeds-limit", { size: 4 }),
         });
       } else {
         toast({

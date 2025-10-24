@@ -4,6 +4,7 @@ import { FieldValues, useController, useWatch } from "react-hook-form";
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
 import { cva } from "class-variance-authority";
+import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/use-toast";
 import { uploadFile } from "@/lib/files";
 import { isValidURL, web2URL } from "@/lib/uris";
@@ -46,6 +47,8 @@ export const FormFieldImage = <T extends FieldValues>({
   const { field, fieldState } = useController(props);
   const imageUri = useWatch({ control: props.control, name: props.name });
 
+  const t = useTranslations("components.widgets.form.form-field-image");
+
   const fit = props.fit || "cover";
 
   const hiddenInputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +61,7 @@ export const FormFieldImage = <T extends FieldValues>({
       if (!file) {
         toast({
           variant: "destructive",
-          title: "No file selected.",
+          title: t("error-no-file-selected"),
         });
         return;
       }
@@ -74,13 +77,15 @@ export const FormFieldImage = <T extends FieldValues>({
       ) {
         toast({
           variant: "destructive",
-          title: `File size exceeds limit of ${Math.floor(props.fileSizeLimit / 1024 / 1024)} MB.`,
+          title: t("error-filesize-exceeds-limit", {
+            size: Math.floor(props.fileSizeLimit / 1024 / 1024),
+          }),
         });
         return;
       } else {
         toast({
           variant: "destructive",
-          title: "Trouble uploading file!",
+          title: t("error-uploading-file"),
         });
       }
     } finally {
