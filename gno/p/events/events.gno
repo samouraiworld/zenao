@@ -32,10 +32,12 @@ type Event struct {
 	SetProfileString    basedao.ProfileStringSetter
 	DAOPrivate          *basedao.DAOPrivate
 	DAO                 daokit.DAO
+	HashParams          string // parameters used for hashing event password
 	ParticipationPubkey []byte // ed25519 pubkey of secret key derived from event password, event is private if set
 	CheckedIn           uint32 // number of checked-in participants, used for rendering only
 	Cancelled           bool   // true if event is cancelled
 	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
+	ICSSeqNumber        uint32 // incremented at each edit, used for ics feed generation
 
 	Config *Config // to get initial data during upgrade
 }
@@ -53,6 +55,7 @@ type Config struct {
 	SetProfileString    basedao.ProfileStringSetter
 	ZenaoAdminAddr      string
 	Location            *zenaov1.EventLocation
+	HashParams          string // parameters used for hashing event password
 	ParticipationPubkey string // ed25519 pubkey of secret key derived from event password, event is private if set
 	Discoverable        bool   // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
 	CrossFn             daokit.CrossFn
@@ -157,9 +160,11 @@ func NewEvent(conf *Config) *Event {
 		DAOPrivate:          privdao,
 		DAO:                 pubdao,
 		Location:            conf.Location,
+		HashParams:          conf.HashParams,
 		ParticipationPubkey: participationPubkey,
 		CheckedIn:           0,
 		Cancelled:           false,
+		ICSSeqNumber:        0,
 		Config:              conf,
 	}
 
@@ -465,47 +470,54 @@ func (e *Event) editEventHandler() daokit.ActionHandler {
 		if e.Cancelled {
 			panic("event is cancelled")
 		}
-		if len(msg.organizers) != 0 {
-			e.updateEventUserRoles("organizer", msg.organizers)
+
+		if len(msg.organizers) == 0 {
+			panic("at least one organizer is required")
 		}
-		if len(msg.gatekeepers) != 0 {
-			e.updateEventUserRoles("gatekeeper", msg.gatekeepers)
+		if len(msg.title) < 3 {
+			panic("title must be at least 3 characters long")
 		}
-		if msg.title != "" {
-			e.SetProfileString(cross, "DisplayName", msg.title)
+		if msg.imageURI == "" {
+			panic("image URI is required")
 		}
-		if msg.description != "" {
-			e.SetProfileString(cross, "Bio", msg.description)
+		if msg.startDate != 0 && msg.endDate != 0 && msg.endDate <= msg.startDate {
+			panic("end date must be after start date and both must be non-zero")
 		}
-		if msg.imageURI != "" {
-			e.SetProfileString(cross, "Avatar", msg.imageURI)
+		if msg.capacity != 0 && msg.capacity < e.CountParticipants() {
+			panic("capacity can't be lower than the number of current participants and must be non-zero")
 		}
-		if msg.startDate != 0 {
-			e.StartDate = msg.startDate
+		if msg.location == nil {
+			panic("location is required")
 		}
-		if msg.endDate != 0 {
-			e.EndDate = msg.endDate
+		if msg.privacy == nil {
+			panic("privacy is required")
 		}
-		if msg.capacity != 0 {
-			e.Capacity = msg.capacity
-		}
-		if msg.location != nil {
-			e.Location = msg.location
-		}
-		if msg.privacy != nil {
-			switch val := msg.privacy.EventPrivacy.(type) {
-			case *zenaov1.EventPrivacyPublic:
-				e.ParticipationPubkey = nil
-			case *zenaov1.EventPrivacyGuarded:
-				participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
-				if err != nil {
-					panic(err)
-				}
-				e.ParticipationPubkey = participationPubkeyBz
-			default:
-				panic("unknown privacy model")
+		e.updateEventUserRoles("organizer", msg.organizers)
+		e.updateEventUserRoles("gatekeeper", msg.gatekeepers)
+		e.SetProfileString(cross, "DisplayName", msg.title)
+		e.SetProfileString(cross, "Bio", msg.description)
+		e.SetProfileString(cross, "Avatar", msg.imageURI)
+		e.StartDate = msg.startDate
+		e.EndDate = msg.endDate
+		e.Capacity = msg.capacity
+		e.Location = msg.location
+
+		switch val := msg.privacy.EventPrivacy.(type) {
+		case *zenaov1.EventPrivacyPublic:
+			e.ParticipationPubkey = nil
+			e.HashParams = ""
+		case *zenaov1.EventPrivacyGuarded:
+			participationPubkeyBz, err := base64.RawURLEncoding.DecodeString(val.ParticipationPubkey)
+			if err != nil {
+				panic(err)
 			}
+			e.ParticipationPubkey = participationPubkeyBz
+			e.HashParams = val.HashParams
+		default:
+			panic("unknown privacy model")
 		}
+
+		e.ICSSeqNumber += 1
 		e.Discoverable = msg.discoverable
 	})
 }

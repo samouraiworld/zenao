@@ -1,4 +1,4 @@
-package main
+package gzchain
 
 import (
 	"context"
@@ -30,7 +30,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func newGenTxsCmd() *commands.Command {
+// TODO: REMOVE WHEN SOT TRANSITION IS DONE
+
+func NewGenTxsCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
 			Name:       "gentxs",
@@ -158,12 +160,7 @@ func execGenTxs() error {
 		logger.Info("event cancel indexed into event registry tx created", zap.String("event-id", deletedEvent.ID))
 	}
 	for _, event := range events {
-		sk, err := zeni.EventSKFromPasswordHash(event.PasswordHash)
-		if err != nil {
-			return err
-		}
-
-		privacy, err := zeni.EventPrivacyFromSK(sk)
+		privacy, sk, err := zeni.EventPrivacyFromPasswordHash(event.PasswordHash)
 		if err != nil {
 			return err
 		}
@@ -559,8 +556,8 @@ func createPostTxs(chain *gnoZenaoChain, authorID string, caller cryptoGno.Addre
 }
 
 func createReactionTx(chain *gnoZenaoChain, authorID string, caller cryptoGno.Address, orgType string, orgID string, reaction *zeni.Reaction) (gnoland.TxWithMetadata, error) {
-	userPkgPath := chain.userRealmPkgPath(authorID)
-	body := genReactPostMsgRunBody(userPkgPath, authorID, reaction.PostID, orgType, orgID, reaction.Icon)
+	userRealmID := chain.UserRealmID(authorID)
+	body := genReactPostMsgRunBody(userRealmID, reaction.PostID, reaction.Icon)
 
 	tx := std.Tx{
 		Msgs: []std.Msg{
@@ -613,6 +610,15 @@ func createVoteTx(chain *gnoZenaoChain, authorID string, caller cryptoGno.Addres
 			Timestamp: vote.CreatedAt.Unix(),
 		},
 	}, nil
+}
+
+func (g *gnoZenaoChain) orgPkgPath(orgType string, orgID string) string {
+	if orgType == zeni.EntityTypeEvent {
+		return g.eventRealmPkgPath(orgID)
+	} else if orgType == zeni.EntityTypeCommunity {
+		return g.communityPkgPath(orgID)
+	}
+	return ""
 }
 
 func createPollTx(chain *gnoZenaoChain, authorID string, caller cryptoGno.Address, orgType string, orgID string, poll *zeni.Poll, options []string) (gnoland.TxWithMetadata, error) {
@@ -1084,7 +1090,7 @@ func createCommunityAddEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Address
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "AddEvent",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.eventRealmPkgPath(eventID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.EventRealmID(eventID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1108,7 +1114,7 @@ func createCommunityRemoveEventRegTx(chain *gnoZenaoChain, caller cryptoGno.Addr
 				Send:    []std.Coin{},
 				PkgPath: chain.communitiesIndexPkgPath,
 				Func:    "RemoveEvent",
-				Args:    []string{chain.communityPkgPath(community.ID), chain.eventRealmPkgPath(eventID)},
+				Args:    []string{chain.communityPkgPath(community.ID), chain.EventRealmID(eventID)},
 			},
 		},
 		Fee: std.Fee{
@@ -1259,7 +1265,7 @@ func createCommunityRemoveMemberRegTx(chain *gnoZenaoChain, community *zeni.Comm
 
 func createCommunityRemoveEventTx(chain *gnoZenaoChain, caller cryptoGno.Address, community *zeni.Community, eventID string, deletedAt time.Time) (gnoland.TxWithMetadata, error) {
 	communityPkgPath := chain.communityPkgPath(community.ID)
-	eventAddr := chain.eventRealmPkgPath(eventID)
+	eventAddr := chain.EventRealmID(eventID)
 	callerPkgPath := chain.userRealmPkgPath(community.CreatorID)
 	body := genCommunityRemoveEventMsgRunBody(callerPkgPath, communityPkgPath, eventAddr)
 
@@ -1286,4 +1292,26 @@ func createCommunityRemoveEventTx(chain *gnoZenaoChain, caller cryptoGno.Address
 			Timestamp: deletedAt.Unix(),
 		},
 	}, nil
+}
+
+func genEventRemoveGatekeeperMsgRunBody(callerPkgPath, eventPkgPath, gatekeeper string) string {
+	return fmt.Sprintf(`package main
+
+	import (
+		user %q
+		event %q
+		"gno.land/p/zenao/daokit"
+		"gno.land/p/zenao/events"
+	)
+
+	func main() {
+		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
+			Title: %q,
+			Action: daokit.NewInstantExecuteAction(event.DAO, daokit.ProposalRequest{
+				Title: "Remove gatekeeper",
+				Action: events.NewRemoveGatekeeperAction(%q),
+			}),
+		})
+	}
+`, callerPkgPath, eventPkgPath, "Remove gatekeeper in "+eventPkgPath, gatekeeper)
 }
