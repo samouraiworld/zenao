@@ -39,6 +39,7 @@ export const FormFieldImage = <T extends FieldValues>({
   aspectRatio: [number, number];
   tooltip?: React.ReactNode;
   hint?: boolean;
+  fileSizeLimit?: number;
   fit?: "cover" | "pad";
 }) => {
   const { toast } = useToast();
@@ -62,14 +63,30 @@ export const FormFieldImage = <T extends FieldValues>({
         return;
       }
       setUploading(true);
-      const uri = await uploadFile(file);
+      const uri = await uploadFile(file, props.fileSizeLimit);
       field.onChange(uri);
     } catch (e) {
       console.error(e);
-      toast({
-        variant: "destructive",
-        title: "Trouble uploading file!",
-      });
+      if (
+        e instanceof Error &&
+        props.fileSizeLimit &&
+        e.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: `File size exceeds limit of ${Math.floor(props.fileSizeLimit / 1024 / 1024)} MB.`,
+        });
+        return;
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Trouble uploading file!",
+        });
+      }
+    } finally {
+      if (hiddenInputRef.current) {
+        hiddenInputRef.current.value = "";
+      }
     }
     setUploading(false);
   };

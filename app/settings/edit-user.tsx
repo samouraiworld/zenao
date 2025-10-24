@@ -147,6 +147,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             name="bannerUri"
             placeholder={t("banner-placeholder")}
             aspectRatio={[4, 1]}
+            fileSizeLimit={4 * 1024 * 1024}
             className="w-full rounded-xl overflow-hidden"
             tooltip={<Text size="sm">{t("change-banner")}</Text>}
           />
