@@ -99,7 +99,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       if (!file) {
         toast({
           variant: "destructive",
-          title: "No file selected.",
+          title: t("no-file-selected-error"),
         });
         return;
       }
@@ -148,7 +148,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       if (!file) {
         toast({
           variant: "destructive",
-          title: "No file selected.",
+          title: t("no-file-selected-error"),
         });
         return;
       }

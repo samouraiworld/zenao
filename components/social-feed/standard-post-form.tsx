@@ -31,7 +31,9 @@ import {
 import { captureException } from "@/lib/report";
 import {
   AUDIO_FILE_SIZE_LIMIT,
+  AUDIO_FILE_SIZE_LIMIT_MB,
   IMAGE_FILE_SIZE_LIMIT,
+  IMAGE_FILE_SIZE_LIMIT_MB,
 } from "@/app/event/[id]/constants";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
@@ -81,7 +83,7 @@ export function StandardPostForm({
     if (!file) {
       toast({
         variant: "destructive",
-        title: "No file selected.",
+        title: t("no-file-selected-error"),
       });
       return;
     }
@@ -108,12 +110,14 @@ export function StandardPostForm({
       ) {
         toast({
           variant: "destructive",
-          title: "Image file size exceeds limit of 4 MB.",
+          title: t("error-filesize-exceeds-limit", {
+            size: IMAGE_FILE_SIZE_LIMIT_MB,
+          }),
         });
       } else {
         toast({
           variant: "destructive",
-          title: "Error uploading image.",
+          title: t("image-upload-error"),
         });
       }
     } finally {
@@ -128,7 +132,7 @@ export function StandardPostForm({
     if (!file) {
       toast({
         variant: "destructive",
-        title: "No file selected.",
+        title: t("no-file-selected-error"),
       });
       return;
     }
@@ -154,12 +158,14 @@ export function StandardPostForm({
       ) {
         toast({
           variant: "destructive",
-          title: "Audio file size exceeds limit of 4 MB.",
+          title: t("error-filesize-exceeds-limit", {
+            size: AUDIO_FILE_SIZE_LIMIT_MB,
+          }),
         });
       } else {
         toast({
           variant: "destructive",
-          title: "Error uploading audio.",
+          title: t("audio-upload-error"),
         });
       }
     } finally {
