@@ -36,6 +36,12 @@ import {
 } from "@/components/shadcn/tooltip";
 import PortfolioUploadVideoDialog from "@/components/dialogs/portfolio-upload-video-dialog";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
+import {
+  AUDIO_FILE_SIZE_LIMIT,
+  AUDIO_FILE_SIZE_LIMIT_MB,
+  IMAGE_FILE_SIZE_LIMIT,
+  IMAGE_FILE_SIZE_LIMIT_MB,
+} from "@/app/event/[id]/constants";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -155,7 +161,10 @@ export default function CommunityPortfolio({
 
       setIsUploading(true);
 
-      const uri = await uploadFile(files[0], 4 * 1024 * 1024); // 4 MB limit
+      const uri = await uploadFile(
+        files[0],
+        fileType === "image" ? IMAGE_FILE_SIZE_LIMIT : AUDIO_FILE_SIZE_LIMIT,
+      );
       const newItem: PortfolioItem = {
         type: fileType,
         name: files[0].name,
@@ -180,7 +189,12 @@ export default function CommunityPortfolio({
       ) {
         toast({
           variant: "destructive",
-          title: t("error-filesize-exceeds-limit", { size: 4 }),
+          title: t("error-filesize-exceeds-limit", {
+            size:
+              fileType === "image"
+                ? IMAGE_FILE_SIZE_LIMIT_MB
+                : AUDIO_FILE_SIZE_LIMIT_MB,
+          }),
         });
       } else {
         toast({

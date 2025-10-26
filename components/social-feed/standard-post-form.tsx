@@ -29,6 +29,10 @@ import {
   standardPostFormSchema,
 } from "@/types/schemas";
 import { captureException } from "@/lib/report";
+import {
+  AUDIO_FILE_SIZE_LIMIT,
+  IMAGE_FILE_SIZE_LIMIT,
+} from "@/app/event/[id]/constants";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -93,7 +97,7 @@ export function StandardPostForm({
           form.setValue("content", text);
           textareaRef.current?.focus();
         },
-        4 * 1024 * 1024, // 4 MB limit
+        IMAGE_FILE_SIZE_LIMIT,
       );
     } catch (error) {
       captureException(error);
@@ -139,7 +143,7 @@ export function StandardPostForm({
           form.setValue("content", text);
           textareaRef.current?.focus();
         },
-        4 * 1024 * 1024, // 4 MB limit
+        AUDIO_FILE_SIZE_LIMIT,
       );
     } catch (error) {
       captureException(error);

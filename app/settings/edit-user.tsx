@@ -38,6 +38,7 @@ import { addressFromRealmId } from "@/lib/gno";
 import UserExperiences from "@/components/features/user/settings/user-experiences";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
+import { IMAGE_FILE_SIZE_LIMIT } from "../event/[id]/constants";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
@@ -147,7 +148,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             name="bannerUri"
             placeholder={t("banner-placeholder")}
             aspectRatio={[4, 1]}
-            fileSizeLimit={4 * 1024 * 1024}
+            fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
             className="w-full rounded-xl overflow-hidden"
             tooltip={<Text size="sm">{t("change-banner")}</Text>}
           />
@@ -157,7 +158,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               name="avatarUri"
               placeholder={t("avatar-placeholder")}
               aspectRatio={[4, 4]}
-              fileSizeLimit={4 * 1024 * 1024}
+              fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
               className="w-full rounded-xl overflow-hidden"
               tooltip={<Text size="sm">{t("change-avatar")}</Text>}
             />

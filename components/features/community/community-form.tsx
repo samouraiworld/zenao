@@ -26,6 +26,7 @@ import {
 import SettingsSection from "@/components/layout/settings-section";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
+import { IMAGE_FILE_SIZE_LIMIT } from "@/app/event/[id]/constants";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -72,7 +73,7 @@ export const CommunityForm = ({
             name="bannerUri"
             control={form.control}
             aspectRatio={isDesktop ? [48, 9] : [21, 9]}
-            fileSizeLimit={4 * 1024 * 1024}
+            fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
             placeholder={t("upload-banner")}
             className="w-full rounded-xl overflow-hidden"
           />
@@ -81,7 +82,7 @@ export const CommunityForm = ({
               name="avatarUri"
               control={form.control}
               aspectRatio={[4, 4]}
-              fileSizeLimit={4 * 1024 * 1024}
+              fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
               placeholder={t("upload-avatar")}
               className="w-full rounded-xl overflow-hidden"
             />

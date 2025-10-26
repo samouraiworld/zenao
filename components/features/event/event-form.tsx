@@ -39,6 +39,12 @@ import Heading from "@/components/widgets/texts/heading";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 import { locationTimezone } from "@/lib/event-location";
 import { captureException } from "@/lib/report";
+import {
+  AUDIO_FILE_SIZE_LIMIT,
+  AUDIO_FILE_SIZE_LIMIT_MB,
+  IMAGE_FILE_SIZE_LIMIT,
+  IMAGE_FILE_SIZE_LIMIT_MB,
+} from "@/app/event/[id]/constants";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -108,7 +114,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           form.setValue("description", text);
           descriptionRef.current?.focus();
         },
-        4 * 1024 * 1024, // 4 MB limit
+        IMAGE_FILE_SIZE_LIMIT,
       );
     } catch (error) {
       captureException(error);
@@ -119,7 +125,9 @@ export const EventForm: React.FC<EventFormProps> = ({
       ) {
         toast({
           variant: "destructive",
-          title: t("error-filesize-exceeds-limit", { size: 4 }),
+          title: t("error-filesize-exceeds-limit", {
+            size: IMAGE_FILE_SIZE_LIMIT_MB,
+          }),
         });
       } else {
         toast({
@@ -155,7 +163,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           form.setValue("description", text);
           descriptionRef.current?.focus();
         },
-        4 * 1024 * 1024, // 4 MB limit
+        AUDIO_FILE_SIZE_LIMIT,
       );
     } catch (error) {
       captureException(error);
@@ -166,7 +174,9 @@ export const EventForm: React.FC<EventFormProps> = ({
       ) {
         toast({
           variant: "destructive",
-          title: t("error-filesize-exceeds-limit", { size: 4 }),
+          title: t("error-filesize-exceeds-limit", {
+            size: AUDIO_FILE_SIZE_LIMIT_MB,
+          }),
         });
       } else {
         toast({
@@ -207,7 +217,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             control={form.control}
             placeholder={t("image-uri-placeholder")}
             aspectRatio={[16, 9]}
-            fileSizeLimit={4 * 1024 * 1024}
+            fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
             fit="pad"
           />
