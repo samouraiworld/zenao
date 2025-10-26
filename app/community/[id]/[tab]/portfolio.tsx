@@ -155,7 +155,7 @@ export default function CommunityPortfolio({
 
       setIsUploading(true);
 
-      const uri = await uploadFile(files[0], 4 * 1024 * 1024); // 10 MB limit
+      const uri = await uploadFile(files[0], 4 * 1024 * 1024); // 4 MB limit
       const newItem: PortfolioItem = {
         type: fileType,
         name: files[0].name,
