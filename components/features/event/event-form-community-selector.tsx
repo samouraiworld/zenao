@@ -46,14 +46,10 @@ export default function EventFormCommunitySelector({
     communitiesListByMember(userRealmId, DEFAULT_COMMUNITIES_LIMIT),
   );
 
-  userCommunitiesPages.pages.map((page) => console.log(page));
-
   // Filter only communities where user is administrator
   const selectableCommunities = (
     userCommunitiesPages?.pages.flat() ?? []
   ).filter((c) => c.administrators.includes(userRealmId!));
-
-  console.log("selectableCommunities: " + selectableCommunities);
 
   const options = selectableCommunities.map((community) => ({
     label: community.displayName,
