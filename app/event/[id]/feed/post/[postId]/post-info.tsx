@@ -6,9 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { PollPost } from "@/components/social-feed/poll-post";
-import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
-import { StandardPostCard } from "@/components/social-feed/standard-post-card";
+import { StandardPostCard } from "@/components/social-feed/cards/standard-post-card";
 import Heading from "@/components/widgets/texts/heading";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
@@ -22,8 +20,10 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { FeedPostFormSchemaType } from "@/types/schemas";
-import { StandardPostForm } from "@/components/social-feed/standard-post-form";
-import { PostComments } from "@/components/social-feed/post-comments";
+import { StandardPostForm } from "@/components/social-feed/forms/standard-post-form";
+import { PostCardSkeleton } from "@/components/social-feed/cards/post-card-skeleton";
+import { PollPost } from "@/components/social-feed/polls/poll-post";
+import CommentsList from "@/components/social-feed/lists/comments-list";
 
 function PostCommentForm({
   eventId,
@@ -225,7 +225,7 @@ export default function PostInfo({
 
         <div className="pl-6">
           <Suspense fallback={<PostCardSkeleton />}>
-            <PostComments
+            <CommentsList
               orgType="event"
               orgId={eventId}
               parentId={post.post.localPostId.toString()}

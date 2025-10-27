@@ -6,7 +6,7 @@ import { FeedInputMode } from "./standard-post-form";
 import { cn } from "@/lib/tailwind";
 import { ButtonBase } from "@/components/widgets/buttons/button-bases";
 
-export function FeedInputButtons({
+export default function SocialFeedActionButtons({
   feedInputMode,
   setFeedInputMode,
   isLoading = false,

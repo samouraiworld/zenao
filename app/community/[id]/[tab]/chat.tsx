@@ -12,12 +12,12 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import { PostsList } from "@/components/social-feed/posts-list";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import { communityUserRoles } from "@/lib/queries/community";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
 import { FeedPostFormSchemaType } from "@/types/schemas";
+import { PostsList } from "@/components/social-feed/lists/posts-list";
 
 type CommunityChatProps = {
   communityId: string;

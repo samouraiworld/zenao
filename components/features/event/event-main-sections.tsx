@@ -26,7 +26,7 @@ import {
 } from "@/types/schemas";
 import EventFeed from "@/app/event/[id]/(general)/[tab]/feed";
 import EventPolls from "@/app/event/[id]/(general)/[tab]/votes";
-import SocialFeedForm from "@/components/social-feed/social-feed-form";
+import SocialFeedForm from "@/components/social-feed/forms/social-feed-form";
 
 export function MainEventSections({
   className,

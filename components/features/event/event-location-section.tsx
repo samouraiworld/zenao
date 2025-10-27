@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink, MapPin } from "lucide-react";
 import Heading from "../../widgets/texts/heading";
 import { EventFormSchemaType } from "@/types/schemas";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 function EventLocationSection({
   location,
@@ -9,6 +10,8 @@ function EventLocationSection({
   location: EventFormSchemaType["location"];
 }) {
   const iconSize = 22;
+
+  const isStandalone = useMediaQuery("(display-mode: standalone)");
 
   return (
     <div className="flex flex-col">
@@ -28,7 +31,11 @@ function EventLocationSection({
           </Link>
         ) : location.kind === "geo" ? (
           <Link
-            href={`https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}#map=17/${location.lat}/${location.lng}`}
+            href={
+              isStandalone
+                ? `geo:${location.lat},${location.lng}?z=17`
+                : `https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}#map=17/${location.lat}/${location.lng}`
+            }
             target="_blank"
           >
             <div className="flex flex-row gap-2 group">

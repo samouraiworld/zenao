@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { useMediaQuery } from "react-responsive";
-import { FeedInputButtons } from "./feed-input-buttons";
 import { PollFields } from "./poll-fields";
+import SocialFeedActionButtons from "./social-feed-action-buttons";
 import { PollKind } from "@/app/gen/polls/v1/polls_pb";
 import {
   Form,
@@ -162,7 +162,7 @@ export function PollPostForm({
               </FormItem>
             )}
           />
-          <FeedInputButtons
+          <SocialFeedActionButtons
             feedInputMode={feedInputMode}
             isReplying={!!parentPostId}
             setFeedInputMode={setFeedInputMode}

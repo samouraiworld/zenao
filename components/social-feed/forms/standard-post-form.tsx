@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useMediaQuery } from "react-responsive";
 import { UseFormReturn } from "react-hook-form";
-import { FeedInputButtons } from "./feed-input-buttons";
+import SocialFeedActionButtons from "./social-feed-action-buttons";
 import { ButtonBase } from "@/components/widgets/buttons/button-bases";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import {
@@ -230,7 +230,7 @@ export function StandardPostForm({
                   className="hidden"
                   disabled={uploading}
                 />
-                <FeedInputButtons
+                <SocialFeedActionButtons
                   feedInputMode={feedInputMode}
                   isReplying={!!parentPostId}
                   isEditing={!!isEditing}

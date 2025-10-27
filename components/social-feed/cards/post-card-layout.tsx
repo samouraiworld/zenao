@@ -4,15 +4,15 @@ import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode } from "react";
 import { Hash, MapPin, MessageCircle, X } from "lucide-react";
 import Link from "next/link";
-import { UserAvatar } from "../features/user/user";
-import { PostMenu } from "./post-menu";
-import PostReactions from "./post-reactions";
+import { PostMenu } from "../post-menu";
+import PostReactions from "../post-reactions";
 import { Card } from "@/components/widgets/cards/card";
 import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 import { DateTimeText } from "@/components/widgets/date-time-text";
 import Text from "@/components/widgets/texts/text";
 import { GnoProfile } from "@/lib/queries/profile";
 import { Button } from "@/components/shadcn/button";
+import { UserAvatar } from "@/components/features/user/user";
 
 type PostCardLayoutProps = {
   post: PostView;
