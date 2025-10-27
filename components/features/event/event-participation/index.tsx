@@ -74,16 +74,13 @@ export const EventParticipation = ({
 };
 
 EventParticipation.Registration = function EventParticipationRegistration() {
-  const { eventId, eventData, isParticipant, isStarted, password } =
+  const { eventId, password, eventData, isParticipant, isStarted, isSoldOut } =
     useEventParticipation();
-  const [guestEmail, setGuestEmail] = useState<string>("");
+  const [guestEmail, setGuestEmail] = useState("");
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
-
   const t = useTranslations("event");
 
-  if (isParticipant || isStarted) {
-    return null;
-  }
+  if (isParticipant || isStarted) return null;
 
   return (
     <>
@@ -91,24 +88,32 @@ EventParticipation.Registration = function EventParticipationRegistration() {
         title={eventData.title}
         email={guestEmail}
         open={guestDialogOpen}
-        onOpenChange={(o) => setGuestDialogOpen(o)}
+        onOpenChange={setGuestDialogOpen}
       />
 
-      {/* Registration logic will go here */}
-      <div>
-        <Heading level={2} size="xl">
-          {t("registration")}
-        </Heading>
-        <Text className="my-4">{t("join-desc")}</Text>
-        <EventRegistrationForm
-          eventId={eventId}
-          eventPassword={password}
-          onGuestRegistrationSuccess={(email) => {
-            setGuestEmail(email);
-            setGuestDialogOpen(true);
-          }}
-        />
-      </div>
+      {isSoldOut ? (
+        <Button
+          disabled
+          className="w-full bg-gray-300 text-gray-600 cursor-not-allowed"
+        >
+          {t("sold-out-msg")}
+        </Button>
+      ) : (
+        <div>
+          <Heading level={2} size="xl">
+            {t("registration")}
+          </Heading>
+          <Text className="my-4">{t("join-desc")}</Text>
+          <EventRegistrationForm
+            eventId={eventId}
+            eventPassword={password}
+            onGuestRegistrationSuccess={(email) => {
+              setGuestEmail(email);
+              setGuestDialogOpen(true);
+            }}
+          />
+        </div>
+      )}
     </>
   );
 };
