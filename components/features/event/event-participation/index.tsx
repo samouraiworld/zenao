@@ -74,7 +74,7 @@ export const EventParticipation = ({
 };
 
 EventParticipation.Registration = function EventParticipationRegistration() {
-  const { eventId, password, eventData, isParticipant, isStarted, isSoldOut } =
+  const { eventId, eventData, isParticipant, isStarted, password, isSoldOut } =
     useEventParticipation();
   const [guestEmail, setGuestEmail] = useState("");
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
@@ -122,9 +122,7 @@ EventParticipation.TooLate = function EventParticipationTooLate() {
   const { isParticipant, isStarted } = useEventParticipation();
   const t = useTranslations("event");
 
-  if (isParticipant || !isStarted) {
-    return null;
-  }
+  if (isParticipant || !isStarted) return null;
 
   return (
     <div>
@@ -140,9 +138,7 @@ EventParticipation.SoldOut = function EventParticipationSoldOut() {
   const { isParticipant, isSoldOut } = useEventParticipation();
   const t = useTranslations("event");
 
-  if (isParticipant || !isSoldOut) {
-    return null;
-  }
+  if (isParticipant || !isSoldOut) return null;
 
   return (
     <div>
@@ -158,9 +154,7 @@ EventParticipation.Participant = function EventParticipationParticipant() {
   const [confirmCancelDialogOpen, setConfirmCancelDialogOpen] = useState(false);
   const t = useTranslations("event");
 
-  if (!isParticipant) {
-    return null;
-  }
+  if (!isParticipant) return null;
 
   return (
     <>
