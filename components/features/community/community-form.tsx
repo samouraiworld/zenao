@@ -73,7 +73,7 @@ export const CommunityForm = ({
             name="bannerUri"
             control={form.control}
             aspectRatio={isDesktop ? [48, 9] : [21, 9]}
-            fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
+            fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
             placeholder={t("upload-banner")}
             className="w-full rounded-xl overflow-hidden"
           />
@@ -82,7 +82,7 @@ export const CommunityForm = ({
               name="avatarUri"
               control={form.control}
               aspectRatio={[4, 4]}
-              fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
+              fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
               placeholder={t("upload-avatar")}
               className="w-full rounded-xl overflow-hidden"
             />

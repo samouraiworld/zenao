@@ -148,7 +148,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             name="bannerUri"
             placeholder={t("banner-placeholder")}
             aspectRatio={[4, 1]}
-            fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
+            fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
             className="w-full rounded-xl overflow-hidden"
             tooltip={<Text size="sm">{t("change-banner")}</Text>}
           />
@@ -158,7 +158,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               name="avatarUri"
               placeholder={t("avatar-placeholder")}
               aspectRatio={[4, 4]}
-              fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
+              fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
               className="w-full rounded-xl overflow-hidden"
               tooltip={<Text size="sm">{t("change-avatar")}</Text>}
             />

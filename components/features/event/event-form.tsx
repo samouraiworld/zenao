@@ -217,7 +217,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             control={form.control}
             placeholder={t("image-uri-placeholder")}
             aspectRatio={[16, 9]}
-            fileSizeLimit={IMAGE_FILE_SIZE_LIMIT}
+            fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
             fit="pad"
           />
