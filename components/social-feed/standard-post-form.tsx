@@ -29,6 +29,12 @@ import {
   standardPostFormSchema,
 } from "@/types/schemas";
 import { captureException } from "@/lib/report";
+import {
+  AUDIO_FILE_SIZE_LIMIT,
+  AUDIO_FILE_SIZE_LIMIT_MB,
+  IMAGE_FILE_SIZE_LIMIT,
+  IMAGE_FILE_SIZE_LIMIT_MB,
+} from "@/app/event/[id]/constants";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
@@ -77,7 +83,7 @@ export function StandardPostForm({
     if (!file) {
       toast({
         variant: "destructive",
-        title: "No file selected.",
+        title: t("no-file-selected-error"),
       });
       return;
     }
@@ -93,14 +99,27 @@ export function StandardPostForm({
           form.setValue("content", text);
           textareaRef.current?.focus();
         },
+        IMAGE_FILE_SIZE_LIMIT,
       );
     } catch (error) {
-      console.error("Error uploading image:", error);
       captureException(error);
-      toast({
-        variant: "destructive",
-        title: "Error uploading image.",
-      });
+      console.error("Error uploading image:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: t("error-filesize-exceeds-limit", {
+            size: IMAGE_FILE_SIZE_LIMIT_MB,
+          }),
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: t("image-upload-error"),
+        });
+      }
     } finally {
       if (hiddenImgInputRef.current) {
         hiddenImgInputRef.current.value = "";
@@ -113,11 +132,10 @@ export function StandardPostForm({
     if (!file) {
       toast({
         variant: "destructive",
-        title: "No file selected.",
+        title: t("no-file-selected-error"),
       });
       return;
     }
-
     try {
       await uploadMdFile(
         file,
@@ -129,14 +147,27 @@ export function StandardPostForm({
           form.setValue("content", text);
           textareaRef.current?.focus();
         },
+        AUDIO_FILE_SIZE_LIMIT,
       );
     } catch (error) {
-      console.error("Error uploading audio:", error);
       captureException(error);
-      toast({
-        variant: "destructive",
-        title: "Error uploading audio.",
-      });
+      console.error("Error uploading audio:", error);
+      if (
+        error instanceof Error &&
+        error.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: t("error-filesize-exceeds-limit", {
+            size: AUDIO_FILE_SIZE_LIMIT_MB,
+          }),
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: t("audio-upload-error"),
+        });
+      }
     } finally {
       if (hiddenAudioInputRef.current) {
         hiddenAudioInputRef.current.value = "";
