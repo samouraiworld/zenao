@@ -23,23 +23,22 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { useCreatePoll } from "@/lib/mutations/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
-import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
+import { SocialFeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
 import { OrgType } from "@/lib/organization";
-
-export type FeedInputMode = "POLL" | "STANDARD_POST";
+import { SocialFeedPostType } from "@/lib/social-feed";
 
 export function PollPostForm({
   orgType,
   orgId,
-  feedInputMode,
-  setFeedInputMode,
+  postTypeMode,
+  setPostTypeMode,
   form,
 }: {
   orgType: OrgType;
   orgId: string;
-  feedInputMode: FeedInputMode;
-  setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
-  form: UseFormReturn<FeedPostFormSchemaType>;
+  postTypeMode: SocialFeedPostType;
+  setPostTypeMode: Dispatch<SetStateAction<SocialFeedPostType>>;
+  form: UseFormReturn<SocialFeedPostFormSchemaType>;
 }) {
   const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
@@ -76,7 +75,7 @@ export function PollPostForm({
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [question]);
 
-  const onSubmitPoll = async (values: FeedPostFormSchemaType) => {
+  const onSubmitPoll = async (values: SocialFeedPostFormSchemaType) => {
     try {
       if (values.kind !== "POLL") {
         throw new Error("invalid form type");
@@ -163,9 +162,9 @@ export function PollPostForm({
             )}
           />
           <SocialFeedActionButtons
-            feedInputMode={feedInputMode}
+            postTypeMode={postTypeMode}
             isReplying={!!parentPostId}
-            setFeedInputMode={setFeedInputMode}
+            setPostTypeMode={setPostTypeMode}
             isLoading={isPending}
           />
         </div>

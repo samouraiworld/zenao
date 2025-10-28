@@ -16,7 +16,7 @@ import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import { communityUserRoles } from "@/lib/queries/community";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
-import { FeedPostFormSchemaType } from "@/types/schemas";
+import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { PostsList } from "@/components/social-feed/lists/posts-list";
 
 type CommunityChatProps = {
@@ -77,7 +77,10 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
   const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
-  const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
+  const onEdit = async (
+    postId: string,
+    values: SocialFeedPostFormSchemaType,
+  ) => {
     await onEditStandardPost(postId, values);
     setPostInEdition(null);
   };

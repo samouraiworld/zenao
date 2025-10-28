@@ -6,7 +6,7 @@ import { PollPost } from "../polls/poll-post";
 import { StandardPostCard } from "@/components/social-feed/cards/standard-post-card";
 import { SocialFeedPost } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
-import { FeedPostFormSchemaType } from "@/types/schemas";
+import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 
 export function PostsList({
   userRealmId,
@@ -39,7 +39,7 @@ export function PostsList({
   innerEditMode?: boolean;
   onEdit?: (
     postId: string,
-    values: FeedPostFormSchemaType,
+    values: SocialFeedPostFormSchemaType,
   ) => void | Promise<void>;
   isEditing?: boolean;
   isReacting?: boolean;

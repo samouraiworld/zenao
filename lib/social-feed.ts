@@ -16,6 +16,8 @@ import { Poll } from "@/app/gen/polls/v1/polls_pb";
 //   | "standard"
 //   | "poll";
 
+export type SocialFeedPostType = "POLL" | "STANDARD_POST";
+
 export type SocialFeedPost =
   | SocialFeedPoll
   | SocialFeedStandardPost

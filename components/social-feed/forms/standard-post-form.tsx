@@ -25,26 +25,25 @@ import { cn } from "@/lib/tailwind";
 import useMarkdownUpload from "@/hooks/use-markdown-upload";
 import { useToast } from "@/hooks/use-toast";
 import {
-  FeedPostFormSchemaType,
+  SocialFeedPostFormSchemaType,
   standardPostFormSchema,
 } from "@/types/schemas";
 import { captureException } from "@/lib/report";
-
-export type FeedInputMode = "POLL" | "STANDARD_POST";
+import { SocialFeedPostType } from "@/lib/social-feed";
 
 export function StandardPostForm({
-  feedInputMode,
-  setFeedInputMode,
+  postTypeMode,
+  setPostTypeMode,
   onSubmit,
   isEditing,
   form,
   isLoading,
 }: {
-  feedInputMode: FeedInputMode;
+  postTypeMode: SocialFeedPostType;
   isEditing?: boolean;
-  onSubmit: (values: FeedPostFormSchemaType) => Promise<void> | void;
-  setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
-  form: UseFormReturn<FeedPostFormSchemaType>;
+  onSubmit: (values: SocialFeedPostFormSchemaType) => Promise<void> | void;
+  setPostTypeMode: Dispatch<SetStateAction<SocialFeedPostType>>;
+  form: UseFormReturn<SocialFeedPostFormSchemaType>;
   isLoading?: boolean;
 }) {
   const { toast } = useToast();
@@ -231,10 +230,10 @@ export function StandardPostForm({
                   disabled={uploading}
                 />
                 <SocialFeedActionButtons
-                  feedInputMode={feedInputMode}
+                  postTypeMode={postTypeMode}
                   isReplying={!!parentPostId}
                   isEditing={!!isEditing}
-                  setFeedInputMode={setFeedInputMode}
+                  setPostTypeMode={setPostTypeMode}
                   isLoading={isLoading}
                   isDisabled={uploading || isLoading}
                 />
