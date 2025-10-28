@@ -12,6 +12,7 @@ import CommunityMemberCard from "@/components/user/community-member-card";
 import { GnoProfile, profileOptions } from "@/lib/queries/profile";
 import { communityUsersWithRoles } from "@/lib/queries/community";
 import EmptyList from "@/components/widgets/lists/empty-list";
+import { addressFromRealmId } from "@/lib/gno";
 
 type CommunityMembersProps = {
   communityId: string;
@@ -36,8 +37,13 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
 
   const membersWithRoles = membersProfiles.map((profile, idx) => ({
     ...profile,
+    realmId:
+      members.find((m) => addressFromRealmId(m.address) === profile.address)
+        ?.address || "",
     roles: members[idx].roles,
   }));
+
+  console.log(membersWithRoles);
 
   return (
     <div className="space-y-8">
@@ -57,11 +63,11 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
           {membersWithRoles.map((member) => (
             <Link
               key={member.address}
-              href={`/profile/${member.address}`}
+              href={`/profile/${member.realmId}`}
               className="block"
             >
               <CommunityMemberCard
-                address={member.address}
+                address={member.realmId}
                 displayName={member.displayName}
                 bio={member.bio}
                 roles={member.roles}
