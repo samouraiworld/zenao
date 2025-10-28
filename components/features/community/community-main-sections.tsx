@@ -17,8 +17,8 @@ import {
 } from "@/components/shadcn/tabs";
 import {
   CommunityTabsSchemaType,
-  feedPostFormSchema,
-  FeedPostFormSchemaType,
+  socialFeedPostFormSchema,
+  SocialFeedPostFormSchemaType,
 } from "@/types/schemas";
 import CommunityEvents from "@/app/community/[id]/[tab]/events";
 import CommunityChat from "@/app/community/[id]/[tab]/chat";
@@ -57,9 +57,9 @@ function CommunityMainSections({
     [userRoles],
   );
 
-  const form = useForm<FeedPostFormSchemaType>({
+  const form = useForm<SocialFeedPostFormSchemaType>({
     mode: "all",
-    resolver: zodResolver(feedPostFormSchema),
+    resolver: zodResolver(socialFeedPostFormSchema),
     defaultValues: {
       content: "",
       question: "",
