@@ -2,7 +2,7 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { PollPostCard } from "./poll-post-card";
+import { PollPostCard } from "../cards/poll-post-card";
 import { PollPostView, PollPostViewInfo } from "@/lib/social-feed";
 import { pollInfo } from "@/lib/queries/social-feed";
 

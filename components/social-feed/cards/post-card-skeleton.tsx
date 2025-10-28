@@ -1,4 +1,4 @@
-import { UserAvatarSkeleton } from "../features/user/user";
+import { UserAvatarSkeleton } from "@/components/features/user/user";
 import { Card } from "@/components/widgets/cards/card";
 import { Skeleton } from "@/components/shadcn/skeleton";
 
