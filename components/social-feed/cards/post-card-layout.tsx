@@ -13,6 +13,7 @@ import Text from "@/components/widgets/texts/text";
 import { GnoProfile } from "@/lib/queries/profile";
 import { Button } from "@/components/shadcn/button";
 import { UserAvatar } from "@/components/features/user/user";
+import { derivePkgAddr } from "@/lib/gno";
 
 type PostCardLayoutProps = {
   post: PostView;
@@ -59,7 +60,7 @@ export function PostCardLayout({
     <Card className="w-full flex flex-col gap-2">
       <div className="flex flex-col sm:flex-row items-start gap-2 relative">
         <div className="w-full flex flex-row items-center gap-3">
-          <Link href={`/profile/${post.post.author}`}>
+          <Link href={`/profile/${derivePkgAddr(post.post.author)}`}>
             <UserAvatar
               className="flex ring-2 ring-background/80 cursor-pointer hover:scale-110 transition-transform ease-out"
               realmId={post.post.author}
