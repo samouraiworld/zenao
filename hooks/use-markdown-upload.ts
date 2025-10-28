@@ -13,55 +13,61 @@ function useMarkdownUpload(
     fileType: "image" | "audio",
     onUploading?: (text: string) => void,
     onSuccess?: (test: string) => void,
+    fileSizeLimit?: number,
   ) => {
-    setUploading(true);
-    const textarea = textareaRef.current;
-    const loadingText = `${cursor > 0 ? "\n" : ""}[Uploading ${file.name}...]\n`;
+    try {
+      setUploading(true);
+      const textarea = textareaRef.current;
+      const loadingText = `${cursor > 0 ? "\n" : ""}[Uploading ${file.name}...]\n`;
 
-    if (textarea) {
-      const before = textarea.value.substring(0, cursor);
-      const after = textarea.value.substring(cursor);
-
-      // Insert the text at cursor position
-      onUploading?.(before + loadingText + after);
-
-      // Move cursor after the inserted text
-      const newCursorPos = cursor + loadingText.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
-    }
-
-    const uri = await uploadFile(file);
-
-    if (textarea) {
-      onSuccess?.(uri);
-
-      const text =
-        fileType === "image"
-          ? `${cursor > 0 ? "\n" : ""}![${file.name}](${uri})\n`
-          : `${cursor > 0 ? "\n" : ""}::audio[${file.name}]{url="${uri}"}\n`;
-
-      const start = textarea.value.indexOf(loadingText);
-
-      if (start < 0) {
-        // If loading text not found, insert at cursor
+      if (textarea) {
         const before = textarea.value.substring(0, cursor);
         const after = textarea.value.substring(cursor);
 
         // Insert the text at cursor position
-        onSuccess?.(before + text + after);
-      } else {
-        const before = textarea.value.substring(0, cursor);
-        const after = textarea.value.substring(start + loadingText.length);
+        onUploading?.(before + loadingText + after);
 
-        onSuccess?.(before + text + after);
-
-        const newCursor = start + loadingText.length;
-        textarea.setSelectionRange(newCursor, newCursor);
-
-        textarea.focus();
+        // Move cursor after the inserted text
+        const newCursorPos = cursor + loadingText.length;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
       }
+
+      const uri = await uploadFile(file, fileSizeLimit);
+
+      if (textarea) {
+        onSuccess?.(uri);
+
+        const text =
+          fileType === "image"
+            ? `${cursor > 0 ? "\n" : ""}![${file.name}](${uri})\n`
+            : `${cursor > 0 ? "\n" : ""}::audio[${file.name}]{url="${uri}"}\n`;
+
+        const start = textarea.value.indexOf(loadingText);
+
+        if (start < 0) {
+          // If loading text not found, insert at cursor
+          const before = textarea.value.substring(0, cursor);
+          const after = textarea.value.substring(cursor);
+
+          // Insert the text at cursor position
+          onSuccess?.(before + text + after);
+        } else {
+          const before = textarea.value.substring(0, cursor);
+          const after = textarea.value.substring(start + loadingText.length);
+
+          onSuccess?.(before + text + after);
+
+          const newCursor = start + loadingText.length;
+          textarea.setSelectionRange(newCursor, newCursor);
+
+          textarea.focus();
+        }
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
   };
 
   return {

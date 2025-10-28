@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { IMAGE_FILE_SIZE_LIMIT } from "../event/[id]/constants";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -147,6 +148,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
             name="bannerUri"
             placeholder={t("banner-placeholder")}
             aspectRatio={[4, 1]}
+            fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
             className="w-full rounded-xl overflow-hidden"
             tooltip={<Text size="sm">{t("change-banner")}</Text>}
           />
@@ -156,6 +158,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               name="avatarUri"
               placeholder={t("avatar-placeholder")}
               aspectRatio={[4, 4]}
+              fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
               className="w-full rounded-xl overflow-hidden"
               tooltip={<Text size="sm">{t("change-avatar")}</Text>}
             />
