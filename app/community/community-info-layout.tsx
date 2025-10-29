@@ -57,6 +57,9 @@ function CommunityInfoLayout({
     image: [web2URL(data.avatarUri), web2URL(data.bannerUri)],
   };
 
+  console.log("jsonLd", jsonLd);
+  console.log("stringified", JSON.stringify(jsonLd));
+
   return (
     <div className="flex flex-col gap-8 w-full">
       <script
