@@ -10,6 +10,8 @@ import {
 } from "@/lib/queries/community";
 import { profileOptions } from "@/lib/queries/profile";
 import { web2URL } from "@/lib/uris";
+import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { communityDetailsSchema } from "@/types/schemas";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -35,12 +37,24 @@ export async function generateMetadata({
     notFound();
   }
 
+  const { description, shortDescription } = deserializeWithFrontMatter({
+    serialized: communityData.description || "",
+    schema: communityDetailsSchema,
+    defaultValue: {
+      description: "",
+      shortDescription: "",
+      socialMediaLinks: [],
+      portfolio: [],
+    },
+    contentFieldName: "description",
+  });
+
   return {
     title: communityData.displayName,
     description: communityData.description,
     openGraph: {
       title: communityData.displayName,
-      description: communityData.description,
+      description: shortDescription || description || "",
       images: [
         {
           url: web2URL(communityData.avatarUri),

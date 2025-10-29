@@ -42,23 +42,17 @@ function CommunityInfoLayout({
       contentFieldName: "description",
     });
 
-  const jsonLdDescription =
-    shortDescription.length > 0 ? shortDescription : description;
-
   const jsonLd: WithContext<Organization> = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: data.displayName,
-    description: jsonLdDescription,
+    description: shortDescription || description || "",
     logo: {
       "@type": "ImageObject",
       url: web2URL(data.avatarUri),
     },
-    image: [web2URL(data.avatarUri), web2URL(data.bannerUri)],
+    image: [web2URL(data.bannerUri)],
   };
-
-  console.log("jsonLd", jsonLd);
-  console.log("stringified", JSON.stringify(jsonLd));
 
   return (
     <div className="flex flex-col gap-8 w-full">
