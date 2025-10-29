@@ -6,13 +6,14 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { PollPostForm } from "./poll-post-form";
-import { FeedInputMode, StandardPostForm } from "./standard-post-form";
-import { FeedPostFormSchemaType } from "@/types/schemas";
+import { StandardPostForm } from "./standard-post-form";
+import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
 import { userInfoOptions } from "@/lib/queries/user";
 import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/hooks/use-toast";
 import { OrgType } from "@/lib/organization";
+import { SocialFeedPostType } from "@/lib/social-feed";
 
 const SocialFeedForm = ({
   orgType,
@@ -21,7 +22,7 @@ const SocialFeedForm = ({
 }: {
   orgType: OrgType;
   orgId: string;
-  form: UseFormReturn<FeedPostFormSchemaType>;
+  form: UseFormReturn<SocialFeedPostFormSchemaType>;
 }) => {
   const { toast } = useToast();
 
@@ -35,18 +36,18 @@ const SocialFeedForm = ({
   const t = useTranslations("social-feed.standard-post-form");
 
   const formContainerRef = useRef<HTMLDivElement>(null);
-  const [feedInputMode, setFeedInputMode] =
-    useState<FeedInputMode>("STANDARD_POST");
+  const [postTypeMode, setPostTypeMode] =
+    useState<SocialFeedPostType>("STANDARD_POST");
 
   useEffect(() => {
-    if (feedInputMode === "POLL") {
+    if (postTypeMode === "POLL") {
       form.setValue("kind", "POLL");
     } else {
       form.setValue("kind", "STANDARD_POST");
     }
-  }, [feedInputMode, form]);
+  }, [postTypeMode, form]);
 
-  const onSubmitStandardPost = async (values: FeedPostFormSchemaType) => {
+  const onSubmitStandardPost = async (values: SocialFeedPostFormSchemaType) => {
     try {
       if (values.kind !== "STANDARD_POST") {
         throw new Error("invalid form");
@@ -88,18 +89,18 @@ const SocialFeedForm = ({
       className="flex justify-center w-full transition-all duration-300 bg-secondary/80"
     >
       <div className="w-full">
-        {feedInputMode === "POLL" ? (
+        {postTypeMode === "POLL" ? (
           <PollPostForm
             orgType={orgType}
             orgId={orgId}
-            feedInputMode={feedInputMode}
-            setFeedInputMode={setFeedInputMode}
+            postTypeMode={postTypeMode}
+            setPostTypeMode={setPostTypeMode}
             form={form}
           />
         ) : (
           <StandardPostForm
-            feedInputMode={feedInputMode}
-            setFeedInputMode={setFeedInputMode}
+            postTypeMode={postTypeMode}
+            setPostTypeMode={setPostTypeMode}
             form={form}
             onSubmit={onSubmitStandardPost}
             isLoading={isPending}
