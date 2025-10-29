@@ -108,7 +108,7 @@ export function ProfileInfo({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ProfileHeader
-          address={profile.address}
+          address={address}
           displayName={profile.displayName}
           bio={profile.bio}
           avatarUri={profile.avatarUri}

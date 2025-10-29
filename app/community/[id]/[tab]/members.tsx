@@ -43,8 +43,6 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
     roles: members[idx].roles,
   }));
 
-  console.log(membersWithRoles);
-
   return (
     <div className="space-y-8">
       <Heading level={2} size="lg">
@@ -67,7 +65,7 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
               className="block"
             >
               <CommunityMemberCard
-                address={member.realmId}
+                address={member.address}
                 displayName={member.displayName}
                 bio={member.bio}
                 roles={member.roles}
