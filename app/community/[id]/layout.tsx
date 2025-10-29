@@ -51,7 +51,7 @@ export async function generateMetadata({
 
   return {
     title: communityData.displayName,
-    description: communityData.description,
+    description: shortDescription || description || "",
     openGraph: {
       title: communityData.displayName,
       description: shortDescription || description || "",
