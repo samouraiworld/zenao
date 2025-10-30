@@ -8,6 +8,7 @@ export default defineConfig({
     baseUrl: "http://localhost:3000",
     video: true,
     videoCompression: 32,
+    defaultCommandTimeout: 10000,
     setupNodeEvents(on, config) {
       on("before:browser:launch", (browser, launchOptions) => {
         if (browser.family === "chromium" && browser.name !== "electron") {
