@@ -195,9 +195,9 @@ export default function ProfileHeader({
 
 const EditProfileButton = ({ address }: { address: string }) => {
   const { userId, getToken } = useAuth();
-  const [clientUserId, setClientUserId] = useState("");
+  const [clientUserId, setClientUserId] = useState<string>();
   useEffect(() => {
-    setClientUserId(userId);
+    setClientUserId(userId || undefined);
   }, [userId]);
   const { data: info } = useSuspenseQuery(
     userInfoOptions(getToken, clientUserId),
