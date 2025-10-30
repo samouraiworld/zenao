@@ -10,14 +10,14 @@ import { Card } from "@/components/widgets/cards/card";
 import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 import { DateTimeText } from "@/components/widgets/date-time-text";
 import Text from "@/components/widgets/texts/text";
-import { GnoProfile } from "@/lib/queries/profile";
+import { UserProfile } from "@/lib/queries/profile";
 import { Button } from "@/components/shadcn/button";
 import { UserAvatar } from "@/components/features/user/user";
 import { derivePkgAddr } from "@/lib/gno";
 
 type PostCardLayoutProps = {
   post: PostView;
-  createdBy: GnoProfile | null;
+  createdBy: UserProfile | null;
   children: ReactNode;
   isOwner?: boolean;
   canReply?: boolean;
