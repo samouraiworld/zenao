@@ -33,12 +33,11 @@ export function deserializeWithFrontMatter<U extends z.ZodType>({
     aContent = content;
     aData = data;
   } catch (error) {
-    if (error instanceof Error && error.message.includes("is not valid JSON")) {
-      // If the error is due to invalid JSON, fallback trying  default "YAML" parsing
-      const { content, data } = matter(serialized);
-      aContent = content;
-      aData = data;
-    }
+    console.error("failed to parse frontmatter as json", error);
+    // If the error is due to invalid JSON, fallback trying  default "YAML" parsing
+    const { content, data } = matter(serialized);
+    aContent = content;
+    aData = data;
   }
 
   const result = schema.safeParse({ [contentFieldName]: aContent, ...aData });
