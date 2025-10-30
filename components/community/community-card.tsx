@@ -1,7 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { Suspense } from "react";
 import { Card } from "../widgets/cards/card";
 import { AspectRatio } from "../shadcn/aspect-ratio";
 import { Web3Image } from "../widgets/images/web3-image";
@@ -61,7 +62,9 @@ function CommunityCard({ id, community }: CommunityCardProps) {
             {shortDescription || t("no-description")}
           </Text>
 
-          <MembersPreview id={id} />
+          <Suspense fallback={<MembersPreviewFallback />}>
+            <MembersPreview id={id} />
+          </Suspense>
         </div>
       </div>
     </Card>
@@ -71,11 +74,15 @@ function CommunityCard({ id, community }: CommunityCardProps) {
 function MembersPreview({ id }: { id: string }) {
   const t = useTranslations("community-card");
   // NOTE: we useQuery instead of useSuspenseQuery here to ensure this is fetched on the client
-  const { data: members } = useQuery(communityUsersWithRoles(id, ["member"]));
+  const { data: members } = useSuspenseQuery(
+    communityUsersWithRoles(id, ["member"]),
+  );
   const memberAddresses = members?.map((m) => m.address);
-  if (!memberAddresses) {
-    return <MembersPreviewFallback />;
-  }
+
+  // if (!memberAddresses) {
+  //   return <MembersPreviewFallback />;
+  // }
+
   return (
     <div className="flex flex-col gap-2 ">
       {/* 6 because we decide to show the first 6 participants avatars as preview */}
