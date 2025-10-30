@@ -2,6 +2,7 @@ import { ClerkLoaded, SignedIn, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ExternalLink, Link2, List, MapPin } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Button } from "@/components/shadcn/button";
 import { Skeleton } from "@/components/shadcn/skeleton";
@@ -30,11 +31,6 @@ export default function ProfileHeader({
   avatarUri,
   bio,
 }: ProfileHeaderProps) {
-  const { userId, getToken } = useAuth();
-  const { data: info } = useSuspenseQuery(userInfoOptions(getToken, userId));
-  const realmId = info?.realmId;
-  const userLoggedAddress = addressFromRealmId(realmId);
-
   const profileDetails = deserializeWithFrontMatter({
     serialized: bio,
     schema: gnoProfileDetailsSchema,
@@ -114,13 +110,7 @@ export default function ProfileHeader({
             />
             <ClerkLoaded>
               <SignedIn>
-                {userLoggedAddress === address && (
-                  <Link href="/settings" className="w-full sm:w-auto">
-                    <Button className="w-full sm:w-auto">
-                      Edit my profile
-                    </Button>
-                  </Link>
-                )}
+                <EditProfileButton address={address} />
               </SignedIn>
             </ClerkLoaded>
           </div>
@@ -202,3 +192,23 @@ export default function ProfileHeader({
     </div>
   );
 }
+
+const EditProfileButton = ({ address }: { address: string }) => {
+  const { userId, getToken } = useAuth();
+  const [clientUserId, setClientUserId] = useState("");
+  useEffect(() => {
+    setClientUserId(userId);
+  }, [userId]);
+  const { data: info } = useSuspenseQuery(
+    userInfoOptions(getToken, clientUserId),
+  );
+  const realmId = info?.realmId;
+  const userLoggedAddress = addressFromRealmId(realmId);
+  return (
+    userLoggedAddress === address && (
+      <Link href="/settings" className="w-full sm:w-auto">
+        <Button className="w-full sm:w-auto">Edit my profile</Button>
+      </Link>
+    )
+  );
+};
