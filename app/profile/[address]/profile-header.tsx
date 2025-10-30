@@ -196,12 +196,16 @@ export default function ProfileHeader({
 const EditProfileButton = ({ address }: { address: string }) => {
   const { userId, getToken } = useAuth();
   const [clientUserId, setClientUserId] = useState<string>();
+
+  // we need this useEffect to prevent hydration errors due to clerk
   useEffect(() => {
     setClientUserId(userId || undefined);
   }, [userId]);
+
   const { data: info } = useSuspenseQuery(
     userInfoOptions(getToken, clientUserId),
   );
+
   const realmId = info?.realmId;
   const userLoggedAddress = addressFromRealmId(realmId);
   return (
