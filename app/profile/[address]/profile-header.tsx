@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/nextjs";
+import { ClerkLoaded, SignedIn, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ExternalLink, Link2, List, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -112,11 +112,17 @@ export default function ProfileHeader({
               href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${address}`}
               className="w-full sm:w-auto"
             />
-            {userLoggedAddress === address && (
-              <Link href="/settings" className="w-full sm:w-auto">
-                <Button className="w-full sm:w-auto">Edit my profile</Button>
-              </Link>
-            )}
+            <ClerkLoaded>
+              <SignedIn>
+                {userLoggedAddress === address && (
+                  <Link href="/settings" className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto">
+                      Edit my profile
+                    </Button>
+                  </Link>
+                )}
+              </SignedIn>
+            </ClerkLoaded>
           </div>
         </div>
 
