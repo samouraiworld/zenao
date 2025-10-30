@@ -54,7 +54,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextUpcomingPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      address,
+      userInfo?.realmId ?? "",
       discoverableFilter,
       now,
       Number.MAX_SAFE_INTEGER,
@@ -69,7 +69,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextPastPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      address,
+      userInfo?.realmId ?? "",
       discoverableFilter,
       now - 1,
       0,
