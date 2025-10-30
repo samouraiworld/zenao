@@ -237,6 +237,7 @@ describe("main", () => {
     // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
+      .should("be.enabled")
       .type(testStandardPost, { delay: 1 });
 
     // Submit post
@@ -273,9 +274,9 @@ describe("main", () => {
     cy.get('button[aria-label="set type post"]').click();
 
     // Enter question
-    cy.get(
-      `textarea[placeholder="What do you wanna ask to the community ?"]`,
-    ).type(testStandardPost, { delay: 1 });
+    cy.get(`textarea[placeholder="What do you wanna ask to the community ?"]`)
+      .should("be.enabled")
+      .type(testStandardPost, { delay: 1 });
 
     // Enter answers
     cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
@@ -330,6 +331,7 @@ describe("main", () => {
     // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
+      .should("be.enabled")
       .type(testStandardPost, { delay: 1 });
 
     // Submit post
@@ -350,10 +352,11 @@ describe("main", () => {
     // Type comment
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
+      .should("be.enabled")
       .type(testComment, { delay: 1 });
 
     // Submit comment
-    cy.get('button[aria-label="submit post"]').click();
+    cy.get('button[aria-label="submit post"]').should("be.enabled").click();
 
     // Assert comment exists
     cy.get("p").contains(testComment).should("be.visible");
