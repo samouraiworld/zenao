@@ -4,7 +4,22 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./app/i18n/request.ts");
 
+const isE2ETesting = process.env.E2E_TESTING === "true";
+
+const e2eConfig: NextConfig = {
+  reactStrictMode: true,
+  productionBrowserSourceMaps: true,
+  reactProductionProfiling: true,
+  webpack: (config) => {
+    config.optimization.minimize = false;
+    return config;
+  },
+};
+
 const nextConfig: NextConfig = {
+  ...(!isE2ETesting ? {} : e2eConfig),
+  // Optimizations disabled when e2e testing is running
+
   /* config options here */
   images: {
     remotePatterns: [
