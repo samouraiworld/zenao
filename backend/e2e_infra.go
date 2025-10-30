@@ -197,7 +197,7 @@ func execE2EInfra() error {
 	}
 
 	// build and run next project in background
-	args := []string{"sh", "-c", "npm run build -- --profile && npm run start"}
+	args := []string{"sh", "-c", "npm run build && npm run start"}
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
