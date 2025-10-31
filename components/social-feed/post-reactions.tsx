@@ -19,39 +19,64 @@ type PostReactionsProps = {
   onReactionChange?: (icon: string) => void | Promise<void>;
 };
 
+const EmojiPickerDialog = ({
+  isOpen,
+  onOpenChange,
+  canReact,
+  isPending,
+  onReactionChange,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  isPending?: boolean;
+  onReactionChange?: (icon: string) => void | Promise<void>;
+  canReact?: boolean;
+}) => {
+  const { resolvedTheme } = useTheme();
+
+  if (!canReact) return null;
+
+  return (
+    <Popover open={isOpen} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className="reaction-btn rounded-full cursor-pointer size-8 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
+        >
+          <Smile size={16} color="hsl(var(--secondary-color))" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-fit bg-transparent p-0 border-none transition-all">
+        <EmojiPicker
+          theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
+          onEmojiClick={(choice) => {
+            if (isPending) return;
+            onReactionChange?.(choice.emoji);
+            onOpenChange(false);
+          }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 function PostReactions({
   reactions,
   canReact,
   isPending,
   onReactionChange,
 }: PostReactionsProps) {
-  const { resolvedTheme } = useTheme();
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
 
   return (
     <div className="flex flex-row gap-2 overflow-auto">
-      {canReact && (
-        <Popover open={emojiPickerOpen} onOpenChange={setEmojiPickerOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="reaction-btn rounded-full cursor-pointer size-8 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
-            >
-              <Smile size={16} color="hsl(var(--secondary-color))" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-fit bg-transparent p-0 border-none transition-all">
-            <EmojiPicker
-              theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
-              onEmojiClick={(choice) => {
-                if (isPending) return;
-                onReactionChange?.(choice.emoji);
-                setEmojiPickerOpen(false);
-              }}
-            />
-          </PopoverContent>
-        </Popover>
-      )}
+      <EmojiPickerDialog
+        isOpen={emojiPickerOpen}
+        onOpenChange={setEmojiPickerOpen}
+        canReact={canReact}
+        isPending={isPending}
+        onReactionChange={onReactionChange}
+      />
 
       <div className="flex flex-row gap-1 grow overflow-auto">
         {reactions

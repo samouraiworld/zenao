@@ -7,6 +7,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
+import dynamic from "next/dynamic";
 import {
   Tabs,
   TabsContent,
@@ -26,7 +27,11 @@ import {
 } from "@/types/schemas";
 import EventFeed from "@/app/event/[id]/(general)/[tab]/feed";
 import EventPolls from "@/app/event/[id]/(general)/[tab]/votes";
-import SocialFeedForm from "@/components/social-feed/forms/social-feed-form";
+
+const SocialFeedFormNoSSR = dynamic(
+  () => import("@/components/social-feed/forms/social-feed-form"),
+  { ssr: false },
+);
 
 export function MainEventSections({
   className,
@@ -111,8 +116,13 @@ export function MainEventSections({
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-6 min-h-0 pt-4">
-          {section !== "description" && isMember && (
-            <SocialFeedForm orgType="event" orgId={eventId} form={form} />
+          {section !== "description" && (
+            <SocialFeedFormNoSSR
+              orgType="event"
+              isDisplayed={isMember}
+              orgId={eventId}
+              form={form}
+            />
           )}
           {/* Social Feed (Discussions) */}
           <TabsContent value="feed">
