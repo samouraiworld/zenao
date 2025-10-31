@@ -71,12 +71,14 @@ type User struct {
 	CreatedAt   time.Time
 	ID          string
 	AuthID      string
-	DisplayName string
-	Bio         string
-	AvatarURI   string
+	RealmID     string
+	DisplayName string //TODO: to remove
+	Bio         string //TODO: to remove
+	AvatarURI   string //TODO: to remove
 	Plan        Plan
 }
 
+// TODO: TO DELETE
 type Event struct {
 	CreatedAt         time.Time
 	DeletedAt         time.Time
@@ -95,6 +97,7 @@ type Event struct {
 	Discoverable      bool
 }
 
+// TODO: TO DELETE
 type Community struct {
 	CreatedAt   time.Time
 	ID          string
@@ -105,6 +108,7 @@ type Community struct {
 	CreatorID   string
 }
 
+// TODO: TO DELETE
 type EntityRole struct {
 	CreatedAt  time.Time
 	DeletedAt  time.Time
@@ -115,6 +119,7 @@ type EntityRole struct {
 	Role       string // one of: organizer, gatekeeper, participant, administrator, member,
 }
 
+// TODO: TO DELETE
 type Feed struct {
 	CreatedAt time.Time
 	ID        string
@@ -123,6 +128,7 @@ type Feed struct {
 	OrgID     string
 }
 
+// TODO: TO DELETE
 type Post struct {
 	CreatedAt time.Time
 	ID        string
@@ -132,6 +138,7 @@ type Post struct {
 	Reactions []*Reaction
 }
 
+// TODO: TO DELETE
 type Poll struct {
 	CreatedAt time.Time
 	ID        string
@@ -143,6 +150,7 @@ type Poll struct {
 	Votes     []*Vote
 }
 
+// TODO: TO DELETE
 type Vote struct {
 	CreatedAt time.Time
 	ID        string
@@ -150,6 +158,7 @@ type Vote struct {
 	Option    string
 }
 
+// TODO: TO DELETE
 type Reaction struct {
 	CreatedAt time.Time
 	ID        string
@@ -159,15 +168,20 @@ type Reaction struct {
 }
 
 type SoldTicket struct {
-	DeletedAt time.Time
-	CreatedAt time.Time
-	Ticket    *Ticket
-	BuyerID   string
-	UserID    string
-	User      *User
-	Checkin   *Checkin
+	DeletedAt    time.Time
+	CreatedAt    time.Time
+	Ticket       *Ticket
+	EventRealmID string
+	BuyerRealmID string
+	UserRealmID  string
+
+	//TODO: TO DELETE
+	Checkin *Checkin
+	BuyerID string
+	UserID  string
 }
 
+// TODO: TO DELETE
 type Checkin struct {
 	At           time.Time
 	GatekeeperID string
@@ -184,6 +198,7 @@ func init() {
 	}
 }
 
+// TODO: DELETE THIS
 func (e *Event) Timezone() (*time.Location, error) {
 	switch val := e.Location.GetAddress().(type) {
 	case *zenaov1.EventLocation_Virtual:
@@ -201,6 +216,22 @@ func (e *Event) Timezone() (*time.Location, error) {
 	}
 }
 
+func EventTimezone(location *zenaov1.EventLocation) (*time.Location, error) {
+	switch val := location.GetAddress().(type) {
+	case *zenaov1.EventLocation_Virtual:
+		return time.UTC, nil
+
+	case *zenaov1.EventLocation_Custom:
+		return time.LoadLocation(val.Custom.GetTimezone())
+
+	case *zenaov1.EventLocation_Geo:
+		name := tzFinder.GetTimezoneName(float64(val.Geo.Lng), float64(val.Geo.Lat))
+		return time.LoadLocation(name)
+	default:
+		return nil, errors.New("unknown location kind")
+	}
+}
+
 // authID is the user id coming from the auth system.
 // userID is an internal zenao user id.
 type DB interface {
@@ -208,62 +239,26 @@ type DB interface {
 	TxWithSpan(ctx context.Context, label string, cb func(db DB) error) error
 	WithContext(ctx context.Context) DB
 
-	CreateUser(authID string) (*User, error)
-	GetUser(authID string) (*User, error)
-	// XXX: add EnsureUsersExist
+	CreateUser(authID string, realmIDPrefix string) (*User, error)
+	GetUserByAuthID(authID string) (*User, error)
+	GetUserByRealmID(realmID string) (*User, error)
+	GetUsersByRealmIDs(realmIDs []string) ([]*User, error)
 
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
-	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
-	GetAllUsers() ([]*User, error)
 
-	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)
-	CancelEvent(eventID string) error
-	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
-	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
-	GetEvent(eventID string) (*Event, error)
-	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
+	Participate(buyerID string, userID string, eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error
 	CancelParticipation(eventID string, userID string) error
+	GetEventUserTicket(eventRealmID string, userRealmID string) (*SoldTicket, error)
+	GetEventUserOrBuyerTickets(eventRealmID string, userRealmID string) ([]*SoldTicket, error)
+
+	// TODO: GENTXS SPECIFIC METHODS TO DELETE LATER
 	GetAllEvents() ([]*Event, error)
 	GetEventTickets(eventID string) ([]*SoldTicket, error)
-	GetEventCommunity(eventID string) (*Community, error)
-	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
-	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
-	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
-
-	AddEventToCommunity(eventID string, communityID string) error
-	RemoveEventFromCommunity(eventID string, communityID string) error
-	// returns all communities that contains the event
-	CommunitiesByEvent(eventID string) ([]*Community, error)
-
-	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
-	EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
-	GetCommunity(communityID string) (*Community, error)
-	AddMemberToCommunity(communityID string, userID string) error
-	RemoveMemberFromCommunity(communityID string, userID string) error
+	GetAllUsers() ([]*User, error)
 	GetAllCommunities() ([]*Community, error)
-
-	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
-	GetOrgUsers(orgType string, orgID string) ([]*User, error)
-	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
-	GetOrgByPostID(postID string) (orgType, orgID string, err error)
-
-	CreateFeed(orgType string, orgID string, slug string) (*Feed, error)
-	GetFeed(orgType string, orgID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
-
-	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
-	DeletePost(postID string) error
-	EditPost(postID string, req *zenaov1.EditPostRequest) error
-	GetPostByID(postID string) (*Post, error)
 	GetAllPosts(getDeleted bool) ([]*Post, error)
-	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
-
-	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByPostID(postID string) (*Poll, error)
-
-	// gentxs specific
 	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
@@ -273,32 +268,51 @@ type DB interface {
 type Chain interface {
 	WithContext(ctx context.Context) Chain
 
+	// Off-chain operations
+	SignerAddress() string
+	UserRealmID(userID string) string
+	EventRealmID(eventID string) string
+	CommunityRealmID(communityID string) string
+	EntityRealmID(entityType string, entityID string) (string, error)
+
+	// Read operations (Query)
+	EntityRoles(entityRealmID string, orgRealmID string, orgType string) ([]string, error)
+
+	GetUser(userRealmID string) (displayName string, Bio string, ImageUri string, err error)
+
+	GetEvent(eventRealmID string) (*zenaov1.EventInfo, error)
+	GetEventUsersByRole(eventRealmID string, role string) ([]string, error)
+	GetEventCommunity(eventRealmID string) (*zenaov1.CommunityInfo, error)
+
+	GetCommunity(communityRealmID string) (*zenaov1.CommunityInfo, error)
+	GetCommunityUsersByRole(communityRealmID string, role string) ([]string, error)
+
+	// Write operations (Transactions)
 	FillAdminProfile()
 	CreateUser(user *User) error
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
-	UserRealmID(userID string) string
+	EditUser(userRealmID string, req *zenaov1.EditUserRequest) error
 
-	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
-	CancelEvent(eventID string, callerID string) error
-	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
-	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
-	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
-	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
+	CreateEvent(eventRealmID string, organizersRealmIDs []string, gatekeepersRealmIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
+	CancelEvent(eventRealmID string, callerRealmID string) error
+	EditEvent(eventRealmID string, callerRealmID string, organizersRealmIDs []string, gatekeepersRealmIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
+	Participate(eventRealmID string, callerRealmID string, participantRealmID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
+	CancelParticipation(eventRealmID string, callerRealmID string, participantRealmID string, ticketPubkey string) error
+	Checkin(eventRealmID string, gatekeeperRealmID string, req *zenaov1.CheckinRequest) error
 
-	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
-	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
-	AddEventToCommunity(callerID string, communityID string, eventID string) error
-	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
-	AddMemberToCommunity(callerID string, communityID string, userID string) error
-	AddMembersToCommunity(callerID string, communityID string, userIDs []string) error
-	RemoveMemberFromCommunity(callerID string, communityID string, userID string) error
+	CreateCommunity(communityRealmID string, administratorsRealmIDs []string, membersRealmIDs []string, eventsRealmIDs []string, req *zenaov1.CreateCommunityRequest) error
+	EditCommunity(communityRealmID string, callerRealmID string, administratorsRealmIDs []string, req *zenaov1.EditCommunityRequest) error
+	AddEventToCommunity(callerRealmID string, communityRealmID string, eventRealmID string) error
+	RemoveEventFromCommunity(callerRealmID string, communityRealmID string, eventRealmID string) error
+	AddMemberToCommunity(callerRealmID string, communityRealmID string, userRealmID string) error
+	AddMembersToCommunity(callerRealmID string, communityRealmID string, userRealmIDs []string) error
+	RemoveMemberFromCommunity(callerRealmID string, communityRealmID string, userRealmID string) error
 
-	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
-	DeletePost(userID string, postID string) error
-	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+	CreatePost(userRealmID string, orgRealmID string, post *feedsv1.Post) (postID string, err error)
+	DeletePost(userRealmID string, postID string) error
+	EditPost(userRealmID string, postID string, post *feedsv1.Post) error
+	ReactPost(userRealmID string, req *zenaov1.ReactPostRequest) error
+	CreatePoll(userRealmID string, orgRealmID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
+	VotePoll(userRealmID string, req *zenaov1.VotePollRequest) error
 }
 
 type Auth interface {

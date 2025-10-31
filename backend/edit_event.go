@@ -41,8 +41,8 @@ func (s *ZenaoServer) EditEvent(
 	}
 
 	//XXX: refactor the logic to avoid duplicate w/ gkps ?
-	var organizersIDs []string
-	organizersIDs = append(organizersIDs, zUser.ID)
+	var organizersRealmIDs []string
+	organizersRealmIDs = append(organizersRealmIDs, s.Chain.UserRealmID(zUser.ID))
 	for _, authOrg := range authOrgas {
 		if authOrg.Banned {
 			return nil, fmt.Errorf("user %s is banned", authOrg.Email)
@@ -51,10 +51,11 @@ func (s *ZenaoServer) EditEvent(
 		if err != nil {
 			return nil, err
 		}
-		if slices.Contains(organizersIDs, zOrg.ID) {
+		orgRealmID := s.Chain.UserRealmID(zOrg.ID)
+		if slices.Contains(organizersRealmIDs, orgRealmID) {
 			return nil, fmt.Errorf("duplicate organizer: %s", authOrg.Email)
 		}
-		organizersIDs = append(organizersIDs, zOrg.ID)
+		organizersRealmIDs = append(organizersRealmIDs, orgRealmID)
 	}
 
 	authGkps, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Gatekeepers)
@@ -62,7 +63,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	var gatekeepersIDs []string
+	var gatekeepersRealmIDs []string
 	for _, authGkp := range authGkps {
 		if authGkp.Banned {
 			return nil, fmt.Errorf("user %s is banned", authGkp.Email)
@@ -71,99 +72,104 @@ func (s *ZenaoServer) EditEvent(
 		if err != nil {
 			return nil, err
 		}
-		if slices.Contains(gatekeepersIDs, zGkp.ID) {
+		gkpRealmID := s.Chain.UserRealmID(zGkp.ID)
+		if slices.Contains(gatekeepersRealmIDs, gkpRealmID) {
 			return nil, fmt.Errorf("duplicate gatekeeper: %s", authGkp.Email)
 		}
-		gatekeepersIDs = append(gatekeepersIDs, zGkp.ID)
+		gatekeepersRealmIDs = append(gatekeepersRealmIDs, gkpRealmID)
 	}
 
 	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	var (
-		targets      []*zeni.User
-		participants []*zeni.User
-		targetIDs    = make(map[string]bool)
-		cmt          *zeni.Community
-		newCmt       *zeni.Community
-		evt          *zeni.Event
-	)
-	if err := s.DB.TxWithSpan(ctx, "db.EditEvent", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("user is not organizer of the event")
-		}
-
-		if cmt, err = db.GetEventCommunity(req.Msg.EventId); err != nil {
-			return err
-		}
-
-		if cmt != nil && cmt.ID != req.Msg.CommunityId {
-			if err = db.RemoveEventFromCommunity(req.Msg.EventId, cmt.ID); err != nil {
-				return err
-			}
-		}
-
-		if req.Msg.CommunityId != "" && (cmt == nil || req.Msg.CommunityId != cmt.ID) {
-			newCmt, err = db.GetCommunity(req.Msg.CommunityId)
-			if err != nil {
-				return err
-			}
-			entityRoles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
-			if err != nil {
-				return err
-			}
-			if !slices.Contains(entityRoles, zeni.RoleAdministrator) {
-				return errors.New("user is not administrator of the community")
-			}
-			if err = db.AddEventToCommunity(req.Msg.EventId, req.Msg.CommunityId); err != nil {
-				return err
-			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
-			if err != nil {
-				return err
-			}
-			participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
-			if err != nil {
-				return err
-			}
-
-			for _, target := range targets {
-				targetIDs[target.ID] = true
-			}
-
-			for _, participant := range participants {
-				if !targetIDs[participant.ID] {
-					if err := db.AddMemberToCommunity(req.Msg.CommunityId, participant.ID); err != nil {
-						return err
-					}
-				}
-			}
-		}
-
-		if evt, err = db.EditEvent(req.Msg.EventId, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
-			return err
-		}
-
-		return nil
-	}); err != nil {
+	eventRealmID := s.Chain.EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.UserRealmID(zUser.ID)
+	cmtRealmID := s.Chain.CommunityRealmID(req.Msg.CommunityId)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(eventRealmID)
+	if err != nil {
 		return nil, err
 	}
 
-	if newCmt != nil && time.Now().Add(24*time.Hour).Before(evt.StartDate) && req.Msg.CommunityEmail && s.MailClient != nil {
+	cmt, err := s.Chain.WithContext(ctx).GetEventCommunity(eventRealmID)
+	if err != nil {
+		return nil, err
+	}
+
+	passwordHash, err := zeni.NewPasswordHash(req.Msg.Password)
+	if err != nil {
+		return nil, err
+	}
+	privacy, _, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
+	if err != nil {
+		return nil, err
+	}
+
+	// XXX: how to have atomicity on these operations ?
+	if err := s.Chain.WithContext(ctx).EditEvent(eventRealmID, userRealmID, organizersRealmIDs, gatekeepersRealmIDs, req.Msg, privacy); err != nil {
+		return nil, err
+	}
+
+	if cmt != nil && cmt.PkgPath != cmtRealmID {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.Administrators[0], cmt.PkgPath, eventRealmID); err != nil {
+			return nil, err
+		}
+	}
+	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(eventRealmID, zeni.RoleParticipant)
+	if err != nil {
+		return nil, err
+	}
+	var members []*zeni.User
+	if req.Msg.CommunityId != "" {
+		membersRealmIDs, err := s.Chain.WithContext(ctx).GetCommunityUsersByRole(cmtRealmID, zeni.RoleMember)
+		if err != nil {
+			return nil, err
+		}
+		members, err = s.DB.GetUsersByRealmIDs(membersRealmIDs)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var newCmt *zenaov1.CommunityInfo
+	if req.Msg.CommunityId != "" && (cmt == nil || cmt.PkgPath != cmtRealmID) {
+		newCmt, err = s.Chain.WithContext(ctx).GetCommunity(cmtRealmID)
+		if err != nil {
+			return nil, err
+		}
+		memberIDs := make(map[string]bool)
+		for _, m := range members {
+			memberIDs[m.ID] = true
+		}
+
+		if err := s.Chain.WithContext(ctx).AddEventToCommunity(userRealmID, cmtRealmID, eventRealmID); err != nil {
+			return nil, err
+		}
+
+		newMembers := make([]string, 0, len(participants))
+		for _, participant := range participants {
+			if !memberIDs[participant] {
+				newMembers = append(newMembers, participant)
+			}
+		}
+		if len(newMembers) > 0 {
+			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(userRealmID, cmtRealmID, newMembers); err != nil {
+				s.Logger.Error("add-members-to-community", zap.String("community-id", req.Msg.CommunityId), zap.Strings("new-members", newMembers), zap.Error(err))
+			}
+		}
+	}
+
+	startDate := time.Unix(evt.StartDate, 0).In(time.UTC)
+	if newCmt != nil && time.Now().Add(24*time.Hour).Before(startDate) && req.Msg.CommunityEmail && s.MailClient != nil {
 		participantsIDS := make(map[string]bool)
 		for _, participant := range participants {
-			participantsIDS[participant.ID] = true
+			participantsIDS[participant] = true
 		}
 
 		var authIDs []string
-		for _, target := range targets {
-			if !participantsIDS[target.ID] {
-				authIDs = append(authIDs, target.AuthID)
+		for _, member := range members {
+			if !participantsIDS[member.ID] {
+				authIDs = append(authIDs, member.AuthID)
 			}
 		}
 		authTargets, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
@@ -171,7 +177,7 @@ func (s *ZenaoServer) EditEvent(
 			return nil, err
 		}
 
-		htmlStr, text, err := communityNewEventMailContent(evt, newCmt)
+		htmlStr, text, err := communityNewEventMailContent(req.Msg.EventId, evt, req.Msg.CommunityId, newCmt)
 		if err != nil {
 			return nil, err
 		}
@@ -202,39 +208,6 @@ func (s *ZenaoServer) EditEvent(
 			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
 		}
 
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		return nil, err
-	}
-
-	if cmt != nil && cmt.ID != req.Msg.CommunityId {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, req.Msg.EventId); err != nil {
-			return nil, err
-		}
-	}
-
-	if newCmt != nil {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, newCmt.ID, req.Msg.EventId); err != nil {
-			return nil, err
-		}
-
-		newMembers := make([]string, 0, len(participants))
-		for _, participant := range participants {
-			if !targetIDs[participant.ID] {
-				newMembers = append(newMembers, participant.ID)
-			}
-		}
-		if len(newMembers) > 0 {
-			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(newCmt.CreatorID, newCmt.ID, newMembers); err != nil {
-				s.Logger.Error("add-members-to-community", zap.String("community-id", newCmt.ID), zap.Strings("new-members", newMembers), zap.Error(err))
-			}
-		}
 	}
 
 	return connect.NewResponse(&zenaov1.EditEventResponse{
