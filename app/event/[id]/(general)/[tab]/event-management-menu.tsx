@@ -113,7 +113,7 @@ function EventManagementMenuOrganizer({
   );
 }
 
-export function EventManagementMenu({
+export default function EventManagementMenu({
   eventId,
   roles,
   nbParticipants,
