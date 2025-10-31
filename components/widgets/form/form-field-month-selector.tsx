@@ -1,4 +1,5 @@
 import { FieldValues } from "react-hook-form";
+import { useLocale } from "next-intl";
 import { FormFieldProps } from "@/types/schemas";
 import {
   FormField,
@@ -28,6 +29,7 @@ export default function FormFieldMonthSelector<T extends FieldValues>({
   label,
   disabled = false,
 }: FormFieldMonthSelectorProps<T>) {
+  const locale = useLocale();
   return (
     <FormField
       name={name}
@@ -46,7 +48,7 @@ export default function FormFieldMonthSelector<T extends FieldValues>({
             <SelectContent className="max-h-60 overflow-y-auto">
               {Array.from({ length: 12 }, (_, i) => {
                 const month = i + 1;
-                const monthName = new Date(1, i).toLocaleString("default", {
+                const monthName = new Date(1, i).toLocaleString(locale, {
                   month: "long",
                 });
                 return (
