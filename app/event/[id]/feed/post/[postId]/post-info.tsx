@@ -1,123 +1,29 @@
 "use client";
 
-import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import dynamic from "next/dynamic";
 import { StandardPostCard } from "@/components/social-feed/cards/standard-post-card";
 import Heading from "@/components/widgets/texts/heading";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
-import { useToast } from "@/hooks/use-toast";
 import { parsePollUri } from "@/lib/multiaddr";
-import { useCreateStandardPost } from "@/lib/mutations/social-feed";
-import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import { feedPost } from "@/lib/queries/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
-import { captureException } from "@/lib/report";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
-import { StandardPostForm } from "@/components/social-feed/forms/standard-post-form";
 import { PostCardSkeleton } from "@/components/social-feed/cards/post-card-skeleton";
 import { PollPost } from "@/components/social-feed/polls/poll-post";
 import CommentsList from "@/components/social-feed/lists/comments-list";
 
-function PostCommentForm({
-  eventId,
-  parentId,
-  userRoles,
-  form,
-}: {
-  eventId: string;
-  parentId: bigint;
-  userRoles: EventUserRole[];
-  form: UseFormReturn<SocialFeedPostFormSchemaType>;
-}) {
-  const { toast } = useToast();
-  const t = useTranslations("social-feed.standard-post-form");
-
-  const { getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const userRealmId = userInfo?.realmId || "";
-  const { createStandardPost, isPending } = useCreateStandardPost();
-
-  const onSubmit = async (values: SocialFeedPostFormSchemaType) => {
-    try {
-      if (values.kind !== "STANDARD_POST") {
-        throw new Error("invalid form");
-      }
-
-      const token = await getToken();
-      if (!token) {
-        throw new Error("invalid clerk token");
-      }
-
-      await createStandardPost({
-        orgType: "event",
-        orgId: eventId,
-        content: values.content,
-        parentId: parentId.toString(),
-        token,
-        userRealmId,
-        tags: [],
-      });
-
-      toast({
-        title: t("toast-post-creation-success"),
-      });
-
-      form.resetField("content", { defaultValue: "" });
-      form.resetField("parentPostId");
-    } catch (err) {
-      captureException(err);
-      toast({
-        variant: "destructive",
-        title: t("toast-post-creation-error"),
-      });
-    }
-  };
-
-  return (
-    <>
-      <SignedOut>
-        <div className="flex justify-center w-full">
-          <div className="w-full">
-            {t("comment-restricted-to-participants")}
-          </div>
-        </div>
-      </SignedOut>
-      <SignedIn>
-        {!userRoles.includes("organizer") &&
-        !userRoles.includes("participant") ? (
-          <div className="flex justify-center w-full">
-            <div className="w-full">
-              {t("comment-restricted-to-participants")}
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
-            <div className="w-full">
-              <StandardPostForm
-                form={form}
-                postTypeMode={"STANDARD_POST"}
-                setPostTypeMode={() => {
-                  console.log("not available");
-                }}
-                onSubmit={onSubmit}
-                isLoading={isPending}
-              />
-            </div>
-          </div>
-        )}
-      </SignedIn>
-    </>
-  );
-}
+const PostCommentFormNoSSR = dynamic(() => import("./post-comment-form"), {
+  ssr: false,
+});
 
 export default function PostInfo({
   eventId,
@@ -219,7 +125,7 @@ export default function PostInfo({
 
       <div className="flex flex-col gap-4">
         <Heading level={2}>Comments ({post.childrenCount})</Heading>
-        <PostCommentForm
+        <PostCommentFormNoSSR
           eventId={eventId}
           parentId={post.post.localPostId}
           userRoles={roles}

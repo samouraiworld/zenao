@@ -11,7 +11,7 @@ import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
-import { EventManagementMenu } from "./event-management-menu";
+import dynamic from "next/dynamic";
 import { ParticipantsSection } from "./event-participants-section";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
@@ -26,7 +26,6 @@ import { eventUserRoles } from "@/lib/queries/event-users";
 import { userInfoOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
-import EventParticipationInfo from "@/components/features/event/event-participation-info";
 import { EventImage } from "@/components/features/event/event-image";
 import { locationTimezone } from "@/lib/event-location";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
@@ -51,6 +50,16 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
     </div>
   );
 };
+
+const EventParticipationInfoNoSSR = dynamic(
+  () => import("@/components/features/event/event-participation-info"),
+  { ssr: false },
+);
+
+const EventManagementMenuNoSSR = dynamic(
+  () => import("./event-management-menu"),
+  { ssr: false },
+);
 
 export function EventInfoLayout({
   eventId,
@@ -163,7 +172,7 @@ export function EventInfoLayout({
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
           />
-          <EventManagementMenu
+          <EventManagementMenuNoSSR
             eventId={eventId}
             roles={roles}
             nbParticipants={data.participants}
@@ -194,7 +203,7 @@ export function EventInfoLayout({
       </div>
 
       {/* Participate Card */}
-      <EventParticipationInfo
+      <EventParticipationInfoNoSSR
         eventId={eventId}
         eventData={data}
         roles={roles}

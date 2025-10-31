@@ -270,6 +270,8 @@ describe("main", () => {
     // Go to feed tab
     cy.get("button").contains("Discussions").click();
 
+    cy.url().should("contain", "/feed");
+
     // Channge type of post
     cy.get('button[aria-label="set type post"]').click();
 
@@ -327,6 +329,8 @@ describe("main", () => {
 
     // Go Description tab
     cy.get("button").contains("Discussions").click();
+
+    cy.url().should("contain", "/feed");
 
     // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)

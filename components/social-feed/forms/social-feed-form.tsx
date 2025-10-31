@@ -19,9 +19,11 @@ const SocialFeedForm = ({
   orgType,
   orgId,
   form,
+  isDisplayed = true,
 }: {
   orgType: OrgType;
   orgId: string;
+  isDisplayed?: boolean;
   form: UseFormReturn<SocialFeedPostFormSchemaType>;
 }) => {
   const { toast } = useToast();
@@ -82,6 +84,10 @@ const SocialFeedForm = ({
       });
     }
   };
+
+  if (!isDisplayed) {
+    return null;
+  }
 
   return (
     <div

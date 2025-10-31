@@ -4,8 +4,7 @@ import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode } from "react";
 import { Hash, MapPin, MessageCircle, X } from "lucide-react";
 import Link from "next/link";
-import { PostMenu } from "../post-menu";
-import PostReactions from "../post-reactions";
+import dynamic from "next/dynamic";
 import { Card } from "@/components/widgets/cards/card";
 import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 import { DateTimeText } from "@/components/widgets/date-time-text";
@@ -33,6 +32,16 @@ type PostCardLayoutProps = {
   isReacting?: boolean;
   isDeleting?: boolean;
 };
+
+const PostMenuNoSSR = dynamic(
+  () => import("../post-menu").then((mod) => mod.PostMenu),
+  { ssr: false },
+);
+
+const PostReactionsNoSSR = dynamic(
+  () => import("../post-reactions").then((mod) => mod.default),
+  { ssr: false },
+);
 
 export function PostCardLayout({
   post,
@@ -120,7 +129,7 @@ export function PostCardLayout({
               </div>
             )}
             <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
-              <PostMenu
+              <PostMenuNoSSR
                 gnowebHref={gnowebHref}
                 isOwner={isOwner}
                 onDelete={async () => await onDelete?.(parentId)}
@@ -152,7 +161,7 @@ export function PostCardLayout({
             </Link>
           )}
 
-          <PostReactions
+          <PostReactionsNoSSR
             reactions={post.reactions}
             canReact={canInteract}
             isPending={isReacting}
