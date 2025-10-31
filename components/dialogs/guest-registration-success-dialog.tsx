@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { SignInButton } from "@clerk/nextjs";
 import { MailCheck } from "lucide-react";

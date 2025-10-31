@@ -1,3 +1,5 @@
+"use client";
+
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { BeforeInstallPromptEvent } from "../widgets/buttons/pwa-install-button";
 import {
