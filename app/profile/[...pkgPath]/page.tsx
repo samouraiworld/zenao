@@ -4,10 +4,9 @@ import { ProfileInfo } from "./profile-info";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { profileOptions } from "@/lib/queries/profile";
-import { UserRealmId, userRealmIdSchema } from "@/types/schemas";
 
 type Props = {
-  params: Promise<{ realmId: string[] }>;
+  params: Promise<{ pkgPath: string[] }>;
 };
 
 export const revalidate = 60;
@@ -18,24 +17,28 @@ export async function generateStaticParams() {
 
 export default async function ProfilePage({ params }: Props) {
   const queryClient = getQueryClient();
-  const { realmId: realmIdUnsafe } = await params;
+  const { pkgPath: pkgPathUnsafe } = await params;
 
-  let realmId: UserRealmId;
+  let pkgPath: string;
 
-  try {
-    realmId = await userRealmIdSchema.parseAsync(realmIdUnsafe.join("/"));
-  } catch (e) {
-    console.log("Failed to parse realmId: ", e);
+  const isValidPkgPath =
+    /^([a-z0-9-]+\.)*[a-z0-9-]+\.[a-z]{2,}(\/[a-z0-9\-_]+)+$/.test(
+      pkgPathUnsafe.join("/"),
+    );
+
+  if (isValidPkgPath) {
+    pkgPath = pkgPathUnsafe.join("/");
+  } else {
     notFound();
   }
 
-  queryClient.prefetchQuery(profileOptions(realmId));
+  queryClient.prefetchQuery(profileOptions(pkgPath));
   const now = Date.now() / 1000;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ScreenContainer>
-        <ProfileInfo realmId={realmId} now={now} />
+        <ProfileInfo pkgPath={pkgPath} now={now} />
       </ScreenContainer>
     </HydrationBoundary>
   );

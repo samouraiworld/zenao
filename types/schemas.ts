@@ -335,9 +335,3 @@ export const communityDetailsSchema = z.object({
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
-
-export const userRealmIdSchema = z
-  .string()
-  .regex(/^gno.land\/r\/zenao\/users\/u[0-9a-f]+$/);
-
-export type UserRealmId = z.infer<typeof userRealmIdSchema>;
