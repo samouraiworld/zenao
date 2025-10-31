@@ -328,6 +328,8 @@ describe("main", () => {
     // Go Description tab
     cy.get("button").contains("Discussions").click();
 
+    cy.url().should("contain", "/feed");
+
     // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
