@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { useMediaQuery } from "react-responsive";
 import { UseFormReturn } from "react-hook-form";
-import { FeedInputButtons } from "./feed-input-buttons";
+import SocialFeedActionButtons from "./social-feed-action-buttons";
 import { ButtonBase } from "@/components/widgets/buttons/button-bases";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import {
@@ -25,10 +25,11 @@ import { cn } from "@/lib/tailwind";
 import useMarkdownUpload from "@/hooks/use-markdown-upload";
 import { useToast } from "@/hooks/use-toast";
 import {
-  FeedPostFormSchemaType,
+  SocialFeedPostFormSchemaType,
   standardPostFormSchema,
 } from "@/types/schemas";
 import { captureException } from "@/lib/report";
+import { SocialFeedPostType } from "@/lib/social-feed";
 import {
   AUDIO_FILE_SIZE_LIMIT,
   AUDIO_FILE_SIZE_LIMIT_MB,
@@ -39,18 +40,18 @@ import {
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 
 export function StandardPostForm({
-  feedInputMode,
-  setFeedInputMode,
+  postTypeMode,
+  setPostTypeMode,
   onSubmit,
   isEditing,
   form,
   isLoading,
 }: {
-  feedInputMode: FeedInputMode;
+  postTypeMode: SocialFeedPostType;
   isEditing?: boolean;
-  onSubmit: (values: FeedPostFormSchemaType) => Promise<void> | void;
-  setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
-  form: UseFormReturn<FeedPostFormSchemaType>;
+  onSubmit: (values: SocialFeedPostFormSchemaType) => Promise<void> | void;
+  setPostTypeMode: Dispatch<SetStateAction<SocialFeedPostType>>;
+  form: UseFormReturn<SocialFeedPostFormSchemaType>;
   isLoading?: boolean;
 }) {
   const { toast } = useToast();
@@ -261,11 +262,11 @@ export function StandardPostForm({
                   className="hidden"
                   disabled={uploading}
                 />
-                <FeedInputButtons
-                  feedInputMode={feedInputMode}
+                <SocialFeedActionButtons
+                  postTypeMode={postTypeMode}
                   isReplying={!!parentPostId}
                   isEditing={!!isEditing}
-                  setFeedInputMode={setFeedInputMode}
+                  setPostTypeMode={setPostTypeMode}
                   isLoading={isLoading}
                   isDisabled={uploading || isLoading}
                 />
