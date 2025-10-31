@@ -2,13 +2,13 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { StandardPostForm } from "../forms/standard-post-form";
 import { PostCardLayout } from "./post-card-layout";
-import { StandardPostForm } from "./standard-post-form";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { cford32Encode } from "@/lib/cford32";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
-import { FeedPostFormSchemaType } from "@/types/schemas";
+import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 
 export function StandardPostCard({
   post,
@@ -31,7 +31,7 @@ export function StandardPostCard({
   post: StandardPostView;
   canReply?: boolean;
   replyHref?: string;
-  onEdit?: (values: FeedPostFormSchemaType) => void | Promise<void>;
+  onEdit?: (values: SocialFeedPostFormSchemaType) => void | Promise<void>;
   isEditing?: boolean;
   innerEditForm?: boolean;
   editMode: boolean;
@@ -47,7 +47,7 @@ export function StandardPostCard({
 
   const standardPost = post.post.post.value;
 
-  const form = useForm<FeedPostFormSchemaType>({
+  const form = useForm<SocialFeedPostFormSchemaType>({
     mode: "all",
     defaultValues: {
       kind: "STANDARD_POST",
@@ -55,7 +55,7 @@ export function StandardPostCard({
     },
   });
 
-  const onSubmit = async (values: FeedPostFormSchemaType) => {
+  const onSubmit = async (values: SocialFeedPostFormSchemaType) => {
     await onEdit?.(values);
   };
 
@@ -79,10 +79,10 @@ export function StandardPostCard({
       >
         {innerEditForm && editMode ? (
           <StandardPostForm
-            feedInputMode="STANDARD_POST"
+            postTypeMode="STANDARD_POST"
             form={form}
             onSubmit={onSubmit}
-            setFeedInputMode={() => {
+            setPostTypeMode={() => {
               console.log("not available");
             }}
             isEditing

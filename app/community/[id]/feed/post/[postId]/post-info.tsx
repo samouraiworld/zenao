@@ -6,9 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { PollPost } from "@/components/social-feed/poll-post";
-import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
-import { StandardPostCard } from "@/components/social-feed/standard-post-card";
+import { StandardPostCard } from "@/components/social-feed/cards/standard-post-card";
 import Heading from "@/components/widgets/texts/heading";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
@@ -20,10 +18,12 @@ import { feedPost } from "@/lib/queries/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { isPollPost, isStandardPost } from "@/lib/social-feed";
-import { FeedPostFormSchemaType } from "@/types/schemas";
-import { StandardPostForm } from "@/components/social-feed/standard-post-form";
-import { PostComments } from "@/components/social-feed/post-comments";
+import { SocialFeedPostFormSchemaType } from "@/types/schemas";
+import { StandardPostForm } from "@/components/social-feed/forms/standard-post-form";
 import { CommunityUserRole, communityUserRoles } from "@/lib/queries/community";
+import { PollPost } from "@/components/social-feed/polls/poll-post";
+import { PostCardSkeleton } from "@/components/social-feed/cards/post-card-skeleton";
+import CommentsList from "@/components/social-feed/lists/comments-list";
 
 function PostCommentForm({
   communityId,
@@ -34,7 +34,7 @@ function PostCommentForm({
   communityId: string;
   parentId: bigint;
   userRoles: CommunityUserRole[];
-  form: UseFormReturn<FeedPostFormSchemaType>;
+  form: UseFormReturn<SocialFeedPostFormSchemaType>;
 }) {
   const { toast } = useToast();
   const t = useTranslations("social-feed.standard-post-form");
@@ -46,7 +46,7 @@ function PostCommentForm({
   const userRealmId = userInfo?.realmId || "";
   const { createStandardPost, isPending } = useCreateStandardPost();
 
-  const onSubmit = async (values: FeedPostFormSchemaType) => {
+  const onSubmit = async (values: SocialFeedPostFormSchemaType) => {
     try {
       if (values.kind !== "STANDARD_POST") {
         throw new Error("invalid form");
@@ -100,8 +100,8 @@ function PostCommentForm({
             <div className="w-full">
               <StandardPostForm
                 form={form}
-                feedInputMode={"STANDARD_POST"}
-                setFeedInputMode={() => {
+                postTypeMode={"STANDARD_POST"}
+                setPostTypeMode={() => {
                   console.log("not available");
                 }}
                 onSubmit={onSubmit}
@@ -135,7 +135,7 @@ export default function PostInfo({
 
   const [editMode, setEditMode] = useState(false);
 
-  const form = useForm<FeedPostFormSchemaType>({
+  const form = useForm<SocialFeedPostFormSchemaType>({
     mode: "all",
     defaultValues: {
       kind: "STANDARD_POST",
@@ -151,7 +151,10 @@ export default function PostInfo({
   const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
   const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
-  const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
+  const onEdit = async (
+    postId: string,
+    values: SocialFeedPostFormSchemaType,
+  ) => {
     await onEditStandardPost(postId, values);
     setEditMode(false);
   };
@@ -221,7 +224,7 @@ export default function PostInfo({
 
         <div className="pl-6">
           <Suspense fallback={<PostCardSkeleton />}>
-            <PostComments
+            <CommentsList
               orgType="community"
               orgId={communityId}
               parentId={post.post.localPostId.toString()}

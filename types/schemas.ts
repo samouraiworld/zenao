@@ -226,7 +226,7 @@ export const pollFormSchema = z.object({
 });
 export type PollFormSchemaType = z.infer<typeof pollFormSchema>;
 
-export const feedPostFormSchema = z
+export const socialFeedPostFormSchema = z
   .union([standardPostFormSchema, pollFormSchema])
   .refine(
     (data) => {
@@ -241,7 +241,9 @@ export const feedPostFormSchema = z
     },
     { params: [] },
   );
-export type FeedPostFormSchemaType = z.infer<typeof feedPostFormSchema>;
+export type SocialFeedPostFormSchemaType = z.infer<
+  typeof socialFeedPostFormSchema
+>;
 
 export const eventProtectionFormSchema = z.object({
   password: z
