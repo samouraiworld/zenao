@@ -24,10 +24,12 @@ export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
 
 export const communityGetUserRolesSchema = z.array(communityUserRolesEnum);
 
-const communityUsersWithRolesResponseSchema = z.object({
-  address: z.string(),
-  roles: z.string().array(),
-});
+const communityUsersWithRolesResponseSchema = z
+  .object({
+    address: z.string(),
+    roles: z.string().array(),
+  })
+  .transform(({ address, roles }) => ({ realmId: address, roles }));
 
 export type CommunityUsersWithRolesResponseSchema = z.infer<
   typeof communityUsersWithRolesResponseSchema

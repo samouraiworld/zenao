@@ -79,7 +79,7 @@ export function UserAvatarWithName({
 
   const content = (
     <div className="flex flex-row gap-2 items-center">
-      <UserAvatar realmId={profile?.address} size={size} />
+      <UserAvatar realmId={realmId} size={size} />
       <Text size="sm">{profile?.displayName}</Text>
     </div>
   );
@@ -87,7 +87,7 @@ export function UserAvatarWithName({
   if (linkToProfile) {
     return (
       <Link
-        href={`/profile/${profile?.address}`}
+        href={`/profile/${realmId}`}
         className={cn("flex w-max", className)}
       >
         {content}

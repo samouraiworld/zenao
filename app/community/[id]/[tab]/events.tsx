@@ -27,8 +27,8 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
   );
 
   const events = useSuspenseQueries({
-    queries: eventsRoles.map(
-      (role) => eventOptions(eventIdFromPkgPath(role.address)), // XXX: rename address -> realm id
+    queries: eventsRoles.map((role) =>
+      eventOptions(eventIdFromPkgPath(role.realmId)),
     ),
     combine: (results) =>
       results
@@ -38,7 +38,7 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
         )
         .map((elem, idx) => ({
           ...elem.data,
-          pkgPath: eventsRoles[idx].address,
+          pkgPath: eventsRoles[idx].realmId,
         })),
   });
 

@@ -25,10 +25,10 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
 
 export function ProfileInfo({
-  address,
+  pkgPath,
   now,
 }: {
-  address: string;
+  pkgPath: string;
   now: number;
 }) {
   const t = useTranslations("profile-info");
@@ -36,6 +36,7 @@ export function ProfileInfo({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
+  const address = addressFromRealmId(pkgPath);
   const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
   const isOwner = loggedUserAddress === address;
   // The connected user can see his both discoverable and undiscoverable events
@@ -43,7 +44,7 @@ export function ProfileInfo({
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
 
-  const { data: profile } = useSuspenseQuery(profileOptions(address));
+  const { data: profile } = useSuspenseQuery(profileOptions(pkgPath));
   const {
     data: upcomingEventsPages,
     isFetchingNextPage: isFetchingUpcomingNextPage,
@@ -52,7 +53,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextUpcomingPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      address,
+      pkgPath, // pkgPath need here (not derivedAddr) to fetch events organized by communities, issue #837
       discoverableFilter,
       now,
       Number.MAX_SAFE_INTEGER,
@@ -67,7 +68,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextPastPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      address,
+      pkgPath, // pkgPath need here (not derivedAddr) to fetch events organized by communities, issue #837
       discoverableFilter,
       now - 1,
       0,
@@ -106,7 +107,7 @@ export function ProfileInfo({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ProfileHeader
-          address={profile.address}
+          address={address}
           displayName={profile.displayName}
           bio={profile.bio}
           avatarUri={profile.avatarUri}
