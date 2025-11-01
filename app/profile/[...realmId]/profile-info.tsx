@@ -23,12 +23,13 @@ import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button"
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
+import { UserRealmId } from "@/types/schemas";
 
 export function ProfileInfo({
-  pkgPath,
+  realmId,
   now,
 }: {
-  pkgPath: string;
+  realmId: UserRealmId;
   now: number;
 }) {
   const t = useTranslations("profile-info");
@@ -36,7 +37,7 @@ export function ProfileInfo({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const address = addressFromRealmId(pkgPath);
+  const address = addressFromRealmId(realmId);
   const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
   const isOwner = loggedUserAddress === address;
   // The connected user can see his both discoverable and undiscoverable events
@@ -44,7 +45,7 @@ export function ProfileInfo({
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
 
-  const { data: profile } = useSuspenseQuery(profileOptions(pkgPath));
+  const { data: profile } = useSuspenseQuery(profileOptions(realmId));
   const {
     data: upcomingEventsPages,
     isFetchingNextPage: isFetchingUpcomingNextPage,
@@ -53,7 +54,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextUpcomingPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      pkgPath, // pkgPath need here (not derivedAddr) to fetch events organized by communities, issue #837
+      realmId,
       discoverableFilter,
       now,
       Number.MAX_SAFE_INTEGER,
@@ -68,7 +69,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextPastPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      pkgPath, // pkgPath need here (not derivedAddr) to fetch events organized by communities, issue #837
+      realmId,
       discoverableFilter,
       now - 1,
       0,
