@@ -4,7 +4,7 @@ import { ProfileInfo } from "./profile-info";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { profileOptions } from "@/lib/queries/profile";
-import { UserRealmId, userRealmIdSchema } from "@/types/schemas";
+import { RealmId, realmIdSchema } from "@/types/schemas";
 
 type Props = {
   params: Promise<{ realmId: string[] }>;
@@ -20,10 +20,10 @@ export default async function ProfilePage({ params }: Props) {
   const queryClient = getQueryClient();
   const { realmId: realmIdUnsafe } = await params;
 
-  let realmId: UserRealmId;
+  let realmId: RealmId;
 
   try {
-    realmId = await userRealmIdSchema.parseAsync(realmIdUnsafe.join("/"));
+    realmId = await realmIdSchema.parseAsync(realmIdUnsafe.join("/"));
   } catch (e) {
     console.log("Failed to parse realmId: ", e);
     notFound();

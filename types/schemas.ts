@@ -336,8 +336,9 @@ export const communityDetailsSchema = z.object({
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
 
-export const userRealmIdSchema = z
-  .string()
-  .regex(/^gno.land\/r\/zenao\/users\/u[0-9a-f]+$/);
+export const realmIdSchema = z.union([
+  z.string().regex(/^([a-z0-9-]+\.)*[a-z0-9-]+\.[a-z]{2,}(\/[a-z0-9\-_]+)+$/),
+  z.string().regex(/^g[a-z0-9]{39}/),
+]);
 
-export type UserRealmId = z.infer<typeof userRealmIdSchema>;
+export type RealmId = z.infer<typeof realmIdSchema>;

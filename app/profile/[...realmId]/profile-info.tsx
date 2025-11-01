@@ -23,13 +23,13 @@ import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button"
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
-import { UserRealmId } from "@/types/schemas";
+import { RealmId } from "@/types/schemas";
 
 export function ProfileInfo({
   realmId,
   now,
 }: {
-  realmId: UserRealmId;
+  realmId: RealmId;
   now: number;
 }) {
   const t = useTranslations("profile-info");
@@ -44,6 +44,8 @@ export function ProfileInfo({
   const discoverableFilter = isOwner
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
+
+  console.log(address);
 
   const { data: profile } = useSuspenseQuery(profileOptions(realmId));
   const {
