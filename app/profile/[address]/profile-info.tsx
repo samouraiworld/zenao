@@ -1,28 +1,15 @@
 "use client";
 
-import {
-  useSuspenseInfiniteQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Person, WithContext } from "schema-dts";
-import { useMemo } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@clerk/nextjs";
 import ProfileHeader from "./profile-header";
-import { EventCard } from "@/components/features/event/event-card";
-import { Separator } from "@/components/shadcn/separator";
-import Heading from "@/components/widgets/texts/heading";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
-import {
-  DEFAULT_EVENTS_LIMIT,
-  eventsByOrganizerList,
-} from "@/lib/queries/events-list";
+
+import ProfileEvents from "./[tab]/events";
+import ProfilePortfolio from "./[tab]/portfolio";
 import { profileOptions } from "@/lib/queries/profile";
-import EventCardListLayout from "@/components/features/event/event-card-list-layout";
-import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
-import { userInfoOptions } from "@/lib/queries/user";
-import { addressFromRealmId } from "@/lib/gno";
+import { ProfileTabsSchemaType } from "@/types/schemas";
 
 export function ProfileInfo({
   address,
@@ -32,57 +19,7 @@ export function ProfileInfo({
   now: number;
 }) {
   const t = useTranslations("profile-info");
-  const { getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
-  const isOwner = loggedUserAddress === address;
-  // The connected user can see his both discoverable and undiscoverable events
-  const discoverableFilter = isOwner
-    ? DiscoverableFilter.UNSPECIFIED
-    : DiscoverableFilter.DISCOVERABLE;
-
   const { data: profile } = useSuspenseQuery(profileOptions(address));
-  const {
-    data: upcomingEventsPages,
-    isFetchingNextPage: isFetchingUpcomingNextPage,
-    hasNextPage: hasNextUpcomingPage,
-    isFetching: isFetchingUpcoming,
-    fetchNextPage: fetchNextUpcomingPage,
-  } = useSuspenseInfiniteQuery(
-    eventsByOrganizerList(
-      address,
-      discoverableFilter,
-      now,
-      Number.MAX_SAFE_INTEGER,
-      DEFAULT_EVENTS_LIMIT,
-    ),
-  );
-  const {
-    data: pastEventsPages,
-    isFetchingNextPage: isFetchingPastNextPage,
-    hasNextPage: hasNextPastPage,
-    isFetching: isFetchingPast,
-    fetchNextPage: fetchNextPastPage,
-  } = useSuspenseInfiniteQuery(
-    eventsByOrganizerList(
-      address,
-      discoverableFilter,
-      now - 1,
-      0,
-      DEFAULT_EVENTS_LIMIT,
-    ),
-  );
-
-  const upcomingEvents = useMemo(
-    () => upcomingEventsPages.pages.flat(),
-    [upcomingEventsPages],
-  );
-  const pastEvents = useMemo(
-    () => pastEventsPages.pages.flat(),
-    [pastEventsPages],
-  );
 
   // profileOptions can return array of object with empty string (except address)
   // So to detect if a user doesn't exist we have to check if all strings are empty (except address)
@@ -98,73 +35,43 @@ export function ProfileInfo({
     knowsAbout: profile?.bio,
   };
 
+  const [activeTab, setActiveTab] = useState<ProfileTabsSchemaType>("events");
+
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <ProfileHeader
-          address={profile.address}
-          displayName={profile.displayName}
-          bio={profile.bio}
-          avatarUri={profile.avatarUri}
-        />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <ProfileHeader
+        address={profile.address}
+        displayName={profile.displayName}
+        bio={profile.bio}
+        avatarUri={profile.avatarUri}
+      />
+
+      <div className="mt-6 flex gap-4 border-b border-muted">
+        {(["events", "portfolio"] as ProfileTabsSchemaType[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 font-medium transition border-b-2 ${
+              activeTab === tab
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground"
+            }`}
+          >
+            {t(tab)}
+          </button>
+        ))}
       </div>
 
-      <Separator />
-
-      <Heading level={2} size="lg">
-        {t("hosting-events")} ({upcomingEvents.length})
-      </Heading>
-
-      <div className="flex flex-col gap-0">
-        <EventCardListLayout>
-          {upcomingEvents.map((evt) => (
-            <EventCard
-              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
-              key={evt.pkgPath}
-              evt={evt}
-            />
-          ))}
-        </EventCardListLayout>
-
-        <LoaderMoreButton
-          fetchNextPage={fetchNextUpcomingPage}
-          hasNextPage={hasNextUpcomingPage}
-          isFetching={isFetchingUpcoming}
-          isFetchingNextPage={isFetchingUpcomingNextPage}
-          page={upcomingEvents}
-          noMoreLabel=""
-        />
-      </div>
-
-      <Heading level={2} size="lg">
-        {t("past-events")} ({pastEvents.length})
-      </Heading>
-
-      <div className="flex flex-col gap-0">
-        <EventCardListLayout>
-          {pastEvents.map((evt) => (
-            <EventCard
-              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
-              key={evt.pkgPath}
-              evt={evt}
-            />
-          ))}
-        </EventCardListLayout>
-
-        <div className="mt-8">
-          <LoaderMoreButton
-            fetchNextPage={fetchNextPastPage}
-            hasNextPage={hasNextPastPage}
-            isFetching={isFetchingPast}
-            isFetchingNextPage={isFetchingPastNextPage}
-            page={pastEvents}
-            noMoreLabel=""
-          />
-        </div>
+      <div className="mt-6">
+        {activeTab === "events" && (
+          <ProfileEvents address={address} now={now} />
+        )}
+        {activeTab === "portfolio" && <ProfilePortfolio address={address} />}
       </div>
     </div>
   );

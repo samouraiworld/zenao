@@ -113,7 +113,9 @@
   "profile-info": {
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",
-    "past-events": "Past events"
+    "past-events": "Past events",
+    "events": "Events",
+    "portfolio": "Portfolio"
   },
   "guest-registration-success-dialog": {
     "registration-title": "You're in!",

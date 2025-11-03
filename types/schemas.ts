@@ -268,6 +268,12 @@ export const communityTabsSchema = z.union([
 ]);
 export type CommunityTabsSchemaType = z.infer<typeof communityTabsSchema>;
 
+export const profileTabsSchema = z.union([
+  z.literal("events"),
+  z.literal("portfolio"),
+]);
+export type ProfileTabsSchemaType = z.infer<typeof profileTabsSchema>;
+
 export const communityFormSchema = z.object({
   displayName: z.string().min(2, "Name too short"),
   description: z.string().min(10, "Description too short"),
@@ -333,3 +339,9 @@ export const communityDetailsSchema = z.object({
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
+
+const userPortfolioSchema = z.object({
+  portfolio: z.array(portfolioItemSchema).default([]),
+});
+
+export type UserPortfolio = z.infer<typeof userPortfolioSchema>;
