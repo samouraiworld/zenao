@@ -131,6 +131,7 @@ export default function PostInfo({
   const { data: roles } = useSuspenseQuery(
     communityUserRoles(communityId, userRealmId),
   );
+
   const { data: post } = useSuspenseQuery(feedPost(postId, userRealmId || ""));
 
   const [editMode, setEditMode] = useState(false);
