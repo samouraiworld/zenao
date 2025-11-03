@@ -1,4 +1,5 @@
 import { PencilIcon, XIcon } from "lucide-react";
+import { useLocale } from "next-intl";
 import { Button } from "@/components/shadcn/button";
 import Text from "@/components/widgets/texts/text";
 import { UserExperienceSchemaType } from "@/types/schemas";
@@ -17,6 +18,7 @@ export default function ProfileExperience({
   onEdit,
   onDelete,
 }: ProfileExperienceProps) {
+  const locale = useLocale();
   return (
     <div
       className={cn(
@@ -32,10 +34,10 @@ export default function ProfileExperience({
             {new Date(
               experience.start.year,
               experience.start.month - 1,
-            ).toLocaleString("default", { month: "long" })}{" "}
+            ).toLocaleString(locale, { month: "long" })}{" "}
             {experience.start.year} -{" "}
             {experience.end
-              ? `${new Date(experience.end.year, experience.end.month - 1).toLocaleString("default", { month: "long" })} ${experience.end.year}`
+              ? `${new Date(experience.end.year, experience.end.month - 1).toLocaleString(locale, { month: "long" })} ${experience.end.year}`
               : "Present"}
           </Text>
         </div>

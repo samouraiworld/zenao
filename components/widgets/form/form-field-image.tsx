@@ -4,6 +4,7 @@ import { FieldValues, useController, useWatch } from "react-hook-form";
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2 } from "lucide-react";
 import { cva } from "class-variance-authority";
+import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/use-toast";
 import { uploadFile } from "@/lib/files";
 import { isValidURL, web2URL } from "@/lib/uris";
@@ -39,11 +40,14 @@ export const FormFieldImage = <T extends FieldValues>({
   aspectRatio: [number, number];
   tooltip?: React.ReactNode;
   hint?: boolean;
+  fileSizeLimitMb?: number;
   fit?: "cover" | "pad";
 }) => {
   const { toast } = useToast();
   const { field, fieldState } = useController(props);
   const imageUri = useWatch({ control: props.control, name: props.name });
+
+  const t = useTranslations("components.widgets.form.form-field-image");
 
   const fit = props.fit || "cover";
 
@@ -57,21 +61,40 @@ export const FormFieldImage = <T extends FieldValues>({
       if (!file) {
         toast({
           variant: "destructive",
-          title: "No file selected.",
+          title: t("error-no-file-selected"),
         });
         return;
       }
       setUploading(true);
-      const uri = await uploadFile(file);
+      const uri = await uploadFile(file, props.fileSizeLimitMb);
       field.onChange(uri);
     } catch (e) {
       console.error(e);
-      toast({
-        variant: "destructive",
-        title: "Trouble uploading file!",
-      });
+      if (
+        e instanceof Error &&
+        props.fileSizeLimitMb &&
+        e.message.includes("File size exceeds limit")
+      ) {
+        toast({
+          variant: "destructive",
+          title: t("error-filesize-exceeds-limit", {
+            size: Math.floor(props.fileSizeLimitMb / 1024 / 1024),
+          }),
+        });
+        return;
+      } else {
+        toast({
+          variant: "destructive",
+          title: t("error-uploading-file"),
+        });
+      }
+    } finally {
+      setUploading(false);
+
+      if (hiddenInputRef.current) {
+        hiddenInputRef.current.value = "";
+      }
     }
-    setUploading(false);
   };
 
   const handleClick = () => {
@@ -128,6 +151,7 @@ export const FormFieldImage = <T extends FieldValues>({
                           imageVariants({ fit }),
                         )}
                       />
+                      {uploading && <Loader2 className="animate-spin" />}
                     </>
                   ) : (
                     <>

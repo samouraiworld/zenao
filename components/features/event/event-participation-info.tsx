@@ -36,7 +36,6 @@ function EventParticipationInfo({
           >
             <EventParticipation.Registration />
             <EventParticipation.TooLate />
-            <EventParticipation.SoldOut />
             <EventParticipation.Participant />
           </EventParticipation>
         </Card>

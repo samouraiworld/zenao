@@ -4,7 +4,14 @@ export const filesPostResponseSchema = z.object({
   uri: z.string(),
 });
 
-export const uploadFile = async (file: File): Promise<string> => {
+export const uploadFile = async (
+  file: File,
+  sizeLimit?: number,
+): Promise<string> => {
+  if (sizeLimit && file.size > sizeLimit) {
+    throw new Error(`File size exceeds limit: ${sizeLimit} bytes`);
+  }
+
   const data = new FormData();
   data.set("file", file);
   const uploadRequest = await fetch("/api/files", {

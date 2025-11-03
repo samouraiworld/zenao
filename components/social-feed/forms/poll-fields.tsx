@@ -9,13 +9,13 @@ import Text from "@/components/widgets/texts/text";
 import { FormFieldCheckbox } from "@/components/widgets/form/form-field-checkbox";
 import { FormFieldInputNumber } from "@/components/widgets/form/form-field-input-number";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
-import { FeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
+import { SocialFeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
 import { FormControl, FormField, FormItem } from "@/components/shadcn/form";
 
 export function PollFields({
   form,
 }: {
-  form: UseFormReturn<FeedPostFormSchemaType>;
+  form: UseFormReturn<SocialFeedPostFormSchemaType>;
 }) {
   const t = useTranslations("social-feed.poll-form");
   const {
@@ -82,7 +82,7 @@ function PollOptionItem({
   canRemove,
 }: {
   name: `options.${number}.text`;
-  control: Control<FeedPostFormSchemaType>;
+  control: Control<SocialFeedPostFormSchemaType>;
   onClickRemove: () => void;
   canRemove: boolean;
 }) {
@@ -143,7 +143,7 @@ function RemoveOptionButton({
 function PollFormDuration({
   form,
 }: {
-  form: UseFormReturn<FeedPostFormSchemaType>;
+  form: UseFormReturn<SocialFeedPostFormSchemaType>;
 }) {
   const t = useTranslations("social-feed.poll-form");
 

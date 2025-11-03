@@ -2,21 +2,21 @@
 
 import { Dispatch, SetStateAction } from "react";
 import { Save, SendHorizonalIcon, VoteIcon } from "lucide-react";
-import { FeedInputMode } from "./standard-post-form";
 import { cn } from "@/lib/tailwind";
 import { ButtonBase } from "@/components/widgets/buttons/button-bases";
+import { SocialFeedPostType } from "@/lib/social-feed";
 
-export function FeedInputButtons({
-  feedInputMode,
-  setFeedInputMode,
+export default function SocialFeedActionButtons({
+  postTypeMode,
+  setPostTypeMode,
   isLoading = false,
   isReplying = false,
   isEditing = false,
   isDisabled = false,
 }: {
-  feedInputMode: FeedInputMode;
+  postTypeMode: SocialFeedPostType;
   isReplying: boolean;
-  setFeedInputMode: Dispatch<SetStateAction<FeedInputMode>>;
+  setPostTypeMode: Dispatch<SetStateAction<SocialFeedPostType>>;
   isLoading?: boolean;
   isEditing?: boolean;
   isDisabled?: boolean;
@@ -28,13 +28,13 @@ export function FeedInputButtons({
           variant="link"
           className={cn(
             "flex items-center justify-center rounded-full aspect-square cursor-pointer w-7 h-7 md:w-12 md:h-12",
-            feedInputMode === "POLL"
+            postTypeMode === "POLL"
               ? "dark:bg-white bg-black"
               : "hover:bg-neutral-500/20",
           )}
           onClick={() =>
-            setFeedInputMode((feedInputMode) =>
-              feedInputMode === "STANDARD_POST" ? "POLL" : "STANDARD_POST",
+            setPostTypeMode((postTypeMode) =>
+              postTypeMode === "STANDARD_POST" ? "POLL" : "STANDARD_POST",
             )
           }
           aria-label="set type post"
@@ -43,7 +43,7 @@ export function FeedInputButtons({
           <VoteIcon
             className={cn(
               "w-5 h-5 md:!h-6 md:!w-6",
-              feedInputMode === "POLL"
+              postTypeMode === "POLL"
                 ? "dark:text-black text-white"
                 : "dark:text-white text-black",
             )}

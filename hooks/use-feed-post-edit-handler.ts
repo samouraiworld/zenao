@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useToast } from "./use-toast";
 import { useEditStandardPost } from "@/lib/mutations/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
-import { FeedPostFormSchemaType } from "@/types/schemas";
+import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
 
 function useFeedPostEditHandler(feedId: string) {
@@ -19,7 +19,7 @@ function useFeedPostEditHandler(feedId: string) {
 
   const onEditStandardPost = async (
     postId: string,
-    values: FeedPostFormSchemaType,
+    values: SocialFeedPostFormSchemaType,
   ) => {
     try {
       if (values.kind === "POLL") {
