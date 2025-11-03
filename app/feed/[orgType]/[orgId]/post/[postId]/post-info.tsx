@@ -44,8 +44,6 @@ export default function PostInfo({
 
   const { data: post } = useSuspenseQuery(feedPost(postId, userRealmId || ""));
 
-  console.log(post);
-
   const [editMode, setEditMode] = useState(false);
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
