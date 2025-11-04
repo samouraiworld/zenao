@@ -191,7 +191,10 @@
     "see-event-details": "See event details"
   },
   "event-card": {
-    "exclusive-event": "Exclusive event"
+    "exclusive-event": "Exclusive event",
+    "discoverable-tooltip": "This event is discoverable by everyone.",
+    "hidden-tooltip": "This event is only visible for you.",
+    "hosted-by": "Hosted by:"
   },
   "event-protection-guard": {
     "description": "This event is exclusive to certain participants. You need a password to access information.",
