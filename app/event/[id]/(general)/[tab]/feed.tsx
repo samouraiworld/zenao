@@ -107,7 +107,7 @@ function EventFeed({ eventId }: EventFeedProps) {
             }
             onDelete={onDelete}
             replyHrefFormatter={(postId) =>
-              `/event/${eventId}/feed/post/${postId}`
+              `/feed/event/${eventId}/post/${postId}`
             }
             canReply
             postInEdition={postInEdition?.postId ?? null}
