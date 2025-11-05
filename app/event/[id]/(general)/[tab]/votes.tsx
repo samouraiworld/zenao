@@ -77,7 +77,7 @@ function EventPolls({ eventId }: EventPollsProps) {
             }
             onDelete={onDelete}
             replyHrefFormatter={(postId) =>
-              `/event/${eventId}/feed/post/${postId}`
+              `feed/event/${eventId}/post/${postId}`
             }
             canReply
             isReacting={isReacting}
