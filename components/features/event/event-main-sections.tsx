@@ -21,12 +21,12 @@ import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import {
   EventInfoTabsSchemaType,
-  feedPostFormSchema,
-  FeedPostFormSchemaType,
+  socialFeedPostFormSchema,
+  SocialFeedPostFormSchemaType,
 } from "@/types/schemas";
 import EventFeed from "@/app/event/[id]/(general)/[tab]/feed";
 import EventPolls from "@/app/event/[id]/(general)/[tab]/votes";
-import SocialFeedForm from "@/components/social-feed/social-feed-form";
+import SocialFeedForm from "@/components/social-feed/forms/social-feed-form";
 
 export function MainEventSections({
   className,
@@ -56,9 +56,9 @@ export function MainEventSections({
   );
   const t = useTranslations("event");
 
-  const form = useForm<FeedPostFormSchemaType>({
+  const form = useForm<SocialFeedPostFormSchemaType>({
     mode: "all",
-    resolver: zodResolver(feedPostFormSchema),
+    resolver: zodResolver(socialFeedPostFormSchema),
     defaultValues: {
       content: "",
       question: "",

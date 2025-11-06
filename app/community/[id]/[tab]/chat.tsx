@@ -12,12 +12,12 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import { PostsList } from "@/components/social-feed/posts-list";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import { communityUserRoles } from "@/lib/queries/community";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
-import { FeedPostFormSchemaType } from "@/types/schemas";
+import { SocialFeedPostFormSchemaType } from "@/types/schemas";
+import { PostsList } from "@/components/social-feed/lists/posts-list";
 
 type CommunityChatProps = {
   communityId: string;
@@ -77,7 +77,10 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
   const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
 
-  const onEdit = async (postId: string, values: FeedPostFormSchemaType) => {
+  const onEdit = async (
+    postId: string,
+    values: SocialFeedPostFormSchemaType,
+  ) => {
     await onEditStandardPost(postId, values);
     setPostInEdition(null);
   };
@@ -109,7 +112,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
               setPostInEdition({ postId, content });
             }}
             replyHrefFormatter={(postId) =>
-              `/community/${communityId}/feed/post/${postId}`
+              `/feed/community/${communityId}/post/${postId}`
             }
             canReply
             innerEditMode

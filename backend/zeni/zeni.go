@@ -332,7 +332,6 @@ func LocationToString(location *zenaov1.EventLocation) (string, error) {
 		buf.WriteString(val.Virtual.Uri)
 	case *zenaov1.EventLocation_Geo:
 		buf.WriteString(val.Geo.GetAddress())
-		fmt.Fprintf(buf, "- %g, %g", val.Geo.Lat, val.Geo.Lng)
 	case *zenaov1.EventLocation_Custom:
 		buf.WriteString(val.Custom.GetAddress())
 	default:

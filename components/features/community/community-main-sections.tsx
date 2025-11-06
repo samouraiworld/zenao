@@ -17,19 +17,19 @@ import {
 } from "@/components/shadcn/tabs";
 import {
   CommunityTabsSchemaType,
-  feedPostFormSchema,
-  FeedPostFormSchemaType,
+  socialFeedPostFormSchema,
+  SocialFeedPostFormSchemaType,
 } from "@/types/schemas";
 import CommunityEvents from "@/app/community/[id]/[tab]/events";
 import CommunityChat from "@/app/community/[id]/[tab]/chat";
 import CommunityMembers from "@/app/community/[id]/[tab]/members";
 import CommunityProposals from "@/app/community/[id]/[tab]/proposals";
-import { PostCardSkeleton } from "@/components/social-feed/post-card-skeleton";
 import CommunityPortfolio from "@/app/community/[id]/[tab]/portfolio";
 import CommunityPolls from "@/app/community/[id]/[tab]/votes";
 import { userInfoOptions } from "@/lib/queries/user";
 import { communityUserRoles } from "@/lib/queries/community";
-import SocialFeedForm from "@/components/social-feed/social-feed-form";
+import SocialFeedForm from "@/components/social-feed/forms/social-feed-form";
+import { PostCardSkeleton } from "@/components/social-feed/cards/post-card-skeleton";
 
 type CommunityMainSectionsProps = {
   communityId: string;
@@ -57,9 +57,9 @@ function CommunityMainSections({
     [userRoles],
   );
 
-  const form = useForm<FeedPostFormSchemaType>({
+  const form = useForm<SocialFeedPostFormSchemaType>({
     mode: "all",
-    resolver: zodResolver(feedPostFormSchema),
+    resolver: zodResolver(socialFeedPostFormSchema),
     defaultValues: {
       content: "",
       question: "",

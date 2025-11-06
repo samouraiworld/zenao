@@ -56,6 +56,10 @@
     "pick-a-end-date-placeholder": "Pick a end date...",
     "from": "From",
     "to": "To",
+    "no-file-selected-error": "No file selected.",
+    "error-file-uploading-img": "Error while uploading image",
+    "error-file-uploading-audio": "Error while uploading audio",
+    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
     "custom-timezone-select": "You choose a custom location, so please select a timezone.",
     "no-timezone-found": "No timezones found.",
     "no-address-found": "No address found.",
@@ -187,7 +191,10 @@
     "see-event-details": "See event details"
   },
   "event-card": {
-    "exclusive-event": "Exclusive event"
+    "exclusive-event": "Exclusive event",
+    "discoverable-tooltip": "This event is discoverable by everyone.",
+    "hidden-tooltip": "This event is only visible for you.",
+    "hosted-by": "Hosted by:"
   },
   "event-protection-guard": {
     "description": "This event is exclusive to certain participants. You need a password to access information.",
@@ -229,6 +236,15 @@
     },
     "buttons": {
       "gnoweb-button": "See on gnoweb"
+    },
+    "widgets": {
+      "form": {
+        "form-field-image": {
+          "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+          "error-no-file-selected": "No file selected.",
+          "error-uploading-file": "Trouble uploading file!"
+        }
+      }
     }
   },
   "blog": {
@@ -261,8 +277,13 @@
       "message-placeholder-lg": "Don't be shy, say something!",
       "toast-post-creation-success": "Post created !",
       "toast-post-creation-error": "Error on creating post !",
+      "toast-post-edit-error": "Error on editing post !",
       "comment-restricted-to-members": "You must be a member to submit a comment.",
-      "comment-restricted-to-participants": "You must be a participant to submit a comment."
+      "comment-restricted-to-participants": "You must be a participant to submit a comment.",
+      "no-file-selected-error": "No file selected.",
+      "image-upload-error": "Error while uploading image.",
+      "audio-upload-error": "Error while uploading audio.",
+      "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB."
     },
     "vote": {
       "toast-vote-success": "Vote submitted !",
@@ -282,6 +303,9 @@
     "toast-email-sent-success": "Email sent !",
     "toast-email-sent-error": "Error while trying to send the email",
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
+  },
+  "event-community-section": {
+    "sponsored-by": "Sponsored by community"
   },
   "event-scanner": {
     "check-in-confirmation-dialog": {
@@ -345,6 +369,7 @@
   },
   "community-portfolio": { 
     "error-file-uploading": "Error while uploading file",
+    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
     "error-file-deleting": "Error while deleting file",
     "delete-file-success": "Item deleted successfully",
     "upload-file-success": "File uploaded successfully",

@@ -10,7 +10,7 @@ import { useMemo } from "react";
 import { userInfoOptions } from "@/lib/queries/user";
 import { PollPostView } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
-import { PollsList } from "@/components/social-feed/polls-list";
+import { PollsList } from "@/components/social-feed/lists/polls-list";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
@@ -77,7 +77,7 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
             }
             onDelete={onDelete}
             replyHrefFormatter={(postId) =>
-              `/community/${communityId}/feed/post/${postId}`
+              `/feed/community/${communityId}/post/${postId}`
             }
             canReply
             isReacting={isReacting}
