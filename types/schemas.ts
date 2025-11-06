@@ -165,6 +165,58 @@ export const userFormSkillSchema = z.object({
     .max(20, "Skill name too long"),
 });
 
+export const portfolioItemSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(["image", "video", "audio"]),
+  uploadedAt: z.coerce.date(),
+  uri: uriSchema,
+  name: z.string().min(1).max(100),
+});
+
+export type PortfolioItem = z.infer<typeof portfolioItemSchema>;
+
+export const portfolioUploadVideoSchema = z
+  .object({
+    origin: z.union([z.literal("youtube"), z.literal("vimeo")]),
+    uri: uriSchema,
+  })
+  .refine(
+    (data) => {
+      if (
+        (data.origin === "youtube" &&
+          !/^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]{11}(&.*)?$/.test(
+            data.uri,
+          ) &&
+          !/^https?:\/\/youtu\.be\/[\w-]{11}(&.*)?$/.test(data.uri)) ||
+        (data.origin === "vimeo" &&
+          !/^https?:\/\/(www\.)?vimeo\.com\/\d+(&.*)?$/.test(data.uri))
+      ) {
+        return false;
+      }
+      return true;
+    },
+    { message: "Video URL is not valid", path: ["uri"] },
+  );
+
+export type PortfolioUploadVideoSchemaType = z.infer<
+  typeof portfolioUploadVideoSchema
+>;
+
+export const communityDetailsSchema = z.object({
+  shortDescription: z.string().max(200).optional().default(""),
+  description: z.string().trim().max(1000).optional().default(""),
+  portfolio: z.array(portfolioItemSchema).default([]),
+  socialMediaLinks: z.array(socialLinkSchema).default([]),
+});
+
+export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
+
+const userPortfolioSchema = z.object({
+  portfolio: z.array(portfolioItemSchema).default([]),
+});
+
+export type UserPortfolio = z.infer<typeof userPortfolioSchema>;
+
 export type UserFormSkillSchemaType = z.infer<typeof userFormSkillSchema>;
 
 export const userFormSchema = z.object({
@@ -188,6 +240,7 @@ export const gnoProfileDetailsSchema = z.object({
   bannerUri: z.string().optional().default(""),
   experiences: z.array(userExperienceSchema).default([]),
   skills: z.array(userFormSkillSchema).default([]),
+    portfolio: z.array(portfolioItemSchema).default([]),
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
@@ -295,55 +348,3 @@ export const communityFormSchema = z.object({
 });
 
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
-
-export const portfolioItemSchema = z.object({
-  id: z.string().uuid(),
-  type: z.enum(["image", "video", "audio"]),
-  uploadedAt: z.coerce.date(),
-  uri: uriSchema,
-  name: z.string().min(1).max(100),
-});
-
-export type PortfolioItem = z.infer<typeof portfolioItemSchema>;
-
-export const portfolioUploadVideoSchema = z
-  .object({
-    origin: z.union([z.literal("youtube"), z.literal("vimeo")]),
-    uri: uriSchema,
-  })
-  .refine(
-    (data) => {
-      if (
-        (data.origin === "youtube" &&
-          !/^https?:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]{11}(&.*)?$/.test(
-            data.uri,
-          ) &&
-          !/^https?:\/\/youtu\.be\/[\w-]{11}(&.*)?$/.test(data.uri)) ||
-        (data.origin === "vimeo" &&
-          !/^https?:\/\/(www\.)?vimeo\.com\/\d+(&.*)?$/.test(data.uri))
-      ) {
-        return false;
-      }
-      return true;
-    },
-    { message: "Video URL is not valid", path: ["uri"] },
-  );
-
-export type PortfolioUploadVideoSchemaType = z.infer<
-  typeof portfolioUploadVideoSchema
->;
-
-export const communityDetailsSchema = z.object({
-  shortDescription: z.string().max(200).optional().default(""),
-  description: z.string().trim().max(1000).optional().default(""),
-  portfolio: z.array(portfolioItemSchema).default([]),
-  socialMediaLinks: z.array(socialLinkSchema).default([]),
-});
-
-export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
-
-const userPortfolioSchema = z.object({
-  portfolio: z.array(portfolioItemSchema).default([]),
-});
-
-export type UserPortfolio = z.infer<typeof userPortfolioSchema>;

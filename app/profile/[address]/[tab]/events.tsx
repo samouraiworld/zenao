@@ -16,7 +16,7 @@ import {
   DEFAULT_EVENTS_LIMIT,
   eventsByOrganizerList,
 } from "@/lib/queries/events-list";
-import { profileOptions } from "@/lib/queries/profile";
+// import { profileOptions } from "@/lib/queries/profile";
 import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
