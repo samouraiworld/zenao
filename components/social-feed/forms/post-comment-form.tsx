@@ -1,28 +1,31 @@
 "use client";
 
-import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
 import { UseFormReturn } from "react-hook-form";
-import { StandardPostForm } from "@/components/social-feed/forms/standard-post-form";
-import { useToast } from "@/hooks/use-toast";
-import { useCreateStandardPost } from "@/lib/mutations/social-feed";
-import { CommunityUserRole } from "@/lib/queries/community";
-import { userInfoOptions } from "@/lib/queries/user";
-import { captureException } from "@/lib/report";
+import { SignedIn, SignedOut, useAuth } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { OrgType } from "@/lib/organization";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
+import { useToast } from "@/hooks/use-toast";
+import { userInfoOptions } from "@/lib/queries/user";
+import { useCreateStandardPost } from "@/lib/mutations/social-feed";
+import { captureException } from "@/lib/report";
+import CommunityPostCommentForm from "@/components/features/community/community-post-comment-form";
+import EventPostCommentForm from "@/components/features/event/event-post-comment-form";
+
+interface PostCommentFormProps {
+  orgType: OrgType;
+  orgId: string;
+  parentId: bigint;
+  form: UseFormReturn<SocialFeedPostFormSchemaType>;
+}
 
 export default function PostCommentForm({
-  communityId,
+  orgType,
+  orgId,
   parentId,
-  userRoles,
   form,
-}: {
-  communityId: string;
-  parentId: bigint;
-  userRoles: CommunityUserRole[];
-  form: UseFormReturn<SocialFeedPostFormSchemaType>;
-}) {
+}: PostCommentFormProps) {
   const { toast } = useToast();
   const t = useTranslations("social-feed.standard-post-form");
 
@@ -45,8 +48,8 @@ export default function PostCommentForm({
       }
 
       await createStandardPost({
-        orgType: "community",
-        orgId: communityId,
+        orgType,
+        orgId,
         content: values.content,
         parentId: parentId.toString(),
         token,
@@ -73,29 +76,29 @@ export default function PostCommentForm({
     <>
       <SignedOut>
         <div className="flex justify-center w-full">
-          <div className="w-full">{t("comment-restricted-to-members")}</div>
+          <div className="w-full">
+            {t("comment-restricted-to-participants")}
+          </div>
         </div>
       </SignedOut>
       <SignedIn>
-        {!userRoles.includes("administrator") &&
-        !userRoles.includes("member") ? (
-          <div className="flex justify-center w-full">
-            <div className="w-full">{t("comment-restricted-to-members")}</div>
-          </div>
-        ) : (
-          <div className="flex justify-center w-full transition-all duration-300 bg-secondary/80">
-            <div className="w-full">
-              <StandardPostForm
-                form={form}
-                postTypeMode={"STANDARD_POST"}
-                setPostTypeMode={() => {
-                  console.log("not available");
-                }}
-                onSubmit={onSubmit}
-                isLoading={isPending}
-              />
-            </div>
-          </div>
+        {orgType === "event" && (
+          <EventPostCommentForm
+            form={form}
+            eventId={orgId}
+            userRealmId={userRealmId}
+            onSubmit={onSubmit}
+            isPending={isPending}
+          />
+        )}
+        {orgType === "community" && (
+          <CommunityPostCommentForm
+            form={form}
+            communityId={orgId}
+            userRealmId={userRealmId}
+            onSubmit={onSubmit}
+            isPending={isPending}
+          />
         )}
       </SignedIn>
     </>
