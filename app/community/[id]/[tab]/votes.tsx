@@ -77,7 +77,7 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
             }
             onDelete={onDelete}
             replyHrefFormatter={(postId) =>
-              `/community/${communityId}/feed/post/${postId}`
+              `/feed/community/${communityId}/post/${postId}`
             }
             canReply
             isReacting={isReacting}
