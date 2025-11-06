@@ -112,7 +112,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
               setPostInEdition({ postId, content });
             }}
             replyHrefFormatter={(postId) =>
-              `/community/${communityId}/feed/post/${postId}`
+              `/feed/community/${communityId}/post/${postId}`
             }
             canReply
             innerEditMode

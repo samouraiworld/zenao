@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff, MapPin, Users } from "lucide-react";
+import { Eye, EyeOff, Lock, MapPin, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
@@ -14,6 +14,11 @@ import { makeLocationFromEvent } from "@/lib/location";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 import { locationTimezone } from "@/lib/event-location";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
 
 const EventDateTime = ({
   startDate,
@@ -36,7 +41,7 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
   const location = makeLocationFromEvent(evt.location);
   const eventTimezone = locationTimezone(location);
   const timezone = useLayoutTimezone(eventTimezone);
-  const t = useTranslations("event");
+  const t = useTranslations("event-card");
 
   const locationString =
     location.kind === "geo" || location.kind === "custom"
@@ -62,11 +67,31 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <EventDateTime startDate={evt.startDate} timezone={timezone} />
-              {evt.discoverable ? (
-                <Eye className="size-5" />
-              ) : (
-                <EyeOff className="size-5" />
-              )}
+
+              <div className="flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger>
+                    {evt.discoverable ? (
+                      <Eye className="size-5" />
+                    ) : (
+                      <EyeOff className="size-5" />
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {evt.discoverable
+                      ? t("discoverable-tooltip")
+                      : t("hidden-tooltip")}
+                  </TooltipContent>
+                </Tooltip>
+                {evt.privacy && evt.privacy.eventPrivacy.case === "guarded" && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Lock className="size-5" />
+                    </TooltipTrigger>
+                    <TooltipContent>{t("exclusive-event")}</TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             </div>
             <div className="flex flex-row gap-2 items-baseline">
               <Heading level={1} size="xl" className="mb-1 line-clamp-3">
