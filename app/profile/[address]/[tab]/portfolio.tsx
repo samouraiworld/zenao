@@ -342,7 +342,6 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
                 onClick={() => setPreviewDialogState({ isOpen: true, item })}
               >
                 <div className="h-full border rounded border-muted overflow-hidden">
-                  {/* blurred bg */}
                   <Web3Image
                     src={item.uri}
                     alt={`${item.name}-bg`}
@@ -352,7 +351,6 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
                       "hover:brightness-[60%] transition-all",
                     )}
                   />
-                  {/* main image */}
                   <Web3Image
                     src={item.uri}
                     alt={item.name}
