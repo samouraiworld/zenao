@@ -229,6 +229,7 @@ export const userFormSchema = z.object({
   shortBio: z.string().max(200).optional().default(""),
   experiences: z.array(userExperienceSchema).default([]),
   skills: z.array(userFormSkillSchema),
+  portfolio: z.array(portfolioItemSchema).default([]),
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
@@ -240,7 +241,7 @@ export const gnoProfileDetailsSchema = z.object({
   bannerUri: z.string().optional().default(""),
   experiences: z.array(userExperienceSchema).default([]),
   skills: z.array(userFormSkillSchema).default([]),
-    portfolio: z.array(portfolioItemSchema).default([]),
+  portfolio: z.array(portfolioItemSchema).default([]),
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
