@@ -12,12 +12,13 @@ import { GatekeeperManagementDialog } from "@/components/dialogs/gatekeeper-mana
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
-import { EventUserRole } from "@/lib/queries/event-users";
+import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
 import { zenaoClient } from "@/lib/zenao-client";
+import { userInfoOptions } from "@/lib/queries/user";
 
 type EventManagementMenuProps = {
   eventId: string;
-  roles: EventUserRole[];
+  // roles: EventUserRole[];
   nbParticipants: number;
 };
 
@@ -115,11 +116,18 @@ function EventManagementMenuOrganizer({
 
 export function EventManagementMenu({
   eventId,
-  roles,
+  // roles,
   nbParticipants,
 }: EventManagementMenuProps) {
-  const { getToken } = useAuth();
+  const { userId, getToken } = useAuth();
   const t = useTranslations("event");
+
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userInfo?.realmId),
+  );
 
   const roleLevel = useMemo(() => getRoleLevel(roles), [roles]);
 

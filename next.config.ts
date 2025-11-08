@@ -28,10 +28,6 @@ const nextConfig: NextConfig = {
         destination: "/tickets/upcoming",
       },
       {
-        source: "/event/:id",
-        destination: "/event/:id/description",
-      },
-      {
         source: "/community/:id",
         destination: "/community/:id/chat",
       },

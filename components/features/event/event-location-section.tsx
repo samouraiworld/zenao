@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink, MapPin } from "lucide-react";
 import Heading from "../../widgets/texts/heading";
 import { EventFormSchemaType } from "@/types/schemas";
+import { Skeleton } from "@/components/shadcn/skeleton";
 
 function EventLocationSection({
   location,
@@ -47,6 +48,19 @@ function EventLocationSection({
       {/* {location.kind === "geo" && (
               <MapCaller lat={location.lat} lng={location.lng} />
             )} */}
+    </div>
+  );
+}
+
+export function EventLocationSkeleton() {
+  return (
+    <div className="flex flex-col">
+      <div className="flex flex-row gap-4 items-center mb-2">
+        <div className="w-[22px] h-[22px]">
+          <MapPin width={22} height={22} />
+        </div>
+        <Skeleton className="h-5 w-40" />
+      </div>
     </div>
   );
 }
