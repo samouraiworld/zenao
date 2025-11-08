@@ -7,8 +7,6 @@ import { Loader2, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { imageHeight, imageWidth } from "./constants";
-import { ScreenContainer } from "@/components/layout/screen-container";
 import { EventPasswordProvider } from "@/components/providers/event-password-provider";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Form } from "@/components/shadcn/form";
@@ -109,13 +107,7 @@ export function ExclusiveEventGuard({
   }
 
   return (
-    <ScreenContainer
-      background={{
-        src: imageUri,
-        width: imageWidth,
-        height: imageHeight,
-      }}
-    >
+    <>
       <div className="flex flex-col gap-8 items-center justify-center w-full h-full">
         <div className="w-full max-w-[512px]">
           <AspectRatio ratio={16 / 9}>
@@ -167,6 +159,6 @@ export function ExclusiveEventGuard({
           </Form>
         )}
       </div>
-    </ScreenContainer>
+    </>
   );
 }

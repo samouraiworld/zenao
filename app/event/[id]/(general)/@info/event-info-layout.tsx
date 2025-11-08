@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import React, { Suspense, useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
 import dynamic from "next/dynamic";
-import { ParticipantsSection } from "../../../../components/features/event/event-participants-section";
+import { ParticipantsSection } from "../../../../../components/features/event/event-participants-section";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
