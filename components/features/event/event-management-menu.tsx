@@ -18,7 +18,6 @@ import { userInfoOptions } from "@/lib/queries/user";
 
 type EventManagementMenuProps = {
   eventId: string;
-  // roles: EventUserRole[];
   nbParticipants: number;
 };
 
@@ -114,9 +113,8 @@ function EventManagementMenuOrganizer({
   );
 }
 
-export function EventManagementMenu({
+export default function EventManagementMenu({
   eventId,
-  // roles,
   nbParticipants,
 }: EventManagementMenuProps) {
   const { userId, getToken } = useAuth();

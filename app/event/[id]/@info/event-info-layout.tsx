@@ -7,7 +7,7 @@ import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { Suspense, useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
-import { EventManagementMenu } from "../../../../components/features/event/event-management-menu";
+import dynamic from "next/dynamic";
 import { ParticipantsSection } from "../../../../components/features/event/event-participants-section";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Separator } from "@/components/shadcn/separator";
@@ -17,7 +17,6 @@ import EventLocationSection from "@/components/features/event/event-location-sec
 import { makeLocationFromEvent } from "@/lib/location";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
-import EventParticipationInfo from "@/components/features/event/event-participation-info";
 import { EventImage } from "@/components/features/event/event-image";
 import { locationTimezone } from "@/lib/event-location";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
@@ -30,6 +29,18 @@ import EventCommunitySection from "@/components/features/event/event-community-s
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
+
+const EventParticipationInfo = dynamic(
+  () => import("@/components/features/event/event-participation-info"),
+  { ssr: false },
+);
+
+const EventManagementMenu = dynamic(
+  () => import("@/components/features/event/event-management-menu"),
+  {
+    ssr: false,
+  },
+);
 
 interface EventSectionProps {
   title: string;
@@ -115,12 +126,15 @@ export function EventInfoLayout({
           <div className="flex flex-row gap-4 items-center">
             <Calendar width={iconSize} height={iconSize} />
             <div className="flex flex-col">
-              <Heading level={2} size="xl">
+              <Heading level={2} size="xl" suppressHydrationWarning>
                 {formatTZ(fromUnixTime(Number(data.startDate)), "PPP", {
                   timeZone: timezone,
                 })}
               </Heading>
-              <div className="flex flex-row text-sm gap-1">
+              <div
+                className="flex flex-row text-sm gap-1"
+                suppressHydrationWarning
+              >
                 <Text variant="secondary" size="sm">
                   {formatTZ(fromUnixTime(Number(data.startDate)), "p", {
                     timeZone: timezone,
@@ -129,7 +143,7 @@ export function EventInfoLayout({
                 <Text variant="secondary" size="sm">
                   -
                 </Text>
-                <Text variant="secondary" size="sm">
+                <Text variant="secondary" size="sm" suppressHydrationWarning>
                   {formatTZ(fromUnixTime(Number(data.endDate)), "PPp O", {
                     timeZone: timezone,
                   })}
