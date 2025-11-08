@@ -103,7 +103,6 @@ function MainEventSectionsContent({
     () => isOrganizer || isParticipant,
     [isOrganizer, isParticipant],
   );
-
   const form = useForm<SocialFeedPostFormSchemaType>({
     mode: "all",
     resolver: zodResolver(socialFeedPostFormSchema),

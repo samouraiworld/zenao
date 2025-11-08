@@ -13,7 +13,6 @@ import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import EventLocationSection from "@/components/features/event/event-location-section";
 import { makeLocationFromEvent } from "@/lib/location";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
@@ -29,6 +28,7 @@ import EventCommunitySection from "@/components/features/event/event-community-s
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
+import EventLocationSection from "@/components/features/event/event-location-section";
 
 const EventParticipationInfo = dynamic(
   () => import("@/components/features/event/event-participation-info"),
@@ -56,6 +56,8 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
     </div>
   );
 };
+
+const iconSize = 22;
 
 export function EventInfoLayout({
   eventId,
@@ -95,8 +97,6 @@ export function EventInfoLayout({
     maximumAttendeeCapacity: data.capacity,
     image: web2URL(data.imageUri),
   };
-
-  const iconSize = 22;
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-8">

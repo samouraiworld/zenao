@@ -19,8 +19,8 @@ import {
   SignInButton,
   useAuth,
 } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -174,42 +174,46 @@ export function Header() {
   }, []);
 
   return (
-    <div className="flex justify-between p-4 w-full items-center">
-      {/* Desktop */}
-      <div className="flex max-[450px]:gap-4 gap-6 items-center">
-        <div className="flex items-center gap-2">
-          <GoBackButton className="hidden standalone:flex" />
-          <Link href="/" className="flex gap-2 items-center">
-            <Web3Image
-              src="/zenao-logo.png"
-              alt="zenao logo"
-              width={28}
-              height={28}
-              className="max-[450px]:w-6 max-[450px]:h-6"
-              priority
-            />
-            <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
-          </Link>
+    <div
+      className={`sticky -top-24 bg-background z-50 transition-all duration-500`}
+    >
+      <div className="flex justify-between p-4 w-full items-center">
+        {/* Desktop */}
+        <div className="flex max-[450px]:gap-4 gap-6 items-center">
+          <div className="flex items-center gap-2">
+            <GoBackButton className="hidden standalone:flex" />
+            <Link href="/" className="flex gap-2 items-center">
+              <Web3Image
+                src="/zenao-logo.png"
+                alt="zenao logo"
+                width={28}
+                height={28}
+                className="max-[450px]:w-6 max-[450px]:h-6"
+                priority
+              />
+              <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
+            </Link>
+          </div>
+          <div className="flex standalone:hidden standalone:md:flex flex-row gap-4">
+            <HeaderLinks />
+          </div>
         </div>
-        <div className="flex standalone:hidden standalone:md:flex flex-row gap-4">
-          <HeaderLinks />
-        </div>
-      </div>
 
-      <div className="flex gap-2 items-center">
-        <Link passHref href="/create">
-          <ButtonWithChildren
-            variant="outline"
-            size="sm"
-            className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
-          >
-            {t("create-event")}
-          </ButtonWithChildren>
-        </Link>
-        <div className="max-md:hidden">
-          <ToggleThemeButton />
+        <div className="flex gap-2 items-center">
+          <Link passHref href="/create">
+            <ButtonWithChildren
+              variant="outline"
+              size="sm"
+              className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
+            >
+              {t("create-event")}
+            </ButtonWithChildren>
+          </Link>
+          <div className="max-md:hidden">
+            <ToggleThemeButton />
+          </div>
+          <Auth className="h-fit" isMounted={isMounted} />
         </div>
-        <Auth className="h-fit" isMounted={isMounted} />
       </div>
     </div>
   );
@@ -222,7 +226,7 @@ const Auth = ({
   isMounted,
 }: {
   className?: string;
-  isMounted: boolean;
+  isMounted?: boolean;
 }) => {
   const t = useTranslations("navigation");
   const { signOut, getToken, userId } = useAuth();

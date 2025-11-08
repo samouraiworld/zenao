@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Loader2, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { EventPasswordProvider } from "@/components/providers/event-password-provider";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
@@ -37,18 +37,17 @@ export function ExclusiveEventGuard({
   eventId,
   title,
   imageUri,
-  exclusive = false,
   children,
+  exclusive,
 }: ExclusiveEventGuardProps) {
-  const { getToken, userId } = useAuth();
+  const { getToken, userId, isLoaded } = useAuth();
   const { data: info } = useSuspenseQuery(userInfoOptions(getToken, userId));
   const realmId = info?.realmId;
   const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, realmId));
 
   const [isPending, setIsPending] = useState(false);
-  const [isCheckingAccess, setIsCheckingAccess] = useState<boolean>(true);
   const isMember = useMemo(() => roles.length > 0, [roles]);
-  const [canAccess, setCanAccess] = useState<boolean>(!exclusive || isMember);
+  const [canAccess, setCanAccess] = useState<boolean>(isMember);
 
   const t = useTranslations("event-protection-guard");
   const form = useForm<EventProtectionFormSchemaType>({
@@ -60,13 +59,6 @@ export function ExclusiveEventGuard({
   });
   const password = form.watch("password");
   const { toast } = useToast();
-
-  useEffect(() => {
-    setCanAccess(!exclusive || isMember);
-    const timeout = setTimeout(() => setIsCheckingAccess(false), 1000);
-
-    return () => clearTimeout(timeout);
-  }, [exclusive, isMember]);
 
   const onSubmit = async (data: EventProtectionFormSchemaType) => {
     // Call the API to check if the password is correct
@@ -98,7 +90,9 @@ export function ExclusiveEventGuard({
     setIsPending(false);
   };
 
-  if (canAccess) {
+  const pass = isLoaded && (!exclusive || isMember || canAccess);
+
+  if (pass) {
     return (
       <EventPasswordProvider password={password}>
         {children}
@@ -129,7 +123,7 @@ export function ExclusiveEventGuard({
         </Heading>
         <Text className="text-center">{t("description")}</Text>
 
-        {isCheckingAccess ? (
+        {!isLoaded ? (
           <div className="w-full flex justify-center items-center">
             <Loader2 size={24} className="animate-spin" />
           </div>

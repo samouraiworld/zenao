@@ -1,11 +1,11 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import { imageHeight, imageWidth } from "./constants";
+import { ExclusiveEventGuard } from "./event-exclusive-guard";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { ExclusiveEventGuard } from "@/app/event/[id]/event-exclusive-guard";
 
 type Props = {
   id: string;

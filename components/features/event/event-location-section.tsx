@@ -4,7 +4,7 @@ import Heading from "../../widgets/texts/heading";
 import { EventFormSchemaType } from "@/types/schemas";
 import { Skeleton } from "@/components/shadcn/skeleton";
 
-function EventLocationSection({
+export function EventLocationSection({
   location,
 }: {
   location: EventFormSchemaType["location"];
@@ -45,21 +45,20 @@ function EventLocationSection({
           </Heading>
         )}
       </div>
-      {/* {location.kind === "geo" && (
-              <MapCaller lat={location.lat} lng={location.lng} />
-            )} */}
     </div>
   );
 }
 
 export function EventLocationSkeleton() {
+  const iconSize = 22;
+
   return (
     <div className="flex flex-col">
       <div className="flex flex-row gap-4 items-center mb-2">
         <div className="w-[22px] h-[22px]">
-          <MapPin width={22} height={22} />
+          <MapPin width={iconSize} height={iconSize} />
         </div>
-        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-[1.125rem] my-[0.3125rem] w-60" />
       </div>
     </div>
   );

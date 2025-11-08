@@ -9,12 +9,12 @@ import { useMemo, useState } from "react";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { CancelEventDialog } from "@/components/dialogs/cancel-event";
 import { GatekeeperManagementDialog } from "@/components/dialogs/gatekeeper-management-dialog";
-import { Card } from "@/components/widgets/cards/card";
-import Text from "@/components/widgets/texts/text";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
-import { zenaoClient } from "@/lib/zenao-client";
 import { userInfoOptions } from "@/lib/queries/user";
+import { zenaoClient } from "@/lib/zenao-client";
+import { Card } from "@/components/widgets/cards/card";
+import Text from "@/components/widgets/texts/text";
 
 type EventManagementMenuProps = {
   eventId: string;
