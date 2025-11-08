@@ -174,9 +174,7 @@ export function Header() {
   }, []);
 
   return (
-    <div
-      className={`sticky -top-24 bg-background z-50 transition-all duration-500`}
-    >
+    <div className={`sticky -top-24 z-50 transition-all duration-500`}>
       <div className="flex justify-between p-4 w-full items-center">
         {/* Desktop */}
         <div className="flex max-[450px]:gap-4 gap-6 items-center">
