@@ -35,7 +35,7 @@ export function EventTabs({
   const section = useSelectedLayoutSegment() || "description";
 
   return (
-    <Tabs value={section} className="w-full min-h-screen">
+    <Tabs value={section} className="w-full min-h-[300px]">
       <TabsList className="flex w-full bg-transparent p-0 m-0 overflow-auto justify-start">
         <Link href={`/event/${eventId}`} scroll={false}>
           <TabsTrigger
