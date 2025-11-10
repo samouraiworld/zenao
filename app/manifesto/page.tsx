@@ -36,7 +36,7 @@ export default function Manifesto() {
               <Text>
                 <span className="font-semibold">ZENAO</span>
                 <span className="mx-[6px]">{t("means")}</span>
-                <span className="text-secondry-color font-light italic">
+                <span className="text-secondary-color font-light italic">
                   Zen Autonomous Organizations
                 </span>
               </Text>
