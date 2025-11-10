@@ -15,6 +15,8 @@ export default function Manifesto() {
     <ScreenContainerCentered>
       <div className="flex flex-col justify-center lg:flex-row">
         <div className="w-full flex justify-center my-10 lg:my-0 lg:w-1/3 lg:self-center lg:justify-evenly">
+          <div />
+          <div />
           <Image
             src="/zenao-logo.png"
             alt="zenao logo"
