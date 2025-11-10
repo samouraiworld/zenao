@@ -85,8 +85,31 @@ export default function Manifesto() {
             </Text>
             <Text size="sm">{t2("vision-p1")}</Text>
             <Text size="sm">{t2("vision-p2")}</Text>
-            <Text size="sm">{t2("vision-p3")}</Text>
-            <Text size="sm">{t2("vision-p4")}</Text>
+            <div>
+              <Text size="sm">
+                <span>{t2("vision-p3")}</span>
+                <a
+                  href="https://en.wikipedia.org/wiki/Sovereignty"
+                  className="mx-[6px]"
+                >
+                  <span className="underline font-bold">sovereignty</span>
+                </a>
+                <span>{t2("vision-p3-end")}</span>
+              </Text>
+            </div>
+            <div>
+              <Text size="sm">
+                <span>{t2("vision-p4")}</span>
+                <a
+                  href="https://en.wikipedia.org/wiki/Decentralized_autonomous_organization"
+                  className="mx-[6px]"
+                >
+                  <span className="underline font-bold">
+                    decentralized organization.
+                  </span>
+                </a>
+              </Text>
+            </div>
           </div>
           <div className="flex flex-col gap-4">
             <Text>
@@ -178,9 +201,21 @@ export default function Manifesto() {
             <Text>
               <span className="font-bold">{t2("story-title")}</span>
             </Text>
-            <Text size="sm">{t2("story-p1")}</Text>
-            <Text size="sm">{t2("story-p2")}</Text>
 
+            <div>
+              <Text size="sm">
+                <span>{t2("story-p1")}</span>
+                <a
+                  href="https://zenao.io/"
+                  className="mx-[6px]"
+                >
+                  <span className="underline font-bold">Zenao.io</span>
+                </a>
+                <span>{t2("story-p1-end")}</span>
+              </Text>
+            </div>
+
+            <Text size="sm">{t2("story-p2")}</Text>
             <Text className="font-semibold">
               {t2("story-community-actions-title")}
             </Text>
