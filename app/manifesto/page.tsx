@@ -161,11 +161,18 @@ export default function Manifesto() {
             <Text size="sm" className="font-semibold">
               {t2("gov-actors-p1")}
             </Text>
-            <ul className="list-disc ml-6 text-sm">
-              {t2.raw("gov-actors-list").map((item: string, idx: number) => (
-                <li key={idx}>{item}</li>
-              ))}
+            <ul className="ml-6 text-sm">
+              {t2.raw("gov-actors-list").map((item: string, idx: number) => {
+                const [label, ...rest] = item.split(":");
+                const description = rest.join(":").trim();
+                return (
+                  <li key={idx}>
+                    <span className="font-bold">{label}:</span> {description}
+                  </li>
+                );
+              })}
             </ul>
+
             <Text size="sm">{t2("gov-actors-example")}</Text>
             <Text size="sm" className="font-bold">
               {t2("gov-arch-title")}
