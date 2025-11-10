@@ -139,9 +139,14 @@ export default function Manifesto() {
             <ul className="list-disc ml-6 text-sm">
               {t2
                 .raw("product-upcoming-list")
-                .map((item: string, idx: number) => (
-                  <li key={idx}>{item}</li>
-                ))}
+                .map((item: string, idx: number) => {
+                  const startsLowercase = /^[a-z]/.test(item);
+                  return (
+                    <li key={idx} className={startsLowercase ? "ml-4" : ""}>
+                      {item}
+                    </li>
+                  );
+                })}
             </ul>
           </div>
 
@@ -205,10 +210,7 @@ export default function Manifesto() {
             <div>
               <Text size="sm">
                 <span>{t2("story-p1")}</span>
-                <a
-                  href="https://zenao.io/"
-                  className="mx-[6px]"
-                >
+                <a href="https://zenao.io/" className="mx-[6px]">
                   <span className="underline font-bold">Zenao.io</span>
                 </a>
                 <span>{t2("story-p1-end")}</span>
