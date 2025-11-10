@@ -2,13 +2,19 @@
 
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AudioWaveform, ImageIcon, Loader2, Video } from "lucide-react";
+import {
+  AudioWaveform,
+  ImageIcon,
+  Loader2,
+  Video,
+  Trash2Icon,
+} from "lucide-react";
 import { memo, useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/widgets/texts/heading";
 import { Web3Image } from "@/components/widgets/images/web3-image";
-// import { useEditUserProfile } from "@/lib/mutations/profile";
+import { useEditUserProfile } from "@/lib/mutations/profile";
 import { profileOptions } from "@/lib/queries/profile";
 import { userInfoOptions } from "@/lib/queries/user";
 import {
@@ -19,6 +25,7 @@ import {
   PortfolioItem,
   PortfolioUploadVideoSchemaType,
   gnoProfileDetailsSchema,
+  GnoProfileDetails,
 } from "@/types/schemas";
 import { Button } from "@/components/shadcn/button";
 import { useToast } from "@/hooks/use-toast";
@@ -76,7 +83,7 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
 
   const isOwner = userId && addressFromRealmId(realmId) === address;
 
-  const { portfolio, ...otherDetails } = profile; // TODO
+  const { portfolio, ..._otherDetails } = profile; // TODO
 
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
@@ -94,30 +101,29 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
   }>({ isOpen: false, item: {} as never });
 
   const t = useTranslations("community-portfolio");
-
-  // const { editUser } = useEditUserProfile();
+  const { editUser } = useEditUserProfile();
 
   const onSave = async (newPortfolio: PortfolioItem[]) => {
     try {
       const token = await getToken();
       if (!token) throw new Error("invalid clerk token");
 
-      //   const description = serializeWithFrontMatter(profile.bio, {
-      //     socialMediaLinks: profile.socialMediaLinks,
-      //     location: profile.location,
-      //     shortBio: profile.shortBio,
-      //     bannerUri: profile.bannerUri,
-      //     experiences: profile.experiences,
-      //     skills: profile.skills,
-      //     portfolio: newPortfolio,
-      //   });
+      const bio = serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
+        profile.bio,
+        { ...profile, portfolio: newPortfolio },
+      );
 
-      // await editUser({
-      // });
+      await editUser({
+        realmId,
+        token,
+        avatarUri: user?.avatarUri ?? "",
+        displayName: user?.displayName ?? "",
+        bio,
+      });
 
       setLocalPortfolio(newPortfolio);
       toast({ title: t("upload-file-success") });
-    } catch (error: unknown) {
+    } catch (error) {
       captureException(error);
       toast({ title: t("error-saving"), variant: "destructive" });
     }
@@ -148,9 +154,12 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
       await onSave([newItem, ...localPortfolio]);
 
       toast({ title: t("upload-file-success") });
-    } catch (error: any) {
+    } catch (error: unknown) {
       captureException(error);
-      if (error.message?.includes("File size exceeds limit")) {
+      if (
+        error instanceof Error &&
+        error.message.includes("File size exceeds limit")
+      ) {
         toast({
           variant: "destructive",
           title: t("error-filesize-exceeds-limit", {
@@ -331,11 +340,21 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
         {localPortfolio.map((item) => (
           <div
             className={cn(
-              "w-full max-w-full",
+              "w-full max-w-full relative",
               localPortfolio.length < 2 && "max-w-[400px]",
             )}
             key={item.id}
           >
+            {isOwner && (
+              <button
+                className="absolute top-2 right-2 z-10 bg-white/70 text-red-600 rounded-full p-1 hover:bg-red-600 hover:text-white transition flex items-center justify-center"
+                onClick={() => onDelete(item)}
+                type="button"
+              >
+                <Trash2Icon className="w-4 h-4" />
+              </button>
+            )}
+
             {item.type === "image" && (
               <AspectRatio
                 ratio={16 / 9}

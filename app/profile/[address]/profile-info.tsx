@@ -20,6 +20,7 @@ export function ProfileInfo({
 }) {
   const t = useTranslations("profile-info");
   const { data: profile } = useSuspenseQuery(profileOptions(address));
+  const [activeTab, setActiveTab] = useState<ProfileTabsSchemaType>("events");
 
   // profileOptions can return array of object with empty string (except address)
   // So to detect if a user doesn't exist we have to check if all strings are empty (except address)
@@ -34,8 +35,6 @@ export function ProfileInfo({
     image: profile?.avatarUri,
     knowsAbout: profile?.bio,
   };
-
-  const [activeTab, setActiveTab] = useState<ProfileTabsSchemaType>("events");
 
   return (
     <div className="flex flex-col gap-10">
