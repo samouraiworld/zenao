@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"slices"
 
 	"connectrpc.com/connect"
 	"github.com/samouraiworld/zenao/backend/mapsl"
@@ -29,29 +28,22 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 		return nil, errors.New("user is banned")
 	}
 
-	var admins []*zeni.User
-	if err := s.DB.TxWithSpan(ctx, "db.GetCommunityAdministrators", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleAdministrator) {
-			return errors.New("user is not administrator of the community")
-		}
-		admins, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleAdministrator)
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
+	communityRealmID := s.Chain.WithContext(ctx).CommunityRealmID(req.Msg.CommunityId)
+	administrators, err := s.Chain.WithContext(ctx).GetCommunityUsersByRole(communityRealmID, zeni.RoleAdministrator)
+	if err != nil {
 		return nil, err
 	}
 
-	admIDs := mapsl.Map(admins, func(adm *zeni.User) string {
-		return adm.AuthID
+	zAdministrators, err := s.DB.GetUsersByRealmIDs(administrators)
+	if err != nil {
+		return nil, err
+	}
+
+	adminsAuthIDs := mapsl.Map(zAdministrators, func(u *zeni.User) string {
+		return u.AuthID
 	})
 
-	users, err := s.Auth.GetUsersFromIDs(ctx, admIDs)
+	users, err := s.Auth.GetUsersFromIDs(ctx, adminsAuthIDs)
 	if err != nil {
 		return nil, err
 	}

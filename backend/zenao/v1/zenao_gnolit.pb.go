@@ -511,6 +511,9 @@ func (e *EventPrivacyGuarded) GnoLiteral(typePrefix string, linePrefix string) s
 	if e.ParticipationPubkey != "" {
 		fmt.Fprintf(buf, "%s\tParticipationPubkey: %q,\n", linePrefix, e.ParticipationPubkey)
 	}
+	if e.HashParams != "" {
+		fmt.Fprintf(buf, "%s\tHashParams: %q,\n", linePrefix, e.HashParams)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -573,6 +576,9 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	}
 	if e.Discoverable != false {
 		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, e.Discoverable)
+	}
+	if e.IcsSeqNumber != 0 {
+		fmt.Fprintf(buf, "%s\tIcsSeqNumber: %d,\n", linePrefix, e.IcsSeqNumber)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -805,9 +811,6 @@ func (e *EditPostResponse) GnoLiteral(typePrefix string, linePrefix string) stri
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("EditPostResponse{\n")
-	if e.PostId != "" {
-		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, e.PostId)
-	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -867,6 +870,9 @@ func (c *CheckinRequest) GnoLiteral(typePrefix string, linePrefix string) string
 	}
 	if c.Signature != "" {
 		fmt.Fprintf(buf, "%s\tSignature: %q,\n", linePrefix, c.Signature)
+	}
+	if c.EventId != "" {
+		fmt.Fprintf(buf, "%s\tEventId: %q,\n", linePrefix, c.EventId)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
