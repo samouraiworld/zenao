@@ -526,6 +526,7 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		Ticket: tickobj,
 		//TODO: TO DELETE
 		BuyerID:   fmt.Sprint(dbtick.BuyerID),
+		UserID:    fmt.Sprint(dbtick.UserID),
 		CreatedAt: dbtick.CreatedAt,
 
 		BuyerRealmID: dbtick.BuyerRealmID,

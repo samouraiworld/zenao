@@ -1806,7 +1806,6 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 	
 		"gno.land/p/nt/ufmt"
 		"gno.land/p/zenao/daokit"
-		"gno.land/p/zenao/basedao"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
 		pollsv1 "gno.land/p/zenao/polls/v1"
 		org %q
@@ -1814,7 +1813,6 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		"gno.land/r/zenao/social_feed"
 		user %q
 		ma "gno.land/p/zenao/multiaddr"
-		"gno.land/p/zenao/realmid"
 	)
 	
 	func main() {
@@ -1828,11 +1826,7 @@ func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, questi
 		question := %q
 		options := %s
 		kind := pollsv1.PollKind(%d)
-		authFn := func() (string, bool) {
-			caller := realmid.Previous() // XXX: this should be upgradable
-			return caller, basedao.MustGetMembersViewExtension(org.DAO).IsMember(caller)
-		}
-		p := polls.NewPoll(cross, question, kind, %d, options, authFn)
+		p := polls.NewPoll(cross, question, kind, %d, options, org.FeedAuth)
 		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
 		if err != nil {
 			panic("multiaddr validation failed")
@@ -2092,7 +2086,7 @@ var (
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	feedId = social_feed.NewFeed(cross, "main", false, feedAuth)
+	feedId = social_feed.NewFeed(cross, "main", false, FeedAuth)
 }
 
 func init() {
@@ -2133,7 +2127,7 @@ func Render(path string) string {
 	return localDAO.Render(path)
 }
 
-func feedAuth() (string, bool) {
+func FeedAuth() (string, bool) {
 	caller := event.DAOPrivate.CallerID() // XXX: this should be upgradable
 	return caller, basedao.MustGetMembersViewExtension(localDAO).IsMember(caller)
 }
@@ -2191,7 +2185,7 @@ var (
 
 func init() {
 	// XXX: workaround for "unexpected zero object id" issue
-	feedId = social_feed.NewFeed(cross, "main", false, feedAuth)
+	feedId = social_feed.NewFeed(cross, "main", false, FeedAuth)
 }
 
 func init() {
@@ -2227,7 +2221,7 @@ func Render(path string) string {
 	return localDAO.Render(path)
 }
 
-func feedAuth() (string, bool) {
+func FeedAuth() (string, bool) {
 	caller := community.DAOPrivate.CallerID() // XXX: this should be upgradable
 	return caller, basedao.MustGetMembersViewExtension(localDAO).IsMember(caller)
 }
