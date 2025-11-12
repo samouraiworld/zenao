@@ -45,8 +45,6 @@ export function ProfileInfo({
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
 
-  console.log(address);
-
   const { data: profile } = useSuspenseQuery(profileOptions(realmId));
   const {
     data: upcomingEventsPages,
