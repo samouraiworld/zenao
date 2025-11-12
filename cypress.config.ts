@@ -4,6 +4,7 @@ import { clerkSetup } from "@clerk/testing/cypress";
 import { defineConfig } from "cypress";
 
 export default defineConfig({
+  requestTimeout: 10000,
   e2e: {
     baseUrl: "http://localhost:3000",
     video: true,

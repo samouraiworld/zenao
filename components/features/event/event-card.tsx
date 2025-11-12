@@ -28,7 +28,7 @@ const EventDateTime = ({
   timezone: string;
 }) => {
   return (
-    <Text variant="secondary">
+    <Text variant="secondary" suppressHydrationWarning>
       {formatTZ(fromUnixTime(Number(startDate)), "p O", {
         timeZone: timezone,
       })}
