@@ -20,6 +20,7 @@ export const userInfoOptions = (
       if (authToken == null) {
         return null;
       }
+
       return await zenaoClient.getUserInfo(
         {},
         { headers: { Authorization: "Bearer " + authToken } },

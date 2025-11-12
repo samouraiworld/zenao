@@ -20,11 +20,12 @@ export const eventOptions = (id: string) =>
       const event = extractGnoJSONResponse(res) as EventInfoJson;
       return fromJson(EventInfoSchema, event);
     },
+    staleTime: Infinity,
   });
 
 export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
   queryOptions({
-    queryKey: ["event", eventId, "getkeepers"],
+    queryKey: ["event", eventId, "gatekeepers"],
     queryFn: async () => {
       const token = await getToken();
 
