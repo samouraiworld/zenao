@@ -25,7 +25,7 @@ import {
 import SettingsSection from "@/components/layout/settings-section";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
-import { IMAGE_FILE_SIZE_LIMIT } from "@/app/event/[id]/constants";
+import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;

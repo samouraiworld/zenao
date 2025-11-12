@@ -20,6 +20,16 @@ interface UserComponentProps {
 XXX: these classnames (rounded-full, overflow-hidden) are already set in the shadcn avatar components
 but the class merging does not seem to work so we need to reset them here
 */
+const loaderTextClassName = cva("rounded overflow-hidden inline-block", {
+  variants: {
+    size: {
+      sm: "w-40 h-4",
+      md: `w-80 h-8`,
+      lg: "w-160 h-16",
+    },
+  },
+  defaultVariants: { size: "sm" },
+});
 
 const avatarClassName = cva("rounded-full overflow-hidden inline-block", {
   variants: {
@@ -62,8 +72,14 @@ export function UserAvatar({
   );
 }
 
-export function UserAvatarSkeleton({ className }: { className?: string }) {
-  return <Skeleton className={cn(avatarClassName, className)} />;
+export function UserAvatarSkeleton({
+  className,
+  size = "sm",
+}: {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  return <Skeleton className={cn(avatarClassName({ size }), className)} />;
 }
 
 export function UserAvatarWithName({
@@ -96,4 +112,30 @@ export function UserAvatarWithName({
   }
 
   return <div className={className}>{content}</div>;
+}
+
+export function UserAvatarWithNameSkeleton(props: {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  return (
+    <div className={props.className}>
+      <div className="flex flex-row gap-2 items-center">
+        <UserAvatarWithNameLoader size={props.size} />{" "}
+      </div>
+    </div>
+  );
+}
+
+function UserAvatarWithNameLoader({
+  size = "sm",
+}: {
+  size?: UserComponentProps["size"];
+}) {
+  return (
+    <>
+      <UserAvatarSkeleton size={size} />
+      <Skeleton className={loaderTextClassName({ size })} />
+    </>
+  );
 }

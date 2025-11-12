@@ -6,7 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { IMAGE_FILE_SIZE_LIMIT } from "../event/[id]/constants";
+import { IMAGE_FILE_SIZE_LIMIT } from "../../components/features/event/constants";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userInfoOptions } from "@/lib/queries/user";
