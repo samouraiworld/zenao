@@ -93,7 +93,7 @@
   "devDependencies": {
     "@bufbuild/buf": "^1.58.0",
     "@bufbuild/protoc-gen-es": "^2.9.0",
-    "@clerk/testing": "^1.13.7",
+    "@clerk/testing": "^1.13.14",
     "@eslint/eslintrc": "^3",
     "@react-email/preview-server": "^4.3.1",
     "@types/geobuf": "^3.0.4",
