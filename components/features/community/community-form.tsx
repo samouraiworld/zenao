@@ -4,7 +4,6 @@ import React from "react";
 import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Trash2Icon, Plus, Info } from "lucide-react";
-import { useMediaQuery } from "../../../hooks/use-media-query";
 import SocialMediaLinks from "../user/settings/social-media-links";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
@@ -26,7 +25,7 @@ import {
 import SettingsSection from "@/components/layout/settings-section";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
-import { IMAGE_FILE_SIZE_LIMIT } from "@/app/event/[id]/constants";
+import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
@@ -50,7 +49,6 @@ export const CommunityForm = ({
   });
 
   const description = form.watch("description");
-  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const lastAdmin = adminInputs?.[adminInputs.length - 1];
   const isLastAdminInvalid =
@@ -72,7 +70,7 @@ export const CommunityForm = ({
           <FormFieldImage
             name="bannerUri"
             control={form.control}
-            aspectRatio={isDesktop ? [48, 9] : [21, 9]}
+            aspectRatio={[4, 1]}
             fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
             placeholder={t("upload-banner")}
             className="w-full rounded-xl overflow-hidden"

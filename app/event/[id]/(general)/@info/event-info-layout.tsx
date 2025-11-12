@@ -1,32 +1,21 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-import {
-  useSuspenseInfiniteQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
-import React, { useMemo } from "react";
+import React, { Suspense, useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
-import { EventManagementMenu } from "./event-management-menu";
-import { ParticipantsSection } from "./event-participants-section";
+import dynamic from "next/dynamic";
+import { ParticipantsSection } from "../../../../../components/features/event/event-participants-section";
 import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
-import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
-import { useEventPassword } from "@/components/providers/event-password-provider";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import EventLocationSection from "@/components/features/event/event-location-section";
 import { makeLocationFromEvent } from "@/lib/location";
-import { eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-users";
-import { userInfoOptions } from "@/lib/queries/user";
 import { web2URL } from "@/lib/uris";
 import { UserAvatarWithName } from "@/components/features/user/user";
-import EventParticipationInfo from "@/components/features/event/event-participation-info";
 import { EventImage } from "@/components/features/event/event-image";
 import { locationTimezone } from "@/lib/event-location";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
@@ -36,6 +25,22 @@ import {
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import EventCommunitySection from "@/components/features/event/event-community-section";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
+import EventLocationSection from "@/components/features/event/event-location-section";
+
+const EventParticipationInfo = dynamic(
+  () => import("@/components/features/event/event-participation-info"),
+  { ssr: false },
+);
+
+const EventManagementMenu = dynamic(
+  () => import("@/components/features/event/event-management-menu"),
+  {
+    ssr: false,
+  },
+);
 
 interface EventSectionProps {
   title: string;
@@ -52,23 +57,15 @@ const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
   );
 };
 
+const iconSize = 22;
+
 export function EventInfoLayout({
   eventId,
-  children,
+  data,
 }: {
   eventId: string;
-  children: React.ReactNode;
+  data: EventInfo;
 }) {
-  const { getToken, userId } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
-  const { password } = useEventPassword();
-  const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.realmId),
-  );
-
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
   );
@@ -101,8 +98,6 @@ export function EventInfoLayout({
     image: web2URL(data.imageUri),
   };
 
-  const iconSize = 22;
-
   return (
     <div className="flex flex-col w-full sm:h-full gap-8">
       <script
@@ -131,12 +126,15 @@ export function EventInfoLayout({
           <div className="flex flex-row gap-4 items-center">
             <Calendar width={iconSize} height={iconSize} />
             <div className="flex flex-col">
-              <Heading level={2} size="xl">
+              <Heading level={2} size="xl" suppressHydrationWarning>
                 {formatTZ(fromUnixTime(Number(data.startDate)), "PPP", {
                   timeZone: timezone,
                 })}
               </Heading>
-              <div className="flex flex-row text-sm gap-1">
+              <div
+                className="flex flex-row text-sm gap-1"
+                suppressHydrationWarning
+              >
                 <Text variant="secondary" size="sm">
                   {formatTZ(fromUnixTime(Number(data.startDate)), "p", {
                     timeZone: timezone,
@@ -145,7 +143,7 @@ export function EventInfoLayout({
                 <Text variant="secondary" size="sm">
                   -
                 </Text>
-                <Text variant="secondary" size="sm">
+                <Text variant="secondary" size="sm" suppressHydrationWarning>
                   {formatTZ(fromUnixTime(Number(data.endDate)), "PPp O", {
                     timeZone: timezone,
                   })}
@@ -163,11 +161,13 @@ export function EventInfoLayout({
           <GnowebButton
             href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
           />
-          <EventManagementMenu
-            eventId={eventId}
-            roles={roles}
-            nbParticipants={data.participants}
-          />
+
+          <Suspense>
+            <EventManagementMenu
+              eventId={eventId}
+              nbParticipants={data.participants}
+            />
+          </Suspense>
         </div>
       </div>
 
@@ -188,20 +188,17 @@ export function EventInfoLayout({
                 : t("going", { count: data.participants })
             }
           >
-            <ParticipantsSection id={eventId} />
+            <Suspense>
+              <ParticipantsSection id={eventId} />
+            </Suspense>
           </EventSection>
         </div>
       </div>
 
       {/* Participate Card */}
-      <EventParticipationInfo
-        eventId={eventId}
-        eventData={data}
-        roles={roles}
-        password={password}
-      />
-
-      {children}
+      <Suspense fallback={<Skeleton className="h-28 w-full rounded-md" />}>
+        <EventParticipationInfo eventId={eventId} eventData={data} />
+      </Suspense>
 
       <GoTopButton />
     </div>
