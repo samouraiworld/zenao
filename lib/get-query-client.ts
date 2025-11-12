@@ -4,6 +4,7 @@ import {
   defaultShouldDehydrateQuery,
   isServer,
 } from "@tanstack/react-query";
+import { cache } from "react";
 import { captureException } from "./report";
 
 function makeQueryClient() {
@@ -29,7 +30,8 @@ function makeQueryClient() {
 
 let browserQueryClient: QueryClient | undefined = undefined;
 
-export function getQueryClient() {
+// cache() is scoped per request, so we don't leak data between requests
+export const getQueryClient = cache(() => {
   if (isServer) {
     // Server: always make a new query client
     return makeQueryClient();
@@ -41,4 +43,4 @@ export function getQueryClient() {
     if (!browserQueryClient) browserQueryClient = makeQueryClient();
     return browserQueryClient;
   }
-}
+});

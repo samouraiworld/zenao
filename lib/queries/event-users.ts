@@ -23,6 +23,7 @@ export const eventUserRoles = (
       ) {
         return [];
       }
+
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT,
       );
@@ -45,6 +46,7 @@ export const eventUsersWithRole = (
       if (!eventId || !role || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
         return [];
       }
+
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT,
       );

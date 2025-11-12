@@ -35,7 +35,7 @@ import {
   AUDIO_FILE_SIZE_LIMIT_MB,
   IMAGE_FILE_SIZE_LIMIT,
   IMAGE_FILE_SIZE_LIMIT_MB,
-} from "@/app/event/[id]/constants";
+} from "@/components/features/event/constants";
 
 export type FeedInputMode = "POLL" | "STANDARD_POST";
 

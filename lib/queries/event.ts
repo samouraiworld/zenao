@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
-import { GetToken } from "../utils";
+import { GetToken } from "@/lib/utils";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
 import { zenaoClient } from "@/lib/zenao-client";
@@ -20,11 +20,12 @@ export const eventOptions = (id: string) =>
       const event = extractGnoJSONResponse(res) as EventInfoJson;
       return fromJson(EventInfoSchema, event);
     },
+    staleTime: Infinity,
   });
 
 export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
   queryOptions({
-    queryKey: ["event", eventId, "getkeepers"],
+    queryKey: ["event", eventId, "gatekeepers"],
     queryFn: async () => {
       const token = await getToken();
 
