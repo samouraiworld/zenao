@@ -18,6 +18,7 @@ import MapCaller from "../../widgets/map/map-lazy-components";
 import { Button } from "../../shadcn/button";
 import { ButtonWithChildren } from "../../widgets/buttons/button-with-children";
 import EventFormCommunitySelector from "./event-form-community-selector";
+import { eventImageAspectRatio } from "./event-image";
 import { Form, FormDescription } from "@/components/shadcn/form";
 import { currentTimezone } from "@/lib/time";
 import { cn } from "@/lib/tailwind";
@@ -44,7 +45,7 @@ import {
   AUDIO_FILE_SIZE_LIMIT_MB,
   IMAGE_FILE_SIZE_LIMIT,
   IMAGE_FILE_SIZE_LIMIT_MB,
-} from "@/app/event/[id]/constants";
+} from "@/components/features/event/constants";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -216,7 +217,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             name="imageUri"
             control={form.control}
             placeholder={t("image-uri-placeholder")}
-            aspectRatio={[16, 9]}
+            aspectRatio={eventImageAspectRatio}
             fileSizeLimitMb={IMAGE_FILE_SIZE_LIMIT}
             tooltip={imageUri ? <Text>{t("change-image")}</Text> : null}
             fit="pad"

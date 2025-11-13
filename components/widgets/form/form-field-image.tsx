@@ -37,7 +37,7 @@ export const FormFieldImage = <T extends FieldValues>({
   hint = true,
   ...props
 }: FormFieldProps<T, string> & {
-  aspectRatio: [number, number];
+  aspectRatio: readonly [number, number];
   tooltip?: React.ReactNode;
   hint?: boolean;
   fileSizeLimitMb?: number;
@@ -200,7 +200,7 @@ export const FormFieldImage = <T extends FieldValues>({
   );
 };
 
-function getAspectRatioHint(aspectRatio: [number, number]) {
+function getAspectRatioHint(aspectRatio: readonly [number, number]) {
   const gcd = greatestCommonDivisor(aspectRatio[0], aspectRatio[1]);
   const a = Math.round(aspectRatio[0] / gcd);
   const b = Math.round(aspectRatio[1] / gcd);
