@@ -1678,30 +1678,19 @@ func genCreatePostMsgRunBody(userRealmPkgPath, feedID, gnoLitPost string) string
 	return fmt.Sprintf(`package main
 
 	import (
-		"chain"
-
 		"gno.land/p/zenao/daokit"
-		"gno.land/p/nt/ufmt"
+		sfactions "gno.land/r/zenao/social_feed/actions/v1"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
-		"gno.land/r/zenao/social_feed"
 		user %q
 	)
 
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Add new post",
-			Action: daokit.NewExecuteLambdaAction(newPost),
+			Action: sfactions.NewActionNewPost(%q, %s),
 		})
 	}
-
-	func newPost() {
-		feedID := %q
-		post := %s
-
-		postID := social_feed.NewPost(cross, feedID, post)
-		chain.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
-	}
-`, userRealmPkgPath, feedID, gnoLitPost, gnoEventPostCreate)
+`, userRealmPkgPath, feedID, gnoLitPost)
 }
 
 func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64) string {
@@ -1709,23 +1698,16 @@ func genEditPostMsgRunBody(userRealmPkgPath, gnoLitPost string, postIDint uint64
 
 	import (
 		"gno.land/p/zenao/daokit"
+		sfactions "gno.land/r/zenao/social_feed/actions/v1"
 		feedsv1 "gno.land/p/zenao/feeds/v1"
-		"gno.land/r/zenao/social_feed"
 		user %q
 	)
 
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Edit post #%d",
-			Action: daokit.NewExecuteLambdaAction(editPost),
+			Action: sfactions.NewActionEditPost(uint64(%d), %s),
 		})
-	}
-
-	func editPost() {
-		postID := %d
-		post := %s
-
-		social_feed.EditPost(cross, uint64(postID), post)
 	}
 `, userRealmPkgPath, postIDint, postIDint, gnoLitPost)
 }
@@ -1735,20 +1717,15 @@ func genDeletePostMsgRunBody(userRealmPkgPath string, postIDInt uint64) string {
 
 	import (
 		"gno.land/p/zenao/daokit"
-		"gno.land/r/zenao/social_feed"
+		sfactions "gno.land/r/zenao/social_feed/actions/v1"
 		user %q
 	)
 
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Delete post #%d",
-			Action: daokit.NewExecuteLambdaAction(deletePost),
+			Action: sfactions.NewActionDeletePost(uint64(%d)),
 		})
-	}
-
-	func deletePost() {
-		postID := uint64(%d)
-		social_feed.DeletePost(cross, postID)
 	}
 `, userRealmPkgPath, postIDInt, postIDInt)
 }
@@ -1756,20 +1733,17 @@ func genDeletePostMsgRunBody(userRealmPkgPath string, postIDInt uint64) string {
 func genReactPostMsgRunBody(userRealmID, postID, icon string) string {
 	return fmt.Sprintf(`package main
 import (
+
 	"gno.land/p/zenao/daokit"
-	"gno.land/r/zenao/social_feed"
+	sfactions "gno.land/r/zenao/social_feed/actions/v1"
 	user %q
 )
 	
 func main() {
 	daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 		Title: "User %s reacts to post #%s",
-		Action: daokit.NewExecuteLambdaAction(newReaction),
+		Action: sfactions.NewActionReactPost(%s, %q),
 	})
-}
-
-func newReaction() {
-	social_feed.ReactPost(cross, %s, %q)
 }
 `, userRealmID, userRealmID, postID, postID, icon)
 }
@@ -1779,21 +1753,15 @@ func genVotePollMsgRunBody(userRealmPkgPath, pollID, option string) string {
 				
 	import (
 		"gno.land/p/zenao/daokit"
-		"gno.land/r/zenao/polls"
+		pactions "gno.land/r/zenao/polls/actions/v1"
 		user %q
 	)
 
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Vote on poll",
-			Action: daokit.NewExecuteLambdaAction(voteOnPoll),
+			Action: pactions.NewActionVotePoll(%s, %q),
 		})
-	}
-
-	func voteOnPoll() {
-		pollID := %s
-		option := %q
-		polls.Vote(cross, uint64(pollID), option)
 	}
 `, userRealmPkgPath, pollID, option)
 }
@@ -1801,51 +1769,21 @@ func genVotePollMsgRunBody(userRealmPkgPath, pollID, option string) string {
 func genCreatePollMsgRunBody(orgPkgPath, userRealmPkgPath, feedID string, question string, options []string, kind pollsv1.PollKind, duration int64) string {
 	return fmt.Sprintf(`package main
 
-	import (
-		"chain"
-	
-		"gno.land/p/nt/ufmt"
+	import (	
 		"gno.land/p/zenao/daokit"
-		feedsv1 "gno.land/p/zenao/feeds/v1"
 		pollsv1 "gno.land/p/zenao/polls/v1"
 		org %q
-		"gno.land/r/zenao/polls"
-		"gno.land/r/zenao/social_feed"
 		user %q
-		ma "gno.land/p/zenao/multiaddr"
+		pactions "gno.land/r/zenao/polls/actions/v1"
 	)
 	
 	func main() {
 		daokit.InstantExecute(user.DAO, daokit.ProposalRequest{
 			Title: "Add new poll",
-			Action: daokit.NewExecuteLambdaAction(newPoll),
+			Action: pactions.NewActionNewPoll(%q, pollsv1.PollKind(%d), %s, %d, org.FeedAuth, %q),
 		})
 	}
-	
-	func newPoll() {
-		question := %q
-		options := %s
-		kind := pollsv1.PollKind(%d)
-		p := polls.NewPoll(cross, question, kind, %d, options, org.FeedAuth)
-		ma, err := ma.NewMultiaddr(social_feed.Protocols, ufmt.Sprintf("/poll/%%d/gno/gno.land/r/zenao/polls", uint64(p.ID)))
-		if err != nil {
-			panic("multiaddr validation failed")
-		}
-		chain.Emit(%q, "pollID", ufmt.Sprintf("%%d", uint64(p.ID)))
-	
-		feedID := %q
-		post := &feedsv1.Post{
-			Loc:  nil,
-			Tags: []string{"poll"},
-			Post: &feedsv1.LinkPost{
-				Uri: ma.String(),
-			},
-		}
-	
-		postID := social_feed.NewPost(cross, feedID, post)
-		chain.Emit(%q, "postID", ufmt.Sprintf("%%d", postID))
-	}
-	`, orgPkgPath, userRealmPkgPath, question, stringSliceLit(options), kind, duration, gnoEventPollCreate, feedID, gnoEventPostCreate)
+	`, orgPkgPath, userRealmPkgPath, question, kind, stringSliceLit(options), duration, feedID)
 }
 func genCheckinMsgRunBody(eventPkgPath, gatekeeperPkgPath, ticketPubkey, signature string) string {
 	return fmt.Sprintf(`package main
@@ -2270,6 +2208,8 @@ import (
 	"gno.land/r/demo/profile"
 	"gno.land/p/{{.namespace}}/daokit"
 	"gno.land/p/{{.namespace}}/daocond"
+	pactions "gno.land/r/{{.namespace}}/polls/actions/v1"
+	sfactions "gno.land/r/{{.namespace}}/social_feed/actions/v1"
 )
 
 var (
@@ -2291,6 +2231,32 @@ func init() {
 		SetImplemFn: setImplem,
 		PrivateVarName: "user",
 	})
+
+	adminVetoCond := daocond.RoleCount(1, "zenao-admin", user.DAOPrivate.Members.HasRole)
+	resources := []struct {
+		cond     daocond.Condition
+		handlers []daokit.ActionHandler
+	}{
+		{
+		cond: adminVetoCond,
+		handlers: []daokit.ActionHandler{
+			sfactions.ActionNewPostHandler(),
+			sfactions.ActionEditPostHandler(),
+			sfactions.ActionDeletePostHandler(),
+			sfactions.ActionReactPostHandler(),
+			pactions.ActionNewPollHandler(),
+			pactions.ActionVotePollHandler(),
+		},
+	}}
+
+	for _, res := range resources {
+		for _, h := range res.handlers {
+			user.DAOPrivate.Core.Resources.Set(&daokit.Resource{
+				Handler:   h,
+				Condition: res.cond,
+			})
+		}
+	}
 }
 
 func Vote(_ realm, proposalID uint64, vote daocond.Vote) {
