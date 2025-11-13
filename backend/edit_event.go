@@ -100,7 +100,14 @@ func (s *ZenaoServer) EditEvent(
 	if err != nil {
 		return nil, err
 	}
-	privacy, _, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
+
+	if err := s.DB.TxWithSpan(ctx, "db.EditEvent", func(db zeni.DB) error {
+		return db.EditEvent(eventRealmID, passwordHash)
+	}); err != nil {
+		return nil, err
+	}
+
+	privacy, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
 	if err != nil {
 		return nil, err
 	}

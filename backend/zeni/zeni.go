@@ -78,11 +78,14 @@ type User struct {
 	Plan        Plan
 }
 
-// TODO: TO DELETE
 type Event struct {
+	EventRealmID string
+	PasswordHash string
+
+	// TODO: TO DELETE
+	ID                string
 	CreatedAt         time.Time
 	DeletedAt         time.Time
-	ID                string
 	Title             string
 	Description       string
 	StartDate         time.Time
@@ -92,7 +95,6 @@ type Event struct {
 	Capacity          uint32
 	CreatorID         string
 	Location          *zenaov1.EventLocation
-	PasswordHash      string
 	ICSSequenceNumber uint32
 	Discoverable      bool
 }
@@ -246,6 +248,9 @@ type DB interface {
 
 	PromoteUser(userID string, plan Plan) error
 
+	CreateEvent(eventRealmID string, passwordHash string) error
+	GetEvent(eventRealmID string) (*Event, error)
+	EditEvent(eventRealmID string, passwordHash string) error
 	Participate(buyerID string, userID string, eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error
 	CancelParticipation(eventID string, userID string) error
 	GetEventUserTicket(eventRealmID string, userRealmID string) (*SoldTicket, error)

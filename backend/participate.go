@@ -103,21 +103,33 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		needPasswordIfGuarded = false
 	}
 
+	// TODO: do this check in backend since on-chain its skipped since the caller is the organizer
 	var eventSK ed25519.PrivateKey
 	if needPasswordIfGuarded {
-		valid := true
-		if guarded := evt.Privacy.GetGuarded(); guarded != nil {
-			valid, err = zeni.ValidatePassword(req.Msg.Password, guarded.HashParams, guarded.ParticipationPubkey)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if !valid {
-			return nil, errors.New("invalid event password")
-		}
-		if eventSK, err = zeni.EventSKFromPasswordHash(req.Msg.Password); err != nil {
+		zEvt, err := s.DB.GetEvent(evtRealmID)
+		if err != nil {
 			return nil, err
 		}
+		valid, err := zeni.ValidatePassword(req.Msg.Password, zEvt.PasswordHash)
+		if err != nil {
+			return nil, err
+		}
+		if !valid {
+			return nil, errors.New("invalid password")
+		}
+	}
+
+	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
+		for i, ticket := range tickets {
+			// XXX: support batch
+			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
+			if err := tx.Participate(buyer.ID, participants[i].ID, evtRealmID, buyerRealmID, participantRealmID, ticket.Secret()); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
 	for i, ticket := range tickets {
@@ -141,19 +153,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				return nil, err
 			}
 		}
-	}
-
-	if err := s.DB.TxWithSpan(ctx, "db.Participate", func(tx zeni.DB) error {
-		for i, ticket := range tickets {
-			// XXX: support batch
-			participantRealmID := s.Chain.UserRealmID(participants[i].ID)
-			if err := tx.Participate(buyer.ID, participants[i].ID, evtRealmID, buyerRealmID, participantRealmID, ticket.Secret()); err != nil {
-				return err
-			}
-		}
-		return nil
-	}); err != nil {
-		return nil, err
 	}
 
 	wg := sync.WaitGroup{}

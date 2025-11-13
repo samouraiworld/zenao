@@ -12,6 +12,10 @@ import (
 
 type Event struct {
 	gorm.Model
+	EventRealmID string `gorm:"uniqueIndex;not null"`
+	PasswordHash string
+
+	//TODO: TO DELETE
 	Title       string
 	Description string
 	StartDate   time.Time
@@ -23,8 +27,6 @@ type Event struct {
 	Creator     User `gorm:"foreignKey:CreatorID"` // XXX: move the creator to the UserRoles table ?
 
 	Discoverable bool // if false, event won't be listed publicly (See listEventsInternal in eventreg.gno)
-
-	PasswordHash string // event is guarded if set
 
 	LocVenueName    string
 	LocKind         string // one of: geo, virtual or custom
@@ -80,6 +82,7 @@ func (e *Event) SetLocation(loc *zenaov1.EventLocation) error {
 }
 
 func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
+	// TODO: KEEP ONLY EventRealmID AND PasswordHash IN THE RETURNED STRUCTURE
 	loc := &zenaov1.EventLocation{
 		VenueName:    dbevt.LocVenueName,
 		Instructions: dbevt.LocInstructions,
@@ -106,6 +109,9 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 	}
 
 	evt := &zeni.Event{
+		EventRealmID: dbevt.EventRealmID,
+		PasswordHash: dbevt.PasswordHash,
+
 		ID:                fmt.Sprintf("%d", dbevt.ID),
 		CreatedAt:         dbevt.CreatedAt,
 		Title:             dbevt.Title,
@@ -118,7 +124,6 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		Discoverable:      dbevt.Discoverable,
 		CreatorID:         fmt.Sprintf("%d", dbevt.CreatorID),
 		Location:          loc,
-		PasswordHash:      dbevt.PasswordHash,
 		ICSSequenceNumber: dbevt.ICSSequenceNumber,
 	}
 

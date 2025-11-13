@@ -2035,10 +2035,8 @@ func genEventRealmSource(organizers []string, gatekeepers []string, zenaoAdminAd
 	}
 
 	participationPubkey := ""
-	hashParams := ""
 	if guarded := privacy.GetGuarded(); guarded != nil {
 		participationPubkey = guarded.GetParticipationPubkey()
-		hashParams = guarded.GetHashParams()
 	}
 
 	toMarshal := map[string]any{
@@ -2046,7 +2044,6 @@ func genEventRealmSource(organizers []string, gatekeepers []string, zenaoAdminAd
 		"description":         req.Description,
 		"imageURI":            req.ImageUri,
 		"participationPubkey": participationPubkey,
-		"hashParams":          hashParams,
 	}
 	for key, val := range toMarshal {
 		bz, err := json.Marshal(val)
@@ -2104,7 +2101,6 @@ func init() {
 		SetProfileString: profile.SetStringField,
 		ZenaoAdminAddr: "{{.zenaoAdminAddr}}",
 		Location: {{.location}},
-		HashParams: {{.hashParams}},
 		ParticipationPubkey: {{.participationPubkey}},
 		CrossFn: crossFn,
 		SetImplemFn: setImplem,

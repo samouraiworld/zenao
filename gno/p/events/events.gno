@@ -512,7 +512,6 @@ func (e *Event) editEventHandler() daokit.ActionHandler {
 				panic(err)
 			}
 			e.ParticipationPubkey = participationPubkeyBz
-			e.HashParams = val.HashParams
 		default:
 			panic("unknown privacy model")
 		}

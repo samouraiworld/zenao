@@ -1,7 +1,7 @@
 package zeni
 
 import (
-	"crypto/ed25519"
+	"bytes"
 	srand "crypto/rand"
 	"encoding/base64"
 	"errors"
@@ -17,35 +17,6 @@ type argon2Params struct {
 	MemoryCost uint32
 	Threads    uint8
 	KeyLength  uint32
-}
-
-func ValidatePassword(password string, encodedHashParams string, expectedPK string) (bool, error) {
-	if expectedPK == "" && password == "" {
-		return true, nil
-	}
-
-	if expectedPK == "" && password != "" {
-		return false, errors.New("event is not guarded")
-	}
-
-	saltBz, params, err := decodeHashParams(encodedHashParams)
-	if err != nil {
-		return false, err
-	}
-
-	hashBz := hashPass(password, saltBz, params)
-	encodedHash := encodeHash(hashBz, saltBz, params)
-	sk, err := EventSKFromPasswordHash(encodedHash)
-	if err != nil {
-		return false, err
-	}
-	pkBz := []byte(sk.Public().(ed25519.PublicKey))
-	pk := base64.RawURLEncoding.EncodeToString(pkBz)
-	if pk != expectedPK {
-		return false, nil
-	}
-
-	return true, nil
 }
 
 func NewPasswordHash(password string) (string, error) {
@@ -72,95 +43,99 @@ func NewPasswordHash(password string) (string, error) {
 	return encodeHash(hashBz, saltBz, hashParams), nil
 }
 
+func ValidatePassword(password string, hash string) (bool, error) {
+	if hash == "" && password == "" {
+		return true, nil
+	}
+	if hash == "" && password != "" {
+		return false, errors.New("event is not guarded")
+	}
+
+	hashBz, saltBz, params, err := decodeHash(hash)
+	if err != nil {
+		return false, err
+	}
+
+	valid := bytes.Equal(hashPass(password, saltBz, params), hashBz)
+	return valid, nil
+}
+
 func hashPass(password string, salt []byte, params *argon2Params) []byte {
 	return argon2.IDKey([]byte(password), salt, params.TimeCost, params.MemoryCost, params.Threads, params.KeyLength)
 }
 
-func encodeHashParams(salt []byte, params *argon2Params) string {
+func encodeHash(hash []byte, salt []byte, params *argon2Params) string {
 	return fmt.Sprintf(
-		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s",
+		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
 		argon2.Version,
 		params.MemoryCost,
 		params.TimeCost,
 		params.Threads,
 		base64.RawStdEncoding.EncodeToString(salt),
+		base64.RawStdEncoding.EncodeToString(hash),
 	)
 }
 
-func encodeHash(hash []byte, salt []byte, params *argon2Params) string {
-	return fmt.Sprintf("%s$%s", encodeHashParams(salt, params), base64.RawStdEncoding.EncodeToString(hash))
-}
-
-func decodeHashParams(encodedHashParams string) ([]byte, *argon2Params, error) {
-	parts := strings.Split(encodedHashParams, "$")
-	if len(parts) < 5 {
-		return nil, nil, errors.New("malformed hash params")
+func decodeHash(hash string) ([]byte, []byte, *argon2Params, error) {
+	parts := strings.Split(hash, "$")
+	if len(parts) != 6 {
+		return nil, nil, nil, errors.New("malformed hash")
 	}
 
 	if parts[0] != "" {
-		return nil, nil, errors.New("invalid prefix")
+		return nil, nil, nil, errors.New("invalid prefix")
 	}
+
 	if parts[1] != "argon2id" {
-		return nil, nil, errors.New("unknown algo")
+		return nil, nil, nil, errors.New("unknown algo")
 	}
+
 	if parts[2] != fmt.Sprintf("v=%d", argon2.Version) {
-		return nil, nil, errors.New("invalid algo version")
+		return nil, nil, nil, errors.New("invalid algo version")
 	}
 
 	paramsParts := strings.Split(parts[3], ",")
 	if len(paramsParts) != 3 {
-		return nil, nil, errors.New("unexpected params count")
+		return nil, nil, nil, errors.New("unexpected params count")
 	}
 
-	params := argon2Params{
-		KeyLength: 32, // XXX: store it in the encoded params?
-	}
+	params := argon2Params{}
 	for _, param := range paramsParts {
 		kv := strings.Split(param, "=")
 		if len(kv) != 2 {
-			return nil, nil, errors.New("invalid param kv")
+			return nil, nil, nil, errors.New("invalid param kv")
 		}
 		switch kv[0] {
 		case "m":
 			m, err := strconv.ParseUint(kv[1], 10, 32)
 			if err != nil {
-				return nil, nil, errors.New("invalid m")
+				return nil, nil, nil, errors.New("invalid m")
 			}
 			params.MemoryCost = uint32(m)
 		case "t":
 			t, err := strconv.ParseUint(kv[1], 10, 32)
 			if err != nil {
-				return nil, nil, errors.New("invalid t")
+				return nil, nil, nil, errors.New("invalid t")
 			}
 			params.TimeCost = uint32(t)
 		case "p":
 			p, err := strconv.ParseUint(kv[1], 10, 8)
 			if err != nil {
-				return nil, nil, errors.New("invalid p")
+				return nil, nil, nil, errors.New("invalid p")
 			}
 			params.Threads = uint8(p)
 		default:
-			return nil, nil, errors.New("unknown param")
+			return nil, nil, nil, errors.New("unknown param")
 		}
 	}
 
 	if params.MemoryCost == 0 || params.TimeCost == 0 || params.Threads == 0 {
-		return nil, nil, errors.New("missing param")
+		return nil, nil, nil, errors.New("missing param")
 	}
 
 	saltBz, err := base64.RawStdEncoding.DecodeString(parts[4])
 	if err != nil {
-		return nil, nil, errors.New("invalid salt")
-	}
-
-	return saltBz, &params, nil
-}
-
-func decodeHash(hash string) ([]byte, []byte, *argon2Params, error) {
-	parts := strings.Split(hash, "$")
-	saltBz, params, err := decodeHashParams(strings.Join(parts[0:5], "$"))
-	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, errors.New("invalid salt")
 	}
 
 	hashBz, err := base64.RawStdEncoding.DecodeString(parts[5])
@@ -169,5 +144,5 @@ func decodeHash(hash string) ([]byte, []byte, *argon2Params, error) {
 	}
 	params.KeyLength = uint32(len(hashBz))
 
-	return hashBz, saltBz, params, nil
+	return hashBz, saltBz, &params, nil
 }

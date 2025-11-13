@@ -7,11 +7,11 @@ import (
 )
 
 func TestPassword(t *testing.T) {
-	valid, err := ValidatePassword("", "", "")
+	valid, err := ValidatePassword("", "")
 	require.NoError(t, err)
 	require.True(t, valid)
 
-	valid, err = ValidatePassword("password", "", "")
+	valid, err = ValidatePassword("password", "")
 	require.ErrorContains(t, err, "event is not guarded")
 	require.False(t, valid)
 
@@ -28,12 +28,6 @@ func TestPassword(t *testing.T) {
 	require.NotEmpty(t, hash)
 
 	encodedHash := encodeHash(hash, salt, hashParams)
-	encodedHashParams := encodeHashParams(salt, hashParams)
-	privacy, sk, err := EventPrivacyFromPasswordHash(encodedHash)
-	require.NoError(t, err)
-	require.NotNil(t, sk)
-	require.NotNil(t, privacy)
-	require.NotNil(t, privacy.GetGuarded())
 	require.Equal(t, "$argon2id$v=19$m=19456,t=2,p=1$c2FsdA$9QyfT5o7Sa27GSMOCN2GzdqaNwYMX8RmDMyUUqwHjfY", encodedHash)
 
 	_, decodedSalt, decodedParams, err := decodeHash(encodedHash)
@@ -41,15 +35,15 @@ func TestPassword(t *testing.T) {
 	require.Equal(t, salt, decodedSalt)
 	require.Equal(t, hashParams, decodedParams)
 
-	valid, err = ValidatePassword(password, encodedHashParams, privacy.GetGuarded().ParticipationPubkey)
+	valid, err = ValidatePassword(password, encodedHash)
 	require.NoError(t, err)
 	require.True(t, valid)
 
-	valid, err = ValidatePassword("", encodedHashParams, privacy.GetGuarded().ParticipationPubkey)
+	valid, err = ValidatePassword("", encodedHash)
 	require.NoError(t, err)
 	require.False(t, valid)
 
-	valid, err = ValidatePassword("nimda", encodedHashParams, privacy.GetGuarded().ParticipationPubkey)
+	valid, err = ValidatePassword("nimda", encodedHash)
 	require.NoError(t, err)
 	require.False(t, valid)
 }

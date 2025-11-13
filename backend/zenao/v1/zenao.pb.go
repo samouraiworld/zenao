@@ -1695,7 +1695,6 @@ func (*EventPrivacyPublic) Descriptor() ([]byte, []int) {
 type EventPrivacyGuarded struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
 	ParticipationPubkey string                 `protobuf:"bytes,1,opt,name=participation_pubkey,json=participationPubkey,proto3" json:"participation_pubkey,omitempty"`
-	HashParams          string                 `protobuf:"bytes,2,opt,name=hash_params,json=hashParams,proto3" json:"hash_params,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -1733,13 +1732,6 @@ func (*EventPrivacyGuarded) Descriptor() ([]byte, []int) {
 func (x *EventPrivacyGuarded) GetParticipationPubkey() string {
 	if x != nil {
 		return x.ParticipationPubkey
-	}
-	return ""
-}
-
-func (x *EventPrivacyGuarded) GetHashParams() string {
-	if x != nil {
-		return x.HashParams
 	}
 	return ""
 }
@@ -3815,11 +3807,9 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x06public\x18\x01 \x01(\v2\x1c.zenao.v1.EventPrivacyPublicH\x00R\x06public\x129\n" +
 	"\aguarded\x18\x02 \x01(\v2\x1d.zenao.v1.EventPrivacyGuardedH\x00R\aguardedB\x0f\n" +
 	"\revent_privacy\"\x14\n" +
-	"\x12EventPrivacyPublic\"i\n" +
+	"\x12EventPrivacyPublic\"H\n" +
 	"\x13EventPrivacyGuarded\x121\n" +
-	"\x14participation_pubkey\x18\x01 \x01(\tR\x13participationPubkey\x12\x1f\n" +
-	"\vhash_params\x18\x02 \x01(\tR\n" +
-	"hashParams\"\x87\x04\n" +
+	"\x14participation_pubkey\x18\x01 \x01(\tR\x13participationPubkey\"\x87\x04\n" +
 	"\tEventInfo\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
