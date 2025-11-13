@@ -209,6 +209,14 @@ table "events" {
     null = true
     type = datetime
   }
+  column "event_realm_id" {
+    null = false
+    type = text
+  }
+  column "password_hash" {
+    null = true
+    type = text
+  }
   column "title" {
     null = true
     type = text
@@ -244,10 +252,6 @@ table "events" {
   column "discoverable" {
     null = true
     type = numeric
-  }
-  column "password_hash" {
-    null = true
-    type = text
   }
   column "loc_venue_name" {
     null = true
@@ -290,6 +294,10 @@ table "events" {
     ref_columns = [table.users.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
+  }
+  index "idx_events_event_realm_id" {
+    unique  = true
+    columns = [column.event_realm_id]
   }
   index "idx_events_deleted_at" {
     columns = [column.deleted_at]
