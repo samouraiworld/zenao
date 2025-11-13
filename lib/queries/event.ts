@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { fromJson } from "@bufbuild/protobuf";
+import { withSpan } from "../tracer";
 import { GetToken } from "@/lib/utils";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import { EventInfoJson, EventInfoSchema } from "@/app/gen/zenao/v1/zenao_pb";
@@ -10,15 +11,17 @@ export const eventOptions = (id: string) =>
   queryOptions({
     queryKey: ["event", id],
     queryFn: async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/events/e${id}`,
-        `event.GetInfoJSON()`,
-      );
-      const event = extractGnoJSONResponse(res) as EventInfoJson;
-      return fromJson(EventInfoSchema, event);
+      return withSpan(`query:event:${id}`, async () => {
+        const client = new GnoJSONRPCProvider(
+          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        );
+        const res = await client.evaluateExpression(
+          `gno.land/r/zenao/events/e${id}`,
+          `event.GetInfoJSON()`,
+        );
+        const event = extractGnoJSONResponse(res) as EventInfoJson;
+        return fromJson(EventInfoSchema, event);
+      });
     },
     staleTime: Infinity,
   });
@@ -27,20 +30,22 @@ export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
   queryOptions({
     queryKey: ["event", eventId, "gatekeepers"],
     queryFn: async () => {
-      const token = await getToken();
+      return withSpan(`query:event:${eventId}:gatekeepers`, async () => {
+        const token = await getToken();
 
-      if (!token) {
-        throw new Error("not authenticated");
-      }
+        if (!token) {
+          throw new Error("not authenticated");
+        }
 
-      const data = await zenaoClient.getEventGatekeepers(
-        {
-          eventId,
-        },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+        const data = await zenaoClient.getEventGatekeepers(
+          {
+            eventId,
+          },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
 
-      return data;
+        return data;
+      });
     },
   });
 
