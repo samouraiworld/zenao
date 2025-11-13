@@ -210,6 +210,7 @@ type EventInfo struct {
 	Privacy      *EventPrivacy
 	CheckedIn    uint32
 	Discoverable bool
+	IcsSeqNumber uint32
 }
 
 type BatchProfileField struct {
@@ -277,7 +278,6 @@ type EditPostRequest struct {
 }
 
 type EditPostResponse struct {
-	PostId string
 }
 
 type GetEventTicketsRequest struct {
@@ -296,6 +296,7 @@ type TicketInfo struct {
 type CheckinRequest struct {
 	TicketPubkey string
 	Signature    string
+	EventId      string
 }
 
 type CheckinResponse struct {

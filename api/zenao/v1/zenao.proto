@@ -181,7 +181,9 @@ message EventPrivacy {
 
 message EventPrivacyPublic {}
 
-message EventPrivacyGuarded { string participation_pubkey = 1; }
+message EventPrivacyGuarded {
+  string participation_pubkey = 1;
+}
 
 enum DiscoverableFilter {
   DISCOVERABLE_FILTER_UNSPECIFIED = 0;
@@ -204,6 +206,7 @@ message EventInfo {
   EventPrivacy privacy = 12;
   uint32 checked_in = 13;
   bool discoverable = 14;
+  uint32 ics_seq_number = 15;
 }
 
 message BatchProfileField {
@@ -261,7 +264,7 @@ message EditPostRequest {
   repeated string tags = 3;
 }
 
-message EditPostResponse { string post_id = 1; }
+message EditPostResponse {}
 
 message GetEventTicketsRequest { string event_id = 1; }
 
@@ -275,6 +278,7 @@ message TicketInfo {
 message CheckinRequest {
   string ticket_pubkey = 1;
   string signature = 2;
+  string event_id = 3;
 }
 
 message CheckinResponse {}

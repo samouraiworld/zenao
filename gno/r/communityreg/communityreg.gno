@@ -16,7 +16,7 @@ var (
 	registered           avl.Tree // <communityPkgPath> -> func() communities.Info
 	communityesByMembers avl.Tree // <memberID>/<communityPkgPath> -> communityPkgPath
 	communitiesByPkgPath avl.Tree // <communityPkgPath> -> communities.Info
-	communitiesByEvent   avl.Tree // <eventPkgPath>/<communityID> -> communityID
+	communitiesByEvent   avl.Tree // <eventPkgPath>/<communityPkgPath> -> communityPkgPath
 
 	ErrCommunityNotFound = errors.New("community not found")
 )
@@ -151,10 +151,11 @@ func listCommunitiesInternal(at avl.ITree, fromKey string, toKey string, rev boo
 		switch val := value.(type) {
 		case *zenaov1.CommunityInfo:
 			info = *val
+			info.PkgPath = key
 		case string:
 			info = *mustGetCommunityByPkgPath(val)
+			info.PkgPath = val
 		}
-		info.PkgPath = key
 		res = append(res, &info)
 		return uint32(len(res)) >= limit
 	}

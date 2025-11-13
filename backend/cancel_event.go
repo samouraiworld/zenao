@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -30,43 +29,42 @@ func (s *ZenaoServer) CancelEvent(
 
 	s.Logger.Info("cancel-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
 
-	var users []*zeni.User
-	var cmties []*zeni.Community
-	var evt *zeni.Event
-	if err := s.DB.TxWithSpan(ctx, "db.CancelEvent", func(db zeni.DB) error {
-		evt, err = db.GetEvent(req.Msg.EventId)
-		if err != nil {
-			return err
+	if user.Banned {
+		return nil, errors.New("user is banned")
+	}
+
+	eventRealmID := s.Chain.WithContext(ctx).EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.WithContext(ctx).UserRealmID(zUser.ID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(eventRealmID)
+	if err != nil {
+		return nil, err
+	}
+	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(eventRealmID, zeni.RoleParticipant)
+	if err != nil {
+		return nil, err
+	}
+	community, err := s.Chain.WithContext(ctx).GetEventCommunity(eventRealmID)
+	if err != nil {
+		return nil, err
+	}
+
+	// XXX: how to have atomicity on these operations ?
+	if community != nil {
+		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(community.Administrators[0], community.PkgPath, req.Msg.EventId); err != nil {
+			return nil, err
 		}
-		users, err = db.GetOrgUsers(zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if time.Now().Add(24 * time.Hour).After(evt.StartDate) {
-			return errors.New("events already started or starting within 24h cannot be cancelled")
-		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("only organizers can cancel an event")
-		}
-		cmties, err = db.CommunitiesByEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		return db.CancelEvent(req.Msg.EventId)
-	}); err != nil {
+	}
+	if err := s.Chain.WithContext(ctx).CancelEvent(eventRealmID, userRealmID); err != nil {
 		return nil, err
 	}
 
 	if s.MailClient != nil {
-		idsList := make([]string, 0, len(users))
-		for _, u := range users {
-			idsList = append(idsList, u.AuthID)
+		zParticipants, err := s.DB.GetUsersByRealmIDs(participants)
+		if err != nil {
+			return nil, err
 		}
-		authUsers, err := s.Auth.GetUsersFromIDs(ctx, idsList)
+		authIDs := mapsl.Map(zParticipants, func(u *zeni.User) string { return u.AuthID })
+		authUsers, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 		if err != nil {
 			return nil, err
 		}
@@ -95,16 +93,6 @@ func (s *ZenaoServer) CancelEvent(
 			count += len(batch)
 			s.Logger.Info("send-event-cancellation-email", zap.Int("already-sent", count), zap.Int("total", len(requests)))
 		}
-	}
-
-	for _, cmt := range cmties {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, evt.ID); err != nil {
-			s.Logger.Error("remove-cancelled-event-from-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
-		}
-	}
-
-	if err := s.Chain.WithContext(ctx).CancelEvent(evt.ID, evt.CreatorID); err != nil {
-		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.CancelEventResponse{}), nil

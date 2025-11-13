@@ -1752,6 +1752,7 @@ type EventInfo struct {
 	Privacy       *EventPrivacy          `protobuf:"bytes,12,opt,name=privacy,proto3" json:"privacy,omitempty"`
 	CheckedIn     uint32                 `protobuf:"varint,13,opt,name=checked_in,json=checkedIn,proto3" json:"checked_in,omitempty"`
 	Discoverable  bool                   `protobuf:"varint,14,opt,name=discoverable,proto3" json:"discoverable,omitempty"`
+	IcsSeqNumber  uint32                 `protobuf:"varint,15,opt,name=ics_seq_number,json=icsSeqNumber,proto3" json:"ics_seq_number,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1882,6 +1883,13 @@ func (x *EventInfo) GetDiscoverable() bool {
 		return x.Discoverable
 	}
 	return false
+}
+
+func (x *EventInfo) GetIcsSeqNumber() uint32 {
+	if x != nil {
+		return x.IcsSeqNumber
+	}
+	return 0
 }
 
 type BatchProfileField struct {
@@ -2554,7 +2562,6 @@ func (x *EditPostRequest) GetTags() []string {
 
 type EditPostResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        string                 `protobuf:"bytes,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2587,13 +2594,6 @@ func (x *EditPostResponse) ProtoReflect() protoreflect.Message {
 // Deprecated: Use EditPostResponse.ProtoReflect.Descriptor instead.
 func (*EditPostResponse) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{43}
-}
-
-func (x *EditPostResponse) GetPostId() string {
-	if x != nil {
-		return x.PostId
-	}
-	return ""
 }
 
 type GetEventTicketsRequest struct {
@@ -2740,6 +2740,7 @@ type CheckinRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TicketPubkey  string                 `protobuf:"bytes,1,opt,name=ticket_pubkey,json=ticketPubkey,proto3" json:"ticket_pubkey,omitempty"`
 	Signature     string                 `protobuf:"bytes,2,opt,name=signature,proto3" json:"signature,omitempty"`
+	EventId       string                 `protobuf:"bytes,3,opt,name=event_id,json=eventId,proto3" json:"event_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2784,6 +2785,13 @@ func (x *CheckinRequest) GetTicketPubkey() string {
 func (x *CheckinRequest) GetSignature() string {
 	if x != nil {
 		return x.Signature
+	}
+	return ""
+}
+
+func (x *CheckinRequest) GetEventId() string {
+	if x != nil {
+		return x.EventId
 	}
 	return ""
 }
@@ -3801,7 +3809,7 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\revent_privacy\"\x14\n" +
 	"\x12EventPrivacyPublic\"H\n" +
 	"\x13EventPrivacyGuarded\x121\n" +
-	"\x14participation_pubkey\x18\x01 \x01(\tR\x13participationPubkey\"\xe1\x03\n" +
+	"\x14participation_pubkey\x18\x01 \x01(\tR\x13participationPubkey\"\x87\x04\n" +
 	"\tEventInfo\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
@@ -3821,7 +3829,8 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\aprivacy\x18\f \x01(\v2\x16.zenao.v1.EventPrivacyR\aprivacy\x12\x1d\n" +
 	"\n" +
 	"checked_in\x18\r \x01(\rR\tcheckedIn\x12\"\n" +
-	"\fdiscoverable\x18\x0e \x01(\bR\fdiscoverable\"9\n" +
+	"\fdiscoverable\x18\x0e \x01(\bR\fdiscoverable\x12$\n" +
+	"\x0eics_seq_number\x18\x0f \x01(\rR\ficsSeqNumber\"9\n" +
 	"\x11BatchProfileField\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\tR\x04type\x12\x10\n" +
 	"\x03key\x18\x02 \x01(\tR\x03key\"h\n" +
@@ -3859,9 +3868,8 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x0fEditPostRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12\x12\n" +
-	"\x04tags\x18\x03 \x03(\tR\x04tags\"+\n" +
-	"\x10EditPostResponse\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\tR\x06postId\"3\n" +
+	"\x04tags\x18\x03 \x03(\tR\x04tags\"\x12\n" +
+	"\x10EditPostResponse\"3\n" +
 	"\x16GetEventTicketsRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\"R\n" +
 	"\x17GetEventTicketsResponse\x127\n" +
@@ -3870,10 +3878,11 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"TicketInfo\x12#\n" +
 	"\rticket_secret\x18\x01 \x01(\tR\fticketSecret\x12\x1d\n" +
 	"\n" +
-	"user_email\x18\x02 \x01(\tR\tuserEmail\"S\n" +
+	"user_email\x18\x02 \x01(\tR\tuserEmail\"n\n" +
 	"\x0eCheckinRequest\x12#\n" +
 	"\rticket_pubkey\x18\x01 \x01(\tR\fticketPubkey\x12\x1c\n" +
-	"\tsignature\x18\x02 \x01(\tR\tsignature\"\x11\n" +
+	"\tsignature\x18\x02 \x01(\tR\tsignature\x12\x19\n" +
+	"\bevent_id\x18\x03 \x01(\tR\aeventId\"\x11\n" +
 	"\x0fCheckinResponse\"6\n" +
 	"\x19ExportParticipantsRequest\x12\x19\n" +
 	"\bevent_id\x18\x01 \x01(\tR\aeventId\"o\n" +

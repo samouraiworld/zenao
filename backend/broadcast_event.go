@@ -8,6 +8,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/resend/resend-go/v2"
+	"github.com/samouraiworld/zenao/backend/mapsl"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -45,35 +46,21 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, errors.New("zenao mail client is not initialized")
 	}
 
-	evt := (*zeni.Event)(nil)
-	var participants []*zeni.User
-	tickets := make(map[string][]*zeni.SoldTicket)
-	if err := s.DB.TxWithSpan(ctx, "db.BroadcastEvent", func(db zeni.DB) error {
-		evt, err = db.GetEvent(req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
-		if err != nil {
-			return err
-		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
-		if err != nil {
-			return err
-		}
-		if !slices.Contains(roles, zeni.RoleOrganizer) {
-			return errors.New("user is not organizer of the event")
-		}
-		if req.Msg.AttachTicket {
-			for _, participant := range participants {
-				tickets[participant.AuthID], err = db.GetEventUserOrBuyerTickets(req.Msg.EventId, participant.ID)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}); err != nil {
+	evtRealmID := s.Chain.WithContext(ctx).EventRealmID(req.Msg.EventId)
+	userRealmID := s.Chain.WithContext(ctx).UserRealmID(zUser.ID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
+	if err != nil {
+		return nil, err
+	}
+	roles, err := s.Chain.WithContext(ctx).EntityRoles(userRealmID, evtRealmID, zeni.EntityTypeEvent)
+	if err != nil {
+		return nil, err
+	}
+	if !slices.Contains(roles, zeni.RoleOrganizer) {
+		return nil, errors.New("user is not organizer of the event")
+	}
+	participants, err := s.Chain.WithContext(ctx).GetEventUsersByRole(evtRealmID, zeni.RoleParticipant)
+	if err != nil {
 		return nil, err
 	}
 
@@ -81,15 +68,30 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, errors.New("a broadcast message cannot be sent to an event without any participants")
 	}
 
-	idsList := make([]string, len(participants))
-	for i, participant := range participants {
-		idsList[i] = participant.AuthID
+	tickets := make(map[string][]*zeni.SoldTicket)
+	zParticipants := make([]*zeni.User, 0, len(participants))
+	if err := s.DB.TxWithSpan(ctx, "db.BroadcastEvent", func(db zeni.DB) error {
+		zParticipants, err = s.DB.GetUsersByRealmIDs(participants)
+		if err != nil {
+			return err
+		}
+		for _, p := range zParticipants {
+			ticket, err := db.GetEventUserOrBuyerTickets(evtRealmID, s.Chain.UserRealmID(p.ID))
+			if err != nil {
+				return err
+			}
+			tickets[p.AuthID] = ticket
+		}
+		return nil
+	}); err != nil {
+		return nil, err
 	}
-	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
+	authIDs := mapsl.Map(zParticipants, func(u *zeni.User) string { return u.AuthID })
+	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 	if err != nil {
 		return nil, err
 	}
-	htmlStr, text, err := eventBroadcastMailContent(evt, req.Msg.Message)
+	htmlStr, text, err := eventBroadcastMailContent(req.Msg.EventId, evt, req.Msg.Message)
 	if err != nil {
 		return nil, err
 	}
@@ -102,14 +104,18 @@ func (s *ZenaoServer) BroadcastEvent(
 		attachments := make([]*resend.Attachment, 0, len(tickets))
 		if req.Msg.AttachTicket {
 			for i, ticket := range tickets[authParticipant.ID] {
-				pdfData, err := GeneratePDFTicket(evt, ticket.Ticket.Secret(), ticket.User.DisplayName, authParticipant.Email, ticket.CreatedAt, s.Logger)
+				displayName, _, _, err := s.Chain.WithContext(ctx).GetUser(ticket.UserRealmID)
+				if err != nil {
+					return nil, err
+				}
+				pdfData, err := GeneratePDFTicket(req.Msg.EventId, evt, ticket.Ticket.Secret(), displayName, authParticipant.Email, ticket.CreatedAt, s.Logger)
 				if err != nil {
 					s.Logger.Error("generate-ticket-pdf", zap.Error(err), zap.String("ticket-id", ticket.Ticket.Secret()))
 					return nil, err
 				}
 				attachments = append(attachments, &resend.Attachment{
 					Content:     pdfData,
-					Filename:    fmt.Sprintf("ticket_%s_%s_%d.pdf", ticket.BuyerID, evt.ID, i),
+					Filename:    fmt.Sprintf("ticket_%s_%d.pdf", req.Msg.EventId, i),
 					ContentType: "application/pdf",
 				})
 			}

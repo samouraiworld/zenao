@@ -1,4 +1,4 @@
-package gzdb
+package zeni
 
 import (
 	"bytes"
@@ -19,7 +19,7 @@ type argon2Params struct {
 	KeyLength  uint32
 }
 
-func newPasswordHash(password string) (string, error) {
+func NewPasswordHash(password string) (string, error) {
 	if password == "" {
 		return "", nil
 	}
@@ -43,7 +43,7 @@ func newPasswordHash(password string) (string, error) {
 	return encodeHash(hashBz, saltBz, hashParams), nil
 }
 
-func validatePassword(password string, hash string) (bool, error) {
+func ValidatePassword(password string, hash string) (bool, error) {
 	if hash == "" && password == "" {
 		return true, nil
 	}
