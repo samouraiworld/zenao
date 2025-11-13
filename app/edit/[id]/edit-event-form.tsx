@@ -10,6 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
+import z from "zod";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { EventForm } from "@/components/features/event/event-form";
 import { useToast } from "@/hooks/use-toast";
@@ -71,18 +72,25 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const form = useForm<EventFormSchemaType>({
     mode: "all",
     resolver: zodResolver(
-      eventFormSchema.refine(
-        (data) => {
-          if (data.exclusive && !defaultValues.exclusive) {
-            return data.password && data.password.length > 0;
-          }
-          return true;
-        },
-        {
-          message: "Password is required when event is exclusive",
-          path: ["password"],
-        },
-      ),
+      eventFormSchema
+        .extend({
+          password: z
+            .string()
+            .max(12, "Password is too long (12 characters max)")
+            .optional(),
+        })
+        .refine(
+          (data) => {
+            if (data.exclusive && !defaultValues.exclusive) {
+              return data.password && data.password.length > 0;
+            }
+            return true;
+          },
+          {
+            message: "Password is required when event is exclusive",
+            path: ["password"],
+          },
+        ),
     ),
     defaultValues,
   });

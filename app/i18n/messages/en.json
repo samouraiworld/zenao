@@ -46,7 +46,7 @@
     "preview-empty": "Nothing to preview",
     "location-placeholder": "Add an address...",
     "password-placeholder": "Password...",
-    "password-label": "Password",
+    "password-label": "Password ({max} characters max.)",
     "no-changes-password-placeholder": "No changes if empty",
     "capacity-label": "Event capacity limit",
     "capacity-placeholder": "Capacity...",

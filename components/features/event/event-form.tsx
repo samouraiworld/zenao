@@ -518,7 +518,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                   ? t("no-changes-password-placeholder")
                   : t("password-placeholder")
               }
-              label={t("password-label")}
+              label={t("password-label", { max: 12 })}
             />
           )}
 

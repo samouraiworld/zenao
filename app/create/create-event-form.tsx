@@ -21,7 +21,10 @@ export const CreateEventForm: React.FC = () => {
     resolver: zodResolver(
       eventFormSchema
         .extend({
-          password: z.string().optional(),
+          password: z
+            .string()
+            .max(12, "Password is too long (12 characters max)")
+            .optional(),
         })
         .refine(
           (data) => {
