@@ -66,7 +66,7 @@ export function ProfileInfo({
         ))}
       </div>
 
-      <div className="mt-6">
+      <div>
         {activeTab === "events" && (
           <ProfileEvents address={address} now={now} />
         )}
