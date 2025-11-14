@@ -7,7 +7,10 @@ export function PostCardSkeleton() {
     <Card className="w-full flex flex-col gap-2">
       <div className="flex flex-col sm:flex-row items-start gap-2">
         <div className="w-full flex flex-row gap-3">
-          <UserAvatarSkeleton className="flex cursor-pointer size-8 transition-transform ease-out" />
+          <UserAvatarSkeleton
+            className="flex cursor-pointer size-8 transition-transform ease-out"
+            size="sm"
+          />
 
           <div className="flex flex-col gap-1 w-full">
             <Skeleton className="h-3 w-12" />

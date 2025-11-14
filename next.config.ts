@@ -1,3 +1,5 @@
+/* eslint-disable local/kebab-case-filename */
+
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -26,10 +28,6 @@ const nextConfig: NextConfig = {
       {
         source: "/tickets",
         destination: "/tickets/upcoming",
-      },
-      {
-        source: "/event/:id",
-        destination: "/event/:id/description",
       },
       {
         source: "/community/:id",

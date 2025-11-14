@@ -1,20 +1,19 @@
 import { notFound, redirect, RedirectType } from "next/navigation";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
 import { EventTicketScanner } from "./event-ticket-scanner";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import { userInfoOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
+import { EventScreenContainer } from "@/components/features/event/event-screen-container";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function ScannerPage({ params }: Props) {
   const p = await params;
+
   const queryClient = getQueryClient();
 
   const { getToken, userId } = await auth();
@@ -39,8 +38,8 @@ export default async function ScannerPage({ params }: Props) {
   }
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <EventScreenContainer id={p.id}>
       <EventTicketScanner eventId={p.id} eventData={eventData} />
-    </HydrationBoundary>
+    </EventScreenContainer>
   );
 }
