@@ -59,11 +59,15 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
 
+  const profileRealmId = address;
+  const { data: user } = useSuspenseQuery(profileOptions(profileRealmId));
+
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const realmId = userInfo?.realmId || "";
-  const { data: user } = useSuspenseQuery(profileOptions(realmId));
+  const loggedInUserRealmId = userInfo?.realmId || "";
+
+  const isOwner = userId && addressFromRealmId(loggedInUserRealmId) === address;
 
   const profile = deserializeWithFrontMatter({
     serialized: user?.bio ?? "",
@@ -81,9 +85,7 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
     contentFieldName: "bio",
   });
 
-  const isOwner = userId && addressFromRealmId(realmId) === address;
-
-  const { portfolio, ..._otherDetails } = profile; // TODO
+  const { portfolio, ..._otherDetails } = profile;
 
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
@@ -114,7 +116,7 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
       );
 
       await editUser({
-        realmId,
+        realmId: address,
         token,
         avatarUri: user?.avatarUri ?? "",
         displayName: user?.displayName ?? "",
