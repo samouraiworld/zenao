@@ -5,6 +5,7 @@ import {
   infiniteQueryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
+import { withSpan } from "../tracer";
 import { extractGnoJSONResponse } from "@/lib/gno";
 import {
   EventInfo,
@@ -42,19 +43,21 @@ export const eventsList = (
     queryKey: ["events", fromInt, toInt, limitInt],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}, ${
-          pageParam * limitInt
-        }))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-      const json = eventListFromJson(raw);
+      return withSpan(`query:events`, async () => {
+        const client = new GnoJSONRPCProvider(
+          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        );
+        const res = await client.evaluateExpression(
+          `gno.land/r/zenao/eventreg`,
+          `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}, ${
+            pageParam * limitInt
+          }))`,
+        );
+        const raw = extractGnoJSONResponse(res);
+        const json = eventListFromJson(raw);
 
-      return json;
+        return json;
+      });
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
@@ -87,15 +90,20 @@ export const eventsByOrganizerList = (
     queryKey: ["eventsByOrganizer", organizer, fromInt, toInt, limitInt],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      return withSpan(
+        `query:user:${organizer}:events:role:organizer`,
+        async () => {
+          const client = new GnoJSONRPCProvider(
+            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+          );
+          const res = await client.evaluateExpression(
+            `gno.land/r/zenao/eventreg`,
+            `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+          );
+          const raw = extractGnoJSONResponse(res);
+          return eventListFromJson(raw);
+        },
       );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-      return eventListFromJson(raw);
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
@@ -126,15 +134,20 @@ export const eventsByParticipantList = (
     queryKey: ["eventsByParticipant", participant, fromInt, toInt, limitInt],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      return withSpan(
+        `query:user:${participant}:events:role:participant`,
+        async () => {
+          const client = new GnoJSONRPCProvider(
+            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+          );
+          const res = await client.evaluateExpression(
+            `gno.land/r/zenao/eventreg`,
+            `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+          );
+          const raw = extractGnoJSONResponse(res);
+          return eventListFromJson(raw);
+        },
       );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-      return eventListFromJson(raw);
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
