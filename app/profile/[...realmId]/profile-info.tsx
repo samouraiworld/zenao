@@ -23,12 +23,13 @@ import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button"
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
+import { RealmId } from "@/types/schemas";
 
 export function ProfileInfo({
-  address,
+  realmId,
   now,
 }: {
-  address: string;
+  realmId: RealmId;
   now: number;
 }) {
   const t = useTranslations("profile-info");
@@ -36,6 +37,7 @@ export function ProfileInfo({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
+  const address = addressFromRealmId(realmId);
   const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
   const isOwner = loggedUserAddress === address;
   // The connected user can see his both discoverable and undiscoverable events
@@ -43,7 +45,7 @@ export function ProfileInfo({
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
 
-  const { data: profile } = useSuspenseQuery(profileOptions(address));
+  const { data: profile } = useSuspenseQuery(profileOptions(realmId));
   const {
     data: upcomingEventsPages,
     isFetchingNextPage: isFetchingUpcomingNextPage,
@@ -52,7 +54,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextUpcomingPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      address,
+      realmId,
       discoverableFilter,
       now,
       Number.MAX_SAFE_INTEGER,
@@ -67,7 +69,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextPastPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      address,
+      realmId,
       discoverableFilter,
       now - 1,
       0,
@@ -106,7 +108,7 @@ export function ProfileInfo({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ProfileHeader
-          address={profile.address}
+          address={address}
           displayName={profile.displayName}
           bio={profile.bio}
           avatarUri={profile.avatarUri}
