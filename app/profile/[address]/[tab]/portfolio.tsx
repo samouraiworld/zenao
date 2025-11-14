@@ -58,8 +58,8 @@ type UserPortfolioProps = {
 export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
-  
-  const profileRealmId = address; 
+
+  const profileRealmId = address;
   const { data: user } = useSuspenseQuery(profileOptions(profileRealmId));
 
   const { data: userInfo } = useSuspenseQuery(
