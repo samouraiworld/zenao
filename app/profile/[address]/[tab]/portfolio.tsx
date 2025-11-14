@@ -41,7 +41,7 @@ import {
   AUDIO_FILE_SIZE_LIMIT_MB,
   IMAGE_FILE_SIZE_LIMIT,
   IMAGE_FILE_SIZE_LIMIT_MB,
-} from "@/app/event/[id]/constants";
+} from "@/components/features/event/constants";
 
 const MemoizedVideoPreview = memo(({ uri }: { uri: string }) => (
   <MarkdownPreview
@@ -58,8 +58,8 @@ type UserPortfolioProps = {
 export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
-
-  const profileRealmId = address;
+  
+  const profileRealmId = address; 
   const { data: user } = useSuspenseQuery(profileOptions(profileRealmId));
 
   const { data: userInfo } = useSuspenseQuery(
