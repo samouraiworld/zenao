@@ -12,7 +12,7 @@ import (
 
 type Event struct {
 	gorm.Model
-	EventRealmID string `gorm:"uniqueIndex;not null"`
+	EventRealmID string `gorm:"uniqueIndex"`
 	PasswordHash string
 
 	//TODO: DELETE ALL FIELDS BELOW

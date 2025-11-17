@@ -8,7 +8,7 @@ CREATE TABLE
     `created_at` datetime NULL,
     `updated_at` datetime NULL,
     `deleted_at` datetime NULL,
-    `event_realm_id` text NOT NULL,
+    `event_realm_id` text NULL,
     `password_hash` text NULL,
     `title` text NULL,
     `description` text NULL,
@@ -34,7 +34,6 @@ CREATE TABLE
 INSERT INTO
   `new_events` (
     `id`,
-    `event_realm_id`,
     `created_at`,
     `updated_at`,
     `deleted_at`,
@@ -59,7 +58,6 @@ INSERT INTO
   )
 SELECT
   `id`,
-  '' AS `event_realm_id`,
   `created_at`,
   `updated_at`,
   `deleted_at`,
