@@ -1,4 +1,4 @@
-h1:cVURIF+7hzAJ6QmN+N0mCKklwB+kAkHnbgVwJwYPllg=
+h1:fZc/p7k/R2bSMCOqdzOC/ptwWLuyrJe2VUqtHqdRksc=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
@@ -20,5 +20,5 @@ h1:cVURIF+7hzAJ6QmN+N0mCKklwB+kAkHnbgVwJwYPllg=
 20250729123743_membership-roles.sql h1:UoXH4kxOgouwDk64x40BrzDNGij9g4/44CmgeZJs2Fs=
 20250729152448_community-feed.sql h1:OfFTIdZubRWgoP0XPruv6NtXn2rUy8Ze6tBPSTYnqQw=
 20250911102919_event-discoverable.sql h1:9OJxqg6+ZGCIyyi63MVmwIdmlEFuNW9E13PdBpZda8E=
-20251113104506_sot-transition.sql h1:Qz/2XY2VHCG8tQD+m7V/ZFowCo5len7ziJNMe4lCoQo=
-20251113104957_backfill_realm_id.sql h1:ZWshp+gfBKj8963bLC273a9Xz1tJiQwGOa2tiRrRAGA=
+20251113104506_sot-transition.sql h1:qKw47fxwzmXyfLY+fBT3O/AB4cGzV0K9//svv70N0rw=
+20251113104957_backfill_realm_id.sql h1:VPJ6fnDH8go2R78tf9NJuvlrTHwhCTeAbtylP5PsEjY=

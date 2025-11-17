@@ -34,6 +34,7 @@ CREATE TABLE
 INSERT INTO
   `new_events` (
     `id`,
+    `event_realm_id`,
     `created_at`,
     `updated_at`,
     `deleted_at`,
@@ -58,6 +59,7 @@ INSERT INTO
   )
 SELECT
   `id`,
+  '' AS `event_realm_id`,
   `created_at`,
   `updated_at`,
   `deleted_at`,
