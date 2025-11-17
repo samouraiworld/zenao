@@ -186,7 +186,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               />
 
               <div className="flex flex-col gap-4 relative">
-                <div className="mb-4 flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Heading level={3}>{t("bio-label")}</Heading>
                 </div>
 
@@ -198,15 +198,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
                     })}
                     className="absolute top-0 right-0 rounded p-0 h-fit"
                   />
-
                   <TabsContent value="write" tabIndex={-1}>
                     <FormFieldTextArea
                       control={form.control}
                       name="bio"
                       placeholder={t("bio-placeholder")}
-                      className={cn(
-                        "bg-transparent border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
-                      )}
+                      className={cn("w-full placeholder:text-secondary-color")}
                       maxLength={1000}
                       wordCounter
                     />
