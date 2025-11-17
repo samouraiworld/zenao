@@ -88,6 +88,7 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		Instructions: dbevt.LocInstructions,
 	}
 
+	// INFO: removed error since we don't store these data anymore. this part will be removed in next PR
 	switch dbevt.LocKind {
 	case "geo":
 		loc.Address = &zenaov1.EventLocation_Geo{Geo: &zenaov1.AddressGeo{
@@ -104,8 +105,6 @@ func dbEventToZeniEvent(dbevt *Event) (*zeni.Event, error) {
 		loc.Address = &zenaov1.EventLocation_Virtual{Virtual: &zenaov1.AddressVirtual{
 			Uri: dbevt.LocAddress,
 		}}
-	default:
-		return nil, fmt.Errorf("unknown address kind %q", dbevt.LocKind)
 	}
 
 	evt := &zeni.Event{
