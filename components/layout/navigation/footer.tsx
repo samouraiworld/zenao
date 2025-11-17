@@ -23,7 +23,7 @@ export const Footer = () => {
     <footer className="standalone:hidden flex flex-col items-center gap-2 sm:flex-row sm:justify-between sm:items-end p-4">
       <div className="flex flex-row items-center gap-3 sm:gap-5">
         <Text size="sm" variant="secondary">
-          {t("footer.copyright", { year: new Date().getFullYear() })}
+          {t("footer.tagline")}
         </Text>
       </div>
       <div className="flex flex-row align-center gap-3 sm:gap-5">

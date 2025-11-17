@@ -20,10 +20,7 @@
     "view-profile": "View my profile",
     "create-event": "Create Event",
     "footer": {
-      "copyright": "© {year} Zenao. All rights reserved.",
-      "terms": "Terms",
-      "privacy": "Privacy",
-      "security": "Security",
+      "tagline": "Made with ❤️ by Samourai.world crew",
       "report-bug": "Report a bug"
     }
   },
