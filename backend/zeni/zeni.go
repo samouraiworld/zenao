@@ -82,7 +82,7 @@ type Event struct {
 	EventRealmID string
 	PasswordHash string
 
-	// TODO: TO DELETE
+	//TODO: DELETE ALL FIELDS BELOW
 	ID                string
 	CreatedAt         time.Time
 	DeletedAt         time.Time
@@ -99,7 +99,7 @@ type Event struct {
 	Discoverable      bool
 }
 
-// TODO: TO DELETE
+// TODO: DELETE THE ENTIRE STRUCTURE
 type Community struct {
 	CreatedAt   time.Time
 	ID          string
@@ -110,7 +110,7 @@ type Community struct {
 	CreatorID   string
 }
 
-// TODO: TO DELETE
+// TODO: DELETE THE ENTIRE STRUCTURE
 type EntityRole struct {
 	CreatedAt  time.Time
 	DeletedAt  time.Time
@@ -121,7 +121,7 @@ type EntityRole struct {
 	Role       string // one of: organizer, gatekeeper, participant, administrator, member,
 }
 
-// TODO: TO DELETE
+// TODO: DELETE THE ENTIRE STRUCTURE
 type Feed struct {
 	CreatedAt time.Time
 	ID        string
@@ -130,7 +130,7 @@ type Feed struct {
 	OrgID     string
 }
 
-// TODO: TO DELETE
+// TODO: DELETE THE ENTIRE STRUCTURE
 type Post struct {
 	CreatedAt time.Time
 	ID        string
@@ -140,7 +140,7 @@ type Post struct {
 	Reactions []*Reaction
 }
 
-// TODO: TO DELETE
+// TODO: DELETE THE ENTIRE STRUCTURE
 type Poll struct {
 	CreatedAt time.Time
 	ID        string
@@ -152,7 +152,7 @@ type Poll struct {
 	Votes     []*Vote
 }
 
-// TODO: TO DELETE
+// TODO: DELETE THE ENTIRE STRUCTURE
 type Vote struct {
 	CreatedAt time.Time
 	ID        string
@@ -160,7 +160,7 @@ type Vote struct {
 	Option    string
 }
 
-// TODO: TO DELETE
+// TODO: DELETE THE ENTIRE STRUCTURE
 type Reaction struct {
 	CreatedAt time.Time
 	ID        string
@@ -177,13 +177,13 @@ type SoldTicket struct {
 	BuyerRealmID string
 	UserRealmID  string
 
-	//TODO: TO DELETE
+	//TODO: DELETE ALL FIELDS BELOW
 	Checkin *Checkin
 	BuyerID string
 	UserID  string
 }
 
-// TODO: TO DELETE
+// TODO: DELETE THE ENTIRE STRUCTURE
 type Checkin struct {
 	At           time.Time
 	GatekeeperID string

@@ -23,7 +23,7 @@ type User struct {
 	Plan       string `gorm:"default:'free'"`
 	RealmID    string `gorm:"uniqueIndex"`
 
-	// TODO: TO DELETE
+	//TODO: DELETE ALL FIELDS BELOW
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -57,7 +57,7 @@ type SoldTicket struct {
 	Secret string `gorm:"uniqueIndex;not null"`
 	Pubkey string `gorm:"uniqueIndex;not null"`
 
-	//TODO: TO DELETE
+	//TODO: DELETE ALL FIELDS BELOW
 	EventID uint `gorm:"index"`
 	UserID  uint
 	User    *User
@@ -65,7 +65,7 @@ type SoldTicket struct {
 	BuyerID uint
 }
 
-// TODO: TO DELETE
+// TODO: DELETE ALL FIELDS BELOW
 type Checkin struct {
 	// gorm.Model without ID
 	CreatedAt time.Time
@@ -562,14 +562,15 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 	}
 	ticket := &zeni.SoldTicket{
 		Ticket: tickobj,
-		//TODO: TO DELETE
-		BuyerID:   fmt.Sprint(dbtick.BuyerID),
-		UserID:    fmt.Sprint(dbtick.UserID),
-		CreatedAt: dbtick.CreatedAt,
 
 		BuyerRealmID: dbtick.BuyerRealmID,
 		UserRealmID:  dbtick.UserRealmID,
 		EventRealmID: dbtick.EventRealmID,
+
+		//TODO: DELETE ALL FIELDS BELOW
+		BuyerID:   fmt.Sprint(dbtick.BuyerID),
+		UserID:    fmt.Sprint(dbtick.UserID),
+		CreatedAt: dbtick.CreatedAt,
 	}
 	if dbtick.DeletedAt.Valid {
 		ticket.DeletedAt = dbtick.DeletedAt.Time

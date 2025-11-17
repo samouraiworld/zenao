@@ -15,7 +15,7 @@ type Event struct {
 	EventRealmID string `gorm:"uniqueIndex;not null"`
 	PasswordHash string
 
-	//TODO: TO DELETE
+	//TODO: DELETE ALL FIELDS BELOW
 	Title       string
 	Description string
 	StartDate   time.Time
