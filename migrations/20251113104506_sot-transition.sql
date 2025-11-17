@@ -1,4 +1,5 @@
 -- Disable the enforcement of foreign-keys constraints
+PRAGMA defer_foreign_keys = on;
 PRAGMA foreign_keys = off;
 
 -- Create "new_events" table
@@ -229,3 +230,4 @@ CREATE INDEX `idx_sold_tickets_deleted_at` ON `sold_tickets` (`deleted_at`);
 
 -- Enable back the enforcement of foreign-keys constraints
 PRAGMA foreign_keys = on;
+PRAGMA defer_foreign_keys = off;
