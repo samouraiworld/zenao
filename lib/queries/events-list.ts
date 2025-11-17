@@ -73,7 +73,7 @@ export const eventsList = (
 };
 
 export const eventsByOrganizerList = (
-  organizer: string,
+  organizerRealmId: string,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -84,7 +84,7 @@ export const eventsByOrganizerList = (
   const limitInt = Math.floor(limit);
 
   return infiniteQueryOptions({
-    queryKey: ["eventsByOrganizer", organizer, fromInt, toInt, limitInt],
+    queryKey: ["eventsByOrganizer", organizerRealmId, fromInt, toInt, limitInt],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
@@ -92,7 +92,7 @@ export const eventsByOrganizerList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizerRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
@@ -113,7 +113,7 @@ export const eventsByOrganizerList = (
 };
 
 export const eventsByParticipantList = (
-  participant: string,
+  participantRealmId: string,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
@@ -123,7 +123,13 @@ export const eventsByParticipantList = (
   const limitInt = Math.floor(limit);
 
   return infiniteQueryOptions({
-    queryKey: ["eventsByParticipant", participant, fromInt, toInt, limitInt],
+    queryKey: [
+      "eventsByParticipant",
+      participantRealmId,
+      fromInt,
+      toInt,
+      limitInt,
+    ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
@@ -131,7 +137,7 @@ export const eventsByParticipantList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participantRealmId)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
