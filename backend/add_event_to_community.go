@@ -78,11 +78,12 @@ func (s *ZenaoServer) AddEventToCommunity(
 	}
 
 	for _, participantRealmID := range participantsRealmIDs {
-		if !membersMap[participantRealmID] {
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.Administrators[0], cmtRealmID, participantRealmID); err != nil {
-				s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-realm-id", participantRealmID))
-				return nil, err
-			}
+		if membersMap[participantRealmID] {
+			continue
+		}
+		if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.Administrators[0], cmtRealmID, participantRealmID); err != nil {
+			s.Logger.Error("add-event-to-community-chain", zap.Error(err), zap.String("community-id", req.Msg.CommunityId), zap.String("participant-realm-id", participantRealmID))
+			return nil, err
 		}
 	}
 
