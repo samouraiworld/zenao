@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -37,7 +38,7 @@ func (s *ZenaoServer) LeaveCommunity(
 	}
 
 	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.Administrators[0], cmtRealmID, userRealmID); err != nil {
-		return nil, errors.New("failed to remove member from community on chain")
+		return nil, fmt.Errorf("remove member from community: %w", err)
 	}
 
 	return connect.NewResponse(&zenaov1.LeaveCommunityResponse{}), nil
