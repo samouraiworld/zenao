@@ -95,10 +95,6 @@ CREATE UNIQUE INDEX `idx_events_event_realm_id` ON `events` (`event_realm_id`);
 -- Create index "idx_events_deleted_at" to table: "events"
 CREATE INDEX `idx_events_deleted_at` ON `events` (`deleted_at`);
 
--- Add column "created_at" to table: "poll_votes"
-ALTER TABLE `poll_votes`
-ADD COLUMN `created_at` datetime NULL;
-
 -- Create "new_users" table
 CREATE TABLE
   `new_users` (
