@@ -75,6 +75,6 @@ jobs:
             set -xe
             cd zenao
             docker compose -f staging.docker-compose.yml up -d --wait otel-collector jaeger
-            docker compose -f staging.docker-compose.yml up -d --force-recreate --build gno --wait
+            docker compose -f staging.docker-compose.yml up -d --force-recreate --wait
             yq -iy 'del(.services.backend.command)' staging.docker-compose.yml
             docker compose -f staging.docker-compose.yml up -d --build backend
