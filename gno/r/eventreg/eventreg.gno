@@ -224,7 +224,7 @@ func listEventsByParticipant(participantID string, from, to int64, limit, offset
 	fromKey := participantID + "/" + unixTimeKey(from) + "/"
 	toKey := participantID + "/" + unixTimeKey(to) + "/"
 
-	return listEventsInternal(&eventsByParticipant, zenaov1.DISCOVERABLE_FILTER_DISCOVERABLE, fromKey, toKey, from > to, limit, offset)
+	return listEventsInternal(&eventsByParticipant, zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, fromKey, toKey, from > to, limit, offset)
 }
 
 func listEventsInternal(at avl.ITree, discoverableFilter zenaov1.DiscoverableFilter, fromKey string, toKey string, rev bool, limit, offset uint32) []*zenaov1.EventInfo {
