@@ -130,7 +130,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 
 		if cmt != nil {
-			roles, err := s.Chain.WithContext(ctx).EntityRoles(s.Chain.UserRealmID(participants[i].ID), zeni.EntityTypeCommunity, cmt.PkgPath)
+			roles, err := s.Chain.WithContext(ctx).EntityRoles(s.Chain.UserRealmID(participants[i].ID), cmt.PkgPath, zeni.EntityTypeCommunity)
 			if err != nil {
 				return nil, err
 			}
