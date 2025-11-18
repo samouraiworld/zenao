@@ -160,12 +160,7 @@ func execGenTxs() error {
 		logger.Info("event cancel indexed into event registry tx created", zap.String("event-id", deletedEvent.ID))
 	}
 	for _, event := range events {
-		sk, err := zeni.EventSKFromPasswordHash(event.PasswordHash)
-		if err != nil {
-			return err
-		}
-
-		privacy, err := zeni.EventPrivacyFromSK(sk)
+		privacy, sk, err := zeni.EventPrivacyFromPasswordHash(event.PasswordHash)
 		if err != nil {
 			return err
 		}

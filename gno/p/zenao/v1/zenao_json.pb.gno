@@ -882,6 +882,9 @@ func (e *EventPrivacyGuarded) ToJSON() *json.Node {
 	if e.ParticipationPubkey != "" {
 		fields["participationPubkey"] = json.StringNode("", e.ParticipationPubkey)
 	}
+	if e.HashParams != "" {
+		fields["hashParams"] = json.StringNode("", e.HashParams)
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -892,6 +895,9 @@ func EventPrivacyGuardedFromJSON(e *EventPrivacyGuarded, node *json.Node) {
 
 	if val, ok := fields["participationPubkey"]; ok {
 		e.ParticipationPubkey = val.MustString()
+	}
+	if val, ok := fields["hashParams"]; ok {
+		e.HashParams = val.MustString()
 	}
 }
 

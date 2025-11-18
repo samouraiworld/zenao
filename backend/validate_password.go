@@ -11,12 +11,17 @@ import (
 // XXX: rate limit to avoid bruteforce weak passwords
 func (s *ZenaoServer) ValidatePassword(ctx context.Context, req *connect.Request[zenaov1.ValidatePasswordRequest]) (*connect.Response[zenaov1.ValidatePasswordResponse], error) {
 	evtRealmID := s.Chain.WithContext(ctx).EventRealmID(req.Msg.EventId)
-	zEvt, err := s.DB.GetEvent(evtRealmID)
+	evt, err := s.Chain.WithContext(ctx).GetEvent(evtRealmID)
 	if err != nil {
 		return nil, err
 	}
 
-	valid, err := zeni.ValidatePassword(req.Msg.Password, zEvt.PasswordHash)
+	guarded := evt.Privacy.GetGuarded()
+	if guarded == nil {
+		return nil, nil // public event, no password needed
+	}
+
+	valid, err := zeni.ValidatePassword(req.Msg.Password, guarded.HashParams, guarded.ParticipationPubkey)
 	if err != nil {
 		return nil, err
 	}

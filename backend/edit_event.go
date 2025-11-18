@@ -101,13 +101,7 @@ func (s *ZenaoServer) EditEvent(
 		return nil, err
 	}
 
-	if err := s.DB.TxWithSpan(ctx, "db.EditEvent", func(db zeni.DB) error {
-		return db.EditEvent(eventRealmID, passwordHash)
-	}); err != nil {
-		return nil, err
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
+	privacy, _, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
 	if err != nil {
 		return nil, err
 	}

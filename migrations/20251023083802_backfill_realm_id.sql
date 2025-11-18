@@ -1,3 +1,4 @@
+
 UPDATE `users`
 SET
     `realm_id` = 'gno.land/r/zenao/users/u' || id
@@ -22,10 +23,3 @@ SET
     `buyer_realm_id` = 'gno.land/r/zenao/users/u' || `buyer_id`
 WHERE
     `buyer_realm_id` = '';
-
-UPDATE `events`
-SET
-    `event_realm_id` = 'gno.land/r/zenao/events/e' || id
-WHERE
-    `event_realm_id` IS NULL
-    OR `event_realm_id` = '';

@@ -149,44 +149,6 @@ func (g *gormZenaoDB) CreateUser(authID string, realmIDPrefix string) (*zeni.Use
 	return dbUserToZeniDBUser(user), nil
 }
 
-// CreateEvent implements zeni.DB.
-func (g *gormZenaoDB) CreateEvent(eventRealmID string, passwordHash string) error {
-	evt := &Event{
-		EventRealmID: eventRealmID,
-		PasswordHash: passwordHash,
-	}
-
-	if err := g.db.Create(evt).Error; err != nil {
-		return fmt.Errorf("create event in db: %w", err)
-	}
-
-	return nil
-}
-
-// GetEvent implements zeni.DB.
-func (g *gormZenaoDB) GetEvent(eventRealmID string) (*zeni.Event, error) {
-	var evt Event
-	if err := g.db.Where("event_realm_id = ?", eventRealmID).Find(&evt).Error; err != nil {
-		return nil, fmt.Errorf("get event from db: %w", err)
-	}
-
-	zevt, err := dbEventToZeniEvent(&evt)
-	if err != nil {
-		return nil, fmt.Errorf("convert db event to zeni event: %w", err)
-	}
-	return zevt, nil
-}
-
-// EditEvent implements zeni.DB.
-func (g *gormZenaoDB) EditEvent(eventRealmID string, passwordHash string) error {
-	if err := g.db.Model(&Event{}).Where("event_realm_id = ?", eventRealmID).Updates(map[string]interface{}{
-		"password_hash": passwordHash,
-	}).Error; err != nil {
-		return fmt.Errorf("edit event in db: %w", err)
-	}
-	return nil
-}
-
 // Participate implements zeni.DB.
 func (g *gormZenaoDB) Participate(buyerID string, userID string, eventRealmID string, buyerRealmID string, userRealmID string, ticketSecret string) error {
 	buyerIDInt, err := strconv.ParseUint(buyerID, 10, 64)

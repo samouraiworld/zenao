@@ -98,13 +98,7 @@ func (s *ZenaoServer) CreateEvent(
 		return nil, err
 	}
 
-	if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
-		return db.CreateEvent(evtRealmID, passwordHash)
-	}); err != nil {
-		return nil, err
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
+	privacy, _, err := zeni.EventPrivacyFromPasswordHash(passwordHash)
 	if err != nil {
 		return nil, err
 	}

@@ -193,6 +193,7 @@ type EventPrivacyPublic struct {
 
 type EventPrivacyGuarded struct {
 	ParticipationPubkey string
+	HashParams          string
 }
 
 type EventInfo struct {

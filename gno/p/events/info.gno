@@ -15,6 +15,7 @@ func (e *Event) Info() *zenaov1.EventInfo {
 	} else {
 		privacy.EventPrivacy = &zenaov1.EventPrivacyGuarded{
 			ParticipationPubkey: base64.RawURLEncoding.EncodeToString(e.ParticipationPubkey),
+			HashParams:          e.HashParams,
 		}
 	}
 

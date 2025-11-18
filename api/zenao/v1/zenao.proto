@@ -183,6 +183,7 @@ message EventPrivacyPublic {}
 
 message EventPrivacyGuarded {
   string participation_pubkey = 1;
+  string hash_params = 2;
 }
 
 enum DiscoverableFilter {

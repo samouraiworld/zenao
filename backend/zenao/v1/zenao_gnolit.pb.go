@@ -511,6 +511,9 @@ func (e *EventPrivacyGuarded) GnoLiteral(typePrefix string, linePrefix string) s
 	if e.ParticipationPubkey != "" {
 		fmt.Fprintf(buf, "%s\tParticipationPubkey: %q,\n", linePrefix, e.ParticipationPubkey)
 	}
+	if e.HashParams != "" {
+		fmt.Fprintf(buf, "%s\tHashParams: %q,\n", linePrefix, e.HashParams)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
