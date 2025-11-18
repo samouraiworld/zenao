@@ -9,7 +9,6 @@ import (
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
-	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
 func newMailCmd() *commands.Command {
@@ -27,19 +26,19 @@ func newMailCmd() *commands.Command {
 }
 
 func execMail() error {
-	evt := &zeni.Event{
-		ImageURI:  "ipfs://bafkreifqabflxtsqvaggg2kw4lyju3pckq4osun4vdlltsn7lal7ak5hli",
+	evt := &zenaov1.EventInfo{
+		ImageUri:  "ipfs://bafkreifqabflxtsqvaggg2kw4lyju3pckq4osun4vdlltsn7lal7ak5hli",
 		Title:     "PEER IN STEP: n0izn0iz + zooma + pwnh4",
-		StartDate: time.Now().Add(time.Hour * 24),
-		EndDate:   time.Now().Add(time.Hour * 30),
+		StartDate: int64(time.Hour * 24),
+		EndDate:   int64(time.Hour * 30),
 		Location: &zenaov1.EventLocation{Address: &zenaov1.EventLocation_Custom{Custom: &zenaov1.AddressCustom{
 			Address:  "Ground Control - Paris",
 			Timezone: "Europe/Paris",
 		}}},
 	}
-	evt.ID = "10"
+	evtID := "10"
 
-	str, _, err := ticketsConfirmationMailContent(evt, "Welcome! Tickets will be sent in a few weeks!")
+	str, _, err := ticketsConfirmationMailContent(evtID, evt, "Welcome! Tickets will be sent in a few weeks!")
 	if err != nil {
 		return err
 	}
