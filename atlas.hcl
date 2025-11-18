@@ -37,7 +37,7 @@ env "e2e" {
 }
 
 env "staging" {
-  url     = "libsql://zenao-staging-2-samourai-coop.turso.io?authToken=${var.token}"
+  url     = "libsql://zenao-staging-samourai-coop.turso.io?authToken=${var.token}"
   exclude = ["_litestream*"]
 }
 
