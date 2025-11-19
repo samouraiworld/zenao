@@ -65,7 +65,7 @@ jobs:
         run: TURSO_TOKEN=${{ secrets.STAGING_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env staging
 
       - name: Create genesis txs
-        run: go run ./backend gentxs -output genesis_txs.jsonl --db "libsql://zenao-staging-2-samourai-coop.turso.io?authToken=${{ secrets.STAGING_TURSO_TOKEN }}" --admin-mnemonic '${{ secrets.STAGING_ADMIN_MNEMONIC }}' --chain-id zenao-dev
+        run: go run ./backend gentxs -output genesis_txs.jsonl --db "libsql://zenao-staging-3-samourai-coop.turso.io?authToken=${{ secrets.STAGING_TURSO_TOKEN }}" --admin-mnemonic '${{ secrets.STAGING_ADMIN_MNEMONIC }}' --chain-id zenao-dev
 
       - name: Copy genesis txs
         uses: appleboy/scp-action@v1
