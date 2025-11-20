@@ -33,6 +33,7 @@ import { cn } from "@/lib/tailwind";
 import { useEventBroadcastEmail } from "@/lib/mutations/event-management";
 import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type BroadcastEmailDialogProps = {
   eventId: string;
@@ -59,6 +60,7 @@ export function BroadcastEmailDialog({
 }: BroadcastEmailDialogProps) {
   const { toast } = useToast();
   const { getToken } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { broadcastEmail, isPending } = useEventBroadcastEmail();
   const t = useTranslations("broadcast-email-form");
   const noParticipant = nbParticipants === 0;
@@ -84,6 +86,11 @@ export function BroadcastEmailDialog({
         token,
         eventId,
         ...data,
+      });
+      trackEvent("EventEmailBroadcasted", {
+        props: {
+          eventId,
+        },
       });
       form.reset();
       onOpenChange(false);

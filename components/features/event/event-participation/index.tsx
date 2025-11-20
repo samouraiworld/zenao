@@ -193,7 +193,7 @@ EventParticipation.Participant = function EventParticipationParticipant() {
             </Link>
           </SignedIn>
           <SignedOut>
-            <SignInButton>
+            <SignInButton forceRedirectUrl={`/ticket/${eventId}`}>
               <Text className="text-main underline">
                 {t("login-to-see-tickets")}
               </Text>

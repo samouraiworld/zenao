@@ -5,9 +5,11 @@ type AnalyticEvents = {
   EventParticipation: { eventId: string; method: "guest" | "loggedIn" };
   EventParticipationCanceled: { eventId: string };
   EventCreated: { eventId: string };
+  EventEdited: { eventId: string };
   EventCanceled: { eventId: string };
   EventCheckIn: { eventId: string };
-  EventEmailBroadcasted: never;
+  EventEmailBroadcasted: { eventId: string };
+  EventGatekeepersUpdated: { eventId: string };
   InstallPwaClick: never;
   SignUpClick: never;
   SignInClick: never;

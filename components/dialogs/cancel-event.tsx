@@ -7,6 +7,7 @@ import { captureException } from "@/lib/report";
 import { userInfoOptions } from "@/lib/queries/user";
 import { useEventCancel } from "@/lib/mutations/event-cancel";
 import { useToast } from "@/hooks/use-toast";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type CancelEventDialogProps = {
   eventId: string;
@@ -22,6 +23,7 @@ export function CancelEventDialog({
   const t = useTranslations("cancel-event-confirmation-dialog");
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -36,6 +38,11 @@ export function CancelEventDialog({
         eventId,
         getToken,
         userRealmId,
+      });
+      trackEvent("EventCanceled", {
+        props: {
+          eventId,
+        },
       });
 
       toast({ title: t("toast-cancel-event-success") });
