@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { Albert_Sans } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import PlausibleProvider from "next-plausible";
 import QueryProviders from "../components/providers/query-providers";
 import "./globals.css";
 import { Toaster } from "@/components/shadcn/toaster";
@@ -254,29 +255,31 @@ export default async function RootLayout({
         <ClerkProvider>
           <QueryProviders>
             <NuqsAdapter>
-              <PwaStateProvider>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="system"
-                  enableSystem
-                  disableTransitionOnChange
-                >
-                  <TooltipProvider>
-                    <NextIntlClientProvider
-                      messages={messages}
-                      now={contextNow}
-                    >
-                      <NextTopLoader showSpinner={false} color="#EC7E17" />
-                      <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
-                        <Header />
-                        {children}
-                        <Footer />
-                        <PwaBottomBar />
-                      </div>
-                    </NextIntlClientProvider>
-                  </TooltipProvider>
-                </ThemeProvider>
-              </PwaStateProvider>
+              <PlausibleProvider domain="zenao.io" trackLocalhost enabled manualPageviews>
+                <PwaStateProvider>
+                  <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                  >
+                    <TooltipProvider>
+                      <NextIntlClientProvider
+                        messages={messages}
+                        now={contextNow}
+                      >
+                        <NextTopLoader showSpinner={false} color="#EC7E17" />
+                        <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
+                          <Header />
+                          {children}
+                          <Footer />
+                          <PwaBottomBar />
+                        </div>
+                      </NextIntlClientProvider>
+                    </TooltipProvider>
+                  </ThemeProvider>
+                </PwaStateProvider>
+              </PlausibleProvider>
             </NuqsAdapter>
           </QueryProviders>
         </ClerkProvider>
