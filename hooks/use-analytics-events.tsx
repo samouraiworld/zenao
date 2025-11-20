@@ -16,8 +16,8 @@ type AnalyticEvents = {
   ThemeChange: { theme: "light" | "dark" | "system" };
   ProfileEdited: never;
   CommunityEdited: { communityId: string };
-  JoinCommunity: { communityId: string };
-  LeaveCommunity: { communityId: string };
+  CommunityJoined: { communityId: string };
+  CommunityLeft: { communityId: string };
   PortfolioItemAdded: {
     orgType: OrgType;
     orgId: string;
