@@ -84,7 +84,14 @@ export const eventsByOrganizerList = (
   const limitInt = Math.floor(limit);
 
   return infiniteQueryOptions({
-    queryKey: ["eventsByOrganizer", organizerRealmId, fromInt, toInt, limitInt],
+    queryKey: [
+      "eventsByOrganizer",
+      organizerRealmId,
+      discoverableFilter,
+      fromInt,
+      toInt,
+      limitInt,
+    ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       const client = new GnoJSONRPCProvider(
@@ -114,6 +121,7 @@ export const eventsByOrganizerList = (
 
 export const eventsByParticipantList = (
   participantRealmId: string,
+  discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
@@ -126,6 +134,7 @@ export const eventsByParticipantList = (
     queryKey: [
       "eventsByParticipant",
       participantRealmId,
+      discoverableFilter,
       fromInt,
       toInt,
       limitInt,
@@ -137,7 +146,7 @@ export const eventsByParticipantList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participantRealmId)}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participantRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);

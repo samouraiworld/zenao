@@ -101,17 +101,17 @@ func TestEvents(t *testing.T) {
 	// list events by participant
 	{
 		// from future to past
-		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10, 0)
+		events := listEventsByParticipant("eve", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `future_event_month_1, past_event_hour_3, past_event_month_5`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByParticipant("carol", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `event_will_change_6, past_event_day_4, future_event_day_2`, eventsString(events))
 	}
 	{
 		// none
-		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByParticipant("alice", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 
@@ -161,22 +161,22 @@ func TestEvents(t *testing.T) {
 	// list events by participant
 	{
 		// from future to past
-		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10, 0)
+		events := listEventsByParticipant("eve", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `future_event_month_1, past_event_hour_3, past_event_month_5`, eventsString(events))
 	}
 	{
 		// from future to past with offset 2
-		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10, 2)
+		events := listEventsByParticipant("eve", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 2)
 		urequire.Equal(t, `past_event_month_5`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByParticipant("carol", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `past_event_day_4, future_event_day_2, event_will_change_6`, eventsString(events))
 	}
 	{
 		// none
-		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByParticipant("alice", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 
@@ -221,17 +221,17 @@ func TestEvents(t *testing.T) {
 	// list events by participant
 	{
 		// from future to past
-		events := listEventsByParticipant("eve", nextYearUnix, lastYearUnix, 10, 0)
+		events := listEventsByParticipant("eve", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `future_event_month_1, past_event_hour_3, past_event_month_5`, eventsString(events))
 	}
 	{
 		// from past to future
-		events := listEventsByParticipant("carol", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByParticipant("carol", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, `past_event_day_4, future_event_day_2, event_will_change_6`, eventsString(events))
 	}
 	{
 		// none
-		events := listEventsByParticipant("alice", lastYearUnix, nextYearUnix, 10, 0)
+		events := listEventsByParticipant("alice", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, lastYearUnix, nextYearUnix, 10, 0)
 		urequire.Equal(t, 0, len(events))
 	}
 }
