@@ -3,7 +3,7 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
-import { EventInfo } from "../gen/zenao/v1/zenao_pb";
+import { DiscoverableFilter, EventInfo } from "../gen/zenao/v1/zenao_pb";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByParticipantList,
@@ -35,11 +35,18 @@ export function TicketsEventsList({
     from === "upcoming"
       ? eventsByParticipantList(
           userRealmId,
+          DiscoverableFilter.UNSPECIFIED,
           now,
           Number.MAX_SAFE_INTEGER,
           DEFAULT_EVENTS_LIMIT,
         )
-      : eventsByParticipantList(userRealmId, now - 1, 0, DEFAULT_EVENTS_LIMIT),
+      : eventsByParticipantList(
+          userRealmId,
+          DiscoverableFilter.UNSPECIFIED,
+          now - 1,
+          0,
+          DEFAULT_EVENTS_LIMIT,
+        ),
   );
 
   const events = useMemo(() => eventsPages.pages.flat(), [eventsPages]);
