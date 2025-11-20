@@ -24,9 +24,12 @@ type AnalyticEvents = {
     itemType: "image" | "video" | "audio";
   };
   PostSent: { orgType: OrgType; orgId: string };
-  PostDeleted: { orgType: OrgType; orgId: string };
-  PostReaction: { orgType: OrgType; orgId: string };
+  PostDeleted: { orgType: OrgType; orgId: string; postId: string };
+  PostReactionUpdated: { orgType: OrgType; orgId: string; postId: string };
+  PostEdited: { orgType: OrgType; orgId: string; postId: string };
   PostCommented: { orgType: OrgType; orgId: string; postId: string };
+  PollCreated: { orgType: OrgType; orgId: string };
+  PollVoteUpdated: { pollId: string };
 };
 
 export function useAnalyticsEvents() {

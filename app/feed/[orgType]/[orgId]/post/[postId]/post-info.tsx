@@ -46,9 +46,21 @@ export default function PostInfo({
 
   const [editMode, setEditMode] = useState(false);
 
-  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
-  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
+  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
+    orgType,
+    orgId,
+    feedId,
+  );
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
+    orgType,
+    orgId,
+    feedId,
+  );
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(
+    orgType,
+    orgId,
+    feedId,
+  );
 
   const form = useForm<SocialFeedPostFormSchemaType>({
     mode: "all",
