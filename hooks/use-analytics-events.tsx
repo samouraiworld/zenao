@@ -14,14 +14,14 @@ type AnalyticEvents = {
   SignUpClick: never;
   SignInClick: never;
   ThemeChange: { theme: "light" | "dark" | "system" };
-  ProfileEdited: never;
+  UserProfileEdited: never;
   CommunityEdited: { communityId: string };
   CommunityJoined: { communityId: string };
   CommunityLeft: { communityId: string };
-  PortfolioItemAdded: {
-    orgType: OrgType;
+  PortfolioUpdated: {
+    orgType: OrgType | "user";
     orgId: string;
-    itemType: "photo" | "video" | "audio";
+    itemType: "image" | "video" | "audio";
   };
   PostSent: { orgType: OrgType; orgId: string };
   PostDeleted: { orgType: OrgType; orgId: string };
