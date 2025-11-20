@@ -22,7 +22,7 @@ export default function EventCommunitySection({
     <Link href={`/community/${communityId}`}>
       <Card className="flex items-start gap-4 cursor-pointer hover:bg-secondary/50 transition-colors">
         <Avatar
-          className={cn("rounded-full overflow-hidden inline-block w-12 h-12")}
+          className={cn("rounded overflow-hidden inline-block w-12 h-12")}
         >
           <AvatarFallback>
             <Web3Image
