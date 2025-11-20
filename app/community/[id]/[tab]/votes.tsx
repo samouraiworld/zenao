@@ -55,8 +55,16 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
     [pollsPages],
   );
 
-  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
+    "community",
+    communityId,
+    feedId,
+  );
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(
+    "community",
+    communityId,
+    feedId,
+  );
 
   return (
     <>
