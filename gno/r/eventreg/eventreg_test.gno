@@ -101,7 +101,7 @@ func TestEvents(t *testing.T) {
 	// list events by participant
 	{
 		// from future to past
-		events := listEventsByParticipant("eve",  zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 0)
+		events := listEventsByParticipant("eve", zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, nextYearUnix, lastYearUnix, 10, 0)
 		urequire.Equal(t, `future_event_month_1, past_event_hour_3, past_event_month_5`, eventsString(events))
 	}
 	{
