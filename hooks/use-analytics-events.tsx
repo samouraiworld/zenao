@@ -2,10 +2,12 @@ import { usePlausible } from "next-plausible";
 import { OrgType } from "@/lib/organization";
 
 type AnalyticEvents = {
-  EventParticipation: { eventId: string; guestMode: boolean };
+  EventParticipation: { eventId: string; method: "guest" | "loggedIn" };
   EventParticipationCanceled: { eventId: string };
   EventCreated: { eventId: string };
   EventCanceled: { eventId: string };
+  EventCheckIn: { eventId: string };
+  EventEmailBroadcasted: never;
   InstallPwaClick: never;
   SignUpClick: never;
   SignInClick: never;
@@ -28,5 +30,5 @@ type AnalyticEvents = {
 export function useAnalyticsEvents() {
   const plausible = usePlausible<AnalyticEvents>();
 
-  return plausible;
+  return { trackEvent: plausible };
 }

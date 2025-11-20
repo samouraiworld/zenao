@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEventCancelParticipation } from "@/lib/mutations/event-cancel-participation";
 import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type CancelRegistrationConfirmationDialogProps = {
   eventId: string;
@@ -21,6 +22,7 @@ export function CancelRegistrationConfirmationDialog({
   const { toast } = useToast();
   const t = useTranslations("cancel-registration-confirmation-dialog");
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -33,6 +35,12 @@ export function CancelRegistrationConfirmationDialog({
         eventId,
         getToken,
         userRealmId,
+      });
+
+      trackEvent("EventParticipationCanceled", {
+        props: {
+          eventId,
+        },
       });
 
       toast({
