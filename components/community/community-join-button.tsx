@@ -73,6 +73,9 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
           <Button
             variant="outline"
             className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
+            onClick={() => {
+              trackEvent("SignInClick");
+            }}
           >
             {t("sign-in-to-join-button")}
           </Button>

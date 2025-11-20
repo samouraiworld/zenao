@@ -11,8 +11,7 @@ type AnalyticEvents = {
   EventEmailBroadcasted: { eventId: string };
   EventGatekeepersUpdated: { eventId: string };
   InstallPwaClick: never;
-  SignUpClick: never;
-  SignInClick: never;
+  SignInClick: { context: string };
   ThemeChange: { theme: "light" | "dark" | "system" };
   UserProfileEdited: never;
   CommunityEdited: { communityId: string };
