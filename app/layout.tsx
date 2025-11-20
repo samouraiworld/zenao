@@ -255,7 +255,7 @@ export default async function RootLayout({
         <ClerkProvider>
           <QueryProviders>
             <NuqsAdapter>
-              <PlausibleProvider domain="zenao.io" trackLocalhost enabled manualPageviews>
+              <PlausibleProvider domain="zenao.io">
                 <PwaStateProvider>
                   <ThemeProvider
                     attribute="class"
