@@ -1,8 +1,16 @@
 import * as Sentry from "@sentry/nextjs";
-import { registerOTel } from "@vercel/otel";
+import { OTLPHttpJsonTraceExporter, registerOTel } from "@vercel/otel";
 
 export async function register() {
-  registerOTel({ serviceName: "zenao:frontend" });
+  registerOTel({
+    serviceName: "zenao:frontend",
+    traceExporter: new OTLPHttpJsonTraceExporter({
+      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+      headers: {
+        Authorization: `Bearer ${process.env.OTEL_EXPORTER_OTLP_HEADERS_TOKEN}`,
+      },
+    }),
+  });
 
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("./sentry.server.config");
