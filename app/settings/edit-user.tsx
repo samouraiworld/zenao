@@ -35,7 +35,6 @@ import { Tabs, TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { cn } from "@/lib/tailwind";
 import Heading from "@/components/widgets/texts/heading";
-import { addressFromRealmId } from "@/lib/gno";
 import UserExperiences from "@/components/features/user/settings/user-experiences";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
@@ -125,9 +124,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
 
       trackEvent("UserProfileEdited");
 
-      const address = addressFromRealmId(userRealmId);
-
-      router.push(`/profile/${address}`);
+      router.push(`/profile/${userRealmId}`);
       toast({
         title: t("toast-success"),
       });

@@ -40,7 +40,6 @@ import {
   UserAvatar,
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
-import { addressFromRealmId } from "@/lib/gno";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export type NavItem = {
@@ -232,8 +231,6 @@ const Auth = ({
     userInfoOptions(getToken, userId),
   );
 
-  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
-
   return (
     <div className={className}>
       {/* Signed out state */}
@@ -271,9 +268,9 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    realmId={loggedUserAddress}
+                    realmId={userInfo?.realmId || ""}
                     className={avatarClassName}
-                    size="sm"
+                    size="md"
                   />
                 </div>
               </SignedIn>
@@ -281,7 +278,7 @@ const Auth = ({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <Link href={`/profile/${loggedUserAddress}`}>
+          <Link href={`/profile/${userInfo?.realmId}`}>
             <DropdownMenuItem className="cursor-pointer">
               {t("view-profile")}
             </DropdownMenuItem>

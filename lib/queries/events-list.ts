@@ -76,7 +76,7 @@ export const eventsList = (
 };
 
 export const eventsByOrganizerList = (
-  organizer: string,
+  organizerRealmId: string,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -89,7 +89,7 @@ export const eventsByOrganizerList = (
   return infiniteQueryOptions({
     queryKey: [
       "eventsByOrganizer",
-      organizer,
+      organizerRealmId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -98,14 +98,14 @@ export const eventsByOrganizerList = (
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
-        `query:chain:user:${organizer}:events:role:organizer`,
+        `query:chain:user:${organizerRealmId}:events:role:organizer`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
           );
           const res = await client.evaluateExpression(
             `gno.land/r/zenao/eventreg`,
-            `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+            `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizerRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
           );
           const raw = extractGnoJSONResponse(res);
           return eventListFromJson(raw);
@@ -128,7 +128,7 @@ export const eventsByOrganizerList = (
 };
 
 export const eventsByParticipantList = (
-  participant: string,
+  participantRealmId: string,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -141,7 +141,7 @@ export const eventsByParticipantList = (
   return infiniteQueryOptions({
     queryKey: [
       "eventsByParticipant",
-      participant,
+      participantRealmId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -150,14 +150,14 @@ export const eventsByParticipantList = (
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
-        `query:chain:user:${participant}:events:role:participant`,
+        `query:chain:user:${participantRealmId}:events:role:participant`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
           );
           const res = await client.evaluateExpression(
             `gno.land/r/zenao/eventreg`,
-            `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+            `eventsToJSON(listEventsByParticipant(${JSON.stringify(participantRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
           );
           const raw = extractGnoJSONResponse(res);
           return eventListFromJson(raw);
