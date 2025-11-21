@@ -270,7 +270,7 @@ const Auth = ({
                   <UserAvatar
                     realmId={userInfo?.realmId || ""}
                     className={avatarClassName}
-                    size="sm"
+                    size="md"
                   />
                 </div>
               </SignedIn>
