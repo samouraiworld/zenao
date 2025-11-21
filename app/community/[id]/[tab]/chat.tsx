@@ -73,9 +73,21 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     [postsPages],
   );
 
-  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
-  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
+  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
+    "community",
+    communityId,
+    feedId,
+  );
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
+    "community",
+    communityId,
+    feedId,
+  );
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(
+    "community",
+    communityId,
+    feedId,
+  );
 
   const onEdit = async (
     postId: string,

@@ -12,6 +12,7 @@ import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { captureException } from "@/lib/report";
 import CommunityPostCommentForm from "@/components/features/community/community-post-comment-form";
 import EventPostCommentForm from "@/components/features/event/event-post-comment-form";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 interface PostCommentFormProps {
   orgType: OrgType;
@@ -30,6 +31,7 @@ export default function PostCommentForm({
   const t = useTranslations("social-feed.standard-post-form");
 
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -55,6 +57,13 @@ export default function PostCommentForm({
         token,
         userRealmId,
         tags: [],
+      });
+      trackEvent("PostCommented", {
+        props: {
+          orgType,
+          orgId,
+          postId: parentId.toString(),
+        },
       });
 
       toast({

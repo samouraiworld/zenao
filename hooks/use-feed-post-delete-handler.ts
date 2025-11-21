@@ -2,14 +2,21 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useToast } from "./use-toast";
+import { useAnalyticsEvents } from "./use-analytics-events";
 import { userInfoOptions } from "@/lib/queries/user";
 import { useDeletePost } from "@/lib/mutations/social-feed";
 import { captureException } from "@/lib/report";
+import { OrgType } from "@/lib/organization";
 
-function useFeedPostDeleteHandler(feedId: string) {
+function useFeedPostDeleteHandler(
+  orgType: OrgType,
+  orgId: string,
+  feedId: string,
+) {
   const t = useTranslations();
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -30,6 +37,13 @@ function useFeedPostDeleteHandler(feedId: string) {
         parentId,
         token,
         userRealmId,
+      });
+      trackEvent("PostDeleted", {
+        props: {
+          orgType,
+          orgId,
+          postId,
+        },
       });
 
       toast({

@@ -14,6 +14,7 @@ import { useCreateStandardPost } from "@/lib/mutations/social-feed";
 import { useToast } from "@/hooks/use-toast";
 import { OrgType } from "@/lib/organization";
 import { SocialFeedPostType } from "@/lib/social-feed";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 const SocialFeedForm = ({
   orgType,
@@ -28,6 +29,7 @@ const SocialFeedForm = ({
 
   const { createStandardPost, isPending } = useCreateStandardPost();
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -66,6 +68,13 @@ const SocialFeedForm = ({
         token,
         userRealmId: userRealmId ?? "",
         tags: [],
+      });
+
+      trackEvent("PostSent", {
+        props: {
+          orgType,
+          orgId,
+        },
       });
 
       toast({

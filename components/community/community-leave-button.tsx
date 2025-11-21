@@ -10,6 +10,7 @@ import { useLeaveCommunity } from "@/lib/mutations/community-leave";
 import { communityUserRoles } from "@/lib/queries/community";
 import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type Props = {
   communityId: string;
@@ -17,6 +18,7 @@ type Props = {
 
 export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
   const { getToken, userId, isSignedIn } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { toast } = useToast();
   const t = useTranslations("community");
 
@@ -44,6 +46,11 @@ export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
         communityId,
         token,
         userRealmId,
+      });
+      trackEvent("CommunityLeft", {
+        props: {
+          communityId,
+        },
       });
 
       toast({

@@ -43,6 +43,7 @@ import {
   communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 function GatekeeperManagementForm({
   form,
@@ -158,6 +159,7 @@ export function GatekeeperManagementDialog({
 }) {
   const { toast } = useToast();
   const { getToken } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isStandalone = useMediaQuery("(display-mode: standalone)");
   const t = useTranslations("gatekeeper-management-dialog");
@@ -198,6 +200,11 @@ export function GatekeeperManagementDialog({
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
       await editEvent({ ...values, eventId });
+      trackEvent("EventGatekeepersUpdated", {
+        props: {
+          eventId,
+        },
+      });
       onOpenChange(false);
       toast({
         title: t("toast-gatekeeper-management-success"),

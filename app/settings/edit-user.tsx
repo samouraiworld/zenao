@@ -39,11 +39,13 @@ import { addressFromRealmId } from "@/lib/gno";
 import UserExperiences from "@/components/features/user/settings/user-experiences";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
 
   const { getToken } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -120,6 +122,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         displayName: values.displayName,
         bio,
       });
+
+      trackEvent("UserProfileEdited");
 
       const address = addressFromRealmId(userRealmId);
 

@@ -57,8 +57,16 @@ function EventPolls({ params }: EventPollsProps) {
     [pollsPages],
   );
 
-  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
+    "event",
+    eventId,
+    feedId,
+  );
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(
+    "event",
+    eventId,
+    feedId,
+  );
 
   return (
     <>

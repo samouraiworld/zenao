@@ -25,9 +25,11 @@ import {
   communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export function EditEventForm({ id, userId }: { id: string; userId: string }) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+  const { trackEvent } = useAnalyticsEvents();
   const { data } = useSuspenseQuery(eventOptions(id));
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -98,6 +100,12 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
         ...values,
         eventId: id,
       });
+      trackEvent("EventEdited", {
+        props: {
+          eventId: id,
+        },
+      });
+
       toast({
         title: t("toast-edit-success"),
       });
