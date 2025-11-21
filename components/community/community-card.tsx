@@ -72,7 +72,7 @@ function MembersPreview({ id }: { id: string }) {
   const t = useTranslations("community-card");
   // NOTE: we useQuery instead of useSuspenseQuery here to ensure this is fetched on the client
   const { data: members } = useQuery(communityUsersWithRoles(id, ["member"]));
-  const memberAddresses = members?.map((m) => m.address);
+  const memberAddresses = members?.map((m) => m.realmId);
   if (!memberAddresses) {
     return <MembersPreviewFallback />;
   }

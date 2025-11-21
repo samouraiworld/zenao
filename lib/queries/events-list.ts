@@ -73,7 +73,7 @@ export const eventsList = (
 };
 
 export const eventsByOrganizerList = (
-  organizer: string,
+  organizerRealmId: string,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -86,7 +86,7 @@ export const eventsByOrganizerList = (
   return infiniteQueryOptions({
     queryKey: [
       "eventsByOrganizer",
-      organizer,
+      organizerRealmId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -99,7 +99,7 @@ export const eventsByOrganizerList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizer)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizerRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);
@@ -120,7 +120,7 @@ export const eventsByOrganizerList = (
 };
 
 export const eventsByParticipantList = (
-  participant: string,
+  participantRealmId: string,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -133,7 +133,7 @@ export const eventsByParticipantList = (
   return infiniteQueryOptions({
     queryKey: [
       "eventsByParticipant",
-      participant,
+      participantRealmId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -146,7 +146,7 @@ export const eventsByParticipantList = (
       );
       const res = await client.evaluateExpression(
         `gno.land/r/zenao/eventreg`,
-        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participant)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
+        `eventsToJSON(listEventsByParticipant(${JSON.stringify(participantRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
       );
       const raw = extractGnoJSONResponse(res);
       return eventListFromJson(raw);

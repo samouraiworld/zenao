@@ -16,16 +16,20 @@ export type GnoProfile = {
   avatarUri: string;
 };
 
+export type UserProfile = Omit<GnoProfile, "address">;
+
 export const profileOptions = (realmId: string | null | undefined) => {
   const addr = addressFromRealmId(realmId);
-  return queryOptions({
+  return queryOptions<UserProfile | null>({
     queryKey: ["profile", addr],
     queryFn: async () => {
       if (!addr || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
         return null;
       }
 
-      return profiles.fetch(addr);
+      const profile = await profiles.fetch(addr);
+
+      return profile;
     },
   });
 };
