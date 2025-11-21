@@ -98,7 +98,7 @@ export const eventsByOrganizerList = (
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
-        `query:user:${organizer}:events:role:organizer`,
+        `query:chain:user:${organizer}:events:role:organizer`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
