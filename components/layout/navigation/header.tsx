@@ -264,7 +264,7 @@ const Auth = ({
                   <UserAvatar
                     realmId={loggedUserAddress}
                     className={avatarClassName}
-                    size="sm"
+                    size="md"
                   />
                 </div>
               </SignedIn>
