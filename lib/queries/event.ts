@@ -11,7 +11,7 @@ export const eventOptions = (id: string) =>
   queryOptions({
     queryKey: ["event", id],
     queryFn: async () => {
-      return withSpan(`query:event:${id}`, async () => {
+      return withSpan(`query:chain:event:${id}`, async () => {
         const client = new GnoJSONRPCProvider(
           process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
         );
@@ -30,22 +30,25 @@ export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
   queryOptions({
     queryKey: ["event", eventId, "gatekeepers"],
     queryFn: async () => {
-      return withSpan(`query:event:${eventId}:gatekeepers`, async () => {
-        const token = await getToken();
+      return withSpan(
+        `query:backend:event:${eventId}:gatekeepers`,
+        async () => {
+          const token = await getToken();
 
-        if (!token) {
-          throw new Error("not authenticated");
-        }
+          if (!token) {
+            throw new Error("not authenticated");
+          }
 
-        const data = await zenaoClient.getEventGatekeepers(
-          {
-            eventId,
-          },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
+          const data = await zenaoClient.getEventGatekeepers(
+            {
+              eventId,
+            },
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
 
-        return data;
-      });
+          return data;
+        },
+      );
     },
   });
 

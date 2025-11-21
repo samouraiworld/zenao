@@ -18,7 +18,7 @@ export const userInfoOptions = (
         return null;
       }
 
-      return withSpan(`query:user:${userId}`, async () => {
+      return withSpan(`query:backend:user:${userId}`, async () => {
         const authToken = await getToken();
         if (authToken == null) {
           return null;

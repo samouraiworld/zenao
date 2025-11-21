@@ -9,7 +9,7 @@ export const eventTickets = (eventId: string, getToken: GetToken) =>
     queryFn: async () => {
       const token = await getToken();
 
-      return withSpan(`query:event:${eventId}:tickets`, async () => {
+      return withSpan(`query:backend:event:${eventId}:tickets`, async () => {
         if (!token) {
           throw new Error("User not logged in");
         }

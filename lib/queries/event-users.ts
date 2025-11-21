@@ -26,7 +26,7 @@ export const eventUserRoles = (
       }
 
       return withSpan(
-        `query:event:${eventId}:user-roles:${userRealmId}`,
+        `query:chain:event:${eventId}:user-roles:${userRealmId}`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
@@ -54,7 +54,7 @@ export const eventUsersWithRole = (
       }
 
       return withSpan(
-        `query:event:${eventId}:users-with-role:${role}`,
+        `query:chain:event:${eventId}:users-with-role:${role}`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,

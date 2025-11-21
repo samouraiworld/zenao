@@ -36,7 +36,7 @@ export const profiles = createBatcher({
       return [];
     }
 
-    return withSpan(`query:profiles:${addrs.join(",")}`, async () => {
+    return withSpan(`query:chain:profiles:${addrs.join(",")}`, async () => {
       const client = new GnoJSONRPCProvider(
         process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
       );

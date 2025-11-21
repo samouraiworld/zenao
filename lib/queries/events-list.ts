@@ -150,7 +150,7 @@ export const eventsByParticipantList = (
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
-        `query:user:${participant}:events:role:participant`,
+        `query:chain:user:${participant}:events:role:participant`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",

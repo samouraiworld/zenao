@@ -38,7 +38,7 @@ export const communityInfo = (communityId: string) =>
   queryOptions({
     queryKey: ["community", communityId],
     queryFn: async () => {
-      return withSpan(`query:community:${communityId}`, async () => {
+      return withSpan(`query:chain:community:${communityId}`, async () => {
         const client = new GnoJSONRPCProvider(
           process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
         );
@@ -75,7 +75,7 @@ export const communitiesList = (
     initialPageParam: 0,
     queryKey: ["communities", limitInt],
     queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(`query:communities`, async () => {
+      return withSpan(`query:chain:communities`, async () => {
         const client = new GnoJSONRPCProvider(
           process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
         );
@@ -134,7 +134,7 @@ export const communitiesListByMember = (
         return [] as CommunityInfo[];
       }
       return withSpan(
-        `query:communities-by-member:${memberAddress}`,
+        `query:chain:communities-by-member:${memberAddress}`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
@@ -178,7 +178,7 @@ export const communityUserRoles = (
       }
 
       return withSpan(
-        `query:community:${communityId}:user-roles:${userRealmId}`,
+        `query:chain:community:${communityId}:user-roles:${userRealmId}`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
@@ -203,7 +203,7 @@ export const communityUsersWithRoles = (
     queryKey: ["communityRoles", communityId, JSON.stringify(roles)],
     queryFn: async () => {
       return withSpan(
-        `query:community:${communityId}:users-with-roles:${roles.join(",")}`,
+        `query:chain:community:${communityId}:users-with-roles:${roles.join(",")}`,
         async () => {
           const client = new GnoJSONRPCProvider(
             process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
@@ -244,7 +244,7 @@ export const communityAdministratorsQuery = (
     queryKey: ["community-admins", communityId],
     queryFn: async () => {
       return withSpan(
-        `query:community:${communityId}:administrators`,
+        `query:backend:community:${communityId}:administrators`,
         async () => {
           const token = await getToken();
 
@@ -289,7 +289,7 @@ export const communitiesListByEvent = (
     initialPageParam: 0,
     queryKey: ["communitiesByEvent", id, limitInt],
     queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(`query:event:${id}:communities`, async () => {
+      return withSpan(`query:chain:event:${id}:communities`, async () => {
         const client = new GnoJSONRPCProvider(
           process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
         );
