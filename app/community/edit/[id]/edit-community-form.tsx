@@ -23,6 +23,7 @@ import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
 } from "@/lib/serialization";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 interface EditCommunityFormProps {
   communityId: string;
@@ -30,6 +31,7 @@ interface EditCommunityFormProps {
 
 export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
   const { getToken } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const router = useRouter();
   const { toast } = useToast();
   const { data: communityData } = useSuspenseQuery(communityInfo(communityId));
@@ -100,6 +102,12 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
         bannerUri: values.bannerUri,
         administrators: values.administrators.map((a) => a.address),
       });
+      trackEvent("CommunityEdited", {
+        props: {
+          communityId,
+        },
+      });
+
       toast({ title: t("update-success") });
       router.push(`/community/${communityId}`);
     } catch (err) {

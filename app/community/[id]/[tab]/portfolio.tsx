@@ -42,6 +42,7 @@ import {
   IMAGE_FILE_SIZE_LIMIT,
   IMAGE_FILE_SIZE_LIMIT_MB,
 } from "@/components/features/event/constants";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -60,6 +61,7 @@ export default function CommunityPortfolio({
 }: CommunityPortfolioProps) {
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userAddress } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -115,7 +117,10 @@ export default function CommunityPortfolio({
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
 
-  const onSave = async (newPortfolio: PortfolioItem[]) => {
+  const onSave = async (
+    newPortfolio: PortfolioItem[],
+    itemType: "image" | "audio" | "video",
+  ) => {
     try {
       const token = await getToken();
       if (!token) throw new Error("invalid clerk token");
@@ -136,6 +141,14 @@ export default function CommunityPortfolio({
         description,
       });
       setLocalPortfolio(newPortfolio);
+
+      trackEvent("PortfolioUpdated", {
+        props: {
+          orgType: "community",
+          orgId: communityId,
+          itemType,
+        },
+      });
     } catch (error) {
       captureException(error);
       console.error("Save portfolio failed", error);
@@ -174,7 +187,7 @@ export default function CommunityPortfolio({
       };
 
       const newPortfolio = [newItem, ...localPortfolio];
-      await onSave(newPortfolio);
+      await onSave(newPortfolio, fileType);
 
       toast({
         title: t("upload-file-success"),
@@ -224,7 +237,7 @@ export default function CommunityPortfolio({
     };
 
     const newPortfolio = [newItem, ...localPortfolio];
-    await onSave(newPortfolio);
+    await onSave(newPortfolio, "video");
   };
 
   const onPreview = (item: PortfolioItem) => {
@@ -240,7 +253,7 @@ export default function CommunityPortfolio({
 
       setIsDeleting(true);
       const updatedPortfolio = localPortfolio.filter((p) => p.id !== item.id);
-      await onSave(updatedPortfolio);
+      await onSave(updatedPortfolio, item.type);
 
       toast({
         title: t("delete-file-success"),

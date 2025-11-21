@@ -12,6 +12,7 @@ import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 import { CancelRegistrationConfirmationDialog } from "@/components/dialogs/cancel-registration-confirmation-dialog";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type EventParticipationContextType = {
   password: string;
@@ -150,6 +151,7 @@ EventParticipation.SoldOut = function EventParticipationSoldOut() {
 };
 
 EventParticipation.Participant = function EventParticipationParticipant() {
+  const { trackEvent } = useAnalyticsEvents();
   const { eventId, isParticipant, isStarted } = useEventParticipation();
   const [confirmCancelDialogOpen, setConfirmCancelDialogOpen] = useState(false);
   const t = useTranslations("event");
@@ -193,8 +195,15 @@ EventParticipation.Participant = function EventParticipationParticipant() {
             </Link>
           </SignedIn>
           <SignedOut>
-            <SignInButton>
-              <Text className="text-main underline">
+            <SignInButton forceRedirectUrl={`/ticket/${eventId}`}>
+              <Text
+                className="text-main underline"
+                onClick={() => {
+                  trackEvent("SignInClick", {
+                    props: { context: "see-ticket" },
+                  });
+                }}
+              >
                 {t("login-to-see-tickets")}
               </Text>
             </SignInButton>

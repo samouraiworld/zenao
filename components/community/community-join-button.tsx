@@ -11,6 +11,7 @@ import { communityUserRoles } from "@/lib/queries/community";
 import { captureException } from "@/lib/report";
 import { useToast } from "@/hooks/use-toast";
 import { userInfoOptions } from "@/lib/queries/user";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type Props = {
   communityId: string;
@@ -19,6 +20,7 @@ type Props = {
 export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   const { getToken, userId, isSignedIn } = useAuth();
   const { toast } = useToast();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -41,6 +43,11 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
         communityId,
         token,
         userRealmId,
+      });
+      trackEvent("CommunityJoined", {
+        props: {
+          communityId,
+        },
       });
 
       toast({
@@ -66,6 +73,11 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
           <Button
             variant="outline"
             className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
+            onClick={() => {
+              trackEvent("SignInClick", {
+                props: { context: "join-community" },
+              });
+            }}
           >
             {t("sign-in-to-join-button")}
           </Button>

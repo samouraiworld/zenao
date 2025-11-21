@@ -12,9 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useCreateEvent } from "@/lib/mutations/event-management";
 import { captureException } from "@/lib/report";
 import { EventFormSchemaType, eventFormSchema } from "@/types/schemas";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export const CreateEventForm: React.FC = () => {
   const { getToken } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const router = useRouter();
   const form = useForm<EventFormSchemaType>({
     mode: "all",
@@ -74,10 +76,18 @@ export const CreateEventForm: React.FC = () => {
         ...values,
         token,
       });
+
+      trackEvent("EventCreated", {
+        props: {
+          eventId: id,
+        },
+      });
+
       form.reset();
       toast({
         title: t("toast-creation-success"),
       });
+
       router.push(`/event/${id}`);
     } catch (err) {
       captureException(err);

@@ -2,14 +2,21 @@ import { useAuth } from "@clerk/clerk-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useToast } from "./use-toast";
+import { useAnalyticsEvents } from "./use-analytics-events";
 import { useEditStandardPost } from "@/lib/mutations/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { captureException } from "@/lib/report";
+import { OrgType } from "@/lib/organization";
 
-function useFeedPostEditHandler(feedId: string) {
+function useFeedPostEditHandler(
+  orgType: OrgType,
+  orgId: string,
+  feedId: string,
+) {
   const t = useTranslations();
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { toast } = useToast();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -37,6 +44,14 @@ function useFeedPostEditHandler(feedId: string) {
         postId,
         token,
         userRealmId: userRealmId || "",
+      });
+
+      trackEvent("PostEdited", {
+        props: {
+          orgType,
+          orgId,
+          postId,
+        },
       });
     } catch (error) {
       captureException(error);

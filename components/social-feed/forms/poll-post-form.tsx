@@ -26,6 +26,7 @@ import { captureException } from "@/lib/report";
 import { SocialFeedPostFormSchemaType, pollFormSchema } from "@/types/schemas";
 import { OrgType } from "@/lib/organization";
 import { SocialFeedPostType } from "@/lib/social-feed";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export function PollPostForm({
   orgType,
@@ -42,6 +43,7 @@ export function PollPostForm({
 }) {
   const queryClient = getQueryClient();
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -104,6 +106,13 @@ export function PollPostForm({
         kind: pollKind,
         token: await getToken(),
         userRealmId: userRealmId || "",
+      });
+
+      trackEvent("PollCreated", {
+        props: {
+          orgType,
+          orgId,
+        },
       });
 
       form.resetField("question", {

@@ -78,9 +78,21 @@ function EventFeed({ params }: EventFeedProps) {
     [postsPages],
   );
 
-  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
-  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
+  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
+    "event",
+    eventId,
+    feedId,
+  );
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
+    "event",
+    eventId,
+    feedId,
+  );
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(
+    "event",
+    eventId,
+    feedId,
+  );
 
   const onEdit = async (
     postId: string,
