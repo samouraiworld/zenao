@@ -2,6 +2,7 @@ import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { extractGnoJSONResponse } from "../gno";
+import { withSpan } from "../tracer";
 
 const eventUserRolesEnum = z.enum(["organizer", "participant", "gatekeeper"]);
 
@@ -24,15 +25,20 @@ export const eventUserRoles = (
         return [];
       }
 
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT,
+      return withSpan(
+        `query:chain:event:${eventId}:user-roles:${userRealmId}`,
+        async () => {
+          const client = new GnoJSONRPCProvider(
+            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
+          );
+          const res = await client.evaluateExpression(
+            `gno.land/r/zenao/events/e${eventId}`,
+            `event.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
+          );
+          const roles = extractGnoJSONResponse(res);
+          return eventGetUserRolesSchema.parse(roles);
+        },
       );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/events/e${eventId}`,
-        `event.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
-      );
-      const roles = extractGnoJSONResponse(res);
-      return eventGetUserRolesSchema.parse(roles);
     },
   });
 
@@ -47,14 +53,19 @@ export const eventUsersWithRole = (
         return [];
       }
 
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT,
+      return withSpan(
+        `query:chain:event:${eventId}:users-with-role:${role}`,
+        async () => {
+          const client = new GnoJSONRPCProvider(
+            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
+          );
+          const res = await client.evaluateExpression(
+            `gno.land/r/zenao/events/e${eventId}`,
+            `event.GetUsersWithRoleJSON(${JSON.stringify(role)})`,
+          );
+          const addresses = extractGnoJSONResponse(res);
+          return z.string().array().parse(addresses);
+        },
       );
-      const res = await client.evaluateExpression(
-        `gno.land/r/zenao/events/e${eventId}`,
-        `event.GetUsersWithRoleJSON(${JSON.stringify(role)})`,
-      );
-      const addresses = extractGnoJSONResponse(res);
-      return z.string().array().parse(addresses);
     },
   });

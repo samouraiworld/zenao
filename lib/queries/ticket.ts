@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GetToken } from "../utils";
+import { withSpan } from "../tracer";
 import { zenaoClient } from "@/lib/zenao-client";
 
 export const eventTickets = (eventId: string, getToken: GetToken) =>
@@ -8,17 +9,19 @@ export const eventTickets = (eventId: string, getToken: GetToken) =>
     queryFn: async () => {
       const token = await getToken();
 
-      if (!token) {
-        throw new Error("User not logged in");
-      }
+      return withSpan(`query:backend:event:${eventId}:tickets`, async () => {
+        if (!token) {
+          throw new Error("User not logged in");
+        }
 
-      const data = await zenaoClient.getEventTickets(
-        {
-          eventId,
-        },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+        const data = await zenaoClient.getEventTickets(
+          {
+            eventId,
+          },
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
 
-      return data;
+        return data;
+      });
     },
   });
