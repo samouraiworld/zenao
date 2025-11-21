@@ -335,3 +335,10 @@ export const communityDetailsSchema = z.object({
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
+
+export const realmIdSchema = z
+  .string()
+  .regex(/^([a-z0-9-]+\.)*[a-z0-9-]+\.[a-z]{2,}(\/[a-z0-9\-_]+)+$/)
+  .or(z.string().regex(/^g[a-z0-9]{39}/));
+
+export type RealmId = z.infer<typeof realmIdSchema>;
