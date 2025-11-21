@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { NavItem } from "./header";
 import { usePwaContext } from "@/components/providers/pwa-state-provider";
+import { cn } from "@/lib/tailwind";
 
 function PwaBottomBar() {
   const t = useTranslations("navigation");
@@ -53,7 +54,11 @@ function PwaBottomBar() {
   }
 
   return (
-    <div className="hidden standalone:flex w-full h-bottom-bar fixed bottom-0 left-0 right-0 z-[100] items-center justify-between bg-main px-8 pointer-events-auto shadow-md md:hidden">
+    <div
+      className={cn(
+        "hidden standalone:flex w-full h-bottom-bar fixed bottom-0 left-0 right-0 z-[100] items-center justify-between bg-main px-6 sm:px-8 gap-2 pointer-events-auto shadow-md md:hidden",
+      )}
+    >
       {navItems.map((item) => {
         return <PwaNavLink key={item.key} item={item} pathname={pathname} />;
       })}
@@ -73,11 +78,11 @@ const PwaNavLink = ({
   return (
     <Link href={item.to}>
       <div
-        className={`flex flex-col gap-1 items-center text-xs font-semibold ${
+        className={`flex flex-col gap-1 items-center text-[10px] font-semibold ${
           isActive ? "text-white" : "text-black hover:text-white"
         }`}
       >
-        <item.icon className="h-5 w-5" />
+        <item.icon className="h-4 w-4" />
         <span className="text-inherit">{item.children}</span>
       </div>
     </Link>
