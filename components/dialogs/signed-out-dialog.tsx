@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
@@ -11,8 +13,10 @@ import {
   AlertDialogTitle,
 } from "@/components/shadcn/alert-dialog";
 import { Button } from "@/components/shadcn/button";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export const SignedOutDialog: React.FC = () => {
+  const { trackEvent } = useAnalyticsEvents();
   const t = useTranslations("components.modals.signed-out-modal");
 
   return (
@@ -30,7 +34,13 @@ export const SignedOutDialog: React.FC = () => {
               </Button>
             </SignUpButton>
             <SignInButton>
-              <Button>
+              <Button
+                onClick={() => {
+                  trackEvent("SignInClick", {
+                    props: { context: "signed-out-dialog" },
+                  });
+                }}
+              >
                 <Text variant="invert" size="sm">
                   {t("sign-in")}
                 </Text>

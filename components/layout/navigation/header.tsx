@@ -41,6 +41,7 @@ import {
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
 import { addressFromRealmId } from "@/lib/gno";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export type NavItem = {
   key: string;
@@ -225,6 +226,7 @@ const Auth = ({
   isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
+  const { trackEvent } = useAnalyticsEvents();
   const { signOut, getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -237,7 +239,14 @@ const Auth = ({
       {/* Signed out state */}
       <SignedOut>
         <SignInButton>
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => {
+              trackEvent("SignInClick", {
+                props: { context: "navigation-header" },
+              });
+            }}
+          >
             <Text size="sm">{t("sign-in")}</Text>
           </Button>
         </SignInButton>

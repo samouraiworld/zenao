@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useVotePoll } from "@/lib/mutations/social-feed";
 import { profileOptions } from "@/lib/queries/profile";
 import { useLayoutNow } from "@/hooks/use-layout-now";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export function PollPostCard({
   pollId,
@@ -42,6 +43,7 @@ export function PollPostCard({
   const t = useTranslations("social-feed");
   const queryClient = getQueryClient();
   const { getToken } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { toast } = useToast();
 
   const { data: createdBy } = useSuspenseQuery(
@@ -75,6 +77,12 @@ export function PollPostCard({
         option,
         userRealmId,
       });
+      trackEvent("PollVoteUpdated", {
+        props: {
+          pollId,
+        },
+      });
+
       toast({
         title: t("vote.toast-vote-success"),
       });
