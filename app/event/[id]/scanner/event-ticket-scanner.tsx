@@ -18,6 +18,7 @@ import { cn } from "@/lib/tailwind";
 import { eventOptions } from "@/lib/queries/event";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Button } from "@/components/shadcn/button";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type EventTicketScannerProps = {
   eventId: string;
@@ -42,6 +43,7 @@ export function EventTicketScanner({
     isFetching,
     refetch,
   } = useSuspenseQuery(eventOptions(eventId));
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -94,6 +96,12 @@ export function EventTicketScanner({
         signature,
         ticketPubkey,
         token,
+      });
+
+      trackEvent("EventCheckIn", {
+        props: {
+          eventId,
+        },
       });
 
       updateHistory(signature);
