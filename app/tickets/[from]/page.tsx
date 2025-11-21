@@ -11,6 +11,7 @@ import {
 import { userInfoOptions } from "@/lib/queries/user";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/features/event/events-list-layout";
+import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const revalidate = 60;
 
@@ -46,8 +47,20 @@ export default async function TicketsPage({ params }: PageProps) {
 
   queryClient.prefetchInfiniteQuery(
     from === "upcoming"
-      ? eventsByParticipantList(userRealmId, now, Number.MAX_SAFE_INTEGER, 20)
-      : eventsByParticipantList(userRealmId, now - 1, 0, 20),
+      ? eventsByParticipantList(
+          userRealmId,
+          DiscoverableFilter.UNSPECIFIED,
+          now,
+          Number.MAX_SAFE_INTEGER,
+          20,
+        )
+      : eventsByParticipantList(
+          userRealmId,
+          DiscoverableFilter.UNSPECIFIED,
+          now - 1,
+          0,
+          20,
+        ),
   );
 
   return (

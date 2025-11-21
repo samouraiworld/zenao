@@ -24,7 +24,7 @@ func Render(path string) string {
 	case strings.HasPrefix(path, "tickets/"):
 		title = "My Zenao Tickets"
 		listFn = func(from int64, to int64, limit uint32, offset uint32) []*zenaov1.EventInfo {
-			return listEventsByParticipant(strings.TrimPrefix(path, "tickets/"), from, to, limit, offset)
+			return listEventsByParticipant(strings.TrimPrefix(path, "tickets/"), zenaov1.DISCOVERABLE_FILTER_UNSPECIFIED, from, to, limit, offset)
 		}
 	}
 
