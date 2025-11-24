@@ -50,7 +50,7 @@ export function ProfileInfo({
         avatarUri={profile.avatarUri}
       />
 
-      <div className="mt-6 flex gap-4 border-b border-muted">
+      <div className="flex gap-4 border-b border-muted">
         {(["events", "portfolio"] as ProfileTabsSchemaType[]).map((tab) => (
           <button
             key={tab}

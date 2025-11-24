@@ -212,7 +212,7 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
   };
 
   return (
-    <div className="space-y-8 relative">
+    <div className="relative">
       <PortfolioPreviewDialog
         isOpen={previewDialogState.isOpen}
         onOpenChange={(open) =>
@@ -229,8 +229,8 @@ export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
         onVideoAdded={handleVideoAdded}
       />
 
-      <div className="flex flex-col md:flex-row gap-4 md:items-center">
-        <Heading level={3}>
+      <div className="flex flex-col md:flex-row gap-4 mb-8 md:items-center">
+        <Heading level={2} size="lg">
           {t("recent-media-uploaded")} ({localPortfolio.length})
         </Heading>
 
