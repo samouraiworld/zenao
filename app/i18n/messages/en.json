@@ -460,6 +460,7 @@
   "toast-delete-post-success": "Your post has been deleted",
   "toast-delete-post-error": "Error while deleting the post",
   "community": {
+    "communities": "Communities",
     "chat": "Chat",
     "votes": "Votes",
     "events": "Events",

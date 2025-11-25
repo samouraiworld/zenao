@@ -1,6 +1,6 @@
 "use client";
 
-import { UserAvatar } from "../features/user/user";
+import { UserAvatar, UserAvatarSkeleton } from "../features/user/user";
 
 function UsersAvatarsPreview({ users }: { users: string[] }) {
   return (
@@ -12,6 +12,20 @@ function UsersAvatarsPreview({ users }: { users: string[] }) {
           realmId={realmId}
           size="sm"
         />
+      ))}
+    </div>
+  );
+}
+
+export function UsersAvatarsPreviewFallback({
+  nbUsers = 6,
+}: {
+  nbUsers?: number;
+}) {
+  return (
+    <div className="flex -space-x-2 overflow-hidden">
+      {new Array(nbUsers).fill(null).map((_, index) => (
+        <UserAvatarSkeleton key={index} size="sm" />
       ))}
     </div>
   );
