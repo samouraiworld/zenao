@@ -12,6 +12,7 @@ import UsersAvatarsPreview, {
   UsersAvatarsPreviewFallback,
 } from "../user/users-avatars-preview";
 import UsersNamesPreview from "../user/users-names-preview";
+import { Skeleton } from "../shadcn/skeleton";
 import CommunityMembersPreviewFallback from "./community-members-preview-fallback";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { communityUsersWithRoles } from "@/lib/queries/community";
@@ -95,7 +96,9 @@ function MembersPreview({ id }: { id: string }) {
       <Text className="text-xs md:text-sm text-secondary-color">
         {t("members", { count: memberAddresses.length })}
       </Text>
-      <UsersNamesPreview usersAddresses={memberAddresses} />
+      <Suspense fallback={<Skeleton className="h-4 w-32" />}>
+        <UsersNamesPreview usersAddresses={memberAddresses} />
+      </Suspense>
     </div>
   );
 }
