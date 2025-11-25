@@ -7,7 +7,7 @@ export async function register() {
     traceExporter: new OTLPHttpJsonTraceExporter({
       url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
       headers: {
-        Authorization: `Bearer ${process.env.OTEL_EXPORTER_OTLP_HEADERS_TOKEN}`,
+        "X-OTEL-TOKEN": process.env.OTEL_EXPORTER_OTLP_HEADERS_TOKEN,
       },
     }),
   });
