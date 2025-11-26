@@ -23,7 +23,8 @@ import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button"
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
-import { RealmId } from "@/types/schemas";
+import { gnoProfileDetailsSchema, RealmId } from "@/types/schemas";
+import { deserializeWithFrontMatter } from "@/lib/serialization";
 
 export function ProfileInfo({
   realmId,
@@ -92,12 +93,27 @@ export function ProfileInfo({
     return <p>{t("profile-not-exist")}</p>;
   }
 
+  const profileDetails = deserializeWithFrontMatter({
+    serialized: profile.bio,
+    schema: gnoProfileDetailsSchema,
+    defaultValue: {
+      bio: "",
+      socialMediaLinks: [],
+      location: "",
+      shortBio: "",
+      bannerUri: "",
+      experiences: [],
+      skills: [],
+    },
+    contentFieldName: "bio",
+  });
+
   const jsonLd: WithContext<Person> = {
     "@context": "https://schema.org",
     "@type": "Person",
     alternateName: profile?.displayName,
     image: profile?.avatarUri,
-    knowsAbout: profile?.bio,
+    knowsAbout: profileDetails?.bio,
   };
 
   return (
