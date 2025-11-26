@@ -69,7 +69,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   silent: !process.env.CI,
 
   unstable_sentryWebpackPluginOptions: {
-    disable: (process.env.VERCEL ?? "0") !== "1",
+    disable: (process.env.NEXT_PUBLIC_ENV ?? "development") === "development",
   },
 
   // For all available options, see:
