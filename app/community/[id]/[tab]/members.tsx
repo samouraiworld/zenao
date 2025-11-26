@@ -8,7 +8,7 @@ import Heading from "@/components/widgets/texts/heading";
 import CommunityMemberCard from "@/components/user/community-member-card";
 import { communityUsersWithRoles } from "@/lib/queries/community";
 import EmptyList from "@/components/widgets/lists/empty-list";
-import CommunityMemberCardSkeleton from "@/components/community/commuity-member-card-skeleton";
+import CommunityMemberCardSkeleton from "@/components/community/community-member-card-skeleton";
 
 type CommunityMembersProps = {
   communityId: string;
