@@ -16,7 +16,7 @@ import { TooltipProvider } from "@/components/shadcn/tooltip";
 import { Header } from "@/components/layout/navigation/header";
 import { Footer } from "@/components/layout/navigation/footer";
 import PwaBottomBar from "@/components/layout/navigation/pwa-bottom-bar";
-import { ScreenContainer } from "@/components/layout/screen-container";
+import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { Button } from "@/components/shadcn/button";
 
 const albertSans = Albert_Sans({
@@ -64,9 +64,9 @@ export default function GlobalError({
                         <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
                           <Header />
 
-                          <ScreenContainer>
+                          <ScreenContainerCentered>
                             <MainErrorContent />
-                          </ScreenContainer>
+                          </ScreenContainerCentered>
                           <Footer />
                           <PwaBottomBar />
                         </div>
@@ -87,7 +87,7 @@ function MainErrorContent() {
   const t = useTranslations("error");
 
   return (
-    <main className="flex-grow flex items-center justify-center p-4">
+    <div className="flex-grow h-full flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         <h1 className="text-2xl font-bold mb-4">
           {t("oops-something-went-wrong")}
@@ -97,6 +97,6 @@ function MainErrorContent() {
           {t("refresh-page")}
         </Button>
       </div>
-    </main>
+    </div>
   );
 }
