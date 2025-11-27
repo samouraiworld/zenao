@@ -6,8 +6,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ProfileHeader from "./profile-header";
 
-import ProfileEvents from "./[tab]/events";
-import ProfilePortfolio from "./[tab]/portfolio";
+import ProfileEvents from "./(general)/@tabs/events/page";
+import ProfilePortfolio from "./(general)/@tabs/portfolio/page";
 import { profileOptions } from "@/lib/queries/profile";
 import { ProfileTabsSchemaType } from "@/types/schemas";
 
