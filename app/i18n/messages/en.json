@@ -329,7 +329,10 @@
   },
   "error": {
     "label": "Oups! An error has occured.",
-    "retry-button": "Retry"
+    "retry-button": "Retry",
+    "oops-something-went-wrong": "Oups! Something went wrong.",
+    "unexpected-error-occurred": "An unexpected error occurred. Please try again later.",
+    "refresh-page": "Refresh the page"
   },
   "not-found": {
     "label": "Page not found.",
