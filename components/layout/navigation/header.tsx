@@ -19,12 +19,10 @@ import {
   SignInButton,
   useAuth,
 } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { useAccount } from "wagmi";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
-import { userInfoOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
 import {
   DropdownMenu,
