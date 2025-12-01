@@ -58,11 +58,6 @@ If you need to test file uploads, add back the `PINATA_JWT` in `.env.local`
 
 Be careful not to commit the PINATA_JWT or clerk secret!
 
-Optionnaly, generate the `genesis_txs.jsonl` file, used to provide TXs to gnodev 
-```bash
-go run ./backend gentxs
-```
-
 Now, start gnodev with the admin account:
 
 ```bash
@@ -75,6 +70,11 @@ In another terminal, initialize the db, inject the clerk secret and start the ba
 make migrate-local
 export ZENAO_CLERK_SECRET_KEY=<clerk-testing-secret-key>
 go run ./backend start
+```
+
+Optionnaly, generate the `genesis_txs.jsonl` file, used to provide TXs to gnodev 
+```bash
+go run ./backend gentxs
 ```
 
 You can get the clerk testing secret with `vercel env pull`
