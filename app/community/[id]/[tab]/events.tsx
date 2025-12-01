@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-query";
 import { useMemo } from "react";
 import EmptyList from "@/components/widgets/lists/empty-list";
-import Heading from "@/components/widgets/texts/heading";
 import { communityUsersWithRoles } from "@/lib/queries/community";
 
 import { eventIdFromPkgPath, eventOptions } from "@/lib/queries/event";
