@@ -6,14 +6,27 @@ import {
   useSuspenseQuery,
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import Heading from "@/components/widgets/texts/heading";
-import { communityUsersWithRoles } from "@/lib/queries/community";
+import {
+  communityAdministrators,
+  communityInfo,
+  communityUsersWithRoles,
+} from "@/lib/queries/community";
 
 import { eventIdFromPkgPath, eventOptions } from "@/lib/queries/event";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { EventCard } from "@/components/features/event/event-card";
+import {
+  deserializeWithFrontMatter,
+  serializeWithFrontMatter,
+} from "@/lib/serialization";
+import { CommunityDetails, communityDetailsSchema } from "@/types/schemas";
+import { useEditCommunity } from "@/lib/mutations/community-edit";
+import { useToast } from "@/hooks/use-toast";
 
 type CommunityEventsProps = {
   communityId: string;
@@ -22,9 +35,36 @@ type CommunityEventsProps = {
 
 function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
   const t = useTranslations();
+  const { data: community } = useSuspenseQuery(communityInfo(communityId));
+  const { getToken } = useAuth();
+  const { data: administrators } = useSuspenseQuery(
+    communityAdministrators(communityId, getToken),
+  );
+
   const { data: eventsRoles } = useSuspenseQuery(
     communityUsersWithRoles(communityId, ["event"]),
   );
+
+  const { mutateAsync: editCommunity } = useEditCommunity();
+  const { toast } = useToast();
+
+  // Load pinned events list
+  const { pinnedEvents: pinnedEventsPkgPath, ...otherDetails } =
+    deserializeWithFrontMatter({
+      contentFieldName: "description",
+      schema: communityDetailsSchema,
+      serialized: community?.description ?? "",
+      defaultValue: {
+        description: "",
+        shortDescription: "",
+        portfolio: [],
+        socialMediaLinks: [],
+        pinnedEvents: [],
+      },
+    });
+
+  const [localPinnedEventsPkgPath, setLocalPinnedEventsPkgPath] =
+    useState<string[]>(pinnedEventsPkgPath);
 
   const events = useSuspenseQueries({
     queries: eventsRoles.map((role) =>
@@ -42,13 +82,64 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
         })),
   });
 
+  const pinnedEvents = useMemo(
+    () =>
+      events.filter((evt) => {
+        return (
+          localPinnedEventsPkgPath.includes(evt.pkgPath) &&
+          Number(evt.endDate) * 1000 >= Date.now() // Only show pinned events that are upcoming
+        );
+      }),
+    [events, localPinnedEventsPkgPath],
+  );
+
+  const handlePinClick = async (evt: EventInfo) => {
+    try {
+      const token = await getToken();
+
+      if (!token) throw new Error("User not authenticated");
+
+      // Update pinned events in the community description
+      const description = serializeWithFrontMatter<
+        Omit<CommunityDetails, "description">
+      >(otherDetails.description, {
+        shortDescription: otherDetails.shortDescription,
+        portfolio: otherDetails.portfolio,
+        socialMediaLinks: otherDetails.socialMediaLinks,
+        pinnedEvents: localPinnedEventsPkgPath,
+      });
+
+      await editCommunity({
+        ...community,
+        communityId,
+        administrators,
+        token,
+        description,
+      });
+
+      // Update local pinned events state
+      setLocalPinnedEventsPkgPath((prev) => {
+        if (prev.includes(evt.pkgPath)) {
+          toast({
+            title: t("community.event-unpinned"),
+          });
+          return prev.filter((pkgPath) => pkgPath !== evt.pkgPath);
+        } else {
+          toast({
+            title: t("community.event-pinned"),
+          });
+
+          return [...new Set([evt.pkgPath, ...prev])];
+        }
+      });
+    } catch (error) {
+      console.error("Failed to update pinned events:", error);
+    }
+  };
+
   return (
     <div className="space-y-8 pb-8">
       <div className="flex flex-col gap-4">
-        <Heading level={2} size="lg">
-          {t("community.events")}
-        </Heading>
-
         <div className="flex flex-col gap-0">
           {events.length === 0 && (
             <EmptyList
@@ -58,12 +149,38 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
           )}
         </div>
 
+        {pinnedEvents.length > 0 && (
+          <>
+            <Heading level={2} size="lg">
+              {t("community.pinned-events")}
+            </Heading>
+
+            <EventCardListLayout>
+              {pinnedEvents.map((evt) => (
+                <EventCard
+                  key={evt.pkgPath}
+                  evt={evt}
+                  href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
+                  pinned
+                  onPin={() => handlePinClick(evt)}
+                />
+              ))}
+            </EventCardListLayout>
+          </>
+        )}
+
+        <Heading level={2} size="lg">
+          {t("community.all-events")}
+        </Heading>
+
         <EventCardListLayout>
           {events.map((evt) => (
             <EventCard
               key={evt.pkgPath}
               evt={evt}
               href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
+              onPin={() => handlePinClick(evt)}
+              pinned={localPinnedEventsPkgPath.includes(evt.pkgPath)}
             />
           ))}
         </EventCardListLayout>

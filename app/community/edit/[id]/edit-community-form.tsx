@@ -10,7 +10,10 @@ import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/use-toast";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
-import { communityInfo } from "@/lib/queries/community";
+import {
+  communityAdministrators,
+  communityInfo,
+} from "@/lib/queries/community";
 import { CommunityForm } from "@/components/features/community/community-form";
 import {
   CommunityDetails,
@@ -18,7 +21,6 @@ import {
   communityFormSchema,
   CommunityFormSchemaType,
 } from "@/types/schemas";
-import { zenaoClient } from "@/lib/zenao-client";
 import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
@@ -36,18 +38,9 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
   const { toast } = useToast();
   const { data: communityData } = useSuspenseQuery(communityInfo(communityId));
 
-  const { data: adminAddresses } = useSuspenseQuery({
-    queryKey: ["communityAdmins", communityId],
-    queryFn: async () => {
-      const token = await getToken();
-      if (!token) throw new Error("invalid clerk token");
-      const res = await zenaoClient.getCommunityAdministrators(
-        { communityId },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      return res.administrators;
-    },
-  });
+  const { data: adminAddresses } = useSuspenseQuery(
+    communityAdministrators(communityId, getToken),
+  );
 
   const communityDetails = deserializeWithFrontMatter({
     serialized: communityData.description || "",
@@ -57,6 +50,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
       shortDescription: "",
       portfolio: [],
       socialMediaLinks: [],
+      pinnedEvents: [],
     },
     contentFieldName: "description",
   });
@@ -91,6 +85,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
         shortDescription: values.shortDescription,
         portfolio: communityDetails.portfolio,
         socialMediaLinks: values.socialMediaLinks,
+        pinnedEvents: communityDetails.pinnedEvents,
       });
 
       await editCommunity({

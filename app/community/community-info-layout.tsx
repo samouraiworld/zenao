@@ -36,6 +36,7 @@ function CommunityInfoLayout({
         shortDescription: "",
         socialMediaLinks: [],
         portfolio: [],
+        pinnedEvents: [],
       },
       contentFieldName: "description",
     });
