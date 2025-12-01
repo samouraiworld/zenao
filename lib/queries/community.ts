@@ -54,6 +54,29 @@ export const communityInfo = (communityId: string) =>
     },
   });
 
+export const communityAdministrators = (
+  communityId: string,
+  getToken: GetToken,
+) =>
+  queryOptions({
+    queryKey: ["communityAdmins", communityId],
+    queryFn: async () => {
+      return withSpan(
+        `query:backend:community:${communityId}:administrators`,
+        async () => {
+          const token = await getToken();
+          if (!token) throw new Error("invalid clerk token");
+          const res = await zenaoClient.getCommunityAdministrators(
+            { communityId },
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
+          return res.administrators;
+        },
+      );
+    },
+    initialData: [],
+  });
+
 export const communitiesList = (
   limit: number,
   options?: Omit<
