@@ -49,7 +49,7 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
         })),
   });
 
-  const sortedEvents = useMemo(() => {
+  const sortDescendingEvents = useMemo(() => {
     return events.sort((a, b) => {
       return Number(b.startDate) - Number(a.startDate);
     });
@@ -57,18 +57,18 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
 
   const upcomingEvents = useMemo(
     () =>
-      sortedEvents.filter((evt) => {
+      sortDescendingEvents.filter((evt) => {
         return Number(evt.endDate) * 1000 >= BigInt(Date.now());
       }),
-    [sortedEvents],
+    [sortDescendingEvents],
   );
 
   const pastEvents = useMemo(
     () =>
-      sortedEvents.filter((evt) => {
+      sortDescendingEvents.filter((evt) => {
         return Number(evt.endDate) * 1000 < BigInt(Date.now());
       }),
-    [sortedEvents],
+    [sortDescendingEvents],
   );
 
   return (
@@ -83,7 +83,7 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
           </TabsList>
           <TabsContent value="upcoming">
             <div className="flex flex-col gap-0">
-              {upcomingEvents.length === 0 && (
+              {upcomingEvents.reverse().length === 0 && (
                 <EmptyList
                   title={t("no-events-title")}
                   description={t("no-events-description")}
