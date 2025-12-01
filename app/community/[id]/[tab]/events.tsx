@@ -13,6 +13,7 @@ import Heading from "@/components/widgets/texts/heading";
 import {
   communityAdministrators,
   communityInfo,
+  communityUserRoles,
   communityUsersWithRoles,
 } from "@/lib/queries/community";
 
@@ -26,7 +27,8 @@ import {
 import { CommunityDetails, communityDetailsSchema } from "@/types/schemas";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { useToast } from "@/hooks/use-toast";
-import PinnableEventCard from "@/components/features/event/pinnable-event-card";
+import { userInfoOptions } from "@/lib/queries/user";
+import CommunityEventCard from "@/components/features/community/community-event-card";
 
 type CommunityEventsProps = {
   communityId: string;
@@ -35,14 +37,27 @@ type CommunityEventsProps = {
 
 function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
   const t = useTranslations();
+  const { getToken, userId } = useAuth();
+
+  const { data: userAddress } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+  const { data: userRoles = [] } = useSuspenseQuery(
+    communityUserRoles(communityId, userAddress?.realmId),
+  );
+
   const { data: community } = useSuspenseQuery(communityInfo(communityId));
-  const { getToken } = useAuth();
   const { data: administrators } = useSuspenseQuery(
     communityAdministrators(communityId, getToken),
   );
 
   const { data: eventsRoles } = useSuspenseQuery(
     communityUsersWithRoles(communityId, ["event"]),
+  );
+
+  const isAdmin = useMemo(
+    () => userRoles.includes("administrator"),
+    [userRoles],
   );
 
   const { mutateAsync: editCommunity } = useEditCommunity();
@@ -157,10 +172,11 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
 
             <EventCardListLayout>
               {pinnedEvents.map((evt) => (
-                <PinnableEventCard
+                <CommunityEventCard
                   key={evt.pkgPath}
                   evt={evt}
                   href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
+                  isAdmin={isAdmin}
                   pinned
                   onPin={() => handlePinClick(evt)}
                 />
@@ -175,10 +191,11 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
 
         <EventCardListLayout>
           {events.map((evt) => (
-            <PinnableEventCard
+            <CommunityEventCard
               key={evt.pkgPath}
               evt={evt}
               href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
+              isAdmin={isAdmin}
               onPin={() => handlePinClick(evt)}
               pinned={localPinnedEventsPkgPath.includes(evt.pkgPath)}
             />
