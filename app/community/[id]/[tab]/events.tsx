@@ -19,7 +19,6 @@ import {
 import { eventIdFromPkgPath, eventOptions } from "@/lib/queries/event";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
-import { EventCard } from "@/components/features/event/event-card";
 import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
@@ -27,6 +26,7 @@ import {
 import { CommunityDetails, communityDetailsSchema } from "@/types/schemas";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { useToast } from "@/hooks/use-toast";
+import PinnableEventCard from "@/components/features/event/pinnable-event-card";
 
 type CommunityEventsProps = {
   communityId: string;
@@ -157,7 +157,7 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
 
             <EventCardListLayout>
               {pinnedEvents.map((evt) => (
-                <EventCard
+                <PinnableEventCard
                   key={evt.pkgPath}
                   evt={evt}
                   href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
@@ -175,7 +175,7 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
 
         <EventCardListLayout>
           {events.map((evt) => (
-            <EventCard
+            <PinnableEventCard
               key={evt.pkgPath}
               evt={evt}
               href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
