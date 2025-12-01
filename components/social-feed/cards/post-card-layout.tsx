@@ -27,9 +27,12 @@ type PostCardLayoutProps = {
   parentId?: string;
   canEdit?: boolean;
   canInteract?: boolean;
+  canPin?: boolean;
+  pinned?: boolean;
   onEditModeChange?: (editMode: boolean) => void;
   onDelete?: (parentId?: string) => void | Promise<void>;
   onReactionChange?: (icon: string) => void | Promise<void>;
+  onPinToggle?: () => void | Promise<void>;
   isReacting?: boolean;
   isDeleting?: boolean;
 };
@@ -46,6 +49,9 @@ export function PostCardLayout({
   parentId = "",
   canEdit,
   canInteract,
+  canPin,
+  pinned,
+  onPinToggle,
   onEditModeChange,
   onDelete,
   onReactionChange,
@@ -127,6 +133,9 @@ export function PostCardLayout({
                 isDeleting={isDeleting}
                 canEdit={canEdit}
                 onEdit={() => onEditModeChange?.(true)}
+                canPin={canPin}
+                onPin={() => onPinToggle?.()}
+                pinned={pinned}
               />
             </div>
           </div>

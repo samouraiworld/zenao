@@ -25,6 +25,9 @@ export function StandardPostCard({
   isReacting,
   onDelete,
   isDeleting,
+  canPin,
+  pinned,
+  onPinToggle,
 }: {
   isOwner?: boolean;
   canInteract?: boolean;
@@ -38,6 +41,9 @@ export function StandardPostCard({
   onEditModeChange?: (editMode: boolean) => void;
   onReactionChange?: (icon: string) => void | Promise<void>;
   isReacting?: boolean;
+  canPin?: boolean;
+  pinned?: boolean;
+  onPinToggle?: () => void | Promise<void>;
   onDelete?: (parentId?: string) => void;
   isDeleting?: boolean;
 }) {
@@ -70,6 +76,9 @@ export function StandardPostCard({
         canInteract={canInteract}
         onDelete={onDelete}
         canEdit
+        canPin={canPin}
+        pinned={pinned}
+        onPinToggle={onPinToggle}
         editMode={editMode}
         onEditModeChange={onEditModeChange}
         onReactionChange={onReactionChange}

@@ -19,7 +19,10 @@ type PostMenuProps = {
   isOwner?: boolean;
   onEdit?: () => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
+  onPin?: () => void | Promise<void>;
+  pinned?: boolean;
   canEdit?: boolean;
+  canPin?: boolean;
   isDeleting?: boolean;
 };
 
@@ -29,6 +32,9 @@ export function PostMenu({
   canEdit,
   onEdit,
   onDelete,
+  onPin,
+  pinned,
+  canPin,
   isDeleting,
 }: PostMenuProps) {
   const t = useTranslations("components.buttons");
@@ -68,6 +74,11 @@ export function PostMenu({
                 Delete post
               </DropdownMenuItem>
             </>
+          )}
+          {canPin && onPin && (
+            <DropdownMenuItem onClick={onPin}>
+              {pinned ? "Unpin post" : "Pin post"}
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
