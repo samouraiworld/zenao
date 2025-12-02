@@ -14,6 +14,7 @@ import { UserProfile } from "@/lib/queries/profile";
 import { Button } from "@/components/shadcn/button";
 import { UserAvatar } from "@/components/features/user/user";
 import { derivePkgAddr } from "@/lib/gno";
+import { cn } from "@/lib/tailwind";
 
 type PostCardLayoutProps = {
   post: PostView;
@@ -63,7 +64,11 @@ export function PostCardLayout({
   }
 
   return (
-    <Card className="w-full flex flex-col gap-2">
+    <Card
+      className={cn("w-full flex flex-col gap-2 relative", {
+        "border-2": pinned,
+      })}
+    >
       {pinned && (
         <div className="flex gap-1 items-center">
           <Pin className="w-4 h-4 text-secondary-color" />
@@ -72,7 +77,7 @@ export function PostCardLayout({
           </Text>
         </div>
       )}
-      <div className="flex flex-col sm:flex-row items-start gap-2 relative">
+      <div className="flex flex-col sm:flex-row items-start gap-2">
         <div className="w-full flex flex-row items-center gap-3">
           <Link href={`/profile/${derivePkgAddr(post.post.author)}`}>
             <UserAvatar
@@ -133,21 +138,21 @@ export function PostCardLayout({
                 </Text>
               </div>
             )}
-            <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
-              <PostMenu
-                gnowebHref={gnowebHref}
-                isOwner={isOwner}
-                onDelete={async () => await onDelete?.(parentId)}
-                isDeleting={isDeleting}
-                canEdit={canEdit}
-                onEdit={() => onEditModeChange?.(true)}
-                canPin={canPin}
-                onPinToggle={() => onPinToggle?.()}
-                pinned={pinned}
-              />
-            </div>
           </div>
         )}
+        <div className="flex items-center absolute right-2 top-2">
+          <PostMenu
+            gnowebHref={gnowebHref}
+            isOwner={isOwner}
+            onDelete={async () => await onDelete?.(parentId)}
+            isDeleting={isDeleting}
+            canEdit={canEdit}
+            onEdit={() => onEditModeChange?.(true)}
+            canPin={canPin}
+            onPinToggle={() => onPinToggle?.()}
+            pinned={pinned}
+          />
+        </div>
       </div>
 
       <div className="my-1">{children}</div>

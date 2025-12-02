@@ -78,6 +78,12 @@ function EventFeed({ params }: EventFeedProps) {
     [postsPages],
   );
 
+  const pinnedPosts = useMemo(
+    () => posts.filter((_) => false),
+    // () => posts.filter((post) => post.data.pinned), // TODO: add pinned field to posts
+    [posts],
+  );
+
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
     "event",
     eventId,
@@ -116,34 +122,65 @@ function EventFeed({ params }: EventFeedProps) {
             description={t("no-posts-description")}
           />
         ) : (
-          <PostsList
-            posts={posts}
-            userRealmId={userRealmId}
-            onReactionChange={onReactionChange}
-            canInteract={
-              roles.includes("organizer") || roles.includes("participant")
-            }
-            onDelete={onDelete}
-            replyHrefFormatter={(postId) =>
-              `/feed/event/${eventId}/post/${postId}`
-            }
-            canReply
-            postInEdition={postInEdition?.postId ?? null}
-            canPin={roles.includes("organizer")}
-            onPinToggle={onPinToggle}
-            innerEditMode
-            onEdit={onEdit}
-            onEditModeChange={(postId, content, editMode) => {
-              if (!editMode) {
-                setPostInEdition(null);
-                return;
+          <>
+            <PostsList
+              posts={pinnedPosts}
+              userRealmId={userRealmId}
+              onReactionChange={onReactionChange}
+              canInteract={
+                roles.includes("organizer") || roles.includes("participant")
               }
-              setPostInEdition({ postId, content });
-            }}
-            isEditing={isEditing}
-            isReacting={isReacting}
-            isDeleting={isDeleting}
-          />
+              onDelete={onDelete}
+              replyHrefFormatter={(postId) =>
+                `/feed/event/${eventId}/post/${postId}`
+              }
+              canReply
+              postInEdition={postInEdition?.postId ?? null}
+              canPin={roles.includes("organizer")}
+              onPinToggle={onPinToggle}
+              innerEditMode
+              onEdit={onEdit}
+              onEditModeChange={(postId, content, editMode) => {
+                if (!editMode) {
+                  setPostInEdition(null);
+                  return;
+                }
+                setPostInEdition({ postId, content });
+              }}
+              isEditing={isEditing}
+              isReacting={isReacting}
+              isDeleting={isDeleting}
+            />
+
+            <PostsList
+              posts={posts}
+              userRealmId={userRealmId}
+              onReactionChange={onReactionChange}
+              canInteract={
+                roles.includes("organizer") || roles.includes("participant")
+              }
+              onDelete={onDelete}
+              replyHrefFormatter={(postId) =>
+                `/feed/event/${eventId}/post/${postId}`
+              }
+              canReply
+              postInEdition={postInEdition?.postId ?? null}
+              canPin={roles.includes("organizer")}
+              onPinToggle={onPinToggle}
+              innerEditMode
+              onEdit={onEdit}
+              onEditModeChange={(postId, content, editMode) => {
+                if (!editMode) {
+                  setPostInEdition(null);
+                  return;
+                }
+                setPostInEdition({ postId, content });
+              }}
+              isEditing={isEditing}
+              isReacting={isReacting}
+              isDeleting={isDeleting}
+            />
+          </>
         )}
       </div>
       <div className="py-4">
