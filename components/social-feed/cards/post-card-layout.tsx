@@ -134,7 +134,7 @@ export function PostCardLayout({
                 canEdit={canEdit}
                 onEdit={() => onEditModeChange?.(true)}
                 canPin={canPin}
-                onPin={() => onPinToggle?.()}
+                onPinToggle={() => onPinToggle?.()}
                 pinned={pinned}
               />
             </div>

@@ -338,6 +338,12 @@
     "label": "Page not found.",
     "button": "Return Home"
   },
+  "post-menu": {
+    "pin-post": "Pin post",
+    "unpin-post": "Unpin post",
+    "edit-post": "Edit post",
+    "delete-post": "Delete post"
+  },
   "components": {
     "modals": {
       "signed-out-modal": {

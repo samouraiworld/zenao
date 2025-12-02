@@ -19,7 +19,7 @@ type PostMenuProps = {
   isOwner?: boolean;
   onEdit?: () => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
-  onPin?: () => void | Promise<void>;
+  onPinToggle?: () => void | Promise<void>;
   pinned?: boolean;
   canEdit?: boolean;
   canPin?: boolean;
@@ -32,12 +32,13 @@ export function PostMenu({
   canEdit,
   onEdit,
   onDelete,
-  onPin,
+  onPinToggle,
   pinned,
   canPin,
   isDeleting,
 }: PostMenuProps) {
   const t = useTranslations("components.buttons");
+  const tPostMenu = useTranslations("post-menu");
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const onDeletePost = async () => {
@@ -62,23 +63,30 @@ export function PostMenu({
         <DropdownMenuContent className="w-36">
           {gnowebHref && (
             <Link href={gnowebHref}>
-              <DropdownMenuItem>{t("gnoweb-button")}</DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
+                {t("gnoweb-button")}
+              </DropdownMenuItem>
             </Link>
+          )}
+          {canPin && onPinToggle && (
+            <DropdownMenuItem className="cursor-pointer" onClick={onPinToggle}>
+              {pinned ? tPostMenu("unpin-post") : tPostMenu("pin-post")}
+            </DropdownMenuItem>
           )}
           {isOwner && (
             <>
               {canEdit && onEdit && (
-                <DropdownMenuItem onClick={onEdit}>Edit post</DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={onEdit}>
+                  {tPostMenu("edit-post")}
+                </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => setDialogOpen(true)}>
-                Delete post
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setDialogOpen(true)}
+              >
+                {tPostMenu("delete-post")}
               </DropdownMenuItem>
             </>
-          )}
-          {canPin && onPin && (
-            <DropdownMenuItem onClick={onPin}>
-              {pinned ? "Unpin post" : "Pin post"}
-            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

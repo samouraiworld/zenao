@@ -97,6 +97,11 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     setPostInEdition(null);
   };
 
+  const onPinToggle = async (_postId: string) => {
+    console.log("Pin toggle clicked");
+    // await onPinTogglePost(postId);
+  };
+
   return (
     <div className="relative space-y-8">
       {posts.length === 0 ? (
@@ -127,6 +132,8 @@ function CommunityChat({ communityId }: CommunityChatProps) {
               `/feed/community/${communityId}/post/${postId}`
             }
             canReply
+            canPin={userRoles.includes("administrator")}
+            onPinToggle={onPinToggle}
             innerEditMode
             onEdit={onEdit}
             isReacting={isReacting}

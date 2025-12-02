@@ -18,6 +18,8 @@ export function PostsList({
   replyHrefFormatter,
   canReply,
   canInteract,
+  canPin,
+  onPinToggle,
   onEdit,
   isEditing,
   isReacting,
@@ -36,6 +38,8 @@ export function PostsList({
   replyHrefFormatter?: (postId: bigint) => string;
   canReply?: boolean;
   canInteract?: boolean;
+  canPin?: boolean;
+  onPinToggle?: (postId: string) => void | Promise<void>;
   innerEditMode?: boolean;
   onEdit?: (
     postId: string,
@@ -67,6 +71,11 @@ export function PostsList({
               canReply={canReply}
               replyHref={replyHrefFormatter?.(post.data.post.localPostId)}
               canInteract={canInteract}
+              canPin={canPin}
+              // pinned={post.data.pinned}
+              onPinToggle={async () => {
+                await onPinToggle?.(postId);
+              }}
               editMode={postInEdition === postId}
               onEditModeChange={async (editMode) =>
                 await onEditModeChange?.(
