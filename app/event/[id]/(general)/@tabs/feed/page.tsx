@@ -94,6 +94,11 @@ function EventFeed({ params }: EventFeedProps) {
     feedId,
   );
 
+  const onPinToggle = async (_postId: string) => {
+    console.log("Pin toggle clicked");
+    // await onPinTogglePost(postId);
+  };
+
   const onEdit = async (
     postId: string,
     values: SocialFeedPostFormSchemaType,
@@ -124,6 +129,8 @@ function EventFeed({ params }: EventFeedProps) {
             }
             canReply
             postInEdition={postInEdition?.postId ?? null}
+            canPin={roles.includes("organizer")}
+            onPinToggle={onPinToggle}
             innerEditMode
             onEdit={onEdit}
             onEditModeChange={(postId, content, editMode) => {
