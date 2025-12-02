@@ -2,7 +2,7 @@
 
 import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode } from "react";
-import { Hash, MapPin, MessageCircle, X } from "lucide-react";
+import { Hash, MapPin, MessageCircle, Pin, X } from "lucide-react";
 import Link from "next/link";
 import { PostMenu } from "../post-menu";
 import PostReactions from "../post-reactions";
@@ -64,6 +64,14 @@ export function PostCardLayout({
 
   return (
     <Card className="w-full flex flex-col gap-2">
+      {pinned && (
+        <div className="flex gap-1 items-center">
+          <Pin className="w-4 h-4 text-secondary-color" />
+          <Text className="text-sm font-medium" variant="secondary">
+            Pinned Post
+          </Text>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row items-start gap-2 relative">
         <div className="w-full flex flex-row items-center gap-3">
           <Link href={`/profile/${derivePkgAddr(post.post.author)}`}>
