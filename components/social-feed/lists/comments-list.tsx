@@ -53,10 +53,16 @@ export default function CommentsList({
   }, [commentsPages]);
 
   const { onReactionChange, isReacting } = useFeedPostReactionHandler(
+    orgType,
+    orgId,
     feedId,
     parentId,
   );
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(
+    orgType,
+    orgId,
+    feedId,
+  );
 
   return (
     <div className="space-y-1">

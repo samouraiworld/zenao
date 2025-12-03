@@ -4,10 +4,12 @@ import { clerkSetup } from "@clerk/testing/cypress";
 import { defineConfig } from "cypress";
 
 export default defineConfig({
+  requestTimeout: 10000,
   e2e: {
     baseUrl: "http://localhost:3000",
     video: true,
     videoCompression: 32,
+    defaultCommandTimeout: 10000,
     setupNodeEvents(on, config) {
       on("before:browser:launch", (browser, launchOptions) => {
         if (browser.family === "chromium" && browser.name !== "electron") {

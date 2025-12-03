@@ -40,7 +40,7 @@ import {
   UserAvatar,
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
-import { addressFromRealmId } from "@/lib/gno";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export type NavItem = {
   key: string;
@@ -225,19 +225,25 @@ const Auth = ({
   isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
+  const { trackEvent } = useAnalyticsEvents();
   const { signOut, getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-
-  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
 
   return (
     <div className={className}>
       {/* Signed out state */}
       <SignedOut>
         <SignInButton>
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => {
+              trackEvent("SignInClick", {
+                props: { context: "navigation-header" },
+              });
+            }}
+          >
             <Text size="sm">{t("sign-in")}</Text>
           </Button>
         </SignInButton>
@@ -262,9 +268,9 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    realmId={loggedUserAddress}
+                    realmId={userInfo?.realmId || ""}
                     className={avatarClassName}
-                    size="sm"
+                    size="md"
                   />
                 </div>
               </SignedIn>
@@ -272,7 +278,7 @@ const Auth = ({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <Link href={`/profile/${loggedUserAddress}`}>
+          <Link href={`/profile/${userInfo?.realmId}`}>
             <DropdownMenuItem className="cursor-pointer">
               {t("view-profile")}
             </DropdownMenuItem>

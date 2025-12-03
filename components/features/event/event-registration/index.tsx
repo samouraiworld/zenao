@@ -20,6 +20,7 @@ import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-chi
 import { emailSchema } from "@/types/schemas";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { userInfoOptions } from "@/lib/queries/user";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 const eventRegistrationFormSchema = z.object({
   email: z.string().email().optional(),
@@ -46,6 +47,7 @@ export function EventRegistrationForm({
   eventPassword,
   onGuestRegistrationSuccess,
 }: EventRegistrationFormProps) {
+  const { trackEvent } = useAnalyticsEvents();
   const { getToken, userId } = useAuth();
   const { data } = useSuspenseQuery(eventOptions(eventId));
   const { data: userInfo } = useSuspenseQuery(
@@ -98,6 +100,13 @@ export function EventRegistrationForm({
           guests,
           password: eventPassword,
         });
+
+        trackEvent("EventParticipation", {
+          props: {
+            eventId,
+            method: "loggedIn",
+          },
+        });
       } else {
         // Guest
         await participateGuest({
@@ -106,6 +115,12 @@ export function EventRegistrationForm({
           guests,
           userRealmId,
           password: eventPassword,
+        });
+        trackEvent("EventParticipation", {
+          props: {
+            eventId,
+            method: "guest",
+          },
         });
         onGuestRegistrationSuccess?.(data.email!);
       }

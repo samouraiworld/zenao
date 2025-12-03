@@ -6,7 +6,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { userInfoOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
@@ -20,10 +20,11 @@ import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { PostsList } from "@/components/social-feed/lists/posts-list";
 
 type EventFeedProps = {
-  eventId: string;
+  params: Promise<{ id: string }>;
 };
 
-function EventFeed({ eventId }: EventFeedProps) {
+function EventFeed({ params }: EventFeedProps) {
+  const { id: eventId } = React.use(params);
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -77,9 +78,21 @@ function EventFeed({ eventId }: EventFeedProps) {
     [postsPages],
   );
 
-  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(feedId);
-  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
+  const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
+    "event",
+    eventId,
+    feedId,
+  );
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
+    "event",
+    eventId,
+    feedId,
+  );
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(
+    "event",
+    eventId,
+    feedId,
+  );
 
   const onEdit = async (
     postId: string,

@@ -18,6 +18,7 @@ import {
 } from "../shadcn/drawer";
 import Text from "../widgets/texts/text";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 type DialogProps = {
   title: string;
@@ -32,6 +33,7 @@ export function GuestRegistrationSuccessDialog({
   open,
   onOpenChange,
 }: DialogProps) {
+  const { trackEvent } = useAnalyticsEvents();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const isStandalone = useMediaQuery("(display-mode: standalone)");
   const t = useTranslations("guest-registration-success-dialog");
@@ -58,7 +60,14 @@ export function GuestRegistrationSuccessDialog({
             <Text>{t("profile-completion-incentive")}</Text>
           </div>
           <SignInButton forceRedirectUrl={"/settings"}>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() => {
+                trackEvent("SignInClick", {
+                  props: { context: "guest-registration" },
+                });
+              }}
+            >
               <Text>{t("sign-in")}</Text>
             </Button>
           </SignInButton>
@@ -88,7 +97,14 @@ export function GuestRegistrationSuccessDialog({
           <Text>{t("profile-completion-incentive")}</Text>
         </div>
         <SignInButton forceRedirectUrl={"/settings"}>
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => {
+              trackEvent("SignInClick", {
+                props: { context: "guest-registration" },
+              });
+            }}
+          >
             <Text>{t("sign-in")}</Text>
           </Button>
         </SignInButton>

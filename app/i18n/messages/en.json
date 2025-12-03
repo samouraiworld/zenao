@@ -20,9 +20,7 @@
     "view-profile": "View my profile",
     "create-event": "Create Event",
     "footer": {
-      "terms": "Terms",
-      "privacy": "Privacy",
-      "security": "Security",
+      "tagline": "Made with ❤️ by Samourai.world crew",
       "report-bug": "Report a bug"
     }
   },
@@ -151,6 +149,118 @@
     "p6-ref": "(*Decentralized Autonomous Organizations)",
     "p7": "In case of emergency, stay zen and organize."
   },
+  "whitepaper": {
+    "title": "WHITEPAPER",
+    "vision-title": "1. The Vision",
+    "vision-p1": "Abstract & context: In today's digital world, all of our social interactions are governed and administered by commercial companies that manage centralised platforms on which we are merely consumers.",
+    "vision-p2": "Zenao aims to gradually build a social and technological experience based on a radically different architecture that is open, modular, interoperable, and transparent.",
+    "vision-p3": "We believe that users should have",
+    "vision-p3-end": "in their relationship with the social organisations they found or join, but also in their relationship with the tool itself.",
+    "vision-p4": "As the Zenao platform and application, the user community will gradually build a layer of governance based on a",
+    "product-title": "2. The Product",
+    "product-p1": "Zenao is a platform centered around communities and designed to progressively evolve toward decentralized governance.",
+    "product-p2": "Today, users can participate in, create, or manage a community and its associated events. Ultimately, each community will become autonomous and decentralized, define its own rules, and control its operations. An individual will simply be a member of a community, with a role assigned by that community.",
+    "product-p3": "The Zenao application itself follows a path toward decentralization, allowing power users to influence the direction and future roadmap of the platform.",
+    "product-features-title": "Features — Beta version (live)",
+    "product-features-list": [
+      "Creation and management of public or private communities & events",
+      "Frictionless digital ticketing (no login required)",
+      "Ticket scanning within the application",
+      "Distributed governance system based on roles",
+      "Discovery of public events",
+      "Social community & events (messages, images, videos, polls, etc.)",
+      "Social profiles enabling users to showcase portfolios"
+    ],
+    "product-upcoming-title": "Upcoming Features",
+    "product-upcoming-list": [
+      "Accept payments (paid events, community subscription thought Stripe payments)",
+      "Accept cryptocurrency payments (Bitcoin, EVM, Stablecoins, etc.)",
+      "Vaults allowing communities to co-manage crypto-funds",
+      "make transactions using a multisig & dao votes",
+      "connect/integration of DAO-vault yield optimization (Morpho)",
+      "DAO Templates for easy and safe organisations configurations",
+      "fitting with simple models (from entrepreneurship to DAOs)",
+      "Connect DAOKit based IAM w/ centralized tools",
+      "ordering centralized services as a DAO",
+      "Private events & ZK-proofs",
+      "allowing private but trustable accounts with zero-knowledge proofs"
+    ],
+    "gov-title": "3. Self-Sovereign Governance Layers & Modularity",
+    "gov-actors-title": "3.1 System Actors",
+    "gov-actors-p1": "Each actor in the system is represented as a DAO:",
+    "gov-actors-list": [
+      "User: a DAO with a single member, corresponding to a user account on the platform",
+      "Event: a DAO with multiple members who can distribute roles (participant, gatekeeper, organizer, etc.)",
+      "Community: a DAO composed of many members and events, with roles such as administrator, moderator, member, etc.",
+      "Zenao: the platform itself will become a community of users able to coordinate, self-fund, and co-administer the product through DAO governance"
+    ],
+    "gov-actors-example": "DAOs operate through a role-based permission system, where each role depends on specific governance rules. For example: an event DAO can grant a gatekeeper role to a user to give him the ability to check in tickets at entrance.",
+    "gov-arch-title": "3.2 Zenao Architecture & Foundations",
+    "gov-arch-p1": "Zenao is designed to integrate with programmable blockchain infrastructures.",
+    "gov-arch-list": [
+      "Blockchain-agnostic DAOKit built in Golang",
+      "Compatible with any Turing-complete VM (EVM, WASM, etc.)"
+    ],
+    "gov-arch-p2": "Zenao integrates a future-proof DAO framework called Daokit, developed in-house and used to represent every entity (community, event, user) as an upgradable DAO.",
+    "gov-arch-p3": "Each DAO implementation can be updated over time, allowing continuous evolution of governance mechanisms.",
+    "gov-arch-doc": "📖 Documentation about DAOKit by Samouraï crew.",
+    "story-title": "4. User Story Example — Hyper Hacktive Festival",
+    "story-p1": "As a first experience, the Samouraï Coop team ( builders behind",
+    "story-p1-end": ") decided to demonstrate the power of Zenao's vision with a concrete use case.",
+    "story-p2": "Context: Hyper Hacktive Festival is a short film festival taking place in Paris, produced by the Samouraï Coop crew with a strong “DAO Culture” approach. The concept is to build an engaged and passionate community around films and audiovisual creations in Paris—connecting, encouraging, and supporting the next generation of young directors.",
+    "story-community-actions-title": "All participants are invited to:",
+    "story-community-actions-list": [
+      "A community meet-up before the event to connect with others",
+      "The main event in a cinema, screening 8 to 10 short films",
+      "A community after-party",
+      "Vote for films and directors they want the community to support",
+      "Serve as jury members for the next event's film selection"
+    ],
+    "story-community-title": "The community is composed of:",
+    "story-community-list": [
+      "Participants (attendees watching films)",
+      "Filmmakers, technicians, creatives, authors, etc.",
+      "Producers, professionals, etc.",
+      "Partners and sponsors",
+      "Organizers (Samouraï crew)"
+    ],
+    "story-tools-title": "Tools:",
+    "story-tools-list": [
+      "Community page: gathering all community information",
+      "Events page: focusing on main event details",
+      "Polls and feeds for community discussion and media sharing"
+    ],
+    "story-organizer-title": "As organizer:",
+    "story-organizer-list": [
+      "Set up community page and create events",
+      "Send newsletters and emails to community members",
+      "Assign organization roles for staff",
+      "Super-admin (C-level)",
+      "Administration / Treasury Manager / Community Manager / Technicians / Developers",
+      "Community moderators",
+      "Gatekeepers and security officers at the entrance (scanning tickets)"
+    ],
+    "story-community-member-title": "As community member:",
+    "story-community-member-list": [
+      "Stay informed about community news and initiatives via email",
+      "Connect and collaborate with other community members",
+      "Create a personal profile and portfolio",
+      "Gain roles based on responsibilities and trust",
+      "Vote on community governance, grant allocations, etc."
+    ],
+    "story-others-title": "As filmmaker, creative, or technician:",
+    "story-others-list": [
+      "Same benefits as community members",
+      "Use profile as a professional portfolio",
+      "Access community networking and opportunities",
+      "Vote on community governance, grant allocations, etc."
+    ],
+    "roadmap-title": "5. Roadmap & Philosophical Position",
+    "roadmap-p1": "At this stage of Zenao, we believe the only focus must remain to address users needs. 99% of the population are not interested about decentralization or distributed protocols values. People are just looking for efficient tools, products and simple apps to fit their needs.",
+    "roadmap-p2": "We consider that Zenao is made for real-life needs and not “Web3 speculation” narratives. The potential of the dApp is very large, both in term of “market”, as a product, but also in term of adoption for decentralized protocols to be used by main stream people.",
+    "roadmap-p3": "We want to spend upcoming phase to make the user experience perfectly fitting with non-tech people, in order to orchestrate an organic, in-real-life,and non-speculative user growth.",
+    "roadmap-p4": "Once we’ll reach an important monthly user base, we’ll progressively present our decentralization roadmap and present it to our power-users as a proposal, fitting perfectly with the DAO culture we want to encourage, support and build with and for the Zenao community."
+  },
   "settings": {
     "title": "Settings",
     "gnoweb-label": "See your profile on gnoweb",
@@ -219,7 +329,10 @@
   },
   "error": {
     "label": "Oups! An error has occured.",
-    "retry-button": "Retry"
+    "retry-button": "Retry",
+    "oops-something-went-wrong": "Oups! Something went wrong.",
+    "unexpected-error-occurred": "An unexpected error occurred. Please try again later.",
+    "refresh-page": "Refresh the page"
   },
   "not-found": {
     "label": "Page not found.",
@@ -350,12 +463,15 @@
   "toast-delete-post-success": "Your post has been deleted",
   "toast-delete-post-error": "Error while deleting the post",
   "community": {
+    "communities": "Communities",
     "chat": "Chat",
     "votes": "Votes",
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals",
     "portfolio": "Portfolio",
+    "upcoming": "Upcoming",
+    "past": "Past",
     "leave-community-button": "Leave community",
     "leaving-state": "Leaving...",
     "leave-success": "You have left the community.",

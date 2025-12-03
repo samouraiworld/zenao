@@ -6,7 +6,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userInfoOptions } from "@/lib/queries/user";
 import { PollPostView } from "@/lib/social-feed";
@@ -18,10 +18,11 @@ import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 
 type EventPollsProps = {
-  eventId: string;
+  params: Promise<{ id: string }>;
 };
 
-function EventPolls({ eventId }: EventPollsProps) {
+function EventPolls({ params }: EventPollsProps) {
+  const { id: eventId } = React.use(params);
   const t = useTranslations();
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
@@ -56,8 +57,16 @@ function EventPolls({ eventId }: EventPollsProps) {
     [pollsPages],
   );
 
-  const { onReactionChange, isReacting } = useFeedPostReactionHandler(feedId);
-  const { onDelete, isDeleting } = useFeedPostDeleteHandler(feedId);
+  const { onReactionChange, isReacting } = useFeedPostReactionHandler(
+    "event",
+    eventId,
+    feedId,
+  );
+  const { onDelete, isDeleting } = useFeedPostDeleteHandler(
+    "event",
+    eventId,
+    feedId,
+  );
 
   return (
     <>

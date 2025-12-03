@@ -9,15 +9,15 @@ import { useMemo, useState } from "react";
 import { BroadcastEmailDialog } from "@/components/dialogs/broadcast-email-dialog";
 import { CancelEventDialog } from "@/components/dialogs/cancel-event";
 import { GatekeeperManagementDialog } from "@/components/dialogs/gatekeeper-management-dialog";
+import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
+import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
+import { userInfoOptions } from "@/lib/queries/user";
+import { zenaoClient } from "@/lib/zenao-client";
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
-import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
-import { EventUserRole } from "@/lib/queries/event-users";
-import { zenaoClient } from "@/lib/zenao-client";
 
 type EventManagementMenuProps = {
   eventId: string;
-  roles: EventUserRole[];
   nbParticipants: number;
 };
 
@@ -113,13 +113,19 @@ function EventManagementMenuOrganizer({
   );
 }
 
-export function EventManagementMenu({
+export default function EventManagementMenu({
   eventId,
-  roles,
   nbParticipants,
 }: EventManagementMenuProps) {
-  const { getToken } = useAuth();
+  const { userId, getToken } = useAuth();
   const t = useTranslations("event");
+
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userInfo?.realmId),
+  );
 
   const roleLevel = useMemo(() => getRoleLevel(roles), [roles]);
 

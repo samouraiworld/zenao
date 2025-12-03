@@ -6,7 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { IMAGE_FILE_SIZE_LIMIT } from "../event/[id]/constants";
+import { IMAGE_FILE_SIZE_LIMIT } from "../../components/features/event/constants";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -35,15 +35,16 @@ import { Tabs, TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { cn } from "@/lib/tailwind";
 import Heading from "@/components/widgets/texts/heading";
-import { addressFromRealmId } from "@/lib/gno";
 import UserExperiences from "@/components/features/user/settings/user-experiences";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
 
   const { getToken } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -121,9 +122,9 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         bio,
       });
 
-      const address = addressFromRealmId(userRealmId);
+      trackEvent("UserProfileEdited");
 
-      router.push(`/profile/${address}`);
+      router.push(`/profile/${userRealmId}`);
       toast({
         title: t("toast-success"),
       });
@@ -186,7 +187,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
               />
 
               <div className="flex flex-col gap-4 relative">
-                <div className="mb-4 flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <Heading level={3}>{t("bio-label")}</Heading>
                 </div>
 
@@ -198,15 +199,12 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
                     })}
                     className="absolute top-0 right-0 rounded p-0 h-fit"
                   />
-
                   <TabsContent value="write" tabIndex={-1}>
                     <FormFieldTextArea
                       control={form.control}
                       name="bio"
                       placeholder={t("bio-placeholder")}
-                      className={cn(
-                        "bg-transparent border-0 focus-visible:ring-transparent p-0 w-full placeholder:text-secondary-color",
-                      )}
+                      className={cn("w-full placeholder:text-secondary-color")}
                       maxLength={1000}
                       wordCounter
                     />

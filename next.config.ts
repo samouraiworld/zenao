@@ -1,3 +1,5 @@
+/* eslint-disable local/kebab-case-filename */
+
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
@@ -26,10 +28,6 @@ const nextConfig: NextConfig = {
       {
         source: "/tickets",
         destination: "/tickets/upcoming",
-      },
-      {
-        source: "/event/:id",
-        destination: "/event/:id/description",
       },
       {
         source: "/community/:id",
@@ -71,7 +69,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   silent: !process.env.CI,
 
   unstable_sentryWebpackPluginOptions: {
-    disable: (process.env.VERCEL ?? "0") !== "1",
+    disable: (process.env.NEXT_PUBLIC_ENV ?? "development") === "development",
   },
 
   // For all available options, see:
