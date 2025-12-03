@@ -470,6 +470,8 @@
     "members": "Members",
     "proposals": "Proposals",
     "portfolio": "Portfolio",
+    "upcoming": "Upcoming",
+    "past": "Past",
     "leave-community-button": "Leave community",
     "leaving-state": "Leaving...",
     "leave-success": "You have left the community.",
