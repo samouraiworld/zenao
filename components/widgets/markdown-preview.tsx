@@ -61,8 +61,9 @@ export function MarkdownPreview({
               alt={props.alt ?? ""}
               width={960}
               height={960}
-              quality={75}
-              loading="lazy"
+              imgFit="pad"
+              // quality={75}
+              // loading="lazy"
             />
           );
         },
