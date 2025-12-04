@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useQuery,
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
@@ -87,14 +88,28 @@ export function ProfileInfo({
     [pastEventsPages],
   );
 
+  const { data: ipfsBio } = useQuery({
+    queryKey: ["get", profile?.bio],
+    queryFn: async () => {
+      const res = await fetch(
+        `https://${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${profile?.bio.substring(7)}`,
+      );
+      const body = await res.bytes();
+      return Buffer.from(body).toString();
+    },
+    enabled: profile?.bio.startsWith("ipfs://"),
+  });
+
   // profileOptions can return array of object with empty string (except address)
   // So to detect if a user doesn't exist we have to check if all strings are empty (except address)
-  if (!profile?.bio && !profile?.displayName && !profile?.avatarUri) {
+  if (!profile?.displayName && !profile?.avatarUri) {
     return <p>{t("profile-not-exist")}</p>;
   }
 
+  const bio = profile.bio.startsWith("ipfs://") ? ipfsBio || "" : profile.bio;
+
   const profileDetails = deserializeWithFrontMatter({
-    serialized: profile.bio,
+    serialized: bio,
     schema: gnoProfileDetailsSchema,
     defaultValue: {
       bio: "",
@@ -126,7 +141,7 @@ export function ProfileInfo({
         <ProfileHeader
           address={address}
           displayName={profile.displayName}
-          bio={profile.bio}
+          bio={bio}
           avatarUri={profile.avatarUri}
         />
       </div>
