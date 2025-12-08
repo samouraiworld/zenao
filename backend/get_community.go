@@ -12,7 +12,7 @@ import (
 
 func (s *ZenaoServer) GetCommunity(ctx context.Context, req *connect.Request[zenaov1.GetCommunityRequest]) (*connect.Response[zenaov1.CommunityInfo], error) {
 	if req.Msg.CommunityId == "" {
-		return nil, errors.New("community id is required")
+		return nil, errors.New("community ID is required")
 	}
 
 	var (

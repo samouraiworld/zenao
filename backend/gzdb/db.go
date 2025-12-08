@@ -314,6 +314,24 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 	return dbEventToZeniEvent(evt)
 }
 
+// CountCheckedIn implements zeni.DB.
+func (g *gormZenaoDB) CountCheckedIn(eventID string) (uint32, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("parse event id: %w", err)
+	}
+
+	var count int64
+	if err := g.db.Model(&Checkin{}).
+		Joins("JOIN sold_tickets ON sold_tickets.id = checkins.sold_ticket_id").
+		Where("sold_tickets.event_id = ?", evtIDInt).
+		Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return uint32(count), nil
+}
+
 func (g *gormZenaoDB) GetOrgByPollID(pollID string) (orgType, orgID string, err error) {
 	pollIDInt, err := strconv.ParseUint(pollID, 10, 64)
 	if err != nil {
