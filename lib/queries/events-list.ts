@@ -76,7 +76,7 @@ export const eventsList = (
 };
 
 export const eventsByOrganizerList = (
-  organizerRealmId: string,
+  organizerRealmId: string | undefined,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -97,6 +97,8 @@ export const eventsByOrganizerList = (
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
+      if (!organizerRealmId) return [];
+
       return withSpan(
         `query:chain:user:${organizerRealmId}:events:role:organizer`,
         async () => {
@@ -124,6 +126,7 @@ export const eventsByOrganizerList = (
       }
       return pages.length - 2;
     },
+    enabled: !!organizerRealmId,
   });
 };
 
