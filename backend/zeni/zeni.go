@@ -241,6 +241,7 @@ type DB interface {
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
 	EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
 	GetCommunity(communityID string) (*Community, error)
+	ListCommunities(entityType string, entityID string, role string, limit int, offset int) ([]*Community, error)
 	AddMemberToCommunity(communityID string, userID string) error
 	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)

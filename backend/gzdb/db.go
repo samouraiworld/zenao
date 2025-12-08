@@ -332,6 +332,49 @@ func (g *gormZenaoDB) CountCheckedIn(eventID string) (uint32, error) {
 	return uint32(count), nil
 }
 
+// ListCommunities implements zeni.DB.
+func (g *gormZenaoDB) ListCommunities(entityType string, entityID string, role string, limit int, offset int) ([]*zeni.Community, error) {
+	g, span := g.trace("gzdb.ListCommunities")
+	defer span.End()
+
+	var orgIDs []uint
+	if entityID != "" && entityType != "" {
+		entityIDInt, err := strconv.ParseUint(entityID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse entity id: %w", err)
+		}
+		query := g.db.Model(&EntityRole{}).Select("org_id").Where("entity_type = ? AND entity_id = ? AND org_type = ?", entityType, entityIDInt, zeni.EntityTypeCommunity)
+		if role != "" {
+			query = query.Where("role = ?", role)
+		}
+		if err := query.Find(&orgIDs).Order("org_id DESC").Limit(limit).Offset(offset).Error; err != nil {
+			return nil, fmt.Errorf("query org ids: %w", err)
+		}
+		if len(orgIDs) == 0 {
+			return []*zeni.Community{}, nil
+		}
+	}
+
+	var dbCmts []Community
+	query := g.db.Model(&Community{}).Order("id DESC").Limit(limit).Offset(offset)
+	if len(orgIDs) > 0 {
+		query = query.Where("id IN ?", orgIDs)
+	}
+	if err := query.Find(&dbCmts).Error; err != nil {
+		return nil, fmt.Errorf("query communities: %w", err)
+	}
+	zenCmts := make([]*zeni.Community, 0, len(dbCmts))
+	for _, dbCmt := range dbCmts {
+		zenCmt, err := dbCommunityToZeniCommunity(&dbCmt)
+		if err != nil {
+			return nil, fmt.Errorf("convert db community to zeni community: %w", err)
+		}
+		zenCmts = append(zenCmts, zenCmt)
+	}
+
+	return zenCmts, nil
+}
+
 func (g *gormZenaoDB) GetOrgByPollID(pollID string) (orgType, orgID string, err error) {
 	pollIDInt, err := strconv.ParseUint(pollID, 10, 64)
 	if err != nil {
