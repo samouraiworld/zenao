@@ -5,6 +5,7 @@ package zenaov1
 import (
 	"errors"
 
+	v11 "gno.land/p/zenao/feeds/v1"
 	v1 "gno.land/p/zenao/polls/v1"
 )
 
@@ -65,6 +66,37 @@ type GetUserInfoRequest struct {
 type GetUserInfoResponse struct {
 	RealmId string
 	Plan    string
+}
+
+type Profile struct {
+	Address     string
+	DisplayName string
+	Bio         string
+	AvatarUri   string
+}
+
+type GetUsersProfileRequest struct {
+	Addresses []string
+}
+
+type GetUsersProfileResponse struct {
+	Profiles []*Profile
+}
+
+type GetEventRequest struct {
+	EventId string
+}
+
+type ListEventsRequest struct {
+	EntityId   string
+	EntityType string
+	Role       string
+	Limit      uint32
+	Offset     uint32
+}
+
+type ListEventsResponse struct {
+	Events []*EventInfo
 }
 
 type CreateEventRequest struct {
@@ -235,6 +267,11 @@ type CreatePollResponse struct {
 	PostId string
 }
 
+type GetPollRequest struct {
+	PollId string
+	UserId string
+}
+
 type VotePollRequest struct {
 	PollId string
 	Option string
@@ -253,6 +290,24 @@ type CreatePostRequest struct {
 
 type CreatePostResponse struct {
 	PostId string
+}
+
+type GetPostRequest struct {
+	PostId string
+	UserId string
+}
+
+type GetPostsRequest struct {
+	FeedId   string
+	Limit    uint32
+	Offset   uint32
+	Tags     []string
+	ParentId string
+	UserId   string
+}
+
+type GetPostsResponse struct {
+	Posts []*v11.PostView
 }
 
 type DeletePostRequest struct {
@@ -311,6 +366,33 @@ type ExportParticipantsResponse struct {
 	MimeType string
 }
 
+type Entity struct {
+	EntityType string
+	EntityId   string
+}
+
+type EntityRolesRequest struct {
+	Org    *Entity
+	Entity *Entity
+}
+
+type EntityRolesResponse struct {
+	Roles []string
+}
+
+type EntitiesWithRoleRequest struct {
+	Org  *Entity
+	Role string
+}
+
+type EntitiesWithRoleResponse struct {
+	Entities []*Entity
+}
+
+type GetCommunityRequest struct {
+	CommunityId string
+}
+
 type CommunityInfo struct {
 	DisplayName    string
 	Description    string
@@ -319,6 +401,18 @@ type CommunityInfo struct {
 	Administrators []string
 	CountMembers   uint32
 	PkgPath        string
+}
+
+type ListCommunitiesRequest struct {
+	EntityType string
+	EntityId   string
+	Role       string
+	Limit      uint32
+	Offset     uint32
+}
+
+type ListCommunitiesResponse struct {
+	Communities []*CommunityInfo
 }
 
 type CreateCommunityRequest struct {

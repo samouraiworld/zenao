@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"gno.land/p/onbloc/json"
+	v11 "gno.land/p/zenao/feeds/v1"
 	v1 "gno.land/p/zenao/polls/v1"
 )
 
@@ -121,6 +122,193 @@ func GetUserInfoResponseFromJSON(g *GetUserInfoResponse, node *json.Node) {
 	}
 	if val, ok := fields["plan"]; ok {
 		g.Plan = val.MustString()
+	}
+}
+
+func (p *Profile) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if p.Address != "" {
+		fields["address"] = json.StringNode("", p.Address)
+	}
+	if p.DisplayName != "" {
+		fields["displayName"] = json.StringNode("", p.DisplayName)
+	}
+	if p.Bio != "" {
+		fields["bio"] = json.StringNode("", p.Bio)
+	}
+	if p.AvatarUri != "" {
+		fields["avatarUri"] = json.StringNode("", p.AvatarUri)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ProfileFromJSON(p *Profile, node *json.Node) {
+	*p = Profile{}
+	fields := node.MustObject()
+
+	if val, ok := fields["address"]; ok {
+		p.Address = val.MustString()
+	}
+	if val, ok := fields["displayName"]; ok {
+		p.DisplayName = val.MustString()
+	}
+	if val, ok := fields["bio"]; ok {
+		p.Bio = val.MustString()
+	}
+	if val, ok := fields["avatarUri"]; ok {
+		p.AvatarUri = val.MustString()
+	}
+}
+
+func (g *GetUsersProfileRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(g.Addresses) != 0 {
+		arr := make([]*json.Node, len(g.Addresses))
+		for i, val := range g.Addresses {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["addresses"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetUsersProfileRequestFromJSON(g *GetUsersProfileRequest, node *json.Node) {
+	*g = GetUsersProfileRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["addresses"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		g.Addresses = arr
+	}
+}
+
+func (g *GetUsersProfileResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(g.Profiles) != 0 {
+		arr := make([]*json.Node, len(g.Profiles))
+		for i, val := range g.Profiles {
+			arr[i] = val.ToJSON()
+		}
+		fields["profiles"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetUsersProfileResponseFromJSON(g *GetUsersProfileResponse, node *json.Node) {
+	*g = GetUsersProfileResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["profiles"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*Profile, len(jarr))
+		for i, val := range jarr {
+			fv := &Profile{}
+			ProfileFromJSON(fv, val)
+			arr[i] = fv
+		}
+		g.Profiles = arr
+	}
+}
+
+func (g *GetEventRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.EventId != "" {
+		fields["eventId"] = json.StringNode("", g.EventId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetEventRequestFromJSON(g *GetEventRequest, node *json.Node) {
+	*g = GetEventRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["eventId"]; ok {
+		g.EventId = val.MustString()
+	}
+}
+
+func (l *ListEventsRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if l.EntityId != "" {
+		fields["entityId"] = json.StringNode("", l.EntityId)
+	}
+	if l.EntityType != "" {
+		fields["entityType"] = json.StringNode("", l.EntityType)
+	}
+	if l.Role != "" {
+		fields["role"] = json.StringNode("", l.Role)
+	}
+	if l.Limit != 0 {
+		fields["limit"] = json.NumberNode("", float64(l.Limit))
+	}
+	if l.Offset != 0 {
+		fields["offset"] = json.NumberNode("", float64(l.Offset))
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListEventsRequestFromJSON(l *ListEventsRequest, node *json.Node) {
+	*l = ListEventsRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["entityId"]; ok {
+		l.EntityId = val.MustString()
+	}
+	if val, ok := fields["entityType"]; ok {
+		l.EntityType = val.MustString()
+	}
+	if val, ok := fields["role"]; ok {
+		l.Role = val.MustString()
+	}
+	if val, ok := fields["limit"]; ok {
+		l.Limit = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["offset"]; ok {
+		l.Offset = uint32(val.MustNumeric())
+	}
+}
+
+func (l *ListEventsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(l.Events) != 0 {
+		arr := make([]*json.Node, len(l.Events))
+		for i, val := range l.Events {
+			arr[i] = val.ToJSON()
+		}
+		fields["events"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListEventsResponseFromJSON(l *ListEventsResponse, node *json.Node) {
+	*l = ListEventsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["events"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*EventInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &EventInfo{}
+			EventInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		l.Events = arr
 	}
 }
 
@@ -1173,6 +1361,31 @@ func CreatePollResponseFromJSON(c *CreatePollResponse, node *json.Node) {
 	}
 }
 
+func (g *GetPollRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.PollId != "" {
+		fields["pollId"] = json.StringNode("", g.PollId)
+	}
+	if g.UserId != "" {
+		fields["userId"] = json.StringNode("", g.UserId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetPollRequestFromJSON(g *GetPollRequest, node *json.Node) {
+	*g = GetPollRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["pollId"]; ok {
+		g.PollId = val.MustString()
+	}
+	if val, ok := fields["userId"]; ok {
+		g.UserId = val.MustString()
+	}
+}
+
 func (v *VotePollRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -1276,6 +1489,119 @@ func CreatePostResponseFromJSON(c *CreatePostResponse, node *json.Node) {
 
 	if val, ok := fields["postId"]; ok {
 		c.PostId = val.MustString()
+	}
+}
+
+func (g *GetPostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.PostId != "" {
+		fields["postId"] = json.StringNode("", g.PostId)
+	}
+	if g.UserId != "" {
+		fields["userId"] = json.StringNode("", g.UserId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetPostRequestFromJSON(g *GetPostRequest, node *json.Node) {
+	*g = GetPostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		g.PostId = val.MustString()
+	}
+	if val, ok := fields["userId"]; ok {
+		g.UserId = val.MustString()
+	}
+}
+
+func (g *GetPostsRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.FeedId != "" {
+		fields["feedId"] = json.StringNode("", g.FeedId)
+	}
+	if g.Limit != 0 {
+		fields["limit"] = json.NumberNode("", float64(g.Limit))
+	}
+	if g.Offset != 0 {
+		fields["offset"] = json.NumberNode("", float64(g.Offset))
+	}
+	if len(g.Tags) != 0 {
+		arr := make([]*json.Node, len(g.Tags))
+		for i, val := range g.Tags {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["tags"] = json.ArrayNode("", arr)
+	}
+	if g.ParentId != "" {
+		fields["parentId"] = json.StringNode("", g.ParentId)
+	}
+	if g.UserId != "" {
+		fields["userId"] = json.StringNode("", g.UserId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetPostsRequestFromJSON(g *GetPostsRequest, node *json.Node) {
+	*g = GetPostsRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["feedId"]; ok {
+		g.FeedId = val.MustString()
+	}
+	if val, ok := fields["limit"]; ok {
+		g.Limit = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["offset"]; ok {
+		g.Offset = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["tags"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		g.Tags = arr
+	}
+	if val, ok := fields["parentId"]; ok {
+		g.ParentId = val.MustString()
+	}
+	if val, ok := fields["userId"]; ok {
+		g.UserId = val.MustString()
+	}
+}
+
+func (g *GetPostsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(g.Posts) != 0 {
+		arr := make([]*json.Node, len(g.Posts))
+		for i, val := range g.Posts {
+			arr[i] = val.ToJSON()
+		}
+		fields["posts"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetPostsResponseFromJSON(g *GetPostsResponse, node *json.Node) {
+	*g = GetPostsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["posts"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*v11.PostView, len(jarr))
+		for i, val := range jarr {
+			fv := &v11.PostView{}
+			PostViewFromJSON(fv, val)
+			arr[i] = fv
+		}
+		g.Posts = arr
 	}
 }
 
@@ -1561,6 +1887,164 @@ func ExportParticipantsResponseFromJSON(e *ExportParticipantsResponse, node *jso
 	}
 }
 
+func (e *Entity) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.EntityType != "" {
+		fields["entityType"] = json.StringNode("", e.EntityType)
+	}
+	if e.EntityId != "" {
+		fields["entityId"] = json.StringNode("", e.EntityId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func EntityFromJSON(e *Entity, node *json.Node) {
+	*e = Entity{}
+	fields := node.MustObject()
+
+	if val, ok := fields["entityType"]; ok {
+		e.EntityType = val.MustString()
+	}
+	if val, ok := fields["entityId"]; ok {
+		e.EntityId = val.MustString()
+	}
+}
+
+func (e *EntityRolesRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.Org != nil {
+		fields["org"] = e.Org.ToJSON()
+	}
+	if e.Entity != nil {
+		fields["entity"] = e.Entity.ToJSON()
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func EntityRolesRequestFromJSON(e *EntityRolesRequest, node *json.Node) {
+	*e = EntityRolesRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["org"]; ok {
+		fv := &Entity{}
+		EntityFromJSON(fv, val)
+		e.Org = fv
+	}
+	if val, ok := fields["entity"]; ok {
+		fv := &Entity{}
+		EntityFromJSON(fv, val)
+		e.Entity = fv
+	}
+}
+
+func (e *EntityRolesResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(e.Roles) != 0 {
+		arr := make([]*json.Node, len(e.Roles))
+		for i, val := range e.Roles {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["roles"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func EntityRolesResponseFromJSON(e *EntityRolesResponse, node *json.Node) {
+	*e = EntityRolesResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["roles"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		e.Roles = arr
+	}
+}
+
+func (e *EntitiesWithRoleRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if e.Org != nil {
+		fields["org"] = e.Org.ToJSON()
+	}
+	if e.Role != "" {
+		fields["role"] = json.StringNode("", e.Role)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func EntitiesWithRoleRequestFromJSON(e *EntitiesWithRoleRequest, node *json.Node) {
+	*e = EntitiesWithRoleRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["org"]; ok {
+		fv := &Entity{}
+		EntityFromJSON(fv, val)
+		e.Org = fv
+	}
+	if val, ok := fields["role"]; ok {
+		e.Role = val.MustString()
+	}
+}
+
+func (e *EntitiesWithRoleResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(e.Entities) != 0 {
+		arr := make([]*json.Node, len(e.Entities))
+		for i, val := range e.Entities {
+			arr[i] = val.ToJSON()
+		}
+		fields["entities"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func EntitiesWithRoleResponseFromJSON(e *EntitiesWithRoleResponse, node *json.Node) {
+	*e = EntitiesWithRoleResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["entities"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*Entity, len(jarr))
+		for i, val := range jarr {
+			fv := &Entity{}
+			EntityFromJSON(fv, val)
+			arr[i] = fv
+		}
+		e.Entities = arr
+	}
+}
+
+func (g *GetCommunityRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.CommunityId != "" {
+		fields["communityId"] = json.StringNode("", g.CommunityId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetCommunityRequestFromJSON(g *GetCommunityRequest, node *json.Node) {
+	*g = GetCommunityRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communityId"]; ok {
+		g.CommunityId = val.MustString()
+	}
+}
+
 func (c *CommunityInfo) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -1622,6 +2106,79 @@ func CommunityInfoFromJSON(c *CommunityInfo, node *json.Node) {
 	}
 	if val, ok := fields["pkgPath"]; ok {
 		c.PkgPath = val.MustString()
+	}
+}
+
+func (l *ListCommunitiesRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if l.EntityType != "" {
+		fields["entityType"] = json.StringNode("", l.EntityType)
+	}
+	if l.EntityId != "" {
+		fields["entityId"] = json.StringNode("", l.EntityId)
+	}
+	if l.Role != "" {
+		fields["role"] = json.StringNode("", l.Role)
+	}
+	if l.Limit != 0 {
+		fields["limit"] = json.NumberNode("", float64(l.Limit))
+	}
+	if l.Offset != 0 {
+		fields["offset"] = json.NumberNode("", float64(l.Offset))
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListCommunitiesRequestFromJSON(l *ListCommunitiesRequest, node *json.Node) {
+	*l = ListCommunitiesRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["entityType"]; ok {
+		l.EntityType = val.MustString()
+	}
+	if val, ok := fields["entityId"]; ok {
+		l.EntityId = val.MustString()
+	}
+	if val, ok := fields["role"]; ok {
+		l.Role = val.MustString()
+	}
+	if val, ok := fields["limit"]; ok {
+		l.Limit = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["offset"]; ok {
+		l.Offset = uint32(val.MustNumeric())
+	}
+}
+
+func (l *ListCommunitiesResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(l.Communities) != 0 {
+		arr := make([]*json.Node, len(l.Communities))
+		for i, val := range l.Communities {
+			arr[i] = val.ToJSON()
+		}
+		fields["communities"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListCommunitiesResponseFromJSON(l *ListCommunitiesResponse, node *json.Node) {
+	*l = ListCommunitiesResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communities"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*CommunityInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &CommunityInfo{}
+			CommunityInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		l.Communities = arr
 	}
 }
 

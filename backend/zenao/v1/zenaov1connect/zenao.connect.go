@@ -8,6 +8,8 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
+	v11 "github.com/samouraiworld/zenao/backend/feeds/v1"
+	v12 "github.com/samouraiworld/zenao/backend/polls/v1"
 	v1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	http "net/http"
 	strings "strings"
@@ -90,6 +92,31 @@ const (
 	// ZenaoServiceRemoveEventFromCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// RemoveEventFromCommunity RPC.
 	ZenaoServiceRemoveEventFromCommunityProcedure = "/zenao.v1.ZenaoService/RemoveEventFromCommunity"
+	// ZenaoServiceEntityRolesProcedure is the fully-qualified name of the ZenaoService's EntityRoles
+	// RPC.
+	ZenaoServiceEntityRolesProcedure = "/zenao.v1.ZenaoService/EntityRoles"
+	// ZenaoServiceEntitiesWithRoleProcedure is the fully-qualified name of the ZenaoService's
+	// EntitiesWithRole RPC.
+	ZenaoServiceEntitiesWithRoleProcedure = "/zenao.v1.ZenaoService/EntitiesWithRole"
+	// ZenaoServiceGetCommunityProcedure is the fully-qualified name of the ZenaoService's GetCommunity
+	// RPC.
+	ZenaoServiceGetCommunityProcedure = "/zenao.v1.ZenaoService/GetCommunity"
+	// ZenaoServiceListCommunitiesProcedure is the fully-qualified name of the ZenaoService's
+	// ListCommunities RPC.
+	ZenaoServiceListCommunitiesProcedure = "/zenao.v1.ZenaoService/ListCommunities"
+	// ZenaoServiceGetEventProcedure is the fully-qualified name of the ZenaoService's GetEvent RPC.
+	ZenaoServiceGetEventProcedure = "/zenao.v1.ZenaoService/GetEvent"
+	// ZenaoServiceListEventsProcedure is the fully-qualified name of the ZenaoService's ListEvents RPC.
+	ZenaoServiceListEventsProcedure = "/zenao.v1.ZenaoService/ListEvents"
+	// ZenaoServiceGetPostProcedure is the fully-qualified name of the ZenaoService's GetPost RPC.
+	ZenaoServiceGetPostProcedure = "/zenao.v1.ZenaoService/GetPost"
+	// ZenaoServiceGetPostsProcedure is the fully-qualified name of the ZenaoService's GetPosts RPC.
+	ZenaoServiceGetPostsProcedure = "/zenao.v1.ZenaoService/GetPosts"
+	// ZenaoServiceGetPollProcedure is the fully-qualified name of the ZenaoService's GetPoll RPC.
+	ZenaoServiceGetPollProcedure = "/zenao.v1.ZenaoService/GetPoll"
+	// ZenaoServiceGetUsersProfileProcedure is the fully-qualified name of the ZenaoService's
+	// GetUsersProfile RPC.
+	ZenaoServiceGetUsersProfileProcedure = "/zenao.v1.ZenaoService/GetUsersProfile"
 	// ZenaoServiceCreatePollProcedure is the fully-qualified name of the ZenaoService's CreatePoll RPC.
 	ZenaoServiceCreatePollProcedure = "/zenao.v1.ZenaoService/CreatePoll"
 	// ZenaoServiceVotePollProcedure is the fully-qualified name of the ZenaoService's VotePoll RPC.
@@ -131,6 +158,17 @@ type ZenaoServiceClient interface {
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
 	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
 	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
+	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
+	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
+	EntitiesWithRole(context.Context, *connect.Request[v1.EntitiesWithRoleRequest]) (*connect.Response[v1.EntitiesWithRoleResponse], error)
+	GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error)
+	ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.ListCommunitiesResponse], error)
+	GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.EventInfo], error)
+	ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.ListEventsResponse], error)
+	GetPost(context.Context, *connect.Request[v1.GetPostRequest]) (*connect.Response[v11.PostView], error)
+	GetPosts(context.Context, *connect.Request[v1.GetPostsRequest]) (*connect.Response[v1.GetPostsResponse], error)
+	GetPoll(context.Context, *connect.Request[v1.GetPollRequest]) (*connect.Response[v12.Poll], error)
+	GetUsersProfile(context.Context, *connect.Request[v1.GetUsersProfileRequest]) (*connect.Response[v1.GetUsersProfileResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -273,6 +311,66 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("RemoveEventFromCommunity")),
 			connect.WithClientOptions(opts...),
 		),
+		entityRoles: connect.NewClient[v1.EntityRolesRequest, v1.EntityRolesResponse](
+			httpClient,
+			baseURL+ZenaoServiceEntityRolesProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("EntityRoles")),
+			connect.WithClientOptions(opts...),
+		),
+		entitiesWithRole: connect.NewClient[v1.EntitiesWithRoleRequest, v1.EntitiesWithRoleResponse](
+			httpClient,
+			baseURL+ZenaoServiceEntitiesWithRoleProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("EntitiesWithRole")),
+			connect.WithClientOptions(opts...),
+		),
+		getCommunity: connect.NewClient[v1.GetCommunityRequest, v1.CommunityInfo](
+			httpClient,
+			baseURL+ZenaoServiceGetCommunityProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetCommunity")),
+			connect.WithClientOptions(opts...),
+		),
+		listCommunities: connect.NewClient[v1.ListCommunitiesRequest, v1.ListCommunitiesResponse](
+			httpClient,
+			baseURL+ZenaoServiceListCommunitiesProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("ListCommunities")),
+			connect.WithClientOptions(opts...),
+		),
+		getEvent: connect.NewClient[v1.GetEventRequest, v1.EventInfo](
+			httpClient,
+			baseURL+ZenaoServiceGetEventProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetEvent")),
+			connect.WithClientOptions(opts...),
+		),
+		listEvents: connect.NewClient[v1.ListEventsRequest, v1.ListEventsResponse](
+			httpClient,
+			baseURL+ZenaoServiceListEventsProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("ListEvents")),
+			connect.WithClientOptions(opts...),
+		),
+		getPost: connect.NewClient[v1.GetPostRequest, v11.PostView](
+			httpClient,
+			baseURL+ZenaoServiceGetPostProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetPost")),
+			connect.WithClientOptions(opts...),
+		),
+		getPosts: connect.NewClient[v1.GetPostsRequest, v1.GetPostsResponse](
+			httpClient,
+			baseURL+ZenaoServiceGetPostsProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetPosts")),
+			connect.WithClientOptions(opts...),
+		),
+		getPoll: connect.NewClient[v1.GetPollRequest, v12.Poll](
+			httpClient,
+			baseURL+ZenaoServiceGetPollProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetPoll")),
+			connect.WithClientOptions(opts...),
+		),
+		getUsersProfile: connect.NewClient[v1.GetUsersProfileRequest, v1.GetUsersProfileResponse](
+			httpClient,
+			baseURL+ZenaoServiceGetUsersProfileProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetUsersProfile")),
+			connect.WithClientOptions(opts...),
+		),
 		createPoll: connect.NewClient[v1.CreatePollRequest, v1.CreatePollResponse](
 			httpClient,
 			baseURL+ZenaoServiceCreatePollProcedure,
@@ -340,6 +438,16 @@ type zenaoServiceClient struct {
 	leaveCommunity             *connect.Client[v1.LeaveCommunityRequest, v1.LeaveCommunityResponse]
 	addEventToCommunity        *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
 	removeEventFromCommunity   *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
+	entityRoles                *connect.Client[v1.EntityRolesRequest, v1.EntityRolesResponse]
+	entitiesWithRole           *connect.Client[v1.EntitiesWithRoleRequest, v1.EntitiesWithRoleResponse]
+	getCommunity               *connect.Client[v1.GetCommunityRequest, v1.CommunityInfo]
+	listCommunities            *connect.Client[v1.ListCommunitiesRequest, v1.ListCommunitiesResponse]
+	getEvent                   *connect.Client[v1.GetEventRequest, v1.EventInfo]
+	listEvents                 *connect.Client[v1.ListEventsRequest, v1.ListEventsResponse]
+	getPost                    *connect.Client[v1.GetPostRequest, v11.PostView]
+	getPosts                   *connect.Client[v1.GetPostsRequest, v1.GetPostsResponse]
+	getPoll                    *connect.Client[v1.GetPollRequest, v12.Poll]
+	getUsersProfile            *connect.Client[v1.GetUsersProfileRequest, v1.GetUsersProfileResponse]
 	createPoll                 *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
 	votePoll                   *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
 	createPost                 *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
@@ -449,6 +557,56 @@ func (c *zenaoServiceClient) RemoveEventFromCommunity(ctx context.Context, req *
 	return c.removeEventFromCommunity.CallUnary(ctx, req)
 }
 
+// EntityRoles calls zenao.v1.ZenaoService.EntityRoles.
+func (c *zenaoServiceClient) EntityRoles(ctx context.Context, req *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error) {
+	return c.entityRoles.CallUnary(ctx, req)
+}
+
+// EntitiesWithRole calls zenao.v1.ZenaoService.EntitiesWithRole.
+func (c *zenaoServiceClient) EntitiesWithRole(ctx context.Context, req *connect.Request[v1.EntitiesWithRoleRequest]) (*connect.Response[v1.EntitiesWithRoleResponse], error) {
+	return c.entitiesWithRole.CallUnary(ctx, req)
+}
+
+// GetCommunity calls zenao.v1.ZenaoService.GetCommunity.
+func (c *zenaoServiceClient) GetCommunity(ctx context.Context, req *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error) {
+	return c.getCommunity.CallUnary(ctx, req)
+}
+
+// ListCommunities calls zenao.v1.ZenaoService.ListCommunities.
+func (c *zenaoServiceClient) ListCommunities(ctx context.Context, req *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.ListCommunitiesResponse], error) {
+	return c.listCommunities.CallUnary(ctx, req)
+}
+
+// GetEvent calls zenao.v1.ZenaoService.GetEvent.
+func (c *zenaoServiceClient) GetEvent(ctx context.Context, req *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.EventInfo], error) {
+	return c.getEvent.CallUnary(ctx, req)
+}
+
+// ListEvents calls zenao.v1.ZenaoService.ListEvents.
+func (c *zenaoServiceClient) ListEvents(ctx context.Context, req *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.ListEventsResponse], error) {
+	return c.listEvents.CallUnary(ctx, req)
+}
+
+// GetPost calls zenao.v1.ZenaoService.GetPost.
+func (c *zenaoServiceClient) GetPost(ctx context.Context, req *connect.Request[v1.GetPostRequest]) (*connect.Response[v11.PostView], error) {
+	return c.getPost.CallUnary(ctx, req)
+}
+
+// GetPosts calls zenao.v1.ZenaoService.GetPosts.
+func (c *zenaoServiceClient) GetPosts(ctx context.Context, req *connect.Request[v1.GetPostsRequest]) (*connect.Response[v1.GetPostsResponse], error) {
+	return c.getPosts.CallUnary(ctx, req)
+}
+
+// GetPoll calls zenao.v1.ZenaoService.GetPoll.
+func (c *zenaoServiceClient) GetPoll(ctx context.Context, req *connect.Request[v1.GetPollRequest]) (*connect.Response[v12.Poll], error) {
+	return c.getPoll.CallUnary(ctx, req)
+}
+
+// GetUsersProfile calls zenao.v1.ZenaoService.GetUsersProfile.
+func (c *zenaoServiceClient) GetUsersProfile(ctx context.Context, req *connect.Request[v1.GetUsersProfileRequest]) (*connect.Response[v1.GetUsersProfileResponse], error) {
+	return c.getUsersProfile.CallUnary(ctx, req)
+}
+
 // CreatePoll calls zenao.v1.ZenaoService.CreatePoll.
 func (c *zenaoServiceClient) CreatePoll(ctx context.Context, req *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
 	return c.createPoll.CallUnary(ctx, req)
@@ -509,6 +667,17 @@ type ZenaoServiceHandler interface {
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
 	AddEventToCommunity(context.Context, *connect.Request[v1.AddEventToCommunityRequest]) (*connect.Response[v1.AddEventToCommunityResponse], error)
 	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
+	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
+	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
+	EntitiesWithRole(context.Context, *connect.Request[v1.EntitiesWithRoleRequest]) (*connect.Response[v1.EntitiesWithRoleResponse], error)
+	GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error)
+	ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.ListCommunitiesResponse], error)
+	GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.EventInfo], error)
+	ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.ListEventsResponse], error)
+	GetPost(context.Context, *connect.Request[v1.GetPostRequest]) (*connect.Response[v11.PostView], error)
+	GetPosts(context.Context, *connect.Request[v1.GetPostsRequest]) (*connect.Response[v1.GetPostsResponse], error)
+	GetPoll(context.Context, *connect.Request[v1.GetPollRequest]) (*connect.Response[v12.Poll], error)
+	GetUsersProfile(context.Context, *connect.Request[v1.GetUsersProfileRequest]) (*connect.Response[v1.GetUsersProfileResponse], error)
 	// FEED
 	CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error)
 	VotePoll(context.Context, *connect.Request[v1.VotePollRequest]) (*connect.Response[v1.VotePollResponse], error)
@@ -647,6 +816,66 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("RemoveEventFromCommunity")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceEntityRolesHandler := connect.NewUnaryHandler(
+		ZenaoServiceEntityRolesProcedure,
+		svc.EntityRoles,
+		connect.WithSchema(zenaoServiceMethods.ByName("EntityRoles")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceEntitiesWithRoleHandler := connect.NewUnaryHandler(
+		ZenaoServiceEntitiesWithRoleProcedure,
+		svc.EntitiesWithRole,
+		connect.WithSchema(zenaoServiceMethods.ByName("EntitiesWithRole")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetCommunityHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetCommunityProcedure,
+		svc.GetCommunity,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetCommunity")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceListCommunitiesHandler := connect.NewUnaryHandler(
+		ZenaoServiceListCommunitiesProcedure,
+		svc.ListCommunities,
+		connect.WithSchema(zenaoServiceMethods.ByName("ListCommunities")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetEventHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetEventProcedure,
+		svc.GetEvent,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetEvent")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceListEventsHandler := connect.NewUnaryHandler(
+		ZenaoServiceListEventsProcedure,
+		svc.ListEvents,
+		connect.WithSchema(zenaoServiceMethods.ByName("ListEvents")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetPostHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetPostProcedure,
+		svc.GetPost,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetPost")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetPostsHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetPostsProcedure,
+		svc.GetPosts,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetPosts")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetPollHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetPollProcedure,
+		svc.GetPoll,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetPoll")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetUsersProfileHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetUsersProfileProcedure,
+		svc.GetUsersProfile,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetUsersProfile")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceCreatePollHandler := connect.NewUnaryHandler(
 		ZenaoServiceCreatePollProcedure,
 		svc.CreatePoll,
@@ -731,6 +960,26 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceAddEventToCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceRemoveEventFromCommunityProcedure:
 			zenaoServiceRemoveEventFromCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceEntityRolesProcedure:
+			zenaoServiceEntityRolesHandler.ServeHTTP(w, r)
+		case ZenaoServiceEntitiesWithRoleProcedure:
+			zenaoServiceEntitiesWithRoleHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetCommunityProcedure:
+			zenaoServiceGetCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceListCommunitiesProcedure:
+			zenaoServiceListCommunitiesHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetEventProcedure:
+			zenaoServiceGetEventHandler.ServeHTTP(w, r)
+		case ZenaoServiceListEventsProcedure:
+			zenaoServiceListEventsHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetPostProcedure:
+			zenaoServiceGetPostHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetPostsProcedure:
+			zenaoServiceGetPostsHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetPollProcedure:
+			zenaoServiceGetPollHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetUsersProfileProcedure:
+			zenaoServiceGetUsersProfileHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreatePollProcedure:
 			zenaoServiceCreatePollHandler.ServeHTTP(w, r)
 		case ZenaoServiceVotePollProcedure:
@@ -832,6 +1081,46 @@ func (UnimplementedZenaoServiceHandler) AddEventToCommunity(context.Context, *co
 
 func (UnimplementedZenaoServiceHandler) RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.RemoveEventFromCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EntityRoles is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) EntitiesWithRole(context.Context, *connect.Request[v1.EntitiesWithRoleRequest]) (*connect.Response[v1.EntitiesWithRoleResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EntitiesWithRole is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.ListCommunitiesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListCommunities is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.EventInfo], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetEvent is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.ListEventsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListEvents is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetPost(context.Context, *connect.Request[v1.GetPostRequest]) (*connect.Response[v11.PostView], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetPost is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetPosts(context.Context, *connect.Request[v1.GetPostsRequest]) (*connect.Response[v1.GetPostsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetPosts is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetPoll(context.Context, *connect.Request[v1.GetPollRequest]) (*connect.Response[v12.Poll], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetPoll is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetUsersProfile(context.Context, *connect.Request[v1.GetUsersProfileRequest]) (*connect.Response[v1.GetUsersProfileResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetUsersProfile is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreatePoll(context.Context, *connect.Request[v1.CreatePollRequest]) (*connect.Response[v1.CreatePollResponse], error) {
