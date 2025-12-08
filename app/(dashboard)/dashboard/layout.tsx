@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 import { AppSidebar } from "@/components/features/dashboard/app-sidebar";
 import DashboardHeader from "@/components/features/dashboard/header";
 import { SidebarInset, SidebarProvider } from "@/components/shadcn/sidebar";
@@ -14,12 +16,33 @@ import {
   SidebarVariant,
 } from "@/lib/preferences/preferences";
 import { cn } from "@/lib/tailwind";
+import { ScreenContainerCentered } from "@/components/layout/screen-container";
+import { getQueryClient } from "@/lib/get-query-client";
+import { userInfoOptions } from "@/lib/queries/user";
 
 export default async function DashboardRootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const queryClient = getQueryClient();
+  const { getToken, userId } = await auth();
+  const token = await getToken();
+
+  const t = await getTranslations("");
+
+  const userAddrOpts = userInfoOptions(getToken, userId);
+  const userInfo = await queryClient.fetchQuery(userAddrOpts);
+  const userRealmId = userInfo?.realmId;
+
+  if (!token || !userRealmId) {
+    return (
+      <ScreenContainerCentered isSignedOutModal>
+        {t("eventForm.log-in")}
+      </ScreenContainerCentered>
+    );
+  }
+
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 

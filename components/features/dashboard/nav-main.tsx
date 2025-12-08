@@ -196,9 +196,15 @@ export function NavMain({ items }: NavMainProps) {
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <SidebarMenuButton variant="outline" tooltip="Quick Create">
-                <PlusCircleIcon />
-                <span>Create event</span>
+              <SidebarMenuButton
+                variant="outline"
+                tooltip="Quick Create"
+                asChild
+              >
+                <Link href="/dashboard/event/create">
+                  <PlusCircleIcon />
+                  <span>Create event</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
