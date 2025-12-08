@@ -1,45 +1,37 @@
 import { Table } from "@tanstack/react-table";
-import { ChevronRight, ChevronLeft, ChevronsLeft } from "lucide-react";
-
 import {
-  FetchNextPageOptions,
-  FetchPreviousPageOptions,
-  InfiniteData,
-  InfiniteQueryObserverResult,
-} from "@tanstack/react-query";
+  ChevronRight,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
+
 import { Button } from "@/components/shadcn/button";
+import { Label } from "@/components/shadcn/label";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
-  async?: {
+  manuelPagination?: {
     isFetchingNext: boolean;
     isFetchingPrevious: boolean;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
-    fetchNextPage: (
-      options?: FetchNextPageOptions,
-    ) => Promise<
-      InfiniteQueryObserverResult<InfiniteData<TData[], unknown>, Error>
-    >;
-    fetchPreviousPage: (
-      options?: FetchPreviousPageOptions,
-    ) => Promise<
-      InfiniteQueryObserverResult<InfiniteData<TData[], unknown>, Error>
-    >;
+    fetchNextPage: () => void;
+    fetchPreviousPage: () => void;
   };
 }
 
-export function DataTablePagination<TData>({
+export function DataTablePaginationSync<TData>({
   table,
-  async = undefined,
 }: DataTablePaginationProps<TData>) {
   return (
-    <div className="flex items-center justify-between px-4">
-      <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
-      </div>
+    <div className="flex items-center justify-between">
       <div className="flex w-full items-center gap-8 lg:w-fit">
+        <div className="hidden items-center gap-2 lg:flex">
+          <Label htmlFor="rows-per-page" className="text-sm font-medium">
+            Rows per page
+          </Label>
+        </div>
         <div className="flex w-fit items-center justify-center text-sm font-medium">
           Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
@@ -49,7 +41,7 @@ export function DataTablePagination<TData>({
             variant="outline"
             className="hidden h-8 w-8 p-0 lg:flex"
             onClick={() => table.setPageIndex(0)}
-            disabled={!table.getCanPreviousPage() || !async?.hasPreviousPage}
+            disabled={!table.getCanPreviousPage()}
           >
             <span className="sr-only">Go to first page</span>
             <ChevronsLeft />
@@ -58,16 +50,58 @@ export function DataTablePagination<TData>({
             variant="outline"
             className="size-8"
             size="icon"
-            onClick={async () => {
-              if (async) {
-                await async.fetchPreviousPage();
-              }
-              table.previousPage();
-            }}
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <span className="sr-only">Go to previous page</span>
+            <ChevronLeft />
+          </Button>
+          <Button
+            variant="outline"
+            className="size-8"
+            size="icon"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <span className="sr-only">Go to next page</span>
+            <ChevronRight />
+          </Button>
+          <Button
+            variant="outline"
+            className="hidden size-8 lg:flex"
+            size="icon"
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={!table.getCanNextPage()}
+          >
+            <span className="sr-only">Go to last page</span>
+            <ChevronsRight />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function DataTablePagination<TData>({
+  table,
+  manuelPagination = undefined,
+}: DataTablePaginationProps<TData>) {
+  if (!manuelPagination) {
+    return <DataTablePaginationSync table={table} />;
+  }
+
+  return (
+    <div className="flex items-center justify-between mt-2">
+      <div className="flex w-full items-center gap-8 lg:w-fit">
+        <div className="ml-auto flex items-center gap-2 lg:ml-0">
+          <Button
+            variant="outline"
+            className="size-8"
+            size="icon"
+            onClick={manuelPagination.fetchPreviousPage}
             disabled={
-              !table.getCanPreviousPage() ||
-              async?.isFetchingPrevious ||
-              !async?.hasPreviousPage
+              !manuelPagination.hasPreviousPage ||
+              manuelPagination.isFetchingPrevious
             }
           >
             <span className="sr-only">Go to previous page</span>
@@ -77,16 +111,9 @@ export function DataTablePagination<TData>({
             variant="outline"
             className="size-8"
             size="icon"
-            onClick={async () => {
-              if (async) {
-                await async.fetchNextPage();
-              }
-              table.nextPage();
-            }}
+            onClick={manuelPagination.fetchNextPage}
             disabled={
-              !table.getCanNextPage() ||
-              async?.isFetchingNext ||
-              !async?.hasNextPage
+              !manuelPagination.hasNextPage || manuelPagination.isFetchingNext
             }
           >
             <span className="sr-only">Go to next page</span>

@@ -2,7 +2,7 @@ import EventsTable from "@/components/features/dashboard/home/events-table";
 import Heading from "@/components/widgets/texts/heading";
 
 export default function DashboardHome() {
-  const now = Date.now();
+  const now = Date.now() / 1000;
 
   return (
     <div className="flex flex-col gap-6">

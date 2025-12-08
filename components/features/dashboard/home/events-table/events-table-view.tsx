@@ -2,16 +2,10 @@
 
 import * as React from "react";
 
-import {
-  FetchNextPageOptions,
-  FetchPreviousPageOptions,
-  InfiniteData,
-  InfiniteQueryObserverResult,
-} from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { eventsTableColumns } from "../columns";
+import { useEventsTableColumns } from "../columns";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/widgets/data-table/data-table-view-options";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
@@ -27,39 +21,24 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 import { eventIdFromPkgPath } from "@/lib/queries/event";
+import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
 
 interface EventsTableViewProps {
-  upcomingEvents: EventInfo[];
-  pastEvents: EventInfo[];
+  now: number;
+  tab: "upcoming" | "past";
+  onTabChange: (tab: "upcoming" | "past") => void;
+  events: EventInfo[];
   isFetchingPastNextPage: boolean;
   isFetchingPastPreviousPage: boolean;
-  fetchPastNextPage: (
-    options?: FetchNextPageOptions,
-  ) => Promise<
-    InfiniteQueryObserverResult<InfiniteData<EventInfo[], unknown>, Error>
-  >;
-  fetchPastPreviousPage: (
-    options?: FetchPreviousPageOptions,
-  ) => Promise<
-    InfiniteQueryObserverResult<InfiniteData<EventInfo[], unknown>, Error>
-  >;
+  fetchPastNextPage: () => void | Promise<void>;
+  fetchPastPreviousPage: () => void | Promise<void>;
   isFetchingUpcomingNextPage: boolean;
   isFetchingUpcomingPreviousPage: boolean;
-  fetchUpcomingNextPage: (
-    options?: FetchNextPageOptions,
-  ) => Promise<
-    InfiniteQueryObserverResult<InfiniteData<EventInfo[], unknown>, Error>
-  >;
-  fetchUpcomingPreviousPage: (
-    options?: FetchPreviousPageOptions,
-  ) => Promise<
-    InfiniteQueryObserverResult<InfiniteData<EventInfo[], unknown>, Error>
-  >;
-
+  fetchUpcomingNextPage: () => void | Promise<void>;
+  fetchUpcomingPreviousPage: () => void | Promise<void>;
   hasUpcomingNextPage: boolean;
   hasUpcomingPreviousPage: boolean;
   hasPastNextPage: boolean;
@@ -67,8 +46,10 @@ interface EventsTableViewProps {
 }
 
 export function EventsTableView({
-  upcomingEvents,
-  pastEvents,
+  now,
+  tab,
+  onTabChange,
+  events,
   isFetchingPastNextPage,
   isFetchingPastPreviousPage,
   fetchPastNextPage,
@@ -83,10 +64,10 @@ export function EventsTableView({
   hasPastPreviousPage,
 }: EventsTableViewProps) {
   const router = useRouter();
-  const [tab, setTab] = React.useState<"upcoming" | "past">("upcoming");
+  const eventsTableColumns = useEventsTableColumns(now);
   const columns = withDndColumn(eventsTableColumns);
   const table = useDataTableInstance({
-    data: tab === "upcoming" ? upcomingEvents : pastEvents,
+    data: events,
     columns,
     enableRowSelection: false,
     defaultPageSize: DEFAULT_EVENTS_LIMIT,
@@ -97,7 +78,9 @@ export function EventsTableView({
     <Tabs
       defaultValue="upcoming"
       value={tab}
-      onValueChange={setTab as React.Dispatch<React.SetStateAction<string>>}
+      onValueChange={
+        onTabChange as React.Dispatch<React.SetStateAction<string>>
+      }
       className="w-full flex-col justify-start gap-6"
     >
       <div className="flex items-center justify-between">
@@ -107,7 +90,9 @@ export function EventsTableView({
         <Select
           defaultValue="upcoming"
           value={tab}
-          onValueChange={setTab as React.Dispatch<React.SetStateAction<string>>}
+          onValueChange={
+            onTabChange as React.Dispatch<React.SetStateAction<string>>
+          }
         >
           <SelectTrigger className="flex w-fit xl:hidden" id="view-selector">
             <SelectValue placeholder="Select a view" />
@@ -157,7 +142,7 @@ export function EventsTableView({
       </div>
       <DataTablePagination
         table={table}
-        async={{
+        manuelPagination={{
           isFetchingNext:
             tab === "upcoming"
               ? isFetchingUpcomingNextPage

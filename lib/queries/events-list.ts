@@ -3,6 +3,7 @@ import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import {
   InfiniteData,
   infiniteQueryOptions,
+  queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
 import { withSpan } from "../tracer";
@@ -72,6 +73,52 @@ export const eventsList = (
       return pages.length - 2;
     },
     ...options,
+  });
+};
+
+export const eventsByOrganizerListSuspense = (
+  organizerRealmId: string | undefined,
+  discoverableFilter: DiscoverableFilter,
+  fromUnixSec: number,
+  toUnixSec: number,
+  limit: number,
+  page: number,
+) => {
+  const fromInt = Math.floor(fromUnixSec);
+  const toInt = Math.floor(toUnixSec);
+  const limitInt = Math.floor(limit);
+  const pageInt = Math.floor(page);
+
+  return queryOptions({
+    queryKey: [
+      "eventsByOrganizer",
+      organizerRealmId,
+      discoverableFilter,
+      fromInt,
+      toInt,
+      limitInt,
+      pageInt,
+    ],
+    queryFn: async () => {
+      if (!organizerRealmId) return [];
+
+      return withSpan(
+        `query:chain:user:${organizerRealmId}:events:role:organizer`,
+        async () => {
+          const client = new GnoJSONRPCProvider(
+            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+          );
+          const res = await client.evaluateExpression(
+            `gno.land/r/zenao/eventreg`,
+            `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizerRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageInt * limitInt}))`,
+          );
+          const raw = extractGnoJSONResponse(res);
+
+          return eventListFromJson(raw);
+        },
+      );
+    },
+    enabled: !!organizerRealmId,
   });
 };
 

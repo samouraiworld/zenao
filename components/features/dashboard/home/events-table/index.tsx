@@ -1,18 +1,16 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import {
-  useSuspenseInfiniteQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { EventsTableView } from "./events-table-view";
 import { userInfoOptions } from "@/lib/queries/user";
 import {
   DEFAULT_EVENTS_LIMIT,
-  eventsByOrganizerList,
+  eventsByOrganizerListSuspense,
 } from "@/lib/queries/events-list";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import useManualPagination from "@/hooks/use-manual-pagination";
 
 interface EventsTableProps {
   now: number;
@@ -23,66 +21,86 @@ export default function EventsTable({ now }: EventsTableProps) {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const {
-    data: upcomingEventsPages,
-    isFetchingNextPage: isFetchingUpcomingNextPage,
-    isFetchingPreviousPage: isFetchingUpcomingPreviousPage,
-    hasNextPage: hasNextUpcomingPage,
-    hasPreviousPage: hasPreviousUpcomingPage,
-    fetchNextPage: fetchNextUpcomingPage,
-    fetchPreviousPage: fetchPreviousUpcomingPage,
-  } = useSuspenseInfiniteQuery(
-    eventsByOrganizerList(
-      userInfo?.realmId,
-      DiscoverableFilter.UNSPECIFIED,
-      now,
-      Number.MAX_SAFE_INTEGER,
-      DEFAULT_EVENTS_LIMIT,
-    ),
-  );
-  const {
-    data: pastEventsPages,
-    isFetchingNextPage: isFetchingPastNextPage,
-    isFetchingPreviousPage: isFetchingPastPreviousPage,
-    hasNextPage: hasNextPastPage,
-    hasPreviousPage: hasPreviousPastPage,
-    fetchNextPage: fetchNextPastPage,
-    fetchPreviousPage: fetchPreviousPastPage,
-  } = useSuspenseInfiniteQuery(
-    eventsByOrganizerList(
-      userInfo?.realmId,
-      DiscoverableFilter.UNSPECIFIED,
-      now - 1,
-      0,
-      DEFAULT_EVENTS_LIMIT,
-    ),
-  );
 
-  const upcomingEvents = useMemo(
-    () => upcomingEventsPages.pages.flat(),
-    [upcomingEventsPages],
-  );
-  const pastEvents = useMemo(
-    () => pastEventsPages.pages.flat(),
-    [pastEventsPages],
-  );
+  const [tablePage, setTablePage] = useState(0);
+  const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
+
+  const { data: pastEvents, isFetching: isFetchingPastEvents } =
+    useSuspenseQuery(
+      eventsByOrganizerListSuspense(
+        userInfo?.realmId,
+        DiscoverableFilter.UNSPECIFIED,
+        now - 1,
+        0,
+        DEFAULT_EVENTS_LIMIT,
+        tablePage,
+      ),
+    );
+
+  const { data: upcomingEvents, isFetching: isFetchingUpcomingEvents } =
+    useSuspenseQuery(
+      eventsByOrganizerListSuspense(
+        userInfo?.realmId,
+        DiscoverableFilter.UNSPECIFIED,
+        now,
+        Number.MAX_SAFE_INTEGER,
+        DEFAULT_EVENTS_LIMIT,
+        tablePage,
+      ),
+    );
+
+  console.log(upcomingEvents);
+
+  const {
+    hasNextPage: hasPastNextPage,
+    hasPreviousPage: hasPastPreviousPage,
+    fetchNextPage: fetchPastNextPage,
+    fetchPreviousPage: fetchPastPreviousPage,
+  } = useManualPagination({
+    page: tablePage,
+    onPageChange: setTablePage,
+    getHasNextPage: () => {
+      return pastEvents.length > DEFAULT_EVENTS_LIMIT;
+    },
+    getHasPreviousPage: (currentPage) => {
+      return currentPage > 0 && pastEvents.length < DEFAULT_EVENTS_LIMIT;
+    },
+  });
+
+  const {
+    hasNextPage: hasUpcomingNextPage,
+    hasPreviousPage: hasUpcomingPreviousPage,
+    fetchNextPage: fetchUpcomingNextPage,
+    fetchPreviousPage: fetchUpcomingPreviousPage,
+  } = useManualPagination({
+    page: tablePage,
+    onPageChange: setTablePage,
+    getHasNextPage: () => {
+      return upcomingEvents.length == DEFAULT_EVENTS_LIMIT;
+    },
+    getHasPreviousPage: (currentPage) => {
+      return currentPage > 0 && upcomingEvents.length < DEFAULT_EVENTS_LIMIT;
+    },
+  });
 
   return (
     <EventsTableView
-      upcomingEvents={upcomingEvents}
-      pastEvents={pastEvents}
-      isFetchingPastNextPage={isFetchingPastNextPage}
-      isFetchingPastPreviousPage={isFetchingPastPreviousPage}
-      hasPastNextPage={hasNextPastPage}
-      hasPastPreviousPage={hasPreviousPastPage}
-      fetchPastNextPage={fetchNextPastPage}
-      fetchPastPreviousPage={fetchPreviousPastPage}
-      isFetchingUpcomingNextPage={isFetchingUpcomingNextPage}
-      isFetchingUpcomingPreviousPage={isFetchingUpcomingPreviousPage}
-      hasUpcomingNextPage={hasNextUpcomingPage}
-      hasUpcomingPreviousPage={hasPreviousUpcomingPage}
-      fetchUpcomingNextPage={fetchNextUpcomingPage}
-      fetchUpcomingPreviousPage={fetchPreviousUpcomingPage}
+      now={now}
+      tab={tab}
+      onTabChange={setTab}
+      events={tab === "upcoming" ? upcomingEvents : pastEvents}
+      isFetchingPastNextPage={isFetchingPastEvents}
+      isFetchingPastPreviousPage={isFetchingPastEvents}
+      hasPastNextPage={hasPastNextPage}
+      hasPastPreviousPage={hasPastPreviousPage}
+      fetchPastNextPage={fetchPastNextPage}
+      fetchPastPreviousPage={fetchPastPreviousPage}
+      isFetchingUpcomingNextPage={isFetchingUpcomingEvents}
+      isFetchingUpcomingPreviousPage={isFetchingUpcomingEvents}
+      hasUpcomingNextPage={hasUpcomingNextPage}
+      hasUpcomingPreviousPage={hasUpcomingPreviousPage}
+      fetchUpcomingNextPage={fetchUpcomingNextPage}
+      fetchUpcomingPreviousPage={fetchUpcomingPreviousPage}
     />
   );
 }
