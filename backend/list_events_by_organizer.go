@@ -8,6 +8,6 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
-func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenaov1.ListEventsRequest]) (*connect.Response[zenaov1.EventsInfo], error) {
+func (s *ZenaoServer) ListEventsByOrganizer(ctx context.Context, req *connect.Request[zenaov1.ListEventsByOrganizerRequest]) (*connect.Response[zenaov1.EventsInfo], error) {
 	return nil, errors.New("not implemented")
 }

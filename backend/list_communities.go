@@ -8,6 +8,7 @@ import (
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 )
 
-func (s *ZenaoServer) ListCommunities(ctx context.Context, req *connect.Request[zenaov1.ListCommunitiesRequest]) (*connect.Response[zenaov1.ListCommunitiesResponse], error) {
+func (s *ZenaoServer) ListCommunities(ctx context.Context, req *connect.Request[zenaov1.ListCommunitiesRequest]) (*connect.Response[zenaov1.CommunitiesInfo], error) {
+
 	return nil, errors.New("not implemented")
 }

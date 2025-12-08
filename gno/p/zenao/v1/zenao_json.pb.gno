@@ -282,33 +282,65 @@ func ListEventsRequestFromJSON(l *ListEventsRequest, node *json.Node) {
 	}
 }
 
-func (l *ListEventsResponse) ToJSON() *json.Node {
+func (l *ListEventsByOrganizerRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if len(l.Events) != 0 {
-		arr := make([]*json.Node, len(l.Events))
-		for i, val := range l.Events {
-			arr[i] = val.ToJSON()
-		}
-		fields["events"] = json.ArrayNode("", arr)
+	if l.OrganizerId != "" {
+		fields["organizerId"] = json.StringNode("", l.OrganizerId)
+	}
+	if l.Limit != 0 {
+		fields["limit"] = json.NumberNode("", float64(l.Limit))
+	}
+	if l.Offset != 0 {
+		fields["offset"] = json.NumberNode("", float64(l.Offset))
 	}
 
 	return json.ObjectNode("", fields)
 }
 
-func ListEventsResponseFromJSON(l *ListEventsResponse, node *json.Node) {
-	*l = ListEventsResponse{}
+func ListEventsByOrganizerRequestFromJSON(l *ListEventsByOrganizerRequest, node *json.Node) {
+	*l = ListEventsByOrganizerRequest{}
 	fields := node.MustObject()
 
-	if val, ok := fields["events"]; ok {
-		jarr := val.MustArray()
-		arr := make([]*EventInfo, len(jarr))
-		for i, val := range jarr {
-			fv := &EventInfo{}
-			EventInfoFromJSON(fv, val)
-			arr[i] = fv
-		}
-		l.Events = arr
+	if val, ok := fields["organizerId"]; ok {
+		l.OrganizerId = val.MustString()
+	}
+	if val, ok := fields["limit"]; ok {
+		l.Limit = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["offset"]; ok {
+		l.Offset = uint32(val.MustNumeric())
+	}
+}
+
+func (l *ListEventsByParticipantRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if l.ParticipantId != "" {
+		fields["participantId"] = json.StringNode("", l.ParticipantId)
+	}
+	if l.Limit != 0 {
+		fields["limit"] = json.NumberNode("", float64(l.Limit))
+	}
+	if l.Offset != 0 {
+		fields["offset"] = json.NumberNode("", float64(l.Offset))
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListEventsByParticipantRequestFromJSON(l *ListEventsByParticipantRequest, node *json.Node) {
+	*l = ListEventsByParticipantRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["participantId"]; ok {
+		l.ParticipantId = val.MustString()
+	}
+	if val, ok := fields["limit"]; ok {
+		l.Limit = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["offset"]; ok {
+		l.Offset = uint32(val.MustNumeric())
 	}
 }
 
@@ -1207,6 +1239,36 @@ func EventInfoFromJSON(e *EventInfo, node *json.Node) {
 	}
 	if val, ok := fields["discoverable"]; ok {
 		e.Discoverable = val.MustBool()
+	}
+}
+
+func (e *EventsInfo) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(e.Events) != 0 {
+		arr := make([]*json.Node, len(e.Events))
+		for i, val := range e.Events {
+			arr[i] = val.ToJSON()
+		}
+		fields["events"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func EventsInfoFromJSON(e *EventsInfo, node *json.Node) {
+	*e = EventsInfo{}
+	fields := node.MustObject()
+
+	if val, ok := fields["events"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*EventInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &EventInfo{}
+			EventInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		e.Events = arr
 	}
 }
 
@@ -2109,18 +2171,39 @@ func CommunityInfoFromJSON(c *CommunityInfo, node *json.Node) {
 	}
 }
 
+func (c *CommunitiesInfo) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(c.Communities) != 0 {
+		arr := make([]*json.Node, len(c.Communities))
+		for i, val := range c.Communities {
+			arr[i] = val.ToJSON()
+		}
+		fields["communities"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func CommunitiesInfoFromJSON(c *CommunitiesInfo, node *json.Node) {
+	*c = CommunitiesInfo{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communities"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*CommunityInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &CommunityInfo{}
+			CommunityInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		c.Communities = arr
+	}
+}
+
 func (l *ListCommunitiesRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if l.EntityType != "" {
-		fields["entityType"] = json.StringNode("", l.EntityType)
-	}
-	if l.EntityId != "" {
-		fields["entityId"] = json.StringNode("", l.EntityId)
-	}
-	if l.Role != "" {
-		fields["role"] = json.StringNode("", l.Role)
-	}
 	if l.Limit != 0 {
 		fields["limit"] = json.NumberNode("", float64(l.Limit))
 	}
@@ -2135,14 +2218,36 @@ func ListCommunitiesRequestFromJSON(l *ListCommunitiesRequest, node *json.Node) 
 	*l = ListCommunitiesRequest{}
 	fields := node.MustObject()
 
-	if val, ok := fields["entityType"]; ok {
-		l.EntityType = val.MustString()
+	if val, ok := fields["limit"]; ok {
+		l.Limit = uint32(val.MustNumeric())
 	}
-	if val, ok := fields["entityId"]; ok {
-		l.EntityId = val.MustString()
+	if val, ok := fields["offset"]; ok {
+		l.Offset = uint32(val.MustNumeric())
 	}
-	if val, ok := fields["role"]; ok {
-		l.Role = val.MustString()
+}
+
+func (l *ListCommunitiesByMemberRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if l.MemberId != "" {
+		fields["memberId"] = json.StringNode("", l.MemberId)
+	}
+	if l.Limit != 0 {
+		fields["limit"] = json.NumberNode("", float64(l.Limit))
+	}
+	if l.Offset != 0 {
+		fields["offset"] = json.NumberNode("", float64(l.Offset))
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListCommunitiesByMemberRequestFromJSON(l *ListCommunitiesByMemberRequest, node *json.Node) {
+	*l = ListCommunitiesByMemberRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["memberId"]; ok {
+		l.MemberId = val.MustString()
 	}
 	if val, ok := fields["limit"]; ok {
 		l.Limit = uint32(val.MustNumeric())
@@ -2152,33 +2257,34 @@ func ListCommunitiesRequestFromJSON(l *ListCommunitiesRequest, node *json.Node) 
 	}
 }
 
-func (l *ListCommunitiesResponse) ToJSON() *json.Node {
+func (l *ListCommunitiesByEventRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if len(l.Communities) != 0 {
-		arr := make([]*json.Node, len(l.Communities))
-		for i, val := range l.Communities {
-			arr[i] = val.ToJSON()
-		}
-		fields["communities"] = json.ArrayNode("", arr)
+	if l.EventId != "" {
+		fields["eventId"] = json.StringNode("", l.EventId)
+	}
+	if l.Limit != 0 {
+		fields["limit"] = json.NumberNode("", float64(l.Limit))
+	}
+	if l.Offset != 0 {
+		fields["offset"] = json.NumberNode("", float64(l.Offset))
 	}
 
 	return json.ObjectNode("", fields)
 }
 
-func ListCommunitiesResponseFromJSON(l *ListCommunitiesResponse, node *json.Node) {
-	*l = ListCommunitiesResponse{}
+func ListCommunitiesByEventRequestFromJSON(l *ListCommunitiesByEventRequest, node *json.Node) {
+	*l = ListCommunitiesByEventRequest{}
 	fields := node.MustObject()
 
-	if val, ok := fields["communities"]; ok {
-		jarr := val.MustArray()
-		arr := make([]*CommunityInfo, len(jarr))
-		for i, val := range jarr {
-			fv := &CommunityInfo{}
-			CommunityInfoFromJSON(fv, val)
-			arr[i] = fv
-		}
-		l.Communities = arr
+	if val, ok := fields["eventId"]; ok {
+		l.EventId = val.MustString()
+	}
+	if val, ok := fields["limit"]; ok {
+		l.Limit = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["offset"]; ok {
+		l.Offset = uint32(val.MustNumeric())
 	}
 }
 
