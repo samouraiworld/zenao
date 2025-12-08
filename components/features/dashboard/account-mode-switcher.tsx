@@ -1,5 +1,7 @@
 import { BadgeCheck, Bell, CreditCard, LogOut } from "lucide-react";
 
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { UserAvatar } from "../user/user";
 import {
   DropdownMenu,
@@ -9,11 +11,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
-import { UserProfile } from "@/lib/queries/profile";
+import { profileOptions, UserProfile } from "@/lib/queries/profile";
+import { userInfoOptions } from "@/lib/queries/user";
 
 const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
-export function AccountModeSwitcher({
+export function AccountModeSwitcher() {
+  const { getToken, userId } = useAuth();
+  const { data: user } = useSuspenseQuery(userInfoOptions(getToken, userId));
+  const { data: profile } = useSuspenseQuery(
+    profileOptions(user?.realmId || ""),
+  );
+
+  if (!user || !profile) {
+    return null;
+  }
+
+  return <AccountModeSwitcherView user={profile} realmId={user.realmId} />;
+}
+
+export function AccountModeSwitcherView({
   user,
   realmId,
 }: {

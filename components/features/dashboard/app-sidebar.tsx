@@ -1,14 +1,12 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/clerk-react";
+import { Suspense } from "react";
 import { NavMain } from "./nav-main";
-import { NavUser } from "./nav-user";
 
+import AppSidebarFooter from "./app-sidebar-footer";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
@@ -17,20 +15,9 @@ import {
 import { APP_CONFIG } from "@/lib/config/app-config";
 import { sidebarItems } from "@/lib/navigation/dashboard/sidebar/sidebar-items";
 import { Web3Image } from "@/components/widgets/images/web3-image";
-import { userInfoOptions } from "@/lib/queries/user";
-import { profileOptions } from "@/lib/queries/profile";
+import { Skeleton } from "@/components/shadcn/skeleton";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { getToken, userId } = useAuth();
-  const { data: user } = useSuspenseQuery(userInfoOptions(getToken, userId));
-  const { data: profile } = useSuspenseQuery(
-    profileOptions(user?.realmId || ""),
-  );
-
-  if (!user || !profile) {
-    return null;
-  }
-
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -53,9 +40,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={sidebarItems} />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={profile} realmId={user?.realmId ?? ""} />
-      </SidebarFooter>
+      <Suspense fallback={<Skeleton className="h-12 w-full" />}>
+        <AppSidebarFooter />
+      </Suspense>
     </Sidebar>
   );
 }

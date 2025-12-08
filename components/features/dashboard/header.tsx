@@ -1,31 +1,19 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { Suspense } from "react";
 import { AccountModeSwitcher } from "./account-mode-switcher";
 import { Separator } from "@/components/shadcn/separator";
 import { SidebarTrigger } from "@/components/shadcn/sidebar";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { cn } from "@/lib/tailwind";
-import { profileOptions } from "@/lib/queries/profile";
-import { userInfoOptions } from "@/lib/queries/user";
 import { NavbarStyle } from "@/lib/preferences/preferences";
+import { Skeleton } from "@/components/shadcn/skeleton";
 
 type DashboardHeaderProps = {
   readonly navbarStyle: NavbarStyle;
 };
 
 export default function DashboardHeader({ navbarStyle }: DashboardHeaderProps) {
-  const { getToken, userId } = useAuth();
-  const { data: user } = useSuspenseQuery(userInfoOptions(getToken, userId));
-  const { data: profile } = useSuspenseQuery(
-    profileOptions(user?.realmId || ""),
-  );
-
-  if (!user || !profile) {
-    return null;
-  }
-
   return (
     <header
       data-navbar-style={navbarStyle}
@@ -45,7 +33,9 @@ export default function DashboardHeader({ navbarStyle }: DashboardHeaderProps) {
         </div>
         <div className="flex items-center gap-2">
           <ToggleThemeButton />
-          <AccountModeSwitcher user={profile} realmId={user.realmId} />
+          <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
+            <AccountModeSwitcher />
+          </Suspense>
         </div>
       </div>
     </header>
