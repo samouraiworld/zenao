@@ -314,6 +314,49 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 	return dbEventToZeniEvent(evt)
 }
 
+// ListEvents implements zeni.DB.
+func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string, limit int, offset int) ([]*zeni.Event, error) {
+	g, span := g.trace("gzdb.ListEvents")
+	defer span.End()
+
+	var orgIDs []uint
+	if entityID != "" && entityType != "" {
+		entityIDInt, err := strconv.ParseUint(entityID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse entity id: %w", err)
+		}
+		query := g.db.Model(&EntityRole{}).Select("org_id").Where("entity_type = ? AND entity_id = ? AND org_type = ?", entityType, entityIDInt, zeni.EntityTypeEvent)
+		if role != "" {
+			query = query.Where("role = ?", role)
+		}
+		if err := query.Find(&orgIDs).Order("org_id DESC").Limit(limit).Offset(offset).Error; err != nil {
+			return nil, fmt.Errorf("query org ids: %w", err)
+		}
+		if len(orgIDs) == 0 {
+			return []*zeni.Event{}, nil
+		}
+	}
+
+	var dbEvts []Event
+	query := g.db.Model(&Event{}).Order("id DESC").Limit(limit).Offset(offset)
+	if len(orgIDs) > 0 {
+		query = query.Where("id IN ?", orgIDs)
+	}
+	if err := query.Find(&dbEvts).Error; err != nil {
+		return nil, fmt.Errorf("query events: %w", err)
+	}
+	zenEvts := make([]*zeni.Event, 0, len(dbEvts))
+	for _, dbEvt := range dbEvts {
+		zenCmt, err := dbEventToZeniEvent(&dbEvt)
+		if err != nil {
+			return nil, fmt.Errorf("convert db event to zeni event: %w", err)
+		}
+		zenEvts = append(zenEvts, zenCmt)
+	}
+
+	return zenEvts, nil
+}
+
 // CountCheckedIn implements zeni.DB.
 func (g *gormZenaoDB) CountCheckedIn(eventID string) (uint32, error) {
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)

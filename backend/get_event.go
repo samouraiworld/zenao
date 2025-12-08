@@ -33,6 +33,10 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		if err != nil {
 			return err
 		}
+		gatekeepers, err = tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleGatekeeper)
+		if err != nil {
+			return err
+		}
 		participants, err = tx.CountEntities(zeni.EntityTypeEvent, req.Msg.EventId, zeni.EntityTypeUser, zeni.RoleParticipant)
 		if err != nil {
 			return err
