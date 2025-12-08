@@ -55,3 +55,6 @@ genesis_txs.jsonl
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+/lib/forge-std
+/cache
