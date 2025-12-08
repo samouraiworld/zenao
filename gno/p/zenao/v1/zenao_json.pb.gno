@@ -1448,6 +1448,27 @@ func GetPollRequestFromJSON(g *GetPollRequest, node *json.Node) {
 	}
 }
 
+func (g *GetPollResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.Poll != nil {
+		fields["poll"] = g.Poll.ToJSON()
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetPollResponseFromJSON(g *GetPollResponse, node *json.Node) {
+	*g = GetPollResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["poll"]; ok {
+		fv := &v1.Poll{}
+		PollFromJSON(fv, val)
+		g.Poll = fv
+	}
+}
+
 func (v *VotePollRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -1576,6 +1597,27 @@ func GetPostRequestFromJSON(g *GetPostRequest, node *json.Node) {
 	}
 	if val, ok := fields["userId"]; ok {
 		g.UserId = val.MustString()
+	}
+}
+
+func (g *GetPostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.Post != nil {
+		fields["post"] = g.Post.ToJSON()
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetPostResponseFromJSON(g *GetPostResponse, node *json.Node) {
+	*g = GetPostResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["post"]; ok {
+		fv := &v11.PostView{}
+		PostViewFromJSON(fv, val)
+		g.Post = fv
 	}
 }
 

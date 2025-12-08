@@ -284,6 +284,10 @@ type GetPollRequest struct {
 	UserId string
 }
 
+type GetPollResponse struct {
+	Poll *v1.Poll
+}
+
 type VotePollRequest struct {
 	PollId string
 	Option string
@@ -307,6 +311,10 @@ type CreatePostResponse struct {
 type GetPostRequest struct {
 	PostId string
 	UserId string
+}
+
+type GetPostResponse struct {
+	Post *v11.PostView
 }
 
 type GetPostsRequest struct {

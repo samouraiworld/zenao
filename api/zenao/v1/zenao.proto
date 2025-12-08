@@ -52,9 +52,9 @@ service ZenaoService {
   rpc ListEvents(ListEventsRequest) returns (EventsInfo);
   rpc ListEventsByOrganizer(ListEventsByOrganizerRequest) returns (EventsInfo);
   rpc ListEventsByParticipant(ListEventsByParticipantRequest) returns (EventsInfo);
-  rpc GetPost(GetPostRequest) returns (feeds.v1.PostView);
+  rpc GetPost(GetPostRequest) returns (GetPostResponse);
   rpc GetPosts(GetPostsRequest) returns (GetPostsResponse);
-  rpc GetPoll(GetPollRequest) returns (polls.v1.Poll);
+  rpc GetPoll(GetPollRequest) returns (GetPollResponse);
   rpc GetUsersProfile(GetUsersProfileRequest) returns (GetUsersProfileResponse); // -> BatchProfile
 
   // FEED
@@ -292,6 +292,10 @@ message GetPollRequest {
   string user_id = 2; // optional, to check if the user has voted
  }
 
+message GetPollResponse {
+  polls.v1.Poll poll = 1;
+}
+
 message VotePollRequest {
   string poll_id = 1;
   string option = 2;
@@ -312,6 +316,10 @@ message CreatePostResponse { string post_id = 1; }
 message GetPostRequest {
   string post_id = 1;
   string user_id = 2; // optional, to check if the user has reacted
+}
+
+message GetPostResponse {
+  feeds.v1.PostView post = 1;
 }
 
 message GetPostsRequest {

@@ -829,6 +829,18 @@ func (g *GetPollRequest) GnoLiteral(typePrefix string, linePrefix string) string
 	return buf.String()
 }
 
+func (g *GetPollResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetPollResponse{\n")
+	if g.Poll != nil {
+		fmt.Fprintf(buf, "%s\tPoll: &%s%s,\n", linePrefix, typePrefix, g.Poll.GnoLiteral(typePrefix, linePrefix+"\t"))
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (v *VotePollRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -904,6 +916,18 @@ func (g *GetPostRequest) GnoLiteral(typePrefix string, linePrefix string) string
 	}
 	if g.UserId != "" {
 		fmt.Fprintf(buf, "%s\tUserId: %q,\n", linePrefix, g.UserId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetPostResponse{\n")
+	if g.Post != nil {
+		fmt.Fprintf(buf, "%s\tPost: &%s%s,\n", linePrefix, typePrefix, g.Post.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
