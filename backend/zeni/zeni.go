@@ -215,6 +215,7 @@ type DB interface {
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
+	CountEntities(orgType string, orgID string, entityType string, role string) (uint32, error)
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)

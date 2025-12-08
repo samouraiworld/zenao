@@ -787,6 +787,7 @@ func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventID string, userID string) 
 	return res, nil
 }
 
+// EntityRoles implements zeni.DB.
 func (g *gormZenaoDB) EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error) {
 	var roles []EntityRole
 
@@ -803,6 +804,35 @@ func (g *gormZenaoDB) EntityRoles(entityType string, entityID string, orgType st
 	}
 
 	return res, nil
+}
+
+// CountEntities implements zeni.DB.
+func (g *gormZenaoDB) CountEntities(orgType string, orgID string, entityType string, role string) (uint32, error) {
+	var count int64
+
+	query := g.db.Model(&EntityRole{})
+
+	if orgType != "" {
+		query = query.Where("org_type = ?", orgType)
+	}
+
+	if orgID != "" {
+		query = query.Where("org_id = ?", orgID)
+	}
+
+	if entityType != "" {
+		query = query.Where("entity_type = ?", entityType)
+	}
+
+	if role != "" {
+		query = query.Where("role = ?", role)
+	}
+
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return uint32(count), nil
 }
 
 // CreateCommunity implements zeni.DB.
