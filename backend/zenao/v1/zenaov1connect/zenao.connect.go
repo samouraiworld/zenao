@@ -95,9 +95,9 @@ const (
 	// ZenaoServiceEntityRolesProcedure is the fully-qualified name of the ZenaoService's EntityRoles
 	// RPC.
 	ZenaoServiceEntityRolesProcedure = "/zenao.v1.ZenaoService/EntityRoles"
-	// ZenaoServiceEntitiesWithRoleProcedure is the fully-qualified name of the ZenaoService's
-	// EntitiesWithRole RPC.
-	ZenaoServiceEntitiesWithRoleProcedure = "/zenao.v1.ZenaoService/EntitiesWithRole"
+	// ZenaoServiceUsersWithRoleProcedure is the fully-qualified name of the ZenaoService's
+	// UsersWithRole RPC.
+	ZenaoServiceUsersWithRoleProcedure = "/zenao.v1.ZenaoService/UsersWithRole"
 	// ZenaoServiceGetCommunityProcedure is the fully-qualified name of the ZenaoService's GetCommunity
 	// RPC.
 	ZenaoServiceGetCommunityProcedure = "/zenao.v1.ZenaoService/GetCommunity"
@@ -172,7 +172,7 @@ type ZenaoServiceClient interface {
 	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
 	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
 	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
-	EntitiesWithRole(context.Context, *connect.Request[v1.EntitiesWithRoleRequest]) (*connect.Response[v1.EntitiesWithRoleResponse], error)
+	UsersWithRole(context.Context, *connect.Request[v1.UsersWithRoleRequest]) (*connect.Response[v1.UsersWithRoleResponse], error)
 	GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error)
 	ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.CommunitiesInfo], error)
 	ListCommunitiesByMember(context.Context, *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.CommunitiesInfo], error)
@@ -333,10 +333,10 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("EntityRoles")),
 			connect.WithClientOptions(opts...),
 		),
-		entitiesWithRole: connect.NewClient[v1.EntitiesWithRoleRequest, v1.EntitiesWithRoleResponse](
+		usersWithRole: connect.NewClient[v1.UsersWithRoleRequest, v1.UsersWithRoleResponse](
 			httpClient,
-			baseURL+ZenaoServiceEntitiesWithRoleProcedure,
-			connect.WithSchema(zenaoServiceMethods.ByName("EntitiesWithRole")),
+			baseURL+ZenaoServiceUsersWithRoleProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("UsersWithRole")),
 			connect.WithClientOptions(opts...),
 		),
 		getCommunity: connect.NewClient[v1.GetCommunityRequest, v1.CommunityInfo](
@@ -479,7 +479,7 @@ type zenaoServiceClient struct {
 	addEventToCommunity        *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
 	removeEventFromCommunity   *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
 	entityRoles                *connect.Client[v1.EntityRolesRequest, v1.EntityRolesResponse]
-	entitiesWithRole           *connect.Client[v1.EntitiesWithRoleRequest, v1.EntitiesWithRoleResponse]
+	usersWithRole              *connect.Client[v1.UsersWithRoleRequest, v1.UsersWithRoleResponse]
 	getCommunity               *connect.Client[v1.GetCommunityRequest, v1.CommunityInfo]
 	listCommunities            *connect.Client[v1.ListCommunitiesRequest, v1.CommunitiesInfo]
 	listCommunitiesByMember    *connect.Client[v1.ListCommunitiesByMemberRequest, v1.CommunitiesInfo]
@@ -606,9 +606,9 @@ func (c *zenaoServiceClient) EntityRoles(ctx context.Context, req *connect.Reque
 	return c.entityRoles.CallUnary(ctx, req)
 }
 
-// EntitiesWithRole calls zenao.v1.ZenaoService.EntitiesWithRole.
-func (c *zenaoServiceClient) EntitiesWithRole(ctx context.Context, req *connect.Request[v1.EntitiesWithRoleRequest]) (*connect.Response[v1.EntitiesWithRoleResponse], error) {
-	return c.entitiesWithRole.CallUnary(ctx, req)
+// UsersWithRole calls zenao.v1.ZenaoService.UsersWithRole.
+func (c *zenaoServiceClient) UsersWithRole(ctx context.Context, req *connect.Request[v1.UsersWithRoleRequest]) (*connect.Response[v1.UsersWithRoleResponse], error) {
+	return c.usersWithRole.CallUnary(ctx, req)
 }
 
 // GetCommunity calls zenao.v1.ZenaoService.GetCommunity.
@@ -733,7 +733,7 @@ type ZenaoServiceHandler interface {
 	RemoveEventFromCommunity(context.Context, *connect.Request[v1.RemoveEventFromCommunityRequest]) (*connect.Response[v1.RemoveEventFromCommunityResponse], error)
 	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
 	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
-	EntitiesWithRole(context.Context, *connect.Request[v1.EntitiesWithRoleRequest]) (*connect.Response[v1.EntitiesWithRoleResponse], error)
+	UsersWithRole(context.Context, *connect.Request[v1.UsersWithRoleRequest]) (*connect.Response[v1.UsersWithRoleResponse], error)
 	GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error)
 	ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.CommunitiesInfo], error)
 	ListCommunitiesByMember(context.Context, *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.CommunitiesInfo], error)
@@ -890,10 +890,10 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("EntityRoles")),
 		connect.WithHandlerOptions(opts...),
 	)
-	zenaoServiceEntitiesWithRoleHandler := connect.NewUnaryHandler(
-		ZenaoServiceEntitiesWithRoleProcedure,
-		svc.EntitiesWithRole,
-		connect.WithSchema(zenaoServiceMethods.ByName("EntitiesWithRole")),
+	zenaoServiceUsersWithRoleHandler := connect.NewUnaryHandler(
+		ZenaoServiceUsersWithRoleProcedure,
+		svc.UsersWithRole,
+		connect.WithSchema(zenaoServiceMethods.ByName("UsersWithRole")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceGetCommunityHandler := connect.NewUnaryHandler(
@@ -1054,8 +1054,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceRemoveEventFromCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceEntityRolesProcedure:
 			zenaoServiceEntityRolesHandler.ServeHTTP(w, r)
-		case ZenaoServiceEntitiesWithRoleProcedure:
-			zenaoServiceEntitiesWithRoleHandler.ServeHTTP(w, r)
+		case ZenaoServiceUsersWithRoleProcedure:
+			zenaoServiceUsersWithRoleHandler.ServeHTTP(w, r)
 		case ZenaoServiceGetCommunityProcedure:
 			zenaoServiceGetCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceListCommunitiesProcedure:
@@ -1187,8 +1187,8 @@ func (UnimplementedZenaoServiceHandler) EntityRoles(context.Context, *connect.Re
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EntityRoles is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) EntitiesWithRole(context.Context, *connect.Request[v1.EntitiesWithRoleRequest]) (*connect.Response[v1.EntitiesWithRoleResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EntitiesWithRole is not implemented"))
+func (UnimplementedZenaoServiceHandler) UsersWithRole(context.Context, *connect.Request[v1.UsersWithRoleRequest]) (*connect.Response[v1.UsersWithRoleResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.UsersWithRole is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error) {

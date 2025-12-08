@@ -2031,60 +2031,58 @@ func EntityRolesResponseFromJSON(e *EntityRolesResponse, node *json.Node) {
 	}
 }
 
-func (e *EntitiesWithRoleRequest) ToJSON() *json.Node {
+func (u *UsersWithRoleRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if e.Org != nil {
-		fields["org"] = e.Org.ToJSON()
+	if u.Org != nil {
+		fields["org"] = u.Org.ToJSON()
 	}
-	if e.Role != "" {
-		fields["role"] = json.StringNode("", e.Role)
+	if u.Role != "" {
+		fields["role"] = json.StringNode("", u.Role)
 	}
 
 	return json.ObjectNode("", fields)
 }
 
-func EntitiesWithRoleRequestFromJSON(e *EntitiesWithRoleRequest, node *json.Node) {
-	*e = EntitiesWithRoleRequest{}
+func UsersWithRoleRequestFromJSON(u *UsersWithRoleRequest, node *json.Node) {
+	*u = UsersWithRoleRequest{}
 	fields := node.MustObject()
 
 	if val, ok := fields["org"]; ok {
 		fv := &Entity{}
 		EntityFromJSON(fv, val)
-		e.Org = fv
+		u.Org = fv
 	}
 	if val, ok := fields["role"]; ok {
-		e.Role = val.MustString()
+		u.Role = val.MustString()
 	}
 }
 
-func (e *EntitiesWithRoleResponse) ToJSON() *json.Node {
+func (u *UsersWithRoleResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if len(e.Entities) != 0 {
-		arr := make([]*json.Node, len(e.Entities))
-		for i, val := range e.Entities {
-			arr[i] = val.ToJSON()
+	if len(u.UsersIds) != 0 {
+		arr := make([]*json.Node, len(u.UsersIds))
+		for i, val := range u.UsersIds {
+			arr[i] = json.StringNode("", val)
 		}
-		fields["entities"] = json.ArrayNode("", arr)
+		fields["usersIds"] = json.ArrayNode("", arr)
 	}
 
 	return json.ObjectNode("", fields)
 }
 
-func EntitiesWithRoleResponseFromJSON(e *EntitiesWithRoleResponse, node *json.Node) {
-	*e = EntitiesWithRoleResponse{}
+func UsersWithRoleResponseFromJSON(u *UsersWithRoleResponse, node *json.Node) {
+	*u = UsersWithRoleResponse{}
 	fields := node.MustObject()
 
-	if val, ok := fields["entities"]; ok {
+	if val, ok := fields["usersIds"]; ok {
 		jarr := val.MustArray()
-		arr := make([]*Entity, len(jarr))
+		arr := make([]string, len(jarr))
 		for i, val := range jarr {
-			fv := &Entity{}
-			EntityFromJSON(fv, val)
-			arr[i] = fv
+			arr[i] = val.MustString()
 		}
-		e.Entities = arr
+		u.UsersIds = arr
 	}
 }
 

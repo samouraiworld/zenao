@@ -392,13 +392,13 @@ type EntityRolesResponse struct {
 	Roles []string
 }
 
-type EntitiesWithRoleRequest struct {
+type UsersWithRoleRequest struct {
 	Org  *Entity
 	Role string
 }
 
-type EntitiesWithRoleResponse struct {
-	Entities []*Entity
+type UsersWithRoleResponse struct {
+	UsersIds []string
 }
 
 type GetCommunityRequest struct {

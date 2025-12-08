@@ -1189,30 +1189,30 @@ func (e *EntityRolesResponse) GnoLiteral(typePrefix string, linePrefix string) s
 	return buf.String()
 }
 
-func (e *EntitiesWithRoleRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+func (u *UsersWithRoleRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("EntitiesWithRoleRequest{\n")
-	if e.Org != nil {
-		fmt.Fprintf(buf, "%s\tOrg: &%s%s,\n", linePrefix, typePrefix, e.Org.GnoLiteral(typePrefix, linePrefix+"\t"))
+	buf.WriteString("UsersWithRoleRequest{\n")
+	if u.Org != nil {
+		fmt.Fprintf(buf, "%s\tOrg: &%s%s,\n", linePrefix, typePrefix, u.Org.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
-	if e.Role != "" {
-		fmt.Fprintf(buf, "%s\tRole: %q,\n", linePrefix, e.Role)
+	if u.Role != "" {
+		fmt.Fprintf(buf, "%s\tRole: %q,\n", linePrefix, u.Role)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
 }
 
-func (e *EntitiesWithRoleResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+func (u *UsersWithRoleResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("EntitiesWithRoleResponse{\n")
-	if len(e.Entities) != 0 {
-		fmt.Fprintf(buf, "%s\tEntities: []*Entity{\n", linePrefix)
+	buf.WriteString("UsersWithRoleResponse{\n")
+	if len(u.UsersIds) != 0 {
+		fmt.Fprintf(buf, "%s\tUsersIds: []string{\n", linePrefix)
 		linePrefix += "\t"
-		for _, elem := range e.Entities {
-			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		for _, elem := range u.UsersIds {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
