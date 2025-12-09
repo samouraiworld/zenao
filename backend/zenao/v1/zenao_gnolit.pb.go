@@ -89,8 +89,8 @@ func (p *Profile) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("Profile{\n")
-	if p.Id != "" {
-		fmt.Fprintf(buf, "%s\tId: %q,\n", linePrefix, p.Id)
+	if p.Address != "" {
+		fmt.Fprintf(buf, "%s\tAddress: %q,\n", linePrefix, p.Address)
 	}
 	if p.DisplayName != "" {
 		fmt.Fprintf(buf, "%s\tDisplayName: %q,\n", linePrefix, p.DisplayName)

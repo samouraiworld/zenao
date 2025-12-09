@@ -91,7 +91,7 @@ message GetUserInfoResponse {
 }
 
 message Profile {
-  string id = 1;
+  string address = 1;
   string display_name = 2;
   string bio = 3;
   string avatar_uri = 4;

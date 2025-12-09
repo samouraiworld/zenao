@@ -69,7 +69,7 @@ type GetUserInfoResponse struct {
 }
 
 type Profile struct {
-	Id          string
+	Address     string
 	DisplayName string
 	Bio         string
 	AvatarUri   string

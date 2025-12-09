@@ -128,8 +128,8 @@ func GetUserInfoResponseFromJSON(g *GetUserInfoResponse, node *json.Node) {
 func (p *Profile) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if p.Id != "" {
-		fields["id"] = json.StringNode("", p.Id)
+	if p.Address != "" {
+		fields["address"] = json.StringNode("", p.Address)
 	}
 	if p.DisplayName != "" {
 		fields["displayName"] = json.StringNode("", p.DisplayName)
@@ -148,8 +148,8 @@ func ProfileFromJSON(p *Profile, node *json.Node) {
 	*p = Profile{}
 	fields := node.MustObject()
 
-	if val, ok := fields["id"]; ok {
-		p.Id = val.MustString()
+	if val, ok := fields["address"]; ok {
+		p.Address = val.MustString()
 	}
 	if val, ok := fields["displayName"]; ok {
 		p.DisplayName = val.MustString()

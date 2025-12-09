@@ -1,14 +1,13 @@
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { queryOptions } from "@tanstack/react-query";
 import {
   create as createBatcher,
   windowScheduler,
   keyResolver,
 } from "@yornaath/batshit";
-import { MessageInitShape } from "@bufbuild/protobuf";
-import { addressFromRealmId, extractGnoJSONResponse } from "../gno";
+import { addressFromRealmId } from "../gno";
 import { withSpan } from "../tracer";
-import { BatchProfileRequestSchema } from "@/app/gen/zenao/v1/zenao_pb";
+import { zenaoClient } from "../zenao-client";
+import { userIdFromPkgPath } from "./user";
 
 export type GnoProfile = {
   address: string;
@@ -40,34 +39,38 @@ export const profiles = createBatcher({
       return [];
     }
 
-    return withSpan(`query:chain:profiles:${addrs.join(",")}`, async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
-      );
+    const ids = addrs.map((addr) => userIdFromPkgPath(addr));
+    return withSpan(`query:backend:profiles:${ids.join(",")}`, async () => {
+      // const client = new GnoJSONRPCProvider(
+      //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
+      // );
 
-      const req: MessageInitShape<typeof BatchProfileRequestSchema> = {
-        fields: [
-          { key: "DisplayName", type: "string" },
-          { key: "Bio", type: "string" },
-          { key: "Avatar", type: "string" },
-        ],
-        addresses: addrs,
-      };
-      const resRaw = await client.evaluateExpression(
-        `gno.land/r/zenao/batchprofile`,
-        `queryJSON(${JSON.stringify(JSON.stringify(req))})`,
-      );
-      const resu = extractGnoJSONResponse(resRaw) as unknown[][];
-      const res: GnoProfile[] = [];
-      for (let i = 0; i < addrs.length; i++) {
-        res.push({
-          address: addrs[i],
-          displayName: resu[i][0] as string,
-          bio: resu[i][1] as string,
-          avatarUri: resu[i][2] as string,
-        });
-      }
-      return res;
+      // const req: MessageInitShape<typeof BatchProfileRequestSchema> = {
+      //   fields: [
+      //     { key: "DisplayName", type: "string" },
+      //     { key: "Bio", type: "string" },
+      //     { key: "Avatar", type: "string" },
+      //   ],
+      //   addresses: addrs,
+      // };
+      // const resRaw = await client.evaluateExpression(
+      //   `gno.land/r/zenao/batchprofile`,
+      //   `queryJSON(${JSON.stringify(JSON.stringify(req))})`,
+      // );
+      // const resu = extractGnoJSONResponse(resRaw) as unknown[][];
+      // const res: GnoProfile[] = [];
+      // for (let i = 0; i < addrs.length; i++) {
+      //   res.push({
+      //     address: addrs[i],
+      //     displayName: resu[i][0] as string,
+      //     bio: resu[i][1] as string,
+      //     avatarUri: resu[i][2] as string,
+      //   });
+      // }
+      const res = await zenaoClient.getUsersProfile({
+        ids,
+      });
+      return res.profiles;
     });
   },
   // when we call profiles.fetch, this will resolve the correct user using the field `address`
