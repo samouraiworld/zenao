@@ -30,7 +30,7 @@ func (s *ZenaoServer) ListCommunities(ctx context.Context, req *connect.Request[
 			}
 
 			admIDs := mapsl.Map(adm, func(u *zeni.User) string {
-				return u.ID
+				return s.Chain.UserRealmID(u.ID) // TODO: remove usage in front-end to use ID instead ?
 			})
 
 			info := zenaov1.CommunityInfo{

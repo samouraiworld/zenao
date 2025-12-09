@@ -430,7 +430,7 @@ message UsersWithRolesRequest {
 }
 
 message UserWithRoles {
-  string address = 1;
+  string realmId = 1;
   repeated string roles = 2;
 }
 

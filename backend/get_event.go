@@ -51,11 +51,11 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 	}
 
 	orgIDs := mapsl.Map(organizers, func(u *zeni.User) string {
-		return u.ID
+		return s.Chain.UserRealmID(u.ID) // TODO: remove usage in front-end to use ID instead ?
 	})
 
 	gkpIDs := mapsl.Map(gatekeepers, func(u *zeni.User) string {
-		return u.ID
+		return s.Chain.UserRealmID(u.ID) // TODO: remove usage in front-end to use ID instead ?
 	})
 
 	info := zenaov1.EventInfo{

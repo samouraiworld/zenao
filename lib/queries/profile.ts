@@ -19,27 +19,27 @@ export type GnoProfile = {
 export type UserProfile = Omit<GnoProfile, "address">;
 
 export const profileOptions = (realmId: string | null | undefined) => {
-  const addr = addressFromRealmId(realmId);
   return queryOptions<UserProfile | null>({
-    queryKey: ["profile", addr],
+    queryKey: ["profile", realmId],
     queryFn: async () => {
-      if (!addr || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
+      if (!realmId || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
         return null;
       }
 
-      const profile = await profiles.fetch(addr);
+      const profile = await profiles.fetch(realmId);
 
       return profile;
     },
   });
 };
 export const profiles = createBatcher({
-  fetcher: async (addrs: string[]) => {
-    if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || addrs.length === 0) {
+  fetcher: async (realmIDs: string[]) => {
+    console.log("Batch fetching profiles for realmIDs:", realmIDs);
+    if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || realmIDs.length === 0) {
       return [];
     }
 
-    const ids = addrs.map((addr) => userIdFromPkgPath(addr));
+    const ids = realmIDs.map((realmId) => userIdFromPkgPath(realmId));
     return withSpan(`query:backend:profiles:${ids.join(",")}`, async () => {
       // const client = new GnoJSONRPCProvider(
       //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
@@ -67,6 +67,7 @@ export const profiles = createBatcher({
       //     avatarUri: resu[i][2] as string,
       //   });
       // }
+      console.log("Fetching profiles for ids:", ids);
       const res = await zenaoClient.getUsersProfile({
         ids,
       });

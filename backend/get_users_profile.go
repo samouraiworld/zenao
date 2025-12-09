@@ -14,6 +14,12 @@ func (s *ZenaoServer) GetUsersProfile(ctx context.Context, req *connect.Request[
 		return nil, errors.New("ids array required")
 	}
 
+	for _, id := range req.Msg.Ids {
+		if id == "" {
+			return nil, errors.New("ids cannot contain empty string")
+		}
+	}
+
 	var zUsers []*zeni.User
 	if err := s.DB.TxWithSpan(ctx, "GetUsersProfile", func(tx zeni.DB) error {
 		var err error
