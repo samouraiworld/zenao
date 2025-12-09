@@ -154,6 +154,18 @@ func (g *GetEventRequest) GnoLiteral(typePrefix string, linePrefix string) strin
 	return buf.String()
 }
 
+func (g *GetEventResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetEventResponse{\n")
+	if g.Event != nil {
+		fmt.Fprintf(buf, "%s\tEvent: &%s%s,\n", linePrefix, typePrefix, g.Event.GnoLiteral(typePrefix, linePrefix+"\t"))
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (l *ListEventsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -178,6 +190,24 @@ func (l *ListEventsRequest) GnoLiteral(typePrefix string, linePrefix string) str
 	return buf.String()
 }
 
+func (l *ListEventsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ListEventsResponse{\n")
+	if len(l.Events) != 0 {
+		fmt.Fprintf(buf, "%s\tEvents: []*EventInfo{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range l.Events {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (l *ListEventsByOrganizerRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -196,6 +226,24 @@ func (l *ListEventsByOrganizerRequest) GnoLiteral(typePrefix string, linePrefix 
 	return buf.String()
 }
 
+func (l *ListEventsByOrganizerResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ListEventsByOrganizerResponse{\n")
+	if len(l.Events) != 0 {
+		fmt.Fprintf(buf, "%s\tEvents: []*EventInfo{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range l.Events {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (l *ListEventsByParticipantRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -208,6 +256,24 @@ func (l *ListEventsByParticipantRequest) GnoLiteral(typePrefix string, linePrefi
 	}
 	if l.Offset != 0 {
 		fmt.Fprintf(buf, "%s\tOffset: %d,\n", linePrefix, l.Offset)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (l *ListEventsByParticipantResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ListEventsByParticipantResponse{\n")
+	if len(l.Events) != 0 {
+		fmt.Fprintf(buf, "%s\tEvents: []*EventInfo{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range l.Events {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -703,24 +769,6 @@ func (e *EventInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	}
 	if e.Discoverable != false {
 		fmt.Fprintf(buf, "%s\tDiscoverable: %t,\n", linePrefix, e.Discoverable)
-	}
-	buf.WriteString(linePrefix)
-	buf.WriteString("}")
-	return buf.String()
-}
-
-func (e *EventsInfo) GnoLiteral(typePrefix string, linePrefix string) string {
-	buf := &strings.Builder{}
-	buf.WriteString(typePrefix)
-	buf.WriteString("EventsInfo{\n")
-	if len(e.Events) != 0 {
-		fmt.Fprintf(buf, "%s\tEvents: []*EventInfo{\n", linePrefix)
-		linePrefix += "\t"
-		for _, elem := range e.Events {
-			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
-		}
-		linePrefix = linePrefix[:len(linePrefix)-1]
-		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -1303,6 +1351,18 @@ func (g *GetCommunityRequest) GnoLiteral(typePrefix string, linePrefix string) s
 	return buf.String()
 }
 
+func (g *GetCommunityResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetCommunityResponse{\n")
+	if g.Community != nil {
+		fmt.Fprintf(buf, "%s\tCommunity: &%s%s,\n", linePrefix, typePrefix, g.Community.GnoLiteral(typePrefix, linePrefix+"\t"))
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (c *CommunityInfo) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -1339,24 +1399,6 @@ func (c *CommunityInfo) GnoLiteral(typePrefix string, linePrefix string) string 
 	return buf.String()
 }
 
-func (c *CommunitiesInfo) GnoLiteral(typePrefix string, linePrefix string) string {
-	buf := &strings.Builder{}
-	buf.WriteString(typePrefix)
-	buf.WriteString("CommunitiesInfo{\n")
-	if len(c.Communities) != 0 {
-		fmt.Fprintf(buf, "%s\tCommunities: []*CommunityInfo{\n", linePrefix)
-		linePrefix += "\t"
-		for _, elem := range c.Communities {
-			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
-		}
-		linePrefix = linePrefix[:len(linePrefix)-1]
-		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
-	}
-	buf.WriteString(linePrefix)
-	buf.WriteString("}")
-	return buf.String()
-}
-
 func (l *ListCommunitiesRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -1366,6 +1408,24 @@ func (l *ListCommunitiesRequest) GnoLiteral(typePrefix string, linePrefix string
 	}
 	if l.Offset != 0 {
 		fmt.Fprintf(buf, "%s\tOffset: %d,\n", linePrefix, l.Offset)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (l *ListCommunitiesResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ListCommunitiesResponse{\n")
+	if len(l.Communities) != 0 {
+		fmt.Fprintf(buf, "%s\tCommunities: []*CommunityInfo{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range l.Communities {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -1390,6 +1450,24 @@ func (l *ListCommunitiesByMemberRequest) GnoLiteral(typePrefix string, linePrefi
 	return buf.String()
 }
 
+func (l *ListCommunitiesByMemberResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ListCommunitiesByMemberResponse{\n")
+	if len(l.Communities) != 0 {
+		fmt.Fprintf(buf, "%s\tCommunities: []*CommunityInfo{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range l.Communities {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (l *ListCommunitiesByEventRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
@@ -1402,6 +1480,24 @@ func (l *ListCommunitiesByEventRequest) GnoLiteral(typePrefix string, linePrefix
 	}
 	if l.Offset != 0 {
 		fmt.Fprintf(buf, "%s\tOffset: %d,\n", linePrefix, l.Offset)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (l *ListCommunitiesByEventResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("ListCommunitiesByEventResponse{\n")
+	if len(l.Communities) != 0 {
+		fmt.Fprintf(buf, "%s\tCommunities: []*CommunityInfo{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range l.Communities {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")

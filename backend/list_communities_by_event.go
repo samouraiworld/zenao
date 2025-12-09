@@ -10,13 +10,13 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) ListCommunitiesByEvent(ctx context.Context, req *connect.Request[zenaov1.ListCommunitiesByEventRequest]) (*connect.Response[zenaov1.CommunitiesInfo], error) {
+func (s *ZenaoServer) ListCommunitiesByEvent(ctx context.Context, req *connect.Request[zenaov1.ListCommunitiesByEventRequest]) (*connect.Response[zenaov1.ListCommunitiesByEventResponse], error) {
 	if req.Msg.EventId == "" {
 		return nil, errors.New("event_id is required")
 	}
 
 	var cmts []*zeni.Community
-	var infos *zenaov1.CommunitiesInfo
+	var infos []*zenaov1.CommunityInfo
 	if err := s.DB.TxWithSpan(ctx, "ListCommunitiesByEvent", func(tx zeni.DB) error {
 		var err error
 		cmts, err = tx.ListCommunities(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleEvent, int(req.Msg.Limit), int(req.Msg.Offset))
@@ -46,12 +46,12 @@ func (s *ZenaoServer) ListCommunitiesByEvent(ctx context.Context, req *connect.R
 				Administrators: admIDs,
 				CountMembers:   count,
 			}
-			infos.Communities = append(infos.Communities, &info)
+			infos = append(infos, &info)
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return connect.NewResponse(infos), nil
+	return connect.NewResponse(&zenaov1.ListCommunitiesByEventResponse{Communities: infos}), nil
 }

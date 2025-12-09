@@ -10,13 +10,13 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) ListEventsByOrganizer(ctx context.Context, req *connect.Request[zenaov1.ListEventsByOrganizerRequest]) (*connect.Response[zenaov1.EventsInfo], error) {
+func (s *ZenaoServer) ListEventsByOrganizer(ctx context.Context, req *connect.Request[zenaov1.ListEventsByOrganizerRequest]) (*connect.Response[zenaov1.ListEventsByOrganizerResponse], error) {
 	if req.Msg.OrganizerId == "" {
 		return nil, errors.New("organizer_id is required")
 	}
 
 	var evts []*zeni.Event
-	var infos *zenaov1.EventsInfo
+	var infos []*zenaov1.EventInfo
 	if err := s.DB.TxWithSpan(ctx, "ListEvents", func(tx zeni.DB) error {
 		var err error
 		evts, err = tx.ListEvents(zeni.EntityTypeUser, req.Msg.OrganizerId, zeni.RoleOrganizer, int(req.Msg.Limit), int(req.Msg.Offset))
@@ -64,12 +64,12 @@ func (s *ZenaoServer) ListEventsByOrganizer(ctx context.Context, req *connect.Re
 				CheckedIn:    checkedIn,
 				Discoverable: evt.Discoverable,
 			}
-			infos.Events = append(infos.Events, &info)
+			infos = append(infos, &info)
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return connect.NewResponse(infos), nil
+	return connect.NewResponse(&zenaov1.ListEventsByOrganizerResponse{Events: infos}), nil
 }

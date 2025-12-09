@@ -9,9 +9,9 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenaov1.ListEventsRequest]) (*connect.Response[zenaov1.EventsInfo], error) {
+func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenaov1.ListEventsRequest]) (*connect.Response[zenaov1.ListEventsResponse], error) {
 	var evts []*zeni.Event
-	var infos *zenaov1.EventsInfo
+	var infos []*zenaov1.EventInfo
 	if err := s.DB.TxWithSpan(ctx, "ListEvents", func(tx zeni.DB) error {
 		var err error
 		evts, err = tx.ListEvents("", "", "", int(req.Msg.Limit), int(req.Msg.Offset))
@@ -59,12 +59,12 @@ func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenao
 				CheckedIn:    checkedIn,
 				Discoverable: evt.Discoverable,
 			}
-			infos.Events = append(infos.Events, &info)
+			infos = append(infos, &info)
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return connect.NewResponse(infos), nil
+	return connect.NewResponse(&zenaov1.ListEventsResponse{Events: infos}), nil
 }

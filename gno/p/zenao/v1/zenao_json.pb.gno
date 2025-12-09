@@ -239,6 +239,27 @@ func GetEventRequestFromJSON(g *GetEventRequest, node *json.Node) {
 	}
 }
 
+func (g *GetEventResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.Event != nil {
+		fields["event"] = g.Event.ToJSON()
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetEventResponseFromJSON(g *GetEventResponse, node *json.Node) {
+	*g = GetEventResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["event"]; ok {
+		fv := &EventInfo{}
+		EventInfoFromJSON(fv, val)
+		g.Event = fv
+	}
+}
+
 func (l *ListEventsRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -282,6 +303,36 @@ func ListEventsRequestFromJSON(l *ListEventsRequest, node *json.Node) {
 	}
 }
 
+func (l *ListEventsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(l.Events) != 0 {
+		arr := make([]*json.Node, len(l.Events))
+		for i, val := range l.Events {
+			arr[i] = val.ToJSON()
+		}
+		fields["events"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListEventsResponseFromJSON(l *ListEventsResponse, node *json.Node) {
+	*l = ListEventsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["events"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*EventInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &EventInfo{}
+			EventInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		l.Events = arr
+	}
+}
+
 func (l *ListEventsByOrganizerRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -313,6 +364,36 @@ func ListEventsByOrganizerRequestFromJSON(l *ListEventsByOrganizerRequest, node 
 	}
 }
 
+func (l *ListEventsByOrganizerResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(l.Events) != 0 {
+		arr := make([]*json.Node, len(l.Events))
+		for i, val := range l.Events {
+			arr[i] = val.ToJSON()
+		}
+		fields["events"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListEventsByOrganizerResponseFromJSON(l *ListEventsByOrganizerResponse, node *json.Node) {
+	*l = ListEventsByOrganizerResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["events"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*EventInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &EventInfo{}
+			EventInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		l.Events = arr
+	}
+}
+
 func (l *ListEventsByParticipantRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -341,6 +422,36 @@ func ListEventsByParticipantRequestFromJSON(l *ListEventsByParticipantRequest, n
 	}
 	if val, ok := fields["offset"]; ok {
 		l.Offset = uint32(val.MustNumeric())
+	}
+}
+
+func (l *ListEventsByParticipantResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(l.Events) != 0 {
+		arr := make([]*json.Node, len(l.Events))
+		for i, val := range l.Events {
+			arr[i] = val.ToJSON()
+		}
+		fields["events"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListEventsByParticipantResponseFromJSON(l *ListEventsByParticipantResponse, node *json.Node) {
+	*l = ListEventsByParticipantResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["events"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*EventInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &EventInfo{}
+			EventInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		l.Events = arr
 	}
 }
 
@@ -1239,36 +1350,6 @@ func EventInfoFromJSON(e *EventInfo, node *json.Node) {
 	}
 	if val, ok := fields["discoverable"]; ok {
 		e.Discoverable = val.MustBool()
-	}
-}
-
-func (e *EventsInfo) ToJSON() *json.Node {
-	fields := map[string]*json.Node{}
-
-	if len(e.Events) != 0 {
-		arr := make([]*json.Node, len(e.Events))
-		for i, val := range e.Events {
-			arr[i] = val.ToJSON()
-		}
-		fields["events"] = json.ArrayNode("", arr)
-	}
-
-	return json.ObjectNode("", fields)
-}
-
-func EventsInfoFromJSON(e *EventsInfo, node *json.Node) {
-	*e = EventsInfo{}
-	fields := node.MustObject()
-
-	if val, ok := fields["events"]; ok {
-		jarr := val.MustArray()
-		arr := make([]*EventInfo, len(jarr))
-		for i, val := range jarr {
-			fv := &EventInfo{}
-			EventInfoFromJSON(fv, val)
-			arr[i] = fv
-		}
-		e.Events = arr
 	}
 }
 
@@ -2223,6 +2304,27 @@ func GetCommunityRequestFromJSON(g *GetCommunityRequest, node *json.Node) {
 	}
 }
 
+func (g *GetCommunityResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.Community != nil {
+		fields["community"] = g.Community.ToJSON()
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetCommunityResponseFromJSON(g *GetCommunityResponse, node *json.Node) {
+	*g = GetCommunityResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["community"]; ok {
+		fv := &CommunityInfo{}
+		CommunityInfoFromJSON(fv, val)
+		g.Community = fv
+	}
+}
+
 func (c *CommunityInfo) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -2287,36 +2389,6 @@ func CommunityInfoFromJSON(c *CommunityInfo, node *json.Node) {
 	}
 }
 
-func (c *CommunitiesInfo) ToJSON() *json.Node {
-	fields := map[string]*json.Node{}
-
-	if len(c.Communities) != 0 {
-		arr := make([]*json.Node, len(c.Communities))
-		for i, val := range c.Communities {
-			arr[i] = val.ToJSON()
-		}
-		fields["communities"] = json.ArrayNode("", arr)
-	}
-
-	return json.ObjectNode("", fields)
-}
-
-func CommunitiesInfoFromJSON(c *CommunitiesInfo, node *json.Node) {
-	*c = CommunitiesInfo{}
-	fields := node.MustObject()
-
-	if val, ok := fields["communities"]; ok {
-		jarr := val.MustArray()
-		arr := make([]*CommunityInfo, len(jarr))
-		for i, val := range jarr {
-			fv := &CommunityInfo{}
-			CommunityInfoFromJSON(fv, val)
-			arr[i] = fv
-		}
-		c.Communities = arr
-	}
-}
-
 func (l *ListCommunitiesRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -2339,6 +2411,36 @@ func ListCommunitiesRequestFromJSON(l *ListCommunitiesRequest, node *json.Node) 
 	}
 	if val, ok := fields["offset"]; ok {
 		l.Offset = uint32(val.MustNumeric())
+	}
+}
+
+func (l *ListCommunitiesResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(l.Communities) != 0 {
+		arr := make([]*json.Node, len(l.Communities))
+		for i, val := range l.Communities {
+			arr[i] = val.ToJSON()
+		}
+		fields["communities"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListCommunitiesResponseFromJSON(l *ListCommunitiesResponse, node *json.Node) {
+	*l = ListCommunitiesResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communities"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*CommunityInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &CommunityInfo{}
+			CommunityInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		l.Communities = arr
 	}
 }
 
@@ -2373,6 +2475,36 @@ func ListCommunitiesByMemberRequestFromJSON(l *ListCommunitiesByMemberRequest, n
 	}
 }
 
+func (l *ListCommunitiesByMemberResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(l.Communities) != 0 {
+		arr := make([]*json.Node, len(l.Communities))
+		for i, val := range l.Communities {
+			arr[i] = val.ToJSON()
+		}
+		fields["communities"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListCommunitiesByMemberResponseFromJSON(l *ListCommunitiesByMemberResponse, node *json.Node) {
+	*l = ListCommunitiesByMemberResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communities"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*CommunityInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &CommunityInfo{}
+			CommunityInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		l.Communities = arr
+	}
+}
+
 func (l *ListCommunitiesByEventRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
@@ -2401,6 +2533,36 @@ func ListCommunitiesByEventRequestFromJSON(l *ListCommunitiesByEventRequest, nod
 	}
 	if val, ok := fields["offset"]; ok {
 		l.Offset = uint32(val.MustNumeric())
+	}
+}
+
+func (l *ListCommunitiesByEventResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(l.Communities) != 0 {
+		arr := make([]*json.Node, len(l.Communities))
+		for i, val := range l.Communities {
+			arr[i] = val.ToJSON()
+		}
+		fields["communities"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func ListCommunitiesByEventResponseFromJSON(l *ListCommunitiesByEventResponse, node *json.Node) {
+	*l = ListCommunitiesByEventResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["communities"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*CommunityInfo, len(jarr))
+		for i, val := range jarr {
+			fv := &CommunityInfo{}
+			CommunityInfoFromJSON(fv, val)
+			arr[i] = fv
+		}
+		l.Communities = arr
 	}
 }
 

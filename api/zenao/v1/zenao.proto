@@ -44,14 +44,14 @@ service ZenaoService {
   // XXX: TEMPORARY SWITCH TO WEB2 FIRST
   rpc EntityRoles(EntityRolesRequest) returns (EntityRolesResponse); // -> GetCommunityUserRoles, GetEventUserRoles
   rpc UsersWithRole(UsersWithRoleRequest) returns (UsersWithRoleResponse); // -> CommunitiesWithUserRole, EventsWithUserRole
-  rpc GetCommunity(GetCommunityRequest) returns (CommunityInfo);
-  rpc ListCommunities(ListCommunitiesRequest) returns (CommunitiesInfo);
-  rpc ListCommunitiesByMember(ListCommunitiesByMemberRequest) returns (CommunitiesInfo);
-  rpc ListCommunitiesByEvent(ListCommunitiesByEventRequest) returns (CommunitiesInfo);
-  rpc GetEvent(GetEventRequest) returns (EventInfo);
-  rpc ListEvents(ListEventsRequest) returns (EventsInfo);
-  rpc ListEventsByOrganizer(ListEventsByOrganizerRequest) returns (EventsInfo);
-  rpc ListEventsByParticipant(ListEventsByParticipantRequest) returns (EventsInfo);
+  rpc GetCommunity(GetCommunityRequest) returns (GetCommunityResponse);
+  rpc ListCommunities(ListCommunitiesRequest) returns (ListCommunitiesResponse);
+  rpc ListCommunitiesByMember(ListCommunitiesByMemberRequest) returns (ListCommunitiesByMemberResponse);
+  rpc ListCommunitiesByEvent(ListCommunitiesByEventRequest) returns (ListCommunitiesByEventResponse);
+  rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+  rpc ListEventsByOrganizer(ListEventsByOrganizerRequest) returns (ListEventsByOrganizerResponse);
+  rpc ListEventsByParticipant(ListEventsByParticipantRequest) returns (ListEventsByParticipantResponse);
   rpc GetPost(GetPostRequest) returns (GetPostResponse);
   rpc GetFeedPosts(GetFeedPostsRequest) returns (GetFeedPostsResponse);
   rpc GetChildrenPosts(GetChildrenPostsRequest) returns (GetChildrenPostsResponse);
@@ -109,6 +109,10 @@ message GetEventRequest {
   string event_id = 1;
 }
 
+message GetEventResponse {
+  EventInfo event = 1;
+}
+
 message ListEventsRequest {
   string entity_id = 1; // if empty lists all events
   string entity_type = 2; // one of: user (one option for now)
@@ -117,16 +121,28 @@ message ListEventsRequest {
   uint32 offset = 5;
 }
 
+message ListEventsResponse {
+  repeated EventInfo events = 1;
+}
+
 message ListEventsByOrganizerRequest {
   string organizer_id = 1;
   uint32 limit = 2;
   uint32 offset = 3;
 }
 
+message ListEventsByOrganizerResponse {
+  repeated EventInfo events = 1;
+}
+
 message ListEventsByParticipantRequest {
   string participant_id = 1;
   uint32 limit = 2;
   uint32 offset = 3;
+}
+
+message ListEventsByParticipantResponse {
+  repeated EventInfo events = 1;
 }
 
 message CreateEventRequest {
@@ -261,10 +277,6 @@ message EventInfo {
   EventPrivacy privacy = 12;
   uint32 checked_in = 13;
   bool discoverable = 14;
-}
-
-message EventsInfo {
-  repeated EventInfo events = 1;
 }
 
 message BatchProfileField {
@@ -419,6 +431,10 @@ message GetCommunityRequest {
   string community_id = 1;
 }
 
+message GetCommunityResponse {
+  CommunityInfo community = 1;
+}
+
 message CommunityInfo {
   string display_name = 1;
   string description = 2;
@@ -429,13 +445,13 @@ message CommunityInfo {
   string pkg_path = 7;
 }
 
-message CommunitiesInfo {
-  repeated CommunityInfo communities = 1;
-}
-
 message ListCommunitiesRequest {
   uint32 limit = 1;
   uint32 offset = 2;
+}
+
+message ListCommunitiesResponse {
+  repeated CommunityInfo communities = 1;
 }
 
 message ListCommunitiesByMemberRequest {
@@ -444,10 +460,18 @@ message ListCommunitiesByMemberRequest {
   uint32 offset = 3;
 }
 
+message ListCommunitiesByMemberResponse {
+  repeated CommunityInfo communities = 1;
+}
+
 message ListCommunitiesByEventRequest {
   string event_id = 1;
   uint32 limit = 2;
   uint32 offset = 3;
+}
+
+message ListCommunitiesByEventResponse {
+  repeated CommunityInfo communities = 1;
 }
 
 message CreateCommunityRequest {

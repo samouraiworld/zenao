@@ -10,13 +10,13 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) ListCommunitiesByMember(ctx context.Context, req *connect.Request[zenaov1.ListCommunitiesByMemberRequest]) (*connect.Response[zenaov1.CommunitiesInfo], error) {
+func (s *ZenaoServer) ListCommunitiesByMember(ctx context.Context, req *connect.Request[zenaov1.ListCommunitiesByMemberRequest]) (*connect.Response[zenaov1.ListCommunitiesByMemberResponse], error) {
 	if req.Msg.MemberId == "" {
 		return nil, errors.New("member_id is required")
 	}
 
 	var cmts []*zeni.Community
-	var infos *zenaov1.CommunitiesInfo
+	var infos []*zenaov1.CommunityInfo
 	if err := s.DB.TxWithSpan(ctx, "ListCommunitiesByMember", func(tx zeni.DB) error {
 		var err error
 		cmts, err = tx.ListCommunities(zeni.EntityTypeUser, req.Msg.MemberId, zeni.RoleMember, int(req.Msg.Limit), int(req.Msg.Offset))
@@ -46,12 +46,12 @@ func (s *ZenaoServer) ListCommunitiesByMember(ctx context.Context, req *connect.
 				Administrators: admIDs,
 				CountMembers:   count,
 			}
-			infos.Communities = append(infos.Communities, &info)
+			infos = append(infos, &info)
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return connect.NewResponse(infos), nil
+	return connect.NewResponse(&zenaov1.ListCommunitiesByMemberResponse{Communities: infos}), nil
 }

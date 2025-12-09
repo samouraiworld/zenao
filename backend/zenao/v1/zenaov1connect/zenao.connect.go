@@ -176,14 +176,14 @@ type ZenaoServiceClient interface {
 	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
 	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
 	UsersWithRole(context.Context, *connect.Request[v1.UsersWithRoleRequest]) (*connect.Response[v1.UsersWithRoleResponse], error)
-	GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error)
-	ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.CommunitiesInfo], error)
-	ListCommunitiesByMember(context.Context, *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.CommunitiesInfo], error)
-	ListCommunitiesByEvent(context.Context, *connect.Request[v1.ListCommunitiesByEventRequest]) (*connect.Response[v1.CommunitiesInfo], error)
-	GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.EventInfo], error)
-	ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.EventsInfo], error)
-	ListEventsByOrganizer(context.Context, *connect.Request[v1.ListEventsByOrganizerRequest]) (*connect.Response[v1.EventsInfo], error)
-	ListEventsByParticipant(context.Context, *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.EventsInfo], error)
+	GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.GetCommunityResponse], error)
+	ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.ListCommunitiesResponse], error)
+	ListCommunitiesByMember(context.Context, *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.ListCommunitiesByMemberResponse], error)
+	ListCommunitiesByEvent(context.Context, *connect.Request[v1.ListCommunitiesByEventRequest]) (*connect.Response[v1.ListCommunitiesByEventResponse], error)
+	GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.GetEventResponse], error)
+	ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.ListEventsResponse], error)
+	ListEventsByOrganizer(context.Context, *connect.Request[v1.ListEventsByOrganizerRequest]) (*connect.Response[v1.ListEventsByOrganizerResponse], error)
+	ListEventsByParticipant(context.Context, *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.ListEventsByParticipantResponse], error)
 	GetPost(context.Context, *connect.Request[v1.GetPostRequest]) (*connect.Response[v1.GetPostResponse], error)
 	GetFeedPosts(context.Context, *connect.Request[v1.GetFeedPostsRequest]) (*connect.Response[v1.GetFeedPostsResponse], error)
 	GetChildrenPosts(context.Context, *connect.Request[v1.GetChildrenPostsRequest]) (*connect.Response[v1.GetChildrenPostsResponse], error)
@@ -343,49 +343,49 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("UsersWithRole")),
 			connect.WithClientOptions(opts...),
 		),
-		getCommunity: connect.NewClient[v1.GetCommunityRequest, v1.CommunityInfo](
+		getCommunity: connect.NewClient[v1.GetCommunityRequest, v1.GetCommunityResponse](
 			httpClient,
 			baseURL+ZenaoServiceGetCommunityProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("GetCommunity")),
 			connect.WithClientOptions(opts...),
 		),
-		listCommunities: connect.NewClient[v1.ListCommunitiesRequest, v1.CommunitiesInfo](
+		listCommunities: connect.NewClient[v1.ListCommunitiesRequest, v1.ListCommunitiesResponse](
 			httpClient,
 			baseURL+ZenaoServiceListCommunitiesProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("ListCommunities")),
 			connect.WithClientOptions(opts...),
 		),
-		listCommunitiesByMember: connect.NewClient[v1.ListCommunitiesByMemberRequest, v1.CommunitiesInfo](
+		listCommunitiesByMember: connect.NewClient[v1.ListCommunitiesByMemberRequest, v1.ListCommunitiesByMemberResponse](
 			httpClient,
 			baseURL+ZenaoServiceListCommunitiesByMemberProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("ListCommunitiesByMember")),
 			connect.WithClientOptions(opts...),
 		),
-		listCommunitiesByEvent: connect.NewClient[v1.ListCommunitiesByEventRequest, v1.CommunitiesInfo](
+		listCommunitiesByEvent: connect.NewClient[v1.ListCommunitiesByEventRequest, v1.ListCommunitiesByEventResponse](
 			httpClient,
 			baseURL+ZenaoServiceListCommunitiesByEventProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("ListCommunitiesByEvent")),
 			connect.WithClientOptions(opts...),
 		),
-		getEvent: connect.NewClient[v1.GetEventRequest, v1.EventInfo](
+		getEvent: connect.NewClient[v1.GetEventRequest, v1.GetEventResponse](
 			httpClient,
 			baseURL+ZenaoServiceGetEventProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("GetEvent")),
 			connect.WithClientOptions(opts...),
 		),
-		listEvents: connect.NewClient[v1.ListEventsRequest, v1.EventsInfo](
+		listEvents: connect.NewClient[v1.ListEventsRequest, v1.ListEventsResponse](
 			httpClient,
 			baseURL+ZenaoServiceListEventsProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("ListEvents")),
 			connect.WithClientOptions(opts...),
 		),
-		listEventsByOrganizer: connect.NewClient[v1.ListEventsByOrganizerRequest, v1.EventsInfo](
+		listEventsByOrganizer: connect.NewClient[v1.ListEventsByOrganizerRequest, v1.ListEventsByOrganizerResponse](
 			httpClient,
 			baseURL+ZenaoServiceListEventsByOrganizerProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("ListEventsByOrganizer")),
 			connect.WithClientOptions(opts...),
 		),
-		listEventsByParticipant: connect.NewClient[v1.ListEventsByParticipantRequest, v1.EventsInfo](
+		listEventsByParticipant: connect.NewClient[v1.ListEventsByParticipantRequest, v1.ListEventsByParticipantResponse](
 			httpClient,
 			baseURL+ZenaoServiceListEventsByParticipantProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("ListEventsByParticipant")),
@@ -490,14 +490,14 @@ type zenaoServiceClient struct {
 	removeEventFromCommunity   *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
 	entityRoles                *connect.Client[v1.EntityRolesRequest, v1.EntityRolesResponse]
 	usersWithRole              *connect.Client[v1.UsersWithRoleRequest, v1.UsersWithRoleResponse]
-	getCommunity               *connect.Client[v1.GetCommunityRequest, v1.CommunityInfo]
-	listCommunities            *connect.Client[v1.ListCommunitiesRequest, v1.CommunitiesInfo]
-	listCommunitiesByMember    *connect.Client[v1.ListCommunitiesByMemberRequest, v1.CommunitiesInfo]
-	listCommunitiesByEvent     *connect.Client[v1.ListCommunitiesByEventRequest, v1.CommunitiesInfo]
-	getEvent                   *connect.Client[v1.GetEventRequest, v1.EventInfo]
-	listEvents                 *connect.Client[v1.ListEventsRequest, v1.EventsInfo]
-	listEventsByOrganizer      *connect.Client[v1.ListEventsByOrganizerRequest, v1.EventsInfo]
-	listEventsByParticipant    *connect.Client[v1.ListEventsByParticipantRequest, v1.EventsInfo]
+	getCommunity               *connect.Client[v1.GetCommunityRequest, v1.GetCommunityResponse]
+	listCommunities            *connect.Client[v1.ListCommunitiesRequest, v1.ListCommunitiesResponse]
+	listCommunitiesByMember    *connect.Client[v1.ListCommunitiesByMemberRequest, v1.ListCommunitiesByMemberResponse]
+	listCommunitiesByEvent     *connect.Client[v1.ListCommunitiesByEventRequest, v1.ListCommunitiesByEventResponse]
+	getEvent                   *connect.Client[v1.GetEventRequest, v1.GetEventResponse]
+	listEvents                 *connect.Client[v1.ListEventsRequest, v1.ListEventsResponse]
+	listEventsByOrganizer      *connect.Client[v1.ListEventsByOrganizerRequest, v1.ListEventsByOrganizerResponse]
+	listEventsByParticipant    *connect.Client[v1.ListEventsByParticipantRequest, v1.ListEventsByParticipantResponse]
 	getPost                    *connect.Client[v1.GetPostRequest, v1.GetPostResponse]
 	getFeedPosts               *connect.Client[v1.GetFeedPostsRequest, v1.GetFeedPostsResponse]
 	getChildrenPosts           *connect.Client[v1.GetChildrenPostsRequest, v1.GetChildrenPostsResponse]
@@ -623,42 +623,42 @@ func (c *zenaoServiceClient) UsersWithRole(ctx context.Context, req *connect.Req
 }
 
 // GetCommunity calls zenao.v1.ZenaoService.GetCommunity.
-func (c *zenaoServiceClient) GetCommunity(ctx context.Context, req *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error) {
+func (c *zenaoServiceClient) GetCommunity(ctx context.Context, req *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.GetCommunityResponse], error) {
 	return c.getCommunity.CallUnary(ctx, req)
 }
 
 // ListCommunities calls zenao.v1.ZenaoService.ListCommunities.
-func (c *zenaoServiceClient) ListCommunities(ctx context.Context, req *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.CommunitiesInfo], error) {
+func (c *zenaoServiceClient) ListCommunities(ctx context.Context, req *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.ListCommunitiesResponse], error) {
 	return c.listCommunities.CallUnary(ctx, req)
 }
 
 // ListCommunitiesByMember calls zenao.v1.ZenaoService.ListCommunitiesByMember.
-func (c *zenaoServiceClient) ListCommunitiesByMember(ctx context.Context, req *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.CommunitiesInfo], error) {
+func (c *zenaoServiceClient) ListCommunitiesByMember(ctx context.Context, req *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.ListCommunitiesByMemberResponse], error) {
 	return c.listCommunitiesByMember.CallUnary(ctx, req)
 }
 
 // ListCommunitiesByEvent calls zenao.v1.ZenaoService.ListCommunitiesByEvent.
-func (c *zenaoServiceClient) ListCommunitiesByEvent(ctx context.Context, req *connect.Request[v1.ListCommunitiesByEventRequest]) (*connect.Response[v1.CommunitiesInfo], error) {
+func (c *zenaoServiceClient) ListCommunitiesByEvent(ctx context.Context, req *connect.Request[v1.ListCommunitiesByEventRequest]) (*connect.Response[v1.ListCommunitiesByEventResponse], error) {
 	return c.listCommunitiesByEvent.CallUnary(ctx, req)
 }
 
 // GetEvent calls zenao.v1.ZenaoService.GetEvent.
-func (c *zenaoServiceClient) GetEvent(ctx context.Context, req *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.EventInfo], error) {
+func (c *zenaoServiceClient) GetEvent(ctx context.Context, req *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.GetEventResponse], error) {
 	return c.getEvent.CallUnary(ctx, req)
 }
 
 // ListEvents calls zenao.v1.ZenaoService.ListEvents.
-func (c *zenaoServiceClient) ListEvents(ctx context.Context, req *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.EventsInfo], error) {
+func (c *zenaoServiceClient) ListEvents(ctx context.Context, req *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.ListEventsResponse], error) {
 	return c.listEvents.CallUnary(ctx, req)
 }
 
 // ListEventsByOrganizer calls zenao.v1.ZenaoService.ListEventsByOrganizer.
-func (c *zenaoServiceClient) ListEventsByOrganizer(ctx context.Context, req *connect.Request[v1.ListEventsByOrganizerRequest]) (*connect.Response[v1.EventsInfo], error) {
+func (c *zenaoServiceClient) ListEventsByOrganizer(ctx context.Context, req *connect.Request[v1.ListEventsByOrganizerRequest]) (*connect.Response[v1.ListEventsByOrganizerResponse], error) {
 	return c.listEventsByOrganizer.CallUnary(ctx, req)
 }
 
 // ListEventsByParticipant calls zenao.v1.ZenaoService.ListEventsByParticipant.
-func (c *zenaoServiceClient) ListEventsByParticipant(ctx context.Context, req *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.EventsInfo], error) {
+func (c *zenaoServiceClient) ListEventsByParticipant(ctx context.Context, req *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.ListEventsByParticipantResponse], error) {
 	return c.listEventsByParticipant.CallUnary(ctx, req)
 }
 
@@ -750,14 +750,14 @@ type ZenaoServiceHandler interface {
 	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
 	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
 	UsersWithRole(context.Context, *connect.Request[v1.UsersWithRoleRequest]) (*connect.Response[v1.UsersWithRoleResponse], error)
-	GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error)
-	ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.CommunitiesInfo], error)
-	ListCommunitiesByMember(context.Context, *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.CommunitiesInfo], error)
-	ListCommunitiesByEvent(context.Context, *connect.Request[v1.ListCommunitiesByEventRequest]) (*connect.Response[v1.CommunitiesInfo], error)
-	GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.EventInfo], error)
-	ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.EventsInfo], error)
-	ListEventsByOrganizer(context.Context, *connect.Request[v1.ListEventsByOrganizerRequest]) (*connect.Response[v1.EventsInfo], error)
-	ListEventsByParticipant(context.Context, *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.EventsInfo], error)
+	GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.GetCommunityResponse], error)
+	ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.ListCommunitiesResponse], error)
+	ListCommunitiesByMember(context.Context, *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.ListCommunitiesByMemberResponse], error)
+	ListCommunitiesByEvent(context.Context, *connect.Request[v1.ListCommunitiesByEventRequest]) (*connect.Response[v1.ListCommunitiesByEventResponse], error)
+	GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.GetEventResponse], error)
+	ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.ListEventsResponse], error)
+	ListEventsByOrganizer(context.Context, *connect.Request[v1.ListEventsByOrganizerRequest]) (*connect.Response[v1.ListEventsByOrganizerResponse], error)
+	ListEventsByParticipant(context.Context, *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.ListEventsByParticipantResponse], error)
 	GetPost(context.Context, *connect.Request[v1.GetPostRequest]) (*connect.Response[v1.GetPostResponse], error)
 	GetFeedPosts(context.Context, *connect.Request[v1.GetFeedPostsRequest]) (*connect.Response[v1.GetFeedPostsResponse], error)
 	GetChildrenPosts(context.Context, *connect.Request[v1.GetChildrenPostsRequest]) (*connect.Response[v1.GetChildrenPostsResponse], error)
@@ -1216,35 +1216,35 @@ func (UnimplementedZenaoServiceHandler) UsersWithRole(context.Context, *connect.
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.UsersWithRole is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.CommunityInfo], error) {
+func (UnimplementedZenaoServiceHandler) GetCommunity(context.Context, *connect.Request[v1.GetCommunityRequest]) (*connect.Response[v1.GetCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetCommunity is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.CommunitiesInfo], error) {
+func (UnimplementedZenaoServiceHandler) ListCommunities(context.Context, *connect.Request[v1.ListCommunitiesRequest]) (*connect.Response[v1.ListCommunitiesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListCommunities is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) ListCommunitiesByMember(context.Context, *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.CommunitiesInfo], error) {
+func (UnimplementedZenaoServiceHandler) ListCommunitiesByMember(context.Context, *connect.Request[v1.ListCommunitiesByMemberRequest]) (*connect.Response[v1.ListCommunitiesByMemberResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListCommunitiesByMember is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) ListCommunitiesByEvent(context.Context, *connect.Request[v1.ListCommunitiesByEventRequest]) (*connect.Response[v1.CommunitiesInfo], error) {
+func (UnimplementedZenaoServiceHandler) ListCommunitiesByEvent(context.Context, *connect.Request[v1.ListCommunitiesByEventRequest]) (*connect.Response[v1.ListCommunitiesByEventResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListCommunitiesByEvent is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.EventInfo], error) {
+func (UnimplementedZenaoServiceHandler) GetEvent(context.Context, *connect.Request[v1.GetEventRequest]) (*connect.Response[v1.GetEventResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetEvent is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.EventsInfo], error) {
+func (UnimplementedZenaoServiceHandler) ListEvents(context.Context, *connect.Request[v1.ListEventsRequest]) (*connect.Response[v1.ListEventsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListEvents is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) ListEventsByOrganizer(context.Context, *connect.Request[v1.ListEventsByOrganizerRequest]) (*connect.Response[v1.EventsInfo], error) {
+func (UnimplementedZenaoServiceHandler) ListEventsByOrganizer(context.Context, *connect.Request[v1.ListEventsByOrganizerRequest]) (*connect.Response[v1.ListEventsByOrganizerResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListEventsByOrganizer is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) ListEventsByParticipant(context.Context, *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.EventsInfo], error) {
+func (UnimplementedZenaoServiceHandler) ListEventsByParticipant(context.Context, *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.ListEventsByParticipantResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ListEventsByParticipant is not implemented"))
 }
 

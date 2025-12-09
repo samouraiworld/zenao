@@ -10,7 +10,7 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1.GetEventRequest]) (*connect.Response[zenaov1.EventInfo], error) {
+func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1.GetEventRequest]) (*connect.Response[zenaov1.GetEventResponse], error) {
 	if req.Msg.EventId == "" {
 		return nil, errors.New("event ID is required")
 	}
@@ -73,5 +73,5 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		Discoverable: evt.Discoverable,
 	}
 
-	return connect.NewResponse(&info), nil
+	return connect.NewResponse(&zenaov1.GetEventResponse{Event: &info}), nil
 }

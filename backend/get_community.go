@@ -10,7 +10,7 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) GetCommunity(ctx context.Context, req *connect.Request[zenaov1.GetCommunityRequest]) (*connect.Response[zenaov1.CommunityInfo], error) {
+func (s *ZenaoServer) GetCommunity(ctx context.Context, req *connect.Request[zenaov1.GetCommunityRequest]) (*connect.Response[zenaov1.GetCommunityResponse], error) {
 	if req.Msg.CommunityId == "" {
 		return nil, errors.New("community ID is required")
 	}
@@ -52,5 +52,5 @@ func (s *ZenaoServer) GetCommunity(ctx context.Context, req *connect.Request[zen
 		CountMembers:   count,
 	}
 
-	return connect.NewResponse(&info), nil
+	return connect.NewResponse(&zenaov1.GetCommunityResponse{Community: &info}), nil
 }

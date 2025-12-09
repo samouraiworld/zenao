@@ -87,6 +87,10 @@ type GetEventRequest struct {
 	EventId string
 }
 
+type GetEventResponse struct {
+	Event *EventInfo
+}
+
 type ListEventsRequest struct {
 	EntityId   string
 	EntityType string
@@ -95,16 +99,28 @@ type ListEventsRequest struct {
 	Offset     uint32
 }
 
+type ListEventsResponse struct {
+	Events []*EventInfo
+}
+
 type ListEventsByOrganizerRequest struct {
 	OrganizerId string
 	Limit       uint32
 	Offset      uint32
 }
 
+type ListEventsByOrganizerResponse struct {
+	Events []*EventInfo
+}
+
 type ListEventsByParticipantRequest struct {
 	ParticipantId string
 	Limit         uint32
 	Offset        uint32
+}
+
+type ListEventsByParticipantResponse struct {
+	Events []*EventInfo
 }
 
 type CreateEventRequest struct {
@@ -250,10 +266,6 @@ type EventInfo struct {
 	Privacy      *EventPrivacy
 	CheckedIn    uint32
 	Discoverable bool
-}
-
-type EventsInfo struct {
-	Events []*EventInfo
 }
 
 type BatchProfileField struct {
@@ -424,6 +436,10 @@ type GetCommunityRequest struct {
 	CommunityId string
 }
 
+type GetCommunityResponse struct {
+	Community *CommunityInfo
+}
+
 type CommunityInfo struct {
 	DisplayName    string
 	Description    string
@@ -434,13 +450,13 @@ type CommunityInfo struct {
 	PkgPath        string
 }
 
-type CommunitiesInfo struct {
-	Communities []*CommunityInfo
-}
-
 type ListCommunitiesRequest struct {
 	Limit  uint32
 	Offset uint32
+}
+
+type ListCommunitiesResponse struct {
+	Communities []*CommunityInfo
 }
 
 type ListCommunitiesByMemberRequest struct {
@@ -449,10 +465,18 @@ type ListCommunitiesByMemberRequest struct {
 	Offset   uint32
 }
 
+type ListCommunitiesByMemberResponse struct {
+	Communities []*CommunityInfo
+}
+
 type ListCommunitiesByEventRequest struct {
 	EventId string
 	Limit   uint32
 	Offset  uint32
+}
+
+type ListCommunitiesByEventResponse struct {
+	Communities []*CommunityInfo
 }
 
 type CreateCommunityRequest struct {
