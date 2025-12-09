@@ -121,6 +121,7 @@ func injectStartEnv() {
 
 }
 
+// TODO: Remove chain
 func execStart(ctx context.Context) (retErr error) {
 	logger, err := zap.NewDevelopment()
 	if err != nil {

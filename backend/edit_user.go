@@ -40,9 +40,9 @@ func (s *ZenaoServer) EditUser(
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).EditUser(zUser.ID, req.Msg); err != nil {
-		return nil, err
-	}
+	// if err := s.Chain.WithContext(ctx).EditUser(zUser.ID, req.Msg); err != nil {
+	// 	return nil, err
+	// }
 
 	return connect.NewResponse(&zenaov1.EditUserResponse{
 		Id: zUser.ID,

@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) JoinCommunity(
 	ctx context.Context,
 	req *connect.Request[zenaov1.JoinCommunityRequest],
@@ -53,9 +54,9 @@ func (s *ZenaoServer) JoinCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
-		return nil, errors.New("failed to add member to community on chain")
-	}
+	// if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
+	// 	return nil, errors.New("failed to add member to community on chain")
+	// }
 
 	return connect.NewResponse(&zenaov1.JoinCommunityResponse{}), nil
 }

@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[zenaov1.EditCommunityRequest]) (*connect.Response[zenaov1.EditCommunityResponse], error) {
 	user := s.Auth.GetUser(ctx)
 	if user == nil {
@@ -55,7 +56,7 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 		adminIDs = append(adminIDs, zAdmin.ID)
 	}
 
-	cmt := (*zeni.Community)(nil)
+	//cmt := (*zeni.Community)(nil)
 	if err := s.DB.TxWithSpan(ctx, "db.EditCommunity", func(tx zeni.DB) error {
 		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
@@ -64,18 +65,18 @@ func (s *ZenaoServer) EditCommunity(ctx context.Context, req *connect.Request[ze
 		if !slices.Contains(roles, zeni.RoleAdministrator) {
 			return errors.New("you must be an administrator of the community to edit it")
 		}
-		cmt, err = tx.EditCommunity(req.Msg.CommunityId, adminIDs, req.Msg)
-		if err != nil {
-			return err
-		}
+		// cmt, err = tx.EditCommunity(req.Msg.CommunityId, adminIDs, req.Msg)
+		// if err != nil {
+		// 	return err
+		// }
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).EditCommunity(cmt.ID, zUser.ID, adminIDs, req.Msg); err != nil {
-		return nil, fmt.Errorf("failed to edit community on chain: %w", err)
-	}
+	// if err := s.Chain.WithContext(ctx).EditCommunity(cmt.ID, zUser.ID, adminIDs, req.Msg); err != nil {
+	// 	return nil, fmt.Errorf("failed to edit community on chain: %w", err)
+	// }
 
 	return connect.NewResponse(&zenaov1.EditCommunityResponse{}), nil
 }

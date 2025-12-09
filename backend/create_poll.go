@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	ma "github.com/multiformats/go-multiaddr"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -15,6 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenaov1.CreatePollRequest]) (*connect.Response[zenaov1.CreatePollResponse], error) {
 	user := s.Auth.GetUser(ctx)
 	if user == nil {
@@ -43,20 +43,21 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 	if len(roles) == 0 {
 		return nil, errors.New("user is not a member of the organization that owns the feed")
 	}
-	pollID, postID, err := s.Chain.WithContext(ctx).CreatePoll(zUser.ID, req.Msg)
-	if err != nil {
-		return nil, err
-	}
+	// pollID, postID, err := s.Chain.WithContext(ctx).CreatePoll(zUser.ID, req.Msg)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
-	if err != nil {
-		return nil, err
-	}
+	// postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	post := &feedsv1.Post{
 		Post: &feedsv1.Post_Link{
 			Link: &feedsv1.LinkPost{
-				Uri: postURI.String(),
+				// TODO: WHAT WE DO HERE ?
+				// Uri: postURI.String(),
 			},
 		},
 	}
@@ -68,6 +69,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
+		// TODO: FIX THIS
 		if zpoll, err = db.CreatePoll(zUser.ID, pollID, postID, feed.ID, post, req.Msg); err != nil {
 			return err
 		}

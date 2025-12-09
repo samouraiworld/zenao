@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenaov1.CreatePostRequest]) (*connect.Response[zenaov1.CreatePostResponse], error) {
 	user := s.Auth.GetUser(ctx)
 	if user == nil {
@@ -69,10 +70,10 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		},
 	}
 
-	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
-	if err != nil {
-		return nil, err
-	}
+	// postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	zpost := (*zeni.Post)(nil)
 	if err := s.DB.TxWithSpan(ctx, "db.CreatePost", func(db zeni.DB) error {

@@ -21,6 +21,7 @@ import (
 	"github.com/goware/prefixer"
 )
 
+// TODO: REMOVE GNO
 func newE2EInfraCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{

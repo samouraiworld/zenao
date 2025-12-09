@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) RemoveEventFromCommunity(
 	ctx context.Context,
 	req *connect.Request[zenaov1.RemoveEventFromCommunityRequest],
@@ -55,9 +56,9 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
-		return nil, err
-	}
+	// if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
+	// 	return nil, err
+	// }
 
 	return connect.NewResponse(&zenaov1.RemoveEventFromCommunityResponse{}), nil
 }

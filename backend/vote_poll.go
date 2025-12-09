@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1.VotePollRequest]) (*connect.Response[zenaov1.VotePollResponse], error) {
 	user := s.Auth.GetUser(ctx)
 	if user == nil {
@@ -47,9 +48,9 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 		return nil, err
 	}
 
-	if err = s.Chain.WithContext(ctx).VotePoll(zUser.ID, req.Msg); err != nil {
-		return nil, err
-	}
+	// if err = s.Chain.WithContext(ctx).VotePoll(zUser.ID, req.Msg); err != nil {
+	// 	return nil, err
+	// }
 
 	return connect.NewResponse(&zenaov1.VotePollResponse{}), nil
 }

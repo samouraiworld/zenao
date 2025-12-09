@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov1.ReactPostRequest]) (*connect.Response[zenaov1.ReactPostResponse], error) {
 	user := s.Auth.GetUser(ctx)
 	if user == nil {
@@ -54,9 +55,9 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		return nil, err
 	}
 
-	if err = s.Chain.WithContext(ctx).ReactPost(zUser.ID, orgID, orgID, req.Msg); err != nil {
-		return nil, err
-	}
+	// if err = s.Chain.WithContext(ctx).ReactPost(zUser.ID, orgID, orgID, req.Msg); err != nil {
+	// 	return nil, err
+	// }
 
 	return connect.NewResponse(&zenaov1.ReactPostResponse{}), nil
 }

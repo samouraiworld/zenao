@@ -30,6 +30,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: REmove Gentxs
 func newGenTxsCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{

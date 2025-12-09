@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: REMOVE EVERYTHING RELATED TO GNO
 func newConvertEvtToComCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{

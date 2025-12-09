@@ -9,6 +9,8 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
+// TODO: Remove protoc gen gno ? (port on a standalone repo ?)
+
 func main() {
 	protogen.Options{}.Run(func(gen *protogen.Plugin) error {
 		for _, f := range gen.Files {

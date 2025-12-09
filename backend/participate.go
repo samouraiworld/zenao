@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/ed25519"
 	"errors"
 	"fmt"
 	"slices"
@@ -19,6 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 // Participate implements zenaov1connect.ZenaoServiceHandler.
 func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zenaov1.ParticipateRequest]) (*connect.Response[zenaov1.ParticipateResponse], error) {
 	authUser := s.Auth.GetUser(ctx)
@@ -204,33 +204,33 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 
 	// XXX: there could be race conditions if the db has changed password but the chain did not
 
-	var eventSK ed25519.PrivateKey
-	if needPasswordIfGuarded {
-		if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
-			return nil, err
-		}
-	}
+	// var eventSK ed25519.PrivateKey
+	// if needPasswordIfGuarded {
+	// 	if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
-	for i, ticket := range tickets {
-		// XXX: support batch, this might be very very slow
-		// XXX: callerID should be the current user and not creator,
-		//      this could break if the initial creator has the organizer role removed
-		//      also this bypasses password protection on-chain
-		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
-			// XXX: handle case where db tx pass but chain fail
-			return nil, err
-		}
+	// for i, ticket := range tickets {
+	// 	// XXX: support batch, this might be very very slow
+	// 	// XXX: callerID should be the current user and not creator,
+	// 	//      this could break if the initial creator has the organizer role removed
+	// 	//      also this bypasses password protection on-chain
+	// 	if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
+	// 		// XXX: handle case where db tx pass but chain fail
+	// 		return nil, err
+	// 	}
 
-		for _, cmt := range communities {
-			// XXX: does the check in the chain instead of using db.
-			if slices.Contains(rolesByParticipant[i], zeni.RoleMember) {
-				continue
-			}
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
-				return nil, err
-			}
-		}
-	}
+	// 	for _, cmt := range communities {
+	// 		// XXX: does the check in the chain instead of using db.
+	// 		if slices.Contains(rolesByParticipant[i], zeni.RoleMember) {
+	// 			continue
+	// 		}
+	// 		if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
+	// 			return nil, err
+	// 		}
+	// 	}
+	// }
 
 	return connect.NewResponse(&zenaov1.ParticipateResponse{}), nil
 }

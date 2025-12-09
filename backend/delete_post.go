@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenaov1.DeletePostRequest]) (*connect.Response[zenaov1.DeletePostResponse], error) {
 	user := s.Auth.GetUser(ctx)
 	if user == nil {
@@ -51,9 +52,9 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).DeletePost(zUser.ID, req.Msg.PostId); err != nil {
-		return nil, err
-	}
+	// if err := s.Chain.WithContext(ctx).DeletePost(zUser.ID, req.Msg.PostId); err != nil {
+	// 	return nil, err
+	// }
 
 	return connect.NewResponse(&zenaov1.DeletePostResponse{}), nil
 }

@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Request[zenaov1.CancelParticipationRequest]) (*connect.Response[zenaov1.CancelParticipationResponse], error) {
 	user := s.Auth.GetUser(ctx)
 	if user == nil {
@@ -54,9 +55,9 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
-		return nil, err
-	}
+	// if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
+	// 	return nil, err
+	// }
 
 	return connect.NewResponse(&zenaov1.CancelParticipationResponse{}), nil
 }

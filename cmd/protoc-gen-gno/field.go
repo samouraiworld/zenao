@@ -10,6 +10,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+// TODO: Remove protoc gen gno ? (port on a standalone repo ?)
 // fieldGnoType returns the Go type used for a field.
 //
 // If it returns pointer=true, the struct field is a pointer to the type.

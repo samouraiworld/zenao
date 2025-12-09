@@ -14,6 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: CLEAN COMMENT
 func (s *ZenaoServer) EditEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.EditEventRequest],
@@ -204,38 +205,38 @@ func (s *ZenaoServer) EditEvent(
 
 	}
 
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
+	// privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	if err := s.Chain.WithContext(ctx).EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		return nil, err
-	}
+	// if err := s.Chain.WithContext(ctx).EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
+	// 	return nil, err
+	// }
 
-	if cmt != nil && cmt.ID != req.Msg.CommunityId {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, req.Msg.EventId); err != nil {
-			return nil, err
-		}
-	}
+	// if cmt != nil && cmt.ID != req.Msg.CommunityId {
+	// 	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, req.Msg.EventId); err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
-	if newCmt != nil {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, newCmt.ID, req.Msg.EventId); err != nil {
-			return nil, err
-		}
+	// if newCmt != nil {
+	// 	if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, newCmt.ID, req.Msg.EventId); err != nil {
+	// 		return nil, err
+	// 	}
 
-		newMembers := make([]string, 0, len(participants))
-		for _, participant := range participants {
-			if !targetIDs[participant.ID] {
-				newMembers = append(newMembers, participant.ID)
-			}
-		}
-		if len(newMembers) > 0 {
-			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(newCmt.CreatorID, newCmt.ID, newMembers); err != nil {
-				s.Logger.Error("add-members-to-community", zap.String("community-id", newCmt.ID), zap.Strings("new-members", newMembers), zap.Error(err))
-			}
-		}
-	}
+	// 	newMembers := make([]string, 0, len(participants))
+	// 	for _, participant := range participants {
+	// 		if !targetIDs[participant.ID] {
+	// 			newMembers = append(newMembers, participant.ID)
+	// 		}
+	// 	}
+	// 	if len(newMembers) > 0 {
+	// 		if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(newCmt.CreatorID, newCmt.ID, newMembers); err != nil {
+	// 			s.Logger.Error("add-members-to-community", zap.String("community-id", newCmt.ID), zap.Strings("new-members", newMembers), zap.Error(err))
+	// 		}
+	// 	}
+	// }
 
 	return connect.NewResponse(&zenaov1.EditEventResponse{
 		Id: req.Msg.EventId,

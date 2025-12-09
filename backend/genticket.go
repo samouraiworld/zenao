@@ -16,6 +16,7 @@ type genticketConfig struct {
 	gatekeeper string
 }
 
+// TODO: Remove GNO
 func (conf *genticketConfig) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.gatekeeper, "gatekeeper", "", "Gatekeeper address used to pregenerate a signature")
 }

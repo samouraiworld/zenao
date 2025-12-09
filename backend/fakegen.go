@@ -18,6 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO: Remove GNo
 func newFakegenCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
