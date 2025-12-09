@@ -84,7 +84,8 @@ export const eventUsersWithRole = (
             },
             roles: [role],
           });
-          return z.string().array().parse(res.usersWithRoles);
+          const realmIds = res.usersWithRoles.map((u) => u.realmId);
+          return z.string().array().parse(realmIds);
         },
       );
     },

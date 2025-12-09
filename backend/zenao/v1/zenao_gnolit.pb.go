@@ -1004,8 +1004,8 @@ func (g *GetFeedPostsRequest) GnoLiteral(typePrefix string, linePrefix string) s
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("GetFeedPostsRequest{\n")
-	if g.FeedId != "" {
-		fmt.Fprintf(buf, "%s\tFeedId: %q,\n", linePrefix, g.FeedId)
+	if g.Org != nil {
+		fmt.Fprintf(buf, "%s\tOrg: &%s%s,\n", linePrefix, typePrefix, g.Org.GnoLiteral(typePrefix, linePrefix+"\t"))
 	}
 	if g.Limit != 0 {
 		fmt.Fprintf(buf, "%s\tLimit: %d,\n", linePrefix, g.Limit)
@@ -1349,8 +1349,8 @@ func (u *UserWithRoles) GnoLiteral(typePrefix string, linePrefix string) string 
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("UserWithRoles{\n")
-	if u.Address != "" {
-		fmt.Fprintf(buf, "%s\tAddress: %q,\n", linePrefix, u.Address)
+	if u.RealmId != "" {
+		fmt.Fprintf(buf, "%s\tRealmId: %q,\n", linePrefix, u.RealmId)
 	}
 	if len(u.Roles) != 0 {
 		fmt.Fprintf(buf, "%s\tRoles: []string{\n", linePrefix)

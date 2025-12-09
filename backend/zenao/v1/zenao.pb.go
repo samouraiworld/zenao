@@ -3140,7 +3140,7 @@ func (x *GetPostResponse) GetPost() *v11.PostView {
 
 type GetFeedPostsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	FeedId        string                 `protobuf:"bytes,1,opt,name=feed_id,json=feedId,proto3" json:"feed_id,omitempty"`
+	Org           *Entity                `protobuf:"bytes,1,opt,name=org,proto3" json:"org,omitempty"`
 	Limit         uint32                 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	Offset        uint32                 `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
 	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
@@ -3179,11 +3179,11 @@ func (*GetFeedPostsRequest) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{53}
 }
 
-func (x *GetFeedPostsRequest) GetFeedId() string {
+func (x *GetFeedPostsRequest) GetOrg() *Entity {
 	if x != nil {
-		return x.FeedId
+		return x.Org
 	}
-	return ""
+	return nil
 }
 
 func (x *GetFeedPostsRequest) GetLimit() uint32 {
@@ -4186,7 +4186,7 @@ func (x *UsersWithRolesRequest) GetRoles() []string {
 
 type UserWithRoles struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Address       string                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	RealmId       string                 `protobuf:"bytes,1,opt,name=realmId,proto3" json:"realmId,omitempty"`
 	Roles         []string               `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4222,9 +4222,9 @@ func (*UserWithRoles) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{74}
 }
 
-func (x *UserWithRoles) GetAddress() string {
+func (x *UserWithRoles) GetRealmId() string {
 	if x != nil {
-		return x.Address
+		return x.RealmId
 	}
 	return ""
 }
@@ -5640,9 +5640,9 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\"9\n" +
 	"\x0fGetPostResponse\x12&\n" +
-	"\x04post\x18\x01 \x01(\v2\x12.feeds.v1.PostViewR\x04post\"\x89\x01\n" +
-	"\x13GetFeedPostsRequest\x12\x17\n" +
-	"\afeed_id\x18\x01 \x01(\tR\x06feedId\x12\x14\n" +
+	"\x04post\x18\x01 \x01(\v2\x12.feeds.v1.PostViewR\x04post\"\x94\x01\n" +
+	"\x13GetFeedPostsRequest\x12\"\n" +
+	"\x03org\x18\x01 \x01(\v2\x10.zenao.v1.EntityR\x03org\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\rR\x05limit\x12\x16\n" +
 	"\x06offset\x18\x03 \x01(\rR\x06offset\x12\x12\n" +
 	"\x04tags\x18\x04 \x03(\tR\x04tags\x12\x17\n" +
@@ -5702,7 +5702,7 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x03org\x18\x01 \x01(\v2\x10.zenao.v1.EntityR\x03org\x12\x14\n" +
 	"\x05roles\x18\x02 \x03(\tR\x05roles\"?\n" +
 	"\rUserWithRoles\x12\x18\n" +
-	"\aaddress\x18\x01 \x01(\tR\aaddress\x12\x14\n" +
+	"\arealmId\x18\x01 \x01(\tR\arealmId\x12\x14\n" +
 	"\x05roles\x18\x02 \x03(\tR\x05roles\"[\n" +
 	"\x16UsersWithRolesResponse\x12A\n" +
 	"\x10users_with_roles\x18\x01 \x03(\v2\x17.zenao.v1.UserWithRolesR\x0eusersWithRoles\"8\n" +
@@ -5968,106 +5968,107 @@ var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	100, // 18: zenao.v1.CreatePollRequest.kind:type_name -> polls.v1.PollKind
 	101, // 19: zenao.v1.GetPollResponse.poll:type_name -> polls.v1.Poll
 	102, // 20: zenao.v1.GetPostResponse.post:type_name -> feeds.v1.PostView
-	102, // 21: zenao.v1.GetFeedPostsResponse.posts:type_name -> feeds.v1.PostView
-	102, // 22: zenao.v1.GetChildrenPostsResponse.posts:type_name -> feeds.v1.PostView
-	66,  // 23: zenao.v1.GetEventTicketsResponse.tickets_info:type_name -> zenao.v1.TicketInfo
-	71,  // 24: zenao.v1.EntityRolesRequest.org:type_name -> zenao.v1.Entity
-	71,  // 25: zenao.v1.EntityRolesRequest.entity:type_name -> zenao.v1.Entity
-	71,  // 26: zenao.v1.UsersWithRolesRequest.org:type_name -> zenao.v1.Entity
-	75,  // 27: zenao.v1.UsersWithRolesResponse.users_with_roles:type_name -> zenao.v1.UserWithRoles
-	79,  // 28: zenao.v1.GetCommunityResponse.community:type_name -> zenao.v1.CommunityInfo
-	79,  // 29: zenao.v1.ListCommunitiesResponse.communities:type_name -> zenao.v1.CommunityInfo
-	79,  // 30: zenao.v1.ListCommunitiesByMemberResponse.communities:type_name -> zenao.v1.CommunityInfo
-	79,  // 31: zenao.v1.ListCommunitiesByEventResponse.communities:type_name -> zenao.v1.CommunityInfo
-	3,   // 32: zenao.v1.ZenaoService.EditUser:input_type -> zenao.v1.EditUserRequest
-	5,   // 33: zenao.v1.ZenaoService.GetUserInfo:input_type -> zenao.v1.GetUserInfoRequest
-	18,  // 34: zenao.v1.ZenaoService.CreateEvent:input_type -> zenao.v1.CreateEventRequest
-	20,  // 35: zenao.v1.ZenaoService.CancelEvent:input_type -> zenao.v1.CancelEventRequest
-	22,  // 36: zenao.v1.ZenaoService.EditEvent:input_type -> zenao.v1.EditEventRequest
-	24,  // 37: zenao.v1.ZenaoService.GetEventGatekeepers:input_type -> zenao.v1.GetEventGatekeepersRequest
-	26,  // 38: zenao.v1.ZenaoService.ValidatePassword:input_type -> zenao.v1.ValidatePasswordRequest
-	32,  // 39: zenao.v1.ZenaoService.BroadcastEvent:input_type -> zenao.v1.BroadcastEventRequest
-	28,  // 40: zenao.v1.ZenaoService.Participate:input_type -> zenao.v1.ParticipateRequest
-	29,  // 41: zenao.v1.ZenaoService.CancelParticipation:input_type -> zenao.v1.CancelParticipationRequest
-	64,  // 42: zenao.v1.ZenaoService.GetEventTickets:input_type -> zenao.v1.GetEventTicketsRequest
-	67,  // 43: zenao.v1.ZenaoService.Checkin:input_type -> zenao.v1.CheckinRequest
-	69,  // 44: zenao.v1.ZenaoService.ExportParticipants:input_type -> zenao.v1.ExportParticipantsRequest
-	86,  // 45: zenao.v1.ZenaoService.CreateCommunity:input_type -> zenao.v1.CreateCommunityRequest
-	88,  // 46: zenao.v1.ZenaoService.EditCommunity:input_type -> zenao.v1.EditCommunityRequest
-	90,  // 47: zenao.v1.ZenaoService.GetCommunityAdministrators:input_type -> zenao.v1.GetCommunityAdministratorsRequest
-	92,  // 48: zenao.v1.ZenaoService.JoinCommunity:input_type -> zenao.v1.JoinCommunityRequest
-	94,  // 49: zenao.v1.ZenaoService.LeaveCommunity:input_type -> zenao.v1.LeaveCommunityRequest
-	96,  // 50: zenao.v1.ZenaoService.AddEventToCommunity:input_type -> zenao.v1.AddEventToCommunityRequest
-	98,  // 51: zenao.v1.ZenaoService.RemoveEventFromCommunity:input_type -> zenao.v1.RemoveEventFromCommunityRequest
-	72,  // 52: zenao.v1.ZenaoService.EntityRoles:input_type -> zenao.v1.EntityRolesRequest
-	74,  // 53: zenao.v1.ZenaoService.UsersWithRoles:input_type -> zenao.v1.UsersWithRolesRequest
-	77,  // 54: zenao.v1.ZenaoService.GetCommunity:input_type -> zenao.v1.GetCommunityRequest
-	80,  // 55: zenao.v1.ZenaoService.ListCommunities:input_type -> zenao.v1.ListCommunitiesRequest
-	82,  // 56: zenao.v1.ZenaoService.ListCommunitiesByMember:input_type -> zenao.v1.ListCommunitiesByMemberRequest
-	84,  // 57: zenao.v1.ZenaoService.ListCommunitiesByEvent:input_type -> zenao.v1.ListCommunitiesByEventRequest
-	10,  // 58: zenao.v1.ZenaoService.GetEvent:input_type -> zenao.v1.GetEventRequest
-	12,  // 59: zenao.v1.ZenaoService.ListEvents:input_type -> zenao.v1.ListEventsRequest
-	14,  // 60: zenao.v1.ZenaoService.ListEventsByOrganizer:input_type -> zenao.v1.ListEventsByOrganizerRequest
-	16,  // 61: zenao.v1.ZenaoService.ListEventsByParticipant:input_type -> zenao.v1.ListEventsByParticipantRequest
-	52,  // 62: zenao.v1.ZenaoService.GetPost:input_type -> zenao.v1.GetPostRequest
-	54,  // 63: zenao.v1.ZenaoService.GetFeedPosts:input_type -> zenao.v1.GetFeedPostsRequest
-	56,  // 64: zenao.v1.ZenaoService.GetChildrenPosts:input_type -> zenao.v1.GetChildrenPostsRequest
-	46,  // 65: zenao.v1.ZenaoService.GetPoll:input_type -> zenao.v1.GetPollRequest
-	8,   // 66: zenao.v1.ZenaoService.GetUsersProfile:input_type -> zenao.v1.GetUsersProfileRequest
-	44,  // 67: zenao.v1.ZenaoService.CreatePoll:input_type -> zenao.v1.CreatePollRequest
-	48,  // 68: zenao.v1.ZenaoService.VotePoll:input_type -> zenao.v1.VotePollRequest
-	50,  // 69: zenao.v1.ZenaoService.CreatePost:input_type -> zenao.v1.CreatePostRequest
-	58,  // 70: zenao.v1.ZenaoService.DeletePost:input_type -> zenao.v1.DeletePostRequest
-	60,  // 71: zenao.v1.ZenaoService.ReactPost:input_type -> zenao.v1.ReactPostRequest
-	62,  // 72: zenao.v1.ZenaoService.EditPost:input_type -> zenao.v1.EditPostRequest
-	1,   // 73: zenao.v1.ZenaoService.Health:input_type -> zenao.v1.HealthRequest
-	4,   // 74: zenao.v1.ZenaoService.EditUser:output_type -> zenao.v1.EditUserResponse
-	6,   // 75: zenao.v1.ZenaoService.GetUserInfo:output_type -> zenao.v1.GetUserInfoResponse
-	19,  // 76: zenao.v1.ZenaoService.CreateEvent:output_type -> zenao.v1.CreateEventResponse
-	21,  // 77: zenao.v1.ZenaoService.CancelEvent:output_type -> zenao.v1.CancelEventResponse
-	23,  // 78: zenao.v1.ZenaoService.EditEvent:output_type -> zenao.v1.EditEventResponse
-	25,  // 79: zenao.v1.ZenaoService.GetEventGatekeepers:output_type -> zenao.v1.GetEventGatekeepersResponse
-	27,  // 80: zenao.v1.ZenaoService.ValidatePassword:output_type -> zenao.v1.ValidatePasswordResponse
-	33,  // 81: zenao.v1.ZenaoService.BroadcastEvent:output_type -> zenao.v1.BroadcastEventResponse
-	31,  // 82: zenao.v1.ZenaoService.Participate:output_type -> zenao.v1.ParticipateResponse
-	30,  // 83: zenao.v1.ZenaoService.CancelParticipation:output_type -> zenao.v1.CancelParticipationResponse
-	65,  // 84: zenao.v1.ZenaoService.GetEventTickets:output_type -> zenao.v1.GetEventTicketsResponse
-	68,  // 85: zenao.v1.ZenaoService.Checkin:output_type -> zenao.v1.CheckinResponse
-	70,  // 86: zenao.v1.ZenaoService.ExportParticipants:output_type -> zenao.v1.ExportParticipantsResponse
-	87,  // 87: zenao.v1.ZenaoService.CreateCommunity:output_type -> zenao.v1.CreateCommunityResponse
-	89,  // 88: zenao.v1.ZenaoService.EditCommunity:output_type -> zenao.v1.EditCommunityResponse
-	91,  // 89: zenao.v1.ZenaoService.GetCommunityAdministrators:output_type -> zenao.v1.GetCommunityAdministratorsResponse
-	93,  // 90: zenao.v1.ZenaoService.JoinCommunity:output_type -> zenao.v1.JoinCommunityResponse
-	95,  // 91: zenao.v1.ZenaoService.LeaveCommunity:output_type -> zenao.v1.LeaveCommunityResponse
-	97,  // 92: zenao.v1.ZenaoService.AddEventToCommunity:output_type -> zenao.v1.AddEventToCommunityResponse
-	99,  // 93: zenao.v1.ZenaoService.RemoveEventFromCommunity:output_type -> zenao.v1.RemoveEventFromCommunityResponse
-	73,  // 94: zenao.v1.ZenaoService.EntityRoles:output_type -> zenao.v1.EntityRolesResponse
-	76,  // 95: zenao.v1.ZenaoService.UsersWithRoles:output_type -> zenao.v1.UsersWithRolesResponse
-	78,  // 96: zenao.v1.ZenaoService.GetCommunity:output_type -> zenao.v1.GetCommunityResponse
-	81,  // 97: zenao.v1.ZenaoService.ListCommunities:output_type -> zenao.v1.ListCommunitiesResponse
-	83,  // 98: zenao.v1.ZenaoService.ListCommunitiesByMember:output_type -> zenao.v1.ListCommunitiesByMemberResponse
-	85,  // 99: zenao.v1.ZenaoService.ListCommunitiesByEvent:output_type -> zenao.v1.ListCommunitiesByEventResponse
-	11,  // 100: zenao.v1.ZenaoService.GetEvent:output_type -> zenao.v1.GetEventResponse
-	13,  // 101: zenao.v1.ZenaoService.ListEvents:output_type -> zenao.v1.ListEventsResponse
-	15,  // 102: zenao.v1.ZenaoService.ListEventsByOrganizer:output_type -> zenao.v1.ListEventsByOrganizerResponse
-	17,  // 103: zenao.v1.ZenaoService.ListEventsByParticipant:output_type -> zenao.v1.ListEventsByParticipantResponse
-	53,  // 104: zenao.v1.ZenaoService.GetPost:output_type -> zenao.v1.GetPostResponse
-	55,  // 105: zenao.v1.ZenaoService.GetFeedPosts:output_type -> zenao.v1.GetFeedPostsResponse
-	57,  // 106: zenao.v1.ZenaoService.GetChildrenPosts:output_type -> zenao.v1.GetChildrenPostsResponse
-	47,  // 107: zenao.v1.ZenaoService.GetPoll:output_type -> zenao.v1.GetPollResponse
-	9,   // 108: zenao.v1.ZenaoService.GetUsersProfile:output_type -> zenao.v1.GetUsersProfileResponse
-	45,  // 109: zenao.v1.ZenaoService.CreatePoll:output_type -> zenao.v1.CreatePollResponse
-	49,  // 110: zenao.v1.ZenaoService.VotePoll:output_type -> zenao.v1.VotePollResponse
-	51,  // 111: zenao.v1.ZenaoService.CreatePost:output_type -> zenao.v1.CreatePostResponse
-	59,  // 112: zenao.v1.ZenaoService.DeletePost:output_type -> zenao.v1.DeletePostResponse
-	61,  // 113: zenao.v1.ZenaoService.ReactPost:output_type -> zenao.v1.ReactPostResponse
-	63,  // 114: zenao.v1.ZenaoService.EditPost:output_type -> zenao.v1.EditPostResponse
-	2,   // 115: zenao.v1.ZenaoService.Health:output_type -> zenao.v1.HealthResponse
-	74,  // [74:116] is the sub-list for method output_type
-	32,  // [32:74] is the sub-list for method input_type
-	32,  // [32:32] is the sub-list for extension type_name
-	32,  // [32:32] is the sub-list for extension extendee
-	0,   // [0:32] is the sub-list for field type_name
+	71,  // 21: zenao.v1.GetFeedPostsRequest.org:type_name -> zenao.v1.Entity
+	102, // 22: zenao.v1.GetFeedPostsResponse.posts:type_name -> feeds.v1.PostView
+	102, // 23: zenao.v1.GetChildrenPostsResponse.posts:type_name -> feeds.v1.PostView
+	66,  // 24: zenao.v1.GetEventTicketsResponse.tickets_info:type_name -> zenao.v1.TicketInfo
+	71,  // 25: zenao.v1.EntityRolesRequest.org:type_name -> zenao.v1.Entity
+	71,  // 26: zenao.v1.EntityRolesRequest.entity:type_name -> zenao.v1.Entity
+	71,  // 27: zenao.v1.UsersWithRolesRequest.org:type_name -> zenao.v1.Entity
+	75,  // 28: zenao.v1.UsersWithRolesResponse.users_with_roles:type_name -> zenao.v1.UserWithRoles
+	79,  // 29: zenao.v1.GetCommunityResponse.community:type_name -> zenao.v1.CommunityInfo
+	79,  // 30: zenao.v1.ListCommunitiesResponse.communities:type_name -> zenao.v1.CommunityInfo
+	79,  // 31: zenao.v1.ListCommunitiesByMemberResponse.communities:type_name -> zenao.v1.CommunityInfo
+	79,  // 32: zenao.v1.ListCommunitiesByEventResponse.communities:type_name -> zenao.v1.CommunityInfo
+	3,   // 33: zenao.v1.ZenaoService.EditUser:input_type -> zenao.v1.EditUserRequest
+	5,   // 34: zenao.v1.ZenaoService.GetUserInfo:input_type -> zenao.v1.GetUserInfoRequest
+	18,  // 35: zenao.v1.ZenaoService.CreateEvent:input_type -> zenao.v1.CreateEventRequest
+	20,  // 36: zenao.v1.ZenaoService.CancelEvent:input_type -> zenao.v1.CancelEventRequest
+	22,  // 37: zenao.v1.ZenaoService.EditEvent:input_type -> zenao.v1.EditEventRequest
+	24,  // 38: zenao.v1.ZenaoService.GetEventGatekeepers:input_type -> zenao.v1.GetEventGatekeepersRequest
+	26,  // 39: zenao.v1.ZenaoService.ValidatePassword:input_type -> zenao.v1.ValidatePasswordRequest
+	32,  // 40: zenao.v1.ZenaoService.BroadcastEvent:input_type -> zenao.v1.BroadcastEventRequest
+	28,  // 41: zenao.v1.ZenaoService.Participate:input_type -> zenao.v1.ParticipateRequest
+	29,  // 42: zenao.v1.ZenaoService.CancelParticipation:input_type -> zenao.v1.CancelParticipationRequest
+	64,  // 43: zenao.v1.ZenaoService.GetEventTickets:input_type -> zenao.v1.GetEventTicketsRequest
+	67,  // 44: zenao.v1.ZenaoService.Checkin:input_type -> zenao.v1.CheckinRequest
+	69,  // 45: zenao.v1.ZenaoService.ExportParticipants:input_type -> zenao.v1.ExportParticipantsRequest
+	86,  // 46: zenao.v1.ZenaoService.CreateCommunity:input_type -> zenao.v1.CreateCommunityRequest
+	88,  // 47: zenao.v1.ZenaoService.EditCommunity:input_type -> zenao.v1.EditCommunityRequest
+	90,  // 48: zenao.v1.ZenaoService.GetCommunityAdministrators:input_type -> zenao.v1.GetCommunityAdministratorsRequest
+	92,  // 49: zenao.v1.ZenaoService.JoinCommunity:input_type -> zenao.v1.JoinCommunityRequest
+	94,  // 50: zenao.v1.ZenaoService.LeaveCommunity:input_type -> zenao.v1.LeaveCommunityRequest
+	96,  // 51: zenao.v1.ZenaoService.AddEventToCommunity:input_type -> zenao.v1.AddEventToCommunityRequest
+	98,  // 52: zenao.v1.ZenaoService.RemoveEventFromCommunity:input_type -> zenao.v1.RemoveEventFromCommunityRequest
+	72,  // 53: zenao.v1.ZenaoService.EntityRoles:input_type -> zenao.v1.EntityRolesRequest
+	74,  // 54: zenao.v1.ZenaoService.UsersWithRoles:input_type -> zenao.v1.UsersWithRolesRequest
+	77,  // 55: zenao.v1.ZenaoService.GetCommunity:input_type -> zenao.v1.GetCommunityRequest
+	80,  // 56: zenao.v1.ZenaoService.ListCommunities:input_type -> zenao.v1.ListCommunitiesRequest
+	82,  // 57: zenao.v1.ZenaoService.ListCommunitiesByMember:input_type -> zenao.v1.ListCommunitiesByMemberRequest
+	84,  // 58: zenao.v1.ZenaoService.ListCommunitiesByEvent:input_type -> zenao.v1.ListCommunitiesByEventRequest
+	10,  // 59: zenao.v1.ZenaoService.GetEvent:input_type -> zenao.v1.GetEventRequest
+	12,  // 60: zenao.v1.ZenaoService.ListEvents:input_type -> zenao.v1.ListEventsRequest
+	14,  // 61: zenao.v1.ZenaoService.ListEventsByOrganizer:input_type -> zenao.v1.ListEventsByOrganizerRequest
+	16,  // 62: zenao.v1.ZenaoService.ListEventsByParticipant:input_type -> zenao.v1.ListEventsByParticipantRequest
+	52,  // 63: zenao.v1.ZenaoService.GetPost:input_type -> zenao.v1.GetPostRequest
+	54,  // 64: zenao.v1.ZenaoService.GetFeedPosts:input_type -> zenao.v1.GetFeedPostsRequest
+	56,  // 65: zenao.v1.ZenaoService.GetChildrenPosts:input_type -> zenao.v1.GetChildrenPostsRequest
+	46,  // 66: zenao.v1.ZenaoService.GetPoll:input_type -> zenao.v1.GetPollRequest
+	8,   // 67: zenao.v1.ZenaoService.GetUsersProfile:input_type -> zenao.v1.GetUsersProfileRequest
+	44,  // 68: zenao.v1.ZenaoService.CreatePoll:input_type -> zenao.v1.CreatePollRequest
+	48,  // 69: zenao.v1.ZenaoService.VotePoll:input_type -> zenao.v1.VotePollRequest
+	50,  // 70: zenao.v1.ZenaoService.CreatePost:input_type -> zenao.v1.CreatePostRequest
+	58,  // 71: zenao.v1.ZenaoService.DeletePost:input_type -> zenao.v1.DeletePostRequest
+	60,  // 72: zenao.v1.ZenaoService.ReactPost:input_type -> zenao.v1.ReactPostRequest
+	62,  // 73: zenao.v1.ZenaoService.EditPost:input_type -> zenao.v1.EditPostRequest
+	1,   // 74: zenao.v1.ZenaoService.Health:input_type -> zenao.v1.HealthRequest
+	4,   // 75: zenao.v1.ZenaoService.EditUser:output_type -> zenao.v1.EditUserResponse
+	6,   // 76: zenao.v1.ZenaoService.GetUserInfo:output_type -> zenao.v1.GetUserInfoResponse
+	19,  // 77: zenao.v1.ZenaoService.CreateEvent:output_type -> zenao.v1.CreateEventResponse
+	21,  // 78: zenao.v1.ZenaoService.CancelEvent:output_type -> zenao.v1.CancelEventResponse
+	23,  // 79: zenao.v1.ZenaoService.EditEvent:output_type -> zenao.v1.EditEventResponse
+	25,  // 80: zenao.v1.ZenaoService.GetEventGatekeepers:output_type -> zenao.v1.GetEventGatekeepersResponse
+	27,  // 81: zenao.v1.ZenaoService.ValidatePassword:output_type -> zenao.v1.ValidatePasswordResponse
+	33,  // 82: zenao.v1.ZenaoService.BroadcastEvent:output_type -> zenao.v1.BroadcastEventResponse
+	31,  // 83: zenao.v1.ZenaoService.Participate:output_type -> zenao.v1.ParticipateResponse
+	30,  // 84: zenao.v1.ZenaoService.CancelParticipation:output_type -> zenao.v1.CancelParticipationResponse
+	65,  // 85: zenao.v1.ZenaoService.GetEventTickets:output_type -> zenao.v1.GetEventTicketsResponse
+	68,  // 86: zenao.v1.ZenaoService.Checkin:output_type -> zenao.v1.CheckinResponse
+	70,  // 87: zenao.v1.ZenaoService.ExportParticipants:output_type -> zenao.v1.ExportParticipantsResponse
+	87,  // 88: zenao.v1.ZenaoService.CreateCommunity:output_type -> zenao.v1.CreateCommunityResponse
+	89,  // 89: zenao.v1.ZenaoService.EditCommunity:output_type -> zenao.v1.EditCommunityResponse
+	91,  // 90: zenao.v1.ZenaoService.GetCommunityAdministrators:output_type -> zenao.v1.GetCommunityAdministratorsResponse
+	93,  // 91: zenao.v1.ZenaoService.JoinCommunity:output_type -> zenao.v1.JoinCommunityResponse
+	95,  // 92: zenao.v1.ZenaoService.LeaveCommunity:output_type -> zenao.v1.LeaveCommunityResponse
+	97,  // 93: zenao.v1.ZenaoService.AddEventToCommunity:output_type -> zenao.v1.AddEventToCommunityResponse
+	99,  // 94: zenao.v1.ZenaoService.RemoveEventFromCommunity:output_type -> zenao.v1.RemoveEventFromCommunityResponse
+	73,  // 95: zenao.v1.ZenaoService.EntityRoles:output_type -> zenao.v1.EntityRolesResponse
+	76,  // 96: zenao.v1.ZenaoService.UsersWithRoles:output_type -> zenao.v1.UsersWithRolesResponse
+	78,  // 97: zenao.v1.ZenaoService.GetCommunity:output_type -> zenao.v1.GetCommunityResponse
+	81,  // 98: zenao.v1.ZenaoService.ListCommunities:output_type -> zenao.v1.ListCommunitiesResponse
+	83,  // 99: zenao.v1.ZenaoService.ListCommunitiesByMember:output_type -> zenao.v1.ListCommunitiesByMemberResponse
+	85,  // 100: zenao.v1.ZenaoService.ListCommunitiesByEvent:output_type -> zenao.v1.ListCommunitiesByEventResponse
+	11,  // 101: zenao.v1.ZenaoService.GetEvent:output_type -> zenao.v1.GetEventResponse
+	13,  // 102: zenao.v1.ZenaoService.ListEvents:output_type -> zenao.v1.ListEventsResponse
+	15,  // 103: zenao.v1.ZenaoService.ListEventsByOrganizer:output_type -> zenao.v1.ListEventsByOrganizerResponse
+	17,  // 104: zenao.v1.ZenaoService.ListEventsByParticipant:output_type -> zenao.v1.ListEventsByParticipantResponse
+	53,  // 105: zenao.v1.ZenaoService.GetPost:output_type -> zenao.v1.GetPostResponse
+	55,  // 106: zenao.v1.ZenaoService.GetFeedPosts:output_type -> zenao.v1.GetFeedPostsResponse
+	57,  // 107: zenao.v1.ZenaoService.GetChildrenPosts:output_type -> zenao.v1.GetChildrenPostsResponse
+	47,  // 108: zenao.v1.ZenaoService.GetPoll:output_type -> zenao.v1.GetPollResponse
+	9,   // 109: zenao.v1.ZenaoService.GetUsersProfile:output_type -> zenao.v1.GetUsersProfileResponse
+	45,  // 110: zenao.v1.ZenaoService.CreatePoll:output_type -> zenao.v1.CreatePollResponse
+	49,  // 111: zenao.v1.ZenaoService.VotePoll:output_type -> zenao.v1.VotePollResponse
+	51,  // 112: zenao.v1.ZenaoService.CreatePost:output_type -> zenao.v1.CreatePostResponse
+	59,  // 113: zenao.v1.ZenaoService.DeletePost:output_type -> zenao.v1.DeletePostResponse
+	61,  // 114: zenao.v1.ZenaoService.ReactPost:output_type -> zenao.v1.ReactPostResponse
+	63,  // 115: zenao.v1.ZenaoService.EditPost:output_type -> zenao.v1.EditPostResponse
+	2,   // 116: zenao.v1.ZenaoService.Health:output_type -> zenao.v1.HealthResponse
+	75,  // [75:117] is the sub-list for method output_type
+	33,  // [33:75] is the sub-list for method input_type
+	33,  // [33:33] is the sub-list for extension type_name
+	33,  // [33:33] is the sub-list for extension extendee
+	0,   // [0:33] is the sub-list for field type_name
 }
 
 func init() { file_zenao_v1_zenao_proto_init() }

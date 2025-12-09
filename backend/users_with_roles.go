@@ -35,7 +35,7 @@ func (s *ZenaoServer) UsersWithRoles(ctx context.Context, req *connect.Request[z
 				return err
 			}
 			userWithRoles := &zenaov1.UserWithRoles{
-				Address: s.Chain.UserRealmID(u.ID), // TODO: adapt front-end to expect ID instead of addresses.
+				RealmId: s.Chain.UserRealmID(u.ID), // TODO: adapt front-end to expect ID instead of addresses ?
 				Roles:   roles,
 			}
 			res = append(res, userWithRoles)

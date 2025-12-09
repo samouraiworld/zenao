@@ -342,7 +342,7 @@ message GetPostResponse {
 }
 
 message GetFeedPostsRequest {
-  string feed_id = 1;
+  Entity org = 1;
   uint32 limit = 2;
   uint32 offset = 3;
   repeated string tags = 4;

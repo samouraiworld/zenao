@@ -2,6 +2,8 @@ import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
+import { eventIdFromPkgPath } from "./event";
+import { communityIdFromPkgPath } from "./community";
 
 export const DEFAULT_FEED_POSTS_LIMIT = 30;
 export const DEFAULT_FEED_POSTS_COMMENTS_LIMIT = 10;
@@ -56,13 +58,32 @@ export const feedPosts = (
           // );
           // const raw = extractGnoJSONResponse(res);
           // return postViewsFromJson(raw);
+
+          // PARSE THIS TO GET IF ITS EVENT OR COMMUNITY
+          // EX EVENT: gno.land/r/zenao/events/e21:main
+          // EX COMMUNITY: gno.land/r/zenao/communities/c15:main
+          // check if it contains events else communities
+
+          // start by pop the :main
+
+          const pkgPath = feedId.split(":")[0];
+          const orgType = pkgPath.includes("events/") ? "event" : "community";
+          const orgId =
+            orgType === "event"
+              ? eventIdFromPkgPath(pkgPath)
+              : communityIdFromPkgPath(pkgPath);
+
           const res = await zenaoClient.getFeedPosts({
-            feedId,
+            org: {
+              entityType: orgType,
+              entityId: orgId,
+            },
             offset: pageParam * limit,
             limit,
             tags: tags ? tags.split(",") : [],
             userId: userIdFromPkgPath(userRealmId),
           });
+          console.log("Fetched feed posts:", res.posts);
           return res.posts;
         },
       );

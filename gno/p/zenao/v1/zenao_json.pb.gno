@@ -1765,8 +1765,8 @@ func GetPostResponseFromJSON(g *GetPostResponse, node *json.Node) {
 func (g *GetFeedPostsRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if g.FeedId != "" {
-		fields["feedId"] = json.StringNode("", g.FeedId)
+	if g.Org != nil {
+		fields["org"] = g.Org.ToJSON()
 	}
 	if g.Limit != 0 {
 		fields["limit"] = json.NumberNode("", float64(g.Limit))
@@ -1792,8 +1792,10 @@ func GetFeedPostsRequestFromJSON(g *GetFeedPostsRequest, node *json.Node) {
 	*g = GetFeedPostsRequest{}
 	fields := node.MustObject()
 
-	if val, ok := fields["feedId"]; ok {
-		g.FeedId = val.MustString()
+	if val, ok := fields["org"]; ok {
+		fv := &Entity{}
+		EntityFromJSON(fv, val)
+		g.Org = fv
 	}
 	if val, ok := fields["limit"]; ok {
 		g.Limit = uint32(val.MustNumeric())
@@ -2329,8 +2331,8 @@ func UsersWithRolesRequestFromJSON(u *UsersWithRolesRequest, node *json.Node) {
 func (u *UserWithRoles) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if u.Address != "" {
-		fields["address"] = json.StringNode("", u.Address)
+	if u.RealmId != "" {
+		fields["realmId"] = json.StringNode("", u.RealmId)
 	}
 	if len(u.Roles) != 0 {
 		arr := make([]*json.Node, len(u.Roles))
@@ -2347,8 +2349,8 @@ func UserWithRolesFromJSON(u *UserWithRoles, node *json.Node) {
 	*u = UserWithRoles{}
 	fields := node.MustObject()
 
-	if val, ok := fields["address"]; ok {
-		u.Address = val.MustString()
+	if val, ok := fields["realmId"]; ok {
+		u.RealmId = val.MustString()
 	}
 	if val, ok := fields["roles"]; ok {
 		jarr := val.MustArray()

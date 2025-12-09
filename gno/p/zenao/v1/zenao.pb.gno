@@ -336,7 +336,7 @@ type GetPostResponse struct {
 }
 
 type GetFeedPostsRequest struct {
-	FeedId string
+	Org    *Entity
 	Limit  uint32
 	Offset uint32
 	Tags   []string
@@ -435,7 +435,7 @@ type UsersWithRolesRequest struct {
 }
 
 type UserWithRoles struct {
-	Address string
+	RealmId string
 	Roles   []string
 }
 

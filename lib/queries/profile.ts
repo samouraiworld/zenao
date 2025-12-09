@@ -4,7 +4,6 @@ import {
   windowScheduler,
   keyResolver,
 } from "@yornaath/batshit";
-import { addressFromRealmId } from "../gno";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
