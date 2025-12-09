@@ -260,6 +260,8 @@ type DB interface {
 	DeletePost(postID string) error
 	EditPost(postID string, req *zenaov1.EditPostRequest) error
 	GetPostByID(postID string) (*Post, error)
+	GetPostsByFeedID(feedID string, limit int, offset int) ([]*Post, error)
+	CountChildrenPosts(parentID string) (uint64, error)
 	GetAllPosts(getDeleted bool) ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 

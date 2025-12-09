@@ -1357,6 +1357,45 @@ func (g *gormZenaoDB) GetPostByID(postID string) (*zeni.Post, error) {
 	return dbPostToZeniPost(&post)
 }
 
+// CountChildrenPosts implements zeni.DB.
+func (g *gormZenaoDB) CountChildrenPosts(parentID string) (uint64, error) {
+	parentIDUint, err := strconv.ParseUint(parentID, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("parse parent post id: %w", err)
+	}
+
+	var count int64
+	if err := g.db.Model(&Post{}).Where("parent_uri = ?", parentIDUint).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return uint64(count), nil
+}
+
+// GetPostsByFeedID implements zeni.DB.
+func (g *gormZenaoDB) GetPostsByFeedID(feedID string, limit int, offset int) ([]*zeni.Post, error) {
+	feedIDUint, err := strconv.ParseUint(feedID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse feed id: %w", err)
+	}
+
+	var posts []*Post
+	if err := g.db.Preload("Reactions").Preload("Tags").Where("feed_id = ?", feedIDUint).Limit(int(limit)).Offset(int(offset)).Find(&posts).Error; err != nil {
+		return nil, err
+	}
+
+	res := make([]*zeni.Post, 0, len(posts))
+	for _, p := range posts {
+		zpost, err := dbPostToZeniPost(p)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, zpost)
+	}
+
+	return res, nil
+}
+
 // GetAllPosts implements zeni.DB.
 func (g *gormZenaoDB) GetAllPosts(getDeleted bool) ([]*zeni.Post, error) {
 	db := g.db

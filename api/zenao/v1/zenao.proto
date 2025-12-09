@@ -53,7 +53,7 @@ service ZenaoService {
   rpc ListEventsByOrganizer(ListEventsByOrganizerRequest) returns (EventsInfo);
   rpc ListEventsByParticipant(ListEventsByParticipantRequest) returns (EventsInfo);
   rpc GetPost(GetPostRequest) returns (GetPostResponse);
-  rpc GetPosts(GetPostsRequest) returns (GetPostsResponse);
+  rpc GetPosts(GetPostsRequest) returns (GetPostsResponse); // -> FeedPosts, ChildrensPosts
   rpc GetPoll(GetPollRequest) returns (GetPollResponse);
   rpc GetUsersProfile(GetUsersProfileRequest) returns (GetUsersProfileResponse); // -> BatchProfile
 
