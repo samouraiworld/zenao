@@ -982,10 +982,10 @@ func (g *GetFeedPostsResponse) GnoLiteral(typePrefix string, linePrefix string) 
 	return buf.String()
 }
 
-func (g *GetChildrensPostsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+func (g *GetChildrenPostsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("GetChildrensPostsRequest{\n")
+	buf.WriteString("GetChildrenPostsRequest{\n")
 	if g.ParentId != "" {
 		fmt.Fprintf(buf, "%s\tParentId: %q,\n", linePrefix, g.ParentId)
 	}
@@ -1012,10 +1012,10 @@ func (g *GetChildrensPostsRequest) GnoLiteral(typePrefix string, linePrefix stri
 	return buf.String()
 }
 
-func (g *GetChildrensPostsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+func (g *GetChildrenPostsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("GetChildrensPostsResponse{\n")
+	buf.WriteString("GetChildrenPostsResponse{\n")
 	if len(g.Posts) != 0 {
 		fmt.Fprintf(buf, "%s\tPosts: []*v11.PostView{\n", linePrefix)
 		linePrefix += "\t"

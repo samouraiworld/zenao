@@ -329,7 +329,7 @@ type GetFeedPostsResponse struct {
 	Posts []*v11.PostView
 }
 
-type GetChildrensPostsRequest struct {
+type GetChildrenPostsRequest struct {
 	ParentId string
 	Limit    uint32
 	Offset   uint32
@@ -337,7 +337,7 @@ type GetChildrensPostsRequest struct {
 	UserId   string
 }
 
-type GetChildrensPostsResponse struct {
+type GetChildrenPostsResponse struct {
 	Posts []*v11.PostView
 }
 

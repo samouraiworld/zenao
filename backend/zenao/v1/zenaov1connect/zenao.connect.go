@@ -185,7 +185,7 @@ type ZenaoServiceClient interface {
 	ListEventsByParticipant(context.Context, *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.EventsInfo], error)
 	GetPost(context.Context, *connect.Request[v1.GetPostRequest]) (*connect.Response[v1.GetPostResponse], error)
 	GetFeedPosts(context.Context, *connect.Request[v1.GetFeedPostsRequest]) (*connect.Response[v1.GetFeedPostsResponse], error)
-	GetChildrenPosts(context.Context, *connect.Request[v1.GetChildrensPostsRequest]) (*connect.Response[v1.GetChildrensPostsResponse], error)
+	GetChildrenPosts(context.Context, *connect.Request[v1.GetChildrenPostsRequest]) (*connect.Response[v1.GetChildrenPostsResponse], error)
 	GetPoll(context.Context, *connect.Request[v1.GetPollRequest]) (*connect.Response[v1.GetPollResponse], error)
 	GetUsersProfile(context.Context, *connect.Request[v1.GetUsersProfileRequest]) (*connect.Response[v1.GetUsersProfileResponse], error)
 	// FEED
@@ -402,7 +402,7 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("GetFeedPosts")),
 			connect.WithClientOptions(opts...),
 		),
-		getChildrenPosts: connect.NewClient[v1.GetChildrensPostsRequest, v1.GetChildrensPostsResponse](
+		getChildrenPosts: connect.NewClient[v1.GetChildrenPostsRequest, v1.GetChildrenPostsResponse](
 			httpClient,
 			baseURL+ZenaoServiceGetChildrenPostsProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("GetChildrenPosts")),
@@ -499,7 +499,7 @@ type zenaoServiceClient struct {
 	listEventsByParticipant    *connect.Client[v1.ListEventsByParticipantRequest, v1.EventsInfo]
 	getPost                    *connect.Client[v1.GetPostRequest, v1.GetPostResponse]
 	getFeedPosts               *connect.Client[v1.GetFeedPostsRequest, v1.GetFeedPostsResponse]
-	getChildrenPosts           *connect.Client[v1.GetChildrensPostsRequest, v1.GetChildrensPostsResponse]
+	getChildrenPosts           *connect.Client[v1.GetChildrenPostsRequest, v1.GetChildrenPostsResponse]
 	getPoll                    *connect.Client[v1.GetPollRequest, v1.GetPollResponse]
 	getUsersProfile            *connect.Client[v1.GetUsersProfileRequest, v1.GetUsersProfileResponse]
 	createPoll                 *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
@@ -672,7 +672,7 @@ func (c *zenaoServiceClient) GetFeedPosts(ctx context.Context, req *connect.Requ
 }
 
 // GetChildrenPosts calls zenao.v1.ZenaoService.GetChildrenPosts.
-func (c *zenaoServiceClient) GetChildrenPosts(ctx context.Context, req *connect.Request[v1.GetChildrensPostsRequest]) (*connect.Response[v1.GetChildrensPostsResponse], error) {
+func (c *zenaoServiceClient) GetChildrenPosts(ctx context.Context, req *connect.Request[v1.GetChildrenPostsRequest]) (*connect.Response[v1.GetChildrenPostsResponse], error) {
 	return c.getChildrenPosts.CallUnary(ctx, req)
 }
 
@@ -759,7 +759,7 @@ type ZenaoServiceHandler interface {
 	ListEventsByParticipant(context.Context, *connect.Request[v1.ListEventsByParticipantRequest]) (*connect.Response[v1.EventsInfo], error)
 	GetPost(context.Context, *connect.Request[v1.GetPostRequest]) (*connect.Response[v1.GetPostResponse], error)
 	GetFeedPosts(context.Context, *connect.Request[v1.GetFeedPostsRequest]) (*connect.Response[v1.GetFeedPostsResponse], error)
-	GetChildrenPosts(context.Context, *connect.Request[v1.GetChildrensPostsRequest]) (*connect.Response[v1.GetChildrensPostsResponse], error)
+	GetChildrenPosts(context.Context, *connect.Request[v1.GetChildrenPostsRequest]) (*connect.Response[v1.GetChildrenPostsResponse], error)
 	GetPoll(context.Context, *connect.Request[v1.GetPollRequest]) (*connect.Response[v1.GetPollResponse], error)
 	GetUsersProfile(context.Context, *connect.Request[v1.GetUsersProfileRequest]) (*connect.Response[v1.GetUsersProfileResponse], error)
 	// FEED
@@ -1255,7 +1255,7 @@ func (UnimplementedZenaoServiceHandler) GetFeedPosts(context.Context, *connect.R
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetFeedPosts is not implemented"))
 }
 
-func (UnimplementedZenaoServiceHandler) GetChildrenPosts(context.Context, *connect.Request[v1.GetChildrensPostsRequest]) (*connect.Response[v1.GetChildrensPostsResponse], error) {
+func (UnimplementedZenaoServiceHandler) GetChildrenPosts(context.Context, *connect.Request[v1.GetChildrenPostsRequest]) (*connect.Response[v1.GetChildrenPostsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetChildrenPosts is not implemented"))
 }
 

@@ -3077,7 +3077,7 @@ func (x *GetFeedPostsResponse) GetPosts() []*v11.PostView {
 	return nil
 }
 
-type GetChildrensPostsRequest struct {
+type GetChildrenPostsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ParentId      string                 `protobuf:"bytes,1,opt,name=parent_id,json=parentId,proto3" json:"parent_id,omitempty"`
 	Limit         uint32                 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
@@ -3088,20 +3088,20 @@ type GetChildrensPostsRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetChildrensPostsRequest) Reset() {
-	*x = GetChildrensPostsRequest{}
+func (x *GetChildrenPostsRequest) Reset() {
+	*x = GetChildrenPostsRequest{}
 	mi := &file_zenao_v1_zenao_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetChildrensPostsRequest) String() string {
+func (x *GetChildrenPostsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetChildrensPostsRequest) ProtoMessage() {}
+func (*GetChildrenPostsRequest) ProtoMessage() {}
 
-func (x *GetChildrensPostsRequest) ProtoReflect() protoreflect.Message {
+func (x *GetChildrenPostsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_zenao_v1_zenao_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3113,67 +3113,67 @@ func (x *GetChildrensPostsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetChildrensPostsRequest.ProtoReflect.Descriptor instead.
-func (*GetChildrensPostsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetChildrenPostsRequest.ProtoReflect.Descriptor instead.
+func (*GetChildrenPostsRequest) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{52}
 }
 
-func (x *GetChildrensPostsRequest) GetParentId() string {
+func (x *GetChildrenPostsRequest) GetParentId() string {
 	if x != nil {
 		return x.ParentId
 	}
 	return ""
 }
 
-func (x *GetChildrensPostsRequest) GetLimit() uint32 {
+func (x *GetChildrenPostsRequest) GetLimit() uint32 {
 	if x != nil {
 		return x.Limit
 	}
 	return 0
 }
 
-func (x *GetChildrensPostsRequest) GetOffset() uint32 {
+func (x *GetChildrenPostsRequest) GetOffset() uint32 {
 	if x != nil {
 		return x.Offset
 	}
 	return 0
 }
 
-func (x *GetChildrensPostsRequest) GetTags() []string {
+func (x *GetChildrenPostsRequest) GetTags() []string {
 	if x != nil {
 		return x.Tags
 	}
 	return nil
 }
 
-func (x *GetChildrensPostsRequest) GetUserId() string {
+func (x *GetChildrenPostsRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-type GetChildrensPostsResponse struct {
+type GetChildrenPostsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Posts         []*v11.PostView        `protobuf:"bytes,1,rep,name=posts,proto3" json:"posts,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetChildrensPostsResponse) Reset() {
-	*x = GetChildrensPostsResponse{}
+func (x *GetChildrenPostsResponse) Reset() {
+	*x = GetChildrenPostsResponse{}
 	mi := &file_zenao_v1_zenao_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetChildrensPostsResponse) String() string {
+func (x *GetChildrenPostsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetChildrensPostsResponse) ProtoMessage() {}
+func (*GetChildrenPostsResponse) ProtoMessage() {}
 
-func (x *GetChildrensPostsResponse) ProtoReflect() protoreflect.Message {
+func (x *GetChildrenPostsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_zenao_v1_zenao_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3185,12 +3185,12 @@ func (x *GetChildrensPostsResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetChildrensPostsResponse.ProtoReflect.Descriptor instead.
-func (*GetChildrensPostsResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetChildrenPostsResponse.ProtoReflect.Descriptor instead.
+func (*GetChildrenPostsResponse) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{53}
 }
 
-func (x *GetChildrensPostsResponse) GetPosts() []*v11.PostView {
+func (x *GetChildrenPostsResponse) GetPosts() []*v11.PostView {
 	if x != nil {
 		return x.Posts
 	}
@@ -5273,14 +5273,14 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x04tags\x18\x04 \x03(\tR\x04tags\x12\x17\n" +
 	"\auser_id\x18\x05 \x01(\tR\x06userId\"@\n" +
 	"\x14GetFeedPostsResponse\x12(\n" +
-	"\x05posts\x18\x01 \x03(\v2\x12.feeds.v1.PostViewR\x05posts\"\x92\x01\n" +
-	"\x18GetChildrensPostsRequest\x12\x1b\n" +
+	"\x05posts\x18\x01 \x03(\v2\x12.feeds.v1.PostViewR\x05posts\"\x91\x01\n" +
+	"\x17GetChildrenPostsRequest\x12\x1b\n" +
 	"\tparent_id\x18\x01 \x01(\tR\bparentId\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\rR\x05limit\x12\x16\n" +
 	"\x06offset\x18\x03 \x01(\rR\x06offset\x12\x12\n" +
 	"\x04tags\x18\x04 \x03(\tR\x04tags\x12\x17\n" +
-	"\auser_id\x18\x05 \x01(\tR\x06userId\"E\n" +
-	"\x19GetChildrensPostsResponse\x12(\n" +
+	"\auser_id\x18\x05 \x01(\tR\x06userId\"D\n" +
+	"\x18GetChildrenPostsResponse\x12(\n" +
 	"\x05posts\x18\x01 \x03(\v2\x12.feeds.v1.PostViewR\x05posts\",\n" +
 	"\x11DeletePostRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\tR\x06postId\"\x14\n" +
@@ -5394,7 +5394,7 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x12DiscoverableFilter\x12#\n" +
 	"\x1fDISCOVERABLE_FILTER_UNSPECIFIED\x10\x00\x12$\n" +
 	" DISCOVERABLE_FILTER_DISCOVERABLE\x10\x01\x12&\n" +
-	"\"DISCOVERABLE_FILTER_UNDISCOVERABLE\x10\x022\xe4\x1a\n" +
+	"\"DISCOVERABLE_FILTER_UNDISCOVERABLE\x10\x022\xe2\x1a\n" +
 	"\fZenaoService\x12A\n" +
 	"\bEditUser\x12\x19.zenao.v1.EditUserRequest\x1a\x1a.zenao.v1.EditUserResponse\x12J\n" +
 	"\vGetUserInfo\x12\x1c.zenao.v1.GetUserInfoRequest\x1a\x1d.zenao.v1.GetUserInfoResponse\x12J\n" +
@@ -5428,8 +5428,8 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x15ListEventsByOrganizer\x12&.zenao.v1.ListEventsByOrganizerRequest\x1a\x14.zenao.v1.EventsInfo\x12Y\n" +
 	"\x17ListEventsByParticipant\x12(.zenao.v1.ListEventsByParticipantRequest\x1a\x14.zenao.v1.EventsInfo\x12>\n" +
 	"\aGetPost\x12\x18.zenao.v1.GetPostRequest\x1a\x19.zenao.v1.GetPostResponse\x12M\n" +
-	"\fGetFeedPosts\x12\x1d.zenao.v1.GetFeedPostsRequest\x1a\x1e.zenao.v1.GetFeedPostsResponse\x12[\n" +
-	"\x10GetChildrenPosts\x12\".zenao.v1.GetChildrensPostsRequest\x1a#.zenao.v1.GetChildrensPostsResponse\x12>\n" +
+	"\fGetFeedPosts\x12\x1d.zenao.v1.GetFeedPostsRequest\x1a\x1e.zenao.v1.GetFeedPostsResponse\x12Y\n" +
+	"\x10GetChildrenPosts\x12!.zenao.v1.GetChildrenPostsRequest\x1a\".zenao.v1.GetChildrenPostsResponse\x12>\n" +
 	"\aGetPoll\x12\x18.zenao.v1.GetPollRequest\x1a\x19.zenao.v1.GetPollResponse\x12V\n" +
 	"\x0fGetUsersProfile\x12 .zenao.v1.GetUsersProfileRequest\x1a!.zenao.v1.GetUsersProfileResponse\x12G\n" +
 	"\n" +
@@ -5511,8 +5511,8 @@ var file_zenao_v1_zenao_proto_goTypes = []any{
 	(*GetPostResponse)(nil),                    // 50: zenao.v1.GetPostResponse
 	(*GetFeedPostsRequest)(nil),                // 51: zenao.v1.GetFeedPostsRequest
 	(*GetFeedPostsResponse)(nil),               // 52: zenao.v1.GetFeedPostsResponse
-	(*GetChildrensPostsRequest)(nil),           // 53: zenao.v1.GetChildrensPostsRequest
-	(*GetChildrensPostsResponse)(nil),          // 54: zenao.v1.GetChildrensPostsResponse
+	(*GetChildrenPostsRequest)(nil),            // 53: zenao.v1.GetChildrenPostsRequest
+	(*GetChildrenPostsResponse)(nil),           // 54: zenao.v1.GetChildrenPostsResponse
 	(*DeletePostRequest)(nil),                  // 55: zenao.v1.DeletePostRequest
 	(*DeletePostResponse)(nil),                 // 56: zenao.v1.DeletePostResponse
 	(*ReactPostRequest)(nil),                   // 57: zenao.v1.ReactPostRequest
@@ -5572,7 +5572,7 @@ var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	94, // 13: zenao.v1.GetPollResponse.poll:type_name -> polls.v1.Poll
 	95, // 14: zenao.v1.GetPostResponse.post:type_name -> feeds.v1.PostView
 	95, // 15: zenao.v1.GetFeedPostsResponse.posts:type_name -> feeds.v1.PostView
-	95, // 16: zenao.v1.GetChildrensPostsResponse.posts:type_name -> feeds.v1.PostView
+	95, // 16: zenao.v1.GetChildrenPostsResponse.posts:type_name -> feeds.v1.PostView
 	63, // 17: zenao.v1.GetEventTicketsResponse.tickets_info:type_name -> zenao.v1.TicketInfo
 	68, // 18: zenao.v1.EntityRolesRequest.org:type_name -> zenao.v1.Entity
 	68, // 19: zenao.v1.EntityRolesRequest.entity:type_name -> zenao.v1.Entity
@@ -5610,7 +5610,7 @@ var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	13, // 51: zenao.v1.ZenaoService.ListEventsByParticipant:input_type -> zenao.v1.ListEventsByParticipantRequest
 	49, // 52: zenao.v1.ZenaoService.GetPost:input_type -> zenao.v1.GetPostRequest
 	51, // 53: zenao.v1.ZenaoService.GetFeedPosts:input_type -> zenao.v1.GetFeedPostsRequest
-	53, // 54: zenao.v1.ZenaoService.GetChildrenPosts:input_type -> zenao.v1.GetChildrensPostsRequest
+	53, // 54: zenao.v1.ZenaoService.GetChildrenPosts:input_type -> zenao.v1.GetChildrenPostsRequest
 	43, // 55: zenao.v1.ZenaoService.GetPoll:input_type -> zenao.v1.GetPollRequest
 	8,  // 56: zenao.v1.ZenaoService.GetUsersProfile:input_type -> zenao.v1.GetUsersProfileRequest
 	41, // 57: zenao.v1.ZenaoService.CreatePoll:input_type -> zenao.v1.CreatePollRequest
@@ -5652,7 +5652,7 @@ var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	38, // 93: zenao.v1.ZenaoService.ListEventsByParticipant:output_type -> zenao.v1.EventsInfo
 	50, // 94: zenao.v1.ZenaoService.GetPost:output_type -> zenao.v1.GetPostResponse
 	52, // 95: zenao.v1.ZenaoService.GetFeedPosts:output_type -> zenao.v1.GetFeedPostsResponse
-	54, // 96: zenao.v1.ZenaoService.GetChildrenPosts:output_type -> zenao.v1.GetChildrensPostsResponse
+	54, // 96: zenao.v1.ZenaoService.GetChildrenPosts:output_type -> zenao.v1.GetChildrenPostsResponse
 	44, // 97: zenao.v1.ZenaoService.GetPoll:output_type -> zenao.v1.GetPollResponse
 	9,  // 98: zenao.v1.ZenaoService.GetUsersProfile:output_type -> zenao.v1.GetUsersProfileResponse
 	42, // 99: zenao.v1.ZenaoService.CreatePoll:output_type -> zenao.v1.CreatePollResponse

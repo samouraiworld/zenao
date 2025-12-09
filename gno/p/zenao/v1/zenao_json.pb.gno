@@ -1703,7 +1703,7 @@ func GetFeedPostsResponseFromJSON(g *GetFeedPostsResponse, node *json.Node) {
 	}
 }
 
-func (g *GetChildrensPostsRequest) ToJSON() *json.Node {
+func (g *GetChildrenPostsRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
 	if g.ParentId != "" {
@@ -1729,8 +1729,8 @@ func (g *GetChildrensPostsRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func GetChildrensPostsRequestFromJSON(g *GetChildrensPostsRequest, node *json.Node) {
-	*g = GetChildrensPostsRequest{}
+func GetChildrenPostsRequestFromJSON(g *GetChildrenPostsRequest, node *json.Node) {
+	*g = GetChildrenPostsRequest{}
 	fields := node.MustObject()
 
 	if val, ok := fields["parentId"]; ok {
@@ -1755,7 +1755,7 @@ func GetChildrensPostsRequestFromJSON(g *GetChildrensPostsRequest, node *json.No
 	}
 }
 
-func (g *GetChildrensPostsResponse) ToJSON() *json.Node {
+func (g *GetChildrenPostsResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
 	if len(g.Posts) != 0 {
@@ -1769,8 +1769,8 @@ func (g *GetChildrensPostsResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func GetChildrensPostsResponseFromJSON(g *GetChildrensPostsResponse, node *json.Node) {
-	*g = GetChildrensPostsResponse{}
+func GetChildrenPostsResponseFromJSON(g *GetChildrenPostsResponse, node *json.Node) {
+	*g = GetChildrenPostsResponse{}
 	fields := node.MustObject()
 
 	if val, ok := fields["posts"]; ok {

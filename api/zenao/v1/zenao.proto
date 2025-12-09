@@ -54,7 +54,7 @@ service ZenaoService {
   rpc ListEventsByParticipant(ListEventsByParticipantRequest) returns (EventsInfo);
   rpc GetPost(GetPostRequest) returns (GetPostResponse);
   rpc GetFeedPosts(GetFeedPostsRequest) returns (GetFeedPostsResponse);
-  rpc GetChildrenPosts(GetChildrensPostsRequest) returns (GetChildrensPostsResponse);
+  rpc GetChildrenPosts(GetChildrenPostsRequest) returns (GetChildrenPostsResponse);
   rpc GetPoll(GetPollRequest) returns (GetPollResponse);
   rpc GetUsersProfile(GetUsersProfileRequest) returns (GetUsersProfileResponse); // -> BatchProfile
 
@@ -335,7 +335,7 @@ message GetFeedPostsResponse {
   repeated feeds.v1.PostView posts = 1;
 }
 
-message GetChildrensPostsRequest {
+message GetChildrenPostsRequest {
   string parent_id = 1;
   uint32 limit = 2;
   uint32 offset = 3;
@@ -343,7 +343,7 @@ message GetChildrensPostsRequest {
   string user_id = 5;   // optional, to check if the user has reacted
 }
 
-message GetChildrensPostsResponse {
+message GetChildrenPostsResponse {
   repeated feeds.v1.PostView posts = 1;
 }
 

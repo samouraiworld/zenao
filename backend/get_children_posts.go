@@ -10,7 +10,7 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) GetChildrensPosts(ctx context.Context, req *connect.Request[zenaov1.GetChildrensPostsRequest]) (*connect.Response[zenaov1.GetChildrensPostsResponse], error) {
+func (s *ZenaoServer) GetChildrenPosts(ctx context.Context, req *connect.Request[zenaov1.GetChildrenPostsRequest]) (*connect.Response[zenaov1.GetChildrenPostsResponse], error) {
 	if req.Msg.ParentId == "" {
 		return nil, errors.New("parent ID is required")
 	}
@@ -77,5 +77,5 @@ func (s *ZenaoServer) GetChildrensPosts(ctx context.Context, req *connect.Reques
 		return nil, err
 	}
 
-	return connect.NewResponse(&zenaov1.GetChildrensPostsResponse{Posts: PostsViews}), nil
+	return connect.NewResponse(&zenaov1.GetChildrenPostsResponse{Posts: PostsViews}), nil
 }
