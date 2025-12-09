@@ -1545,7 +1545,7 @@ func GetPollResponseFromJSON(g *GetPollResponse, node *json.Node) {
 
 	if val, ok := fields["poll"]; ok {
 		fv := &v1.Poll{}
-		PollFromJSON(fv, val)
+		v1.PollFromJSON(fv, val)
 		g.Poll = fv
 	}
 }
@@ -1697,7 +1697,7 @@ func GetPostResponseFromJSON(g *GetPostResponse, node *json.Node) {
 
 	if val, ok := fields["post"]; ok {
 		fv := &v11.PostView{}
-		PostViewFromJSON(fv, val)
+		v11.PostViewFromJSON(fv, val)
 		g.Post = fv
 	}
 }
@@ -1777,7 +1777,7 @@ func GetFeedPostsResponseFromJSON(g *GetFeedPostsResponse, node *json.Node) {
 		arr := make([]*v11.PostView, len(jarr))
 		for i, val := range jarr {
 			fv := &v11.PostView{}
-			PostViewFromJSON(fv, val)
+			v11.PostViewFromJSON(fv, val)
 			arr[i] = fv
 		}
 		g.Posts = arr
@@ -1859,7 +1859,7 @@ func GetChildrenPostsResponseFromJSON(g *GetChildrenPostsResponse, node *json.No
 		arr := make([]*v11.PostView, len(jarr))
 		for i, val := range jarr {
 			fv := &v11.PostView{}
-			PostViewFromJSON(fv, val)
+			v11.PostViewFromJSON(fv, val)
 			arr[i] = fv
 		}
 		g.Posts = arr
