@@ -249,7 +249,7 @@ type DB interface {
 	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)
 
-	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
+	GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
 	GetOrgByPostID(postID string) (orgType, orgID string, err error)
@@ -287,6 +287,8 @@ type Chain interface {
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	UserRealmID(userID string) string
+	CommunityRealmID(userID string) string
+	EventRealmID(eventID string) string
 
 	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
 	CancelEvent(eventID string, callerID string) error

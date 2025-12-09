@@ -695,24 +695,24 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 }
 
 // GetOrgUsersWithRole implements zeni.DB.
-func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*zeni.User, error) {
-	g, span := g.trace("gzdb.GetOrgUsersWithRole")
+func (g *gormZenaoDB) GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*zeni.User, error) {
+	g, span := g.trace("gzdb.GetOrgUsersWithRoles")
 	defer span.End()
 
-	var roles []EntityRole
+	var userIDs []uint
 	if err := g.db.
-		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ?",
-			orgType, orgID, role, zeni.EntityTypeUser).
-		Find(&roles).Error; err != nil {
+		Model(&EntityRole{}).
+		Select("entity_id").
+		Where("org_type = ? AND org_id = ? AND entity_type = ? AND role IN ?",
+			orgType, orgID, zeni.EntityTypeUser, roles).
+		Group("entity_id").
+		Having("COUNT(DISTINCT role) = ?", len(roles)).
+		Scan(&userIDs).Error; err != nil {
 		return nil, err
 	}
-	if len(roles) == 0 {
-		return []*zeni.User{}, nil
-	}
 
-	userIDs := make([]uint, 0, len(roles))
-	for _, r := range roles {
-		userIDs = append(userIDs, r.EntityID)
+	if len(userIDs) == 0 {
+		return []*zeni.User{}, nil
 	}
 
 	var users []User
@@ -1900,7 +1900,7 @@ func (g *gormZenaoDB) updateUserRoles(role string, userIDs []string, orgID strin
 	}
 
 	var currentUsersIDs []string
-	currentUsers, err := g.GetOrgUsersWithRole(orgType, orgID, role)
+	currentUsers, err := g.GetOrgUsersWithRoles(orgType, orgID, []string{role})
 	if err != nil {
 		return fmt.Errorf("get users with role %s: %w", role, err)
 	}

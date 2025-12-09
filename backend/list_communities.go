@@ -20,7 +20,7 @@ func (s *ZenaoServer) ListCommunities(ctx context.Context, req *connect.Request[
 		}
 		// XXX: find a way to this efficiently ? (one TX)
 		for _, cmt := range cmts {
-			adm, err := tx.GetOrgUsersWithRole(zeni.EntityTypeCommunity, cmt.ID, zeni.RoleAdministrator)
+			adm, err := tx.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, cmt.ID, []string{zeni.RoleAdministrator})
 			if err != nil {
 				return err
 			}
@@ -40,6 +40,7 @@ func (s *ZenaoServer) ListCommunities(ctx context.Context, req *connect.Request[
 				BannerUri:      cmt.BannerURI,
 				Administrators: admIDs,
 				CountMembers:   count,
+				PkgPath:        s.Chain.CommunityRealmID(cmt.ID), // TODO: remove usage in front-end to use ID instead ?
 			}
 			infos = append(infos, &info)
 		}

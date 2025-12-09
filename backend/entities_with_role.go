@@ -10,19 +10,19 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) UsersWithRole(ctx context.Context, req *connect.Request[zenaov1.UsersWithRoleRequest]) (*connect.Response[zenaov1.UsersWithRoleResponse], error) {
+func (s *ZenaoServer) UsersWithRoles(ctx context.Context, req *connect.Request[zenaov1.UsersWithRolesRequest]) (*connect.Response[zenaov1.UsersWithRolesResponse], error) {
 	if req.Msg.Org == nil || req.Msg.Org.EntityId == "" || req.Msg.Org.EntityType == "" {
 		return nil, errors.New("org entity type and id are required")
 	}
 
-	if req.Msg.Role == "" {
-		return nil, errors.New("role is required")
+	if len(req.Msg.Roles) == 0 {
+		return nil, errors.New("roles array is required with at least one element")
 	}
 
 	var users []*zeni.User
 	if err := s.DB.TxWithSpan(ctx, "UsersWithRole", func(tx zeni.DB) error {
 		var err error
-		users, err = tx.GetOrgUsersWithRole(req.Msg.Org.EntityType, req.Msg.Org.EntityId, req.Msg.Role)
+		users, err = tx.GetOrgUsersWithRoles(req.Msg.Org.EntityType, req.Msg.Org.EntityId, req.Msg.Roles)
 		if err != nil {
 			return err
 		}
@@ -35,5 +35,5 @@ func (s *ZenaoServer) UsersWithRole(ctx context.Context, req *connect.Request[ze
 		return u.ID
 	})
 
-	return connect.NewResponse(&zenaov1.UsersWithRoleResponse{UsersIds: usersIDs}), nil
+	return connect.NewResponse(&zenaov1.UsersWithRolesResponse{UsersIds: usersIDs}), nil
 }

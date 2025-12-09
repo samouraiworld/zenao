@@ -4084,28 +4084,28 @@ func (x *EntityRolesResponse) GetRoles() []string {
 	return nil
 }
 
-type UsersWithRoleRequest struct {
+type UsersWithRolesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Org           *Entity                `protobuf:"bytes,1,opt,name=org,proto3" json:"org,omitempty"`   // one of: community, event
-	Role          string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"` // one of: administrator, organizer, gatekeeper, member, participant
+	Org           *Entity                `protobuf:"bytes,1,opt,name=org,proto3" json:"org,omitempty"`     // one of: community, event
+	Roles         []string               `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"` // one of: administrator, organizer, gatekeeper, member, participant
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UsersWithRoleRequest) Reset() {
-	*x = UsersWithRoleRequest{}
+func (x *UsersWithRolesRequest) Reset() {
+	*x = UsersWithRolesRequest{}
 	mi := &file_zenao_v1_zenao_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UsersWithRoleRequest) String() string {
+func (x *UsersWithRolesRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UsersWithRoleRequest) ProtoMessage() {}
+func (*UsersWithRolesRequest) ProtoMessage() {}
 
-func (x *UsersWithRoleRequest) ProtoReflect() protoreflect.Message {
+func (x *UsersWithRolesRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_zenao_v1_zenao_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4117,46 +4117,46 @@ func (x *UsersWithRoleRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UsersWithRoleRequest.ProtoReflect.Descriptor instead.
-func (*UsersWithRoleRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use UsersWithRolesRequest.ProtoReflect.Descriptor instead.
+func (*UsersWithRolesRequest) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{73}
 }
 
-func (x *UsersWithRoleRequest) GetOrg() *Entity {
+func (x *UsersWithRolesRequest) GetOrg() *Entity {
 	if x != nil {
 		return x.Org
 	}
 	return nil
 }
 
-func (x *UsersWithRoleRequest) GetRole() string {
+func (x *UsersWithRolesRequest) GetRoles() []string {
 	if x != nil {
-		return x.Role
+		return x.Roles
 	}
-	return ""
+	return nil
 }
 
-type UsersWithRoleResponse struct {
+type UsersWithRolesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UsersIds      []string               `protobuf:"bytes,1,rep,name=users_ids,json=usersIds,proto3" json:"users_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UsersWithRoleResponse) Reset() {
-	*x = UsersWithRoleResponse{}
+func (x *UsersWithRolesResponse) Reset() {
+	*x = UsersWithRolesResponse{}
 	mi := &file_zenao_v1_zenao_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UsersWithRoleResponse) String() string {
+func (x *UsersWithRolesResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UsersWithRoleResponse) ProtoMessage() {}
+func (*UsersWithRolesResponse) ProtoMessage() {}
 
-func (x *UsersWithRoleResponse) ProtoReflect() protoreflect.Message {
+func (x *UsersWithRolesResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_zenao_v1_zenao_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -4168,12 +4168,12 @@ func (x *UsersWithRoleResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UsersWithRoleResponse.ProtoReflect.Descriptor instead.
-func (*UsersWithRoleResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use UsersWithRolesResponse.ProtoReflect.Descriptor instead.
+func (*UsersWithRolesResponse) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{74}
 }
 
-func (x *UsersWithRoleResponse) GetUsersIds() []string {
+func (x *UsersWithRolesResponse) GetUsersIds() []string {
 	if x != nil {
 		return x.UsersIds
 	}
@@ -5592,11 +5592,11 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x03org\x18\x01 \x01(\v2\x10.zenao.v1.EntityR\x03org\x12(\n" +
 	"\x06entity\x18\x02 \x01(\v2\x10.zenao.v1.EntityR\x06entity\"+\n" +
 	"\x13EntityRolesResponse\x12\x14\n" +
-	"\x05roles\x18\x01 \x03(\tR\x05roles\"N\n" +
-	"\x14UsersWithRoleRequest\x12\"\n" +
-	"\x03org\x18\x01 \x01(\v2\x10.zenao.v1.EntityR\x03org\x12\x12\n" +
-	"\x04role\x18\x02 \x01(\tR\x04role\"4\n" +
-	"\x15UsersWithRoleResponse\x12\x1b\n" +
+	"\x05roles\x18\x01 \x03(\tR\x05roles\"Q\n" +
+	"\x15UsersWithRolesRequest\x12\"\n" +
+	"\x03org\x18\x01 \x01(\v2\x10.zenao.v1.EntityR\x03org\x12\x14\n" +
+	"\x05roles\x18\x02 \x03(\tR\x05roles\"5\n" +
+	"\x16UsersWithRolesResponse\x12\x1b\n" +
 	"\tusers_ids\x18\x01 \x03(\tR\busersIds\"8\n" +
 	"\x13GetCommunityRequest\x12!\n" +
 	"\fcommunity_id\x18\x01 \x01(\tR\vcommunityId\"M\n" +
@@ -5670,7 +5670,7 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x12DiscoverableFilter\x12#\n" +
 	"\x1fDISCOVERABLE_FILTER_UNSPECIFIED\x10\x00\x12$\n" +
 	" DISCOVERABLE_FILTER_DISCOVERABLE\x10\x01\x12&\n" +
-	"\"DISCOVERABLE_FILTER_UNDISCOVERABLE\x10\x022\xc7\x1b\n" +
+	"\"DISCOVERABLE_FILTER_UNDISCOVERABLE\x10\x022\xca\x1b\n" +
 	"\fZenaoService\x12A\n" +
 	"\bEditUser\x12\x19.zenao.v1.EditUserRequest\x1a\x1a.zenao.v1.EditUserResponse\x12J\n" +
 	"\vGetUserInfo\x12\x1c.zenao.v1.GetUserInfoRequest\x1a\x1d.zenao.v1.GetUserInfoResponse\x12J\n" +
@@ -5692,8 +5692,8 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x0eLeaveCommunity\x12\x1f.zenao.v1.LeaveCommunityRequest\x1a .zenao.v1.LeaveCommunityResponse\x12b\n" +
 	"\x13AddEventToCommunity\x12$.zenao.v1.AddEventToCommunityRequest\x1a%.zenao.v1.AddEventToCommunityResponse\x12q\n" +
 	"\x18RemoveEventFromCommunity\x12).zenao.v1.RemoveEventFromCommunityRequest\x1a*.zenao.v1.RemoveEventFromCommunityResponse\x12J\n" +
-	"\vEntityRoles\x12\x1c.zenao.v1.EntityRolesRequest\x1a\x1d.zenao.v1.EntityRolesResponse\x12P\n" +
-	"\rUsersWithRole\x12\x1e.zenao.v1.UsersWithRoleRequest\x1a\x1f.zenao.v1.UsersWithRoleResponse\x12M\n" +
+	"\vEntityRoles\x12\x1c.zenao.v1.EntityRolesRequest\x1a\x1d.zenao.v1.EntityRolesResponse\x12S\n" +
+	"\x0eUsersWithRoles\x12\x1f.zenao.v1.UsersWithRolesRequest\x1a .zenao.v1.UsersWithRolesResponse\x12M\n" +
 	"\fGetCommunity\x12\x1d.zenao.v1.GetCommunityRequest\x1a\x1e.zenao.v1.GetCommunityResponse\x12V\n" +
 	"\x0fListCommunities\x12 .zenao.v1.ListCommunitiesRequest\x1a!.zenao.v1.ListCommunitiesResponse\x12n\n" +
 	"\x17ListCommunitiesByMember\x12(.zenao.v1.ListCommunitiesByMemberRequest\x1a).zenao.v1.ListCommunitiesByMemberResponse\x12k\n" +
@@ -5808,8 +5808,8 @@ var file_zenao_v1_zenao_proto_goTypes = []any{
 	(*Entity)(nil),                             // 71: zenao.v1.Entity
 	(*EntityRolesRequest)(nil),                 // 72: zenao.v1.EntityRolesRequest
 	(*EntityRolesResponse)(nil),                // 73: zenao.v1.EntityRolesResponse
-	(*UsersWithRoleRequest)(nil),               // 74: zenao.v1.UsersWithRoleRequest
-	(*UsersWithRoleResponse)(nil),              // 75: zenao.v1.UsersWithRoleResponse
+	(*UsersWithRolesRequest)(nil),              // 74: zenao.v1.UsersWithRolesRequest
+	(*UsersWithRolesResponse)(nil),             // 75: zenao.v1.UsersWithRolesResponse
 	(*GetCommunityRequest)(nil),                // 76: zenao.v1.GetCommunityRequest
 	(*GetCommunityResponse)(nil),               // 77: zenao.v1.GetCommunityResponse
 	(*CommunityInfo)(nil),                      // 78: zenao.v1.CommunityInfo
@@ -5861,7 +5861,7 @@ var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	66,  // 20: zenao.v1.GetEventTicketsResponse.tickets_info:type_name -> zenao.v1.TicketInfo
 	71,  // 21: zenao.v1.EntityRolesRequest.org:type_name -> zenao.v1.Entity
 	71,  // 22: zenao.v1.EntityRolesRequest.entity:type_name -> zenao.v1.Entity
-	71,  // 23: zenao.v1.UsersWithRoleRequest.org:type_name -> zenao.v1.Entity
+	71,  // 23: zenao.v1.UsersWithRolesRequest.org:type_name -> zenao.v1.Entity
 	78,  // 24: zenao.v1.GetCommunityResponse.community:type_name -> zenao.v1.CommunityInfo
 	78,  // 25: zenao.v1.ListCommunitiesResponse.communities:type_name -> zenao.v1.CommunityInfo
 	78,  // 26: zenao.v1.ListCommunitiesByMemberResponse.communities:type_name -> zenao.v1.CommunityInfo
@@ -5887,7 +5887,7 @@ var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	95,  // 46: zenao.v1.ZenaoService.AddEventToCommunity:input_type -> zenao.v1.AddEventToCommunityRequest
 	97,  // 47: zenao.v1.ZenaoService.RemoveEventFromCommunity:input_type -> zenao.v1.RemoveEventFromCommunityRequest
 	72,  // 48: zenao.v1.ZenaoService.EntityRoles:input_type -> zenao.v1.EntityRolesRequest
-	74,  // 49: zenao.v1.ZenaoService.UsersWithRole:input_type -> zenao.v1.UsersWithRoleRequest
+	74,  // 49: zenao.v1.ZenaoService.UsersWithRoles:input_type -> zenao.v1.UsersWithRolesRequest
 	76,  // 50: zenao.v1.ZenaoService.GetCommunity:input_type -> zenao.v1.GetCommunityRequest
 	79,  // 51: zenao.v1.ZenaoService.ListCommunities:input_type -> zenao.v1.ListCommunitiesRequest
 	81,  // 52: zenao.v1.ZenaoService.ListCommunitiesByMember:input_type -> zenao.v1.ListCommunitiesByMemberRequest
@@ -5929,7 +5929,7 @@ var file_zenao_v1_zenao_proto_depIdxs = []int32{
 	96,  // 88: zenao.v1.ZenaoService.AddEventToCommunity:output_type -> zenao.v1.AddEventToCommunityResponse
 	98,  // 89: zenao.v1.ZenaoService.RemoveEventFromCommunity:output_type -> zenao.v1.RemoveEventFromCommunityResponse
 	73,  // 90: zenao.v1.ZenaoService.EntityRoles:output_type -> zenao.v1.EntityRolesResponse
-	75,  // 91: zenao.v1.ZenaoService.UsersWithRole:output_type -> zenao.v1.UsersWithRoleResponse
+	75,  // 91: zenao.v1.ZenaoService.UsersWithRoles:output_type -> zenao.v1.UsersWithRolesResponse
 	77,  // 92: zenao.v1.ZenaoService.GetCommunity:output_type -> zenao.v1.GetCommunityResponse
 	80,  // 93: zenao.v1.ZenaoService.ListCommunities:output_type -> zenao.v1.ListCommunitiesResponse
 	82,  // 94: zenao.v1.ZenaoService.ListCommunitiesByMember:output_type -> zenao.v1.ListCommunitiesByMemberResponse

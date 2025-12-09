@@ -26,7 +26,7 @@ func (s *ZenaoServer) GetCommunity(ctx context.Context, req *connect.Request[zen
 		if err != nil {
 			return err
 		}
-		adm, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleAdministrator)
+		adm, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleAdministrator})
 		if err != nil {
 			return err
 		}

@@ -1074,6 +1074,16 @@ func (g *gnoZenaoChain) UserRealmID(userID string) string {
 	return g.userRealmPkgPath(userID)
 }
 
+// CommunityRealmID implements ZenaoChain.
+func (g *gnoZenaoChain) CommunityRealmID(communityID string) string {
+	return g.communityPkgPath(communityID)
+}
+
+// EventRealmID implements ZenaoChain.
+func (g *gnoZenaoChain) EventRealmID(eventID string) string {
+	return g.eventRealmPkgPath(eventID)
+}
+
 // CreatePost implements ZenaoChain
 func (g *gnoZenaoChain) CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error) {
 	g, span := g.trace("gzchain.CreatePost")

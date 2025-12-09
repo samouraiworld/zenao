@@ -423,12 +423,12 @@ type EntityRolesResponse struct {
 	Roles []string
 }
 
-type UsersWithRoleRequest struct {
-	Org  *Entity
-	Role string
+type UsersWithRolesRequest struct {
+	Org   *Entity
+	Roles []string
 }
 
-type UsersWithRoleResponse struct {
+type UsersWithRolesResponse struct {
 	UsersIds []string
 }
 

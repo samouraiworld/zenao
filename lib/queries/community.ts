@@ -10,6 +10,7 @@ import { z } from "zod";
 import { GetToken } from "@clerk/types";
 import { extractGnoJSONResponse } from "../gno";
 import { withSpan } from "../tracer";
+import { userIdFromPkgPath } from "./user";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
   CommunityInfo,
@@ -40,16 +41,16 @@ export const communityInfo = (communityId: string) =>
   queryOptions({
     queryKey: ["community", communityId],
     queryFn: async () => {
-      return withSpan(`query:chain:community:${communityId}`, async () => {
-        const client = new GnoJSONRPCProvider(
-          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        );
-        const res = await client.evaluateExpression(
-          `gno.land/r/zenao/communities/c${communityId}`,
-          `community.GetInfoJSON()`,
-        );
-        const community = extractGnoJSONResponse(res) as CommunityInfoJson;
-        return fromJson(CommunityInfoSchema, community);
+      return withSpan(`query:backend:community:${communityId}`, async () => {
+        // const client = new GnoJSONRPCProvider(
+        //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        // );
+        // const res = await client.evaluateExpression(
+        //   `gno.land/r/zenao/communities/c${communityId}`,
+        //   `community.GetInfoJSON()`,
+        // );
+        const res = await zenaoClient.getCommunity({ communityId });
+        return res.community;
       });
     },
   });
@@ -77,18 +78,21 @@ export const communitiesList = (
     initialPageParam: 0,
     queryKey: ["communities", limitInt],
     queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(`query:chain:communities`, async () => {
-        const client = new GnoJSONRPCProvider(
-          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        );
-        const res = await client.evaluateExpression(
-          `gno.land/r/zenao/communityreg`,
-          `communitiesToJSON(listCommunities(${limitInt}, ${pageParam * limitInt}))`,
-        );
-        const raw = extractGnoJSONResponse(res);
-        const json = communitiesListFromJson(raw);
+      return withSpan(`query:backend:communities`, async () => {
+        // const client = new GnoJSONRPCProvider(
+        //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        // );
+        // const res = await client.evaluateExpression(
+        //   `gno.land/r/zenao/communityreg`,
+        //   `communitiesToJSON(listCommunities(${limitInt}, ${pageParam * limitInt}))`,
+        // );
 
-        return json;
+        const res = await zenaoClient.listCommunities({
+          limit: limitInt,
+          offset: pageParam * limitInt,
+        });
+
+        return res.communities;
       });
     },
     getNextPageParam: (lastPage, pages) => {
@@ -136,17 +140,24 @@ export const communitiesListByMember = (
         return [] as CommunityInfo[];
       }
       return withSpan(
-        `query:chain:communities-by-member:${memberAddress}`,
+        `query:backend:communities-by-member:${userIdFromPkgPath(memberAddress)}`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/communityreg`,
-            `communitiesToJSON(listCommunitiesByMembers(${JSON.stringify(memberAddress)}, ${limitInt}, ${pageParam * limitInt}))`,
-          );
-          const raw = extractGnoJSONResponse(res);
-          const json = communitiesListFromJson(raw);
+          // const client = new GnoJSONRPCProvider(
+          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+          // );
+          // const res = await client.evaluateExpression(
+          //   `gno.land/r/zenao/communityreg`,
+          //   `communitiesToJSON(listCommunitiesByMembers(${JSON.stringify(memberAddress)}, ${limitInt}, ${pageParam * limitInt}))`,
+          // );
+          // const raw = extractGnoJSONResponse(res);
+          // const json = communitiesListFromJson(raw);
+
+          const res = await zenaoClient.listCommunitiesByMember({
+            memberId: userIdFromPkgPath(memberAddress),
+            limit: limitInt,
+            offset: pageParam * limitInt,
+          });
+          const json = res.communities;
 
           return json;
         },
@@ -180,16 +191,27 @@ export const communityUserRoles = (
       }
 
       return withSpan(
-        `query:chain:community:${communityId}:user-roles:${userRealmId}`,
+        `query:backend:community:${communityId}:user-roles:${userIdFromPkgPath(userRealmId)}`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/communities/c${communityId}`,
-            `community.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
-          );
-          const roles = extractGnoJSONResponse(res);
+          // const client = new GnoJSONRPCProvider(
+          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+          // );
+          // const res = await client.evaluateExpression(
+          //   `gno.land/r/zenao/communities/c${communityId}`,
+          //   `community.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
+          // );
+          // const roles = extractGnoJSONResponse(res);
+          const res = await zenaoClient.entityRoles({
+            org: {
+              entityType: "community",
+              entityId: communityId,
+            },
+            entity: {
+              entityType: "user",
+              entityId: userIdFromPkgPath(userRealmId),
+            },
+          });
+          const roles = res.roles;
           return communityGetUserRolesSchema.parse(roles);
         },
       );
@@ -205,16 +227,25 @@ export const communityUsersWithRoles = (
     queryKey: ["communityRoles", communityId, JSON.stringify(roles)],
     queryFn: async () => {
       return withSpan(
-        `query:chain:community:${communityId}:users-with-roles:${roles.join(",")}`,
+        `query:backend:community:${communityId}:users-with-roles:${roles.join(",")}`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/communities/c${communityId}`,
-            `community.GetUsersWithRolesJSON(${goStringSliceLiteral(roles)})`,
-          );
-          const raw = extractGnoJSONResponse(res);
+          // const client = new GnoJSONRPCProvider(
+          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+          // );
+          // const res = await client.evaluateExpression(
+          //   `gno.land/r/zenao/communities/c${communityId}`,
+          //   `community.GetUsersWithRolesJSON(${goStringSliceLiteral(roles)})`,
+          // );
+          // const raw = extractGnoJSONResponse(res);
+
+          const res = await zenaoClient.usersWithRole({
+            org: {
+              entityType: "community",
+              entityId: communityId,
+            },
+            role: roles,
+          });
+          const raw = res.usersWithRoles;
 
           return communityUsersWithRolesResponseSchema.array().parse(raw);
         },

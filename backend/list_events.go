@@ -20,11 +20,11 @@ func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenao
 		}
 		// XXX: find a way to this efficiently ? (one TX)
 		for _, evt := range evts {
-			organizers, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleOrganizer)
+			organizers, err := tx.GetOrgUsersWithRoles(zeni.EntityTypeEvent, evt.ID, []string{zeni.RoleOrganizer})
 			if err != nil {
 				return err
 			}
-			gatekeepers, err := tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, evt.ID, zeni.RoleGatekeeper)
+			gatekeepers, err := tx.GetOrgUsersWithRoles(zeni.EntityTypeEvent, evt.ID, []string{zeni.RoleGatekeeper})
 			if err != nil {
 				return err
 			}
@@ -58,6 +58,7 @@ func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenao
 				Participants: participants,
 				CheckedIn:    checkedIn,
 				Discoverable: evt.Discoverable,
+				PkgPath:      s.Chain.EventRealmID(evt.ID), // TODO: remove usage in front-end to use ID instead ?
 			}
 			infos = append(infos, &info)
 		}

@@ -29,11 +29,11 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		if err != nil {
 			return err
 		}
-		organizers, err = tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleOrganizer)
+		organizers, err = tx.GetOrgUsersWithRoles(zeni.EntityTypeEvent, req.Msg.EventId, []string{zeni.RoleOrganizer})
 		if err != nil {
 			return err
 		}
-		gatekeepers, err = tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleGatekeeper)
+		gatekeepers, err = tx.GetOrgUsersWithRoles(zeni.EntityTypeEvent, req.Msg.EventId, []string{zeni.RoleGatekeeper})
 		if err != nil {
 			return err
 		}
