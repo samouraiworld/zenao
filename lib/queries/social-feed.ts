@@ -83,7 +83,20 @@ export const feedPosts = (
             tags: tags ? tags.split(",") : [],
             userId: userIdFromPkgPath(userRealmId),
           });
-          console.log("Fetched feed posts:", res.posts);
+          console.log("Fetchedex feed posts:", res.posts);
+          for (const p of res.posts) {
+            console.log("RAW POST =", p.post); // 1️⃣ prints the Post
+
+            console.log("POST KEYS =", Object.keys(p.post || {})); // 2️⃣ what fields exist?
+
+            const oneof = p.post?.post;
+            console.log("ONEOF KEYS =", oneof && Object.keys(oneof)); // 3️⃣ should see ["case", "value"]
+
+            console.log("CASE VALUE ACCESS =", p.post?.post?.case); // 4️⃣ should be "standard"
+
+            // eslint-disable-next-line no-restricted-syntax
+            console.log("JSON.stringify =", JSON.parse(JSON.stringify(p.post))); // 5️⃣ what data is actually present?
+          }
           return res.posts;
         },
       );

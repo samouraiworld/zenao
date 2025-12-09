@@ -5,7 +5,7 @@ plugins:
     # Also generate any imported dependencies
     include_imports: true
     # Add more plugin options here
-    opt: target=ts,json_types=true
+    opt: target=ts
 
   - local: [go, run, -modfile, go.mod, google.golang.org/protobuf/cmd/protoc-gen-go]
     out: backend
