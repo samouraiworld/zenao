@@ -134,6 +134,7 @@ type Post struct {
 
 type Poll struct {
 	CreatedAt time.Time
+	CreatedBy string
 	ID        string
 	Question  string
 	Kind      pollsv1.PollKind
@@ -210,6 +211,7 @@ type DB interface {
 
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
+	GetUsersByIDs(ids []string) ([]*User, error)
 	// XXX: add EnsureUsersExist
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
@@ -268,7 +270,8 @@ type DB interface {
 
 	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
-	GetPollByPostID(postID string) (*Poll, error)
+	GetPollByID(pollID string, userID string) (*Poll, error)
+	GetPollByPostID(postID string, userID string) (*Poll, error)
 
 	// gentxs specific
 	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)

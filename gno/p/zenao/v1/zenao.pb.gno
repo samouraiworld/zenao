@@ -69,14 +69,14 @@ type GetUserInfoResponse struct {
 }
 
 type Profile struct {
-	Address     string
+	Id          string
 	DisplayName string
 	Bio         string
 	AvatarUri   string
 }
 
 type GetUsersProfileRequest struct {
-	Addresses []string
+	Ids []string
 }
 
 type GetUsersProfileResponse struct {

@@ -348,7 +348,7 @@ func (x *GetUserInfoResponse) GetPlan() string {
 
 type Profile struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Address       string                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	Bio           string                 `protobuf:"bytes,3,opt,name=bio,proto3" json:"bio,omitempty"`
 	AvatarUri     string                 `protobuf:"bytes,4,opt,name=avatar_uri,json=avatarUri,proto3" json:"avatar_uri,omitempty"`
@@ -386,9 +386,9 @@ func (*Profile) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *Profile) GetAddress() string {
+func (x *Profile) GetId() string {
 	if x != nil {
-		return x.Address
+		return x.Id
 	}
 	return ""
 }
@@ -416,7 +416,7 @@ func (x *Profile) GetAvatarUri() string {
 
 type GetUsersProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Addresses     []string               `protobuf:"bytes,1,rep,name=addresses,proto3" json:"addresses,omitempty"`
+	Ids           []string               `protobuf:"bytes,1,rep,name=ids,proto3" json:"ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -451,9 +451,9 @@ func (*GetUsersProfileRequest) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *GetUsersProfileRequest) GetAddresses() []string {
+func (x *GetUsersProfileRequest) GetIds() []string {
 	if x != nil {
-		return x.Addresses
+		return x.Ids
 	}
 	return nil
 }
@@ -5346,15 +5346,15 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x12GetUserInfoRequest\"D\n" +
 	"\x13GetUserInfoResponse\x12\x19\n" +
 	"\brealm_id\x18\x01 \x01(\tR\arealmId\x12\x12\n" +
-	"\x04plan\x18\x02 \x01(\tR\x04plan\"w\n" +
-	"\aProfile\x12\x18\n" +
-	"\aaddress\x18\x01 \x01(\tR\aaddress\x12!\n" +
+	"\x04plan\x18\x02 \x01(\tR\x04plan\"m\n" +
+	"\aProfile\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x10\n" +
 	"\x03bio\x18\x03 \x01(\tR\x03bio\x12\x1d\n" +
 	"\n" +
-	"avatar_uri\x18\x04 \x01(\tR\tavatarUri\"6\n" +
-	"\x16GetUsersProfileRequest\x12\x1c\n" +
-	"\taddresses\x18\x01 \x03(\tR\taddresses\"H\n" +
+	"avatar_uri\x18\x04 \x01(\tR\tavatarUri\"*\n" +
+	"\x16GetUsersProfileRequest\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\tR\x03ids\"H\n" +
 	"\x17GetUsersProfileResponse\x12-\n" +
 	"\bprofiles\x18\x01 \x03(\v2\x11.zenao.v1.ProfileR\bprofiles\",\n" +
 	"\x0fGetEventRequest\x12\x19\n" +

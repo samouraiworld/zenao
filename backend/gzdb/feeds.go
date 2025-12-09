@@ -207,7 +207,7 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 	return zpost, nil
 }
 
-func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
+func dbPollToZeniPoll(poll *Poll, userID string) (*zeni.Poll, error) {
 	kind := pollsv1.PollKind(poll.Kind)
 	zpoll := &zeni.Poll{
 		ID:        strconv.FormatUint(uint64(poll.ID), 10),
@@ -220,18 +220,21 @@ func dbPollToZeniPoll(poll *Poll) (*zeni.Poll, error) {
 
 	var votes []*zeni.Vote
 	for _, result := range poll.Results {
-		zpoll.Results = append(zpoll.Results, &pollsv1.PollResult{
-			Option:       result.Option,
-			Count:        uint32(len(result.Votes)),
-			HasUserVoted: false, // TODO: check if user has voted
-		})
+		res := &pollsv1.PollResult{
+			Option: result.Option,
+			Count:  uint32(len(result.Votes)),
+		}
 		for _, vote := range result.Votes {
 			votes = append(votes, &zeni.Vote{
 				CreatedAt: vote.CreatedAt,
 				UserID:    strconv.FormatUint(uint64(vote.UserID), 10),
 				Option:    result.Option,
 			})
+			if userID != "" && strconv.FormatUint(uint64(vote.UserID), 10) == userID {
+				res.HasUserVoted = true
+			}
 		}
+		zpoll.Results = append(zpoll.Results, res)
 	}
 	zpoll.Votes = votes
 

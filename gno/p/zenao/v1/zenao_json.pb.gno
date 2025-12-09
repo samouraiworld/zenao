@@ -128,8 +128,8 @@ func GetUserInfoResponseFromJSON(g *GetUserInfoResponse, node *json.Node) {
 func (p *Profile) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if p.Address != "" {
-		fields["address"] = json.StringNode("", p.Address)
+	if p.Id != "" {
+		fields["id"] = json.StringNode("", p.Id)
 	}
 	if p.DisplayName != "" {
 		fields["displayName"] = json.StringNode("", p.DisplayName)
@@ -148,8 +148,8 @@ func ProfileFromJSON(p *Profile, node *json.Node) {
 	*p = Profile{}
 	fields := node.MustObject()
 
-	if val, ok := fields["address"]; ok {
-		p.Address = val.MustString()
+	if val, ok := fields["id"]; ok {
+		p.Id = val.MustString()
 	}
 	if val, ok := fields["displayName"]; ok {
 		p.DisplayName = val.MustString()
@@ -165,12 +165,12 @@ func ProfileFromJSON(p *Profile, node *json.Node) {
 func (g *GetUsersProfileRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if len(g.Addresses) != 0 {
-		arr := make([]*json.Node, len(g.Addresses))
-		for i, val := range g.Addresses {
+	if len(g.Ids) != 0 {
+		arr := make([]*json.Node, len(g.Ids))
+		for i, val := range g.Ids {
 			arr[i] = json.StringNode("", val)
 		}
-		fields["addresses"] = json.ArrayNode("", arr)
+		fields["ids"] = json.ArrayNode("", arr)
 	}
 
 	return json.ObjectNode("", fields)
@@ -180,13 +180,13 @@ func GetUsersProfileRequestFromJSON(g *GetUsersProfileRequest, node *json.Node) 
 	*g = GetUsersProfileRequest{}
 	fields := node.MustObject()
 
-	if val, ok := fields["addresses"]; ok {
+	if val, ok := fields["ids"]; ok {
 		jarr := val.MustArray()
 		arr := make([]string, len(jarr))
 		for i, val := range jarr {
 			arr[i] = val.MustString()
 		}
-		g.Addresses = arr
+		g.Ids = arr
 	}
 }
 

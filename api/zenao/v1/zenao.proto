@@ -91,14 +91,14 @@ message GetUserInfoResponse {
 }
 
 message Profile {
-  string address = 1;
+  string id = 1;
   string display_name = 2;
   string bio = 3;
   string avatar_uri = 4;
 }
 
 message GetUsersProfileRequest {
-  repeated string addresses = 1;
+  repeated string ids = 1;
 }
 
 message GetUsersProfileResponse {

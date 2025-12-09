@@ -89,8 +89,8 @@ func (p *Profile) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("Profile{\n")
-	if p.Address != "" {
-		fmt.Fprintf(buf, "%s\tAddress: %q,\n", linePrefix, p.Address)
+	if p.Id != "" {
+		fmt.Fprintf(buf, "%s\tId: %q,\n", linePrefix, p.Id)
 	}
 	if p.DisplayName != "" {
 		fmt.Fprintf(buf, "%s\tDisplayName: %q,\n", linePrefix, p.DisplayName)
@@ -110,10 +110,10 @@ func (g *GetUsersProfileRequest) GnoLiteral(typePrefix string, linePrefix string
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("GetUsersProfileRequest{\n")
-	if len(g.Addresses) != 0 {
-		fmt.Fprintf(buf, "%s\tAddresses: []string{\n", linePrefix)
+	if len(g.Ids) != 0 {
+		fmt.Fprintf(buf, "%s\tIds: []string{\n", linePrefix)
 		linePrefix += "\t"
-		for _, elem := range g.Addresses {
+		for _, elem := range g.Ids {
 			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]

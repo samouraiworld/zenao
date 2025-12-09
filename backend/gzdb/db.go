@@ -633,6 +633,37 @@ func (g *gormZenaoDB) GetUser(authID string) (*zeni.User, error) {
 	return dbUserToZeniDBUser(&user), nil
 }
 
+// GetUsersByIDs implements zeni.DB.
+func (g *gormZenaoDB) GetUsersByIDs(ids []string) ([]*zeni.User, error) {
+	g, span := g.trace("gzdb.GetUsersByIDs")
+	defer span.End()
+
+	if len(ids) == 0 {
+		return []*zeni.User{}, nil
+	}
+
+	userIDs := make([]uint, 0, len(ids))
+	for _, id := range ids {
+		idInt, err := strconv.ParseUint(id, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse user id: %w", err)
+		}
+		userIDs = append(userIDs, uint(idInt))
+	}
+
+	var users []User
+	if err := g.db.Where("id IN ?", userIDs).Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*zeni.User, 0, len(users))
+	for _, u := range users {
+		result = append(result, dbUserToZeniDBUser(&u))
+	}
+
+	return result, nil
+}
+
 // GetAllUsers implements zeni.DB.
 func (g *gormZenaoDB) GetAllUsers() ([]*zeni.User, error) {
 	var users []*User
@@ -1588,7 +1619,7 @@ func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, fe
 		return nil, err
 	}
 
-	return dbPollToZeniPoll(dbPoll)
+	return dbPollToZeniPoll(dbPoll, "")
 }
 
 // VotePoll implements zeni.DB.
@@ -1644,7 +1675,23 @@ func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) erro
 	})
 }
 
-func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
+// GetPollByID implements zeni.DB.
+func (g *gormZenaoDB) GetPollByID(pollID string, userID string) (*zeni.Poll, error) {
+	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var poll Poll
+	if err := g.db.Where("id = ?", pollIDint).Preload("Results").Preload("Results.Votes").First(&poll).Error; err != nil {
+		return nil, err
+	}
+
+	return dbPollToZeniPoll(&poll, userID)
+}
+
+// GetPollByPostID implements zeni.DB.
+func (g *gormZenaoDB) GetPollByPostID(postID string, userID string) (*zeni.Poll, error) {
 	postIDint, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -1655,7 +1702,7 @@ func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
 		return nil, err
 	}
 
-	return dbPollToZeniPoll(&poll)
+	return dbPollToZeniPoll(&poll, userID)
 }
 
 // Checkin implements zeni.DB.

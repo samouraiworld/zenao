@@ -17,9 +17,9 @@ func (s *ZenaoServer) GetPost(ctx context.Context, req *connect.Request[zenaov1.
 
 	var (
 		zUser *zeni.User
-		err   error
 		zPost *zeni.Post
 		count uint64
+		err   error
 	)
 
 	user := s.Auth.GetUser(ctx)
@@ -32,7 +32,6 @@ func (s *ZenaoServer) GetPost(ctx context.Context, req *connect.Request[zenaov1.
 
 	// TODO: check if children count works good
 	if err = s.DB.TxWithSpan(ctx, "GetPost", func(tx zeni.DB) error {
-		var err error
 		zPost, err = tx.GetPostByID(req.Msg.PostId)
 		if err != nil {
 			return err
