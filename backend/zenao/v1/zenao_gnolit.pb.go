@@ -5,9 +5,9 @@ package zenaov1
 import (
 	errors "errors"
 	fmt "fmt"
-	v11 "github.com/samouraiworld/zenao/backend/feeds/v1"
-	v1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	strings "strings"
+
+	v1 "github.com/samouraiworld/zenao/backend/polls/v1"
 )
 
 func (h *HealthRequest) GnoLiteral(typePrefix string, linePrefix string) string {
