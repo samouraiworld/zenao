@@ -2,9 +2,6 @@
 
 import {
   EllipsisVertical,
-  CircleUser,
-  CreditCard,
-  MessageSquareDot,
   LogOut,
   CircleUserRound,
   ArrowLeftRight,
