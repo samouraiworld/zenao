@@ -1373,14 +1373,69 @@ func (g *gormZenaoDB) CountChildrenPosts(parentID string) (uint64, error) {
 }
 
 // GetPostsByFeedID implements zeni.DB.
-func (g *gormZenaoDB) GetPostsByFeedID(feedID string, limit int, offset int) ([]*zeni.Post, error) {
+func (g *gormZenaoDB) GetPostsByFeedID(feedID string, limit int, offset int, tags []string) ([]*zeni.Post, error) {
+	g, span := g.trace("gzdb.GetPostsByFeedID")
+	defer span.End()
+
 	feedIDUint, err := strconv.ParseUint(feedID, 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("parse feed id: %w", err)
 	}
 
 	var posts []*Post
-	if err := g.db.Preload("Reactions").Preload("Tags").Where("feed_id = ?", feedIDUint).Limit(int(limit)).Offset(int(offset)).Find(&posts).Error; err != nil {
+	db := g.db.Model(&Post{}).
+		Preload("Reactions").
+		Preload("Tags").
+		Where("feed_id = ?", feedIDUint)
+
+	if len(tags) > 0 {
+		db = db.
+			Joins("JOIN tags ON tags.post_id = posts.id").
+			Where("tags.name IN ?", tags).
+			Group("posts.id").
+			Having("COUNT(DISTINCT tags.name) = ?", len(tags))
+	}
+
+	if err := db.Limit(limit).Offset(offset).Find(&posts).Error; err != nil {
+		return nil, err
+	}
+
+	res := make([]*zeni.Post, 0, len(posts))
+	for _, p := range posts {
+		zpost, err := dbPostToZeniPost(p)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, zpost)
+	}
+
+	return res, nil
+}
+
+func (g *gormZenaoDB) GetPostsByParentID(parentID string, limit int, offset int, tags []string) ([]*zeni.Post, error) {
+	g, span := g.trace("gzdb.GetPostsByParentID")
+	defer span.End()
+
+	parentIDUint, err := strconv.ParseUint(parentID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse parent id: %w", err)
+	}
+
+	var posts []*Post
+	db := g.db.Model(&Post{}).
+		Preload("Reactions").
+		Preload("Tags").
+		Where("parent_uri = ?", parentIDUint)
+
+	if len(tags) > 0 {
+		db = db.
+			Joins("JOIN tags ON tags.post_id = posts.id").
+			Where("tags.name IN ?", tags).
+			Group("posts.id").
+			Having("COUNT(DISTINCT tags.name) = ?", len(tags))
+	}
+
+	if err := db.Limit(limit).Offset(offset).Find(&posts).Error; err != nil {
 		return nil, err
 	}
 

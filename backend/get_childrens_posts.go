@@ -10,9 +10,9 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) Posts(ctx context.Context, req *connect.Request[zenaov1.GetPostsRequest]) (*connect.Response[zenaov1.GetPostsResponse], error) {
-	if req.Msg.FeedId == "" {
-		return nil, errors.New("feed ID is required")
+func (s *ZenaoServer) GetChildrensPosts(ctx context.Context, req *connect.Request[zenaov1.GetChildrensPostsRequest]) (*connect.Response[zenaov1.GetChildrensPostsResponse], error) {
+	if req.Msg.ParentId == "" {
+		return nil, errors.New("parent ID is required")
 	}
 
 	var (
@@ -31,8 +31,8 @@ func (s *ZenaoServer) Posts(ctx context.Context, req *connect.Request[zenaov1.Ge
 	}
 
 	// TODO: see to improve this
-	if err := s.DB.TxWithSpan(ctx, "Posts", func(tx zeni.DB) error {
-		zPosts, err = tx.GetPostsByFeedID(req.Msg.FeedId, int(req.Msg.Limit), int(req.Msg.Offset))
+	if err := s.DB.TxWithSpan(ctx, "GetChildrensPosts", func(tx zeni.DB) error {
+		zPosts, err = tx.GetPostsByParentID(req.Msg.ParentId, int(req.Msg.Limit), int(req.Msg.Offset), req.Msg.Tags)
 		if err != nil {
 			return err
 		}
@@ -77,5 +77,5 @@ func (s *ZenaoServer) Posts(ctx context.Context, req *connect.Request[zenaov1.Ge
 		return nil, err
 	}
 
-	return connect.NewResponse(&zenaov1.GetPostsResponse{Posts: PostsViews}), nil
+	return connect.NewResponse(&zenaov1.GetChildrensPostsResponse{Posts: PostsViews}), nil
 }

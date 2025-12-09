@@ -934,10 +934,10 @@ func (g *GetPostResponse) GnoLiteral(typePrefix string, linePrefix string) strin
 	return buf.String()
 }
 
-func (g *GetPostsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+func (g *GetFeedPostsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("GetPostsRequest{\n")
+	buf.WriteString("GetFeedPostsRequest{\n")
 	if g.FeedId != "" {
 		fmt.Fprintf(buf, "%s\tFeedId: %q,\n", linePrefix, g.FeedId)
 	}
@@ -956,8 +956,53 @@ func (g *GetPostsRequest) GnoLiteral(typePrefix string, linePrefix string) strin
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
+	if g.UserId != "" {
+		fmt.Fprintf(buf, "%s\tUserId: %q,\n", linePrefix, g.UserId)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetFeedPostsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetFeedPostsResponse{\n")
+	if len(g.Posts) != 0 {
+		fmt.Fprintf(buf, "%s\tPosts: []*v11.PostView{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range g.Posts {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (g *GetChildrensPostsRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("GetChildrensPostsRequest{\n")
 	if g.ParentId != "" {
 		fmt.Fprintf(buf, "%s\tParentId: %q,\n", linePrefix, g.ParentId)
+	}
+	if g.Limit != 0 {
+		fmt.Fprintf(buf, "%s\tLimit: %d,\n", linePrefix, g.Limit)
+	}
+	if g.Offset != 0 {
+		fmt.Fprintf(buf, "%s\tOffset: %d,\n", linePrefix, g.Offset)
+	}
+	if len(g.Tags) != 0 {
+		fmt.Fprintf(buf, "%s\tTags: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range g.Tags {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
 	if g.UserId != "" {
 		fmt.Fprintf(buf, "%s\tUserId: %q,\n", linePrefix, g.UserId)
@@ -967,10 +1012,10 @@ func (g *GetPostsRequest) GnoLiteral(typePrefix string, linePrefix string) strin
 	return buf.String()
 }
 
-func (g *GetPostsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+func (g *GetChildrensPostsResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
-	buf.WriteString("GetPostsResponse{\n")
+	buf.WriteString("GetChildrensPostsResponse{\n")
 	if len(g.Posts) != 0 {
 		fmt.Fprintf(buf, "%s\tPosts: []*v11.PostView{\n", linePrefix)
 		linePrefix += "\t"

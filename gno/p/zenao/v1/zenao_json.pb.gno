@@ -1621,7 +1621,7 @@ func GetPostResponseFromJSON(g *GetPostResponse, node *json.Node) {
 	}
 }
 
-func (g *GetPostsRequest) ToJSON() *json.Node {
+func (g *GetFeedPostsRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
 	if g.FeedId != "" {
@@ -1640,9 +1640,6 @@ func (g *GetPostsRequest) ToJSON() *json.Node {
 		}
 		fields["tags"] = json.ArrayNode("", arr)
 	}
-	if g.ParentId != "" {
-		fields["parentId"] = json.StringNode("", g.ParentId)
-	}
 	if g.UserId != "" {
 		fields["userId"] = json.StringNode("", g.UserId)
 	}
@@ -1650,8 +1647,8 @@ func (g *GetPostsRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func GetPostsRequestFromJSON(g *GetPostsRequest, node *json.Node) {
-	*g = GetPostsRequest{}
+func GetFeedPostsRequestFromJSON(g *GetFeedPostsRequest, node *json.Node) {
+	*g = GetFeedPostsRequest{}
 	fields := node.MustObject()
 
 	if val, ok := fields["feedId"]; ok {
@@ -1671,15 +1668,12 @@ func GetPostsRequestFromJSON(g *GetPostsRequest, node *json.Node) {
 		}
 		g.Tags = arr
 	}
-	if val, ok := fields["parentId"]; ok {
-		g.ParentId = val.MustString()
-	}
 	if val, ok := fields["userId"]; ok {
 		g.UserId = val.MustString()
 	}
 }
 
-func (g *GetPostsResponse) ToJSON() *json.Node {
+func (g *GetFeedPostsResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
 	if len(g.Posts) != 0 {
@@ -1693,8 +1687,90 @@ func (g *GetPostsResponse) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func GetPostsResponseFromJSON(g *GetPostsResponse, node *json.Node) {
-	*g = GetPostsResponse{}
+func GetFeedPostsResponseFromJSON(g *GetFeedPostsResponse, node *json.Node) {
+	*g = GetFeedPostsResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["posts"]; ok {
+		jarr := val.MustArray()
+		arr := make([]*v11.PostView, len(jarr))
+		for i, val := range jarr {
+			fv := &v11.PostView{}
+			PostViewFromJSON(fv, val)
+			arr[i] = fv
+		}
+		g.Posts = arr
+	}
+}
+
+func (g *GetChildrensPostsRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if g.ParentId != "" {
+		fields["parentId"] = json.StringNode("", g.ParentId)
+	}
+	if g.Limit != 0 {
+		fields["limit"] = json.NumberNode("", float64(g.Limit))
+	}
+	if g.Offset != 0 {
+		fields["offset"] = json.NumberNode("", float64(g.Offset))
+	}
+	if len(g.Tags) != 0 {
+		arr := make([]*json.Node, len(g.Tags))
+		for i, val := range g.Tags {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["tags"] = json.ArrayNode("", arr)
+	}
+	if g.UserId != "" {
+		fields["userId"] = json.StringNode("", g.UserId)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetChildrensPostsRequestFromJSON(g *GetChildrensPostsRequest, node *json.Node) {
+	*g = GetChildrensPostsRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["parentId"]; ok {
+		g.ParentId = val.MustString()
+	}
+	if val, ok := fields["limit"]; ok {
+		g.Limit = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["offset"]; ok {
+		g.Offset = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["tags"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		g.Tags = arr
+	}
+	if val, ok := fields["userId"]; ok {
+		g.UserId = val.MustString()
+	}
+}
+
+func (g *GetChildrensPostsResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if len(g.Posts) != 0 {
+		arr := make([]*json.Node, len(g.Posts))
+		for i, val := range g.Posts {
+			arr[i] = val.ToJSON()
+		}
+		fields["posts"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func GetChildrensPostsResponseFromJSON(g *GetChildrensPostsResponse, node *json.Node) {
+	*g = GetChildrensPostsResponse{}
 	fields := node.MustObject()
 
 	if val, ok := fields["posts"]; ok {

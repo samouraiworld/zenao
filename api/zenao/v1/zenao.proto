@@ -53,7 +53,8 @@ service ZenaoService {
   rpc ListEventsByOrganizer(ListEventsByOrganizerRequest) returns (EventsInfo);
   rpc ListEventsByParticipant(ListEventsByParticipantRequest) returns (EventsInfo);
   rpc GetPost(GetPostRequest) returns (GetPostResponse);
-  rpc GetPosts(GetPostsRequest) returns (GetPostsResponse); // -> FeedPosts, ChildrensPosts
+  rpc GetFeedPosts(GetFeedPostsRequest) returns (GetFeedPostsResponse);
+  rpc GetChildrenPosts(GetChildrensPostsRequest) returns (GetChildrensPostsResponse);
   rpc GetPoll(GetPollRequest) returns (GetPollResponse);
   rpc GetUsersProfile(GetUsersProfileRequest) returns (GetUsersProfileResponse); // -> BatchProfile
 
@@ -322,16 +323,27 @@ message GetPostResponse {
   feeds.v1.PostView post = 1;
 }
 
-message GetPostsRequest {
+message GetFeedPostsRequest {
   string feed_id = 1;
   uint32 limit = 2;
   uint32 offset = 3;
   repeated string tags = 4;
-  string parent_id = 5; // optional, to get only children of a post
-  string user_id = 6;   // optional, to check if the user has reacted
+  string user_id = 5;   // optional, to check if the user has reacted
 }
 
-message GetPostsResponse {
+message GetFeedPostsResponse {
+  repeated feeds.v1.PostView posts = 1;
+}
+
+message GetChildrensPostsRequest {
+  string parent_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  repeated string tags = 4;
+  string user_id = 5;   // optional, to check if the user has reacted
+}
+
+message GetChildrensPostsResponse {
   repeated feeds.v1.PostView posts = 1;
 }
 

@@ -317,16 +317,27 @@ type GetPostResponse struct {
 	Post *v11.PostView
 }
 
-type GetPostsRequest struct {
-	FeedId   string
+type GetFeedPostsRequest struct {
+	FeedId string
+	Limit  uint32
+	Offset uint32
+	Tags   []string
+	UserId string
+}
+
+type GetFeedPostsResponse struct {
+	Posts []*v11.PostView
+}
+
+type GetChildrensPostsRequest struct {
+	ParentId string
 	Limit    uint32
 	Offset   uint32
 	Tags     []string
-	ParentId string
 	UserId   string
 }
 
-type GetPostsResponse struct {
+type GetChildrensPostsResponse struct {
 	Posts []*v11.PostView
 }
 
