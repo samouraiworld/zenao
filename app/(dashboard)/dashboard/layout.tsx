@@ -29,7 +29,7 @@ export default async function DashboardRootLayout({
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const t = await getTranslations("");
+  const t = await getTranslations();
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
