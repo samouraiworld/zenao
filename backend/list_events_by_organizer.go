@@ -19,7 +19,7 @@ func (s *ZenaoServer) ListEventsByOrganizer(ctx context.Context, req *connect.Re
 	var infos []*zenaov1.EventInfo
 	if err := s.DB.TxWithSpan(ctx, "ListEvents", func(tx zeni.DB) error {
 		var err error
-		evts, err = tx.ListEvents(zeni.EntityTypeUser, req.Msg.OrganizerId, zeni.RoleOrganizer, int(req.Msg.Limit), int(req.Msg.Offset))
+		evts, err = tx.ListEvents(zeni.EntityTypeUser, req.Msg.OrganizerId, zeni.RoleOrganizer, int(req.Msg.Limit), int(req.Msg.Offset), req.Msg.From, req.Msg.To, req.Msg.DiscoverableFilter)
 		if err != nil {
 			return err
 		}

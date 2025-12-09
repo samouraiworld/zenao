@@ -92,11 +92,11 @@ type GetEventResponse struct {
 }
 
 type ListEventsRequest struct {
-	EntityId   string
-	EntityType string
-	Role       string
-	Limit      uint32
-	Offset     uint32
+	Limit              uint32
+	Offset             uint32
+	From               int64
+	To                 int64
+	DiscoverableFilter DiscoverableFilter
 }
 
 type ListEventsResponse struct {
@@ -104,9 +104,12 @@ type ListEventsResponse struct {
 }
 
 type ListEventsByOrganizerRequest struct {
-	OrganizerId string
-	Limit       uint32
-	Offset      uint32
+	OrganizerId        string
+	Limit              uint32
+	Offset             uint32
+	From               int64
+	To                 int64
+	DiscoverableFilter DiscoverableFilter
 }
 
 type ListEventsByOrganizerResponse struct {
@@ -114,9 +117,12 @@ type ListEventsByOrganizerResponse struct {
 }
 
 type ListEventsByParticipantRequest struct {
-	ParticipantId string
-	Limit         uint32
-	Offset        uint32
+	ParticipantId      string
+	Limit              uint32
+	Offset             uint32
+	From               int64
+	To                 int64
+	DiscoverableFilter DiscoverableFilter
 }
 
 type ListEventsByParticipantResponse struct {
@@ -428,8 +434,13 @@ type UsersWithRolesRequest struct {
 	Roles []string
 }
 
+type UserWithRoles struct {
+	Address string
+	Roles   []string
+}
+
 type UsersWithRolesResponse struct {
-	UsersIds []string
+	UsersWithRoles []*UserWithRoles
 }
 
 type GetCommunityRequest struct {

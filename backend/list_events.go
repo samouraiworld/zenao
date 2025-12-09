@@ -14,7 +14,7 @@ func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenao
 	var infos []*zenaov1.EventInfo
 	if err := s.DB.TxWithSpan(ctx, "ListEvents", func(tx zeni.DB) error {
 		var err error
-		evts, err = tx.ListEvents("", "", "", int(req.Msg.Limit), int(req.Msg.Offset))
+		evts, err = tx.ListEvents("", "", "", int(req.Msg.Limit), int(req.Msg.Offset), req.Msg.From, req.Msg.To, req.Msg.DiscoverableFilter)
 		if err != nil {
 			return err
 		}

@@ -170,20 +170,20 @@ func (l *ListEventsRequest) GnoLiteral(typePrefix string, linePrefix string) str
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("ListEventsRequest{\n")
-	if l.EntityId != "" {
-		fmt.Fprintf(buf, "%s\tEntityId: %q,\n", linePrefix, l.EntityId)
-	}
-	if l.EntityType != "" {
-		fmt.Fprintf(buf, "%s\tEntityType: %q,\n", linePrefix, l.EntityType)
-	}
-	if l.Role != "" {
-		fmt.Fprintf(buf, "%s\tRole: %q,\n", linePrefix, l.Role)
-	}
 	if l.Limit != 0 {
 		fmt.Fprintf(buf, "%s\tLimit: %d,\n", linePrefix, l.Limit)
 	}
 	if l.Offset != 0 {
 		fmt.Fprintf(buf, "%s\tOffset: %d,\n", linePrefix, l.Offset)
+	}
+	if l.From != 0 {
+		fmt.Fprintf(buf, "%s\tFrom: %d,\n", linePrefix, l.From)
+	}
+	if l.To != 0 {
+		fmt.Fprintf(buf, "%s\tTo: %d,\n", linePrefix, l.To)
+	}
+	if l.DiscoverableFilter != DiscoverableFilter(0) {
+		fmt.Fprintf(buf, "%s\tDiscoverableFilter: %d,\n", linePrefix, l.DiscoverableFilter)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -221,6 +221,15 @@ func (l *ListEventsByOrganizerRequest) GnoLiteral(typePrefix string, linePrefix 
 	if l.Offset != 0 {
 		fmt.Fprintf(buf, "%s\tOffset: %d,\n", linePrefix, l.Offset)
 	}
+	if l.From != 0 {
+		fmt.Fprintf(buf, "%s\tFrom: %d,\n", linePrefix, l.From)
+	}
+	if l.To != 0 {
+		fmt.Fprintf(buf, "%s\tTo: %d,\n", linePrefix, l.To)
+	}
+	if l.DiscoverableFilter != DiscoverableFilter(0) {
+		fmt.Fprintf(buf, "%s\tDiscoverableFilter: %d,\n", linePrefix, l.DiscoverableFilter)
+	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
 	return buf.String()
@@ -256,6 +265,15 @@ func (l *ListEventsByParticipantRequest) GnoLiteral(typePrefix string, linePrefi
 	}
 	if l.Offset != 0 {
 		fmt.Fprintf(buf, "%s\tOffset: %d,\n", linePrefix, l.Offset)
+	}
+	if l.From != 0 {
+		fmt.Fprintf(buf, "%s\tFrom: %d,\n", linePrefix, l.From)
+	}
+	if l.To != 0 {
+		fmt.Fprintf(buf, "%s\tTo: %d,\n", linePrefix, l.To)
+	}
+	if l.DiscoverableFilter != DiscoverableFilter(0) {
+		fmt.Fprintf(buf, "%s\tDiscoverableFilter: %d,\n", linePrefix, l.DiscoverableFilter)
 	}
 	buf.WriteString(linePrefix)
 	buf.WriteString("}")
@@ -1327,15 +1345,36 @@ func (u *UsersWithRolesRequest) GnoLiteral(typePrefix string, linePrefix string)
 	return buf.String()
 }
 
+func (u *UserWithRoles) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("UserWithRoles{\n")
+	if u.Address != "" {
+		fmt.Fprintf(buf, "%s\tAddress: %q,\n", linePrefix, u.Address)
+	}
+	if len(u.Roles) != 0 {
+		fmt.Fprintf(buf, "%s\tRoles: []string{\n", linePrefix)
+		linePrefix += "\t"
+		for _, elem := range u.Roles {
+			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		}
+		linePrefix = linePrefix[:len(linePrefix)-1]
+		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (u *UsersWithRolesResponse) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)
 	buf.WriteString("UsersWithRolesResponse{\n")
-	if len(u.UsersIds) != 0 {
-		fmt.Fprintf(buf, "%s\tUsersIds: []string{\n", linePrefix)
+	if len(u.UsersWithRoles) != 0 {
+		fmt.Fprintf(buf, "%s\tUsersWithRoles: []*UserWithRoles{\n", linePrefix)
 		linePrefix += "\t"
-		for _, elem := range u.UsersIds {
-			fmt.Fprintf(buf, "%s\t%q,\n", linePrefix, elem)
+		for _, elem := range u.UsersWithRoles {
+			fmt.Fprintf(buf, "%s\t&%s%s,\n", linePrefix, typePrefix, elem.GnoLiteral(typePrefix, linePrefix+"\t"))
 		}
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)

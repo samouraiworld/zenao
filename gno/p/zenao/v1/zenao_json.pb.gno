@@ -263,20 +263,20 @@ func GetEventResponseFromJSON(g *GetEventResponse, node *json.Node) {
 func (l *ListEventsRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if l.EntityId != "" {
-		fields["entityId"] = json.StringNode("", l.EntityId)
-	}
-	if l.EntityType != "" {
-		fields["entityType"] = json.StringNode("", l.EntityType)
-	}
-	if l.Role != "" {
-		fields["role"] = json.StringNode("", l.Role)
-	}
 	if l.Limit != 0 {
 		fields["limit"] = json.NumberNode("", float64(l.Limit))
 	}
 	if l.Offset != 0 {
 		fields["offset"] = json.NumberNode("", float64(l.Offset))
+	}
+	if l.From != 0 {
+		fields["from"] = json.StringNode("", strconv.FormatInt(l.From, 10))
+	}
+	if l.To != 0 {
+		fields["to"] = json.StringNode("", strconv.FormatInt(l.To, 10))
+	}
+	if l.DiscoverableFilter != 0 {
+		fields["discoverableFilter"] = json.StringNode("", l.DiscoverableFilter.ToString())
 	}
 
 	return json.ObjectNode("", fields)
@@ -286,20 +286,28 @@ func ListEventsRequestFromJSON(l *ListEventsRequest, node *json.Node) {
 	*l = ListEventsRequest{}
 	fields := node.MustObject()
 
-	if val, ok := fields["entityId"]; ok {
-		l.EntityId = val.MustString()
-	}
-	if val, ok := fields["entityType"]; ok {
-		l.EntityType = val.MustString()
-	}
-	if val, ok := fields["role"]; ok {
-		l.Role = val.MustString()
-	}
 	if val, ok := fields["limit"]; ok {
 		l.Limit = uint32(val.MustNumeric())
 	}
 	if val, ok := fields["offset"]; ok {
 		l.Offset = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["from"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		l.From = fv
+	}
+	if val, ok := fields["to"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		l.To = fv
+	}
+	if val, ok := fields["discoverableFilter"]; ok {
+		l.DiscoverableFilter = DiscoverableFilterFromString(val.MustString())
 	}
 }
 
@@ -345,6 +353,15 @@ func (l *ListEventsByOrganizerRequest) ToJSON() *json.Node {
 	if l.Offset != 0 {
 		fields["offset"] = json.NumberNode("", float64(l.Offset))
 	}
+	if l.From != 0 {
+		fields["from"] = json.StringNode("", strconv.FormatInt(l.From, 10))
+	}
+	if l.To != 0 {
+		fields["to"] = json.StringNode("", strconv.FormatInt(l.To, 10))
+	}
+	if l.DiscoverableFilter != 0 {
+		fields["discoverableFilter"] = json.StringNode("", l.DiscoverableFilter.ToString())
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -361,6 +378,23 @@ func ListEventsByOrganizerRequestFromJSON(l *ListEventsByOrganizerRequest, node 
 	}
 	if val, ok := fields["offset"]; ok {
 		l.Offset = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["from"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		l.From = fv
+	}
+	if val, ok := fields["to"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		l.To = fv
+	}
+	if val, ok := fields["discoverableFilter"]; ok {
+		l.DiscoverableFilter = DiscoverableFilterFromString(val.MustString())
 	}
 }
 
@@ -406,6 +440,15 @@ func (l *ListEventsByParticipantRequest) ToJSON() *json.Node {
 	if l.Offset != 0 {
 		fields["offset"] = json.NumberNode("", float64(l.Offset))
 	}
+	if l.From != 0 {
+		fields["from"] = json.StringNode("", strconv.FormatInt(l.From, 10))
+	}
+	if l.To != 0 {
+		fields["to"] = json.StringNode("", strconv.FormatInt(l.To, 10))
+	}
+	if l.DiscoverableFilter != 0 {
+		fields["discoverableFilter"] = json.StringNode("", l.DiscoverableFilter.ToString())
+	}
 
 	return json.ObjectNode("", fields)
 }
@@ -422,6 +465,23 @@ func ListEventsByParticipantRequestFromJSON(l *ListEventsByParticipantRequest, n
 	}
 	if val, ok := fields["offset"]; ok {
 		l.Offset = uint32(val.MustNumeric())
+	}
+	if val, ok := fields["from"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		l.From = fv
+	}
+	if val, ok := fields["to"]; ok {
+		fv, err := strconv.ParseInt(val.MustString(), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		l.To = fv
+	}
+	if val, ok := fields["discoverableFilter"]; ok {
+		l.DiscoverableFilter = DiscoverableFilterFromString(val.MustString())
 	}
 }
 
@@ -2266,15 +2326,49 @@ func UsersWithRolesRequestFromJSON(u *UsersWithRolesRequest, node *json.Node) {
 	}
 }
 
+func (u *UserWithRoles) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if u.Address != "" {
+		fields["address"] = json.StringNode("", u.Address)
+	}
+	if len(u.Roles) != 0 {
+		arr := make([]*json.Node, len(u.Roles))
+		for i, val := range u.Roles {
+			arr[i] = json.StringNode("", val)
+		}
+		fields["roles"] = json.ArrayNode("", arr)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func UserWithRolesFromJSON(u *UserWithRoles, node *json.Node) {
+	*u = UserWithRoles{}
+	fields := node.MustObject()
+
+	if val, ok := fields["address"]; ok {
+		u.Address = val.MustString()
+	}
+	if val, ok := fields["roles"]; ok {
+		jarr := val.MustArray()
+		arr := make([]string, len(jarr))
+		for i, val := range jarr {
+			arr[i] = val.MustString()
+		}
+		u.Roles = arr
+	}
+}
+
 func (u *UsersWithRolesResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if len(u.UsersIds) != 0 {
-		arr := make([]*json.Node, len(u.UsersIds))
-		for i, val := range u.UsersIds {
-			arr[i] = json.StringNode("", val)
+	if len(u.UsersWithRoles) != 0 {
+		arr := make([]*json.Node, len(u.UsersWithRoles))
+		for i, val := range u.UsersWithRoles {
+			arr[i] = val.ToJSON()
 		}
-		fields["usersIds"] = json.ArrayNode("", arr)
+		fields["usersWithRoles"] = json.ArrayNode("", arr)
 	}
 
 	return json.ObjectNode("", fields)
@@ -2284,13 +2378,15 @@ func UsersWithRolesResponseFromJSON(u *UsersWithRolesResponse, node *json.Node) 
 	*u = UsersWithRolesResponse{}
 	fields := node.MustObject()
 
-	if val, ok := fields["usersIds"]; ok {
+	if val, ok := fields["usersWithRoles"]; ok {
 		jarr := val.MustArray()
-		arr := make([]string, len(jarr))
+		arr := make([]*UserWithRoles, len(jarr))
 		for i, val := range jarr {
-			arr[i] = val.MustString()
+			fv := &UserWithRoles{}
+			UserWithRolesFromJSON(fv, val)
+			arr[i] = fv
 		}
-		u.UsersIds = arr
+		u.UsersWithRoles = arr
 	}
 }
 

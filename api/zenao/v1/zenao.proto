@@ -114,11 +114,11 @@ message GetEventResponse {
 }
 
 message ListEventsRequest {
-  string entity_id = 1; // if empty lists all events
-  string entity_type = 2; // one of: user (one option for now)
-  string role = 3;    // one of: organizer, gatekeeper, participant
-  uint32 limit = 4;
-  uint32 offset = 5;
+  uint32 limit = 1;
+  uint32 offset = 2;
+  int64 from = 3; // unix seconds
+  int64 to = 4;   // unix seconds
+  DiscoverableFilter discoverable_filter = 5; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
 }
 
 message ListEventsResponse {
@@ -129,6 +129,9 @@ message ListEventsByOrganizerRequest {
   string organizer_id = 1;
   uint32 limit = 2;
   uint32 offset = 3;
+  int64 from = 4; // unix seconds
+  int64 to = 5;   // unix seconds
+  DiscoverableFilter discoverable_filter = 6; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
 }
 
 message ListEventsByOrganizerResponse {
@@ -139,6 +142,9 @@ message ListEventsByParticipantRequest {
   string participant_id = 1;
   uint32 limit = 2;
   uint32 offset = 3;
+  int64 from = 4; // unix seconds
+  int64 to = 5;   // unix seconds
+  DiscoverableFilter discoverable_filter = 6; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
 }
 
 message ListEventsByParticipantResponse {
@@ -423,8 +429,13 @@ message UsersWithRolesRequest {
   repeated string roles = 2; // one of: administrator, organizer, gatekeeper, member, participant
 }
 
+message UserWithRoles {
+  string address = 1;
+  repeated string roles = 2;
+}
+
 message UsersWithRolesResponse {
-  repeated string users_ids = 1;
+  repeated UserWithRoles users_with_roles = 1;
 }
 
 message GetCommunityRequest {

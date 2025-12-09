@@ -13,6 +13,7 @@ import {
   EventInfoSchema,
   DiscoverableFilter,
 } from "@/app/gen/zenao/v1/zenao_pb";
+import { zenaoClient } from "../zenao-client";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
 
@@ -43,18 +44,28 @@ export const eventsList = (
     queryKey: ["events", fromInt, toInt, limitInt],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(`query:events`, async () => {
-        const client = new GnoJSONRPCProvider(
-          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      return withSpan(`query:backend:events`, async () => {
+        // const client = new GnoJSONRPCProvider(
+        //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+        // );
+        // const res = await client.evaluateExpression(
+        //   `gno.land/r/zenao/eventreg`,
+        //   `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}, ${
+        //     pageParam * limitInt
+        //   }))`,
+        // );
+        // const raw = extractGnoJSONResponse(res);
+        // const json = eventListFromJson(raw);
+
+        const res = await zenaoClient.listEvents({
+          fromUnixSec: fromInt,
+          toUnixSec: toInt,
+          limit: limitInt,
+          offset: pageParam * limitInt,
+        });
+        const json = res.events.map((e) =>
+          fromJson(EventInfoSchema, e as EventInfoJson),
         );
-        const res = await client.evaluateExpression(
-          `gno.land/r/zenao/eventreg`,
-          `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}, ${
-            pageParam * limitInt
-          }))`,
-        );
-        const raw = extractGnoJSONResponse(res);
-        const json = eventListFromJson(raw);
 
         return json;
       });

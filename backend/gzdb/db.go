@@ -315,7 +315,7 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 }
 
 // ListEvents implements zeni.DB.
-func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string, limit int, offset int) ([]*zeni.Event, error) {
+func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*zeni.Event, error) {
 	g, span := g.trace("gzdb.ListEvents")
 	defer span.End()
 
@@ -329,7 +329,8 @@ func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string
 		if role != "" {
 			query = query.Where("role = ?", role)
 		}
-		if err := query.Find(&orgIDs).Order("org_id DESC").Limit(limit).Offset(offset).Error; err != nil {
+
+		if err := query.Order("org_id DESC").Find(&orgIDs).Error; err != nil {
 			return nil, fmt.Errorf("query org ids: %w", err)
 		}
 		if len(orgIDs) == 0 {
@@ -338,13 +339,51 @@ func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string
 	}
 
 	var dbEvts []Event
-	query := g.db.Model(&Event{}).Order("id DESC").Limit(limit).Offset(offset)
+	query := g.db.Model(&Event{})
+
+	haveFrom := from != 0
+	haveTo := to != 0
+
+	// XXX: if both value set we need to know if we want reverse or not (rep. of what we have in eventreg with Iterate/ReverseIterate)
+	if haveFrom && haveTo {
+		var start, end int64
+		var asc bool
+		if from < to {
+			start, end = from, to
+			asc = true
+		} else {
+			start, end = to, from
+			asc = false
+		}
+		query = query.Where("end_date >= ? AND end_date <= ?", start, end)
+		if asc {
+			query = query.Order("end_date ASC, id ASC")
+		} else {
+			query = query.Order("end_date DESC, id DESC")
+		}
+	} else {
+		if haveFrom {
+			query = query.Where("end_date >= ?", from)
+		}
+		if haveTo {
+			query = query.Where("end_date <= ?", to)
+		}
+		// XXX: default reverse iterate (newest first)
+		query = query.Order("end_date DESC, id DESC")
+	}
+	if discoverable != zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_UNSPECIFIED {
+		d := discoverable == zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_DISCOVERABLE
+		query = query.Where("discoverable = ?", d)
+	}
+
+	// XXX: use a join and make org_id an sql idx to optimize ?
 	if len(orgIDs) > 0 {
 		query = query.Where("id IN ?", orgIDs)
 	}
-	if err := query.Find(&dbEvts).Error; err != nil {
+	if err := query.Limit(limit).Offset(offset).Find(&dbEvts).Error; err != nil {
 		return nil, fmt.Errorf("query events: %w", err)
 	}
+
 	zenEvts := make([]*zeni.Event, 0, len(dbEvts))
 	for _, dbEvt := range dbEvts {
 		zenCmt, err := dbEventToZeniEvent(&dbEvt)
@@ -390,7 +429,7 @@ func (g *gormZenaoDB) ListCommunities(entityType string, entityID string, role s
 		if role != "" {
 			query = query.Where("role = ?", role)
 		}
-		if err := query.Find(&orgIDs).Order("org_id DESC").Limit(limit).Offset(offset).Error; err != nil {
+		if err := query.Order("org_id DESC").Limit(limit).Offset(offset).Find(&orgIDs).Error; err != nil {
 			return nil, fmt.Errorf("query org ids: %w", err)
 		}
 		if len(orgIDs) == 0 {
@@ -696,23 +735,23 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 
 // GetOrgUsersWithRole implements zeni.DB.
 func (g *gormZenaoDB) GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*zeni.User, error) {
-	g, span := g.trace("gzdb.GetOrgUsersWithRoles")
+	g, span := g.trace("gzdb.GetOrgUsersWithRole")
 	defer span.End()
 
-	var userIDs []uint
+	var entities []EntityRole
 	if err := g.db.
-		Model(&EntityRole{}).
-		Select("entity_id").
-		Where("org_type = ? AND org_id = ? AND entity_type = ? AND role IN ?",
-			orgType, orgID, zeni.EntityTypeUser, roles).
-		Group("entity_id").
-		Having("COUNT(DISTINCT role) = ?", len(roles)).
-		Scan(&userIDs).Error; err != nil {
+		Where("org_type = ? AND org_id = ? AND role in ? AND entity_type = ?",
+			orgType, orgID, roles, zeni.EntityTypeUser).
+		Find(&entities).Error; err != nil {
 		return nil, err
 	}
-
-	if len(userIDs) == 0 {
+	if len(entities) == 0 {
 		return []*zeni.User{}, nil
+	}
+
+	userIDs := make([]uint, 0, len(entities))
+	for _, e := range entities {
+		userIDs = append(userIDs, e.EntityID)
 	}
 
 	var users []User
