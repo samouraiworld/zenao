@@ -49,8 +49,6 @@ export default function EventsTable({ now }: EventsTableProps) {
       ),
     );
 
-  console.log(upcomingEvents);
-
   const {
     hasNextPage: hasPastNextPage,
     hasPreviousPage: hasPastPreviousPage,

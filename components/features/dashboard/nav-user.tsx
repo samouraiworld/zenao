@@ -6,11 +6,14 @@ import {
   CreditCard,
   MessageSquareDot,
   LogOut,
+  CircleUserRound,
+  ArrowLeftRight,
 } from "lucide-react";
 
 import { ClerkLoading } from "@clerk/nextjs";
-import { SignedIn } from "@clerk/clerk-react";
+import { SignedIn, SignOutButton } from "@clerk/clerk-react";
 
+import Link from "next/link";
 import { UserAvatar, UserAvatarSkeleton } from "../user/user";
 import { UserProfile } from "@/lib/queries/profile";
 import {
@@ -109,23 +112,27 @@ export function NavUser({ realmId, user }: NavUserProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUser />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href={`/profile/${realmId}`}>
+                  <CircleUserRound />
+                  Profile
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <MessageSquareDot />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/">
+                  <ArrowLeftRight />
+                  Switch to regular user mode
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <DropdownMenuItem asChild>
+              <SignOutButton>
+                <div>
+                  <LogOut />
+                  Log out
+                </div>
+              </SignOutButton>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
