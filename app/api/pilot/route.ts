@@ -2,11 +2,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import z from "zod";
 import { SupportedNetworks } from "@gnosis-guild/zodiac";
-import { planApplyEventOrganizerRole } from "@/lib/zodiac";
+import { planApplyEventRoles } from "@/lib/zodiac";
 
 export const getPlanRequestSchema = z.object({
   organizers: z.string().array(),
+  gatekeepers: z.string().array(),
+  ticketsManagers: z.string().array(),
   rolesModAddr: z.string(),
+  ticketsMaster: z.string(),
 });
 
 export type GetPlanRequest = z.infer<typeof getPlanRequestSchema>;
@@ -28,8 +31,14 @@ export async function POST(request: NextRequest) {
     const j = await request.json();
     const req = getPlanRequestSchema.parse(j);
 
-    const calls = await planApplyEventOrganizerRole(
-      req.organizers as `0x${string}`[],
+    const calls = await planApplyEventRoles(
+      {
+        organizers: req.organizers as `0x${string}`[],
+        gatekeepers: req.gatekeepers as `0x${string}`[],
+        ticketsManagers: req.ticketsManagers as `0x${string}`[],
+        ticketsMaster: req.ticketsMaster as `0x${string}`,
+        rolesModAddr: req.rolesModAddr as `0x${string}`,
+      },
       {
         chainId: SupportedNetworks.BaseSepolia,
         address: req.rolesModAddr as `0x${string}`,

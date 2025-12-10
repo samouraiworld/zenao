@@ -1,1 +1,86 @@
-[{"inputs":[{"internalType":"address","name":"addr","type":"address"},{"internalType":"string","name":"key","type":"string"}],"name":"get","outputs":[{"internalType":"bytes","name":"value","type":"bytes"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address[]","name":"addrs","type":"address[]"},{"internalType":"string[]","name":"keys","type":"string[]"}],"name":"getBatch","outputs":[{"internalType":"bytes[][]","name":"values","type":"bytes[][]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"key","type":"string"},{"internalType":"bytes","name":"value","type":"bytes"}],"name":"set","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string[]","name":"keys","type":"string[]"},{"internalType":"bytes[]","name":"values","type":"bytes[]"}],"name":"setBatch","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+[
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "key",
+                "type": "string"
+            }
+        ],
+        "name": "get",
+        "outputs": [
+            {
+                "internalType": "bytes",
+                "name": "value",
+                "type": "bytes"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "addrs",
+                "type": "address[]"
+            },
+            {
+                "internalType": "string[]",
+                "name": "keys",
+                "type": "string[]"
+            }
+        ],
+        "name": "getBatch",
+        "outputs": [
+            {
+                "internalType": "bytes[][]",
+                "name": "values",
+                "type": "bytes[][]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "key",
+                "type": "string"
+            },
+            {
+                "internalType": "bytes",
+                "name": "value",
+                "type": "bytes"
+            }
+        ],
+        "name": "set",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string[]",
+                "name": "keys",
+                "type": "string[]"
+            },
+            {
+                "internalType": "bytes[]",
+                "name": "values",
+                "type": "bytes[]"
+            }
+        ],
+        "name": "setBatch",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]

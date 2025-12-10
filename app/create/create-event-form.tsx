@@ -24,20 +24,48 @@ import { waitForTransactionReceipt } from "viem/actions";
 import { useWeb3Auth } from "@web3auth/modal/react";
 import { rolesAbi } from "zodiac-roles-sdk";
 import { encodeFunctionData } from "viem";
+import { useRouter } from "next/navigation";
 import { GetPlanRequest } from "../api/pilot/route";
 import { EventForm } from "@/components/features/event/event-form";
 import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
 import { EventFormSchemaType, eventFormSchema } from "@/types/schemas";
-import {
-  EventOrganizerRoleKey,
-  planApplyEventOrganizerRole,
-} from "@/lib/zodiac";
+import { EventOrganizerRoleKey, planApplyEventRoles } from "@/lib/zodiac";
 import { useEthersProvider } from "@/lib/ethers-wagmi";
-import { profileABI } from "@/lib/evm";
+import { profileABI, ticketMasterABI, ticketMasterAddress } from "@/lib/evm";
+import { serializeWithFrontMatter } from "@/lib/serialization";
+import { uploadString } from "@/lib/files";
 
 const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 // Private key: 0xbd6277d9eb47ea66b2d3cf6e32b3566849cd9e49a6cc49e33e5de402fe4aa3e8
+
+/* TODO
+- X: sale end date in ticketmaster
+- X: render event details from on-chain data
+- X: roles list -> thegraph
+- X: participate button -> onchain or backend??
+- edit event
+- participation mail
+- participation guests
+- participation as guest
+- cancel event
+- manage gatekeepers
+- send message to participants
+- export participants list
+- checkin/scan
+- tickets list
+- discover list -> indexer
+- events list in profile -> indexer
+- community deploy
+- community view
+- community list -> indexer?
+- community edit
+- link community with event -> probably do everything in TicketMaster and rename it
+- feed -> poster?
+- make every actions in one tx
+- replace gnoweb buttons with explorer, safe and zodiac buttons
+- check capacity = 1 probable bug
+*/
 
 export const CreateEventForm: React.FC = () => {
   const form = useForm<EventFormSchemaType>({
@@ -81,6 +109,8 @@ export const CreateEventForm: React.FC = () => {
     },
   });
 
+  const router = useRouter();
+
   const { toast } = useToast();
   const t = useTranslations("eventForm");
 
@@ -113,14 +143,13 @@ export const CreateEventForm: React.FC = () => {
         throw new Error("no ethers provider");
       }
 
-      const _todo = values;
-
       const safeAccountConfig: SafeAccountConfig = {
         owners: [zenaoAdmin, address],
         threshold: 1,
         // More optional properties
       };
 
+      // TODO: 32 bytes nonce
       const array = new Uint32Array(1);
       self.crypto.getRandomValues(array);
       const nonce = array[0].toString();
@@ -228,7 +257,12 @@ export const CreateEventForm: React.FC = () => {
 
       const pilotReq: GetPlanRequest = {
         organizers: [address],
+        gatekeepers: [],
+        ticketsManagers: [
+          process.env.NEXT_PUBLIC_TICKETS_MANAGER_ADDRESS as `0x${string}`,
+        ],
         rolesModAddr,
+        ticketsMaster: ticketMasterAddress,
       };
 
       const uploadRequest = await fetch("/api/pilot", {
@@ -236,9 +270,7 @@ export const CreateEventForm: React.FC = () => {
         body: JSON.stringify(pilotReq),
       });
       const resRaw = uploadRequest.json();
-      const calls = await (resRaw as ReturnType<
-        typeof planApplyEventOrganizerRole
-      >);
+      const calls = await (resRaw as ReturnType<typeof planApplyEventRoles>);
       console.log("planned role update", calls);
 
       const updateRoleTx = await protocolKit2.createTransaction({
@@ -279,11 +311,21 @@ export const CreateEventForm: React.FC = () => {
       const profileContractAddr = process.env
         .NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS as `0x${string}`;
 
+      const bio = serializeWithFrontMatter(values.description, {
+        startDate: values.startDate.toString(),
+        endDate: values.endDate.toString(),
+        discoverable: values.discoverable,
+        location: values.location,
+      });
+
+      const bioCID = await uploadString(bio);
+
       // TODO: only update keys that have been updated
-      const keys: string[] = ["pfp", "dn"];
+      const keys: string[] = ["pfp", "dn", "bio"];
       const txValues: `0x${string}`[] = [
         `0x${Buffer.from(values.imageUri, "utf-8").toString("hex")}`,
         `0x${Buffer.from(values.title, "utf-8").toString("hex")}`,
+        `0x${Buffer.from(bioCID, "utf-8").toString("hex")}`,
       ];
 
       const profileSetData = encodeFunctionData({
@@ -292,7 +334,7 @@ export const CreateEventForm: React.FC = () => {
         args: [keys, txValues],
       });
 
-      const res = await writeContractAsync({
+      let res = await writeContractAsync({
         abi: rolesAbi,
         address: rolesModAddr,
         functionName: "execTransactionWithRole",
@@ -308,7 +350,73 @@ export const CreateEventForm: React.FC = () => {
 
       console.log("updated profile", res);
 
-      // router.push(`/event/${safeAddress}`);
+      const capacitySetData = encodeFunctionData({
+        abi: ticketMasterABI,
+        functionName: "setCapacity",
+        args: [BigInt(values.capacity)],
+      });
+
+      res = await writeContractAsync({
+        abi: rolesAbi,
+        address: rolesModAddr,
+        functionName: "execTransactionWithRole",
+        args: [
+          ticketMasterAddress, // to
+          BigInt(0), // value
+          capacitySetData, // data
+          0, // operation -> Call = 0, DelegateCall = 1
+          EventOrganizerRoleKey, // roleKey
+          true, // should revert
+        ],
+      });
+
+      console.log("updated capacity", res);
+
+      const saleEndSetData = encodeFunctionData({
+        abi: ticketMasterABI,
+        functionName: "setSaleEnd",
+        args: [values.endDate],
+      });
+
+      res = await writeContractAsync({
+        abi: rolesAbi,
+        address: rolesModAddr,
+        functionName: "execTransactionWithRole",
+        args: [
+          ticketMasterAddress, // to
+          BigInt(0), // value
+          saleEndSetData, // data
+          0, // operation -> Call = 0, DelegateCall = 1
+          EventOrganizerRoleKey, // roleKey
+          true, // should revert
+        ],
+      });
+
+      console.log("updated sale end", res);
+
+      const rolesModAddrSetData = encodeFunctionData({
+        abi: ticketMasterABI,
+        functionName: "setRolesMod",
+        args: [rolesModAddr],
+      });
+
+      res = await writeContractAsync({
+        abi: rolesAbi,
+        address: rolesModAddr,
+        functionName: "execTransactionWithRole",
+        args: [
+          ticketMasterAddress, // to
+          BigInt(0), // value
+          rolesModAddrSetData, // data
+          0, // operation -> Call = 0, DelegateCall = 1
+          EventOrganizerRoleKey, // roleKey
+          true, // should revert
+        ],
+      });
+
+      console.log("updated roles mod addr", res);
+
+      router.push(`/event/${safeAddress}`);
     } catch (err) {
       captureException(err);
       toast({

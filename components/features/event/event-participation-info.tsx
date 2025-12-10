@@ -1,14 +1,14 @@
 "use client";
 
-import { ClerkLoaded, ClerkLoading, useAuth } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
 import { EventParticipation } from "./event-participation";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Card } from "@/components/widgets/cards/card";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { useEventPassword } from "@/components/providers/event-password-provider";
-import { userInfoOptions } from "@/lib/queries/user";
 
 type EventParticipationInfoProps = {
   eventId: string;
@@ -20,13 +20,8 @@ function EventParticipationInfo({
   eventData,
 }: EventParticipationInfoProps) {
   const { password } = useEventPassword();
-  const { getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.realmId),
-  );
+  const { address } = useAccount();
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
 
   return (
     <>

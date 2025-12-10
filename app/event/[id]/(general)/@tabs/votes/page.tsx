@@ -1,14 +1,13 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
+import { useAccount } from "wagmi";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userInfoOptions } from "@/lib/queries/user";
 import { PollPostView } from "@/lib/social-feed";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import { PollsList } from "@/components/social-feed/lists/polls-list";
@@ -24,11 +23,8 @@ type EventPollsProps = {
 function EventPolls({ params }: EventPollsProps) {
   const { id: eventId } = React.use(params);
   const t = useTranslations();
-  const { getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const userRealmId = userInfo?.realmId || "";
+  const { address } = useAccount();
+  const userRealmId = address;
 
   const { data: roles } = useSuspenseQuery(
     eventUserRoles(eventId, userRealmId),
@@ -79,7 +75,7 @@ function EventPolls({ params }: EventPollsProps) {
         ) : (
           <PollsList
             polls={polls}
-            userRealmId={userRealmId}
+            userRealmId={userRealmId || null}
             onReactionChange={onReactionChange}
             canInteract={
               roles.includes("organizer") || roles.includes("participant")

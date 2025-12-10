@@ -62,6 +62,8 @@ const locationSchema = z
     }
   });
 
+export type ZodLocation = z.infer<typeof locationSchema>;
+
 const uriSchema = z.union([
   z
     .string()
@@ -191,6 +193,16 @@ export const gnoProfileDetailsSchema = z.object({
 });
 
 export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
+
+export const eventDetailsSchema = z.object({
+  bio: z.string().trim().optional().default(""),
+  startDate: z.string(),
+  endDate: z.string(),
+  discoverable: z.boolean(),
+  location: locationSchema,
+});
+
+export type EventDetails = z.infer<typeof eventDetailsSchema>;
 
 const pollOptionFormSchema = z.object({
   text: z

@@ -2,12 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo } from "react";
-import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { useAccount } from "wagmi";
 import {
   Tabs,
   TabsContent,
@@ -15,7 +15,6 @@ import {
   TabsTrigger,
 } from "@/components/shadcn/tabs";
 import { Separator } from "@/components/shadcn/separator";
-import { userInfoOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import {
   EventInfoTabsSchemaType,
@@ -87,11 +86,8 @@ function MainEventSectionsContent({
   section: EventInfoTabsSchemaType;
   children?: React.ReactNode;
 }) {
-  const { getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const userRealmId = userInfo?.realmId || "";
+  const { address } = useAccount();
+  const userRealmId = address;
 
   const { data: roles } = useSuspenseQuery(
     eventUserRoles(eventId, userRealmId),
