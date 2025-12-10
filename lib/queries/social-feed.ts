@@ -83,6 +83,11 @@ export const feedPosts = (
             tags: tags ? tags.split(",") : [],
             userId: userIdFromPkgPath(userRealmId),
           });
+          console.log(
+            "JS RAW:",
+            res.posts.map((p) => ({ post: p.post })),
+          );
+          console.dir(res.posts[0].post, { depth: 10 });
           console.log("Fetchedex feed posts:", res.posts);
           for (const p of res.posts) {
             const oneof = p.post?.post;
