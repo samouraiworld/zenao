@@ -1475,7 +1475,8 @@ func (g *gormZenaoDB) GetPostsByFeedID(feedID string, limit int, offset int, tag
 	db := g.db.Model(&Post{}).
 		Preload("Reactions").
 		Preload("Tags").
-		Where("feed_id = ?", feedIDUint)
+		Where("feed_id = ?", feedIDUint).
+		Order("id DESC")
 
 	if len(tags) > 0 {
 		db = db.
@@ -1514,7 +1515,8 @@ func (g *gormZenaoDB) GetPostsByParentID(parentID string, limit int, offset int,
 	db := g.db.Model(&Post{}).
 		Preload("Reactions").
 		Preload("Tags").
-		Where("parent_uri = ?", parentIDUint)
+		Where("parent_uri = ?", parentIDUint).
+		Order("id DESC")
 
 	if len(tags) > 0 {
 		db = db.
