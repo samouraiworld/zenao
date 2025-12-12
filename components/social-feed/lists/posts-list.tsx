@@ -49,11 +49,6 @@ export function PostsList({
   return posts.map((post) => {
     const postId = post.post!.localPostId.toString(10);
 
-    // loop over post and display all that are standard posts or poll posts
-    if (isStandardPost(post)) {
-      console.log("Rendering StandardPost:", postId);
-    }
-
     if (isStandardPost(post)) {
       return (
         <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>

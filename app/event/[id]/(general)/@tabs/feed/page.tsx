@@ -56,13 +56,9 @@ function EventFeed({ params }: EventFeedProps) {
     feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
   );
 
-  console.log("EventFeed postsPages:", postsPages);
-
   const posts = useMemo(() => {
     return postsPages.pages.flat();
   }, [postsPages]);
-
-  console.log("EventFeed posts:", posts);
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
     "event",

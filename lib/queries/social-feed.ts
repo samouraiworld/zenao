@@ -83,41 +83,6 @@ export const feedPosts = (
             tags: tags ? tags.split(",") : [],
             userId: userIdFromPkgPath(userRealmId),
           });
-          console.log(
-            "JS RAW:",
-            res.posts.map((p) => ({ post: p.post })),
-          );
-          console.dir(res.posts[0].post, { depth: 10 });
-          console.log("Fetchedex feed posts:", res.posts);
-          for (const p of res.posts) {
-            const oneof = p.post?.post;
-            if (!oneof || oneof.case === undefined) {
-              console.log("Unknown or deleted post type");
-              continue;
-            }
-            console.log("Post type:", oneof.case);
-
-            switch (oneof.case) {
-              case "standard":
-                console.log("Standard content:", oneof.value.content);
-                break;
-              case "link":
-                console.log("Link URL:", oneof.value.uri);
-                break;
-              case "image":
-                console.log("Image URI:", oneof.value.imageUri);
-                break;
-              case "article":
-                console.log("Article:", oneof.value.title);
-                break;
-              case "video":
-                console.log("Video:", oneof.value.videoUri);
-                break;
-              case "audio":
-                console.log("Audio:", oneof.value.audioUri);
-                break;
-            }
-          }
           return res.posts;
         },
       );

@@ -43,6 +43,5 @@ export const isPollPost = (postView: PostView): postView is PollPostView => {
 export const isStandardPost = (
   postView: PostView,
 ): postView is StandardPostView => {
-  console.log("Checking if StandardPost:", postView.post);
   return postView.post?.post.case === "standard";
 };

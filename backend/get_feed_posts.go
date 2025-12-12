@@ -77,7 +77,6 @@ func (s *ZenaoServer) GetFeedPosts(ctx context.Context, req *connect.Request[zen
 				ChildrenCount: childrens,
 				Reactions:     rviews,
 			}
-			s.Logger.Log(zap.DebugLevel, "post-view", zap.Any("post-view", pv), zap.Any("post-deep", pv.Post.Post))
 			PostsViews = append(PostsViews, pv)
 		}
 		return nil
@@ -85,8 +84,5 @@ func (s *ZenaoServer) GetFeedPosts(ctx context.Context, req *connect.Request[zen
 		return nil, err
 	}
 
-	resp := &zenaov1.GetFeedPostsResponse{Posts: PostsViews}
-	s.Logger.Log(zap.DebugLevel, "any", zap.Any("any", resp))
-
-	return connect.NewResponse(resp), nil
+	return connect.NewResponse(&zenaov1.GetFeedPostsResponse{Posts: PostsViews}), nil
 }
