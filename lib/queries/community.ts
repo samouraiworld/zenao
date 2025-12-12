@@ -36,6 +36,9 @@ export const communityInfo = (communityId: string) =>
     queryFn: async () => {
       return withSpan(`query:backend:community:${communityId}`, async () => {
         const res = await zenaoClient.getCommunity({ communityId });
+        if (res.community == null) {
+          throw new Error("community not found");
+        }
         return res.community;
       });
     },

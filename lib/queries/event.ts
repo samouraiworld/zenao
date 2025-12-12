@@ -9,6 +9,9 @@ export const eventOptions = (id: string) =>
     queryFn: async () => {
       return withSpan(`query:backend:event:${id}`, async () => {
         const res = await zenaoClient.getEvent({ eventId: id });
+        if (res.event == null) {
+          throw new Error("event not found");
+        }
         return res.event;
       });
     },

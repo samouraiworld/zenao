@@ -15,22 +15,14 @@ export const feedPost = (postId: string, userRealmId: string) =>
       return withSpan(
         `query:backend:post:${postId}:main:${userIdFromPkgPath(userRealmId)}`,
         async () => {
-          // const client = new GnoJSONRPCProvider(
-          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          // );
-
-          // const res = await client.evaluateExpression(
-          //   "gno.land/r/zenao/social_feed",
-          //   `postViewToJSON(GetPostView(${postId}, "${userRealmId}"))`,
-          // );
-          // const raw = extractGnoJSONResponse(res);
-
-          // return fromJson(PostViewSchema, raw as PostViewJson);
           const res = await zenaoClient.getPost({
             postId,
             userId: userIdFromPkgPath(userRealmId),
           });
-          return res;
+          if (res.post == null) {
+            throw new Error("post not found");
+          }
+          return res.post;
         },
       );
     },
@@ -121,6 +113,9 @@ export const pollInfo = (pollId: string, userRealmId: string) =>
             pollId,
             userId: userIdFromPkgPath(userRealmId),
           });
+          if (res.poll == null) {
+            throw new Error("poll not found");
+          }
           return res.poll;
         },
       );
