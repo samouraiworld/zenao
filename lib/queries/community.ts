@@ -35,13 +35,6 @@ export const communityInfo = (communityId: string) =>
     queryKey: ["community", communityId],
     queryFn: async () => {
       return withSpan(`query:backend:community:${communityId}`, async () => {
-        // const client = new GnoJSONRPCProvider(
-        //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        // );
-        // const res = await client.evaluateExpression(
-        //   `gno.land/r/zenao/communities/c${communityId}`,
-        //   `community.GetInfoJSON()`,
-        // );
         const res = await zenaoClient.getCommunity({ communityId });
         return res.community;
       });
@@ -72,14 +65,6 @@ export const communitiesList = (
     queryKey: ["communities", limitInt],
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(`query:backend:communities`, async () => {
-        // const client = new GnoJSONRPCProvider(
-        //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        // );
-        // const res = await client.evaluateExpression(
-        //   `gno.land/r/zenao/communityreg`,
-        //   `communitiesToJSON(listCommunities(${limitInt}, ${pageParam * limitInt}))`,
-        // );
-
         const res = await zenaoClient.listCommunities({
           limit: limitInt,
           offset: pageParam * limitInt,
@@ -135,16 +120,6 @@ export const communitiesListByMember = (
       return withSpan(
         `query:backend:communities-by-member:${userIdFromPkgPath(memberAddress)}`,
         async () => {
-          // const client = new GnoJSONRPCProvider(
-          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          // );
-          // const res = await client.evaluateExpression(
-          //   `gno.land/r/zenao/communityreg`,
-          //   `communitiesToJSON(listCommunitiesByMembers(${JSON.stringify(memberAddress)}, ${limitInt}, ${pageParam * limitInt}))`,
-          // );
-          // const raw = extractGnoJSONResponse(res);
-          // const json = communitiesListFromJson(raw);
-
           const res = await zenaoClient.listCommunitiesByMember({
             memberId: userIdFromPkgPath(memberAddress),
             limit: limitInt,
@@ -186,14 +161,6 @@ export const communityUserRoles = (
       return withSpan(
         `query:backend:community:${communityId}:user-roles:${userIdFromPkgPath(userRealmId)}`,
         async () => {
-          // const client = new GnoJSONRPCProvider(
-          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          // );
-          // const res = await client.evaluateExpression(
-          //   `gno.land/r/zenao/communities/c${communityId}`,
-          //   `community.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
-          // );
-          // const roles = extractGnoJSONResponse(res);
           const res = await zenaoClient.entityRoles({
             org: {
               entityType: "community",
@@ -222,15 +189,6 @@ export const communityUsersWithRoles = (
       return withSpan(
         `query:backend:community:${communityId}:users-with-roles:${roles.join(",")}`,
         async () => {
-          // const client = new GnoJSONRPCProvider(
-          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          // );
-          // const res = await client.evaluateExpression(
-          //   `gno.land/r/zenao/communities/c${communityId}`,
-          //   `community.GetUsersWithRolesJSON(${goStringSliceLiteral(roles)})`,
-          // );
-          // const raw = extractGnoJSONResponse(res);
-
           const res = await zenaoClient.usersWithRoles({
             org: {
               entityType: "community",
@@ -310,17 +268,6 @@ export const communitiesListByEvent = (
     queryKey: ["communitiesByEvent", id, limitInt],
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(`query:backend:event:${id}:communities`, async () => {
-        // const client = new GnoJSONRPCProvider(
-        //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        // );
-        // const pkgPath = `gno.land/r/zenao/events/e${id}`;
-        // const res = await client.evaluateExpression(
-        //   `gno.land/r/zenao/communityreg`,
-        //   `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(pkgPath)}, ${limitInt}, ${pageParam * limitInt}))`,
-        // );
-        // const raw = extractGnoJSONResponse(res);
-        // const json = communitiesListFromJson(raw);
-
         const res = await zenaoClient.listCommunitiesByEvent({
           eventId: id,
           limit: limitInt,

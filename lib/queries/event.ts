@@ -8,14 +8,6 @@ export const eventOptions = (id: string) =>
     queryKey: ["event", id],
     queryFn: async () => {
       return withSpan(`query:backend:event:${id}`, async () => {
-        // const client = new GnoJSONRPCProvider(
-        //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        // );
-        // const res = await client.evaluateExpression(
-        //   `gno.land/r/zenao/events/e${id}`,
-        //   `event.GetInfoJSON()`,
-        // );
-        // const event = extractGnoJSONResponse(res) as EventInfoJson;
         const res = await zenaoClient.getEvent({ eventId: id });
         return res.event;
       });

@@ -38,19 +38,6 @@ export const eventsList = (
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(`query:backend:events`, async () => {
-        // const client = new GnoJSONRPCProvider(
-        //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        // );
-        // const res = await client.evaluateExpression(
-        //   `gno.land/r/zenao/eventreg`,
-        //   `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}, ${
-        //     pageParam * limitInt
-        //   }))`,
-        // );
-        // const raw = extractGnoJSONResponse(res);
-        // const json = eventListFromJson(raw);
-        // return json;
-
         const res = await zenaoClient.listEvents({
           limit: limitInt,
           offset: pageParam * limitInt,

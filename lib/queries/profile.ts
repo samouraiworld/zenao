@@ -40,32 +40,6 @@ export const profiles = createBatcher({
 
     const ids = realmIDs.map((realmId) => userIdFromPkgPath(realmId));
     return withSpan(`query:backend:profiles:${ids.join(",")}`, async () => {
-      // const client = new GnoJSONRPCProvider(
-      //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
-      // );
-
-      // const req: MessageInitShape<typeof BatchProfileRequestSchema> = {
-      //   fields: [
-      //     { key: "DisplayName", type: "string" },
-      //     { key: "Bio", type: "string" },
-      //     { key: "Avatar", type: "string" },
-      //   ],
-      //   addresses: addrs,
-      // };
-      // const resRaw = await client.evaluateExpression(
-      //   `gno.land/r/zenao/batchprofile`,
-      //   `queryJSON(${JSON.stringify(JSON.stringify(req))})`,
-      // );
-      // const resu = extractGnoJSONResponse(resRaw) as unknown[][];
-      // const res: GnoProfile[] = [];
-      // for (let i = 0; i < addrs.length; i++) {
-      //   res.push({
-      //     address: addrs[i],
-      //     displayName: resu[i][0] as string,
-      //     bio: resu[i][1] as string,
-      //     avatarUri: resu[i][2] as string,
-      //   });
-      // }
       const res = await zenaoClient.getUsersProfile({
         ids,
       });

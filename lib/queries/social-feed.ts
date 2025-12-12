@@ -48,24 +48,6 @@ export const feedPosts = (
       return withSpan(
         `query:backend:feed:${feedId}:posts:${tags}:${userIdFromPkgPath(userRealmId)}`,
         async () => {
-          // const client = new GnoJSONRPCProvider(
-          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          // );
-
-          // const res = await client.evaluateExpression(
-          //   "gno.land/r/zenao/social_feed",
-          //   `postViewsToJSON(GetFeedPosts("${feedId}", ${pageParam * limit}, ${limit}, "${tags}", "${userRealmId}"))`,
-          // );
-          // const raw = extractGnoJSONResponse(res);
-          // return postViewsFromJson(raw);
-
-          // PARSE THIS TO GET IF ITS EVENT OR COMMUNITY
-          // EX EVENT: gno.land/r/zenao/events/e21:main
-          // EX COMMUNITY: gno.land/r/zenao/communities/c15:main
-          // check if it contains events else communities
-
-          // start by pop the :main
-
           const pkgPath = feedId.split(":")[0];
           const orgType = pkgPath.includes("events/") ? "event" : "community";
           const orgId =

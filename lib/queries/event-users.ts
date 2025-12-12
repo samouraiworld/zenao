@@ -28,15 +28,6 @@ export const eventUserRoles = (
       return withSpan(
         `query:backend:event:${eventId}:user-roles:${userIdFromPkgPath(userRealmId)}`,
         async () => {
-          // const client = new GnoJSONRPCProvider(
-          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
-          // );
-          // const res = await client.evaluateExpression(
-          //   `gno.land/r/zenao/events/e${eventId}`,
-          //   `event.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
-          // );
-          // const roles = extractGnoJSONResponse(res);
-
           const res = await zenaoClient.entityRoles({
             org: {
               entityType: "event",
@@ -69,14 +60,6 @@ export const eventUsersWithRole = (
       return withSpan(
         `query:backend:event:${eventId}:users-with-role:${role}`,
         async () => {
-          // const client = new GnoJSONRPCProvider(
-          //   process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
-          // );
-          // const res = await client.evaluateExpression(
-          //   `gno.land/r/zenao/events/e${eventId}`,
-          //   `event.GetUsersWithRoleJSON(${JSON.stringify(role)})`,
-          // );
-          // const addresses = extractGnoJSONResponse(res);
           const res = await zenaoClient.usersWithRoles({
             org: {
               entityType: "event",
