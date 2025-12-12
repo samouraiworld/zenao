@@ -430,7 +430,7 @@ message EntitiesWithRolesRequest {
 }
 
 message EntityWithRoles {
-  string realmId = 1;
+  string realm_id = 1;
   repeated string roles = 2;
 }
 

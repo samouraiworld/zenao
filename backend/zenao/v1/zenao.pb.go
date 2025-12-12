@@ -4186,7 +4186,7 @@ func (x *EntitiesWithRolesRequest) GetRoles() []string {
 
 type EntityWithRoles struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RealmId       string                 `protobuf:"bytes,1,opt,name=realmId,proto3" json:"realmId,omitempty"`
+	RealmId       string                 `protobuf:"bytes,1,opt,name=realm_id,json=realmId,proto3" json:"realm_id,omitempty"`
 	Roles         []string               `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -5700,9 +5700,9 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x05roles\x18\x01 \x03(\tR\x05roles\"T\n" +
 	"\x18EntitiesWithRolesRequest\x12\"\n" +
 	"\x03org\x18\x01 \x01(\v2\x10.zenao.v1.EntityR\x03org\x12\x14\n" +
-	"\x05roles\x18\x02 \x03(\tR\x05roles\"A\n" +
-	"\x0fEntityWithRoles\x12\x18\n" +
-	"\arealmId\x18\x01 \x01(\tR\arealmId\x12\x14\n" +
+	"\x05roles\x18\x02 \x03(\tR\x05roles\"B\n" +
+	"\x0fEntityWithRoles\x12\x19\n" +
+	"\brealm_id\x18\x01 \x01(\tR\arealmId\x12\x14\n" +
 	"\x05roles\x18\x02 \x03(\tR\x05roles\"f\n" +
 	"\x19EntitiesWithRolesResponse\x12I\n" +
 	"\x13entities_with_roles\x18\x01 \x03(\v2\x19.zenao.v1.EntityWithRolesR\x11entitiesWithRoles\"8\n" +
