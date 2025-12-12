@@ -21,6 +21,8 @@ import (
 	"gorm.io/plugin/opentelemetry/tracing"
 )
 
+const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
+
 type User struct {
 	gorm.Model         // this ID should be used for any database related logic (like querying)
 	AuthID      string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
@@ -520,11 +522,21 @@ func (g *gormZenaoDB) getDBCommunity(id string) (*Community, error) {
 // CreateUser implements zeni.DB.
 func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 	user := &User{
-		AuthID: authID,
+		AuthID:    authID,
+		Bio:       "Zenao managed user",
+		AvatarURI: userDefaultAvatar,
 	}
+
 	if err := g.db.Create(user).Error; err != nil {
 		return nil, err
 	}
+
+	user.DisplayName = fmt.Sprintf("Zenao user #%d", user.ID)
+	if err := g.db.Model(user).
+		Update("display_name", user.DisplayName).Error; err != nil {
+		return nil, err
+	}
+
 	return dbUserToZeniDBUser(user), nil
 }
 

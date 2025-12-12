@@ -66,10 +66,10 @@ export const profiles = createBatcher({
       //     avatarUri: resu[i][2] as string,
       //   });
       // }
-      console.log("Fetching profiles for ids:", ids);
       const res = await zenaoClient.getUsersProfile({
         ids,
       });
+      console.log("Fetched profiles:", res.profiles);
       return res.profiles;
     });
   },
