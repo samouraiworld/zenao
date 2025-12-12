@@ -77,6 +77,7 @@ func (s *ZenaoServer) GetFeedPosts(ctx context.Context, req *connect.Request[zen
 				ChildrenCount: childrens,
 				Reactions:     rviews,
 			}
+			pv.Post.Author = s.Chain.UserRealmID(pv.Post.Author) // TODO: remove usage in front-end to use ID instead ?
 			PostsViews = append(PostsViews, pv)
 		}
 		return nil

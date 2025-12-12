@@ -134,7 +134,6 @@ type Post struct {
 
 type Poll struct {
 	CreatedAt time.Time
-	CreatedBy string
 	ID        string
 	Question  string
 	Kind      pollsv1.PollKind
