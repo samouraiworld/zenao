@@ -216,6 +216,7 @@ func dbPollToZeniPoll(poll *Poll, userID string) (*zeni.Poll, error) {
 		Question:  poll.Question,
 		Kind:      kind,
 		Duration:  poll.Duration,
+		PostID:    strconv.FormatUint(uint64(poll.PostID), 10),
 		Results:   []*pollsv1.PollResult{},
 	}
 

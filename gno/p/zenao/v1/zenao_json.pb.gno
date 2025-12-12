@@ -2292,15 +2292,15 @@ func EntityRolesResponseFromJSON(e *EntityRolesResponse, node *json.Node) {
 	}
 }
 
-func (u *UsersWithRolesRequest) ToJSON() *json.Node {
+func (e *EntitiesWithRolesRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if u.Org != nil {
-		fields["org"] = u.Org.ToJSON()
+	if e.Org != nil {
+		fields["org"] = e.Org.ToJSON()
 	}
-	if len(u.Roles) != 0 {
-		arr := make([]*json.Node, len(u.Roles))
-		for i, val := range u.Roles {
+	if len(e.Roles) != 0 {
+		arr := make([]*json.Node, len(e.Roles))
+		for i, val := range e.Roles {
 			arr[i] = json.StringNode("", val)
 		}
 		fields["roles"] = json.ArrayNode("", arr)
@@ -2309,14 +2309,14 @@ func (u *UsersWithRolesRequest) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func UsersWithRolesRequestFromJSON(u *UsersWithRolesRequest, node *json.Node) {
-	*u = UsersWithRolesRequest{}
+func EntitiesWithRolesRequestFromJSON(e *EntitiesWithRolesRequest, node *json.Node) {
+	*e = EntitiesWithRolesRequest{}
 	fields := node.MustObject()
 
 	if val, ok := fields["org"]; ok {
 		fv := &Entity{}
 		EntityFromJSON(fv, val)
-		u.Org = fv
+		e.Org = fv
 	}
 	if val, ok := fields["roles"]; ok {
 		jarr := val.MustArray()
@@ -2324,19 +2324,19 @@ func UsersWithRolesRequestFromJSON(u *UsersWithRolesRequest, node *json.Node) {
 		for i, val := range jarr {
 			arr[i] = val.MustString()
 		}
-		u.Roles = arr
+		e.Roles = arr
 	}
 }
 
-func (u *UserWithRoles) ToJSON() *json.Node {
+func (e *EntityWithRoles) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if u.RealmId != "" {
-		fields["realmId"] = json.StringNode("", u.RealmId)
+	if e.RealmId != "" {
+		fields["realmId"] = json.StringNode("", e.RealmId)
 	}
-	if len(u.Roles) != 0 {
-		arr := make([]*json.Node, len(u.Roles))
-		for i, val := range u.Roles {
+	if len(e.Roles) != 0 {
+		arr := make([]*json.Node, len(e.Roles))
+		for i, val := range e.Roles {
 			arr[i] = json.StringNode("", val)
 		}
 		fields["roles"] = json.ArrayNode("", arr)
@@ -2345,12 +2345,12 @@ func (u *UserWithRoles) ToJSON() *json.Node {
 	return json.ObjectNode("", fields)
 }
 
-func UserWithRolesFromJSON(u *UserWithRoles, node *json.Node) {
-	*u = UserWithRoles{}
+func EntityWithRolesFromJSON(e *EntityWithRoles, node *json.Node) {
+	*e = EntityWithRoles{}
 	fields := node.MustObject()
 
 	if val, ok := fields["realmId"]; ok {
-		u.RealmId = val.MustString()
+		e.RealmId = val.MustString()
 	}
 	if val, ok := fields["roles"]; ok {
 		jarr := val.MustArray()
@@ -2358,37 +2358,37 @@ func UserWithRolesFromJSON(u *UserWithRoles, node *json.Node) {
 		for i, val := range jarr {
 			arr[i] = val.MustString()
 		}
-		u.Roles = arr
+		e.Roles = arr
 	}
 }
 
-func (u *UsersWithRolesResponse) ToJSON() *json.Node {
+func (e *EntitiesWithRolesResponse) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 
-	if len(u.UsersWithRoles) != 0 {
-		arr := make([]*json.Node, len(u.UsersWithRoles))
-		for i, val := range u.UsersWithRoles {
+	if len(e.EntitiesWithRoles) != 0 {
+		arr := make([]*json.Node, len(e.EntitiesWithRoles))
+		for i, val := range e.EntitiesWithRoles {
 			arr[i] = val.ToJSON()
 		}
-		fields["usersWithRoles"] = json.ArrayNode("", arr)
+		fields["entitiesWithRoles"] = json.ArrayNode("", arr)
 	}
 
 	return json.ObjectNode("", fields)
 }
 
-func UsersWithRolesResponseFromJSON(u *UsersWithRolesResponse, node *json.Node) {
-	*u = UsersWithRolesResponse{}
+func EntitiesWithRolesResponseFromJSON(e *EntitiesWithRolesResponse, node *json.Node) {
+	*e = EntitiesWithRolesResponse{}
 	fields := node.MustObject()
 
-	if val, ok := fields["usersWithRoles"]; ok {
+	if val, ok := fields["entitiesWithRoles"]; ok {
 		jarr := val.MustArray()
-		arr := make([]*UserWithRoles, len(jarr))
+		arr := make([]*EntityWithRoles, len(jarr))
 		for i, val := range jarr {
-			fv := &UserWithRoles{}
-			UserWithRolesFromJSON(fv, val)
+			fv := &EntityWithRoles{}
+			EntityWithRolesFromJSON(fv, val)
 			arr[i] = fv
 		}
-		u.UsersWithRoles = arr
+		e.EntitiesWithRoles = arr
 	}
 }
 

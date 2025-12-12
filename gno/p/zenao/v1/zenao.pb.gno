@@ -429,18 +429,18 @@ type EntityRolesResponse struct {
 	Roles []string
 }
 
-type UsersWithRolesRequest struct {
+type EntitiesWithRolesRequest struct {
 	Org   *Entity
 	Roles []string
 }
 
-type UserWithRoles struct {
+type EntityWithRoles struct {
 	RealmId string
 	Roles   []string
 }
 
-type UsersWithRolesResponse struct {
-	UsersWithRoles []*UserWithRoles
+type EntitiesWithRolesResponse struct {
+	EntitiesWithRoles []*EntityWithRoles
 }
 
 type GetCommunityRequest struct {

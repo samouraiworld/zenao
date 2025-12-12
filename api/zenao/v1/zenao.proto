@@ -43,7 +43,7 @@ service ZenaoService {
 
   // XXX: TEMPORARY SWITCH TO WEB2 FIRST
   rpc EntityRoles(EntityRolesRequest) returns (EntityRolesResponse); // -> GetCommunityUserRoles, GetEventUserRoles
-  rpc UsersWithRoles(UsersWithRolesRequest) returns (UsersWithRolesResponse); // -> CommunitiesWithUserRole, EventsWithUserRole
+  rpc EntitiesWithRoles(EntitiesWithRolesRequest) returns (EntitiesWithRolesResponse); // -> CommunitiesWithUserRole, EventsWithUserRole
   rpc GetCommunity(GetCommunityRequest) returns (GetCommunityResponse);
   rpc ListCommunities(ListCommunitiesRequest) returns (ListCommunitiesResponse);
   rpc ListCommunitiesByMember(ListCommunitiesByMemberRequest) returns (ListCommunitiesByMemberResponse);
@@ -424,18 +424,18 @@ message EntityRolesResponse {
   repeated string roles = 1; // one of: administrator, organizer, gatekeeper, member, participant
 }
 
-message UsersWithRolesRequest {
+message EntitiesWithRolesRequest {
   Entity org = 1; // one of: community, event
   repeated string roles = 2; // one of: administrator, organizer, gatekeeper, member, participant
 }
 
-message UserWithRoles {
+message EntityWithRoles {
   string realmId = 1;
   repeated string roles = 2;
 }
 
-message UsersWithRolesResponse {
-  repeated UserWithRoles users_with_roles = 1;
+message EntitiesWithRolesResponse {
+  repeated EntityWithRoles entities_with_roles = 1;
 }
 
 message GetCommunityRequest {

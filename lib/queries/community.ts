@@ -189,7 +189,7 @@ export const communityUsersWithRoles = (
       return withSpan(
         `query:backend:community:${communityId}:users-with-roles:${roles.join(",")}`,
         async () => {
-          const res = await zenaoClient.usersWithRoles({
+          const res = await zenaoClient.entitiesWithRoles({
             org: {
               entityType: "community",
               entityId: communityId,
@@ -199,7 +199,7 @@ export const communityUsersWithRoles = (
 
           return communityUsersWithRolesResponseSchema
             .array()
-            .parse(res.usersWithRoles);
+            .parse(res.entitiesWithRoles);
         },
       );
     },

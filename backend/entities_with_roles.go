@@ -9,7 +9,7 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
-func (s *ZenaoServer) UsersWithRoles(ctx context.Context, req *connect.Request[zenaov1.UsersWithRolesRequest]) (*connect.Response[zenaov1.UsersWithRolesResponse], error) {
+func (s *ZenaoServer) EntitiesWithRoles(ctx context.Context, req *connect.Request[zenaov1.EntitiesWithRolesRequest]) (*connect.Response[zenaov1.EntitiesWithRolesResponse], error) {
 	if req.Msg.Org == nil || req.Msg.Org.EntityId == "" || req.Msg.Org.EntityType == "" {
 		return nil, errors.New("org entity type and id are required")
 	}
@@ -19,23 +19,27 @@ func (s *ZenaoServer) UsersWithRoles(ctx context.Context, req *connect.Request[z
 	}
 
 	var (
-		users []*zeni.User
-		res   []*zenaov1.UserWithRoles
+		entities []*zeni.EntityRole
+		res      []*zenaov1.EntityWithRoles
 	)
 	// TODO: Optimize to include the roles within the return of GetOrgUsersWithRoles ?
 	if err := s.DB.TxWithSpan(ctx, "UsersWithRole", func(tx zeni.DB) error {
 		var err error
-		users, err = tx.GetOrgUsersWithRoles(req.Msg.Org.EntityType, req.Msg.Org.EntityId, req.Msg.Roles)
+		entities, err = tx.EntitiesWithRoles(req.Msg.Org.EntityType, req.Msg.Org.EntityId, req.Msg.Roles)
 		if err != nil {
 			return err
 		}
-		for _, u := range users {
-			roles, err := tx.EntityRoles(zeni.EntityTypeUser, u.ID, req.Msg.Org.EntityType, req.Msg.Org.EntityId)
+		for _, e := range entities {
+			roles, err := tx.EntityRoles(e.EntityType, e.EntityID, req.Msg.Org.EntityType, req.Msg.Org.EntityId)
 			if err != nil {
 				return err
 			}
-			userWithRoles := &zenaov1.UserWithRoles{
-				RealmId: s.Chain.UserRealmID(u.ID), // TODO: adapt front-end to expect ID instead of addresses ?
+			realmID, err := s.Chain.EntityRealmID(e.EntityType, e.EntityID)
+			if err != nil {
+				return err
+			}
+			userWithRoles := &zenaov1.EntityWithRoles{
+				RealmId: realmID,
 				Roles:   roles,
 			}
 			res = append(res, userWithRoles)
@@ -45,5 +49,5 @@ func (s *ZenaoServer) UsersWithRoles(ctx context.Context, req *connect.Request[z
 		return nil, err
 	}
 
-	return connect.NewResponse(&zenaov1.UsersWithRolesResponse{UsersWithRoles: res}), nil
+	return connect.NewResponse(&zenaov1.EntitiesWithRolesResponse{EntitiesWithRoles: res}), nil
 }

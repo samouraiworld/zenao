@@ -60,14 +60,14 @@ export const eventUsersWithRole = (
       return withSpan(
         `query:backend:event:${eventId}:users-with-role:${role}`,
         async () => {
-          const res = await zenaoClient.usersWithRoles({
+          const res = await zenaoClient.entitiesWithRoles({
             org: {
               entityType: "event",
               entityId: eventId,
             },
             roles: [role],
           });
-          const realmIds = res.usersWithRoles.map((u) => u.realmId);
+          const realmIds = res.entitiesWithRoles.map((u) => u.realmId);
           return z.string().array().parse(realmIds);
         },
       );

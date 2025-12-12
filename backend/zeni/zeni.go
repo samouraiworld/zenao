@@ -216,6 +216,7 @@ type DB interface {
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
+	EntitiesWithRoles(orgType string, orgID string, roles []string) ([]*EntityRole, error)
 	CountEntities(orgType string, orgID string, entityType string, role string) (uint32, error)
 	GetAllUsers() ([]*User, error)
 
@@ -285,6 +286,7 @@ type Chain interface {
 	FillAdminProfile()
 	CreateUser(user *User) error
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	EntityRealmID(entityType string, entityID string) (string, error)
 	UserRealmID(userID string) string
 	CommunityRealmID(userID string) string
 	EventRealmID(eventID string) string
