@@ -87,91 +87,342 @@ export const profileABI = [
 
 export const ticketMasterABI = [
   {
+    type: "function",
+    name: "all_tickets_by_owner",
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "cancelTicket",
-    type: "function",
     inputs: [
-      { name: "ticketPubKey", type: "uint256", internalType: "uint256" },
+      {
+        name: "eventAddr",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "ticketPubKey",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
+    type: "function",
     name: "capacity",
-    type: "function",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "view",
   },
   {
+    type: "function",
     name: "checkin",
-    type: "function",
     inputs: [
-      { name: "ticketPubKey", type: "uint256", internalType: "uint256" },
+      {
+        name: "ticketPubKey",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
+    type: "function",
     name: "checkins",
-    type: "function",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "view",
   },
   {
+    type: "function",
     name: "emitTicket",
-    type: "function",
     inputs: [
-      { name: "eventAddr", type: "address", internalType: "address" },
-      { name: "ticketPubKey", type: "uint256", internalType: "uint256" },
+      {
+        name: "eventAddr",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "ticketPubKey",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
+    type: "function",
+    name: "events_by_sale_end",
+    inputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "queryEvents",
+    inputs: [
+      {
+        name: "from",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "to",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "limit",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "res",
+        type: "address[]",
+        internalType: "address[]",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "queryEventsReverse",
+    inputs: [
+      {
+        name: "from",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "to",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "limit",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "res",
+        type: "address[]",
+        internalType: "address[]",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "roles_mod",
-    type: "function",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
-    stateMutability: "view",
-  },
-  {
-    name: "sale_end",
-    type: "function",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    name: "setCapacity",
-    type: "function",
-    inputs: [{ name: "newCapacity", type: "uint256", internalType: "uint256" }],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    name: "setRolesMod",
-    type: "function",
     inputs: [
-      { name: "newRolesMode", type: "address", internalType: "address" },
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "sale_end",
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "setCapacity",
+    inputs: [
+      {
+        name: "newCapacity",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
-    name: "setSaleEnd",
     type: "function",
-    inputs: [{ name: "newSaleEnd", type: "uint256", internalType: "uint256" }],
+    name: "setRolesMod",
+    inputs: [
+      {
+        name: "newRolesMode",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
-    name: "sold_tickets",
     type: "function",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    name: "setSaleEnd",
+    inputs: [
+      {
+        name: "newSaleEnd",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "discoverable",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "sold_tickets",
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "ticket_by_owner",
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "owner",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "ticket_owner",
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "ticketPubKey",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
 ] as const;
 
-export const ticketMasterAddress = "0xA2f106ecEA274119d90df9f1d1A67a734E6955C4";
+export const ticketMasterAddress = "0x2642C6237c2546258F16381987fef56DE525028F";

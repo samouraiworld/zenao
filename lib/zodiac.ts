@@ -19,6 +19,7 @@ const organizerPermissions = [
   allow.basesep.ticketMaster.setSaleEnd(),
   allow.basesep.ticketMaster.checkin(),
   allow.basesep.ticketMaster.setRolesMod(),
+  allow.basesep.ticketMaster.cancelTicket(),
 ];
 
 const { targets: organizerTargets } = processPermissions(organizerPermissions);
@@ -59,10 +60,7 @@ export const planApplyEventGatekeeperRole = async (
 export const EventTicketsManagerRoleKey =
   "0x7469636b6574735f6d616e616765720000000000000000000000000000000000"; // tickets_manager
 
-const ticketsManagerPermissions = [
-  allow.basesep.ticketMaster.emitTicket(),
-  allow.basesep.ticketMaster.cancelTicket(),
-];
+const ticketsManagerPermissions = [allow.basesep.ticketMaster.cancelTicket()];
 
 const { targets: ticketsManagerTargets } = processPermissions(
   ticketsManagerPermissions,

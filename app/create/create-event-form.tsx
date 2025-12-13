@@ -44,6 +44,10 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: render event details from on-chain data
 - X: roles list -> thegraph
 - X: participate button -> onchain or backend??
+- cancel ticket
+- bug: register state not updated in ui
+- tickets list
+- discover list
 - edit event
 - participation mail
 - participation guests
@@ -53,8 +57,6 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - send message to participants
 - export participants list
 - checkin/scan
-- tickets list
-- discover list -> indexer
 - events list in profile -> indexer
 - community deploy
 - community view
@@ -243,6 +245,8 @@ export const CreateEventForm: React.FC = () => {
 
       console.log("setup roles tx hash", safeTxHash);
 
+      // TODO: check if we can execute without approve first since we're executing with aprover
+
       // Sign transaction to verify that the transaction is coming from owner 1
       await protocolKit2.approveTransactionHash(safeTxHash);
 
@@ -375,7 +379,7 @@ export const CreateEventForm: React.FC = () => {
       const saleEndSetData = encodeFunctionData({
         abi: ticketMasterABI,
         functionName: "setSaleEnd",
-        args: [values.endDate],
+        args: [values.endDate, values.discoverable],
       });
 
       res = await writeContractAsync({
