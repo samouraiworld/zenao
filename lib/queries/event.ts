@@ -66,19 +66,22 @@ export const eventOptions = (id: string) =>
           transport: http(process.env.NEXT_PUBLIC_EVM_RPC),
         });
 
-        const resu = await evmClient.readContract({
+        const capacity = await evmClient.readContract({
           abi: ticketMasterABI,
           address: ticketMasterAddress,
           functionName: "capacity",
           args: [id as `0x${string}`],
         });
 
+        const participants = await evmClient.readContract({
+          abi: ticketMasterABI,
+          address: ticketMasterAddress,
+          functionName: "sold_tickets",
+          args: [id as `0x${string}`],
+        });
+
         const organizers = await client.fetchQuery(
           eventUsersWithRole(id, "organizer"),
-        );
-
-        const participants = await client.fetchQuery(
-          eventUsersWithRole(id, "participant"),
         );
 
         const info: EventInfo = fromJson(EventInfoSchema, {
@@ -90,8 +93,8 @@ export const eventOptions = (id: string) =>
           endDate: eventDetails.endDate,
           privacy: { public: {} },
           organizers,
-          participants: participants.length,
-          capacity: Number(resu),
+          participants: Number(participants),
+          capacity: Number(capacity),
         } satisfies EventInfoJson);
         return info;
       });
