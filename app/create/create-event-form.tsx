@@ -44,27 +44,29 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: render event details from on-chain data
 - X: roles list -> thegraph
 - X: participate button -> onchain or backend??
-- cancel ticket
+- X: cancel ticket
 - bug: register state not updated in ui
+- opti: event creation too slow
+- opti: web3 connection too slow
+- indexer setup
 - tickets list
 - discover list
+- events list in profile
 - edit event
+- manage gatekeepers
+- cancel event
 - participation mail
 - participation guests
 - participation as guest
-- cancel event
-- manage gatekeepers
 - send message to participants
 - export participants list
 - checkin/scan
-- events list in profile -> indexer
 - community deploy
 - community view
 - community list -> indexer?
 - community edit
 - link community with event -> probably do everything in TicketMaster and rename it
 - feed -> poster?
-- make every actions in one tx
 - replace gnoweb buttons with explorer, safe and zodiac buttons
 - check capacity = 1 probable bug
 */

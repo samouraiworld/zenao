@@ -102,10 +102,11 @@ export function EventInfoLayout({
 
   const linkBadges = [
     [
-      "Safe",
+      "Safe{Wallet}",
       `https://app.safe.global/transactions/history?safe=basesep:${eventId}`,
     ],
-    ["Roles", `https://roles.gnosisguild.org/basesep:${rolesModAddr}`],
+    ["Zodiac Roles", `https://roles.gnosisguild.org/basesep:${rolesModAddr}`],
+    ["BaseScan", `https://sepolia.basescan.org/address/${eventId}`],
   ] as const;
 
   return (
@@ -168,7 +169,7 @@ export function EventInfoLayout({
           {/* Community */}
           {communityId && <EventCommunitySection communityId={communityId} />}
 
-          <div className="flex row gap-4 flex-wrap">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             {linkBadges.map((lb) => {
               return <LinkBadge key={lb[0]} label={lb[0]} href={lb[1]} />;
             })}

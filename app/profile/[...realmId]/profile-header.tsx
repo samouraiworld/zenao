@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Button } from "@/components/shadcn/button";
 import { Skeleton } from "@/components/shadcn/skeleton";
-import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
+import { LinkBadge } from "@/components/widgets/buttons/gnoweb-button";
 import { Card } from "@/components/widgets/cards/card";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import Heading from "@/components/widgets/texts/heading";
@@ -45,6 +45,14 @@ export default function ProfileHeader({
     },
     contentFieldName: "bio",
   });
+
+  const linkBadges = [
+    [
+      "Safe{Wallet}",
+      `https://app.safe.global/transactions/history?safe=basesep:${address}`,
+    ],
+    ["BaseScan", `https://sepolia.basescan.org/address/${address}`],
+  ] as const;
 
   return (
     <div className="flex flex-col w-full">
@@ -104,10 +112,9 @@ export default function ProfileHeader({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <GnowebButton
-              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/cockpit:u/${address}`}
-              className="w-full sm:w-auto"
-            />
+            {linkBadges.map((lb) => {
+              return <LinkBadge key={lb[0]} label={lb[0]} href={lb[1]} />;
+            })}
             <ClerkLoaded>
               <SignedIn>
                 <EditProfileButton address={address} />
