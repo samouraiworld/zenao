@@ -8,21 +8,16 @@ import {
 import { Person, WithContext } from "schema-dts";
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@clerk/nextjs";
+import { useAccount } from "wagmi";
 import ProfileHeader from "./profile-header";
 import { EventCard } from "@/components/features/event/event-card";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
-import {
-  DEFAULT_EVENTS_LIMIT,
-  eventsByOrganizerList,
-} from "@/lib/queries/events-list";
+import { DEFAULT_EVENTS_LIMIT, eventsList } from "@/lib/queries/events-list";
 import { profileOptions } from "@/lib/queries/profile";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
-import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
 import { gnoProfileDetailsSchema, RealmId } from "@/types/schemas";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
@@ -35,17 +30,15 @@ export function ProfileInfo({
   now: number;
 }) {
   const t = useTranslations("profile-info");
-  const { getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
+  const { address: loggedUserAddress } = useAccount();
   const address = addressFromRealmId(realmId);
-  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
   const isOwner = loggedUserAddress === address;
   // The connected user can see his both discoverable and undiscoverable events
   const discoverableFilter = isOwner
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
+
+  const _todo = discoverableFilter;
 
   const { data: profile } = useSuspenseQuery(profileOptions(realmId));
   const {
@@ -55,12 +48,12 @@ export function ProfileInfo({
     isFetching: isFetchingUpcoming,
     fetchNextPage: fetchNextUpcomingPage,
   } = useSuspenseInfiniteQuery(
-    eventsByOrganizerList(
-      realmId,
-      discoverableFilter,
+    eventsList(
       now,
       Number.MAX_SAFE_INTEGER,
       DEFAULT_EVENTS_LIMIT,
+      discoverableFilter,
+      realmId,
     ),
   );
   const {
@@ -70,13 +63,7 @@ export function ProfileInfo({
     isFetching: isFetchingPast,
     fetchNextPage: fetchNextPastPage,
   } = useSuspenseInfiniteQuery(
-    eventsByOrganizerList(
-      realmId,
-      discoverableFilter,
-      now - 1,
-      0,
-      DEFAULT_EVENTS_LIMIT,
-    ),
+    eventsList(now - 1, 0, DEFAULT_EVENTS_LIMIT, discoverableFilter, realmId),
   );
 
   const upcomingEvents = useMemo(
@@ -156,8 +143,8 @@ export function ProfileInfo({
         <EventCardListLayout>
           {upcomingEvents.map((evt) => (
             <EventCard
-              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
-              key={evt.pkgPath}
+              href={`/event/${evt.eventAddr}`}
+              key={evt.eventAddr}
               evt={evt}
             />
           ))}
@@ -181,8 +168,8 @@ export function ProfileInfo({
         <EventCardListLayout>
           {pastEvents.map((evt) => (
             <EventCard
-              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
-              key={evt.pkgPath}
+              href={`/event/${evt.eventAddr}`}
+              key={evt.eventAddr}
               evt={evt}
             />
           ))}

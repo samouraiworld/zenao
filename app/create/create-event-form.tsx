@@ -42,17 +42,26 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 /* TODO
 - X: sale end date in ticketmaster
 - X: render event details from on-chain data
-- X: roles list -> thegraph
-- X: participate button -> onchain or backend??
+- X: roles list
+- X: participate button
 - X: cancel ticket
+- X: indexer setup
+- X: tickets list
+- X: discover list
+- X: tickets for event list
+- X: events list in profile
+- multichain (allow to build targeting another evm to prepare for mainnet deployment)
+- ticket secret
+- checkin/scan
+- guest invite
+- show mail of ticket
+- discover ordering by start date
 - bug: register state not updated in ui
 - opti: event creation too slow
 - opti: web3 connection too slow
-- indexer setup
-- tickets list
-- discover list
-- events list in profile
 - edit event
+- proper tickets pagination by event start date
+- proper creator / organizer separation
 - manage gatekeepers
 - cancel event
 - participation mail
@@ -60,15 +69,22 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - participation as guest
 - send message to participants
 - export participants list
-- checkin/scan
 - community deploy
 - community view
 - community list -> indexer?
 - community edit
-- link community with event -> probably do everything in TicketMaster and rename it
+- link community with event
 - feed -> poster?
 - replace gnoweb buttons with explorer, safe and zodiac buttons
 - check capacity = 1 probable bug
+- prepare paid event
+- prepare payment provider service
+- teams
+- e2e tests
+- reduce api usage
+- reduce gas cost
+- make contracts upgradable
+- setup admin and services wallets
 */
 
 export const CreateEventForm: React.FC = () => {
@@ -421,6 +437,28 @@ export const CreateEventForm: React.FC = () => {
       });
 
       console.log("updated roles mod addr", res);
+
+      const creatorSetData = encodeFunctionData({
+        abi: ticketMasterABI,
+        functionName: "setCreator",
+        args: [address],
+      });
+
+      res = await writeContractAsync({
+        abi: rolesAbi,
+        address: rolesModAddr,
+        functionName: "execTransactionWithRole",
+        args: [
+          ticketMasterAddress, // to
+          BigInt(0), // value
+          creatorSetData, // data
+          0, // operation -> Call = 0, DelegateCall = 1
+          EventOrganizerRoleKey, // roleKey
+          true, // should revert
+        ],
+      });
+
+      console.log("updated creator", res);
 
       router.push(`/event/${safeAddress}`);
     } catch (err) {

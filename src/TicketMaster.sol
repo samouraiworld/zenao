@@ -42,12 +42,18 @@ contract TicketMaster {
     mapping(address => uint256) public checkins;
     mapping(address => uint) public sale_end;
     mapping(address => address) public roles_mod;
+    mapping(address => address) public creator;
     mapping(address => mapping(uint256 ticketPubKey => address))
         public ticket_owner;
     mapping(address => mapping(address owner => uint256))
         public ticket_by_owner;
     mapping(address => uint256[]) public all_tickets_by_owner;
     address[] public events_by_sale_end;
+
+    event SaleEndSet(address eventAddr, uint saleEnd, bool discoverable);
+    event CreatorSet(address eventAddr, address creatorAddr);
+    event TicketEmitted(address eventAddr, address owner, uint256 ticketPubKey);
+    event TicketCancelled(address eventAddr, uint256 ticketPubKey);
 
     // TODO: consider using openzepelin Ownable instead of manager
 
@@ -95,7 +101,8 @@ contract TicketMaster {
             ),
             "failed to add participant role"
         );
-        // TODO: emit event?
+
+        emit TicketEmitted(eventAddr, msg.sender, ticketPubKey);
     }
 
     function cancelTicket(
@@ -153,7 +160,7 @@ contract TicketMaster {
             "failed to remove participant role"
         );
 
-        // TODO: emit event?
+        emit TicketCancelled(eventAddr, ticketPubKey);
     }
 
     function checkin(
@@ -279,12 +286,17 @@ contract TicketMaster {
 
         sale_end[msg.sender] = newSaleEnd;
 
-        // TODO: emit event?
+        emit SaleEndSet(msg.sender, newSaleEnd, discoverable);
     }
 
     function setRolesMod(address newRolesMode) public {
         roles_mod[msg.sender] = newRolesMode;
         // TODO: emit event?
+    }
+
+    function setCreator(address creatorAddr) public {
+        creator[msg.sender] = creatorAddr;
+        emit CreatorSet(msg.sender, creatorAddr);
     }
 
     modifier onlyRegisteredTicket(address owner, uint256 ticketPubKey) {

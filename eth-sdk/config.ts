@@ -4,7 +4,7 @@ export default defineConfig({
   contracts: {
     basesep: {
       profile: "0xEf66182171C33a2FbA3BC24e1714E8b8e44D49eB",
-      ticketMaster: "0x7018Ca3394d7f504B8df9aD539a9D8679790DBf5",
+      ticketMaster: "0x9a3680C978C277ba12bD9895D231a54D8B84a148",
     },
   },
 });

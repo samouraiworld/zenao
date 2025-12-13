@@ -3,14 +3,19 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
-import { EventInfo } from "../gen/zenao/v1/zenao_pb";
-import { DEFAULT_EVENTS_LIMIT, eventsList } from "@/lib/queries/events-list";
+import { DiscoverableFilter } from "../gen/zenao/v1/zenao_pb";
+import {
+  DEFAULT_EVENTS_LIMIT,
+  eventsList,
+  EVMListEvent,
+} from "@/lib/queries/events-list";
 import EmptyEventsList from "@/components/features/event/event-empty-list";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { EventCard } from "@/components/features/event/event-card";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+
+// TODO: index by startDate
 
 export function DiscoverEventsList({
   from,
@@ -27,10 +32,23 @@ export function DiscoverEventsList({
     fetchNextPage,
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
-      ? eventsList(now, Number.MAX_SAFE_INTEGER, DEFAULT_EVENTS_LIMIT)
-      : eventsList(now - 1, 0, DEFAULT_EVENTS_LIMIT, {
-          staleTime: 1000 * 60, // 1 minute
-        }),
+      ? eventsList(
+          now,
+          Number.MAX_SAFE_INTEGER,
+          DEFAULT_EVENTS_LIMIT,
+          DiscoverableFilter.DISCOVERABLE,
+          undefined,
+        )
+      : eventsList(
+          now - 1,
+          0,
+          DEFAULT_EVENTS_LIMIT,
+          DiscoverableFilter.DISCOVERABLE,
+          undefined,
+          {
+            staleTime: 1000 * 60, // 1 minute
+          },
+        ),
   );
 
   const events = useMemo(() => eventsPages.pages.flat(), [eventsPages]);
@@ -38,7 +56,7 @@ export function DiscoverEventsList({
   const eventsByDay = useMemo(() => {
     return events.reduce(
       (acc, event) => {
-        const dateKey = fromUnixTime(Number(event.startDate))
+        const dateKey = fromUnixTime(Number(event.saleEnd))
           .toISOString()
           .split("T")[0];
 
@@ -49,7 +67,7 @@ export function DiscoverEventsList({
         acc[dateKey].push(event);
         return acc;
       },
-      {} as Record<string, EventInfo[]>,
+      {} as Record<string, EVMListEvent[]>,
     );
   }, [events]);
 
@@ -73,9 +91,9 @@ export function DiscoverEventsList({
             <EventCardListLayout>
               {eventsOfTheDay.map((evt) => (
                 <EventCard
-                  key={evt.pkgPath}
+                  key={evt.eventAddr}
                   evt={evt}
-                  href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
+                  href={`/event/${evt.eventAddr}`}
                 />
               ))}
             </EventCardListLayout>
