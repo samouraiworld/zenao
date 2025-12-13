@@ -54,3 +54,35 @@ export const GnowebButton: React.FC<GnowebButtonProps> = ({
     </Link>
   );
 };
+
+export const LinkBadge: React.FC<GnowebButtonProps> = ({
+  href,
+  label,
+  className,
+}) => {
+  const disabled = href === "";
+
+  const content = (
+    <>
+      <Text variant="secondary" size="sm">
+        {label}
+      </Text>
+    </>
+  );
+
+  const containerClassName = cn(
+    buttonVariants({ variant: "secondary" }),
+    "w-max",
+    className,
+  );
+
+  if (disabled) {
+    return <div className={containerClassName}>{content}</div>;
+  }
+
+  return (
+    <Link className={containerClassName} href={href} target="_blank">
+      {content}
+    </Link>
+  );
+};

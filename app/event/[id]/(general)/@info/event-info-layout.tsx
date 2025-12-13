@@ -9,7 +9,7 @@ import React, { Suspense, useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
 import dynamic from "next/dynamic";
 import { ParticipantsSection } from "../../../../../components/features/event/event-participants-section";
-import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
+import { LinkBadge } from "@/components/widgets/buttons/gnoweb-button";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
@@ -62,9 +62,11 @@ const iconSize = 22;
 export function EventInfoLayout({
   eventId,
   data,
+  rolesModAddr,
 }: {
   eventId: string;
   data: EventInfo;
+  rolesModAddr: string;
 }) {
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
@@ -97,6 +99,14 @@ export function EventInfoLayout({
     maximumAttendeeCapacity: data.capacity,
     image: web2URL(data.imageUri),
   };
+
+  const linkBadges = [
+    [
+      "Safe",
+      `https://app.safe.global/transactions/history?safe=basesep:${eventId}`,
+    ],
+    ["Roles", `https://roles.gnosisguild.org/basesep:${rolesModAddr}`],
+  ] as const;
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-8">
@@ -158,9 +168,11 @@ export function EventInfoLayout({
           {/* Community */}
           {communityId && <EventCommunitySection communityId={communityId} />}
 
-          <GnowebButton
-            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
-          />
+          <div className="flex row gap-4 flex-wrap">
+            {linkBadges.map((lb) => {
+              return <LinkBadge key={lb[0]} label={lb[0]} href={lb[1]} />;
+            })}
+          </div>
 
           <Suspense>
             <EventManagementMenu
