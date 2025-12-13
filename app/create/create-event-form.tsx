@@ -64,6 +64,7 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - proper creator / organizer separation
 - manage gatekeepers
 - cancel event
+- event password
 - participation mail
 - participation guests
 - participation as guest
