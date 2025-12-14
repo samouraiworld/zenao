@@ -50,7 +50,7 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: discover list
 - X: tickets for event list
 - X: events list in profile
-- multichain (allow to build targeting another evm to prepare for mainnet deployment)
+- X: discoverable field in eventOptions
 - ticket secret
 - checkin/scan
 - guest invite
@@ -64,6 +64,7 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - proper creator / organizer separation
 - manage gatekeepers
 - cancel event
+- multichain (allow to build targeting another evm to prepare for mainnet deployment)
 - event password
 - participation mail
 - participation guests

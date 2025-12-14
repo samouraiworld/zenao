@@ -1,11 +1,14 @@
 import { queryOptions } from "@tanstack/react-query";
 import { fromJson } from "@bufbuild/protobuf";
 import { createPublicClient, http } from "viem";
+import { gql } from "urql";
+import z from "zod";
 import { withSpan } from "../tracer";
 import { deserializeWithFrontMatter } from "../serialization";
 import { ticketMasterABI, ticketMasterAddress } from "../evm";
 import { profileOptions } from "./profile";
 import { eventUsersWithRole } from "./event-users";
+import { evmListEventSchema, ticketMasterGraphClient } from "./events-list";
 import { GetToken } from "@/lib/utils";
 import {
   EventInfo,
@@ -84,6 +87,29 @@ export const eventOptions = (id: string) =>
           eventUsersWithRole(id, "organizer"),
         );
 
+        const query = gql`
+          {
+            event(
+              id: ${JSON.stringify(id)}
+            ) {
+              eventAddr
+              saleEnd
+              discoverable
+              creatorAddr
+            }
+          }
+        `;
+
+        const result = await ticketMasterGraphClient
+          .query(query, {})
+          .toPromise();
+
+        console.log("events list", result.data);
+
+        const parsedListEvent = z
+          .object({ event: evmListEventSchema })
+          .parse(result.data).event;
+
         const info: EventInfo = fromJson(EventInfoSchema, {
           title: profile?.displayName || "",
           description: eventDetails.bio || "",
@@ -95,6 +121,7 @@ export const eventOptions = (id: string) =>
           organizers,
           participants: Number(participants),
           capacity: Number(capacity),
+          discoverable: parsedListEvent.discoverable,
         } satisfies EventInfoJson);
         return info;
       });

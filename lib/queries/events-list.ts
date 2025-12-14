@@ -10,13 +10,13 @@ import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
 
-const thegraphClient = createClient({
+export const ticketMasterGraphClient = createClient({
   url: `https://api.studio.thegraph.com/query/1718593/zenao-dev-1/version/latest`,
   exchanges: [cacheExchange, fetchExchange],
   preferGetMethod: false,
 });
 
-const evmListEventSchema = z.object({
+export const evmListEventSchema = z.object({
   discoverable: z.boolean(),
   eventAddr: z.string(),
   saleEnd: z.string(),
@@ -104,7 +104,9 @@ export const eventsList = (
           }
         `;
 
-        const result = await thegraphClient.query(query, {}).toPromise();
+        const result = await ticketMasterGraphClient
+          .query(query, {})
+          .toPromise();
 
         console.log("events list", result.data);
 
@@ -170,7 +172,9 @@ export const ticketsByOwner = (
           }
         `;
 
-          const result = await thegraphClient.query(query, {}).toPromise();
+          const result = await ticketMasterGraphClient
+            .query(query, {})
+            .toPromise();
 
           console.log("tickets list", result.data);
 
