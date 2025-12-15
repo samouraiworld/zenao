@@ -5,10 +5,8 @@ import { GithubIcon, TwitterIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import packageJson from "../../../package.json";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
-import { Badge } from "@/components/shadcn/badge";
 import SoonOnBase from "@/components/widgets/soon-on-base";
 
 export const Footer = () => {
@@ -27,11 +25,6 @@ export const Footer = () => {
       <div className="flex flex-col sm:flex-row items-center gap-2">
         <div className="flex flex-row items-center gap-3">
           <SoonOnBase className="flex sm:hidden" />
-          <Badge variant="secondary" className="rounded">
-            <Text size="sm" variant="secondary">
-              version {packageJson.version} beta
-            </Text>
-          </Badge>
         </div>
         <div className="flex flex-row items-center gap-3">
           <Text size="sm" variant="secondary">

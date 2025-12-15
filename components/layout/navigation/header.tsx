@@ -42,6 +42,7 @@ import {
 } from "@/components/features/user/user";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import SoonOnBase from "@/components/widgets/soon-on-base";
+import VersionTag from "@/components/widgets/version-tag";
 
 export type NavItem = {
   key: string;
@@ -177,7 +178,7 @@ export function Header() {
   return (
     <div className="flex justify-between p-4 w-full items-center">
       {/* Desktop */}
-      <div className="flex max-[450px]:gap-4 gap-6 items-center">
+      <div className="flex gap-4 items-center">
         <div className="flex items-center gap-2">
           <GoBackButton className="hidden standalone:flex" />
           <Link href="/" className="flex gap-2 items-center">
@@ -191,6 +192,7 @@ export function Header() {
             />
             <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
           </Link>
+          <VersionTag />
         </div>
         <div className="flex standalone:hidden standalone:md:flex flex-row gap-4">
           <HeaderLinks />
