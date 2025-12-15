@@ -5,7 +5,6 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import Text from "@/components/widgets/texts/text";
 import { EventLocationSkeleton } from "@/components/features/event/event-location-section";
 import { EventSection } from "@/components/features/event/event-section";
-import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { UserAvatarWithNameSkeleton } from "@/components/features/user/user";
 
 const iconSize = 20;
@@ -41,8 +40,6 @@ export function EventInfoLayoutSkeleton() {
 
           {/* Location */}
           <EventLocationSkeleton />
-
-          <GnowebButton href={""} />
         </div>
       </div>
 

@@ -9,7 +9,6 @@ import React, { Suspense, useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
 import dynamic from "next/dynamic";
 import { ParticipantsSection } from "../../../../../components/features/event/event-participants-section";
-import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
@@ -157,10 +156,6 @@ export function EventInfoLayout({
 
           {/* Community */}
           {communityId && <EventCommunitySection communityId={communityId} />}
-
-          <GnowebButton
-            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/events/e${eventId}`}
-          />
 
           <Suspense>
             <EventManagementMenu
