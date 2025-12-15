@@ -9,7 +9,6 @@ import { useAuth } from "@clerk/nextjs";
 import React, { useMemo, useState } from "react";
 import { userInfoOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
-import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -56,27 +55,10 @@ function EventFeed({ params }: EventFeedProps) {
   } = useSuspenseInfiniteQuery(
     feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
   );
-  const posts = useMemo(
-    () =>
-      postsPages.pages.flat().map<SocialFeedPost>((post) => {
-        if (isPollPost(post)) {
-          return {
-            postType: "poll",
-            data: post,
-          };
-        } else if (isStandardPost(post)) {
-          return {
-            postType: "standard",
-            data: post,
-          };
-        }
-        return {
-          postType: "unknown",
-          data: post,
-        };
-      }),
-    [postsPages],
-  );
+
+  const posts = useMemo(() => {
+    return postsPages.pages.flat();
+  }, [postsPages]);
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
     "event",

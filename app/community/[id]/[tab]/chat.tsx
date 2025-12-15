@@ -10,7 +10,6 @@ import {
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { userInfoOptions } from "@/lib/queries/user";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
-import { isPollPost, isStandardPost, SocialFeedPost } from "@/lib/social-feed";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import useFeedPostReactionHandler from "@/hooks/use-feed-post-reaction-handler";
 import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
@@ -51,27 +50,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   } = useSuspenseInfiniteQuery(
     feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
   );
-  const posts = useMemo(
-    () =>
-      postsPages.pages.flat().map<SocialFeedPost>((post) => {
-        if (isPollPost(post)) {
-          return {
-            postType: "poll",
-            data: post,
-          };
-        } else if (isStandardPost(post)) {
-          return {
-            postType: "standard",
-            data: post,
-          };
-        }
-        return {
-          postType: "unknown",
-          data: post,
-        };
-      }),
-    [postsPages],
-  );
+  const posts = useMemo(() => postsPages.pages.flat(), [postsPages]);
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
     "community",

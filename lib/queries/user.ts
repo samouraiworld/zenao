@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
+import { withSpan } from "../tracer";
 import { zenaoClient } from "@/lib/zenao-client";
 import { GetUserInfoResponse } from "@/app/gen/zenao/v1/zenao_pb";
 
@@ -16,15 +17,18 @@ export const userInfoOptions = (
       if (!userId || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
         return null;
       }
-      const authToken = await getToken();
-      if (authToken == null) {
-        return null;
-      }
 
-      return await zenaoClient.getUserInfo(
-        {},
-        { headers: { Authorization: "Bearer " + authToken } },
-      );
+      return withSpan(`query:backend:user:${userId}`, async () => {
+        const authToken = await getToken();
+        if (authToken == null) {
+          return null;
+        }
+
+        return await zenaoClient.getUserInfo(
+          {},
+          { headers: { Authorization: "Bearer " + authToken } },
+        );
+      });
     },
     enabled: !!userId,
   });

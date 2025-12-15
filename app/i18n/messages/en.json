@@ -329,7 +329,10 @@
   },
   "error": {
     "label": "Oups! An error has occured.",
-    "retry-button": "Retry"
+    "retry-button": "Retry",
+    "oops-something-went-wrong": "Oups! Something went wrong.",
+    "unexpected-error-occurred": "An unexpected error occurred. Please try again later.",
+    "refresh-page": "Refresh the page"
   },
   "not-found": {
     "label": "Page not found.",
@@ -460,12 +463,15 @@
   "toast-delete-post-success": "Your post has been deleted",
   "toast-delete-post-error": "Error while deleting the post",
   "community": {
+    "communities": "Communities",
     "chat": "Chat",
     "votes": "Votes",
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals",
     "portfolio": "Portfolio",
+    "upcoming": "Upcoming",
+    "past": "Past",
     "leave-community-button": "Leave community",
     "leaving-state": "Leaving...",
     "leave-success": "You have left the community.",
