@@ -19,6 +19,7 @@ export async function EventScreenContainer({ id, children }: Props) {
   try {
     eventData = await queryClient.fetchQuery(eventOptions(id));
   } catch {
+    console.log("EventScreenContainer: Event not found for ID:", id);
     notFound();
   }
 
