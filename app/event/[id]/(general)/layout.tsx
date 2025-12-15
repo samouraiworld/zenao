@@ -28,7 +28,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     };
   } catch {
-    console.log("generateMetadata: Event not found for ID:", id);
     notFound();
   }
 }
@@ -42,7 +41,6 @@ export default async function EventLayout({ params, children }: Props) {
     const queryClient = getQueryClient();
     event = await queryClient.fetchQuery(eventOptions(p.id));
   } catch {
-    console.log("generateMetadata: Event not found for ID:", p.id);
     notFound();
   }
 

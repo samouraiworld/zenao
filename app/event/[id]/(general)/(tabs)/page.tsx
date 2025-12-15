@@ -17,7 +17,6 @@ export default async function DescriptionPage({ params }: Props) {
   try {
     data = await queryClient.fetchQuery(eventOptions(id));
   } catch {
-    console.log("DescriptionPage: Event not found for ID:", id);
     notFound();
   }
 
