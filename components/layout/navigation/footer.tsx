@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
+import { Badge } from "@/components/shadcn/badge";
 
 export const Footer = () => {
   const t = useTranslations("navigation");
@@ -21,10 +22,15 @@ export const Footer = () => {
 
   return (
     <footer className="standalone:hidden flex flex-col items-center gap-2 sm:flex-row sm:justify-between sm:items-end p-4">
-      <div className="flex flex-row items-center gap-3 sm:gap-5">
+      <div className="flex flex-row items-center gap-3">
         <Text size="sm" variant="secondary">
           {t("footer.tagline")}
         </Text>
+        <Badge variant="secondary" className="rounded">
+          <Text size="sm" variant="secondary">
+            version 0.7 beta
+          </Text>
+        </Badge>
       </div>
       <div className="flex flex-row align-center gap-3 sm:gap-5">
         {!!feedback && (

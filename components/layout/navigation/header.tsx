@@ -41,6 +41,8 @@ import {
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import { Card } from "@/components/widgets/cards/card";
+import { BaseLogo } from "@/components/widgets/icons";
 
 export type NavItem = {
   key: string;
@@ -197,6 +199,12 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center">
+        <Card className="py-1 px-2 flex flex-row items-center">
+          <Text size="sm" variant="secondary" className="pr-1.5">
+            Soon on
+          </Text>
+          <BaseLogo className="h-3 dark:fill-secondary-color" />
+        </Card>
         <Link passHref href="/create">
           <ButtonWithChildren
             variant="outline"
