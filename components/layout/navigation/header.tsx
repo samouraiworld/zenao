@@ -41,8 +41,7 @@ import {
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
-import { Card } from "@/components/widgets/cards/card";
-import { BaseLogo } from "@/components/widgets/icons";
+import SoonOnBase from "@/components/widgets/soon-on-base";
 
 export type NavItem = {
   key: string;
@@ -138,7 +137,7 @@ const NavLink = ({ item, pathname }: { item: NavItem; pathname: string }) => {
         <Text
           size="sm"
           variant={isActive ? "primary" : "secondary"}
-          className="text-inherit max-[624px]:hidden"
+          className="text-inherit max-[848px]:hidden"
         >
           {item.children}
         </Text>
@@ -199,12 +198,7 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center">
-        <Card className="py-1 px-2 flex flex-row items-center">
-          <Text size="sm" variant="secondary" className="pr-1.5">
-            Soon on
-          </Text>
-          <BaseLogo className="h-3 dark:fill-secondary-color" />
-        </Card>
+        <SoonOnBase className="hidden sm:flex" />
         <Link passHref href="/create">
           <ButtonWithChildren
             variant="outline"
