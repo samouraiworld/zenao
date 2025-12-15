@@ -25,6 +25,7 @@
     }
   },
   "home": {
+    "base-news": "News & Updates: We are arriving soon on",
     "main-text": "Organize event(s) in seconds",
     "secondary-text": "\"Anything that happens, arrives or appears, can give birth to an autonomous community, or a new tribe.\"",
     "placeholder": "Event name...",
@@ -351,6 +352,9 @@
       "gnoweb-button": "See on gnoweb"
     },
     "widgets": {
+      "soon-on-base": {
+        "soon-on": "Soon on"
+      },
       "form": {
         "form-field-image": {
           "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
