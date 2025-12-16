@@ -1,6 +1,5 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getTranslations } from "next-intl/server";
-import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import {
@@ -31,9 +30,6 @@ async function CommunitiesLayout({ children }: CommunitiesLayoutProps) {
               <Heading level={1} size="4xl" className="truncate">
                 {t("communities")}
               </Heading>
-              <GnowebButton
-                href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/communityreg`}
-              />
             </div>
           </div>
           {children}
