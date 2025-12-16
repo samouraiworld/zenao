@@ -506,7 +506,9 @@
   },
   "community-create-form": {
     "log-in": "Log in to create a community",
-    "create-community-button": "Create community"
+    "create-community-button": "Create community",
+    "toast-creation-success": "Community created!",
+    "toast-creation-error": "Error on creating community!"
   },
   "community-form": {
     "update-success": "Community updated successfully",
