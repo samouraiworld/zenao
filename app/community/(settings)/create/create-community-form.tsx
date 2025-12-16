@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import z from "zod";
 import {
   CommunityDetails,
   communityFormSchema,
@@ -28,10 +29,20 @@ export default function CreateCommunityForm() {
     userInfoOptions(getToken, userId),
   );
 
-  const t = useTranslations("community-form");
+  const t = useTranslations("community-create-form");
   const form = useForm<CommunityFormSchemaType>({
     mode: "all",
-    resolver: zodResolver(communityFormSchema),
+    resolver: zodResolver(
+      communityFormSchema.extend({
+        administrators: z.array(
+          z.object({
+            address: z
+              .string()
+              .email("Administrator must be a valid email address"),
+          }),
+        ),
+      }),
+    ),
     defaultValues: {
       displayName: "",
       avatarUri: "",
@@ -60,8 +71,6 @@ export default function CreateCommunityForm() {
         portfolio: [],
         socialMediaLinks: data.socialMediaLinks,
       });
-
-      console.log("Creating community with data:", data);
 
       const communityId = await createCommunity({
         token,
