@@ -511,7 +511,7 @@
     "log-in": "Log in to create a community",
     "create-community-button": "Create community"
   },
-  "community-edit-form": {
+  "community-form": {
     "update-success": "Community updated successfully",
     "update-failure": "Failed to update community",
     "edit-button": "Edit community",
@@ -538,7 +538,8 @@
     "socialLinks-description": "Add links to your community's social media profiles to enhance visibility",
     "remove-admin": "Remove",
     "add-admin": "Add Administrator",
-    "submit": "Update Community"
+    "submit-create": "Create Community",
+    "submit-edit": "Update Community"
   },
   "empty-list": {
     "title": "Nothing listed",

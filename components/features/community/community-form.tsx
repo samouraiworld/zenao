@@ -30,6 +30,7 @@ import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
   onSubmit: (values: CommunityFormSchemaType) => Promise<void>;
+  isEditing?: boolean;
   isLoading: boolean;
 }
 
@@ -37,6 +38,7 @@ export const CommunityForm = ({
   form,
   onSubmit,
   isLoading,
+  isEditing,
 }: CommunityFormProps) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -58,7 +60,7 @@ export const CommunityForm = ({
     ).success;
   const isButtonDisabled = !form.formState.isValid || isLastAdminInvalid;
 
-  const t = useTranslations("community-edit-form");
+  const t = useTranslations("community-form");
 
   return (
     <Form {...form}>
@@ -246,7 +248,7 @@ export const CommunityForm = ({
             type="submit"
             className="px-8 w-full"
           >
-            {t("submit")}
+            {isEditing ? t("submit-edit") : t("submit-create")}
           </ButtonWithChildren>
         </SettingsSection>
       </form>
