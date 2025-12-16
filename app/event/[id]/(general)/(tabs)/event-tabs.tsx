@@ -32,6 +32,7 @@ export function EventTabs({
   children?: React.ReactNode;
 }) {
   const t = useTranslations("event");
+
   const section = useSelectedLayoutSegment() || "description";
 
   return (
