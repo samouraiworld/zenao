@@ -3,10 +3,14 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import packageJson from "./package.json";
 
 const withNextIntl = createNextIntlPlugin("./app/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_APP_VERSION: packageJson.version,
+  },
   /* config options here */
   images: {
     remotePatterns: [

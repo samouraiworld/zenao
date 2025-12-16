@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
+import SoonOnBase from "@/components/widgets/soon-on-base";
 import { Discord } from "@/components/widgets/icons";
 
 export const Footer = () => {
@@ -22,10 +23,15 @@ export const Footer = () => {
 
   return (
     <footer className="standalone:hidden flex flex-col items-center gap-2 sm:flex-row sm:justify-between sm:items-end p-4">
-      <div className="flex flex-row items-center gap-3 sm:gap-5">
-        <Text size="sm" variant="secondary">
-          {t("footer.tagline")}
-        </Text>
+      <div className="flex flex-col sm:flex-row items-center gap-2">
+        <div className="flex flex-row items-center gap-3">
+          <SoonOnBase className="flex sm:hidden" />
+        </div>
+        <div className="flex flex-row items-center gap-3">
+          <Text size="sm" variant="secondary">
+            {t("footer.tagline")}
+          </Text>
+        </div>
       </div>
       <div className="flex flex-row align-center gap-3 sm:gap-5">
         {!!feedback && (
