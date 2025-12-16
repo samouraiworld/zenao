@@ -5,7 +5,6 @@ import { ExternalLink, Link2 } from "lucide-react";
 import Link from "next/link";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
-import { GnowebButton } from "@/components/widgets/buttons/gnoweb-button";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { communityInfo } from "@/lib/queries/community";
 import { CommunityLeaveButton } from "@/components/community/community-leave-button";
@@ -102,9 +101,6 @@ function CommunityInfoLayout({
           </div>
 
           <div className="flex gap-2 max-md:hidden">
-            <GnowebButton
-              href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
-            />
             <CommunityEditAdminButton communityId={communityId} />
             <CommunityJoinButton communityId={communityId} />
             <CommunityLeaveButton communityId={communityId} />
@@ -141,11 +137,6 @@ function CommunityInfoLayout({
         )}
 
         <div className="flex flex-col md:hidden gap-2">
-          <GnowebButton
-            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/communities/c${communityId}`}
-            className="w-full"
-          />
-
           <div className="flex flex-col gap-2 justify-center">
             <CommunityEditAdminButton communityId={communityId} />
             <CommunityJoinButton communityId={communityId} />

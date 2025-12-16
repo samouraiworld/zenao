@@ -12,6 +12,10 @@ import (
 	"github.com/samouraiworld/zenao/backend/zeni"
 )
 
+var blacklistedDomains = []string{
+	"test.com",
+}
+
 func newMailCmd() *commands.Command {
 	return commands.NewCommand(
 		commands.Metadata{
