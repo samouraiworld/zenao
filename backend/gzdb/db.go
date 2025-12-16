@@ -1896,7 +1896,7 @@ func (g *gormZenaoDB) CommunitiesByEvent(eventID string) ([]*zeni.Community, err
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
-	return &zeni.User{
+	u := &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),
 		CreatedAt:   dbuser.CreatedAt,
 		DisplayName: dbuser.DisplayName,
@@ -1905,6 +1905,16 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		AuthID:      dbuser.AuthID,
 		Plan:        zeni.Plan(dbuser.Plan),
 	}
+	if u.DisplayName == "" {
+		u.DisplayName = fmt.Sprintf("Zenao user #%d", dbuser.ID)
+	}
+	if u.Bio == "" {
+		u.Bio = "Zenao Managed User"
+	}
+	if u.AvatarURI == "" {
+		u.AvatarURI = userDefaultAvatar
+	}
+	return u
 }
 
 func dbEntityRoleToZeniEntityRole(dbrole *EntityRole) *zeni.EntityRole {
