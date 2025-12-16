@@ -43,7 +43,7 @@ export const Footer = () => {
             </Text>
           </Button>
         )}
-        <Link href="https://x.com/zenaolabs" target="_blank">
+        <Link href="https://x.com/zenaoHQ" target="_blank">
           <TwitterIcon className="text-secondary-color hover:text-primary-color h-5 w-5" />
         </Link>
         <Link href="https://github.com/samouraiworld/zenao" target="_blank">
