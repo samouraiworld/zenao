@@ -985,8 +985,10 @@ func (g *gormZenaoDB) EntitiesWithRoles(orgType string, orgID string, roles []st
 	var entities []EntityRole
 
 	if err := g.db.
+		Model(&EntityRole{}).
 		Where("org_type = ? AND org_id = ? AND role IN ?",
 			orgType, orgID, roles).
+		Group("entity_type, entity_id").
 		Find(&entities).Error; err != nil {
 		return nil, err
 	}
