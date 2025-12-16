@@ -347,9 +347,6 @@
         "sign-up": "Sign up"
       }
     },
-    "buttons": {
-      "gnoweb-button": "See on gnoweb"
-    },
     "widgets": {
       "form": {
         "form-field-image": {

@@ -1,6 +1,5 @@
 "use client";
 
-import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode } from "react";
 import { Hash, MapPin, MessageCircle, X } from "lucide-react";
 import Link from "next/link";
@@ -23,7 +22,6 @@ type PostCardLayoutProps = {
   canReply?: boolean;
   replyHref?: string;
   editMode?: boolean;
-  gnowebHref?: Url;
   parentId?: string;
   canEdit?: boolean;
   canInteract?: boolean;
@@ -37,7 +35,6 @@ type PostCardLayoutProps = {
 export function PostCardLayout({
   post,
   createdBy,
-  gnowebHref,
   children,
   isOwner,
   canReply,
@@ -121,7 +118,6 @@ export function PostCardLayout({
             )}
             <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
               <PostMenu
-                gnowebHref={gnowebHref}
                 isOwner={isOwner}
                 onDelete={async () => await onDelete?.(parentId)}
                 isDeleting={isDeleting}
