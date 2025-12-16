@@ -25,7 +25,7 @@ export const CommunityEditAdminButton = ({
   if (!isAdmin) return null;
   return (
     <div>
-      <Link passHref href={`/community/edit/${communityId}`}>
+      <Link passHref href={`/community/${communityId}/edit`}>
         <ButtonWithChildren
           variant="outline"
           className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"

@@ -37,7 +37,7 @@
     "title-placeholder": "Event name...",
     "description-label": "Description",
     "write-tab": "Write",
-    "log-in": " Log in to create an event",
+    "log-in": "Log in to create an event",
     "preview-tab": "Preview",
     "change-image": "Change image",
     "description-placeholder": "Description...",
@@ -506,6 +506,10 @@
     "confirm-delete-desc": "This action cannot be undone.",
     "confirm-delete-cancel": "Cancel",
     "confirm-delete-confirm": "Yes, delete it"
+  },
+  "community-create-form": {
+    "log-in": "Log in to create a community",
+    "create-community-button": "Create community"
   },
   "community-edit-form": {
     "update-success": "Community updated successfully",

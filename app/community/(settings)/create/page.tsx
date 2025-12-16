@@ -1,0 +1,40 @@
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { getTranslations } from "next-intl/server";
+import { auth } from "@clerk/nextjs/server";
+import CreateCommunityForm from "./create-community-form";
+import { getQueryClient } from "@/lib/get-query-client";
+import { userInfoOptions } from "@/lib/queries/user";
+import {
+  ScreenContainer,
+  ScreenContainerCentered,
+} from "@/components/layout/screen-container";
+
+export default async function CreateCommunityPage() {
+  const queryClient = getQueryClient();
+
+  const t = await getTranslations("community-create-form");
+
+  // Fetch user
+  const { getToken, userId } = await auth();
+  const token = await getToken();
+
+  const userAddrOpts = userInfoOptions(getToken, userId);
+  const userInfo = await queryClient.fetchQuery(userAddrOpts);
+  const userRealmId = userInfo?.realmId;
+
+  if (!token || !userRealmId) {
+    return (
+      <ScreenContainerCentered isSignedOutModal>
+        {t("log-in")}
+      </ScreenContainerCentered>
+    );
+  }
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ScreenContainer>
+        <CreateCommunityForm />
+      </ScreenContainer>
+    </HydrationBoundary>
+  );
+}
