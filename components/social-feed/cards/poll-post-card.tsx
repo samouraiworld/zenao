@@ -100,7 +100,6 @@ export function PollPostCard({
       <PostCardLayout
         post={pollPost}
         createdBy={createdBy}
-        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
         canReply={canReply}
         canInteract={canInteract}
         isDeleting={isDeleting}

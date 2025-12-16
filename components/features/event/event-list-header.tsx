@@ -1,6 +1,5 @@
 import Heading from "../../widgets/texts/heading";
 import Text from "../../widgets/texts/text";
-import { GnowebButton } from "../../widgets/buttons/gnoweb-button";
 import EventFromFilterTab from "./event-from-filter-tab";
 import { FromFilter } from "@/lib/search-params";
 
@@ -17,9 +16,6 @@ const HeaderEventsList: React.FC<{
           <Heading level={1} size="4xl" className="truncate">
             {title}
           </Heading>
-          <GnowebButton
-            href={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/zenao/eventreg`}
-          />
         </div>
         <div>
           <EventFromFilterTab from={from} tabLinks={tabLinks} />
