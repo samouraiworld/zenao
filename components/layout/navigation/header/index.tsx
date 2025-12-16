@@ -198,18 +198,6 @@ export function Header() {
 
       <div className="flex gap-2 items-center">
         <QuickCreateMenu />
-
-        {/* <Link passHref href="/create-event">
-        </Link>
-        <Link passHref href="/create">
-          <ButtonWithChildren
-            variant="outline"
-            size="sm"
-            className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
-          >
-            {t("create-event")}
-          </ButtonWithChildren>
-        </Link> */}
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>

@@ -34,7 +34,7 @@ export default function Home() {
         </Text>
 
         <div className="flex flex-col gap-2 items-center">
-          <Link href="/create">
+          <Link href="/event/create">
             <ButtonWithChildren className="w-full flex rounded-3xl py-5">
               <Text variant="invert" className="text-sm">
                 {t("button")}
