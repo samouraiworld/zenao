@@ -22,13 +22,13 @@ export const EventAnnouncementEmail = () => (
     <Head />
     <Body style={main}>
       <Preview>
-        New Event Sponsored by the Community - {"{{.EventName}}"}
+        New Event Organized by the Community - {"{{.EventName}}"}
       </Preview>
       <Container style={container}>
         <EmailEventImg src="{{.EventImage}}" />
         <Section style={welcome.section}>
           <Text style={welcome.text}>
-            Join us for the upcoming event sponsored by {"{{.CommunityName}}"}!
+            Join us for the upcoming event organized by {"{{.CommunityName}}"}!
           </Text>
         </Section>
         <Section style={details.section}>
@@ -55,7 +55,7 @@ export const EventAnnouncementEmail = () => (
           <Row>
             <Column>
               <EmailEventBox
-                title="SPONSORED BY"
+                title="ORGANIZED BY"
                 icon={`{{.CommunityImage}}`}
                 iconAlt="Community logo"
                 content={`{{.CommunityName}}`}

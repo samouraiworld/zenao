@@ -8,6 +8,7 @@ import Link from "next/link";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 import SoonOnBase from "@/components/widgets/soon-on-base";
+import { Discord } from "@/components/widgets/icons";
 
 export const Footer = () => {
   const t = useTranslations("navigation");
@@ -48,11 +49,14 @@ export const Footer = () => {
             </Text>
           </Button>
         )}
-        <Link href="https://x.com/samouraicoop" target="_blank">
+        <Link href="https://x.com/zenaoHQ" target="_blank">
           <TwitterIcon className="text-secondary-color hover:text-primary-color h-5 w-5" />
         </Link>
         <Link href="https://github.com/samouraiworld/zenao" target="_blank">
           <GithubIcon className="text-secondary-color hover:text-primary-color h-5 w-5" />
+        </Link>
+        <Link href="https://discord.gg/TkpJgp9zjK" target="_blank">
+          <Discord className="text-secondary-color hover:text-primary-color h-5 w-5" />
         </Link>
       </div>
     </footer>
