@@ -5,7 +5,9 @@ import (
 	"crypto/ed25519"
 	"errors"
 	"fmt"
+	"net/mail"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -34,6 +36,28 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 	} else if req.Msg.Email != "" {
 		return nil, errors.New("authenticating and providing an email are mutually exclusive")
+	}
+
+	_, err := mail.ParseAddress(authUser.Email)
+	if err != nil {
+		return nil, fmt.Errorf("invalid email address: %w", err)
+	}
+
+	domain := strings.Split(authUser.Email, "@")[1]
+	if blacklistedDomains != nil && slices.Contains(blacklistedDomains, domain) {
+		return nil, fmt.Errorf("email domain %s is not allowed", domain)
+	}
+
+	for _, guestEmail := range req.Msg.Guests {
+		_, err := mail.ParseAddress(guestEmail)
+		if err != nil {
+			return nil, fmt.Errorf("invalid guest email address: %w", err)
+		}
+
+		guestDomain := strings.Split(guestEmail, "@")[1]
+		if blacklistedDomains != nil && slices.Contains(blacklistedDomains, guestDomain) {
+			return nil, fmt.Errorf("guest email domain %s is not allowed", guestDomain)
+		}
 	}
 
 	if authUser.Banned {
