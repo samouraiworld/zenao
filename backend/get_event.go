@@ -58,6 +58,11 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		return s.Chain.UserRealmID(u.ID) // TODO: remove usage in front-end to use ID instead ?
 	})
 
+	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
+	if err != nil {
+		return nil, err
+	}
+
 	info := zenaov1.EventInfo{
 		Title:        evt.Title,
 		Description:  evt.Description,
@@ -71,6 +76,7 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		Participants: participants,
 		CheckedIn:    checkedIn,
 		Discoverable: evt.Discoverable,
+		Privacy:      privacy,
 	}
 
 	return connect.NewResponse(&zenaov1.GetEventResponse{Event: &info}), nil
