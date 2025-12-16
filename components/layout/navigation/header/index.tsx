@@ -21,6 +21,7 @@ import {
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import QuickCreateMenu from "./quick-create-menu";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -35,7 +36,6 @@ import {
 import useSmartBack from "@/hooks/use-smart-back";
 import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
-import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import {
   UserAvatar,
   UserAvatarSkeleton,
@@ -197,6 +197,10 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center">
+        <QuickCreateMenu />
+
+        {/* <Link passHref href="/create-event">
+        </Link>
         <Link passHref href="/create">
           <ButtonWithChildren
             variant="outline"
@@ -205,7 +209,7 @@ export function Header() {
           >
             {t("create-event")}
           </ButtonWithChildren>
-        </Link>
+        </Link> */}
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
