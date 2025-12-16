@@ -6,6 +6,8 @@ import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { LazyInstallButton } from "@/components/widgets/buttons/pwa-install-button";
+import { Card } from "@/components/widgets/cards/card";
+import { BaseLogo } from "@/components/widgets/icons";
 
 export default function Home() {
   const t = useTranslations("home");
@@ -13,6 +15,12 @@ export default function Home() {
   return (
     <ScreenContainerCentered>
       <div className="flex flex-col items-center">
+        <Card className="mx-4 max-w-[580px] flex flex-wrap items-center mb-8">
+          <Text variant="secondary" className="pr-1.5">
+            {t("base-news")}
+          </Text>
+          <BaseLogo className="h-3 dark:fill-secondary-color" />
+        </Card>
         <Image
           src="/zenao-logo.png"
           alt="zeano logo"
@@ -22,7 +30,7 @@ export default function Home() {
           fetchPriority="high"
           className="mb-5 mt-5"
         />
-        <Heading level={1} size="4xl" className="w-[200px] text-center">
+        <Heading level={1} size="4xl" className="max-w-[560px] text-center">
           {t("main-text")}
         </Heading>
         <Text
