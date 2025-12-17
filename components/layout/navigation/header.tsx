@@ -19,11 +19,10 @@ import {
   SignInButton,
   useAuth,
 } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import { useAccount } from "wagmi";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
-import { userInfoOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
 import {
   DropdownMenu,
@@ -230,10 +229,8 @@ const Auth = ({
 }) => {
   const t = useTranslations("navigation");
   const { trackEvent } = useAnalyticsEvents();
-  const { signOut, getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
+  const { signOut } = useAuth();
+  const { address } = useAccount();
 
   return (
     <div className={className}>
@@ -272,7 +269,7 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    realmId={userInfo?.realmId || ""}
+                    realmId={address}
                     className={avatarClassName}
                     size="md"
                   />
@@ -282,7 +279,7 @@ const Auth = ({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <Link href={`/profile/${userInfo?.realmId}`}>
+          <Link href={`/profile/${address}`}>
             <DropdownMenuItem className="cursor-pointer">
               {t("view-profile")}
             </DropdownMenuItem>
