@@ -8,6 +8,7 @@ GNO := go run github.com/gnolang/gno/gnovm/cmd/gno@${GNOVERSION}
 generate:
 	npm i
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
+	goimports -w ./backend
 	gno fmt -w ./gno/...
 	${MAKE} gno-mod-tidy
 	npm run mail:build
