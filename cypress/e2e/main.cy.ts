@@ -54,7 +54,7 @@ describe("main", () => {
     cy.get("a").contains("Discover").click();
 
     // click on first event
-    cy.get('a[href^="/event/"]').first().click();
+    cy.get('a[href^="/event/"]').eq(-2).click();
 
     // type email in participate form
     cy.get('input[placeholder="Email..."]').type(testEmail2);
@@ -80,7 +80,7 @@ describe("main", () => {
     cy.get("a").contains("Discover").click();
 
     // click on last event since we already participate in first
-    cy.get('a[href^="/event/"]').first().click();
+    cy.get('a[href^="/event/"]').eq(-2).click();
 
     // make sure there is no email field
     cy.get('input[placeholder="Email..."]').should("not.exist");
@@ -690,11 +690,14 @@ Cypress.Commands.add(
     cy.visit("/");
 
     // click on home create button
-    cy.get("button").contains("Create").parent().click();
+    cy.get("header").get("button[aria-label='quick menu create']").click();
     // Select create event
-    cy.get("div").contains("Create new event").parent().click();
+    cy.get("div").contains("Create new event").click();
 
     login();
+
+    // Click outside to close any open modal
+    cy.get("header").click(0, 0);
 
     // fill event info
     cy.get("input[name=imageUri]").selectFile(

@@ -18,7 +18,7 @@ export default function NotFound() {
       <Text className="text-center">{t("label")}</Text>
       <br />
       <Link href="/">
-        <ButtonWithChildren>
+        <ButtonWithChildren className="max-w-[480px]">
           <Text variant="invert" size="sm">
             {t("button")}
           </Text>

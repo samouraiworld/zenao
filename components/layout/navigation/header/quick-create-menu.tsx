@@ -17,6 +17,7 @@ export default function QuickCreateMenu() {
         <Button
           variant="outline"
           size="icon"
+          aria-label="quick menu create"
           className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] focus-visible:ring-0"
         >
           <PlusIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
@@ -24,22 +25,22 @@ export default function QuickCreateMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>
-          <Link href="/event/create">
+        <Link href="/event/create">
+          <DropdownMenuItem>
             <div className="flex">
               <Calendar className="mr-2 h-5 w-5" />
               <span className="mr-2">Create new event</span>
             </div>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Link href="/community/create">
+          </DropdownMenuItem>
+        </Link>
+        <Link href="/community/create">
+          <DropdownMenuItem asChild>
             <div className="flex">
               <UserRound className="mr-2 h-5 w-5" />
               <span className="mr-2">Create new community</span>
             </div>
-          </Link>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
+        </Link>
       </DropdownMenuContent>
     </DropdownMenu>
   );

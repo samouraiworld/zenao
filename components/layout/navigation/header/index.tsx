@@ -176,7 +176,7 @@ export function Header() {
   }, []);
 
   return (
-    <div className="flex justify-between p-4 w-full items-center">
+    <header className="flex justify-between p-4 w-full items-center">
       {/* Desktop */}
       <div className="flex gap-4 items-center">
         <div className="flex items-center gap-2">
@@ -207,7 +207,7 @@ export function Header() {
         </div>
         <Auth className="h-fit" isMounted={isMounted} />
       </div>
-    </div>
+    </header>
   );
 }
 
