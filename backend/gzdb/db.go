@@ -733,7 +733,7 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 	return res, nil
 }
 
-// GetOrgUsersWithRole implements zeni.DB.
+// GetOrgUsersWithRoles implements zeni.DB.
 func (g *gormZenaoDB) GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*zeni.User, error) {
 	g, span := g.trace("gzdb.GetOrgUsersWithRole")
 	defer span.End()
