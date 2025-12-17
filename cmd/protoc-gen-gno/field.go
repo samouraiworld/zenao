@@ -203,7 +203,7 @@ func fieldFromJSON(prefix string, g *protogen.GeneratedFile, field *protogen.Fie
 	case protoreflect.BytesKind:
 		panic("bytes not supported")
 	case protoreflect.MessageKind, protoreflect.GroupKind:
-		printField("fv := &"+g.QualifiedGoIdent(field.Message.GoIdent)+"{}\n"+field.Message.GoIdent.GoName+"FromJSON(fv, val)", "fv")
+		printField("fv := &"+g.QualifiedGoIdent(field.Message.GoIdent)+"{}\n"+g.QualifiedGoIdent(field.Message.GoIdent)+"FromJSON(fv, val)", "fv")
 	default:
 		panic(fmt.Errorf("unexpected field type %q", field.Desc.Kind().String()))
 	}

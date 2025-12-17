@@ -21,6 +21,8 @@ import (
 	"gorm.io/plugin/opentelemetry/tracing"
 )
 
+const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
+
 type User struct {
 	gorm.Model         // this ID should be used for any database related logic (like querying)
 	AuthID      string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
@@ -314,6 +316,137 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 	return dbEventToZeniEvent(evt)
 }
 
+// ListEvents implements zeni.DB.
+func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*zeni.Event, error) {
+	g, span := g.trace("gzdb.ListEvents")
+	defer span.End()
+
+	var orgIDs []uint
+	if entityID != "" && entityType != "" {
+		entityIDInt, err := strconv.ParseUint(entityID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse entity id: %w", err)
+		}
+		query := g.db.Model(&EntityRole{}).Select("org_id").Where("entity_type = ? AND entity_id = ? AND org_type = ?", entityType, entityIDInt, zeni.EntityTypeEvent)
+		if role != "" {
+			query = query.Where("role = ?", role)
+		}
+
+		if err := query.Order("org_id DESC").Find(&orgIDs).Error; err != nil {
+			return nil, fmt.Errorf("query org ids: %w", err)
+		}
+		if len(orgIDs) == 0 {
+			return []*zeni.Event{}, nil
+		}
+	}
+
+	var dbEvts []Event
+	query := g.db.Model(&Event{})
+
+	// XXX: if both value set we need to know if we want reverse or not (rep. of what we have in eventreg with Iterate/ReverseIterate)
+	if from != 0 || to != 0 {
+		fromTime := time.Unix(from, 0)
+		toTime := time.Unix(to, 0)
+		if from <= to {
+			query = query.
+				Where("end_date >= ? AND end_date <= ?", fromTime, toTime).
+				Order("end_date ASC, id ASC")
+		} else {
+			query = query.
+				Where("end_date >= ? AND end_date <= ?", toTime, fromTime).
+				Order("end_date DESC, id DESC")
+		}
+	} else {
+		query = query.Order("end_date DESC, id DESC")
+	}
+
+	if discoverable != zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_UNSPECIFIED {
+		d := discoverable == zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_DISCOVERABLE
+		query = query.Where("discoverable = ?", d)
+	}
+
+	// XXX: use a join and make org_id an sql idx to optimize ?
+	if len(orgIDs) > 0 {
+		query = query.Where("id IN ?", orgIDs)
+	}
+
+	if err := query.Limit(limit).Offset(offset).Find(&dbEvts).Error; err != nil {
+		return nil, fmt.Errorf("query events: %w", err)
+	}
+
+	zenEvts := make([]*zeni.Event, 0, len(dbEvts))
+	for _, dbEvt := range dbEvts {
+		zenCmt, err := dbEventToZeniEvent(&dbEvt)
+		if err != nil {
+			return nil, fmt.Errorf("convert db event to zeni event: %w", err)
+		}
+		zenEvts = append(zenEvts, zenCmt)
+	}
+
+	return zenEvts, nil
+}
+
+// CountCheckedIn implements zeni.DB.
+func (g *gormZenaoDB) CountCheckedIn(eventID string) (uint32, error) {
+	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("parse event id: %w", err)
+	}
+
+	var count int64
+	if err := g.db.Model(&Checkin{}).
+		Joins("JOIN sold_tickets ON sold_tickets.id = checkins.sold_ticket_id").
+		Where("sold_tickets.event_id = ?", evtIDInt).
+		Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return uint32(count), nil
+}
+
+// ListCommunities implements zeni.DB.
+func (g *gormZenaoDB) ListCommunities(entityType string, entityID string, role string, limit int, offset int) ([]*zeni.Community, error) {
+	g, span := g.trace("gzdb.ListCommunities")
+	defer span.End()
+
+	var orgIDs []uint
+	if entityID != "" && entityType != "" {
+		entityIDInt, err := strconv.ParseUint(entityID, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse entity id: %w", err)
+		}
+		query := g.db.Model(&EntityRole{}).Select("org_id").Where("entity_type = ? AND entity_id = ? AND org_type = ?", entityType, entityIDInt, zeni.EntityTypeCommunity)
+		if role != "" {
+			query = query.Where("role = ?", role)
+		}
+		if err := query.Order("org_id DESC").Limit(limit).Offset(offset).Find(&orgIDs).Error; err != nil {
+			return nil, fmt.Errorf("query org ids: %w", err)
+		}
+		if len(orgIDs) == 0 {
+			return []*zeni.Community{}, nil
+		}
+	}
+
+	var dbCmts []Community
+	query := g.db.Model(&Community{}).Order("id DESC").Limit(limit).Offset(offset)
+	if len(orgIDs) > 0 {
+		query = query.Where("id IN ?", orgIDs)
+	}
+	if err := query.Find(&dbCmts).Error; err != nil {
+		return nil, fmt.Errorf("query communities: %w", err)
+	}
+	zenCmts := make([]*zeni.Community, 0, len(dbCmts))
+	for _, dbCmt := range dbCmts {
+		zenCmt, err := dbCommunityToZeniCommunity(&dbCmt)
+		if err != nil {
+			return nil, fmt.Errorf("convert db community to zeni community: %w", err)
+		}
+		zenCmts = append(zenCmts, zenCmt)
+	}
+
+	return zenCmts, nil
+}
+
 func (g *gormZenaoDB) GetOrgByPollID(pollID string) (orgType, orgID string, err error) {
 	pollIDInt, err := strconv.ParseUint(pollID, 10, 64)
 	if err != nil {
@@ -377,11 +510,21 @@ func (g *gormZenaoDB) getDBCommunity(id string) (*Community, error) {
 // CreateUser implements zeni.DB.
 func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 	user := &User{
-		AuthID: authID,
+		AuthID:    authID,
+		Bio:       "Zenao managed user",
+		AvatarURI: userDefaultAvatar,
 	}
+
 	if err := g.db.Create(user).Error; err != nil {
 		return nil, err
 	}
+
+	user.DisplayName = fmt.Sprintf("Zenao user #%d", user.ID)
+	if err := g.db.Model(user).
+		Update("display_name", user.DisplayName).Error; err != nil {
+		return nil, err
+	}
+
 	return dbUserToZeniDBUser(user), nil
 }
 
@@ -529,6 +672,37 @@ func (g *gormZenaoDB) GetUser(authID string) (*zeni.User, error) {
 	return dbUserToZeniDBUser(&user), nil
 }
 
+// GetUsersByIDs implements zeni.DB.
+func (g *gormZenaoDB) GetUsersByIDs(ids []string) ([]*zeni.User, error) {
+	g, span := g.trace("gzdb.GetUsersByIDs")
+	defer span.End()
+
+	if len(ids) == 0 {
+		return []*zeni.User{}, nil
+	}
+
+	userIDs := make([]uint, 0, len(ids))
+	for _, id := range ids {
+		idInt, err := strconv.ParseUint(id, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("parse user id: %w", err)
+		}
+		userIDs = append(userIDs, uint(idInt))
+	}
+
+	var users []User
+	if err := g.db.Where("id IN ?", userIDs).Find(&users).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*zeni.User, 0, len(users))
+	for _, u := range users {
+		result = append(result, dbUserToZeniDBUser(&u))
+	}
+
+	return result, nil
+}
+
 // GetAllUsers implements zeni.DB.
 func (g *gormZenaoDB) GetAllUsers() ([]*zeni.User, error) {
 	var users []*User
@@ -559,25 +733,25 @@ func (g *gormZenaoDB) GetAllEvents() ([]*zeni.Event, error) {
 	return res, nil
 }
 
-// GetOrgUsersWithRole implements zeni.DB.
-func (g *gormZenaoDB) GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*zeni.User, error) {
+// GetOrgUsersWithRoles implements zeni.DB.
+func (g *gormZenaoDB) GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*zeni.User, error) {
 	g, span := g.trace("gzdb.GetOrgUsersWithRole")
 	defer span.End()
 
-	var roles []EntityRole
+	var entities []EntityRole
 	if err := g.db.
-		Where("org_type = ? AND org_id = ? AND role = ? AND entity_type = ?",
-			orgType, orgID, role, zeni.EntityTypeUser).
-		Find(&roles).Error; err != nil {
+		Where("org_type = ? AND org_id = ? AND role in ? AND entity_type = ?",
+			orgType, orgID, roles, zeni.EntityTypeUser).
+		Find(&entities).Error; err != nil {
 		return nil, err
 	}
-	if len(roles) == 0 {
+	if len(entities) == 0 {
 		return []*zeni.User{}, nil
 	}
 
-	userIDs := make([]uint, 0, len(roles))
-	for _, r := range roles {
-		userIDs = append(userIDs, r.EntityID)
+	userIDs := make([]uint, 0, len(entities))
+	for _, e := range entities {
+		userIDs = append(userIDs, e.EntityID)
 	}
 
 	var users []User
@@ -787,6 +961,7 @@ func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventID string, userID string) 
 	return res, nil
 }
 
+// EntityRoles implements zeni.DB.
 func (g *gormZenaoDB) EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error) {
 	var roles []EntityRole
 
@@ -803,6 +978,56 @@ func (g *gormZenaoDB) EntityRoles(entityType string, entityID string, orgType st
 	}
 
 	return res, nil
+}
+
+// EntitiesWithRoles implements zeni.DB.
+func (g *gormZenaoDB) EntitiesWithRoles(orgType string, orgID string, roles []string) ([]*zeni.EntityRole, error) {
+	var entities []EntityRole
+
+	if err := g.db.
+		Model(&EntityRole{}).
+		Where("org_type = ? AND org_id = ? AND role IN ?",
+			orgType, orgID, roles).
+		Group("entity_type, entity_id").
+		Find(&entities).Error; err != nil {
+		return nil, err
+	}
+
+	result := make([]*zeni.EntityRole, 0, len(entities))
+	for _, e := range entities {
+		result = append(result, dbEntityRoleToZeniEntityRole(&e))
+	}
+
+	return result, nil
+}
+
+// CountEntities implements zeni.DB.
+func (g *gormZenaoDB) CountEntities(orgType string, orgID string, entityType string, role string) (uint32, error) {
+	var count int64
+
+	query := g.db.Model(&EntityRole{})
+
+	if orgType != "" {
+		query = query.Where("org_type = ?", orgType)
+	}
+
+	if orgID != "" {
+		query = query.Where("org_id = ?", orgID)
+	}
+
+	if entityType != "" {
+		query = query.Where("entity_type = ?", entityType)
+	}
+
+	if role != "" {
+		query = query.Where("role = ?", role)
+	}
+
+	if err := query.Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return uint32(count), nil
 }
 
 // CreateCommunity implements zeni.DB.
@@ -1223,6 +1448,102 @@ func (g *gormZenaoDB) GetPostByID(postID string) (*zeni.Post, error) {
 	return dbPostToZeniPost(&post)
 }
 
+// CountChildrenPosts implements zeni.DB.
+func (g *gormZenaoDB) CountChildrenPosts(parentID string) (uint64, error) {
+	parentIDUint, err := strconv.ParseUint(parentID, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("parse parent post id: %w", err)
+	}
+
+	var count int64
+	if err := g.db.Model(&Post{}).Where("parent_uri = ?", parentIDUint).Count(&count).Error; err != nil {
+		return 0, err
+	}
+
+	return uint64(count), nil
+}
+
+// GetPostsByFeedID implements zeni.DB.
+func (g *gormZenaoDB) GetPostsByFeedID(feedID string, limit int, offset int, tags []string) ([]*zeni.Post, error) {
+	g, span := g.trace("gzdb.GetPostsByFeedID")
+	defer span.End()
+
+	feedIDUint, err := strconv.ParseUint(feedID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse feed id: %w", err)
+	}
+
+	var posts []*Post
+	db := g.db.Model(&Post{}).
+		Preload("Reactions").
+		Preload("Tags").
+		Where("feed_id = ?", feedIDUint).
+		Order("id DESC")
+
+	if len(tags) > 0 {
+		db = db.
+			Joins("JOIN tags ON tags.post_id = posts.id").
+			Where("tags.name IN ?", tags).
+			Group("posts.id").
+			Having("COUNT(DISTINCT tags.name) = ?", len(tags))
+	}
+
+	if err := db.Limit(limit).Offset(offset).Find(&posts).Error; err != nil {
+		return nil, err
+	}
+
+	res := make([]*zeni.Post, 0, len(posts))
+	for _, p := range posts {
+		zpost, err := dbPostToZeniPost(p)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, zpost)
+	}
+
+	return res, nil
+}
+
+func (g *gormZenaoDB) GetPostsByParentID(parentID string, limit int, offset int, tags []string) ([]*zeni.Post, error) {
+	g, span := g.trace("gzdb.GetPostsByParentID")
+	defer span.End()
+
+	parentIDUint, err := strconv.ParseUint(parentID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse parent id: %w", err)
+	}
+
+	var posts []*Post
+	db := g.db.Model(&Post{}).
+		Preload("Reactions").
+		Preload("Tags").
+		Where("parent_uri = ?", parentIDUint).
+		Order("id DESC")
+
+	if len(tags) > 0 {
+		db = db.
+			Joins("JOIN tags ON tags.post_id = posts.id").
+			Where("tags.name IN ?", tags).
+			Group("posts.id").
+			Having("COUNT(DISTINCT tags.name) = ?", len(tags))
+	}
+
+	if err := db.Limit(limit).Offset(offset).Find(&posts).Error; err != nil {
+		return nil, err
+	}
+
+	res := make([]*zeni.Post, 0, len(posts))
+	for _, p := range posts {
+		zpost, err := dbPostToZeniPost(p)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, zpost)
+	}
+
+	return res, nil
+}
+
 // GetAllPosts implements zeni.DB.
 func (g *gormZenaoDB) GetAllPosts(getDeleted bool) ([]*zeni.Post, error) {
 	db := g.db
@@ -1360,7 +1681,7 @@ func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, fe
 		return nil, err
 	}
 
-	return dbPollToZeniPoll(dbPoll)
+	return dbPollToZeniPoll(dbPoll, "")
 }
 
 // VotePoll implements zeni.DB.
@@ -1416,7 +1737,23 @@ func (g *gormZenaoDB) VotePoll(userID string, req *zenaov1.VotePollRequest) erro
 	})
 }
 
-func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
+// GetPollByID implements zeni.DB.
+func (g *gormZenaoDB) GetPollByID(pollID string, userID string) (*zeni.Poll, error) {
+	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var poll Poll
+	if err := g.db.Where("id = ?", pollIDint).Preload("Results").Preload("Results.Votes").First(&poll).Error; err != nil {
+		return nil, err
+	}
+
+	return dbPollToZeniPoll(&poll, userID)
+}
+
+// GetPollByPostID implements zeni.DB.
+func (g *gormZenaoDB) GetPollByPostID(postID string, userID string) (*zeni.Poll, error) {
 	postIDint, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -1427,7 +1764,7 @@ func (g *gormZenaoDB) GetPollByPostID(postID string) (*zeni.Poll, error) {
 		return nil, err
 	}
 
-	return dbPollToZeniPoll(&poll)
+	return dbPollToZeniPoll(&poll, userID)
 }
 
 // Checkin implements zeni.DB.
@@ -1559,7 +1896,7 @@ func (g *gormZenaoDB) CommunitiesByEvent(eventID string) ([]*zeni.Community, err
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
-	return &zeni.User{
+	u := &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),
 		CreatedAt:   dbuser.CreatedAt,
 		DisplayName: dbuser.DisplayName,
@@ -1568,6 +1905,16 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		AuthID:      dbuser.AuthID,
 		Plan:        zeni.Plan(dbuser.Plan),
 	}
+	if u.DisplayName == "" {
+		u.DisplayName = fmt.Sprintf("Zenao user #%d", dbuser.ID)
+	}
+	if u.Bio == "" {
+		u.Bio = "Zenao Managed User"
+	}
+	if u.AvatarURI == "" {
+		u.AvatarURI = userDefaultAvatar
+	}
+	return u
 }
 
 func dbEntityRoleToZeniEntityRole(dbrole *EntityRole) *zeni.EntityRole {
@@ -1625,7 +1972,7 @@ func (g *gormZenaoDB) updateUserRoles(role string, userIDs []string, orgID strin
 	}
 
 	var currentUsersIDs []string
-	currentUsers, err := g.GetOrgUsersWithRole(orgType, orgID, role)
+	currentUsers, err := g.GetOrgUsersWithRoles(orgType, orgID, []string{role})
 	if err != nil {
 		return fmt.Errorf("get users with role %s: %w", role, err)
 	}

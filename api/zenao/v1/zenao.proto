@@ -4,6 +4,7 @@ package zenao.v1;
 option go_package = "github.com/samouraiworld/zenao/backend/zenao/v1;zenaov1";
 
 import "polls/v1/polls.proto";
+import "feeds/v1/feeds.proto";
 
 service ZenaoService {
   // USER
@@ -40,6 +41,23 @@ service ZenaoService {
   rpc RemoveEventFromCommunity(RemoveEventFromCommunityRequest)
       returns (RemoveEventFromCommunityResponse);
 
+  // XXX: TEMPORARY SWITCH TO WEB2 FIRST
+  rpc EntityRoles(EntityRolesRequest) returns (EntityRolesResponse); // -> GetCommunityUserRoles, GetEventUserRoles
+  rpc EntitiesWithRoles(EntitiesWithRolesRequest) returns (EntitiesWithRolesResponse); // -> CommunitiesWithUserRole, EventsWithUserRole
+  rpc GetCommunity(GetCommunityRequest) returns (GetCommunityResponse);
+  rpc ListCommunities(ListCommunitiesRequest) returns (ListCommunitiesResponse);
+  rpc ListCommunitiesByMember(ListCommunitiesByMemberRequest) returns (ListCommunitiesByMemberResponse);
+  rpc ListCommunitiesByEvent(ListCommunitiesByEventRequest) returns (ListCommunitiesByEventResponse);
+  rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
+  rpc ListEventsByOrganizer(ListEventsByOrganizerRequest) returns (ListEventsByOrganizerResponse);
+  rpc ListEventsByParticipant(ListEventsByParticipantRequest) returns (ListEventsByParticipantResponse);
+  rpc GetPost(GetPostRequest) returns (GetPostResponse);
+  rpc GetFeedPosts(GetFeedPostsRequest) returns (GetFeedPostsResponse);
+  rpc GetChildrenPosts(GetChildrenPostsRequest) returns (GetChildrenPostsResponse);
+  rpc GetPoll(GetPollRequest) returns (GetPollResponse);
+  rpc GetUsersProfile(GetUsersProfileRequest) returns (GetUsersProfileResponse); // -> BatchProfile
+
   // FEED
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
   rpc VotePoll(VotePollRequest) returns (VotePollResponse);
@@ -70,6 +88,67 @@ message GetUserInfoRequest {}
 message GetUserInfoResponse {
   string realm_id = 1;
   string plan = 2;
+}
+
+message Profile {
+  string address = 1;
+  string display_name = 2;
+  string bio = 3;
+  string avatar_uri = 4;
+}
+
+message GetUsersProfileRequest {
+  repeated string ids = 1;
+}
+
+message GetUsersProfileResponse {
+  repeated Profile profiles = 1;
+}
+
+message GetEventRequest {
+  string event_id = 1;
+}
+
+message GetEventResponse {
+  EventInfo event = 1;
+}
+
+message ListEventsRequest {
+  uint32 limit = 1;
+  uint32 offset = 2;
+  int64 from = 3; // unix seconds
+  int64 to = 4;   // unix seconds
+  DiscoverableFilter discoverable_filter = 5; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
+}
+
+message ListEventsResponse {
+  repeated EventInfo events = 1;
+}
+
+message ListEventsByOrganizerRequest {
+  string organizer_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  int64 from = 4; // unix seconds
+  int64 to = 5;   // unix seconds
+  DiscoverableFilter discoverable_filter = 6; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
+}
+
+message ListEventsByOrganizerResponse {
+  repeated EventInfo events = 1;
+}
+
+message ListEventsByParticipantRequest {
+  string participant_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  int64 from = 4; // unix seconds
+  int64 to = 5;   // unix seconds
+  DiscoverableFilter discoverable_filter = 6; // XXX: should we ensure events non discoverable are listed only if the user is an organizer?
+}
+
+message ListEventsByParticipantResponse {
+  repeated EventInfo events = 1;
 }
 
 message CreateEventRequest {
@@ -227,6 +306,15 @@ message CreatePollRequest {
 
 message CreatePollResponse { string post_id = 1; }
 
+message GetPollRequest { 
+  string poll_id = 1;
+  string user_id = 2; // optional, to check if the user has voted
+ }
+
+message GetPollResponse {
+  polls.v1.Poll poll = 1;
+}
+
 message VotePollRequest {
   string poll_id = 1;
   string option = 2;
@@ -243,6 +331,39 @@ message CreatePostRequest {
 }
 
 message CreatePostResponse { string post_id = 1; }
+
+message GetPostRequest {
+  string post_id = 1;
+  string user_id = 2; // optional, to check if the user has reacted
+}
+
+message GetPostResponse {
+  feeds.v1.PostView post = 1;
+}
+
+message GetFeedPostsRequest {
+  Entity org = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  repeated string tags = 4;
+  string user_id = 5;   // optional, to check if the user has reacted
+}
+
+message GetFeedPostsResponse {
+  repeated feeds.v1.PostView posts = 1;
+}
+
+message GetChildrenPostsRequest {
+  string parent_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  repeated string tags = 4;
+  string user_id = 5;   // optional, to check if the user has reacted
+}
+
+message GetChildrenPostsResponse {
+  repeated feeds.v1.PostView posts = 1;
+}
 
 message DeletePostRequest { string post_id = 1; }
 
@@ -289,6 +410,42 @@ message ExportParticipantsResponse {
   string mime_type = 3;
 }
 
+message Entity {
+  string entity_type = 1; // one of: user, event
+  string entity_id = 2;
+}
+
+message EntityRolesRequest {
+  Entity org = 1; // one of: community, event
+  Entity entity = 2; // one of: user, event
+}
+
+message EntityRolesResponse {
+  repeated string roles = 1; // one of: administrator, organizer, gatekeeper, member, participant
+}
+
+message EntitiesWithRolesRequest {
+  Entity org = 1; // one of: community, event
+  repeated string roles = 2; // one of: administrator, organizer, gatekeeper, member, participant
+}
+
+message EntityWithRoles {
+  string realm_id = 1;
+  repeated string roles = 2;
+}
+
+message EntitiesWithRolesResponse {
+  repeated EntityWithRoles entities_with_roles = 1;
+}
+
+message GetCommunityRequest {
+  string community_id = 1;
+}
+
+message GetCommunityResponse {
+  CommunityInfo community = 1;
+}
+
 message CommunityInfo {
   string display_name = 1;
   string description = 2;
@@ -297,6 +454,35 @@ message CommunityInfo {
   repeated string administrators = 5;
   uint32 count_members = 6;
   string pkg_path = 7;
+}
+
+message ListCommunitiesRequest {
+  uint32 limit = 1;
+  uint32 offset = 2;
+}
+
+message ListCommunitiesResponse {
+  repeated CommunityInfo communities = 1;
+}
+
+message ListCommunitiesByMemberRequest {
+  string member_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+}
+
+message ListCommunitiesByMemberResponse {
+  repeated CommunityInfo communities = 1;
+}
+
+message ListCommunitiesByEventRequest {
+  string event_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+}
+
+message ListCommunitiesByEventResponse {
+  repeated CommunityInfo communities = 1;
 }
 
 message CreateCommunityRequest {

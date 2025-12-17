@@ -112,7 +112,7 @@ func (s *ZenaoServer) CreateEvent(
 			if err != nil {
 				return err
 			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+			targets, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleMember})
 			if err != nil {
 				return err
 			}

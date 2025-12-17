@@ -1069,9 +1069,33 @@ func main() {
 	return nil
 }
 
+// EntityRealmID implements ZenaoChain.
+func (g *gnoZenaoChain) EntityRealmID(entityType string, entityID string) (string, error) {
+	switch entityType {
+	case zeni.EntityTypeUser:
+		return g.userRealmPkgPath(entityID), nil
+	case zeni.EntityTypeCommunity:
+		return g.communityPkgPath(entityID), nil
+	case zeni.EntityTypeEvent:
+		return g.eventRealmPkgPath(entityID), nil
+	default:
+		return "", fmt.Errorf("unknown entity type: %s", entityType)
+	}
+}
+
 // UserRealmID implements ZenaoChain.
 func (g *gnoZenaoChain) UserRealmID(userID string) string {
 	return g.userRealmPkgPath(userID)
+}
+
+// CommunityRealmID implements ZenaoChain.
+func (g *gnoZenaoChain) CommunityRealmID(communityID string) string {
+	return g.communityPkgPath(communityID)
+}
+
+// EventRealmID implements ZenaoChain.
+func (g *gnoZenaoChain) EventRealmID(eventID string) string {
+	return g.eventRealmPkgPath(eventID)
 }
 
 // CreatePost implements ZenaoChain
