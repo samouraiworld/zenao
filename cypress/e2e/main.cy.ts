@@ -63,8 +63,10 @@ describe("main", () => {
     // go to discover page
     cy.get("a").contains("Discover").click();
 
+    cy.url().should("contain", "/discover");
+
     // click on first event
-    cy.get('a[href^="/event/"]').eq(-2).click();
+    cy.get('a.group[href^="/event/"]').first().click();
 
     // type email in participate form
     cy.get('input[placeholder="Email..."]').type(testEmail2);
@@ -90,7 +92,7 @@ describe("main", () => {
     cy.get("a").contains("Discover").click();
 
     // click on last event since we already participate in first
-    cy.get('a[href^="/event/"]').eq(-2).click();
+    cy.get('a.group[href^="/event/"]').first().click();
 
     // make sure there is no email field
     cy.get('input[placeholder="Email..."]').should("not.exist");
@@ -227,7 +229,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     logout();
 
@@ -263,7 +265,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -331,7 +333,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -389,7 +391,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -515,12 +517,7 @@ describe("main", () => {
 
   it("create a community", () => {
     cy.visit("/");
-    // cy.createCommunity({
-    //   administrators: ["miosan@samourai.coop", "zoo@samourai.coop"],
-    // });
-
-    cy.get("a").contains("Communities").click();
-    cy.get('a[href^="/community/"]').last().click();
+    cy.createCommunity({});
 
     cy.url().should("contain", "/community/");
 
