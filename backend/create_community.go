@@ -75,5 +75,5 @@ func (s *ZenaoServer) CreateCommunity(
 		return nil, fmt.Errorf("failed to create community on chain: %w", err)
 	}
 
-	return nil, errors.New("not implemented yet")
+	return connect.NewResponse(&zenaov1.CreateCommunityResponse{CommunityId: cmt.ID}), nil
 }
