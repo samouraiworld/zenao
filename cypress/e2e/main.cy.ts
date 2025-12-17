@@ -690,7 +690,9 @@ Cypress.Commands.add(
     cy.visit("/");
 
     // click on home create button
-    cy.get("button").contains("Create").click();
+    cy.get("button").contains("Create").parent().click();
+    // Select create event
+    cy.get("div").contains("Create new event").parent().click();
 
     login();
 

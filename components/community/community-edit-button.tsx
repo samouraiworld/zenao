@@ -13,7 +13,7 @@ export const CommunityEditAdminButton = ({
 }: {
   communityId: string;
 }) => {
-  const t = useTranslations("community-edit-form");
+  const t = useTranslations("community");
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -30,7 +30,7 @@ export const CommunityEditAdminButton = ({
           variant="outline"
           className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
         >
-          {t("edit-button")}
+          {t("edit-community-button")}
         </ButtonWithChildren>
       </Link>
     </div>

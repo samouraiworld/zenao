@@ -6,8 +6,9 @@ import {
   communityUserRoles,
   communityUsersWithRoles,
 } from "../queries/community";
+import { CreateCommunityRequestJson } from "@/app/gen/zenao/v1/zenao_pb";
 
-interface CreateCommunityRequest {
+interface CreateCommunityRequest extends CreateCommunityRequestJson {
   token: string;
   userRealmId: string;
   displayName: string;
