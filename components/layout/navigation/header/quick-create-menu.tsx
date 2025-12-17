@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, PlusIcon, UserRound } from "lucide-react";
+import { Calendar, PlusIcon, Users } from "lucide-react";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -36,7 +36,7 @@ export default function QuickCreateMenu() {
         <Link href="/community/create">
           <DropdownMenuItem asChild>
             <div className="flex">
-              <UserRound className="mr-2 h-5 w-5" />
+              <Users className="h-5 w-5" />
               <span className="mr-2">Create new community</span>
             </div>
           </DropdownMenuItem>

@@ -524,8 +524,8 @@ describe("main", () => {
     cy.get("h1").contains(testCommunityName).should("be.visible");
     cy.get("p").contains("A community for QA enthusiasts to share knowledge.");
 
-    cy.get("a").contains("Edit community").should("be.visible");
-    cy.get("a").contains("Leave community").should("be.visible");
+    cy.get("button").contains("Edit community").should("be.visible");
+    cy.get("button").contains("Leave community").should("be.visible");
   });
 
   it("access a community", () => {

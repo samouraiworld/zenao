@@ -482,8 +482,8 @@
     "leave-only-admin-error": "You cannot leave this community as you are the only administrator.",
     "sign-in-to-join-button": "Sign in to join",
     "joining-state": "Joining...",
-    "join-community-button": "Join Community",
-    "edit-community-button": "Edit Community"
+    "join-community-button": "Join community",
+    "edit-community-button": "Edit community"
   },
   "community-portfolio": { 
     "error-file-uploading": "Error while uploading file",

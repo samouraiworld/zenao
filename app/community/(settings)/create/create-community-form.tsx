@@ -93,7 +93,7 @@ export default function CreateCommunityForm() {
         title: t("toast-creation-success"),
       });
 
-      router.push(`/community/${communityId}`);
+      router.push(`/community/${communityId}`, { scroll: false });
     } catch (error) {
       captureException(error);
       toast({
