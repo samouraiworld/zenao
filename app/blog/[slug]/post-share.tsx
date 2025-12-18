@@ -11,9 +11,12 @@ interface PostShareProps {
 
 export default function PostShare({ slug, title }: PostShareProps) {
   const { toast } = useToast();
-  const shareUrl = `${window.location.origin}/blog/${slug}`;
 
   const handleShare = () => {
+    if (typeof window === "undefined") return;
+
+    const shareUrl = `${window.location.origin}/blog/${slug}`;
+
     // Use the Web Share API if available
     if (navigator.share) {
       navigator
