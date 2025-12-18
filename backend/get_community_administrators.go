@@ -38,7 +38,7 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 		if !slices.Contains(roles, zeni.RoleAdministrator) {
 			return errors.New("user is not administrator of the community")
 		}
-		admins, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleAdministrator)
+		admins, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleAdministrator})
 		if err != nil {
 			return err
 		}

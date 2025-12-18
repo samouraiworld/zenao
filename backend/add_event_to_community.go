@@ -80,11 +80,11 @@ func (s *ZenaoServer) AddEventToCommunity(
 			return err
 		}
 
-		targets, err = tx.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+		targets, err = tx.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleMember})
 		if err != nil {
 			return err
 		}
-		participants, err = tx.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
+		participants, err = tx.GetOrgUsersWithRoles(zeni.EntityTypeEvent, req.Msg.EventId, []string{zeni.RoleParticipant})
 		if err != nil {
 			return err
 		}

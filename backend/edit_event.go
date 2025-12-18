@@ -123,11 +123,11 @@ func (s *ZenaoServer) EditEvent(
 			if err = db.AddEventToCommunity(req.Msg.EventId, req.Msg.CommunityId); err != nil {
 				return err
 			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+			targets, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleMember})
 			if err != nil {
 				return err
 			}
-			participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
+			participants, err = db.GetOrgUsersWithRoles(zeni.EntityTypeEvent, req.Msg.EventId, []string{zeni.RoleParticipant})
 			if err != nil {
 				return err
 			}
