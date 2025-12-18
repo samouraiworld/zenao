@@ -16,7 +16,7 @@ export default async function Blog() {
     <ScreenContainer>
       <div className="flex flex-col gap-12">
         <BlogHeader />
-        <div className="grid justify-items-center grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           {posts.map((post) => (
             <BlogPostCard
               key={post.slug}

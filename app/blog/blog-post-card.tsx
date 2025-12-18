@@ -3,6 +3,7 @@ import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import Heading from "@/components/widgets/texts/heading";
 import { Web3Image } from "@/components/widgets/images/web3-image";
+import { EventImage } from "@/components/features/event/event-image";
 
 interface BlogPostCardProps {
   title: string;
@@ -22,20 +23,24 @@ export default function BlogPostCard({
     ? {
         src: previewImageUrl,
         alt: `${title} post image background`,
-        className:
-          "absolute top-0 left-0 w-full h-full object-cover rounded-lg",
       }
     : {
         src: "/zenao-logo.png",
         alt: "Zenao logo",
-        className: "w-16 h-16",
       };
   return (
     <Link href={`/blog/${slug}`} className="w-full max-w-md h-full">
       <Card className="flex flex-col h-full gap-8 hover:bg-secondary/60 transition-colors">
-        <div className="flex relative aspect-[16/7] justify-center items-center bg-background rounded-lg">
-          <Web3Image alt={alt} width={800} height={800} {...imageProps} />
-        </div>
+        <EventImage
+          {...imageProps}
+          alt={alt}
+          fill
+          sizes="(max-width: 768px) 100vw,
+                (max-width: 1200px) 50vw,
+                33vw"
+          className="group-hover:opacity-80"
+          quality={60}
+        />
         <div className="flex flex-col h-full gap-4">
           <Heading level={2} size="xl">
             {title}
