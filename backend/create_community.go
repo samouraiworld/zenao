@@ -77,7 +77,7 @@ func (s *ZenaoServer) CreateCommunity(
 	}
 
 	// XXX: put the admins as members too.
-	if err := s.Chain.CreateCommunity(cmt.ID, adminIDs, adminIDs, []string{}, req.Msg); err != nil {
+	if err := s.Chain.WithContext(ctx).CreateCommunity(cmt.ID, adminIDs, adminIDs, []string{}, req.Msg); err != nil {
 		return nil, fmt.Errorf("failed to create community on chain: %w", err)
 	}
 
