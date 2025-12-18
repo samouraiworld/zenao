@@ -128,6 +128,21 @@ describe("main", () => {
     cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
   });
 
+  it("navigate to blog from home", () => {
+    // start from the index page
+    cy.visit("/");
+
+    logout();
+
+    // go to manifesto page
+    cy.get("a").contains("Blog").click();
+
+    // check that manifesto text is present
+    cy.get("p")
+      .contains("Explore the exciting updates and innovations of Zenao")
+      .should("be.visible");
+  });
+
   it("edit it's profile", () => {
     // start from the home
     cy.visit("/");
