@@ -1,5 +1,5 @@
 import Link from "next/link";
-import BlogPostCardDate from "./blog-post-card-date";
+import PostDate from "./[slug]/post-date";
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import Heading from "@/components/widgets/texts/heading";
@@ -34,7 +34,7 @@ export default function BlogPostCard({
         alt: "Zenao logo",
       };
   return (
-    <Link href={`/blog/${slug}`} className="w-full max-w-md h-full">
+    <Link href={`/blog/${slug}`} className="w-full h-full">
       <Card
         role="group"
         className="flex flex-col h-full gap-8 hover:bg-secondary/50 transition-colors"
@@ -63,7 +63,7 @@ export default function BlogPostCard({
           <div className="flex gap-2">
             <Text className="font-semibold">{author}</Text>
             <Text variant="secondary">•</Text>
-            <BlogPostCardDate date={publishedAt} />
+            <PostDate date={publishedAt} />
           </div>
         </div>
       </Card>

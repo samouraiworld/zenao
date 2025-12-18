@@ -6,8 +6,6 @@ date: "2025-03-05"
 category: "News & insights"
 ---
 
-# Sustainable Living: Tips for a Greener Future
-
 Sustainability is more than a trend—it's a necessity for our planet’s future.
 
 ## Simple Steps to Live Sustainably

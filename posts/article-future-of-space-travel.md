@@ -6,8 +6,6 @@ date: "2025-03-08"
 category: "Engineering"
 ---
 
-# The Future of Space Travel
-
 Space travel has evolved significantly, and private companies like **SpaceX** and **Blue Origin** are revolutionizing the industry.
 
 ## The Role of Private Companies
