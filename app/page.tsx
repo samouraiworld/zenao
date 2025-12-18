@@ -19,7 +19,7 @@ export default function Home() {
           <Text variant="secondary" className="pr-1.5">
             {t("base-news")}
           </Text>
-          <BaseLogo className="h-3 dark:fill-secondary-color" />
+          <BaseLogo className="h-3 fill-[#1652F0]" />
         </Card>
         <Image
           src="/zenao-logo.png"
