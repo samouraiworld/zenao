@@ -6,7 +6,7 @@ import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import supersub from "remark-supersub";
 import remarkHtml from "remark-html";
 import remarkDirective from "remark-directive";
-import { Web3Image } from "./images/web3-image";
+import { EventImage } from "../features/event/event-image";
 import { Web3Audio } from "./audio/web3-audio";
 import { cn } from "@/lib/tailwind";
 import remarkAudioDirective from "@/lib/remark-audio-directive-plugin";
@@ -53,17 +53,19 @@ export function MarkdownPreview({
             {...props}
           ></iframe>
         ),
-        img: ({ src, ...props }) => {
+        img: ({ src, width, height, ...props }) => {
           return (
-            <Web3Image
+            <EventImage
               {...props}
+              width={width ? Number(width) : undefined}
+              height={height ? Number(height) : undefined}
+              fill={!width && !height}
+              sizes="(max-width: 768px) 100vw,
+                (max-width: 1200px) 50vw,
+                33vw"
               src={typeof src === "string" ? src : ""}
               alt={props.alt ?? ""}
-              width={960}
-              height={960}
-              imgFit="pad"
-              // quality={75}
-              // loading="lazy"
+              loading="lazy"
             />
           );
         },
