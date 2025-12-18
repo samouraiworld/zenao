@@ -6,7 +6,8 @@ import { getPostsMetadata } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: "Blog | Zenao",
-  description: "Zenao blog",
+  description:
+    "Find the latest articles, news, and updates about Zenao in our blog.",
 };
 
 export default async function Blog() {
