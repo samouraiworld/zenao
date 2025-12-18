@@ -14,7 +14,7 @@ export const userInfoOptions = (
   queryOptions({
     queryKey: ["userInfo", userId],
     queryFn: async (): Promise<GetUserInfoResponse | null> => {
-      if (!userId || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
+      if (!userId) {
         return null;
       }
 
@@ -32,3 +32,8 @@ export const userInfoOptions = (
     },
     enabled: !!userId,
   });
+
+export function userIdFromPkgPath(pkgPath: string): string {
+  const res = /(u\d+)$/.exec(pkgPath);
+  return res?.[1].substring(1) || "";
+}
