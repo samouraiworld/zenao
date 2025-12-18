@@ -1,7 +1,9 @@
 ---
 title: "The Rise of AI in Everyday Life"
 description: "Some kind of description"
+author: "Mio-san"
 date: "2025-03-10"
+category: "Spotlight"
 ---
 
 # The Rise of AI in Everyday Life

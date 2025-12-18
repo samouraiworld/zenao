@@ -22,9 +22,11 @@ export default async function Blog() {
               key={post.slug}
               slug={post.slug}
               title={post.title}
-              description={post.title}
+              author={post.author}
+              category={post.category}
+              description={post.description}
               previewImageUrl={post.previewImageUrl}
-              date={new Date(post.date)}
+              publishedAt={new Date(post.date)}
             />
           ))}
         </div>
