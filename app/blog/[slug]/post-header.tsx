@@ -7,6 +7,7 @@ import Text from "@/components/widgets/texts/text";
 
 interface PostHeaderProps {
   slug: string;
+  category: string;
   title: string;
   description: string;
   previewImageUrl?: string;
@@ -16,6 +17,7 @@ interface PostHeaderProps {
 
 export default function PostHeader({
   slug,
+  category,
   title,
   description,
   previewImageUrl,
@@ -34,6 +36,8 @@ export default function PostHeader({
 
   return (
     <div className="flex flex-col gap-4">
+      <Text className="text-main font-semibold">{category}</Text>
+
       <Heading level={1} className="text-4xl">
         {title}
       </Heading>

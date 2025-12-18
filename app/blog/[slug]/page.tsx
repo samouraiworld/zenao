@@ -45,6 +45,7 @@ export default async function Post({ params }: Props) {
       <div className="flex flex-col gap-12 mx-auto max-w-5xl sm:w-full pb-8 md:pb-12">
         <PostHeader
           slug={slug}
+          category={post.data.category}
           title={post.data.title}
           description={post.data.description}
           previewImageUrl={post.data.previewImageUrl}
