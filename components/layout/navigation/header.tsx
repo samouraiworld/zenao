@@ -10,6 +10,7 @@ import {
   BoxesIcon,
   CompassIcon,
   LucideProps,
+  Rss,
   Tickets,
 } from "lucide-react";
 import {
@@ -89,6 +90,13 @@ const HeaderLinks = () => {
         icon: BookOpenText,
         needsAuth: false,
         children: t("manifesto"),
+      },
+      {
+        key: "blog",
+        to: "/blog",
+        icon: Rss,
+        needsAuth: false,
+        children: t("blog"),
       },
     ],
     [t],
