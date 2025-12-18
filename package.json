@@ -1,6 +1,6 @@
 {
   "name": "zenao",
-  "version": "0.1.0",
+  "version": "0.7.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -63,7 +63,7 @@
     "leaflet": "^1.9.4",
     "leaflet-geosearch": "^4.1.0",
     "lucide-react": "^0.546.0",
-    "next": "^15.5.6",
+    "next": "^15.5.7",
     "next-intl": "^4.3.12",
     "next-plausible": "^3.12.5",
     "next-qrcode": "^2.5.1",

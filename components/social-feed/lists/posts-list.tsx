@@ -4,9 +4,10 @@ import { Suspense } from "react";
 import { PostCardSkeleton } from "../cards/post-card-skeleton";
 import { PollPost } from "../polls/poll-post";
 import { StandardPostCard } from "@/components/social-feed/cards/standard-post-card";
-import { SocialFeedPost } from "@/lib/social-feed";
+import { isPollPost, isStandardPost } from "@/lib/social-feed";
 import { parsePollUri } from "@/lib/multiaddr";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
+import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 
 export function PostsList({
   userRealmId,
@@ -32,7 +33,7 @@ export function PostsList({
   ) => void | Promise<void>;
   onReactionChange?: (postId: string, icon: string) => void | Promise<void>;
   onDelete?: (postId: string, parentId?: string) => void | Promise<void>;
-  posts: SocialFeedPost[];
+  posts: PostView[];
   replyHrefFormatter?: (postId: bigint) => string;
   canReply?: boolean;
   canInteract?: boolean;
@@ -46,73 +47,65 @@ export function PostsList({
   isDeleting?: boolean;
 }) {
   return posts.map((post) => {
-    const postId = post.data.post!.localPostId.toString(10);
+    const postId = post.post!.localPostId.toString(10);
 
-    switch (post.postType) {
-      case "standard":
-        return (
-          <Suspense
-            key={post.data.post.localPostId}
-            fallback={<PostCardSkeleton />}
-          >
-            <StandardPostCard
-              post={post.data}
-              onReactionChange={async (icon) =>
-                await onReactionChange?.(postId, icon)
-              }
-              onDelete={async (parentId) => {
-                await onDelete?.(postId, parentId);
-              }}
-              isOwner={post.data.post.author === userRealmId}
-              canReply={canReply}
-              replyHref={replyHrefFormatter?.(post.data.post.localPostId)}
-              canInteract={canInteract}
-              editMode={postInEdition === postId}
-              onEditModeChange={async (editMode) =>
-                await onEditModeChange?.(
-                  postId,
-                  post.data.post.post.value.content,
-                  editMode,
-                )
-              }
-              innerEditForm
-              onEdit={async (values) => await onEdit?.(postId, values)}
-              isEditing={isEditing}
-              isReacting={isReacting}
-              isDeleting={isDeleting}
-            />
-          </Suspense>
-        );
-      case "poll":
-        const { pollId } = parsePollUri(post.data.post.post.value.uri);
+    if (isStandardPost(post)) {
+      return (
+        <Suspense key={post.post.localPostId} fallback={<PostCardSkeleton />}>
+          <StandardPostCard
+            post={post}
+            onReactionChange={async (icon) =>
+              await onReactionChange?.(postId, icon)
+            }
+            onDelete={async (parentId) => {
+              await onDelete?.(postId, parentId);
+            }}
+            isOwner={post.post.author === userRealmId}
+            canReply={canReply}
+            replyHref={replyHrefFormatter?.(post.post.localPostId)}
+            canInteract={canInteract}
+            editMode={postInEdition === postId}
+            onEditModeChange={async (editMode) =>
+              await onEditModeChange?.(
+                postId,
+                post.post.post.value.content,
+                editMode,
+              )
+            }
+            innerEditForm
+            onEdit={async (values) => await onEdit?.(postId, values)}
+            isEditing={isEditing}
+            isReacting={isReacting}
+            isDeleting={isDeleting}
+          />
+        </Suspense>
+      );
+    } else if (isPollPost(post)) {
+      const { pollId } = parsePollUri(post.post.post.value.uri);
 
-        return (
-          <Suspense
-            fallback={<PostCardSkeleton />}
-            key={post.data.post.localPostId}
-          >
-            <PollPost
-              userRealmId={userRealmId}
-              pollId={pollId}
-              pollPost={post.data}
-              onDelete={async (parentId) => {
-                await onDelete?.(postId, parentId);
-              }}
-              onReactionChange={async (icon) =>
-                await onReactionChange?.(postId, icon)
-              }
-              isOwner={post.data.post.author === userRealmId}
-              replyHref={replyHrefFormatter?.(post.data.post.localPostId)}
-              canReply={canReply}
-              canInteract={canInteract}
-              isDeleting={isDeleting}
-              isReacting={isReacting}
-            />
-          </Suspense>
-        );
-
-      case "unknown":
-        return null;
+      return (
+        <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
+          <PollPost
+            userRealmId={userRealmId}
+            pollId={pollId}
+            pollPost={post}
+            onDelete={async (parentId) => {
+              await onDelete?.(postId, parentId);
+            }}
+            onReactionChange={async (icon) =>
+              await onReactionChange?.(postId, icon)
+            }
+            isOwner={post.post.author === userRealmId}
+            replyHref={replyHrefFormatter?.(post.post.localPostId)}
+            canReply={canReply}
+            canInteract={canInteract}
+            isDeleting={isDeleting}
+            isReacting={isReacting}
+          />
+        </Suspense>
+      );
+    } else {
+      return null;
     }
   });
 }
