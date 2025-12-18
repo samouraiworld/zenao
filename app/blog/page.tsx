@@ -13,6 +13,17 @@ export const metadata: Metadata = {
 export default async function Blog() {
   const posts = await getPostsMetadata();
 
+  if (!posts.length) {
+    return (
+      <ScreenContainer>
+        <div className="flex flex-col gap-12">
+          <BlogHeader />
+          <p className="text-center text-main">No blog posts available.</p>
+        </div>
+      </ScreenContainer>
+    );
+  }
+
   return (
     <ScreenContainer>
       <div className="flex flex-col gap-12">
