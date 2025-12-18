@@ -347,9 +347,6 @@
         "sign-up": "Sign up"
       }
     },
-    "buttons": {
-      "gnoweb-button": "See on gnoweb"
-    },
     "widgets": {
       "form": {
         "form-field-image": {
@@ -418,7 +415,7 @@
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
   },
   "event-community-section": {
-    "sponsored-by": "Sponsored by community"
+    "organized-by": "Organized by community"
   },
   "event-scanner": {
     "check-in-confirmation-dialog": {
