@@ -24,12 +24,12 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { communityUserRoles } from "@/lib/queries/community";
 import SocialFeedForm from "@/components/social-feed/forms/social-feed-form";
 import { PostCardSkeleton } from "@/components/social-feed/cards/post-card-skeleton";
-import CommunityChat from "@/app/community/(general)/[id]/[tab]/chat";
-import CommunityEvents from "@/app/community/(general)/[id]/[tab]/events";
-import CommunityMembers from "@/app/community/(general)/[id]/[tab]/members";
-import CommunityPortfolio from "@/app/community/(general)/[id]/[tab]/portfolio";
-import CommunityProposals from "@/app/community/(general)/[id]/[tab]/proposals";
-import CommunityPolls from "@/app/community/(general)/[id]/[tab]/votes";
+import CommunityChat from "@/app/(general)/community/(general)/[id]/[tab]/chat";
+import CommunityEvents from "@/app/(general)/community/(general)/[id]/[tab]/events";
+import CommunityMembers from "@/app/(general)/community/(general)/[id]/[tab]/members";
+import CommunityPortfolio from "@/app/(general)/community/(general)/[id]/[tab]/portfolio";
+import CommunityProposals from "@/app/(general)/community/(general)/[id]/[tab]/proposals";
+import CommunityPolls from "@/app/(general)/community/(general)/[id]/[tab]/votes";
 
 type CommunityMainSectionsProps = {
   communityId: string;
