@@ -93,18 +93,17 @@ export const eventsByOrganizerListSuspense = (
       if (!organizerRealmId) return [];
 
       return withSpan(
-        `query:chain:user:${organizerRealmId}:events:role:organizer`,
+        `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/eventreg`,
-            `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizerRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageInt * limitInt}))`,
-          );
-          const raw = extractGnoJSONResponse(res);
-
-          return eventListFromJson(raw);
+          const res = await zenaoClient.listEventsByOrganizer({
+            organizerId: userIdFromPkgPath(organizerRealmId),
+            limit: limitInt,
+            offset: pageInt * limitInt,
+            from: BigInt(fromInt),
+            to: BigInt(toInt),
+            discoverableFilter: discoverableFilter,
+          });
+          return res.events;
         },
       );
     },
