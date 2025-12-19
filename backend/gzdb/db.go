@@ -1650,6 +1650,7 @@ func (g *gormZenaoDB) CreatePoll(userID string, feedID string, parentURI string,
 		if err := tx.Create(dbPost).Error; err != nil {
 			return err
 		}
+		dbPoll.PostID = dbPost.ID
 		if err := tx.Create(dbPoll).Error; err != nil {
 			return err
 		}
