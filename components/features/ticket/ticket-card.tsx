@@ -12,13 +12,15 @@ import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import { EVMTicket } from "@/lib/queries/events-list";
 
 type TicketCardProps = {
   eventId: string;
   event: EventInfo;
   timezone: string;
-  ticketInfo: EVMTicket;
+  ticketInfo: {
+    ticketSecret: string;
+    userEmail: string;
+  };
 };
 
 export function TicketCard({
@@ -66,7 +68,7 @@ export function TicketCard({
             {event.title}
           </Heading>
           <Text className="text-black font-semibold">
-            {/*ticketInfo.userEmail*/}TODO
+            {ticketInfo.userEmail}
           </Text>
           <div className="flex flex-row gap-2 max-sm:items-center">
             <div className="flex flex-col max-sm:items-center">
@@ -93,7 +95,7 @@ export function TicketCard({
           <div className="flex flex-col grow items-center justify-center">
             <div className="aspect-video flex flex-col items-center justify-center qrcode">
               <QRCode
-                text={ticketInfo.ticketPubKey} // TODO
+                text={ticketInfo.ticketSecret}
                 options={{
                   errorCorrectionLevel: "M",
                   margin: 2,

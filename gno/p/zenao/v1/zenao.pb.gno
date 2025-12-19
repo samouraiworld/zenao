@@ -382,3 +382,13 @@ type RemoveEventFromCommunityRequest struct {
 
 type RemoveEventFromCommunityResponse struct {
 }
+
+type CreateTicketSecretRequest struct {
+	OwnerId      string
+	EventAddress string
+}
+
+type CreateTicketSecretResponse struct {
+	Secret    string
+	PublicKey string
+}

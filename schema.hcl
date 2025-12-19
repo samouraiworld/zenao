@@ -618,6 +618,10 @@ table "sold_tickets" {
     null = true
     type = integer
   }
+  column "event_address" {
+    null = true
+    type = text
+  }
   column "buyer_id" {
     null = true
     type = integer
@@ -654,6 +658,9 @@ table "sold_tickets" {
   index "idx_sold_tickets_secret" {
     unique  = true
     columns = [column.secret]
+  }
+  index "idx_sold_tickets_event_address" {
+    columns = [column.event_address]
   }
   index "idx_sold_tickets_event_id" {
     columns = [column.event_id]

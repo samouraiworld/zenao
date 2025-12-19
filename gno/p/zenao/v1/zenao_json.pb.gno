@@ -1938,3 +1938,53 @@ func (r *RemoveEventFromCommunityResponse) ToJSON() *json.Node {
 func RemoveEventFromCommunityResponseFromJSON(r *RemoveEventFromCommunityResponse, node *json.Node) {
 	*r = RemoveEventFromCommunityResponse{}
 }
+
+func (c *CreateTicketSecretRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.OwnerId != "" {
+		fields["ownerId"] = json.StringNode("", c.OwnerId)
+	}
+	if c.EventAddress != "" {
+		fields["eventAddress"] = json.StringNode("", c.EventAddress)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func CreateTicketSecretRequestFromJSON(c *CreateTicketSecretRequest, node *json.Node) {
+	*c = CreateTicketSecretRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["ownerId"]; ok {
+		c.OwnerId = val.MustString()
+	}
+	if val, ok := fields["eventAddress"]; ok {
+		c.EventAddress = val.MustString()
+	}
+}
+
+func (c *CreateTicketSecretResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if c.Secret != "" {
+		fields["secret"] = json.StringNode("", c.Secret)
+	}
+	if c.PublicKey != "" {
+		fields["publicKey"] = json.StringNode("", c.PublicKey)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func CreateTicketSecretResponseFromJSON(c *CreateTicketSecretResponse, node *json.Node) {
+	*c = CreateTicketSecretResponse{}
+	fields := node.MustObject()
+
+	if val, ok := fields["secret"]; ok {
+		c.Secret = val.MustString()
+	}
+	if val, ok := fields["publicKey"]; ok {
+		c.PublicKey = val.MustString()
+	}
+}

@@ -20,7 +20,6 @@ import { captureException } from "@/lib/report";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { emailSchema } from "@/types/schemas";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
-import { userInfoOptions } from "@/lib/queries/user";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 const eventRegistrationFormSchema = z.object({

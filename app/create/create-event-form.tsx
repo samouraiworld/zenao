@@ -51,10 +51,10 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: tickets for event list
 - X: events list in profile
 - X: discoverable field in eventOptions
-- ticket secret
+- X: ticket secret
+- X: show mail of ticket
 - checkin/scan
 - guest invite
-- show mail of ticket
 - discover ordering by start date
 - bug: register state not updated in ui
 - opti: event creation too slow

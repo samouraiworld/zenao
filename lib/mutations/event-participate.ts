@@ -46,14 +46,26 @@ export const useEventParticipateLoggedIn = () => {
       token,
       password,
     }: EventParticipateLoggedInRequest) => {
-      const array = new Uint32Array(1);
-      self.crypto.getRandomValues(array);
-      const nonce = array[0].toString();
+      const ticket = await zenaoClient.createTicketSecret(
+        {
+          eventAddress: eventId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      const arr = new Uint8Array(Buffer.from(ticket.publicKey, "base64"));
+      let bi = BigInt(0);
+      for (let i = arr.length - 1; i >= 0; i--) {
+        bi = bi * BigInt(256) + BigInt(arr[i]);
+      }
+
+      console.group("pubkey size", arr.length);
+
       const res = await writeContractAsync({
         abi: ticketMasterABI,
         address: ticketMasterAddress,
         functionName: "emitTicket",
-        args: [eventId as `0x${string}`, BigInt(nonce)],
+        args: [eventId as `0x${string}`, bi],
       });
       console.log("registered", res);
     },

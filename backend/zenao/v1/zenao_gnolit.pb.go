@@ -1151,3 +1151,33 @@ func (r *RemoveEventFromCommunityResponse) GnoLiteral(typePrefix string, linePre
 	buf.WriteString("}")
 	return buf.String()
 }
+
+func (c *CreateTicketSecretRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreateTicketSecretRequest{\n")
+	if c.OwnerId != "" {
+		fmt.Fprintf(buf, "%s\tOwnerId: %q,\n", linePrefix, c.OwnerId)
+	}
+	if c.EventAddress != "" {
+		fmt.Fprintf(buf, "%s\tEventAddress: %q,\n", linePrefix, c.EventAddress)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (c *CreateTicketSecretResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("CreateTicketSecretResponse{\n")
+	if c.Secret != "" {
+		fmt.Fprintf(buf, "%s\tSecret: %q,\n", linePrefix, c.Secret)
+	}
+	if c.PublicKey != "" {
+		fmt.Fprintf(buf, "%s\tPublicKey: %q,\n", linePrefix, c.PublicKey)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}

@@ -46,14 +46,15 @@ type EntityRole struct {
 
 type SoldTicket struct {
 	gorm.Model
-	EventID uint `gorm:"index"`
-	BuyerID uint
-	UserID  uint
-	User    *User
-	Price   float64
-	Secret  string `gorm:"uniqueIndex;not null"`
-	Pubkey  string `gorm:"uniqueIndex;not null"`
-	Checkin *Checkin
+	EventID      uint   `gorm:"index"`
+	EventAddress string `gorm:"index"`
+	BuyerID      uint
+	UserID       uint
+	User         *User
+	Price        float64
+	Secret       string `gorm:"uniqueIndex;not null"`
+	Pubkey       string `gorm:"uniqueIndex;not null"`
+	Checkin      *Checkin
 }
 
 type Checkin struct {
@@ -94,6 +95,26 @@ func SetupDB(dsn string) (zeni.DB, error) {
 
 type gormZenaoDB struct {
 	db *gorm.DB
+}
+
+// StoreTicketSecret implements zeni.DB.
+func (g *gormZenaoDB) StoreTicketSecret(eventAddress string, ownerId string, buyerId string, ticket *zeni.Ticket) error {
+	ownerIdInt, err := strconv.ParseUint(ownerId, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid owner id: %w", err)
+	}
+	buyerIdInt, err := strconv.ParseUint(buyerId, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid buyer id: %w", err)
+	}
+	dbTicket := &SoldTicket{
+		EventAddress: eventAddress,
+		UserID:       uint(ownerIdInt),
+		BuyerID:      uint(buyerIdInt),
+		Secret:       ticket.Secret(),
+		Pubkey:       ticket.Pubkey(),
+	}
+	return g.db.Save(dbTicket).Error
 }
 
 // TxWithSpan implements zeni.DB.
@@ -771,9 +792,17 @@ func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventID string, userID string) 
 	}
 
 	tickets := []*SoldTicket{}
-	err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_id = ? AND (buyer_id = ? OR user_id = ?)", eventID, userIDint, userIDint).Error
-	if err != nil {
-		return nil, err
+
+	if strings.HasPrefix(eventID, "0x") {
+		err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_address = ? AND (buyer_id = ? OR user_id = ?)", eventID, userIDint, userIDint).Error
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_id = ? AND (buyer_id = ? OR user_id = ?)", eventID, userIDint, userIDint).Error
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	res := make([]*zeni.SoldTicket, len(tickets))
