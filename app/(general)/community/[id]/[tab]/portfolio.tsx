@@ -2,13 +2,16 @@
 
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AudioWaveform, ImageIcon, Loader2, Video } from "lucide-react";
+import { AudioWaveform, Loader2 } from "lucide-react";
 import { memo, useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/widgets/texts/heading";
 import { Web3Image } from "@/components/widgets/images/web3-image";
-import { communityInfo, communityUserRoles } from "@/lib/queries/community";
+import {
+  communityInfo as communityInfoQuery,
+  communityUserRoles,
+} from "@/lib/queries/community";
 import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
@@ -19,7 +22,6 @@ import {
   PortfolioItem,
   PortfolioUploadVideoSchemaType,
 } from "@/types/schemas";
-import { Button } from "@/components/shadcn/button";
 import { useToast } from "@/hooks/use-toast";
 import { web2URL } from "@/lib/uris";
 import { cn } from "@/lib/tailwind";
@@ -29,11 +31,6 @@ import { captureException } from "@/lib/report";
 import { zenaoClient } from "@/lib/zenao-client";
 import PortfolioPreviewDialog from "@/components/dialogs/portfolio-preview-dialog";
 import { userInfoOptions } from "@/lib/queries/user";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/shadcn/tooltip";
 import PortfolioUploadVideoDialog from "@/components/dialogs/portfolio-upload-video-dialog";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import {
@@ -43,6 +40,8 @@ import {
   IMAGE_FILE_SIZE_LIMIT_MB,
 } from "@/components/features/event/constants";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import EmptyList from "@/components/widgets/lists/empty-list";
+import { UploadMediasButtons } from "@/components/widgets/portfolio/upload-medias-buttons";
 
 type CommunityPortfolioProps = {
   communityId: string;
@@ -82,7 +81,9 @@ export default function CommunityPortfolio({
     item: {} as never,
   });
 
-  const { data: community } = useSuspenseQuery(communityInfo(communityId));
+  const { data: communityInfo } = useSuspenseQuery(
+    communityInfoQuery(communityId),
+  );
   const { data: administrators } = useSuspenseQuery({
     queryKey: ["communityAdmins", communityId],
     queryFn: async () => {
@@ -99,12 +100,12 @@ export default function CommunityPortfolio({
 
   const isAdmin = userRoles.includes("administrator");
 
-  const t = useTranslations("community-portfolio");
+  const t = useTranslations("portfolio");
 
   const { portfolio, ...otherDetails } = deserializeWithFrontMatter({
     contentFieldName: "description",
     schema: communityDetailsSchema,
-    serialized: community?.description ?? "",
+    serialized: communityInfo?.description ?? "",
     defaultValue: {
       description: "",
       shortDescription: "",
@@ -112,6 +113,7 @@ export default function CommunityPortfolio({
       socialMediaLinks: [],
     },
   });
+
   const { mutateAsync: editCommunity } = useEditCommunity();
 
   const [localPortfolio, setLocalPortfolio] =
@@ -134,7 +136,7 @@ export default function CommunityPortfolio({
       });
 
       await editCommunity({
-        ...community,
+        ...communityInfo,
         communityId,
         administrators,
         token,
@@ -164,7 +166,7 @@ export default function CommunityPortfolio({
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const files = e.target.files;
-    if (!files || files.length === 0) {
+    if (!files || !files.length) {
       return;
     }
 
@@ -272,11 +274,11 @@ export default function CommunityPortfolio({
   };
 
   return (
-    <div className="space-y-8 relative">
+    <div className="relative">
       <PortfolioPreviewDialog
         isOpen={previewDialogState.isOpen}
         onOpenChange={(open) =>
-          setPreviewDialogState(() => ({ isOpen: open, item: {} as never }))
+          setPreviewDialogState({ isOpen: open, item: {} as never })
         }
         item={previewDialogState.item}
         onDelete={onDelete}
@@ -290,64 +292,21 @@ export default function CommunityPortfolio({
         onVideoAdded={handleVideoAdded}
       />
 
-      <div className="flex flex-col md:flex-row gap-4 md:items-center">
-        <Heading level={3}>
+      {isAdmin && !!localPortfolio.length && (
+        <UploadMediasButtons
+          imageFileInputRef={imageFileInputRef}
+          audioFileInputRef={audioFileInputRef}
+          isUploading={isUploading}
+          setVideoDialogOpen={setVideoDialogOpen}
+          className="mb-2"
+        />
+      )}
+
+      {!!localPortfolio.length && (
+        <Heading level={2} size="lg" className="mt-2">
           {t("recent-media-uploaded")} ({localPortfolio.length})
         </Heading>
-
-        {isAdmin && localPortfolio.length > 0 && (
-          <div className="flex gap-4 items-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="text-main bg-transparent border-none"
-                  disabled={isUploading}
-                  onClick={() => imageFileInputRef.current?.click()}
-                >
-                  <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
-                  <span className="max-md:hidden">{t("upload-image")}</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="md:hidden">
-                {t("upload-image")}
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="text-main bg-transparent border-none"
-                  disabled={isUploading}
-                  onClick={() => audioFileInputRef.current?.click()}
-                >
-                  <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
-                  <span className="max-md:hidden">{t("upload-audio")}</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="md:hidden">
-                {t("upload-audio")}
-              </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="text-main bg-transparent border-none"
-                  disabled={isUploading}
-                  onClick={() => setVideoDialogOpen(true)}
-                >
-                  <Video className="w-5 h-5 md:!h-6 md:!w-6" />
-                  <span className="max-md:hidden">{t("add-video")}</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="md:hidden">
-                {t("add-video")}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Image upload */}
       <input
@@ -372,56 +331,20 @@ export default function CommunityPortfolio({
           maxWidth: "100%",
         }}
       >
-        {localPortfolio.length === 0 && !isUploading && (
-          <div className="flex flex-col justify-center text-muted-foreground">
-            <p className="text-center">
-              {t("no-media-uploaded")}{" "}
-              {isAdmin && `${t("upload-first-file-btn")} ?`}
-            </p>
+        {!localPortfolio.length && !isUploading && (
+          <div className="flex flex-col justify-center text-muted-foreground gap-4">
+            <EmptyList
+              title={t("no-media-title")}
+              description={isAdmin ? t("no-media-description") : undefined}
+            />
+
             {isAdmin && (
-              <div className="flex justify-center mt-4">
-                <div className="flex gap-4">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="text-main bg-transparent border-none"
-                        disabled={isUploading}
-                        onClick={() => imageFileInputRef.current?.click()}
-                      >
-                        <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Upload image</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="text-main bg-transparent border-none"
-                        disabled={isUploading}
-                        onClick={() => audioFileInputRef.current?.click()}
-                      >
-                        <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("upload-audio")}</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="text-main bg-transparent border-none"
-                        disabled={isUploading}
-                        onClick={() => setVideoDialogOpen(true)}
-                      >
-                        <Video className="w-5 h-5 md:!h-6 md:!w-6" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("add-video")}</TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
+              <UploadMediasButtons
+                imageFileInputRef={imageFileInputRef}
+                audioFileInputRef={audioFileInputRef}
+                isUploading={isUploading}
+                setVideoDialogOpen={setVideoDialogOpen}
+              />
             )}
           </div>
         )}

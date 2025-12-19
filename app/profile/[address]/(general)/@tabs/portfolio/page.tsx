@@ -2,13 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import {
-  AudioWaveform,
-  ImageIcon,
-  Loader2,
-  Video,
-  Trash2Icon,
-} from "lucide-react";
+import { AudioWaveform, Loader2 } from "lucide-react";
 import { memo, useRef, useState } from "react";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
@@ -28,7 +22,6 @@ import {
   GnoProfileDetails,
   RealmId,
 } from "@/types/schemas";
-import { Button } from "@/components/shadcn/button";
 import { useToast } from "@/hooks/use-toast";
 import { uploadFile } from "@/lib/files";
 import { captureException } from "@/lib/report";
@@ -43,6 +36,8 @@ import {
   IMAGE_FILE_SIZE_LIMIT,
   IMAGE_FILE_SIZE_LIMIT_MB,
 } from "@/components/features/event/constants";
+import EmptyList from "@/components/widgets/lists/empty-list";
+import { UploadMediasButtons } from "@/components/widgets/portfolio/upload-medias-buttons";
 
 const MemoizedVideoPreview = memo(({ uri }: { uri: string }) => (
   <MarkdownPreview
@@ -61,7 +56,7 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
   const { getToken, userId } = useAuth();
 
   const address = addressFromRealmId(realmId);
-  const { data: user } = useSuspenseQuery(profileOptions(realmId));
+  const { data: userProfile } = useSuspenseQuery(profileOptions(realmId));
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -70,7 +65,7 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
   const isOwner = loggedUserAddress === address;
 
   const profile = deserializeWithFrontMatter({
-    serialized: user?.bio ?? "",
+    serialized: userProfile?.bio ?? "",
     schema: gnoProfileDetailsSchema,
     defaultValue: {
       bio: "",
@@ -85,7 +80,7 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
     contentFieldName: "bio",
   });
 
-  const { portfolio, ..._otherDetails } = profile;
+  const { portfolio } = profile;
 
   const [localPortfolio, setLocalPortfolio] =
     useState<PortfolioItem[]>(portfolio);
@@ -102,7 +97,7 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
     item: PortfolioItem;
   }>({ isOpen: false, item: {} as never });
 
-  const t = useTranslations("community-portfolio");
+  const t = useTranslations("portfolio");
   const { editUser } = useEditUserProfile();
 
   const onSave = async (newPortfolio: PortfolioItem[]) => {
@@ -118,8 +113,8 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
       await editUser({
         realmId: address,
         token,
-        avatarUri: user?.avatarUri ?? "",
-        displayName: user?.displayName ?? "",
+        avatarUri: userProfile?.avatarUri ?? "",
+        displayName: userProfile?.displayName ?? "",
         bio,
       });
 
@@ -221,54 +216,29 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
         item={previewDialogState.item}
         onDelete={onDelete}
         isDeleting={isDeleting}
+        isAdmin={isOwner}
       />
-
       <PortfolioUploadVideoDialog
         isOpen={videoDialogOpen}
         onOpenChange={setVideoDialogOpen}
         onVideoAdded={handleVideoAdded}
       />
 
-      <div className="flex flex-col md:flex-row gap-4 mb-8 md:items-center">
+      {isOwner && !!localPortfolio.length && (
+        <UploadMediasButtons
+          imageFileInputRef={imageFileInputRef}
+          audioFileInputRef={audioFileInputRef}
+          isUploading={isUploading}
+          setVideoDialogOpen={setVideoDialogOpen}
+          className="mb-2"
+        />
+      )}
+
+      {!!localPortfolio.length && (
         <Heading level={2} size="lg">
           {t("recent-media-uploaded")} ({localPortfolio.length})
         </Heading>
-
-        {isOwner && localPortfolio.length > 0 && (
-          <div className="flex gap-4 items-center">
-            <Button
-              variant="outline"
-              className="text-main bg-transparent border-none"
-              disabled={isUploading}
-              onClick={() => imageFileInputRef.current?.click()}
-            >
-              <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
-              <span className="max-md:hidden">{t("upload-image")}</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              className="text-main bg-transparent border-none"
-              disabled={isUploading}
-              onClick={() => audioFileInputRef.current?.click()}
-            >
-              <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
-              <span className="max-md:hidden">{t("upload-audio")}</span>
-            </Button>
-
-            <Button
-              variant="outline"
-              className="text-main bg-transparent border-none"
-              disabled={isUploading}
-              onClick={() => setVideoDialogOpen(true)}
-            >
-              <Video className="w-5 h-5 md:!h-6 md:!w-6" />
-              <span className="max-md:hidden">{t("add-video")}</span>
-            </Button>
-          </div>
-        )}
-      </div>
-
+      )}
       {/* Image upload */}
       <input
         ref={imageFileInputRef}
@@ -276,7 +246,6 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
         className="hidden"
         onChange={(e) => onUpload("image", e)}
       />
-
       {/* Audio upload */}
       <input
         ref={audioFileInputRef}
@@ -284,7 +253,6 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
         className="hidden"
         onChange={(e) => onUpload("audio", e)}
       />
-
       <div
         className="grid gap-4"
         style={{
@@ -292,39 +260,20 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
           maxWidth: "100%",
         }}
       >
-        {localPortfolio.length === 0 && !isUploading && (
-          <div className="flex flex-col justify-center text-muted-foreground">
-            <p className="text-center">{t("no-media-uploaded")}</p>
+        {!localPortfolio.length && !isUploading && (
+          <div className="flex flex-col justify-center text-muted-foreground gap-4">
+            <EmptyList
+              title={t("no-media-title")}
+              description={isOwner ? t("no-media-description") : undefined}
+            />
 
             {isOwner && (
-              <div className="flex justify-center mt-4 gap-4">
-                <Button
-                  variant="outline"
-                  className="text-main bg-transparent border-none"
-                  disabled={isUploading}
-                  onClick={() => imageFileInputRef.current?.click()}
-                >
-                  <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="text-main bg-transparent border-none"
-                  disabled={isUploading}
-                  onClick={() => audioFileInputRef.current?.click()}
-                >
-                  <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="text-main bg-transparent border-none"
-                  disabled={isUploading}
-                  onClick={() => setVideoDialogOpen(true)}
-                >
-                  <Video className="w-5 h-5 md:!h-6 md:!w-6" />
-                </Button>
-              </div>
+              <UploadMediasButtons
+                imageFileInputRef={imageFileInputRef}
+                audioFileInputRef={audioFileInputRef}
+                isUploading={isUploading}
+                setVideoDialogOpen={setVideoDialogOpen}
+              />
             )}
           </div>
         )}
@@ -347,16 +296,6 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
             )}
             key={item.id}
           >
-            {isOwner && (
-              <button
-                className="absolute top-2 right-2 z-10 bg-white/70 text-red-600 rounded-full p-1 hover:bg-red-600 hover:text-white transition flex items-center justify-center"
-                onClick={() => onDelete(item)}
-                type="button"
-              >
-                <Trash2Icon className="w-4 h-4" />
-              </button>
-            )}
-
             {item.type === "image" && (
               <AspectRatio
                 ratio={16 / 9}
