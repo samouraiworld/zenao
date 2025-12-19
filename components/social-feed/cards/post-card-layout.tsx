@@ -117,13 +117,15 @@ export function PostCardLayout({
               </div>
             )}
             <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
-              <PostMenu
-                isOwner={isOwner}
-                onDelete={async () => await onDelete?.(parentId)}
-                isDeleting={isDeleting}
-                canEdit={canEdit}
-                onEdit={() => onEditModeChange?.(true)}
-              />
+              {canInteract && (
+                <PostMenu
+                  isOwner={isOwner}
+                  onDelete={async () => await onDelete?.(parentId)}
+                  isDeleting={isDeleting}
+                  canEdit={canEdit}
+                  onEdit={() => onEditModeChange?.(true)}
+                />
+              )}
             </div>
           </div>
         )}
