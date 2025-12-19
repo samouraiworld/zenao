@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 	"time"
 
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/go-faker/faker/v4"
-	ma "github.com/multiformats/go-multiaddr"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	"github.com/samouraiworld/zenao/backend/gzdb"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
@@ -35,31 +33,21 @@ func newFakegenCmd() *commands.Command {
 var fakegenConf fakegenConfig
 
 type fakegenConfig struct {
-	adminMnemonic    string
-	gnoNamespace     string
-	chainEndpoint    string
-	chainID          string
 	dbPath           string
 	gasSecurityRate  float64
 	communitiesCount uint
 	eventsCount      uint
 	postsCount       uint
 	pollsCount       uint
-	skipChain        bool
 }
 
 func (conf *fakegenConfig) RegisterFlags(flset *flag.FlagSet) {
-	flset.StringVar(&fakegenConf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
-	flset.StringVar(&fakegenConf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
-	flset.StringVar(&fakegenConf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
-	flset.StringVar(&fakegenConf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&fakegenConf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.Float64Var(&fakegenConf.gasSecurityRate, "gas-security-rate", 0.2, "margin multiplier for estimated gas wanted to be safe")
 	flset.UintVar(&fakegenConf.eventsCount, "events", 20, "number of fake events to generate")
 	flset.UintVar(&fakegenConf.communitiesCount, "communities", 5, "number of fake communities to generate")
 	flset.UintVar(&fakegenConf.postsCount, "posts", 31, "number of fake posts to generate")
 	flset.UintVar(&fakegenConf.pollsCount, "polls", 13, "number of fake polls to generate")
-	flset.BoolVar(&fakegenConf.skipChain, "skip-chain", false, "skip chain")
 }
 
 type fakeEvent struct {
@@ -94,11 +82,6 @@ func execFakegen() (retErr error) {
 		return err
 	}
 
-	chain, err := setupChain(fakegenConf.adminMnemonic, fakegenConf.gnoNamespace, fakegenConf.chainID, fakegenConf.chainEndpoint, fakegenConf.gasSecurityRate, logger)
-	if err != nil {
-		return err
-	}
-
 	db, err := gzdb.SetupDB(fakegenConf.dbPath)
 	if err != nil {
 		return err
@@ -113,12 +96,6 @@ func execFakegen() (retErr error) {
 	zUser, err := db.CreateUser("user_2tYwvgu86EutANd5FUalvHvHm05") // alice+clerk_test@example.com
 	if err != nil {
 		return err
-	}
-
-	if !fakegenConf.skipChain {
-		if err := chain.CreateUser(&zeni.User{ID: zUser.ID}); err != nil {
-			return err
-		}
 	}
 
 	logger.Info("creating events")
@@ -156,12 +133,6 @@ func execFakegen() (retErr error) {
 			return err
 		}
 
-		if !fakegenConf.skipChain {
-			if err := chain.CreateEvent(zevt.ID, []string{creatorID}, []string{}, evtReq, nil); err != nil {
-				return err
-			}
-		}
-
 		// Create Feed
 		logger.Info("creating feed")
 		zfeed, err := db.CreateFeed(zeni.EntityTypeEvent, zevt.ID, "main")
@@ -192,15 +163,8 @@ func execFakegen() (retErr error) {
 					},
 				}
 
-				postID := fmt.Sprintf("%d", pID)
-				if !fakegenConf.skipChain {
-					postID, err = chain.CreatePost(creatorID, zeni.EntityTypeEvent, zevt.ID, post)
-					if err != nil {
-						return err
-					}
-				}
-
-				if _, err := db.CreatePost(postID, zfeed.ID, zUser.ID, post); err != nil {
+				zPost, err := db.CreatePost(zfeed.ID, zUser.ID, post)
+				if err != nil {
 					return err
 				}
 
@@ -211,18 +175,12 @@ func execFakegen() (retErr error) {
 					for rC := range len(icons) {
 						// React to Posts
 						reactReq := &zenaov1.ReactPostRequest{
-							PostId: postID,
+							PostId: zPost.ID,
 							Icon:   icons[rC],
 						}
 
 						if err = db.ReactPost(creatorID, reactReq); err != nil {
 							return err
-						}
-
-						if !fakegenConf.skipChain {
-							if err = chain.ReactPost(creatorID, zeni.EntityTypeEvent, zevt.ID, reactReq); err != nil {
-								return err
-							}
 						}
 					}
 				}
@@ -253,44 +211,18 @@ func execFakegen() (retErr error) {
 					Kind:     pollsv1.PollKind(p.KindRaw),
 				}
 
-				pollID := fmt.Sprintf("%d", poID)
-				postID := fmt.Sprintf("%d", pID)
-				if !fakegenConf.skipChain {
-					pollID, postID, err = chain.CreatePoll(creatorID, pollReq)
-					if err != nil {
-						return err
-					}
-				}
-
-				postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
+				zPoll, err := db.CreatePoll(creatorID, zfeed.ID, "", pollReq)
 				if err != nil {
-					return err
-				}
-
-				pollPost := &feedsv1.Post{
-					Post: &feedsv1.Post_Link{
-						Link: &feedsv1.LinkPost{
-							Uri: postURI.String(),
-						},
-					},
-				}
-
-				if _, err := db.CreatePoll(creatorID, pollID, postID, zfeed.ID, pollPost, pollReq); err != nil {
 					return err
 				}
 
 				//Vote on Polls
 				voteReq := &zenaov1.VotePollRequest{
-					PollId: pollID,
+					PollId: zPoll.ID,
 					Option: options[0],
 				}
 				if err = db.VotePoll(creatorID, voteReq); err != nil {
 					return err
-				}
-				if !fakegenConf.skipChain {
-					if err = chain.VotePoll(creatorID, voteReq); err != nil {
-						return err
-					}
 				}
 				poID++
 				pID++
@@ -319,12 +251,6 @@ func execFakegen() (retErr error) {
 		zCommunity, err := db.CreateCommunity(creatorID, []string{creatorID}, []string{creatorID}, []string{}, communityReq)
 		if err != nil {
 			return err
-		}
-
-		if !fakegenConf.skipChain {
-			if err = chain.CreateCommunity(zCommunity.ID, []string{creatorID}, []string{creatorID}, []string{}, communityReq); err != nil {
-				return err
-			}
 		}
 
 		// Create Feed

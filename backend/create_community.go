@@ -70,10 +70,5 @@ func (s *ZenaoServer) CreateCommunity(
 		return nil, err
 	}
 
-	// XXX: put the admins as members too.
-	if err := s.Chain.CreateCommunity(cmt.ID, adminIDs, adminIDs, []string{}, req.Msg); err != nil {
-		return nil, fmt.Errorf("failed to create community on chain: %w", err)
-	}
-
 	return connect.NewResponse(&zenaov1.CreateCommunityResponse{CommunityId: cmt.ID}), nil
 }

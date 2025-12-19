@@ -69,11 +69,6 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		},
 	}
 
-	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
-	if err != nil {
-		return nil, err
-	}
-
 	zpost := (*zeni.Post)(nil)
 	if err := s.DB.TxWithSpan(ctx, "db.CreatePost", func(db zeni.DB) error {
 		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
@@ -81,7 +76,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
-		if zpost, err = db.CreatePost(postID, feed.ID, zUser.ID, post); err != nil {
+		if zpost, err = db.CreatePost(feed.ID, zUser.ID, post); err != nil {
 			return err
 		}
 

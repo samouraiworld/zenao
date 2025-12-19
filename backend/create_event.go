@@ -184,23 +184,6 @@ func (s *ZenaoServer) CreateEvent(
 		}
 	}
 
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		s.Logger.Error("create-event", zap.Error(err))
-		return nil, err
-	}
-
-	if req.Msg.CommunityId != "" {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
-			s.Logger.Error("add-event-to-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
-			return nil, err
-		}
-	}
-
 	return connect.NewResponse(&zenaov1.CreateEventResponse{
 		Id: evt.ID,
 	}), nil
