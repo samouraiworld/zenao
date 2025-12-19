@@ -51,4 +51,4 @@ COPY --from=builder /app/build/zenao-backend /bin/zenao-backend
 ENV HOME=/app
 WORKDIR $HOME
 
-ENTRYPOINT ["/bin/zenao-backend", "start", "--bind-addr", "0.0.0.0:4242", "--gno-chain-id", "zenao-dev"]
+ENTRYPOINT ["/bin/zenao-backend", "start", "--bind-addr", "0.0.0.0:4242"]

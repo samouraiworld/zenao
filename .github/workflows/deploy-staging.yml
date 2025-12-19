@@ -63,31 +63,16 @@ jobs:
 
       - name: Migrate DB
         run: TURSO_TOKEN=${{ secrets.STAGING_TURSO_TOKEN }} atlas migrate apply --dir "file://migrations" --env staging
-
-      - name: Create genesis txs
-        run: go run ./backend gentxs -output genesis_txs.jsonl --db "libsql://zenao-staging-3-samourai-coop.turso.io?authToken=${{ secrets.STAGING_TURSO_TOKEN }}" --admin-mnemonic '${{ secrets.STAGING_ADMIN_MNEMONIC }}' --chain-id zenao-dev
-
-      - name: Copy genesis txs
-        uses: appleboy/scp-action@v1
-        with:
-          host: 51.159.98.163
-          username: root
-          key: ${{ secrets.STAGING_SSH_KEY }}
-          source: genesis_txs.jsonl
-          target: /root/zenao
-          overwrite: true
-
       - name: Upgrade services
         uses: appleboy/ssh-action@v1
         with:
           host: 51.159.98.163
-          username: root
+          username: rootg
           key: ${{ secrets.STAGING_SSH_KEY }}
           # the yq del is there to disable maintenance mode
           script: |
             set -xe
             cd zenao
             docker compose -f staging.docker-compose.yml up -d --wait otel-collector jaeger
-            docker compose -f staging.docker-compose.yml up -d --force-recreate --build gno --wait
             yq -iy 'del(.services.backend.command)' staging.docker-compose.yml
             docker compose -f staging.docker-compose.yml up -d --build backend
