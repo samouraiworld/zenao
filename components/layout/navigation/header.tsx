@@ -40,7 +40,9 @@ import {
   UserAvatar,
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
-import { addressFromRealmId } from "@/lib/gno";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import SoonOnBase from "@/components/widgets/soon-on-base";
+import VersionTag from "@/components/widgets/version-tag";
 
 export type NavItem = {
   key: string;
@@ -136,7 +138,7 @@ const NavLink = ({ item, pathname }: { item: NavItem; pathname: string }) => {
         <Text
           size="sm"
           variant={isActive ? "primary" : "secondary"}
-          className="text-inherit max-[624px]:hidden"
+          className="text-inherit max-[848px]:hidden"
         >
           {item.children}
         </Text>
@@ -176,7 +178,7 @@ export function Header() {
   return (
     <div className="flex justify-between p-4 w-full items-center">
       {/* Desktop */}
-      <div className="flex max-[450px]:gap-4 gap-6 items-center">
+      <div className="flex gap-4 items-center">
         <div className="flex items-center gap-2">
           <GoBackButton className="hidden standalone:flex" />
           <Link href="/" className="flex gap-2 items-center">
@@ -190,6 +192,7 @@ export function Header() {
             />
             <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
           </Link>
+          <VersionTag />
         </div>
         <div className="flex standalone:hidden standalone:md:flex flex-row gap-4">
           <HeaderLinks />
@@ -197,6 +200,7 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center">
+        <SoonOnBase className="hidden sm:flex" />
         <Link passHref href="/create">
           <ButtonWithChildren
             variant="outline"
@@ -225,19 +229,25 @@ const Auth = ({
   isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
+  const { trackEvent } = useAnalyticsEvents();
   const { signOut, getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-
-  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
 
   return (
     <div className={className}>
       {/* Signed out state */}
       <SignedOut>
         <SignInButton>
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={() => {
+              trackEvent("SignInClick", {
+                props: { context: "navigation-header" },
+              });
+            }}
+          >
             <Text size="sm">{t("sign-in")}</Text>
           </Button>
         </SignInButton>
@@ -262,9 +272,9 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    realmId={loggedUserAddress}
+                    realmId={userInfo?.realmId || ""}
                     className={avatarClassName}
-                    size="sm"
+                    size="md"
                   />
                 </div>
               </SignedIn>
@@ -272,7 +282,7 @@ const Auth = ({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <Link href={`/profile/${loggedUserAddress}`}>
+          <Link href={`/profile/${userInfo?.realmId}`}>
             <DropdownMenuItem className="cursor-pointer">
               {t("view-profile")}
             </DropdownMenuItem>

@@ -7,6 +7,7 @@ import { Button } from "../../shadcn/button";
 import Text from "../texts/text";
 import { PwaInstallDialog } from "../../dialogs/pwa-install-dialog";
 import useIsPWAInstalled from "@/hooks/use-is-pwa-installed";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export const LazyInstallButton = dynamic(
   () => import("@/components/widgets/buttons/pwa-install-button"),
@@ -23,6 +24,7 @@ export interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function InstallButton() {
+  const { trackEvent } = useAnalyticsEvents();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [installDialogOpen, setInstallDialogOpen] = useState(false);
@@ -47,6 +49,7 @@ export default function InstallButton() {
   }, []);
 
   const installApp = async () => {
+    trackEvent("InstallPwaClick");
     setInstallDialogOpen(true);
     if (deferredPrompt) {
       deferredPrompt.prompt();

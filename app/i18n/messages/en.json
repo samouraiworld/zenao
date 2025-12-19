@@ -25,6 +25,7 @@
     }
   },
   "home": {
+    "base-news": "News & Updates: We are arriving soon on",
     "main-text": "Organize event(s) in seconds",
     "secondary-text": "\"Anything that happens, arrives or appears, can give birth to an autonomous community, or a new tribe.\"",
     "placeholder": "Event name...",
@@ -331,7 +332,10 @@
   },
   "error": {
     "label": "Oups! An error has occured.",
-    "retry-button": "Retry"
+    "retry-button": "Retry",
+    "oops-something-went-wrong": "Oups! Something went wrong.",
+    "unexpected-error-occurred": "An unexpected error occurred. Please try again later.",
+    "refresh-page": "Refresh the page"
   },
   "not-found": {
     "label": "Page not found.",
@@ -346,10 +350,10 @@
         "sign-up": "Sign up"
       }
     },
-    "buttons": {
-      "gnoweb-button": "See on gnoweb"
-    },
     "widgets": {
+      "soon-on-base": {
+        "soon-on": "Soon on"
+      },
       "form": {
         "form-field-image": {
           "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
@@ -417,7 +421,7 @@
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
   },
   "event-community-section": {
-    "sponsored-by": "Sponsored by community"
+    "organized-by": "Organized by community"
   },
   "event-scanner": {
     "check-in-confirmation-dialog": {
@@ -462,12 +466,15 @@
   "toast-delete-post-success": "Your post has been deleted",
   "toast-delete-post-error": "Error while deleting the post",
   "community": {
+    "communities": "Communities",
     "chat": "Chat",
     "votes": "Votes",
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals",
     "portfolio": "Portfolio",
+    "upcoming": "Upcoming",
+    "past": "Past",
     "leave-community-button": "Leave community",
     "leaving-state": "Leaving...",
     "leave-success": "You have left the community.",

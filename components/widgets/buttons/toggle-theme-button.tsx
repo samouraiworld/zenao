@@ -11,9 +11,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 export const ToggleThemeButton: React.FC = () => {
   const { setTheme } = useTheme();
+  const { trackEvent } = useAnalyticsEvents();
 
   return (
     <DropdownMenu>
@@ -26,7 +28,10 @@ export const ToggleThemeButton: React.FC = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onClick={() => setTheme("light")}
+          onClick={() => {
+            setTheme("light");
+            trackEvent("ThemeChange", { props: { theme: "light" } });
+          }}
           aria-label="theme-dropdown-item-light"
         >
           Light

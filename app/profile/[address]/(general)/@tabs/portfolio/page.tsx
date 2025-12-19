@@ -26,6 +26,7 @@ import {
   PortfolioUploadVideoSchemaType,
   gnoProfileDetailsSchema,
   GnoProfileDetails,
+  RealmId,
 } from "@/types/schemas";
 import { Button } from "@/components/shadcn/button";
 import { useToast } from "@/hooks/use-toast";
@@ -52,22 +53,21 @@ const MemoizedVideoPreview = memo(({ uri }: { uri: string }) => (
 MemoizedVideoPreview.displayName = "MemoizedVideoPreview";
 
 type UserPortfolioProps = {
-  address: string;
+  realmId: RealmId;
 };
 
-export default function ProfilePortfolioUser({ address }: UserPortfolioProps) {
+export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
 
-  const profileRealmId = address;
-  const { data: user } = useSuspenseQuery(profileOptions(profileRealmId));
+  const address = addressFromRealmId(realmId);
+  const { data: user } = useSuspenseQuery(profileOptions(realmId));
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const loggedInUserRealmId = userInfo?.realmId || "";
-
-  const isOwner = userId && addressFromRealmId(loggedInUserRealmId) === address;
+  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
+  const isOwner = loggedUserAddress === address;
 
   const profile = deserializeWithFrontMatter({
     serialized: user?.bio ?? "",

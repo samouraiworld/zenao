@@ -1,11 +1,19 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAnalyticsEvents } from "./use-analytics-events";
 import { useReactPost } from "@/lib/mutations/social-feed";
 import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
+import { OrgType } from "@/lib/organization";
 
-function useFeedPostReactionHandler(feedId: string, parentId: string = "") {
+function useFeedPostReactionHandler(
+  orgType: OrgType,
+  orgId: string,
+  feedId: string,
+  parentId: string = "",
+) {
   const { getToken, userId } = useAuth();
+  const { trackEvent } = useAnalyticsEvents();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
@@ -26,6 +34,13 @@ function useFeedPostReactionHandler(feedId: string, parentId: string = "") {
         icon,
         feedId,
         parentId,
+      });
+      trackEvent("PostReactionUpdated", {
+        props: {
+          orgType,
+          orgId,
+          postId,
+        },
       });
     } catch (error) {
       if (error instanceof Error) {

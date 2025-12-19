@@ -211,7 +211,7 @@ export const communityDetailsSchema = z.object({
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
 
-const userPortfolioSchema = z.object({
+export const userPortfolioSchema = z.object({
   portfolio: z.array(portfolioItemSchema).default([]),
 });
 
@@ -349,3 +349,10 @@ export const communityFormSchema = z.object({
 });
 
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
+
+export const realmIdSchema = z
+  .string()
+  .regex(/^([a-z0-9-]+\.)*[a-z0-9-]+\.[a-z]{2,}(\/[a-z0-9\-_]+)+$/)
+  .or(z.string().regex(/^g[a-z0-9]{39}/));
+
+export type RealmId = z.infer<typeof realmIdSchema>;

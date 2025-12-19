@@ -19,19 +19,21 @@ import {
 import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import { RealmId } from "@/types/schemas";
 
 type EventsTabProps = {
-  address: string;
+  realmId: RealmId;
   now: number;
 };
 
-export default function ProfileEvents({ address, now }: EventsTabProps) {
+export default function ProfileEvents({ realmId, now }: EventsTabProps) {
   const t = useTranslations("profile-info");
   const { getToken, userId } = useAuth();
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
+  const address = addressFromRealmId(realmId);
   const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
   const isOwner = loggedUserAddress === address;
   // The connected user can see his both discoverable and undiscoverable events
@@ -47,7 +49,7 @@ export default function ProfileEvents({ address, now }: EventsTabProps) {
     fetchNextPage: fetchNextUpcomingPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      address,
+      realmId,
       discoverableFilter,
       now,
       Number.MAX_SAFE_INTEGER,
@@ -63,7 +65,7 @@ export default function ProfileEvents({ address, now }: EventsTabProps) {
     fetchNextPage: fetchNextPastPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      address,
+      realmId,
       discoverableFilter,
       now - 1,
       0,

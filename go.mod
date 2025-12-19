@@ -385,6 +385,3 @@ require (
 	mvdan.cc/unparam v0.0.0-20240528143540-8a5130ca722f // indirect
 	pluginrpc.com/pluginrpc v0.5.0 // indirect
 )
-
-// we use a forked version of protojson to match protoc-gen-es types
-replace google.golang.org/protobuf => github.com/samouraiworld/protobuf-go v0.0.0-20251019102754-003ac92f26ee

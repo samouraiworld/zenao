@@ -1,9 +1,9 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
-import { fromJson } from "@bufbuild/protobuf";
-import { extractGnoJSONResponse } from "@/lib/gno";
-import { PostViewJson, PostViewSchema } from "@/app/gen/feeds/v1/feeds_pb";
-import { PollJson, PollSchema } from "@/app/gen/polls/v1/polls_pb";
+import { withSpan } from "../tracer";
+import { zenaoClient } from "../zenao-client";
+import { userIdFromPkgPath } from "./user";
+import { eventIdFromPkgPath } from "./event";
+import { communityIdFromPkgPath } from "./community";
 
 export const DEFAULT_FEED_POSTS_LIMIT = 30;
 export const DEFAULT_FEED_POSTS_COMMENTS_LIMIT = 10;
@@ -12,17 +12,19 @@ export const feedPost = (postId: string, userRealmId: string) =>
   queryOptions({
     queryKey: ["feedPost", postId, userRealmId],
     queryFn: async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      return withSpan(
+        `query:backend:post:${postId}:main:${userIdFromPkgPath(userRealmId)}`,
+        async () => {
+          const res = await zenaoClient.getPost({
+            postId,
+            userId: userIdFromPkgPath(userRealmId),
+          });
+          if (res.post == null) {
+            throw new Error("post not found");
+          }
+          return res.post;
+        },
       );
-
-      const res = await client.evaluateExpression(
-        "gno.land/r/zenao/social_feed",
-        `postViewToJSON(GetPostView(${postId}, "${userRealmId}"))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-
-      return fromJson(PostViewSchema, raw as PostViewJson);
     },
   });
 
@@ -35,16 +37,29 @@ export const feedPosts = (
   infiniteQueryOptions({
     queryKey: ["feedPosts", feedId, tags, userRealmId],
     queryFn: async ({ pageParam = 0 }) => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-      );
+      return withSpan(
+        `query:backend:feed:${feedId}:posts:${tags}:${userIdFromPkgPath(userRealmId)}`,
+        async () => {
+          const pkgPath = feedId.split(":")[0];
+          const orgType = pkgPath.includes("events/") ? "event" : "community";
+          const orgId =
+            orgType === "event"
+              ? eventIdFromPkgPath(pkgPath)
+              : communityIdFromPkgPath(pkgPath);
 
-      const res = await client.evaluateExpression(
-        "gno.land/r/zenao/social_feed",
-        `postViewsToJSON(GetFeedPosts("${feedId}", ${pageParam * limit}, ${limit}, "${tags}", "${userRealmId}"))`,
+          const res = await zenaoClient.getFeedPosts({
+            org: {
+              entityType: orgType,
+              entityId: orgId,
+            },
+            offset: pageParam * limit,
+            limit,
+            tags: tags ? tags.split(",") : [],
+            userId: userIdFromPkgPath(userRealmId),
+          });
+          return res.posts;
+        },
       );
-      const raw = extractGnoJSONResponse(res);
-      return postViewsFromJson(raw);
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -64,16 +79,19 @@ export const feedPostsChildren = (
   infiniteQueryOptions({
     queryKey: ["feedPostsChildren", parentId, tags, userRealmId],
     queryFn: async ({ pageParam = 0 }) => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      return withSpan(
+        `query:backend:post:${parentId}:${tags}:${userIdFromPkgPath(userRealmId)}`,
+        async () => {
+          const res = await zenaoClient.getChildrenPosts({
+            parentId,
+            offset: pageParam * limit,
+            limit,
+            tags: tags ? tags.split(",") : [],
+            userId: userIdFromPkgPath(userRealmId),
+          });
+          return res.posts;
+        },
       );
-      const res = await client.evaluateExpression(
-        "gno.land/r/zenao/social_feed",
-        `postViewsToJSON(GetChildrenPosts("${parentId}", ${pageParam * limit}, ${limit}, "${tags}", "${userRealmId}"))`,
-      );
-      const raw = extractGnoJSONResponse(res);
-
-      return postViewsFromJson(raw);
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -84,25 +102,22 @@ export const feedPostsChildren = (
     },
   });
 
-function postViewsFromJson(raw: unknown) {
-  const list = raw as unknown[];
-  return list.map((elem) => fromJson(PostViewSchema, elem as PostViewJson));
-}
-
 export const pollInfo = (pollId: string, userRealmId: string) =>
   queryOptions({
     queryKey: ["poll", pollId],
     queryFn: async () => {
-      const client = new GnoJSONRPCProvider(
-        process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+      return withSpan(
+        `query:backend:poll:${pollId}:${userIdFromPkgPath(userRealmId)}`,
+        async () => {
+          const res = await zenaoClient.getPoll({
+            pollId,
+            userId: userIdFromPkgPath(userRealmId),
+          });
+          if (res.poll == null) {
+            throw new Error("poll not found");
+          }
+          return res.poll;
+        },
       );
-
-      const res = await client.evaluateExpression(
-        "gno.land/r/zenao/polls",
-        `pollToJSON(GetInfo(${parseInt(pollId, 10)}, "${userRealmId}"))`,
-      );
-
-      const raw = extractGnoJSONResponse(res) as PollJson;
-      return fromJson(PollSchema, raw);
     },
   });
