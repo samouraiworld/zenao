@@ -14,6 +14,7 @@ type AnalyticEvents = {
   SignInClick: { context: string };
   ThemeChange: { theme: "light" | "dark" | "system" };
   UserProfileEdited: never;
+  CommunityCreated: { communityId: string };
   CommunityEdited: { communityId: string };
   CommunityJoined: { communityId: string };
   CommunityLeft: { communityId: string };
