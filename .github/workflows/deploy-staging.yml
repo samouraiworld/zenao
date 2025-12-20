@@ -46,6 +46,7 @@ jobs:
             yq -iy 'del(.services.backend.command)' staging.docker-compose.yml
             yq -iy '.services.backend |= ({"command": "--maintenance"} + .)' staging.docker-compose.yml
             docker compose -f staging.docker-compose.yml up -d backend
+            git restore staging.docker-compose.yml
 
       - name: Backup DB
         shell: bash
