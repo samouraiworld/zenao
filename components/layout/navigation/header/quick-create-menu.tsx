@@ -2,6 +2,7 @@
 
 import { Calendar, PlusIcon, Users } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,8 @@ import {
 import { Button } from "@/components/shadcn/button";
 
 export default function QuickCreateMenu() {
+  const t = useTranslations("components.widgets.quick-create-menu");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -29,7 +32,7 @@ export default function QuickCreateMenu() {
           <DropdownMenuItem>
             <div className="flex">
               <Calendar className="mr-2 h-5 w-5" />
-              <span className="mr-2">Create new event</span>
+              <span className="mr-2">{t("create-event")}</span>
             </div>
           </DropdownMenuItem>
         </Link>
@@ -37,7 +40,7 @@ export default function QuickCreateMenu() {
           <DropdownMenuItem asChild>
             <div className="flex">
               <Users className="h-5 w-5" />
-              <span className="mr-2">Create new community</span>
+              <span className="mr-2">{t("create-community")}</span>
             </div>
           </DropdownMenuItem>
         </Link>
