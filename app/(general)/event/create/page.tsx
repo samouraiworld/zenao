@@ -29,7 +29,9 @@ export default async function CreateEventPage() {
   if (!token || !userRealmId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
-        {t("log-in")}
+        <div className="flex flex-col items-center mx-auto md:max-w-5xl">
+          {t("log-in")}
+        </div>
       </ScreenContainerCentered>
     );
   }
