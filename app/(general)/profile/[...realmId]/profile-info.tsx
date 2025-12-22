@@ -10,7 +10,7 @@ import { profileOptions } from "@/lib/queries/profile";
 import { ProfileTabsSchemaType, RealmId } from "@/types/schemas";
 import { addressFromRealmId } from "@/lib/gno";
 import ProfileEvents from "@/app/profile/[address]/(general)/@tabs/events/page";
-import ProfilePortfolioUser from "@/app/profile/[address]/(general)/@tabs/portfolio/page";
+import ProfilePortfolio from "@/app/profile/[address]/(general)/@tabs/portfolio/page";
 
 export function ProfileInfo({
   realmId,
@@ -72,9 +72,7 @@ export function ProfileInfo({
         {activeTab === "events" && (
           <ProfileEvents realmId={realmId} now={now} />
         )}
-        {activeTab === "portfolio" && (
-          <ProfilePortfolioUser realmId={realmId} />
-        )}
+        {activeTab === "portfolio" && <ProfilePortfolio realmId={realmId} />}
       </div>
     </div>
   );
