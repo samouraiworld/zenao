@@ -146,7 +146,7 @@ const NavLink = ({ item, pathname }: { item: NavItem; pathname: string }) => {
         <Text
           size="sm"
           variant={isActive ? "primary" : "secondary"}
-          className="text-inherit max-[848px]:hidden"
+          className="text-inherit max-[999px]:hidden"
         >
           {item.children}
         </Text>
@@ -200,7 +200,7 @@ export function Header() {
             />
             <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
           </Link>
-          <VersionTag />
+          <VersionTag className="hidden sm:flex" />
         </div>
         <div className="flex standalone:hidden standalone:md:flex flex-row gap-4">
           <HeaderLinks />
