@@ -30,6 +30,7 @@ import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
   onSubmit: (values: CommunityFormSchemaType) => Promise<void>;
+  isEditing?: boolean;
   isLoading: boolean;
 }
 
@@ -37,6 +38,7 @@ export const CommunityForm = ({
   form,
   onSubmit,
   isLoading,
+  isEditing,
 }: CommunityFormProps) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -52,13 +54,14 @@ export const CommunityForm = ({
 
   const lastAdmin = adminInputs?.[adminInputs.length - 1];
   const isLastAdminInvalid =
-    !lastAdmin ||
-    !communityFormSchema.shape.administrators.element.shape.address.safeParse(
-      lastAdmin.address,
-    ).success;
+    lastAdmin &&
+    (lastAdmin.address === "" ||
+      !communityFormSchema.shape.administrators.element.shape.address.safeParse(
+        lastAdmin.address,
+      ).success);
   const isButtonDisabled = !form.formState.isValid || isLastAdminInvalid;
 
-  const t = useTranslations("community-edit-form");
+  const t = useTranslations("community-form");
 
   return (
     <Form {...form}>
@@ -210,11 +213,11 @@ export const CommunityForm = ({
                     />
                     <div
                       onClick={() => {
-                        if (fields.length > 1) remove(index);
+                        if (!isEditing || fields.length > 1) remove(index);
                       }}
                       className={cn(
                         "hover:cursor-pointer flex items-center justify-center rounded-full size-11 aspect-square",
-                        fields.length > 1
+                        !isEditing || fields.length > 1
                           ? "hover:bg-destructive"
                           : "opacity-30 cursor-not-allowed",
                       )}
@@ -246,7 +249,7 @@ export const CommunityForm = ({
             type="submit"
             className="px-8 w-full"
           >
-            {t("submit")}
+            {isEditing ? t("submit-edit") : t("submit-create")}
           </ButtonWithChildren>
         </SettingsSection>
       </form>

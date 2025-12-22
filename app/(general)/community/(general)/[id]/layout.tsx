@@ -1,7 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import CommunityInfoLayout from "../community-info-layout";
+import CommunityInfoLayout from "./community-info-layout";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import {

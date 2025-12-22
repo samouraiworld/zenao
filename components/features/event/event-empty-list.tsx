@@ -21,7 +21,7 @@ const EmptyEventsList: React.FC = () => {
         </Text>
       </div>
       <Button variant="secondary">
-        <Link href="/create">
+        <Link href="/event/create">
           <Text size="sm" variant="secondary">
             {t("create-event")}
           </Text>
