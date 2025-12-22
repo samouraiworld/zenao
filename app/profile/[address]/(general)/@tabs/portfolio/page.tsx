@@ -65,25 +65,21 @@ export default function ProfilePortfolio({ realmId }: UserPortfolioProps) {
   const { editUser } = useEditUserProfile();
 
   const onSave = async (newPortfolio: PortfolioItem[]) => {
-    try {
-      const token = await getToken();
-      if (!token) throw new Error("invalid clerk token");
+    const token = await getToken();
+    if (!token) throw new Error("invalid clerk token");
 
-      const bio = serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
-        profile.bio,
-        { ...profile, portfolio: newPortfolio },
-      );
+    const bio = serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
+      profile.bio,
+      { ...profile, portfolio: newPortfolio },
+    );
 
-      await editUser({
-        realmId: address,
-        token,
-        avatarUri: userProfile?.avatarUri ?? "",
-        displayName: userProfile?.displayName ?? "",
-        bio,
-      });
-    } catch (error) {
-      throw error;
-    }
+    await editUser({
+      realmId: address,
+      token,
+      avatarUri: userProfile?.avatarUri ?? "",
+      displayName: userProfile?.displayName ?? "",
+      bio,
+    });
   };
   return (
     <PortfolioTab

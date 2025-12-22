@@ -85,36 +85,32 @@ export default function CommunityPortfolio({
     newPortfolio: PortfolioItem[],
     itemType: "image" | "audio" | "video",
   ) => {
-    try {
-      const token = await getToken();
-      if (!token) throw new Error("invalid clerk token");
+    const token = await getToken();
+    if (!token) throw new Error("invalid clerk token");
 
-      const description = serializeWithFrontMatter<
-        Omit<CommunityDetails, "description">
-      >(otherDetails.description, {
-        shortDescription: otherDetails.shortDescription,
-        portfolio: newPortfolio,
-        socialMediaLinks: otherDetails.socialMediaLinks,
-      });
+    const description = serializeWithFrontMatter<
+      Omit<CommunityDetails, "description">
+    >(otherDetails.description, {
+      shortDescription: otherDetails.shortDescription,
+      portfolio: newPortfolio,
+      socialMediaLinks: otherDetails.socialMediaLinks,
+    });
 
-      await editCommunity({
-        ...communityInfo,
-        communityId,
-        administrators,
-        token,
-        description,
-      });
+    await editCommunity({
+      ...communityInfo,
+      communityId,
+      administrators,
+      token,
+      description,
+    });
 
-      trackEvent("PortfolioUpdated", {
-        props: {
-          orgType: "community",
-          orgId: communityId,
-          itemType,
-        },
-      });
-    } catch (error) {
-      throw error;
-    }
+    trackEvent("PortfolioUpdated", {
+      props: {
+        orgType: "community",
+        orgId: communityId,
+        itemType,
+      },
+    });
   };
 
   return (
