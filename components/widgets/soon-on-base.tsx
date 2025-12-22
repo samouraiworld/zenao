@@ -17,7 +17,7 @@ export default function SoonOnBase({ className }: { className?: string }) {
       <Text size="sm" variant="secondary" className="pr-1.5">
         {t("soon-on")}
       </Text>
-      <BaseLogo className="h-3 dark:fill-secondary-color" />
+      <BaseLogo className="h-3 fill-[#1652F0]" />
     </Card>
   );
 }
