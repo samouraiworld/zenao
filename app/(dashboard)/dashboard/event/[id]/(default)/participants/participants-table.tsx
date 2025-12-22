@@ -2,6 +2,7 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { Download } from "lucide-react";
 import {
   DEFAULT_EVENT_PARTICIPANTS_LIMIT,
   eventUsersWithRole,
@@ -11,6 +12,7 @@ import Text from "@/components/widgets/texts/text";
 import { useParticipantsColumns } from "@/components/features/dashboard/event-details/columns";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
+import { Button } from "@/components/shadcn/button";
 
 interface ParticipantsTableProps {
   eventId: string;
@@ -32,6 +34,14 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
 
   return (
     <div className="flex flex-col gap-4">
+      <Button
+        variant="outline"
+        size="sm"
+        className="ml-auto hidden h-8 lg:flex"
+      >
+        <Download />
+        Export CSV
+      </Button>
       <div className="mt-2 relative flex flex-col gap-4 overflow-hidden rounded-lg border">
         <div className="w-full">
           <DataTableNew
