@@ -137,7 +137,7 @@ describe("main", () => {
     // go to manifesto page
     cy.get("a").contains("Blog").click();
 
-    // check that manifesto text is present
+    // check that blog page's header text is present
     cy.get("p")
       .contains("Explore the exciting updates and innovations of Zenao")
       .should("be.visible");
