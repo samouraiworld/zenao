@@ -66,22 +66,6 @@ export function PortfolioTab({
     itemType: "image" | "video" | "audio",
   ) => {
     try {
-      //   const token = await getToken();
-      //   if (!token) throw new Error("invalid clerk token");
-
-      //   const bio = serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
-      //     profile.bio,
-      //     { ...profile, portfolio: newPortfolio },
-      //   );
-
-      //   await editUser({
-      //     realmId: address,
-      //     token,
-      //     avatarUri: userProfile?.avatarUri ?? "",
-      //     displayName: userProfile?.displayName ?? "",
-      //     bio,
-      //   });
-
       await onSave(newPortfolio, itemType);
 
       setLocalPortfolio(newPortfolio);
