@@ -120,6 +120,11 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
   };
 
   return (
-    <CommunityForm form={form} onSubmit={onSubmit} isLoading={isPending} />
+    <CommunityForm
+      form={form}
+      onSubmit={onSubmit}
+      isLoading={isPending}
+      isEditing
+    />
   );
 };
