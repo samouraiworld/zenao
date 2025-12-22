@@ -1,4 +1,4 @@
-Join us for the upcoming event sponsored by {{.CommunityName}}!
+Join us for the upcoming event organized by {{.CommunityName}}!
 
 
 EVENT DETAILS:
@@ -11,7 +11,7 @@ DATE AND TIME
 
 From: {{.EventDate}} To: {{.EventEndDate}}
 
-SPONSORED BY
+ORGANIZED BY
 
 
 

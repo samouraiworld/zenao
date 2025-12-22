@@ -417,7 +417,7 @@ func execGenTxs() error {
 		}
 
 		if slices.Contains(post.Post.Tags, "poll") {
-			poll, err := db.GetPollByPostID(post.ID)
+			poll, err := db.GetPollByPostID(post.ID, "")
 			if err != nil {
 				logger.Error("failed to retrieve poll for post", zap.String("post-id", post.ID), zap.Error(err))
 			}

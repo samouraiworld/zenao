@@ -21,6 +21,7 @@ import {
 } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import QuickCreateMenu from "./quick-create-menu";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -35,12 +36,13 @@ import {
 import useSmartBack from "@/hooks/use-smart-back";
 import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
-import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import {
   UserAvatar,
   UserAvatarSkeleton,
 } from "@/components/features/user/user";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import SoonOnBase from "@/components/widgets/soon-on-base";
+import VersionTag from "@/components/widgets/version-tag";
 
 export type NavItem = {
   key: string;
@@ -136,7 +138,7 @@ const NavLink = ({ item, pathname }: { item: NavItem; pathname: string }) => {
         <Text
           size="sm"
           variant={isActive ? "primary" : "secondary"}
-          className="text-inherit max-[624px]:hidden"
+          className="text-inherit max-[848px]:hidden"
         >
           {item.children}
         </Text>
@@ -174,9 +176,9 @@ export function Header() {
   }, []);
 
   return (
-    <div className="flex justify-between p-4 w-full items-center">
+    <header className="flex justify-between p-4 w-full items-center">
       {/* Desktop */}
-      <div className="flex max-[450px]:gap-4 gap-6 items-center">
+      <div className="flex gap-4 items-center">
         <div className="flex items-center gap-2">
           <GoBackButton className="hidden standalone:flex" />
           <Link href="/" className="flex gap-2 items-center">
@@ -190,6 +192,7 @@ export function Header() {
             />
             <Text className="max-md:hidden font-extrabold">{t("zenao")}</Text>
           </Link>
+          <VersionTag />
         </div>
         <div className="flex standalone:hidden standalone:md:flex flex-row gap-4">
           <HeaderLinks />
@@ -197,21 +200,14 @@ export function Header() {
       </div>
 
       <div className="flex gap-2 items-center">
-        <Link passHref href="/create">
-          <ButtonWithChildren
-            variant="outline"
-            size="sm"
-            className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17]"
-          >
-            {t("create-event")}
-          </ButtonWithChildren>
-        </Link>
+        <SoonOnBase className="hidden sm:flex" />
+        <QuickCreateMenu />
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
         <Auth className="h-fit" isMounted={isMounted} />
       </div>
-    </div>
+    </header>
   );
 }
 
