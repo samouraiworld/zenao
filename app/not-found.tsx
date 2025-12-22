@@ -12,14 +12,14 @@ export default function NotFound() {
 
   return (
     <ScreenContainerCentered>
-      <div className="mx-auto max-w-md flex flex-col">
+      <div className="flex flex-col items-center mx-auto md:max-w-5xl">
         <Heading level={1} size="4xl" className="text-center">
           404
         </Heading>
         <Text className="text-center">{t("label")}</Text>
         <br />
         <Link href="/">
-          <ButtonWithChildren>
+          <ButtonWithChildren className="max-w-[480px]">
             <Text variant="invert" size="sm">
               {t("button")}
             </Text>

@@ -61,17 +61,23 @@ func (s *ZenaoServer) CreateCommunity(
 	cmt := (*zeni.Community)(nil)
 	if err := s.DB.TxWithSpan(ctx, "db.CreateCommunity", func(tx zeni.DB) error {
 		var err error
-		cmt, err = tx.CreateCommunity(zUser.ID, adminIDs, []string{}, []string{}, req.Msg)
+		// XXX: put the admins as members too.
+		cmt, err = tx.CreateCommunity(zUser.ID, adminIDs, adminIDs, []string{}, req.Msg)
 		if err != nil {
 			return err
 		}
+
+		if _, err = tx.CreateFeed(zeni.EntityTypeCommunity, cmt.ID, "main"); err != nil {
+			return err
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
 	// XXX: put the admins as members too.
-	if err := s.Chain.CreateCommunity(cmt.ID, adminIDs, adminIDs, []string{}, req.Msg); err != nil {
+	if err := s.Chain.WithContext(ctx).CreateCommunity(cmt.ID, adminIDs, adminIDs, []string{}, req.Msg); err != nil {
 		return nil, fmt.Errorf("failed to create community on chain: %w", err)
 	}
 
