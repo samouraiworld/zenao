@@ -12,6 +12,7 @@ import {
 import { DeletePostConfirmationDialog } from "@/components/dialogs/delete-post-confirmation-dialog";
 
 type PostMenuProps = {
+  isAdmin?: boolean;
   isOwner?: boolean;
   onEdit?: () => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
@@ -20,6 +21,7 @@ type PostMenuProps = {
 };
 
 export function PostMenu({
+  isAdmin,
   isOwner,
   canEdit,
   onEdit,
@@ -32,6 +34,10 @@ export function PostMenu({
     await onDelete?.();
     setDialogOpen(false);
   };
+
+  if (!isOwner && !isAdmin) {
+    return null;
+  }
 
   return (
     <>
@@ -53,11 +59,12 @@ export function PostMenu({
               {canEdit && onEdit && (
                 <DropdownMenuItem onClick={onEdit}>Edit post</DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => setDialogOpen(true)}>
-                Delete post
-              </DropdownMenuItem>
             </>
           )}
+
+          <DropdownMenuItem onClick={() => setDialogOpen(true)}>
+            Delete post
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>
