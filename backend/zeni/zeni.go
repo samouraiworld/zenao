@@ -129,6 +129,7 @@ type Post struct {
 	Post      *feedsv1.Post
 	UserID    string
 	FeedID    string
+	PinnedAt  *time.Time
 	Reactions []*Reaction
 }
 
