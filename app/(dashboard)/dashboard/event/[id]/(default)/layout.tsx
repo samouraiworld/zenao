@@ -73,7 +73,13 @@ export default async function DashboardEventInfoLayoutProps({
           eventInfo={eventInfo}
           realmId={userRealmId}
         />
-        <DashboardEventTabs eventId={eventId}>{children}</DashboardEventTabs>
+
+        <DashboardEventTabs
+          eventId={eventId}
+          nbParticipants={eventInfo.participants}
+        >
+          {children}
+        </DashboardEventTabs>
       </div>
     </HydrationBoundary>
   );

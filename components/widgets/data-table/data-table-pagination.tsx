@@ -8,6 +8,13 @@ import {
 
 import { Button } from "@/components/shadcn/button";
 import { Label } from "@/components/shadcn/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn/select";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -31,6 +38,23 @@ export function DataTablePaginationSync<TData>({
           <Label htmlFor="rows-per-page" className="text-sm font-medium">
             Rows per page
           </Label>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => {
+              table.setPageSize(Number(value));
+            }}
+          >
+            <SelectTrigger className="w-20 text-sm" id="rows-per-page">
+              <SelectValue placeholder={table.getState().pagination.pageSize} />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <SelectItem key={pageSize} value={`${pageSize}`}>
+                  {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex w-fit items-center justify-center text-sm font-medium">
           Page {table.getState().pagination.pageIndex + 1} of{" "}

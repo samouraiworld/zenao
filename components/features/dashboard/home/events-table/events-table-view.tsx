@@ -9,7 +9,6 @@ import { useEventsTableColumns } from "../columns";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/widgets/data-table/data-table-view-options";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
-import { withDndColumn } from "@/lib/utils/data-table-utils";
 import { Label } from "@/components/shadcn/label";
 import {
   Select,
@@ -64,8 +63,7 @@ export function EventsTableView({
   hasPastPreviousPage,
 }: EventsTableViewProps) {
   const router = useRouter();
-  const eventsTableColumns = useEventsTableColumns(now);
-  const columns = withDndColumn(eventsTableColumns);
+  const columns = useEventsTableColumns(now);
   const table = useDataTableInstance({
     data: events,
     columns,

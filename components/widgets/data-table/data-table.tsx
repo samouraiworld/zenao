@@ -83,11 +83,13 @@ function renderTableBody<TData, TValue>({
       onClick={() => onClickRow?.(row)}
       className={onClickRow && "cursor-pointer"}
     >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
+      {row.getVisibleCells().map((cell) => {
+        return (
+          <TableCell key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        );
+      })}
     </TableRow>
   ));
 }

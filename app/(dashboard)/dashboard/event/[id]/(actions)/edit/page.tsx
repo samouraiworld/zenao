@@ -10,7 +10,7 @@ import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
-import { EditEventForm } from "@/app/(general)/edit/[id]/edit-event-form";
+import { EditEventForm } from "@/app/(general)/event/[id]/edit/edit-event-form";
 
 export default async function EditPage({
   params,

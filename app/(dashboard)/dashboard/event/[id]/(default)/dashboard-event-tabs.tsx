@@ -5,13 +5,16 @@ import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { TabsContent } from "@/components/shadcn/tabs";
 import { Separator } from "@/components/shadcn/separator";
+import { Badge } from "@/components/shadcn/badge";
 
 export default function DashboardEventTabs({
   eventId,
   children,
+  nbParticipants,
 }: {
   eventId: string;
   children: React.ReactNode;
+  nbParticipants: number;
 }) {
   const section = useSelectedLayoutSegment() || "description";
 
@@ -29,9 +32,9 @@ export default function DashboardEventTabs({
         <Link href={`/dashboard/event/${eventId}/participants`} scroll={false}>
           <TabsTrigger
             value="participants"
-            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
+            className="w-fit flex gap-2 p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            Participants
+            Participants <Badge variant="secondary">{nbParticipants}</Badge>
           </TabsTrigger>
         </Link>
         <Link href={`/dashboard/event/${eventId}/gatekeepers`} scroll={false}>
