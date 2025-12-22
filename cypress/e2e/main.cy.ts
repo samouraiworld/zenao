@@ -134,7 +134,7 @@ describe("main", () => {
 
     logout();
 
-    // go to manifesto page
+    // go to blog page
     cy.get("a").contains("Blog").click();
 
     // check that blog page's header text is present
