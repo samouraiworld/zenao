@@ -1614,6 +1614,38 @@ func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) er
 	})
 }
 
+// PinPost implements zeni.DB.
+func (g *gormZenaoDB) PinPost(feedID string, postID string, pin bool) error {
+	g, span := g.trace("gzdb.PinPost")
+	defer span.End()
+
+	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
+	if err != nil {
+		return err
+	}
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	var pinnedAt *time.Time
+	if pin {
+		now := time.Now()
+		pinnedAt = &now
+	}
+
+	res := g.db.Model(&Post{}).Where("id = ? AND feed_id = ?", postIDInt, feedIDInt).
+		Update("pinned_at", pinnedAt)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return errors.New("post not found in the specified feed")
+	}
+
+	return nil
+}
+
 // CreatePoll implements zeni.DB.
 func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
 	g, span := g.trace("gzdb.CreatePoll")

@@ -267,6 +267,7 @@ type DB interface {
 	CountChildrenPosts(parentID string) (uint64, error)
 	GetAllPosts(getDeleted bool) ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
+	PinPost(feedID string, postID string, pinned bool) error
 
 	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error

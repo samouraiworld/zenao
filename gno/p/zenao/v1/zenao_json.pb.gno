@@ -1992,6 +1992,41 @@ func ReactPostResponseFromJSON(r *ReactPostResponse, node *json.Node) {
 	*r = ReactPostResponse{}
 }
 
+func (p *PinPostRequest) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	if p.PostId != "" {
+		fields["postId"] = json.StringNode("", p.PostId)
+	}
+	if p.Pinned != false {
+		fields["pinned"] = json.BoolNode("", p.Pinned)
+	}
+
+	return json.ObjectNode("", fields)
+}
+
+func PinPostRequestFromJSON(p *PinPostRequest, node *json.Node) {
+	*p = PinPostRequest{}
+	fields := node.MustObject()
+
+	if val, ok := fields["postId"]; ok {
+		p.PostId = val.MustString()
+	}
+	if val, ok := fields["pinned"]; ok {
+		p.Pinned = val.MustBool()
+	}
+}
+
+func (p *PinPostResponse) ToJSON() *json.Node {
+	fields := map[string]*json.Node{}
+
+	return json.ObjectNode("", fields)
+}
+
+func PinPostResponseFromJSON(p *PinPostResponse, node *json.Node) {
+	*p = PinPostResponse{}
+}
+
 func (e *EditPostRequest) ToJSON() *json.Node {
 	fields := map[string]*json.Node{}
 

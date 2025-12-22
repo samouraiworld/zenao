@@ -1141,6 +1141,30 @@ func (r *ReactPostResponse) GnoLiteral(typePrefix string, linePrefix string) str
 	return buf.String()
 }
 
+func (p *PinPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("PinPostRequest{\n")
+	if p.PostId != "" {
+		fmt.Fprintf(buf, "%s\tPostId: %q,\n", linePrefix, p.PostId)
+	}
+	if p.Pinned != false {
+		fmt.Fprintf(buf, "%s\tPinned: %t,\n", linePrefix, p.Pinned)
+	}
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
+func (p *PinPostResponse) GnoLiteral(typePrefix string, linePrefix string) string {
+	buf := &strings.Builder{}
+	buf.WriteString(typePrefix)
+	buf.WriteString("PinPostResponse{\n")
+	buf.WriteString(linePrefix)
+	buf.WriteString("}")
+	return buf.String()
+}
+
 func (e *EditPostRequest) GnoLiteral(typePrefix string, linePrefix string) string {
 	buf := &strings.Builder{}
 	buf.WriteString(typePrefix)

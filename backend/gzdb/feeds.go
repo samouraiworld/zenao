@@ -67,6 +67,8 @@ type Post struct {
 	VideoURI          string // VideoPost
 	ThumbnailImageURI string // VideoPost
 
+	PinnedAt *time.Time // use time zero value to indicate not pinned
+
 	UserID uint
 	User   User
 	FeedID uint
