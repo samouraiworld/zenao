@@ -122,7 +122,7 @@ export default function ProfilePortfolioUser({ realmId }: UserPortfolioProps) {
       toast({ title: t("upload-file-success") });
     } catch (error) {
       captureException(error);
-      toast({ title: t("error-saving"), variant: "destructive" });
+      toast({ title: t("error-saving-portfolio"), variant: "destructive" });
     }
   };
 
