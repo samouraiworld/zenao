@@ -1,8 +1,10 @@
 "use client";
 
 import { Share } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn/button";
 import { useToast } from "@/hooks/use-toast";
+import { captureException } from "@/lib/report";
 
 interface PostShareProps {
   slug: string;
@@ -11,6 +13,7 @@ interface PostShareProps {
 
 export default function PostShare({ slug, title }: PostShareProps) {
   const { toast } = useToast();
+  const t = useTranslations("blog-post");
 
   const handleShare = () => {
     if (typeof window === "undefined") return;
@@ -25,8 +28,9 @@ export default function PostShare({ slug, title }: PostShareProps) {
           url: shareUrl,
         })
         .catch((error) => {
-          if (error instanceof Error) {
-            console.log("Error sharing:", error.message);
+          if (error instanceof Error && error.name !== "AbortError") {
+            captureException(error);
+            console.log("Error sharing:", error);
           }
         });
     } else {
@@ -35,13 +39,17 @@ export default function PostShare({ slug, title }: PostShareProps) {
         .writeText(`${title} - ${shareUrl}`)
         .then(() => {
           toast({
-            title: "Link copied to clipboard",
+            title: t("link-copied-toast"),
             variant: "default",
           });
         })
         .catch((error) => {
           if (error instanceof Error) {
-            console.error("Error copying to clipboard:", error.message);
+            captureException(error);
+            toast({
+              variant: "destructive",
+              title: t("failed-to-copy-link-toast"),
+            });
           }
         });
     }

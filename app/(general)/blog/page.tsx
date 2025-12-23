@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import BlogPostCard from "./blog-post-card";
 import BlogHeader from "./blog-header";
 import { ScreenContainer } from "@/components/layout/screen-container";
@@ -12,13 +13,14 @@ export const metadata: Metadata = {
 
 export default async function Blog() {
   const posts = await getPostsMetadata();
+  const t = await getTranslations("blog");
 
   if (!posts.length) {
     return (
       <ScreenContainer>
         <div className="flex flex-col gap-12">
           <BlogHeader />
-          <p className="text-center text-main">No blog posts available.</p>
+          <p className="text-center text-main">{t("no-blog-posts-title")}</p>
         </div>
       </ScreenContainer>
     );

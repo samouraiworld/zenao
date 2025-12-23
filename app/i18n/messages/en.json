@@ -368,7 +368,12 @@
   },
   "blog": {
     "pageTitle": "Blog",
-    "pageSubheading": "Explore the exciting updates and innovations of Zenao"
+    "pageSubheading": "Explore the exciting updates and innovations of Zenao",
+    "no-blog-posts-title": "No blog posts to show."
+  },
+  "blog-post": {
+    "link-copied-toast": "Link copied to clipboard!",
+    "failed-to-copy-link-toast": "Failed to copy link to clipboard!"
   },
   "load-more": "Load more",
   "no-posts-title": "No posts to show.",
