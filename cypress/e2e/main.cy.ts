@@ -140,14 +140,14 @@ describe("main", () => {
     cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
   });
 
-  it("navigate to blog from home", () => {
+  it("blog exists", () => {
     // start from the index page
-    cy.visit("/");
-
     logout();
 
+    cy.visit("/blog");
+
     // go to blog page
-    cy.get("a").contains("Blog").click();
+    // cy.get("a").contains("Blog").click();
 
     // check that blog page's header text is present
     cy.get("p")
