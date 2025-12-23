@@ -10,12 +10,18 @@ import { useGatekeepersColumns } from "@/components/features/dashboard/event-det
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import Text from "@/components/widgets/texts/text";
+import { AddGatekeeperForm } from "@/components/features/dashboard/event-details/gatekeepers/add-gatekeeper-form";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 interface GatekeepersTableProps {
   eventId: string;
+  eventInfo: EventInfo;
 }
 
-export default function GatekeepersTable({ eventId }: GatekeepersTableProps) {
+export default function GatekeepersTable({
+  eventId,
+  eventInfo,
+}: GatekeepersTableProps) {
   const { getToken, userId } = useAuth();
 
   const { data: userInfo } = useSuspenseQuery(
@@ -42,7 +48,11 @@ export default function GatekeepersTable({ eventId }: GatekeepersTableProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="mb-4 text-lg font-semibold">Gatekeepers</h2>
+      <AddGatekeeperForm
+        eventId={eventId}
+        eventInfo={eventInfo}
+        gatekeepers={gatekeepers.gatekeepers}
+      />
       <div className="mt-2 relative flex flex-col gap-4 overflow-hidden rounded-lg border">
         <div className="w-full">
           <DataTableNew
