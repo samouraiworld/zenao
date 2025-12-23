@@ -91,13 +91,6 @@ const HeaderLinks = () => {
         needsAuth: false,
         children: t("manifesto"),
       },
-      {
-        key: "blog",
-        to: "/blog",
-        icon: Rss,
-        needsAuth: false,
-        children: t("blog"),
-      },
     ],
     [t],
   );
