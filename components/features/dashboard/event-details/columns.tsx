@@ -1,15 +1,13 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { EllipsisVertical } from "lucide-react";
-import Link from "next/link";
+import { Trash2 } from "lucide-react";
 import { UserAvatarWithName } from "../../user/user";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/shadcn/dropdown-menu";
 import { Button } from "@/components/shadcn/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
 
 export const useParticipantsColumns = (): ColumnDef<string>[] => {
   const columns = useMemo<ColumnDef<string>[]>(
@@ -36,7 +34,13 @@ export const useParticipantsColumns = (): ColumnDef<string>[] => {
   return columns;
 };
 
-export const useGatekeepersColumns = (): ColumnDef<string>[] => {
+interface UseGatekeepersColumnsProps {
+  onDelete: (email: string) => void;
+}
+
+export const useGatekeepersColumns = (
+  props: UseGatekeepersColumnsProps,
+): ColumnDef<string>[] => {
   const columns = useMemo<ColumnDef<string>[]>(
     () => [
       {
@@ -52,24 +56,19 @@ export const useGatekeepersColumns = (): ColumnDef<string>[] => {
       {
         id: "actions",
         header: () => <div>Actions</div>,
-        cell: () => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        cell: ({ row }) => (
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
               <Button
                 variant="ghost"
-                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-                size="icon"
+                className="p-0 size-8"
+                onClick={() => props.onDelete(row.original)}
               >
-                <EllipsisVertical />
-                <span className="sr-only">Open menu</span>
+                <Trash2 className="text-muted-foreground w-4 h-4" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem>
-                <Link href={`#`}>View</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </TooltipTrigger>
+            <TooltipContent>Delete gatekeeper</TooltipContent>
+          </Tooltip>
         ),
         enableHiding: false,
         enableSorting: false,
@@ -78,7 +77,7 @@ export const useGatekeepersColumns = (): ColumnDef<string>[] => {
         },
       },
     ],
-    [],
+    [props],
   );
 
   return columns;
