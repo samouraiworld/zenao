@@ -10,7 +10,6 @@ import {
   BoxesIcon,
   CompassIcon,
   LucideProps,
-  Rss,
   Tickets,
 } from "lucide-react";
 import {
