@@ -76,7 +76,7 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
             dndEnabled={false}
             nothingFn={() => (
               <div className="flex h-48 flex-col justify-center items-center gap-4">
-                <Text className="text-center">No participant found.</Text>
+                <Text className="text-center">No participants found.</Text>
               </div>
             )}
             onClickRow={(row) => {
