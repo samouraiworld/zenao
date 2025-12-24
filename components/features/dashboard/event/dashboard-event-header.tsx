@@ -145,6 +145,22 @@ export default function DashboardEventHeader({
             </div>
           </EventSection>
 
+          <EventSection title="Capacity">
+            <div className="flex gap-2">
+              <Text>
+                {eventInfo.capacity === 0
+                  ? "No places"
+                  : eventInfo.capacity.toString()}{" "}
+                attendees
+              </Text>
+              <div className="text-main hover:underline">
+                <Link href={`/dashboard/event/${eventId}/edit`}>
+                  Update Capacity
+                </Link>
+              </div>
+            </div>
+          </EventSection>
+
           {/* Community */}
           {communityId && <EventCommunitySection communityId={communityId} />}
         </div>
