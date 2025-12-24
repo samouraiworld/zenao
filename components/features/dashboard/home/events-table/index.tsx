@@ -22,11 +22,11 @@ export default function EventsTable({ now }: EventsTableProps) {
     userInfoOptions(getToken, userId),
   );
 
-  const [tablePage, setTablePage] = useQueryState("tablePage", {
-    defaultValue: 0,
+  const [tablePage, setTablePage] = useQueryState("page", {
+    defaultValue: 1,
     parse: (value) => {
       const parsed = parseInt(value, 10);
-      return isNaN(parsed) || parsed < 0 ? 0 : parsed;
+      return isNaN(parsed) || parsed < 1 ? 1 : parsed;
     },
   });
   const [tab, setTab] = useQueryState<"upcoming" | "past">("tab", {

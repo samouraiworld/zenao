@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Download } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useTransition } from "react";
+import { parseAsInteger, useQueryStates } from "nuqs";
 import {
   DEFAULT_EVENT_PARTICIPANTS_LIMIT,
   eventUsersWithRole,
@@ -27,12 +28,29 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
   const { data: participants } = useSuspenseQuery(
     eventUsersWithRole(eventId, "participant"),
   );
+
+  const [tablePagination, setTablePagination] = useQueryStates(
+    {
+      page: parseAsInteger.withDefault(1),
+      limit: parseAsInteger.withDefault(DEFAULT_EVENT_PARTICIPANTS_LIMIT),
+    },
+    {
+      scroll: false,
+      clearOnDefault: true,
+    },
+  );
+
   const columns = useParticipantsColumns();
   const table = useDataTableInstance({
     data: participants,
     columns,
     enableRowSelection: false,
-    defaultPageSize: DEFAULT_EVENT_PARTICIPANTS_LIMIT,
+    defaultPageSize:
+      tablePagination.limit < 10
+        ? tablePagination.limit
+        : DEFAULT_EVENT_PARTICIPANTS_LIMIT,
+    defaultPageIndex:
+      tablePagination.page - 1 >= 0 ? tablePagination.page - 1 : 0,
     getRowId: (row) => row,
   });
 
@@ -85,7 +103,19 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
           />
         </div>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination
+        table={table}
+        pagination={{
+          page: tablePagination.page,
+          limit: tablePagination.limit,
+          setPage: (page: number) => {
+            setTablePagination((prev) => ({ ...prev, page }));
+          },
+          setLimit: (limit: number) => {
+            setTablePagination((prev) => ({ ...prev, limit }));
+          },
+        }}
+      />
     </div>
   );
 }
