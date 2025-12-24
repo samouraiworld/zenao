@@ -1,6 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import GatekeepersTable from "./gatekeepers-table";
+import { GatekeepersEditionContextProvider } from "./gatekeepers-edition-context-provider";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 
@@ -24,7 +25,12 @@ export default async function DashboardEventGatekeepersPage({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <GatekeepersTable eventId={eventId} eventInfo={eventInfo} />
+      <GatekeepersEditionContextProvider
+        eventId={eventId}
+        eventInfo={eventInfo}
+      >
+        <GatekeepersTable eventId={eventId} />
+      </GatekeepersEditionContextProvider>
     </HydrationBoundary>
   );
 }

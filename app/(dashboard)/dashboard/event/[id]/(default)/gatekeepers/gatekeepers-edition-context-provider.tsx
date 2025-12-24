@@ -1,0 +1,160 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { useDebouncedCallback } from "use-debounce";
+import { useAuth } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { eventGatekeepersEmails } from "@/lib/queries/event";
+import {
+  communitiesListByEvent,
+  communityIdFromPkgPath,
+  DEFAULT_COMMUNITIES_LIMIT,
+} from "@/lib/queries/community";
+import { makeLocationFromEvent } from "@/lib/location";
+import { captureException } from "@/lib/report";
+import { useToast } from "@/hooks/use-toast";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import { useEditEvent } from "@/lib/mutations/event-management";
+import { EventFormSchemaType } from "@/types/schemas";
+
+interface GatekeepersEditionContextProviderProps {
+  eventId: string;
+  eventInfo: EventInfo;
+  children: React.ReactNode;
+}
+
+interface GatekeepersEditionContextType {
+  onAdd: (email: string) => void;
+  onDelete: (email: string) => void;
+  gatekeepers: string[];
+  isActionPending: boolean;
+}
+
+const GatekeepersEditionContext = createContext<GatekeepersEditionContextType>(
+  {} as never,
+);
+
+export function GatekeepersEditionContextProvider({
+  eventId,
+  eventInfo,
+  children,
+}: GatekeepersEditionContextProviderProps) {
+  const t = useTranslations("gatekeeper-management-dialog");
+  const { toast } = useToast();
+  const { trackEvent } = useAnalyticsEvents();
+  const { getToken } = useAuth();
+  const { editEvent } = useEditEvent(getToken);
+  const { data: gatekeepers } = useSuspenseQuery(
+    eventGatekeepersEmails(eventId, getToken),
+  );
+  const [localGatekeepers, setGatekeepers] = useState<string[]>(
+    gatekeepers.gatekeepers,
+  );
+
+  const { data: communitiesPages } = useSuspenseInfiniteQuery(
+    communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
+  );
+  const communities = useMemo(
+    () => communitiesPages.pages.flat(),
+    [communitiesPages],
+  );
+
+  const communityId =
+    communities.length > 0
+      ? communityIdFromPkgPath(communities[0].pkgPath)
+      : null;
+
+  const location = makeLocationFromEvent(eventInfo.location);
+
+  const [isActionPending, startTransition] = useTransition();
+
+  const edit = (newGatekeepers: string[]) => {
+    startTransition(async () => {
+      const values: EventFormSchemaType = {
+        capacity: eventInfo.capacity,
+        title: eventInfo.title,
+        description: eventInfo.description,
+        startDate: eventInfo.startDate,
+        endDate: eventInfo.endDate,
+        discoverable: eventInfo.discoverable,
+        imageUri: eventInfo.imageUri,
+        location,
+        gatekeepers: newGatekeepers.map((gatekeeperEmail) => ({
+          email: gatekeeperEmail,
+        })),
+        exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
+        password: "",
+        communityId: communityId || null,
+      };
+
+      try {
+        await editEvent({ ...values, eventId });
+        trackEvent("EventGatekeepersUpdated", {
+          props: {
+            eventId,
+          },
+        });
+        toast({
+          title: t("toast-gatekeeper-management-success"),
+        });
+      } catch (err) {
+        captureException(err);
+        toast({
+          variant: "destructive",
+          title: t("toast-gatekeeper-management-error"),
+        });
+      }
+    });
+  };
+
+  const editDebounced = useDebouncedCallback(edit, 600);
+
+  const onDelete = (email: string) => {
+    const newGatekeepers = localGatekeepers.filter(
+      (gatekeeperEmail) => gatekeeperEmail !== email,
+    );
+    editDebounced(newGatekeepers);
+    setGatekeepers(newGatekeepers);
+  };
+
+  const onAdd = async (email: string) => {
+    // No debounce on add to provide better UX
+    await edit([...localGatekeepers, email]);
+    setGatekeepers((prev) => [...prev, email]);
+  };
+
+  return (
+    <GatekeepersEditionContext.Provider
+      value={{
+        onAdd,
+        onDelete,
+        gatekeepers: localGatekeepers,
+        isActionPending,
+      }}
+    >
+      {children}
+    </GatekeepersEditionContext.Provider>
+  );
+}
+
+export function useGatekeepersEdition() {
+  const context = useContext(GatekeepersEditionContext);
+
+  if (!context) {
+    throw new Error(
+      "useGatekeepersEdition must be used within a GatekeepersEditionContextProvider",
+    );
+  }
+  return context;
+}
