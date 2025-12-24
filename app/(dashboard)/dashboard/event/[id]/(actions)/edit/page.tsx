@@ -43,7 +43,7 @@ export default async function EditPage({
   return (
     <ScreenContainer isSignedOutModal={!userId}>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        {userId && <EditEventForm id={p.id} userId={userId} />}
+        {userId && <EditEventForm id={p.id} userId={userId} dashboard />}
       </HydrationBoundary>
     </ScreenContainer>
   );
