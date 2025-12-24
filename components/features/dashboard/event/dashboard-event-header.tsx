@@ -4,9 +4,9 @@ import { CircleX, EllipsisVertical, PencilIcon } from "lucide-react";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
-import { HTMLAttributes } from "react";
 import { EventImage } from "../../event/event-image";
 import EventCommunitySection from "../../event/event-community-section";
+import { EventSection } from "../../event/event-section";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import {
   DropdownMenu,
@@ -19,29 +19,7 @@ import {
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
-import { Separator } from "@/components/shadcn/separator";
-import { cn } from "@/lib/tailwind";
 import { EventFormSchemaType } from "@/types/schemas";
-
-interface EventSectionProps {
-  title: string;
-  children?: React.ReactNode;
-}
-
-const EventSection = ({
-  title,
-  children,
-  className,
-  ...props
-}: EventSectionProps & HTMLAttributes<HTMLDivElement>) => {
-  return (
-    <div className={cn("flex flex-col", className)} {...props}>
-      <Text className="font-semibold">{title}</Text>
-      <Separator className="mt-2 mb-3" />
-      {children && children}
-    </div>
-  );
-};
 
 interface DashboardEventHeaderProps {
   eventId: string;
