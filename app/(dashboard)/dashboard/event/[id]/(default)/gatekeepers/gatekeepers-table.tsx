@@ -2,10 +2,14 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { parseAsInteger, useQueryStates } from "nuqs";
 import { useGatekeepersEdition } from "./gatekeepers-edition-context-provider";
 import { userInfoOptions } from "@/lib/queries/user";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
-import { eventUserRoles } from "@/lib/queries/event-users";
+import {
+  DEFAULT_EVENT_PARTICIPANTS_LIMIT,
+  eventUserRoles,
+} from "@/lib/queries/event-users";
 import { useGatekeepersColumns } from "@/components/features/dashboard/event-details/columns";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
@@ -31,6 +35,18 @@ export default function GatekeepersTable({ eventId }: GatekeepersTableProps) {
   const columns = useGatekeepersColumns({
     onDelete,
   });
+
+  const [tablePagination, setTablePagination] = useQueryStates(
+    {
+      page: parseAsInteger.withDefault(1),
+      limit: parseAsInteger.withDefault(DEFAULT_EVENT_PARTICIPANTS_LIMIT),
+    },
+    {
+      scroll: false,
+      clearOnDefault: true,
+    },
+  );
+
   const table = useDataTableInstance({
     data: gatekeepers,
     columns,
@@ -59,7 +75,25 @@ export default function GatekeepersTable({ eventId }: GatekeepersTableProps) {
           />
         </div>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination
+        pagination={{
+          page: tablePagination.page,
+          limit: tablePagination.limit,
+          setLimit: (newLimit) => {
+            setTablePagination((prev) => ({
+              ...prev,
+              limit: newLimit,
+            }));
+          },
+          setPage: (newPage) => {
+            setTablePagination((prev) => ({
+              ...prev,
+              page: newPage,
+            }));
+          },
+        }}
+        table={table}
+      />
     </div>
   );
 }

@@ -64,7 +64,8 @@ export function DataTablePaginationSync<TData>({
             </SelectContent>
           </Select>
         </div>
-        {(table.getPageCount() > 0 && (pagination?.page ?? 1) - 1 < table.getPageCount()) ??
+        {(table.getPageCount() > 0 &&
+          (pagination?.page ?? 1) - 1 < table.getPageCount()) ??
           (0 < table.getPageCount() && (
             <div className="flex w-fit items-center justify-center text-sm font-medium">
               Page {table.getState().pagination.pageIndex + 1} of{" "}
