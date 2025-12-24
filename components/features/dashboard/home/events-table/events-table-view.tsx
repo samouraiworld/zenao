@@ -85,28 +85,30 @@ export function EventsTableView({
         <Label htmlFor="view-selector" className="sr-only">
           View
         </Label>
-        <Select
-          defaultValue="upcoming"
-          value={tab}
-          onValueChange={
-            onTabChange as React.Dispatch<React.SetStateAction<string>>
-          }
-        >
+        <Select defaultValue="upcoming" value={tab}>
           <SelectTrigger className="flex w-fit xl:hidden" id="view-selector">
             <SelectValue placeholder="Select a view" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="upcoming">Upcoming</SelectItem>
-            <SelectItem value="past">Past</SelectItem>
+            <Link href="/dashboard">
+              <SelectItem value="upcoming">Upcoming</SelectItem>
+            </Link>
+            <Link href="/dashboard?tab=upcoming">
+              <SelectItem value="past">Past</SelectItem>
+            </Link>
           </SelectContent>
         </Select>
         <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 xl:flex">
-          <TabsTrigger value="upcoming" className="gap-2">
-            Upcoming
-          </TabsTrigger>
-          <TabsTrigger value="past" className="gap-2">
-            Past
-          </TabsTrigger>
+          <Link href="/dashboard?tab=upcoming">
+            <TabsTrigger value="upcoming" className="gap-2">
+              Upcoming
+            </TabsTrigger>
+          </Link>
+          <Link href="/dashboard?tab=past">
+            <TabsTrigger value="past" className="gap-2">
+              Past
+            </TabsTrigger>
+          </Link>
         </TabsList>
         <div className="flex items-center gap-2">
           <DataTableViewOptions table={table} />

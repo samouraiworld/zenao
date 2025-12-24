@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQueryState } from "nuqs";
 import { EventsTableView } from "./events-table-view";
 import { userInfoOptions } from "@/lib/queries/user";
 import {
@@ -22,8 +22,18 @@ export default function EventsTable({ now }: EventsTableProps) {
     userInfoOptions(getToken, userId),
   );
 
-  const [tablePage, setTablePage] = useState(0);
-  const [tab, setTab] = useState<"upcoming" | "past">("upcoming");
+  const [tablePage, setTablePage] = useQueryState("tablePage", {
+    defaultValue: 0,
+    parse: (value) => {
+      const parsed = parseInt(value, 10);
+      return isNaN(parsed) || parsed < 0 ? 0 : parsed;
+    },
+  });
+  const [tab, setTab] = useQueryState<"upcoming" | "past">("tab", {
+    defaultValue: "upcoming",
+    parse: (value) =>
+      value === "upcoming" || value === "past" ? value : "upcoming",
+  });
 
   const { data: pastEvents, isFetching: isFetchingPastEvents } =
     useSuspenseQuery(
