@@ -6,6 +6,7 @@ import {
   useSuspenseQuery,
 } from "@tanstack/react-query";
 import { useMemo, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { eventGatekeepersEmails } from "@/lib/queries/event";
 import { userInfoOptions } from "@/lib/queries/user";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
@@ -23,6 +24,10 @@ import {
 } from "@/lib/queries/community";
 import { makeLocationFromEvent } from "@/lib/location";
 import { EventFormSchemaType } from "@/types/schemas";
+import { useEditEvent } from "@/lib/mutations/event-management";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import { useToast } from "@/hooks/use-toast";
+import { captureException } from "@/lib/report";
 
 interface GatekeepersTableProps {
   eventId: string;
@@ -33,7 +38,12 @@ export default function GatekeepersTable({
   eventId,
   eventInfo,
 }: GatekeepersTableProps) {
+  const { toast } = useToast();
   const { getToken, userId } = useAuth();
+  const { editEvent } = useEditEvent(getToken);
+  const { trackEvent } = useAnalyticsEvents();
+
+  const t = useTranslations("gatekeeper-management-dialog");
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -60,7 +70,7 @@ export default function GatekeepersTable({
 
   const location = makeLocationFromEvent(eventInfo.location);
 
-  const [isPending, startTransition] = useTransition();
+  const [_, startTransition] = useTransition();
   const onDelete = (email: string) => {
     startTransition(async () => {
       const newGatekeepers = gatekeepers.gatekeepers.filter(
@@ -68,7 +78,13 @@ export default function GatekeepersTable({
       );
 
       const values: EventFormSchemaType = {
-        ...eventInfo,
+        capacity: eventInfo.capacity,
+        title: eventInfo.title,
+        description: eventInfo.description,
+        startDate: eventInfo.startDate,
+        endDate: eventInfo.endDate,
+        discoverable: eventInfo.discoverable,
+        imageUri: eventInfo.imageUri,
         location,
         gatekeepers: newGatekeepers.map((gatekeeperEmail) => ({
           email: gatekeeperEmail,
@@ -78,7 +94,23 @@ export default function GatekeepersTable({
         communityId: communityId || null,
       };
 
-      console.log("Submitting:", values.gatekeepers);
+      try {
+        await editEvent({ ...values, eventId });
+        trackEvent("EventGatekeepersUpdated", {
+          props: {
+            eventId,
+          },
+        });
+        toast({
+          title: t("toast-gatekeeper-management-success"),
+        });
+      } catch (err) {
+        captureException(err);
+        toast({
+          variant: "destructive",
+          title: t("toast-gatekeeper-management-error"),
+        });
+      }
     });
   };
 

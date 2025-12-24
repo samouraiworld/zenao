@@ -80,7 +80,13 @@ export function AddGatekeeperForm({
   const onSubmit = (newGatekeeper: EmailSchemaType) => {
     startTransition(async () => {
       const values: EventFormSchemaType = {
-        ...eventInfo,
+        capacity: eventInfo.capacity,
+        title: eventInfo.title,
+        description: eventInfo.description,
+        startDate: eventInfo.startDate,
+        endDate: eventInfo.endDate,
+        discoverable: eventInfo.discoverable,
+        imageUri: eventInfo.imageUri,
         location,
         gatekeepers: [
           newGatekeeper,
@@ -92,8 +98,6 @@ export function AddGatekeeperForm({
         password: "",
         communityId: communityId || null,
       };
-
-      console.log("Submitting:", values.gatekeepers);
 
       try {
         await editEvent({ ...values, eventId });
