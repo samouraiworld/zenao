@@ -374,6 +374,14 @@ type ReactPostRequest struct {
 type ReactPostResponse struct {
 }
 
+type PinPostRequest struct {
+	PostId string
+	Pinned bool
+}
+
+type PinPostResponse struct {
+}
+
 type EditPostRequest struct {
 	PostId  string
 	Content string

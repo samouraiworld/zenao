@@ -311,6 +311,9 @@ func (p *Post) ToJSON() *json.Node {
 		}
 		fields["tags"] = json.ArrayNode("", arr)
 	}
+	if p.Pinned != false {
+		fields["pinned"] = json.BoolNode("", p.Pinned)
+	}
 
 	switch val := p.Post.(type) {
 	case *StandardPost:
@@ -382,6 +385,9 @@ func PostFromJSON(p *Post, node *json.Node) {
 			arr[i] = val.MustString()
 		}
 		p.Tags = arr
+	}
+	if val, ok := fields["pinned"]; ok {
+		p.Pinned = val.MustBool()
 	}
 
 	variantFieldNames := []string{"standard", "article", "link", "image", "video", "audio"}

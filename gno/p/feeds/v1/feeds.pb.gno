@@ -63,6 +63,7 @@ type Post struct {
 	UpdatedAt   int64
 	DeletedAt   int64
 	Tags        []string
+	Pinned      bool
 	Post        interface{}
 }
 
