@@ -142,6 +142,8 @@ const (
 	ZenaoServiceDeletePostProcedure = "/zenao.v1.ZenaoService/DeletePost"
 	// ZenaoServiceReactPostProcedure is the fully-qualified name of the ZenaoService's ReactPost RPC.
 	ZenaoServiceReactPostProcedure = "/zenao.v1.ZenaoService/ReactPost"
+	// ZenaoServicePinPostProcedure is the fully-qualified name of the ZenaoService's PinPost RPC.
+	ZenaoServicePinPostProcedure = "/zenao.v1.ZenaoService/PinPost"
 	// ZenaoServiceEditPostProcedure is the fully-qualified name of the ZenaoService's EditPost RPC.
 	ZenaoServiceEditPostProcedure = "/zenao.v1.ZenaoService/EditPost"
 	// ZenaoServiceHealthProcedure is the fully-qualified name of the ZenaoService's Health RPC.
@@ -195,6 +197,7 @@ type ZenaoServiceClient interface {
 	CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error)
 	DeletePost(context.Context, *connect.Request[v1.DeletePostRequest]) (*connect.Response[v1.DeletePostResponse], error)
 	ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error)
+	PinPost(context.Context, *connect.Request[v1.PinPostRequest]) (*connect.Response[v1.PinPostResponse], error)
 	EditPost(context.Context, *connect.Request[v1.EditPostRequest]) (*connect.Response[v1.EditPostResponse], error)
 	// HEALTH
 	Health(context.Context, *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error)
@@ -451,6 +454,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("ReactPost")),
 			connect.WithClientOptions(opts...),
 		),
+		pinPost: connect.NewClient[v1.PinPostRequest, v1.PinPostResponse](
+			httpClient,
+			baseURL+ZenaoServicePinPostProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("PinPost")),
+			connect.WithClientOptions(opts...),
+		),
 		editPost: connect.NewClient[v1.EditPostRequest, v1.EditPostResponse](
 			httpClient,
 			baseURL+ZenaoServiceEditPostProcedure,
@@ -508,6 +517,7 @@ type zenaoServiceClient struct {
 	createPost                 *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
 	deletePost                 *connect.Client[v1.DeletePostRequest, v1.DeletePostResponse]
 	reactPost                  *connect.Client[v1.ReactPostRequest, v1.ReactPostResponse]
+	pinPost                    *connect.Client[v1.PinPostRequest, v1.PinPostResponse]
 	editPost                   *connect.Client[v1.EditPostRequest, v1.EditPostResponse]
 	health                     *connect.Client[v1.HealthRequest, v1.HealthResponse]
 }
@@ -712,6 +722,11 @@ func (c *zenaoServiceClient) ReactPost(ctx context.Context, req *connect.Request
 	return c.reactPost.CallUnary(ctx, req)
 }
 
+// PinPost calls zenao.v1.ZenaoService.PinPost.
+func (c *zenaoServiceClient) PinPost(ctx context.Context, req *connect.Request[v1.PinPostRequest]) (*connect.Response[v1.PinPostResponse], error) {
+	return c.pinPost.CallUnary(ctx, req)
+}
+
 // EditPost calls zenao.v1.ZenaoService.EditPost.
 func (c *zenaoServiceClient) EditPost(ctx context.Context, req *connect.Request[v1.EditPostRequest]) (*connect.Response[v1.EditPostResponse], error) {
 	return c.editPost.CallUnary(ctx, req)
@@ -769,6 +784,7 @@ type ZenaoServiceHandler interface {
 	CreatePost(context.Context, *connect.Request[v1.CreatePostRequest]) (*connect.Response[v1.CreatePostResponse], error)
 	DeletePost(context.Context, *connect.Request[v1.DeletePostRequest]) (*connect.Response[v1.DeletePostResponse], error)
 	ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error)
+	PinPost(context.Context, *connect.Request[v1.PinPostRequest]) (*connect.Response[v1.PinPostResponse], error)
 	EditPost(context.Context, *connect.Request[v1.EditPostRequest]) (*connect.Response[v1.EditPostResponse], error)
 	// HEALTH
 	Health(context.Context, *connect.Request[v1.HealthRequest]) (*connect.Response[v1.HealthResponse], error)
@@ -1021,6 +1037,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("ReactPost")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServicePinPostHandler := connect.NewUnaryHandler(
+		ZenaoServicePinPostProcedure,
+		svc.PinPost,
+		connect.WithSchema(zenaoServiceMethods.ByName("PinPost")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceEditPostHandler := connect.NewUnaryHandler(
 		ZenaoServiceEditPostProcedure,
 		svc.EditPost,
@@ -1115,6 +1137,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceDeletePostHandler.ServeHTTP(w, r)
 		case ZenaoServiceReactPostProcedure:
 			zenaoServiceReactPostHandler.ServeHTTP(w, r)
+		case ZenaoServicePinPostProcedure:
+			zenaoServicePinPostHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditPostProcedure:
 			zenaoServiceEditPostHandler.ServeHTTP(w, r)
 		case ZenaoServiceHealthProcedure:
@@ -1286,6 +1310,10 @@ func (UnimplementedZenaoServiceHandler) DeletePost(context.Context, *connect.Req
 
 func (UnimplementedZenaoServiceHandler) ReactPost(context.Context, *connect.Request[v1.ReactPostRequest]) (*connect.Response[v1.ReactPostResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ReactPost is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) PinPost(context.Context, *connect.Request[v1.PinPostRequest]) (*connect.Response[v1.PinPostResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.PinPost is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) EditPost(context.Context, *connect.Request[v1.EditPostRequest]) (*connect.Response[v1.EditPostResponse], error) {

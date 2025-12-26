@@ -198,6 +198,9 @@ func (p *Post) GnoLiteral(typePrefix string, linePrefix string) string {
 		linePrefix = linePrefix[:len(linePrefix)-1]
 		fmt.Fprintf(buf, "%s\t},\n", linePrefix)
 	}
+	if p.Pinned != false {
+		fmt.Fprintf(buf, "%s\tPinned: %t,\n", linePrefix, p.Pinned)
+	}
 	switch val := p.Post.(type) {
 	case *Post_Standard:
 		fmt.Fprintf(buf, "%s\tPost: &%s,\n", linePrefix, val.Standard.GnoLiteral(typePrefix, linePrefix+"\t"))
