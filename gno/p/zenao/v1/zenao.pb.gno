@@ -5,6 +5,7 @@ package zenaov1
 import (
 	"errors"
 
+	v11 "gno.land/p/zenao/feeds/v1"
 	v1 "gno.land/p/zenao/polls/v1"
 )
 
@@ -65,6 +66,67 @@ type GetUserInfoRequest struct {
 type GetUserInfoResponse struct {
 	RealmId string
 	Plan    string
+}
+
+type Profile struct {
+	Address     string
+	DisplayName string
+	Bio         string
+	AvatarUri   string
+}
+
+type GetUsersProfileRequest struct {
+	Ids []string
+}
+
+type GetUsersProfileResponse struct {
+	Profiles []*Profile
+}
+
+type GetEventRequest struct {
+	EventId string
+}
+
+type GetEventResponse struct {
+	Event *EventInfo
+}
+
+type ListEventsRequest struct {
+	Limit              uint32
+	Offset             uint32
+	From               int64
+	To                 int64
+	DiscoverableFilter DiscoverableFilter
+}
+
+type ListEventsResponse struct {
+	Events []*EventInfo
+}
+
+type ListEventsByOrganizerRequest struct {
+	OrganizerId        string
+	Limit              uint32
+	Offset             uint32
+	From               int64
+	To                 int64
+	DiscoverableFilter DiscoverableFilter
+}
+
+type ListEventsByOrganizerResponse struct {
+	Events []*EventInfo
+}
+
+type ListEventsByParticipantRequest struct {
+	ParticipantId      string
+	Limit              uint32
+	Offset             uint32
+	From               int64
+	To                 int64
+	DiscoverableFilter DiscoverableFilter
+}
+
+type ListEventsByParticipantResponse struct {
+	Events []*EventInfo
 }
 
 type CreateEventRequest struct {
@@ -235,6 +297,15 @@ type CreatePollResponse struct {
 	PostId string
 }
 
+type GetPollRequest struct {
+	PollId string
+	UserId string
+}
+
+type GetPollResponse struct {
+	Poll *v1.Poll
+}
+
 type VotePollRequest struct {
 	PollId string
 	Option string
@@ -253,6 +324,39 @@ type CreatePostRequest struct {
 
 type CreatePostResponse struct {
 	PostId string
+}
+
+type GetPostRequest struct {
+	PostId string
+	UserId string
+}
+
+type GetPostResponse struct {
+	Post *v11.PostView
+}
+
+type GetFeedPostsRequest struct {
+	Org    *Entity
+	Limit  uint32
+	Offset uint32
+	Tags   []string
+	UserId string
+}
+
+type GetFeedPostsResponse struct {
+	Posts []*v11.PostView
+}
+
+type GetChildrenPostsRequest struct {
+	ParentId string
+	Limit    uint32
+	Offset   uint32
+	Tags     []string
+	UserId   string
+}
+
+type GetChildrenPostsResponse struct {
+	Posts []*v11.PostView
 }
 
 type DeletePostRequest struct {
@@ -311,6 +415,42 @@ type ExportParticipantsResponse struct {
 	MimeType string
 }
 
+type Entity struct {
+	EntityType string
+	EntityId   string
+}
+
+type EntityRolesRequest struct {
+	Org    *Entity
+	Entity *Entity
+}
+
+type EntityRolesResponse struct {
+	Roles []string
+}
+
+type EntitiesWithRolesRequest struct {
+	Org   *Entity
+	Roles []string
+}
+
+type EntityWithRoles struct {
+	RealmId string
+	Roles   []string
+}
+
+type EntitiesWithRolesResponse struct {
+	EntitiesWithRoles []*EntityWithRoles
+}
+
+type GetCommunityRequest struct {
+	CommunityId string
+}
+
+type GetCommunityResponse struct {
+	Community *CommunityInfo
+}
+
 type CommunityInfo struct {
 	DisplayName    string
 	Description    string
@@ -319,6 +459,35 @@ type CommunityInfo struct {
 	Administrators []string
 	CountMembers   uint32
 	PkgPath        string
+}
+
+type ListCommunitiesRequest struct {
+	Limit  uint32
+	Offset uint32
+}
+
+type ListCommunitiesResponse struct {
+	Communities []*CommunityInfo
+}
+
+type ListCommunitiesByMemberRequest struct {
+	MemberId string
+	Limit    uint32
+	Offset   uint32
+}
+
+type ListCommunitiesByMemberResponse struct {
+	Communities []*CommunityInfo
+}
+
+type ListCommunitiesByEventRequest struct {
+	EventId string
+	Limit   uint32
+	Offset  uint32
+}
+
+type ListCommunitiesByEventResponse struct {
+	Communities []*CommunityInfo
 }
 
 type CreateCommunityRequest struct {

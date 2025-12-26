@@ -38,7 +38,7 @@ export default function EventCommunitySection({
 
         <div className="flex flex-col">
           <Text variant="secondary" size="sm">
-            {t("sponsored-by")}
+            {t("organized-by")}
           </Text>
           <Text size="lg" className="font-medium">
             {community.displayName}

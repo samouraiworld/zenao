@@ -23,20 +23,30 @@ import {
 const EventDateTime = ({
   startDate,
   timezone,
+  fullDate,
 }: {
   startDate: bigint;
   timezone: string;
+  fullDate: boolean;
 }) => {
   return (
     <Text variant="secondary" suppressHydrationWarning>
-      {formatTZ(fromUnixTime(Number(startDate)), "p O", {
+      {formatTZ(fromUnixTime(Number(startDate)), fullDate ? "PPp" : "p O", {
         timeZone: timezone,
       })}
     </Text>
   );
 };
 
-export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
+export function EventCard({
+  evt,
+  href,
+  fullDate = true,
+}: {
+  evt: EventInfo;
+  href: string;
+  fullDate?: boolean;
+}) {
   const iconSize = 16;
   const location = makeLocationFromEvent(evt.location);
   const eventTimezone = locationTimezone(location);
@@ -66,7 +76,11 @@ export function EventCard({ evt, href }: { evt: EventInfo; href: string }) {
         <div className="py-2 px-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <EventDateTime startDate={evt.startDate} timezone={timezone} />
+              <EventDateTime
+                startDate={evt.startDate}
+                timezone={timezone}
+                fullDate={fullDate}
+              />
 
               <div className="flex items-center gap-2">
                 <Tooltip>

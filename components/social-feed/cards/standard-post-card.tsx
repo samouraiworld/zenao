@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { StandardPostForm } from "../forms/standard-post-form";
 import { PostCardLayout } from "./post-card-layout";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import { cford32Encode } from "@/lib/cford32";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
@@ -70,7 +69,6 @@ export function StandardPostCard({
       <PostCardLayout
         post={post}
         createdBy={createdBy}
-        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${cford32Encode(post.post.localPostId, 7)}`}
         canReply={canReply}
         replyHref={replyHref}
         canInteract={canInteract}

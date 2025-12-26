@@ -1,6 +1,5 @@
 "use client";
 
-import { Url } from "next/dist/shared/lib/router/router";
 import React, { ReactNode } from "react";
 import { Hash, MapPin, MessageCircle, Pin, X } from "lucide-react";
 import Link from "next/link";
@@ -24,7 +23,6 @@ type PostCardLayoutProps = {
   canReply?: boolean;
   replyHref?: string;
   editMode?: boolean;
-  gnowebHref?: Url;
   parentId?: string;
   canEdit?: boolean;
   canInteract?: boolean;
@@ -41,7 +39,6 @@ type PostCardLayoutProps = {
 export function PostCardLayout({
   post,
   createdBy,
-  gnowebHref,
   children,
   isOwner,
   canReply,
@@ -140,19 +137,20 @@ export function PostCardLayout({
             )}
           </div>
         )}
-        <div className="flex items-center absolute right-2 top-2">
-          <PostMenu
-            gnowebHref={gnowebHref}
-            isOwner={isOwner}
-            onDelete={async () => await onDelete?.(parentId)}
-            isDeleting={isDeleting}
-            canEdit={canEdit}
-            onEdit={() => onEditModeChange?.(true)}
-            canPin={canPin}
-            onPinToggle={() => onPinToggle?.()}
-            pinned={pinned}
-          />
-        </div>
+        {canInteract && (
+          <div className="flex items-center absolute right-2 top-2">
+            <PostMenu
+              isOwner={isOwner}
+              onDelete={async () => await onDelete?.(parentId)}
+              isDeleting={isDeleting}
+              canEdit={canEdit}
+              onEdit={() => onEditModeChange?.(true)}
+              canPin={canPin}
+              onPinToggle={() => onPinToggle?.()}
+              pinned={pinned}
+            />
+          </div>
+        )}
       </div>
 
       <div className="my-1">{children}</div>
