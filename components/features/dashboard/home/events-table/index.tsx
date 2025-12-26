@@ -61,7 +61,7 @@ export default function EventsTable({ now }: EventsTableProps) {
       return pastEvents.length > DEFAULT_EVENTS_LIMIT;
     },
     getHasPreviousPage: (currentPage) => {
-      return currentPage > 0 && pastEvents.length < DEFAULT_EVENTS_LIMIT;
+      return currentPage > 0;
     },
   });
 
@@ -77,7 +77,7 @@ export default function EventsTable({ now }: EventsTableProps) {
       return upcomingEvents.length == DEFAULT_EVENTS_LIMIT;
     },
     getHasPreviousPage: (currentPage) => {
-      return currentPage > 0 && upcomingEvents.length < DEFAULT_EVENTS_LIMIT;
+      return currentPage > 0;
     },
   });
 
