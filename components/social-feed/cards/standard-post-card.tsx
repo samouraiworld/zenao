@@ -24,6 +24,10 @@ export function StandardPostCard({
   isReacting,
   onDelete,
   isDeleting,
+  canPin,
+  pinned,
+  onPinToggle,
+  isPinning,
 }: {
   isOwner?: boolean;
   canInteract?: boolean;
@@ -37,8 +41,12 @@ export function StandardPostCard({
   onEditModeChange?: (editMode: boolean) => void;
   onReactionChange?: (icon: string) => void | Promise<void>;
   isReacting?: boolean;
+  canPin?: boolean;
+  pinned?: boolean;
+  onPinToggle?: () => void | Promise<void>;
   onDelete?: (parentId?: string) => void;
   isDeleting?: boolean;
+  isPinning?: boolean;
 }) {
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
@@ -68,11 +76,15 @@ export function StandardPostCard({
         canInteract={canInteract}
         onDelete={onDelete}
         canEdit
+        canPin={canPin}
+        pinned={pinned}
+        onPinToggle={onPinToggle}
         editMode={editMode}
         onEditModeChange={onEditModeChange}
         onReactionChange={onReactionChange}
         isReacting={isReacting}
         isDeleting={isDeleting}
+        isPinning={isPinning}
         isOwner={isOwner}
       >
         {innerEditForm && editMode ? (

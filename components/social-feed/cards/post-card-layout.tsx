@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { Hash, MapPin, MessageCircle, X } from "lucide-react";
+import { Hash, MapPin, MessageCircle, Pin, X } from "lucide-react";
 import Link from "next/link";
 import { PostMenu } from "../post-menu";
 import PostReactions from "../post-reactions";
@@ -13,6 +13,7 @@ import { UserProfile } from "@/lib/queries/profile";
 import { Button } from "@/components/shadcn/button";
 import { UserAvatar } from "@/components/features/user/user";
 import { derivePkgAddr } from "@/lib/gno";
+import { cn } from "@/lib/tailwind";
 
 type PostCardLayoutProps = {
   post: PostView;
@@ -25,11 +26,15 @@ type PostCardLayoutProps = {
   parentId?: string;
   canEdit?: boolean;
   canInteract?: boolean;
+  canPin?: boolean;
+  pinned?: boolean;
   onEditModeChange?: (editMode: boolean) => void;
   onDelete?: (parentId?: string) => void | Promise<void>;
   onReactionChange?: (icon: string) => void | Promise<void>;
+  onPinToggle?: () => void | Promise<void>;
   isReacting?: boolean;
   isDeleting?: boolean;
+  isPinning?: boolean;
 };
 
 export function PostCardLayout({
@@ -43,19 +48,35 @@ export function PostCardLayout({
   parentId = "",
   canEdit,
   canInteract,
+  canPin,
+  pinned,
+  onPinToggle,
   onEditModeChange,
   onDelete,
   onReactionChange,
   isReacting,
   isDeleting,
+  isPinning,
 }: PostCardLayoutProps) {
   if (!post.post) {
     return null;
   }
 
   return (
-    <Card className="w-full flex flex-col gap-2">
-      <div className="flex flex-col sm:flex-row items-start gap-2 relative">
+    <Card
+      className={cn("w-full flex flex-col gap-2 relative", {
+        "border-2": pinned,
+      })}
+    >
+      {pinned && (
+        <div className="flex gap-1 items-center">
+          <Pin className="w-4 h-4 text-secondary-color" />
+          <Text className="text-sm font-medium" variant="secondary">
+            Pinned Post
+          </Text>
+        </div>
+      )}
+      <div className="flex flex-col sm:flex-row items-start gap-2">
         <div className="w-full flex flex-row items-center gap-3">
           <Link href={`/profile/${derivePkgAddr(post.post.author)}`}>
             <UserAvatar
@@ -116,17 +137,21 @@ export function PostCardLayout({
                 </Text>
               </div>
             )}
-            <div className="flex items-center max-sm:absolute max-sm:right-0 max-sm:top-0">
-              {canInteract && (
-                <PostMenu
-                  isOwner={isOwner}
-                  onDelete={async () => await onDelete?.(parentId)}
-                  isDeleting={isDeleting}
-                  canEdit={canEdit}
-                  onEdit={() => onEditModeChange?.(true)}
-                />
-              )}
-            </div>
+          </div>
+        )}
+        {canInteract && (
+          <div className="flex items-center absolute right-2 top-2">
+            <PostMenu
+              isOwner={isOwner}
+              onDelete={async () => await onDelete?.(parentId)}
+              isDeleting={isDeleting}
+              canEdit={canEdit}
+              onEdit={() => onEditModeChange?.(true)}
+              canPin={canPin}
+              onPinToggle={() => onPinToggle?.()}
+              pinned={pinned}
+              isPinning={isPinning}
+            />
           </div>
         )}
       </div>

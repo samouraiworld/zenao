@@ -28,6 +28,7 @@ type AnalyticEvents = {
   PostReactionUpdated: { orgType: OrgType; orgId: string; postId: string };
   PostEdited: { orgType: OrgType; orgId: string; postId: string };
   PostCommented: { orgType: OrgType; orgId: string; postId: string };
+  PostPinUpdated: { orgType: OrgType; orgId: string; postId: string };
   PollCreated: { orgType: OrgType; orgId: string };
   PollVoteUpdated: { pollId: string };
 };

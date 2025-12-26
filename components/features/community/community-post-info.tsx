@@ -32,6 +32,8 @@ interface CommunityPostInfoProps {
   isReacting: boolean;
   onDelete: (postId: string, parentId?: string) => Promise<void>;
   isDeleting: boolean;
+  pinned?: boolean;
+  onPinToggle?: () => void | Promise<void>;
 }
 
 export default function CommunityPostInfo({
@@ -47,6 +49,8 @@ export default function CommunityPostInfo({
   isReacting,
   onDelete,
   isDeleting,
+  pinned,
+  onPinToggle,
 }: CommunityPostInfoProps) {
   const router = useRouter();
   const { data: roles } = useSuspenseQuery(
@@ -72,6 +76,9 @@ export default function CommunityPostInfo({
           isDeleting={isDeleting}
           isReacting={isReacting}
           isEditing={isEditing}
+          canPin={roles.includes("administrator")}
+          pinned={pinned}
+          onPinToggle={onPinToggle}
           canInteract
           isOwner={roles.includes("administrator") || roles.includes("member")}
         />

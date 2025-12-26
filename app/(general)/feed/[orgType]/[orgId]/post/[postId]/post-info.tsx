@@ -100,6 +100,8 @@ export default function PostInfo({
           isReacting={isReacting}
           onDelete={onDelete}
           isDeleting={isDeleting}
+          // pinned={post.pinned}
+          // onPinToggle={onPinToggle}
         />
       )}
       {orgType === "event" && (
@@ -116,6 +118,8 @@ export default function PostInfo({
           isReacting={isReacting}
           onDelete={onDelete}
           isDeleting={isDeleting}
+          // pinned={post.pinned}
+          // onPinToggle={onPinToggle}
         />
       )}
 
