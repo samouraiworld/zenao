@@ -559,5 +559,14 @@
   "empty-list": {
     "title": "Nothing listed",
     "description": "Let's change that!"
+  },
+  "dashboard": {
+    "sidebar": {
+      "create-event-btn": "Create event",
+      "events": "Events",
+      "settings": "Settings",
+      "coming-soon": "Soon",
+      "quick-create": "Quick create"
+    }
   }
 }
