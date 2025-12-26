@@ -37,8 +37,11 @@ export default async function DashboardRootLayout({
 
   if (!token || !userRealmId) {
     return (
-      <ScreenContainerCentered isSignedOutModal>
-        {t("eventForm.log-in")}
+      <ScreenContainerCentered
+        isSignedOutModal
+        description={t("dashboard.signout-desc")}
+      >
+        <div className="flex justify-center">{t("dashboard.signout-desc")}</div>
       </ScreenContainerCentered>
     );
   }
