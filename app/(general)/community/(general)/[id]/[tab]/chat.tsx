@@ -53,14 +53,6 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   );
   const posts = useMemo(() => postsPages.pages.flat(), [postsPages]);
 
-  console.log("posts", posts);
-
-  // const pinnedPosts = useMemo(
-  //   () => posts.filter((_) => false),
-  //   // () => posts.filter((post) => post.data.pinned), // TODO: add pinned field to posts
-  //   [posts],
-  // );
-
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
     "community",
     communityId,
@@ -104,36 +96,6 @@ function CommunityChat({ communityId }: CommunityChatProps) {
         />
       ) : (
         <div className="space-y-4">
-          {/* <PostsList
-            posts={pinnedPosts}
-            userRealmId={userRealmId}
-            onReactionChange={onReactionChange}
-            canInteract={
-              userRoles.includes("member") ||
-              userRoles.includes("administrator")
-            }
-            onDelete={onDelete}
-            postInEdition={postInEdition?.postId ?? null}
-            onEditModeChange={(postId, content, editMode) => {
-              if (!editMode) {
-                setPostInEdition(null);
-                return;
-              }
-              setPostInEdition({ postId, content });
-            }}
-            replyHrefFormatter={(postId) =>
-              `/feed/community/${communityId}/post/${postId}`
-            }
-            canReply
-            canPin={userRoles.includes("administrator")}
-            onPinToggle={onPinToggle}
-            innerEditMode
-            onEdit={onEdit}
-            isReacting={isReacting}
-            isDeleting={isDeleting}
-            isEditing={isEditing}
-          /> */}
-
           <PostsList
             posts={posts}
             userRealmId={userRealmId}

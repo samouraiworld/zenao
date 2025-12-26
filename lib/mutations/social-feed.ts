@@ -13,7 +13,6 @@ import { zenaoClient } from "@/lib/zenao-client";
 import {
   CreatePollRequest,
   CreatePostRequest,
-  PinPostRequest,
   PinPostRequestJson,
   VotePollRequest,
 } from "@/app/gen/zenao/v1/zenao_pb";
