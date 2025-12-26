@@ -41,11 +41,9 @@ func main() {
 		newFakegenCmd(),
 		newMailCmd(),
 		newPromoteUserCmd(),
-		newRealmsrcCmd(),
 		newE2EInfraCmd(),
 		newGenticketCmd(),
 		newGenPdfTicketCmd(),
-		newGenTxsCmd(),
 		newConvertEvtToComCmd(),
 	)
 
@@ -56,15 +54,11 @@ type config struct {
 	allowedOrigins  string
 	clerkSecretKey  string
 	bindAddr        string
-	adminMnemonic   string
 	gnoNamespace    string
-	chainEndpoint   string
-	chainID         string
 	dbPath          string
 	mailSender      string
 	resendSecretKey string
 	discordtoken    string
-	gasSecurityRate float64
 	maintenance     bool
 }
 
@@ -72,15 +66,11 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
 	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
-	flset.StringVar(&conf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
-	flset.StringVar(&conf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
 	flset.StringVar(&conf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
-	flset.StringVar(&conf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.mailSender, "mail-sender", "contact@mail.zenao.io", "Mail sender address")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
 	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
-	flset.Float64Var(&conf.gasSecurityRate, "gas-security-rate", 0.2, "margin multiplier for estimated gas wanted to be safe")
 	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
 }
 
@@ -102,11 +92,9 @@ func newStartCmd() *commands.Command {
 
 func injectStartEnv() {
 	mappings := map[string]*string{
-		"ZENAO_ADMIN_MNEMONIC":    &conf.adminMnemonic,
 		"ZENAO_RESEND_SECRET_KEY": &conf.resendSecretKey,
 		"ZENAO_CLERK_SECRET_KEY":  &conf.clerkSecretKey,
 		"ZENAO_DB":                &conf.dbPath,
-		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
 		"ZENAO_MAIL_SENDER":       &conf.mailSender,
 		"DISCORD_TOKEN":           &conf.discordtoken,
@@ -142,7 +130,7 @@ func execStart(ctx context.Context) (retErr error) {
 		return err
 	}
 
-	chain, err := setupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, conf.gasSecurityRate, logger)
+	chain, err := setupChain(conf.gnoNamespace)
 	if err != nil {
 		return err
 	}
