@@ -5,6 +5,7 @@ import * as React from "react";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEventsTableColumns } from "../columns";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/widgets/data-table/data-table-view-options";
@@ -63,6 +64,7 @@ export function EventsTableView({
   hasPastNextPage,
   hasPastPreviousPage,
 }: EventsTableViewProps) {
+  const t = useTranslations("dashboard.eventsTable");
   const router = useRouter();
   const eventsTableColumns = useEventsTableColumns(now);
   const columns = withDndColumn(eventsTableColumns);
@@ -98,16 +100,16 @@ export function EventsTableView({
             <SelectValue placeholder="Select a view" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="upcoming">Upcoming</SelectItem>
-            <SelectItem value="past">Past</SelectItem>
+            <SelectItem value="upcoming">{t("upcoming")}</SelectItem>
+            <SelectItem value="past">{t("past")}</SelectItem>
           </SelectContent>
         </Select>
         <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 xl:flex">
           <TabsTrigger value="upcoming" className="gap-2">
-            Upcoming
+            {t("upcoming")}
           </TabsTrigger>
           <TabsTrigger value="past" className="gap-2">
-            Past
+            {t("past")}
           </TabsTrigger>
         </TabsList>
         <div className="flex items-center gap-2">
@@ -123,11 +125,11 @@ export function EventsTableView({
             dndEnabled={false}
             nothingFn={() => (
               <div className="flex h-48 flex-col justify-center items-center gap-4">
-                <Text className="text-center">No events found.</Text>
+                <Text className="text-center">{t("no-events")}</Text>
                 <Link href="/dashboard/event/create">
                   <Button size="sm">
                     <Plus />
-                    Create event
+                    {t("create-event-btn")}
                   </Button>
                 </Link>
               </div>

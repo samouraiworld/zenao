@@ -572,6 +572,12 @@
       "profile": "Profile",
       "switch-to-regular-user-mode": "Switch to regular user mode",
       "sign-out": "Sign out"
+    },
+    "eventsTable": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "no-events": "No events found.",
+      "create-event-btn": "Create an event"
     }
   }
 }
