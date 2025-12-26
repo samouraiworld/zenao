@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { PostPublishedAt } from "./post-published-at";
+import PostHeader from "./post-header";
 import { getPostContent, getPostsMetadata } from "@/lib/blog";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
@@ -35,12 +35,25 @@ export default async function Post({ params }: Props) {
   }
 
   return (
-    <ScreenContainer>
-      <div className="flex justify-center">
-        <div className="w-fit flex flex-col items-center gap-4">
-          <PostPublishedAt publishedAt={new Date(post.data.date)} />
-          <MarkdownPreview markdownString={post.content} />
-        </div>
+    <ScreenContainer
+      background={{
+        src: post.data.previewImageUrl ?? "/zenao-logo.png",
+        width: 600,
+        height: 600,
+      }}
+    >
+      <div className="flex flex-col gap-12 mx-auto max-w-5xl sm:w-full pb-8 md:pb-12">
+        <PostHeader
+          slug={slug}
+          category={post.data.category}
+          title={post.data.title}
+          description={post.data.description}
+          previewImageUrl={post.data.previewImageUrl}
+          author={post.data.author}
+          publishedAt={new Date(post.data.date)}
+        />
+
+        <MarkdownPreview markdownString={post.content} className="gap-4" />
       </div>
     </ScreenContainer>
   );
