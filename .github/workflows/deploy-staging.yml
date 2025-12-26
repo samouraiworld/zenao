@@ -67,7 +67,7 @@ jobs:
         uses: appleboy/ssh-action@v1
         with:
           host: 51.159.98.163
-          username: rootg
+          username: root
           key: ${{ secrets.STAGING_SSH_KEY }}
           # git restore is there to disable maintenance mode
           script: |
