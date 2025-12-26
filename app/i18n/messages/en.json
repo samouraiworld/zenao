@@ -420,6 +420,12 @@
     },
     "poll": {
       "result-count": "{count, plural, one {# vote} other {# votes}}"
+    },
+    "actions": {
+      "toast-post-pin-success": "Post pinned !",
+      "toast-post-pin-error": "Error while pinning the post !",
+      "toast-post-unpin-success": "Post unpinned !",
+      "toast-post-unpin-error": "Error while unpinning the post !"
     }
   },
   "broadcast-email-form": {

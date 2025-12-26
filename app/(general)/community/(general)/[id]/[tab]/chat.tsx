@@ -53,11 +53,13 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   );
   const posts = useMemo(() => postsPages.pages.flat(), [postsPages]);
 
-  const pinnedPosts = useMemo(
-    () => posts.filter((_) => false),
-    // () => posts.filter((post) => post.data.pinned), // TODO: add pinned field to posts
-    [posts],
-  );
+  console.log("posts", posts);
+
+  // const pinnedPosts = useMemo(
+  //   () => posts.filter((_) => false),
+  //   // () => posts.filter((post) => post.data.pinned), // TODO: add pinned field to posts
+  //   [posts],
+  // );
 
   const { onEditStandardPost, isEditing } = useFeedPostEditHandler(
     "community",
@@ -160,6 +162,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
             isReacting={isReacting}
             isDeleting={isDeleting}
             isEditing={isEditing}
+            isPinning={isPinning}
           />
         </div>
       )}

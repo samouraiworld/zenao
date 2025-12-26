@@ -71,9 +71,9 @@ export function PostsList({
             replyHref={replyHrefFormatter?.(post.post.localPostId)}
             canInteract={canInteract}
             canPin={canPin}
-            // pinned={post.data.pinned}
+            pinned={post.post.pinned}
             onPinToggle={async () => {
-              await onPinToggle?.(postId, false); // !post.data.pinned);
+              await onPinToggle?.(postId, !post.post.pinned);
             }}
             editMode={postInEdition === postId}
             onEditModeChange={async (editMode) =>
