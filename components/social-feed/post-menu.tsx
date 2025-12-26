@@ -21,6 +21,7 @@ type PostMenuProps = {
   canEdit?: boolean;
   canPin?: boolean;
   isDeleting?: boolean;
+  isPinning?: boolean;
 };
 
 export function PostMenu({
@@ -32,6 +33,7 @@ export function PostMenu({
   pinned,
   canPin,
   isDeleting,
+  isPinning,
 }: PostMenuProps) {
   const tPostMenu = useTranslations("post-menu");
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -57,20 +59,31 @@ export function PostMenu({
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-36">
           {canPin && onPinToggle && (
-            <DropdownMenuItem className="cursor-pointer" onClick={onPinToggle}>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={onPinToggle}
+              disabled={isDeleting || isPinning}
+            >
               {pinned ? tPostMenu("unpin-post") : tPostMenu("pin-post")}
             </DropdownMenuItem>
           )}
           {isOwner && (
             <>
               {canEdit && onEdit && (
-                <DropdownMenuItem className="cursor-pointer" onClick={onEdit}>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={onEdit}
+                  disabled={isDeleting || isPinning}
+                >
                   {tPostMenu("edit-post")}
                 </DropdownMenuItem>
               )}
             </>
           )}
-          <DropdownMenuItem onClick={() => setDialogOpen(true)}>
+          <DropdownMenuItem
+            onClick={() => setDialogOpen(true)}
+            disabled={isDeleting || isPinning}
+          >
             {tPostMenu("delete-post")}
           </DropdownMenuItem>
         </DropdownMenuContent>

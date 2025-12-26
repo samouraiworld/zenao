@@ -17,6 +17,7 @@ import { communityUserRoles } from "@/lib/queries/community";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { PostsList } from "@/components/social-feed/lists/posts-list";
+import usePinPostHandler from "@/hooks/use-pin-post-handler";
 
 type CommunityChatProps = {
   communityId: string;
@@ -74,6 +75,12 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     feedId,
   );
 
+  const { onPinChange, isPinning } = usePinPostHandler(
+    "community",
+    communityId,
+    feedId,
+  );
+
   const onEdit = async (
     postId: string,
     values: SocialFeedPostFormSchemaType,
@@ -82,9 +89,8 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     setPostInEdition(null);
   };
 
-  const onPinToggle = async (_postId: string) => {
-    console.log("Pin toggle clicked");
-    // await onPinTogglePost(postId);
+  const onPinToggle = async (postId: string, pinned: boolean) => {
+    await onPinChange(postId, pinned);
   };
 
   return (
@@ -96,7 +102,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
         />
       ) : (
         <div className="space-y-4">
-          <PostsList
+          {/* <PostsList
             posts={pinnedPosts}
             userRealmId={userRealmId}
             onReactionChange={onReactionChange}
@@ -124,7 +130,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
             isReacting={isReacting}
             isDeleting={isDeleting}
             isEditing={isEditing}
-          />
+          /> */}
 
           <PostsList
             posts={posts}

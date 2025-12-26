@@ -34,6 +34,7 @@ type PostCardLayoutProps = {
   onPinToggle?: () => void | Promise<void>;
   isReacting?: boolean;
   isDeleting?: boolean;
+  isPinning?: boolean;
 };
 
 export function PostCardLayout({
@@ -55,6 +56,7 @@ export function PostCardLayout({
   onReactionChange,
   isReacting,
   isDeleting,
+  isPinning,
 }: PostCardLayoutProps) {
   if (!post.post) {
     return null;
@@ -148,6 +150,7 @@ export function PostCardLayout({
               canPin={canPin}
               onPinToggle={() => onPinToggle?.()}
               pinned={pinned}
+              isPinning={isPinning}
             />
           </div>
         )}

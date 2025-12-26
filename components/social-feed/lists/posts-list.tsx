@@ -25,6 +25,7 @@ export function PostsList({
   isEditing,
   isReacting,
   isDeleting,
+  isPinning,
 }: {
   userRealmId: string | null;
   postInEdition: string | null;
@@ -40,7 +41,7 @@ export function PostsList({
   canReply?: boolean;
   canInteract?: boolean;
   canPin?: boolean;
-  onPinToggle?: (postId: string) => void | Promise<void>;
+  onPinToggle?: (postId: string, pinned: boolean) => void | Promise<void>;
   innerEditMode?: boolean;
   onEdit?: (
     postId: string,
@@ -49,6 +50,7 @@ export function PostsList({
   isEditing?: boolean;
   isReacting?: boolean;
   isDeleting?: boolean;
+  isPinning?: boolean;
 }) {
   return posts.map((post) => {
     const postId = post.post!.localPostId.toString(10);
@@ -71,7 +73,7 @@ export function PostsList({
             canPin={canPin}
             // pinned={post.data.pinned}
             onPinToggle={async () => {
-              await onPinToggle?.(postId);
+              await onPinToggle?.(postId, false); // !post.data.pinned);
             }}
             editMode={postInEdition === postId}
             onEditModeChange={async (editMode) =>
@@ -86,6 +88,7 @@ export function PostsList({
             isEditing={isEditing}
             isReacting={isReacting}
             isDeleting={isDeleting}
+            isPinning={isPinning}
           />
         </Suspense>
       );

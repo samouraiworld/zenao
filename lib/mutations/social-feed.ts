@@ -8,6 +8,7 @@ import {
   feedPostsChildren,
   pollInfo,
 } from "../queries/social-feed";
+import { GetToken } from "../utils";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
   CreatePollRequest,
@@ -563,6 +564,31 @@ export const useDeletePost = () => {
 
   return {
     deletePost: mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
+};
+
+export const usePinPostUpdate = (getToken: GetToken) => {
+  const queryClient = getQueryClient();
+
+  const { isPending, mutateAsync, isSuccess, isError } = useMutation({
+    mutationFn: async ({ postId, feedId, pinned }: PinPostUpdateRequest) => {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("not authenticated");
+      }
+      return;
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate feed posts to reflect pin change
+    },
+  });
+
+  return {
+    updatePinPost: mutateAsync,
     isPending,
     isSuccess,
     isError,
