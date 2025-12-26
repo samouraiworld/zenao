@@ -17,6 +17,7 @@
     "communities": "Communities",
     "features": "Features",
     "manifesto": "Manifesto",
+    "blog": "Blog",
     "view-profile": "View my profile",
     "create-event": "Create Event",
     "footer": {
@@ -368,7 +369,11 @@
   "blog": {
     "pageTitle": "Blog",
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
-    "publishedAt": "Published at"
+    "no-blog-posts-title": "No blog posts to show."
+  },
+  "blog-post": {
+    "link-copied-toast": "Link copied to clipboard!",
+    "failed-to-copy-link-toast": "Failed to copy link to clipboard!"
   },
   "load-more": "Load more",
   "no-posts-title": "No posts to show.",
