@@ -1321,7 +1321,6 @@ func (g *gormZenaoDB) CreatePost(feedID string, userID string, post *feedsv1.Pos
 		return nil, err
 	}
 
-	// TODO: test tags are good set
 	var tags []Tag
 	for _, tagName := range post.Tags {
 		tags = append(tags, Tag{
@@ -1686,7 +1685,7 @@ func (g *gormZenaoDB) CreatePoll(userID string, feedID string, parentURI string,
 		if err := tx.Create(dbPoll).Error; err != nil {
 			return err
 		}
-		// TODO: CHANGE THE URI
+		// XXX: REMOVE THE URI ?
 		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%d/gno/gno.land/r/zenao/polls", dbPoll.ID))
 		if err != nil {
 			return err
