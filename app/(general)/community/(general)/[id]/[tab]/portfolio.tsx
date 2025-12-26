@@ -103,7 +103,6 @@ export default function CommunityPortfolio({
       shortDescription: "",
       portfolio: [],
       socialMediaLinks: [],
-      pinnedEvents: [],
     },
   });
   const { mutateAsync: editCommunity } = useEditCommunity();
@@ -125,7 +124,6 @@ export default function CommunityPortfolio({
         shortDescription: otherDetails.shortDescription,
         portfolio: newPortfolio,
         socialMediaLinks: otherDetails.socialMediaLinks,
-        pinnedEvents: otherDetails.pinnedEvents,
       });
 
       await editCommunity({

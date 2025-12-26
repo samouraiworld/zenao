@@ -35,7 +35,6 @@ function CommunityCard({ id, community }: CommunityCardProps) {
       shortDescription: "",
       portfolio: [],
       socialMediaLinks: [],
-      pinnedEvents: [],
     },
     contentFieldName: "description",
   });

@@ -45,7 +45,6 @@ export async function generateMetadata({
       shortDescription: "",
       socialMediaLinks: [],
       portfolio: [],
-      pinnedEvents: [],
     },
     contentFieldName: "description",
   });

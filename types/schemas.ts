@@ -339,7 +339,6 @@ export const communityDetailsSchema = z.object({
   description: z.string().trim().max(1000).optional().default(""),
   portfolio: z.array(portfolioItemSchema).default([]),
   socialMediaLinks: z.array(socialLinkSchema).default([]),
-  pinnedEvents: z.array(realmIdSchema).default([]),
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;

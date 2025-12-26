@@ -50,7 +50,6 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
       shortDescription: "",
       portfolio: [],
       socialMediaLinks: [],
-      pinnedEvents: [],
     },
     contentFieldName: "description",
   });
@@ -85,7 +84,6 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
         shortDescription: values.shortDescription,
         portfolio: communityDetails.portfolio,
         socialMediaLinks: values.socialMediaLinks,
-        pinnedEvents: communityDetails.pinnedEvents,
       });
 
       await editCommunity({
