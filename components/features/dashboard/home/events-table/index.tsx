@@ -58,7 +58,7 @@ export default function EventsTable({ now }: EventsTableProps) {
     page: tablePage,
     onPageChange: setTablePage,
     getHasNextPage: () => {
-      return pastEvents.length > DEFAULT_EVENTS_LIMIT;
+      return pastEvents.length >= DEFAULT_EVENTS_LIMIT;
     },
     getHasPreviousPage: (currentPage) => {
       return currentPage > 0;
@@ -74,7 +74,7 @@ export default function EventsTable({ now }: EventsTableProps) {
     page: tablePage,
     onPageChange: setTablePage,
     getHasNextPage: () => {
-      return upcomingEvents.length == DEFAULT_EVENTS_LIMIT;
+      return upcomingEvents.length >= DEFAULT_EVENTS_LIMIT;
     },
     getHasPreviousPage: (currentPage) => {
       return currentPage > 0;
