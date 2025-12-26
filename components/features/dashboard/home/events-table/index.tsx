@@ -14,9 +14,10 @@ import useManualPagination from "@/hooks/use-manual-pagination";
 
 interface EventsTableProps {
   now: number;
+  tab: "upcoming" | "past";
 }
 
-export default function EventsTable({ now }: EventsTableProps) {
+export default function EventsTable({ now, tab }: EventsTableProps) {
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -29,11 +30,6 @@ export default function EventsTable({ now }: EventsTableProps) {
       return isNaN(parsed) || parsed < 1 ? 1 : parsed;
     },
   });
-  const [tab, setTab] = useQueryState<"upcoming" | "past">("tab", {
-    defaultValue: "upcoming",
-    parse: (value) =>
-      value === "upcoming" || value === "past" ? value : "upcoming",
-  });
 
   const { data: pastEvents, isFetching: isFetchingPastEvents } =
     useSuspenseQuery(
@@ -43,7 +39,7 @@ export default function EventsTable({ now }: EventsTableProps) {
         now - 1,
         0,
         DEFAULT_EVENTS_LIMIT,
-        tablePage,
+        tablePage - 1,
       ),
     );
 
@@ -55,7 +51,7 @@ export default function EventsTable({ now }: EventsTableProps) {
         now,
         Number.MAX_SAFE_INTEGER,
         DEFAULT_EVENTS_LIMIT,
-        tablePage,
+        tablePage - 1,
       ),
     );
 
@@ -66,12 +62,19 @@ export default function EventsTable({ now }: EventsTableProps) {
     fetchPreviousPage: fetchPastPreviousPage,
   } = useManualPagination({
     page: tablePage,
-    onPageChange: setTablePage,
+    onPageChange: (newPage) => {
+      console.log("Setting table page to:", newPage);
+      setTablePage(newPage < 1 ? 1 : newPage);
+    },
     getHasNextPage: () => {
       return pastEvents.length > DEFAULT_EVENTS_LIMIT;
     },
     getHasPreviousPage: (currentPage) => {
-      return currentPage > 0 && pastEvents.length < DEFAULT_EVENTS_LIMIT;
+      return (
+        currentPage > 0 &&
+        pastEvents.length < DEFAULT_EVENTS_LIMIT &&
+        tablePage > 1
+      );
     },
   });
 
@@ -82,12 +85,19 @@ export default function EventsTable({ now }: EventsTableProps) {
     fetchPreviousPage: fetchUpcomingPreviousPage,
   } = useManualPagination({
     page: tablePage,
-    onPageChange: setTablePage,
+    onPageChange: (newPage) => {
+      console.log("Setting table page to:", newPage);
+      setTablePage(newPage < 1 ? 1 : newPage);
+    },
     getHasNextPage: () => {
       return upcomingEvents.length == DEFAULT_EVENTS_LIMIT;
     },
     getHasPreviousPage: (currentPage) => {
-      return currentPage > 0 && upcomingEvents.length < DEFAULT_EVENTS_LIMIT;
+      return (
+        currentPage > 0 &&
+        upcomingEvents.length < DEFAULT_EVENTS_LIMIT &&
+        tablePage > 1
+      );
     },
   });
 
@@ -95,7 +105,6 @@ export default function EventsTable({ now }: EventsTableProps) {
     <EventsTableView
       now={now}
       tab={tab}
-      onTabChange={setTab}
       events={tab === "upcoming" ? upcomingEvents : pastEvents}
       isFetchingPastNextPage={isFetchingPastEvents}
       isFetchingPastPreviousPage={isFetchingPastEvents}

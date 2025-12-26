@@ -36,7 +36,7 @@ export default function useManualPagination({
   }, [hasNextPage, onPageChange, page]);
 
   const fetchPreviousPage = useCallback(() => {
-    if (hasPreviousPage) {
+    if (hasPreviousPage || page > 1) {
       onPageChange(page - 1);
     }
   }, [hasPreviousPage, onPageChange, page]);
