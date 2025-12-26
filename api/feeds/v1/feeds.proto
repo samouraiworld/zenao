@@ -65,14 +65,15 @@ message Post {
   int64 deleted_at = 7; // if != 0 -> deleted
 
   repeated string tags = 8;
+  bool pinned = 9;
 
   oneof post {
-    StandardPost standard = 9;
-    ArticlePost article = 10;
-    LinkPost link = 11;
-    ImagePost image = 12;
-    VideoPost video = 13;
-    AudioPost audio = 14;
+    StandardPost standard = 10;
+    ArticlePost article = 11;
+    LinkPost link = 12;
+    ImagePost image = 13;
+    VideoPost video = 14;
+    AudioPost audio = 15;
   }
 }
 

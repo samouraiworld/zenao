@@ -1,10 +1,10 @@
 ---
 title: "The Future of Space Travel"
-description: "With advancements in technology, space travel is becoming more accessible, paving the way for interplanetary exploration."
+description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam et blandit odio. Nulla ac ligula neque. Proin porta pulvinar nisi ac vulputate."
+author: "Mio-san"
 date: "2025-03-08"
+category: "Engineering"
 ---
-
-# The Future of Space Travel
 
 Space travel has evolved significantly, and private companies like **SpaceX** and **Blue Origin** are revolutionizing the industry.
 

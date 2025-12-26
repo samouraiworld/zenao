@@ -64,6 +64,7 @@ service ZenaoService {
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
   rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
   rpc ReactPost(ReactPostRequest) returns (ReactPostResponse);
+  rpc PinPost(PinPostRequest) returns (PinPostResponse);
   rpc EditPost(EditPostRequest) returns (EditPostResponse);
 
   // HEALTH
@@ -375,6 +376,13 @@ message ReactPostRequest {
 }
 
 message ReactPostResponse {}
+
+message PinPostRequest {
+  string post_id = 1;
+  bool pinned = 2;
+}
+
+message PinPostResponse {}
 
 message EditPostRequest {
   string post_id = 1;

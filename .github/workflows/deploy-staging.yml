@@ -69,10 +69,10 @@ jobs:
           host: 51.159.98.163
           username: rootg
           key: ${{ secrets.STAGING_SSH_KEY }}
-          # the yq del is there to disable maintenance mode
+          # git restore is there to disable maintenance mode
           script: |
             set -xe
             cd zenao
             docker compose -f staging.docker-compose.yml up -d --wait otel-collector jaeger
-            yq -iy 'del(.services.backend.command)' staging.docker-compose.yml
+            git restore staging.docker-compose.yml
             docker compose -f staging.docker-compose.yml up -d --build backend

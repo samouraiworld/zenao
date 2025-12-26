@@ -70,10 +70,10 @@ jobs:
           host: 62.210.92.144
           username: root
           key: ${{ secrets.PROD_SSH_KEY }}
-          # the yq del is there to disable maintenance mode
+          # git restore is there to disable maintenance mode
           script: |
             set -xe
             cd zenao
             docker compose -f prod.backend.docker-compose.yml up -d --wait otel-collector jaeger
-            yq -iy 'del(.services.backend.command)' prod.backend.docker-compose.yml
+            git restore prod.backend.docker-compose.yml
             docker compose -f prod.backend.docker-compose.yml up -d --build backend

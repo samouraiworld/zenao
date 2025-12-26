@@ -67,6 +67,9 @@ type Post struct {
 	VideoURI          string // VideoPost
 	ThumbnailImageURI string // VideoPost
 
+	// use time zero value to indicate not pinned
+	PinnedAt *time.Time
+
 	UserID uint
 	User   User
 	FeedID uint
@@ -139,6 +142,7 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 		CreatedAt: post.CreatedAt,
 		UserID:    strconv.FormatUint(uint64(post.UserID), 10),
 		FeedID:    strconv.FormatUint(uint64(post.FeedID), 10),
+		PinnedAt:  post.PinnedAt,
 		Post: &feedsv1.Post{
 			// Need to convert this to chain address later.
 			// Using two-step process: first store the ID here,
@@ -154,6 +158,10 @@ func dbPostToZeniPost(post *Post) (*zeni.Post, error) {
 			Tags:      tags,
 		},
 		Reactions: reactions,
+	}
+
+	if post.PinnedAt != nil {
+		zpost.Post.Pinned = true
 	}
 
 	switch post.Kind {

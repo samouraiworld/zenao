@@ -1,10 +1,10 @@
 ---
 title: "Sustainable Living: Tips for a Greener Future"
 description: "Small lifestyle changes can make a big impact on the environment. Here are practical tips for sustainable living."
+author: "Mio-san"
 date: "2025-03-05"
+category: "News & insights"
 ---
-
-# Sustainable Living: Tips for a Greener Future
 
 Sustainability is more than a trend—it's a necessity for our planet’s future.
 

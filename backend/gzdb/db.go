@@ -1474,7 +1474,7 @@ func (g *gormZenaoDB) GetPostsByFeedID(feedID string, limit int, offset int, tag
 		Preload("Reactions").
 		Preload("Tags").
 		Where("feed_id = ?", feedIDUint).
-		Order("id DESC")
+		Order("pinned_at IS NOT NULL DESC, pinned_at DESC, id DESC")
 
 	if len(tags) > 0 {
 		db = db.
@@ -1514,7 +1514,7 @@ func (g *gormZenaoDB) GetPostsByParentID(parentID string, limit int, offset int,
 		Preload("Reactions").
 		Preload("Tags").
 		Where("parent_uri = ?", parentIDUint).
-		Order("id DESC")
+		Order("pinned_at IS NOT NULL DESC, pinned_at DESC, id DESC")
 
 	if len(tags) > 0 {
 		db = db.
@@ -1608,6 +1608,38 @@ func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) er
 
 		return nil
 	})
+}
+
+// PinPost implements zeni.DB.
+func (g *gormZenaoDB) PinPost(feedID string, postID string, pin bool) error {
+	g, span := g.trace("gzdb.PinPost")
+	defer span.End()
+
+	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
+	if err != nil {
+		return err
+	}
+	postIDInt, err := strconv.ParseUint(postID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	var pinnedAt *time.Time
+	if pin {
+		now := time.Now()
+		pinnedAt = &now
+	}
+
+	res := g.db.Model(&Post{}).Where("id = ? AND feed_id = ?", postIDInt, feedIDInt).
+		Update("pinned_at", pinnedAt)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return errors.New("post not found in the specified feed")
+	}
+
+	return nil
 }
 
 // CreatePoll implements zeni.DB.
