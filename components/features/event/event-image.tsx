@@ -1,3 +1,5 @@
+"use client";
+
 import { ImageProps } from "next/image";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/widgets/images/web3-image";

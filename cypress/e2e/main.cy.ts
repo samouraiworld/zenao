@@ -140,6 +140,19 @@ describe("main", () => {
     cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
   });
 
+  it("blog exists", () => {
+    // start from the index page
+    cy.visit("/blog");
+
+    // go to blog page
+    // cy.get("a").contains("Blog").click();
+
+    // check that blog page's header text is present
+    cy.get("p")
+      .contains("Explore the exciting updates and innovations of Zenao")
+      .should("be.visible");
+  });
+
   it("edit it's profile", () => {
     // start from the home
     cy.visit("/");
