@@ -10,7 +10,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file feeds/v1/feeds.proto.
  */
 export const file_feeds_v1_feeds: GenFile = /*@__PURE__*/
-  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIl8KCVZpZGVvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCgl2aWRlb191cmkYAyABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgEIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIqIDCgRQb3N0EhUKDWxvY2FsX3Bvc3RfaWQYASABKAQSDgoGYXV0aG9yGAIgASgJEhIKCnBhcmVudF91cmkYAyABKAkSIQoDbG9jGAQgASgLMhQuZmVlZHMudjEuUG9zdEdlb0xvYxISCgpjcmVhdGVkX2F0GAUgASgDEhIKCnVwZGF0ZWRfYXQYBiABKAMSEgoKZGVsZXRlZF9hdBgHIAEoAxIMCgR0YWdzGAggAygJEioKCHN0YW5kYXJkGAkgASgLMhYuZmVlZHMudjEuU3RhbmRhcmRQb3N0SAASKAoHYXJ0aWNsZRgKIAEoCzIVLmZlZWRzLnYxLkFydGljbGVQb3N0SAASIgoEbGluaxgLIAEoCzISLmZlZWRzLnYxLkxpbmtQb3N0SAASJAoFaW1hZ2UYDCABKAsyEy5mZWVkcy52MS5JbWFnZVBvc3RIABIkCgV2aWRlbxgNIAEoCzITLmZlZWRzLnYxLlZpZGVvUG9zdEgAEiQKBWF1ZGlvGA4gASgLMhMuZmVlZHMudjEuQXVkaW9Qb3N0SABCBgoEcG9zdCJrCghQb3N0VmlldxIcCgRwb3N0GAEgASgLMg4uZmVlZHMudjEuUG9zdBIWCg5jaGlsZHJlbl9jb3VudBgCIAEoBBIpCglyZWFjdGlvbnMYAyADKAsyFi5mZWVkcy52MS5SZWFjdGlvblZpZXciQwoMUmVhY3Rpb25WaWV3EgwKBGljb24YASABKAkSDQoFY291bnQYAiABKA0SFgoOdXNlcl9oYXNfdm90ZWQYAyABKAhCOVo3Z2l0aHViLmNvbS9zYW1vdXJhaXdvcmxkL3plbmFvL2JhY2tlbmQvZmVlZHMvdjE7ZmVlZHN2MWIGcHJvdG8z");
+  fileDesc("ChRmZWVkcy92MS9mZWVkcy5wcm90bxIIZmVlZHMudjEiJgoKUG9zdEdlb0xvYxILCgNsYXQYAiABKAISCwoDbG5nGAMgASgCIh8KDFN0YW5kYXJkUG9zdBIPCgdjb250ZW50GAEgASgJIl4KC0FydGljbGVQb3N0Eg0KBXRpdGxlGAEgASgJEhQKDHByZXZpZXdfdGV4dBgCIAEoCRIZChFwcmV2aWV3X2ltYWdlX3VyaRgDIAEoCRIPCgdjb250ZW50GAQgASgJIhcKCExpbmtQb3N0EgsKA3VyaRgBIAEoCSJCCglJbWFnZVBvc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSEQoJaW1hZ2VfdXJpGAMgASgJIlUKCUF1ZGlvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCglhdWRpb191cmkYAyABKAkSEQoJaW1hZ2VfdXJpGAQgASgJIl8KCVZpZGVvUG9zdBINCgV0aXRsZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIRCgl2aWRlb191cmkYAyABKAkSGwoTdGh1bWJuYWlsX2ltYWdlX3VyaRgEIAEoCSI7CghSZWFjdGlvbhIQCghwb3N0X3VyaRgBIAEoCRIMCgRpY29uGAIgASgJEg8KB3VzZXJfaWQYAyABKAkiOwoDVGlwEhUKDXBvc3RfbG9jYWxfaWQYASABKAkSDQoFZGVub20YAyABKAkSDgoGYW1vdW50GAQgASgDIrIDCgRQb3N0EhUKDWxvY2FsX3Bvc3RfaWQYASABKAQSDgoGYXV0aG9yGAIgASgJEhIKCnBhcmVudF91cmkYAyABKAkSIQoDbG9jGAQgASgLMhQuZmVlZHMudjEuUG9zdEdlb0xvYxISCgpjcmVhdGVkX2F0GAUgASgDEhIKCnVwZGF0ZWRfYXQYBiABKAMSEgoKZGVsZXRlZF9hdBgHIAEoAxIMCgR0YWdzGAggAygJEg4KBnBpbm5lZBgJIAEoCBIqCghzdGFuZGFyZBgKIAEoCzIWLmZlZWRzLnYxLlN0YW5kYXJkUG9zdEgAEigKB2FydGljbGUYCyABKAsyFS5mZWVkcy52MS5BcnRpY2xlUG9zdEgAEiIKBGxpbmsYDCABKAsyEi5mZWVkcy52MS5MaW5rUG9zdEgAEiQKBWltYWdlGA0gASgLMhMuZmVlZHMudjEuSW1hZ2VQb3N0SAASJAoFdmlkZW8YDiABKAsyEy5mZWVkcy52MS5WaWRlb1Bvc3RIABIkCgVhdWRpbxgPIAEoCzITLmZlZWRzLnYxLkF1ZGlvUG9zdEgAQgYKBHBvc3QiawoIUG9zdFZpZXcSHAoEcG9zdBgBIAEoCzIOLmZlZWRzLnYxLlBvc3QSFgoOY2hpbGRyZW5fY291bnQYAiABKAQSKQoJcmVhY3Rpb25zGAMgAygLMhYuZmVlZHMudjEuUmVhY3Rpb25WaWV3IkMKDFJlYWN0aW9uVmlldxIMCgRpY29uGAEgASgJEg0KBWNvdW50GAIgASgNEhYKDnVzZXJfaGFzX3ZvdGVkGAMgASgIQjlaN2dpdGh1Yi5jb20vc2Ftb3VyYWl3b3JsZC96ZW5hby9iYWNrZW5kL2ZlZWRzL3YxO2ZlZWRzdjFiBnByb3RvMw");
 
 /**
  * @generated from message feeds.v1.PostGeoLoc
@@ -476,41 +476,46 @@ export type Post = Message<"feeds.v1.Post"> & {
   tags: string[];
 
   /**
+   * @generated from field: bool pinned = 9;
+   */
+  pinned: boolean;
+
+  /**
    * @generated from oneof feeds.v1.Post.post
    */
   post: {
     /**
-     * @generated from field: feeds.v1.StandardPost standard = 9;
+     * @generated from field: feeds.v1.StandardPost standard = 10;
      */
     value: StandardPost;
     case: "standard";
   } | {
     /**
-     * @generated from field: feeds.v1.ArticlePost article = 10;
+     * @generated from field: feeds.v1.ArticlePost article = 11;
      */
     value: ArticlePost;
     case: "article";
   } | {
     /**
-     * @generated from field: feeds.v1.LinkPost link = 11;
+     * @generated from field: feeds.v1.LinkPost link = 12;
      */
     value: LinkPost;
     case: "link";
   } | {
     /**
-     * @generated from field: feeds.v1.ImagePost image = 12;
+     * @generated from field: feeds.v1.ImagePost image = 13;
      */
     value: ImagePost;
     case: "image";
   } | {
     /**
-     * @generated from field: feeds.v1.VideoPost video = 13;
+     * @generated from field: feeds.v1.VideoPost video = 14;
      */
     value: VideoPost;
     case: "video";
   } | {
     /**
-     * @generated from field: feeds.v1.AudioPost audio = 14;
+     * @generated from field: feeds.v1.AudioPost audio = 15;
      */
     value: AudioPost;
     case: "audio";
@@ -566,32 +571,37 @@ export type PostJson = {
   tags?: string[];
 
   /**
-   * @generated from field: feeds.v1.StandardPost standard = 9;
+   * @generated from field: bool pinned = 9;
+   */
+  pinned?: boolean;
+
+  /**
+   * @generated from field: feeds.v1.StandardPost standard = 10;
    */
   standard?: StandardPostJson;
 
   /**
-   * @generated from field: feeds.v1.ArticlePost article = 10;
+   * @generated from field: feeds.v1.ArticlePost article = 11;
    */
   article?: ArticlePostJson;
 
   /**
-   * @generated from field: feeds.v1.LinkPost link = 11;
+   * @generated from field: feeds.v1.LinkPost link = 12;
    */
   link?: LinkPostJson;
 
   /**
-   * @generated from field: feeds.v1.ImagePost image = 12;
+   * @generated from field: feeds.v1.ImagePost image = 13;
    */
   image?: ImagePostJson;
 
   /**
-   * @generated from field: feeds.v1.VideoPost video = 13;
+   * @generated from field: feeds.v1.VideoPost video = 14;
    */
   video?: VideoPostJson;
 
   /**
-   * @generated from field: feeds.v1.AudioPost audio = 14;
+   * @generated from field: feeds.v1.AudioPost audio = 15;
    */
   audio?: AudioPostJson;
 };
