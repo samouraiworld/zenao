@@ -240,35 +240,6 @@ export function communityIdFromPkgPath(pkgPath: string): string {
   return res?.[1].substring(1) || "";
 }
 
-export const communityAdministratorsQuery = (
-  getToken: GetToken,
-  communityId: string,
-) =>
-  queryOptions({
-    queryKey: ["community-admins", communityId],
-    queryFn: async () => {
-      return withSpan(
-        `query:backend:community:${communityId}:administrators`,
-        async () => {
-          const token = await getToken();
-
-          if (!token) throw new Error("invalid clerk token");
-
-          try {
-            const res = await zenaoClient.getCommunityAdministrators(
-              { communityId },
-              { headers: { Authorization: "Bearer " + token } },
-            );
-
-            return res.administrators;
-          } catch (_) {
-            return [];
-          }
-        },
-      );
-    },
-  });
-
 export const communitiesListByEvent = (
   id: string,
   limit: number,
