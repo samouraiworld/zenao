@@ -11,6 +11,7 @@ import { ClerkLoading } from "@clerk/nextjs";
 import { SignedIn, SignOutButton } from "@clerk/clerk-react";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { UserAvatar, UserAvatarSkeleton } from "../user/user";
 import { UserProfile } from "@/lib/queries/profile";
 import {
@@ -38,6 +39,7 @@ const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
 export function NavUser({ realmId, user }: NavUserProps) {
   const { isMobile } = useSidebar();
+  const t = useTranslations("dashboard.navUser");
 
   return (
     <SidebarMenu>
@@ -112,13 +114,13 @@ export function NavUser({ realmId, user }: NavUserProps) {
               <DropdownMenuItem asChild>
                 <Link href={`/profile/${realmId}`}>
                   <CircleUserRound />
-                  Profile
+                  {t("profile")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/">
                   <ArrowLeftRight />
-                  Switch to regular user mode
+                  {t("switch-to-regular-user-mode")}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -127,7 +129,7 @@ export function NavUser({ realmId, user }: NavUserProps) {
               <SignOutButton>
                 <div>
                   <LogOut />
-                  Log out
+                  {t("sign-out")}
                 </div>
               </SignOutButton>
             </DropdownMenuItem>

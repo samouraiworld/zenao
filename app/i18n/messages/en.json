@@ -567,6 +567,11 @@
       "settings": "Settings",
       "coming-soon": "Soon",
       "quick-create": "Quick create"
+    },
+    "navUser": {
+      "profile": "Profile",
+      "switch-to-regular-user-mode": "Switch to regular user mode",
+      "sign-out": "Sign out"
     }
   }
 }
