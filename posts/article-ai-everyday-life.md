@@ -1,10 +1,10 @@
 ---
 title: "The Rise of AI in Everyday Life"
 description: "Some kind of description"
+author: "Mio-san"
 date: "2025-03-10"
+category: "Spotlight"
 ---
-
-# The Rise of AI in Everyday Life
 
 Artificial Intelligence (AI) has moved beyond the realm of science fiction and is now an integral part of our daily lives. From voice assistants to smart home devices, AI is reshaping the way we interact with technology.
 
