@@ -1,0 +1,84 @@
+import { ColumnDef } from "@tanstack/react-table";
+import { useMemo } from "react";
+import { Trash2 } from "lucide-react";
+import { UserAvatarWithName } from "../../user/user";
+import { Button } from "@/components/shadcn/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shadcn/tooltip";
+
+export const useParticipantsColumns = (): ColumnDef<string>[] => {
+  const columns = useMemo<ColumnDef<string>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: () => <div className="px-4">Name</div>,
+        cell: ({ row }) => (
+          <div className="px-4">
+            <UserAvatarWithName
+              realmId={row.original}
+              className="h-10"
+              linkToProfile
+            />
+          </div>
+        ),
+        enableHiding: false,
+        enableSorting: true,
+      },
+    ],
+    [],
+  );
+
+  return columns;
+};
+
+interface UseGatekeepersColumnsProps {
+  onDelete: (email: string) => void;
+}
+
+export const useGatekeepersColumns = (
+  props: UseGatekeepersColumnsProps,
+): ColumnDef<string>[] => {
+  const columns = useMemo<ColumnDef<string>[]>(
+    () => [
+      {
+        accessorKey: "email",
+        header: () => <div>Email</div>,
+        cell: ({ row }) => <div>{row.original}</div>,
+        enableHiding: false,
+        enableSorting: true,
+        meta: {
+          className: "px-4",
+        },
+      },
+      {
+        id: "actions",
+        header: () => <div>Actions</div>,
+        cell: ({ row }) => (
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                className="p-0 size-8"
+                onClick={() => props.onDelete(row.original)}
+              >
+                <Trash2 className="text-muted-foreground w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete gatekeeper</TooltipContent>
+          </Tooltip>
+        ),
+        enableHiding: false,
+        enableSorting: false,
+        meta: {
+          className: "flex justify-end items-center px-4",
+        },
+      },
+    ],
+    [props],
+  );
+
+  return columns;
+};

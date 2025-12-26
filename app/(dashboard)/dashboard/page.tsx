@@ -1,3 +1,8 @@
+import EventsPageLayout from "./event/events-page-layout";
+// import EventsTable from "@/components/features/dashboard/home/events-table";
+
 export default function DashboardHome() {
-  return <div>Dashboard Home</div>;
+  const now = Date.now() / 1000;
+
+  return <EventsPageLayout now={now} />;
 }

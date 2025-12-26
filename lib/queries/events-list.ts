@@ -1,6 +1,7 @@
 import {
   InfiniteData,
   infiniteQueryOptions,
+  queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
 import { withSpan } from "../tracer";
@@ -65,8 +66,53 @@ export const eventsList = (
   });
 };
 
+export const eventsByOrganizerListSuspense = (
+  organizerRealmId: string | undefined,
+  discoverableFilter: DiscoverableFilter,
+  fromUnixSec: number,
+  toUnixSec: number,
+  limit: number,
+  page: number,
+) => {
+  const fromInt = Math.floor(fromUnixSec);
+  const toInt = Math.floor(toUnixSec);
+  const limitInt = Math.floor(limit);
+  const pageInt = Math.floor(page);
+
+  return queryOptions({
+    queryKey: [
+      "eventsByOrganizer",
+      organizerRealmId,
+      discoverableFilter,
+      fromInt,
+      toInt,
+      limitInt,
+      pageInt,
+    ],
+    queryFn: async () => {
+      if (!organizerRealmId) return [];
+
+      return withSpan(
+        `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
+        async () => {
+          const res = await zenaoClient.listEventsByOrganizer({
+            organizerId: userIdFromPkgPath(organizerRealmId),
+            limit: limitInt,
+            offset: pageInt * limitInt,
+            from: BigInt(fromInt),
+            to: BigInt(toInt),
+            discoverableFilter: discoverableFilter,
+          });
+          return res.events;
+        },
+      );
+    },
+    enabled: !!organizerRealmId,
+  });
+};
+
 export const eventsByOrganizerList = (
-  organizerRealmId: string,
+  organizerRealmId: string | undefined,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -87,6 +133,8 @@ export const eventsByOrganizerList = (
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
+      if (!organizerRealmId) return [];
+
       return withSpan(
         `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
         async () => {
@@ -114,6 +162,7 @@ export const eventsByOrganizerList = (
       }
       return pages.length - 2;
     },
+    enabled: !!organizerRealmId,
   });
 };
 

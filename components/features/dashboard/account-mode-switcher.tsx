@@ -1,7 +1,9 @@
-import { BadgeCheck, Bell, CreditCard, LogOut } from "lucide-react";
+import { ArrowLeftRight, CircleUserRound, LogOut } from "lucide-react";
 
-import { useAuth } from "@clerk/nextjs";
+import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import React from "react";
+import Link from "next/link";
 import { UserAvatar } from "../user/user";
 import {
   DropdownMenu,
@@ -60,28 +62,34 @@ export function AccountModeSwitcherView({
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{user.displayName}</span>
-            <span className="truncate text-xs">{realmId}</span>
+            <span className="truncate text-xs text-muted-foreground">
+              {realmId}
+            </span>
           </div>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <BadgeCheck />
-            Account
+          <DropdownMenuItem asChild>
+            <Link href={`/profile/${realmId}`}>
+              <CircleUserRound />
+              Profile
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard />
-            Billing
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Bell />
-            Notifications
+          <DropdownMenuItem asChild>
+            <Link href="/">
+              <ArrowLeftRight />
+              Switch to regular user mode
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LogOut />
-          Log out
+        <DropdownMenuItem asChild>
+          <SignOutButton>
+            <div>
+              <LogOut />
+              Log out
+            </div>
+          </SignOutButton>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

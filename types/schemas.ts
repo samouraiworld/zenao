@@ -342,3 +342,13 @@ export const realmIdSchema = z
   .or(z.string().regex(/^g[a-z0-9]{39}/));
 
 export type RealmId = z.infer<typeof realmIdSchema>;
+
+export const broadcastEmailFormSchema = z.object({
+  message: z
+    .string()
+    .min(30, "Message must be at least 30 characters")
+    .max(5000, "Message must be at most 5000 characters"),
+  attachTicket: z.boolean(),
+});
+
+export type BroadcastEmailFormSchema = z.infer<typeof broadcastEmailFormSchema>;

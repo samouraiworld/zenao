@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import React, { Suspense, useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
 import dynamic from "next/dynamic";
-import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
@@ -28,6 +27,7 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import EventLocationSection from "@/components/features/event/event-location-section";
 import { ParticipantsSection } from "@/components/features/event/event-participants-section";
+import { EventSection } from "@/components/features/event/event-section";
 
 const EventParticipationInfo = dynamic(
   () => import("@/components/features/event/event-participation-info"),
@@ -40,21 +40,6 @@ const EventManagementMenu = dynamic(
     ssr: false,
   },
 );
-
-interface EventSectionProps {
-  title: string;
-  children?: React.ReactNode;
-}
-
-const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
-  return (
-    <div className="flex flex-col">
-      <Text className="font-semibold">{title}</Text>
-      <Separator className="mt-2 mb-3" />
-      {children && children}
-    </div>
-  );
-};
 
 const iconSize = 22;
 
