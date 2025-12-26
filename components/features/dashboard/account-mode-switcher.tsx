@@ -4,6 +4,7 @@ import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import React from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { UserAvatar } from "../user/user";
 import {
   DropdownMenu,
@@ -39,6 +40,8 @@ export function AccountModeSwitcherView({
   readonly user: UserProfile;
   readonly realmId: string;
 }) {
+  const t = useTranslations("dashboard.navUser");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -72,13 +75,13 @@ export function AccountModeSwitcherView({
           <DropdownMenuItem asChild>
             <Link href={`/profile/${realmId}`}>
               <CircleUserRound />
-              Profile
+              {t("profile")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/">
               <ArrowLeftRight />
-              Switch to regular user mode
+              {t("switch-to-regular-user-mode")}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -87,7 +90,7 @@ export function AccountModeSwitcherView({
           <SignOutButton>
             <div>
               <LogOut />
-              Log out
+              {t("sign-out")}
             </div>
           </SignOutButton>
         </DropdownMenuItem>

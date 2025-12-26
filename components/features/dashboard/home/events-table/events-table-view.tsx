@@ -5,6 +5,7 @@ import * as React from "react";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEventsTableColumns } from "../columns";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
@@ -52,6 +53,7 @@ export function EventsTableView({
 }: EventsTableViewProps) {
   const router = useRouter();
   const columns = useEventsTableColumns(now);
+  const t = useTranslations("dashboard.eventsTable");
   const table = useDataTableInstance({
     data: events,
     columns,
@@ -70,11 +72,11 @@ export function EventsTableView({
             dndEnabled={false}
             nothingFn={() => (
               <div className="flex h-48 flex-col justify-center items-center gap-4">
-                <Text className="text-center">No events found.</Text>
+                <Text className="text-center">{t("no-events")}</Text>
                 <Link href="/dashboard/event/create">
                   <Button size="sm">
                     <Plus />
-                    Create event
+                    {t("create-event-btn")}
                   </Button>
                 </Link>
               </div>
