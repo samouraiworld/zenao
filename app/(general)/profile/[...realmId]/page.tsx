@@ -45,6 +45,7 @@ export async function generateMetadata({
       serialized: profileData?.bio,
       schema: gnoProfileDetailsSchema,
       defaultValue: {
+        portfolio: [],
         bio: "",
         socialMediaLinks: [],
         location: "",

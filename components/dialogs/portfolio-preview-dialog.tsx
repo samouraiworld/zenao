@@ -32,7 +32,7 @@ export default function PortfolioPreviewDialog({
   isAdmin = false,
   isDeleting = false,
 }: PortfolioPreviewDialogProps) {
-  const t = useTranslations("community-portfolio");
+  const t = useTranslations("portfolio");
   const [confirmDialogOpen, setConfirmDialogOpen] = React.useState(false);
 
   const onConfirmDelete = async () => {
