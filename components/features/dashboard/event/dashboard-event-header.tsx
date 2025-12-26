@@ -1,6 +1,11 @@
 "use client";
 
-import { CircleX, EllipsisVertical, PencilIcon } from "lucide-react";
+import {
+  CircleX,
+  EllipsisVertical,
+  PencilIcon,
+  ScanQrCode,
+} from "lucide-react";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
@@ -57,6 +62,13 @@ export default function DashboardEventHeader({
             sideOffset={4}
           >
             <DropdownMenuGroup>
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/event/${eventId}/scanner`}>
+                  <ScanQrCode />
+                  Open QR scanner
+                </Link>
+              </DropdownMenuItem>
+
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/event/${eventId}/edit`}>
                   <PencilIcon />
