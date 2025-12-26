@@ -6,6 +6,8 @@
   - title
   - description
   - date
+  - author
+  - category
   - previewImageUrl (optional)
 
 
