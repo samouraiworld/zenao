@@ -4,6 +4,8 @@ import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
 
+export const DEFAULT_EVENT_PARTICIPANTS_LIMIT = 20;
+
 const eventUserRolesEnum = z.enum(["organizer", "participant", "gatekeeper"]);
 
 export type EventUserRole = z.infer<typeof eventUserRolesEnum>;

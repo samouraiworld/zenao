@@ -62,6 +62,7 @@ export const useEventsTableColumns: (now: number) => ColumnDef<EventInfo>[] = (
       },
       {
         id: "actions",
+        header: () => <div>Actions</div>,
         cell: ({ row }) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -99,6 +100,9 @@ export const useEventsTableColumns: (now: number) => ColumnDef<EventInfo>[] = (
           </DropdownMenu>
         ),
         enableSorting: false,
+        meta: {
+          className: "flex justify-end items-center px-4",
+        },
       },
     ],
     [now],

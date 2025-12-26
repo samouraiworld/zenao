@@ -8,18 +8,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEventsTableColumns } from "../columns";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
-import { DataTableViewOptions } from "@/components/widgets/data-table/data-table-view-options";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
-import { withDndColumn } from "@/lib/utils/data-table-utils";
-import { Label } from "@/components/shadcn/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import Text from "@/components/widgets/texts/text";
@@ -30,7 +19,6 @@ import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
 interface EventsTableViewProps {
   now: number;
   tab: "upcoming" | "past";
-  onTabChange: (tab: "upcoming" | "past") => void;
   events: EventInfo[];
   isFetchingPastNextPage: boolean;
   isFetchingPastPreviousPage: boolean;
@@ -49,7 +37,6 @@ interface EventsTableViewProps {
 export function EventsTableView({
   now,
   tab,
-  onTabChange,
   events,
   isFetchingPastNextPage,
   isFetchingPastPreviousPage,
@@ -64,10 +51,9 @@ export function EventsTableView({
   hasPastNextPage,
   hasPastPreviousPage,
 }: EventsTableViewProps) {
-  const t = useTranslations("dashboard.eventsTable");
   const router = useRouter();
-  const eventsTableColumns = useEventsTableColumns(now);
-  const columns = withDndColumn(eventsTableColumns);
+  const columns = useEventsTableColumns(now);
+  const t = useTranslations("dashboard.eventsTable");
   const table = useDataTableInstance({
     data: events,
     columns,
@@ -77,46 +63,7 @@ export function EventsTableView({
   });
 
   return (
-    <Tabs
-      defaultValue="upcoming"
-      value={tab}
-      onValueChange={
-        onTabChange as React.Dispatch<React.SetStateAction<string>>
-      }
-      className="w-full flex-col justify-start gap-6"
-    >
-      <div className="flex items-center justify-between">
-        <Label htmlFor="view-selector" className="sr-only">
-          View
-        </Label>
-        <Select
-          defaultValue="upcoming"
-          value={tab}
-          onValueChange={
-            onTabChange as React.Dispatch<React.SetStateAction<string>>
-          }
-        >
-          <SelectTrigger className="flex w-fit xl:hidden" id="view-selector">
-            <SelectValue placeholder="Select a view" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="upcoming">{t("upcoming")}</SelectItem>
-            <SelectItem value="past">{t("past")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 xl:flex">
-          <TabsTrigger value="upcoming" className="gap-2">
-            {t("upcoming")}
-          </TabsTrigger>
-          <TabsTrigger value="past" className="gap-2">
-            {t("past")}
-          </TabsTrigger>
-        </TabsList>
-        <div className="flex items-center gap-2">
-          <DataTableViewOptions table={table} />
-        </div>
-      </div>
-
+    <>
       <div className="mt-2 relative flex flex-col gap-4 overflow-hidden rounded-lg border">
         <div className="w-full">
           <DataTableNew
@@ -165,6 +112,6 @@ export function EventsTableView({
               : fetchPastPreviousPage,
         }}
       />
-    </Tabs>
+    </>
   );
 }

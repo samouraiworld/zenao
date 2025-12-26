@@ -1,12 +1,13 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
-import { EditEventForm } from "../../../../(dashboard)/dashboard/event/[id]/edit/edit-event-form";
+import { EditEventForm } from "./edit-event-form";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userInfoOptions } from "@/lib/queries/user";
+
 import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,

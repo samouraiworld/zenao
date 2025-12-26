@@ -29,7 +29,7 @@ export default async function DashboardRootLayout({
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const t = await getTranslations("");
+  const t = await getTranslations();
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
@@ -37,8 +37,11 @@ export default async function DashboardRootLayout({
 
   if (!token || !userRealmId) {
     return (
-      <ScreenContainerCentered isSignedOutModal>
-        {t("eventForm.log-in")}
+      <ScreenContainerCentered
+        isSignedOutModal
+        description={t("dashboard.signout-desc")}
+      >
+        <div className="flex justify-center">{t("dashboard.signout-desc")}</div>
       </ScreenContainerCentered>
     );
   }

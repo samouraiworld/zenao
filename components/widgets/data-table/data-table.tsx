@@ -40,6 +40,8 @@ interface DataTableProps<TData, TValue> {
   dndEnabled?: boolean;
   onReorder?: (newData: TData[]) => void;
   nothingFn?: () => React.ReactNode;
+  loadingFn?: () => React.ReactNode;
+  isLoading?: boolean;
   onClickRow?: (row: Row<TData>) => void;
 }
 
@@ -49,6 +51,8 @@ function renderTableBody<TData, TValue>({
   dndEnabled,
   dataIds,
   nothingFn,
+  loadingFn,
+  isLoading,
   onClickRow,
 }: {
   table: TanStackTable<TData>;
@@ -56,8 +60,20 @@ function renderTableBody<TData, TValue>({
   dndEnabled: boolean;
   dataIds: UniqueIdentifier[];
   nothingFn?: () => React.ReactNode;
+  isLoading?: boolean;
+  loadingFn?: () => React.ReactNode;
   onClickRow?: (row: Row<TData>) => void;
 }) {
+  if (isLoading && !!loadingFn) {
+    return (
+      <TableRow>
+        <TableCell colSpan={columns.length} className="h-24 text-center">
+          {loadingFn()}
+        </TableCell>
+      </TableRow>
+    );
+  }
+
   if (!table.getRowModel().rows.length) {
     return (
       <TableRow>
@@ -83,11 +99,16 @@ function renderTableBody<TData, TValue>({
       onClick={() => onClickRow?.(row)}
       className={onClickRow && "cursor-pointer"}
     >
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
+      {row.getVisibleCells().map((cell) => {
+        return (
+          <TableCell
+            key={cell.id}
+            className={cell.column.columnDef.meta?.className}
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        );
+      })}
     </TableRow>
   ));
 }
@@ -95,9 +116,11 @@ function renderTableBody<TData, TValue>({
 export function DataTable<TData, TValue>({
   table,
   columns,
+  isLoading = false,
   dndEnabled = false,
   onReorder,
   nothingFn,
+  loadingFn,
   onClickRow,
 }: DataTableProps<TData, TValue>) {
   const dataIds: UniqueIdentifier[] = table
@@ -129,7 +152,11 @@ export function DataTable<TData, TValue>({
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => {
               return (
-                <TableHead key={header.id} colSpan={header.colSpan}>
+                <TableHead
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  className={header.column.columnDef.meta?.className}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -148,7 +175,9 @@ export function DataTable<TData, TValue>({
           columns,
           dndEnabled,
           dataIds,
+          isLoading,
           nothingFn,
+          loadingFn,
           onClickRow,
         })}
       </TableBody>
