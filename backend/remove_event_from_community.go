@@ -55,9 +55,5 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(zUser.ID, req.Msg.CommunityId, req.Msg.EventId); err != nil {
-		return nil, err
-	}
-
 	return connect.NewResponse(&zenaov1.RemoveEventFromCommunityResponse{}), nil
 }

@@ -21,7 +21,7 @@ export const profileOptions = (realmId: string | null | undefined) => {
   return queryOptions<UserProfile | null>({
     queryKey: ["profile", realmId],
     queryFn: async () => {
-      if (!realmId || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
+      if (!realmId) {
         return null;
       }
 
@@ -34,7 +34,7 @@ export const profileOptions = (realmId: string | null | undefined) => {
 export const profiles = createBatcher({
   fetcher: async (realmIDs: string[]) => {
     console.log("Batch fetching profiles for realmIDs:", realmIDs);
-    if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || realmIDs.length === 0) {
+    if (realmIDs.length === 0) {
       return [];
     }
 

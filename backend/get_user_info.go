@@ -29,7 +29,7 @@ func (s *ZenaoServer) GetUserInfo(
 		return nil, errors.New("user is banned")
 	}
 
-	userAddr := s.Chain.WithContext(ctx).UserRealmID(zUser.ID)
+	userAddr := s.Chain.UserRealmID(zUser.ID)
 
 	return connect.NewResponse(&zenaov1.GetUserInfoResponse{
 		RealmId: userAddr,
