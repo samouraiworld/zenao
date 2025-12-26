@@ -63,7 +63,6 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
   } = useManualPagination({
     page: tablePage,
     onPageChange: (newPage) => {
-      console.log("Setting table page to:", newPage);
       setTablePage(newPage < 1 ? 1 : newPage);
     },
     getHasNextPage: () => {
@@ -86,7 +85,6 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
   } = useManualPagination({
     page: tablePage,
     onPageChange: (newPage) => {
-      console.log("Setting table page to:", newPage);
       setTablePage(newPage < 1 ? 1 : newPage);
     },
     getHasNextPage: () => {

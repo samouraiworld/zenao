@@ -40,6 +40,8 @@ interface DataTableProps<TData, TValue> {
   dndEnabled?: boolean;
   onReorder?: (newData: TData[]) => void;
   nothingFn?: () => React.ReactNode;
+  loadingFn?: () => React.ReactNode;
+  isLoading?: boolean;
   onClickRow?: (row: Row<TData>) => void;
 }
 
@@ -49,6 +51,8 @@ function renderTableBody<TData, TValue>({
   dndEnabled,
   dataIds,
   nothingFn,
+  loadingFn,
+  isLoading,
   onClickRow,
 }: {
   table: TanStackTable<TData>;
@@ -56,8 +60,21 @@ function renderTableBody<TData, TValue>({
   dndEnabled: boolean;
   dataIds: UniqueIdentifier[];
   nothingFn?: () => React.ReactNode;
+  isLoading?: boolean;
+  loadingFn?: () => React.ReactNode;
   onClickRow?: (row: Row<TData>) => void;
 }) {
+  console.log("isLoading:", isLoading);
+  if (isLoading && !!loadingFn) {
+    return (
+      <TableRow>
+        <TableCell colSpan={columns.length} className="h-24 text-center">
+          {loadingFn()}
+        </TableCell>
+      </TableRow>
+    );
+  }
+
   if (!table.getRowModel().rows.length) {
     return (
       <TableRow>
@@ -67,6 +84,7 @@ function renderTableBody<TData, TValue>({
       </TableRow>
     );
   }
+
   if (dndEnabled) {
     return (
       <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
@@ -100,9 +118,11 @@ function renderTableBody<TData, TValue>({
 export function DataTable<TData, TValue>({
   table,
   columns,
+  isLoading = false,
   dndEnabled = false,
   onReorder,
   nothingFn,
+  loadingFn,
   onClickRow,
 }: DataTableProps<TData, TValue>) {
   const dataIds: UniqueIdentifier[] = table
@@ -157,7 +177,9 @@ export function DataTable<TData, TValue>({
           columns,
           dndEnabled,
           dataIds,
+          isLoading,
           nothingFn,
+          loadingFn,
           onClickRow,
         })}
       </TableBody>

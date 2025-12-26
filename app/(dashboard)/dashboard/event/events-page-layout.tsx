@@ -15,6 +15,7 @@ import {
 } from "@/components/shadcn/select";
 import EventsTable from "@/components/features/dashboard/home/events-table";
 import Heading from "@/components/widgets/texts/heading";
+import EventsTableViewLoading from "@/components/features/dashboard/home/events-table/events-table-view-loading";
 
 interface EventsTableProps {
   now: number;
@@ -79,7 +80,7 @@ export default function EventsPageLayout({ now }: EventsTableProps) {
             </div> */}
           </div>
 
-          <Suspense fallback={<div>Loading events...</div>}>
+          <Suspense fallback={<EventsTableViewLoading now={now} />}>
             <EventsTable now={now} tab={tab} />
           </Suspense>
         </Tabs>
