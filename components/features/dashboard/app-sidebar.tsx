@@ -1,8 +1,8 @@
 "use client";
 
 import { Suspense } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { NavMain } from "./nav-main";
 
 import AppSidebarFooter from "./app-sidebar-footer";

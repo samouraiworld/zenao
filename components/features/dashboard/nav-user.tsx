@@ -2,15 +2,16 @@
 
 import {
   EllipsisVertical,
-  CircleUser,
-  CreditCard,
-  MessageSquareDot,
   LogOut,
+  CircleUserRound,
+  ArrowLeftRight,
 } from "lucide-react";
 
 import { ClerkLoading } from "@clerk/nextjs";
-import { SignedIn } from "@clerk/clerk-react";
+import { SignedIn, SignOutButton } from "@clerk/clerk-react";
 
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { UserAvatar, UserAvatarSkeleton } from "../user/user";
 import { UserProfile } from "@/lib/queries/profile";
 import {
@@ -38,6 +39,7 @@ const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
 export function NavUser({ realmId, user }: NavUserProps) {
   const { isMobile } = useSidebar();
+  const t = useTranslations("dashboard.navUser");
 
   return (
     <SidebarMenu>
@@ -109,23 +111,27 @@ export function NavUser({ realmId, user }: NavUserProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <CircleUser />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href={`/profile/${realmId}`}>
+                  <CircleUserRound />
+                  {t("profile")}
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <MessageSquareDot />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/">
+                  <ArrowLeftRight />
+                  {t("switch-to-regular-user-mode")}
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <DropdownMenuItem asChild>
+              <SignOutButton>
+                <div>
+                  <LogOut />
+                  {t("sign-out")}
+                </div>
+              </SignOutButton>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
