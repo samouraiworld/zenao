@@ -1,7 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@clerk/nextjs/server";
-import { CreateEventForm } from "./create-event-form";
+import { CreateEventForm } from "../../../(dashboard)/dashboard/event/create/create-event-form";
 import { getQueryClient } from "@/lib/get-query-client";
 import {
   ScreenContainer,

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { PlusCircleIcon, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   type NavMainItem,
   type NavGroup,
@@ -36,11 +37,14 @@ interface NavMainProps {
   readonly items: readonly NavGroup[];
 }
 
-const IsComingSoon = () => (
-  <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">
-    Soon
-  </span>
-);
+const IsComingSoon = () => {
+  const t = useTranslations("dashboard.sidebar");
+  return (
+    <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">
+      {t("coming-soon")}
+    </span>
+  );
+};
 
 const NavItemExpanded = ({
   item,
@@ -51,6 +55,8 @@ const NavItemExpanded = ({
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
+  const t = useTranslations("dashboard.sidebar");
+
   return (
     <Collapsible
       key={item.title}
@@ -106,7 +112,7 @@ const NavItemExpanded = ({
                       target={subItem.newTab ? "_blank" : undefined}
                     >
                       {subItem.icon && <subItem.icon />}
-                      <span>{subItem.title}</span>
+                      <span>{t(subItem.title)}</span>
                       {subItem.comingSoon && <IsComingSoon />}
                     </Link>
                   </SidebarMenuSubButton>
@@ -127,6 +133,8 @@ const NavItemCollapsed = ({
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
+  const t = useTranslations("dashboard.sidebar");
+
   return (
     <SidebarMenuItem key={item.title}>
       <DropdownMenu>
@@ -163,7 +171,7 @@ const NavItemCollapsed = ({
                   {subItem.icon && (
                     <subItem.icon className="[&>svg]:text-sidebar-foreground" />
                   )}
-                  <span>{subItem.title}</span>
+                  <span>{t(subItem.title)}</span>
                   {subItem.comingSoon && <IsComingSoon />}
                 </Link>
               </SidebarMenuSubButton>
@@ -178,6 +186,7 @@ const NavItemCollapsed = ({
 export function NavMain({ items }: NavMainProps) {
   const path = usePathname();
   const { state, isMobile } = useSidebar();
+  const t = useTranslations("dashboard.sidebar");
 
   const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
     if (subItems?.length) {
@@ -196,9 +205,15 @@ export function NavMain({ items }: NavMainProps) {
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <SidebarMenuButton variant="outline" tooltip="Quick Create">
-                <PlusCircleIcon />
-                <span>Create event</span>
+              <SidebarMenuButton
+                variant="outline"
+                tooltip={t("quick-create")}
+                asChild
+              >
+                <Link href="/dashboard/event/create">
+                  <PlusCircleIcon />
+                  <span>{t("create-event-btn")}</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -227,7 +242,7 @@ export function NavMain({ items }: NavMainProps) {
                             target={item.newTab ? "_blank" : undefined}
                           >
                             {item.icon && <item.icon />}
-                            <span>{item.title}</span>
+                            <span>{t(item.title)}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
