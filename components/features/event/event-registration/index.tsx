@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { SignedOut, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
 import { InviteeForm } from "./invitee-form";
 import { Form } from "@/components/shadcn/form";
 import {
@@ -19,7 +20,6 @@ import { captureException } from "@/lib/report";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { emailSchema } from "@/types/schemas";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
-import { userInfoOptions } from "@/lib/queries/user";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 const eventRegistrationFormSchema = z.object({
@@ -49,11 +49,9 @@ export function EventRegistrationForm({
 }: EventRegistrationFormProps) {
   const { trackEvent } = useAnalyticsEvents();
   const { getToken, userId } = useAuth();
+  const { address } = useAccount();
   const { data } = useSuspenseQuery(eventOptions(eventId));
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const userRealmId = userInfo?.realmId || "";
+  const userRealmId = address || "";
   const { toast } = useToast();
 
   const [isPending, setIsPending] = useState(false);

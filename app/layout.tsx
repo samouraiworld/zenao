@@ -1,3 +1,5 @@
+import "./globals.css";
+
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -6,8 +8,10 @@ import { ThemeProvider } from "next-themes";
 import { Albert_Sans } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import PlausibleProvider from "next-plausible";
-import QueryProviders from "../components/providers/query-providers";
-import "./globals.css";
+import { headers } from "next/headers";
+import { cookieToWeb3AuthState } from "@web3auth/modal";
+import { AppWeb3AuthProvider } from "./web3-auth-provider";
+
 import { Toaster } from "@/components/shadcn/toaster";
 import PwaStateProvider from "@/components/providers/pwa-state-provider";
 import { TooltipProvider } from "@/components/shadcn/tooltip";
@@ -218,6 +222,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const web3authInitialState = cookieToWeb3AuthState(headersList.get("cookie"));
+
   const locale = await getLocale();
 
   // Providing all messages to the client
@@ -249,7 +256,7 @@ export default async function RootLayout({
         className={`${albertSans.variable} antialiased`}
       >
         <ClerkProvider>
-          <QueryProviders>
+          <AppWeb3AuthProvider initialState={web3authInitialState}>
             <NuqsAdapter>
               <PlausibleProvider domain="zenao.io">
                 <PwaStateProvider>
@@ -271,7 +278,7 @@ export default async function RootLayout({
                 </PwaStateProvider>
               </PlausibleProvider>
             </NuqsAdapter>
-          </QueryProviders>
+          </AppWeb3AuthProvider>
         </ClerkProvider>
         <Toaster />
       </body>

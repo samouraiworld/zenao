@@ -11,9 +11,7 @@ import { Albert_Sans } from "next/font/google";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 import enMessages from "@/app/i18n/messages/en.json";
 import PwaStateProvider from "@/components/providers/pwa-state-provider";
-import QueryProviders from "@/components/providers/query-providers";
 import { TooltipProvider } from "@/components/shadcn/tooltip";
-import { Header } from "@/components/layout/navigation/header";
 import { Footer } from "@/components/layout/navigation/footer";
 import PwaBottomBar from "@/components/layout/navigation/pwa-bottom-bar";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
@@ -44,39 +42,35 @@ export default function GlobalError({
         className={`${albertSans.variable} antialiased`}
       >
         <ClerkProvider>
-          <QueryProviders>
-            <NuqsAdapter>
-              <PlausibleProvider domain="zenao.io">
-                <PwaStateProvider>
-                  <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                  >
-                    <TooltipProvider>
-                      <NextIntlClientProvider
-                        locale="en"
-                        messages={enMessages}
-                        now={contextNow}
-                      >
-                        <NextTopLoader showSpinner={false} color="#EC7E17" />
-                        <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
-                          <Header />
-
-                          <ScreenContainerCentered>
-                            <MainErrorContent />
-                          </ScreenContainerCentered>
-                          <Footer />
-                          <PwaBottomBar />
-                        </div>
-                      </NextIntlClientProvider>
-                    </TooltipProvider>
-                  </ThemeProvider>
-                </PwaStateProvider>
-              </PlausibleProvider>
-            </NuqsAdapter>
-          </QueryProviders>
+          <NuqsAdapter>
+            <PlausibleProvider domain="zenao.io">
+              <PwaStateProvider>
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  <TooltipProvider>
+                    <NextIntlClientProvider
+                      locale="en"
+                      messages={enMessages}
+                      now={contextNow}
+                    >
+                      <NextTopLoader showSpinner={false} color="#EC7E17" />
+                      <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
+                        <ScreenContainerCentered>
+                          <MainErrorContent />
+                        </ScreenContainerCentered>
+                        <Footer />
+                        <PwaBottomBar />
+                      </div>
+                    </NextIntlClientProvider>
+                  </TooltipProvider>
+                </ThemeProvider>
+              </PwaStateProvider>
+            </PlausibleProvider>
+          </NuqsAdapter>
         </ClerkProvider>
       </body>
     </html>

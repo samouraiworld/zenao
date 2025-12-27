@@ -1,60 +1,69 @@
 "use client";
 
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQueries,
+} from "@tanstack/react-query";
 import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
-import { DiscoverableFilter, EventInfo } from "../../gen/zenao/v1/zenao_pb";
-import {
-  DEFAULT_EVENTS_LIMIT,
-  eventsByParticipantList,
-} from "@/lib/queries/events-list";
+import { useAccount } from "wagmi";
+import { ticketsByOwner } from "@/lib/queries/events-list";
 import { FromFilter } from "@/lib/search-params";
 import EmptyEventsList from "@/components/features/event/event-empty-list";
 import { EventCard } from "@/components/features/event/event-card";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
+import { eventOptions } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 export function TicketsEventsList({
   now,
   from,
-  userRealmId,
 }: {
   now: number;
   from: FromFilter;
-  userRealmId: string;
 }) {
+  const { address } = useAccount();
+
   const {
-    data: eventsPages,
+    data: ticketsPages,
     isFetchingNextPage,
     hasNextPage,
     isFetching,
     fetchNextPage,
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
-      ? eventsByParticipantList(
-          userRealmId,
-          DiscoverableFilter.UNSPECIFIED,
-          now,
-          Number.MAX_SAFE_INTEGER,
-          DEFAULT_EVENTS_LIMIT,
-        )
-      : eventsByParticipantList(
-          userRealmId,
-          DiscoverableFilter.UNSPECIFIED,
-          now - 1,
-          0,
-          DEFAULT_EVENTS_LIMIT,
-        ),
+      ? ticketsByOwner(address || "", 200)
+      : ticketsByOwner(address || "", 200),
   );
 
-  const events = useMemo(() => eventsPages.pages.flat(), [eventsPages]);
+  const eventsAddrs = useMemo(
+    () => [
+      ...ticketsPages.pages.reduce((prev, page) => {
+        for (const ticket of page) {
+          prev.add(ticket.eventAddr);
+        }
+        return prev;
+      }, new Set<string>()),
+    ],
+    [ticketsPages.pages],
+  );
+
+  const events = useSuspenseQueries({
+    queries: eventsAddrs.map((eventAddr) => eventOptions(eventAddr)),
+  });
 
   const eventsByDay = useMemo(() => {
     return events.reduce(
-      (acc, event) => {
-        const dateKey = fromUnixTime(Number(event.startDate))
+      (acc, event, idx) => {
+        if (event.data.startDate < now && from == "upcoming") {
+          return acc;
+        }
+        if (event.data.startDate >= now && from == "past") {
+          return acc;
+        }
+        const dateKey = fromUnixTime(Number(event.data.startDate))
           .toISOString()
           .split("T")[0];
 
@@ -62,12 +71,12 @@ export function TicketsEventsList({
           acc[dateKey] = [];
         }
 
-        acc[dateKey].push(event);
+        acc[dateKey].push({ ...event.data, addr: eventsAddrs[idx] });
         return acc;
       },
-      {} as Record<string, EventInfo[]>,
+      {} as Record<string, (EventInfo & { addr: string })[]>,
     );
-  }, [events]);
+  }, [events, eventsAddrs, from, now]);
 
   if (events.length === 0) {
     return (
@@ -89,9 +98,14 @@ export function TicketsEventsList({
             <EventCardListLayout>
               {eventsOfTheDay.map((evt) => (
                 <EventCard
-                  key={evt.pkgPath}
-                  evt={evt}
-                  href={`/ticket/${eventIdFromPkgPath(evt.pkgPath)}`}
+                  key={evt.addr}
+                  evt={{
+                    eventAddr: evt.addr,
+                    discoverable: evt.discoverable,
+                    saleEnd: evt.endDate.toString(),
+                    creatorAddr: evt.organizers[0],
+                  }}
+                  href={`/ticket/${evt.addr}`}
                 />
               ))}
             </EventCardListLayout>
