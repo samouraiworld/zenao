@@ -73,7 +73,7 @@ function EventManagementMenuOrganizer({
       />
 
       <div className="flex flex-col">
-        <Link href={`/edit/${eventId}`} className="text-main underline">
+        <Link href={`/event/${eventId}/edit`} className="text-main underline">
           {t("edit-button")}
         </Link>
 

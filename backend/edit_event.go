@@ -123,11 +123,11 @@ func (s *ZenaoServer) EditEvent(
 			if err = db.AddEventToCommunity(req.Msg.EventId, req.Msg.CommunityId); err != nil {
 				return err
 			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+			targets, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleMember})
 			if err != nil {
 				return err
 			}
-			participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
+			participants, err = db.GetOrgUsersWithRoles(zeni.EntityTypeEvent, req.Msg.EventId, []string{zeni.RoleParticipant})
 			if err != nil {
 				return err
 			}
@@ -202,39 +202,6 @@ func (s *ZenaoServer) EditEvent(
 			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
 		}
 
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).EditEvent(req.Msg.EventId, zUser.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		return nil, err
-	}
-
-	if cmt != nil && cmt.ID != req.Msg.CommunityId {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, req.Msg.EventId); err != nil {
-			return nil, err
-		}
-	}
-
-	if newCmt != nil {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, newCmt.ID, req.Msg.EventId); err != nil {
-			return nil, err
-		}
-
-		newMembers := make([]string, 0, len(participants))
-		for _, participant := range participants {
-			if !targetIDs[participant.ID] {
-				newMembers = append(newMembers, participant.ID)
-			}
-		}
-		if len(newMembers) > 0 {
-			if err := s.Chain.WithContext(context.Background()).AddMembersToCommunity(newCmt.CreatorID, newCmt.ID, newMembers); err != nil {
-				s.Logger.Error("add-members-to-community", zap.String("community-id", newCmt.ID), zap.Strings("new-members", newMembers), zap.Error(err))
-			}
-		}
 	}
 
 	return connect.NewResponse(&zenaov1.EditEventResponse{

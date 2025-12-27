@@ -45,21 +45,17 @@ const DATA_QUERY = (
 
 export const eventUserRoles = (
   eventId: string | null | undefined,
-  userRealmId: string | null | undefined,
+  userId: string | null | undefined,
 ) =>
   queryOptions({
-    queryKey: ["eventUserRoles", eventId, userRealmId],
+    queryKey: ["eventUserRoles", eventId, userId],
     queryFn: async () => {
-      if (
-        !eventId ||
-        !userRealmId ||
-        !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT
-      ) {
+      if (!eventId || !userId) {
         return [];
       }
 
       return withSpan(
-        `query:chain:event:${eventId}:user-roles:${userRealmId}`,
+        `query:backend:event:${eventId}:user-roles:${userId}`,
         async () => {
           const client = createPublicClient({
             transport: http(process.env.NEXT_PUBLIC_EVM_RPC),
@@ -77,7 +73,7 @@ export const eventUserRoles = (
             .query(
               DATA_QUERY(
                 rolesModAddr.toLowerCase() as `0x${string}`,
-                userRealmId.toLowerCase() as `0x${string}`,
+                userId.toLowerCase() as `0x${string}`,
               ),
               {},
             )
@@ -131,12 +127,12 @@ export const eventUsersWithRole = (
   queryOptions({
     queryKey: ["eventUsersWithRole", eventId, role],
     queryFn: async () => {
-      if (!eventId || !role || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
+      if (!eventId || !role) {
         return [];
       }
 
       return withSpan(
-        `query:chain:event:${eventId}:users-with-role:${role}`,
+        `query:backend:event:${eventId}:users-with-role:${role}`,
         async () => {
           const client = createPublicClient({
             transport: http(process.env.NEXT_PUBLIC_EVM_RPC),

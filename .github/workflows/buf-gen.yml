@@ -23,13 +23,10 @@ jobs:
         with:
           go-version-file: go.mod
           cache-key-suffix: buf-gen
-
-      - name: Install gno
+      - name: Install goimports
         run: |
-          git clone https://github.com/gnolang/gno.git gnobuild
-          cd gnobuild
-          git checkout $(shell $(CAT) .gnoversion)
-          make install.gno
+          go install golang.org/x/tools/cmd/goimports@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
       - name: Generate
         run: make generate

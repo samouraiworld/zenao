@@ -112,7 +112,7 @@ func (s *ZenaoServer) CreateEvent(
 			if err != nil {
 				return err
 			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+			targets, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleMember})
 			if err != nil {
 				return err
 			}
@@ -181,23 +181,6 @@ func (s *ZenaoServer) CreateEvent(
 			}
 			count += len(batch)
 			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
-		}
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		s.Logger.Error("create-event", zap.Error(err))
-		return nil, err
-	}
-
-	if req.Msg.CommunityId != "" {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
-			s.Logger.Error("add-event-to-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
-			return nil, err
 		}
 	}
 

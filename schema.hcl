@@ -400,6 +400,10 @@ table "posts" {
     null = true
     type = text
   }
+  column "pinned_at" {
+    null = true
+    type = datetime
+  }
   column "user_id" {
     null = true
     type = integer
@@ -411,15 +415,15 @@ table "posts" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_feed" {
-    columns     = [column.feed_id]
-    ref_columns = [table.feeds.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_feed" {
+    columns     = [column.feed_id]
+    ref_columns = [table.feeds.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }

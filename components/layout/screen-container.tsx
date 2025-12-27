@@ -47,7 +47,7 @@ export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
   return (
     <div className="flex grow flex-col items-center justify-center">
       <main className="flex flex-col w-full justify-center items-center mb-10 sm:mb-0 standalone:mb-24">
-        <div className="mt-8 mx-5">{children}</div>
+        <div className="w-full mt-8 mx-5">{children}</div>
       </main>
       {isSignedOutModal && <SignedOutDialog />}
     </div>

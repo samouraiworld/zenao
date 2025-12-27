@@ -9,6 +9,8 @@ const ARTICLE_PREFIX = "article-";
 const headerSchema = z.object({
   title: z.string(),
   description: z.string(),
+  author: z.string(),
+  category: z.string(),
   previewImageUrl: z.string().optional(),
   date: z.string().refine((value) => !isNaN(Date.parse(value))),
 });
@@ -40,6 +42,8 @@ export async function getPostsMetadata(): Promise<BlogPostMetadata[]> {
         slug,
         title: validatedData.title,
         date: validatedData.date,
+        author: validatedData.author,
+        category: validatedData.category,
         description: validatedData.description,
         previewImageUrl: validatedData.previewImageUrl,
       };
@@ -66,6 +70,8 @@ export async function getPostContent(slug: string): Promise<BlogPost | null> {
       data: {
         title: validatedData.title,
         date: validatedData.date,
+        author: validatedData.author,
+        category: validatedData.category,
         description: validatedData.description,
         previewImageUrl: validatedData.previewImageUrl,
       },

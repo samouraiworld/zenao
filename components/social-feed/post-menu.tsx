@@ -1,10 +1,7 @@
 "use client";
 
-import { Url } from "next/dist/shared/lib/router/router";
 import * as React from "react";
 import { EllipsisVertical } from "lucide-react";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { Button } from "@/components/shadcn/button";
 import {
   DropdownMenu,
@@ -15,7 +12,7 @@ import {
 import { DeletePostConfirmationDialog } from "@/components/dialogs/delete-post-confirmation-dialog";
 
 type PostMenuProps = {
-  gnowebHref?: Url;
+  isAdmin?: boolean;
   isOwner?: boolean;
   onEdit?: () => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
@@ -24,20 +21,23 @@ type PostMenuProps = {
 };
 
 export function PostMenu({
+  isAdmin,
   isOwner,
-  gnowebHref,
   canEdit,
   onEdit,
   onDelete,
   isDeleting,
 }: PostMenuProps) {
-  const t = useTranslations("components.buttons");
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const onDeletePost = async () => {
     await onDelete?.();
     setDialogOpen(false);
   };
+
+  if (!isOwner && !isAdmin) {
+    return null;
+  }
 
   return (
     <>
@@ -54,21 +54,17 @@ export function PostMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-36">
-          {gnowebHref && (
-            <Link href={gnowebHref}>
-              <DropdownMenuItem>{t("gnoweb-button")}</DropdownMenuItem>
-            </Link>
-          )}
           {isOwner && (
             <>
               {canEdit && onEdit && (
                 <DropdownMenuItem onClick={onEdit}>Edit post</DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => setDialogOpen(true)}>
-                Delete post
-              </DropdownMenuItem>
             </>
           )}
+
+          <DropdownMenuItem onClick={() => setDialogOpen(true)}>
+            Delete post
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

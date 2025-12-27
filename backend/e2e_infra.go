@@ -64,8 +64,6 @@ func execE2EInfra() error {
 	}()
 
 	dbPath := filepath.Join(tempDir, "e2e.db")
-	txsPath := filepath.Join(tempDir, "genesis_txs.jsonl")
-
 	// backend ctx handle backend & gnodev
 	backendCtx, cancelBackendCtx := context.WithCancel(ctx)
 	defer cancelBackendCtx()
@@ -89,34 +87,11 @@ func execE2EInfra() error {
 		}
 	}
 
-	// run fakegen with --skip-chain
 	{
-		args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--communities", "5", "--db", dbPath, "--skip-chain"}
+		args := []string{"go", "run", "./backend", "fakegen", "--events", "10", "--communities", "5", "--db", dbPath}
 		if err := runCommand(ctx, "fakegen", "#317738", args); err != nil {
 			return err
 		}
-	}
-
-	// run gentxs
-	{
-		args := []string{"go", "run", "./backend", "gentxs", "--db", dbPath, "--output", txsPath}
-		if err := runCommand(ctx, "gentxs", "#317738", args); err != nil {
-			return err
-		}
-	}
-
-	// start gnodev
-	{
-		args := []string{"make", "start.gnodev-e2e"}
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			cmd := exec.CommandContext(ctx, args[0], args[1:]...)
-			cmd.Env = append(os.Environ(), "TXS_FILE="+txsPath)
-			if err := runCommandWithCmd(ctx, "gnodev", "#7D56F4", cmd); err != nil {
-				fmt.Printf("%-10s | gnodev: %v\n", "RUN_ERR", err)
-			}
-		}()
 	}
 
 	startBackend := func() error {
@@ -138,11 +113,6 @@ func execE2EInfra() error {
 			}()
 		}
 
-		// wait for gnodev to be ready
-		if err := waitHTTPStatus(ctx, 60*time.Second, "http://localhost:26657/health", 200); err != nil {
-			return err
-		}
-
 		// wait for backend to be ready
 		if err := waitHTTPStatus(ctx, 60*time.Second, "http://localhost:4242", 404); err != nil {
 			return err
@@ -157,11 +127,6 @@ func execE2EInfra() error {
 
 	resetReqJoiner := requestsJoiner{process: func() (int, []byte) {
 		fmt.Printf("%-10s | ----------------------------\n", "RESET")
-		// reset gnodev
-		if _, err := http.Get("http://localhost:8888/reset"); err != nil {
-			return http.StatusInternalServerError, []byte(err.Error())
-		}
-
 		// reset backend
 		cancelBackendCtx()
 		<-backendDone

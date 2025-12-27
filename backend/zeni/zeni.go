@@ -2,7 +2,6 @@ package zeni
 
 import (
 	"context"
-	"crypto/ed25519"
 	"errors"
 	"fmt"
 	"net/http"
@@ -129,6 +128,7 @@ type Post struct {
 	Post      *feedsv1.Post
 	UserID    string
 	FeedID    string
+	PinnedAt  *time.Time
 	Reactions []*Reaction
 }
 
@@ -210,11 +210,14 @@ type DB interface {
 
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
+	GetUsersByIDs(ids []string) ([]*User, error)
 	// XXX: add EnsureUsersExist
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
+	EntitiesWithRoles(orgType string, orgID string, roles []string) ([]*EntityRole, error)
+	CountEntities(orgType string, orgID string, entityType string, role string) (uint32, error)
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)
@@ -222,6 +225,8 @@ type DB interface {
 	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
+	ListEvents(entityType string, entityID string, role string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*Event, error)
+	CountCheckedIn(eventID string) (uint32, error)
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
@@ -241,11 +246,12 @@ type DB interface {
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
 	EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
 	GetCommunity(communityID string) (*Community, error)
+	ListCommunities(entityType string, entityID string, role string, limit int, offset int) ([]*Community, error)
 	AddMemberToCommunity(communityID string, userID string) error
 	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)
 
-	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
+	GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
 	GetOrgByPostID(postID string) (orgType, orgID string, err error)
@@ -254,16 +260,21 @@ type DB interface {
 	GetFeed(orgType string, orgID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
 
-	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	CreatePost(feedID string, userID string, post *feedsv1.Post) (*Post, error)
 	DeletePost(postID string) error
 	EditPost(postID string, req *zenaov1.EditPostRequest) error
 	GetPostByID(postID string) (*Post, error)
+	GetPostsByFeedID(feedID string, limit int, offset int, tags []string) ([]*Post, error)
+	GetPostsByParentID(parentID string, limit int, offset int, tags []string) ([]*Post, error)
+	CountChildrenPosts(parentID string) (uint64, error)
 	GetAllPosts(getDeleted bool) ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
+	PinPost(feedID string, postID string, pinned bool) error
 
-	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
+	CreatePoll(userID string, feedID string, parentURI string, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
-	GetPollByPostID(postID string) (*Poll, error)
+	GetPollByID(pollID string, userID string) (*Poll, error)
+	GetPollByPostID(postID string, userID string) (*Poll, error)
 
 	// gentxs specific
 	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
@@ -273,34 +284,10 @@ type DB interface {
 }
 
 type Chain interface {
-	WithContext(ctx context.Context) Chain
-
-	FillAdminProfile()
-	CreateUser(user *User) error
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
+	EntityRealmID(entityType string, entityID string) (string, error)
 	UserRealmID(userID string) string
-
-	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
-	CancelEvent(eventID string, callerID string) error
-	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
-	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
-	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
-	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
-
-	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
-	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
-	AddEventToCommunity(callerID string, communityID string, eventID string) error
-	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
-	AddMemberToCommunity(callerID string, communityID string, userID string) error
-	AddMembersToCommunity(callerID string, communityID string, userIDs []string) error
-	RemoveMemberFromCommunity(callerID string, communityID string, userID string) error
-
-	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
-	DeletePost(userID string, postID string) error
-	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
+	CommunityRealmID(userID string) string
+	EventRealmID(eventID string) string
 }
 
 type Auth interface {

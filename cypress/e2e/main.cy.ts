@@ -4,6 +4,7 @@ const testName = "Alice Tester";
 const testBio =
   "Hi, I’m Alice Tester! I’m a fictional persona created to help test web applications from start to finish.";
 
+// EVENT
 const testEventName = "Bug Bash Bonanza: A Testing Extravaganza";
 const testEventDesc = `Join **Alice Tester** for a fun and interactive event where developers, 
 Don’t miss out—RSVP now and bring your testing A-game! 🐞🎉`;
@@ -11,6 +12,15 @@ const testEventLocation = "123 Test Lane, Suite 404, Bugville, QA 98765";
 const testEventCapacity = "42";
 const testEventPassword = "zenao_everyday";
 
+// COMMUNITY
+const testCommunityName = "Testers United";
+const testCommunityShortDesc =
+  "A community for QA enthusiasts to share knowledge.";
+const testCommunityDesc =
+  "Welcome to **Testers United**!\nA community for QA enthusiasts to share knowledge.";
+const testCommunitySocialLink = "https://twitter.com/testers_united";
+
+// SOCIAL FEED
 const testStandardPost = "Post to test";
 const testComment = "A comment to test";
 
@@ -53,8 +63,10 @@ describe("main", () => {
     // go to discover page
     cy.get("a").contains("Discover").click();
 
+    cy.url().should("contain", "/discover");
+
     // click on first event
-    cy.get('a[href^="/event/"]').first().click();
+    cy.get('a.group[href^="/event/"]').first().click();
 
     // type email in participate form
     cy.get('input[placeholder="Email..."]').type(testEmail2);
@@ -80,7 +92,7 @@ describe("main", () => {
     cy.get("a").contains("Discover").click();
 
     // click on last event since we already participate in first
-    cy.get('a[href^="/event/"]').first().click();
+    cy.get('a.group[href^="/event/"]').first().click();
 
     // make sure there is no email field
     cy.get('input[placeholder="Email..."]').should("not.exist");
@@ -126,6 +138,19 @@ describe("main", () => {
 
     // check that home text is present
     cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
+  });
+
+  it("blog exists", () => {
+    // start from the index page
+    cy.visit("/blog");
+
+    // go to blog page
+    // cy.get("a").contains("Blog").click();
+
+    // check that blog page's header text is present
+    cy.get("p")
+      .contains("Explore the exciting updates and innovations of Zenao")
+      .should("be.visible");
   });
 
   it("edit it's profile", () => {
@@ -217,7 +242,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     logout();
 
@@ -253,7 +278,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -321,7 +346,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -379,7 +404,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -501,6 +526,19 @@ describe("main", () => {
     // Assertions
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
+  });
+
+  it("create a community", () => {
+    cy.visit("/");
+    cy.createCommunity({});
+
+    cy.url().should("contain", "/community/");
+
+    cy.get("h1").contains(testCommunityName).should("be.visible");
+    cy.get("p").contains("A community for QA enthusiasts to share knowledge.");
+
+    cy.get("button").contains("Edit community").should("be.visible");
+    cy.get("button").contains("Leave community").should("be.visible");
   });
 
   it("access a community", () => {
@@ -638,9 +676,6 @@ describe("main", () => {
       cy.visit(url);
     });
 
-    // cy.get("a").contains("Edit community").should("be.visible");
-    // cy.get("a").contains("Leave community").should("be.visible");
-
     // Go to chat tab
     cy.get("button").contains("Chat").click();
 
@@ -689,10 +724,22 @@ Cypress.Commands.add(
     // start from the home
     cy.visit("/");
 
+    // ensure hydration
+    cy.get("button")
+      .contains("Sign in")
+      .should("be.visible", { timeout: 10000 });
+
     // click on home create button
-    cy.get("button").contains("Create").click();
+    cy.get("header").get('button[aria-label="quick menu create"]').click();
+
+    cy.get('[role="menu"]').should("be.visible");
+    // Select create event
+    cy.get("div").contains("Create new event").click();
 
     login();
+
+    // Click outside to close any open modal
+    cy.get("header").click(0, 0);
 
     // fill event info
     cy.get("input[name=imageUri]").selectFile(
@@ -757,5 +804,78 @@ Cypress.Commands.add(
       cy.get("button").contains("Done").click();
       cy.wait(5000);
     }
+  },
+);
+
+Cypress.Commands.add(
+  "createCommunity",
+  ({ administrators = [] }: { administrators?: string[] }) => {
+    // start from the home
+    cy.visit("/");
+
+    // ensure hydration
+    cy.get("button")
+      .contains("Sign in")
+      .should("be.visible", { timeout: 10000 });
+
+    // click on home create button
+    cy.get("header").get('button[aria-label="quick menu create"]').click();
+    cy.get('[role="menu"]').should("be.visible");
+    // Select create community
+    cy.get("div").contains("Create new community").click();
+
+    login();
+
+    // Click outside to close any open modal
+    cy.get("header").click(0, 0);
+
+    // fill community info
+
+    // Avatar
+    cy.get("input[name=avatarUri]").selectFile(
+      "cypress/fixtures/alice-tester.webp",
+      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
+    );
+    // Banner
+    cy.get("input[name=bannerUri]").selectFile(
+      "cypress/fixtures/bug-bash-bonanza.webp",
+      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
+    );
+    // Name
+    cy.get('textarea[name="displayName"]').type(testCommunityName, {
+      delay: 1,
+    });
+    // Short desc
+    cy.get('input[name="shortDescription"]').type(testCommunityShortDesc, {
+      delay: 1,
+    });
+    // Description
+    cy.get('textarea[name="description"]').type(testCommunityDesc, {
+      delay: 1,
+    });
+    // Social link
+    cy.get("button").contains("Add link").click();
+    cy.get('input[placeholder="Enter URL"]').type(testCommunitySocialLink, {
+      delay: 1,
+    });
+    // Administrators
+    if (administrators.length > 0) {
+      administrators.forEach((administrator, index) => {
+        cy.get("button").contains("Add Administrator").click();
+        cy.get(`input[name="administrators.${index}.address"]`).type(
+          administrator,
+        );
+      });
+    }
+
+    // Create community
+    cy.get("button").contains("Create Community").click();
+
+    cy.wait(1000);
+
+    toastShouldContain("Community created!");
+
+    cy.url().should("include", "/community/");
+    cy.url().should("not.include", "/create");
   },
 );

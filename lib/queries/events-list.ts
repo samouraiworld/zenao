@@ -148,6 +148,8 @@ export const ticketsByOwner = (
     queryKey: ["ticketsByOwner", ownerAddress, limitInt, eventAddr],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
+      if (!ownerAddress) return [];
+
       return withSpan(
         `query:chain:user:${ownerAddress}:tickets:${eventAddr}`,
         async () => {
