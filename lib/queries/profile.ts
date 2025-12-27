@@ -19,17 +19,17 @@ export type GnoProfile = {
 
 export type UserProfile = Omit<GnoProfile, "address">;
 
-export const profileOptions = (addr: string | null | undefined) => {
+export const profileOptions = (id: string | null | undefined) => {
   return queryOptions<UserProfile | null>({
-    queryKey: ["profile", addr],
+    queryKey: ["profile", id],
     queryFn: async () => {
-      if (!addr) {
+      if (!id) {
         return null;
       }
 
-      const profile = addr.startsWith("0x")
-        ? await evmProfiles.fetch(addr as `0x${string}`) // TODO: no type override
-        : await profiles.fetch(addr);
+      const profile = id.startsWith("0x")
+        ? await evmProfiles.fetch(id as `0x${string}`) // TODO: no type override
+        : await profiles.fetch(id);
 
       return profile;
     },

@@ -271,6 +271,7 @@ export const communitiesListByEvent = (
     queryKey: ["communitiesByEvent", id, limitInt],
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(`query:backend:event:${id}:communities`, async () => {
+        return [] as CommunityInfo[];
         const res = await zenaoClient.listCommunitiesByEvent({
           eventId: id,
           limit: limitInt,
