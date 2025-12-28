@@ -8,7 +8,7 @@ import { deserializeWithFrontMatter } from "../serialization";
 import { ticketMasterABI, ticketMasterAddress } from "../evm";
 import { profileOptions } from "./profile";
 import { eventUsersWithRole } from "./event-users";
-import { evmListEventSchema, ticketMasterGraphClient } from "./events-list";
+import { ticketMasterGraphClient } from "./events-list";
 import { GetToken } from "@/lib/utils";
 import {
   EventInfo,

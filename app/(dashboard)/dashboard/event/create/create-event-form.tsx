@@ -20,7 +20,6 @@ import {
   useSendTransaction,
   useWriteContract,
 } from "wagmi";
-import { waitForTransactionReceipt } from "viem/actions";
 import { useWeb3Auth } from "@web3auth/modal/react";
 import { rolesAbi } from "zodiac-roles-sdk";
 import { encodeFunctionData } from "viem";
@@ -58,8 +57,8 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: discover ordering by start date
 - X: refacto: merge zenao-evm-indexer into zenao repo
 - X: improve event load time when logged-in
-- bug: register state not updated in ui
 - opti: event creation too slow
+- bug: register state not updated in ui
 - edit event
 - devx: allow to run local chain for dev and e2e
 - proper tickets pagination by event start date
@@ -143,7 +142,7 @@ export const CreateEventForm: React.FC = () => {
 
   const { address } = useAccount();
   const client = useClient();
-  const { sendTransaction } = useSendTransaction();
+  const { sendTransactionAsync } = useSendTransaction();
   const { provider } = useWeb3Auth();
 
   const { writeContractAsync } = useWriteContract();
@@ -200,36 +199,12 @@ export const CreateEventForm: React.FC = () => {
       const deploymentTransaction =
         await protocolKit.createSafeDeploymentTransaction();
 
-      const hash = await new Promise<`0x${string}` | undefined>(
-        (resolve, reject) => {
-          sendTransaction(
-            {
-              to: deploymentTransaction.to as `0x${string}`,
-              value: BigInt(deploymentTransaction.value),
-              data: deploymentTransaction.data as `0x${string}`,
-            },
-            {
-              onSettled: async (data, error, variables) => {
-                console.log("settled create safe");
-                console.log("data", data);
-                console.log("error", error);
-                console.log("variables", variables);
-                if (error !== null) {
-                  reject(error);
-                  return;
-                }
-                resolve(data);
-              },
-            },
-          );
-        },
-      );
-
-      if (!hash) {
-        throw new Error("no hash after deploy");
-      }
-
-      await waitForTransactionReceipt(client, { hash, confirmations: 2 });
+      const hash = await sendTransactionAsync({
+        to: deploymentTransaction.to as `0x${string}`,
+        value: BigInt(deploymentTransaction.value),
+        data: deploymentTransaction.data as `0x${string}`,
+      });
+      console.log("deployment tx", hash);
 
       const deployed = await protocolKit.isSafeDeployed();
       if (!deployed) {
@@ -263,18 +238,6 @@ export const CreateEventForm: React.FC = () => {
         ],
       });
 
-      // Deterministic hash based on transaction parameters
-      let safeTxHash = await protocolKit2.getTransactionHash(setupRolesModTx);
-
-      console.log("setup roles tx hash", safeTxHash);
-
-      // TODO: check if we can execute without approve first since we're executing with aprover
-
-      // Sign transaction to verify that the transaction is coming from owner 1
-      await protocolKit2.approveTransactionHash(safeTxHash);
-
-      console.log("approved setup roles tx");
-
       let executeTxResponse =
         await protocolKit2.executeTransaction(setupRolesModTx);
 
@@ -304,32 +267,12 @@ export const CreateEventForm: React.FC = () => {
         transactions: calls.map((call) => ({ ...call, value: "0" })),
       });
 
-      // Deterministic hash based on transaction parameters
-      safeTxHash = await protocolKit2.getTransactionHash(updateRoleTx);
-
-      console.log("tx hash", safeTxHash);
-
-      // Sign transaction to verify that the transaction is coming from owner 1
-      await protocolKit2.approveTransactionHash(safeTxHash);
-
-      console.log("approved tx");
-
       executeTxResponse = await protocolKit2.executeTransaction(updateRoleTx);
 
       console.log("updated roles", executeTxResponse);
 
       const enableModuleTx =
         await protocolKit2.createEnableModuleTx(rolesModAddr);
-
-      // Deterministic hash based on transaction parameters
-      safeTxHash = await protocolKit2.getTransactionHash(enableModuleTx);
-
-      console.log("tx hash", safeTxHash);
-
-      // Sign transaction to verify that the transaction is coming from owner 1
-      await protocolKit2.approveTransactionHash(safeTxHash);
-
-      console.log("approved tx");
 
       executeTxResponse = await protocolKit2.executeTransaction(enableModuleTx);
 
