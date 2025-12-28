@@ -558,6 +558,7 @@ type Post struct {
 	UpdatedAt   int64                  `protobuf:"varint,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	DeletedAt   int64                  `protobuf:"varint,7,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"` // if != 0 -> deleted
 	Tags        []string               `protobuf:"bytes,8,rep,name=tags,proto3" json:"tags,omitempty"`
+	Pinned      bool                   `protobuf:"varint,9,opt,name=pinned,proto3" json:"pinned,omitempty"`
 	// Types that are valid to be assigned to Post:
 	//
 	//	*Post_Standard
@@ -657,6 +658,13 @@ func (x *Post) GetTags() []string {
 	return nil
 }
 
+func (x *Post) GetPinned() bool {
+	if x != nil {
+		return x.Pinned
+	}
+	return false
+}
+
 func (x *Post) GetPost() isPost_Post {
 	if x != nil {
 		return x.Post
@@ -723,27 +731,27 @@ type isPost_Post interface {
 }
 
 type Post_Standard struct {
-	Standard *StandardPost `protobuf:"bytes,9,opt,name=standard,proto3,oneof"`
+	Standard *StandardPost `protobuf:"bytes,10,opt,name=standard,proto3,oneof"`
 }
 
 type Post_Article struct {
-	Article *ArticlePost `protobuf:"bytes,10,opt,name=article,proto3,oneof"`
+	Article *ArticlePost `protobuf:"bytes,11,opt,name=article,proto3,oneof"`
 }
 
 type Post_Link struct {
-	Link *LinkPost `protobuf:"bytes,11,opt,name=link,proto3,oneof"`
+	Link *LinkPost `protobuf:"bytes,12,opt,name=link,proto3,oneof"`
 }
 
 type Post_Image struct {
-	Image *ImagePost `protobuf:"bytes,12,opt,name=image,proto3,oneof"`
+	Image *ImagePost `protobuf:"bytes,13,opt,name=image,proto3,oneof"`
 }
 
 type Post_Video struct {
-	Video *VideoPost `protobuf:"bytes,13,opt,name=video,proto3,oneof"`
+	Video *VideoPost `protobuf:"bytes,14,opt,name=video,proto3,oneof"`
 }
 
 type Post_Audio struct {
-	Audio *AudioPost `protobuf:"bytes,14,opt,name=audio,proto3,oneof"`
+	Audio *AudioPost `protobuf:"bytes,15,opt,name=audio,proto3,oneof"`
 }
 
 func (*Post_Standard) isPost_Post() {}
@@ -917,7 +925,7 @@ const file_feeds_v1_feeds_proto_rawDesc = "" +
 	"\x03Tip\x12\"\n" +
 	"\rpost_local_id\x18\x01 \x01(\tR\vpostLocalId\x12\x14\n" +
 	"\x05denom\x18\x03 \x01(\tR\x05denom\x12\x16\n" +
-	"\x06amount\x18\x04 \x01(\x03R\x06amount\"\x9c\x04\n" +
+	"\x06amount\x18\x04 \x01(\x03R\x06amount\"\xb4\x04\n" +
 	"\x04Post\x12\"\n" +
 	"\rlocal_post_id\x18\x01 \x01(\x04R\vlocalPostId\x12\x16\n" +
 	"\x06author\x18\x02 \x01(\tR\x06author\x12\x1d\n" +
@@ -930,14 +938,15 @@ const file_feeds_v1_feeds_proto_rawDesc = "" +
 	"updated_at\x18\x06 \x01(\x03R\tupdatedAt\x12\x1d\n" +
 	"\n" +
 	"deleted_at\x18\a \x01(\x03R\tdeletedAt\x12\x12\n" +
-	"\x04tags\x18\b \x03(\tR\x04tags\x124\n" +
-	"\bstandard\x18\t \x01(\v2\x16.feeds.v1.StandardPostH\x00R\bstandard\x121\n" +
-	"\aarticle\x18\n" +
-	" \x01(\v2\x15.feeds.v1.ArticlePostH\x00R\aarticle\x12(\n" +
-	"\x04link\x18\v \x01(\v2\x12.feeds.v1.LinkPostH\x00R\x04link\x12+\n" +
-	"\x05image\x18\f \x01(\v2\x13.feeds.v1.ImagePostH\x00R\x05image\x12+\n" +
-	"\x05video\x18\r \x01(\v2\x13.feeds.v1.VideoPostH\x00R\x05video\x12+\n" +
-	"\x05audio\x18\x0e \x01(\v2\x13.feeds.v1.AudioPostH\x00R\x05audioB\x06\n" +
+	"\x04tags\x18\b \x03(\tR\x04tags\x12\x16\n" +
+	"\x06pinned\x18\t \x01(\bR\x06pinned\x124\n" +
+	"\bstandard\x18\n" +
+	" \x01(\v2\x16.feeds.v1.StandardPostH\x00R\bstandard\x121\n" +
+	"\aarticle\x18\v \x01(\v2\x15.feeds.v1.ArticlePostH\x00R\aarticle\x12(\n" +
+	"\x04link\x18\f \x01(\v2\x12.feeds.v1.LinkPostH\x00R\x04link\x12+\n" +
+	"\x05image\x18\r \x01(\v2\x13.feeds.v1.ImagePostH\x00R\x05image\x12+\n" +
+	"\x05video\x18\x0e \x01(\v2\x13.feeds.v1.VideoPostH\x00R\x05video\x12+\n" +
+	"\x05audio\x18\x0f \x01(\v2\x13.feeds.v1.AudioPostH\x00R\x05audioB\x06\n" +
 	"\x04post\"\x8b\x01\n" +
 	"\bPostView\x12\"\n" +
 	"\x04post\x18\x01 \x01(\v2\x0e.feeds.v1.PostR\x04post\x12%\n" +

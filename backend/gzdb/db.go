@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	ma "github.com/multiformats/go-multiaddr"
 	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -1309,11 +1310,7 @@ func (g *gormZenaoDB) GetFeedByID(feedID string) (*zeni.Feed, error) {
 }
 
 // CreatePost implements zeni.DB.
-func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*zeni.Post, error) {
-	postIDInt, err := strconv.ParseUint(postID, 10, 64)
-	if err != nil {
-		return nil, err
-	}
+func (g *gormZenaoDB) CreatePost(feedID string, userID string, post *feedsv1.Post) (*zeni.Post, error) {
 	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -1327,13 +1324,11 @@ func (g *gormZenaoDB) CreatePost(postID string, feedID string, userID string, po
 	var tags []Tag
 	for _, tagName := range post.Tags {
 		tags = append(tags, Tag{
-			PostID: uint(postIDInt),
-			Name:   tagName,
+			Name: tagName,
 		})
 	}
 
 	dbPost := &Post{
-		Model:     gorm.Model{ID: uint(postIDInt)},
 		ParentURI: post.ParentUri,
 		UserID:    uint(userIDInt),
 		FeedID:    uint(feedIDInt),
@@ -1478,7 +1473,7 @@ func (g *gormZenaoDB) GetPostsByFeedID(feedID string, limit int, offset int, tag
 		Preload("Reactions").
 		Preload("Tags").
 		Where("feed_id = ?", feedIDUint).
-		Order("id DESC")
+		Order("pinned_at IS NOT NULL DESC, pinned_at DESC, id DESC")
 
 	if len(tags) > 0 {
 		db = db.
@@ -1518,7 +1513,7 @@ func (g *gormZenaoDB) GetPostsByParentID(parentID string, limit int, offset int,
 		Preload("Reactions").
 		Preload("Tags").
 		Where("parent_uri = ?", parentIDUint).
-		Order("id DESC")
+		Order("pinned_at IS NOT NULL DESC, pinned_at DESC, id DESC")
 
 	if len(tags) > 0 {
 		db = db.
@@ -1614,19 +1609,42 @@ func (g *gormZenaoDB) ReactPost(userID string, req *zenaov1.ReactPostRequest) er
 	})
 }
 
-// CreatePoll implements zeni.DB.
-func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
-	g, span := g.trace("gzdb.CreatePoll")
+// PinPost implements zeni.DB.
+func (g *gormZenaoDB) PinPost(feedID string, postID string, pin bool) error {
+	g, span := g.trace("gzdb.PinPost")
 	defer span.End()
 
-	pollIDint, err := strconv.ParseUint(pollID, 10, 64)
+	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	postIDInt, err := strconv.ParseUint(postID, 10, 64)
 	if err != nil {
-		return nil, err
+		return err
 	}
+
+	var pinnedAt *time.Time
+	if pin {
+		now := time.Now()
+		pinnedAt = &now
+	}
+
+	res := g.db.Model(&Post{}).Where("id = ? AND feed_id = ?", postIDInt, feedIDInt).
+		Update("pinned_at", pinnedAt)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return errors.New("post not found in the specified feed")
+	}
+
+	return nil
+}
+
+// CreatePoll implements zeni.DB.
+func (g *gormZenaoDB) CreatePoll(userID string, feedID string, parentURI string, req *zenaov1.CreatePollRequest) (*zeni.Poll, error) {
+	g, span := g.trace("gzdb.CreatePoll")
+	defer span.End()
 	feedIDInt, err := strconv.ParseUint(feedID, 10, 64)
 	if err != nil {
 		return nil, err
@@ -1636,31 +1654,21 @@ func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, fe
 		return nil, err
 	}
 
-	linkPost, ok := post.Post.(*feedsv1.Post_Link)
-	if !ok {
-		return nil, errors.New("trying to insert a poll in database with a post that is not a link type")
-	}
-
 	dbPost := &Post{
-		Model:     gorm.Model{ID: uint(postIDInt)},
-		ParentURI: post.ParentUri,
+		ParentURI: parentURI,
 		UserID:    uint(userIDInt),
 		FeedID:    uint(feedIDInt),
 		Kind:      PostTypeLink,
-		URI:       linkPost.Link.Uri,
 		Tags: []Tag{{
-			PostID: uint(postIDInt),
-			Name:   "poll",
+			Name: "poll",
 		}},
 	}
 
 	dbPoll := &Poll{
-		Model:    gorm.Model{ID: uint(pollIDint)},
 		Question: req.Question,
 		Kind:     int(req.Kind),
 		Duration: req.Duration,
 		Results:  []PollResult{},
-		PostID:   uint(postIDInt),
 	}
 
 	for _, option := range req.Options {
@@ -1673,9 +1681,20 @@ func (g *gormZenaoDB) CreatePoll(userID string, pollID string, postID string, fe
 		if err := tx.Create(dbPost).Error; err != nil {
 			return err
 		}
+		dbPoll.PostID = dbPost.ID
 		if err := tx.Create(dbPoll).Error; err != nil {
 			return err
 		}
+		// XXX: REMOVE THE URI ?
+		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%d/gno/gno.land/r/zenao/polls", dbPoll.ID))
+		if err != nil {
+			return err
+		}
+
+		if err := tx.Model(&Post{}).Where("id = ?", dbPost.ID).Update("uri", postURI.String()).Error; err != nil {
+			return err
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err

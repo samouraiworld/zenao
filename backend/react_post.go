@@ -54,9 +54,5 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		return nil, err
 	}
 
-	if err = s.Chain.WithContext(ctx).ReactPost(zUser.ID, orgID, orgID, req.Msg); err != nil {
-		return nil, err
-	}
-
 	return connect.NewResponse(&zenaov1.ReactPostResponse{}), nil
 }

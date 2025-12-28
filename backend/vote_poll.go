@@ -47,9 +47,5 @@ func (s *ZenaoServer) VotePoll(ctx context.Context, req *connect.Request[zenaov1
 		return nil, err
 	}
 
-	if err = s.Chain.WithContext(ctx).VotePoll(zUser.ID, req.Msg); err != nil {
-		return nil, err
-	}
-
 	return connect.NewResponse(&zenaov1.VotePollResponse{}), nil
 }

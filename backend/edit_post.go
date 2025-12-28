@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"connectrpc.com/connect"
-	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
 	"go.uber.org/zap"
@@ -60,26 +59,6 @@ func (s *ZenaoServer) EditPost(ctx context.Context, req *connect.Request[zenaov1
 		}
 		return db.EditPost(req.Msg.PostId, req.Msg)
 	}); err != nil {
-		return nil, err
-	}
-
-	post := &feedsv1.Post{
-		Loc:  zpost.Post.Loc,
-		Tags: req.Msg.Tags,
-
-		// XXX: this cannot be changed in contract, but to be future proof we insert them here too
-		ParentUri: zpost.Post.ParentUri,
-		Author:    zpost.Post.Author,
-		CreatedAt: zpost.Post.CreatedAt,
-
-		Post: &feedsv1.Post_Standard{
-			Standard: &feedsv1.StandardPost{
-				Content: req.Msg.Content,
-			},
-		},
-	}
-
-	if err := s.Chain.WithContext(ctx).EditPost(zUser.ID, req.Msg.PostId, post); err != nil {
 		return nil, err
 	}
 

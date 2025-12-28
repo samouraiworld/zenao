@@ -30,32 +30,22 @@ func newConvertEvtToComCmd() *commands.Command {
 var evtToComConf EvtToComConfig
 
 type EvtToComConfig struct {
-	adminMnemonic   string
-	chainID         string
-	chainEndpoint   string
-	gnoNamespace    string
-	dbPath          string
-	evtID           string
-	displayName     string
-	description     string
-	avatarURI       string
-	bannerURI       string
-	gasSecurityRate float64
-	verbose         bool
+	dbPath      string
+	evtID       string
+	displayName string
+	description string
+	avatarURI   string
+	bannerURI   string
+	verbose     bool
 }
 
 func (conf *EvtToComConfig) RegisterFlags(flset *flag.FlagSet) {
-	flset.StringVar(&evtToComConf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
-	flset.StringVar(&evtToComConf.chainID, "chain-id", "dev", "Chain ID")
-	flset.StringVar(&evtToComConf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
-	flset.StringVar(&evtToComConf.gnoNamespace, "gno-namespace", "zenao", "Namespace used to deploy pkg on the chain")
 	flset.StringVar(&evtToComConf.dbPath, "db-path", "dev.db", "Path to the database")
 	flset.StringVar(&evtToComConf.evtID, "evt-id", "", "ID of the event to convert")
 	flset.StringVar(&evtToComConf.displayName, "display-name", "", "Display name for the new community")
 	flset.StringVar(&evtToComConf.description, "description", "", "Description for the new community")
 	flset.StringVar(&evtToComConf.avatarURI, "avatar-uri", "", "Avatar URI for the new community")
 	flset.StringVar(&evtToComConf.bannerURI, "banner-uri", "", "Banner URI for the new community")
-	flset.Float64Var(&evtToComConf.gasSecurityRate, "gas-security-rate", 0.2, "Margin multiplier for estimated gas wanted to be safe")
 	flset.BoolVar(&evtToComConf.verbose, "v", false, "Enable verbose logging")
 }
 
@@ -68,18 +58,11 @@ func convertEvtToCom() error {
 			return err
 		}
 	}
-	logger.Info("converting an event to a community with args: ", zap.String("chain-id", evtToComConf.chainID), zap.String("db-path", evtToComConf.dbPath), zap.String("evt-id", evtToComConf.evtID), zap.String("display-name", evtToComConf.displayName), zap.String("description", evtToComConf.description), zap.String("avatar-uri", evtToComConf.avatarURI), zap.String("banner-uri", evtToComConf.bannerURI), zap.Float64("gas-security-rate", evtToComConf.gasSecurityRate), zap.Bool("verbose", evtToComConf.verbose), zap.String("gno-namespace", evtToComConf.gnoNamespace), zap.String("chain-endpoint", evtToComConf.chainEndpoint))
+	logger.Info("converting an event to a community with args: ", zap.String("db-path", evtToComConf.dbPath), zap.String("evt-id", evtToComConf.evtID), zap.String("display-name", evtToComConf.displayName), zap.String("description", evtToComConf.description), zap.String("avatar-uri", evtToComConf.avatarURI), zap.String("banner-uri", evtToComConf.bannerURI), zap.Bool("verbose", evtToComConf.verbose))
 
 	if evtToComConf.evtID == "" {
 		return errors.New("evt-id is required")
 	}
-
-	chain, err := setupChain(evtToComConf.adminMnemonic, evtToComConf.gnoNamespace, evtToComConf.chainID, evtToComConf.chainEndpoint, evtToComConf.gasSecurityRate, logger)
-	if err != nil {
-		return err
-	}
-	logger.Info("Signer initialized", zap.String("address", chain.signerInfo.GetAddress().String()))
-
 	db, err := gzdb.SetupDB(evtToComConf.dbPath)
 	if err != nil {
 		return err
@@ -139,12 +122,6 @@ func convertEvtToCom() error {
 	}
 
 	logger.Info("community persisted successfully in the database")
-
-	err = chain.CreateCommunity(cmt.ID, []string{cmt.CreatorID}, membersIDs, []string{evt.ID}, cmtReq)
-	if err != nil {
-		return err
-	}
-	logger.Info("community created on the chain", zap.String("community-pkg-path", chain.communityPkgPath(cmt.ID)))
 
 	return nil
 }

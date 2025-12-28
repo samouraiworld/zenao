@@ -562,5 +562,25 @@
   "empty-list": {
     "title": "Nothing listed",
     "description": "Let's change that!"
+  },
+  "dashboard": {
+    "sidebar": {
+      "create-event-btn": "Create event",
+      "events": "Events",
+      "settings": "Settings",
+      "coming-soon": "Soon",
+      "quick-create": "Quick create"
+    },
+    "navUser": {
+      "profile": "Profile",
+      "switch-to-regular-user-mode": "Switch to regular user mode",
+      "sign-out": "Sign out"
+    },
+    "eventsTable": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "no-events": "No events found.",
+      "create-event-btn": "Create an event"
+    }
   }
 }
