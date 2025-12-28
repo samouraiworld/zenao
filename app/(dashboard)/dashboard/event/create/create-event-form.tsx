@@ -57,7 +57,7 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: checkin/scan
 - X: discover ordering by start date
 - X: refacto: merge zenao-evm-indexer into zenao repo
-- X: enable web3auth ssr
+- X: improve event load time when logged-in
 - bug: register state not updated in ui
 - opti: event creation too slow
 - edit event
