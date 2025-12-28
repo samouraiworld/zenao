@@ -55,8 +55,8 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: show mail of ticket
 - X: working local subgraph
 - X: checkin/scan
-- discover ordering by start date
-- refacto: merge zenao-evm-indexer into zenao repo
+- X: discover ordering by start date
+- X: refacto: merge zenao-evm-indexer into zenao repo
 - devx: allow to run local chain for dev and e2e
 - bug: register state not updated in ui
 - opti: event creation too slow

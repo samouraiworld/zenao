@@ -1,0 +1,53 @@
+type SaleEndSet @entity(immutable: true) {
+  id: Bytes!
+  eventAddr: Bytes! # address
+  saleEnd: BigInt! # uint256
+  discoverable: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TicketCancelled @entity(immutable: true) {
+  id: Bytes!
+  eventAddr: Bytes! # address
+  ticketPubKey: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type TicketEmitted @entity(immutable: true) {
+  id: Bytes!
+  eventAddr: Bytes! # address
+  owner: Bytes! # address
+  ticketPubKey: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Ticket @entity(immutable: false) {
+  id: Bytes!
+  eventAddr: Bytes! # address
+  owner: Bytes! # address
+  ticketPubKey: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  deleted: Boolean!
+}
+
+type Event @entity(immutable: false) {
+  id: Bytes!
+  eventAddr: Bytes! # address
+  creatorAddr: Bytes # address
+  startDate: BigInt # uint
+  saleEnd: BigInt! # uint
+  discoverable: Boolean!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+# TODO: sync creator addr with event creation

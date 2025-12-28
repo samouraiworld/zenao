@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "TicketMaster": {
+      "address": "0x93C012Ff9904bF00950Cc09F56Cc716672A27A76",
+      "startBlock": 34932059
+    }
+  }
+}
