@@ -294,6 +294,19 @@
   },
   {
     "type": "function",
+    "name": "setStartDate",
+    "inputs": [
+      {
+        "name": "startDate",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "sold_tickets",
     "inputs": [
       {
@@ -360,6 +373,35 @@
     "stateMutability": "view"
   },
   {
+    "type": "function",
+    "name": "verify",
+    "inputs": [
+      {
+        "name": "key",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "signature",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "h",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
     "type": "event",
     "name": "CreatorSet",
     "inputs": [
@@ -399,6 +441,25 @@
         "type": "bool",
         "indexed": false,
         "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "StartDateSet",
+    "inputs": [
+      {
+        "name": "eventAddr",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "startDate",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       }
     ],
     "anonymous": false

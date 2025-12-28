@@ -381,6 +381,19 @@ export const ticketMasterABI = [
   },
   {
     type: "function",
+    name: "setStartDate",
+    inputs: [
+      {
+        name: "startDate",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "sold_tickets",
     inputs: [
       {
@@ -447,6 +460,35 @@ export const ticketMasterABI = [
     stateMutability: "view",
   },
   {
+    type: "function",
+    name: "verify",
+    inputs: [
+      {
+        name: "key",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "signature",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "h",
+        type: "bytes32",
+        internalType: "bytes32",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
     type: "event",
     name: "CreatorSet",
     inputs: [
@@ -486,6 +528,25 @@ export const ticketMasterABI = [
         type: "bool",
         indexed: false,
         internalType: "bool",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "StartDateSet",
+    inputs: [
+      {
+        name: "eventAddr",
+        type: "address",
+        indexed: false,
+        internalType: "address",
+      },
+      {
+        name: "startDate",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
       },
     ],
     anonymous: false,
@@ -536,4 +597,4 @@ export const ticketMasterABI = [
   },
 ] as const;
 
-export const ticketMasterAddress = "0x33addc84F5a81C9d42447294196cfC4388811231";
+export const ticketMasterAddress = "0x8a6288c06c6b01Cdc114CC9836A25a29889768d2";

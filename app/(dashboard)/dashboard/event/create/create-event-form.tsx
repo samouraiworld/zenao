@@ -54,8 +54,7 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: ticket secret
 - X: show mail of ticket
 - X: working local subgraph
-- checkin/scan
-- guest invite
+- X: checkin/scan
 - discover ordering by start date
 - refacto: merge zenao-evm-indexer into zenao repo
 - devx: allow to run local chain for dev and e2e
@@ -464,6 +463,28 @@ export const CreateEventForm: React.FC = () => {
       });
 
       console.log("updated creator", res);
+
+      const startDateSetData = encodeFunctionData({
+        abi: ticketMasterABI,
+        functionName: "setStartDate",
+        args: [values.startDate],
+      });
+
+      res = await writeContractAsync({
+        abi: rolesAbi,
+        address: rolesModAddr,
+        functionName: "execTransactionWithRole",
+        args: [
+          ticketMasterAddress, // to
+          BigInt(0), // value
+          startDateSetData, // data
+          0, // operation -> Call = 0, DelegateCall = 1
+          EventOrganizerRoleKey, // roleKey
+          true, // should revert
+        ],
+      });
+
+      console.log("updated startDate", res);
 
       router.push(`/event/${safeAddress}`);
     } catch (err) {

@@ -21,6 +21,7 @@ const organizerPermissions = [
   allow.basesep.ticketMaster.setRolesMod(),
   allow.basesep.ticketMaster.cancelTicket(),
   allow.basesep.ticketMaster.setCreator(),
+  allow.basesep.ticketMaster.setStartDate(),
 ];
 
 const { targets: organizerTargets } = processPermissions(organizerPermissions);

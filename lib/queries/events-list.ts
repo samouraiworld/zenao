@@ -20,7 +20,8 @@ export const evmListEventSchema = z.object({
   discoverable: z.boolean(),
   eventAddr: z.string(),
   saleEnd: z.string(),
-  creatorAddr: z.string().nullable(),
+  startDate: z.string().nullable().optional(),
+  creatorAddr: z.string().nullable().optional(),
 });
 
 export type EVMListEvent = z.infer<typeof evmListEventSchema>;
@@ -92,14 +93,15 @@ export const eventsList = (
               where: {
                 ${creator ? `creatorAddr: ${JSON.stringify(creator)}` : ""}
                 ${discoverableFilter}
-                saleEnd_gte: ${JSON.stringify(start.toString())}
-                saleEnd_lte: ${JSON.stringify(end.toString())}
+                startDate_gte: ${JSON.stringify(start.toString())}
+                startDate_lte: ${JSON.stringify(end.toString())}
               }
             ) {
               eventAddr
               saleEnd
               discoverable
               creatorAddr
+              startDate
             }
           }
         `;

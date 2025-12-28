@@ -56,7 +56,7 @@ export function DiscoverEventsList({
   const eventsByDay = useMemo(() => {
     return events.reduce(
       (acc, event) => {
-        const dateKey = fromUnixTime(Number(event.saleEnd))
+        const dateKey = fromUnixTime(Number(event.startDate))
           .toISOString()
           .split("T")[0];
 

@@ -56,6 +56,7 @@ contract TicketMaster {
     event CreatorSet(address eventAddr, address creatorAddr);
     event TicketEmitted(address eventAddr, address owner, bytes ticketPubKey);
     event TicketCancelled(address eventAddr, bytes ticketPubKey);
+    event StartDateSet(address eventAddr, uint startDate);
 
     // TODO: consider using openzepelin Ownable instead of manager
 
@@ -302,6 +303,11 @@ contract TicketMaster {
     function setCreator(address creatorAddr) public {
         creator[msg.sender] = creatorAddr;
         emit CreatorSet(msg.sender, creatorAddr);
+    }
+
+    function setStartDate(uint startDate) public {
+        // this is used to index events by startDate
+        emit StartDateSet(msg.sender, startDate);
     }
 
     modifier onlyRegisteredTicket(address owner, bytes calldata ticketPubKey) {
