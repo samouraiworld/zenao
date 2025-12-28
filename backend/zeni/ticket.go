@@ -1,27 +1,38 @@
 package zeni
 
 import (
-	"crypto"
-	"crypto/ed25519"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	srand "crypto/rand"
 	"encoding/base64"
 )
 
+var curve = elliptic.P256()
+
 type Ticket struct {
-	sk ed25519.PrivateKey
+	sk *ecdsa.PrivateKey
 }
 
 func (t *Ticket) Secret() string {
-	return base64.RawURLEncoding.EncodeToString(t.sk.Seed())
+	bz, err := t.sk.Bytes()
+	if err != nil {
+		panic(err)
+	}
+	return base64.RawURLEncoding.EncodeToString(bz)
 }
 
 func (t *Ticket) Pubkey() string {
-	pk := t.sk.Public().(ed25519.PublicKey)
-	return base64.RawURLEncoding.EncodeToString(pk)
+	pk := t.sk.Public().(*ecdsa.PublicKey)
+	bz, err := pk.Bytes()
+	if err != nil {
+		panic(err)
+	}
+	return base64.RawURLEncoding.EncodeToString(bz[1:])
 }
 
 func (t *Ticket) Signature(gatekeeper string) (string, error) {
-	signature, err := t.sk.Sign(srand.Reader, []byte(gatekeeper), crypto.Hash(0))
+	// XXX: should be deterministic signature??
+	signature, err := t.sk.Sign(srand.Reader, []byte(gatekeeper), nil)
 	if err != nil {
 		return "", err
 	}
@@ -29,11 +40,12 @@ func (t *Ticket) Signature(gatekeeper string) (string, error) {
 }
 
 func NewTicket() (*Ticket, error) {
-	secret := make([]byte, ed25519.SeedSize)
-	if _, err := srand.Read(secret); err != nil {
+	sk, err := ecdsa.GenerateKey(curve, srand.Reader)
+	if err != nil {
 		return nil, err
 	}
-	return &Ticket{sk: ed25519.NewKeyFromSeed(secret)}, nil
+
+	return &Ticket{sk: sk}, nil
 }
 
 func NewTicketFromSecret(secret string) (*Ticket, error) {
@@ -41,5 +53,11 @@ func NewTicketFromSecret(secret string) (*Ticket, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Ticket{sk: ed25519.NewKeyFromSeed(secretBz)}, nil
+
+	sk, err := ecdsa.ParseRawPrivateKey(curve, secretBz)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Ticket{sk: sk}, nil
 }

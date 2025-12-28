@@ -1,26 +1,47 @@
 import {
   InfiniteData,
   infiniteQueryOptions,
-  queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
+import { cacheExchange, createClient, fetchExchange, gql } from "urql";
+import z from "zod";
 import { withSpan } from "../tracer";
-import { zenaoClient } from "../zenao-client";
-import { userIdFromPkgPath } from "./user";
-import { EventInfo, DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
+
+export const ticketMasterGraphClient = createClient({
+  url: "http://localhost:8000/subgraphs/name/subgraph-0/",
+  exchanges: [cacheExchange, fetchExchange],
+  preferGetMethod: false,
+});
+
+export const evmListEventSchema = z.object({
+  discoverable: z.boolean(),
+  eventAddr: z.string(),
+  saleEnd: z.string(),
+  startDate: z.string().nullable().optional(),
+  creatorAddr: z.string().nullable().optional(),
+});
+
+export type EVMListEvent = z.infer<typeof evmListEventSchema>;
+
+const eventsQueryResponseSchema = z.object({
+  events: evmListEventSchema.array(),
+});
 
 export const eventsList = (
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
+  discoverable: DiscoverableFilter,
+  creator: string | undefined,
   options?: Omit<
     UseInfiniteQueryOptions<
-      EventInfo[],
+      EVMListEvent[],
       Error,
-      InfiniteData<EventInfo[]>,
-      (string | number)[],
+      InfiniteData<EVMListEvent[]>,
+      (string | number | undefined)[],
       number // pageParam type
     >,
     | "queryKey"
@@ -35,19 +56,62 @@ export const eventsList = (
   const limitInt = Math.floor(limit);
 
   return infiniteQueryOptions({
-    queryKey: ["events", fromInt, toInt, limitInt],
+    queryKey: ["events", fromInt, toInt, creator, discoverable, limitInt],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(`query:backend:events`, async () => {
-        const res = await zenaoClient.listEvents({
-          limit: limitInt,
-          offset: pageParam * limitInt,
-          from: BigInt(fromInt),
-          to: BigInt(toInt),
-          discoverableFilter: DiscoverableFilter.DISCOVERABLE,
-        });
+      return withSpan(`query:events`, async () => {
+        console.log("query event list");
 
-        return res.events;
+        let start, end, dir;
+        if (fromInt < toInt) {
+          start = fromInt;
+          end = toInt;
+          dir = "asc";
+        } else {
+          start = toInt;
+          end = fromInt;
+          dir = "desc";
+        }
+
+        let discoverableFilter = "";
+        switch (discoverable) {
+          case DiscoverableFilter.DISCOVERABLE:
+            discoverableFilter = "discoverable: true";
+            break;
+          case DiscoverableFilter.UNDISCOVERABLE:
+            discoverableFilter = "discoverable: false";
+            break;
+        }
+
+        const query = gql`
+          {
+            events(
+              first: ${limitInt.toString()}
+              skip: ${(pageParam * limitInt).toString()}
+              orderBy: saleEnd
+              orderDirection: ${dir}
+              where: {
+                ${creator ? `creatorAddr: ${JSON.stringify(creator)}` : ""}
+                ${discoverableFilter}
+                startDate_gte: ${JSON.stringify(start.toString())}
+                startDate_lte: ${JSON.stringify(end.toString())}
+              }
+            ) {
+              eventAddr
+              saleEnd
+              discoverable
+              creatorAddr
+              startDate
+            }
+          }
+        `;
+
+        const result = await ticketMasterGraphClient
+          .query(query, {})
+          .toPromise();
+
+        return eventsQueryResponseSchema.parse(result.data || { events: [] })
+          .events;
       });
     },
     getNextPageParam: (lastPage, pages) => {
@@ -66,140 +130,60 @@ export const eventsList = (
   });
 };
 
-export const eventsByOrganizerListSuspense = (
-  organizerRealmId: string | undefined,
-  discoverableFilter: DiscoverableFilter,
-  fromUnixSec: number,
-  toUnixSec: number,
+const evmTicketSchema = z.object({
+  eventAddr: z.string(),
+  ticketPubKey: z.string(),
+  owner: z.string(),
+});
+
+export type EVMTicket = z.infer<typeof evmTicketSchema>;
+
+export const ticketsByOwner = (
+  ownerAddress: string | undefined,
   limit: number,
-  page: number,
+  eventAddr?: string,
 ) => {
-  const fromInt = Math.floor(fromUnixSec);
-  const toInt = Math.floor(toUnixSec);
-  const limitInt = Math.floor(limit);
-  const pageInt = Math.floor(page);
-
-  return queryOptions({
-    queryKey: [
-      "eventsByOrganizer",
-      organizerRealmId,
-      discoverableFilter,
-      fromInt,
-      toInt,
-      limitInt,
-      pageInt,
-    ],
-    queryFn: async () => {
-      if (!organizerRealmId) return [];
-
-      return withSpan(
-        `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
-        async () => {
-          const res = await zenaoClient.listEventsByOrganizer({
-            organizerId: userIdFromPkgPath(organizerRealmId),
-            limit: limitInt,
-            offset: pageInt * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
-          return res.events;
-        },
-      );
-    },
-    enabled: !!organizerRealmId,
-  });
-};
-
-export const eventsByOrganizerList = (
-  organizerRealmId: string | undefined,
-  discoverableFilter: DiscoverableFilter,
-  fromUnixSec: number,
-  toUnixSec: number,
-  limit: number,
-) => {
-  const fromInt = Math.floor(fromUnixSec);
-  const toInt = Math.floor(toUnixSec);
   const limitInt = Math.floor(limit);
 
   return infiniteQueryOptions({
-    queryKey: [
-      "eventsByOrganizer",
-      organizerRealmId,
-      discoverableFilter,
-      fromInt,
-      toInt,
-      limitInt,
-    ],
+    queryKey: ["ticketsByOwner", ownerAddress, limitInt, eventAddr],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      if (!organizerRealmId) return [];
+      if (!ownerAddress) return [];
 
       return withSpan(
-        `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
+        `query:chain:user:${ownerAddress}:tickets:${eventAddr}`,
         async () => {
-          const res = await zenaoClient.listEventsByOrganizer({
-            organizerId: userIdFromPkgPath(organizerRealmId),
-            limit: limitInt,
-            offset: pageParam * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
-          return res.events;
-        },
-      );
-    },
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length;
-    },
-    getPreviousPageParam: (fistPage, pages) => {
-      if (fistPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length - 2;
-    },
-    enabled: !!organizerRealmId,
-  });
-};
+          const eventAddrFilter = eventAddr
+            ? `eventAddr: ${JSON.stringify(eventAddr)}`
+            : "";
 
-export const eventsByParticipantList = (
-  participantRealmId: string,
-  discoverableFilter: DiscoverableFilter,
-  fromUnixSec: number,
-  toUnixSec: number,
-  limit: number,
-) => {
-  const fromInt = Math.floor(fromUnixSec);
-  const toInt = Math.floor(toUnixSec);
-  const limitInt = Math.floor(limit);
+          const query = gql`
+          {
+            tickets(
+              first: ${limitInt.toString()}
+              skip: ${(pageParam * limitInt).toString()}
+              where: {
+                ${eventAddrFilter}
+                owner: ${JSON.stringify(ownerAddress)}
+              }
+            ) {
+              eventAddr
+              owner
+              ticketPubKey
+            }
+          }
+        `;
 
-  return infiniteQueryOptions({
-    queryKey: [
-      "eventsByParticipant",
-      participantRealmId,
-      discoverableFilter,
-      fromInt,
-      toInt,
-      limitInt,
-    ],
-    initialPageParam: 0,
-    queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(
-        `query:backend:user:${userIdFromPkgPath(participantRealmId)}:events:role:participant`,
-        async () => {
-          const res = await zenaoClient.listEventsByParticipant({
-            participantId: userIdFromPkgPath(participantRealmId),
-            limit: limitInt,
-            offset: pageParam * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
-          return res.events;
+          const result = await ticketMasterGraphClient
+            .query(query, {})
+            .toPromise();
+
+          console.log("tickets list", result.data);
+
+          return z
+            .object({ tickets: evmTicketSchema.array() })
+            .parse(result.data).tickets;
         },
       );
     },
@@ -215,5 +199,6 @@ export const eventsByParticipantList = (
       }
       return pages.length - 2;
     },
+    enabled: !!ownerAddress,
   });
 };

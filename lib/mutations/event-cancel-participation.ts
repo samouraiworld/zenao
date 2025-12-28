@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
+import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import { getQueryClient } from "../get-query-client";
 import { eventOptions } from "../queries/event";
 import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventTickets } from "../queries/ticket";
 import { GetToken } from "../utils";
-import { zenaoClient } from "@/lib/zenao-client";
+import { ticketMasterABI, ticketMasterAddress } from "../evm";
 
 type EventCancelParticipationRequest = {
   eventId: string;
@@ -14,25 +15,30 @@ type EventCancelParticipationRequest = {
 
 export const useEventCancelParticipation = () => {
   const queryClient = getQueryClient();
+  const { writeContractAsync } = useWriteContract();
+  const { address } = useAccount();
+  const client = usePublicClient();
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       eventId,
-      getToken,
+      // getToken,
     }: EventCancelParticipationRequest) => {
-      const token = await getToken();
-
-      if (!token) {
-        throw new Error("not authenticated");
+      if (!client) {
+        throw new Error("no wagmi client");
       }
-
-      await zenaoClient.cancelParticipation(
-        {
-          eventId,
-        },
-        {
-          headers: { Authorization: "Bearer " + token },
-        },
-      );
+      const ticketPubKey = await client.readContract({
+        abi: ticketMasterABI,
+        address: ticketMasterAddress,
+        functionName: "ticket_by_owner",
+        args: [eventId as `0x${string}`, address as `0x${string}`],
+      });
+      const res = await writeContractAsync({
+        abi: ticketMasterABI,
+        functionName: "cancelTicket",
+        address: ticketMasterAddress,
+        args: [eventId as `0x${string}`, ticketPubKey],
+      });
+      console.log("cancelled ticket", res);
     },
     onSuccess: (_, variables, _ctx) => {
       const eventTicketsOpts = eventTickets(

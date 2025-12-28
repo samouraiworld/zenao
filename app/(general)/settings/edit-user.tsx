@@ -6,13 +6,12 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { IMAGE_FILE_SIZE_LIMIT } from "../../../components/features/event/constants";
+import { useWriteContract } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userInfoOptions } from "@/lib/queries/user";
 import { profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/widgets/texts/text";
-import { useEditUserProfile } from "@/lib/mutations/profile";
 import { captureException } from "@/lib/report";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
@@ -39,6 +38,9 @@ import UserExperiences from "@/components/features/user/settings/user-experience
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import { uploadString } from "@/lib/files";
+import { profileABI } from "@/lib/evm";
+import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
@@ -78,7 +80,6 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     skills: profileDetails.skills,
   };
 
-  const { editUser, isPending } = useEditUserProfile();
   const form = useForm<UserFormSchemaType>({
     mode: "all",
     resolver: zodResolver(userFormSchema),
@@ -88,6 +89,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const t = useTranslations("settings");
 
   const bio = form.watch("bio");
+
+  const { writeContractAsync } = useWriteContract();
 
   const onSubmit = async (values: UserFormSchemaType) => {
     try {
@@ -114,13 +117,25 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         },
       );
 
-      await editUser({
-        realmId: userRealmId,
-        token,
-        avatarUri: values.avatarUri,
-        displayName: values.displayName,
-        bio,
+      const bioCID = await uploadString(bio);
+
+      // TODO: only update keys that have been updated
+      const keys: string[] = ["pfp", "dn", "bio"];
+      const txValues: `0x${string}`[] = [
+        `0x${Buffer.from(values.avatarUri, "utf-8").toString("hex")}`,
+        `0x${Buffer.from(values.displayName, "utf-8").toString("hex")}`,
+        `0x${Buffer.from(bioCID, "utf-8").toString("hex")}`,
+      ];
+
+      const res = await writeContractAsync({
+        abi: profileABI,
+        address: process.env
+          .NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS as `0x${string}`,
+        functionName: "setBatch",
+        args: [keys, txValues],
       });
+
+      console.log(res, "updated on-chain profile");
 
       trackEvent("UserProfileEdited");
 
@@ -233,7 +248,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
 
           <ButtonWithChildren
-            loading={isPending}
+            loading={false} // TODO
             type="submit"
             className="w-full"
           >

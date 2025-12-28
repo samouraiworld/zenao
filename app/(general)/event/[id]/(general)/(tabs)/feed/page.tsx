@@ -5,9 +5,8 @@ import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { useAuth } from "@clerk/nextjs";
 import React, { useMemo, useState } from "react";
-import { userInfoOptions } from "@/lib/queries/user";
+import { useAccount } from "wagmi";
 import { DEFAULT_FEED_POSTS_LIMIT, feedPosts } from "@/lib/queries/social-feed";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
@@ -24,16 +23,11 @@ type EventFeedProps = {
 
 function EventFeed({ params }: EventFeedProps) {
   const { id: eventId } = React.use(params);
-  const { getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
+  const { address } = useAccount();
 
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.realmId),
-  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, address));
 
-  const userRealmId = userInfo?.realmId || "";
+  const userRealmId = address || "";
 
   const [postInEdition, setPostInEdition] = useState<{
     postId: string;

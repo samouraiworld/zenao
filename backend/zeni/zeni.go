@@ -236,6 +236,8 @@ type DB interface {
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
 
+	StoreTicketSecret(eventAddress string, ownerId string, buyerId string, ticket *Ticket) error
+
 	AddEventToCommunity(eventID string, communityID string) error
 	RemoveEventFromCommunity(eventID string, communityID string) error
 	// returns all communities that contains the event

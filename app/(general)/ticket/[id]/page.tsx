@@ -7,11 +7,8 @@ import {
   ScreenContainerCentered,
 } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
-import { userInfoOptions } from "@/lib/queries/user";
 import { eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-users";
 import { imageWidth, imageHeight } from "@/components/features/event/constants";
-import { eventTickets } from "@/lib/queries/ticket";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -22,14 +19,10 @@ export default async function TicketsPage({ params }: PageProps) {
   const queryClient = getQueryClient();
   const t = await getTranslations("tickets");
 
-  const { getToken, userId } = await auth();
+  const { getToken } = await auth();
   const token = await getToken();
 
-  const userAddrOpts = userInfoOptions(getToken, userId);
-  const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
-
-  if (!token || !userRealmId) {
+  if (!token) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("log-in")}
@@ -46,16 +39,6 @@ export default async function TicketsPage({ params }: PageProps) {
     console.error("error", err);
     notFound();
   }
-
-  // Check if user is a participant
-  const roles = await queryClient.fetchQuery(eventUserRoles(id, userRealmId));
-
-  if (!roles.includes("participant")) {
-    // For now not found handler
-    notFound();
-  }
-
-  queryClient.prefetchQuery(eventTickets(id, getToken));
 
   return (
     <ScreenContainer

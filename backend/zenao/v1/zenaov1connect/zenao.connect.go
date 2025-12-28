@@ -70,6 +70,9 @@ const (
 	// ZenaoServiceExportParticipantsProcedure is the fully-qualified name of the ZenaoService's
 	// ExportParticipants RPC.
 	ZenaoServiceExportParticipantsProcedure = "/zenao.v1.ZenaoService/ExportParticipants"
+	// ZenaoServiceCreateTicketSecretProcedure is the fully-qualified name of the ZenaoService's
+	// CreateTicketSecret RPC.
+	ZenaoServiceCreateTicketSecretProcedure = "/zenao.v1.ZenaoService/CreateTicketSecret"
 	// ZenaoServiceCreateCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// CreateCommunity RPC.
 	ZenaoServiceCreateCommunityProcedure = "/zenao.v1.ZenaoService/CreateCommunity"
@@ -167,6 +170,7 @@ type ZenaoServiceClient interface {
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
+	CreateTicketSecret(context.Context, *connect.Request[v1.CreateTicketSecretRequest]) (*connect.Response[v1.CreateTicketSecretResponse], error)
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error)
@@ -290,6 +294,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceExportParticipantsProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
+			connect.WithClientOptions(opts...),
+		),
+		createTicketSecret: connect.NewClient[v1.CreateTicketSecretRequest, v1.CreateTicketSecretResponse](
+			httpClient,
+			baseURL+ZenaoServiceCreateTicketSecretProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("CreateTicketSecret")),
 			connect.WithClientOptions(opts...),
 		),
 		createCommunity: connect.NewClient[v1.CreateCommunityRequest, v1.CreateCommunityResponse](
@@ -490,6 +500,7 @@ type zenaoServiceClient struct {
 	getEventTickets            *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
 	checkin                    *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
 	exportParticipants         *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
+	createTicketSecret         *connect.Client[v1.CreateTicketSecretRequest, v1.CreateTicketSecretResponse]
 	createCommunity            *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
 	editCommunity              *connect.Client[v1.EditCommunityRequest, v1.EditCommunityResponse]
 	getCommunityAdministrators *connect.Client[v1.GetCommunityAdministratorsRequest, v1.GetCommunityAdministratorsResponse]
@@ -585,6 +596,11 @@ func (c *zenaoServiceClient) Checkin(ctx context.Context, req *connect.Request[v
 // ExportParticipants calls zenao.v1.ZenaoService.ExportParticipants.
 func (c *zenaoServiceClient) ExportParticipants(ctx context.Context, req *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error) {
 	return c.exportParticipants.CallUnary(ctx, req)
+}
+
+// CreateTicketSecret calls zenao.v1.ZenaoService.CreateTicketSecret.
+func (c *zenaoServiceClient) CreateTicketSecret(ctx context.Context, req *connect.Request[v1.CreateTicketSecretRequest]) (*connect.Response[v1.CreateTicketSecretResponse], error) {
+	return c.createTicketSecret.CallUnary(ctx, req)
 }
 
 // CreateCommunity calls zenao.v1.ZenaoService.CreateCommunity.
@@ -754,6 +770,7 @@ type ZenaoServiceHandler interface {
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
 	ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error)
+	CreateTicketSecret(context.Context, *connect.Request[v1.CreateTicketSecretRequest]) (*connect.Response[v1.CreateTicketSecretResponse], error)
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error)
@@ -873,6 +890,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceExportParticipantsProcedure,
 		svc.ExportParticipants,
 		connect.WithSchema(zenaoServiceMethods.ByName("ExportParticipants")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceCreateTicketSecretHandler := connect.NewUnaryHandler(
+		ZenaoServiceCreateTicketSecretProcedure,
+		svc.CreateTicketSecret,
+		connect.WithSchema(zenaoServiceMethods.ByName("CreateTicketSecret")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceCreateCommunityHandler := connect.NewUnaryHandler(
@@ -1083,6 +1106,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceCheckinHandler.ServeHTTP(w, r)
 		case ZenaoServiceExportParticipantsProcedure:
 			zenaoServiceExportParticipantsHandler.ServeHTTP(w, r)
+		case ZenaoServiceCreateTicketSecretProcedure:
+			zenaoServiceCreateTicketSecretHandler.ServeHTTP(w, r)
 		case ZenaoServiceCreateCommunityProcedure:
 			zenaoServiceCreateCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditCommunityProcedure:
@@ -1202,6 +1227,10 @@ func (UnimplementedZenaoServiceHandler) Checkin(context.Context, *connect.Reques
 
 func (UnimplementedZenaoServiceHandler) ExportParticipants(context.Context, *connect.Request[v1.ExportParticipantsRequest]) (*connect.Response[v1.ExportParticipantsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.ExportParticipants is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) CreateTicketSecret(context.Context, *connect.Request[v1.CreateTicketSecretRequest]) (*connect.Response[v1.CreateTicketSecretResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.CreateTicketSecret is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error) {

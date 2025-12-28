@@ -33,7 +33,8 @@ export function deserializeWithFrontMatter<U extends z.ZodType>({
     aContent = content;
     aData = data;
   } catch (error) {
-    console.error("failed to parse frontmatter as json", error);
+    // console.warn("failed to parse frontmatter as json", error);
+    const _ = error;
     // If the error is due to invalid JSON, fallback trying  default "YAML" parsing
     const { content, data } = matter(serialized);
     aContent = content;

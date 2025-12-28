@@ -1,7 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
+import { useWriteContract } from "wagmi";
 import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventOptions } from "../queries/event";
 import { getQueryClient } from "../get-query-client";
+import { ticketMasterABI, ticketMasterAddress } from "../evm";
 import { zenaoClient } from "@/lib/zenao-client";
 
 type EventParticipateLoggedInRequest = {
@@ -36,6 +38,7 @@ export const getRelatedQueriesOptions = (variables: {
 
 export const useEventParticipateLoggedIn = () => {
   const queryClient = getQueryClient();
+  const { writeContractAsync } = useWriteContract();
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       eventId,
@@ -43,10 +46,23 @@ export const useEventParticipateLoggedIn = () => {
       token,
       password,
     }: EventParticipateLoggedInRequest) => {
-      await zenaoClient.participate(
-        { eventId, guests, password },
+      const ticket = await zenaoClient.createTicketSecret(
+        {
+          eventAddress: eventId,
+        },
         { headers: { Authorization: `Bearer ${token}` } },
       );
+
+      const res = await writeContractAsync({
+        abi: ticketMasterABI,
+        address: ticketMasterAddress,
+        functionName: "emitTicket",
+        args: [
+          eventId as `0x${string}`,
+          `0x${Buffer.from(ticket.publicKey, "base64").toString("hex")}`,
+        ],
+      });
+      console.log("registered", res);
     },
     onMutate: async (variables) => {
       // Cancel queries using eventUserRoles & eventOptions & eventUsersWithRole (impacted by new participation)

@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Loader2, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useAccount } from "wagmi";
 import { EventPasswordProvider } from "@/components/providers/event-password-provider";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Form } from "@/components/shadcn/form";
@@ -17,7 +17,6 @@ import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { useToast } from "@/hooks/use-toast";
 import { eventUserRoles } from "@/lib/queries/event-users";
-import { userInfoOptions } from "@/lib/queries/user";
 import { captureException } from "@/lib/report";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
@@ -40,9 +39,8 @@ export function ExclusiveEventGuard({
   children,
   exclusive,
 }: ExclusiveEventGuardProps) {
-  const { getToken, userId, isLoaded } = useAuth();
-  const { data: info } = useSuspenseQuery(userInfoOptions(getToken, userId));
-  const realmId = info?.realmId;
+  const { address, isConnected: isLoaded } = useAccount();
+  const realmId = address;
   const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, realmId));
 
   const [isPending, setIsPending] = useState(false);
@@ -90,7 +88,7 @@ export function ExclusiveEventGuard({
     setIsPending(false);
   };
 
-  const pass = isLoaded && (!exclusive || isMember || canAccess);
+  const pass = !exclusive || (isLoaded && (isMember || canAccess));
 
   if (pass) {
     return (

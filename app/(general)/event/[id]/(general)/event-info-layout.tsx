@@ -28,6 +28,7 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import EventLocationSection from "@/components/features/event/event-location-section";
 import { ParticipantsSection } from "@/components/features/event/event-participants-section";
+import { LinkBadge } from "@/components/widgets/buttons/link-badge";
 
 const EventParticipationInfo = dynamic(
   () => import("@/components/features/event/event-participation-info"),
@@ -61,9 +62,11 @@ const iconSize = 22;
 export function EventInfoLayout({
   eventId,
   data,
+  rolesModAddr,
 }: {
   eventId: string;
   data: EventInfo;
+  rolesModAddr: string;
 }) {
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
@@ -96,6 +99,15 @@ export function EventInfoLayout({
     maximumAttendeeCapacity: data.capacity,
     image: web2URL(data.imageUri),
   };
+
+  const linkBadges = [
+    [
+      "Safe{Wallet}",
+      `https://app.safe.global/transactions/history?safe=basesep:${eventId}`,
+    ],
+    ["Zodiac Roles", `https://roles.gnosisguild.org/basesep:${rolesModAddr}`],
+    ["BaseScan", `https://sepolia.basescan.org/address/${eventId}`],
+  ] as const;
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-8">
@@ -156,6 +168,12 @@ export function EventInfoLayout({
 
           {/* Community */}
           {communityId && <EventCommunitySection communityId={communityId} />}
+
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            {linkBadges.map((lb) => {
+              return <LinkBadge key={lb[0]} label={lb[0]} href={lb[1]} />;
+            })}
+          </div>
 
           <Suspense>
             <EventManagementMenu
