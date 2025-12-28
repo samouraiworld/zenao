@@ -57,11 +57,11 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: checkin/scan
 - X: discover ordering by start date
 - X: refacto: merge zenao-evm-indexer into zenao repo
-- devx: allow to run local chain for dev and e2e
+- X: enable web3auth ssr
 - bug: register state not updated in ui
 - opti: event creation too slow
-- opti: web3 connection too slow
 - edit event
+- devx: allow to run local chain for dev and e2e
 - proper tickets pagination by event start date
 - proper creator / organizer separation
 - manage gatekeepers
@@ -77,6 +77,7 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - community view
 - community list -> indexer?
 - community edit
+- opti: web3 connection too slow
 - link community with event
 - feed -> poster?
 - replace gnoweb buttons with explorer, safe and zodiac buttons

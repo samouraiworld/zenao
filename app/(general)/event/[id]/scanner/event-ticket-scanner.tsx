@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/shadcn/skeleton";
 import { Button } from "@/components/shadcn/button";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
-const secp = new ec("p256");
+const p256 = new ec("p256");
 
 const N = new BN(
   "FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551",
@@ -84,7 +84,7 @@ export function EventTicketScanner({
 
       const b64 = value.replaceAll("_", "/").replaceAll("-", "+");
       const secret = ticketSecretSchema.parse(b64);
-      const key = secp.keyFromPrivate(secret);
+      const key = p256.keyFromPrivate(secret);
 
       const msgHash = keccak256(address, "bytes");
 

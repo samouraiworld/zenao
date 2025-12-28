@@ -110,9 +110,8 @@ export const eventsList = (
           .query(query, {})
           .toPromise();
 
-        console.log("events list", result.data);
-
-        return eventsQueryResponseSchema.parse(result.data).events;
+        return eventsQueryResponseSchema.parse(result.data || { events: [] })
+          .events;
       });
     },
     getNextPageParam: (lastPage, pages) => {

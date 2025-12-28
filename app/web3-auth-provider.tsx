@@ -31,7 +31,7 @@ const web3AuthContextConfig: Web3AuthContextConfig = {
     clientId,
     web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
     // IMP START - SSR
-    // ssr: true,
+    ssr: true,
     accountAbstractionConfig: {
       smartAccountType: "safe",
       chains: [

@@ -88,7 +88,7 @@ export function ExclusiveEventGuard({
     setIsPending(false);
   };
 
-  const pass = isLoaded && (!exclusive || isMember || canAccess);
+  const pass = !exclusive || (isLoaded && (isMember || canAccess));
 
   if (pass) {
     return (
