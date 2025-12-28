@@ -87,28 +87,9 @@ export const profileABI = [
 
 export const ticketMasterABI = [
   {
-    type: "function",
-    name: "all_tickets_by_owner",
-    inputs: [
-      {
-        name: "",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
+    type: "constructor",
+    inputs: [],
+    stateMutability: "nonpayable",
   },
   {
     type: "function",
@@ -121,8 +102,8 @@ export const ticketMasterABI = [
       },
       {
         name: "ticketPubKey",
-        type: "uint256",
-        internalType: "uint256",
+        type: "bytes",
+        internalType: "bytes",
       },
     ],
     outputs: [],
@@ -152,9 +133,19 @@ export const ticketMasterABI = [
     name: "checkin",
     inputs: [
       {
+        name: "gatekeeper",
+        type: "address",
+        internalType: "address",
+      },
+      {
         name: "ticketPubKey",
-        type: "uint256",
-        internalType: "uint256",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "signature",
+        type: "bytes",
+        internalType: "bytes",
       },
     ],
     outputs: [],
@@ -209,8 +200,8 @@ export const ticketMasterABI = [
       },
       {
         name: "ticketPubKey",
-        type: "uint256",
-        internalType: "uint256",
+        type: "bytes",
+        internalType: "bytes",
       },
     ],
     outputs: [],
@@ -425,8 +416,8 @@ export const ticketMasterABI = [
     outputs: [
       {
         name: "",
-        type: "uint256",
-        internalType: "uint256",
+        type: "bytes",
+        internalType: "bytes",
       },
     ],
     stateMutability: "view",
@@ -442,8 +433,8 @@ export const ticketMasterABI = [
       },
       {
         name: "ticketPubKey",
-        type: "uint256",
-        internalType: "uint256",
+        type: "bytes",
+        internalType: "bytes",
       },
     ],
     outputs: [
@@ -511,9 +502,9 @@ export const ticketMasterABI = [
       },
       {
         name: "ticketPubKey",
-        type: "uint256",
+        type: "bytes",
         indexed: false,
-        internalType: "uint256",
+        internalType: "bytes",
       },
     ],
     anonymous: false,
@@ -536,13 +527,13 @@ export const ticketMasterABI = [
       },
       {
         name: "ticketPubKey",
-        type: "uint256",
+        type: "bytes",
         indexed: false,
-        internalType: "uint256",
+        internalType: "bytes",
       },
     ],
     anonymous: false,
   },
 ] as const;
 
-export const ticketMasterAddress = "0x9a3680C978C277ba12bD9895D231a54D8B84a148";
+export const ticketMasterAddress = "0x33addc84F5a81C9d42447294196cfC4388811231";

@@ -83,6 +83,8 @@ export const eventUserRoles = (
             roleAssignments: { role: { key: string } }[];
           }; // TODO: proper typing
 
+          console.log("res user roles", res);
+
           return eventGetUserRolesSchema.parse(
             res.roleAssignments.map((r) => {
               switch (r.role.key) {

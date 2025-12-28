@@ -25,7 +25,7 @@ func (s *ZenaoServer) GetEventTickets(
 		return nil, err
 	}
 
-	s.Logger.Info("get-event-tickets", zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("get-event-tickets", zap.String("user-id", zUser.ID), zap.String("event-id", req.Msg.EventId), zap.Bool("user-banned", user.Banned))
 
 	if user.Banned {
 		return nil, errors.New("user is banned")
@@ -35,6 +35,8 @@ func (s *ZenaoServer) GetEventTickets(
 	if err != nil {
 		return nil, err
 	}
+
+	s.Logger.Debug("tickets", zap.Any("tickets", tickets))
 
 	userIDs := []string{}
 	ticketsWithUser := []*zeni.SoldTicket{}

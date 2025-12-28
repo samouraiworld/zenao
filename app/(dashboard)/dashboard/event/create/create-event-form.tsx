@@ -25,7 +25,6 @@ import { useWeb3Auth } from "@web3auth/modal/react";
 import { rolesAbi } from "zodiac-roles-sdk";
 import { encodeFunctionData } from "viem";
 import { useRouter } from "next/navigation";
-import { GetPlanRequest } from "../api/pilot/route";
 import { EventForm } from "@/components/features/event/event-form";
 import { useToast } from "@/hooks/use-toast";
 import { captureException } from "@/lib/report";
@@ -35,6 +34,7 @@ import { useEthersProvider } from "@/lib/ethers-wagmi";
 import { profileABI, ticketMasterABI, ticketMasterAddress } from "@/lib/evm";
 import { serializeWithFrontMatter } from "@/lib/serialization";
 import { uploadString } from "@/lib/files";
+import { GetPlanRequest } from "@/app/api/pilot/route";
 
 const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 // Private key: 0xbd6277d9eb47ea66b2d3cf6e32b3566849cd9e49a6cc49e33e5de402fe4aa3e8
@@ -53,9 +53,12 @@ const zenaoAdmin = "0x5CF41F7f586fb46d32683FFf9B76dfa4E262337c";
 - X: discoverable field in eventOptions
 - X: ticket secret
 - X: show mail of ticket
+- X: working local subgraph
 - checkin/scan
 - guest invite
 - discover ordering by start date
+- refacto: merge zenao-evm-indexer into zenao repo
+- devx: allow to run local chain for dev and e2e
 - bug: register state not updated in ui
 - opti: event creation too slow
 - opti: web3 connection too slow

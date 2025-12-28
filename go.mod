@@ -1,6 +1,6 @@
 module github.com/samouraiworld/zenao
 
-go 1.24.0
+go 1.25.0
 
 require (
 	ariga.io/atlas-provider-gorm v0.5.0
@@ -12,6 +12,7 @@ require (
 	github.com/bufbuild/buf v1.58.0
 	github.com/charmbracelet/lipgloss v1.0.0
 	github.com/clerk/clerk-sdk-go/v2 v2.4.2
+	github.com/ethereum/go-ethereum v1.16.7
 	github.com/fullstorydev/grpcurl v1.9.3
 	github.com/gnolang/gno v0.0.0-20250929152115-4e80c37e8d18
 	github.com/go-faker/faker/v4 v4.5.0
@@ -74,6 +75,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/OpenPeeDeeP/depguard/v2 v2.2.1 // indirect
+	github.com/ProjectZKM/Ziren/crates/go-runtime/zkvm_runtime v0.0.0-20251001021608-1fe7b43fc4d6 // indirect
 	github.com/alecthomas/go-check-sumtype v0.3.1 // indirect
 	github.com/alexkohler/nakedret/v2 v2.0.5 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
@@ -111,6 +113,7 @@ require (
 	github.com/curioswitch/go-reassign v0.3.0 // indirect
 	github.com/daixiang0/gci v0.13.5 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
 	github.com/denis-tingaikin/go-header v0.5.0 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v28.5.1+incompatible // indirect
@@ -174,6 +177,7 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
+	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ipfs/go-cid v0.0.7 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

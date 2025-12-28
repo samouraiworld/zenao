@@ -59,11 +59,12 @@ contract TicketMasterTest is Test {
     function testFuzz_EmitCancelTicket(
         address eventAddr,
         address ownerAddr,
-        uint256 ticketPubKey,
         bool discoverable
     ) public {
-        ticketPubKey = bound(ticketPubKey, 1, type(uint256).max);
         RolesModMock rolesMod = new RolesModMock();
+
+        bytes
+            memory ticketPubKey = hex"144bfff61dc9fccb596ee85ae84ed844d94e657ddd48a3a32f25c7cf6c7324d3e389aabab089a667ee3753a850ab0d634ac9e0193dbfa8cf922ec53587ef7ab0";
 
         vm.startPrank(eventAddr);
         ticketMaster.setCapacity(42);
@@ -76,6 +77,76 @@ contract TicketMasterTest is Test {
 
         vm.prank(ownerAddr);
         ticketMaster.cancelTicket(eventAddr, ticketPubKey);
+    }
+
+    function test_Signature() public {
+        address addr = 0xb68b43E56474325f0B7e0FC5ad1869b6E97284f0;
+
+        bytes32 h = 0x13732c556826599ff4d071fd81858cc7c427cf50704d39acbc88f0222355b905;
+        assertEq(keccak256(abi.encodePacked(addr)), h, "invalid hash"); // this ensures we get same hash as in javascript
+
+        bytes
+            memory ticketPubKey = hex"144bfff61dc9fccb596ee85ae84ed844d94e657ddd48a3a32f25c7cf6c7324d3e389aabab089a667ee3753a850ab0d634ac9e0193dbfa8cf922ec53587ef7ab0";
+        assertEq(ticketPubKey.length, 64, "invalid length for pk");
+
+        bytes
+            memory signature = hex"a7091182d3095c03a552a28a2070ab44ea67a60c5393253a521301db7f8fab9134f404efd916efd3141d9be89e69f8e3f826797a6d0d4cb76025b201be7bd876";
+        assertEq(signature.length, 64, "invalid length for sig");
+
+        bytes32 qx;
+        assembly {
+            qx := mload(add(ticketPubKey, 0x20))
+        }
+        assertEq(
+            uint256(qx),
+            9180537082126167592233666925496709969015080171904535570456332917295117706451,
+            "invalid qx"
+        );
+
+        bytes32 qy;
+        assembly {
+            qy := mload(add(ticketPubKey, 0x40))
+        }
+        assertEq(
+            uint256(qy),
+            102918253006296732568612546013345523315573583013021682549405935992937494051504,
+            "invalid qy"
+        );
+
+        bytes32 r;
+        assembly {
+            r := mload(add(signature, 0x20))
+        }
+        assertEq(
+            uint256(r),
+            75552268193694198274983563347751717264334617307642003969435952901866625411985,
+            "invalid r"
+        );
+
+        /*
+        bytes32 s;
+        assembly {
+            s := mload(add(signature, 0x40))
+        }
+        assertEq(
+            uint256(s),
+            91840676326945627229311750599348318376809269698616025652713944151637912669403,
+            "invalid s"
+        );
+        */
+
+        assertTrue(
+            ticketMaster.verify(ticketPubKey, signature, h),
+            "can't verify signature"
+        );
+
+        /*
+        assertEq(
+            verifier.verify(ticketPubKey, h, signature),
+            IERC7913SignatureVerifier.verify.selector,
+            "invalid signature"
+        );
+        */
     }
 }
 

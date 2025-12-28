@@ -43,6 +43,6 @@ gen.eth-sdk:
 
 .PHONY: post-update-contracts
 post-update-contracts:
-	forge build
+	forge build --via-ir
 	cat ./out/TicketMaster.sol/TicketMaster.json | jq .abi > eth-sdk/abis/basesep/ticketMaster.json
 	$(MAKE) gen.eth-sdk

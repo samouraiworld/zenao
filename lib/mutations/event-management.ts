@@ -1,8 +1,14 @@
 import { useMutation } from "@tanstack/react-query";
+import { createPublicClient, encodeFunctionData, http } from "viem";
+import { useAccount, useWriteContract } from "wagmi";
+import { rolesAbi } from "zodiac-roles-sdk";
 import { getQueryClient } from "../get-query-client";
 import { eventGatekeepersEmails, eventOptions } from "../queries/event";
 import { currentTimezone } from "../time";
 import { GetToken } from "../utils";
+import { ticketMasterABI, ticketMasterAddress } from "../evm";
+import { EventGatekeeperRoleKey, EventOrganizerRoleKey } from "../zodiac";
+import { eventUserRoles } from "../queries/event-users";
 import { EventFormSchemaType } from "@/types/schemas";
 import { zenaoClient } from "@/lib/zenao-client";
 
@@ -175,26 +181,85 @@ export const useEventBroadcastEmail = () => {
 
 type EventCheckInRequest = {
   eventId: string;
-  signature: string;
-  ticketPubkey: string;
-  token: string;
+  signature: Uint8Array;
+  ticketPubkey: Uint8Array;
 };
 
 export const useEventCheckIn = () => {
   const queryClient = getQueryClient();
+  const { writeContractAsync } = useWriteContract();
+  const { address } = useAccount();
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
+      eventId,
       signature,
       ticketPubkey,
-      token,
     }: EventCheckInRequest) => {
-      await zenaoClient.checkin(
-        {
-          signature,
-          ticketPubkey,
-        },
-        { headers: { Authorization: `Bearer ${token}` } },
+      const evmClient = createPublicClient({
+        transport: http(process.env.NEXT_PUBLIC_EVM_RPC),
+      });
+
+      console.log("user address", address);
+
+      console.log("ticket master address", ticketMasterAddress);
+
+      const rolesModAddr = await evmClient.readContract({
+        abi: ticketMasterABI,
+        address: ticketMasterAddress,
+        functionName: "roles_mod",
+        args: [eventId as `0x${string}`],
+      });
+
+      console.log(
+        "checkin data",
+        "addr",
+        address,
+        "pk",
+        `0x${Buffer.from(ticketPubkey).toString("hex")}`,
+        "sig",
+        `0x${Buffer.from(signature).toString("hex")}`,
       );
+
+      const checkinData = encodeFunctionData({
+        abi: ticketMasterABI,
+        functionName: "checkin",
+        args: [
+          address as `0x${string}`,
+          `0x${Buffer.from(ticketPubkey).toString("hex")}`,
+          `0x${Buffer.from(signature).toString("hex")}`,
+        ],
+      });
+
+      const roles = await queryClient.fetchQuery(
+        eventUserRoles(eventId, address),
+      );
+
+      let roleKey: `0x${string}`;
+      if (roles.includes("organizer")) {
+        roleKey = EventOrganizerRoleKey;
+      } else if (roles.includes("gatekeeper")) {
+        roleKey = EventGatekeeperRoleKey;
+      } else {
+        throw new Error("user is neither organizer not gatekeeper");
+      }
+
+      console.log("roles mod address", rolesModAddr);
+
+      const res = await writeContractAsync({
+        abi: rolesAbi,
+        address: rolesModAddr,
+        functionName: "execTransactionWithRole",
+        args: [
+          ticketMasterAddress, // to
+          BigInt(0), // value
+          checkinData, // data
+          0, // operation -> Call = 0, DelegateCall = 1
+          roleKey, // roleKey
+          true, // should revert
+        ],
+      });
+
+      console.log("checked in", res);
     },
     onSuccess: (_, variables) => {
       const eventOpts = eventOptions(variables.eventId);

@@ -1,27 +1,8 @@
 [
   {
-    "type": "function",
-    "name": "all_tickets_by_owner",
-    "inputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
+    "type": "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -34,8 +15,8 @@
       },
       {
         "name": "ticketPubKey",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
     "outputs": [],
@@ -65,9 +46,19 @@
     "name": "checkin",
     "inputs": [
       {
+        "name": "gatekeeper",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "ticketPubKey",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "signature",
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
     "outputs": [],
@@ -122,8 +113,8 @@
       },
       {
         "name": "ticketPubKey",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
     "outputs": [],
@@ -338,8 +329,8 @@
     "outputs": [
       {
         "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
     "stateMutability": "view"
@@ -355,8 +346,8 @@
       },
       {
         "name": "ticketPubKey",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "bytes",
+        "internalType": "bytes"
       }
     ],
     "outputs": [
@@ -424,9 +415,9 @@
       },
       {
         "name": "ticketPubKey",
-        "type": "uint256",
+        "type": "bytes",
         "indexed": false,
-        "internalType": "uint256"
+        "internalType": "bytes"
       }
     ],
     "anonymous": false
@@ -449,9 +440,9 @@
       },
       {
         "name": "ticketPubKey",
-        "type": "uint256",
+        "type": "bytes",
         "indexed": false,
-        "internalType": "uint256"
+        "internalType": "bytes"
       }
     ],
     "anonymous": false

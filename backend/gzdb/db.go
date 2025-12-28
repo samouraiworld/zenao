@@ -111,7 +111,7 @@ func (g *gormZenaoDB) StoreTicketSecret(eventAddress string, ownerId string, buy
 		return fmt.Errorf("invalid buyer id: %w", err)
 	}
 	dbTicket := &SoldTicket{
-		EventAddress: eventAddress,
+		EventAddress: strings.ToLower(eventAddress),
 		UserID:       uint(ownerIdInt),
 		BuyerID:      uint(buyerIdInt),
 		Secret:       ticket.Secret(),
@@ -969,7 +969,7 @@ func (g *gormZenaoDB) GetEventUserOrBuyerTickets(eventID string, userID string) 
 	tickets := []*SoldTicket{}
 
 	if strings.HasPrefix(eventID, "0x") {
-		err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_address = ? AND (buyer_id = ? OR user_id = ?)", eventID, userIDint, userIDint).Error
+		err = g.db.Model(&SoldTicket{}).Preload("Checkin").Preload("User").Find(&tickets, "event_address = ? AND (buyer_id = ? OR user_id = ?)", strings.ToLower(eventID), userIDint, userIDint).Error
 		if err != nil {
 			return nil, err
 		}

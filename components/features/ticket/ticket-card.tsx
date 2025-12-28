@@ -12,23 +12,20 @@ import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
+import { makeLocationFromEvent } from "@/lib/location";
+import { locationTimezone } from "@/lib/event-location";
+import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 
 type TicketCardProps = {
   eventId: string;
   event: EventInfo;
-  timezone: string;
   ticketInfo: {
     ticketSecret: string;
     userEmail: string;
   };
 };
 
-export function TicketCard({
-  eventId,
-  event,
-  timezone,
-  ticketInfo,
-}: TicketCardProps) {
+export function TicketCard({ eventId, event, ticketInfo }: TicketCardProps) {
   const t = useTranslations("tickets");
   const { Canvas: QRCode } = useQRCode();
 
@@ -36,6 +33,10 @@ export function TicketCard({
   const y = useMotionValue(0);
   const rotateX = useTransform(y, [-80, 80], [25, -25]);
   const rotateY = useTransform(x, [-80, 80], [-25, 25]);
+
+  const location = makeLocationFromEvent(event.location);
+  const eventTimezone = locationTimezone(location);
+  const timezone = useLayoutTimezone(eventTimezone);
 
   return (
     <div className="card-3d">

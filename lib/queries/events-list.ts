@@ -11,7 +11,7 @@ import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 export const DEFAULT_EVENTS_LIMIT = 20;
 
 export const ticketMasterGraphClient = createClient({
-  url: `https://api.studio.thegraph.com/query/1718593/zenao-dev-1/version/latest`,
+  url: "http://localhost:8000/subgraphs/name/subgraph-0/",
   exchanges: [cacheExchange, fetchExchange],
   preferGetMethod: false,
 });
@@ -138,7 +138,7 @@ const evmTicketSchema = z.object({
 export type EVMTicket = z.infer<typeof evmTicketSchema>;
 
 export const ticketsByOwner = (
-  ownerAddress: string,
+  ownerAddress: string | undefined,
   limit: number,
   eventAddr?: string,
 ) => {
@@ -198,5 +198,6 @@ export const ticketsByOwner = (
       }
       return pages.length - 2;
     },
+    enabled: !!ownerAddress,
   });
 };

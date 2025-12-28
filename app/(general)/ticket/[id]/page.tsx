@@ -9,7 +9,6 @@ import {
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import { imageWidth, imageHeight } from "@/components/features/event/constants";
-import { eventTickets } from "@/lib/queries/ticket";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -40,8 +39,6 @@ export default async function TicketsPage({ params }: PageProps) {
     console.error("error", err);
     notFound();
   }
-
-  queryClient.prefetchQuery(eventTickets(id, getToken));
 
   return (
     <ScreenContainer

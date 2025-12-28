@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import "@openzeppelin/contracts/utils/cryptography/verifiers/ERC7913P256Verifier.sol";
+import {P256} from "@openzeppelin/contracts/utils/cryptography/P256.sol";
+
 enum Operation {
     Call,
     DelegateCall
@@ -37,29 +40,32 @@ interface RolesMod {
 
 contract TicketMaster {
     mapping(address => uint256) public capacity;
-    mapping(address => mapping(uint256 ticketPubKey => bool)) tickets;
+    mapping(address => mapping(bytes ticketPubKey => bool)) tickets;
     mapping(address => uint256) public sold_tickets;
     mapping(address => uint256) public checkins;
     mapping(address => uint) public sale_end;
     mapping(address => address) public roles_mod;
     mapping(address => address) public creator;
-    mapping(address => mapping(uint256 ticketPubKey => address))
+    mapping(address => mapping(bytes ticketPubKey => address))
         public ticket_owner;
-    mapping(address => mapping(address owner => uint256))
-        public ticket_by_owner;
-    mapping(address => uint256[]) public all_tickets_by_owner;
+    mapping(address => mapping(address owner => bytes)) public ticket_by_owner;
     address[] public events_by_sale_end;
+    ERC7913P256Verifier verifier;
 
     event SaleEndSet(address eventAddr, uint saleEnd, bool discoverable);
     event CreatorSet(address eventAddr, address creatorAddr);
-    event TicketEmitted(address eventAddr, address owner, uint256 ticketPubKey);
-    event TicketCancelled(address eventAddr, uint256 ticketPubKey);
+    event TicketEmitted(address eventAddr, address owner, bytes ticketPubKey);
+    event TicketCancelled(address eventAddr, bytes ticketPubKey);
 
     // TODO: consider using openzepelin Ownable instead of manager
 
     // TODO: make this upgradable
 
-    function emitTicket(address eventAddr, uint256 ticketPubKey) public {
+    constructor() {
+        verifier = new ERC7913P256Verifier();
+    }
+
+    function emitTicket(address eventAddr, bytes calldata ticketPubKey) public {
         require(roles_mod[eventAddr] != address(0), "no such event");
         require(sale_end[eventAddr] > block.timestamp, "sale ended");
         require(sold_tickets[eventAddr] < capacity[eventAddr], "sold out");
@@ -67,9 +73,9 @@ contract TicketMaster {
             !tickets[eventAddr][ticketPubKey],
             "ticket public key already used"
         );
-        require(ticketPubKey != 0, "ticket pubkey must not be 0");
+        require(ticketPubKey.length == 64, "ticket pubkey must be 64 bytes");
         require(
-            ticket_by_owner[eventAddr][msg.sender] == 0,
+            ticket_by_owner[eventAddr][msg.sender].length == 0,
             "owner already has a ticket"
         );
         require(sale_end[eventAddr] != 0, "sale end not set");
@@ -80,7 +86,6 @@ contract TicketMaster {
         sold_tickets[eventAddr]++;
         ticket_owner[eventAddr][ticketPubKey] = msg.sender;
         ticket_by_owner[eventAddr][msg.sender] = ticketPubKey;
-        all_tickets_by_owner[msg.sender].push(ticketPubKey);
 
         bytes32[] memory roles = new bytes32[](1);
         roles[0] = "participant";
@@ -107,7 +112,7 @@ contract TicketMaster {
 
     function cancelTicket(
         address eventAddr,
-        uint256 ticketPubKey
+        bytes calldata ticketPubKey
     ) public onlyRegisteredTicket(eventAddr, ticketPubKey) {
         require(
             ticket_owner[eventAddr][ticketPubKey] == msg.sender,
@@ -118,27 +123,6 @@ contract TicketMaster {
         sold_tickets[eventAddr]--;
         delete ticket_owner[eventAddr][ticketPubKey];
         delete ticket_by_owner[eventAddr][msg.sender];
-
-        uint index;
-        for (
-            index = 0;
-            index < all_tickets_by_owner[msg.sender].length;
-            index++
-        ) {
-            if (all_tickets_by_owner[msg.sender][index] == ticketPubKey) {
-                break;
-            }
-        }
-        for (
-            uint i = index;
-            i < all_tickets_by_owner[msg.sender].length - 1;
-            i++
-        ) {
-            all_tickets_by_owner[msg.sender][i] = all_tickets_by_owner[
-                msg.sender
-            ][i + 1];
-        }
-        all_tickets_by_owner[msg.sender].pop();
 
         bytes32[] memory roles = new bytes32[](1);
         roles[0] = "participant";
@@ -164,13 +148,34 @@ contract TicketMaster {
     }
 
     function checkin(
-        uint256 ticketPubKey
+        address gatekeeper,
+        bytes calldata ticketPubKey,
+        bytes calldata signature
     ) public onlyRegisteredTicket(msg.sender, ticketPubKey) {
-        // TODO: validate signature
+        require(
+            verifier.verify(
+                ticketPubKey,
+                keccak256(abi.encodePacked(gatekeeper)),
+                signature
+            ) == IERC7913SignatureVerifier.verify.selector,
+            "invalid signature"
+        );
 
         delete tickets[msg.sender][ticketPubKey];
         checkins[msg.sender]++; // should this only emit an event and be counted offchain?
         // TODO: emit event?
+    }
+
+    function verify(
+        bytes calldata key,
+        bytes calldata signature,
+        bytes32 h
+    ) public view returns (bool) {
+        bytes32 qx = bytes32(key[0x00:0x20]);
+        bytes32 qy = bytes32(key[0x20:0x40]);
+        bytes32 r = bytes32(signature[0x00:0x20]);
+        bytes32 s = bytes32(signature[0x20:0x40]);
+        return P256.verify(h, r, s, qx, qy);
     }
 
     function setCapacity(uint256 newCapacity) public {
@@ -299,7 +304,7 @@ contract TicketMaster {
         emit CreatorSet(msg.sender, creatorAddr);
     }
 
-    modifier onlyRegisteredTicket(address owner, uint256 ticketPubKey) {
+    modifier onlyRegisteredTicket(address owner, bytes calldata ticketPubKey) {
         require(tickets[owner][ticketPubKey], "no such ticket");
         _;
     }
