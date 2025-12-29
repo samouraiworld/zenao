@@ -54,7 +54,7 @@ function BroadcastEmailForm({
         <FormFieldCheckbox
           control={form.control}
           name="attachTicket"
-          label="Attach ticket to the message"
+          label={t("attach-ticket-label")}
         />
       </div>
       <div className="flex justify-end">
