@@ -584,6 +584,19 @@
       "no-events": "No events found.",
       "create-event-btn": "Create an event"
     },
+    "eventDetails": {
+      "event-details": "Event details",
+      "manage-event": "Manage event",
+      "edit-event": "Edit event",
+      "cancel-event": "Cancel event",
+      "view-event": "View event",
+      "eventTabs": {
+        "description": "Description",
+        "participants": "Participants",
+        "gatekeepers": "Gatekeepers",
+        "broadcast": "Broadcast"
+      }
+    },
     "data-table": {
       "pagination": {
         "rows-per-page": "Rows per page",

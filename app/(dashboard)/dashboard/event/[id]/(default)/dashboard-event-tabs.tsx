@@ -3,6 +3,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { TabsContent } from "@/components/shadcn/tabs";
 import { Separator } from "@/components/shadcn/separator";
 import { Badge } from "@/components/shadcn/badge";
@@ -16,6 +17,7 @@ export default function DashboardEventTabs({
   children: React.ReactNode;
   nbParticipants: number;
 }) {
+  const t = useTranslations("dashboard.eventDetails.eventTabs");
   const section = useSelectedLayoutSegment() || "description";
 
   return (
@@ -26,7 +28,7 @@ export default function DashboardEventTabs({
             value="description"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            Description
+            {t("description")}
           </TabsTrigger>
         </Link>
         <Link href={`/dashboard/event/${eventId}/participants`} scroll={false}>
@@ -34,7 +36,8 @@ export default function DashboardEventTabs({
             value="participants"
             className="w-fit flex gap-2 p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            Participants <Badge variant="secondary">{nbParticipants}</Badge>
+            {t("participants")}{" "}
+            <Badge variant="secondary">{nbParticipants}</Badge>
           </TabsTrigger>
         </Link>
         <Link href={`/dashboard/event/${eventId}/gatekeepers`} scroll={false}>
@@ -42,7 +45,7 @@ export default function DashboardEventTabs({
             value="gatekeepers"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            Gatekeepers
+            {t("gatekeepers")}
           </TabsTrigger>
         </Link>
         <Link href={`/dashboard/event/${eventId}/broadcast`} scroll={false}>
@@ -50,7 +53,7 @@ export default function DashboardEventTabs({
             value="broadcast"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            Broadcast
+            {t("broadcast")}
           </TabsTrigger>
         </Link>
       </TabsList>
