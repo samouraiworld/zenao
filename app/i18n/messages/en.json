@@ -343,6 +343,12 @@
     "label": "Page not found.",
     "button": "Return Home"
   },
+  "post-menu": {
+    "pin-post": "Pin post",
+    "unpin-post": "Unpin post",
+    "edit-post": "Edit post",
+    "delete-post": "Delete post"
+  },
   "components": {
     "modals": {
       "signed-out-modal": {
@@ -417,6 +423,12 @@
     },
     "poll": {
       "result-count": "{count, plural, one {# vote} other {# votes}}"
+    },
+    "actions": {
+      "toast-post-pin-success": "Post pinned !",
+      "toast-post-pin-error": "Error while pinning the post !",
+      "toast-post-unpin-success": "Post unpinned !",
+      "toast-post-unpin-error": "Error while unpinning the post !"
     }
   },
   "broadcast-email-form": {
@@ -482,6 +494,10 @@
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals",
+    "pinned-events": "Pinned Events",
+    "all-events": "All Events",
+    "event-unpinned": "Event unpinned",
+    "event-pinned": "Event pinned",
     "portfolio": "Portfolio",
     "upcoming": "Upcoming",
     "past": "Past",

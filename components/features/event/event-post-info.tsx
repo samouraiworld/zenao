@@ -32,6 +32,8 @@ interface EventPostInfoProps {
   isReacting: boolean;
   onDelete: (postId: string, parentId?: string) => Promise<void>;
   isDeleting: boolean;
+  pinned?: boolean;
+  onPinToggle?: () => void | Promise<void>;
 }
 
 export default function EventPostInfo({
@@ -47,6 +49,8 @@ export default function EventPostInfo({
   isReacting,
   onDelete,
   isDeleting,
+  pinned,
+  onPinToggle,
 }: EventPostInfoProps) {
   const router = useRouter();
   const { data: roles } = useSuspenseQuery(
@@ -70,6 +74,9 @@ export default function EventPostInfo({
           }}
           onEdit={async (values) => await onEdit(postId, values)}
           isDeleting={isDeleting}
+          canPin={roles.includes("organizer")}
+          pinned={pinned}
+          onPinToggle={onPinToggle}
           isReacting={isReacting}
           isEditing={isEditing}
           canInteract
