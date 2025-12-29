@@ -621,6 +621,14 @@
       "participants": {
         "exportCSV": "Export CSV",
         "no-participants": "No participants yet."
+      },
+      "gatekeepers": {
+        "no-gatekeepers": "No gatekeepers assigned yet.",
+        "add-gatekeeper-form": {
+          "email-placeholder": "Enter gatekeeper email to add...",
+          "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
+          "add-btn": "Add Gatekeeper"
+        }
       }
     },
     "data-table": {
