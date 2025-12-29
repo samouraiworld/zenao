@@ -602,6 +602,21 @@
         "notPubliclyVisible": "This event is not publicly visible by anyone",
         "publiclyVisible": "This event is visible by anyone",
         "changeVisibility": "Change visibility"
+      },
+      "header": {
+        "actions": "Actions",
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "dateAndTime": "Date & Time",
+        "from": "From",
+        "to": "To",
+        "updateEventTime": "Update Event Time",
+        "location": "Location",
+        "updateLocation": "Update Location",
+        "capacity": "Capacity",
+        "noPlaces": "No places",
+        "attendees": "{count} attendees",
+        "updateCapacity": "Update Capacity"
       }
     },
     "data-table": {
