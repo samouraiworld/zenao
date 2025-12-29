@@ -7,6 +7,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { userInfoOptions } from "@/lib/queries/user";
+
 import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,

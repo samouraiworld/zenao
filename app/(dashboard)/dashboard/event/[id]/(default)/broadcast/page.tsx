@@ -17,7 +17,7 @@ export default async function DashboardEventBroadcastPage({
 
   const queryClient = getQueryClient();
 
-  const t = await getTranslations("broadcast-email-form");
+  const t = await getTranslations("dashboard.eventDetails.broadcast");
 
   let eventInfo;
 
@@ -30,7 +30,7 @@ export default async function DashboardEventBroadcastPage({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="mb-12 space-y-8">
-        <Text variant="secondary">{t("desc")}</Text>
+        <Text variant="secondary">{t("subtitle")}</Text>
         <DashboardBroadcastForm eventId={eventId} eventInfo={eventInfo} />
       </div>
     </HydrationBoundary>

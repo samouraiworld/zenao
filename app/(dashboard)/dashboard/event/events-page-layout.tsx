@@ -4,6 +4,7 @@ import { useQueryState } from "nuqs";
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn/tabs";
 import { Label } from "@/components/shadcn/label";
 import {
@@ -23,6 +24,7 @@ interface EventsTableProps {
 
 export default function EventsPageLayout({ now }: EventsTableProps) {
   const router = useRouter();
+  const t = useTranslations("dashboard.eventsTable");
   const [tab] = useQueryState<"upcoming" | "past">("tab", {
     defaultValue: "upcoming",
     parse: (value) =>
@@ -32,7 +34,7 @@ export default function EventsPageLayout({ now }: EventsTableProps) {
   return (
     <div className="flex flex-col gap-6">
       <Heading level={1} className="text-2xl">
-        Events
+        {t("events")}
       </Heading>
 
       <div className="flex flex-col gap-4">
@@ -59,25 +61,22 @@ export default function EventsPageLayout({ now }: EventsTableProps) {
                 <SelectValue placeholder="Select a view" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="past">Past</SelectItem>
+                <SelectItem value="upcoming">{t("upcoming")}</SelectItem>
+                <SelectItem value="past">{t("past")}</SelectItem>
               </SelectContent>
             </Select>
             <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-1 xl:flex">
               <Link href="/dashboard?tab=upcoming">
                 <TabsTrigger value="upcoming" className="gap-2">
-                  Upcoming
+                  {t("upcoming")}
                 </TabsTrigger>
               </Link>
               <Link href="/dashboard?tab=past">
                 <TabsTrigger value="past" className="gap-2">
-                  Past
+                  {t("past")}
                 </TabsTrigger>
               </Link>
             </TabsList>
-            {/* <div className="flex items-center gap-2">
-              <DataTableViewOptions table={table} />
-            </div> */}
           </div>
 
           <Suspense fallback={<EventsTableViewLoading now={now} />}>

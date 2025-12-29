@@ -59,9 +59,5 @@ func (s *ZenaoServer) LeaveCommunity(
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
-		return nil, errors.New("failed to remove member from community on chain")
-	}
-
 	return connect.NewResponse(&zenaov1.LeaveCommunityResponse{}), nil
 }

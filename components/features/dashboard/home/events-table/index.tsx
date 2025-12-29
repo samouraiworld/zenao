@@ -66,14 +66,10 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
       setTablePage(newPage < 1 ? 1 : newPage);
     },
     getHasNextPage: () => {
-      return pastEvents.length > DEFAULT_EVENTS_LIMIT;
+      return pastEvents.length >= DEFAULT_EVENTS_LIMIT;
     },
     getHasPreviousPage: (currentPage) => {
-      return (
-        currentPage > 0 &&
-        pastEvents.length < DEFAULT_EVENTS_LIMIT &&
-        tablePage > 1
-      );
+      return currentPage > 1;
     },
   });
 
@@ -88,14 +84,10 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
       setTablePage(newPage < 1 ? 1 : newPage);
     },
     getHasNextPage: () => {
-      return upcomingEvents.length == DEFAULT_EVENTS_LIMIT;
+      return upcomingEvents.length >= DEFAULT_EVENTS_LIMIT;
     },
     getHasPreviousPage: (currentPage) => {
-      return (
-        currentPage > 0 &&
-        upcomingEvents.length < DEFAULT_EVENTS_LIMIT &&
-        tablePage > 1
-      );
+      return currentPage > 1;
     },
   });
 

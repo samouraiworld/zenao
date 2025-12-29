@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useMemo,
+  useOptimistic,
   useState,
   useTransition,
 } from "react";
@@ -58,9 +59,6 @@ export function GatekeepersEditionContextProvider({
   const { data: gatekeepers } = useSuspenseQuery(
     eventGatekeepersEmails(eventId, getToken),
   );
-  const [localGatekeepers, setGatekeepers] = useState<string[]>(
-    gatekeepers.gatekeepers,
-  );
 
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
@@ -77,61 +75,95 @@ export function GatekeepersEditionContextProvider({
 
   const location = makeLocationFromEvent(eventInfo.location);
 
+  const [previousGatekeepers, setPreviousGatekeepers] = useState<
+    string[] | null
+  >(null);
+  const [localGatekeepers, setGatekeepers] = useState<string[]>(
+    gatekeepers.gatekeepers,
+  );
   const [isActionPending, startTransition] = useTransition();
 
-  const edit = (newGatekeepers: string[]) => {
-    startTransition(async () => {
-      const values: EventFormSchemaType = {
-        capacity: eventInfo.capacity,
-        title: eventInfo.title,
-        description: eventInfo.description,
-        startDate: eventInfo.startDate,
-        endDate: eventInfo.endDate,
-        discoverable: eventInfo.discoverable,
-        imageUri: eventInfo.imageUri,
-        location,
-        gatekeepers: newGatekeepers.map((gatekeeperEmail) => ({
-          email: gatekeeperEmail,
-        })),
-        exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
-        password: "",
-        communityId: communityId || null,
-      };
+  const [optimisticGatekeepers, setOptimisticGatekeepers] = useOptimistic(
+    localGatekeepers,
+    (_, newGatekeepers: string[]) => newGatekeepers,
+  );
 
-      try {
-        await editEvent({ ...values, eventId });
-        trackEvent("EventGatekeepersUpdated", {
-          props: {
-            eventId,
-          },
-        });
-        toast({
-          title: t("toast-gatekeeper-management-success"),
-        });
-      } catch (err) {
-        captureException(err);
-        toast({
-          variant: "destructive",
-          title: t("toast-gatekeeper-management-error"),
-        });
-      }
-    });
+  const edit = async (
+    previousGatekeepers: string[],
+    newGatekeepers: string[],
+  ) => {
+    const values: EventFormSchemaType = {
+      capacity: eventInfo.capacity,
+      title: eventInfo.title,
+      description: eventInfo.description,
+      startDate: eventInfo.startDate,
+      endDate: eventInfo.endDate,
+      discoverable: eventInfo.discoverable,
+      imageUri: eventInfo.imageUri,
+      location,
+      gatekeepers: newGatekeepers.map((gatekeeperEmail) => ({
+        email: gatekeeperEmail,
+      })),
+      exclusive: eventInfo.privacy?.eventPrivacy.case === "guarded",
+      password: "",
+      communityId: communityId || null,
+    };
+
+    try {
+      await editEvent({ ...values, eventId });
+      // Persist optimistic update
+      setGatekeepers(newGatekeepers);
+      trackEvent("EventGatekeepersUpdated", {
+        props: {
+          eventId,
+        },
+      });
+      toast({
+        title: t("toast-gatekeeper-management-success"),
+      });
+    } catch (err) {
+      // Revert optimistic update
+      setGatekeepers(previousGatekeepers);
+      setPreviousGatekeepers(null);
+      captureException(err);
+      toast({
+        variant: "destructive",
+        title: t("toast-gatekeeper-management-error"),
+      });
+    }
   };
 
-  const editDebounced = useDebouncedCallback(edit, 600);
+  const startDelete = async (
+    previousGatekeepers: string[],
+    newGatekeepers: string[],
+  ) => {
+    await edit(previousGatekeepers, newGatekeepers);
+  };
+
+  const deleteDebounced = useDebouncedCallback(startDelete, 600);
 
   const onDelete = (email: string) => {
     const newGatekeepers = localGatekeepers.filter(
       (gatekeeperEmail) => gatekeeperEmail !== email,
     );
-    editDebounced(newGatekeepers);
+
+    const previous =
+      previousGatekeepers !== null
+        ? previousGatekeepers
+        : [...localGatekeepers];
+    if (previousGatekeepers === null) {
+      setPreviousGatekeepers([...localGatekeepers]);
+    }
     setGatekeepers(newGatekeepers);
+    deleteDebounced(previous, newGatekeepers);
   };
 
   const onAdd = async (email: string) => {
-    // No debounce on add to provide better UX
-    await edit([...localGatekeepers, email]);
-    setGatekeepers((prev) => [...prev, email]);
+    startTransition(async () => {
+      setOptimisticGatekeepers([...localGatekeepers, email]);
+      // No debounce on add to provide better UX
+      await edit(localGatekeepers, [...localGatekeepers, email]);
+    });
   };
 
   return (
@@ -139,7 +171,7 @@ export function GatekeepersEditionContextProvider({
       value={{
         onAdd,
         onDelete,
-        gatekeepers: localGatekeepers,
+        gatekeepers: optimisticGatekeepers,
         isActionPending,
       }}
     >

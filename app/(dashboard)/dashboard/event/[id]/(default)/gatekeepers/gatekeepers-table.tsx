@@ -3,6 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { parseAsInteger, useQueryStates } from "nuqs";
+import { useTranslations } from "next-intl";
 import { useGatekeepersEdition } from "./gatekeepers-edition-context-provider";
 import { userInfoOptions } from "@/lib/queries/user";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
@@ -21,6 +22,7 @@ interface GatekeepersTableProps {
 }
 
 export default function GatekeepersTable({ eventId }: GatekeepersTableProps) {
+  const t = useTranslations("dashboard.eventDetails.gatekeepers");
   const { getToken, userId } = useAuth();
 
   const { data: userInfo } = useSuspenseQuery(
@@ -69,7 +71,7 @@ export default function GatekeepersTable({ eventId }: GatekeepersTableProps) {
             dndEnabled={false}
             nothingFn={() => (
               <div className="flex h-48 flex-col justify-center items-center gap-4">
-                <Text className="text-center">No gatekeepers found.</Text>
+                <Text className="text-center">{t("no-gatekeepers")}</Text>
               </div>
             )}
           />

@@ -2,7 +2,6 @@ package zeni
 
 import (
 	"context"
-	"crypto/ed25519"
 	"errors"
 	"fmt"
 	"net/http"
@@ -259,7 +258,7 @@ type DB interface {
 	GetFeed(orgType string, orgID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
 
-	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	CreatePost(feedID string, userID string, post *feedsv1.Post) (*Post, error)
 	DeletePost(postID string) error
 	EditPost(postID string, req *zenaov1.EditPostRequest) error
 	GetPostByID(postID string) (*Post, error)
@@ -270,7 +269,7 @@ type DB interface {
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 	PinPost(feedID string, postID string, pinned bool) error
 
-	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
+	CreatePoll(userID string, feedID string, parentURI string, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 	GetPollByID(pollID string, userID string) (*Poll, error)
 	GetPollByPostID(postID string, userID string) (*Poll, error)
@@ -283,37 +282,10 @@ type DB interface {
 }
 
 type Chain interface {
-	WithContext(ctx context.Context) Chain
-
-	FillAdminProfile()
-	CreateUser(user *User) error
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	EntityRealmID(entityType string, entityID string) (string, error)
 	UserRealmID(userID string) string
 	CommunityRealmID(userID string) string
 	EventRealmID(eventID string) string
-
-	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
-	CancelEvent(eventID string, callerID string) error
-	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
-	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
-	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
-	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
-
-	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
-	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
-	AddEventToCommunity(callerID string, communityID string, eventID string) error
-	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
-	AddMemberToCommunity(callerID string, communityID string, userID string) error
-	AddMembersToCommunity(callerID string, communityID string, userIDs []string) error
-	RemoveMemberFromCommunity(callerID string, communityID string, userID string) error
-
-	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
-	DeletePost(userID string, postID string) error
-	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }
 
 type Auth interface {

@@ -64,7 +64,6 @@ function renderTableBody<TData, TValue>({
   loadingFn?: () => React.ReactNode;
   onClickRow?: (row: Row<TData>) => void;
 }) {
-  console.log("isLoading:", isLoading);
   if (isLoading && !!loadingFn) {
     return (
       <TableRow>
@@ -84,7 +83,6 @@ function renderTableBody<TData, TValue>({
       </TableRow>
     );
   }
-
   if (dndEnabled) {
     return (
       <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>

@@ -19,11 +19,7 @@ export const eventUserRoles = (
   queryOptions({
     queryKey: ["eventUserRoles", eventId, userRealmId],
     queryFn: async () => {
-      if (
-        !eventId ||
-        !userRealmId ||
-        !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT
-      ) {
+      if (!eventId || !userRealmId) {
         return [];
       }
 
@@ -55,7 +51,7 @@ export const eventUsersWithRole = (
   queryOptions({
     queryKey: ["eventUsersWithRole", eventId, role],
     queryFn: async () => {
-      if (!eventId || !role || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
+      if (!eventId || !role) {
         return [];
       }
 

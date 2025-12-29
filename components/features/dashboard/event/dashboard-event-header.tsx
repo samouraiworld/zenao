@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
+import { useTranslations } from "next-intl";
 import { EventImage } from "../../event/event-image";
 import EventCommunitySection from "../../event/event-community-section";
 import { EventSection } from "../../event/event-section";
@@ -39,6 +40,8 @@ export default function DashboardEventHeader({
   location,
   communityId,
 }: DashboardEventHeaderProps) {
+  const t = useTranslations("dashboard.eventDetails.header");
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex justify-between items-center">
@@ -51,7 +54,7 @@ export default function DashboardEventHeader({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              <Text className="hidden md:flex">Actions</Text>
+              <Text className="hidden md:flex">{t("actions")}</Text>
               <EllipsisVertical />
             </Button>
           </DropdownMenuTrigger>
@@ -72,14 +75,14 @@ export default function DashboardEventHeader({
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/event/${eventId}/edit`}>
                   <PencilIcon />
-                  Edit
+                  {t("edit")}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <CircleX />
-              Cancel event
+              {t("cancel")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -101,10 +104,10 @@ export default function DashboardEventHeader({
 
         <div className="flex flex-col gap-8 w-full sm:w-3/6">
           {/* Date & Time */}
-          <EventSection title="Date & Time">
+          <EventSection title={t("dateAndTime")}>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex flex-col">
-                <Text>From</Text>{" "}
+                <Text>{t("from")}</Text>{" "}
                 <Text variant="secondary" size="sm" suppressHydrationWarning>
                   {formatTZ(
                     fromUnixTime(Number(eventInfo.startDate)),
@@ -113,7 +116,7 @@ export default function DashboardEventHeader({
                 </Text>
               </div>
               <div className="flex flex-col">
-                <Text>To</Text>{" "}
+                <Text>{t("to")}</Text>{" "}
                 <Text variant="secondary" size="sm" suppressHydrationWarning>
                   {formatTZ(fromUnixTime(Number(eventInfo.endDate)), "PPPp O")}
                 </Text>
@@ -121,13 +124,13 @@ export default function DashboardEventHeader({
             </div>
             <div className="text-main hover:underline">
               <Link href={`/dashboard/event/${eventId}/edit`}>
-                Update Event Time
+                {t("updateEventTime")}
               </Link>
             </div>
           </EventSection>
 
           {/* Location */}
-          <EventSection title="Location">
+          <EventSection title={t("location")}>
             <div className="flex flex-row gap-2 items-center">
               {location.kind === "virtual" ? (
                 <Link href={location.location} target="_blank">
@@ -151,23 +154,22 @@ export default function DashboardEventHeader({
               )}
               <div className="text-main hover:underline">
                 <Link href={`/dashboard/event/${eventId}/edit`}>
-                  Update Location
+                  {t("updateLocation")}
                 </Link>
               </div>
             </div>
           </EventSection>
 
-          <EventSection title="Capacity">
+          <EventSection title={t("capacity")}>
             <div className="flex gap-2">
               <Text>
                 {eventInfo.capacity === 0
-                  ? "No places"
-                  : eventInfo.capacity.toString()}{" "}
-                attendees
+                  ? t("noPlaces")
+                  : t("attendees", { count: eventInfo.capacity })}
               </Text>
               <div className="text-main hover:underline">
                 <Link href={`/dashboard/event/${eventId}/edit`}>
-                  Update Capacity
+                  {t("updateCapacity")}
                 </Link>
               </div>
             </div>

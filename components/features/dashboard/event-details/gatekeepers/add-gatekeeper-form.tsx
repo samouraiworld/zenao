@@ -10,7 +10,9 @@ import { Button } from "@/components/shadcn/button";
 import { useGatekeepersEdition } from "@/app/(dashboard)/dashboard/event/[id]/(default)/gatekeepers/gatekeepers-edition-context-provider";
 
 export function AddGatekeeperForm() {
-  const t = useTranslations("gatekeeper-management-dialog"); // TODO set name
+  const t = useTranslations(
+    "dashboard.eventDetails.gatekeepers.add-gatekeeper-form",
+  );
   const { gatekeepers, onAdd, isActionPending } = useGatekeepersEdition();
 
   const {
@@ -50,7 +52,7 @@ export function AddGatekeeperForm() {
           <FormFieldInputString
             control={control}
             name="email"
-            placeholder={t("gatekeeper-email-placeholder")}
+            placeholder={t("email-placeholder")}
             className="w-96"
           />
           <Button
@@ -58,7 +60,7 @@ export function AddGatekeeperForm() {
             disabled={isActionPending || !isDirty || !isValid}
             className="h-12"
           >
-            {t("add-gatekeeper-button")}
+            {t("add-btn")}
           </Button>
         </div>
       </form>

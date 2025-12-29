@@ -6,9 +6,6 @@
     "members": "{count, plural, =0 {no members yet} =1 {1 member} other {# members}}",
     "no-description": "No description yet"
   },
-  "dashboard": {
-    "signout-desc": "Log in to access your dashboard"
-  }, 
   "navigation": {
     "zenao": "ZENAO",
     "your-events": "Your events",
@@ -346,6 +343,12 @@
     "label": "Page not found.",
     "button": "Return Home"
   },
+  "post-menu": {
+    "pin-post": "Pin post",
+    "unpin-post": "Unpin post",
+    "edit-post": "Edit post",
+    "delete-post": "Delete post"
+  },
   "components": {
     "modals": {
       "signed-out-modal": {
@@ -420,6 +423,12 @@
     },
     "poll": {
       "result-count": "{count, plural, one {# vote} other {# votes}}"
+    },
+    "actions": {
+      "toast-post-pin-success": "Post pinned !",
+      "toast-post-pin-error": "Error while pinning the post !",
+      "toast-post-unpin-success": "Post unpinned !",
+      "toast-post-unpin-error": "Error while unpinning the post !"
     }
   },
   "broadcast-email-form": {
@@ -485,6 +494,10 @@
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals",
+    "pinned-events": "Pinned Events",
+    "all-events": "All Events",
+    "event-unpinned": "Event unpinned",
+    "event-pinned": "Event pinned",
     "portfolio": "Portfolio",
     "upcoming": "Upcoming",
     "past": "Past",
@@ -565,5 +578,83 @@
   "empty-list": {
     "title": "Nothing listed",
     "description": "Let's change that!"
+  },
+  "dashboard": {
+    "signout-desc": "Log in to access your dashboard",
+    "sidebar": {
+      "create-event-btn": "Create event",
+      "events": "Events",
+      "settings": "Settings",
+      "coming-soon": "Soon",
+      "quick-create": "Quick create"
+    },
+    "navUser": {
+      "profile": "Profile",
+      "switch-to-regular-user-mode": "Switch to regular user mode",
+      "sign-out": "Sign out"
+    },
+    "eventsTable": {
+      "events": "Events",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "no-events": "No events found.",
+      "create-event-btn": "Create an event"
+    },
+    "eventDetails": {
+      "event-details": "Event details",
+      "manage-event": "Manage event",
+      "edit-event": "Edit event",
+      "cancel-event": "Cancel event",
+      "view-event": "View event",
+      "eventTabs": {
+        "description": "Description",
+        "participants": "Participants",
+        "gatekeepers": "Gatekeepers",
+        "broadcast": "Broadcast"
+      },
+      "importantInfo": {
+        "registrationRestricted": "The registration to this event is restricted by a password",
+        "updateRestrictions": "Update restrictions",
+        "notPubliclyVisible": "This event is not publicly visible by anyone",
+        "publiclyVisible": "This event is visible by anyone",
+        "changeVisibility": "Change visibility"
+      },
+      "header": {
+        "actions": "Actions",
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "dateAndTime": "Date & Time",
+        "from": "From",
+        "to": "To",
+        "updateEventTime": "Update Event Time",
+        "location": "Location",
+        "updateLocation": "Update Location",
+        "capacity": "Capacity",
+        "noPlaces": "No places",
+        "attendees": "{count} attendees",
+        "updateCapacity": "Update Capacity"
+      },
+      "participants": {
+        "exportCSV": "Export CSV",
+        "no-participants": "No participants yet."
+      },
+      "gatekeepers": {
+        "no-gatekeepers": "No gatekeepers assigned yet.",
+        "add-gatekeeper-form": {
+          "email-placeholder": "Enter gatekeeper email to add...",
+          "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
+          "add-btn": "Add Gatekeeper"
+        }
+      },
+      "broadcast": {
+        "subtitle": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change."
+      }
+    },
+    "data-table": {
+      "pagination": {
+        "rows-per-page": "Rows per page",
+        "page-of": "Page {page} of {pages}"
+      }
+    } 
   }
 }
