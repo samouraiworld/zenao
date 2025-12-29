@@ -27,20 +27,11 @@ func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.
 	}
 
 	s.Logger.Info("checkin", zap.String("gatekeeper", zUser.ID), zap.String("pubkey", req.Msg.TicketPubkey))
-
-	var evt *zeni.Event
-
 	if err := s.DB.TxWithSpan(ctx, "db.Checkin", func(db zeni.DB) error {
-		evt, err = db.Checkin(req.Msg.TicketPubkey, zUser.ID, req.Msg.Signature)
+		_, err = db.Checkin(req.Msg.TicketPubkey, zUser.ID, req.Msg.Signature)
 		return err
 	}); err != nil {
 		return nil, err
-	}
-
-	if evt != nil {
-		if err := s.Chain.WithContext(ctx).Checkin(evt.ID, zUser.ID, req.Msg); err != nil {
-			s.Logger.Error("failed to checkin on-chain, ignoring to prevent entrance brick")
-		}
 	}
 
 	return connect.NewResponse(&zenaov1.CheckinResponse{}), nil

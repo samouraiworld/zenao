@@ -45,9 +45,6 @@ build
 # go
 zenao-backend
 
-# gno
-**/gnobuild
-
 # db
 dev.db
 fly.toml

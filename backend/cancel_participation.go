@@ -54,9 +54,5 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 		return nil, err
 	}
 
-	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
-		return nil, err
-	}
-
 	return connect.NewResponse(&zenaov1.CancelParticipationResponse{}), nil
 }
