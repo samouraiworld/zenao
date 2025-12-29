@@ -629,6 +629,9 @@
           "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
           "add-btn": "Add Gatekeeper"
         }
+      },
+      "broadcast": {
+        "subtitle": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change."
       }
     },
     "data-table": {
