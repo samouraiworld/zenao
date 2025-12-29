@@ -6,6 +6,7 @@ import { Download } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useTransition } from "react";
 import { parseAsInteger, useQueryStates } from "nuqs";
+import { useTranslations } from "next-intl";
 import {
   DEFAULT_EVENT_PARTICIPANTS_LIMIT,
   eventUsersWithRole,
@@ -23,6 +24,7 @@ interface ParticipantsTableProps {
 }
 
 export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
+  const t = useTranslations("dashboard.eventDetails.participants");
   const router = useRouter();
   const { getToken } = useAuth();
   const { data: participants } = useSuspenseQuery(
@@ -84,7 +86,7 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
         onClick={onDownloadParticipantList}
       >
         <Download />
-        Export CSV
+        {t("exportCSV")}
       </Button>
       <div className="mt-2 relative flex flex-col gap-4 overflow-hidden rounded-lg border">
         <div className="w-full">
@@ -94,7 +96,7 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
             dndEnabled={false}
             nothingFn={() => (
               <div className="flex h-48 flex-col justify-center items-center gap-4">
-                <Text className="text-center">No participants found.</Text>
+                <Text className="text-center">{t("no-participants")}</Text>
               </div>
             )}
             onClickRow={(row) => {

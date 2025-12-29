@@ -39,7 +39,7 @@ export function DataTablePaginationSync<TData>({
   table,
   pagination,
 }: DataTablePaginationProps<TData>) {
-  const t = useTranslations("data-table.pagination");
+  const t = useTranslations("dashboard.data-table.pagination");
 
   return (
     <div className="flex items-center justify-between">

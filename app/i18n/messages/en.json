@@ -617,6 +617,10 @@
         "noPlaces": "No places",
         "attendees": "{count} attendees",
         "updateCapacity": "Update Capacity"
+      },
+      "participants": {
+        "exportCSV": "Export CSV",
+        "no-participants": "No participants yet."
       }
     },
     "data-table": {
