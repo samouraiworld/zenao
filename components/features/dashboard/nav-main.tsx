@@ -73,7 +73,7 @@ const NavItemExpanded = ({
               tooltip={item.title}
             >
               {item.icon && <item.icon />}
-              <span>{item.title}</span>
+              <span>{t(item.title)}</span>
               {item.comingSoon && <IsComingSoon />}
               <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
             </SidebarMenuButton>
@@ -90,7 +90,7 @@ const NavItemExpanded = ({
                 target={item.newTab ? "_blank" : undefined}
               >
                 {item.icon && <item.icon />}
-                <span>{item.title}</span>
+                <span>{t(item.title)}</span>
                 {item.comingSoon && <IsComingSoon />}
               </Link>
             </SidebarMenuButton>
@@ -233,7 +233,7 @@ export function NavMain({ items }: NavMainProps) {
                         <SidebarMenuButton
                           asChild
                           aria-disabled={item.comingSoon}
-                          tooltip={item.title}
+                          tooltip={t(item.title)}
                           isActive={isItemActive(item.url)}
                         >
                           <Link

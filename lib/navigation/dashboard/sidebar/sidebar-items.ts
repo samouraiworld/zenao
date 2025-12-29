@@ -31,12 +31,12 @@ export const sidebarItems: NavGroup[] = [
     label: "",
     items: [
       {
-        title: "Events",
+        title: "events",
         url: "/dashboard",
         icon: Calendar,
       },
       {
-        title: "Settings",
+        title: "settings",
         url: "/dashboard/coming-soon",
         icon: Forklift,
         comingSoon: true,

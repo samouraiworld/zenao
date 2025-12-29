@@ -6,9 +6,6 @@
     "members": "{count, plural, =0 {no members yet} =1 {1 member} other {# members}}",
     "no-description": "No description yet"
   },
-  "dashboard": {
-    "signout-desc": "Log in to access your dashboard"
-  }, 
   "navigation": {
     "zenao": "ZENAO",
     "your-events": "Your events",
@@ -567,6 +564,7 @@
     "description": "Let's change that!"
   },
   "dashboard": {
+    "signout-desc": "Log in to access your dashboard",
     "sidebar": {
       "create-event-btn": "Create event",
       "events": "Events",
