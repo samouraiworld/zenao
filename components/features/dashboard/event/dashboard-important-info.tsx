@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { EventInfo, EventPrivacy } from "@/app/gen/zenao/v1/zenao_pb";
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
@@ -18,6 +19,8 @@ function EventGuardedInfoCard({
   eventId: string;
   eventPrivacy?: EventPrivacy;
 }) {
+  const t = useTranslations("dashboard.eventDetails.importantInfo");
+
   if (!eventPrivacy) {
     return null;
   }
@@ -25,10 +28,10 @@ function EventGuardedInfoCard({
   if ((eventPrivacy.eventPrivacy.case ?? "public") === "guarded") {
     return (
       <Card className="flex flex-col md:flex-row md:justify-between items-center">
-        <Text>The registration to this event is restricted by a password</Text>
+        <Text>{t("registrationRestricted")}</Text>
         <Link href={`/dashboard/event/${eventId}/edit`}>
           <Button variant="link" className="text-main">
-            Update restrictions
+            {t("updateRestrictions")}
           </Button>
         </Link>
       </Card>
@@ -43,17 +46,16 @@ function EventVisibilityInfoCard({
   eventId: string;
   discoverable: boolean;
 }) {
+  const t = useTranslations("dashboard.eventDetails.importantInfo");
+
   return (
     <Card className="flex flex-col md:flex-row md:justify-between items-center">
       <Text>
-        {!discoverable
-          ? "This event is not publicly visible by anyone"
-          : "This event is visible by anyone"}
+        {!discoverable ? t("notPubliclyVisible") : t("publiclyVisible")}
       </Text>
       <Link href={`/dashboard/event/${eventId}/edit`}>
         <Button variant="link" className="text-main">
-          {" "}
-          Change visibility
+          {t("changeVisibility")}
         </Button>
       </Link>
     </Card>
