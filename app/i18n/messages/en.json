@@ -578,10 +578,17 @@
       "sign-out": "Sign out"
     },
     "eventsTable": {
+      "events": "Events",
       "upcoming": "Upcoming",
       "past": "Past",
       "no-events": "No events found.",
       "create-event-btn": "Create an event"
-    }
+    },
+    "data-table": {
+      "pagination": {
+        "rows-per-page": "Rows per page",
+        "page-of": "Page {page} of {pages}"
+      }
+    } 
   }
 }
