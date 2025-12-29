@@ -68,7 +68,7 @@ export default function DashboardEventHeader({
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/event/${eventId}/scanner`}>
                   <ScanQrCode />
-                  Open QR scanner
+                  {t("openQrCodeScanner")}
                 </Link>
               </DropdownMenuItem>
 
