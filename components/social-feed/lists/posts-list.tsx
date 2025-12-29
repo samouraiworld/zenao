@@ -19,10 +19,13 @@ export function PostsList({
   replyHrefFormatter,
   canReply,
   canInteract,
+  canPin,
+  onPinToggle,
   onEdit,
   isEditing,
   isReacting,
   isDeleting,
+  isPinning,
 }: {
   userRealmId: string | null;
   postInEdition: string | null;
@@ -37,6 +40,8 @@ export function PostsList({
   replyHrefFormatter?: (postId: bigint) => string;
   canReply?: boolean;
   canInteract?: boolean;
+  canPin?: boolean;
+  onPinToggle?: (postId: string, pinned: boolean) => void | Promise<void>;
   innerEditMode?: boolean;
   onEdit?: (
     postId: string,
@@ -45,6 +50,7 @@ export function PostsList({
   isEditing?: boolean;
   isReacting?: boolean;
   isDeleting?: boolean;
+  isPinning?: boolean;
 }) {
   return posts.map((post) => {
     const postId = post.post!.localPostId.toString(10);
@@ -64,6 +70,11 @@ export function PostsList({
             canReply={canReply}
             replyHref={replyHrefFormatter?.(post.post.localPostId)}
             canInteract={canInteract}
+            canPin={canPin}
+            pinned={post.post.pinned}
+            onPinToggle={async () => {
+              await onPinToggle?.(postId, !post.post.pinned);
+            }}
             editMode={postInEdition === postId}
             onEditModeChange={async (editMode) =>
               await onEditModeChange?.(
@@ -77,6 +88,7 @@ export function PostsList({
             isEditing={isEditing}
             isReacting={isReacting}
             isDeleting={isDeleting}
+            isPinning={isPinning}
           />
         </Suspense>
       );

@@ -8,10 +8,12 @@ import {
   feedPostsChildren,
   pollInfo,
 } from "../queries/social-feed";
+import { GetToken } from "../utils";
 import { zenaoClient } from "@/lib/zenao-client";
 import {
   CreatePollRequest,
   CreatePostRequest,
+  PinPostRequestJson,
   VotePollRequest,
 } from "@/app/gen/zenao/v1/zenao_pb";
 
@@ -563,6 +565,79 @@ export const useDeletePost = () => {
 
   return {
     deletePost: mutateAsync,
+    isPending,
+    isSuccess,
+    isError,
+  };
+};
+
+interface PinPostUpdateRequest extends Required<PinPostRequestJson> {
+  feedId: string;
+  parentId?: string;
+  userRealmId: string;
+}
+
+export const usePinPostUpdate = (getToken: GetToken) => {
+  const queryClient = getQueryClient();
+
+  const { isPending, mutateAsync, isSuccess, isError } = useMutation({
+    mutationFn: async ({ postId, pinned }: PinPostUpdateRequest) => {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("not authenticated");
+      }
+
+      await zenaoClient.pinPost(
+        {
+          postId,
+          pinned: pinned,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate feed posts to reflect pin change
+      const feedPostOpts = feedPost(variables.postId, variables.userRealmId);
+      queryClient.invalidateQueries(feedPostOpts);
+
+      if (variables.parentId) {
+        const feedPostsChildrenOpts = feedPostsChildren(
+          variables.parentId,
+          DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
+          "",
+          variables.userRealmId,
+        );
+        const feedParentPostOpts = feedPost(
+          variables.parentId,
+          variables.userRealmId,
+        );
+
+        queryClient.invalidateQueries(feedPostsChildrenOpts);
+        queryClient.invalidateQueries(feedParentPostOpts);
+      }
+      const feedPostsOpts = feedPosts(
+        variables.feedId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "",
+        variables.userRealmId,
+      );
+      const feedPollsOpts = feedPosts(
+        variables.feedId,
+        DEFAULT_FEED_POSTS_LIMIT,
+        "poll",
+        variables.userRealmId,
+      );
+
+      queryClient.invalidateQueries(feedPostsOpts);
+      queryClient.invalidateQueries(feedPollsOpts);
+    },
+  });
+
+  return {
+    updatePinPost: mutateAsync,
     isPending,
     isSuccess,
     isError,

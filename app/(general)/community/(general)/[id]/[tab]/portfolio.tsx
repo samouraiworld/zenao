@@ -8,7 +8,11 @@ import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { useAuth } from "@clerk/nextjs";
 import Heading from "@/components/widgets/texts/heading";
 import { Web3Image } from "@/components/widgets/images/web3-image";
-import { communityInfo, communityUserRoles } from "@/lib/queries/community";
+import {
+  communityAdministrators,
+  communityInfo,
+  communityUserRoles,
+} from "@/lib/queries/community";
 import {
   deserializeWithFrontMatter,
   serializeWithFrontMatter,
@@ -26,7 +30,6 @@ import { cn } from "@/lib/tailwind";
 import { uploadFile } from "@/lib/files";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
-import { zenaoClient } from "@/lib/zenao-client";
 import PortfolioPreviewDialog from "@/components/dialogs/portfolio-preview-dialog";
 import { userInfoOptions } from "@/lib/queries/user";
 import {
@@ -83,19 +86,9 @@ export default function CommunityPortfolio({
   });
 
   const { data: community } = useSuspenseQuery(communityInfo(communityId));
-  const { data: administrators } = useSuspenseQuery({
-    queryKey: ["communityAdmins", communityId],
-    queryFn: async () => {
-      const token = await getToken();
-      if (!token) throw new Error("invalid clerk token");
-      const res = await zenaoClient.getCommunityAdministrators(
-        { communityId },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      return res.administrators;
-    },
-    initialData: [],
-  });
+  const { data: administrators } = useSuspenseQuery(
+    communityAdministrators(communityId, getToken),
+  );
 
   const isAdmin = userRoles.includes("administrator");
 

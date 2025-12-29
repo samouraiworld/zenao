@@ -18,6 +18,13 @@ export type FormFieldProps<
   TCondition,
 > = GenericFormFieldProps<T, TCondition>;
 
+export const realmIdSchema = z
+  .string()
+  .regex(/^([a-z0-9-]+\.)*[a-z0-9-]+\.[a-z]{2,}(\/[a-z0-9\-_]+)+$/)
+  .or(z.string().regex(/^g[a-z0-9]{39}/));
+
+export type RealmId = z.infer<typeof realmIdSchema>;
+
 // Regular expression pattern to match a URL
 export const urlPattern =
   /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
@@ -335,10 +342,3 @@ export const communityDetailsSchema = z.object({
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
-
-export const realmIdSchema = z
-  .string()
-  .regex(/^([a-z0-9-]+\.)*[a-z0-9-]+\.[a-z]{2,}(\/[a-z0-9\-_]+)+$/)
-  .or(z.string().regex(/^g[a-z0-9]{39}/));
-
-export type RealmId = z.infer<typeof realmIdSchema>;
