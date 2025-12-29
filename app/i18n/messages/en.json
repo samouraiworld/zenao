@@ -132,6 +132,9 @@
     "title": "Manage gatekeepers",
     "description": "Assign and manage gatekeepers responsible for controlling access to the event.",
     "input-placeholder": "Email...",
+    "gatekeeper-email-placeholder": "Enter gatekeeper email to add...",
+    "add-gatekeeper-button": "Add",
+    "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
     "default": "Default (You)",
     "toast-gatekeeper-management-success": "Gatekeepers successfully updated!",
     "toast-gatekeeper-management-error": "Error while updating gatekeepers!",
@@ -435,6 +438,7 @@
     "message-input-label": "Enter your message",
     "cancel": "Cancel",
     "send": "Send email",
+    "attach-ticket-label": "Attach ticket to the message",
     "toast-email-sent-success": "Email sent !",
     "toast-email-sent-error": "Error while trying to send the email",
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
@@ -577,6 +581,7 @@
     "description": "Let's change that!"
   },
   "dashboard": {
+    "signout-desc": "Log in to access your dashboard",
     "sidebar": {
       "create-event-btn": "Create event",
       "events": "Events",
@@ -590,10 +595,67 @@
       "sign-out": "Sign out"
     },
     "eventsTable": {
+      "events": "Events",
       "upcoming": "Upcoming",
       "past": "Past",
       "no-events": "No events found.",
       "create-event-btn": "Create an event"
-    }
+    },
+    "eventDetails": {
+      "event-details": "Event details",
+      "manage-event": "Manage event",
+      "edit-event": "Edit event",
+      "cancel-event": "Cancel event",
+      "view-event": "View event",
+      "eventTabs": {
+        "description": "Description",
+        "participants": "Participants",
+        "gatekeepers": "Gatekeepers",
+        "broadcast": "Broadcast"
+      },
+      "importantInfo": {
+        "registrationRestricted": "The registration to this event is restricted by a password",
+        "updateRestrictions": "Update restrictions",
+        "notPubliclyVisible": "This event is not publicly visible by anyone",
+        "publiclyVisible": "This event is visible by anyone",
+        "changeVisibility": "Change visibility"
+      },
+      "header": {
+        "actions": "Actions",
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "dateAndTime": "Date & Time",
+        "from": "From",
+        "to": "To",
+        "updateEventTime": "Update Event Time",
+        "location": "Location",
+        "updateLocation": "Update Location",
+        "capacity": "Capacity",
+        "noPlaces": "No places",
+        "attendees": "{count} attendees",
+        "updateCapacity": "Update Capacity"
+      },
+      "participants": {
+        "exportCSV": "Export CSV",
+        "no-participants": "No participants yet."
+      },
+      "gatekeepers": {
+        "no-gatekeepers": "No gatekeepers assigned yet.",
+        "add-gatekeeper-form": {
+          "email-placeholder": "Enter gatekeeper email to add...",
+          "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
+          "add-btn": "Add Gatekeeper"
+        }
+      },
+      "broadcast": {
+        "subtitle": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change."
+      }
+    },
+    "data-table": {
+      "pagination": {
+        "rows-per-page": "Rows per page",
+        "page-of": "Page {page} of {pages}"
+      }
+    } 
   }
 }

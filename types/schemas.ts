@@ -342,3 +342,13 @@ export const communityDetailsSchema = z.object({
 });
 
 export type CommunityDetails = z.infer<typeof communityDetailsSchema>;
+
+export const broadcastEmailFormSchema = z.object({
+  message: z
+    .string()
+    .min(30, "Message must be at least 30 characters")
+    .max(5000, "Message must be at most 5000 characters"),
+  attachTicket: z.boolean(),
+});
+
+export type BroadcastEmailFormSchema = z.infer<typeof broadcastEmailFormSchema>;

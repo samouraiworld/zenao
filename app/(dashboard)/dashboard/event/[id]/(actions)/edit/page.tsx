@@ -1,7 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
-import { EditEventForm } from "./edit-event-form";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
@@ -11,6 +10,7 @@ import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
+import { EditEventForm } from "@/app/(general)/event/[id]/edit/edit-event-form";
 
 export default async function EditPage({
   params,
@@ -43,7 +43,7 @@ export default async function EditPage({
   return (
     <ScreenContainer isSignedOutModal={!userId}>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        {userId && <EditEventForm id={p.id} userId={userId} />}
+        {userId && <EditEventForm id={p.id} userId={userId} dashboard />}
       </HydrationBoundary>
     </ScreenContainer>
   );

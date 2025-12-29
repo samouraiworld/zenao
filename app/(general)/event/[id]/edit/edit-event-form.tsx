@@ -27,7 +27,13 @@ import {
 } from "@/lib/queries/community";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
-export function EditEventForm({ id, userId }: { id: string; userId: string }) {
+interface EditEventFormProps {
+  id: string;
+  userId: string;
+  dashboard?: boolean;
+}
+
+export function EditEventForm({ id, userId, dashboard }: EditEventFormProps) {
   const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
   const { trackEvent } = useAnalyticsEvents();
   const { data } = useSuspenseQuery(eventOptions(id));
@@ -109,7 +115,7 @@ export function EditEventForm({ id, userId }: { id: string; userId: string }) {
       toast({
         title: t("toast-edit-success"),
       });
-      router.push(`/event/${id}`);
+      router.push(`/${dashboard ? "dashboard/" : ""}event/${id}`);
     } catch (err) {
       captureException(err);
       toast({

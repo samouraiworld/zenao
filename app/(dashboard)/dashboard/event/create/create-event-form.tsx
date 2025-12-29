@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import React from "react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 import { EventForm } from "@/components/features/event/event-form";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateEvent } from "@/lib/mutations/event-management";
@@ -14,7 +14,11 @@ import { captureException } from "@/lib/report";
 import { EventFormSchemaType, eventFormSchema } from "@/types/schemas";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
-export const CreateEventForm: React.FC = () => {
+interface CreateEventFormProps {
+  dashboard?: boolean;
+}
+
+export function CreateEventForm({ dashboard }: CreateEventFormProps) {
   const { getToken } = useAuth();
   const { trackEvent } = useAnalyticsEvents();
   const router = useRouter();
@@ -88,7 +92,7 @@ export const CreateEventForm: React.FC = () => {
         title: t("toast-creation-success"),
       });
 
-      router.push(`/event/${id}`);
+      router.push(`/${dashboard ? "dashboard/" : ""}event/${id}`);
     } catch (err) {
       captureException(err);
       toast({
@@ -106,4 +110,4 @@ export const CreateEventForm: React.FC = () => {
       minDateRange={new Date()}
     />
   );
-};
+}

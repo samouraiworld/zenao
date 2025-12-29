@@ -33,7 +33,6 @@ export const profileOptions = (realmId: string | null | undefined) => {
 };
 export const profiles = createBatcher({
   fetcher: async (realmIDs: string[]) => {
-    console.log("Batch fetching profiles for realmIDs:", realmIDs);
     if (realmIDs.length === 0) {
       return [];
     }
@@ -43,7 +42,6 @@ export const profiles = createBatcher({
       const res = await zenaoClient.getUsersProfile({
         ids,
       });
-      console.log("Fetched profiles:", res.profiles);
       return res.profiles;
     });
   },
