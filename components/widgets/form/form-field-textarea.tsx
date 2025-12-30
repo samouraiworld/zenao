@@ -30,9 +30,11 @@ export const FormFieldTextArea = <T extends FieldValues>({
   wordCounterPosition = "right",
   label,
   ref,
+  formItemClassName,
   ...otherProps
 }: FormFieldTextAreaProps<T> & {
   label?: string;
+  formItemClassName?: string;
   ref?: RefObject<HTMLTextAreaElement | null>;
 }) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -58,7 +60,11 @@ export const FormFieldTextArea = <T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem
-          className={cn("relative w-full", wordCounter ? "pb-6" : null)}
+          className={cn(
+            "relative w-full",
+            wordCounter ? "pb-6" : null,
+            formItemClassName,
+          )}
         >
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>

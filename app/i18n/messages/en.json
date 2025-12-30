@@ -615,9 +615,9 @@
       },
       "header": {
         "actions": "Actions",
-        "openQrCodeScanner": "QR Code Scanner",
+        "saveChanges": "Save changes",
         "edit": "Edit",
-        "cancel": "Cancel",
+        "cancel": "Cancel event",
         "dateAndTime": "Date & Time",
         "from": "From",
         "to": "To",
@@ -631,6 +631,7 @@
       },
       "participants": {
         "exportCSV": "Export CSV",
+        "openQrCodeScanner":"QR Code Scanner",
         "no-participants": "No participants yet."
       },
       "gatekeepers": {

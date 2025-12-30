@@ -2,7 +2,7 @@
 
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { Download } from "lucide-react";
+import { Download, ScanQrCode } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useTransition } from "react";
 import { parseAsInteger, useQueryStates } from "nuqs";
@@ -78,16 +78,22 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Button
-        variant="outline"
-        size="sm"
-        className="ml-auto hidden h-8 lg:flex"
-        disabled={isPending}
-        onClick={onDownloadParticipantList}
-      >
-        <Download />
-        {t("exportCSV")}
-      </Button>
+      <div className="ml-auto flex items-center gap-4">
+        <Button size="sm" className="h-8">
+          <ScanQrCode />
+          {t("openQrCodeScanner")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8"
+          disabled={isPending}
+          onClick={onDownloadParticipantList}
+        >
+          <Download />
+          {t("exportCSV")}
+        </Button>
+      </div>
       <div className="mt-2 relative flex flex-col gap-4 overflow-hidden rounded-lg border">
         <div className="w-full">
           <DataTableNew

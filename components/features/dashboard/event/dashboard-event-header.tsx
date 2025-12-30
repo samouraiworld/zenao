@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  CircleX,
-  EllipsisVertical,
-  PencilIcon,
-  ScanQrCode,
-} from "lucide-react";
+import { CircleX, Save } from "lucide-react";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
@@ -22,14 +17,6 @@ import DashboardFormCommunity from "./_components/dashboard-form-community";
 import DashbaordFormMap from "./_components/dashboard-form-map";
 import { DashboardFormPrivacy } from "./_components/dashboard-form-privacy";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/shadcn/dropdown-menu";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
@@ -51,11 +38,11 @@ export default function DashboardEventHeader({
   communityId,
 }: DashboardEventHeaderProps) {
   const t = useTranslations("dashboard.eventDetails.header");
-  const { roles } = useDashboardEventEditionContext();
+  const { roles, isSubmittable } = useDashboardEventEditionContext();
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex justify-between items-start gap-24">
+      <div className="grid grid-col-1 md:grid-cols-2 gap-10">
         {/* Title of the event */}
         <RoleBasedEditViewMode
           roles={roles}
@@ -68,46 +55,27 @@ export default function DashboardEventHeader({
           }
         />
 
-        {/* Actions dropdown menu // TODO UDPATE Menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <Text className="hidden md:flex">{t("actions")}</Text>
-              <EllipsisVertical />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="min-w-48 space-y-1 rounded-lg"
-            side="bottom"
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/event/${eventId}/scanner`}>
-                  <ScanQrCode />
-                  {t("openQrCodeScanner")}
-                </Link>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/event/${eventId}/edit`}>
-                  <PencilIcon />
-                  {t("edit")}
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <CircleX />
-              {t("cancel")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <RoleBasedEditViewMode
+          roles={roles}
+          allowedRoles={["organizer"]}
+          edit={
+            <div className="flex gap-4 justify-end">
+              <Button disabled={!isSubmittable}>
+                <Save />
+                {t("saveChanges")}
+              </Button>
+              <Button variant="outline">
+                <CircleX />
+                {t("cancel")}
+              </Button>
+            </div>
+          }
+          view={null}
+        />
       </div>
 
-      <div className="flex flex-col w-full sm:flex-row sm:h-full gap-10">
-        <div className="flex flex-col gap-8 w-full sm:w-3/6">
+      <div className="flex flex-col w-full md:flex-row md:h-full gap-10">
+        <div className="flex flex-col gap-8 w-full md:w-3/6">
           <RoleBasedEditViewMode
             roles={roles}
             allowedRoles={["organizer"]}
@@ -136,7 +104,7 @@ export default function DashboardEventHeader({
           </div>
         </div>
 
-        <div className="flex flex-col gap-8 w-full sm:w-3/6">
+        <div className="flex flex-col gap-8 w-full md:w-3/6">
           {/* Date & Time */}
           <EventSection title={t("dateAndTime")}>
             <RoleBasedEditViewMode
