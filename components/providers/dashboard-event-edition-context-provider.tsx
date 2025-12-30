@@ -5,7 +5,13 @@ import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { createContext, useMemo, useRef, useTransition } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  useTransition,
+} from "react";
 import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +36,7 @@ interface DashboardEventEditionContextProps {
   roles: EventUserRole[];
   eventId: string;
   isUpdating: boolean;
+  isSubmittable?: boolean;
   eventInfo: EventInfo;
   formRef?: React.RefObject<HTMLFormElement | null>;
 }
@@ -40,6 +47,17 @@ const DashboardEventEditionContext =
 interface DashboardEventEditionContextProviderProps {
   eventId: string;
   children: React.ReactNode;
+}
+
+export function useDashboardEventEditionContext() {
+  const context = useContext(DashboardEventEditionContext);
+
+  if (!context) {
+    throw new Error(
+      "useDashboardEventEditionContext must be used within a DashboardEventEditionContextProvider",
+    );
+  }
+  return context;
 }
 
 export default function DashboardEventEditionContextProvider({
@@ -118,6 +136,11 @@ export default function DashboardEventEditionContextProvider({
     defaultValues,
   });
 
+  const isSubmittable = useMemo(
+    () => form.formState.isValid && form.formState.isDirty,
+    [form.formState.isValid, form.formState.isDirty],
+  );
+
   const [isUpdating, startTransition] = useTransition();
   const save = (values: EventFormSchemaType) => {
     startTransition(async () => {
@@ -148,6 +171,7 @@ export default function DashboardEventEditionContextProvider({
         roles,
         eventId,
         isUpdating,
+        isSubmittable,
         eventInfo,
         formRef,
       }}
