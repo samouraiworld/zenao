@@ -179,11 +179,7 @@ export default function DashboardEventEditionContextProvider({
         save,
       }}
     >
-      {roles.includes("organizer") ? (
-        <Form {...form}>{children}</Form>
-      ) : (
-        <>{children}</>
-      )}
+      <Form {...form}>{children}</Form>
     </DashboardEventEditionContext.Provider>
   );
 }
