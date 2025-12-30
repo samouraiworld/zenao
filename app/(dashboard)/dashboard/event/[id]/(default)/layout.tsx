@@ -13,6 +13,7 @@ import {
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-event-info";
+import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
@@ -56,7 +57,7 @@ export default async function DashboardEventInfoLayoutProps({
     eventUserRoles(eventId, userRealmId),
   );
 
-  if (!roles.includes("organizer")) {
+  if (!(roles.includes("organizer") || roles.includes("gatekeeper"))) {
     notFound();
   }
 
@@ -67,20 +68,22 @@ export default async function DashboardEventInfoLayoutProps({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="flex flex-col gap-8">
-        <DashboardEventInfo
-          eventId={eventId}
-          eventInfo={eventInfo}
-          realmId={userRealmId}
-        />
+      <DashboardEventEditionContextProvider eventId={eventId}>
+        <div className="flex flex-col gap-8">
+          <DashboardEventInfo
+            eventId={eventId}
+            eventInfo={eventInfo}
+            realmId={userRealmId}
+          />
 
-        <DashboardEventTabs
-          eventId={eventId}
-          nbParticipants={eventInfo.participants}
-        >
-          {children}
-        </DashboardEventTabs>
-      </div>
+          <DashboardEventTabs
+            eventId={eventId}
+            nbParticipants={eventInfo.participants}
+          >
+            {children}
+          </DashboardEventTabs>
+        </div>
+      </DashboardEventEditionContextProvider>
     </HydrationBoundary>
   );
 }
