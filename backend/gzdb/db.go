@@ -387,6 +387,92 @@ func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string
 	return zenEvts, nil
 }
 
+// ListEventsByUserRoles implements zeni.DB.
+func (g *gormZenaoDB) ListEventsByUserRoles(userID string, roles []string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*zeni.EventWithRoles, error) {
+	g, span := g.trace("gzdb.ListEventsByUserRoles")
+	defer span.End()
+
+	if len(roles) == 0 {
+		return []*zeni.EventWithRoles{}, nil
+	}
+
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
+	type OrgRoles struct {
+		OrgID uint
+		Roles string
+	}
+
+	var orgRoles []OrgRoles
+	query := g.db.Table("entity_roles").
+		Select("org_id, GROUP_CONCAT(role) as roles").
+		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND role IN ?",
+			zeni.EntityTypeUser, userIDInt, zeni.EntityTypeEvent, roles).
+		Group("org_id").
+		Order("org_id DESC")
+
+	if err := query.Find(&orgRoles).Error; err != nil {
+		return nil, fmt.Errorf("query org roles: %w", err)
+	}
+
+	if len(orgRoles) == 0 {
+		return []*zeni.EventWithRoles{}, nil
+	}
+
+	orgIDs := make([]uint, len(orgRoles))
+	roleMap := make(map[uint][]string)
+	for i, or := range orgRoles {
+		orgIDs[i] = or.OrgID
+		roleMap[or.OrgID] = strings.Split(or.Roles, ",")
+	}
+
+	var dbEvts []Event
+	eventQuery := g.db.Model(&Event{}).Where("id IN ?", orgIDs)
+
+	if from != 0 || to != 0 {
+		fromTime := time.Unix(from, 0)
+		toTime := time.Unix(to, 0)
+		if from <= to {
+			eventQuery = eventQuery.
+				Where("end_date >= ? AND end_date <= ?", fromTime, toTime).
+				Order("end_date ASC, id ASC")
+		} else {
+			eventQuery = eventQuery.
+				Where("end_date >= ? AND end_date <= ?", toTime, fromTime).
+				Order("end_date DESC, id DESC")
+		}
+	} else {
+		eventQuery = eventQuery.Order("end_date DESC, id DESC")
+	}
+
+	if discoverable != zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_UNSPECIFIED {
+		d := discoverable == zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_DISCOVERABLE
+		eventQuery = eventQuery.Where("discoverable = ?", d)
+	}
+
+	if err := eventQuery.Limit(limit).Offset(offset).Find(&dbEvts).Error; err != nil {
+		return nil, fmt.Errorf("query events: %w", err)
+	}
+
+	result := make([]*zeni.EventWithRoles, 0, len(dbEvts))
+	for _, dbEvt := range dbEvts {
+		zenEvt, err := dbEventToZeniEvent(&dbEvt)
+		if err != nil {
+			return nil, fmt.Errorf("convert event: %w", err)
+		}
+
+		result = append(result, &zeni.EventWithRoles{
+			Event: zenEvt,
+			Roles: roleMap[dbEvt.ID],
+		})
+	}
+
+	return result, nil
+}
+
 // CountCheckedIn implements zeni.DB.
 func (g *gormZenaoDB) CountCheckedIn(eventID string) (uint32, error) {
 	evtIDInt, err := strconv.ParseUint(eventID, 10, 64)
