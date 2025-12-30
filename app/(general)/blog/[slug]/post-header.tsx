@@ -1,3 +1,5 @@
+import { IArticleIndex } from "seobot/dist/types/blog";
+import Link from "next/link";
 import PostDate from "./post-date";
 import PostShare from "./post-share";
 import { EventImage } from "@/components/features/event/event-image";
@@ -7,27 +9,14 @@ import Text from "@/components/widgets/texts/text";
 
 interface PostHeaderProps {
   slug: string;
-  category: string;
-  title: string;
-  description: string;
-  previewImageUrl?: string;
-  author: string;
-  publishedAt: Date;
+  post: IArticleIndex;
 }
 
-export default function PostHeader({
-  slug,
-  category,
-  title,
-  description,
-  previewImageUrl,
-  author,
-  publishedAt,
-}: PostHeaderProps) {
-  const { alt, ...imageProps } = previewImageUrl
+export default function PostHeader({ slug, post }: PostHeaderProps) {
+  const { alt, ...imageProps } = post.image
     ? {
-        src: previewImageUrl,
-        alt: `${title} post image background`,
+        src: post.image,
+        alt: `${post.headline} post image background`,
       }
     : {
         src: "/zenao-logo.png",
@@ -36,13 +25,19 @@ export default function PostHeader({
 
   return (
     <div className="flex flex-col gap-4">
-      <Text className="text-main font-semibold">{category}</Text>
+      {post.category && (
+        <Link href={`/blog/category/${post.category.slug}`}>
+          <Text size="sm" className="text-main font-semibold">
+            {post.category.title}
+          </Text>
+        </Link>
+      )}
 
       <Heading level={1} className="text-4xl">
-        {title}
+        {post.headline}
       </Heading>
       <Heading level={2} variant="secondary" className="text-lg font-semibold">
-        {description}
+        {post.metaDescription}
       </Heading>
 
       <EventImage
@@ -56,11 +51,15 @@ export default function PostHeader({
       />
       <div className="flex justify-between items-center gap-2">
         <div className="flex gap-2">
-          <Text className="font-semibold">{author}</Text>
-          <Text variant="secondary">•</Text>
-          <PostDate date={publishedAt} />
+          <PostDate date={new Date(post.publishedAt || post.createdAt)} />
+          {post.readingTime ? (
+            <>
+              <Text variant="secondary">•</Text>
+              <Text className="font-semibold">{post.readingTime} min read</Text>
+            </>
+          ) : null}
         </div>
-        <PostShare slug={slug} title={title} />
+        <PostShare slug={slug} title={post.headline} />
       </div>
       <Separator color="#EC7E17" />
     </div>
