@@ -318,28 +318,9 @@ func (g *gormZenaoDB) GetEvent(id string) (*zeni.Event, error) {
 }
 
 // ListEvents implements zeni.DB.
-func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*zeni.Event, error) {
+func (g *gormZenaoDB) ListEvents(limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*zeni.Event, error) {
 	g, span := g.trace("gzdb.ListEvents")
 	defer span.End()
-
-	var orgIDs []uint
-	if entityID != "" && entityType != "" {
-		entityIDInt, err := strconv.ParseUint(entityID, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("parse entity id: %w", err)
-		}
-		query := g.db.Model(&EntityRole{}).Select("org_id").Where("entity_type = ? AND entity_id = ? AND org_type = ?", entityType, entityIDInt, zeni.EntityTypeEvent)
-		if role != "" {
-			query = query.Where("role = ?", role)
-		}
-
-		if err := query.Order("org_id DESC").Find(&orgIDs).Error; err != nil {
-			return nil, fmt.Errorf("query org ids: %w", err)
-		}
-		if len(orgIDs) == 0 {
-			return []*zeni.Event{}, nil
-		}
-	}
 
 	var dbEvts []Event
 	query := g.db.Model(&Event{})
@@ -364,11 +345,6 @@ func (g *gormZenaoDB) ListEvents(entityType string, entityID string, role string
 	if discoverable != zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_UNSPECIFIED {
 		d := discoverable == zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_DISCOVERABLE
 		query = query.Where("discoverable = ?", d)
-	}
-
-	// XXX: use a join and make org_id an sql idx to optimize ?
-	if len(orgIDs) > 0 {
-		query = query.Where("id IN ?", orgIDs)
 	}
 
 	if err := query.Limit(limit).Offset(offset).Find(&dbEvts).Error; err != nil {
@@ -401,32 +377,28 @@ func (g *gormZenaoDB) ListEventsByUserRoles(userID string, roles []string, limit
 		return nil, fmt.Errorf("parse user id: %w", err)
 	}
 
-	type OrgRoles struct {
-		OrgID uint
-		Roles string
-	}
-
-	var orgRoles []OrgRoles
-	query := g.db.Table("entity_roles").
-		Select("org_id, GROUP_CONCAT(role) as roles").
+	// Find all entity roles for this user matching the requested roles
+	var entityRoles []EntityRole
+	if err := g.db.Model(&EntityRole{}).
 		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND role IN ?",
 			zeni.EntityTypeUser, userIDInt, zeni.EntityTypeEvent, roles).
-		Group("org_id").
-		Order("org_id DESC")
-
-	if err := query.Find(&orgRoles).Error; err != nil {
-		return nil, fmt.Errorf("query org roles: %w", err)
+		Order("org_id DESC").
+		Find(&entityRoles).Error; err != nil {
+		return nil, fmt.Errorf("query entity roles: %w", err)
 	}
 
-	if len(orgRoles) == 0 {
+	if len(entityRoles) == 0 {
 		return []*zeni.EventWithRoles{}, nil
 	}
 
-	orgIDs := make([]uint, len(orgRoles))
 	roleMap := make(map[uint][]string)
-	for i, or := range orgRoles {
-		orgIDs[i] = or.OrgID
-		roleMap[or.OrgID] = strings.Split(or.Roles, ",")
+	for _, er := range entityRoles {
+		roleMap[er.OrgID] = append(roleMap[er.OrgID], er.Role)
+	}
+
+	orgIDs := make([]uint, 0, len(roleMap))
+	for id := range roleMap {
+		orgIDs = append(orgIDs, id)
 	}
 
 	var dbEvts []Event
