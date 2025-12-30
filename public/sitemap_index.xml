@@ -6,4 +6,7 @@
   <sitemap>
     <loc>https://zenao.io/event/sitemap.xml</loc>
   </sitemap>
+    <sitemap>
+    <loc>https://zenao.io/blog/sitemap.xml</loc>
+  </sitemap>
 </sitemapindex>
