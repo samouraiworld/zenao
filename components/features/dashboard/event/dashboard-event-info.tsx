@@ -2,7 +2,6 @@
 
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import DashboardImportantInfo from "./dashboard-important-info";
 import DashboardEventHeader from "./dashboard-event-header";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { makeLocationFromEvent } from "@/lib/location";
@@ -40,7 +39,6 @@ export default function DashboardEventInfo({
 
   return (
     <div className="flex flex-col gap-8">
-      <DashboardImportantInfo eventId={eventId} eventInfo={eventInfo} />
       <DashboardEventHeader
         eventId={eventId}
         eventInfo={eventInfo}

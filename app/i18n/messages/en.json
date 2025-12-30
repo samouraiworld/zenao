@@ -613,13 +613,6 @@
         "gatekeepers": "Gatekeepers",
         "broadcast": "Broadcast"
       },
-      "importantInfo": {
-        "registrationRestricted": "The registration to this event is restricted by a password",
-        "updateRestrictions": "Update restrictions",
-        "notPubliclyVisible": "This event is not publicly visible by anyone",
-        "publiclyVisible": "This event is visible by anyone",
-        "changeVisibility": "Change visibility"
-      },
       "header": {
         "actions": "Actions",
         "openQrCodeScanner": "QR Code Scanner",
