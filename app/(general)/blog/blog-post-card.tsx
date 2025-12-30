@@ -2,22 +2,11 @@
 
 import Link from "next/link";
 import { IArticleIndex } from "seobot/dist/types/blog";
-import { useRouter } from "next/navigation";
 import PostDate from "./[slug]/post-date";
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import Heading from "@/components/widgets/texts/heading";
 import { EventImage } from "@/components/features/event/event-image";
-
-// interface BlogPostCardProps {
-//   title: string;
-//   description: string;
-//   author: string;
-//   category: string;
-//   previewImageUrl?: string;
-//   slug: string;
-//   publishedAt: Date;
-// }
 
 declare module "seobot/dist/types/blog" {
   interface IArticleIndex {
@@ -45,7 +34,6 @@ declare module "seobot/dist/types/blog" {
 }
 
 export default function BlogPostCard({ post }: { post: IArticleIndex }) {
-  const router = useRouter();
   const { alt, ...imageProps } = post.image
     ? {
         src: post.image,
@@ -59,7 +47,6 @@ export default function BlogPostCard({ post }: { post: IArticleIndex }) {
     <Card
       role="group"
       className="cursor-pointer w-full flex flex-col h-full gap-8 hover:bg-secondary/50 transition-colors"
-      onClick={() => router.push(`/blog/${post.slug}`)}
     >
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-2">
@@ -83,9 +70,11 @@ export default function BlogPostCard({ post }: { post: IArticleIndex }) {
         />
       </div>
       <div className="flex flex-col h-full gap-4">
-        <Heading level={2} size="xl" className="font-bold">
-          {post.headline}
-        </Heading>
+        <Link href={`/blog/${post.slug}`}>
+          <Heading level={2} size="xl" className="font-bold">
+            {post.headline}
+          </Heading>
+        </Link>
         <div className="flex-grow min-h-14">
           <Text variant="secondary">{post.metaDescription}</Text>
         </div>
