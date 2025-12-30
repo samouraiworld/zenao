@@ -622,6 +622,7 @@
       },
       "header": {
         "actions": "Actions",
+        "openQrCodeScanner": "QR Code Scanner",
         "edit": "Edit",
         "cancel": "Cancel",
         "dateAndTime": "Date & Time",
