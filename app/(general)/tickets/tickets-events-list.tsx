@@ -3,6 +3,7 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
+import { useAuth } from "@clerk/nextjs";
 import { DiscoverableFilter, EventInfo } from "../../gen/zenao/v1/zenao_pb";
 import {
   DEFAULT_EVENTS_LIMIT,
@@ -25,6 +26,7 @@ export function TicketsEventsList({
   from: FromFilter;
   userRealmId: string;
 }) {
+  const { getToken } = useAuth();
   const {
     data: eventsPages,
     isFetchingNextPage,
@@ -39,6 +41,7 @@ export function TicketsEventsList({
           now,
           Number.MAX_SAFE_INTEGER,
           DEFAULT_EVENTS_LIMIT,
+          getToken,
         )
       : eventsByParticipantList(
           userRealmId,
@@ -46,6 +49,7 @@ export function TicketsEventsList({
           now - 1,
           0,
           DEFAULT_EVENTS_LIMIT,
+          getToken,
         ),
   );
 

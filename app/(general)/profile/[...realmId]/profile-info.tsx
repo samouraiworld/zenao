@@ -60,6 +60,7 @@ export function ProfileInfo({
       now,
       Number.MAX_SAFE_INTEGER,
       DEFAULT_EVENTS_LIMIT,
+      getToken,
     ),
   );
   const {
@@ -75,6 +76,7 @@ export function ProfileInfo({
       now - 1,
       0,
       DEFAULT_EVENTS_LIMIT,
+      getToken,
     ),
   );
 

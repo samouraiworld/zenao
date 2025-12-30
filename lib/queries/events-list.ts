@@ -8,6 +8,7 @@ import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
 import { EventInfo, DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import { GetToken } from "@/lib/utils";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
 
@@ -73,6 +74,7 @@ export const eventsByOrganizerListSuspense = (
   toUnixSec: number,
   limit: number,
   page: number,
+  getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -95,15 +97,19 @@ export const eventsByOrganizerListSuspense = (
       return withSpan(
         `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
         async () => {
-          const res = await zenaoClient.listEventsByUserRoles({
-            userId: userIdFromPkgPath(organizerRealmId),
-            roles: ["organizer"],
-            limit: limitInt,
-            offset: pageInt * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listEventsByUserRoles(
+            {
+              userId: userIdFromPkgPath(organizerRealmId),
+              roles: ["organizer"],
+              limit: limitInt,
+              offset: pageInt * limitInt,
+              from: BigInt(fromInt),
+              to: BigInt(toInt),
+              discoverableFilter: discoverableFilter,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
           return res.events.map((eu) => eu.event!);
         },
       );
@@ -118,6 +124,7 @@ export const eventsByOrganizerList = (
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
+  getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -139,15 +146,19 @@ export const eventsByOrganizerList = (
       return withSpan(
         `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
         async () => {
-          const res = await zenaoClient.listEventsByUserRoles({
-            userId: userIdFromPkgPath(organizerRealmId),
-            roles: ["organizer"],
-            limit: limitInt,
-            offset: pageParam * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listEventsByUserRoles(
+            {
+              userId: userIdFromPkgPath(organizerRealmId),
+              roles: ["organizer"],
+              limit: limitInt,
+              offset: pageParam * limitInt,
+              from: BigInt(fromInt),
+              to: BigInt(toInt),
+              discoverableFilter: discoverableFilter,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
           return res.events.map((eu) => eu.event!);
         },
       );
@@ -174,6 +185,7 @@ export const eventsByParticipantList = (
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
+  getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -193,15 +205,19 @@ export const eventsByParticipantList = (
       return withSpan(
         `query:backend:user:${userIdFromPkgPath(participantRealmId)}:events:role:participant`,
         async () => {
-          const res = await zenaoClient.listEventsByUserRoles({
-            userId: userIdFromPkgPath(participantRealmId),
-            roles: ["participant"],
-            limit: limitInt,
-            offset: pageParam * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listEventsByUserRoles(
+            {
+              userId: userIdFromPkgPath(participantRealmId),
+              roles: ["participant"],
+              limit: limitInt,
+              offset: pageParam * limitInt,
+              from: BigInt(fromInt),
+              to: BigInt(toInt),
+              discoverableFilter: discoverableFilter,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
           return res.events.map((eu) => eu.event!);
         },
       );
