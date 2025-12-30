@@ -3,25 +3,16 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import DashboardEventHeader from "./dashboard-event-header";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { makeLocationFromEvent } from "@/lib/location";
 import {
   communitiesListByEvent,
   communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
+import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
 
-interface DashboardEventDetailsProps {
-  eventId: string;
-  eventInfo: EventInfo;
-  realmId: string;
-}
-
-export default function DashboardEventInfo({
-  eventId,
-  eventInfo,
-  realmId: _realmId,
-}: DashboardEventDetailsProps) {
+export default function DashboardEventInfo() {
+  const { eventId, eventInfo } = useDashboardEventContext();
   const location = makeLocationFromEvent(eventInfo.location);
 
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
@@ -39,12 +30,7 @@ export default function DashboardEventInfo({
 
   return (
     <div className="flex flex-col gap-8">
-      <DashboardEventHeader
-        eventId={eventId}
-        eventInfo={eventInfo}
-        location={location}
-        communityId={communityId}
-      />
+      <DashboardEventHeader location={location} communityId={communityId} />
     </div>
   );
 }

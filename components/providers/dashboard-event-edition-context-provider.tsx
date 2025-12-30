@@ -35,9 +35,9 @@ import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 interface DashboardEventEditionContextProps {
   roles: EventUserRole[];
   eventId: string;
+  eventInfo: EventInfo;
   isUpdating: boolean;
   isSubmittable?: boolean;
-  eventInfo: EventInfo;
   formRef?: React.RefObject<HTMLFormElement | null>;
   save: (values: EventFormSchemaType) => void;
 }
