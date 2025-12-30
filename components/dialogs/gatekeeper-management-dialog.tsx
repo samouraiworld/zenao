@@ -199,6 +199,7 @@ export function GatekeeperManagementDialog({
 
   const onSubmit = async (values: EventFormSchemaType) => {
     try {
+      console.log("Submitting:", values.gatekeepers);
       await editEvent({ ...values, eventId });
       trackEvent("EventGatekeepersUpdated", {
         props: {
