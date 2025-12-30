@@ -39,6 +39,7 @@ interface DashboardEventEditionContextProps {
   isSubmittable?: boolean;
   eventInfo: EventInfo;
   formRef?: React.RefObject<HTMLFormElement | null>;
+  save: (values: EventFormSchemaType) => void;
 }
 
 const DashboardEventEditionContext =
@@ -175,14 +176,11 @@ export default function DashboardEventEditionContextProvider({
         isSubmittable,
         eventInfo,
         formRef,
+        save,
       }}
     >
       {roles.includes("organizer") ? (
-        <Form {...form}>
-          <form ref={formRef} onSubmit={form.handleSubmit(save)}>
-            {children}
-          </form>
-        </Form>
+        <Form {...form}>{children}</Form>
       ) : (
         <>{children}</>
       )}
