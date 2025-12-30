@@ -1,6 +1,5 @@
 "use client";
 
-import { CircleX, Save } from "lucide-react";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
@@ -16,10 +15,10 @@ import DashboardFormCapacity from "./_components/dashboard-form-capacity";
 import DashboardFormCommunity from "./_components/dashboard-form-community";
 import DashbaordFormMap from "./_components/dashboard-form-map";
 import { DashboardFormPrivacy } from "./_components/dashboard-form-privacy";
+import DashboardFormActions from "./_components/dashboard-form-actions";
 import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import { Button } from "@/components/shadcn/button";
 import { EventFormSchemaType } from "@/types/schemas";
 import RoleBasedEditViewMode from "@/components/widgets/permissions/edit-view-mode";
 import { useDashboardEventEditionContext } from "@/components/providers/dashboard-event-edition-context-provider";
@@ -38,7 +37,7 @@ export default function DashboardEventHeader({
   communityId,
 }: DashboardEventHeaderProps) {
   const t = useTranslations("dashboard.eventDetails.header");
-  const { roles, isSubmittable } = useDashboardEventEditionContext();
+  const { roles } = useDashboardEventEditionContext();
 
   return (
     <div className="flex flex-col gap-8">
@@ -58,18 +57,7 @@ export default function DashboardEventHeader({
         <RoleBasedEditViewMode
           roles={roles}
           allowedRoles={["organizer"]}
-          edit={
-            <div className="flex gap-4 justify-end">
-              <Button disabled={!isSubmittable}>
-                <Save />
-                {t("saveChanges")}
-              </Button>
-              <Button variant="outline">
-                <CircleX />
-                {t("cancel")}
-              </Button>
-            </div>
-          }
+          edit={<DashboardFormActions />}
           view={null}
         />
       </div>

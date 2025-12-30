@@ -69,7 +69,7 @@ export default async function DashboardEventInfoLayoutProps({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <DashboardEventEditionContextProvider eventId={eventId}>
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 pb-16 md:pb-0">
           <DashboardEventInfo
             eventId={eventId}
             eventInfo={eventInfo}

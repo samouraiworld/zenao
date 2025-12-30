@@ -146,6 +146,7 @@ export default function DashboardEventEditionContextProvider({
     startTransition(async () => {
       try {
         await editEvent({ ...values, eventId });
+        form.reset(values, { keepDirty: false });
         trackEvent("EventEdited", {
           props: {
             eventId,
