@@ -7,7 +7,7 @@ import {
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
-import { EventInfo, DiscoverableFilter, EventUser } from "@/app/gen/zenao/v1/zenao_pb";
+import { EventInfo, DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
 
