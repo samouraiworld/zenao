@@ -6,10 +6,6 @@ import PostHeader from "./post-header";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import Heading from "@/components/widgets/texts/heading";
 
-type Props = {
-  params: Promise<{ slug: string }>;
-};
-
 async function getPost(slug: string) {
   const key = process.env.SEOBOT_API_KEY;
   if (!key)
@@ -24,10 +20,11 @@ async function getPost(slug: string) {
 export const fetchCache = "force-no-store";
 
 export async function generateMetadata({
-  params: { slug },
+  params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const { slug } = await params;
   const post = await getPost(slug);
 
   if (!post) return {};
@@ -57,7 +54,11 @@ export async function generateMetadata({
   };
 }
 
-export default async function Post({ params }: Props) {
+export default async function Article({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const post = await getPost(slug);
 

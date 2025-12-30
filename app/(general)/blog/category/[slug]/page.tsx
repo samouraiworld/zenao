@@ -23,10 +23,11 @@ function deslugify(str: string) {
 export const fetchCache = "force-no-store";
 
 export async function generateMetadata({
-  params: { slug },
+  params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const { slug } = await params;
   const title = `${deslugify(slug)} - DevHunt Blog`;
   return {
     title,
@@ -37,26 +38,23 @@ export async function generateMetadata({
     openGraph: {
       type: "article",
       title,
-      // description: '',
-      // images: [],
       url: `https://devhunt.org/blog/category/${slug}`,
     },
     twitter: {
       title,
-      // description: '',
-      // card: 'summary_large_image',
-      // images: [],
     },
   };
 }
 
 export default async function Category({
-  params: { slug },
-  searchParams: { page },
+  params,
+  searchParams,
 }: {
-  params: { slug: string };
-  searchParams: { page: number };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page: number }>;
 }) {
+  const { slug } = await params;
+  const { page } = await searchParams;
   const pageNumber = Math.max((page || 0) - 1, 0);
   const { total, articles } = await getPosts(slug, pageNumber);
   const posts = articles || [];

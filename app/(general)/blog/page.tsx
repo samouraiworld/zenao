@@ -35,7 +35,6 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       title,
       description,
-      // images: [],
       url: "https://zenao.io/blog",
     },
     twitter: {
@@ -46,16 +45,16 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Blog({
-  searchParams: { page },
+  searchParams,
 }: {
-  searchParams: { page: number };
+  searchParams: Promise<{ page: number }>;
 }) {
+  const { page } = await searchParams;
   const pageNumber = Math.max((page || 0) - 1, 0);
   const { total, articles } = await getPosts(pageNumber);
   const posts = articles || [];
   const lastPage = Math.ceil(total / 10);
 
-  // const posts = await getPostsMetadata();
   const t = await getTranslations("blog");
 
   if (!posts.length) {
