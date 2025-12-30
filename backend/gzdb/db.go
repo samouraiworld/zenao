@@ -377,7 +377,7 @@ func (g *gormZenaoDB) ListEventsByUserRoles(userID string, roles []string, limit
 		return nil, fmt.Errorf("parse user id: %w", err)
 	}
 
-	eventQuery := g.db.Model(&Event{}).
+	query := g.db.Model(&Event{}).
 		Distinct("events.id").
 		Joins("INNER JOIN entity_roles ON entity_roles.org_id = events.id").
 		Where("entity_roles.entity_type = ? AND entity_roles.entity_id = ? AND entity_roles.org_type = ? AND entity_roles.role IN ?",
@@ -387,25 +387,25 @@ func (g *gormZenaoDB) ListEventsByUserRoles(userID string, roles []string, limit
 		fromTime := time.Unix(from, 0)
 		toTime := time.Unix(to, 0)
 		if from <= to {
-			eventQuery = eventQuery.
+			query = query.
 				Where("events.end_date >= ? AND events.end_date <= ?", fromTime, toTime).
 				Order("events.end_date ASC, events.id ASC")
 		} else {
-			eventQuery = eventQuery.
+			query = query.
 				Where("events.end_date >= ? AND events.end_date <= ?", toTime, fromTime).
 				Order("events.end_date DESC, events.id DESC")
 		}
 	} else {
-		eventQuery = eventQuery.Order("events.end_date DESC, events.id DESC")
+		query = query.Order("events.end_date DESC, events.id DESC")
 	}
 
 	if discoverable != zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_UNSPECIFIED {
 		d := discoverable == zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_DISCOVERABLE
-		eventQuery = eventQuery.Where("events.discoverable = ?", d)
+		query = query.Where("events.discoverable = ?", d)
 	}
 
 	var dbEvts []Event
-	if err := eventQuery.Limit(limit).Offset(offset).Find(&dbEvts).Error; err != nil {
+	if err := query.Limit(limit).Offset(offset).Find(&dbEvts).Error; err != nil {
 		return nil, fmt.Errorf("query events: %w", err)
 	}
 
