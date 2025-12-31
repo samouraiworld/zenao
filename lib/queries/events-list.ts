@@ -8,9 +8,13 @@ import z from "zod";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
-import { EventInfo, DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { GetToken } from "@/lib/utils";
-import { eventUserSchema } from "@/types/schemas";
+import {
+  eventInfoSchema,
+  eventUserSchema,
+  SafeEventInfo,
+} from "@/types/schemas";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
 
@@ -20,9 +24,9 @@ export const eventsList = (
   limit: number,
   options?: Omit<
     UseInfiniteQueryOptions<
-      EventInfo[],
+      SafeEventInfo[],
       Error,
-      InfiniteData<EventInfo[]>,
+      InfiniteData<SafeEventInfo[]>,
       (string | number)[],
       number // pageParam type
     >,
@@ -50,7 +54,7 @@ export const eventsList = (
           discoverableFilter: DiscoverableFilter.DISCOVERABLE,
         });
 
-        return res.events;
+        return z.array(eventInfoSchema).parse(res.events);
       });
     },
     getNextPageParam: (lastPage, pages) => {

@@ -8,7 +8,6 @@ import * as ed from "@noble/ed25519";
 import { useTranslations } from "next-intl";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { Loader2, RefreshCcw } from "lucide-react";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -19,10 +18,11 @@ import { eventOptions } from "@/lib/queries/event";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Button } from "@/components/shadcn/button";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import { SafeEventInfo } from "@/types/schemas";
 
 type EventTicketScannerProps = {
   eventId: string;
-  eventData: EventInfo;
+  eventData: SafeEventInfo;
 };
 
 const ticketSecretSchema = z

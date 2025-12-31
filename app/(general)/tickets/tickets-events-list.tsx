@@ -4,7 +4,7 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
 import { useAuth } from "@clerk/nextjs";
-import { DiscoverableFilter, EventInfo } from "../../gen/zenao/v1/zenao_pb";
+import { DiscoverableFilter } from "../../gen/zenao/v1/zenao_pb";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByParticipantList,
@@ -16,6 +16,7 @@ import { eventIdFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+import { SafeEventInfo } from "@/types/schemas";
 
 export function TicketsEventsList({
   now,
@@ -69,7 +70,7 @@ export function TicketsEventsList({
         acc[dateKey].push(event);
         return acc;
       },
-      {} as Record<string, EventInfo[]>,
+      {} as Record<string, SafeEventInfo[]>,
     );
   }, [events]);
 

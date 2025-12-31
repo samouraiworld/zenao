@@ -4,17 +4,17 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import DashboardImportantInfo from "./dashboard-important-info";
 import DashboardEventHeader from "./dashboard-event-header";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { makeLocationFromEvent } from "@/lib/location";
 import {
   communitiesListByEvent,
   communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
+import { SafeEventInfo } from "@/types/schemas";
 
 interface DashboardEventDetailsProps {
   eventId: string;
-  eventInfo: EventInfo;
+  eventInfo: SafeEventInfo;
   realmId: string;
 }
 
