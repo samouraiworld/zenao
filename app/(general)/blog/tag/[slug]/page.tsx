@@ -1,76 +1,68 @@
-import { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { BlogClient } from "seobot";
+import { type Metadata } from "next";
 import Link from "next/link";
-import BlogPostCard from "./blog-post-card";
-import BlogHeader from "./blog-header";
-import Pagination from "./blog-pagination";
+import { BlogClient } from "seobot";
+import BlogPostCard from "../../blog-post-card";
+import Pagination from "../../blog-pagination";
 import { ScreenContainer } from "@/components/layout/screen-container";
 
-async function getPosts(page: number) {
+async function getPosts(slug: string, page: number) {
   const key = process.env.SEOBOT_API_KEY;
   if (!key)
     throw Error(
-      "SEOBOT_API_KEY enviroment variable must be set. You can use the DEMO key a8c58738-7b98-4597-b20a-0bb1c2fe5772 for testing - please set it in the root .env.local file",
+      "SEOBOT_API_KEY enviroment variable must be set. You can use the DEMO key a8c58738-7b98-4597-b20a-0bb1c2fe5772 for testing - please set it in the root .env.local file.",
     );
 
   const client = new BlogClient(key);
-  return client.getArticles(page, 10);
+  return client.getTagArticles(slug, page, 10);
+}
+
+function deslugify(str: string) {
+  return str.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 export const fetchCache = "force-no-store";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const title = "Blog | Zenao";
-  const description =
-    "Discover the latest articles, news, and updates about Zenao in our blog.";
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const title = `${deslugify(slug)} - DevHunt Blog`;
   return {
     title,
-    description,
-    metadataBase: new URL("https://zenao.io"),
+    metadataBase: new URL("https://devhunt.org"),
     alternates: {
-      canonical: "/blog",
+      canonical: `/blog/tag/${slug}`,
     },
     openGraph: {
-      type: "website",
+      type: "article",
       title,
-      description,
-      url: "https://zenao.io/blog",
+      url: `https://devhunt.org/blog/tag/${slug}`,
     },
     twitter: {
       title,
-      description,
     },
   };
 }
 
-export default async function Blog({
+export default async function Tag({
+  params,
   searchParams,
 }: {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ page: number }>;
 }) {
+  const { slug } = await params;
   const { page } = await searchParams;
   const pageNumber = Math.max((page || 0) - 1, 0);
-  const { total, articles } = await getPosts(pageNumber);
+  const { total, articles } = await getPosts(slug, pageNumber);
   const posts = articles || [];
   const lastPage = Math.ceil(total / 10);
 
-  const t = await getTranslations("blog");
-
-  if (!posts.length) {
-    return (
-      <ScreenContainer>
-        <div className="flex flex-col gap-12">
-          <BlogHeader />
-          <p className="text-center text-main">{t("no-blog-posts-title")}</p>
-        </div>
-      </ScreenContainer>
-    );
-  }
-
   return (
     <ScreenContainer>
-      <div className="flex flex-col gap-8">
+      <section className="max-w-3xl my-8 lg:mt-10 mx-auto px-4 md:px-8 dark:text-white">
         <div className="flex flex-wrap items-center gap-2 mb-1 w-full dark:text-slate-400 text-sm">
           <Link href="/" className="text-orange-500">
             Home
@@ -90,21 +82,20 @@ export default async function Blog({
             Blog
           </Link>
         </div>
-        <BlogHeader />
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <h1 className="text-4xl my-4 font-black">Tag: {slug}</h1>
+        <ul>
           {posts.map((post) => (
             <BlogPostCard key={post.slug} post={post} />
           ))}
-        </div>
-
+        </ul>
         {lastPage > 1 && (
           <Pagination
-            slug="/blog"
+            slug={`/blog/tag/${slug}`}
             pageNumber={pageNumber}
             lastPage={lastPage}
           />
         )}
-      </div>
+      </section>
     </ScreenContainer>
   );
 }
