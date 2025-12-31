@@ -129,7 +129,7 @@ export default function DashboardFormDateTime({
           ]}
         />
         <FormDescription>
-          Displayed time corresponds to {timeZone}
+          {t("displayed-timezone", { timeZone })}
         </FormDescription>
       </div>
     </>

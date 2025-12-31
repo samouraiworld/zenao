@@ -184,7 +184,7 @@ export default function DashboardEventHeader({
             roles={roles}
             allowedRoles={["organizer"]}
             edit={
-              <EventSection title="Community">
+              <EventSection title={t("community")}>
                 <DashboardFormCommunity />
               </EventSection>
             }
@@ -200,7 +200,7 @@ export default function DashboardEventHeader({
             roles={roles}
             allowedRoles={["organizer"]}
             edit={
-              <EventSection title="Security & Privacy">
+              <EventSection title={t("securityAndPrivacy")}>
                 <DashboardFormPrivacy />
               </EventSection>
             }

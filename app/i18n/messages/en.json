@@ -56,6 +56,7 @@
     "pick-a-end-date-placeholder": "Pick a end date...",
     "from": "From",
     "to": "To",
+    "displayed-timezone": "Displayed time corresponds to {timeZone}",
     "no-file-selected-error": "No file selected.",
     "error-file-uploading-img": "Error while uploading image",
     "error-file-uploading-audio": "Error while uploading audio",
@@ -63,6 +64,7 @@
     "custom-timezone-select": "You choose a custom location, so please select a timezone.",
     "no-timezone-found": "No timezones found.",
     "no-address-found": "No address found.",
+    "onlineEvent": "Online event",
     "community-selector-label": "Link event to one of your communities (optional)",
     "community-selector-placeholder": "Select community...",
     "no-communities-found": "No communities found.",
@@ -627,7 +629,9 @@
         "capacity": "Capacity",
         "noPlaces": "No places",
         "attendees": "{count} attendees",
-        "updateCapacity": "Update Capacity"
+        "updateCapacity": "Update Capacity",
+        "community": "Community",
+        "securityAndPrivacy": "Security & Privacy"
       },
       "participants": {
         "exportCSV": "Export CSV",

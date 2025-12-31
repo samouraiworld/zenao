@@ -1,5 +1,6 @@
 import { useFormContext } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import DashboardFormMap from "./dashboard-form-map";
 import { EventFormSchemaType } from "@/types/schemas";
 import { Switch } from "@/components/shadcn/switch";
@@ -10,6 +11,7 @@ import { TimeZonesPopover } from "@/components/widgets/form/time-zones-popover";
 import { currentTimezone } from "@/lib/time";
 
 export default function DashboardFormLocation() {
+  const t = useTranslations("eventForm");
   const form = useFormContext<EventFormSchemaType>();
   const location = form.watch("location");
 
@@ -53,7 +55,7 @@ export default function DashboardFormLocation() {
             setIsVirtual(checked);
           }}
         />
-        <Label htmlFor="virtual">Online event</Label>
+        <Label htmlFor="virtual">{t("onlineEvent")}</Label>
       </div>
       {isVirtual && location.kind === "virtual" ? (
         <FormFieldInputString
