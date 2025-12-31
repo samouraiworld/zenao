@@ -4,11 +4,13 @@ import {
   queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
+import z from "zod";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
 import { EventInfo, DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { GetToken } from "@/lib/utils";
+import { eventUserSchema } from "@/types/schemas";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
 
@@ -110,7 +112,11 @@ export const eventsByOrganizerListSuspense = (
             },
             token ? { headers: { Authorization: `Bearer ${token}` } } : {},
           );
-          return res.events.map((eu) => eu.event!);
+
+          return z
+            .array(eventUserSchema)
+            .parse(res.events)
+            .map((eu) => eu.event);
         },
       );
     },
@@ -159,7 +165,11 @@ export const eventsByOrganizerList = (
             },
             token ? { headers: { Authorization: `Bearer ${token}` } } : {},
           );
-          return res.events.map((eu) => eu.event!);
+
+          return z
+            .array(eventUserSchema)
+            .parse(res.events)
+            .map((eu) => eu.event);
         },
       );
     },
@@ -218,7 +228,11 @@ export const eventsByParticipantList = (
             },
             token ? { headers: { Authorization: `Bearer ${token}` } } : {},
           );
-          return res.events.map((eu) => eu.event!);
+
+          return z
+            .array(eventUserSchema)
+            .parse(res.events)
+            .map((eu) => eu.event);
         },
       );
     },
