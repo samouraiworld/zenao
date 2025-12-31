@@ -2,6 +2,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { withSpan } from "../tracer";
 import { GetToken } from "@/lib/utils";
 import { zenaoClient } from "@/lib/zenao-client";
+import { eventInfoSchema } from "@/types/schemas";
 
 export const eventOptions = (id: string) =>
   queryOptions({
@@ -12,7 +13,7 @@ export const eventOptions = (id: string) =>
         if (res.event == null) {
           throw new Error("event not found");
         }
-        return res.event;
+        return eventInfoSchema.parse(res.event);
       });
     },
     staleTime: Infinity,

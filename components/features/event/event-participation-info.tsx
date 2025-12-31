@@ -5,14 +5,14 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { EventParticipation } from "./event-participation";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Card } from "@/components/widgets/cards/card";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { useEventPassword } from "@/components/providers/event-password-provider";
 import { userInfoOptions } from "@/lib/queries/user";
+import { SafeEventInfo } from "@/types/schemas";
 
 type EventParticipationInfoProps = {
   eventId: string;
-  eventData: EventInfo;
+  eventData: SafeEventInfo;
 };
 
 function EventParticipationInfo({

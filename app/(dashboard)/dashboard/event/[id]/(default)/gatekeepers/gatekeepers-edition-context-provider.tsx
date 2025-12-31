@@ -15,7 +15,6 @@ import {
 import { useDebouncedCallback } from "use-debounce";
 import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { eventGatekeepersEmails } from "@/lib/queries/event";
 import {
   communitiesListByEvent,
@@ -27,11 +26,11 @@ import { captureException } from "@/lib/report";
 import { useToast } from "@/hooks/use-toast";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import { useEditEvent } from "@/lib/mutations/event-management";
-import { EventFormSchemaType } from "@/types/schemas";
+import { EventFormSchemaType, SafeEventInfo } from "@/types/schemas";
 
 interface GatekeepersEditionContextProviderProps {
   eventId: string;
-  eventInfo: EventInfo;
+  eventInfo: SafeEventInfo;
   children: React.ReactNode;
 }
 

@@ -22,12 +22,12 @@ import {
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import EventCommunitySection from "@/components/features/event/event-community-section";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import EventLocationSection from "@/components/features/event/event-location-section";
 import { ParticipantsSection } from "@/components/features/event/event-participants-section";
 import { EventSection } from "@/components/features/event/event-section";
+import { SafeEventInfo } from "@/types/schemas";
 
 const EventParticipationInfo = dynamic(
   () => import("@/components/features/event/event-participation-info"),
@@ -48,7 +48,7 @@ export function EventInfoLayout({
   data,
 }: {
   eventId: string;
-  data: EventInfo;
+  data: SafeEventInfo;
 }) {
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),

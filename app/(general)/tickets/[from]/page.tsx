@@ -53,6 +53,7 @@ export default async function TicketsPage({ params }: PageProps) {
           now,
           Number.MAX_SAFE_INTEGER,
           20,
+          getToken,
         )
       : eventsByParticipantList(
           userRealmId,
@@ -60,6 +61,7 @@ export default async function TicketsPage({ params }: PageProps) {
           now - 1,
           0,
           20,
+          getToken,
         ),
   );
 

@@ -5,7 +5,6 @@ import { ExclusiveEventGuard } from "./event-exclusive-guard";
 import { eventOptions } from "@/lib/queries/event";
 import { getQueryClient } from "@/lib/get-query-client";
 import { ScreenContainer } from "@/components/layout/screen-container";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 type Props = {
   id: string;
@@ -15,7 +14,7 @@ type Props = {
 export async function EventScreenContainer({ id, children }: Props) {
   const queryClient = getQueryClient();
 
-  let eventData: EventInfo;
+  let eventData;
   try {
     eventData = await queryClient.fetchQuery(eventOptions(id));
   } catch {

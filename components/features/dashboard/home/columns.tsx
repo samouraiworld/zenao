@@ -4,7 +4,6 @@ import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
 import { useMemo } from "react";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,10 +15,11 @@ import { Button } from "@/components/shadcn/button";
 import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import Text from "@/components/widgets/texts/text";
+import { SafeEventInfo } from "@/types/schemas";
 
-export const useEventsTableColumns: (now: number) => ColumnDef<EventInfo>[] = (
-  now,
-) =>
+export const useEventsTableColumns: (
+  now: number,
+) => ColumnDef<SafeEventInfo>[] = (now) =>
   useMemo(
     () => [
       {

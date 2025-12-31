@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { EventInfo, EventPrivacy } from "@/app/gen/zenao/v1/zenao_pb";
 import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
+import { SafeEventInfo, SafeEventPrivacy } from "@/types/schemas";
 
 interface DashboardImportantInfoProps {
   eventId: string;
-  eventInfo: EventInfo;
+  eventInfo: SafeEventInfo;
 }
 
 function EventGuardedInfoCard({
@@ -17,7 +17,7 @@ function EventGuardedInfoCard({
   eventPrivacy,
 }: {
   eventId: string;
-  eventPrivacy?: EventPrivacy;
+  eventPrivacy?: SafeEventPrivacy;
 }) {
   const t = useTranslations("dashboard.eventDetails.importantInfo");
 

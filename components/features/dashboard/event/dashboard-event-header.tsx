@@ -13,7 +13,6 @@ import { useTranslations } from "next-intl";
 import { EventImage } from "../../event/event-image";
 import EventCommunitySection from "../../event/event-community-section";
 import { EventSection } from "../../event/event-section";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,11 +24,11 @@ import {
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
-import { EventFormSchemaType } from "@/types/schemas";
+import { EventFormSchemaType, SafeEventInfo } from "@/types/schemas";
 
 interface DashboardEventHeaderProps {
   eventId: string;
-  eventInfo: EventInfo;
+  eventInfo: SafeEventInfo;
   location: EventFormSchemaType["location"];
   communityId: string | null;
 }

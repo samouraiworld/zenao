@@ -77,6 +77,7 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 		CheckedIn:    checkedIn,
 		Discoverable: evt.Discoverable,
 		Privacy:      privacy,
+		PkgPath:      s.Chain.EventRealmID(evt.ID),
 	}
 
 	return connect.NewResponse(&zenaov1.GetEventResponse{Event: &info}), nil

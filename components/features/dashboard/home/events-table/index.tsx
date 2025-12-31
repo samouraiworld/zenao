@@ -40,6 +40,7 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
         0,
         DEFAULT_EVENTS_LIMIT,
         tablePage - 1,
+        getToken,
       ),
     );
 
@@ -52,6 +53,7 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
         Number.MAX_SAFE_INTEGER,
         DEFAULT_EVENTS_LIMIT,
         tablePage - 1,
+        getToken,
       ),
     );
 
