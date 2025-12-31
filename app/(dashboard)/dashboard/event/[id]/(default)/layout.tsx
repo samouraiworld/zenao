@@ -96,7 +96,7 @@ export default async function DashboardEventInfoLayoutProps({
         eventInfo={eventInfo}
         roles={roles}
       >
-        <DashboardEventEditionContextProvider eventId={eventId}>
+        <DashboardEventEditionContextProvider>
           {renderLayout()}
         </DashboardEventEditionContextProvider>
       </DashboardEventContextProvider>

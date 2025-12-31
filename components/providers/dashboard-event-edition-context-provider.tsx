@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "../shadcn/form";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { useDashboardEventContext } from "./dashboard-event-context-provider";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
 import {
@@ -24,7 +24,7 @@ import {
   communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
-import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
+import { eventGatekeepersEmails } from "@/lib/queries/event";
 import { EventUserRole, eventUserRoles } from "@/lib/queries/event-users";
 import { userInfoOptions } from "@/lib/queries/user";
 import { eventFormSchema, EventFormSchemaType } from "@/types/schemas";
@@ -34,8 +34,6 @@ import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
 interface DashboardEventEditionContextProps {
   roles: EventUserRole[];
-  eventId: string;
-  eventInfo: EventInfo;
   isUpdating: boolean;
   isSubmittable?: boolean;
   formRef?: React.RefObject<HTMLFormElement | null>;
@@ -46,7 +44,6 @@ const DashboardEventEditionContext =
   createContext<DashboardEventEditionContextProps>({} as never);
 
 interface DashboardEventEditionContextProviderProps {
-  eventId: string;
   children: React.ReactNode;
 }
 
@@ -62,15 +59,14 @@ export function useDashboardEventEditionContext() {
 }
 
 export default function DashboardEventEditionContextProvider({
-  eventId,
   children,
 }: DashboardEventEditionContextProviderProps) {
   const t = useTranslations("eventForm");
+  const { eventInfo, eventId } = useDashboardEventContext();
   const { toast } = useToast();
   const { trackEvent } = useAnalyticsEvents();
   const { getToken, userId } = useAuth();
   const { editEvent } = useEditEvent(getToken);
-  const { data: eventInfo } = useSuspenseQuery(eventOptions(eventId));
   const { data: gatekeepers } = useSuspenseQuery(
     eventGatekeepersEmails(eventId, getToken),
   );
@@ -171,10 +167,8 @@ export default function DashboardEventEditionContextProvider({
     <DashboardEventEditionContext.Provider
       value={{
         roles,
-        eventId,
         isUpdating,
         isSubmittable,
-        eventInfo,
         formRef,
         save,
       }}
