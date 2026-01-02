@@ -8,11 +8,15 @@ import { TabsContent } from "@/components/shadcn/tabs";
 import { Separator } from "@/components/shadcn/separator";
 import { Badge } from "@/components/shadcn/badge";
 import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
+import { EventUserRole } from "@/lib/queries/event-users";
+import RoleBasedViewMode from "@/components/widgets/permissions/view-mode";
 
 export default function DashboardEventTabs({
   children,
+  roles,
 }: {
   children: React.ReactNode;
+  roles: EventUserRole[];
 }) {
   const t = useTranslations("dashboard.eventDetails.eventTabs");
   const { eventId, eventInfo } = useDashboardEventContext();
@@ -38,22 +42,28 @@ export default function DashboardEventTabs({
             <Badge variant="secondary">{eventInfo.participants}</Badge>
           </TabsTrigger>
         </Link>
-        <Link href={`/dashboard/event/${eventId}/gatekeepers`} scroll={false}>
-          <TabsTrigger
-            value="gatekeepers"
-            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
-          >
-            {t("gatekeepers")}
-          </TabsTrigger>
-        </Link>
-        <Link href={`/dashboard/event/${eventId}/broadcast`} scroll={false}>
-          <TabsTrigger
-            value="broadcast"
-            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
-          >
-            {t("broadcast")}
-          </TabsTrigger>
-        </Link>
+
+        <RoleBasedViewMode roles={roles} allowedRoles={["organizer"]}>
+          <Link href={`/dashboard/event/${eventId}/gatekeepers`} scroll={false}>
+            <TabsTrigger
+              value="gatekeepers"
+              className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
+            >
+              {t("gatekeepers")}
+            </TabsTrigger>
+          </Link>
+        </RoleBasedViewMode>
+
+        <RoleBasedViewMode roles={roles} allowedRoles={["organizer"]}>
+          <Link href={`/dashboard/event/${eventId}/broadcast`} scroll={false}>
+            <TabsTrigger
+              value="broadcast"
+              className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
+            >
+              {t("broadcast")}
+            </TabsTrigger>
+          </Link>
+        </RoleBasedViewMode>
       </TabsList>
       <Separator className="mb-3" />
 

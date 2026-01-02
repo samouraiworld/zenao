@@ -5,12 +5,13 @@ import DashboardBroadcastForm from "./dashboard-broadcast-form";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
+import withEventRoleRestrictions from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventBroadcastPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function DashboardEventBroadcastPage({
+async function DashboardEventBroadcastPage({
   params,
 }: DashboardEventBroadcastPageProps) {
   const { id: eventId } = await params;
@@ -36,3 +37,11 @@ export default async function DashboardEventBroadcastPage({
     </HydrationBoundary>
   );
 }
+
+export default withEventRoleRestrictions(
+  DashboardEventBroadcastPage,
+  ["organizer"],
+  {
+    notFoundOnFail: true,
+  },
+);

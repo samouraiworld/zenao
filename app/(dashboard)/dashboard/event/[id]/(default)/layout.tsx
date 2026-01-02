@@ -15,13 +15,14 @@ import {
 import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-event-info";
 import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
+import withEventRoleRestrictions from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
   children?: React.ReactNode;
 }
 
-export default async function DashboardEventInfoLayoutProps({
+async function DashboardEventInfoLayoutProps({
   children,
   params,
 }: DashboardEventInfoLayoutProps) {
@@ -54,13 +55,10 @@ export default async function DashboardEventInfoLayoutProps({
     console.error("error", err);
     notFound();
   }
+
   const roles = await queryClient.fetchQuery(
     eventUserRoles(eventId, userRealmId),
   );
-
-  if (!(roles.includes("organizer") || roles.includes("gatekeeper"))) {
-    notFound();
-  }
 
   queryClient.prefetchInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
@@ -69,7 +67,7 @@ export default async function DashboardEventInfoLayoutProps({
   const renderLayout = () => (
     <div className="flex flex-col gap-8 pb-16 md:pb-0">
       <DashboardEventInfo />
-      <DashboardEventTabs>{children}</DashboardEventTabs>
+      <DashboardEventTabs roles={roles}>{children}</DashboardEventTabs>
     </div>
   );
 
@@ -103,3 +101,11 @@ export default async function DashboardEventInfoLayoutProps({
     </HydrationBoundary>
   );
 }
+
+export default withEventRoleRestrictions(
+  DashboardEventInfoLayoutProps,
+  ["organizer", "gatekeeper"],
+  {
+    notFoundOnFail: true,
+  },
+);
