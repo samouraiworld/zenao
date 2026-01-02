@@ -97,7 +97,6 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
 
   return (
     <EventsTableView
-      now={now}
       tab={tab}
       events={tab === "upcoming" ? upcomingEvents : pastEvents}
       isFetchingPastNextPage={isFetchingPastEvents}

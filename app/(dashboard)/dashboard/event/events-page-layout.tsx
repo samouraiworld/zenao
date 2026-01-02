@@ -79,7 +79,7 @@ export default function EventsPageLayout({ now }: EventsTableProps) {
             </TabsList>
           </div>
 
-          <Suspense fallback={<EventsTableViewLoading now={now} />}>
+          <Suspense fallback={<EventsTableViewLoading />}>
             <EventsTable now={now} tab={tab} />
           </Suspense>
         </Tabs>

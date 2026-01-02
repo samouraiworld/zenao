@@ -17,7 +17,6 @@ import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
 import { SafeEventUser } from "@/types/schemas";
 
 interface EventsTableViewProps {
-  now: number;
   tab: "upcoming" | "past";
   events: SafeEventUser[];
   isFetchingPastNextPage: boolean;
@@ -35,7 +34,6 @@ interface EventsTableViewProps {
 }
 
 export function EventsTableView({
-  now,
   tab,
   events,
   isFetchingPastNextPage,
@@ -52,7 +50,7 @@ export function EventsTableView({
   hasPastPreviousPage,
 }: EventsTableViewProps) {
   const router = useRouter();
-  const columns = useEventsTableColumns(now);
+  const columns = useEventsTableColumns();
   const t = useTranslations("dashboard.eventsTable");
   const table = useDataTableInstance({
     data: events,
