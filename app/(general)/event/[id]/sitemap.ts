@@ -13,10 +13,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   return [...upcoming.pages[0], ...past.pages[0]].map((event) => {
-    const lastSlashIdx = event.pkgPath.lastIndexOf("/");
-    const id = event.pkgPath.substring(lastSlashIdx + 2); // skip the slash and the e
     return {
-      url: `https://zenao.io/event/${id}`,
+      url: `https://zenao.io/event/${event.id}`,
     };
   });
 }

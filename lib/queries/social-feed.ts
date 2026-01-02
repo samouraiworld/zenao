@@ -1,23 +1,20 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
-import { userIdFromPkgPath } from "./user";
-import { eventIdFromPkgPath } from "./event";
-import { communityIdFromPkgPath } from "./community";
 
 export const DEFAULT_FEED_POSTS_LIMIT = 30;
 export const DEFAULT_FEED_POSTS_COMMENTS_LIMIT = 10;
 
-export const feedPost = (postId: string, userRealmId: string) =>
+export const feedPost = (postId: string, userId: string) =>
   queryOptions({
-    queryKey: ["feedPost", postId, userRealmId],
+    queryKey: ["feedPost", postId, userId],
     queryFn: async () => {
       return withSpan(
-        `query:backend:post:${postId}:main:${userIdFromPkgPath(userRealmId)}`,
+        `query:backend:post:${postId}:main:${userId}`,
         async () => {
           const res = await zenaoClient.getPost({
             postId,
-            userId: userIdFromPkgPath(userRealmId),
+            userId,
           });
           if (res.post == null) {
             throw new Error("post not found");
@@ -32,20 +29,17 @@ export const feedPosts = (
   feedId: string,
   limit: number,
   tags: string,
-  userRealmId: string,
+  userId: string,
 ) =>
   infiniteQueryOptions({
-    queryKey: ["feedPosts", feedId, tags, userRealmId],
+    queryKey: ["feedPosts", feedId, tags, userId],
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
-        `query:backend:feed:${feedId}:posts:${tags}:${userIdFromPkgPath(userRealmId)}`,
+        `query:backend:feed:${feedId}:posts:${tags}:${userId}`,
         async () => {
-          const pkgPath = feedId.split(":")[0];
-          const orgType = pkgPath.includes("events/") ? "event" : "community";
-          const orgId =
-            orgType === "event"
-              ? eventIdFromPkgPath(pkgPath)
-              : communityIdFromPkgPath(pkgPath);
+          const parts = feedId.split(":");
+          const orgType = parts[0]; // "event" or "community"
+          const orgId = parts[1];
 
           const res = await zenaoClient.getFeedPosts({
             org: {
@@ -55,7 +49,7 @@ export const feedPosts = (
             offset: pageParam * limit,
             limit,
             tags: tags ? tags.split(",") : [],
-            userId: userIdFromPkgPath(userRealmId),
+            userId,
           });
           return res.posts;
         },
@@ -74,20 +68,20 @@ export const feedPostsChildren = (
   parentId: string,
   limit: number,
   tags: string,
-  userRealmId: string,
+  userId: string,
 ) =>
   infiniteQueryOptions({
-    queryKey: ["feedPostsChildren", parentId, tags, userRealmId],
+    queryKey: ["feedPostsChildren", parentId, tags, userId],
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
-        `query:backend:post:${parentId}:${tags}:${userIdFromPkgPath(userRealmId)}`,
+        `query:backend:post:${parentId}:${tags}:${userId}`,
         async () => {
           const res = await zenaoClient.getChildrenPosts({
             parentId,
             offset: pageParam * limit,
             limit,
             tags: tags ? tags.split(",") : [],
-            userId: userIdFromPkgPath(userRealmId),
+            userId,
           });
           return res.posts;
         },
@@ -102,22 +96,19 @@ export const feedPostsChildren = (
     },
   });
 
-export const pollInfo = (pollId: string, userRealmId: string) =>
+export const pollInfo = (pollId: string, userId: string) =>
   queryOptions({
     queryKey: ["poll", pollId],
     queryFn: async () => {
-      return withSpan(
-        `query:backend:poll:${pollId}:${userIdFromPkgPath(userRealmId)}`,
-        async () => {
-          const res = await zenaoClient.getPoll({
-            pollId,
-            userId: userIdFromPkgPath(userRealmId),
-          });
-          if (res.poll == null) {
-            throw new Error("poll not found");
-          }
-          return res.poll;
-        },
-      );
+      return withSpan(`query:backend:poll:${pollId}:${userId}`, async () => {
+        const res = await zenaoClient.getPoll({
+          pollId,
+          userId,
+        });
+        if (res.poll == null) {
+          throw new Error("poll not found");
+        }
+        return res.poll;
+      });
     },
   });

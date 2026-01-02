@@ -13,7 +13,7 @@ export default function EventsTableViewLoading({ now }: { now: number }) {
     columns,
     enableRowSelection: false,
     defaultPageSize: DEFAULT_EVENTS_LIMIT,
-    getRowId: (row) => row.pkgPath.toString(),
+    getRowId: (row) => row.id.toString(),
   });
 
   return (

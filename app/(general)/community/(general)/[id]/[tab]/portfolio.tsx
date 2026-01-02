@@ -65,11 +65,11 @@ export default function CommunityPortfolio({
   const { toast } = useToast();
   const { getToken, userId } = useAuth();
   const { trackEvent } = useAnalyticsEvents();
-  const { data: userAddress } = useSuspenseQuery(
+  const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
   const { data: userRoles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userAddress?.realmId),
+    communityUserRoles(communityId, userInfo?.userId),
   );
 
   const imageFileInputRef = useRef<HTMLInputElement>(null);

@@ -10,7 +10,7 @@ import { CreateCommunityRequestJson } from "@/app/gen/zenao/v1/zenao_pb";
 
 interface CreateCommunityRequest extends CreateCommunityRequestJson {
   token: string;
-  userRealmId: string;
+  userId: string;
   displayName: string;
   description: string;
   avatarUri: string;
@@ -48,7 +48,7 @@ export const useCreateCommunity = () => {
     onSuccess: async (communityId, variables) => {
       await queryClient.invalidateQueries(communityInfo(communityId));
       await queryClient.invalidateQueries(
-        communityUserRoles(communityId, variables.userRealmId),
+        communityUserRoles(communityId, variables.userId),
       );
       await queryClient.invalidateQueries(
         communityUsersWithRoles(communityId, ["administrator", "member"]),

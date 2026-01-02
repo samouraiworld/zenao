@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import { Button } from "@/components/shadcn/button";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import Text from "@/components/widgets/texts/text";
 import { SafeEventInfo } from "@/types/schemas";
@@ -77,18 +76,10 @@ export const useEventsTableColumns: (
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
               <DropdownMenuItem>
-                <Link
-                  href={`/event/${eventIdFromPkgPath(row.original.pkgPath)}`}
-                >
-                  View
-                </Link>
+                <Link href={`/event/${row.original.id}`}>View</Link>
               </DropdownMenuItem>
               <DropdownMenuItem disabled={now >= Number(row.original.endDate)}>
-                <Link
-                  href={`/event/${eventIdFromPkgPath(row.original.pkgPath)}/edit`}
-                >
-                  Edit
-                </Link>
+                <Link href={`/event/${row.original.id}/edit`}>Edit</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

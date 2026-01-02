@@ -19,7 +19,7 @@ export const CommunityEditAdminButton = ({
     userInfoOptions(getToken, userId),
   );
   const { data: userRoles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userInfo?.realmId || ""),
+    communityUserRoles(communityId, userInfo?.userId || ""),
   );
   const isAdmin = userRoles.includes("administrator");
   if (!isAdmin) return null;

@@ -34,7 +34,7 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
   const { data: pastEvents, isFetching: isFetchingPastEvents } =
     useSuspenseQuery(
       eventsByOrganizerListSuspense(
-        userInfo?.realmId,
+        userInfo?.userId,
         DiscoverableFilter.UNSPECIFIED,
         now - 1,
         0,
@@ -47,7 +47,7 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
   const { data: upcomingEvents, isFetching: isFetchingUpcomingEvents } =
     useSuspenseQuery(
       eventsByOrganizerListSuspense(
-        userInfo?.realmId,
+        userInfo?.userId,
         DiscoverableFilter.UNSPECIFIED,
         now,
         Number.MAX_SAFE_INTEGER,

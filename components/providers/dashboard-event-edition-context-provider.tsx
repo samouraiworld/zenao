@@ -21,7 +21,6 @@ import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
 import {
   communitiesListByEvent,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { eventGatekeepersEmails } from "@/lib/queries/event";
@@ -81,20 +80,17 @@ export default function DashboardEventEditionContextProvider({
     [communitiesPages],
   );
 
-  const communityId =
-    communities.length > 0
-      ? communityIdFromPkgPath(communities[0].pkgPath)
-      : null;
+  const communityId = communities.length > 0 ? communities[0].id : null;
 
   const location = makeLocationFromEvent(eventInfo.location);
 
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userRealmId),
+    eventUserRoles(eventId, userProfileId),
   );
 
   const defaultValues: EventFormSchemaType = {

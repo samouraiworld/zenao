@@ -32,11 +32,11 @@ export default async function DashboardEventInfoLayoutProps({
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
   const t = await getTranslations();
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("eventForm.log-in")}
@@ -55,7 +55,7 @@ export default async function DashboardEventInfoLayoutProps({
     notFound();
   }
   const roles = await queryClient.fetchQuery(
-    eventUserRoles(eventId, userRealmId),
+    eventUserRoles(eventId, userProfileId),
   );
 
   if (!(roles.includes("organizer") || roles.includes("gatekeeper"))) {

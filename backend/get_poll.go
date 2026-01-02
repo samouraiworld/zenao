@@ -54,7 +54,7 @@ func (s *ZenaoServer) GetPoll(ctx context.Context, req *connect.Request[zenaov1.
 		Kind:      zPoll.Kind,
 		Duration:  zPoll.Duration,
 		CreatedAt: zPoll.CreatedAt.Unix(),
-		CreatedBy: s.Chain.UserRealmID(zPost.UserID), // TODO: adapt front-end to expect id instead of address ?
+		CreatedBy: zPost.UserID,
 	}
 
 	return connect.NewResponse(&zenaov1.GetPollResponse{Poll: poll}), nil

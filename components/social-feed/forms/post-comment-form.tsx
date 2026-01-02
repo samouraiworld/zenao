@@ -35,7 +35,7 @@ export default function PostCommentForm({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { createStandardPost, isPending } = useCreateStandardPost();
 
   const onSubmit = async (values: SocialFeedPostFormSchemaType) => {
@@ -55,7 +55,7 @@ export default function PostCommentForm({
         content: values.content,
         parentId: parentId.toString(),
         token,
-        userRealmId,
+        userId: userProfileId,
         tags: [],
       });
       trackEvent("PostCommented", {
@@ -95,7 +95,7 @@ export default function PostCommentForm({
           <EventPostCommentForm
             form={form}
             eventId={orgId}
-            userRealmId={userRealmId}
+            userId={userProfileId}
             onSubmit={onSubmit}
             isPending={isPending}
           />
@@ -104,7 +104,7 @@ export default function PostCommentForm({
           <CommunityPostCommentForm
             form={form}
             communityId={orgId}
-            userRealmId={userRealmId}
+            userId={userProfileId}
             onSubmit={onSubmit}
             isPending={isPending}
           />

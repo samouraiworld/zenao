@@ -54,7 +54,6 @@ type config struct {
 	allowedOrigins  string
 	clerkSecretKey  string
 	bindAddr        string
-	gnoNamespace    string
 	dbPath          string
 	mailSender      string
 	resendSecretKey string
@@ -66,7 +65,6 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
 	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
-	flset.StringVar(&conf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.mailSender, "mail-sender", "contact@mail.zenao.io", "Mail sender address")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
@@ -106,7 +104,6 @@ func injectStartEnv() {
 			*ps = val
 		}
 	}
-
 }
 
 func execStart(ctx context.Context) (retErr error) {
@@ -126,11 +123,6 @@ func execStart(ctx context.Context) (retErr error) {
 	}()
 
 	auth, err := czauth.SetupAuth(conf.clerkSecretKey, logger)
-	if err != nil {
-		return err
-	}
-
-	chain, err := setupChain(conf.gnoNamespace)
 	if err != nil {
 		return err
 	}
@@ -160,7 +152,6 @@ func execStart(ctx context.Context) (retErr error) {
 	zenao := &ZenaoServer{
 		Logger:       logger,
 		Auth:         auth,
-		Chain:        chain,
 		DB:           db,
 		MailClient:   mailClient,
 		MailSender:   conf.mailSender,

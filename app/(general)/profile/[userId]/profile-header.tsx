@@ -10,29 +10,28 @@ import { Card } from "@/components/widgets/cards/card";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
-import { addressFromRealmId } from "@/lib/gno";
 import { userInfoOptions } from "@/lib/queries/user";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import { gnoProfileDetailsSchema } from "@/types/schemas";
+import { profileDetailsSchema } from "@/types/schemas";
 import ProfileExperience from "@/components/features/user/profile-experience";
 
 type ProfileHeaderProps = {
-  address: string;
+  userId: string;
   displayName: string;
   avatarUri: string;
   bio: string;
 };
 
 export default function ProfileHeader({
-  address,
+  userId,
   displayName,
   avatarUri,
   bio,
 }: ProfileHeaderProps) {
   const profileDetails = deserializeWithFrontMatter({
     serialized: bio,
-    schema: gnoProfileDetailsSchema,
+    schema: profileDetailsSchema,
     defaultValue: {
       bio: "",
       socialMediaLinks: [],
@@ -105,7 +104,7 @@ export default function ProfileHeader({
           <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <ClerkLoaded>
               <SignedIn>
-                <EditProfileButton address={address} />
+                <EditProfileButton userId={userId} />
               </SignedIn>
             </ClerkLoaded>
           </div>
@@ -188,23 +187,22 @@ export default function ProfileHeader({
   );
 }
 
-const EditProfileButton = ({ address }: { address: string }) => {
-  const { userId, getToken } = useAuth();
-  const [clientUserId, setClientUserId] = useState<string>();
+const EditProfileButton = ({ userId }: { userId: string }) => {
+  const { userId: authId, getToken } = useAuth();
+  const [clientAuthId, setClientAuthId] = useState<string>();
 
   // we need this useEffect to prevent hydration errors due to clerk
   useEffect(() => {
-    setClientUserId(userId || undefined);
-  }, [userId]);
+    setClientAuthId(authId || undefined);
+  }, [authId]);
 
   const { data: info } = useSuspenseQuery(
-    userInfoOptions(getToken, clientUserId),
+    userInfoOptions(getToken, clientAuthId),
   );
 
-  const realmId = info?.realmId;
-  const userLoggedAddress = addressFromRealmId(realmId);
+  const loggedInUserId = info?.userId;
   return (
-    userLoggedAddress === address && (
+    loggedInUserId === userId && (
       <Link href="/settings" className="w-full sm:w-auto">
         <Button className="w-full sm:w-auto">Edit my profile</Button>
       </Link>

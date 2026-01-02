@@ -7,7 +7,6 @@ import {
 import z from "zod";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
-import { userIdFromPkgPath } from "./user";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { GetToken } from "@/lib/utils";
 import {
@@ -74,7 +73,7 @@ export const eventsList = (
 };
 
 export const eventsByOrganizerListSuspense = (
-  organizerRealmId: string | undefined,
+  organizerId: string | undefined,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -90,7 +89,7 @@ export const eventsByOrganizerListSuspense = (
   return queryOptions({
     queryKey: [
       "eventsByOrganizer",
-      organizerRealmId,
+      organizerId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -98,15 +97,15 @@ export const eventsByOrganizerListSuspense = (
       pageInt,
     ],
     queryFn: async () => {
-      if (!organizerRealmId) return [];
+      if (!organizerId) return [];
 
       return withSpan(
-        `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
+        `query:backend:user:${organizerId}:events:role:organizer`,
         async () => {
           const token = getToken ? await getToken() : null;
           const res = await zenaoClient.listEventsByUserRoles(
             {
-              userId: userIdFromPkgPath(organizerRealmId),
+              userId: organizerId,
               roles: ["organizer"],
               limit: limitInt,
               offset: pageInt * limitInt,
@@ -124,12 +123,12 @@ export const eventsByOrganizerListSuspense = (
         },
       );
     },
-    enabled: !!organizerRealmId,
+    enabled: !!organizerId,
   });
 };
 
 export const eventsByOrganizerList = (
-  organizerRealmId: string | undefined,
+  organizerId: string | undefined,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -143,7 +142,7 @@ export const eventsByOrganizerList = (
   return infiniteQueryOptions({
     queryKey: [
       "eventsByOrganizer",
-      organizerRealmId,
+      organizerId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -151,15 +150,15 @@ export const eventsByOrganizerList = (
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      if (!organizerRealmId) return [];
+      if (!organizerId) return [];
 
       return withSpan(
-        `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
+        `query:backend:user:${organizerId}:events:role:organizer`,
         async () => {
           const token = getToken ? await getToken() : null;
           const res = await zenaoClient.listEventsByUserRoles(
             {
-              userId: userIdFromPkgPath(organizerRealmId),
+              userId: organizerId,
               roles: ["organizer"],
               limit: limitInt,
               offset: pageParam * limitInt,
@@ -189,12 +188,12 @@ export const eventsByOrganizerList = (
       }
       return pages.length - 2;
     },
-    enabled: !!organizerRealmId,
+    enabled: !!organizerId,
   });
 };
 
 export const eventsByParticipantList = (
-  participantRealmId: string,
+  participantId: string,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -208,7 +207,7 @@ export const eventsByParticipantList = (
   return infiniteQueryOptions({
     queryKey: [
       "eventsByParticipant",
-      participantRealmId,
+      participantId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -217,12 +216,12 @@ export const eventsByParticipantList = (
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
-        `query:backend:user:${userIdFromPkgPath(participantRealmId)}:events:role:participant`,
+        `query:backend:user:${participantId}:events:role:participant`,
         async () => {
           const token = getToken ? await getToken() : null;
           const res = await zenaoClient.listEventsByUserRoles(
             {
-              userId: userIdFromPkgPath(participantRealmId),
+              userId: participantId,
               roles: ["participant"],
               limit: limitInt,
               offset: pageParam * limitInt,

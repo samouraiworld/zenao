@@ -10,13 +10,6 @@ var generalTranscoder = ma.NewTranscoderFromFunctions(generalStB, generalBtS, ni
 
 var ZenaoProtocols []*ma.Protocol = []*ma.Protocol{
 	{
-		Name:       "gno",
-		Code:       0x300,
-		VCode:      ma.CodeToVarint(0x300),
-		Path:       true, // XXX: use URL encoding to avoid to have to put it at the end
-		Size:       ma.LengthPrefixedVarSize,
-		Transcoder: generalTranscoder,
-	}, {
 		Name:       "poll",
 		Code:       0x301,
 		VCode:      ma.CodeToVarint(0x301),
