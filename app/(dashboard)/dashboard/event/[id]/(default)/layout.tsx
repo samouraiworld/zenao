@@ -7,7 +7,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { userInfoOptions } from "@/lib/queries/user";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
-import { EventUserRole } from "@/lib/queries/event-users";
+import { eventUserRoles } from "@/lib/queries/event-users";
 import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,
@@ -19,14 +19,12 @@ import withEventRoleRestrictions from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
-  roles: EventUserRole[];
   children?: React.ReactNode;
 }
 
 async function DashboardEventInfoLayoutProps({
   children,
   params,
-  roles,
 }: DashboardEventInfoLayoutProps) {
   const { id: eventId } = await params;
   const queryClient = getQueryClient();
@@ -57,6 +55,10 @@ async function DashboardEventInfoLayoutProps({
     console.error("error", err);
     notFound();
   }
+
+  const roles = await queryClient.fetchQuery(
+    eventUserRoles(eventId, userRealmId),
+  );
 
   queryClient.prefetchInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),

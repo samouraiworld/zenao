@@ -16,7 +16,6 @@ type ServerComponent<P> = (
 export default function withEventRoleRestrictions<
   P extends {
     params: Promise<{ id: string }>;
-    roles: EventUserRole[];
   },
 >(
   Component: ServerComponent<P>,
@@ -58,6 +57,6 @@ export default function withEventRoleRestrictions<
       redirect(options?.redirectTo ?? "/unauthorized");
     }
 
-    return <Component {...props} roles={roles} />;
+    return <Component {...props} />;
   };
 }

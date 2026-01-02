@@ -11,7 +11,7 @@ interface DashboardEventBroadcastPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function DashboardEventBroadcastPage({
+async function DashboardEventBroadcastPage({
   params,
 }: DashboardEventBroadcastPageProps) {
   const { id: eventId } = await params;
