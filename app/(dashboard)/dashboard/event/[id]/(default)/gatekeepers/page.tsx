@@ -4,12 +4,13 @@ import GatekeepersTable from "./gatekeepers-table";
 import { GatekeepersEditionContextProvider } from "./gatekeepers-edition-context-provider";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
+import withEventRoleRestrictions from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventGatekeepersPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function DashboardEventGatekeepersPage({
+async function DashboardEventGatekeepersPage({
   params,
 }: DashboardEventGatekeepersPageProps) {
   const { id: eventId } = await params;
@@ -34,3 +35,11 @@ export default async function DashboardEventGatekeepersPage({
     </HydrationBoundary>
   );
 }
+
+export default withEventRoleRestrictions(
+  DashboardEventGatekeepersPage,
+  ["organizer"],
+  {
+    notFoundOnFail: true,
+  },
+);

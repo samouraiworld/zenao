@@ -7,7 +7,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { userInfoOptions } from "@/lib/queries/user";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
-import { eventUserRoles } from "@/lib/queries/event-users";
+import { EventUserRole } from "@/lib/queries/event-users";
 import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,
@@ -15,15 +15,18 @@ import {
 import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-event-info";
 import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
+import withEventRoleRestrictions from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
+  roles: EventUserRole[];
   children?: React.ReactNode;
 }
 
-export default async function DashboardEventInfoLayoutProps({
+async function DashboardEventInfoLayoutProps({
   children,
   params,
+  roles,
 }: DashboardEventInfoLayoutProps) {
   const { id: eventId } = await params;
   const queryClient = getQueryClient();
@@ -52,13 +55,6 @@ export default async function DashboardEventInfoLayoutProps({
     });
   } catch (err) {
     console.error("error", err);
-    notFound();
-  }
-  const roles = await queryClient.fetchQuery(
-    eventUserRoles(eventId, userRealmId),
-  );
-
-  if (!(roles.includes("organizer") || roles.includes("gatekeeper"))) {
     notFound();
   }
 
@@ -103,3 +99,11 @@ export default async function DashboardEventInfoLayoutProps({
     </HydrationBoundary>
   );
 }
+
+export default withEventRoleRestrictions(
+  DashboardEventInfoLayoutProps,
+  ["organizer", "gatekeeper"],
+  {
+    notFoundOnFail: true,
+  },
+);
