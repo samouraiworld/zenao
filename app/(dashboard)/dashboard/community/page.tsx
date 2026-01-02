@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import CommunitiesPageLayout from "./communities-page-layout";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -27,5 +28,9 @@ export default async function DashboardCommunityPage() {
     );
   }
 
-  return <CommunitiesPageLayout />;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <CommunitiesPageLayout />
+    </HydrationBoundary>
+  );
 }
