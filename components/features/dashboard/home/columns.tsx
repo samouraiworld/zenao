@@ -1,25 +1,16 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { EllipsisVertical } from "lucide-react";
+import { Eye } from "lucide-react";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
 import { useMemo } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/shadcn/dropdown-menu";
 import { Button } from "@/components/shadcn/button";
 import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import Text from "@/components/widgets/texts/text";
-import { SafeEventInfo } from "@/types/schemas";
+import { SafeEventUser } from "@/types/schemas";
 
-export const useEventsTableColumns: (
-  now: number,
-) => ColumnDef<SafeEventInfo>[] = (now) =>
+export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () =>
   useMemo(
     () => [
       {
@@ -30,7 +21,10 @@ export const useEventsTableColumns: (
         ),
         cell: ({ row }) => (
           <Text size="sm" variant="secondary">
-            {formatTZ(fromUnixTime(Number(row.original.startDate)), "PPp O")}
+            {formatTZ(
+              fromUnixTime(Number(row.original.event.startDate)),
+              "PPp O",
+            )}
           </Text>
         ),
         enableHiding: false,
@@ -44,7 +38,7 @@ export const useEventsTableColumns: (
             title="Name"
           />
         ),
-        cell: ({ row }) => <Text size="sm">{row.original.title}</Text>,
+        cell: ({ row }) => <Text size="sm">{row.original.event.title}</Text>,
         enableSorting: false,
         sortDescFirst: true,
       },
@@ -56,7 +50,19 @@ export const useEventsTableColumns: (
         ),
         cell: ({ row }) => (
           <Text size="sm" variant="secondary">
-            {row.original.participants}
+            {row.original.event.participants}
+          </Text>
+        ),
+      },
+      {
+        accessorKey: "roles",
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Roles" />
+        ),
+        cell: ({ row }) => (
+          <Text size="sm" variant="secondary">
+            {row.original.roles.map((role) => role).join(", ")}
           </Text>
         ),
       },
@@ -64,40 +70,18 @@ export const useEventsTableColumns: (
         id: "actions",
         header: () => <div>Actions</div>,
         cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-                size="icon"
-              >
-                <EllipsisVertical />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem>
-                <Link
-                  href={`/event/${eventIdFromPkgPath(row.original.pkgPath)}`}
-                >
-                  View
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled={now >= Number(row.original.endDate)}>
-                <Link
-                  href={`/event/${eventIdFromPkgPath(row.original.pkgPath)}/edit`}
-                >
-                  Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                disabled={now >= Number(row.original.startDate)}
-              >
-                Cancel Event
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Link
+            href={`/event/${eventIdFromPkgPath(row.original.event.pkgPath)}`}
+          >
+            <Button
+              variant="ghost"
+              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+              size="icon"
+            >
+              <Eye />
+              <span className="sr-only">View</span>
+            </Button>
+          </Link>
         ),
         enableSorting: false,
         meta: {
@@ -105,5 +89,5 @@ export const useEventsTableColumns: (
         },
       },
     ],
-    [now],
+    [],
   );

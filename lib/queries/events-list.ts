@@ -8,6 +8,7 @@ import z from "zod";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
+import { EventUserRole } from "./event-users";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { GetToken } from "@/lib/utils";
 import {
@@ -73,13 +74,14 @@ export const eventsList = (
   });
 };
 
-export const eventsByOrganizerListSuspense = (
+export const eventsByRolesListSuspense = (
   organizerRealmId: string | undefined,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
   page: number,
+  roles: EventUserRole[],
   getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
@@ -89,13 +91,14 @@ export const eventsByOrganizerListSuspense = (
 
   return queryOptions({
     queryKey: [
-      "eventsByOrganizer",
+      "eventsByRoles",
       organizerRealmId,
       discoverableFilter,
       fromInt,
       toInt,
       limitInt,
       pageInt,
+      roles,
     ],
     queryFn: async () => {
       if (!organizerRealmId) return [];
@@ -107,7 +110,7 @@ export const eventsByOrganizerListSuspense = (
           const res = await zenaoClient.listEventsByUserRoles(
             {
               userId: userIdFromPkgPath(organizerRealmId),
-              roles: ["organizer"],
+              roles,
               limit: limitInt,
               offset: pageInt * limitInt,
               from: BigInt(fromInt),
@@ -117,10 +120,7 @@ export const eventsByOrganizerListSuspense = (
             token ? { headers: { Authorization: `Bearer ${token}` } } : {},
           );
 
-          return z
-            .array(eventUserSchema)
-            .parse(res.events)
-            .map((eu) => eu.event);
+          return z.array(eventUserSchema).parse(res.events);
         },
       );
     },
