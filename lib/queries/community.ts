@@ -288,3 +288,38 @@ export const communitiesListByEvent = (
     ...options,
   });
 };
+
+export const communitiesByRolesListSuspense = (
+  page: number,
+  limit: number,
+  roles: CommunityUserRole[],
+  getToken: GetToken,
+) => {
+  const limitInt = Math.floor(limit);
+  const pageInt = Math.max(0, Math.floor(page));
+
+  return queryOptions({
+    queryKey: ["communitiesByRoles", pageInt, limitInt, roles],
+    queryFn: async () => {
+      return withSpan(
+        `query:backend:communities-by-roles:${JSON.stringify(roles)}`,
+        async () => {
+          const token = await getToken();
+          if (!token) throw new Error("invalid clerk token");
+
+          // const res = await zenaoClient.listCommunitiesByRoles(
+          //   {
+          //     limit: limitInt,
+          //     offset: pageInt * limitInt,
+          //     roles,
+          //   },
+          //   { headers: { Authorization: `Bearer ${token}` } },
+          // );
+          // return res.communities;
+          return [];
+        },
+      );
+    },
+    initialData: [] as CommunityInfo[],
+  });
+};
