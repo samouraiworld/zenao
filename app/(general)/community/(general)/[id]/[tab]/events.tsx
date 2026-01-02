@@ -11,7 +11,6 @@ import EmptyList from "@/components/widgets/lists/empty-list";
 import { communityUsersWithRoles } from "@/lib/queries/community";
 
 import { eventIdFromPkgPath, eventOptions } from "@/lib/queries/event";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { EventCard } from "@/components/features/event/event-card";
 import {
@@ -20,6 +19,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/shadcn/tabs";
+import { SafeEventInfo } from "@/types/schemas";
 
 type CommunityEventsProps = {
   communityId: string;
@@ -39,7 +39,7 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
     combine: (results) =>
       results
         .filter(
-          (elem): elem is UseSuspenseQueryResult<EventInfo, Error> =>
+          (elem): elem is UseSuspenseQueryResult<SafeEventInfo, Error> =>
             elem.isSuccess && !!elem.data,
         )
         .map((elem, idx) => ({

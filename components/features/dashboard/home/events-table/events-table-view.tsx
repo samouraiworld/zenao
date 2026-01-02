@@ -10,16 +10,16 @@ import { useEventsTableColumns } from "../columns";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
+import { SafeEventInfo } from "@/types/schemas";
 
 interface EventsTableViewProps {
   now: number;
   tab: "upcoming" | "past";
-  events: EventInfo[];
+  events: SafeEventInfo[];
   isFetchingPastNextPage: boolean;
   isFetchingPastPreviousPage: boolean;
   fetchPastNextPage: () => void | Promise<void>;

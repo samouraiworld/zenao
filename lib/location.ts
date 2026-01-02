@@ -1,8 +1,7 @@
-import { EventLocation } from "@/app/gen/zenao/v1/zenao_pb";
-import { EventFormSchemaType } from "@/types/schemas";
+import { EventFormSchemaType, SafeEventLocation } from "@/types/schemas";
 
 export const makeLocationFromEvent = (
-  eventLocation: EventLocation | undefined,
+  eventLocation: SafeEventLocation | undefined,
 ): EventFormSchemaType["location"] => {
   switch (eventLocation?.address.case) {
     case "custom":

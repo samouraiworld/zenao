@@ -5,6 +5,7 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 import { z } from "zod";
+import { eventGetUserRolesSchema } from "@/lib/queries/event-users";
 
 interface GenericFormFieldProps<T extends FieldValues, TCondition> {
   control: Control<T>;
@@ -352,3 +353,89 @@ export const broadcastEmailFormSchema = z.object({
 });
 
 export type BroadcastEmailFormSchema = z.infer<typeof broadcastEmailFormSchema>;
+
+export const eventInfoPrivacySchema = z.object({
+  eventPrivacy: z.union([
+    z.object({
+      case: z.literal("public"),
+      value: z.object({}),
+    }),
+    z.object({
+      case: z.literal("guarded"),
+      value: z.object({
+        participationPubkey: z.string(),
+      }),
+    }),
+  ]),
+});
+
+export type SafeEventPrivacy = z.infer<typeof eventInfoPrivacySchema>;
+
+export const eventInfoGeoAddress = z.object({
+  case: z.literal("geo"),
+  value: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    address: z.string(),
+    size: z.number(),
+  }),
+});
+
+export type SafeEventGeoAddress = z.infer<typeof eventInfoGeoAddress>;
+
+export const eventInfoVirtualAddress = z.object({
+  case: z.literal("virtual"),
+  value: z.object({
+    uri: z.string().min(1).max(400),
+  }),
+});
+
+export type SafeEventVirtualAddress = z.infer<typeof eventInfoVirtualAddress>;
+
+export const eventInfoCustomAddress = z.object({
+  case: z.literal("custom"),
+  value: z.object({
+    address: z.string().min(1),
+    timezone: z.string().min(1),
+  }),
+});
+
+export type SafeEventCustomAddress = z.infer<typeof eventInfoCustomAddress>;
+
+export const eventInfoLocationSchema = z.object({
+  venueName: z.string().max(200).optional().default(""),
+  instructions: z.string().max(2000).optional().default(""),
+  address: z.union([
+    eventInfoGeoAddress,
+    eventInfoVirtualAddress,
+    eventInfoCustomAddress,
+  ]),
+});
+
+export type SafeEventLocation = z.infer<typeof eventInfoLocationSchema>;
+
+export const eventInfoSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  imageUri: z.string(),
+  organizers: z.array(z.string()),
+  gatekeepers: z.array(z.string()),
+  startDate: z.bigint(),
+  endDate: z.bigint(),
+  capacity: z.number(),
+  checkedIn: z.number(),
+  participants: z.number(),
+  pkgPath: z.string(),
+  location: eventInfoLocationSchema,
+  privacy: eventInfoPrivacySchema.optional(),
+  discoverable: z.boolean(),
+});
+
+export type SafeEventInfo = z.infer<typeof eventInfoSchema>;
+
+export const eventUserSchema = z.object({
+  event: eventInfoSchema,
+  roles: eventGetUserRolesSchema,
+});
+
+export type SafeEventUser = z.infer<typeof eventUserSchema>;

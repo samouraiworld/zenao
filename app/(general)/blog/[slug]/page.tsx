@@ -77,7 +77,7 @@ export default async function Article({
       <div className="flex flex-col gap-12 mx-auto max-w-5xl sm:w-full pb-8 md:pb-12">
         <PostHeader slug={slug} post={post} />
         <div
-          className="prose !max-w-5xl prose-h1:text-main prose-h2:text-main prose-h3:text-main prose-strong:text-main dark:text-slate-100 dark:prose-code:text-slate-100 prose-code:text-slate-700"
+          className="prose !max-w-5xl prose-h1:text-main prose-h2:text-main prose-h3:text-main prose-strong:text-main dark:text-slate-100 dark:prose-code:text-slate-100 prose-code:text-slate-700 prose-blockquote:text-secondary-color"
           dangerouslySetInnerHTML={{ __html: post.html }}
         ></div>
         {post.relatedPosts?.length ? (
