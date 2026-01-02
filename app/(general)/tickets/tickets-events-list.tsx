@@ -3,7 +3,8 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
-import { DiscoverableFilter, EventInfo } from "../../gen/zenao/v1/zenao_pb";
+import { useAuth } from "@clerk/nextjs";
+import { DiscoverableFilter } from "../../gen/zenao/v1/zenao_pb";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByParticipantList,
@@ -15,6 +16,7 @@ import { eventIdFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+import { SafeEventInfo } from "@/types/schemas";
 
 export function TicketsEventsList({
   now,
@@ -25,6 +27,7 @@ export function TicketsEventsList({
   from: FromFilter;
   userRealmId: string;
 }) {
+  const { getToken } = useAuth();
   const {
     data: eventsPages,
     isFetchingNextPage,
@@ -39,6 +42,7 @@ export function TicketsEventsList({
           now,
           Number.MAX_SAFE_INTEGER,
           DEFAULT_EVENTS_LIMIT,
+          getToken,
         )
       : eventsByParticipantList(
           userRealmId,
@@ -46,6 +50,7 @@ export function TicketsEventsList({
           now - 1,
           0,
           DEFAULT_EVENTS_LIMIT,
+          getToken,
         ),
   );
 
@@ -65,7 +70,7 @@ export function TicketsEventsList({
         acc[dateKey].push(event);
         return acc;
       },
-      {} as Record<string, EventInfo[]>,
+      {} as Record<string, SafeEventInfo[]>,
     );
   }, [events]);
 

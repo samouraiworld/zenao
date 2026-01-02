@@ -33,8 +33,8 @@ import {
   EmailSchemaType,
   emailSchema,
   eventFormSchema,
+  SafeEventInfo,
 } from "@/types/schemas";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
 import { useToast } from "@/hooks/use-toast";
@@ -152,7 +152,7 @@ export function GatekeeperManagementDialog({
   onOpenChange,
 }: {
   eventId: string;
-  eventInfo: EventInfo;
+  eventInfo: SafeEventInfo;
   gatekeepers: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;

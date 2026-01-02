@@ -5,13 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { Send } from "lucide-react";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import { useToast } from "@/hooks/use-toast";
 import { useEventBroadcastEmail } from "@/lib/mutations/event-management";
 import {
   broadcastEmailFormSchema,
   BroadcastEmailFormSchema,
+  SafeEventInfo,
 } from "@/types/schemas";
 import { cn } from "@/lib/tailwind";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
@@ -22,7 +22,7 @@ import { captureException } from "@/lib/report";
 
 interface DashboardBroadcastFormProps {
   eventId: string;
-  eventInfo: EventInfo;
+  eventInfo: SafeEventInfo;
 }
 
 function BroadcastEmailForm({

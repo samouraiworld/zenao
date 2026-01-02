@@ -4,10 +4,17 @@ import {
   queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
+import z from "zod";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { userIdFromPkgPath } from "./user";
-import { EventInfo, DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import { GetToken } from "@/lib/utils";
+import {
+  eventInfoSchema,
+  eventUserSchema,
+  SafeEventInfo,
+} from "@/types/schemas";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
 
@@ -17,9 +24,9 @@ export const eventsList = (
   limit: number,
   options?: Omit<
     UseInfiniteQueryOptions<
-      EventInfo[],
+      SafeEventInfo[],
       Error,
-      InfiniteData<EventInfo[]>,
+      InfiniteData<SafeEventInfo[]>,
       (string | number)[],
       number // pageParam type
     >,
@@ -47,7 +54,7 @@ export const eventsList = (
           discoverableFilter: DiscoverableFilter.DISCOVERABLE,
         });
 
-        return res.events;
+        return z.array(eventInfoSchema).parse(res.events);
       });
     },
     getNextPageParam: (lastPage, pages) => {
@@ -73,6 +80,7 @@ export const eventsByOrganizerListSuspense = (
   toUnixSec: number,
   limit: number,
   page: number,
+  getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -95,15 +103,24 @@ export const eventsByOrganizerListSuspense = (
       return withSpan(
         `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
         async () => {
-          const res = await zenaoClient.listEventsByOrganizer({
-            organizerId: userIdFromPkgPath(organizerRealmId),
-            limit: limitInt,
-            offset: pageInt * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
-          return res.events;
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listEventsByUserRoles(
+            {
+              userId: userIdFromPkgPath(organizerRealmId),
+              roles: ["organizer"],
+              limit: limitInt,
+              offset: pageInt * limitInt,
+              from: BigInt(fromInt),
+              to: BigInt(toInt),
+              discoverableFilter: discoverableFilter,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+
+          return z
+            .array(eventUserSchema)
+            .parse(res.events)
+            .map((eu) => eu.event);
         },
       );
     },
@@ -117,6 +134,7 @@ export const eventsByOrganizerList = (
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
+  getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -138,15 +156,24 @@ export const eventsByOrganizerList = (
       return withSpan(
         `query:backend:user:${userIdFromPkgPath(organizerRealmId)}:events:role:organizer`,
         async () => {
-          const res = await zenaoClient.listEventsByOrganizer({
-            organizerId: userIdFromPkgPath(organizerRealmId),
-            limit: limitInt,
-            offset: pageParam * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
-          return res.events;
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listEventsByUserRoles(
+            {
+              userId: userIdFromPkgPath(organizerRealmId),
+              roles: ["organizer"],
+              limit: limitInt,
+              offset: pageParam * limitInt,
+              from: BigInt(fromInt),
+              to: BigInt(toInt),
+              discoverableFilter: discoverableFilter,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+
+          return z
+            .array(eventUserSchema)
+            .parse(res.events)
+            .map((eu) => eu.event);
         },
       );
     },
@@ -172,6 +199,7 @@ export const eventsByParticipantList = (
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
+  getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -191,15 +219,24 @@ export const eventsByParticipantList = (
       return withSpan(
         `query:backend:user:${userIdFromPkgPath(participantRealmId)}:events:role:participant`,
         async () => {
-          const res = await zenaoClient.listEventsByParticipant({
-            participantId: userIdFromPkgPath(participantRealmId),
-            limit: limitInt,
-            offset: pageParam * limitInt,
-            from: BigInt(fromInt),
-            to: BigInt(toInt),
-            discoverableFilter: discoverableFilter,
-          });
-          return res.events;
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listEventsByUserRoles(
+            {
+              userId: userIdFromPkgPath(participantRealmId),
+              roles: ["participant"],
+              limit: limitInt,
+              offset: pageParam * limitInt,
+              from: BigInt(fromInt),
+              to: BigInt(toInt),
+              discoverableFilter: discoverableFilter,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+
+          return z
+            .array(eventUserSchema)
+            .parse(res.events)
+            .map((eu) => eu.event);
         },
       );
     },

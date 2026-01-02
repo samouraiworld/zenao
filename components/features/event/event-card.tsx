@@ -11,7 +11,6 @@ import { Card } from "../../widgets/cards/card";
 import { UserAvatarWithName } from "../user/user";
 import { EventImage } from "./event-image";
 import { makeLocationFromEvent } from "@/lib/location";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 import { locationTimezone } from "@/lib/event-location";
 import {
@@ -19,6 +18,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
+import { SafeEventInfo } from "@/types/schemas";
 
 const EventDateTime = ({
   startDate,
@@ -43,7 +43,7 @@ export function EventCard({
   href,
   fullDate = true,
 }: {
-  evt: EventInfo;
+  evt: SafeEventInfo;
   href: string;
   fullDate?: boolean;
 }) {
