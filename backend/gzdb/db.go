@@ -508,6 +508,70 @@ func (g *gormZenaoDB) ListCommunities(entityType string, entityID string, role s
 	return zenCmts, nil
 }
 
+// ListCommunitiesByUserRoles implements zeni.DB.
+func (g *gormZenaoDB) ListCommunitiesByUserRoles(userID string, roles []string, limit int, offset int) ([]*zeni.CommunityWithRoles, error) {
+	g, span := g.trace("gzdb.ListCommunitiesByUserRoles")
+	defer span.End()
+
+	if len(roles) == 0 {
+		return []*zeni.CommunityWithRoles{}, nil
+	}
+
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
+	query := g.db.Model(&Community{}).
+		Distinct().
+		Joins("INNER JOIN entity_roles ON entity_roles.org_id = communities.id").
+		Where("entity_roles.entity_type = ? AND entity_roles.entity_id = ? AND entity_roles.org_type = ? AND entity_roles.role IN ?",
+			zeni.EntityTypeUser, userIDInt, zeni.EntityTypeCommunity, roles).
+		Order("communities.id DESC")
+
+	var dbCmts []Community
+	if err := query.Limit(limit).Offset(offset).Find(&dbCmts).Error; err != nil {
+		return nil, fmt.Errorf("query communities: %w", err)
+	}
+
+	if len(dbCmts) == 0 {
+		return []*zeni.CommunityWithRoles{}, nil
+	}
+
+	communityIDs := make([]uint, len(dbCmts))
+	for i, cmt := range dbCmts {
+		communityIDs[i] = cmt.ID
+	}
+
+	var entityRoles []EntityRole
+	if err := g.db.Model(&EntityRole{}).
+		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND org_id IN ? AND role IN ?",
+			zeni.EntityTypeUser, userIDInt, zeni.EntityTypeCommunity, communityIDs, roles).
+		Find(&entityRoles).Error; err != nil {
+		return nil, fmt.Errorf("query entity roles: %w", err)
+	}
+
+	roleMap := make(map[uint][]string)
+	for _, er := range entityRoles {
+		roleMap[er.OrgID] = append(roleMap[er.OrgID], er.Role)
+	}
+
+	result := make([]*zeni.CommunityWithRoles, 0, len(dbCmts))
+	for _, dbCmt := range dbCmts {
+		zenCmt, err := dbCommunityToZeniCommunity(&dbCmt)
+		if err != nil {
+			return nil, fmt.Errorf("convert community: %w", err)
+		}
+
+		result = append(result, &zeni.CommunityWithRoles{
+			Community: zenCmt,
+			Roles:     roleMap[dbCmt.ID],
+		})
+	}
+
+	return result, nil
+}
+
 func (g *gormZenaoDB) GetOrgByPollID(pollID string) (orgType, orgID string, err error) {
 	pollIDInt, err := strconv.ParseUint(pollID, 10, 64)
 	if err != nil {

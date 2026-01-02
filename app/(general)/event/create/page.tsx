@@ -9,7 +9,7 @@ import {
 } from "@/components/layout/screen-container";
 import { userInfoOptions } from "@/lib/queries/user";
 import {
-  communitiesListByMember,
+  communitiesByUserRolesList,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 
@@ -36,10 +36,14 @@ export default async function CreateEventPage() {
     );
   }
 
-  // Prefetch communities of logged in user
-  // here we cannot determine yet all communnties where the user is admin
+  // Prefetch communities where logged in user is administrator
   queryClient.prefetchInfiniteQuery(
-    communitiesListByMember(userRealmId, DEFAULT_COMMUNITIES_LIMIT),
+    communitiesByUserRolesList(
+      userRealmId,
+      ["administrator"],
+      DEFAULT_COMMUNITIES_LIMIT,
+      getToken,
+    ),
   );
 
   return (

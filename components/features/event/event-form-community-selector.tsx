@@ -21,7 +21,7 @@ import { Button } from "@/components/shadcn/button";
 import { FormField } from "@/components/shadcn/form";
 import Heading from "@/components/widgets/texts/heading";
 import {
-  communitiesListByMember,
+  communitiesByUserRolesList,
   communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
@@ -43,13 +43,19 @@ export default function EventFormCommunitySelector({
   const userRealmId = userInfo?.realmId || "";
 
   const { data: userCommunitiesPages } = useSuspenseInfiniteQuery(
-    communitiesListByMember(userRealmId, DEFAULT_COMMUNITIES_LIMIT),
+    communitiesByUserRolesList(
+      userRealmId,
+      ["administrator"],
+      DEFAULT_COMMUNITIES_LIMIT,
+      getToken,
+    ),
   );
 
-  // Filter only communities where user is administrator
-  const selectableCommunities = (
-    userCommunitiesPages?.pages.flat() ?? []
-  ).filter((c) => c.administrators.includes(userRealmId!));
+  const selectableCommunities =
+    userCommunitiesPages?.pages
+      .flat()
+      .map((cu) => cu.community)
+      .filter((c) => c !== undefined) ?? [];
 
   const options = selectableCommunities.map((community) => ({
     label: community.displayName,
