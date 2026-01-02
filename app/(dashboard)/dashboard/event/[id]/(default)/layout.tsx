@@ -65,7 +65,7 @@ async function DashboardEventInfoLayoutProps({
   const renderLayout = () => (
     <div className="flex flex-col gap-8 pb-16 md:pb-0">
       <DashboardEventInfo />
-      <DashboardEventTabs>{children}</DashboardEventTabs>
+      <DashboardEventTabs roles={roles}>{children}</DashboardEventTabs>
     </div>
   );
 
