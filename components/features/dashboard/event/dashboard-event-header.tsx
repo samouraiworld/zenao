@@ -19,8 +19,8 @@ import DashboardFormActions from "./_components/dashboard-form-actions";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { EventFormSchemaType } from "@/types/schemas";
-import RoleBasedEditViewMode from "@/components/widgets/permissions/edit-view-mode";
 import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
+import RoleBasedViewMode from "@/components/widgets/permissions/view-mode";
 
 interface DashboardEventHeaderProps {
   location: EventFormSchemaType["location"];
@@ -38,32 +38,29 @@ export default function DashboardEventHeader({
     <div className="flex flex-col gap-8">
       <div className="grid grid-col-1 md:grid-cols-2 gap-10">
         {/* Title of the event */}
-        <RoleBasedEditViewMode
+        <RoleBasedViewMode
           roles={roles}
           allowedRoles={["organizer"]}
-          edit={<DashboardFormTitle />}
-          view={
+          fallback={
             <Heading level={1} size="3xl" className="max-w-1/2">
               {eventInfo.title}
             </Heading>
           }
-        />
+        >
+          <DashboardFormTitle />
+        </RoleBasedViewMode>
 
-        <RoleBasedEditViewMode
-          roles={roles}
-          allowedRoles={["organizer"]}
-          edit={<DashboardFormActions />}
-          view={null}
-        />
+        <RoleBasedViewMode roles={roles} allowedRoles={["organizer"]}>
+          <DashboardFormActions />
+        </RoleBasedViewMode>
       </div>
 
       <div className="flex flex-col w-full md:flex-row md:h-full gap-10">
         <div className="flex flex-col gap-8 w-full md:w-3/6">
-          <RoleBasedEditViewMode
+          <RoleBasedViewMode
             roles={roles}
             allowedRoles={["organizer"]}
-            edit={<DashboardFormImage />}
-            view={
+            fallback={
               <EventImage
                 src={eventInfo.imageUri}
                 sizes="(max-width: 768px) 100vw,
@@ -75,26 +72,24 @@ export default function DashboardEventHeader({
                 fetchPriority="high"
               />
             }
-          />
+          >
+            <DashboardFormImage />
+          </RoleBasedViewMode>
 
           <div className="hidden md:block">
-            <RoleBasedEditViewMode
-              roles={roles}
-              allowedRoles={["organizer"]}
-              edit={<DashbaordFormMap />}
-              view={null}
-            />
+            <RoleBasedViewMode roles={roles} allowedRoles={["organizer"]}>
+              <DashbaordFormMap />
+            </RoleBasedViewMode>
           </div>
         </div>
 
         <div className="flex flex-col gap-8 w-full md:w-3/6">
           {/* Date & Time */}
           <EventSection title={t("dateAndTime")}>
-            <RoleBasedEditViewMode
+            <RoleBasedViewMode
               roles={roles}
               allowedRoles={["organizer"]}
-              edit={<DashboardFormDateTime minDateRange={new Date()} />}
-              view={
+              fallback={
                 <>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="flex flex-col">
@@ -126,16 +121,17 @@ export default function DashboardEventHeader({
                   </div>
                 </>
               }
-            />
+            >
+              <DashboardFormDateTime minDateRange={new Date()} />
+            </RoleBasedViewMode>
           </EventSection>
 
           {/* Location */}
           <EventSection title={t("location")}>
-            <RoleBasedEditViewMode
+            <RoleBasedViewMode
               roles={roles}
               allowedRoles={["organizer"]}
-              edit={<DashboardFormLocation />}
-              view={
+              fallback={
                 <div className="flex flex-row gap-2 items-center">
                   {location.kind === "virtual" ? (
                     <Link href={location.location} target="_blank">
@@ -159,15 +155,16 @@ export default function DashboardEventHeader({
                   )}
                 </div>
               }
-            />
+            >
+              <DashboardFormLocation />
+            </RoleBasedViewMode>
           </EventSection>
 
           <EventSection title={t("capacity")}>
-            <RoleBasedEditViewMode
+            <RoleBasedViewMode
               roles={roles}
               allowedRoles={["organizer"]}
-              edit={<DashboardFormCapacity />}
-              view={
+              fallback={
                 <div className="flex gap-2">
                   <Text>
                     {eventInfo.capacity === 0
@@ -176,36 +173,32 @@ export default function DashboardEventHeader({
                   </Text>
                 </div>
               }
-            />
+            >
+              <DashboardFormCapacity />
+            </RoleBasedViewMode>
           </EventSection>
 
           {/* Community */}
-          <RoleBasedEditViewMode
+          <RoleBasedViewMode
             roles={roles}
             allowedRoles={["organizer"]}
-            edit={
-              <EventSection title={t("community")}>
-                <DashboardFormCommunity />
-              </EventSection>
-            }
-            view={
+            fallback={
               communityId ? (
                 <EventCommunitySection communityId={communityId} />
               ) : null
             }
-          />
+          >
+            <EventSection title={t("community")}>
+              <DashboardFormCommunity />
+            </EventSection>
+          </RoleBasedViewMode>
 
           {/* Security & Privacy */}
-          <RoleBasedEditViewMode
-            roles={roles}
-            allowedRoles={["organizer"]}
-            edit={
-              <EventSection title={t("securityAndPrivacy")}>
-                <DashboardFormPrivacy />
-              </EventSection>
-            }
-            view={null}
-          />
+          <RoleBasedViewMode roles={roles} allowedRoles={["organizer"]}>
+            <EventSection title={t("securityAndPrivacy")}>
+              <DashboardFormPrivacy />
+            </EventSection>
+          </RoleBasedViewMode>
         </div>
       </div>
     </div>
