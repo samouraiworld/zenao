@@ -587,6 +587,7 @@
     "sidebar": {
       "create-event-btn": "Create event",
       "events": "Events",
+      "communities": "Communities",
       "settings": "Settings",
       "coming-soon": "Soon",
       "quick-create": "Quick create"
