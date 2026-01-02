@@ -604,6 +604,11 @@
       "no-events": "No events found.",
       "create-event-btn": "Create an event"
     },
+    "communitiesTable": {
+      "communities": "Communities",
+      "no-communities": "No communities found.",
+      "create-community-btn": "Create a community"
+    },
     "eventDetails": {
       "event-details": "Event details",
       "manage-event": "Manage event",

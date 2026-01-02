@@ -1,9 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
+import CommunitiesPageLayout from "./communities-page-layout";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { userInfoOptions } from "@/lib/queries/user";
-import { communitiesListByMember } from "@/lib/queries/community";
 
 export default async function DashboardCommunityPage() {
   const queryClient = getQueryClient();
@@ -27,7 +27,5 @@ export default async function DashboardCommunityPage() {
     );
   }
 
-  // queryClient.prefetchQuery(communitiesListByMember)
-
-  return <div>Dashboard Community Page</div>;
+  return <CommunitiesPageLayout />;
 }
