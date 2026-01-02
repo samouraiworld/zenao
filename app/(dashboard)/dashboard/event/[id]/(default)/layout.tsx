@@ -13,6 +13,8 @@ import {
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-event-info";
+import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
+import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
@@ -56,31 +58,48 @@ export default async function DashboardEventInfoLayoutProps({
     eventUserRoles(eventId, userRealmId),
   );
 
-  if (!roles.includes("organizer")) {
+  if (!(roles.includes("organizer") || roles.includes("gatekeeper"))) {
     notFound();
   }
 
   queryClient.prefetchInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
   );
+
+  const renderLayout = () => (
+    <div className="flex flex-col gap-8 pb-16 md:pb-0">
+      <DashboardEventInfo />
+      <DashboardEventTabs>{children}</DashboardEventTabs>
+    </div>
+  );
+
+  if (roles.includes("gatekeeper")) {
+    return (
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <DashboardEventContextProvider
+          eventId={eventId}
+          eventInfo={eventInfo}
+          roles={roles}
+        >
+          {renderLayout()}
+        </DashboardEventContextProvider>
+      </HydrationBoundary>
+    );
+  }
+
   queryClient.prefetchQuery(eventGatekeepersEmails(eventId, getToken));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="flex flex-col gap-8">
-        <DashboardEventInfo
-          eventId={eventId}
-          eventInfo={eventInfo}
-          realmId={userRealmId}
-        />
-
-        <DashboardEventTabs
-          eventId={eventId}
-          nbParticipants={eventInfo.participants}
-        >
-          {children}
-        </DashboardEventTabs>
-      </div>
+      <DashboardEventContextProvider
+        eventId={eventId}
+        eventInfo={eventInfo}
+        roles={roles}
+      >
+        <DashboardEventEditionContextProvider>
+          {renderLayout()}
+        </DashboardEventEditionContextProvider>
+      </DashboardEventContextProvider>
     </HydrationBoundary>
   );
 }

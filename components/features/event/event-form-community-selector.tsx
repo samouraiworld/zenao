@@ -126,7 +126,9 @@ export default function EventFormCommunitySelector({
 
   return (
     <div className="flex flex-col gap-4">
-      <Heading level={3}>{t("community-selector-label")}</Heading>
+      <Heading size="sm" level={3}>
+        {t("community-selector-label")}
+      </Heading>
 
       <FormField
         control={form.control}

@@ -2,7 +2,6 @@
 
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import DashboardImportantInfo from "./dashboard-important-info";
 import DashboardEventHeader from "./dashboard-event-header";
 import { makeLocationFromEvent } from "@/lib/location";
 import {
@@ -10,19 +9,10 @@ import {
   communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
-import { SafeEventInfo } from "@/types/schemas";
+import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
 
-interface DashboardEventDetailsProps {
-  eventId: string;
-  eventInfo: SafeEventInfo;
-  realmId: string;
-}
-
-export default function DashboardEventInfo({
-  eventId,
-  eventInfo,
-  realmId: _realmId,
-}: DashboardEventDetailsProps) {
+export default function DashboardEventInfo() {
+  const { eventId, eventInfo } = useDashboardEventContext();
   const location = makeLocationFromEvent(eventInfo.location);
 
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
@@ -40,13 +30,7 @@ export default function DashboardEventInfo({
 
   return (
     <div className="flex flex-col gap-8">
-      <DashboardImportantInfo eventId={eventId} eventInfo={eventInfo} />
-      <DashboardEventHeader
-        eventId={eventId}
-        eventInfo={eventInfo}
-        location={location}
-        communityId={communityId}
-      />
+      <DashboardEventHeader location={location} communityId={communityId} />
     </div>
   );
 }
