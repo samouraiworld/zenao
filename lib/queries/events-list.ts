@@ -7,6 +7,7 @@ import {
 import z from "zod";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
+import { EventUserRole } from "./event-users";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { GetToken } from "@/lib/utils";
 import {
@@ -72,13 +73,14 @@ export const eventsList = (
   });
 };
 
-export const eventsByOrganizerListSuspense = (
-  organizerId: string | undefined,
+export const eventsByRolesListSuspense = (
+  userId: string | undefined,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
   page: number,
+  roles: EventUserRole[],
   getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
@@ -88,42 +90,37 @@ export const eventsByOrganizerListSuspense = (
 
   return queryOptions({
     queryKey: [
-      "eventsByOrganizer",
-      organizerId,
+      "eventsByRoles",
+      userId,
       discoverableFilter,
       fromInt,
       toInt,
       limitInt,
       pageInt,
+      roles,
     ],
     queryFn: async () => {
-      if (!organizerId) return [];
+      if (!userId) return [];
 
-      return withSpan(
-        `query:backend:user:${organizerId}:events:role:organizer`,
-        async () => {
-          const token = getToken ? await getToken() : null;
-          const res = await zenaoClient.listEventsByUserRoles(
-            {
-              userId: organizerId,
-              roles: ["organizer"],
-              limit: limitInt,
-              offset: pageInt * limitInt,
-              from: BigInt(fromInt),
-              to: BigInt(toInt),
-              discoverableFilter: discoverableFilter,
-            },
-            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
-          );
+      return withSpan(`query:backend:user:${userId}:events:roles`, async () => {
+        const token = getToken ? await getToken() : null;
+        const res = await zenaoClient.listEventsByUserRoles(
+          {
+            userId,
+            roles,
+            limit: limitInt,
+            offset: pageInt * limitInt,
+            from: BigInt(fromInt),
+            to: BigInt(toInt),
+            discoverableFilter: discoverableFilter,
+          },
+          token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+        );
 
-          return z
-            .array(eventUserSchema)
-            .parse(res.events)
-            .map((eu) => eu.event);
-        },
-      );
+        return z.array(eventUserSchema).parse(res.events);
+      });
     },
-    enabled: !!organizerId,
+    enabled: !!userId,
   });
 };
 

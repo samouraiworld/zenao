@@ -6,14 +6,14 @@ import Text from "@/components/widgets/texts/text";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
 
-export default function EventsTableViewLoading({ now }: { now: number }) {
-  const columns = useEventsTableColumns(now);
+export default function EventsTableViewLoading() {
+  const columns = useEventsTableColumns();
   const table = useDataTableInstance({
     data: [], // We don't care about data during loading
     columns,
     enableRowSelection: false,
     defaultPageSize: DEFAULT_EVENTS_LIMIT,
-    getRowId: (row) => row.id.toString(),
+    getRowId: (row) => row.event.id.toString(),
   });
 
   return (

@@ -13,12 +13,11 @@ import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
-import { SafeEventInfo } from "@/types/schemas";
+import { SafeEventUser } from "@/types/schemas";
 
 interface EventsTableViewProps {
-  now: number;
   tab: "upcoming" | "past";
-  events: SafeEventInfo[];
+  events: SafeEventUser[];
   isFetchingPastNextPage: boolean;
   isFetchingPastPreviousPage: boolean;
   fetchPastNextPage: () => void | Promise<void>;
@@ -34,7 +33,6 @@ interface EventsTableViewProps {
 }
 
 export function EventsTableView({
-  now,
   tab,
   events,
   isFetchingPastNextPage,
@@ -51,14 +49,14 @@ export function EventsTableView({
   hasPastPreviousPage,
 }: EventsTableViewProps) {
   const router = useRouter();
-  const columns = useEventsTableColumns(now);
+  const columns = useEventsTableColumns();
   const t = useTranslations("dashboard.eventsTable");
   const table = useDataTableInstance({
     data: events,
     columns,
     enableRowSelection: false,
     defaultPageSize: DEFAULT_EVENTS_LIMIT,
-    getRowId: (row) => row.id,
+    getRowId: (row) => row.event.id,
   });
 
   return (
@@ -81,7 +79,7 @@ export function EventsTableView({
               </div>
             )}
             onClickRow={(row) => {
-              router.push(`/dashboard/event/${row.original.id}`);
+              router.push(`/dashboard/event/${row.original.event.id}`);
             }}
           />
         </div>
