@@ -13,7 +13,7 @@ import DashboardFormDateTime from "./_components/dashboard-form-date-time";
 import DashboardFormLocation from "./_components/dashboard-form-location";
 import DashboardFormCapacity from "./_components/dashboard-form-capacity";
 import DashboardFormCommunity from "./_components/dashboard-form-community";
-import DashbaordFormMap from "./_components/dashboard-form-map";
+import DashboardFormMap from "./_components/dashboard-form-map";
 import { DashboardFormPrivacy } from "./_components/dashboard-form-privacy";
 import DashboardFormActions from "./_components/dashboard-form-actions";
 import Heading from "@/components/widgets/texts/heading";
@@ -78,7 +78,7 @@ export default function DashboardEventHeader({
 
           <div className="hidden md:block">
             <RoleBasedViewMode roles={roles} allowedRoles={["organizer"]}>
-              <DashbaordFormMap />
+              <DashboardFormMap />
             </RoleBasedViewMode>
           </div>
         </div>
