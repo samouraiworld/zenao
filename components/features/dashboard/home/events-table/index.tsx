@@ -7,7 +7,7 @@ import { EventsTableView } from "./events-table-view";
 import { userInfoOptions } from "@/lib/queries/user";
 import {
   DEFAULT_EVENTS_LIMIT,
-  eventsByOrganizerListSuspense,
+  eventsByRolesListSuspense,
 } from "@/lib/queries/events-list";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import useManualPagination from "@/hooks/use-manual-pagination";
@@ -33,26 +33,28 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
 
   const { data: pastEvents, isFetching: isFetchingPastEvents } =
     useSuspenseQuery(
-      eventsByOrganizerListSuspense(
+      eventsByRolesListSuspense(
         userInfo?.realmId,
         DiscoverableFilter.UNSPECIFIED,
         now - 1,
         0,
         DEFAULT_EVENTS_LIMIT,
         tablePage - 1,
+        ["organizer", "gatekeeper"],
         getToken,
       ),
     );
 
   const { data: upcomingEvents, isFetching: isFetchingUpcomingEvents } =
     useSuspenseQuery(
-      eventsByOrganizerListSuspense(
+      eventsByRolesListSuspense(
         userInfo?.realmId,
         DiscoverableFilter.UNSPECIFIED,
         now,
         Number.MAX_SAFE_INTEGER,
         DEFAULT_EVENTS_LIMIT,
         tablePage - 1,
+        ["organizer", "gatekeeper"],
         getToken,
       ),
     );

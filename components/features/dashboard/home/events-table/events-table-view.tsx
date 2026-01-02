@@ -14,12 +14,12 @@ import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
-import { SafeEventInfo } from "@/types/schemas";
+import { SafeEventUser } from "@/types/schemas";
 
 interface EventsTableViewProps {
   now: number;
   tab: "upcoming" | "past";
-  events: SafeEventInfo[];
+  events: SafeEventUser[];
   isFetchingPastNextPage: boolean;
   isFetchingPastPreviousPage: boolean;
   fetchPastNextPage: () => void | Promise<void>;
@@ -59,7 +59,7 @@ export function EventsTableView({
     columns,
     enableRowSelection: false,
     defaultPageSize: DEFAULT_EVENTS_LIMIT,
-    getRowId: (row) => row.pkgPath.toString(),
+    getRowId: (row) => row.event.pkgPath.toString(),
   });
 
   return (
@@ -83,7 +83,7 @@ export function EventsTableView({
             )}
             onClickRow={(row) => {
               router.push(
-                `/dashboard/event/${eventIdFromPkgPath(row.original.pkgPath)}`,
+                `/dashboard/event/${eventIdFromPkgPath(row.original.event.pkgPath)}`,
               );
             }}
           />

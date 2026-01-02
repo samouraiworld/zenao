@@ -15,11 +15,11 @@ import { Button } from "@/components/shadcn/button";
 import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import Text from "@/components/widgets/texts/text";
-import { SafeEventInfo } from "@/types/schemas";
+import { SafeEventUser } from "@/types/schemas";
 
 export const useEventsTableColumns: (
   now: number,
-) => ColumnDef<SafeEventInfo>[] = (now) =>
+) => ColumnDef<SafeEventUser>[] = (now) =>
   useMemo(
     () => [
       {
@@ -30,7 +30,10 @@ export const useEventsTableColumns: (
         ),
         cell: ({ row }) => (
           <Text size="sm" variant="secondary">
-            {formatTZ(fromUnixTime(Number(row.original.startDate)), "PPp O")}
+            {formatTZ(
+              fromUnixTime(Number(row.original.event.startDate)),
+              "PPp O",
+            )}
           </Text>
         ),
         enableHiding: false,
@@ -44,7 +47,7 @@ export const useEventsTableColumns: (
             title="Name"
           />
         ),
-        cell: ({ row }) => <Text size="sm">{row.original.title}</Text>,
+        cell: ({ row }) => <Text size="sm">{row.original.event.title}</Text>,
         enableSorting: false,
         sortDescFirst: true,
       },
@@ -56,7 +59,19 @@ export const useEventsTableColumns: (
         ),
         cell: ({ row }) => (
           <Text size="sm" variant="secondary">
-            {row.original.participants}
+            {row.original.event.participants}
+          </Text>
+        ),
+      },
+      {
+        accessorKey: "roles",
+        enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title="Roles" />
+        ),
+        cell: ({ row }) => (
+          <Text size="sm" variant="secondary">
+            {row.original.roles.map((role) => role).join(", ")}
           </Text>
         ),
       },
@@ -78,21 +93,23 @@ export const useEventsTableColumns: (
             <DropdownMenuContent align="end" className="w-32">
               <DropdownMenuItem>
                 <Link
-                  href={`/event/${eventIdFromPkgPath(row.original.pkgPath)}`}
+                  href={`/event/${eventIdFromPkgPath(row.original.event.pkgPath)}`}
                 >
                   View
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem disabled={now >= Number(row.original.endDate)}>
+              <DropdownMenuItem
+                disabled={now >= Number(row.original.event.endDate)}
+              >
                 <Link
-                  href={`/event/${eventIdFromPkgPath(row.original.pkgPath)}/edit`}
+                  href={`/event/${eventIdFromPkgPath(row.original.event.pkgPath)}/edit`}
                 >
                   Edit
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                disabled={now >= Number(row.original.startDate)}
+                disabled={now >= Number(row.original.event.startDate)}
               >
                 Cancel Event
               </DropdownMenuItem>
