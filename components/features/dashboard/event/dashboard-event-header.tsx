@@ -81,7 +81,7 @@ export default function DashboardEventHeader({
             <RoleBasedEditViewMode
               roles={roles}
               allowedRoles={["organizer"]}
-              edit={<DashbaordFormMap />}
+              edit={<DashboardFormMap />}
               view={null}
             />
           </div>
