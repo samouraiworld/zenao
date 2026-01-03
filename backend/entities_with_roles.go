@@ -34,15 +34,12 @@ func (s *ZenaoServer) EntitiesWithRoles(ctx context.Context, req *connect.Reques
 			if err != nil {
 				return err
 			}
-			realmID, err := s.Chain.EntityRealmID(e.EntityType, e.EntityID)
-			if err != nil {
-				return err
+			entityWithRoles := &zenaov1.EntityWithRoles{
+				EntityType: e.EntityType,
+				EntityId:   e.EntityID,
+				Roles:      roles,
 			}
-			userWithRoles := &zenaov1.EntityWithRoles{
-				RealmId: realmID,
-				Roles:   roles,
-			}
-			res = append(res, userWithRoles)
+			res = append(res, entityWithRoles)
 		}
 		return nil
 	}); err != nil {

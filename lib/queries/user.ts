@@ -32,8 +32,3 @@ export const userInfoOptions = (
     },
     enabled: !!userId,
   });
-
-export function userIdFromPkgPath(pkgPath: string): string {
-  const res = /(u\d+)$/.exec(pkgPath);
-  return res?.[1].substring(1) || "";
-}

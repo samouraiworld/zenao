@@ -12,7 +12,6 @@ import {
 import { FromFilter } from "@/lib/search-params";
 import EmptyEventsList from "@/components/features/event/event-empty-list";
 import { EventCard } from "@/components/features/event/event-card";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
@@ -21,11 +20,11 @@ import { SafeEventInfo } from "@/types/schemas";
 export function TicketsEventsList({
   now,
   from,
-  userRealmId,
+  userId,
 }: {
   now: number;
   from: FromFilter;
-  userRealmId: string;
+  userId: string;
 }) {
   const { getToken } = useAuth();
   const {
@@ -37,7 +36,7 @@ export function TicketsEventsList({
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(
-          userRealmId,
+          userId,
           DiscoverableFilter.UNSPECIFIED,
           now,
           Number.MAX_SAFE_INTEGER,
@@ -45,7 +44,7 @@ export function TicketsEventsList({
           getToken,
         )
       : eventsByParticipantList(
-          userRealmId,
+          userId,
           DiscoverableFilter.UNSPECIFIED,
           now - 1,
           0,
@@ -93,11 +92,7 @@ export function TicketsEventsList({
 
             <EventCardListLayout>
               {eventsOfTheDay.map((evt) => (
-                <EventCard
-                  key={evt.pkgPath}
-                  evt={evt}
-                  href={`/ticket/${eventIdFromPkgPath(evt.pkgPath)}`}
-                />
+                <EventCard key={evt.id} evt={evt} href={`/ticket/${evt.id}`} />
               ))}
             </EventCardListLayout>
           </div>

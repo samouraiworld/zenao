@@ -28,14 +28,13 @@ function EventPolls({ params }: EventPollsProps) {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userRealmId),
+    eventUserRoles(eventId, userProfileId),
   );
 
-  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${pkgPath}:main`;
+  const feedId = `event:${eventId}:main`;
 
   const {
     data: pollsPages,
@@ -44,7 +43,7 @@ function EventPolls({ params }: EventPollsProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userRealmId || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userProfileId || ""),
   );
 
   const polls = useMemo(
@@ -79,7 +78,7 @@ function EventPolls({ params }: EventPollsProps) {
         ) : (
           <PollsList
             polls={polls}
-            userRealmId={userRealmId}
+            userId={userProfileId}
             onReactionChange={onReactionChange}
             canInteract={
               roles.includes("organizer") || roles.includes("participant")

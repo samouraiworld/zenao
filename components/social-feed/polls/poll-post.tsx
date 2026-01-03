@@ -8,7 +8,7 @@ import { pollInfo } from "@/lib/queries/social-feed";
 
 export function PollPost({
   pollId,
-  userRealmId,
+  userId,
   pollPost,
   onDelete,
   onReactionChange,
@@ -20,7 +20,7 @@ export function PollPost({
   isOwner,
 }: {
   pollId: string;
-  userRealmId: string | null;
+  userId: string | null;
   pollPost: PollPostView;
   canReply?: boolean;
   replyHref?: string;
@@ -31,7 +31,7 @@ export function PollPost({
   isOwner?: boolean;
   canInteract?: boolean;
 }) {
-  const { data } = useSuspenseQuery(pollInfo(pollId, userRealmId || ""));
+  const { data } = useSuspenseQuery(pollInfo(pollId, userId || ""));
 
   const combined: PollPostViewInfo = useMemo(() => {
     return {
@@ -44,7 +44,7 @@ export function PollPost({
     <PollPostCard
       pollId={pollId}
       pollPost={combined}
-      userRealmId={userRealmId || ""}
+      userId={userId || ""}
       onDelete={onDelete}
       onReactionChange={onReactionChange}
       isDeleting={isDeleting}

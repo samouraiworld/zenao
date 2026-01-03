@@ -5,16 +5,12 @@ import { ProfileInfo } from "./profile-info";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { profileOptions } from "@/lib/queries/profile";
-import {
-  gnoProfileDetailsSchema,
-  RealmId,
-  realmIdSchema,
-} from "@/types/schemas";
+import { profileDetailsSchema } from "@/types/schemas";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
 import { web2URL } from "@/lib/uris";
 
 type Props = {
-  params: Promise<{ realmId: string[] }>;
+  params: Promise<{ userId: string }>;
 };
 
 export const revalidate = 60;
@@ -27,11 +23,14 @@ export async function generateMetadata({
   params,
 }: Props): Promise<Metadata | undefined> {
   const queryClient = getQueryClient();
-  const { realmId: realmIdUnsafe } = await params;
+  const { userId } = await params;
+
+  if (!userId) {
+    return undefined;
+  }
 
   try {
-    const realmId = await realmIdSchema.parseAsync(realmIdUnsafe.join("/"));
-    const profileData = await queryClient.fetchQuery(profileOptions(realmId));
+    const profileData = await queryClient.fetchQuery(profileOptions(userId));
 
     if (
       !profileData?.bio &&
@@ -43,7 +42,7 @@ export async function generateMetadata({
 
     const profileDetails = deserializeWithFrontMatter({
       serialized: profileData?.bio,
-      schema: gnoProfileDetailsSchema,
+      schema: profileDetailsSchema,
       defaultValue: {
         bio: "",
         socialMediaLinks: [],
@@ -73,31 +72,26 @@ export async function generateMetadata({
       },
     };
   } catch (e) {
-    console.log("Failed to parse realmId: ", e);
+    console.log("Failed to fetch profile: ", e);
     notFound();
   }
 }
 
 export default async function ProfilePage({ params }: Props) {
   const queryClient = getQueryClient();
-  const { realmId: realmIdUnsafe } = await params;
+  const { userId } = await params;
 
-  let realmId: RealmId;
-
-  try {
-    realmId = await realmIdSchema.parseAsync(realmIdUnsafe.join("/"));
-  } catch (e) {
-    console.log("Failed to parse realmId: ", e);
+  if (!userId) {
     notFound();
   }
 
-  queryClient.prefetchQuery(profileOptions(realmId));
+  queryClient.prefetchQuery(profileOptions(userId));
   const now = Date.now() / 1000;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ScreenContainer>
-        <ProfileInfo realmId={realmId} now={now} />
+        <ProfileInfo userId={userId} now={now} />
       </ScreenContainer>
     </HydrationBoundary>
   );

@@ -12,7 +12,6 @@ import ProfileHeader from "./profile-header";
 import { EventCard } from "@/components/features/event/event-card";
 import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByOrganizerList,
@@ -22,15 +21,14 @@ import EventCardListLayout from "@/components/features/event/event-card-list-lay
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { userInfoOptions } from "@/lib/queries/user";
-import { addressFromRealmId } from "@/lib/gno";
-import { gnoProfileDetailsSchema, RealmId } from "@/types/schemas";
+import { profileDetailsSchema } from "@/types/schemas";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
 
 export function ProfileInfo({
-  realmId,
+  userId: profileUserId,
   now,
 }: {
-  realmId: RealmId;
+  userId: string;
   now: number;
 }) {
   const t = useTranslations("profile-info");
@@ -38,15 +36,13 @@ export function ProfileInfo({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const address = addressFromRealmId(realmId);
-  const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
-  const isOwner = loggedUserAddress === address;
+  const isOwner = userInfo?.userId === profileUserId;
   // The connected user can see his both discoverable and undiscoverable events
   const discoverableFilter = isOwner
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
 
-  const { data: profile } = useSuspenseQuery(profileOptions(realmId));
+  const { data: profile } = useSuspenseQuery(profileOptions(profileUserId));
   const {
     data: upcomingEventsPages,
     isFetchingNextPage: isFetchingUpcomingNextPage,
@@ -55,7 +51,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextUpcomingPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      realmId,
+      profileUserId,
       discoverableFilter,
       now,
       Number.MAX_SAFE_INTEGER,
@@ -71,7 +67,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextPastPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      realmId,
+      profileUserId,
       discoverableFilter,
       now - 1,
       0,
@@ -97,7 +93,7 @@ export function ProfileInfo({
 
   const profileDetails = deserializeWithFrontMatter({
     serialized: profile.bio,
-    schema: gnoProfileDetailsSchema,
+    schema: profileDetailsSchema,
     defaultValue: {
       bio: "",
       socialMediaLinks: [],
@@ -126,7 +122,7 @@ export function ProfileInfo({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <ProfileHeader
-          address={address}
+          userId={profileUserId}
           displayName={profile.displayName}
           bio={profile.bio}
           avatarUri={profile.avatarUri}
@@ -142,11 +138,7 @@ export function ProfileInfo({
       <div className="flex flex-col gap-0">
         <EventCardListLayout>
           {upcomingEvents.map((evt) => (
-            <EventCard
-              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
-              key={evt.pkgPath}
-              evt={evt}
-            />
+            <EventCard href={`/event/${evt.id}`} key={evt.id} evt={evt} />
           ))}
         </EventCardListLayout>
 
@@ -167,11 +159,7 @@ export function ProfileInfo({
       <div className="flex flex-col gap-0">
         <EventCardListLayout>
           {pastEvents.map((evt) => (
-            <EventCard
-              href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
-              key={evt.pkgPath}
-              evt={evt}
-            />
+            <EventCard href={`/event/${evt.id}`} key={evt.id} evt={evt} />
           ))}
         </EventCardListLayout>
 

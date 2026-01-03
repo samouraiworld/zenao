@@ -79,25 +79,21 @@ function MembersPreview({ id }: { id: string }) {
   const { data: members } = useSuspenseQuery(
     communityUsersWithRoles(id, ["member"]),
   );
-  const memberAddresses = members?.map((m) => m.realmId);
+  const memberIds = members?.map((m) => m.entityId);
 
   return (
     <div className="flex flex-col gap-2 ">
       {/* 6 because we decide to show the first 6 participants avatars as preview */}
       <Suspense fallback={<UsersAvatarsPreviewFallback nbUsers={6} />}>
         <UsersAvatarsPreview
-          users={
-            memberAddresses.length > 6
-              ? memberAddresses.slice(0, 6)
-              : memberAddresses
-          }
+          users={memberIds.length > 6 ? memberIds.slice(0, 6) : memberIds}
         />
       </Suspense>
       <Text className="text-xs md:text-sm text-secondary-color">
-        {t("members", { count: memberAddresses.length })}
+        {t("members", { count: memberIds.length })}
       </Text>
       <Suspense fallback={<Skeleton className="h-4 w-32" />}>
-        <UsersNamesPreview usersAddresses={memberAddresses} />
+        <UsersNamesPreview usersAddresses={memberIds} />
       </Suspense>
     </div>
   );

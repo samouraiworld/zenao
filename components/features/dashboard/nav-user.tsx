@@ -31,13 +31,13 @@ import {
 } from "@/components/shadcn/dropdown-menu";
 
 type NavUserProps = {
-  readonly realmId: string;
+  readonly userId: string;
   readonly user: UserProfile;
 };
 
 const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
-export function NavUser({ realmId, user }: NavUserProps) {
+export function NavUser({ userId, user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const t = useTranslations("dashboard.navUser");
 
@@ -60,7 +60,7 @@ export function NavUser({ realmId, user }: NavUserProps) {
                 <SignedIn>
                   <div className={avatarClassName}>
                     <UserAvatar
-                      realmId={realmId}
+                      userId={userId}
                       className={avatarClassName}
                       size="md"
                     />
@@ -70,7 +70,7 @@ export function NavUser({ realmId, user }: NavUserProps) {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.displayName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {realmId}
+                  {userId}
                 </span>
               </div>
               <EllipsisVertical className="ml-auto size-4" />
@@ -93,7 +93,7 @@ export function NavUser({ realmId, user }: NavUserProps) {
                 <SignedIn>
                   <div className={avatarClassName}>
                     <UserAvatar
-                      realmId={realmId}
+                      userId={userId}
                       className={avatarClassName}
                       size="md"
                     />
@@ -104,7 +104,7 @@ export function NavUser({ realmId, user }: NavUserProps) {
                     {user.displayName}
                   </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {realmId}
+                    {userId}
                   </span>
                 </div>
               </div>
@@ -112,7 +112,7 @@ export function NavUser({ realmId, user }: NavUserProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href={`/profile/${realmId}`}>
+                <Link href={`/profile/${userId}`}>
                   <CircleUserRound />
                   {t("profile")}
                 </Link>

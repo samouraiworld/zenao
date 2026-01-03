@@ -8,7 +8,7 @@ interface EditUserProfileRequest {
   bio: string;
   avatarUri: string;
   token: string;
-  realmId: string;
+  userId: string;
 }
 
 export const useEditUserProfile = () => {
@@ -32,7 +32,7 @@ export const useEditUserProfile = () => {
       );
     },
     onSuccess: async (_, variables) => {
-      await queryClient.invalidateQueries(profileOptions(variables.realmId));
+      await queryClient.invalidateQueries(profileOptions(variables.userId));
     },
   });
 

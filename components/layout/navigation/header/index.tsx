@@ -272,7 +272,7 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    realmId={userInfo?.realmId || ""}
+                    userId={userInfo?.userId || ""}
                     className={avatarClassName}
                     size="md"
                   />
@@ -282,7 +282,7 @@ const Auth = ({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <Link href={`/profile/${userInfo?.realmId}`}>
+          <Link href={`/profile/${userInfo?.userId}`}>
             <DropdownMenuItem className="cursor-pointer">
               {t("view-profile")}
             </DropdownMenuItem>

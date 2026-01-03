@@ -109,7 +109,7 @@ func (*HealthRequest) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{0}
 }
 
-// XXX: add more fields (e.g. version, commit_hash, gno.land version, ...)
+// XXX: add more fields (e.g. version, commit_hash, ...)
 type HealthResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Maintenance   bool                   `protobuf:"varint,1,opt,name=maintenance,proto3" json:"maintenance,omitempty"`
@@ -296,7 +296,7 @@ func (*GetUserInfoRequest) Descriptor() ([]byte, []int) {
 
 type GetUserInfoResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RealmId       string                 `protobuf:"bytes,1,opt,name=realm_id,json=realmId,proto3" json:"realm_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Plan          string                 `protobuf:"bytes,2,opt,name=plan,proto3" json:"plan,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -332,9 +332,9 @@ func (*GetUserInfoResponse) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *GetUserInfoResponse) GetRealmId() string {
+func (x *GetUserInfoResponse) GetUserId() string {
 	if x != nil {
-		return x.RealmId
+		return x.UserId
 	}
 	return ""
 }
@@ -348,7 +348,7 @@ func (x *GetUserInfoResponse) GetPlan() string {
 
 type Profile struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Address       string                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	Bio           string                 `protobuf:"bytes,3,opt,name=bio,proto3" json:"bio,omitempty"`
 	AvatarUri     string                 `protobuf:"bytes,4,opt,name=avatar_uri,json=avatarUri,proto3" json:"avatar_uri,omitempty"`
@@ -386,9 +386,9 @@ func (*Profile) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *Profile) GetAddress() string {
+func (x *Profile) GetUserId() string {
 	if x != nil {
-		return x.Address
+		return x.UserId
 	}
 	return ""
 }
@@ -2292,17 +2292,17 @@ func (x *EventPrivacyGuarded) GetParticipationPubkey() string {
 
 type EventInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	ImageUri      string                 `protobuf:"bytes,3,opt,name=image_uri,json=imageUri,proto3" json:"image_uri,omitempty"`
-	Organizers    []string               `protobuf:"bytes,4,rep,name=organizers,proto3" json:"organizers,omitempty"`
-	Gatekeepers   []string               `protobuf:"bytes,5,rep,name=gatekeepers,proto3" json:"gatekeepers,omitempty"`
-	StartDate     int64                  `protobuf:"varint,6,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"` // unix seconds
-	EndDate       int64                  `protobuf:"varint,7,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`       // unix seconds
-	Capacity      uint32                 `protobuf:"varint,8,opt,name=capacity,proto3" json:"capacity,omitempty"`
-	Location      *EventLocation         `protobuf:"bytes,9,opt,name=location,proto3" json:"location,omitempty"`
-	Participants  uint32                 `protobuf:"varint,10,opt,name=participants,proto3" json:"participants,omitempty"`
-	PkgPath       string                 `protobuf:"bytes,11,opt,name=pkg_path,json=pkgPath,proto3" json:"pkg_path,omitempty"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	ImageUri      string                 `protobuf:"bytes,4,opt,name=image_uri,json=imageUri,proto3" json:"image_uri,omitempty"`
+	Organizers    []string               `protobuf:"bytes,5,rep,name=organizers,proto3" json:"organizers,omitempty"`
+	Gatekeepers   []string               `protobuf:"bytes,6,rep,name=gatekeepers,proto3" json:"gatekeepers,omitempty"`
+	StartDate     int64                  `protobuf:"varint,7,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"` // unix seconds
+	EndDate       int64                  `protobuf:"varint,8,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`       // unix seconds
+	Capacity      uint32                 `protobuf:"varint,9,opt,name=capacity,proto3" json:"capacity,omitempty"`
+	Location      *EventLocation         `protobuf:"bytes,10,opt,name=location,proto3" json:"location,omitempty"`
+	Participants  uint32                 `protobuf:"varint,11,opt,name=participants,proto3" json:"participants,omitempty"`
 	Privacy       *EventPrivacy          `protobuf:"bytes,12,opt,name=privacy,proto3" json:"privacy,omitempty"`
 	CheckedIn     uint32                 `protobuf:"varint,13,opt,name=checked_in,json=checkedIn,proto3" json:"checked_in,omitempty"`
 	Discoverable  bool                   `protobuf:"varint,14,opt,name=discoverable,proto3" json:"discoverable,omitempty"`
@@ -2338,6 +2338,13 @@ func (x *EventInfo) ProtoReflect() protoreflect.Message {
 // Deprecated: Use EventInfo.ProtoReflect.Descriptor instead.
 func (*EventInfo) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *EventInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
 }
 
 func (x *EventInfo) GetTitle() string {
@@ -2408,13 +2415,6 @@ func (x *EventInfo) GetParticipants() uint32 {
 		return x.Participants
 	}
 	return 0
-}
-
-func (x *EventInfo) GetPkgPath() string {
-	if x != nil {
-		return x.PkgPath
-	}
-	return ""
 }
 
 func (x *EventInfo) GetPrivacy() *EventPrivacy {
@@ -4206,8 +4206,9 @@ func (x *EntitiesWithRolesRequest) GetRoles() []string {
 
 type EntityWithRoles struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RealmId       string                 `protobuf:"bytes,1,opt,name=realm_id,json=realmId,proto3" json:"realm_id,omitempty"`
-	Roles         []string               `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
+	EntityType    string                 `protobuf:"bytes,1,opt,name=entity_type,json=entityType,proto3" json:"entity_type,omitempty"`
+	EntityId      string                 `protobuf:"bytes,2,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	Roles         []string               `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4242,9 +4243,16 @@ func (*EntityWithRoles) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{75}
 }
 
-func (x *EntityWithRoles) GetRealmId() string {
+func (x *EntityWithRoles) GetEntityType() string {
 	if x != nil {
-		return x.RealmId
+		return x.EntityType
+	}
+	return ""
+}
+
+func (x *EntityWithRoles) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
 	}
 	return ""
 }
@@ -4390,13 +4398,13 @@ func (x *GetCommunityResponse) GetCommunity() *CommunityInfo {
 
 type CommunityInfo struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	DisplayName    string                 `protobuf:"bytes,1,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Description    string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	AvatarUri      string                 `protobuf:"bytes,3,opt,name=avatar_uri,json=avatarUri,proto3" json:"avatar_uri,omitempty"`
-	BannerUri      string                 `protobuf:"bytes,4,opt,name=banner_uri,json=bannerUri,proto3" json:"banner_uri,omitempty"`
-	Administrators []string               `protobuf:"bytes,5,rep,name=administrators,proto3" json:"administrators,omitempty"`
-	CountMembers   uint32                 `protobuf:"varint,6,opt,name=count_members,json=countMembers,proto3" json:"count_members,omitempty"`
-	PkgPath        string                 `protobuf:"bytes,7,opt,name=pkg_path,json=pkgPath,proto3" json:"pkg_path,omitempty"`
+	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	DisplayName    string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Description    string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	AvatarUri      string                 `protobuf:"bytes,4,opt,name=avatar_uri,json=avatarUri,proto3" json:"avatar_uri,omitempty"`
+	BannerUri      string                 `protobuf:"bytes,5,opt,name=banner_uri,json=bannerUri,proto3" json:"banner_uri,omitempty"`
+	Administrators []string               `protobuf:"bytes,6,rep,name=administrators,proto3" json:"administrators,omitempty"`
+	CountMembers   uint32                 `protobuf:"varint,7,opt,name=count_members,json=countMembers,proto3" json:"count_members,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -4429,6 +4437,13 @@ func (x *CommunityInfo) ProtoReflect() protoreflect.Message {
 // Deprecated: Use CommunityInfo.ProtoReflect.Descriptor instead.
 func (*CommunityInfo) Descriptor() ([]byte, []int) {
 	return file_zenao_v1_zenao_proto_rawDescGZIP(), []int{79}
+}
+
+func (x *CommunityInfo) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
 }
 
 func (x *CommunityInfo) GetDisplayName() string {
@@ -4471,13 +4486,6 @@ func (x *CommunityInfo) GetCountMembers() uint32 {
 		return x.CountMembers
 	}
 	return 0
-}
-
-func (x *CommunityInfo) GetPkgPath() string {
-	if x != nil {
-		return x.PkgPath
-	}
-	return ""
 }
 
 type ListCommunitiesRequest struct {
@@ -5463,12 +5471,12 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"avatar_uri\x18\x03 \x01(\tR\tavatarUri\"\"\n" +
 	"\x10EditUserResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x14\n" +
-	"\x12GetUserInfoRequest\"D\n" +
-	"\x13GetUserInfoResponse\x12\x19\n" +
-	"\brealm_id\x18\x01 \x01(\tR\arealmId\x12\x12\n" +
-	"\x04plan\x18\x02 \x01(\tR\x04plan\"w\n" +
-	"\aProfile\x12\x18\n" +
-	"\aaddress\x18\x01 \x01(\tR\aaddress\x12!\n" +
+	"\x12GetUserInfoRequest\"B\n" +
+	"\x13GetUserInfoResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04plan\x18\x02 \x01(\tR\x04plan\"v\n" +
+	"\aProfile\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x10\n" +
 	"\x03bio\x18\x03 \x01(\tR\x03bio\x12\x1d\n" +
 	"\n" +
@@ -5598,23 +5606,23 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\revent_privacy\"\x14\n" +
 	"\x12EventPrivacyPublic\"H\n" +
 	"\x13EventPrivacyGuarded\x121\n" +
-	"\x14participation_pubkey\x18\x01 \x01(\tR\x13participationPubkey\"\xe1\x03\n" +
-	"\tEventInfo\x12\x14\n" +
-	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1b\n" +
-	"\timage_uri\x18\x03 \x01(\tR\bimageUri\x12\x1e\n" +
+	"\x14participation_pubkey\x18\x01 \x01(\tR\x13participationPubkey\"\xd6\x03\n" +
+	"\tEventInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1b\n" +
+	"\timage_uri\x18\x04 \x01(\tR\bimageUri\x12\x1e\n" +
 	"\n" +
-	"organizers\x18\x04 \x03(\tR\n" +
+	"organizers\x18\x05 \x03(\tR\n" +
 	"organizers\x12 \n" +
-	"\vgatekeepers\x18\x05 \x03(\tR\vgatekeepers\x12\x1d\n" +
+	"\vgatekeepers\x18\x06 \x03(\tR\vgatekeepers\x12\x1d\n" +
 	"\n" +
-	"start_date\x18\x06 \x01(\x03R\tstartDate\x12\x19\n" +
-	"\bend_date\x18\a \x01(\x03R\aendDate\x12\x1a\n" +
-	"\bcapacity\x18\b \x01(\rR\bcapacity\x123\n" +
-	"\blocation\x18\t \x01(\v2\x17.zenao.v1.EventLocationR\blocation\x12\"\n" +
-	"\fparticipants\x18\n" +
-	" \x01(\rR\fparticipants\x12\x19\n" +
-	"\bpkg_path\x18\v \x01(\tR\apkgPath\x120\n" +
+	"start_date\x18\a \x01(\x03R\tstartDate\x12\x19\n" +
+	"\bend_date\x18\b \x01(\x03R\aendDate\x12\x1a\n" +
+	"\bcapacity\x18\t \x01(\rR\bcapacity\x123\n" +
+	"\blocation\x18\n" +
+	" \x01(\v2\x17.zenao.v1.EventLocationR\blocation\x12\"\n" +
+	"\fparticipants\x18\v \x01(\rR\fparticipants\x120\n" +
 	"\aprivacy\x18\f \x01(\v2\x16.zenao.v1.EventPrivacyR\aprivacy\x12\x1d\n" +
 	"\n" +
 	"checked_in\x18\r \x01(\rR\tcheckedIn\x12\"\n" +
@@ -5719,26 +5727,28 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x05roles\x18\x01 \x03(\tR\x05roles\"T\n" +
 	"\x18EntitiesWithRolesRequest\x12\"\n" +
 	"\x03org\x18\x01 \x01(\v2\x10.zenao.v1.EntityR\x03org\x12\x14\n" +
-	"\x05roles\x18\x02 \x03(\tR\x05roles\"B\n" +
-	"\x0fEntityWithRoles\x12\x19\n" +
-	"\brealm_id\x18\x01 \x01(\tR\arealmId\x12\x14\n" +
-	"\x05roles\x18\x02 \x03(\tR\x05roles\"f\n" +
+	"\x05roles\x18\x02 \x03(\tR\x05roles\"e\n" +
+	"\x0fEntityWithRoles\x12\x1f\n" +
+	"\ventity_type\x18\x01 \x01(\tR\n" +
+	"entityType\x12\x1b\n" +
+	"\tentity_id\x18\x02 \x01(\tR\bentityId\x12\x14\n" +
+	"\x05roles\x18\x03 \x03(\tR\x05roles\"f\n" +
 	"\x19EntitiesWithRolesResponse\x12I\n" +
 	"\x13entities_with_roles\x18\x01 \x03(\v2\x19.zenao.v1.EntityWithRolesR\x11entitiesWithRoles\"8\n" +
 	"\x13GetCommunityRequest\x12!\n" +
 	"\fcommunity_id\x18\x01 \x01(\tR\vcommunityId\"M\n" +
 	"\x14GetCommunityResponse\x125\n" +
-	"\tcommunity\x18\x01 \x01(\v2\x17.zenao.v1.CommunityInfoR\tcommunity\"\xfa\x01\n" +
-	"\rCommunityInfo\x12!\n" +
-	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1d\n" +
+	"\tcommunity\x18\x01 \x01(\v2\x17.zenao.v1.CommunityInfoR\tcommunity\"\xef\x01\n" +
+	"\rCommunityInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12!\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1d\n" +
 	"\n" +
-	"avatar_uri\x18\x03 \x01(\tR\tavatarUri\x12\x1d\n" +
+	"avatar_uri\x18\x04 \x01(\tR\tavatarUri\x12\x1d\n" +
 	"\n" +
-	"banner_uri\x18\x04 \x01(\tR\tbannerUri\x12&\n" +
-	"\x0eadministrators\x18\x05 \x03(\tR\x0eadministrators\x12#\n" +
-	"\rcount_members\x18\x06 \x01(\rR\fcountMembers\x12\x19\n" +
-	"\bpkg_path\x18\a \x01(\tR\apkgPath\"F\n" +
+	"banner_uri\x18\x05 \x01(\tR\tbannerUri\x12&\n" +
+	"\x0eadministrators\x18\x06 \x03(\tR\x0eadministrators\x12#\n" +
+	"\rcount_members\x18\a \x01(\rR\fcountMembers\"F\n" +
 	"\x16ListCommunitiesRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\rR\x05limit\x12\x16\n" +
 	"\x06offset\x18\x02 \x01(\rR\x06offset\"T\n" +

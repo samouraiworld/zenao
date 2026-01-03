@@ -44,8 +44,3 @@ export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
       );
     },
   });
-
-export function eventIdFromPkgPath(pkgPath: string): string {
-  const res = /(e\d+)$/.exec(pkgPath);
-  return res?.[1].substring(1) || "";
-}

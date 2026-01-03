@@ -33,7 +33,7 @@ const SocialFeedForm = ({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const t = useTranslations("social-feed.standard-post-form");
 
@@ -66,7 +66,7 @@ const SocialFeedForm = ({
         content: values.content,
         parentId: values.parentPostId?.toString() ?? "",
         token,
-        userRealmId: userRealmId ?? "",
+        userId: userProfileId ?? "",
         tags: [],
       });
 

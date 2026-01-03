@@ -24,9 +24,9 @@ export default async function CreateEventPage() {
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         <div className="flex flex-col items-center mx-auto md:max-w-5xl">
@@ -39,7 +39,7 @@ export default async function CreateEventPage() {
   // Prefetch communities of logged in user
   // here we cannot determine yet all communnties where the user is admin
   queryClient.prefetchInfiniteQuery(
-    communitiesListByMember(userRealmId, DEFAULT_COMMUNITIES_LIMIT),
+    communitiesListByMember(userProfileId, DEFAULT_COMMUNITIES_LIMIT),
   );
 
   return (
