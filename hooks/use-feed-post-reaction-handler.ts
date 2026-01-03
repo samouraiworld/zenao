@@ -17,7 +17,7 @@ function useFeedPostReactionHandler(
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { reactPost, isPending: isReacting } = useReactPost();
 
   const onReactionChange = async (postId: string, icon: string) => {
@@ -29,7 +29,7 @@ function useFeedPostReactionHandler(
       }
       await reactPost({
         token,
-        userRealmId: userRealmId || "",
+        userId: userProfileId || "",
         postId,
         icon,
         feedId,

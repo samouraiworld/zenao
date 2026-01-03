@@ -10,7 +10,7 @@ import { useMemo } from "react";
 import EmptyList from "@/components/widgets/lists/empty-list";
 import { communityUsersWithRoles } from "@/lib/queries/community";
 
-import { eventIdFromPkgPath, eventOptions } from "@/lib/queries/event";
+import { eventOptions } from "@/lib/queries/event";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { EventCard } from "@/components/features/event/event-card";
 import {
@@ -33,18 +33,15 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
   );
 
   const events = useSuspenseQueries({
-    queries: eventsRoles.map((role) =>
-      eventOptions(eventIdFromPkgPath(role.realmId)),
-    ),
+    queries: eventsRoles.map((role) => eventOptions(role.entityId)),
     combine: (results) =>
       results
         .filter(
           (elem): elem is UseSuspenseQueryResult<SafeEventInfo, Error> =>
             elem.isSuccess && !!elem.data,
         )
-        .map((elem, idx) => ({
+        .map((elem) => ({
           ...elem.data,
-          pkgPath: eventsRoles[idx].realmId,
         })),
   });
 
@@ -92,9 +89,9 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
             <EventCardListLayout>
               {upcomingEvents.map((evt) => (
                 <EventCard
-                  key={evt.pkgPath}
+                  key={evt.id}
                   evt={evt}
-                  href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
+                  href={`/event/${evt.id}`}
                   fullDate
                 />
               ))}
@@ -112,9 +109,9 @@ function CommunityEvents({ communityId, now: _now }: CommunityEventsProps) {
             <EventCardListLayout>
               {pastEvents.map((evt) => (
                 <EventCard
-                  key={evt.pkgPath}
+                  key={evt.id}
                   evt={evt}
-                  href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
+                  href={`/event/${evt.id}`}
                   fullDate
                 />
               ))}

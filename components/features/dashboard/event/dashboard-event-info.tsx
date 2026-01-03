@@ -6,7 +6,6 @@ import DashboardEventHeader from "./dashboard-event-header";
 import { makeLocationFromEvent } from "@/lib/location";
 import {
   communitiesListByEvent,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
@@ -23,10 +22,7 @@ export default function DashboardEventInfo() {
     [communitiesPages],
   );
 
-  const communityId =
-    communities.length > 0
-      ? communityIdFromPkgPath(communities[0].pkgPath)
-      : null;
+  const communityId = communities.length > 0 ? communities[0].id : null;
 
   return (
     <div className="flex flex-col gap-8">

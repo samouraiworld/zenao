@@ -24,10 +24,10 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userProfileId),
   );
 
   const { mutateAsync: joinCommunity, isPending } = useJoinCommunity();
@@ -42,7 +42,7 @@ export const CommunityJoinButton: React.FC<Props> = ({ communityId }) => {
       await joinCommunity({
         communityId,
         token,
-        userRealmId,
+        userId: userProfileId,
       });
       trackEvent("CommunityJoined", {
         props: {

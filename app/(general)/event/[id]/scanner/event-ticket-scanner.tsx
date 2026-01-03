@@ -47,7 +47,7 @@ export function EventTicketScanner({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const [isLoading, setIsLoading] = useState(false);
   const [lastSignature, setLastSignature] = useState<string | null>(null);
   const { checkIn } = useEventCheckIn();
@@ -70,14 +70,14 @@ export function EventTicketScanner({
 
     try {
       const token = await getToken();
-      if (!userRealmId || !token) {
+      if (!userProfileId || !token) {
         throw new Error("not authenticated !");
       }
 
       const b64 = value.replaceAll("_", "/").replaceAll("-", "+");
       const ticket = ticketSecretSchema.parse(b64);
       const signature = Buffer.from(
-        await ed.signAsync(Buffer.from(userRealmId), ticket),
+        await ed.signAsync(Buffer.from(userProfileId), ticket),
       )
         .toString("base64")
         .replaceAll("=", "")

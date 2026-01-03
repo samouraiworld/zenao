@@ -72,15 +72,16 @@ func (s *ZenaoServer) ListEventsByUserRoles(ctx context.Context, req *connect.Re
 			}
 
 			orgIDs := mapsl.Map(organizers, func(u *zeni.User) string {
-				return s.Chain.UserRealmID(u.ID)
+				return u.ID
 			})
 			gkpIDs := mapsl.Map(gatekeepers, func(u *zeni.User) string {
-				return s.Chain.UserRealmID(u.ID)
+				return u.ID
 			})
 
 			sort.Strings(ewr.Roles)
 			eventUsers = append(eventUsers, &zenaov1.EventUser{
 				Event: &zenaov1.EventInfo{
+					Id:           ewr.Event.ID,
 					Title:        ewr.Event.Title,
 					Description:  ewr.Event.Description,
 					ImageUri:     ewr.Event.ImageURI,
@@ -93,7 +94,6 @@ func (s *ZenaoServer) ListEventsByUserRoles(ctx context.Context, req *connect.Re
 					Participants: participants,
 					CheckedIn:    checkedIn,
 					Discoverable: ewr.Event.Discoverable,
-					PkgPath:      s.Chain.EventRealmID(ewr.Event.ID),
 				},
 				Roles: ewr.Roles,
 			})

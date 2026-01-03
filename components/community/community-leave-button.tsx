@@ -25,10 +25,10 @@ export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userProfileId),
   );
 
   const { mutateAsync: leaveCommunity, isPending } = useLeaveCommunity();
@@ -45,7 +45,7 @@ export const CommunityLeaveButton: React.FC<Props> = ({ communityId }) => {
       await leaveCommunity({
         communityId,
         token,
-        userRealmId,
+        userId: userProfileId,
       });
       trackEvent("CommunityLeft", {
         props: {

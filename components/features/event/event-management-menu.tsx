@@ -124,7 +124,7 @@ export default function EventManagementMenu({
     userInfoOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.realmId),
+    eventUserRoles(eventId, userInfo?.userId),
   );
 
   const roleLevel = useMemo(() => getRoleLevel(roles), [roles]);

@@ -25,7 +25,7 @@ function EventParticipationInfo({
     userInfoOptions(getToken, userId),
   );
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.realmId),
+    eventUserRoles(eventId, userInfo?.userId),
   );
 
   return (

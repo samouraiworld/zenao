@@ -29,7 +29,7 @@ export default function GatekeepersTable({ eventId }: GatekeepersTableProps) {
     userInfoOptions(getToken, userId),
   );
   const { data: userRoles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.realmId),
+    eventUserRoles(eventId, userInfo?.userId),
   );
 
   const { gatekeepers, onDelete } = useGatekeepersEdition();

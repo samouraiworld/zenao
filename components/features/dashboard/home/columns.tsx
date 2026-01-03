@@ -5,7 +5,6 @@ import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
 import { useMemo } from "react";
 import { Button } from "@/components/shadcn/button";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import Text from "@/components/widgets/texts/text";
 import { SafeEventUser } from "@/types/schemas";
@@ -70,9 +69,7 @@ export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () =>
         id: "actions",
         header: () => <div>Actions</div>,
         cell: ({ row }) => (
-          <Link
-            href={`/event/${eventIdFromPkgPath(row.original.event.pkgPath)}`}
-          >
+          <Link href={`/event/${row.original.event.id}`}>
             <Button
               variant="ghost"
               className="data-[state=open]:bg-muted text-muted-foreground flex size-8"

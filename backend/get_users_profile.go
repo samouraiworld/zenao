@@ -35,7 +35,7 @@ func (s *ZenaoServer) GetUsersProfile(ctx context.Context, req *connect.Request[
 	profiles := []*zenaov1.Profile{}
 	for _, zUser := range zUsers {
 		profile := &zenaov1.Profile{
-			Address:     s.Chain.UserRealmID(zUser.ID), // TODO: adapt front-end to expect id instead of address ?
+			UserId:      zUser.ID,
 			DisplayName: zUser.DisplayName,
 			Bio:         zUser.Bio,
 			AvatarUri:   zUser.AvatarURI,

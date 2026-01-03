@@ -20,7 +20,7 @@ interface CommunityPostInfoProps {
   post: StandardPostView | PollPostView;
   postId: string;
   communityId: string;
-  userRealmId: string;
+  userId: string;
   editMode: boolean;
   onEditModeChange: (editMode: boolean) => void;
   onEdit: (
@@ -41,7 +41,7 @@ export default function CommunityPostInfo({
   postId,
   editMode,
   onEditModeChange,
-  userRealmId,
+  userId,
   communityId,
   onEdit,
   isEditing,
@@ -54,7 +54,7 @@ export default function CommunityPostInfo({
 }: CommunityPostInfoProps) {
   const router = useRouter();
   const { data: roles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userId),
   );
 
   if (isStandardPost(post)) {
@@ -90,7 +90,7 @@ export default function CommunityPostInfo({
     return (
       <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
         <PollPost
-          userRealmId={userRealmId}
+          userId={userId}
           pollId={parsePollUri(post.post.post.value.uri).pollId}
           pollPost={post}
           onReactionChange={async (icon) =>

@@ -33,9 +33,9 @@ export default async function DashboardRootLayout({
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered
         isSignedOutModal

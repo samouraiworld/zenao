@@ -38,12 +38,12 @@ function CommunityMembers({ communityId }: CommunityMembersProps) {
           {members.map((member) => (
             <Suspense
               fallback={<CommunityMemberCardSkeleton />}
-              key={member.realmId}
+              key={member.entityId}
             >
-              <Link href={`/profile/${member.realmId}`} className="block">
+              <Link href={`/profile/${member.entityId}`} className="block">
                 <CommunityMemberCard
                   communityId={communityId}
-                  userRealmId={member.realmId}
+                  userId={member.entityId}
                 />
               </Link>
             </Suspense>
