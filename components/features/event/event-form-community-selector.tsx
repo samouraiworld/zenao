@@ -104,7 +104,10 @@ export default function EventFormCommunitySelector({
     (option: { value: string; label: string }) => {
       setSelected(option);
       setSearch(option.label);
-      form.setValue("communityId", option.value);
+      form.setValue("communityId", option.value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
       setOpen(false);
       form.trigger("communityId");
       inputRef.current?.blur();
