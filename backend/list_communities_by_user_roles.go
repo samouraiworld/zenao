@@ -46,7 +46,7 @@ func (s *ZenaoServer) ListCommunitiesByUserRoles(ctx context.Context, req *conne
 			}
 
 			admIDs := mapsl.Map(administrators, func(u *zeni.User) string {
-				return s.Chain.UserRealmID(u.ID)
+				return u.ID
 			})
 
 			sort.Strings(cwr.Roles)
@@ -58,7 +58,7 @@ func (s *ZenaoServer) ListCommunitiesByUserRoles(ctx context.Context, req *conne
 					BannerUri:      cwr.Community.BannerURI,
 					Administrators: admIDs,
 					CountMembers:   memberCount,
-					PkgPath:        s.Chain.CommunityRealmID(cwr.Community.ID),
+					Id:             cwr.Community.ID,
 				},
 				Roles: cwr.Roles,
 			})
