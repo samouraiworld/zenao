@@ -34,6 +34,7 @@ func (s *ZenaoServer) ListCommunitiesByUserRoles(ctx context.Context, req *conne
 			return err
 		}
 
+// XXX: find a way to do this efficiently ? (one TX)
 		for _, cwr := range communitiesWithRoles {
 			administrators, err := tx.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, cwr.Community.ID, []string{zeni.RoleAdministrator})
 			if err != nil {
