@@ -8,7 +8,14 @@ import {
 import { Command as CommandPrimitive } from "cmdk";
 import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
   CommandGroup,
