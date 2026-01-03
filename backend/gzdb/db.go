@@ -1810,7 +1810,7 @@ func (g *gormZenaoDB) CreatePoll(userID string, feedID string, parentURI string,
 			return err
 		}
 		// XXX: REMOVE THE URI ?
-		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%d/gno/gno.land/r/zenao/polls", dbPoll.ID))
+		postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%d", dbPoll.ID))
 		if err != nil {
 			return err
 		}

@@ -72,7 +72,7 @@ service ZenaoService {
 
 message HealthRequest {}
 
-// XXX: add more fields (e.g. version, commit_hash, gno.land version, ...)
+// XXX: add more fields (e.g. version, commit_hash, ...)
 message HealthResponse { bool maintenance = 1; }
 
 message EditUserRequest {
@@ -86,12 +86,12 @@ message EditUserResponse { string id = 1; }
 message GetUserInfoRequest {}
 
 message GetUserInfoResponse {
-  string realm_id = 1;
+  string user_id = 1;
   string plan = 2;
 }
 
 message Profile {
-  string address = 1;
+  string user_id = 1;
   string display_name = 2;
   string bio = 3;
   string avatar_uri = 4;
@@ -263,17 +263,18 @@ enum DiscoverableFilter {
 }
 
 message EventInfo {
-  string title = 1;
-  string description = 2;
-  string image_uri = 3;
-  repeated string organizers = 4;
-  repeated string gatekeepers = 5;
-  int64 start_date = 6; // unix seconds
-  int64 end_date = 7; // unix seconds
-  uint32 capacity = 8;
-  EventLocation location = 9;
-  uint32 participants = 10;
-  string pkg_path = 11;
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string image_uri = 4;
+  repeated string organizers = 5;
+  repeated string gatekeepers = 6;
+  
+  int64 start_date = 7; // unix seconds
+  int64 end_date = 8; // unix seconds
+  uint32 capacity = 9;
+  EventLocation location = 10;
+  uint32 participants = 11;
   EventPrivacy privacy = 12;
   uint32 checked_in = 13;
   bool discoverable = 14;
@@ -431,8 +432,9 @@ message EntitiesWithRolesRequest {
 }
 
 message EntityWithRoles {
-  string realm_id = 1;
-  repeated string roles = 2;
+  string entity_type = 1;
+  string entity_id = 2;
+  repeated string roles = 3;
 }
 
 message EntitiesWithRolesResponse {
@@ -448,13 +450,13 @@ message GetCommunityResponse {
 }
 
 message CommunityInfo {
-  string display_name = 1;
-  string description = 2;
-  string avatar_uri = 3;
-  string banner_uri = 4;
-  repeated string administrators = 5;
-  uint32 count_members = 6;
-  string pkg_path = 7;
+  string id = 1;
+  string display_name = 2;
+  string description = 3;
+  string avatar_uri = 4;
+  string banner_uri = 5;
+  repeated string administrators = 6;
+  uint32 count_members = 7;
 }
 
 message ListCommunitiesRequest {

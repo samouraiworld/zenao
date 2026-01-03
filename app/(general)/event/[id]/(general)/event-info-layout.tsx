@@ -18,7 +18,6 @@ import { locationTimezone } from "@/lib/event-location";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 import {
   communitiesListByEvent,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import EventCommunitySection from "@/components/features/event/event-community-section";
@@ -58,10 +57,7 @@ export function EventInfoLayout({
     [communitiesPages],
   );
 
-  const communityId =
-    communities.length > 0
-      ? communityIdFromPkgPath(communities[0].pkgPath)
-      : null;
+  const communityId = communities.length > 0 ? communities[0].id : null;
 
   const location = makeLocationFromEvent(data.location);
   const eventTimezone = locationTimezone(location);
@@ -155,7 +151,7 @@ export function EventInfoLayout({
         {/* Host section */}
         <div className="col-span-6 sm:col-span-3">
           <EventSection title={t("hosted-by")}>
-            <UserAvatarWithName linkToProfile realmId={data.organizers[0]} />
+            <UserAvatarWithName linkToProfile userId={data.organizers[0]} />
           </EventSection>
         </div>
 

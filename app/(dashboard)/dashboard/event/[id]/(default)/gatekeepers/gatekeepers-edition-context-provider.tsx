@@ -18,7 +18,6 @@ import { useTranslations } from "next-intl";
 import { eventGatekeepersEmails } from "@/lib/queries/event";
 import {
   communitiesListByEvent,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { makeLocationFromEvent } from "@/lib/location";
@@ -67,10 +66,7 @@ export function GatekeepersEditionContextProvider({
     [communitiesPages],
   );
 
-  const communityId =
-    communities.length > 0
-      ? communityIdFromPkgPath(communities[0].pkgPath)
-      : null;
+  const communityId = communities.length > 0 ? communities[0].id : null;
 
   const location = makeLocationFromEvent(eventInfo.location);
 

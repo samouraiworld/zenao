@@ -75,7 +75,5 @@ func (s *ZenaoServer) GetPost(ctx context.Context, req *connect.Request[zenaov1.
 		ChildrenCount: uint64(count),
 		Reactions:     rviews,
 	}
-	info.Post.Author = s.Chain.UserRealmID(info.Post.Author) // TODO: remove usage in front-end to use ID instead ?
-
 	return connect.NewResponse(&zenaov1.GetPostResponse{Post: info}), nil
 }

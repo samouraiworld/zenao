@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
 import { DEFAULT_EVENTS_LIMIT, eventsList } from "@/lib/queries/events-list";
 import EmptyEventsList from "@/components/features/event/event-empty-list";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { EventCard } from "@/components/features/event/event-card";
@@ -72,11 +71,7 @@ export function DiscoverEventsList({
 
             <EventCardListLayout>
               {eventsOfTheDay.map((evt) => (
-                <EventCard
-                  key={evt.pkgPath}
-                  evt={evt}
-                  href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
-                />
+                <EventCard key={evt.id} evt={evt} href={`/event/${evt.id}`} />
               ))}
             </EventCardListLayout>
           </div>

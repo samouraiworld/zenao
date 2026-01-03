@@ -8,7 +8,7 @@ import {
 import { Command as CommandPrimitive } from "cmdk";
 import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
   CommandGroup,
@@ -22,7 +22,6 @@ import { FormField } from "@/components/shadcn/form";
 import Heading from "@/components/widgets/texts/heading";
 import {
   communitiesByUserRolesList,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -40,26 +39,29 @@ export default function EventFormCommunitySelector({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const { data: userCommunitiesPages } = useSuspenseInfiniteQuery(
     communitiesByUserRolesList(
-      userRealmId,
+      userProfileId,
       ["administrator"],
       DEFAULT_COMMUNITIES_LIMIT,
       getToken,
     ),
   );
 
-  const selectableCommunities =
-    userCommunitiesPages?.pages
-      .flat()
-      .map((cu) => cu.community)
-      .filter((c) => c !== undefined) ?? [];
+  const selectableCommunities = useMemo(
+    () =>
+      userCommunitiesPages?.pages
+        .flat()
+        .map((cu) => cu.community)
+        .filter((c) => c !== undefined) ?? [],
+    [userCommunitiesPages?.pages],
+  );
 
   const options = selectableCommunities.map((community) => ({
     label: community.displayName,
-    value: communityIdFromPkgPath(community.pkgPath),
+    value: community.id,
   }));
 
   const [search, setSearch] = useState<string>(() => {

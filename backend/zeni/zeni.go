@@ -301,13 +301,6 @@ type DB interface {
 	GetDeletedEvents() ([]*Event, error)
 }
 
-type Chain interface {
-	EntityRealmID(entityType string, entityID string) (string, error)
-	UserRealmID(userID string) string
-	CommunityRealmID(userID string) string
-	EventRealmID(eventID string) string
-}
-
 type Auth interface {
 	GetUser(ctx context.Context) *AuthUser
 	GetUsersFromIDs(ctx context.Context, ids []string) ([]*AuthUser, error)

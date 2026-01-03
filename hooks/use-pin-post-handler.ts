@@ -22,7 +22,7 @@ export default function usePinPostHandler(
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const onPinChange = async (postId: string, pinned: boolean) => {
     try {
@@ -31,7 +31,7 @@ export default function usePinPostHandler(
         feedId,
         pinned,
         parentId,
-        userRealmId,
+        userId: userProfileId,
       });
 
       trackEvent("PostPinUpdated", {

@@ -40,9 +40,11 @@ export default function PostInfo({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
-  const { data: post } = useSuspenseQuery(feedPost(postId, userRealmId || ""));
+  const { data: post } = useSuspenseQuery(
+    feedPost(postId, userProfileId || ""),
+  );
 
   const [editMode, setEditMode] = useState(false);
 
@@ -91,7 +93,7 @@ export default function PostInfo({
           post={post}
           postId={postId}
           communityId={orgId}
-          userRealmId={userRealmId}
+          userId={userProfileId}
           editMode={editMode}
           onEditModeChange={setEditMode}
           onEdit={onEdit}
@@ -107,7 +109,7 @@ export default function PostInfo({
           post={post}
           postId={postId}
           eventId={orgId}
-          userRealmId={userRealmId}
+          userId={userProfileId}
           editMode={editMode}
           onEditModeChange={setEditMode}
           onEdit={onEdit}

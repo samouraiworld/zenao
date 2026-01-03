@@ -27,13 +27,12 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userProfileId),
   );
 
-  const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
-  const feedId = `${pkgPath}:main`;
+  const feedId = `community:${communityId}:main`;
 
   const {
     data: pollsPages,
@@ -42,7 +41,7 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userRealmId || ""),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "poll", userProfileId || ""),
   );
 
   const polls = useMemo(
@@ -77,7 +76,7 @@ function CommunityPolls({ communityId }: CommunityPollsProps) {
         ) : (
           <PollsList
             polls={polls}
-            userRealmId={userRealmId}
+            userId={userProfileId}
             onReactionChange={onReactionChange}
             canInteract={
               userRoles.includes("member") ||

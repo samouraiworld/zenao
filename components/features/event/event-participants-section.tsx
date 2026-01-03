@@ -57,11 +57,11 @@ export function ParticipantsSection({ id }: { id: string }) {
               <DialogTitle>{t("participants-list")}</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-2">
-              {participants.map((realmId) => {
+              {participants.map((participantId) => {
                 return (
                   <UserAvatarWithName
-                    key={realmId}
-                    realmId={realmId}
+                    key={participantId}
+                    userId={participantId}
                     className="h-10"
                     linkToProfile
                   />
@@ -94,11 +94,11 @@ export function ParticipantsSection({ id }: { id: string }) {
         </DrawerHeader>
 
         <div className="flex flex-col gap-2 px-4 pb-4 max-h-full overflow-auto">
-          {participants.map((address) => {
+          {participants.map((participantId) => {
             return (
               <UserAvatarWithName
-                key={address}
-                realmId={address}
+                key={participantId}
+                userId={participantId}
                 className="h-10 py-1"
                 linkToProfile
               />

@@ -47,7 +47,7 @@ export function PollPostForm({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const t = useTranslations("social-feed.poll-form");
   const { toast } = useToast();
   const isSmallScreen = useMediaQuery({ maxWidth: 640 });
@@ -105,7 +105,7 @@ export function PollPostForm({
         options: values.options.map((option) => option.text),
         kind: pollKind,
         token: await getToken(),
-        userRealmId: userRealmId || "",
+        userId: userProfileId || "",
       });
 
       trackEvent("PollCreated", {

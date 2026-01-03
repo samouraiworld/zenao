@@ -8,7 +8,7 @@ import GuardedPostCommentForm from "@/components/social-feed/forms/guarded-post-
 
 interface CommunityPostCommentFormProps {
   communityId: string;
-  userRealmId: string;
+  userId: string;
   form: UseFormReturn<SocialFeedPostFormSchemaType>;
   onSubmit: (values: SocialFeedPostFormSchemaType) => Promise<void>;
   isPending: boolean;
@@ -16,13 +16,13 @@ interface CommunityPostCommentFormProps {
 
 export default function CommunityPostCommentForm({
   communityId,
-  userRealmId,
+  userId,
   form,
   onSubmit,
   isPending,
 }: CommunityPostCommentFormProps) {
   const { data: roles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userId),
   );
 
   return (

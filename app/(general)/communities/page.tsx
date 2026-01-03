@@ -5,7 +5,6 @@ import { Suspense, useMemo } from "react";
 import Link from "next/link";
 import {
   communitiesList,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import CommunityCard from "@/components/community/community-card";
@@ -23,11 +22,10 @@ function CommunitiesListPage() {
   return (
     <div className="flex flex-col gap-2">
       {communities.map((community) => {
-        const communityId = communityIdFromPkgPath(community.pkgPath);
         return (
-          <Link key={communityId} href={`/community/${communityId}`}>
+          <Link key={community.id} href={`/community/${community.id}`}>
             <Suspense fallback={<CommunityCardSkeleton />}>
-              <CommunityCard id={communityId} community={community} />
+              <CommunityCard id={community.id} community={community} />
             </Suspense>
           </Link>
         );

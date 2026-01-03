@@ -19,13 +19,6 @@ export type FormFieldProps<
   TCondition,
 > = GenericFormFieldProps<T, TCondition>;
 
-export const realmIdSchema = z
-  .string()
-  .regex(/^([a-z0-9-]+\.)*[a-z0-9-]+\.[a-z]{2,}(\/[a-z0-9\-_]+)+$/)
-  .or(z.string().regex(/^g[a-z0-9]{39}/));
-
-export type RealmId = z.infer<typeof realmIdSchema>;
-
 // Regular expression pattern to match a URL
 export const urlPattern =
   /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
@@ -188,7 +181,7 @@ export const userFormSchema = z.object({
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
-export const gnoProfileDetailsSchema = z.object({
+export const profileDetailsSchema = z.object({
   bio: z.string().trim().max(1000).optional().default(""),
   socialMediaLinks: z.array(socialLinkSchema).default([]),
   location: z.string().trim().max(100).optional().default(""),
@@ -198,7 +191,7 @@ export const gnoProfileDetailsSchema = z.object({
   skills: z.array(userFormSkillSchema).default([]),
 });
 
-export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
+export type ProfileDetails = z.infer<typeof profileDetailsSchema>;
 
 const pollOptionFormSchema = z.object({
   text: z
@@ -288,9 +281,7 @@ export const communityFormSchema = z.object({
   administrators: z
     .array(
       z.object({
-        address: z
-          .string()
-          .email("Administrator must be a valid email address"),
+        email: z.string().email("Administrator must be a valid email address"),
       }),
     )
     .min(1, "At least one admin is required"),
@@ -415,6 +406,7 @@ export const eventInfoLocationSchema = z.object({
 export type SafeEventLocation = z.infer<typeof eventInfoLocationSchema>;
 
 export const eventInfoSchema = z.object({
+  id: z.string(),
   title: z.string(),
   description: z.string(),
   imageUri: z.string(),
@@ -425,7 +417,6 @@ export const eventInfoSchema = z.object({
   capacity: z.number(),
   checkedIn: z.number(),
   participants: z.number(),
-  pkgPath: z.string(),
   location: eventInfoLocationSchema,
   privacy: eventInfoPrivacySchema.optional(),
   discoverable: z.boolean(),
