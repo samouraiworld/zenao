@@ -8,7 +8,7 @@ import { z } from "zod";
 import { GetToken } from "@clerk/types";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "@/lib/zenao-client";
-import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import { CommunityInfo, CommunityUser } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const DEFAULT_COMMUNITIES_LIMIT = 20;
 
@@ -102,64 +102,6 @@ export const communitiesList = (
 
         return res.communities;
       });
-    },
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length;
-    },
-    getPreviousPageParam: (firstPage, pages) => {
-      if (firstPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length - 2;
-    },
-    ...options,
-  });
-};
-
-export const communitiesListByMember = (
-  memberId: string | null,
-  limit: number,
-  options?: Omit<
-    UseInfiniteQueryOptions<
-      CommunityInfo[],
-      Error,
-      InfiniteData<CommunityInfo[]>,
-      (string | number)[],
-      number // pageParam type
-    >,
-    | "queryKey"
-    | "queryFn"
-    | "getNextPageParam"
-    | "initialPageParam"
-    | "getPreviousPageParam"
-  >,
-) => {
-  const limitInt = Math.floor(limit);
-
-  return infiniteQueryOptions({
-    initialPageParam: 0,
-    queryKey: ["communitiesByMember", memberId ?? "", limitInt],
-    enabled: !!memberId,
-    queryFn: async ({ pageParam = 0 }) => {
-      if (!memberId) {
-        return [] as CommunityInfo[];
-      }
-      return withSpan(
-        `query:backend:communities-by-member:${memberId}`,
-        async () => {
-          const res = await zenaoClient.listCommunitiesByMember({
-            memberId,
-            limit: limitInt,
-            offset: pageParam * limitInt,
-          });
-          const json = res.communities;
-
-          return json;
-        },
-      );
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
@@ -271,6 +213,70 @@ export const communitiesListByEvent = (
         });
         return res.communities;
       });
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
+    },
+    ...options,
+  });
+};
+
+export const communitiesByUserRolesList = (
+  userId: string | undefined,
+  roles: CommunityUserRole[],
+  limit: number,
+  getToken?: GetToken,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CommunityUser[],
+      Error,
+      InfiniteData<CommunityUser[]>,
+      (string | number | CommunityUserRole[])[],
+      number
+    >,
+    | "queryKey"
+    | "queryFn"
+    | "getNextPageParam"
+    | "initialPageParam"
+    | "getPreviousPageParam"
+  >,
+) => {
+  const limitInt = Math.floor(limit);
+
+  return infiniteQueryOptions({
+    initialPageParam: 0,
+    queryKey: ["communitiesByUserRoles", userId ?? "", roles, limitInt],
+    enabled: !!userId,
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!userId) {
+        return [] as CommunityUser[];
+      }
+      return withSpan(
+        `query:backend:communities-by-user-roles:${userId}`,
+        async () => {
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listCommunitiesByUserRoles(
+            {
+              userId,
+              roles,
+              limit: limitInt,
+              offset: pageParam * limitInt,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+
+          return res.communities;
+        },
+      );
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
