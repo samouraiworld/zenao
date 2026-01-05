@@ -430,3 +430,27 @@ export const eventUserSchema = z.object({
 });
 
 export type SafeEventUser = z.infer<typeof eventUserSchema>;
+
+const communityUserRolesEnum = z.enum(["administrator", "member", "event"]);
+
+export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
+
+export const communityGetUserRolesSchema = z.array(communityUserRolesEnum);
+
+export const communityInfoSchema = z.object({
+  id: z.string(),
+  displayName: z.string(),
+  description: z.string(),
+  avatarUri: z.string(),
+  bannerUri: z.string(),
+  countMembers: z.number(),
+});
+
+export type SafeCommunityInfo = z.infer<typeof communityInfoSchema>;
+
+export const communityUserSchema = z.object({
+  community: communityInfoSchema,
+  roles: communityGetUserRolesSchema,
+});
+
+export type SafeCommunityUser = z.infer<typeof communityUserSchema>;

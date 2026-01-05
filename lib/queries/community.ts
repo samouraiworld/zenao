@@ -8,21 +8,21 @@ import { z } from "zod";
 import { GetToken } from "@clerk/types";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "@/lib/zenao-client";
-import { CommunityInfo, CommunityUser } from "@/app/gen/zenao/v1/zenao_pb";
+import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import {
+  communityGetUserRolesSchema,
+  CommunityUserRole,
+  communityUserSchema,
+  SafeCommunityUser,
+} from "@/types/schemas";
 
 export const DEFAULT_COMMUNITIES_LIMIT = 20;
-
-const communityUserRolesEnum = z.enum(["administrator", "member", "event"]);
-
-export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
-
-export const communityGetUserRolesSchema = z.array(communityUserRolesEnum);
 
 const communityUsersWithRolesResponseSchema = z
   .object({
     entityType: z.string(),
     entityId: z.string(),
-    roles: z.string().array(),
+    roles: communityGetUserRolesSchema,
   })
   .transform(({ entityType, entityId, roles }) => ({
     entityType,
@@ -231,7 +231,7 @@ export const communitiesListByEvent = (
 };
 
 export const communitiesByUserRolesListSuspense = (
-  userId: string,
+  userId: string | undefined,
   page: number,
   limit: number,
   roles: CommunityUserRole[],
@@ -241,13 +241,18 @@ export const communitiesByUserRolesListSuspense = (
   const pageInt = Math.max(0, Math.floor(page));
 
   return queryOptions({
-    queryKey: ["communitiesByUserRoles", userId, pageInt, limitInt, roles],
+    queryKey: [
+      "communitiesByUserRoles",
+      userId ?? "",
+      pageInt,
+      limitInt,
+      roles,
+    ],
     queryFn: async () => {
       return withSpan(
         `query:backend:communities-by-user-roles:${userId}`,
         async () => {
-          const token = await getToken();
-          if (!token) throw new Error("invalid clerk token");
+          const token = getToken ? await getToken() : null;
 
           const res = await zenaoClient.listCommunitiesByUserRoles(
             {
@@ -256,14 +261,13 @@ export const communitiesByUserRolesListSuspense = (
               offset: pageInt * limitInt,
               roles,
             },
-            { headers: { Authorization: `Bearer ${token}` } },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
           );
 
-          return res.communities;
+          return communityUserSchema.array().parse(res.communities);
         },
       );
     },
-    initialData: [] as CommunityUser[],
   });
 };
 
@@ -274,9 +278,9 @@ export const communitiesByUserRolesList = (
   getToken?: GetToken,
   options?: Omit<
     UseInfiniteQueryOptions<
-      CommunityUser[],
+      SafeCommunityUser[],
       Error,
-      InfiniteData<CommunityUser[]>,
+      InfiniteData<SafeCommunityUser[]>,
       (string | number | CommunityUserRole[])[],
       number
     >,
@@ -295,8 +299,9 @@ export const communitiesByUserRolesList = (
     enabled: !!userId,
     queryFn: async ({ pageParam = 0 }) => {
       if (!userId) {
-        return [] as CommunityUser[];
+        return [] as SafeCommunityUser[];
       }
+
       return withSpan(
         `query:backend:communities-by-user-roles:${userId}`,
         async () => {
@@ -311,7 +316,7 @@ export const communitiesByUserRolesList = (
             token ? { headers: { Authorization: `Bearer ${token}` } } : {},
           );
 
-          return res.communities;
+          return communityUserSchema.array().parse(res.communities);
         },
       );
     },
