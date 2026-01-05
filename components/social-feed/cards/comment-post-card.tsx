@@ -11,25 +11,13 @@ import { communityUserRoles } from "@/lib/queries/community";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 
 // EventRoles and CommunityRoles are used to fetch and cache user roles conditionally, depending on orgType, in PostComment
-function EventRoles({
-  orgId,
-  userRealmId,
-}: {
-  orgId: string;
-  userRealmId: string;
-}) {
-  useSuspenseQuery(eventUserRoles(orgId, userRealmId));
+function EventRoles({ orgId, userId }: { orgId: string; userId: string }) {
+  useSuspenseQuery(eventUserRoles(orgId, userId));
   return null;
 }
 
-function CommunityRoles({
-  orgId,
-  userRealmId,
-}: {
-  orgId: string;
-  userRealmId: string;
-}) {
-  useSuspenseQuery(communityUserRoles(orgId, userRealmId));
+function CommunityRoles({ orgId, userId }: { orgId: string; userId: string }) {
+  useSuspenseQuery(communityUserRoles(orgId, userId));
   return null;
 }
 
@@ -59,7 +47,7 @@ export default function CommentPostCard({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(comment.post.author),
   );
@@ -70,9 +58,9 @@ export default function CommentPostCard({
   return (
     <>
       {orgType === "event" ? (
-        <EventRoles orgId={orgId} userRealmId={userRealmId} />
+        <EventRoles orgId={orgId} userId={userProfileId} />
       ) : (
-        <CommunityRoles orgId={orgId} userRealmId={userRealmId} />
+        <CommunityRoles orgId={orgId} userId={userProfileId} />
       )}
       <PostCardLayout
         key={comment.post.localPostId}
@@ -86,7 +74,7 @@ export default function CommentPostCard({
         }
         isReacting={isReacting}
         canInteract
-        isOwner={userRealmId === comment.post.author}
+        isOwner={userProfileId === comment.post.author}
         onDelete={async (parentId) =>
           await onDelete(comment.post.localPostId.toString(10), parentId)
         }

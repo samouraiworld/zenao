@@ -22,7 +22,6 @@ import { captureException } from "@/lib/report";
 import { eventFormSchema, EventFormSchemaType } from "@/types/schemas";
 import {
   communitiesListByEvent,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
@@ -40,8 +39,8 @@ export function EditEventForm({ id, userId, dashboard }: EditEventFormProps) {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
-  const { data: roles } = useSuspenseQuery(eventUserRoles(id, userRealmId));
+  const userProfileId = userInfo?.userId || "";
+  const { data: roles } = useSuspenseQuery(eventUserRoles(id, userProfileId));
   const { data: gatekeepers } = useSuspenseQuery(
     eventGatekeepersEmails(id, getToken),
   );
@@ -54,10 +53,7 @@ export function EditEventForm({ id, userId, dashboard }: EditEventFormProps) {
     [communitiesPages],
   );
 
-  const communityId =
-    communities.length > 0
-      ? communityIdFromPkgPath(communities[0].pkgPath)
-      : null;
+  const communityId = communities.length > 0 ? communities[0].id : null;
 
   const isOrganizer = roles.includes("organizer");
 

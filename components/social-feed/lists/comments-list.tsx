@@ -31,7 +31,7 @@ export default function CommentsList({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const {
     data: commentsPages,
     isFetchingNextPage,
@@ -43,7 +43,7 @@ export default function CommentsList({
       parentId,
       DEFAULT_FEED_POSTS_COMMENTS_LIMIT,
       "",
-      userRealmId,
+      userProfileId,
     ),
   );
   const comments = useMemo(() => {

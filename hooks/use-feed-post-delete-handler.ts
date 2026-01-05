@@ -20,14 +20,14 @@ function useFeedPostDeleteHandler(
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { deletePost, isPending: isDeleting } = useDeletePost();
 
   const onDelete = async (postId: string, parentId?: string) => {
     const token = await getToken();
 
     try {
-      if (!token || !userRealmId) {
+      if (!token || !userProfileId) {
         throw new Error("not authenticated");
       }
 
@@ -36,7 +36,7 @@ function useFeedPostDeleteHandler(
         postId,
         parentId,
         token,
-        userRealmId,
+        userId: userProfileId,
       });
       trackEvent("PostDeleted", {
         props: {

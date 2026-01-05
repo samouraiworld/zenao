@@ -22,7 +22,6 @@ import { FormField } from "@/components/shadcn/form";
 import Heading from "@/components/widgets/texts/heading";
 import {
   communitiesListByMember,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -40,20 +39,20 @@ export default function EventFormCommunitySelector({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const { data: userCommunitiesPages } = useSuspenseInfiniteQuery(
-    communitiesListByMember(userRealmId, DEFAULT_COMMUNITIES_LIMIT),
+    communitiesListByMember(userProfileId, DEFAULT_COMMUNITIES_LIMIT),
   );
 
   // Filter only communities where user is administrator
   const selectableCommunities = (
     userCommunitiesPages?.pages.flat() ?? []
-  ).filter((c) => c.administrators.includes(userRealmId!));
+  ).filter((c) => c.administrators.includes(userProfileId!));
 
   const options = selectableCommunities.map((community) => ({
     label: community.displayName,
-    value: communityIdFromPkgPath(community.pkgPath),
+    value: community.id,
   }));
 
   const [search, setSearch] = useState<string>(() => {
@@ -104,7 +103,10 @@ export default function EventFormCommunitySelector({
     (option: { value: string; label: string }) => {
       setSelected(option);
       setSearch(option.label);
-      form.setValue("communityId", option.value);
+      form.setValue("communityId", option.value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
       setOpen(false);
       form.trigger("communityId");
       inputRef.current?.blur();

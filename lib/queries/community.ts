@@ -7,7 +7,6 @@ import {
 import { z } from "zod";
 import { GetToken } from "@clerk/types";
 import { withSpan } from "../tracer";
-import { userIdFromPkgPath } from "./user";
 import { zenaoClient } from "@/lib/zenao-client";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
@@ -21,10 +20,15 @@ export const communityGetUserRolesSchema = z.array(communityUserRolesEnum);
 
 const communityUsersWithRolesResponseSchema = z
   .object({
-    realmId: z.string(),
+    entityType: z.string(),
+    entityId: z.string(),
     roles: z.string().array(),
   })
-  .transform(({ realmId, roles }) => ({ realmId, roles }));
+  .transform(({ entityType, entityId, roles }) => ({
+    entityType,
+    entityId,
+    roles,
+  }));
 
 export type CommunityUsersWithRolesResponseSchema = z.infer<
   typeof communityUsersWithRolesResponseSchema
@@ -116,7 +120,7 @@ export const communitiesList = (
 };
 
 export const communitiesListByMember = (
-  memberAddress: string | null,
+  memberId: string | null,
   limit: number,
   options?: Omit<
     UseInfiniteQueryOptions<
@@ -137,17 +141,17 @@ export const communitiesListByMember = (
 
   return infiniteQueryOptions({
     initialPageParam: 0,
-    queryKey: ["communitiesByMember", memberAddress ?? "", limitInt],
-    enabled: !!memberAddress,
+    queryKey: ["communitiesByMember", memberId ?? "", limitInt],
+    enabled: !!memberId,
     queryFn: async ({ pageParam = 0 }) => {
-      if (!memberAddress) {
+      if (!memberId) {
         return [] as CommunityInfo[];
       }
       return withSpan(
-        `query:backend:communities-by-member:${userIdFromPkgPath(memberAddress)}`,
+        `query:backend:communities-by-member:${memberId}`,
         async () => {
           const res = await zenaoClient.listCommunitiesByMember({
-            memberId: userIdFromPkgPath(memberAddress),
+            memberId,
             limit: limitInt,
             offset: pageParam * limitInt,
           });
@@ -175,17 +179,17 @@ export const communitiesListByMember = (
 
 export const communityUserRoles = (
   communityId: string | null | undefined,
-  userRealmId: string | null | undefined,
+  userId: string | null | undefined,
 ) =>
   queryOptions({
-    queryKey: ["communityUserRoles", communityId, userRealmId],
+    queryKey: ["communityUserRoles", communityId, userId],
     queryFn: async () => {
-      if (!communityId || !userRealmId) {
+      if (!communityId || !userId) {
         return [];
       }
 
       return withSpan(
-        `query:backend:community:${communityId}:user-roles:${userIdFromPkgPath(userRealmId)}`,
+        `query:backend:community:${communityId}:user-roles:${userId}`,
         async () => {
           const res = await zenaoClient.entityRoles({
             org: {
@@ -194,7 +198,7 @@ export const communityUserRoles = (
             },
             entity: {
               entityType: "user",
-              entityId: userIdFromPkgPath(userRealmId),
+              entityId: userId,
             },
           });
           const roles = res.roles;
@@ -202,7 +206,7 @@ export const communityUserRoles = (
         },
       );
     },
-    enabled: !!communityId && !!userRealmId,
+    enabled: !!communityId && !!userId,
   });
 
 export const communityUsersWithRoles = (
@@ -233,11 +237,6 @@ export const communityUsersWithRoles = (
 
 export function goStringSliceLiteral(arr: string[]): string {
   return `[]string{${arr.map((s) => JSON.stringify(s)).join(",")}}`;
-}
-
-export function communityIdFromPkgPath(pkgPath: string): string {
-  const res = /(c\d+)$/.exec(pkgPath);
-  return res?.[1].substring(1) || "";
 }
 
 export const communitiesListByEvent = (
