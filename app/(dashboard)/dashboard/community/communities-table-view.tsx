@@ -9,10 +9,7 @@ import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
-import {
-  communityIdFromPkgPath,
-  DEFAULT_COMMUNITIES_LIMIT,
-} from "@/lib/queries/community";
+import { DEFAULT_COMMUNITIES_LIMIT } from "@/lib/queries/community";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 
@@ -43,7 +40,7 @@ export default function CommunitiesTableView({
     columns,
     enableRowSelection: false,
     defaultPageSize: DEFAULT_COMMUNITIES_LIMIT,
-    getRowId: (row) => row.pkgPath.toString(),
+    getRowId: (row) => row.id.toString(),
   });
 
   return (
@@ -66,9 +63,7 @@ export default function CommunitiesTableView({
               </div>
             )}
             onClickRow={(row) => {
-              router.push(
-                `/dashboard/community/${communityIdFromPkgPath(row.original.pkgPath)}`,
-              );
+              router.push(`/dashboard/community/${row.original.id}`);
             }}
           />
         </div>

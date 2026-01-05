@@ -5,7 +5,6 @@ import { Eye } from "lucide-react";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import { Button } from "@/components/shadcn/button";
-import { communityIdFromPkgPath } from "@/lib/queries/community";
 
 const useCommunitiesTableColumns: () => ColumnDef<CommunityInfo>[] = () =>
   useMemo(
@@ -30,7 +29,7 @@ const useCommunitiesTableColumns: () => ColumnDef<CommunityInfo>[] = () =>
         id: "actions",
         header: () => <div>Actions</div>,
         cell: ({ row }) => (
-          <Link href={`/event/${communityIdFromPkgPath(row.original.pkgPath)}`}>
+          <Link href={`/event/${row.original.id}`}>
             <Button
               variant="ghost"
               className="data-[state=open]:bg-muted text-muted-foreground flex size-8"

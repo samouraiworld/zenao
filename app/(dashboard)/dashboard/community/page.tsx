@@ -8,16 +8,16 @@ import { userInfoOptions } from "@/lib/queries/user";
 
 export default async function DashboardCommunityPage() {
   const queryClient = getQueryClient();
-  const { getToken, userId } = await auth();
+  const { getToken, userId: authId } = await auth();
   const token = await getToken();
 
   const t = await getTranslations();
 
-  const userAddrOpts = userInfoOptions(getToken, userId);
+  const userAddrOpts = userInfoOptions(getToken, authId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered
         isSignedOutModal
