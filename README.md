@@ -1,201 +1,316 @@
-# Zenao
+# Zenao - Zen Autonomous Organizations
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+An event management and community platform featuring event creation, community management, and social feeds.
 
-## Table of Contents
-- [Getting Started (Staging)](#getting-started-staging)
-- [Getting Started (Local)](#getting-started-local)
-- [Run E2E tests locally](#run-e2e-tests-locally)
-- [Edit api](#edit-api)
-- [Update database schema](#update-database-schema)
+## Tech Stack
 
-## Getting Started (Staging)
+- **Frontend**: Next.js 15, React, TypeScript, TailwindCSS, Shadcn UI
+- **Backend**: Go, Connect-RPC (gRPC-web)
+- **Database**: SQLite/LibSQL (Turso), GORM, Atlas migrations
+- **Auth**: Clerk
+- **Testing**: Cypress (E2E)
+- **Observability**: OpenTelemetry, Sentry
 
-First, install [node + npm via nvm](https://github.com/nvm-sh/nvm).
+## Prerequisites
 
-Install the [vercel cli](https://vercel.com/docs/cli)
+Install these tools before starting:
 
-Get the staging env by linking the vercel project and pulling the env
+- **Node.js 20+** ([download](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm)/[fnm](https://github.com/Schniz/fnm))
+- **Go 1.21+** ([download](https://go.dev/doc/install))
+- **Atlas CLI** (installed via `make install-atlas`)
+
+## Quick Start - Full Local Development
+
+Follow these steps to run the complete stack locally (frontend + backend + database):
+
+### Option 1: Automated Setup (Recommended)
+
+Run the setup script to install dependencies, configure environment, and initialize the database:
 
 ```bash
-vercel link
+make setup
 ```
 
+Then start the development servers:
+
 ```bash
-vercel env pull
+make dev
 ```
 
-The `.env.local` file should be populated with values targeting the staging environment.
+That's it! The app will be running at:
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend**: [http://localhost:4242](http://localhost:4242)
 
-Now run the development server:
+### Option 2: Manual Setup
 
-```bash
-nvm use
-npm i
-npm run dev
-```
+If you prefer to run each step manually:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-## Getting Started (Local)
-
-First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](https://github.com/nvm-sh/nvm).
-
-Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
+### 1. Install Dependencies
 
 ```bash
+npm install
 make install-atlas
 ```
 
-Override local env with dev env
+### 2. Setup Environment Variables
+
+Create `.env.local` from the template:
+
 ```bash
 cp .env.backend-dev .env.local
 ```
 
-If you need to test file uploads, add back the `PINATA_JWT` in `.env.local`
+**Note:** This uses Clerk test keys that work out of the box - no Clerk account needed for local development.
 
-Be careful not to commit the PINATA_JWT or clerk secret!
+**Optional:** If testing file uploads, add `PINATA_JWT` to `.env.local` (get from team/admin)
 
-Optionnaly, generate the `genesis_txs.jsonl` file, used to provide TXs to gnodev 
-```bash
-go run ./backend gentxs
-```
-
-Now, start gnodev with the admin account:
+### 3. Initialize Database
 
 ```bash
-make start.gnodev
-```
-
-In another terminal, initialize the db, inject the clerk secret and start the backend:
-
-```bash
+# Create and migrate the local SQLite database
 make migrate-local
-export ZENAO_CLERK_SECRET_KEY=<clerk-testing-secret-key>
+```
+
+This creates a `dev.db` file in the project root.
+
+### 4. Start Backend
+
+In a dedicated terminal:
+```bash
 go run ./backend start
 ```
 
-You can get the clerk testing secret with `vercel env pull`
+The backend will run on http://localhost:4242
 
-Optionally, generate fake data (Users, events, posts, communities etc):
+**Optional:** Generate fake data for development:
 ```bash
 go run ./backend fakegen
 ```
 
-In a third terminal, run the development server:
+### 5. Start Frontend
 
+In a new terminal:
 ```bash
-nvm use
-npm i
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 6. Access the Application
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:4242](http://localhost:4242)
+- **Database**: `dev.db` (SQLite file in project root)
 
-## Run E2E tests locally
+You can inspect the database using any SQLite client:
+```bash
+sqlite3 dev.db
+# Or use a GUI like DB Browser for SQLite
+```
 
-First, [install golang](https://go.dev/doc/install) and [node + npm via nvm](https://github.com/nvm-sh/nvm).
+## Environment Variables Reference
 
-Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
+### Frontend (`.env.local`)
+
+These variables are set by copying `.env.backend-dev` and adding the Clerk secret key:
 
 ```bash
+# Clerk Authentication (test keys for local development)
+CLERK_SECRET_KEY=""
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=""
+
+# Backend Configuration
+NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT=http://localhost:4242
+NEXT_PUBLIC_ZENAO_NAMESPACE=zenao
+NEXT_PUBLIC_GATEWAY_URL=pinata.zenao.io
+PINATA_GROUP=""
+
+# Observability
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+SEOBOT_API_KEY=""
+
+# Optional - Only needed for file upload testing
+PINATA_JWT=...                                        # Get from team/admin if needed
+```
+
+### Backend (Environment Variables)
+
+The backend reads these from the environment (prefixed with `ZENAO_`). **All have defaults**, so they're optional for local development:
+
+```bash
+# Optional overrides (backend has sensible defaults):
+ZENAO_CLERK_SECRET_KEY=sk_test_...                    # Default: sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK
+ZENAO_DB=dev.db                                       # Default: dev.db
+ZENAO_ALLOWED_ORIGINS=*                               # Default: * (all origins)
+ZENAO_MAIL_SENDER=contact@mail.zenao.io               # Default: contact@mail.zenao.io
+ZENAO_RESEND_SECRET_KEY=                              # Default: empty (emails disabled)
+DISCORD_TOKEN=                                        # Default: empty (Discord disabled)
+```
+
+## Testing
+
+### E2E Tests
+
+**1. Install dependencies:**
+```bash
+npm install
 make install-atlas
 ```
 
-Override local env with dev env
+**2. Setup environment:**
 ```bash
 cp .env.backend-dev .env.local
 ```
 
-Add back the `PINATA_JWT` in `.env.local`
-
-Be careful not to commit the PINATA_JWT or clerk secret!
-
-Now, run the e2e stack
+**3. Start E2E infrastructure:**
 ```bash
-export ZENAO_CLERK_SECRET_KEY=<clerk-testing-secret-key>
 go run ./backend e2e-infra
 ```
-This command sets the E2E local environment:
-- Applies Atlas migrations on a SQLite temporary DB, and fake data (Users, events, posts, communities etc)
-- Gathers the TXs in a `genesis_txs.jsonl` file for GnoDev
-- Starts GnoDev and the backend in parallel
-- Serves a `http://localhost:4243/reset` http endpoint to reset the stack state. This endpoint is crucial to automate tests. Calls to the reset endpoint will be deduplicated and wait for the current reset to finish if one is ongoing.
-- Prints logs
-- Optional: You can use the `--ci` flag to build/starts the Next.js frontend in background (Used for CI)
-See `backend/e2e_infra.go`
 
-You can get the clerk testing secret with `vercel env pull`
+This command:
+- Applies migrations to temporary SQLite DB (`e2e.db`)
+- Generates fake data
+- Starts backend on port 4242
+- Exposes `http://localhost:4243/reset` endpoint for test automation
 
-In a second terminal, run the development server:
-
-```bash
-nvm use
-npm i
-npm run dev
-```
-
-Wait for the stack to warm up, you should get the following line in the e2e-infra terminal when it is:
+**4. Wait for stack readiness:**
 ```
 READY   | ----------------------------
 ```
 
-In a third terminal, open cypress in e2e mode
+**5. Start frontend (new terminal):**
+```bash
+npm run dev
+```
+
+**6. Open Cypress (new terminal):**
 ```bash
 npm run cypress:e2e
 ```
 
-Select a test like `main.cy.ts`, this will automatically start runnning the test and when done watch for changes in the test file located at `cypress/e2e/main.cy.ts`.
+Select a test file (e.g., `main.cy.ts`) to run. Tests auto-rerun on file changes.
 
-You can now edit the tests and they will automatically re-run on save. If you only edited app sources, you can run the tests manually by clicking on the refresh icon in cypress ui.
+## Development Workflows
 
-Flaky tests, or tests that require cypress hacks to pass are probably a sign of bad architecture / unstable app code, try to think about what could introduce instability and fix it at the root ;)
+### API Changes
 
-## Edit api
+**Prerequisites:** Install [Buf CLI](https://buf.build/docs/installation/)
 
-First, [install buf](https://buf.build/docs/installation/).
-
-Edit the `.proto` files, when you are done, run the codegen with
+Edit `.proto` files in the `api/` directories, then regenerate code:
 
 ```bash
 make generate
 ```
 
-## Update database schema
+This will:
+- Run protobuf code generation
+- Build email templates
+- Format Go code
 
-### Prerequisite
+### Database Schema Updates
 
-Install [atlas](https://atlasgo.io) using a special branch with support for versioned migrations for libsql:
+**1. Edit GORM models** in `./backend/gzdb` (models must embed `gorm.Model` or have gorm annotations)
 
-```bash
-make install-atlas
-```
-
-### Migration flow
-
-First, edit the gorm models in `./backend/gzdb`.
-New models must embbed `gorm.Model` or use a gorm annotation for at least one field.
-
-Then, update the atlas schema using the gorm adapter:
+**2. Update Atlas schema:**
 ```bash
 make update-schema
 ```
 
-You can now create a new migration, replace `$MIGRATION_NAME` with the name of the migration:
+**3. Create migration:**
 ```bash
 atlas migrate diff $MIGRATION_NAME \
-		--dir "file://migrations" \
-		--to "file://schema.hcl" \
-		--dev-url "sqlite://file?mode=memory"
+  --dir "file://migrations" \
+  --to "file://schema.hcl" \
+  --dev-url "sqlite://file?mode=memory"
 ```
 
-Finally you can migrate a db, replace `$ENV` by one of `dev`, `staging`, `prod`:
+**4. Apply migration locally:**
 ```bash
-atlas migrate apply --dir "file://migrations" --env $ENV
+make migrate-local
 ```
-For `staging` and `prod` envs, you need to pass a write-enabled turso token via the `TURSO_TOKEN` env var
-If you create a new prod token, make sure it is short-lived (1 day should be enough in most cases).
+
+**5. Apply to staging/production:**
+```bash
+# For staging or prod, set TURSO_TOKEN with a write-enabled token
+export TURSO_TOKEN=<your-token>
+atlas migrate apply --dir "file://migrations" --env staging  # or prod
+```
+
+**Note:** Production tokens should be short-lived (1 day max).
+
+## Working with Staging/Production
+
+### Using Staging Backend for Frontend Development
+
+If you want to develop the frontend using the staging backend (instead of running the backend locally):
+
+**1. Install Vercel CLI:**
+```bash
+npm i -g vercel
+```
+
+**2. Pull staging environment variables:**
+```bash
+vercel link  # Follow prompts to link to the Zenao project
+vercel env pull .env.local
+```
+
+This will populate `.env.local` with staging credentials including:
+- `CLERK_SECRET_KEY` - Real staging Clerk key
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Staging publishable key
+- Other staging-specific variables
+
+**3. Update backend endpoint:**
+
+Edit `.env.local` and change the backend endpoint to point to staging:
+```bash
+# Replace localhost with your staging URL
+NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT=https://your-staging-backend-url.vercel.app
+```
+
+**4. Start only the frontend:**
+```bash
+npm run dev
+```
+
+Now your local frontend will connect to the staging backend and use real staging data.
+
+### Accessing Staging/Production Data
+
+When using staging environment variables:
+- You'll see **real user data** from staging
+- Authentication uses the **staging Clerk instance**
+- Any changes affect the **staging database**
+
+**Use with caution** - this is real data, not test data!
+
+## Troubleshooting
+
+### Missing Clerk secret key error
+Make sure you've added the Clerk secret key to `.env.local`:
+```bash
+echo "CLERK_SECRET_KEY=sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK" >> .env.local
+# Then restart the frontend: npm run dev
+```
+
+### Database connection errors
+Ensure you've run migrations:
+```bash
+make migrate-local
+```
+
+### Cannot access database file
+The database is created at `dev.db` in the project root after running `make migrate-local`.
+
+## Project Structure
+
+```
+├── app/              # Next.js app router pages
+├── backend/          # Go backend (Connect-RPC handlers)
+├── components/       # React components
+├── cypress/          # E2E tests
+├── migrations/       # Atlas database migrations
+├── api/              # Protobuf definitions
+├── lib/              # Shared utilities
+├── public/           # Static assets
+├── dev.db            # Local SQLite database (created after setup)
+└── .env.local        # Environment variables (create from .env.backend-dev)
+```
