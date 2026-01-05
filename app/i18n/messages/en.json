@@ -615,6 +615,16 @@
         "members": "Members",
         "administrators": "Administrators",
         "events": "Events"
+      },
+      "administrators": {
+        "no-administrators": "No administrators assigned yet.",
+        "toast-administrator-management-success": "Administrators successfully updated!",
+        "toast-administrator-management-error": "Error while updating administrators!",
+        "add-administrator-form": {
+          "email-placeholder": "Enter administrator email to add...",
+          "error-administrator-already-exists": "This administrator is already assigned to the community!",
+          "add-btn": "Add"
+        }
       }
     },
     "eventDetails": {

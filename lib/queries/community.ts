@@ -17,6 +17,7 @@ import {
 } from "@/types/schemas";
 
 export const DEFAULT_COMMUNITIES_LIMIT = 20;
+export const DEFAULT_ADMINISTRATORS_PAGE_LIMIT = 10;
 
 const communityUsersWithRolesResponseSchema = z
   .object({
@@ -58,7 +59,7 @@ export const communityAdministrators = (
       return withSpan(
         `query:backend:community:${communityId}:administrators`,
         async () => {
-          const token = await getToken();
+          const token = getToken ? await getToken() : null;
           if (!token) throw new Error("invalid clerk token");
           const res = await zenaoClient.getCommunityAdministrators(
             { communityId },
