@@ -46,8 +46,8 @@ service ZenaoService {
   rpc EntitiesWithRoles(EntitiesWithRolesRequest) returns (EntitiesWithRolesResponse); // -> CommunitiesWithUserRole, EventsWithUserRole
   rpc GetCommunity(GetCommunityRequest) returns (GetCommunityResponse);
   rpc ListCommunities(ListCommunitiesRequest) returns (ListCommunitiesResponse);
-  rpc ListCommunitiesByMember(ListCommunitiesByMemberRequest) returns (ListCommunitiesByMemberResponse);
   rpc ListCommunitiesByEvent(ListCommunitiesByEventRequest) returns (ListCommunitiesByEventResponse);
+  rpc ListCommunitiesByUserRoles(ListCommunitiesByUserRolesRequest) returns (ListCommunitiesByUserRolesResponse);
   rpc GetEvent(GetEventRequest) returns (GetEventResponse);
   rpc ListEvents(ListEventsRequest) returns (ListEventsResponse);
   rpc ListEventsByUserRoles(ListEventsByUserRolesRequest) returns (ListEventsByUserRolesResponse);
@@ -468,16 +468,6 @@ message ListCommunitiesResponse {
   repeated CommunityInfo communities = 1;
 }
 
-message ListCommunitiesByMemberRequest {
-  string member_id = 1;
-  uint32 limit = 2;
-  uint32 offset = 3;
-}
-
-message ListCommunitiesByMemberResponse {
-  repeated CommunityInfo communities = 1;
-}
-
 message ListCommunitiesByEventRequest {
   string event_id = 1;
   uint32 limit = 2;
@@ -486,6 +476,22 @@ message ListCommunitiesByEventRequest {
 
 message ListCommunitiesByEventResponse {
   repeated CommunityInfo communities = 1;
+}
+
+message CommunityUser {
+  CommunityInfo community = 1;
+  repeated string roles = 2; // one of: administrator, member
+}
+
+message ListCommunitiesByUserRolesRequest {
+  string user_id = 1;
+  repeated string roles = 2; // one of: administrator, member
+  uint32 limit = 3;
+  uint32 offset = 4;
+}
+
+message ListCommunitiesByUserRolesResponse {
+  repeated CommunityUser communities = 1;
 }
 
 message CreateCommunityRequest {

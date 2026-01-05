@@ -58,6 +58,10 @@ func IsValidEventRole(role string) bool {
 	return role == RoleOrganizer || role == RoleGatekeeper || role == RoleParticipant
 }
 
+func IsValidUserCommunityRole(role string) bool {
+	return role == RoleAdministrator || role == RoleMember
+}
+
 const (
 	EntityTypeUser      string = "user"
 	EntityTypeEvent     string = "event"
@@ -111,6 +115,11 @@ type Community struct {
 	AvatarURI   string
 	BannerURI   string
 	CreatorID   string
+}
+
+type CommunityWithRoles struct {
+	Community *Community
+	Roles     []string
 }
 
 type EntityRole struct {
@@ -258,6 +267,7 @@ type DB interface {
 	AddMemberToCommunity(communityID string, userID string) error
 	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)
+	ListCommunitiesByUserRoles(userID string, roles []string, limit int, offset int) ([]*CommunityWithRoles, error)
 
 	GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
