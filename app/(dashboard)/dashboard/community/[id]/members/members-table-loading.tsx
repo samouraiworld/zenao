@@ -4,7 +4,7 @@ import { useMembersColumns } from "./columns";
 import { DataTable } from "@/components/widgets/data-table/data-table";
 import Text from "@/components/widgets/texts/text";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { DEFAULT_COMMUNITY_MEMBERS_LIMIT } from "@/lib/queries/community";
+import { DEFAULT_COMMUNITY_MEMBERS_PAGE_LIMIT } from "@/lib/queries/community";
 
 export default function DashboardMembersPageLoading() {
   const columns = useMembersColumns();
@@ -12,7 +12,7 @@ export default function DashboardMembersPageLoading() {
     data: [], // We don't care about data during loading
     columns,
     enableRowSelection: false,
-    defaultPageSize: DEFAULT_COMMUNITY_MEMBERS_LIMIT,
+    defaultPageSize: DEFAULT_COMMUNITY_MEMBERS_PAGE_LIMIT,
     getRowId: (row) => `${row.entityType}:${row.entityId}`,
   });
 

@@ -18,7 +18,8 @@ import {
 
 export const DEFAULT_COMMUNITIES_LIMIT = 20;
 export const DEFAULT_ADMINISTRATORS_PAGE_LIMIT = 10;
-export const DEFAULT_COMMUNITY_MEMBERS_LIMIT = 20;
+export const DEFAULT_COMMUNITY_MEMBERS_PAGE_LIMIT = 20;
+export const DEFAULT_COMMUNITY_EVENTS_PAGE_LIMIT = 20;
 
 export const communityInfo = (communityId: string) =>
   queryOptions({
@@ -44,7 +45,7 @@ export const communityAdministrators = (
       return withSpan(
         `query:backend:community:${communityId}:administrators`,
         async () => {
-          const token = getToken ? await getToken() : null;
+          const token = await getToken();
           if (!token) throw new Error("invalid clerk token");
           const res = await zenaoClient.getCommunityAdministrators(
             { communityId },
@@ -238,7 +239,7 @@ export const communitiesByUserRolesListSuspense = (
       return withSpan(
         `query:backend:communities-by-user-roles:${userId}`,
         async () => {
-          const token = getToken ? await getToken() : null;
+          const token = await getToken();
 
           const res = await zenaoClient.listCommunitiesByUserRoles(
             {

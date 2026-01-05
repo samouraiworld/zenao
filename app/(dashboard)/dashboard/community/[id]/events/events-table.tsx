@@ -1,30 +1,49 @@
 "use client";
 
 import { parseAsInteger, useQueryStates } from "nuqs";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useSuspenseQueries,
+  useSuspenseQuery,
+  UseSuspenseQueryResult,
+} from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useDashboardCommunityContext } from "../dashboard-community-context-provider";
-import { useMembersColumns } from "./columns";
+import { useCommunityEventsColumns } from "./columns";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import {
   communityUsersWithRoles,
-  DEFAULT_COMMUNITY_MEMBERS_PAGE_LIMIT,
+  DEFAULT_COMMUNITY_EVENTS_PAGE_LIMIT,
 } from "@/lib/queries/community";
 import Text from "@/components/widgets/texts/text";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
+import { eventOptions } from "@/lib/queries/event";
+import { SafeEventInfo } from "@/types/schemas";
 
-export default function MembersTable() {
-  const t = useTranslations("dashboard.communityDetails.members");
+export default function CommunityEventsTable() {
+  const t = useTranslations("dashboard.communityDetails.events");
   const { communityId } = useDashboardCommunityContext();
-  const { data: members } = useSuspenseQuery(
-    communityUsersWithRoles(communityId, ["member"]),
+  const { data: eventRoles } = useSuspenseQuery(
+    communityUsersWithRoles(communityId, ["event"]),
   );
+
+  const events = useSuspenseQueries({
+    queries: eventRoles.map((role) => eventOptions(role.entityId)),
+    combine: (results) =>
+      results
+        .filter(
+          (elem): elem is UseSuspenseQueryResult<SafeEventInfo, Error> =>
+            elem.isSuccess && !!elem.data,
+        )
+        .map((elem) => ({
+          ...elem.data,
+        })),
+  });
 
   const [tablePagination, setTablePagination] = useQueryStates(
     {
       page: parseAsInteger.withDefault(1),
-      limit: parseAsInteger.withDefault(DEFAULT_COMMUNITY_MEMBERS_PAGE_LIMIT),
+      limit: parseAsInteger.withDefault(DEFAULT_COMMUNITY_EVENTS_PAGE_LIMIT),
     },
     {
       scroll: false,
@@ -32,18 +51,18 @@ export default function MembersTable() {
     },
   );
 
-  const columns = useMembersColumns();
+  const columns = useCommunityEventsColumns();
   const table = useDataTableInstance({
-    data: members,
+    data: events,
     columns,
     enableRowSelection: false,
     defaultPageSize:
       tablePagination.limit < 10
         ? tablePagination.limit
-        : DEFAULT_COMMUNITY_MEMBERS_PAGE_LIMIT,
+        : DEFAULT_COMMUNITY_EVENTS_PAGE_LIMIT,
     defaultPageIndex:
       tablePagination.page - 1 >= 0 ? tablePagination.page - 1 : 0,
-    getRowId: (row) => `${row.entityType}:${row.entityId}`,
+    getRowId: (row) => row.id,
   });
 
   return (
@@ -56,15 +75,11 @@ export default function MembersTable() {
             dndEnabled={false}
             nothingFn={() => (
               <div className="flex h-48 flex-col justify-center items-center gap-4">
-                <Text className="text-center">{t("no-members")}</Text>
+                <Text className="text-center">{t("no-events")}</Text>
               </div>
             )}
             onClickRow={(row) => {
-              if (row.original.entityType !== "user") {
-                return;
-              }
-
-              window.open(`/profile/${row.original.entityId}`, "_blank");
+              window.open(`/event/${row.original.id}`, "_blank");
             }}
           />
         </div>

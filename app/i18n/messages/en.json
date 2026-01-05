@@ -628,6 +628,9 @@
       },
       "members": {
         "no-members": "No members yet."
+      },
+      "events": {
+        "no-events": "No events yet."
       }
     },
     "eventDetails": {
