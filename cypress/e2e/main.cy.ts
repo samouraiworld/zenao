@@ -9,6 +9,9 @@ import {
   testComment,
   testEventPassword,
   testCommunityName,
+  testCommunityDesc,
+  testCommunityShortDesc,
+  testCommunitySocialLink,
 } from "../support/constants";
 import { login, logout, reset, toastShouldContain } from "../support/helpers";
 
@@ -174,6 +177,8 @@ describe("main", () => {
   });
 
   it("create an event", () => {
+    cy.accessCreateEventPage();
+
     cy.createEvent({ exclusive: false });
 
     cy.get("h1").contains(testEventName).should("be.visible");
@@ -454,6 +459,8 @@ describe("main", () => {
   });
 
   it("cancel participation", () => {
+    cy.accessCreateEventPage();
+
     cy.createEvent({ exclusive: false });
 
     cy.url().then((url) => {
@@ -678,3 +685,96 @@ describe("main", () => {
     cy.get("p").contains(testComment).should("be.visible");
   });
 });
+
+Cypress.Commands.add("accessCreateEventPage", () => {
+  // start from the home
+  cy.visit("/");
+
+  // ensure hydration
+  cy.get("button").contains("Sign in").should("be.visible", { timeout: 10000 });
+
+  // click on home create button
+  cy.get("header").get('button[aria-label="quick menu create"]').click();
+
+  cy.get('[role="menu"]').should("be.visible");
+  // Select create event
+  cy.get("div").contains("Create new event").click();
+
+  login();
+
+  // Click outside to close any open modal
+  cy.get("header").click(0, 0);
+});
+
+Cypress.Commands.add(
+  "createCommunity",
+  ({ administrators = [] }: { administrators?: string[] }) => {
+    // start from the home
+    cy.visit("/");
+
+    // ensure hydration
+    cy.get("button")
+      .contains("Sign in")
+      .should("be.visible", { timeout: 10000 });
+
+    // click on home create button
+    cy.get("header").get('button[aria-label="quick menu create"]').click();
+    cy.get('[role="menu"]').should("be.visible");
+    // Select create community
+    cy.get("div").contains("Create new community").click();
+
+    login();
+
+    // Click outside to close any open modal
+    cy.get("header").click(0, 0);
+
+    // fill community info
+
+    // Avatar
+    cy.get("input[name=avatarUri]").selectFile(
+      "cypress/fixtures/alice-tester.webp",
+      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
+    );
+    // Banner
+    cy.get("input[name=bannerUri]").selectFile(
+      "cypress/fixtures/bug-bash-bonanza.webp",
+      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
+    );
+    // Name
+    cy.get('textarea[name="displayName"]').type(testCommunityName, {
+      delay: 1,
+    });
+    // Short desc
+    cy.get('input[name="shortDescription"]').type(testCommunityShortDesc, {
+      delay: 1,
+    });
+    // Description
+    cy.get('textarea[name="description"]').type(testCommunityDesc, {
+      delay: 1,
+    });
+    // Social link
+    cy.get("button").contains("Add link").click();
+    cy.get('input[placeholder="Enter URL"]').type(testCommunitySocialLink, {
+      delay: 1,
+    });
+    // Administrators
+    if (administrators.length > 0) {
+      administrators.forEach((administrator, index) => {
+        cy.get("button").contains("Add Administrator").click();
+        cy.get(`input[name="administrators.${index}.address"]`).type(
+          administrator,
+        );
+      });
+    }
+
+    // Create community
+    cy.get("button").contains("Create Community").click();
+
+    cy.wait(1000);
+
+    toastShouldContain("Community created!");
+
+    cy.url().should("include", "/community/");
+    cy.url().should("not.include", "/create");
+  },
+);
