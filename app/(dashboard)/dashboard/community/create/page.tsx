@@ -15,14 +15,14 @@ export default async function CreateCommunityPage() {
   const t = await getTranslations("community-create-form");
 
   // Fetch user
-  const { getToken, userId } = await auth();
+  const { getToken, userId: authId } = await auth();
   const token = await getToken();
 
-  const userAddrOpts = userInfoOptions(getToken, userId);
+  const userAddrOpts = userInfoOptions(getToken, authId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         <div className="flex flex-col items-center mx-auto md:max-w-5xl">
