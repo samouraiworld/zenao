@@ -4,7 +4,7 @@ import GatekeepersTable from "./gatekeepers-table";
 import { GatekeepersEditionContextProvider } from "./gatekeepers-edition-context-provider";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
-import withEventRoleRestrictions from "@/lib/permissions/with-roles-required";
+import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventGatekeepersPageProps {
   params: Promise<{ id: string }>;
