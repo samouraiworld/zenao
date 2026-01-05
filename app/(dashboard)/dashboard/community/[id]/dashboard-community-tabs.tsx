@@ -10,7 +10,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/shadcn/tabs";
-import { Badge } from "@/components/shadcn/badge";
 import { Separator } from "@/components/shadcn/separator";
 
 interface DashboardCommunityTabsProps {
@@ -21,7 +20,7 @@ export default function DashboardCommunityTabs({
   children,
 }: DashboardCommunityTabsProps) {
   const t = useTranslations("dashboard.communityDetails.communityTabs");
-  const { communityId, communityInfo } = useDashboardCommunityContext();
+  const { communityId } = useDashboardCommunityContext();
   const section = useSelectedLayoutSegment() || "general";
 
   return (
@@ -43,8 +42,7 @@ export default function DashboardCommunityTabs({
             value="members"
             className="w-fit flex gap-2 p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            {t("members")}{" "}
-            <Badge variant="secondary">{communityInfo.countMembers}</Badge>
+            {t("members")}
           </TabsTrigger>
         </Link>
 
@@ -56,10 +54,7 @@ export default function DashboardCommunityTabs({
             value="administrators"
             className="w-fit gap-2 p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            {t("administrators")}{" "}
-            <Badge variant="secondary">
-              {communityInfo.administrators.length}
-            </Badge>
+            {t("administrators")}
           </TabsTrigger>
         </Link>
         <Link
