@@ -29,9 +29,9 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userProfileId),
   );
 
   const [postInEdition, setPostInEdition] = useState<{
@@ -39,8 +39,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     content: string;
   } | null>(null);
 
-  const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
-  const feedId = `${pkgPath}:main`;
+  const feedId = `community:${communityId}:main`;
 
   const {
     data: postsPages,
@@ -49,7 +48,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userProfileId),
   );
   const posts = useMemo(() => postsPages.pages.flat(), [postsPages]);
 
@@ -98,7 +97,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
         <div className="space-y-4">
           <PostsList
             posts={posts}
-            userRealmId={userRealmId}
+            userId={userProfileId}
             onReactionChange={onReactionChange}
             canInteract={
               userRoles.includes("member") ||

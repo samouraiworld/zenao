@@ -38,7 +38,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
   const { toast } = useToast();
   const { data: communityData } = useSuspenseQuery(communityInfo(communityId));
 
-  const { data: adminAddresses } = useSuspenseQuery(
+  const { data: adminEmails } = useSuspenseQuery(
     communityAdministrators(communityId, getToken),
   );
 
@@ -60,7 +60,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
     shortDescription: communityDetails.shortDescription,
     avatarUri: communityData.avatarUri ?? "",
     bannerUri: communityData.bannerUri ?? "",
-    administrators: (adminAddresses ?? []).map((address) => ({ address })),
+    administrators: (adminEmails ?? []).map((email) => ({ email })),
     socialMediaLinks: communityDetails.socialMediaLinks,
   };
 
@@ -93,7 +93,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
         description: description,
         avatarUri: values.avatarUri,
         bannerUri: values.bannerUri,
-        administrators: values.administrators.map((a) => a.address),
+        administrators: values.administrators.map((a) => a.email),
       });
       trackEvent("CommunityEdited", {
         props: {

@@ -55,9 +55,9 @@ export const CommunityForm = ({
   const lastAdmin = adminInputs?.[adminInputs.length - 1];
   const isLastAdminInvalid =
     lastAdmin &&
-    (lastAdmin.address === "" ||
-      !communityFormSchema.shape.administrators.element.shape.address.safeParse(
-        lastAdmin.address,
+    (lastAdmin.email === "" ||
+      !communityFormSchema.shape.administrators.element.shape.email.safeParse(
+        lastAdmin.email,
       ).success);
   const isButtonDisabled = !form.formState.isValid || isLastAdminInvalid;
 
@@ -207,7 +207,7 @@ export const CommunityForm = ({
                   <div key={field.id} className="flex gap-2 items-start">
                     <FormFieldInputString
                       control={form.control}
-                      name={`administrators.${index}.address`}
+                      name={`administrators.${index}.email`}
                       placeholder={t("admin-placeholder")}
                       className="flex-grow"
                     />
@@ -229,7 +229,7 @@ export const CommunityForm = ({
 
                 <Button
                   type="button"
-                  onClick={() => append({ address: "" })}
+                  onClick={() => append({ email: "" })}
                   className="w-fit gap-2 mt-2"
                   disabled={isLastAdminInvalid}
                   variant="outline"

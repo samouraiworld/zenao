@@ -27,9 +27,9 @@ export default async function TicketsPage({ params }: PageProps) {
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("log-in")}
@@ -48,7 +48,7 @@ export default async function TicketsPage({ params }: PageProps) {
   }
 
   // Check if user is a participant
-  const roles = await queryClient.fetchQuery(eventUserRoles(id, userRealmId));
+  const roles = await queryClient.fetchQuery(eventUserRoles(id, userProfileId));
 
   if (!roles.includes("participant")) {
     // For now not found handler

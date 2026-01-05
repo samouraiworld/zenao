@@ -20,25 +20,25 @@ import { userInfoOptions } from "@/lib/queries/user";
 const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
 export function AccountModeSwitcher() {
-  const { getToken, userId } = useAuth();
-  const { data: user } = useSuspenseQuery(userInfoOptions(getToken, userId));
+  const { getToken, userId: authId } = useAuth();
+  const { data: user } = useSuspenseQuery(userInfoOptions(getToken, authId));
   const { data: profile } = useSuspenseQuery(
-    profileOptions(user?.realmId || ""),
+    profileOptions(user?.userId || ""),
   );
 
   if (!user || !profile) {
     return null;
   }
 
-  return <AccountModeSwitcherView user={profile} realmId={user.realmId} />;
+  return <AccountModeSwitcherView user={profile} userId={user.userId} />;
 }
 
 export function AccountModeSwitcherView({
   user,
-  realmId,
+  userId,
 }: {
   readonly user: UserProfile;
-  readonly realmId: string;
+  readonly userId: string;
 }) {
   const t = useTranslations("dashboard.navUser");
 
@@ -46,7 +46,7 @@ export function AccountModeSwitcherView({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className={avatarClassName}>
-          <UserAvatar realmId={realmId} className={avatarClassName} size="md" />
+          <UserAvatar userId={userId} className={avatarClassName} size="md" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -57,23 +57,19 @@ export function AccountModeSwitcherView({
       >
         <div className="flex w-full items-center justify-between gap-2 px-1 py-1.5">
           <div className={avatarClassName}>
-            <UserAvatar
-              realmId={realmId}
-              className={avatarClassName}
-              size="md"
-            />
+            <UserAvatar userId={userId} className={avatarClassName} size="md" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{user.displayName}</span>
             <span className="truncate text-xs text-muted-foreground">
-              {realmId}
+              {userId}
             </span>
           </div>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link href={`/profile/${realmId}`}>
+            <Link href={`/profile/${userId}`}>
               <CircleUserRound />
               {t("profile")}
             </Link>

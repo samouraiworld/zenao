@@ -26,7 +26,7 @@ export function CancelRegistrationConfirmationDialog({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { cancelParticipation, isPending } = useEventCancelParticipation();
 
   const onCancel = async () => {
@@ -34,7 +34,7 @@ export function CancelRegistrationConfirmationDialog({
       await cancelParticipation({
         eventId,
         getToken,
-        userRealmId,
+        userId: userProfileId,
       });
 
       trackEvent("EventParticipationCanceled", {

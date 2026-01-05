@@ -1,6 +1,4 @@
-// export const testEmail = "alice+clerk_test@example.com"; // this account exists in our clerk dev env
-export const testEmail = "wadadidou+clerk_test@gmail.com";
-
+export const testEmail = "alice+clerk_test@example.com"; // this account exists in our clerk dev env
 export const testEmail2 = "bob+clerk_test@example.com";
 export const testName = "Alice Tester";
 export const testBio =

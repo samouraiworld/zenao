@@ -20,7 +20,7 @@ interface EventPostInfoProps {
   post: StandardPostView | PollPostView;
   postId: string;
   eventId: string;
-  userRealmId: string;
+  userId: string;
   editMode: boolean;
   onEditModeChange: (editMode: boolean) => void;
   onEdit: (
@@ -41,7 +41,7 @@ export default function EventPostInfo({
   postId,
   editMode,
   onEditModeChange,
-  userRealmId,
+  userId,
   eventId,
   onEdit,
   isEditing,
@@ -53,9 +53,7 @@ export default function EventPostInfo({
   onPinToggle,
 }: EventPostInfoProps) {
   const router = useRouter();
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userRealmId),
-  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, userId));
 
   if (isStandardPost(post)) {
     return (
@@ -90,7 +88,7 @@ export default function EventPostInfo({
     return (
       <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
         <PollPost
-          userRealmId={userRealmId}
+          userId={userId}
           pollId={parsePollUri(post.post.post.value.uri).pollId}
           pollPost={post}
           onReactionChange={async (icon) =>

@@ -10,7 +10,7 @@ import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { PostView } from "@/app/gen/feeds/v1/feeds_pb";
 
 export function PostsList({
-  userRealmId,
+  userId,
   posts,
   postInEdition,
   onEditModeChange,
@@ -27,7 +27,7 @@ export function PostsList({
   isDeleting,
   isPinning,
 }: {
-  userRealmId: string | null;
+  userId: string | null;
   postInEdition: string | null;
   onEditModeChange?: (
     postId: string,
@@ -66,7 +66,7 @@ export function PostsList({
             onDelete={async (parentId) => {
               await onDelete?.(postId, parentId);
             }}
-            isOwner={post.post.author === userRealmId}
+            isOwner={post.post.author === userId}
             canReply={canReply}
             replyHref={replyHrefFormatter?.(post.post.localPostId)}
             canInteract={canInteract}
@@ -98,7 +98,7 @@ export function PostsList({
       return (
         <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
           <PollPost
-            userRealmId={userRealmId}
+            userId={userId}
             pollId={pollId}
             pollPost={post}
             onDelete={async (parentId) => {
@@ -107,7 +107,7 @@ export function PostsList({
             onReactionChange={async (icon) =>
               await onReactionChange?.(postId, icon)
             }
-            isOwner={post.post.author === userRealmId}
+            isOwner={post.post.author === userId}
             replyHref={replyHrefFormatter?.(post.post.localPostId)}
             canReply={canReply}
             canInteract={canInteract}

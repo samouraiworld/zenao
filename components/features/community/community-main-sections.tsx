@@ -48,9 +48,9 @@ function CommunityMainSections({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userProfileId),
   );
   const isMember = useMemo(
     () => userRoles.includes("member") || userRoles.includes("administrator"),

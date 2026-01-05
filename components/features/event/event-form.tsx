@@ -94,6 +94,11 @@ export const EventForm: React.FC<EventFormProps> = ({
   const { uploadMdFile, uploading, setCursor } =
     useMarkdownUpload(descriptionRef);
 
+  const isSubmittable = useMemo(
+    () => form.formState.isValid && form.formState.isDirty && !isLoading,
+    [form.formState.isValid, form.formState.isDirty, isLoading],
+  );
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       const file = e.target?.files?.[0];
@@ -536,7 +541,11 @@ export const EventForm: React.FC<EventFormProps> = ({
             )}
           </div>
 
-          <ButtonWithChildren loading={isLoading} type="submit">
+          <ButtonWithChildren
+            loading={isLoading}
+            type="submit"
+            disabled={!isSubmittable}
+          >
             {isEditing ? t("edit-event-button") : t("create-event-button")}
           </ButtonWithChildren>
         </div>

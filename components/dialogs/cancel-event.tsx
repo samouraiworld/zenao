@@ -27,7 +27,7 @@ export function CancelEventDialog({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const router = useRouter();
 
   const { cancelEvent, isPending } = useEventCancel();
@@ -37,7 +37,7 @@ export function CancelEventDialog({
       await cancelEvent({
         eventId,
         getToken,
-        userRealmId,
+        userId: userProfileId,
       });
       trackEvent("EventCanceled", {
         props: {

@@ -20,9 +20,9 @@ export default async function CreateCommunityPage() {
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         <div className="flex flex-col items-center mx-auto md:max-w-5xl">

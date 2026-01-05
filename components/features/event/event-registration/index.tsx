@@ -53,7 +53,7 @@ export function EventRegistrationForm({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { toast } = useToast();
 
   const [isPending, setIsPending] = useState(false);
@@ -88,15 +88,14 @@ export function EventRegistrationForm({
         if (!token) {
           throw new Error("invalid clerk token");
         }
-        if (!userId || !userRealmId) {
+        if (!userId || !userProfileId) {
           throw new Error("missing user id or user address");
         }
 
         await participateLoggedIn({
           eventId,
           token,
-          userId: userId,
-          userRealmId: userRealmId,
+          userId: userProfileId,
           guests,
           password: eventPassword,
         });
@@ -113,7 +112,7 @@ export function EventRegistrationForm({
           eventId,
           email: data.email!,
           guests,
-          userRealmId,
+          userId: userProfileId,
           password: eventPassword,
         });
         trackEvent("EventParticipation", {
