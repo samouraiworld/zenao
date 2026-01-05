@@ -66,7 +66,7 @@ export default function CreateCommunityForm({
     try {
       const token = await getToken();
 
-      if (!token || !userId || !userInfo?.realmId) {
+      if (!token || !userId || !userInfo?.userId) {
         throw new Error("User is not authenticated");
       }
 
@@ -80,12 +80,12 @@ export default function CreateCommunityForm({
 
       const communityId = await createCommunity({
         token,
-        userRealmId: userInfo?.realmId,
+        userId: userInfo?.userId,
         displayName: data.displayName,
         avatarUri: data.avatarUri,
         bannerUri: data.bannerUri,
         description,
-        administrators: data.administrators.map((admin) => admin.address),
+        administrators: data.administrators.map((admin) => admin.email),
       });
 
       trackEvent("CommunityCreated", {

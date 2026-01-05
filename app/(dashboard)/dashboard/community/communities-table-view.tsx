@@ -5,19 +5,16 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import useCommunitiesTableColumns from "./columns";
-import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
-import {
-  communityIdFromPkgPath,
-  DEFAULT_COMMUNITIES_LIMIT,
-} from "@/lib/queries/community";
+import { DEFAULT_COMMUNITIES_LIMIT } from "@/lib/queries/community";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
+import { SafeCommunityUser } from "@/types/schemas";
 
 interface CommunitiesTableViewProps {
-  communities: CommunityInfo[];
+  communities: SafeCommunityUser[];
   isFetchingNextPage: boolean;
   isFetchingPreviousPage: boolean;
   hasNextPage: boolean;
@@ -35,6 +32,7 @@ export default function CommunitiesTableView({
   fetchNextPage,
   fetchPreviousPage,
 }: CommunitiesTableViewProps) {
+  console.log("communities", communities);
   const router = useRouter();
   const columns = useCommunitiesTableColumns();
   const t = useTranslations("dashboard.communitiesTable");
@@ -43,7 +41,7 @@ export default function CommunitiesTableView({
     columns,
     enableRowSelection: false,
     defaultPageSize: DEFAULT_COMMUNITIES_LIMIT,
-    getRowId: (row) => row.pkgPath.toString(),
+    getRowId: (row) => row.community.id.toString(),
   });
 
   return (
@@ -66,9 +64,7 @@ export default function CommunitiesTableView({
               </div>
             )}
             onClickRow={(row) => {
-              router.push(
-                `/dashboard/community/${communityIdFromPkgPath(row.original.pkgPath)}`,
-              );
+              router.push(`/dashboard/community/${row.original.community.id}`);
             }}
           />
         </div>

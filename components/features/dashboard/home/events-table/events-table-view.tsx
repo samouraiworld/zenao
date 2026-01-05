@@ -12,7 +12,6 @@ import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import { DEFAULT_EVENTS_LIMIT } from "@/lib/queries/events-list";
 import { SafeEventUser } from "@/types/schemas";
 
@@ -57,7 +56,7 @@ export function EventsTableView({
     columns,
     enableRowSelection: false,
     defaultPageSize: DEFAULT_EVENTS_LIMIT,
-    getRowId: (row) => row.event.pkgPath.toString(),
+    getRowId: (row) => row.event.id,
   });
 
   return (
@@ -80,9 +79,7 @@ export function EventsTableView({
               </div>
             )}
             onClickRow={(row) => {
-              router.push(
-                `/dashboard/event/${eventIdFromPkgPath(row.original.event.pkgPath)}`,
-              );
+              router.push(`/dashboard/event/${row.original.event.id}`);
             }}
           />
         </div>

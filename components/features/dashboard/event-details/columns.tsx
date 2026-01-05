@@ -18,7 +18,7 @@ export const useParticipantsColumns = (): ColumnDef<string>[] => {
         cell: ({ row }) => (
           <div className="px-4">
             <UserAvatarWithName
-              realmId={row.original}
+              userId={row.original}
               className="h-10"
               linkToProfile
             />

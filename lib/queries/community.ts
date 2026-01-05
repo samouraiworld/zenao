@@ -7,24 +7,28 @@ import {
 import { z } from "zod";
 import { GetToken } from "@clerk/types";
 import { withSpan } from "../tracer";
-import { userIdFromPkgPath } from "./user";
 import { zenaoClient } from "@/lib/zenao-client";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
+import {
+  communityGetUserRolesSchema,
+  CommunityUserRole,
+  communityUserSchema,
+  SafeCommunityUser,
+} from "@/types/schemas";
 
 export const DEFAULT_COMMUNITIES_LIMIT = 20;
 
-const communityUserRolesEnum = z.enum(["administrator", "member", "event"]);
-
-export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
-
-export const communityGetUserRolesSchema = z.array(communityUserRolesEnum);
-
 const communityUsersWithRolesResponseSchema = z
   .object({
-    realmId: z.string(),
-    roles: z.string().array(),
+    entityType: z.string(),
+    entityId: z.string(),
+    roles: communityGetUserRolesSchema,
   })
-  .transform(({ realmId, roles }) => ({ realmId, roles }));
+  .transform(({ entityType, entityId, roles }) => ({
+    entityType,
+    entityId,
+    roles,
+  }));
 
 export type CommunityUsersWithRolesResponseSchema = z.infer<
   typeof communityUsersWithRolesResponseSchema
@@ -115,77 +119,19 @@ export const communitiesList = (
   });
 };
 
-export const communitiesListByMember = (
-  memberAddress: string | null,
-  limit: number,
-  options?: Omit<
-    UseInfiniteQueryOptions<
-      CommunityInfo[],
-      Error,
-      InfiniteData<CommunityInfo[]>,
-      (string | number)[],
-      number // pageParam type
-    >,
-    | "queryKey"
-    | "queryFn"
-    | "getNextPageParam"
-    | "initialPageParam"
-    | "getPreviousPageParam"
-  >,
-) => {
-  const limitInt = Math.floor(limit);
-
-  return infiniteQueryOptions({
-    initialPageParam: 0,
-    queryKey: ["communitiesByMember", memberAddress ?? "", limitInt],
-    enabled: !!memberAddress,
-    queryFn: async ({ pageParam = 0 }) => {
-      if (!memberAddress) {
-        return [] as CommunityInfo[];
-      }
-      return withSpan(
-        `query:backend:communities-by-member:${userIdFromPkgPath(memberAddress)}`,
-        async () => {
-          const res = await zenaoClient.listCommunitiesByMember({
-            memberId: userIdFromPkgPath(memberAddress),
-            limit: limitInt,
-            offset: pageParam * limitInt,
-          });
-          const json = res.communities;
-
-          return json;
-        },
-      );
-    },
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length;
-    },
-    getPreviousPageParam: (firstPage, pages) => {
-      if (firstPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length - 2;
-    },
-    ...options,
-  });
-};
-
 export const communityUserRoles = (
   communityId: string | null | undefined,
-  userRealmId: string | null | undefined,
+  userId: string | null | undefined,
 ) =>
   queryOptions({
-    queryKey: ["communityUserRoles", communityId, userRealmId],
+    queryKey: ["communityUserRoles", communityId, userId],
     queryFn: async () => {
-      if (!communityId || !userRealmId) {
+      if (!communityId || !userId) {
         return [];
       }
 
       return withSpan(
-        `query:backend:community:${communityId}:user-roles:${userIdFromPkgPath(userRealmId)}`,
+        `query:backend:community:${communityId}:user-roles:${userId}`,
         async () => {
           const res = await zenaoClient.entityRoles({
             org: {
@@ -194,7 +140,7 @@ export const communityUserRoles = (
             },
             entity: {
               entityType: "user",
-              entityId: userIdFromPkgPath(userRealmId),
+              entityId: userId,
             },
           });
           const roles = res.roles;
@@ -202,7 +148,7 @@ export const communityUserRoles = (
         },
       );
     },
-    enabled: !!communityId && !!userRealmId,
+    enabled: !!communityId && !!userId,
   });
 
 export const communityUsersWithRoles = (
@@ -233,11 +179,6 @@ export const communityUsersWithRoles = (
 
 export function goStringSliceLiteral(arr: string[]): string {
   return `[]string{${arr.map((s) => JSON.stringify(s)).join(",")}}`;
-}
-
-export function communityIdFromPkgPath(pkgPath: string): string {
-  const res = /(c\d+)$/.exec(pkgPath);
-  return res?.[1].substring(1) || "";
 }
 
 export const communitiesListByEvent = (
@@ -289,7 +230,8 @@ export const communitiesListByEvent = (
   });
 };
 
-export const communitiesByRolesListSuspense = (
+export const communitiesByUserRolesListSuspense = (
+  userId: string | undefined,
   page: number,
   limit: number,
   roles: CommunityUserRole[],
@@ -299,28 +241,97 @@ export const communitiesByRolesListSuspense = (
   const pageInt = Math.max(0, Math.floor(page));
 
   return queryOptions({
-    queryKey: ["communitiesByRoles", pageInt, limitInt, roles],
+    queryKey: [
+      "communitiesByUserRoles",
+      userId ?? "",
+      pageInt,
+      limitInt,
+      roles,
+    ],
     queryFn: async () => {
       return withSpan(
-        `query:backend:communities-by-roles:${JSON.stringify(roles)}`,
+        `query:backend:communities-by-user-roles:${userId}`,
         async () => {
-          const token = await getToken();
-          if (!token) throw new Error("invalid clerk token");
+          const token = getToken ? await getToken() : null;
 
-          // TODO add backend
-          // const res = await zenaoClient.listCommunitiesByRoles(
-          //   {
-          //     limit: limitInt,
-          //     offset: pageInt * limitInt,
-          //     roles,
-          //   },
-          //   { headers: { Authorization: `Bearer ${token}` } },
-          // );
-          // return res.communities;
-          return [];
+          const res = await zenaoClient.listCommunitiesByUserRoles(
+            {
+              userId,
+              limit: limitInt,
+              offset: pageInt * limitInt,
+              roles,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+
+          return communityUserSchema.array().parse(res.communities);
         },
       );
     },
-    initialData: [] as CommunityInfo[],
+  });
+};
+
+export const communitiesByUserRolesList = (
+  userId: string | undefined,
+  roles: CommunityUserRole[],
+  limit: number,
+  getToken?: GetToken,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      SafeCommunityUser[],
+      Error,
+      InfiniteData<SafeCommunityUser[]>,
+      (string | number | CommunityUserRole[])[],
+      number
+    >,
+    | "queryKey"
+    | "queryFn"
+    | "getNextPageParam"
+    | "initialPageParam"
+    | "getPreviousPageParam"
+  >,
+) => {
+  const limitInt = Math.floor(limit);
+
+  return infiniteQueryOptions({
+    initialPageParam: 0,
+    queryKey: ["communitiesByUserRoles", userId ?? "", roles, limitInt],
+    enabled: !!userId,
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!userId) {
+        return [] as SafeCommunityUser[];
+      }
+
+      return withSpan(
+        `query:backend:communities-by-user-roles:${userId}`,
+        async () => {
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listCommunitiesByUserRoles(
+            {
+              userId,
+              roles,
+              limit: limitInt,
+              offset: pageParam * limitInt,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+
+          return communityUserSchema.array().parse(res.communities);
+        },
+      );
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
+    },
+    ...options,
   });
 };

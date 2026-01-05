@@ -9,7 +9,6 @@ import (
 type ZenaoServer struct {
 	Logger       *zap.Logger
 	Auth         zeni.Auth
-	Chain        zeni.Chain
 	DB           zeni.DB
 	MailClient   *resend.Client
 	MailSender   string

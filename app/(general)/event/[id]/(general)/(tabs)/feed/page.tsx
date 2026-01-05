@@ -31,10 +31,10 @@ function EventFeed({ params }: EventFeedProps) {
   );
 
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.realmId),
+    eventUserRoles(eventId, userInfo?.userId),
   );
 
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const [postInEdition, setPostInEdition] = useState<{
     postId: string;
@@ -44,8 +44,7 @@ function EventFeed({ params }: EventFeedProps) {
   const t = useTranslations();
 
   // Event's social feed posts
-  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${pkgPath}:main`;
+  const feedId = `event:${eventId}:main`;
 
   const {
     data: postsPages,
@@ -54,7 +53,7 @@ function EventFeed({ params }: EventFeedProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userProfileId),
   );
 
   const posts = useMemo(() => {
@@ -106,7 +105,7 @@ function EventFeed({ params }: EventFeedProps) {
         ) : (
           <PostsList
             posts={posts}
-            userRealmId={userRealmId}
+            userId={userProfileId}
             onReactionChange={onReactionChange}
             canInteract={
               roles.includes("organizer") || roles.includes("participant")

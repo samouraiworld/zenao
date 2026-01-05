@@ -19,7 +19,7 @@ export default async function ScannerPage({ params }: Props) {
   const { getToken, userId } = await auth();
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
   let eventData;
   try {
@@ -31,7 +31,9 @@ export default async function ScannerPage({ params }: Props) {
     notFound();
   }
 
-  const roles = await queryClient.fetchQuery(eventUserRoles(p.id, userRealmId));
+  const roles = await queryClient.fetchQuery(
+    eventUserRoles(p.id, userProfileId),
+  );
 
   if (!roles.includes("gatekeeper") && !roles.includes("organizer")) {
     redirect(`/event/${p.id}`, RedirectType.replace);

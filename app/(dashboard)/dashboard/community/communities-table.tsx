@@ -5,13 +5,17 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import CommunitiesTableView from "./communities-table-view";
 import {
-  communitiesByRolesListSuspense,
+  communitiesByUserRolesListSuspense,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import useManualPagination from "@/hooks/use-manual-pagination";
+import { userInfoOptions } from "@/lib/queries/user";
 
 export default function CommunitiesTable() {
-  const { getToken } = useAuth();
+  const { getToken, userId: authId } = useAuth();
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, authId),
+  );
 
   const [tablePage, setTablePage] = useQueryState("page", {
     defaultValue: 1,
@@ -23,10 +27,11 @@ export default function CommunitiesTable() {
 
   const { data: communities, isFetching: isFetchingCommunities } =
     useSuspenseQuery(
-      communitiesByRolesListSuspense(
-        DEFAULT_COMMUNITIES_LIMIT,
+      communitiesByUserRolesListSuspense(
+        userInfo?.userId,
         tablePage - 1,
-        ["administrator"],
+        DEFAULT_COMMUNITIES_LIMIT,
+        ["administrator", "member"],
         getToken,
       ),
     );

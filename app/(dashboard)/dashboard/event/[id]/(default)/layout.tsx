@@ -33,11 +33,11 @@ async function DashboardEventInfoLayoutProps({
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
   const t = await getTranslations();
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("eventForm.log-in")}
@@ -57,7 +57,7 @@ async function DashboardEventInfoLayoutProps({
   }
 
   const roles = await queryClient.fetchQuery(
-    eventUserRoles(eventId, userRealmId),
+    eventUserRoles(eventId, userProfileId),
   );
 
   queryClient.prefetchInfiniteQuery(
