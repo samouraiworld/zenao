@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
 import DashboardCommunityContextProvider from "./dashboard-community-context-provider";
+import DashboardCommunityEditionContextProvider from "./dashboard-community-edition-context-provider";
+import DashboardCommunityTabs from "./dashboard-community-tabs";
 import { getQueryClient } from "@/lib/get-query-client";
 import { withCommunityRolesRestriction } from "@/lib/permissions/with-roles-required";
 import { communityInfo, communityUserRoles } from "@/lib/queries/community";
@@ -49,13 +51,22 @@ async function DashboardCommunityManagementPage({
     communityUserRoles(communityId, userProfileId),
   );
 
+  const renderLayout = () => (
+    <div className="flex flex-col gap-8 pb-16 md:pb-0">
+      {/* <DashboardCommunityInfo /> */}
+      <DashboardCommunityTabs>{children}</DashboardCommunityTabs>
+    </div>
+  );
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <DashboardCommunityContextProvider
         communityData={communityData}
         roles={roles}
       >
-        {children}
+        <DashboardCommunityEditionContextProvider>
+          {renderLayout()}
+        </DashboardCommunityEditionContextProvider>
       </DashboardCommunityContextProvider>
     </HydrationBoundary>
   );

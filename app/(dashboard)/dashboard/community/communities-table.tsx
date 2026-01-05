@@ -31,7 +31,7 @@ export default function CommunitiesTable() {
         userInfo?.userId,
         tablePage - 1,
         DEFAULT_COMMUNITIES_LIMIT,
-        ["administrator", "member"],
+        ["administrator"],
         getToken,
       ),
     );

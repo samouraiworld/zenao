@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useMemo, useRef, useTransition } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  useTransition,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@clerk/nextjs";
@@ -116,7 +122,7 @@ export default function DashboardCommunityEditionContextProvider({
             communityId,
           },
         });
-
+        form.reset(values, { keepDirty: false });
         toast({ title: t("update-success") });
       } catch (err) {
         captureException(err);
@@ -140,4 +146,14 @@ export default function DashboardCommunityEditionContextProvider({
       <Form {...form}>{children}</Form>
     </DashboarCommunityEditionContext.Provider>
   );
+}
+
+export function useDashboardCommunityEditionContext() {
+  const context = useContext(DashboarCommunityEditionContext);
+  if (!context) {
+    throw new Error(
+      "useDashboardCommunityEditionContext must be used within a DashboardCommunityEditionContextProvider",
+    );
+  }
+  return context;
 }

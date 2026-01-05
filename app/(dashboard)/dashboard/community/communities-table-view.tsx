@@ -32,7 +32,6 @@ export default function CommunitiesTableView({
   fetchNextPage,
   fetchPreviousPage,
 }: CommunitiesTableViewProps) {
-  console.log("communities", communities);
   const router = useRouter();
   const columns = useCommunitiesTableColumns();
   const t = useTranslations("dashboard.communitiesTable");
