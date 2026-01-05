@@ -625,6 +625,9 @@
           "error-administrator-already-exists": "This administrator is already assigned to the community!",
           "add-btn": "Add"
         }
+      },
+      "members": {
+        "no-members": "No members yet."
       }
     },
     "eventDetails": {

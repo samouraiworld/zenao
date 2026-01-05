@@ -455,3 +455,13 @@ export const communityUserSchema = z.object({
 });
 
 export type SafeCommunityUser = z.infer<typeof communityUserSchema>;
+
+export const communityEntityWithRolesSchema = z.object({
+  entityType: z.string(),
+  entityId: z.string(),
+  roles: communityGetUserRolesSchema,
+});
+
+export type SafeCommunityEntityWithRoles = z.infer<
+  typeof communityEntityWithRolesSchema
+>;
