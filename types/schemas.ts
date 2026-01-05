@@ -444,6 +444,7 @@ export const communityInfoSchema = z.object({
   avatarUri: z.string(),
   bannerUri: z.string(),
   countMembers: z.number(),
+  administrators: z.array(z.string()),
 });
 
 export type SafeCommunityInfo = z.infer<typeof communityInfoSchema>;

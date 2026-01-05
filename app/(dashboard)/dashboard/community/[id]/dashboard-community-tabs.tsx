@@ -54,9 +54,12 @@ export default function DashboardCommunityTabs({
         >
           <TabsTrigger
             value="administrators"
-            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
+            className="w-fit gap-2 p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            {t("administrators")}
+            {t("administrators")}{" "}
+            <Badge variant="secondary">
+              {communityInfo.administrators.length}
+            </Badge>
           </TabsTrigger>
         </Link>
         <Link
