@@ -19,23 +19,26 @@ import {
 import { userInfoOptions } from "@/lib/queries/user";
 import { addressFromRealmId } from "@/lib/gno";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
-import { RealmId } from "@/types/schemas";
 
-type EventsTabProps = {
-  realmId: RealmId;
+type ProfileEventsProps = {
+  userId: string;
   now: number;
 };
 
-export default function ProfileEvents({ realmId, now }: EventsTabProps) {
+export default function ProfileEvents({ userId, now }: ProfileEventsProps) {
   const t = useTranslations("profile-info");
-  const { getToken, userId } = useAuth();
 
+  const realmId = `gno.land/r/zenao/users/u${userId}`;
+
+  const { getToken, userId: currentUserId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
+    userInfoOptions(getToken, currentUserId),
   );
-  const address = addressFromRealmId(realmId);
+  const userRealmId = userInfo?.realmId || "";
+  const address = addressFromRealmId(userRealmId);
   const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
   const isOwner = loggedUserAddress === address;
+
   // The connected user can see his both discoverable and undiscoverable events
   const discoverableFilter = isOwner
     ? DiscoverableFilter.UNSPECIFIED

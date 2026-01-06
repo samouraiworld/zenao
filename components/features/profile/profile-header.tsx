@@ -198,12 +198,13 @@ const EditProfileButton = ({ address }: { address: string }) => {
     setClientUserId(userId || undefined);
   }, [userId]);
 
-  const { data: info } = useSuspenseQuery(
+  const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, clientUserId),
   );
 
-  const realmId = info?.realmId;
-  const userLoggedAddress = addressFromRealmId(realmId);
+  const userRealmId = userInfo?.realmId;
+  const userLoggedAddress = addressFromRealmId(userRealmId);
+
   return (
     userLoggedAddress === address && (
       <Link href="/settings" className="w-full sm:w-auto">

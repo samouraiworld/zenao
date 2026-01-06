@@ -14,11 +14,14 @@ import {
   PortfolioItem,
   gnoProfileDetailsSchema,
   GnoProfileDetails,
-  RealmId,
 } from "@/types/schemas";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { addressFromRealmId } from "@/lib/gno";
 import { PortfolioTab } from "@/components/portfolio/portfolio-tab";
+
+type ProfilePortfolioProps = {
+  userId: string;
+};
 
 const MemoizedVideoPreview = memo(({ uri }: { uri: string }) => (
   <MarkdownPreview
@@ -28,24 +31,21 @@ const MemoizedVideoPreview = memo(({ uri }: { uri: string }) => (
 ));
 MemoizedVideoPreview.displayName = "MemoizedVideoPreview";
 
-type UserPortfolioProps = {
-  realmId: RealmId;
-};
-
-export default function ProfilePortfolio({ realmId }: UserPortfolioProps) {
-  const { getToken, userId } = useAuth();
-
-  const address = addressFromRealmId(realmId);
-  const { data: userProfile } = useSuspenseQuery(profileOptions(realmId));
-
+export default function ProfilePortfolio({ userId }: ProfilePortfolioProps) {
+  const { getToken, userId: currentUserId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
+    userInfoOptions(getToken, currentUserId),
   );
+  const userRealmId = userInfo?.realmId || "";
+  const address = addressFromRealmId(userRealmId);
   const loggedUserAddress = addressFromRealmId(userInfo?.realmId);
   const isOwner = loggedUserAddress === address;
 
+  const realmId = `gno.land/r/zenao/users/u${userId}`;
+  const { data: consultedProfile } = useSuspenseQuery(profileOptions(realmId));
+
   const profile = deserializeWithFrontMatter({
-    serialized: userProfile?.bio ?? "",
+    serialized: consultedProfile?.bio ?? "",
     schema: gnoProfileDetailsSchema,
     defaultValue: {
       bio: "",
@@ -76,8 +76,8 @@ export default function ProfilePortfolio({ realmId }: UserPortfolioProps) {
     await editUser({
       realmId: address,
       token,
-      avatarUri: userProfile?.avatarUri ?? "",
-      displayName: userProfile?.displayName ?? "",
+      avatarUri: consultedProfile?.avatarUri ?? "",
+      displayName: consultedProfile?.displayName ?? "",
       bio,
     });
   };
