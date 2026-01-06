@@ -48,7 +48,7 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () =>
         id: "actions",
         header: () => <div>Actions</div>,
         cell: ({ row }) => (
-          <Link href={`/event/${row.original.community.id}`}>
+          <Link href={`/community/${row.original.community.id}`}>
             <Button
               variant="ghost"
               className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
