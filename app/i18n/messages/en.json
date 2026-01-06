@@ -611,7 +611,8 @@
       "name-column": "Name",
       "members-column": "Members",
       "roles-column": "Role(s)",
-      "actions-column": "Actions"
+      "actions-column": "Actions",
+      "loading": "Loading..."
     },
     "eventDetails": {
       "event-details": "Event details",
