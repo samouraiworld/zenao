@@ -69,9 +69,6 @@ export function NavUser({ userId, user }: NavUserProps) {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.displayName}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {userId}
-                </span>
               </div>
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -102,9 +99,6 @@ export function NavUser({ userId, user }: NavUserProps) {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
                     {user.displayName}
-                  </span>
-                  <span className="text-muted-foreground truncate text-xs">
-                    {userId}
                   </span>
                 </div>
               </div>
