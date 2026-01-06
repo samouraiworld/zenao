@@ -8,8 +8,12 @@ import {
   ArrowLeft,
   BookOpenText,
   BoxesIcon,
+  CircleUserRound,
   CompassIcon,
+  LayoutDashboard,
+  LogOut,
   LucideProps,
+  Pencil,
   RssIcon,
   Tickets,
 } from "lucide-react";
@@ -284,21 +288,30 @@ const Auth = ({
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
           <Link href={`/profile/${userInfo?.userId}`}>
             <DropdownMenuItem className="cursor-pointer">
+              <CircleUserRound />
               {t("view-profile")}
             </DropdownMenuItem>
           </Link>
           <Link href="/settings">
             <DropdownMenuItem className="cursor-pointer">
+              <Pencil />
               {t("edit-profile")}
             </DropdownMenuItem>
           </Link>
           <DropdownMenuSeparator />
+          <Link href="/settings" target="_blank">
+            <DropdownMenuItem className="cursor-pointer">
+              <LayoutDashboard />
+              {t("dashboard-access")}
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => {
               signOut();
             }}
           >
+            <LogOut />
             {t("sign-out")}
           </DropdownMenuItem>
         </DropdownMenuContent>
