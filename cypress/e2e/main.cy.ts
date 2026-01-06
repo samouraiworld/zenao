@@ -487,7 +487,10 @@ describe("main", () => {
   });
 
   it("access an exclusive event", () => {
+    cy.accessCreateEventPage();
+
     cy.createEvent({ exclusive: true });
+
     cy.url().then((url) => {
       logout();
       cy.visit(url);
