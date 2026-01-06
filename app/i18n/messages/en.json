@@ -587,6 +587,13 @@
     "sidebar": {
       "create-event-btn": "Create event",
       "events": "Events",
+      "upcoming":"Upcoming",
+      "past": "Past",
+      "participants": "Participants",
+      "gatekeepers": "Gatekeepers",
+      "general": "General",
+      "members": "Members",
+      "administrators": "Administrators",
       "communities": "Communities",
       "settings": "Settings",
       "coming-soon": "Soon",
