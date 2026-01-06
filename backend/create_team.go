@@ -36,8 +36,8 @@ func (s *ZenaoServer) CreateTeam(
 		return nil, errors.New("teams cannot create other teams")
 	}
 
-	if len(req.Msg.DisplayName) < 3 || len(req.Msg.DisplayName) > 50 {
-		return nil, errors.New("display name must be between 3 and 50 characters")
+	if err := validateProfile(req.Msg.DisplayName); err != nil {
+		return nil, err
 	}
 
 	team := (*zeni.User)(nil)

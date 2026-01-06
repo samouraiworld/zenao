@@ -31,8 +31,8 @@ func (s *ZenaoServer) EditUser(
 		return nil, errors.New("user is banned")
 	}
 
-	if len(req.Msg.DisplayName) < 3 || len(req.Msg.DisplayName) > 50 {
-		return nil, errors.New("display name must be between 3 and 50 characters")
+	if err := validateProfile(req.Msg.DisplayName); err != nil {
+		return nil, err
 	}
 
 	if err := s.DB.TxWithSpan(ctx, "db.EditUser", func(db zeni.DB) error {
@@ -47,4 +47,11 @@ func (s *ZenaoServer) EditUser(
 	return connect.NewResponse(&zenaov1.EditUserResponse{
 		Id: zUser.ID,
 	}), nil
+}
+
+func validateProfile(displayName string) error {
+	if len(displayName) < 3 || len(displayName) > 50 {
+		return errors.New("display name must be between 3 and 50 characters")
+	}
+	return nil
 }
