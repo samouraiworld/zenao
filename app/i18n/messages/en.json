@@ -118,6 +118,10 @@
     "manage-gatekeepers-button": "Manage gatekeepers"
   },
   "profile-info": {
+    "profile-header": {
+      "edit-profile": "Edit profile",
+      "access-dashboard": "Access dashboard"
+    },
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",
     "past-events": "Past events"
