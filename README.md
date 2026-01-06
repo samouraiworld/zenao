@@ -2,7 +2,7 @@
 
 An event management and community platform featuring event creation, community management, and social feeds.
 
-> **Note:** Zenao is currently a Web2 application, with plans to transition to Web3 using [base](https://www.base.org/) in the future.
+> **Note:** Zenao is currently a Web2 application, with plans to transition to Web3 using [base](https://www.base.org/).
 
 ## Tech Stack
 
@@ -15,11 +15,8 @@ An event management and community platform featuring event creation, community m
 
 ## Prerequisites
 
-Install these tools before starting:
-
 - **Node.js 20+** ([download](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm)/[fnm](https://github.com/Schniz/fnm))
 - **Go 1.21+** ([download](https://go.dev/doc/install))
-- **Atlas CLI** (installed via `make install-atlas`)
 
 ## Quick Start - Full Local Development
 
@@ -176,11 +173,19 @@ cp .env.example .env.local
 go run ./backend e2e-infra
 ```
 
-This command:
-- Applies migrations to temporary SQLite DB (`e2e.db`)
-- Generates fake data
-- Starts backend on port 4242
-- Exposes `http://localhost:4243/reset` endpoint for test automation
+This command sets up the E2E local environment:
+- Applies Atlas migrations on a temporary SQLite DB (`e2e.db`)
+- Generates fake data (users, events, posts, communities, etc.)
+- Starts the backend
+- Exposes `http://localhost:4243/reset` endpoint for test automation (deduplicates/queues concurrent reset requests)
+- Prints logs from all services
+
+**Optional:** Use the `--ci` flag to also build and start the Next.js frontend in the background (used for CI):
+```bash
+go run ./backend e2e-infra --ci
+```
+
+See `backend/e2e_infra.go` for implementation details.
 
 **3. Wait for stack readiness:**
 ```
@@ -192,7 +197,7 @@ READY   | ----------------------------
 npm run dev
 ```
 
-**6. Open Cypress (new terminal):**
+**5. Open Cypress (new terminal):**
 ```bash
 npm run cypress:e2e
 ```
