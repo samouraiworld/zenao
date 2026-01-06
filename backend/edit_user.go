@@ -31,6 +31,10 @@ func (s *ZenaoServer) EditUser(
 		return nil, errors.New("user is banned")
 	}
 
+	if len(req.Msg.DisplayName) < 3 || len(req.Msg.DisplayName) > 50 {
+		return nil, errors.New("display name must be between 3 and 50 characters")
+	}
+
 	if err := s.DB.TxWithSpan(ctx, "db.EditUser", func(db zeni.DB) error {
 		if err := db.EditUser(zUser.ID, req.Msg); err != nil {
 			return err

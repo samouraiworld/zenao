@@ -52,6 +52,9 @@ const (
 	RoleAdministrator string = "administrator" // for communities
 	RoleMember        string = "member"        // for communities
 	RoleEvent         string = "event"         // for communities
+
+	RoleTeamOwner  string = "owner"       // for teams
+	RoleTeamMember string = "team_member" // for teams (distinct from community "member")
 )
 
 func IsValidEventRole(role string) bool {
@@ -62,10 +65,15 @@ func IsValidUserCommunityRole(role string) bool {
 	return role == RoleAdministrator || role == RoleMember
 }
 
+func IsValidTeamRole(role string) bool {
+	return role == RoleTeamOwner || role == RoleTeamMember
+}
+
 const (
 	EntityTypeUser      string = "user"
 	EntityTypeEvent     string = "event"
 	EntityTypeCommunity string = "community"
+	EntityTypeTeam      string = "team"
 )
 
 type AuthUser struct {
@@ -82,6 +90,7 @@ type User struct {
 	Bio         string
 	AvatarURI   string
 	Plan        Plan
+	IsTeam      bool
 }
 
 type Event struct {
@@ -268,6 +277,9 @@ type DB interface {
 	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)
 	ListCommunitiesByUserRoles(userID string, roles []string, limit int, offset int) ([]*CommunityWithRoles, error)
+
+	CreateTeam(ownerID string, displayName string) (*User, error)
+	GetUserByID(userID string) (*User, error)
 
 	GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
