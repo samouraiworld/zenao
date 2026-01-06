@@ -53,7 +53,7 @@ const (
 	RoleMember        string = "member"        // for communities
 	RoleEvent         string = "event"         // for communities
 
-	RoleTeamOwner  string = "owner"       // for teams
+	RoleTeamOwner  string = "team_owner"  // for teams
 	RoleTeamMember string = "team_member" // for teams (distinct from community "member")
 )
 
