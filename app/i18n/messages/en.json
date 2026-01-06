@@ -587,6 +587,7 @@
     "sidebar": {
       "create-event-btn": "Create event",
       "events": "Events",
+      "communities": "Communities",
       "settings": "Settings",
       "coming-soon": "Soon",
       "quick-create": "Quick create"
@@ -602,6 +603,16 @@
       "past": "Past",
       "no-events": "No events found.",
       "create-event-btn": "Create an event"
+    },
+    "communitiesTable": {
+      "communities": "Communities",
+      "no-communities": "No communities found.",
+      "create-community-btn": "Create a community",
+      "name-column": "Name",
+      "members-column": "Members",
+      "roles-column": "Role(s)",
+      "actions-column": "Actions",
+      "loading": "Loading..."
     },
     "eventDetails": {
       "event-details": "Event details",
