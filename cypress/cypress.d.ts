@@ -6,5 +6,7 @@ declare namespace Cypress {
     }): Chainable<void>; // or whatever type it returns
 
     createCommunity(params: { administrators?: string[] }): Chainable<void>; // or whatever type it returns
+
+    accessCreateEventPage(): Chainable<void>;
   }
 }
