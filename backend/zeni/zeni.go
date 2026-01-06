@@ -54,6 +54,14 @@ const (
 	RoleEvent         string = "event"         // for communities
 )
 
+func IsValidEventRole(role string) bool {
+	return role == RoleOrganizer || role == RoleGatekeeper || role == RoleParticipant
+}
+
+func IsValidUserCommunityRole(role string) bool {
+	return role == RoleAdministrator || role == RoleMember
+}
+
 const (
 	EntityTypeUser      string = "user"
 	EntityTypeEvent     string = "event"
@@ -94,6 +102,11 @@ type Event struct {
 	Discoverable      bool
 }
 
+type EventWithRoles struct {
+	Event *Event
+	Roles []string
+}
+
 type Community struct {
 	CreatedAt   time.Time
 	ID          string
@@ -102,6 +115,11 @@ type Community struct {
 	AvatarURI   string
 	BannerURI   string
 	CreatorID   string
+}
+
+type CommunityWithRoles struct {
+	Community *Community
+	Roles     []string
 }
 
 type EntityRole struct {
@@ -225,7 +243,8 @@ type DB interface {
 	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
-	ListEvents(entityType string, entityID string, role string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*Event, error)
+	ListEvents(limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*Event, error)
+	ListEventsByUserRoles(userID string, roles []string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*EventWithRoles, error)
 	CountCheckedIn(eventID string) (uint32, error)
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
 	CancelParticipation(eventID string, userID string) error
@@ -248,6 +267,7 @@ type DB interface {
 	AddMemberToCommunity(communityID string, userID string) error
 	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)
+	ListCommunitiesByUserRoles(userID string, roles []string, limit int, offset int) ([]*CommunityWithRoles, error)
 
 	GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
@@ -279,13 +299,6 @@ type DB interface {
 	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
 	GetDeletedEvents() ([]*Event, error)
-}
-
-type Chain interface {
-	EntityRealmID(entityType string, entityID string) (string, error)
-	UserRealmID(userID string) string
-	CommunityRealmID(userID string) string
-	EventRealmID(eventID string) string
 }
 
 type Auth interface {

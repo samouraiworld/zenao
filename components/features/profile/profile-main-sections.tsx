@@ -13,8 +13,8 @@ import {
   TabsTrigger,
 } from "@/components/shadcn/tabs";
 import { ProfileTabsSchemaType } from "@/types/schemas";
-import ProfileEvents from "@/app/(general)/profile/[id]/[tab]/events";
-import ProfilePortfolio from "@/app/(general)/profile/[id]/[tab]/portfolio";
+import ProfileEvents from "@/app/(general)/profile/[userId]/[tab]/events";
+import ProfilePortfolio from "@/app/(general)/profile/[userId]/[tab]/portfolio";
 import { PostCardSkeleton } from "@/components/social-feed/cards/post-card-skeleton";
 
 type ProfileMainSectionsProps = {
@@ -28,7 +28,7 @@ function ProfileMainSections({
   section,
   now,
 }: ProfileMainSectionsProps) {
-  console.log("asfausaiuazazassioajsa");
+  console.log("asfausaiuazazassioajsa", userId);
 
   const t = useTranslations("profile-info");
 

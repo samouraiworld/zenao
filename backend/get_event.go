@@ -51,11 +51,11 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 	}
 
 	orgIDs := mapsl.Map(organizers, func(u *zeni.User) string {
-		return s.Chain.UserRealmID(u.ID) // TODO: remove usage in front-end to use ID instead ?
+		return u.ID
 	})
 
 	gkpIDs := mapsl.Map(gatekeepers, func(u *zeni.User) string {
-		return s.Chain.UserRealmID(u.ID) // TODO: remove usage in front-end to use ID instead ?
+		return u.ID
 	})
 
 	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
@@ -64,6 +64,7 @@ func (s *ZenaoServer) GetEvent(ctx context.Context, req *connect.Request[zenaov1
 	}
 
 	info := zenaov1.EventInfo{
+		Id:           evt.ID,
 		Title:        evt.Title,
 		Description:  evt.Description,
 		ImageUri:     evt.ImageURI,

@@ -12,7 +12,7 @@ export default function AppSidebarFooter() {
   const { getToken, userId } = useAuth();
   const { data: user } = useSuspenseQuery(userInfoOptions(getToken, userId));
   const { data: profile } = useSuspenseQuery(
-    profileOptions(user?.realmId || ""),
+    profileOptions(user?.userId || ""),
   );
 
   if (!user || !profile) {
@@ -21,7 +21,7 @@ export default function AppSidebarFooter() {
 
   return (
     <SidebarFooter>
-      <NavUser user={profile} realmId={user?.realmId ?? ""} />
+      <NavUser user={profile} userId={user?.userId ?? ""} />
     </SidebarFooter>
   );
 }

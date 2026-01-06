@@ -92,10 +92,10 @@ function MainEventSectionsContent({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userRealmId),
+    eventUserRoles(eventId, userProfileId),
   );
 
   const isOrganizer = useMemo(() => roles.includes("organizer"), [roles]);

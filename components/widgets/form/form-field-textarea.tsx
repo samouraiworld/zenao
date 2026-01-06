@@ -18,6 +18,7 @@ import { FormFieldProps } from "@/types/schemas";
 type FormFieldTextAreaProps<T extends FieldValues> = FormFieldProps<T, string> &
   React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
     wordCounter?: boolean;
+    wordCounterPosition?: "left" | "right";
   };
 
 export const FormFieldTextArea = <T extends FieldValues>({
@@ -26,11 +27,14 @@ export const FormFieldTextArea = <T extends FieldValues>({
   className,
   placeholder,
   wordCounter,
+  wordCounterPosition = "right",
   label,
   ref,
+  formItemClassName,
   ...otherProps
 }: FormFieldTextAreaProps<T> & {
   label?: string;
+  formItemClassName?: string;
   ref?: RefObject<HTMLTextAreaElement | null>;
 }) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -56,7 +60,11 @@ export const FormFieldTextArea = <T extends FieldValues>({
       name={name}
       render={({ field }) => (
         <FormItem
-          className={cn("relative w-full", wordCounter ? "pb-6" : null)}
+          className={cn(
+            "relative w-full",
+            wordCounter ? "pb-6" : null,
+            formItemClassName,
+          )}
         >
           {label && <FormLabel>{label}</FormLabel>}
           <FormControl>
@@ -82,15 +90,20 @@ export const FormFieldTextArea = <T extends FieldValues>({
                 wordCounter ? "absolute bottom-0" : null,
               )}
             >
+              {wordCounter && wordCounterPosition === "left" && (
+                <Text size="sm" className="text-secondary-color">
+                  {`${field.value?.length || 0}${
+                    otherProps.maxLength ? ` / ${otherProps.maxLength}` : ""
+                  }`}
+                </Text>
+              )}
               <FormMessage />
-              {wordCounter && (
-                <>
-                  <div />
-                  <Text size="sm" className="text-primary-color/80">
-                    <span>{field.value.length}</span> /
-                    <span>{otherProps.maxLength}</span>
-                  </Text>
-                </>
+              {wordCounter && wordCounterPosition === "right" && (
+                <Text size="sm" className="text-secondary-color">
+                  {`${field.value?.length || 0}${
+                    otherProps.maxLength ? ` / ${otherProps.maxLength}` : ""
+                  }`}
+                </Text>
               )}
             </div>
           )}

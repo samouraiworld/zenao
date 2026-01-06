@@ -38,8 +38,8 @@ const nextConfig: NextConfig = {
         destination: "/community/:id/chat",
       },
       {
-        source: "/profile/:id",
-        destination: "/profile/:id/events",
+        source: "/profile/:userId",
+        destination: "/profile/:userId/events",
       },
     ];
   },

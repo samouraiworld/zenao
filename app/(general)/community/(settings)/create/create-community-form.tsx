@@ -20,7 +20,13 @@ import { useCreateCommunity } from "@/lib/mutations/community-create";
 import { userInfoOptions } from "@/lib/queries/user";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
-export default function CreateCommunityForm() {
+interface CreateCommunityFormProps {
+  dashboard?: boolean;
+}
+
+export default function CreateCommunityForm({
+  dashboard = false,
+}: CreateCommunityFormProps) {
   const { toast } = useToast();
   const { trackEvent } = useAnalyticsEvents();
   const router = useRouter();
@@ -60,7 +66,7 @@ export default function CreateCommunityForm() {
     try {
       const token = await getToken();
 
-      if (!token || !userId || !userInfo?.realmId) {
+      if (!token || !userId || !userInfo?.userId) {
         throw new Error("User is not authenticated");
       }
 
@@ -74,12 +80,12 @@ export default function CreateCommunityForm() {
 
       const communityId = await createCommunity({
         token,
-        userRealmId: userInfo?.realmId,
+        userId: userInfo?.userId,
         displayName: data.displayName,
         avatarUri: data.avatarUri,
         bannerUri: data.bannerUri,
         description,
-        administrators: data.administrators.map((admin) => admin.address),
+        administrators: data.administrators.map((admin) => admin.email),
       });
 
       trackEvent("CommunityCreated", {
@@ -93,7 +99,12 @@ export default function CreateCommunityForm() {
         title: t("toast-creation-success"),
       });
 
-      router.push(`/community/${communityId}`, { scroll: false });
+      router.push(
+        dashboard
+          ? `/dashboard/community/${communityId}`
+          : `/community/${communityId}`,
+        { scroll: false },
+      );
     } catch (error) {
       captureException(error);
       toast({

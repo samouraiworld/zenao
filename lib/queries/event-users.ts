@@ -2,7 +2,8 @@ import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
-import { userIdFromPkgPath } from "./user";
+
+export const DEFAULT_EVENT_PARTICIPANTS_LIMIT = 20;
 
 const eventUserRolesEnum = z.enum(["organizer", "participant", "gatekeeper"]);
 
@@ -12,17 +13,17 @@ export const eventGetUserRolesSchema = z.array(eventUserRolesEnum);
 
 export const eventUserRoles = (
   eventId: string | null | undefined,
-  userRealmId: string | null | undefined,
+  userId: string | null | undefined,
 ) =>
   queryOptions({
-    queryKey: ["eventUserRoles", eventId, userRealmId],
+    queryKey: ["eventUserRoles", eventId, userId],
     queryFn: async () => {
-      if (!eventId || !userRealmId) {
+      if (!eventId || !userId) {
         return [];
       }
 
       return withSpan(
-        `query:backend:event:${eventId}:user-roles:${userIdFromPkgPath(userRealmId)}`,
+        `query:backend:event:${eventId}:user-roles:${userId}`,
         async () => {
           const res = await zenaoClient.entityRoles({
             org: {
@@ -31,7 +32,7 @@ export const eventUserRoles = (
             },
             entity: {
               entityType: "user",
-              entityId: userIdFromPkgPath(userRealmId),
+              entityId: userId,
             },
           });
           const roles = res.roles;
@@ -63,8 +64,8 @@ export const eventUsersWithRole = (
             },
             roles: [role],
           });
-          const realmIds = res.entitiesWithRoles.map((u) => u.realmId);
-          return z.string().array().parse(realmIds);
+          const userIds = res.entitiesWithRoles.map((u) => u.entityId);
+          return z.string().array().parse(userIds);
         },
       );
     },

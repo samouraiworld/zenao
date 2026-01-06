@@ -9,7 +9,7 @@ import {
 } from "@/components/layout/screen-container";
 import { userInfoOptions } from "@/lib/queries/user";
 import {
-  communitiesListByMember,
+  communitiesByUserRolesList,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 
@@ -24,9 +24,9 @@ export default async function CreateEventPage() {
 
   const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userRealmId = userInfo?.realmId;
+  const userProfileId = userInfo?.userId;
 
-  if (!token || !userRealmId) {
+  if (!token || !userProfileId) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         <div className="flex flex-col items-center mx-auto md:max-w-5xl">
@@ -36,10 +36,14 @@ export default async function CreateEventPage() {
     );
   }
 
-  // Prefetch communities of logged in user
-  // here we cannot determine yet all communnties where the user is admin
+  // Prefetch communities where logged in user is administrator
   queryClient.prefetchInfiniteQuery(
-    communitiesListByMember(userRealmId, DEFAULT_COMMUNITIES_LIMIT),
+    communitiesByUserRolesList(
+      userProfileId,
+      ["administrator"],
+      DEFAULT_COMMUNITIES_LIMIT,
+      getToken,
+    ),
   );
 
   return (

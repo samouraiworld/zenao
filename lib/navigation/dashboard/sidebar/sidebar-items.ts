@@ -1,4 +1,4 @@
-import { Forklift, Calendar, type LucideIcon } from "lucide-react";
+import { Forklift, Calendar, type LucideIcon, BoxesIcon } from "lucide-react";
 
 export interface NavSubItem {
   title: string;
@@ -31,12 +31,17 @@ export const sidebarItems: NavGroup[] = [
     label: "",
     items: [
       {
-        title: "Events",
+        title: "events",
         url: "/dashboard",
         icon: Calendar,
       },
       {
-        title: "Settings",
+        title: "communities",
+        url: "/dashboard/community",
+        icon: BoxesIcon,
+      },
+      {
+        title: "settings",
         url: "/dashboard/coming-soon",
         icon: Forklift,
         comingSoon: true,

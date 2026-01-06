@@ -14,7 +14,7 @@ func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenao
 	var infos []*zenaov1.EventInfo
 	if err := s.DB.TxWithSpan(ctx, "ListEvents", func(tx zeni.DB) error {
 		var err error
-		evts, err = tx.ListEvents("", "", "", int(req.Msg.Limit), int(req.Msg.Offset), req.Msg.From, req.Msg.To, req.Msg.DiscoverableFilter)
+		evts, err = tx.ListEvents(int(req.Msg.Limit), int(req.Msg.Offset), req.Msg.From, req.Msg.To, req.Msg.DiscoverableFilter)
 		if err != nil {
 			return err
 		}
@@ -38,14 +38,15 @@ func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenao
 			}
 
 			orgIDs := mapsl.Map(organizers, func(u *zeni.User) string {
-				return s.Chain.UserRealmID(u.ID) // TODO: remove usage in front-end to use ID instead ?
+				return u.ID
 			})
 
 			gkpIDs := mapsl.Map(gatekeepers, func(u *zeni.User) string {
-				return s.Chain.UserRealmID(u.ID) // TODO: remove usage in front-end to use ID instead ?
+				return u.ID
 			})
 
 			info := zenaov1.EventInfo{
+				Id:           evt.ID,
 				Title:        evt.Title,
 				Description:  evt.Description,
 				ImageUri:     evt.ImageURI,
@@ -58,7 +59,6 @@ func (s *ZenaoServer) ListEvents(ctx context.Context, req *connect.Request[zenao
 				Participants: participants,
 				CheckedIn:    checkedIn,
 				Discoverable: evt.Discoverable,
-				PkgPath:      s.Chain.EventRealmID(evt.ID), // TODO: remove usage in front-end to use ID instead ?
 			}
 			infos = append(infos, &info)
 		}

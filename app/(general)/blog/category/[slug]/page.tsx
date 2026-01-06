@@ -1,0 +1,102 @@
+import { type Metadata } from "next";
+import Link from "next/link";
+import { BlogClient } from "seobot";
+import Pagination from "../../blog-pagination";
+import BlogPostCard from "../../blog-post-card";
+import { ScreenContainer } from "@/components/layout/screen-container";
+
+async function getPosts(slug: string, page: number) {
+  const key = process.env.SEOBOT_API_KEY;
+  if (!key)
+    throw Error(
+      "SEOBOT_API_KEY enviroment variable must be set. You can use the DEMO key a8c58738-7b98-4597-b20a-0bb1c2fe5772 for testing - please set it in the root .env.local file",
+    );
+
+  const client = new BlogClient(key);
+  return client.getCategoryArticles(slug, page, 10);
+}
+
+function deslugify(str: string) {
+  return str.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+export const fetchCache = "force-no-store";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const title = `${deslugify(slug)} - DevHunt Blog`;
+  return {
+    title,
+    metadataBase: new URL("https://devhunt.org"),
+    alternates: {
+      canonical: `/blog/category/${slug}`,
+    },
+    openGraph: {
+      type: "article",
+      title,
+      url: `https://devhunt.org/blog/category/${slug}`,
+    },
+    twitter: {
+      title,
+    },
+  };
+}
+
+export default async function Category({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page: number }>;
+}) {
+  const { slug } = await params;
+  const { page } = await searchParams;
+  const pageNumber = Math.max((page || 0) - 1, 0);
+  const { total, articles } = await getPosts(slug, pageNumber);
+  const posts = articles || [];
+  const lastPage = Math.ceil(total / 10);
+
+  return (
+    <ScreenContainer>
+      <section className="flex flex-col gap-8">
+        <div className="flex flex-wrap items-center gap-2 mb-1 w-full dark:text-slate-400 text-sm">
+          <Link href="/" className="text-orange-500">
+            Home
+          </Link>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 1024 1024"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fill="currentColor"
+              d="M338.752 104.704a64 64 0 0 0 0 90.496l316.8 316.8l-316.8 316.8a64 64 0 0 0 90.496 90.496l362.048-362.048a64 64 0 0 0 0-90.496L429.248 104.704a64 64 0 0 0-90.496 0z"
+            />
+          </svg>
+          <Link href="/blog/" className="text-orange-500">
+            Blog
+          </Link>
+        </div>
+        <h1 className="text-4xl my-4 font-black">Category: {slug}</h1>
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          {posts.map((post) => (
+            <BlogPostCard key={post.slug} post={post} />
+          ))}
+        </div>
+
+        {lastPage > 1 && (
+          <Pagination
+            slug={`/blog/category/${slug}`}
+            pageNumber={pageNumber}
+            lastPage={lastPage}
+          />
+        )}
+      </section>
+    </ScreenContainer>
+  );
+}

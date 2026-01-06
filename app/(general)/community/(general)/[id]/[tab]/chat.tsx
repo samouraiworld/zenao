@@ -17,6 +17,7 @@ import { communityUserRoles } from "@/lib/queries/community";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { PostsList } from "@/components/social-feed/lists/posts-list";
+import usePinPostHandler from "@/hooks/use-pin-post-handler";
 
 type CommunityChatProps = {
   communityId: string;
@@ -28,9 +29,9 @@ function CommunityChat({ communityId }: CommunityChatProps) {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userProfileId),
   );
 
   const [postInEdition, setPostInEdition] = useState<{
@@ -38,8 +39,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     content: string;
   } | null>(null);
 
-  const pkgPath = `gno.land/r/zenao/communities/c${communityId}`;
-  const feedId = `${pkgPath}:main`;
+  const feedId = `community:${communityId}:main`;
 
   const {
     data: postsPages,
@@ -48,7 +48,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userProfileId),
   );
   const posts = useMemo(() => postsPages.pages.flat(), [postsPages]);
 
@@ -68,12 +68,22 @@ function CommunityChat({ communityId }: CommunityChatProps) {
     feedId,
   );
 
+  const { onPinChange, isPinning } = usePinPostHandler(
+    "community",
+    communityId,
+    feedId,
+  );
+
   const onEdit = async (
     postId: string,
     values: SocialFeedPostFormSchemaType,
   ) => {
     await onEditStandardPost(postId, values);
     setPostInEdition(null);
+  };
+
+  const onPinToggle = async (postId: string, pinned: boolean) => {
+    await onPinChange(postId, pinned);
   };
 
   return (
@@ -87,7 +97,7 @@ function CommunityChat({ communityId }: CommunityChatProps) {
         <div className="space-y-4">
           <PostsList
             posts={posts}
-            userRealmId={userRealmId}
+            userId={userProfileId}
             onReactionChange={onReactionChange}
             canInteract={
               userRoles.includes("member") ||
@@ -106,11 +116,14 @@ function CommunityChat({ communityId }: CommunityChatProps) {
               `/feed/community/${communityId}/post/${postId}`
             }
             canReply
+            canPin={userRoles.includes("administrator")}
+            onPinToggle={onPinToggle}
             innerEditMode
             onEdit={onEdit}
             isReacting={isReacting}
             isDeleting={isDeleting}
             isEditing={isEditing}
+            isPinning={isPinning}
           />
         </div>
       )}

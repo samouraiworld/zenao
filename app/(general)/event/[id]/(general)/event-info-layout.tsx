@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import React, { Suspense, useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
 import dynamic from "next/dynamic";
-import { Separator } from "@/components/shadcn/separator";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { makeLocationFromEvent } from "@/lib/location";
@@ -19,15 +18,15 @@ import { locationTimezone } from "@/lib/event-location";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 import {
   communitiesListByEvent,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import EventCommunitySection from "@/components/features/event/event-community-section";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { GoTopButton } from "@/components/widgets/buttons/go-top-button";
 import EventLocationSection from "@/components/features/event/event-location-section";
 import { ParticipantsSection } from "@/components/features/event/event-participants-section";
+import { EventSection } from "@/components/features/event/event-section";
+import { SafeEventInfo } from "@/types/schemas";
 
 const EventParticipationInfo = dynamic(
   () => import("@/components/features/event/event-participation-info"),
@@ -41,21 +40,6 @@ const EventManagementMenu = dynamic(
   },
 );
 
-interface EventSectionProps {
-  title: string;
-  children?: React.ReactNode;
-}
-
-const EventSection: React.FC<EventSectionProps> = ({ title, children }) => {
-  return (
-    <div className="flex flex-col">
-      <Text className="font-semibold">{title}</Text>
-      <Separator className="mt-2 mb-3" />
-      {children && children}
-    </div>
-  );
-};
-
 const iconSize = 22;
 
 export function EventInfoLayout({
@@ -63,7 +47,7 @@ export function EventInfoLayout({
   data,
 }: {
   eventId: string;
-  data: EventInfo;
+  data: SafeEventInfo;
 }) {
   const { data: communitiesPages } = useSuspenseInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
@@ -73,10 +57,7 @@ export function EventInfoLayout({
     [communitiesPages],
   );
 
-  const communityId =
-    communities.length > 0
-      ? communityIdFromPkgPath(communities[0].pkgPath)
-      : null;
+  const communityId = communities.length > 0 ? communities[0].id : null;
 
   const location = makeLocationFromEvent(data.location);
   const eventTimezone = locationTimezone(location);
@@ -170,7 +151,7 @@ export function EventInfoLayout({
         {/* Host section */}
         <div className="col-span-6 sm:col-span-3">
           <EventSection title={t("hosted-by")}>
-            <UserAvatarWithName linkToProfile realmId={data.organizers[0]} />
+            <UserAvatarWithName linkToProfile userId={data.organizers[0]} />
           </EventSection>
         </div>
 

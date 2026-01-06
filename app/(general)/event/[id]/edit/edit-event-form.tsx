@@ -1,0 +1,141 @@
+"use client";
+
+import React, { useMemo } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useAuth } from "@clerk/nextjs";
+import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
+import { EventForm } from "@/components/features/event/event-form";
+import { useToast } from "@/hooks/use-toast";
+import { eventUserRoles } from "@/lib/queries/event-users";
+import { userInfoOptions } from "@/lib/queries/user";
+import Text from "@/components/widgets/texts/text";
+import { makeLocationFromEvent } from "@/lib/location";
+import { useEditEvent } from "@/lib/mutations/event-management";
+import { captureException } from "@/lib/report";
+import { eventFormSchema, EventFormSchemaType } from "@/types/schemas";
+import {
+  communitiesListByEvent,
+  DEFAULT_COMMUNITIES_LIMIT,
+} from "@/lib/queries/community";
+import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+
+interface EditEventFormProps {
+  id: string;
+  userId: string;
+  dashboard?: boolean;
+}
+
+export function EditEventForm({ id, userId, dashboard }: EditEventFormProps) {
+  const { getToken } = useAuth(); // NOTE: don't get userId from there since it's undefined upon navigation and breaks default values
+  const { trackEvent } = useAnalyticsEvents();
+  const { data } = useSuspenseQuery(eventOptions(id));
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, userId),
+  );
+  const userProfileId = userInfo?.userId || "";
+  const { data: roles } = useSuspenseQuery(eventUserRoles(id, userProfileId));
+  const { data: gatekeepers } = useSuspenseQuery(
+    eventGatekeepersEmails(id, getToken),
+  );
+
+  const { data: communitiesPages } = useSuspenseInfiniteQuery(
+    communitiesListByEvent(id, DEFAULT_COMMUNITIES_LIMIT),
+  );
+  const communities = useMemo(
+    () => communitiesPages.pages.flat(),
+    [communitiesPages],
+  );
+
+  const communityId = communities.length > 0 ? communities[0].id : null;
+
+  const isOrganizer = roles.includes("organizer");
+
+  const router = useRouter();
+
+  // Correctly reconstruct location object
+  const location = makeLocationFromEvent(data.location);
+  const defaultValues: EventFormSchemaType = {
+    ...data,
+    location,
+    gatekeepers: gatekeepers.gatekeepers.map((gatekeeperEmail) => ({
+      email: gatekeeperEmail,
+    })),
+    exclusive: data.privacy?.eventPrivacy.case === "guarded",
+    password: "",
+    communityId: communityId || null,
+  };
+
+  const form = useForm<EventFormSchemaType>({
+    mode: "all",
+    resolver: zodResolver(
+      eventFormSchema.refine(
+        (data) => {
+          if (data.exclusive && !defaultValues.exclusive) {
+            return data.password && data.password.length > 0;
+          }
+          return true;
+        },
+        {
+          message: "Password is required when event is exclusive",
+          path: ["password"],
+        },
+      ),
+    ),
+    defaultValues,
+  });
+
+  // EditEvent call loaded value
+  const { editEvent, isPending } = useEditEvent(getToken);
+  const { toast } = useToast();
+  const t = useTranslations("eventForm");
+
+  const onSubmit = async (values: EventFormSchemaType) => {
+    try {
+      await editEvent({
+        ...values,
+        eventId: id,
+      });
+      trackEvent("EventEdited", {
+        props: {
+          eventId: id,
+        },
+      });
+
+      toast({
+        title: t("toast-edit-success"),
+      });
+      router.push(`/${dashboard ? "dashboard/" : ""}event/${id}`);
+    } catch (err) {
+      captureException(err);
+      toast({
+        variant: "destructive",
+        title: t("toast-edit-error"),
+      });
+    }
+  };
+
+  if (!isOrganizer) {
+    return (
+      <div className="flex justify-center">
+        <Text>{t("not-organizer-message")}</Text>
+      </div>
+    );
+  }
+  return (
+    <EventForm
+      form={form}
+      onSubmit={onSubmit}
+      isLoading={isPending}
+      defaultExclusive={defaultValues.exclusive}
+      isEditing
+      minDateRange={new Date()}
+    />
+  );
+}

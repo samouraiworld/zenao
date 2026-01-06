@@ -3,14 +3,13 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
-import { EventInfo } from "../../gen/zenao/v1/zenao_pb";
 import { DEFAULT_EVENTS_LIMIT, eventsList } from "@/lib/queries/events-list";
 import EmptyEventsList from "@/components/features/event/event-empty-list";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { EventCard } from "@/components/features/event/event-card";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+import { SafeEventInfo } from "@/types/schemas";
 
 export function DiscoverEventsList({
   from,
@@ -49,7 +48,7 @@ export function DiscoverEventsList({
         acc[dateKey].push(event);
         return acc;
       },
-      {} as Record<string, EventInfo[]>,
+      {} as Record<string, SafeEventInfo[]>,
     );
   }, [events]);
 
@@ -72,11 +71,7 @@ export function DiscoverEventsList({
 
             <EventCardListLayout>
               {eventsOfTheDay.map((evt) => (
-                <EventCard
-                  key={evt.pkgPath}
-                  evt={evt}
-                  href={`/event/${eventIdFromPkgPath(evt.pkgPath)}`}
-                />
+                <EventCard key={evt.id} evt={evt} href={`/event/${evt.id}`} />
               ))}
             </EventCardListLayout>
           </div>

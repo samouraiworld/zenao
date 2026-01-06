@@ -20,7 +20,7 @@ interface EventPostInfoProps {
   post: StandardPostView | PollPostView;
   postId: string;
   eventId: string;
-  userRealmId: string;
+  userId: string;
   editMode: boolean;
   onEditModeChange: (editMode: boolean) => void;
   onEdit: (
@@ -32,6 +32,8 @@ interface EventPostInfoProps {
   isReacting: boolean;
   onDelete: (postId: string, parentId?: string) => Promise<void>;
   isDeleting: boolean;
+  pinned?: boolean;
+  onPinToggle?: () => void | Promise<void>;
 }
 
 export default function EventPostInfo({
@@ -39,7 +41,7 @@ export default function EventPostInfo({
   postId,
   editMode,
   onEditModeChange,
-  userRealmId,
+  userId,
   eventId,
   onEdit,
   isEditing,
@@ -47,11 +49,11 @@ export default function EventPostInfo({
   isReacting,
   onDelete,
   isDeleting,
+  pinned,
+  onPinToggle,
 }: EventPostInfoProps) {
   const router = useRouter();
-  const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userRealmId),
-  );
+  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, userId));
 
   if (isStandardPost(post)) {
     return (
@@ -70,6 +72,9 @@ export default function EventPostInfo({
           }}
           onEdit={async (values) => await onEdit(postId, values)}
           isDeleting={isDeleting}
+          canPin={roles.includes("organizer")}
+          pinned={pinned}
+          onPinToggle={onPinToggle}
           isReacting={isReacting}
           isEditing={isEditing}
           canInteract
@@ -83,7 +88,7 @@ export default function EventPostInfo({
     return (
       <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
         <PollPost
-          userRealmId={userRealmId}
+          userId={userId}
           pollId={parsePollUri(post.post.post.value.uri).pollId}
           pollPost={post}
           onReactionChange={async (icon) =>

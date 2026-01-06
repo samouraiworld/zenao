@@ -42,8 +42,10 @@ export function ExclusiveEventGuard({
 }: ExclusiveEventGuardProps) {
   const { getToken, userId, isLoaded } = useAuth();
   const { data: info } = useSuspenseQuery(userInfoOptions(getToken, userId));
-  const realmId = info?.realmId;
-  const { data: roles } = useSuspenseQuery(eventUserRoles(eventId, realmId));
+  const userProfileId = info?.userId;
+  const { data: roles } = useSuspenseQuery(
+    eventUserRoles(eventId, userProfileId),
+  );
 
   const [isPending, setIsPending] = useState(false);
   const isMember = useMemo(() => roles.length > 0, [roles]);

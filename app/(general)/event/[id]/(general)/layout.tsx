@@ -6,7 +6,6 @@ import { EventScreenContainer } from "@/components/features/event/event-screen-c
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import { web2URL } from "@/lib/uris";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -35,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function EventLayout({ params, children }: Props) {
   const p = await params;
 
-  let event: EventInfo;
+  let event;
 
   try {
     const queryClient = getQueryClient();

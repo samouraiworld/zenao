@@ -17,6 +17,7 @@ import useFeedPostDeleteHandler from "@/hooks/use-feed-post-delete-handler";
 import useFeedPostEditHandler from "@/hooks/use-feed-post-edit-handler";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
 import { PostsList } from "@/components/social-feed/lists/posts-list";
+import usePinPostHandler from "@/hooks/use-pin-post-handler";
 
 type EventFeedProps = {
   params: Promise<{ id: string }>;
@@ -30,10 +31,10 @@ function EventFeed({ params }: EventFeedProps) {
   );
 
   const { data: roles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.realmId),
+    eventUserRoles(eventId, userInfo?.userId),
   );
 
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
 
   const [postInEdition, setPostInEdition] = useState<{
     postId: string;
@@ -43,8 +44,7 @@ function EventFeed({ params }: EventFeedProps) {
   const t = useTranslations();
 
   // Event's social feed posts
-  const pkgPath = `gno.land/r/zenao/events/e${eventId}`;
-  const feedId = `${pkgPath}:main`;
+  const feedId = `event:${eventId}:main`;
 
   const {
     data: postsPages,
@@ -53,7 +53,7 @@ function EventFeed({ params }: EventFeedProps) {
     fetchNextPage,
     isFetching,
   } = useSuspenseInfiniteQuery(
-    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userRealmId),
+    feedPosts(feedId, DEFAULT_FEED_POSTS_LIMIT, "", userProfileId),
   );
 
   const posts = useMemo(() => {
@@ -76,6 +76,16 @@ function EventFeed({ params }: EventFeedProps) {
     feedId,
   );
 
+  const { onPinChange, isPinning } = usePinPostHandler(
+    "event",
+    eventId,
+    feedId,
+  );
+
+  const onPinToggle = async (postId: string, pinned: boolean) => {
+    await onPinChange(postId, pinned);
+  };
+
   const onEdit = async (
     postId: string,
     values: SocialFeedPostFormSchemaType,
@@ -95,7 +105,7 @@ function EventFeed({ params }: EventFeedProps) {
         ) : (
           <PostsList
             posts={posts}
-            userRealmId={userRealmId}
+            userId={userProfileId}
             onReactionChange={onReactionChange}
             canInteract={
               roles.includes("organizer") || roles.includes("participant")
@@ -106,6 +116,8 @@ function EventFeed({ params }: EventFeedProps) {
             }
             canReply
             postInEdition={postInEdition?.postId ?? null}
+            canPin={roles.includes("organizer")}
+            onPinToggle={onPinToggle}
             innerEditMode
             onEdit={onEdit}
             onEditModeChange={(postId, content, editMode) => {
@@ -118,6 +130,7 @@ function EventFeed({ params }: EventFeedProps) {
             isEditing={isEditing}
             isReacting={isReacting}
             isDeleting={isDeleting}
+            isPinning={isPinning}
           />
         )}
       </div>

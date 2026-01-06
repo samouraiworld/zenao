@@ -5,6 +5,7 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 import { z } from "zod";
+import { eventGetUserRolesSchema } from "@/lib/queries/event-users";
 
 interface GenericFormFieldProps<T extends FieldValues, TCondition> {
   control: Control<T>;
@@ -233,7 +234,7 @@ export const userFormSchema = z.object({
 });
 export type UserFormSchemaType = z.infer<typeof userFormSchema>;
 
-export const gnoProfileDetailsSchema = z.object({
+export const profileDetailsSchema = z.object({
   bio: z.string().trim().max(1000).optional().default(""),
   socialMediaLinks: z.array(socialLinkSchema).default([]),
   location: z.string().trim().max(100).optional().default(""),
@@ -244,7 +245,7 @@ export const gnoProfileDetailsSchema = z.object({
   portfolio: z.array(portfolioItemSchema).default([]),
 });
 
-export type GnoProfileDetails = z.infer<typeof gnoProfileDetailsSchema>;
+export type ProfileDetails = z.infer<typeof profileDetailsSchema>;
 
 const pollOptionFormSchema = z.object({
   text: z
@@ -340,9 +341,7 @@ export const communityFormSchema = z.object({
   administrators: z
     .array(
       z.object({
-        address: z
-          .string()
-          .email("Administrator must be a valid email address"),
+        email: z.string().email("Administrator must be a valid email address"),
       }),
     )
     .min(1, "At least one admin is required"),
@@ -350,9 +349,122 @@ export const communityFormSchema = z.object({
 
 export type CommunityFormSchemaType = z.infer<typeof communityFormSchema>;
 
-export const realmIdSchema = z
-  .string()
-  .regex(/^([a-z0-9-]+\.)*[a-z0-9-]+\.[a-z]{2,}(\/[a-z0-9\-_]+)+$/)
-  .or(z.string().regex(/^g[a-z0-9]{39}/));
+export const broadcastEmailFormSchema = z.object({
+  message: z
+    .string()
+    .min(30, "Message must be at least 30 characters")
+    .max(5000, "Message must be at most 5000 characters"),
+  attachTicket: z.boolean(),
+});
 
-export type RealmId = z.infer<typeof realmIdSchema>;
+export type BroadcastEmailFormSchema = z.infer<typeof broadcastEmailFormSchema>;
+
+export const eventInfoPrivacySchema = z.object({
+  eventPrivacy: z.union([
+    z.object({
+      case: z.literal("public"),
+      value: z.object({}),
+    }),
+    z.object({
+      case: z.literal("guarded"),
+      value: z.object({
+        participationPubkey: z.string(),
+      }),
+    }),
+  ]),
+});
+
+export type SafeEventPrivacy = z.infer<typeof eventInfoPrivacySchema>;
+
+export const eventInfoGeoAddress = z.object({
+  case: z.literal("geo"),
+  value: z.object({
+    lat: z.number(),
+    lng: z.number(),
+    address: z.string(),
+    size: z.number(),
+  }),
+});
+
+export type SafeEventGeoAddress = z.infer<typeof eventInfoGeoAddress>;
+
+export const eventInfoVirtualAddress = z.object({
+  case: z.literal("virtual"),
+  value: z.object({
+    uri: z.string().min(1).max(400),
+  }),
+});
+
+export type SafeEventVirtualAddress = z.infer<typeof eventInfoVirtualAddress>;
+
+export const eventInfoCustomAddress = z.object({
+  case: z.literal("custom"),
+  value: z.object({
+    address: z.string().min(1),
+    timezone: z.string().min(1),
+  }),
+});
+
+export type SafeEventCustomAddress = z.infer<typeof eventInfoCustomAddress>;
+
+export const eventInfoLocationSchema = z.object({
+  venueName: z.string().max(200).optional().default(""),
+  instructions: z.string().max(2000).optional().default(""),
+  address: z.union([
+    eventInfoGeoAddress,
+    eventInfoVirtualAddress,
+    eventInfoCustomAddress,
+  ]),
+});
+
+export type SafeEventLocation = z.infer<typeof eventInfoLocationSchema>;
+
+export const eventInfoSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  imageUri: z.string(),
+  organizers: z.array(z.string()),
+  gatekeepers: z.array(z.string()),
+  startDate: z.bigint(),
+  endDate: z.bigint(),
+  capacity: z.number(),
+  checkedIn: z.number(),
+  participants: z.number(),
+  location: eventInfoLocationSchema,
+  privacy: eventInfoPrivacySchema.optional(),
+  discoverable: z.boolean(),
+});
+
+export type SafeEventInfo = z.infer<typeof eventInfoSchema>;
+
+export const eventUserSchema = z.object({
+  event: eventInfoSchema,
+  roles: eventGetUserRolesSchema,
+});
+
+export type SafeEventUser = z.infer<typeof eventUserSchema>;
+
+const communityUserRolesEnum = z.enum(["administrator", "member", "event"]);
+
+export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
+
+export const communityGetUserRolesSchema = z.array(communityUserRolesEnum);
+
+export const communityInfoSchema = z.object({
+  id: z.string(),
+  displayName: z.string(),
+  description: z.string(),
+  avatarUri: z.string(),
+  bannerUri: z.string(),
+  countMembers: z.number(),
+});
+
+export type SafeCommunityInfo = z.infer<typeof communityInfoSchema>;
+
+export const communityUserSchema = z.object({
+  community: communityInfoSchema,
+  roles: communityGetUserRolesSchema,
+});
+
+export type SafeCommunityUser = z.infer<typeof communityUserSchema>;

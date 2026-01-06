@@ -19,9 +19,9 @@ import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
 import {
-  GnoProfileDetails,
+  ProfileDetails,
   UserFormSchemaType,
-  gnoProfileDetailsSchema,
+  profileDetailsSchema,
   userFormSchema,
 } from "@/types/schemas";
 import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
@@ -49,11 +49,11 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
-  const { data: user } = useSuspenseQuery(profileOptions(userRealmId));
+  const userProfileId = userInfo?.userId || "";
+  const { data: user } = useSuspenseQuery(profileOptions(userProfileId));
   const profileDetails = deserializeWithFrontMatter({
     serialized: user?.bio ?? "",
-    schema: gnoProfileDetailsSchema,
+    schema: profileDetailsSchema,
     defaultValue: {
       bio: "",
       socialMediaLinks: [],
@@ -100,11 +100,11 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       if (!token) {
         throw new Error("invalid clerk token");
       }
-      if (!userRealmId) {
-        throw new Error("no user realm id");
+      if (!userProfileId) {
+        throw new Error("no user profile id");
       }
 
-      const bio = serializeWithFrontMatter<Omit<GnoProfileDetails, "bio">>(
+      const bio = serializeWithFrontMatter<Omit<ProfileDetails, "bio">>(
         values.bio,
         {
           socialMediaLinks: values.socialMediaLinks,
@@ -118,7 +118,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       );
 
       await editUser({
-        realmId: userRealmId,
+        userId: userProfileId,
         token,
         avatarUri: values.avatarUri,
         displayName: values.displayName,
@@ -127,7 +127,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
 
       trackEvent("UserProfileEdited");
 
-      router.push(`/profile/${userRealmId}`);
+      router.push(`/profile/${userProfileId}`);
       toast({
         title: t("toast-success"),
       });

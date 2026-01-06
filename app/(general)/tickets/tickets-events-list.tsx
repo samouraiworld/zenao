@@ -3,7 +3,8 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { format, fromUnixTime } from "date-fns";
-import { DiscoverableFilter, EventInfo } from "../../gen/zenao/v1/zenao_pb";
+import { useAuth } from "@clerk/nextjs";
+import { DiscoverableFilter } from "../../gen/zenao/v1/zenao_pb";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByParticipantList,
@@ -11,20 +12,21 @@ import {
 import { FromFilter } from "@/lib/search-params";
 import EmptyEventsList from "@/components/features/event/event-empty-list";
 import { EventCard } from "@/components/features/event/event-card";
-import { eventIdFromPkgPath } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
+import { SafeEventInfo } from "@/types/schemas";
 
 export function TicketsEventsList({
   now,
   from,
-  userRealmId,
+  userId,
 }: {
   now: number;
   from: FromFilter;
-  userRealmId: string;
+  userId: string;
 }) {
+  const { getToken } = useAuth();
   const {
     data: eventsPages,
     isFetchingNextPage,
@@ -34,18 +36,20 @@ export function TicketsEventsList({
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(
-          userRealmId,
+          userId,
           DiscoverableFilter.UNSPECIFIED,
           now,
           Number.MAX_SAFE_INTEGER,
           DEFAULT_EVENTS_LIMIT,
+          getToken,
         )
       : eventsByParticipantList(
-          userRealmId,
+          userId,
           DiscoverableFilter.UNSPECIFIED,
           now - 1,
           0,
           DEFAULT_EVENTS_LIMIT,
+          getToken,
         ),
   );
 
@@ -65,7 +69,7 @@ export function TicketsEventsList({
         acc[dateKey].push(event);
         return acc;
       },
-      {} as Record<string, EventInfo[]>,
+      {} as Record<string, SafeEventInfo[]>,
     );
   }, [events]);
 
@@ -88,11 +92,7 @@ export function TicketsEventsList({
 
             <EventCardListLayout>
               {eventsOfTheDay.map((evt) => (
-                <EventCard
-                  key={evt.pkgPath}
-                  evt={evt}
-                  href={`/ticket/${eventIdFromPkgPath(evt.pkgPath)}`}
-                />
+                <EventCard key={evt.id} evt={evt} href={`/ticket/${evt.id}`} />
               ))}
             </EventCardListLayout>
           </div>

@@ -6,19 +6,19 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { EventRegistrationForm } from "../event-registration";
 import { EventUserRole } from "@/lib/queries/event-users";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { GuestRegistrationSuccessDialog } from "@/components/dialogs/guest-registration-success-dialog";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
 import { CancelRegistrationConfirmationDialog } from "@/components/dialogs/cancel-registration-confirmation-dialog";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import { SafeEventInfo } from "@/types/schemas";
 
 type EventParticipationContextType = {
   password: string;
   roles: EventUserRole[];
   eventId: string;
-  eventData: EventInfo;
+  eventData: SafeEventInfo;
   isParticipant: boolean;
   isStarted: boolean;
   isSoldOut: boolean;
@@ -28,7 +28,7 @@ const defaultValue: EventParticipationContextType = {
   password: "",
   roles: [],
   eventId: "",
-  eventData: {} as EventInfo,
+  eventData: {} as never,
   isParticipant: false, // Default to false
   isStarted: false, // Default to false
   isSoldOut: false, // Default to false
@@ -49,7 +49,7 @@ export const EventParticipation = ({
 }: {
   eventId: string;
   children: React.ReactNode;
-  eventData: EventInfo;
+  eventData: SafeEventInfo;
   roles: EventUserRole[];
   password: string;
 }) => {

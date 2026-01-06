@@ -9,7 +9,7 @@ export default async function CreateEventPage() {
   return (
     <ScreenContainer isSignedOutModal>
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <CreateEventForm />
+        <CreateEventForm dashboard />
       </HydrationBoundary>
     </ScreenContainer>
   );

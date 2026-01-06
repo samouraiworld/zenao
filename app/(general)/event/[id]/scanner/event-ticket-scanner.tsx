@@ -8,7 +8,6 @@ import * as ed from "@noble/ed25519";
 import { useTranslations } from "next-intl";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { Loader2, RefreshCcw } from "lucide-react";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { CheckinConfirmationDialog } from "@/components/dialogs/check-in-confirmation-dialog";
 import { useEventCheckIn } from "@/lib/mutations/event-management";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -19,10 +18,11 @@ import { eventOptions } from "@/lib/queries/event";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import { Button } from "@/components/shadcn/button";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import { SafeEventInfo } from "@/types/schemas";
 
 type EventTicketScannerProps = {
   eventId: string;
-  eventData: EventInfo;
+  eventData: SafeEventInfo;
 };
 
 const ticketSecretSchema = z
@@ -47,7 +47,7 @@ export function EventTicketScanner({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const [isLoading, setIsLoading] = useState(false);
   const [lastSignature, setLastSignature] = useState<string | null>(null);
   const { checkIn } = useEventCheckIn();
@@ -70,14 +70,14 @@ export function EventTicketScanner({
 
     try {
       const token = await getToken();
-      if (!userRealmId || !token) {
+      if (!userProfileId || !token) {
         throw new Error("not authenticated !");
       }
 
       const b64 = value.replaceAll("_", "/").replaceAll("-", "+");
       const ticket = ticketSecretSchema.parse(b64);
       const signature = Buffer.from(
-        await ed.signAsync(Buffer.from(userRealmId), ticket),
+        await ed.signAsync(Buffer.from(userProfileId), ticket),
       )
         .toString("base64")
         .replaceAll("=", "")

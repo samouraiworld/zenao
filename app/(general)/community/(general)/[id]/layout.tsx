@@ -92,7 +92,7 @@ async function CommunityPageLayout({ params, children }: PageProps) {
   );
 
   members.forEach((member) =>
-    queryClient.prefetchQuery(profileOptions(member.realmId)),
+    queryClient.prefetchQuery(profileOptions(member.entityId)),
   );
 
   await queryClient.prefetchQuery(

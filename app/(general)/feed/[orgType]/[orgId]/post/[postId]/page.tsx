@@ -25,12 +25,7 @@ export default async function SocialFeedPostPage({ params }: PageProps) {
     notFound();
   }
 
-  const pkgPath =
-    orgType === "community"
-      ? `gno.land/r/zenao/communities/c${orgId}`
-      : `gno.land/r/zenao/events/e${orgId}`;
-
-  const feedId = `${pkgPath}:main`;
+  const feedId = `${orgType}:${orgId}:main`;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

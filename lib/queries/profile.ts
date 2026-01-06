@@ -6,49 +6,45 @@ import {
 } from "@yornaath/batshit";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
-import { userIdFromPkgPath } from "./user";
 
 export type GnoProfile = {
-  address: string;
+  userId: string;
   displayName: string;
   bio: string;
   avatarUri: string;
 };
 
-export type UserProfile = Omit<GnoProfile, "address">;
+export type UserProfile = Omit<GnoProfile, "userId">;
 
-export const profileOptions = (realmId: string | null | undefined) => {
+export const profileOptions = (userId: string | null | undefined) => {
   return queryOptions<UserProfile | null>({
-    queryKey: ["profile", realmId],
+    queryKey: ["profile", userId],
     queryFn: async () => {
-      if (!realmId) {
+      if (!userId) {
         return null;
       }
 
-      const profile = await profiles.fetch(realmId);
+      const profile = await profiles.fetch(userId);
 
       return profile;
     },
   });
 };
 export const profiles = createBatcher({
-  fetcher: async (realmIDs: string[]) => {
-    console.log("Batch fetching profiles for realmIDs:", realmIDs);
-    if (realmIDs.length === 0) {
+  fetcher: async (userIds: string[]) => {
+    if (userIds.length === 0) {
       return [];
     }
 
-    const ids = realmIDs.map((realmId) => userIdFromPkgPath(realmId));
-    return withSpan(`query:backend:profiles:${ids.join(",")}`, async () => {
+    return withSpan(`query:backend:profiles:${userIds.join(",")}`, async () => {
       const res = await zenaoClient.getUsersProfile({
-        ids,
+        ids: userIds,
       });
-      console.log("Fetched profiles:", res.profiles);
       return res.profiles;
     });
   },
-  // when we call profiles.fetch, this will resolve the correct user using the field `address`
-  resolver: keyResolver("address"),
+  // when we call profiles.fetch, this will resolve the correct user using the field `userId`
+  resolver: keyResolver("userId"),
   // this will batch all calls to profiles.fetch that are made within 10 milliseconds.
   scheduler: windowScheduler(10),
 });
