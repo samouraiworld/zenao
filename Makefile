@@ -12,7 +12,7 @@ setup:
 	@echo ""
 	@echo "Step 3: Setting up environment variables..."
 	@if [ ! -f .env.local ]; then \
-		cp .env.backend-dev .env.local; \
+		cp .env.example .env.local; \
 		echo "✓ Created .env.local"; \
 	else \
 		echo "⚠ .env.local already exists, skipping..."; \

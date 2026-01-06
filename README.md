@@ -60,7 +60,7 @@ make install-atlas
 Create `.env.local` from the template:
 
 ```bash
-cp .env.backend-dev .env.local
+cp .env.example .env.local
 ```
 
 **Note:** This uses Clerk test keys that work out of the box - no Clerk account needed for local development.
@@ -113,7 +113,7 @@ sqlite3 dev.db
 
 ### Frontend (`.env.local`)
 
-These variables are set by copying `.env.backend-dev` and adding the Clerk secret key:
+These variables are set by copying `.env.example`:
 
 ```bash
 # Clerk Authentication (test keys for local development)
@@ -168,7 +168,7 @@ Or run manually with the Cypress UI:
 
 **1. Setup environment:**
 ```bash
-cp .env.backend-dev .env.local
+cp .env.example .env.local
 ```
 
 **2. Start E2E infrastructure:**
@@ -330,5 +330,5 @@ The database is created at `dev.db` in the project root after running `make migr
 ├── lib/              # Shared utilities
 ├── public/           # Static assets
 ├── dev.db            # Local SQLite database (created after setup)
-└── .env.local        # Environment variables (create from .env.backend-dev)
+└── .env.local        # Environment variables (create from .env.example)
 ```
