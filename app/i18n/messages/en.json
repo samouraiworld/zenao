@@ -114,7 +114,13 @@
     "view-more": "View more",
     "view-less": "View less",
     "export-participant-list": "Export participants list",
-    "manage-gatekeepers-button": "Manage gatekeepers"
+    "manage-gatekeepers-button": "Manage gatekeepers",
+    "event-dashboard-banners": {
+      "gatekeeper": "You have the gatekeeper role for this event. See list of attendees and start scanning tickets.",
+      "organizer": "You are the organizer of this event. Manage your event settings and attendees.",
+      "start-scanning": "Start scanning tickets",
+      "settings": "Settings"
+    }
   },
   "profile-info": {
     "profile-not-exist": "Profile doesn't exist",
