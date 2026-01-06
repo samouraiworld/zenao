@@ -49,6 +49,17 @@ dev:
 	echo "Starting frontend on http://localhost:3000 ..."; \
 	npm run dev
 
+.PHONY: dev-otel
+dev-otel:
+	@echo "Starting Zenao development environment with OpenTelemetry..."
+	@echo ""
+	@trap 'docker compose -f dev.docker-compose.yml down; kill 0' EXIT; \
+	echo "Starting OTEL collector and Jaeger..."; \
+	docker compose -f dev.docker-compose.yml up -d; \
+	sleep 2; \
+	echo "Jaeger UI available at http://localhost:16686"; \
+	$(MAKE) dev
+
 .PHONY: test
 test:
 	go test ./backend/...
@@ -68,7 +79,7 @@ test-e2e:
 generate:
 	npm i
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
-	goimports -w ./backend
+	go run golang.org/x/tools/cmd/goimports@latest -w ./backend
 	npm run mail:build
 
 .PHONY: lint-buf

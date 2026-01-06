@@ -2,7 +2,7 @@
 
 An event management and community platform featuring event creation, community management, and social feeds.
 
-// TODO add more explanation on what is Zenao
+> **Note:** Zenao is currently a Web2 application, with plans to transition to Web3 using [base](https://www.base.org/) in the future.
 
 ## Tech Stack
 
@@ -126,12 +126,12 @@ NEXT_PUBLIC_ZENAO_NAMESPACE=zenao
 NEXT_PUBLIC_GATEWAY_URL=pinata.zenao.io
 PINATA_GROUP=""
 
-# Observability
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+# Observability (optional - only if running OTEL collector via docker compose)
+# OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 SEOBOT_API_KEY=""
 
-# Optional - Only needed for file upload testing
-PINATA_JWT=...                                        # Get from team/admin if needed
+# File uploads (optional - get from team/admin if needed)
+# PINATA_JWT=
 ```
 
 ### Backend (Environment Variables)
@@ -203,8 +203,6 @@ Select a test file (e.g., `cypress/main.cy.ts`) to run. Tests auto-rerun on file
 
 ### API Changes
 
-**Prerequisites:** Install [Buf CLI](https://buf.build/docs/installation/)
-
 Edit `.proto` files in the `api/` directories, then regenerate code:
 
 ```bash
@@ -247,6 +245,50 @@ atlas migrate apply --dir "file://migrations" --env staging  # or prod
 
 **Note:** Production tokens should be short-lived (1 day max).
 
+## Observability (Optional)
+
+For debugging and tracing requests across the stack, you can run an OpenTelemetry collector with Jaeger locally.
+
+### Quick Start (Recommended)
+
+Start the full stack with OTEL enabled:
+```bash
+make dev-otel
+```
+
+This starts everything together:
+- **Frontend** on [http://localhost:3000](http://localhost:3000)
+- **Backend** on [http://localhost:4242](http://localhost:4242)
+- **OTEL Collector** on port 4318
+- **Jaeger UI** on [http://localhost:16686](http://localhost:16686)
+
+### Manual Setup
+
+**1. Start the OTEL stack:**
+```bash
+docker compose -f dev.docker-compose.yml up
+```
+
+This starts:
+- **OTEL Collector** on port 4318 - receives traces from the app
+- **Jaeger UI** on [http://localhost:16686](http://localhost:16686) - visualize traces
+
+**2. Enable OTEL in your environment:**
+
+Set the OTEL endpoint in `.env.local`:
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+```
+
+**3. Restart the backend** to start sending traces.
+
+**4. Open Jaeger UI** at [http://localhost:16686](http://localhost:16686) to view request traces.
+
+This is useful for:
+- Debugging slow requests
+- Understanding request flow between frontend and backend
+- Performance optimization
+
 ## Working with Staging/Production
 
 ### Using Staging Backend for Frontend Development
@@ -263,6 +305,8 @@ npm i -g vercel
 vercel link  # Follow prompts to link to the Zenao project
 vercel env pull .env.local
 ```
+
+> **Note:** You need to be a member of the Zenao Vercel team to access staging environment variables. Contact a team admin if you don't have access.
 
 This will populate `.env.local` with staging credentials including:
 - `CLERK_SECRET_KEY` - Real staging Clerk key
@@ -310,6 +354,7 @@ The database is created at `dev.db` in the project root after running `make migr
 |---------|-------------|
 | `make setup` | Install dependencies, configure environment, run migrations, and generate fake data |
 | `make dev` | Start backend and frontend servers together |
+| `make dev-otel` | Start backend, frontend, and OTEL stack (Jaeger UI at localhost:16686) |
 | `make test` | Run Go backend unit tests |
 | `make test-e2e` | Run Cypress E2E tests in headless mode |
 | `make generate` | Regenerate protobuf code and email templates |
