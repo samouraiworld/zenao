@@ -2,6 +2,8 @@
 
 An event management and community platform featuring event creation, community management, and social feeds.
 
+// TODO add more explanation on what is Zenao
+
 ## Tech Stack
 
 - **Frontend**: Next.js 15, React, TypeScript, TailwindCSS, Shadcn UI
@@ -48,6 +50,7 @@ If you prefer to run each step manually:
 ### 1. Install Dependencies
 
 ```bash
+nvm use # or fnm use
 npm install
 make install-atlas
 ```
@@ -137,7 +140,7 @@ The backend reads these from the environment (prefixed with `ZENAO_`). **All hav
 
 ```bash
 # Optional overrides (backend has sensible defaults):
-ZENAO_CLERK_SECRET_KEY=sk_test_...                    # Default: sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK
+ZENAO_CLERK_SECRET_KEY=sk_test_...                    # Default: sk_test_...
 ZENAO_DB=dev.db                                       # Default: dev.db
 ZENAO_ALLOWED_ORIGINS=*                               # Default: * (all origins)
 ZENAO_MAIL_SENDER=contact@mail.zenao.io               # Default: contact@mail.zenao.io
@@ -147,20 +150,28 @@ DISCORD_TOKEN=                                        # Default: empty (Discord 
 
 ## Testing
 
-### E2E Tests
+### Unit Tests
 
-**1. Install dependencies:**
+Run Go backend tests:
 ```bash
-npm install
-make install-atlas
+make test
 ```
 
-**2. Setup environment:**
+### E2E Tests
+
+Run E2E tests in headless mode (automated):
+```bash
+make test-e2e
+```
+
+Or run manually with the Cypress UI:
+
+**1. Setup environment:**
 ```bash
 cp .env.backend-dev .env.local
 ```
 
-**3. Start E2E infrastructure:**
+**2. Start E2E infrastructure:**
 ```bash
 go run ./backend e2e-infra
 ```
@@ -171,12 +182,12 @@ This command:
 - Starts backend on port 4242
 - Exposes `http://localhost:4243/reset` endpoint for test automation
 
-**4. Wait for stack readiness:**
+**3. Wait for stack readiness:**
 ```
 READY   | ----------------------------
 ```
 
-**5. Start frontend (new terminal):**
+**4. Start frontend (new terminal):**
 ```bash
 npm run dev
 ```
@@ -186,7 +197,7 @@ npm run dev
 npm run cypress:e2e
 ```
 
-Select a test file (e.g., `main.cy.ts`) to run. Tests auto-rerun on file changes.
+Select a test file (e.g., `cypress/main.cy.ts`) to run. Tests auto-rerun on file changes.
 
 ## Development Workflows
 
@@ -284,13 +295,6 @@ When using staging environment variables:
 
 ## Troubleshooting
 
-### Missing Clerk secret key error
-Make sure you've added the Clerk secret key to `.env.local`:
-```bash
-echo "CLERK_SECRET_KEY=sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK" >> .env.local
-# Then restart the frontend: npm run dev
-```
-
 ### Database connection errors
 Ensure you've run migrations:
 ```bash
@@ -299,6 +303,20 @@ make migrate-local
 
 ### Cannot access database file
 The database is created at `dev.db` in the project root after running `make migrate-local`.
+
+## Make Commands
+
+| Command | Description |
+|---------|-------------|
+| `make setup` | Install dependencies, configure environment, run migrations, and generate fake data |
+| `make dev` | Start backend and frontend servers together |
+| `make test` | Run Go backend unit tests |
+| `make test-e2e` | Run Cypress E2E tests in headless mode |
+| `make generate` | Regenerate protobuf code and email templates |
+| `make migrate-local` | Apply database migrations to local dev.db |
+| `make install-atlas` | Install the Atlas CLI for database migrations |
+| `make update-schema` | Update Atlas schema from GORM models |
+| `make lint-fix` | Run ESLint with auto-fix |
 
 ## Project Structure
 

@@ -42,11 +42,27 @@ dev:
 	@echo "Starting Zenao development environment..."
 	@echo "Make sure you have run 'make migrate-local' first!"
 	@echo ""
-	@echo "Starting backend on http://localhost:4242 ..."
-	@go run ./backend start &
-	@sleep 2
-	@echo "Starting frontend on http://localhost:3000 ..."
-	@npm run dev
+	@trap 'kill 0' EXIT; \
+	echo "Starting backend on http://localhost:4242 ..."; \
+	go run ./backend start & \
+	sleep 2; \
+	echo "Starting frontend on http://localhost:3000 ..."; \
+	npm run dev
+
+.PHONY: test
+test:
+	go test ./backend/...
+
+.PHONY: test-e2e
+test-e2e:
+	@echo "Starting E2E test environment..."
+	@trap 'kill 0' EXIT; \
+	go run ./backend e2e-infra & \
+	sleep 5; \
+	npm run dev & \
+	sleep 5; \
+	npm run cypress:e2e:headless; \
+	echo "E2E tests complete"
 
 .PHONY: generate
 generate:
