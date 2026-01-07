@@ -279,6 +279,7 @@ type DB interface {
 	ListCommunitiesByUserRoles(userID string, roles []string, limit int, offset int) ([]*CommunityWithRoles, error)
 
 	CreateTeam(ownerID string, displayName string) (*User, error)
+	EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error
 	GetUserByID(userID string) (*User, error)
 
 	GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*User, error)
