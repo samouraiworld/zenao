@@ -300,33 +300,26 @@ This is useful for:
 
 If you want to develop the frontend using the staging backend (instead of running the backend locally):
 
-**1. Install Vercel CLI:**
-```bash
-npm i -g vercel
-```
+**1. Get staging environment variables:**
 
-**2. Pull staging environment variables:**
-```bash
-vercel link  # Follow prompts to link to the Zenao project
-vercel env pull .env.local
-```
+Copy the staging environment variables from your deployment platform's dashboard (Netlify, etc.) or ask a team admin for the `.env.local` file with staging credentials.
 
-> **Note:** You need to be a member of the Zenao Vercel team to access staging environment variables. Contact a team admin if you don't have access.
-
-This will populate `.env.local` with staging credentials including:
+The staging `.env.local` should include:
 - `CLERK_SECRET_KEY` - Real staging Clerk key
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Staging publishable key
 - Other staging-specific variables
 
-**3. Update backend endpoint:**
+> **Note:** You need to be a team member to access staging environment variables. Contact a team admin if you don't have access.
+
+**2. Update backend endpoint:**
 
 Edit `.env.local` and change the backend endpoint to point to staging:
 ```bash
 # Replace localhost with your staging URL
-NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT=https://your-staging-backend-url.vercel.app
+NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT=https://your-staging-backend-url
 ```
 
-**4. Start only the frontend:**
+**3. Start only the frontend:**
 ```bash
 npm run dev
 ```
