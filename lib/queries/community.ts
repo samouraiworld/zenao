@@ -51,7 +51,7 @@ export const communityAdministrators = (
             { communityId },
             { headers: { Authorization: `Bearer ${token}` } },
           );
-          console.log("administrators response:", res);
+
           return res.administrators;
         },
       );
