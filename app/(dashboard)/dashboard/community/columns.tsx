@@ -2,17 +2,20 @@ import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { Eye } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import { Button } from "@/components/shadcn/button";
 import { SafeCommunityUser } from "@/types/schemas";
 
-const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () =>
-  useMemo(
+const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () => {
+  const t = useTranslations("dashboard.communitiesTable");
+
+  return useMemo(
     () => [
       {
         accessorKey: "displayName",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Name" />
+          <DataTableColumnHeader column={column} title={t("name-column")} />
         ),
         cell: ({ row }) => <span>{row.original.community.displayName}</span>,
         enableSorting: true,
@@ -20,7 +23,7 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () =>
       {
         accessorKey: "countMembers",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Members" />
+          <DataTableColumnHeader column={column} title={t("members-column")} />
         ),
         cell: ({ row }) => <span>{row.original.community.countMembers}</span>,
         enableSorting: true,
@@ -28,7 +31,7 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () =>
       {
         accessorKey: "Roles",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Role(s)" />
+          <DataTableColumnHeader column={column} title={t("roles-column")} />
         ),
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
@@ -46,7 +49,7 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () =>
       },
       {
         id: "actions",
-        header: () => <div>Actions</div>,
+        header: () => <div>{t("actions-column")}</div>,
         cell: ({ row }) => (
           <Link href={`/event/${row.original.community.id}`}>
             <Button
@@ -65,7 +68,7 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () =>
         },
       },
     ],
-    [],
+    [t],
   );
-
+};
 export default useCommunitiesTableColumns;
