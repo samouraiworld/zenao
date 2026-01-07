@@ -607,7 +607,12 @@
     "communitiesTable": {
       "communities": "Communities",
       "no-communities": "No communities found.",
-      "create-community-btn": "Create a community"
+      "create-community-btn": "Create a community",
+      "name-column": "Name",
+      "members-column": "Members",
+      "roles-column": "Role(s)",
+      "actions-column": "Actions",
+      "loading": "Loading..."
     },
     "communityDetails": {
       "communityTabs": {
