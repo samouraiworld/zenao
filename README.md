@@ -220,14 +220,18 @@ Select a test file (e.g., `cypress/main.cy.ts`) to run. Tests auto-rerun on file
 
 **2. Create an API Key:**
 - Dashboard → **API Keys** → **+ New Key**
-- Enable: `pinFileToIPFS`
+- Grant **Files** write permission
 - Copy the JWT (shown only once!)
 
 **3. Create a Gateway:**
 - Dashboard → **Gateways** → **+ New Gateway**
 - Copy your gateway domain (e.g., `your-name.mypinata.cloud`)
 
-**4. Update `.env.local`:**
+**4. (Optional) Create a Group:**
+- Dashboard → **Groups** → **+ Create Group**
+- Copy the Group ID (used to organize uploaded files)
+
+**5. Update `.env.local`:**
 
 ```bash
 PINATA_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -235,7 +239,7 @@ NEXT_PUBLIC_GATEWAY_URL=your-name.mypinata.cloud  # Domain only, no https://
 PINATA_GROUP=your-group-id  # Optional
 ```
 
-**5. Restart:** `npm run dev`
+**6. Restart:** `npm run dev`
 
 ### Common Issues
 
