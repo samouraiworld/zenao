@@ -38,15 +38,15 @@ interface DashboardCommunityEditionContextProps {
 }
 
 const DashboarCommunityEditionContext =
-  createContext<DashboardEventEditionContextProps>({} as never);
+  createContext<DashboardCommunityEditionContextProps>({} as never);
 
-interface DashboardCommunityEditionContextProps {
+interface DashboardCommunityEditionProviderProps {
   children: React.ReactNode;
 }
 
 export default function DashboardCommunityEditionContextProvider({
   children,
-}: DashboardCommunityEditionContextProps) {
+}: DashboardCommunityEditionProviderProps) {
   const { getToken } = useAuth();
   const formRef = useRef<HTMLFormElement>(null);
   const { communityId, communityInfo } = useDashboardCommunityContext();
