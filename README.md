@@ -15,8 +15,13 @@ An event management and community platform featuring event creation, community m
 
 ## Prerequisites
 
-- **Node.js 20+** ([download](https://nodejs.org/) or use [nvm](https://github.com/nvm-sh/nvm)/[fnm](https://github.com/Schniz/fnm))
+- **Node.js 20.13.1+** ([download](https://nodejs.org/)
 - **Go 1.21+** ([download](https://go.dev/doc/install))
+
+> **⚠️ Important:** This project uses **Node.js 20.13.1** (see `.nvmrc`), which is not the latest version. Using a different Node version may cause package-lock.json conflicts and CI failures. We strongly recommend using a Node version manager like [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to switch to the correct version:
+> ```bash
+> nvm use  # or: fnm use
+> ```
 
 ## Quick Start - Full Local Development
 

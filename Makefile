@@ -4,6 +4,16 @@ CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 setup-dev:
 	@echo "Setting up Zenao development environment..."
 	@echo ""
+	@# Check Node version
+	@REQUIRED_NODE=$$(cat .nvmrc); \
+	CURRENT_NODE=$$(node --version 2>/dev/null | sed 's/v//'); \
+	if [ "$$CURRENT_NODE" != "$$REQUIRED_NODE" ]; then \
+		echo "❌ Node version mismatch: v$$CURRENT_NODE (expected v$$REQUIRED_NODE)"; \
+		echo "   Run: nvm use  (or: fnm use)"; \
+		exit 1; \
+	fi
+	@echo "✓ Using Node $$(node --version)"
+	@echo ""
 	@echo "Step 1: Installing dependencies..."
 	npm install
 	go mod download
