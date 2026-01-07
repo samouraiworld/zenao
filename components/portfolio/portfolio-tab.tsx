@@ -183,7 +183,7 @@ export function PortfolioTab({
       )}
 
       {!!localPortfolio.length && (
-        <Heading level={2} size="lg">
+        <Heading level={2} size="lg" className="mb-8">
           {t("recent-media-uploaded")} ({localPortfolio.length})
         </Heading>
       )}
