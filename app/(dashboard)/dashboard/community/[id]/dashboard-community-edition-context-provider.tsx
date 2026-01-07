@@ -30,7 +30,7 @@ import { communityAdministrators } from "@/lib/queries/community";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
 
-interface DashboardEventEditionContextProps {
+interface DashboardCommunityEditionContextProps {
   isUpdating: boolean;
   isSubmittable?: boolean;
   formRef?: React.RefObject<HTMLFormElement | null>;
