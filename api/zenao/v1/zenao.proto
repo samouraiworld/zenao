@@ -43,6 +43,7 @@ service ZenaoService {
 
   // TEAM
   rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);
+  rpc EditTeam(EditTeamRequest) returns (EditTeamResponse);
 
   // XXX: TEMPORARY SWITCH TO WEB2 FIRST
   rpc EntityRoles(EntityRolesRequest) returns (EntityRolesResponse); // -> GetCommunityUserRoles, GetEventUserRoles
@@ -521,6 +522,16 @@ message EditCommunityResponse {}
 message CreateTeamRequest { string display_name = 1; }
 
 message CreateTeamResponse { string team_id = 1; }
+
+message EditTeamRequest {
+  string team_id = 1;
+  string display_name = 2;
+  string bio = 3;
+  string avatar_uri = 4;
+  repeated string members = 5;
+}
+
+message EditTeamResponse {}
 
 message GetCommunityAdministratorsRequest { string community_id = 1; }
 
