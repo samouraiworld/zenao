@@ -1,33 +1,33 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-import { ProfileInfo } from "./profile-info";
+import { ProfileInfoLayout } from "./profile-info-layout";
 import { ScreenContainer } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { profileOptions } from "@/lib/queries/profile";
+
 import { profileDetailsSchema } from "@/types/schemas";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
 import { web2URL } from "@/lib/uris";
 
-type Props = {
+type PageProps = {
   params: Promise<{ userId: string }>;
+  children?: React.ReactNode;
 };
 
 export const revalidate = 60;
 
 export async function generateStaticParams() {
+  console.log("asfausaiuddddssioajsa");
+
   return [];
 }
 
 export async function generateMetadata({
   params,
-}: Props): Promise<Metadata | undefined> {
-  const queryClient = getQueryClient();
+}: PageProps): Promise<Metadata> {
   const { userId } = await params;
-
-  if (!userId) {
-    return undefined;
-  }
+  const queryClient = getQueryClient();
 
   try {
     const profileData = await queryClient.fetchQuery(profileOptions(userId));
@@ -37,13 +37,14 @@ export async function generateMetadata({
       !profileData?.displayName &&
       !profileData?.avatarUri
     ) {
-      return undefined;
+      notFound();
     }
 
     const profileDetails = deserializeWithFrontMatter({
       serialized: profileData?.bio,
       schema: profileDetailsSchema,
       defaultValue: {
+        portfolio: [],
         bio: "",
         socialMediaLinks: [],
         location: "",
@@ -77,7 +78,10 @@ export async function generateMetadata({
   }
 }
 
-export default async function ProfilePage({ params }: Props) {
+export default async function ProfilePageLayout({
+  params,
+  children,
+}: PageProps) {
   const queryClient = getQueryClient();
   const { userId } = await params;
 
@@ -86,12 +90,11 @@ export default async function ProfilePage({ params }: Props) {
   }
 
   queryClient.prefetchQuery(profileOptions(userId));
-  const now = Date.now() / 1000;
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <ScreenContainer>
-        <ProfileInfo userId={userId} now={now} />
+        <ProfileInfoLayout userId={userId}>{children}</ProfileInfoLayout>
       </ScreenContainer>
     </HydrationBoundary>
   );
