@@ -41,6 +41,9 @@ service ZenaoService {
   rpc RemoveEventFromCommunity(RemoveEventFromCommunityRequest)
       returns (RemoveEventFromCommunityResponse);
 
+  // TEAM
+  rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);
+
   // XXX: TEMPORARY SWITCH TO WEB2 FIRST
   rpc EntityRoles(EntityRolesRequest) returns (EntityRolesResponse); // -> GetCommunityUserRoles, GetEventUserRoles
   rpc EntitiesWithRoles(EntitiesWithRolesRequest) returns (EntitiesWithRolesResponse); // -> CommunitiesWithUserRole, EventsWithUserRole
@@ -514,6 +517,10 @@ message EditCommunityRequest {
 }
 
 message EditCommunityResponse {}
+
+message CreateTeamRequest { string display_name = 1; }
+
+message CreateTeamResponse { string team_id = 1; }
 
 message GetCommunityAdministratorsRequest { string community_id = 1; }
 

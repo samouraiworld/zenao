@@ -31,6 +31,7 @@ type User struct {
 	Bio         string
 	AvatarURI   string
 	Plan        string `gorm:"default:'free'"`
+	IsTeam      bool   `gorm:"default:false"` // true for team accounts (teams are stored as users)
 }
 
 type EntityRole struct {
@@ -1375,6 +1376,62 @@ func (g *gormZenaoDB) GetAllCommunities() ([]*zeni.Community, error) {
 	return res, nil
 }
 
+// CreateTeam implements zeni.DB.
+func (g *gormZenaoDB) CreateTeam(ownerID string, displayName string) (*zeni.User, error) {
+	g, span := g.trace("gzdb.CreateTeam")
+	defer span.End()
+
+	ownerIDInt, err := strconv.ParseUint(ownerID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse owner id: %w", err)
+	}
+
+	team := &User{
+		AuthID:      "", // Teams don't have auth
+		DisplayName: displayName,
+		Bio:         "",
+		AvatarURI:   userDefaultAvatar,
+		IsTeam:      true,
+	}
+
+	if err := g.db.Create(team).Error; err != nil {
+		return nil, fmt.Errorf("create team in db: %w", err)
+	}
+
+	// Add creator as owner
+	ownerRole := &EntityRole{
+		EntityType: zeni.EntityTypeUser,
+		EntityID:   uint(ownerIDInt),
+		OrgType:    zeni.EntityTypeTeam,
+		OrgID:      team.ID,
+		Role:       zeni.RoleTeamOwner,
+	}
+
+	if err := g.db.Create(ownerRole).Error; err != nil {
+		return nil, fmt.Errorf("create owner role: %w", err)
+	}
+
+	return dbUserToZeniDBUser(team), nil
+}
+
+// GetUserByID implements zeni.DB.
+func (g *gormZenaoDB) GetUserByID(userID string) (*zeni.User, error) {
+	g, span := g.trace("gzdb.GetUserByID")
+	defer span.End()
+
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
+	var user User
+	if err := g.db.First(&user, userIDInt).Error; err != nil {
+		return nil, fmt.Errorf("get user by id: %w", err)
+	}
+
+	return dbUserToZeniDBUser(&user), nil
+}
+
 // CreateFeed implements zeni.DB.
 func (g *gormZenaoDB) CreateFeed(orgType string, orgID string, slug string) (*zeni.Feed, error) {
 	orgIDInt, err := strconv.ParseUint(orgID, 10, 64)
@@ -2047,6 +2104,7 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		AvatarURI:   dbuser.AvatarURI,
 		AuthID:      dbuser.AuthID,
 		Plan:        zeni.Plan(dbuser.Plan),
+		IsTeam:      dbuser.IsTeam,
 	}
 	if u.DisplayName == "" {
 		u.DisplayName = fmt.Sprintf("Zenao user #%d", dbuser.ID)
