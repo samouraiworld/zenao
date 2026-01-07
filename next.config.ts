@@ -37,6 +37,10 @@ const nextConfig: NextConfig = {
         source: "/community/:id",
         destination: "/community/:id/chat",
       },
+      {
+        source: "/profile/:userId",
+        destination: "/profile/:userId/events",
+      },
     ];
   },
   async headers() {

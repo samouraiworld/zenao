@@ -125,7 +125,9 @@
   "profile-info": {
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",
-    "past-events": "Past events"
+    "past-events": "Past events",
+    "events": "Events",
+    "portfolio": "Portfolio"
   },
   "guest-registration-success-dialog": {
     "registration-title": "You're in!",
@@ -522,30 +524,6 @@
     "join-community-button": "Join community",
     "edit-community-button": "Edit community"
   },
-  "community-portfolio": { 
-    "error-file-uploading": "Error while uploading file",
-    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
-    "error-file-deleting": "Error while deleting file",
-    "delete-file-success": "Item deleted successfully",
-    "upload-file-success": "File uploaded successfully",
-    "recent-media-uploaded": "Recent media uploaded",
-    "upload-file-btn": "Upload file",
-    "upload-first-file-btn": "Upload your first file",
-    "no-media-uploaded": "No media uploaded yet.",
-    "error-saving-portfolio": "Error while saving portfolio",
-    "upload-audio": "Upload audio",
-    "upload-image": "Upload image",
-    "upload-video": "Upload video",
-    "add-video": "Add video",
-    "add-video-description": "Add a video from YouTube, Vimeo",
-    "video-origin-label": "Origin of the video",
-    "video-origin-placeholder": "Video source",
-    "delete": "Delete",
-    "confirm-delete-title": "Are you sure you want to delete this item?",
-    "confirm-delete-desc": "This action cannot be undone.",
-    "confirm-delete-cancel": "Cancel",
-    "confirm-delete-confirm": "Yes, delete it"
-  },
   "community-create-form": {
     "log-in": "Log in to create a community",
     "create-community-button": "Create community",
@@ -583,6 +561,31 @@
     "add-admin": "Add Administrator",
     "submit-create": "Create Community",
     "submit-edit": "Update Community"
+  },
+  "portfolio": { 
+    "error-file-uploading": "Error while uploading file",
+    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+    "error-file-deleting": "Error while deleting file",
+    "delete-file-success": "Item deleted successfully",
+    "upload-file-success": "File uploaded successfully",
+    "recent-media-uploaded": "Recent media uploaded",
+    "upload-file-btn": "Upload file",
+    "upload-first-file-btn": "Upload your first file",
+    "no-media-title": "No media to show.",
+    "no-media-description": "You have no media in your portfolio. Why not upload some?",
+    "error-saving-portfolio": "Error while saving portfolio",
+    "upload-audio": "Upload audio",
+    "upload-image": "Upload image",
+    "upload-video": "Upload video",
+    "add-video": "Add video",
+    "add-video-description": "Add a video from YouTube, Vimeo",
+    "video-origin-label": "Origin of the video",
+    "video-origin-placeholder": "Video source",
+    "delete": "Delete",
+    "confirm-delete-title": "Are you sure you want to delete this item?",
+    "confirm-delete-desc": "This action cannot be undone.",
+    "confirm-delete-cancel": "Cancel",
+    "confirm-delete-confirm": "Yes, delete it"
   },
   "empty-list": {
     "title": "Nothing listed",
