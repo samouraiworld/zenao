@@ -6,11 +6,9 @@ setup:
 	@echo ""
 	@echo "Step 1: Installing dependencies..."
 	npm install
+	go mod download
 	@echo ""
-	@echo "Step 2: Installing Atlas CLI..."
-	@$(MAKE) install-atlas
-	@echo ""
-	@echo "Step 3: Setting up environment variables..."
+	@echo "Step 2: Setting up environment variables..."
 	@if [ ! -f .env.local ]; then \
 		cp .env.example .env.local; \
 		echo "✓ Created .env.local"; \
@@ -19,10 +17,10 @@ setup:
 	fi
 	@echo ""
 	@if [ ! -f dev.db ]; then \
-		@echo "Step 4: Running database migrations..." \
+		@echo "Step 3: Running database migrations..." \
 		$(MAKE) migrate-local; \
 		echo ""; \
-		echo "Step 5: Generating fake data..."; \
+		echo "Step 4: Generating fake data..."; \
 		go run ./backend fakegen; \
 	else \
 		echo "⚠ dev.db already exists, skipping migrations and fake data..."; \
@@ -97,13 +95,3 @@ update-schema:
 .PHONY: migrate-local
 migrate-local:
 	atlas migrate apply --dir "file://migrations" --env dev
-
-# TODO: use normal atlas binary when https://github.com/ariga/atlas/pull/3112 is merged
-.PHONY: install-atlas
-install-atlas:
-	rm -fr atlas
-	git clone https://github.com/samouraiworld/atlas.git
-	cd atlas && git fetch origin versioned-libsql-support
-	cd atlas && git checkout c261f318ac25924555e63fdf005cc53de43fa5db
-	cd atlas/cmd/atlas && go install .
-	rm -fr atlas
