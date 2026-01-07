@@ -66,6 +66,8 @@ cp .env.example .env.local
 
 **Note:** This uses Clerk test keys that work out of the box - no Clerk account needed for local development.
 
+**Optional:** If testing file uploads, add `PINATA_JWT` to `.env.local` (get from team/admin)
+
 ### 3. Initialize Database
 
 ```bash
@@ -122,10 +124,15 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=""
 # Backend Configuration
 NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT=http://localhost:4242
 NEXT_PUBLIC_ZENAO_NAMESPACE=zenao
+NEXT_PUBLIC_GATEWAY_URL=pinata.zenao.io
+PINATA_GROUP=""
 
 # Observability (optional - only if running OTEL collector via docker compose)
 # OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 SEOBOT_API_KEY=""
+
+# File uploads (optional - get from team/admin if needed)
+# PINATA_JWT=
 ```
 
 ### Backend (Environment Variables)
