@@ -40,6 +40,7 @@ export default function ProfileHeader({
       bannerUri: "",
       experiences: [],
       skills: [],
+      portfolio: [],
     },
     contentFieldName: "bio",
   });
