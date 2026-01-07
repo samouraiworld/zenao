@@ -66,7 +66,7 @@ cp .env.example .env.local
 
 **Note:** This uses Clerk test keys that work out of the box - no Clerk account needed for local development.
 
-**Optional:** If testing file uploads, add `PINATA_JWT` to `.env.local` (get from team/admin)
+**File Uploads:** If you need to upload images (e.g., to create events), you'll need to configure Pinata. See [File Uploads with Pinata](#file-uploads-with-pinata).
 
 ### 3. Initialize Database
 
@@ -209,6 +209,44 @@ npm run cypress:e2e
 Select a test file (e.g., `cypress/main.cy.ts`) to run. Tests auto-rerun on file changes.
 
 ## Development Workflows
+
+## File Uploads with Pinata
+
+> **⚠️ Note:** File uploads are required to create events. Without Pinata configured, you cannot upload event images.
+
+### Setup
+
+**1. Create a free Pinata account:** [app.pinata.cloud/register](https://app.pinata.cloud/register)
+
+**2. Create an API Key:**
+- Dashboard → **API Keys** → **+ New Key**
+- Enable: `pinFileToIPFS`
+- Copy the JWT (shown only once!)
+
+**3. Create a Gateway:**
+- Dashboard → **Gateways** → **+ New Gateway**
+- Copy your gateway domain (e.g., `your-name.mypinata.cloud`)
+
+**4. Update `.env.local`:**
+
+```bash
+PINATA_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_GATEWAY_URL=your-name.mypinata.cloud  # Domain only, no https://
+PINATA_GROUP=your-group-id  # Optional
+```
+
+**5. Restart:** `npm run dev`
+
+### Common Issues
+
+**Image uploads but doesn't display:**
+- Check gateway is "Active" in Pinata dashboard
+- Test directly: `https://your-gateway.mypinata.cloud/ipfs/YOUR-CID`
+
+**Upload fails:**
+- Ensure `PINATA_JWT` is valid and has `pinFileToIPFS` permission
+- Check you haven't exceeded 1GB free tier limit
+- Restart dev server after changing `.env.local`
 
 ### API Changes
 
