@@ -24,7 +24,7 @@ function OrganizerQuickAccessBanner({
           href={`/dashboard/event/${eventId}`}
           className="text-main hover:underline"
         >
-          {t("settings")}
+          {t("edit-event")}
         </Link>
       </div>
     </Card>
@@ -34,7 +34,7 @@ function OrganizerQuickAccessBanner({
 function GatekeeperQuickAccessBanner({
   eventId,
 }: EventDashboardQuickAccessBannerProps) {
-  const t = useTranslations("event-dashboard-banners");
+  const t = useTranslations("event.event-dashboard-banners");
 
   return (
     <Card className="w-full flex flex-col md:flex-row space-between gap-2">

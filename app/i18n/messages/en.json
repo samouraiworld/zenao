@@ -119,7 +119,7 @@
       "gatekeeper": "You have the gatekeeper role for this event. See list of attendees and start scanning tickets.",
       "organizer": "You are the organizer of this event. Manage your event settings and attendees.",
       "start-scanning": "Start scanning tickets",
-      "settings": "Settings"
+      "edit-event": "Edit event"
     }
   },
   "profile-info": {
