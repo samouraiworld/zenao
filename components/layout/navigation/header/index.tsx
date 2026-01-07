@@ -299,7 +299,7 @@ const Auth = ({
             </DropdownMenuItem>
           </Link>
           <DropdownMenuSeparator />
-          <Link href="/settings" target="_blank">
+          <Link href="/dashboard" target="_blank">
             <DropdownMenuItem className="cursor-pointer">
               <LayoutDashboard />
               {t("dashboard-access")}
