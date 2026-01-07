@@ -119,7 +119,7 @@
   },
   "profile-info": {
     "profile-header": {
-      "edit-profile": "Edit profile",
+      "edit-profile": "Edit my profile",
       "access-dashboard": "Access dashboard"
     },
     "profile-not-exist": "Profile doesn't exist",
