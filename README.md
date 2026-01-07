@@ -49,7 +49,6 @@ If you prefer to run each step manually:
 ```bash
 nvm use # or fnm use
 npm install
-make install-atlas
 ```
 
 ### 2. Setup Environment Variables
@@ -344,7 +343,6 @@ The database is created at `dev.db` in the project root after running `make migr
 | `make test-e2e` | Run Cypress E2E tests in headless mode |
 | `make generate` | Regenerate protobuf code and email templates |
 | `make migrate-local` | Apply database migrations to local dev.db |
-| `make install-atlas` | Install the Atlas CLI for database migrations |
 | `make update-schema` | Update Atlas schema from GORM models |
 | `make lint-fix` | Run ESLint with auto-fix |
 
