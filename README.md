@@ -27,6 +27,10 @@ An event management and community platform featuring event creation, community m
 
 Follow these steps to run the complete stack locally (frontend + backend + database):
 
+**Before you start:** You may need to configure these services:
+- [Clerk Authentication Setup](#clerk-authentication-setup) - If the default test keys have expired
+- [File Uploads with Pinata](#file-uploads-with-pinata) - Required to upload images (e.g., create events)
+
 ### Option 1: Automated Setup (Recommended)
 
 Run the setup script to install dependencies, configure environment, and initialize the database:
@@ -44,6 +48,11 @@ make dev
 That's it! The app will be running at:
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
 - **Backend**: [http://localhost:4242](http://localhost:4242)
+
+> **⚠️ Note:** The Go backend reads environment variables from your shell, not from `.env.local`. Export the Clerk secret key before running `make dev` if you modified the default key:
+> ```bash
+> export ZENAO_CLERK_SECRET_KEY=sk_test_...  # Must match CLERK_SECRET_KEY in .env.local
+> ```
 
 ### Option 2: Manual Setup
 
@@ -64,10 +73,6 @@ Create `.env.local` from the template:
 cp .env.example .env.local
 ```
 
-**Note:** This uses Clerk test keys that work out of the box - no Clerk account needed for local development.
-
-**File Uploads:** If you need to upload images (e.g., to create events), you'll need to configure Pinata. See [File Uploads with Pinata](#file-uploads-with-pinata).
-
 ### 3. Initialize Database
 
 ```bash
@@ -79,8 +84,9 @@ This creates a `dev.db` file in the project root.
 
 ### 4. Start Backend
 
-In a dedicated terminal:
+In a dedicated terminal, export the Clerk secret key (if you modified the default) and start the backend:
 ```bash
+export ZENAO_CLERK_SECRET_KEY=sk_test_...  # Must match CLERK_SECRET_KEY in .env.local
 go run ./backend start
 ```
 
@@ -118,26 +124,28 @@ These variables are set by copying `.env.example`:
 
 ```bash
 # Clerk Authentication (test keys for local development)
-CLERK_SECRET_KEY=""
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=""
+CLERK_SECRET_KEY=""
 
 # Backend Configuration
 NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT=http://localhost:4242
 NEXT_PUBLIC_ZENAO_NAMESPACE=zenao
+
+# File uploads - See README "File Uploads with Pinata" section
 NEXT_PUBLIC_GATEWAY_URL=pinata.zenao.io
-PINATA_GROUP=""
+PINATA_GROUP=f2ecce4d-b615-48ee-8ae8-744145b40dcb  # Optional: for organizing files in Pinata dashboard
+PINATA_JWT="" # Required for uploading images (e.g., to create events)
 
-# Observability (optional - only if running OTEL collector via docker compose)
-# OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-SEOBOT_API_KEY=""
-
-# File uploads (optional - get from team/admin if needed)
-# PINATA_JWT=
+# Observability (optional)
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+SEOBOT_API_KEY=a8c58738-7b98-4597-b20a-0bb1c2fe5772
 ```
 
 ### Backend (Environment Variables)
 
-The backend reads these from the environment (prefixed with `ZENAO_`). **All have defaults**, so they're optional for local development:
+The backend reads these from the environment (prefixed with `ZENAO_`), not from the `.env.local`. **All have defaults**, so they're optional for local development:
+
+> **⚠️ Important:** If you modify `CLERK_SECRET_KEY` in `.env.local`, you must also export `ZENAO_CLERK_SECRET_KEY` with the same value before starting the backend.
 
 ```bash
 # Optional overrides (backend has sensible defaults):
@@ -208,7 +216,33 @@ npm run cypress:e2e
 
 Select a test file (e.g., `cypress/main.cy.ts`) to run. Tests auto-rerun on file changes.
 
-## Development Workflows
+## Clerk Authentication Setup
+
+The project includes default Clerk test keys that work out of the box. If you encounter authentication errors (e.g., "unauthorized"), the test keys may have expired.
+
+### Creating Your Own Clerk Keys
+
+**1. Create a free Clerk account:** [clerk.com/sign-up](https://clerk.com/sign-up)
+
+**2. Create a new application** in the Clerk dashboard
+
+**3. Get your API keys:**
+- Dashboard → **API Keys**
+- Copy `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (starts with `pk_test_...`)
+- Copy `CLERK_SECRET_KEY` (starts with `sk_test_...`)
+
+**4. Update `.env.local`:**
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key_here
+CLERK_SECRET_KEY=sk_test_your_key_here
+```
+
+**5. Export for backend:**
+
+```bash
+export ZENAO_CLERK_SECRET_KEY=sk_test_your_key_here
+```
 
 ## File Uploads with Pinata
 
@@ -220,7 +254,7 @@ Select a test file (e.g., `cypress/main.cy.ts`) to run. Tests auto-rerun on file
 
 **2. Create an API Key:**
 - Dashboard → **API Keys** → **+ New Key**
-- Grant **Files** write permission
+- Grant **Files** write permission and **Group** read permission
 - Copy the JWT (shown only once!)
 
 **3. Create a Gateway:**
@@ -243,14 +277,11 @@ PINATA_GROUP=your-group-id  # Optional
 
 ### Common Issues
 
-**Image uploads but doesn't display:**
-- Check gateway is "Active" in Pinata dashboard
-- Test directly: `https://your-gateway.mypinata.cloud/ipfs/YOUR-CID`
-
 **Upload fails:**
-- Ensure `PINATA_JWT` is valid and has `pinFileToIPFS` permission
 - Check you haven't exceeded 1GB free tier limit
 - Restart dev server after changing `.env.local`
+
+## Development Workflows
 
 ### API Changes
 

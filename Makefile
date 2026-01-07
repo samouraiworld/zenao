@@ -1,18 +1,19 @@
 CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 
-.PHONY: setup-dev
-setup-dev:
-	@echo "Setting up Zenao development environment..."
-	@echo ""
-	@# Check Node version
+.PHONY: check-node
+check-node:
 	@REQUIRED_NODE=$$(cat .nvmrc); \
 	CURRENT_NODE=$$(node --version 2>/dev/null | sed 's/v//'); \
 	if [ "$$CURRENT_NODE" != "$$REQUIRED_NODE" ]; then \
 		echo "❌ Node version mismatch: v$$CURRENT_NODE (expected v$$REQUIRED_NODE)"; \
 		echo "   Run: nvm use  (or: fnm use)"; \
 		exit 1; \
-	fi
-	@echo "✓ Using Node $$(node --version)"
+	fi; \
+	echo "✓ Using Node v$$CURRENT_NODE"
+
+.PHONY: setup-dev
+setup-dev: check-node
+	@echo "Setting up Zenao development environment..."
 	@echo ""
 	@echo "Step 1: Installing dependencies..."
 	npm install
@@ -27,7 +28,7 @@ setup-dev:
 	fi
 	@echo ""
 	@if [ ! -f dev.db ]; then \
-		@echo "Step 3: Running database migrations..." \
+		echo "Step 3: Running database migrations..."; \
 		$(MAKE) migrate-local; \
 		echo ""; \
 		echo "Step 4: Generating fake data..."; \
@@ -46,7 +47,7 @@ setup-dev:
 	@echo "  npm run dev               # Terminal 2: Frontend"
 
 .PHONY: dev
-dev:
+dev: check-node
 	@echo "Starting Zenao development environment..."
 	@echo "Make sure you have run 'make migrate-local' first!"
 	@echo ""
