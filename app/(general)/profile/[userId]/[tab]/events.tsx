@@ -4,45 +4,39 @@ import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { Person, WithContext } from "schema-dts";
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
-import ProfileHeader from "./profile-header";
 import { EventCard } from "@/components/features/event/event-card";
-import { Separator } from "@/components/shadcn/separator";
+import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import Heading from "@/components/widgets/texts/heading";
+import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByOrganizerList,
 } from "@/lib/queries/events-list";
-import { profileOptions } from "@/lib/queries/profile";
-import EventCardListLayout from "@/components/features/event/event-card-list-layout";
-import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
-import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { userInfoOptions } from "@/lib/queries/user";
-import { profileDetailsSchema } from "@/types/schemas";
-import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 
-export function ProfileInfo({
-  userId: profileUserId,
-  now,
-}: {
+type ProfileEventsProps = {
   userId: string;
   now: number;
-}) {
+};
+
+export default function ProfileEvents({ userId, now }: ProfileEventsProps) {
   const t = useTranslations("profile-info");
-  const { getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
+
+  const { getToken, userId: authId } = useAuth();
+  const { data: authUserInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, authId),
   );
-  const isOwner = userInfo?.userId === profileUserId;
+  const isOwner = authUserInfo?.userId === userId;
+
   // The connected user can see his both discoverable and undiscoverable events
   const discoverableFilter = isOwner
     ? DiscoverableFilter.UNSPECIFIED
     : DiscoverableFilter.DISCOVERABLE;
 
-  const { data: profile } = useSuspenseQuery(profileOptions(profileUserId));
   const {
     data: upcomingEventsPages,
     isFetchingNextPage: isFetchingUpcomingNextPage,
@@ -51,7 +45,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextUpcomingPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      profileUserId,
+      userId,
       discoverableFilter,
       now,
       Number.MAX_SAFE_INTEGER,
@@ -59,6 +53,7 @@ export function ProfileInfo({
       getToken,
     ),
   );
+
   const {
     data: pastEventsPages,
     isFetchingNextPage: isFetchingPastNextPage,
@@ -67,7 +62,7 @@ export function ProfileInfo({
     fetchNextPage: fetchNextPastPage,
   } = useSuspenseInfiniteQuery(
     eventsByOrganizerList(
-      profileUserId,
+      userId,
       discoverableFilter,
       now - 1,
       0,
@@ -85,52 +80,8 @@ export function ProfileInfo({
     [pastEventsPages],
   );
 
-  // profileOptions can return array of object with empty string (except address)
-  // So to detect if a user doesn't exist we have to check if all strings are empty (except address)
-  if (!profile?.bio && !profile?.displayName && !profile?.avatarUri) {
-    return <p>{t("profile-not-exist")}</p>;
-  }
-
-  const profileDetails = deserializeWithFrontMatter({
-    serialized: profile.bio,
-    schema: profileDetailsSchema,
-    defaultValue: {
-      bio: "",
-      socialMediaLinks: [],
-      location: "",
-      shortBio: "",
-      bannerUri: "",
-      experiences: [],
-      skills: [],
-    },
-    contentFieldName: "bio",
-  });
-
-  const jsonLd: WithContext<Person> = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    alternateName: profile?.displayName,
-    image: profile?.avatarUri,
-    knowsAbout: profileDetails?.bio,
-  };
-
   return (
-    <div className="flex flex-col gap-10">
-      <div className="flex flex-col sm:flex-row w-full sm:h-full gap-10">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <ProfileHeader
-          userId={profileUserId}
-          displayName={profile.displayName}
-          bio={profile.bio}
-          avatarUri={profile.avatarUri}
-        />
-      </div>
-
-      <Separator />
-
+    <>
       <Heading level={2} size="lg">
         {t("hosting-events")} ({upcomingEvents.length})
       </Heading>
@@ -152,7 +103,7 @@ export function ProfileInfo({
         />
       </div>
 
-      <Heading level={2} size="lg">
+      <Heading level={2} size="lg" className="mt-8">
         {t("past-events")} ({pastEvents.length})
       </Heading>
 
@@ -174,6 +125,6 @@ export function ProfileInfo({
           />
         </div>
       </div>
-    </div>
+    </>
   );
 }
