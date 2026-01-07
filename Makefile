@@ -1,7 +1,7 @@
 CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 
-.PHONY: setup
-setup:
+.PHONY: setup-dev
+setup-dev:
 	@echo "Setting up Zenao development environment..."
 	@echo ""
 	@echo "Step 1: Installing dependencies..."

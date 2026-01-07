@@ -27,7 +27,7 @@ Follow these steps to run the complete stack locally (frontend + backend + datab
 Run the setup script to install dependencies, configure environment, and initialize the database:
 
 ```bash
-make setup
+make setup-dev
 ```
 
 Then start the development servers:
@@ -337,7 +337,7 @@ The database is created at `dev.db` in the project root after running `make migr
 
 | Command | Description |
 |---------|-------------|
-| `make setup` | Install dependencies, configure environment, run migrations, and generate fake data |
+| `make setup-dev` | Install dependencies, configure environment, run migrations, and generate fake data |
 | `make dev` | Start backend and frontend servers together |
 | `make dev-otel` | Start backend, frontend, and OTEL stack (Jaeger UI at localhost:16686) |
 | `make test` | Run Go backend unit tests |
