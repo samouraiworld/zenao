@@ -49,16 +49,6 @@ export default function BlogPostCard({ post }: { post: IArticleIndex }) {
       className="cursor-pointer w-full flex flex-col h-full gap-8 hover:bg-secondary/50 transition-colors"
     >
       <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap gap-2">
-          {post.category && (
-            <Link href={`/blog/category/${post.category.slug}`}>
-              <Text size="sm" className="text-main font-semibold">
-                {post.category.title}
-              </Text>
-            </Link>
-          )}
-        </div>
-
         <EventImage
           {...imageProps}
           alt={alt}
@@ -75,9 +65,19 @@ export default function BlogPostCard({ post }: { post: IArticleIndex }) {
             {post.headline}
           </Heading>
         </Link>
-        <div className="flex-grow min-h-14">
+        <div className="flex-grow flex flex-col gap-2 min-h-14">
           <Text variant="secondary">{post.metaDescription}</Text>
+          <div className="flex flex-wrap gap-2">
+            {post.category && (
+              <Link href={`/blog/category/${post.category.slug}`}>
+                <Text size="sm" className="text-main font-semibold">
+                  {post.category.title}
+                </Text>
+              </Link>
+            )}
+          </div>
         </div>
+
         <div className="flex gap-2">
           <PostDate date={new Date(post.publishedAt || post.createdAt)} />
           {post.readingTime ? (
