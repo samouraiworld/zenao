@@ -4,6 +4,22 @@ An event management and community platform featuring event creation, community m
 
 > **Note:** Zenao is currently a Web2 application, with plans to transition to Web3 using [base](https://www.base.org/).
 
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Prerequisites](#prerequisites)
+- [Quick Start - Full Local Development](#quick-start---full-local-development)
+- [Environment Variables Reference](#environment-variables-reference)
+- [Testing](#testing)
+- [Clerk Authentication Setup](#clerk-authentication-setup)
+- [File Uploads with Pinata](#file-uploads-with-pinata)
+- [Development Workflows](#development-workflows)
+- [Observability (Optional)](#observability-optional)
+- [Working with Staging/Production](#working-with-stagingproduction)
+- [Troubleshooting](#troubleshooting)
+- [Make Commands](#make-commands)
+- [Project Structure](#project-structure)
+
 ## Tech Stack
 
 - **Frontend**: Next.js 15, React, TypeScript, TailwindCSS, Shadcn UI
@@ -15,7 +31,7 @@ An event management and community platform featuring event creation, community m
 
 ## Prerequisites
 
-- **Node.js 20.13.1+** ([download](https://nodejs.org/)
+- **Node.js 20.13.1+** ([download](https://nodejs.org/))
 - **Go 1.21+** ([download](https://go.dev/doc/install))
 
 > **⚠️ Important:** This project uses **Node.js 20.13.1** (see `.nvmrc`), which is not the latest version. Using a different Node version may cause package-lock.json conflicts and CI failures. We strongly recommend using a Node version manager like [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) to switch to the correct version:
