@@ -62,6 +62,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
       bannerUri: "",
       experiences: [],
       skills: [],
+      portfolio: [],
     },
     contentFieldName: "bio",
   });
@@ -76,6 +77,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
     shortBio: profileDetails.shortBio || "",
     experiences: profileDetails.experiences || [],
     skills: profileDetails.skills,
+    portfolio: profileDetails.portfolio,
   };
 
   const { editUser, isPending } = useEditUserProfile();
@@ -111,6 +113,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           bannerUri: values.bannerUri,
           experiences: values.experiences,
           skills: values.skills,
+          portfolio: values.portfolio,
         },
       );
 

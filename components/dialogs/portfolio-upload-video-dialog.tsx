@@ -51,7 +51,7 @@ export default function PortfolioUploadVideoDialog({
   onOpenChange,
   onVideoAdded,
 }: PortfolioUploadVideoDialogProps) {
-  const t = useTranslations("community-portfolio");
+  const t = useTranslations("portfolio");
   const [isLoading, setIsLoading] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -133,7 +133,7 @@ function PortfolioUploadVideoForm({
   isLoading?: boolean;
   onSubmit: (data: PortfolioUploadVideoSchemaType) => Promise<void> | void;
 }) {
-  const t = useTranslations("community-portfolio");
+  const t = useTranslations("portfolio");
 
   const origin = form.watch("origin");
   const uri = form.watch("uri");

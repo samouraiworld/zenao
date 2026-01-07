@@ -1414,6 +1414,33 @@ func (g *gormZenaoDB) CreateTeam(ownerID string, displayName string) (*zeni.User
 	return dbUserToZeniDBUser(team), nil
 }
 
+// EditTeam implements zeni.DB.
+func (g *gormZenaoDB) EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error {
+	g, span := g.trace("gzdb.EditTeam")
+	defer span.End()
+
+	teamIDInt, err := strconv.ParseUint(teamID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse team id: %w", err)
+	}
+
+	team := User{
+		DisplayName: req.DisplayName,
+		Bio:         req.Bio,
+		AvatarURI:   req.AvatarUri,
+	}
+
+	if err := g.db.Model(&User{}).Where("id = ? AND is_team = ?", teamIDInt, true).Updates(team).Error; err != nil {
+		return fmt.Errorf("update team in db: %w", err)
+	}
+
+	if err := g.updateUserRoles(zeni.RoleTeamMember, memberIDs, teamID, zeni.EntityTypeTeam); err != nil {
+		return fmt.Errorf("update members: %w", err)
+	}
+
+	return nil
+}
+
 // GetUserByID implements zeni.DB.
 func (g *gormZenaoDB) GetUserByID(userID string) (*zeni.User, error) {
 	g, span := g.trace("gzdb.GetUserByID")
