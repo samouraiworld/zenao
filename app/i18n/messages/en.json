@@ -643,6 +643,11 @@
           "email-placeholder": "Enter administrator email to add...",
           "error-administrator-already-exists": "This administrator is already assigned to the community!",
           "add-btn": "Add"
+        },
+        "columns": {
+          "email": "Email",
+          "actions": "Actions",
+          "delete-admin": "Delete administrator"
         }
       },
       "members": {
