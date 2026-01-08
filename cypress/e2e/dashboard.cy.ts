@@ -125,7 +125,9 @@ describe("dashboard", () => {
           // change event name
           cy.get('textarea[placeholder="Event name..."]')
             .clear()
-            .type(newEventName);
+            .type(newEventName, {
+              delay: 10,
+            });
         });
 
       // save changes
