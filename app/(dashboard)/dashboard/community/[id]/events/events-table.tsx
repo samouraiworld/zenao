@@ -7,7 +7,6 @@ import {
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useDashboardCommunityContext } from "../dashboard-community-context-provider";
 import { useCommunityEventsColumns } from "./columns";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
@@ -19,6 +18,7 @@ import Text from "@/components/widgets/texts/text";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import { eventOptions } from "@/lib/queries/event";
 import { SafeEventInfo } from "@/types/schemas";
+import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
 
 export default function CommunityEventsTable() {
   const t = useTranslations("dashboard.communityDetails.events");
