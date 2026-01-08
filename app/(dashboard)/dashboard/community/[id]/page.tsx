@@ -23,16 +23,16 @@ import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
-import DashboardCommunityEditionContextProvider, {
-  DashboardCommunityEditionContextProps,
-} from "@/components/providers/dashboard-community-edition-context-provider";
+import DashboardCommunityEditionProvider, {
+  DashboardCommunityEditionProps,
+} from "@/components/providers/dashboard-community-edition-provider";
 
 function DashboardCommunityInfo({
   isUpdating,
   isSubmittable,
   formRef,
   save,
-}: DashboardCommunityEditionContextProps) {
+}: DashboardCommunityEditionProps) {
   const form = useFormContext<CommunityFormSchemaType>();
   const t = useTranslations("community-form");
 
@@ -193,7 +193,7 @@ function DashboardCommunityInfo({
 
 export default function DashboardCommunityInfoPage() {
   return (
-    <DashboardCommunityEditionContextProvider>
+    <DashboardCommunityEditionProvider>
       {({ isUpdating, isSubmittable, formRef, save }) => (
         <DashboardCommunityInfo
           isUpdating={isUpdating}
@@ -202,6 +202,6 @@ export default function DashboardCommunityInfoPage() {
           save={save}
         />
       )}
-    </DashboardCommunityEditionContextProvider>
+    </DashboardCommunityEditionProvider>
   );
 }

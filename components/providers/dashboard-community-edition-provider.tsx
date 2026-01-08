@@ -24,7 +24,7 @@ import { communityAdministrators } from "@/lib/queries/community";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
 
-export interface DashboardCommunityEditionContextProps {
+export interface DashboardCommunityEditionProps {
   isUpdating: boolean;
   isSubmittable?: boolean;
   formRef?: React.RefObject<HTMLFormElement | null>;
@@ -32,10 +32,10 @@ export interface DashboardCommunityEditionContextProps {
 }
 
 interface DashboardCommunityEditionProviderProps {
-  children: (props: DashboardCommunityEditionContextProps) => React.ReactNode;
+  children: (props: DashboardCommunityEditionProps) => React.ReactNode;
 }
 
-export default function DashboardCommunityEditionContextProvider({
+export default function DashboardCommunityEditionProvider({
   children,
 }: DashboardCommunityEditionProviderProps) {
   const { getToken } = useAuth();
