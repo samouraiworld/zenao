@@ -19,6 +19,7 @@
     "manifesto": "Manifesto",
     "blog": "Blog",
     "view-profile": "View my profile",
+    "dashboard-access": "Go to dashboard",
     "create-event": "Create Event",
     "footer": {
       "tagline": "Made with ❤️ by Samourai.world crew",
@@ -114,9 +115,19 @@
     "view-more": "View more",
     "view-less": "View less",
     "export-participant-list": "Export participants list",
-    "manage-gatekeepers-button": "Manage gatekeepers"
+    "manage-gatekeepers-button": "Manage gatekeepers",
+    "event-dashboard-banners": {
+      "gatekeeper": "You have the gatekeeper role for this event. See list of attendees and start scanning tickets.",
+      "organizer": "You are the organizer of this event. Manage your event settings and attendees.",
+      "start-scanning": "Start scanning tickets",
+      "edit-event": "Edit event"
+    }
   },
   "profile-info": {
+    "profile-header": {
+      "dashboard-access": "Go to dashboard",
+      "edit-profile": "Edit my profile"
+    },
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",
     "past-events": "Past events",

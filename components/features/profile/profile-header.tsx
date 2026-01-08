@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { ExternalLink, Link2, List, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Button } from "@/components/shadcn/button";
 import { Skeleton } from "@/components/shadcn/skeleton";
@@ -106,6 +107,7 @@ export default function ProfileHeader({
             <ClerkLoaded>
               <SignedIn>
                 <EditProfileButton userId={userId} />
+                <DashboardButton userId={userId} />
               </SignedIn>
             </ClerkLoaded>
           </div>
@@ -189,6 +191,7 @@ export default function ProfileHeader({
 }
 
 const EditProfileButton = ({ userId }: { userId: string }) => {
+  const t = useTranslations("profile-info.profile-header");
   const { userId: authId, getToken } = useAuth();
   const [clientAuthId, setClientAuthId] = useState<string>();
 
@@ -205,7 +208,33 @@ const EditProfileButton = ({ userId }: { userId: string }) => {
   return (
     loggedInUserId === userId && (
       <Link href="/settings" className="w-full sm:w-auto">
-        <Button className="w-full sm:w-auto">Edit my profile</Button>
+        <Button className="w-full sm:w-auto">{t("edit-profile")}</Button>
+      </Link>
+    )
+  );
+};
+
+const DashboardButton = ({ userId }: { userId: string }) => {
+  const t = useTranslations("profile-info.profile-header");
+  const { userId: authId, getToken } = useAuth();
+  const [clientAuthId, setClientAuthId] = useState<string>();
+
+  // we need this useEffect to prevent hydration errors due to clerk
+  useEffect(() => {
+    setClientAuthId(authId || undefined);
+  }, [authId]);
+
+  const { data: info } = useSuspenseQuery(
+    userInfoOptions(getToken, clientAuthId),
+  );
+
+  const loggedInUserId = info?.userId;
+  return (
+    loggedInUserId === userId && (
+      <Link href="/dashboard" target="_blank" className="w-full sm:w-auto">
+        <Button variant="outline" className="w-full sm:w-auto">
+          {t("dashboard-access")}
+        </Button>
       </Link>
     )
   );
