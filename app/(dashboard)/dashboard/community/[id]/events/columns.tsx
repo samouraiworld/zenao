@@ -58,7 +58,7 @@ export const useCommunityEventsColumns = (): ColumnDef<SafeEventInfo>[] =>
           <DataTableColumnHeader column={column} title="Organized by" />
         ),
         cell: ({ row }) => (
-          <div className="flex h-hull items-center">
+          <div className="flex h-full items-center">
             <UserAvatarWithName userId={row.original.organizers[0]} />
           </div>
         ),
