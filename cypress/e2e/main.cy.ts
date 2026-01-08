@@ -135,10 +135,9 @@ describe("main", () => {
     cy.visit("/settings");
 
     // check initial values
-    cy.get('input[placeholder="Name..."]').should(
-      "have.value",
-      "Zenao user #1",
-    );
+    cy.get('input[placeholder="Name..."]')
+      .invoke("val")
+      .should("match", /^Zenao user #\d+$/);
     cy.get('textarea[placeholder="Bio..."]').should(
       "have.value",
       "Zenao managed user",

@@ -33,14 +33,19 @@ Cypress.Commands.add(
     exclusive: boolean;
     gatekeepers?: string[];
   }) => {
-    // fill event info
+    // --- fill event infos ---
+    // imageUri
     cy.get("input[name=imageUri]").selectFile(
       "cypress/fixtures/bug-bash-bonanza.webp",
       { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
     );
-    cy.get('textarea[placeholder="Event name..."]').type(testEventName, {
-      delay: 10,
-    });
+    // name
+    cy.get('textarea[placeholder="Event name..."]')
+      .should("be.visible")
+      .clear({ force: true })
+      .type(testEventName, { delay: 0, force: true })
+      .blur();
+    // fill desc
     cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
       delay: 10,
     });
@@ -84,6 +89,7 @@ Cypress.Commands.add(
         delay: 10,
       });
     }
+    // ------
 
     cy.get("button").contains("Create event").click();
 
