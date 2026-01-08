@@ -10,6 +10,7 @@ import QueryProviders from "../components/providers/query-providers";
 import "./globals.css";
 import { Toaster } from "@/components/shadcn/toaster";
 import PwaStateProvider from "@/components/providers/pwa-state-provider";
+import ActiveAccountProvider from "@/components/providers/active-account-provider";
 import { TooltipProvider } from "@/components/shadcn/tooltip";
 import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { zenaoClient } from "@/lib/zenao-client";
@@ -253,21 +254,23 @@ export default async function RootLayout({
             <NuqsAdapter>
               <PlausibleProvider domain="zenao.io">
                 <PwaStateProvider>
-                  <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                  >
-                    <TooltipProvider>
-                      <NextIntlClientProvider
-                        messages={messages}
-                        now={contextNow}
-                      >
-                        {children}
-                      </NextIntlClientProvider>
-                    </TooltipProvider>
-                  </ThemeProvider>
+                  <ActiveAccountProvider>
+                    <ThemeProvider
+                      attribute="class"
+                      defaultTheme="system"
+                      enableSystem
+                      disableTransitionOnChange
+                    >
+                      <TooltipProvider>
+                        <NextIntlClientProvider
+                          messages={messages}
+                          now={contextNow}
+                        >
+                          {children}
+                        </NextIntlClientProvider>
+                      </TooltipProvider>
+                    </ThemeProvider>
+                  </ActiveAccountProvider>
                 </PwaStateProvider>
               </PlausibleProvider>
             </NuqsAdapter>

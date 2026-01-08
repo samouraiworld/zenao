@@ -5,6 +5,8 @@ import {
   LogOut,
   CircleUserRound,
   ArrowLeftRight,
+  Check,
+  Plus,
 } from "lucide-react";
 
 import { ClerkLoading } from "@clerk/nextjs";
@@ -14,6 +16,8 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { UserAvatar, UserAvatarSkeleton } from "../user/user";
 import { UserProfile } from "@/lib/queries/profile";
+import { CreateTeamDialog } from "@/components/dialogs/create-team-dialog";
+import { useAccountSwitcher } from "@/hooks/use-account-switcher";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -40,6 +44,15 @@ const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 export function NavUser({ userId, user }: NavUserProps) {
   const { isMobile } = useSidebar();
   const t = useTranslations("dashboard.navUser");
+  const {
+    teams,
+    activeAccount,
+    isPersonalActive,
+    isCreateTeamOpen,
+    setIsCreateTeamOpen,
+    handleSwitchToPersonal,
+    handleSwitchToTeam,
+  } = useAccountSwitcher(userId, user);
 
   return (
     <SidebarMenu>
@@ -56,11 +69,14 @@ export function NavUser({ userId, user }: NavUserProps) {
                     <UserAvatarSkeleton className={avatarClassName} />
                   </div>
                 </ClerkLoading>
-                {/* Signed in state */}
                 <SignedIn>
                   <div className={avatarClassName}>
                     <UserAvatar
-                      userId={userId}
+                      userId={
+                        activeAccount?.type === "team"
+                          ? activeAccount.id
+                          : userId
+                      }
                       className={avatarClassName}
                       size="md"
                     />
@@ -68,7 +84,16 @@ export function NavUser({ userId, user }: NavUserProps) {
                 </SignedIn>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.displayName}</span>
+                <span className="truncate font-medium">
+                  {activeAccount?.type === "team"
+                    ? activeAccount.displayName
+                    : user.displayName}
+                </span>
+                {activeAccount?.type === "team" && (
+                  <span className="truncate text-xs text-muted-foreground">
+                    {t("team")}
+                  </span>
+                )}
               </div>
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -79,30 +104,66 @@ export function NavUser({ userId, user }: NavUserProps) {
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <ClerkLoading>
-                  <div className={avatarClassName}>
-                    <UserAvatarSkeleton className={avatarClassName} />
-                  </div>
-                </ClerkLoading>
-                {/* Signed in state */}
-                <SignedIn>
-                  <div className={avatarClassName}>
-                    <UserAvatar
-                      userId={userId}
-                      className={avatarClassName}
-                      size="md"
-                    />
-                  </div>
-                </SignedIn>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">
-                    {user.displayName}
-                  </span>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">
+              {t("accounts")}
+            </DropdownMenuLabel>
+
+            <DropdownMenuItem
+              onClick={handleSwitchToPersonal}
+              className="flex items-center gap-2"
+            >
+              <div className={avatarClassName}>
+                <UserAvatar
+                  userId={userId}
+                  className={avatarClassName}
+                  size="md"
+                />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium">{user.displayName}</div>
+                <div className="text-xs text-muted-foreground">
+                  {t("personal-account")}
                 </div>
               </div>
-            </DropdownMenuLabel>
+              {isPersonalActive && <Check className="size-4" />}
+            </DropdownMenuItem>
+
+            {teams.map((team) => (
+              <DropdownMenuItem
+                key={team.teamId}
+                onClick={() => handleSwitchToTeam(team)}
+                className="flex items-center gap-2"
+              >
+                <div className={avatarClassName}>
+                  <UserAvatar
+                    userId={team.teamId}
+                    className={avatarClassName}
+                    size="md"
+                  />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">{team.displayName}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {t("team")}
+                  </div>
+                </div>
+                {activeAccount?.type === "team" &&
+                  activeAccount.id === team.teamId && (
+                    <Check className="size-4" />
+                  )}
+              </DropdownMenuItem>
+            ))}
+
+            <DropdownMenuItem
+              onClick={() => setIsCreateTeamOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <div className="flex size-7 items-center justify-center rounded-full border border-dashed sm:size-8">
+                <Plus className="size-4" />
+              </div>
+              <span>{t("create-team")}</span>
+            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
@@ -130,6 +191,12 @@ export function NavUser({ userId, user }: NavUserProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+
+      <CreateTeamDialog
+        open={isCreateTeamOpen}
+        onOpenChange={setIsCreateTeamOpen}
+        userId={userId}
+      />
     </SidebarMenu>
   );
 }

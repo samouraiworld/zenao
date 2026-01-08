@@ -93,6 +93,11 @@ type User struct {
 	IsTeam      bool
 }
 
+type TeamWithRole struct {
+	Team *User
+	Role string
+}
+
 type Event struct {
 	CreatedAt         time.Time
 	DeletedAt         time.Time
@@ -283,6 +288,7 @@ type DB interface {
 	CreateTeam(ownerID string, displayName string) (*User, error)
 	EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error
 	GetUserByID(userID string) (*User, error)
+	GetUserTeams(userID string) ([]*TeamWithRole, error)
 	CanDeleteTeam(teamID string) error
 	DeleteTeam(teamID string) error
 

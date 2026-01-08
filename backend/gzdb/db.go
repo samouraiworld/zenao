@@ -1459,6 +1459,37 @@ func (g *gormZenaoDB) GetUserByID(userID string) (*zeni.User, error) {
 	return dbUserToZeniDBUser(&user), nil
 }
 
+func (g *gormZenaoDB) GetUserTeams(userID string) ([]*zeni.TeamWithRole, error) {
+	g, span := g.trace("gzdb.GetUserTeams")
+	defer span.End()
+
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
+	var roles []EntityRole
+	if err := g.db.Where("entity_type = ? AND entity_id = ? AND org_type = ?",
+		zeni.EntityTypeUser, userIDInt, zeni.EntityTypeTeam).
+		Find(&roles).Error; err != nil {
+		return nil, fmt.Errorf("get team roles: %w", err)
+	}
+
+	var teams []*zeni.TeamWithRole
+	for _, role := range roles {
+		var team User
+		if err := g.db.First(&team, role.OrgID).Error; err != nil {
+			continue
+		}
+		teams = append(teams, &zeni.TeamWithRole{
+			Team: dbUserToZeniDBUser(&team),
+			Role: role.Role,
+		})
+	}
+
+	return teams, nil
+}
+
 // CanDeleteTeam implements zeni.DB.
 func (g *gormZenaoDB) CanDeleteTeam(teamID string) error {
 	teamIDInt, err := strconv.ParseUint(teamID, 10, 64)
