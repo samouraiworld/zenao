@@ -119,8 +119,8 @@
   },
   "profile-info": {
     "profile-header": {
-      "edit-profile": "Edit profile",
-      "dashboard-access": "Go to dashboard"
+      "dashboard-access": "Go to dashboard",
+      "edit-profile": "Edit my profile"
     },
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",
