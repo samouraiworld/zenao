@@ -22,6 +22,7 @@ require (
 	github.com/ringsaturn/tzf v0.16.1
 	github.com/rs/cors v1.11.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
+	github.com/stripe/stripe-go/v84 v84.0.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.63.0
