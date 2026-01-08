@@ -67,7 +67,7 @@ export const useCommunityEventsColumns = (): ColumnDef<SafeEventInfo>[] => {
           />
         ),
         cell: ({ row }) => (
-          <div className="flex h-hull items-center">
+          <div className="flex h-full items-center">
             <UserAvatarWithName userId={row.original.organizers[0]} />
           </div>
         ),
