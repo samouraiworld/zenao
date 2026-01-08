@@ -19,6 +19,7 @@
     "manifesto": "Manifesto",
     "blog": "Blog",
     "view-profile": "View my profile",
+    "dashboard-access": "Go to dashboard",
     "create-event": "Create Event",
     "footer": {
       "tagline": "Made with ❤️ by Samourai.world crew",
@@ -117,6 +118,10 @@
     "manage-gatekeepers-button": "Manage gatekeepers"
   },
   "profile-info": {
+    "profile-header": {
+      "dashboard-access": "Go to dashboard",
+      "edit-profile": "Edit my profile"
+    },
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",
     "past-events": "Past events",
