@@ -120,7 +120,7 @@
   "profile-info": {
     "profile-header": {
       "edit-profile": "Edit profile",
-      "access-dashboard": "Access dashboard"
+      "dashboard-access": "Go to dashboard"
     },
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",

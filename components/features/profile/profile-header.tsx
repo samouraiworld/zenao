@@ -233,7 +233,7 @@ const DashboardButton = ({ userId }: { userId: string }) => {
     loggedInUserId === userId && (
       <Link href="/dashboard" target="_blank" className="w-full sm:w-auto">
         <Button variant="outline" className="w-full sm:w-auto">
-          {t("access-dashboard")}
+          {t("dashboard-access")}
         </Button>
       </Link>
     )
