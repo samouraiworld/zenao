@@ -53,7 +53,6 @@ async function DashboardCommunityManagementPage({
 
   const renderLayout = () => (
     <div className="flex flex-col gap-8 pb-16 md:pb-0">
-      {/* <DashboardCommunityInfo /> */}
       <DashboardCommunityTabs>{children}</DashboardCommunityTabs>
     </div>
   );
