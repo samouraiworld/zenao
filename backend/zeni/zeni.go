@@ -57,6 +57,13 @@ const (
 	RoleTeamMember string = "team_member" // for teams (distinct from community "member")
 )
 
+const (
+	PaymentPlatformStripeConnect = "stripe_connect"
+
+	PaymentOnboardingStateStarted   = "started"
+	PaymentOnboardingStateCompleted = "completed"
+)
+
 func IsValidEventRole(role string) bool {
 	return role == RoleOrganizer || role == RoleGatekeeper || role == RoleParticipant
 }
@@ -129,6 +136,17 @@ type Community struct {
 type CommunityWithRoles struct {
 	Community *Community
 	Roles     []string
+}
+
+type PaymentAccount struct {
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	ID                string
+	CommunityID       string
+	PlatformType      string
+	PlatformAccountID string
+	OnboardingState   string
+	StartedAt         time.Time
 }
 
 type EntityRole struct {
@@ -279,6 +297,9 @@ type DB interface {
 	GetAllCommunities() ([]*Community, error)
 	ListCommunitiesByUserRoles(userID string, roles []string, limit int, offset int) ([]*CommunityWithRoles, error)
 	RemoveUserFromAllCommunities(userID string) error
+
+	GetPaymentAccountByCommunityPlatform(communityID string, platformType string) (*PaymentAccount, error)
+	UpsertPaymentAccount(account *PaymentAccount) error
 
 	CreateTeam(ownerID string, displayName string) (*User, error)
 	EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error

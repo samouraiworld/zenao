@@ -32,6 +32,8 @@ service ZenaoService {
   rpc CreateCommunity(CreateCommunityRequest)
       returns (CreateCommunityResponse);
   rpc EditCommunity(EditCommunityRequest) returns (EditCommunityResponse);
+  rpc StartCommunityStripeOnboarding(StartCommunityStripeOnboardingRequest)
+      returns (StartCommunityStripeOnboardingResponse);
   rpc GetCommunityAdministrators(GetCommunityAdministratorsRequest)
       returns (GetCommunityAdministratorsResponse);
   rpc JoinCommunity(JoinCommunityRequest) returns (JoinCommunityResponse);
@@ -519,6 +521,14 @@ message EditCommunityRequest {
 }
 
 message EditCommunityResponse {}
+
+message StartCommunityStripeOnboardingRequest {
+  string community_id = 1;
+  string return_path = 2;
+  string refresh_path = 3;
+}
+
+message StartCommunityStripeOnboardingResponse { string onboarding_url = 1; }
 
 message CreateTeamRequest { string display_name = 1; }
 

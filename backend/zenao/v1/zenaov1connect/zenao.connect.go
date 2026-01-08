@@ -76,6 +76,9 @@ const (
 	// ZenaoServiceEditCommunityProcedure is the fully-qualified name of the ZenaoService's
 	// EditCommunity RPC.
 	ZenaoServiceEditCommunityProcedure = "/zenao.v1.ZenaoService/EditCommunity"
+	// ZenaoServiceStartCommunityStripeOnboardingProcedure is the fully-qualified name of the
+	// ZenaoService's StartCommunityStripeOnboarding RPC.
+	ZenaoServiceStartCommunityStripeOnboardingProcedure = "/zenao.v1.ZenaoService/StartCommunityStripeOnboarding"
 	// ZenaoServiceGetCommunityAdministratorsProcedure is the fully-qualified name of the ZenaoService's
 	// GetCommunityAdministrators RPC.
 	ZenaoServiceGetCommunityAdministratorsProcedure = "/zenao.v1.ZenaoService/GetCommunityAdministrators"
@@ -173,6 +176,7 @@ type ZenaoServiceClient interface {
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error)
+	StartCommunityStripeOnboarding(context.Context, *connect.Request[v1.StartCommunityStripeOnboardingRequest]) (*connect.Response[v1.StartCommunityStripeOnboardingResponse], error)
 	GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
@@ -308,6 +312,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceEditCommunityProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("EditCommunity")),
+			connect.WithClientOptions(opts...),
+		),
+		startCommunityStripeOnboarding: connect.NewClient[v1.StartCommunityStripeOnboardingRequest, v1.StartCommunityStripeOnboardingResponse](
+			httpClient,
+			baseURL+ZenaoServiceStartCommunityStripeOnboardingProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("StartCommunityStripeOnboarding")),
 			connect.WithClientOptions(opts...),
 		),
 		getCommunityAdministrators: connect.NewClient[v1.GetCommunityAdministratorsRequest, v1.GetCommunityAdministratorsResponse](
@@ -495,51 +505,52 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 
 // zenaoServiceClient implements ZenaoServiceClient.
 type zenaoServiceClient struct {
-	editUser                   *connect.Client[v1.EditUserRequest, v1.EditUserResponse]
-	getUserInfo                *connect.Client[v1.GetUserInfoRequest, v1.GetUserInfoResponse]
-	createEvent                *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
-	cancelEvent                *connect.Client[v1.CancelEventRequest, v1.CancelEventResponse]
-	editEvent                  *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
-	getEventGatekeepers        *connect.Client[v1.GetEventGatekeepersRequest, v1.GetEventGatekeepersResponse]
-	validatePassword           *connect.Client[v1.ValidatePasswordRequest, v1.ValidatePasswordResponse]
-	broadcastEvent             *connect.Client[v1.BroadcastEventRequest, v1.BroadcastEventResponse]
-	participate                *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
-	cancelParticipation        *connect.Client[v1.CancelParticipationRequest, v1.CancelParticipationResponse]
-	getEventTickets            *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
-	checkin                    *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
-	exportParticipants         *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
-	createCommunity            *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
-	editCommunity              *connect.Client[v1.EditCommunityRequest, v1.EditCommunityResponse]
-	getCommunityAdministrators *connect.Client[v1.GetCommunityAdministratorsRequest, v1.GetCommunityAdministratorsResponse]
-	joinCommunity              *connect.Client[v1.JoinCommunityRequest, v1.JoinCommunityResponse]
-	leaveCommunity             *connect.Client[v1.LeaveCommunityRequest, v1.LeaveCommunityResponse]
-	addEventToCommunity        *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
-	removeEventFromCommunity   *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
-	createTeam                 *connect.Client[v1.CreateTeamRequest, v1.CreateTeamResponse]
-	editTeam                   *connect.Client[v1.EditTeamRequest, v1.EditTeamResponse]
-	deleteTeam                 *connect.Client[v1.DeleteTeamRequest, v1.DeleteTeamResponse]
-	entityRoles                *connect.Client[v1.EntityRolesRequest, v1.EntityRolesResponse]
-	entitiesWithRoles          *connect.Client[v1.EntitiesWithRolesRequest, v1.EntitiesWithRolesResponse]
-	getCommunity               *connect.Client[v1.GetCommunityRequest, v1.GetCommunityResponse]
-	listCommunities            *connect.Client[v1.ListCommunitiesRequest, v1.ListCommunitiesResponse]
-	listCommunitiesByEvent     *connect.Client[v1.ListCommunitiesByEventRequest, v1.ListCommunitiesByEventResponse]
-	listCommunitiesByUserRoles *connect.Client[v1.ListCommunitiesByUserRolesRequest, v1.ListCommunitiesByUserRolesResponse]
-	getEvent                   *connect.Client[v1.GetEventRequest, v1.GetEventResponse]
-	listEvents                 *connect.Client[v1.ListEventsRequest, v1.ListEventsResponse]
-	listEventsByUserRoles      *connect.Client[v1.ListEventsByUserRolesRequest, v1.ListEventsByUserRolesResponse]
-	getPost                    *connect.Client[v1.GetPostRequest, v1.GetPostResponse]
-	getFeedPosts               *connect.Client[v1.GetFeedPostsRequest, v1.GetFeedPostsResponse]
-	getChildrenPosts           *connect.Client[v1.GetChildrenPostsRequest, v1.GetChildrenPostsResponse]
-	getPoll                    *connect.Client[v1.GetPollRequest, v1.GetPollResponse]
-	getUsersProfile            *connect.Client[v1.GetUsersProfileRequest, v1.GetUsersProfileResponse]
-	createPoll                 *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
-	votePoll                   *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
-	createPost                 *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
-	deletePost                 *connect.Client[v1.DeletePostRequest, v1.DeletePostResponse]
-	reactPost                  *connect.Client[v1.ReactPostRequest, v1.ReactPostResponse]
-	pinPost                    *connect.Client[v1.PinPostRequest, v1.PinPostResponse]
-	editPost                   *connect.Client[v1.EditPostRequest, v1.EditPostResponse]
-	health                     *connect.Client[v1.HealthRequest, v1.HealthResponse]
+	editUser                       *connect.Client[v1.EditUserRequest, v1.EditUserResponse]
+	getUserInfo                    *connect.Client[v1.GetUserInfoRequest, v1.GetUserInfoResponse]
+	createEvent                    *connect.Client[v1.CreateEventRequest, v1.CreateEventResponse]
+	cancelEvent                    *connect.Client[v1.CancelEventRequest, v1.CancelEventResponse]
+	editEvent                      *connect.Client[v1.EditEventRequest, v1.EditEventResponse]
+	getEventGatekeepers            *connect.Client[v1.GetEventGatekeepersRequest, v1.GetEventGatekeepersResponse]
+	validatePassword               *connect.Client[v1.ValidatePasswordRequest, v1.ValidatePasswordResponse]
+	broadcastEvent                 *connect.Client[v1.BroadcastEventRequest, v1.BroadcastEventResponse]
+	participate                    *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
+	cancelParticipation            *connect.Client[v1.CancelParticipationRequest, v1.CancelParticipationResponse]
+	getEventTickets                *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
+	checkin                        *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
+	exportParticipants             *connect.Client[v1.ExportParticipantsRequest, v1.ExportParticipantsResponse]
+	createCommunity                *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
+	editCommunity                  *connect.Client[v1.EditCommunityRequest, v1.EditCommunityResponse]
+	startCommunityStripeOnboarding *connect.Client[v1.StartCommunityStripeOnboardingRequest, v1.StartCommunityStripeOnboardingResponse]
+	getCommunityAdministrators     *connect.Client[v1.GetCommunityAdministratorsRequest, v1.GetCommunityAdministratorsResponse]
+	joinCommunity                  *connect.Client[v1.JoinCommunityRequest, v1.JoinCommunityResponse]
+	leaveCommunity                 *connect.Client[v1.LeaveCommunityRequest, v1.LeaveCommunityResponse]
+	addEventToCommunity            *connect.Client[v1.AddEventToCommunityRequest, v1.AddEventToCommunityResponse]
+	removeEventFromCommunity       *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
+	createTeam                     *connect.Client[v1.CreateTeamRequest, v1.CreateTeamResponse]
+	editTeam                       *connect.Client[v1.EditTeamRequest, v1.EditTeamResponse]
+	deleteTeam                     *connect.Client[v1.DeleteTeamRequest, v1.DeleteTeamResponse]
+	entityRoles                    *connect.Client[v1.EntityRolesRequest, v1.EntityRolesResponse]
+	entitiesWithRoles              *connect.Client[v1.EntitiesWithRolesRequest, v1.EntitiesWithRolesResponse]
+	getCommunity                   *connect.Client[v1.GetCommunityRequest, v1.GetCommunityResponse]
+	listCommunities                *connect.Client[v1.ListCommunitiesRequest, v1.ListCommunitiesResponse]
+	listCommunitiesByEvent         *connect.Client[v1.ListCommunitiesByEventRequest, v1.ListCommunitiesByEventResponse]
+	listCommunitiesByUserRoles     *connect.Client[v1.ListCommunitiesByUserRolesRequest, v1.ListCommunitiesByUserRolesResponse]
+	getEvent                       *connect.Client[v1.GetEventRequest, v1.GetEventResponse]
+	listEvents                     *connect.Client[v1.ListEventsRequest, v1.ListEventsResponse]
+	listEventsByUserRoles          *connect.Client[v1.ListEventsByUserRolesRequest, v1.ListEventsByUserRolesResponse]
+	getPost                        *connect.Client[v1.GetPostRequest, v1.GetPostResponse]
+	getFeedPosts                   *connect.Client[v1.GetFeedPostsRequest, v1.GetFeedPostsResponse]
+	getChildrenPosts               *connect.Client[v1.GetChildrenPostsRequest, v1.GetChildrenPostsResponse]
+	getPoll                        *connect.Client[v1.GetPollRequest, v1.GetPollResponse]
+	getUsersProfile                *connect.Client[v1.GetUsersProfileRequest, v1.GetUsersProfileResponse]
+	createPoll                     *connect.Client[v1.CreatePollRequest, v1.CreatePollResponse]
+	votePoll                       *connect.Client[v1.VotePollRequest, v1.VotePollResponse]
+	createPost                     *connect.Client[v1.CreatePostRequest, v1.CreatePostResponse]
+	deletePost                     *connect.Client[v1.DeletePostRequest, v1.DeletePostResponse]
+	reactPost                      *connect.Client[v1.ReactPostRequest, v1.ReactPostResponse]
+	pinPost                        *connect.Client[v1.PinPostRequest, v1.PinPostResponse]
+	editPost                       *connect.Client[v1.EditPostRequest, v1.EditPostResponse]
+	health                         *connect.Client[v1.HealthRequest, v1.HealthResponse]
 }
 
 // EditUser calls zenao.v1.ZenaoService.EditUser.
@@ -615,6 +626,11 @@ func (c *zenaoServiceClient) CreateCommunity(ctx context.Context, req *connect.R
 // EditCommunity calls zenao.v1.ZenaoService.EditCommunity.
 func (c *zenaoServiceClient) EditCommunity(ctx context.Context, req *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error) {
 	return c.editCommunity.CallUnary(ctx, req)
+}
+
+// StartCommunityStripeOnboarding calls zenao.v1.ZenaoService.StartCommunityStripeOnboarding.
+func (c *zenaoServiceClient) StartCommunityStripeOnboarding(ctx context.Context, req *connect.Request[v1.StartCommunityStripeOnboardingRequest]) (*connect.Response[v1.StartCommunityStripeOnboardingResponse], error) {
+	return c.startCommunityStripeOnboarding.CallUnary(ctx, req)
 }
 
 // GetCommunityAdministrators calls zenao.v1.ZenaoService.GetCommunityAdministrators.
@@ -787,6 +803,7 @@ type ZenaoServiceHandler interface {
 	// COMMUNITY
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error)
+	StartCommunityStripeOnboarding(context.Context, *connect.Request[v1.StartCommunityStripeOnboardingRequest]) (*connect.Response[v1.StartCommunityStripeOnboardingResponse], error)
 	GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
@@ -918,6 +935,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceEditCommunityProcedure,
 		svc.EditCommunity,
 		connect.WithSchema(zenaoServiceMethods.ByName("EditCommunity")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceStartCommunityStripeOnboardingHandler := connect.NewUnaryHandler(
+		ZenaoServiceStartCommunityStripeOnboardingProcedure,
+		svc.StartCommunityStripeOnboarding,
+		connect.WithSchema(zenaoServiceMethods.ByName("StartCommunityStripeOnboarding")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceGetCommunityAdministratorsHandler := connect.NewUnaryHandler(
@@ -1132,6 +1155,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceCreateCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditCommunityProcedure:
 			zenaoServiceEditCommunityHandler.ServeHTTP(w, r)
+		case ZenaoServiceStartCommunityStripeOnboardingProcedure:
+			zenaoServiceStartCommunityStripeOnboardingHandler.ServeHTTP(w, r)
 		case ZenaoServiceGetCommunityAdministratorsProcedure:
 			zenaoServiceGetCommunityAdministratorsHandler.ServeHTTP(w, r)
 		case ZenaoServiceJoinCommunityProcedure:
@@ -1259,6 +1284,10 @@ func (UnimplementedZenaoServiceHandler) CreateCommunity(context.Context, *connec
 
 func (UnimplementedZenaoServiceHandler) EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EditCommunity is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) StartCommunityStripeOnboarding(context.Context, *connect.Request[v1.StartCommunityStripeOnboardingRequest]) (*connect.Response[v1.StartCommunityStripeOnboardingResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.StartCommunityStripeOnboarding is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error) {

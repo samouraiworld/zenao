@@ -537,7 +537,10 @@
   },
   "community-edit-form": {
     "update-success": "Community updated successfully",
-    "update-failure": "Failed to update community"
+    "update-failure": "Failed to update community",
+    "stripe-onboarding-failure": "Failed to start Stripe onboarding",
+    "stripe-onboarding-return": "Stripe onboarding completed.",
+    "stripe-onboarding-refresh": "Stripe onboarding was not completed. Please try again."
   },
   "community-form": {
     "edit-button": "Edit community",
@@ -565,7 +568,12 @@
     "remove-admin": "Remove",
     "add-admin": "Add Administrator",
     "submit-create": "Create Community",
-    "submit-edit": "Update Community"
+    "submit-edit": "Update Community",
+    "payments-section": "Payments",
+    "payments-description": "Connect Stripe to receive payouts from your community.",
+    "stripe-connect-label": "Stripe Connect",
+    "stripe-connect-description": "Start onboarding to enable card payments and transfers.",
+    "stripe-connect-cta": "Start Stripe onboarding"
   },
   "portfolio": { 
     "error-file-uploading": "Error while uploading file",

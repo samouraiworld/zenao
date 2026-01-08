@@ -32,6 +32,10 @@ interface CommunityFormProps {
   onSubmit: (values: CommunityFormSchemaType) => Promise<void>;
   isEditing?: boolean;
   isLoading: boolean;
+  stripeOnboarding?: {
+    onStart: () => Promise<void>;
+    isLoading: boolean;
+  };
 }
 
 export const CommunityForm = ({
@@ -39,6 +43,7 @@ export const CommunityForm = ({
   onSubmit,
   isLoading,
   isEditing,
+  stripeOnboarding,
 }: CommunityFormProps) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -240,6 +245,31 @@ export const CommunityForm = ({
               </div>
             </Card>
           </SettingsSection>
+
+          {stripeOnboarding && (
+            <SettingsSection
+              title={t("payments-section")}
+              description={t("payments-description")}
+            >
+              <Card className="p-6">
+                <div className="flex flex-col gap-2">
+                  <Heading level={4}>{t("stripe-connect-label")}</Heading>
+                  <p className="text-sm text-muted-foreground">
+                    {t("stripe-connect-description")}
+                  </p>
+                  <div className="pt-2">
+                    <Button
+                      type="button"
+                      onClick={stripeOnboarding.onStart}
+                      disabled={stripeOnboarding.isLoading}
+                    >
+                      {t("stripe-connect-cta")}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </SettingsSection>
+          )}
         </div>
 
         <SettingsSection title="">
