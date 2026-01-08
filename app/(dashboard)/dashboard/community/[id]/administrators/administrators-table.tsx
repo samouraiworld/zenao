@@ -4,8 +4,7 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { parseAsInteger, useQueryStates } from "nuqs";
-import { useDashboardCommunityContext } from "../dashboard-community-context-provider";
-import { useCommunityAdministratorsEditionContext } from "./community-administrators-edition-context-provider";
+import { useCommunityAdministratorsEditionContext } from "../../../../../../components/providers/community-administrators-edition-context-provider";
 import { useCommunityAdministratorsColumns } from "./columns";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -17,6 +16,7 @@ import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import Text from "@/components/widgets/texts/text";
 import { AddAdministratorsForm } from "@/components/features/dashboard/community-details/admins/add-administrator-form";
+import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
 
 export default function AdministratorsTable() {
   const { communityId } = useDashboardCommunityContext();

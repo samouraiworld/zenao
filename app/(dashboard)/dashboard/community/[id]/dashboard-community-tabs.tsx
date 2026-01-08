@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import { useSelectedLayoutSegment } from "next/navigation";
 import Link from "next/link";
-import { useDashboardCommunityContext } from "./dashboard-community-context-provider";
 import {
   Tabs,
   TabsContent,
@@ -11,6 +10,7 @@ import {
   TabsTrigger,
 } from "@/components/shadcn/tabs";
 import { Separator } from "@/components/shadcn/separator";
+import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
 
 interface DashboardCommunityTabsProps {
   children: React.ReactNode;

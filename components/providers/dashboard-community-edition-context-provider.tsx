@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useRef,
-  useTransition,
-} from "react";
+import { useMemo, useRef, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@clerk/nextjs";
@@ -30,18 +24,15 @@ import { communityAdministrators } from "@/lib/queries/community";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
 
-interface DashboardCommunityEditionContextProps {
+export interface DashboardCommunityEditionContextProps {
   isUpdating: boolean;
   isSubmittable?: boolean;
   formRef?: React.RefObject<HTMLFormElement | null>;
   save: (values: CommunityFormSchemaType) => void;
 }
 
-const DashboarCommunityEditionContext =
-  createContext<DashboardCommunityEditionContextProps>({} as never);
-
 interface DashboardCommunityEditionProviderProps {
-  children: React.ReactNode;
+  children: (props: DashboardCommunityEditionContextProps) => React.ReactNode;
 }
 
 export default function DashboardCommunityEditionContextProvider({
@@ -135,25 +126,8 @@ export default function DashboardCommunityEditionContextProvider({
   };
 
   return (
-    <DashboarCommunityEditionContext.Provider
-      value={{
-        isUpdating,
-        save,
-        formRef,
-        isSubmittable,
-      }}
-    >
-      <Form {...form}>{children}</Form>
-    </DashboarCommunityEditionContext.Provider>
+    <Form {...form}>
+      {children({ isUpdating, isSubmittable, formRef, save })}
+    </Form>
   );
-}
-
-export function useDashboardCommunityEditionContext() {
-  const context = useContext(DashboarCommunityEditionContext);
-  if (!context) {
-    throw new Error(
-      "useDashboardCommunityEditionContext must be used within a DashboardCommunityEditionContextProvider",
-    );
-  }
-  return context;
 }
