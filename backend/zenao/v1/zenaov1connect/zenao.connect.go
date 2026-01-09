@@ -79,6 +79,9 @@ const (
 	// ZenaoServiceStartCommunityStripeOnboardingProcedure is the fully-qualified name of the
 	// ZenaoService's StartCommunityStripeOnboarding RPC.
 	ZenaoServiceStartCommunityStripeOnboardingProcedure = "/zenao.v1.ZenaoService/StartCommunityStripeOnboarding"
+	// ZenaoServiceGetCommunityPayoutStatusProcedure is the fully-qualified name of the ZenaoService's
+	// GetCommunityPayoutStatus RPC.
+	ZenaoServiceGetCommunityPayoutStatusProcedure = "/zenao.v1.ZenaoService/GetCommunityPayoutStatus"
 	// ZenaoServiceGetCommunityAdministratorsProcedure is the fully-qualified name of the ZenaoService's
 	// GetCommunityAdministrators RPC.
 	ZenaoServiceGetCommunityAdministratorsProcedure = "/zenao.v1.ZenaoService/GetCommunityAdministrators"
@@ -177,6 +180,7 @@ type ZenaoServiceClient interface {
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error)
 	StartCommunityStripeOnboarding(context.Context, *connect.Request[v1.StartCommunityStripeOnboardingRequest]) (*connect.Response[v1.StartCommunityStripeOnboardingResponse], error)
+	GetCommunityPayoutStatus(context.Context, *connect.Request[v1.GetCommunityPayoutStatusRequest]) (*connect.Response[v1.GetCommunityPayoutStatusResponse], error)
 	GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
@@ -318,6 +322,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceStartCommunityStripeOnboardingProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("StartCommunityStripeOnboarding")),
+			connect.WithClientOptions(opts...),
+		),
+		getCommunityPayoutStatus: connect.NewClient[v1.GetCommunityPayoutStatusRequest, v1.GetCommunityPayoutStatusResponse](
+			httpClient,
+			baseURL+ZenaoServiceGetCommunityPayoutStatusProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetCommunityPayoutStatus")),
 			connect.WithClientOptions(opts...),
 		),
 		getCommunityAdministrators: connect.NewClient[v1.GetCommunityAdministratorsRequest, v1.GetCommunityAdministratorsResponse](
@@ -521,6 +531,7 @@ type zenaoServiceClient struct {
 	createCommunity                *connect.Client[v1.CreateCommunityRequest, v1.CreateCommunityResponse]
 	editCommunity                  *connect.Client[v1.EditCommunityRequest, v1.EditCommunityResponse]
 	startCommunityStripeOnboarding *connect.Client[v1.StartCommunityStripeOnboardingRequest, v1.StartCommunityStripeOnboardingResponse]
+	getCommunityPayoutStatus       *connect.Client[v1.GetCommunityPayoutStatusRequest, v1.GetCommunityPayoutStatusResponse]
 	getCommunityAdministrators     *connect.Client[v1.GetCommunityAdministratorsRequest, v1.GetCommunityAdministratorsResponse]
 	joinCommunity                  *connect.Client[v1.JoinCommunityRequest, v1.JoinCommunityResponse]
 	leaveCommunity                 *connect.Client[v1.LeaveCommunityRequest, v1.LeaveCommunityResponse]
@@ -631,6 +642,11 @@ func (c *zenaoServiceClient) EditCommunity(ctx context.Context, req *connect.Req
 // StartCommunityStripeOnboarding calls zenao.v1.ZenaoService.StartCommunityStripeOnboarding.
 func (c *zenaoServiceClient) StartCommunityStripeOnboarding(ctx context.Context, req *connect.Request[v1.StartCommunityStripeOnboardingRequest]) (*connect.Response[v1.StartCommunityStripeOnboardingResponse], error) {
 	return c.startCommunityStripeOnboarding.CallUnary(ctx, req)
+}
+
+// GetCommunityPayoutStatus calls zenao.v1.ZenaoService.GetCommunityPayoutStatus.
+func (c *zenaoServiceClient) GetCommunityPayoutStatus(ctx context.Context, req *connect.Request[v1.GetCommunityPayoutStatusRequest]) (*connect.Response[v1.GetCommunityPayoutStatusResponse], error) {
+	return c.getCommunityPayoutStatus.CallUnary(ctx, req)
 }
 
 // GetCommunityAdministrators calls zenao.v1.ZenaoService.GetCommunityAdministrators.
@@ -804,6 +820,7 @@ type ZenaoServiceHandler interface {
 	CreateCommunity(context.Context, *connect.Request[v1.CreateCommunityRequest]) (*connect.Response[v1.CreateCommunityResponse], error)
 	EditCommunity(context.Context, *connect.Request[v1.EditCommunityRequest]) (*connect.Response[v1.EditCommunityResponse], error)
 	StartCommunityStripeOnboarding(context.Context, *connect.Request[v1.StartCommunityStripeOnboardingRequest]) (*connect.Response[v1.StartCommunityStripeOnboardingResponse], error)
+	GetCommunityPayoutStatus(context.Context, *connect.Request[v1.GetCommunityPayoutStatusRequest]) (*connect.Response[v1.GetCommunityPayoutStatusResponse], error)
 	GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error)
 	JoinCommunity(context.Context, *connect.Request[v1.JoinCommunityRequest]) (*connect.Response[v1.JoinCommunityResponse], error)
 	LeaveCommunity(context.Context, *connect.Request[v1.LeaveCommunityRequest]) (*connect.Response[v1.LeaveCommunityResponse], error)
@@ -941,6 +958,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceStartCommunityStripeOnboardingProcedure,
 		svc.StartCommunityStripeOnboarding,
 		connect.WithSchema(zenaoServiceMethods.ByName("StartCommunityStripeOnboarding")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceGetCommunityPayoutStatusHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetCommunityPayoutStatusProcedure,
+		svc.GetCommunityPayoutStatus,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetCommunityPayoutStatus")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceGetCommunityAdministratorsHandler := connect.NewUnaryHandler(
@@ -1157,6 +1180,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceEditCommunityHandler.ServeHTTP(w, r)
 		case ZenaoServiceStartCommunityStripeOnboardingProcedure:
 			zenaoServiceStartCommunityStripeOnboardingHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetCommunityPayoutStatusProcedure:
+			zenaoServiceGetCommunityPayoutStatusHandler.ServeHTTP(w, r)
 		case ZenaoServiceGetCommunityAdministratorsProcedure:
 			zenaoServiceGetCommunityAdministratorsHandler.ServeHTTP(w, r)
 		case ZenaoServiceJoinCommunityProcedure:
@@ -1288,6 +1313,10 @@ func (UnimplementedZenaoServiceHandler) EditCommunity(context.Context, *connect.
 
 func (UnimplementedZenaoServiceHandler) StartCommunityStripeOnboarding(context.Context, *connect.Request[v1.StartCommunityStripeOnboardingRequest]) (*connect.Response[v1.StartCommunityStripeOnboardingResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.StartCommunityStripeOnboarding is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetCommunityPayoutStatus(context.Context, *connect.Request[v1.GetCommunityPayoutStatusRequest]) (*connect.Response[v1.GetCommunityPayoutStatusResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetCommunityPayoutStatus is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) GetCommunityAdministrators(context.Context, *connect.Request[v1.GetCommunityAdministratorsRequest]) (*connect.Response[v1.GetCommunityAdministratorsResponse], error) {

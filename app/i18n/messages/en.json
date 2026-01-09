@@ -573,7 +573,19 @@
     "payments-description": "Connect Stripe to receive payouts from your community.",
     "stripe-connect-label": "Stripe Connect",
     "stripe-connect-description": "Start onboarding to enable card payments and transfers.",
-    "stripe-connect-cta": "Start Stripe onboarding"
+    "stripe-connect-cta": "Start Stripe onboarding",
+    "stripe-dashboard-cta": "Open Stripe dashboard",
+    "payout-status-label": "Payout verification status",
+    "payout-status-loading": "Loading",
+    "payout-status-verified": "Verified",
+    "payout-status-failed": "Failed",
+    "payout-status-pending": "Pending",
+    "payout-status-unknown": "Unknown",
+    "payout-status-last-checked": "Last checked",
+    "payout-status-never": "Not checked yet",
+    "payout-status-stale": "Data may be stale",
+    "payout-status-refresh-error": "Unable to refresh from Stripe. Showing last known status.",
+    "stripe-dashboard-missing-account": "No Stripe account connected, please connect one to enable payouts."
   },
   "portfolio": { 
     "error-file-uploading": "Error while uploading file",

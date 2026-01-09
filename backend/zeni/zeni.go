@@ -60,8 +60,14 @@ const (
 const (
 	PaymentPlatformStripeConnect = "stripe_connect"
 
-	PaymentOnboardingStateStarted   = "started"
-	PaymentOnboardingStateCompleted = "completed"
+	PaymentOnboardingStateStarted        = "started"
+	PaymentOnboardingStateCompleted      = "completed"
+	PaymentOnboardingStateMissingAccount = "missing_account"
+
+	PaymentVerificationStatePending        = "pending"
+	PaymentVerificationStateVerified       = "verified"
+	PaymentVerificationStateFailed         = "failed"
+	PaymentVerificationStateMissingAccount = "missing_account"
 )
 
 func IsValidEventRole(role string) bool {
@@ -147,6 +153,8 @@ type PaymentAccount struct {
 	PlatformAccountID string
 	OnboardingState   string
 	StartedAt         time.Time
+	VerificationState string
+	LastVerifiedAt    *time.Time
 }
 
 type EntityRole struct {

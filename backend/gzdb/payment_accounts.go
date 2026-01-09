@@ -16,6 +16,8 @@ type PaymentAccount struct {
 	PlatformAccountID string    `gorm:"not null"`
 	OnboardingState   string    `gorm:"not null"`
 	StartedAt         time.Time `gorm:"not null"`
+	VerificationState string    `gorm:"not null;default:pending"`
+	LastVerifiedAt    *time.Time
 }
 
 func dbPaymentAccountToZeniPaymentAccount(dbAccount *PaymentAccount) *zeni.PaymentAccount {
@@ -31,5 +33,7 @@ func dbPaymentAccountToZeniPaymentAccount(dbAccount *PaymentAccount) *zeni.Payme
 		PlatformAccountID: dbAccount.PlatformAccountID,
 		OnboardingState:   dbAccount.OnboardingState,
 		StartedAt:         dbAccount.StartedAt,
+		VerificationState: dbAccount.VerificationState,
+		LastVerifiedAt:    dbAccount.LastVerifiedAt,
 	}
 }

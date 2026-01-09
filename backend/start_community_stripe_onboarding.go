@@ -176,6 +176,7 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 			PlatformAccountID: accountID,
 			OnboardingState:   zeni.PaymentOnboardingStateStarted,
 			StartedAt:         time.Now().UTC(),
+			VerificationState: zeni.PaymentVerificationStatePending,
 		})
 	}); err != nil {
 		return nil, err
