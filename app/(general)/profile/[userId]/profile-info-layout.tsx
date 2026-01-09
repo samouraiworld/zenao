@@ -46,6 +46,7 @@ export function ProfileInfoLayout({
         displayName={profile.displayName}
         bio={profile.bio}
         avatarUri={profile.avatarUri}
+        isTeam={profile.isTeam}
       />
 
       {children}

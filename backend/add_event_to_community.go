@@ -19,21 +19,12 @@ func (s *ZenaoServer) AddEventToCommunity(
 	ctx context.Context,
 	req *connect.Request[zenaov1.AddEventToCommunityRequest],
 ) (*connect.Response[zenaov1.AddEventToCommunityResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("add-event-to-community", zap.String("event-id", req.Msg.EventId), zap.String("community-id", req.Msg.CommunityId), zap.String("user-id", zUser.ID))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("add-event-to-community", zap.String("event-id", req.Msg.EventId), zap.String("community-id", req.Msg.CommunityId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	var (
 		targets      []*zeni.User
@@ -52,7 +43,7 @@ func (s *ZenaoServer) AddEventToCommunity(
 		if err != nil {
 			return err
 		}
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+		roles, err := tx.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
 			return err
 		}
@@ -60,7 +51,7 @@ func (s *ZenaoServer) AddEventToCommunity(
 			return errors.New("you must be an administrator of the community to add an event")
 		}
 
-		roles, err = tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		roles, err = tx.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}

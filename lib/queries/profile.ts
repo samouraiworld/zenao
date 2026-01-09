@@ -12,6 +12,7 @@ export type GnoProfile = {
   displayName: string;
   bio: string;
   avatarUri: string;
+  isTeam: boolean;
 };
 
 export type UserProfile = Omit<GnoProfile, "userId">;

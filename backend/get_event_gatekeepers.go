@@ -13,25 +13,16 @@ import (
 )
 
 func (s *ZenaoServer) GetEventGatekeepers(ctx context.Context, req *connect.Request[zenaov1.GetEventGatekeepersRequest]) (*connect.Response[zenaov1.GetEventGatekeepersResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("get-event-gatekeepers", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("get-event-gatekeepers", zap.String("event-id", req.Msg.EventId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	var gatekeepers []*zeni.User
 	if err := s.DB.TxWithSpan(ctx, "db.GetEventGatekeepers", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}

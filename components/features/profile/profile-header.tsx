@@ -22,6 +22,7 @@ type ProfileHeaderProps = {
   displayName: string;
   avatarUri: string;
   bio: string;
+  isTeam?: boolean;
 };
 
 export default function ProfileHeader({
@@ -29,6 +30,7 @@ export default function ProfileHeader({
   displayName,
   avatarUri,
   bio,
+  isTeam,
 }: ProfileHeaderProps) {
   const profileDetails = deserializeWithFrontMatter({
     serialized: bio,
@@ -86,9 +88,16 @@ export default function ProfileHeader({
       <div className="mt-20 sm:mt-24 px-6 flex flex-col gap-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <Heading level={1} size="4xl">
-              {displayName}
-            </Heading>
+            <div className="flex items-center gap-3">
+              <Heading level={1} size="4xl">
+                {displayName}
+              </Heading>
+              {isTeam && (
+                <span className="bg-muted text-white text-sm font-medium px-3 py-1 rounded-md">
+                  Team
+                </span>
+              )}
+            </div>
             {profileDetails.shortBio && (
               <Text className="text-muted-foreground mt-1 text-lg">
                 {profileDetails.shortBio}
