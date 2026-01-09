@@ -1,4 +1,4 @@
-h1:VbO90poePGqHf+938earpYM8LVyo52juPNk/86NtQng=
+h1:wApPpgPTIDY7cZgFu5wWT7riExA8PK7/BP+eTjSrd0I=
 20250201004233_baseline.sql h1:vh+22aQ0RkVcidkcvAmHDsy0RivAqq6w7mRH5H5YZT8=
 20250201033955_user-roles.sql h1:rk6MPhG28YYWHhvp6Wry1km++UoAtTcV9D4pIjTY1XU=
 20250212023048_location-kinds.sql h1:1v870KFyrSoUOlLq4SFAcJuXyfvdNjQ9dFWJqRiFr6s=
@@ -23,3 +23,5 @@ h1:VbO90poePGqHf+938earpYM8LVyo52juPNk/86NtQng=
 20251002162848_created-at-votes.sql h1:PfkpRlg9AT+HoQ5Oo0DgqFZz0+2TuD3QurxRTu9PSfE=
 20251222155425_feed-pin-posts.sql h1:xc9ntM/SEHyDEe+q+iaynRdGFpRAQB46JQ0iPmaqECk=
 20260106152806_add_is_team_to_users.sql h1:YPgsvE1CimMjhxgP3wAzSxdvJozX8hN+5qPZFPqHZ64=
+20260107160000_payment_accounts.sql h1:mGg/alr7L+EP5GvQT6242+sLw1+NmGd+PyzPC5d15OI=
+20260108180000_payment_accounts_verification_state.sql h1:BodKTpGC6EIik0iAVA1Fbf/iqCehHsakAXYriYOsHuA=
