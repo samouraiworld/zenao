@@ -458,6 +458,7 @@ export const communityInfoSchema = z.object({
   avatarUri: z.string(),
   bannerUri: z.string(),
   countMembers: z.number(),
+  administrators: z.array(z.string()),
 });
 
 export type SafeCommunityInfo = z.infer<typeof communityInfoSchema>;
@@ -468,3 +469,13 @@ export const communityUserSchema = z.object({
 });
 
 export type SafeCommunityUser = z.infer<typeof communityUserSchema>;
+
+export const communityEntityWithRolesSchema = z.object({
+  entityType: z.string(),
+  entityId: z.string(),
+  roles: communityGetUserRolesSchema,
+});
+
+export type SafeCommunityEntityWithRoles = z.infer<
+  typeof communityEntityWithRolesSchema
+>;

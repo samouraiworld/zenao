@@ -4,12 +4,12 @@ import {
   queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
-import { z } from "zod";
 import { GetToken } from "@clerk/types";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "@/lib/zenao-client";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import {
+  communityEntityWithRolesSchema,
   communityGetUserRolesSchema,
   CommunityUserRole,
   communityUserSchema,
@@ -17,22 +17,9 @@ import {
 } from "@/types/schemas";
 
 export const DEFAULT_COMMUNITIES_LIMIT = 20;
-
-const communityUsersWithRolesResponseSchema = z
-  .object({
-    entityType: z.string(),
-    entityId: z.string(),
-    roles: communityGetUserRolesSchema,
-  })
-  .transform(({ entityType, entityId, roles }) => ({
-    entityType,
-    entityId,
-    roles,
-  }));
-
-export type CommunityUsersWithRolesResponseSchema = z.infer<
-  typeof communityUsersWithRolesResponseSchema
->;
+export const DEFAULT_ADMINISTRATORS_PAGE_LIMIT = 10;
+export const DEFAULT_COMMUNITY_MEMBERS_PAGE_LIMIT = 20;
+export const DEFAULT_COMMUNITY_EVENTS_PAGE_LIMIT = 20;
 
 export const communityInfo = (communityId: string) =>
   queryOptions({
@@ -64,11 +51,11 @@ export const communityAdministrators = (
             { communityId },
             { headers: { Authorization: `Bearer ${token}` } },
           );
+
           return res.administrators;
         },
       );
     },
-    initialData: [],
   });
 
 export const communitiesList = (
@@ -169,7 +156,7 @@ export const communityUsersWithRoles = (
             roles,
           });
 
-          return communityUsersWithRolesResponseSchema
+          return communityEntityWithRolesSchema
             .array()
             .parse(res.entitiesWithRoles);
         },
@@ -252,7 +239,7 @@ export const communitiesByUserRolesListSuspense = (
       return withSpan(
         `query:backend:communities-by-user-roles:${userId}`,
         async () => {
-          const token = getToken ? await getToken() : null;
+          const token = await getToken();
 
           const res = await zenaoClient.listCommunitiesByUserRoles(
             {

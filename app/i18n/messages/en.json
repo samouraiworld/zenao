@@ -624,9 +624,45 @@
       "create-community-btn": "Create a community",
       "name-column": "Name",
       "members-column": "Members",
-      "roles-column": "Role(s)",
+      "roles-column": "Roles",
       "actions-column": "Actions",
       "loading": "Loading..."
+    },
+    "communitiyEventsTable": {
+      "date-column": "Date",
+      "participants-column": "Participants",
+      "organizers-column": "Organized by",
+      "actions-column": "Actions",
+      "view-event": "View event"
+    },
+    "communityDetails": {
+      "communityTabs": {
+        "general": "General",
+        "members": "Members",
+        "administrators": "Administrators",
+        "events": "Events"
+      },
+      "administrators": {
+        "no-administrators": "No administrators assigned yet.",
+        "toast-administrator-management-success": "Administrators successfully updated!",
+        "toast-administrator-management-error": "Error while updating administrators!",
+        "add-administrator-form": {
+          "email-placeholder": "Enter administrator email to add...",
+          "error-administrator-already-exists": "This administrator is already assigned to the community!",
+          "add-btn": "Add"
+        },
+        "columns": {
+          "email": "Email",
+          "actions": "Actions",
+          "delete-admin": "Delete administrator"
+        }
+      },
+      "members": {
+        "no-members": "No members yet."
+      },
+      "events": {
+        "no-events": "No events yet."
+      }
     },
     "eventDetails": {
       "event-details": "Event details",
