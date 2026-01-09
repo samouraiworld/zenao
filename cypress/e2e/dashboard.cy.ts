@@ -96,8 +96,10 @@ describe("dashboard", () => {
 
       // check we are on event page with correct name
       cy.get("textarea")
-        .should("have.value", testEventName)
-        .should("be.visible");
+        .should("be.visible")
+        .should(($el) => {
+          expect($el.val()).to.eq(testEventName);
+        });
     });
 
     it("edit an event", () => {
