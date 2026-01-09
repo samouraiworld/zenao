@@ -96,7 +96,7 @@ describe("dashboard", () => {
 
       // check we are on event page with correct name
       cy.get("textarea")
-        .should("contain.value", testEventName)
+        .should("have.value", testEventName)
         .should("be.visible");
     });
 
@@ -118,14 +118,16 @@ describe("dashboard", () => {
 
           // check we are on event page with correct event name
           cy.get('textarea[placeholder="Event name..."]').should(
-            "contain.value",
+            "have.value",
             name,
           );
 
           // change event name
           cy.get('textarea[placeholder="Event name..."]')
             .clear()
-            .type(newEventName);
+            .type(newEventName, {
+              delay: 10,
+            });
         });
 
       // save changes
@@ -149,7 +151,7 @@ describe("dashboard", () => {
 
           // check we are on event page with correct event new name
           cy.get('textarea[placeholder="Event name..."]').should(
-            "contain.value",
+            "have.value",
             newEventName,
           );
         });
