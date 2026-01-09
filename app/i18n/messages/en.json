@@ -19,6 +19,7 @@
     "manifesto": "Manifesto",
     "blog": "Blog",
     "view-profile": "View my profile",
+    "dashboard-access": "Go to dashboard",
     "create-event": "Create Event",
     "footer": {
       "tagline": "Made with ❤️ by Samourai.world crew",
@@ -114,12 +115,24 @@
     "view-more": "View more",
     "view-less": "View less",
     "export-participant-list": "Export participants list",
-    "manage-gatekeepers-button": "Manage gatekeepers"
+    "manage-gatekeepers-button": "Manage gatekeepers",
+    "event-dashboard-banners": {
+      "gatekeeper": "You have the gatekeeper role for this event. See list of attendees and start scanning tickets.",
+      "organizer": "You are the organizer of this event. Manage your event settings and attendees.",
+      "start-scanning": "Start scanning tickets",
+      "edit-event": "Edit event"
+    }
   },
   "profile-info": {
+    "profile-header": {
+      "dashboard-access": "Go to dashboard",
+      "edit-profile": "Edit my profile"
+    },
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",
-    "past-events": "Past events"
+    "past-events": "Past events",
+    "events": "Events",
+    "portfolio": "Portfolio"
   },
   "guest-registration-success-dialog": {
     "registration-title": "You're in!",
@@ -516,30 +529,6 @@
     "join-community-button": "Join community",
     "edit-community-button": "Edit community"
   },
-  "community-portfolio": { 
-    "error-file-uploading": "Error while uploading file",
-    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
-    "error-file-deleting": "Error while deleting file",
-    "delete-file-success": "Item deleted successfully",
-    "upload-file-success": "File uploaded successfully",
-    "recent-media-uploaded": "Recent media uploaded",
-    "upload-file-btn": "Upload file",
-    "upload-first-file-btn": "Upload your first file",
-    "no-media-uploaded": "No media uploaded yet.",
-    "error-saving-portfolio": "Error while saving portfolio",
-    "upload-audio": "Upload audio",
-    "upload-image": "Upload image",
-    "upload-video": "Upload video",
-    "add-video": "Add video",
-    "add-video-description": "Add a video from YouTube, Vimeo",
-    "video-origin-label": "Origin of the video",
-    "video-origin-placeholder": "Video source",
-    "delete": "Delete",
-    "confirm-delete-title": "Are you sure you want to delete this item?",
-    "confirm-delete-desc": "This action cannot be undone.",
-    "confirm-delete-cancel": "Cancel",
-    "confirm-delete-confirm": "Yes, delete it"
-  },
   "community-create-form": {
     "log-in": "Log in to create a community",
     "create-community-button": "Create community",
@@ -578,6 +567,31 @@
     "submit-create": "Create Community",
     "submit-edit": "Update Community"
   },
+  "portfolio": { 
+    "error-file-uploading": "Error while uploading file",
+    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+    "error-file-deleting": "Error while deleting file",
+    "delete-file-success": "Item deleted successfully",
+    "upload-file-success": "File uploaded successfully",
+    "recent-media-uploaded": "Recent media uploaded",
+    "upload-file-btn": "Upload file",
+    "upload-first-file-btn": "Upload your first file",
+    "no-media-title": "No media to show.",
+    "no-media-description": "You have no media in your portfolio. Why not upload some?",
+    "error-saving-portfolio": "Error while saving portfolio",
+    "upload-audio": "Upload audio",
+    "upload-image": "Upload image",
+    "upload-video": "Upload video",
+    "add-video": "Add video",
+    "add-video-description": "Add a video from YouTube, Vimeo",
+    "video-origin-label": "Origin of the video",
+    "video-origin-placeholder": "Video source",
+    "delete": "Delete",
+    "confirm-delete-title": "Are you sure you want to delete this item?",
+    "confirm-delete-desc": "This action cannot be undone.",
+    "confirm-delete-cancel": "Cancel",
+    "confirm-delete-confirm": "Yes, delete it"
+  },
   "empty-list": {
     "title": "Nothing listed",
     "description": "Let's change that!"
@@ -614,7 +628,19 @@
     "communitiesTable": {
       "communities": "Communities",
       "no-communities": "No communities found.",
-      "create-community-btn": "Create a community"
+      "create-community-btn": "Create a community",
+      "name-column": "Name",
+      "members-column": "Members",
+      "roles-column": "Roles",
+      "actions-column": "Actions",
+      "loading": "Loading..."
+    },
+        "communitiyEventsTable": {
+      "date-column": "Date",
+      "participants-column": "Participants",
+      "organizers-column": "Organized by",
+      "actions-column": "Actions",
+      "view-event": "View event"
     },
     "communityDetails": {
       "communityTabs": {

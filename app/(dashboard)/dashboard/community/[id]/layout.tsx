@@ -2,14 +2,13 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
-import DashboardCommunityContextProvider from "./dashboard-community-context-provider";
-import DashboardCommunityEditionContextProvider from "./dashboard-community-edition-context-provider";
 import DashboardCommunityTabs from "./dashboard-community-tabs";
 import { getQueryClient } from "@/lib/get-query-client";
 import { withCommunityRolesRestriction } from "@/lib/permissions/with-roles-required";
 import { communityInfo, communityUserRoles } from "@/lib/queries/community";
 import { userInfoOptions } from "@/lib/queries/user";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
+import DashboardCommunityContextProvider from "@/components/providers/dashboard-community-context-provider";
 
 interface DashboardCommunityManagementPageProps {
   params: Promise<{ id: string }>;
@@ -53,7 +52,6 @@ async function DashboardCommunityManagementPage({
 
   const renderLayout = () => (
     <div className="flex flex-col gap-8 pb-16 md:pb-0">
-      {/* <DashboardCommunityInfo /> */}
       <DashboardCommunityTabs>{children}</DashboardCommunityTabs>
     </div>
   );
@@ -64,9 +62,7 @@ async function DashboardCommunityManagementPage({
         communityData={communityData}
         roles={roles}
       >
-        <DashboardCommunityEditionContextProvider>
-          {renderLayout()}
-        </DashboardCommunityEditionContextProvider>
+        {renderLayout()}
       </DashboardCommunityContextProvider>
     </HydrationBoundary>
   );

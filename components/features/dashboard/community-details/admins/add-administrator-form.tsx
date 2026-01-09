@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +7,7 @@ import { emailSchema, EmailSchemaType } from "@/types/schemas";
 import { Form } from "@/components/shadcn/form";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { Button } from "@/components/shadcn/button";
-import { useCommunityAdministratorsEditionContext } from "@/app/(dashboard)/dashboard/community/[id]/administrators/community-administrators-edition-context-provider";
+import { useCommunityAdministratorsEditionContext } from "@/components/providers/community-administrators-edition-context-provider";
 
 export function AddAdministratorsForm() {
   const t = useTranslations(
