@@ -1,32 +1,21 @@
-const testEmail = "alice+clerk_test@example.com"; // this account exists in our clerk dev env
-const testEmail2 = "bob+clerk_test@example.com";
-const testName = "Alice Tester";
-const testBio =
-  "Hi, I’m Alice Tester! I’m a fictional persona created to help test web applications from start to finish.";
-
-// EVENT
-const testEventName = "Bug Bash Bonanza: A Testing Extravaganza";
-const testEventDesc = `Join **Alice Tester** for a fun and interactive event where developers, 
-Don’t miss out—RSVP now and bring your testing A-game! 🐞🎉`;
-const testEventLocation = "123 Test Lane, Suite 404, Bugville, QA 98765";
-const testEventCapacity = "42";
-const testEventPassword = "zenao_everyday";
-
-// COMMUNITY
-const testCommunityName = "Testers United";
-const testCommunityShortDesc =
-  "A community for QA enthusiasts to share knowledge.";
-const testCommunityDesc =
-  "Welcome to **Testers United**!\nA community for QA enthusiasts to share knowledge.";
-const testCommunitySocialLink = "https://twitter.com/testers_united";
-
-// SOCIAL FEED
-const testStandardPost = "Post to test";
-const testComment = "A comment to test";
-
-const testSocialLink = {
-  url: "https://twitter.com/alice_tester",
-};
+import {
+  testEmail,
+  testEmail2,
+  testName,
+  testBio,
+  testSocialLink,
+  testEventName,
+  testEventLocation,
+  testStandardPost,
+  testComment,
+  testEventPassword,
+  testCommunityName,
+  testEventDesc,
+  testEventCapacity,
+  testCommunityShortDesc,
+  testCommunityDesc,
+  testCommunitySocialLink,
+} from "../support/constants";
 
 const login = (email = testEmail) => {
   cy.clerkSignIn({ strategy: "email_code", identifier: email });
