@@ -369,6 +369,15 @@ table "payment_accounts" {
     null = false
     type = datetime
   }
+  column "verification_state" {
+    null    = false
+    type    = text
+    default = "pending"
+  }
+  column "last_verified_at" {
+    null = true
+    type = datetime
+  }
   primary_key {
     columns = [column.id]
   }

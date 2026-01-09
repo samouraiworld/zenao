@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@clerk/nextjs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/use-toast";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
@@ -14,6 +14,7 @@ import { captureException } from "@/lib/report";
 import {
   communityAdministrators,
   communityInfo,
+  communityPayoutStatus,
   communityUserRoles,
 } from "@/lib/queries/community";
 import { CommunityForm } from "@/components/features/community/community-form";
@@ -54,7 +55,10 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
     communityUserRoles(communityId, userInfo?.userId || ""),
   );
   const isAdmin = userRoles.includes("administrator");
-
+  const { data: payoutStatus, isLoading: isPayoutStatusLoading } = useQuery({
+    ...communityPayoutStatus(communityId, getToken),
+    enabled: isAdmin,
+  });
   const communityDetails = deserializeWithFrontMatter({
     serialized: communityData.description || "",
     schema: communityDetailsSchema,
@@ -192,6 +196,8 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
             }
           : undefined
       }
+      payoutStatus={isAdmin ? payoutStatus : undefined}
+      isPayoutStatusLoading={isAdmin ? isPayoutStatusLoading : false}
     />
   );
 };

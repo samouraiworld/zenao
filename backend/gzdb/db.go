@@ -583,9 +583,6 @@ func (g *gormZenaoDB) GetPaymentAccountByCommunityPlatform(communityID string, p
 
 	var account PaymentAccount
 	if err := g.db.Where("community_id = ? AND platform_type = ?", communityIDInt, platformType).First(&account).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
 		return nil, err
 	}
 
@@ -609,6 +606,8 @@ func (g *gormZenaoDB) UpsertPaymentAccount(account *zeni.PaymentAccount) error {
 		PlatformAccountID: account.PlatformAccountID,
 		OnboardingState:   account.OnboardingState,
 		StartedAt:         account.StartedAt,
+		VerificationState: account.VerificationState,
+		LastVerifiedAt:    account.LastVerifiedAt,
 	}
 
 	now := time.Now().UTC()
@@ -621,6 +620,8 @@ func (g *gormZenaoDB) UpsertPaymentAccount(account *zeni.PaymentAccount) error {
 			"platform_account_id": account.PlatformAccountID,
 			"onboarding_state":    account.OnboardingState,
 			"started_at":          account.StartedAt,
+			"verification_state":  account.VerificationState,
+			"last_verified_at":    account.LastVerifiedAt,
 			"updated_at":          now,
 		}),
 	}).Create(&newAccount).Error
