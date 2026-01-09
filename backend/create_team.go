@@ -36,6 +36,11 @@ func (s *ZenaoServer) CreateTeam(
 		return nil, errors.New("teams cannot create other teams")
 	}
 
+	// Only pro plan users can create teams until feature is stabilized
+	if zUser.Plan != zeni.ProPlan {
+		return nil, errors.New("pro plan required to create teams")
+	}
+
 	if err := validateProfile(req.Msg.DisplayName); err != nil {
 		return nil, err
 	}

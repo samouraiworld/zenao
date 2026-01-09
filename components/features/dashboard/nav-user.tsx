@@ -4,7 +4,6 @@ import {
   EllipsisVertical,
   LogOut,
   CircleUserRound,
-  ArrowLeftRight,
   Check,
   Plus,
 } from "lucide-react";
@@ -167,15 +166,9 @@ export function NavUser({ userId, user }: NavUserProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href={`/profile/${userId}`}>
+                <Link href={`/profile/${activeAccount?.id ?? userId}`}>
                   <CircleUserRound />
                   {t("profile")}
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/">
-                  <ArrowLeftRight />
-                  {t("switch-to-regular-user-mode")}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

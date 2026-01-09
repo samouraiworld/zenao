@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   BookOpenText,
   BoxesIcon,
+  Check,
   CircleUserRound,
   CompassIcon,
   LayoutDashboard,
@@ -35,9 +36,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import { useAccountSwitcher } from "@/hooks/use-account-switcher";
+import { profileOptions } from "@/lib/queries/profile";
 import useSmartBack from "@/hooks/use-smart-back";
 import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
@@ -233,11 +237,28 @@ const Auth = ({
   isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
+  const tNav = useTranslations("dashboard.navUser");
   const { trackEvent } = useAnalyticsEvents();
   const { signOut, getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
+  const { data: profile } = useSuspenseQuery(
+    profileOptions(userInfo?.userId),
+  );
+
+  const {
+    teams,
+    activeAccount,
+    isPersonalActive,
+    handleSwitchToPersonal,
+    handleSwitchToTeam,
+  } = useAccountSwitcher(userInfo?.userId || "", {
+    displayName: profile?.displayName || "",
+    avatarUri: profile?.avatarUri,
+  });
+
+  const activeAccountId = activeAccount?.id ?? userInfo?.userId;
 
   return (
     <div className={className}>
@@ -276,7 +297,7 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    userId={userInfo?.userId || ""}
+                    userId={activeAccountId || ""}
                     className={avatarClassName}
                     size="md"
                   />
@@ -286,7 +307,58 @@ const Auth = ({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[200px] mt-2 mr-4">
-          <Link href={`/profile/${userInfo?.userId}`}>
+          {/* Account switcher */}
+          <DropdownMenuLabel className="text-xs text-muted-foreground">
+            {tNav("accounts")}
+          </DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={handleSwitchToPersonal}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <div className={avatarClassName}>
+              <UserAvatar
+                userId={userInfo?.userId || ""}
+                className={avatarClassName}
+                size="md"
+              />
+            </div>
+            <div className="flex-1">
+              <div className="font-medium text-sm">{profile?.displayName}</div>
+              <div className="text-xs text-muted-foreground">
+                {tNav("personal-account")}
+              </div>
+            </div>
+            {isPersonalActive && <Check className="size-4" />}
+          </DropdownMenuItem>
+
+          {teams.map((team) => (
+            <DropdownMenuItem
+              key={team.teamId}
+              onClick={() => handleSwitchToTeam(team)}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <div className={avatarClassName}>
+                <UserAvatar
+                  userId={team.teamId}
+                  className={avatarClassName}
+                  size="md"
+                />
+              </div>
+              <div className="flex-1">
+                <div className="font-medium text-sm">{team.displayName}</div>
+                <div className="text-xs text-muted-foreground">
+                  {tNav("team")}
+                </div>
+              </div>
+              {activeAccount?.type === "team" &&
+                activeAccount.id === team.teamId && (
+                  <Check className="size-4" />
+                )}
+            </DropdownMenuItem>
+          ))}
+
+          <DropdownMenuSeparator />
+          <Link href={`/profile/${activeAccountId}`}>
             <DropdownMenuItem className="cursor-pointer">
               <CircleUserRound />
               {t("view-profile")}

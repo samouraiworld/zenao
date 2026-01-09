@@ -101,6 +101,7 @@ message Profile {
   string display_name = 2;
   string bio = 3;
   string avatar_uri = 4;
+  bool is_team = 5;
 }
 
 message GetUsersProfileRequest {

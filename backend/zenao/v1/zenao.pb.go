@@ -352,6 +352,7 @@ type Profile struct {
 	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	Bio           string                 `protobuf:"bytes,3,opt,name=bio,proto3" json:"bio,omitempty"`
 	AvatarUri     string                 `protobuf:"bytes,4,opt,name=avatar_uri,json=avatarUri,proto3" json:"avatar_uri,omitempty"`
+	IsTeam        bool                   `protobuf:"varint,5,opt,name=is_team,json=isTeam,proto3" json:"is_team,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -412,6 +413,13 @@ func (x *Profile) GetAvatarUri() string {
 		return x.AvatarUri
 	}
 	return ""
+}
+
+func (x *Profile) GetIsTeam() bool {
+	if x != nil {
+		return x.IsTeam
+	}
+	return false
 }
 
 type GetUsersProfileRequest struct {
@@ -5970,13 +5978,14 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x12GetUserInfoRequest\"B\n" +
 	"\x13GetUserInfoResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04plan\x18\x02 \x01(\tR\x04plan\"v\n" +
+	"\x04plan\x18\x02 \x01(\tR\x04plan\"\x8f\x01\n" +
 	"\aProfile\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x10\n" +
 	"\x03bio\x18\x03 \x01(\tR\x03bio\x12\x1d\n" +
 	"\n" +
-	"avatar_uri\x18\x04 \x01(\tR\tavatarUri\"*\n" +
+	"avatar_uri\x18\x04 \x01(\tR\tavatarUri\x12\x17\n" +
+	"\ais_team\x18\x05 \x01(\bR\x06isTeam\"*\n" +
 	"\x16GetUsersProfileRequest\x12\x10\n" +
 	"\x03ids\x18\x01 \x03(\tR\x03ids\"H\n" +
 	"\x17GetUsersProfileResponse\x12-\n" +

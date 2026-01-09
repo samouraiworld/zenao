@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ArrowLeftRight,
-  Check,
-  CircleUserRound,
-  LogOut,
-  Plus,
-} from "lucide-react";
+import { Check, CircleUserRound, LogOut, Plus } from "lucide-react";
 
 import { SignOutButton, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -142,15 +136,9 @@ export function AccountModeSwitcherView({
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href={`/profile/${userId}`}>
+              <Link href={`/profile/${activeAccount?.id ?? userId}`}>
                 <CircleUserRound />
                 {t("profile")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/">
-                <ArrowLeftRight />
-                {t("switch-to-regular-user-mode")}
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
