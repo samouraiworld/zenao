@@ -39,7 +39,9 @@ describe("main", () => {
     cy.get('a.group[href^="/event/"]').first().click();
 
     // type email in participate form
-    cy.get('input[placeholder="Email..."]').type(testEmail2);
+    cy.get('input[placeholder="Email..."]').type(testEmail2, {
+      delay: 10,
+    });
 
     // submit participate form
     cy.get("button").contains("Register").click();
@@ -147,15 +149,17 @@ describe("main", () => {
       "cypress/fixtures/alice-tester.webp",
       { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
     );
-    cy.get('input[placeholder="Name..."]').clear().type(testName);
+    cy.get('input[placeholder="Name..."]').clear().type(testName, {
+      delay: 10,
+    });
     cy.get('textarea[placeholder="Bio..."]')
       .clear()
-      .type(testBio, { delay: 1 });
+      .type(testBio, { delay: 10 });
 
     // add social links
     cy.get("button").contains("Add link").click();
     cy.get('input[placeholder="Enter URL"]').type(testSocialLink.url, {
-      delay: 1,
+      delay: 10,
     });
 
     // save changes
@@ -235,7 +239,7 @@ describe("main", () => {
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
       .should("be.enabled")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Submit post
     cy.get('button[aria-label="submit post"]').click();
@@ -275,12 +279,11 @@ describe("main", () => {
     // Enter question
     cy.get(`textarea[placeholder="What do you wanna ask to the community ?"]`)
       .should("be.enabled")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Enter answers
-    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
-    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 1 });
-
+    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 10 });
+    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 10 });
     // Add another answer
     cy.get("p").contains("Add another answer").click();
 
@@ -288,7 +291,7 @@ describe("main", () => {
     cy.get(".lucide-trash2").should("have.length", 3);
 
     // Add last answer
-    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 1 });
+    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 10 });
 
     // Submit poll
     cy.get('button[aria-label="submit post"]').click();
@@ -333,7 +336,7 @@ describe("main", () => {
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
       .should("be.enabled")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Submit post
     cy.get('button[aria-label="submit post"]').click();
@@ -354,7 +357,7 @@ describe("main", () => {
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
       .should("be.enabled")
-      .type(testComment, { delay: 1 });
+      .type(testComment, { delay: 10 });
 
     // Submit comment
     cy.get('button[aria-label="submit post"]').should("be.enabled").click();
@@ -405,7 +408,9 @@ describe("main", () => {
 
     cy.get("p").contains("Manage gatekeepers (1)").click();
 
-    cy.get('input[placeholder="Email..."]').type(testEmail2);
+    cy.get('input[placeholder="Email..."]').type(testEmail2, {
+      delay: 10,
+    });
 
     cy.get('button[aria-label="add gatekeeper"]').click();
 
@@ -497,7 +502,9 @@ describe("main", () => {
     });
 
     // Guard
-    cy.get("input[type=password]").type(testEventPassword);
+    cy.get("input[type=password]").type(testEventPassword, {
+      delay: 10,
+    });
     cy.get("button").contains("Access event").click();
 
     // Assertions
@@ -563,7 +570,7 @@ describe("main", () => {
     // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Submit post
     cy.get('button[aria-label="submit post"]').click();
@@ -601,12 +608,11 @@ describe("main", () => {
     // Enter question
     cy.get(
       `textarea[placeholder="What do you wanna ask to the community ?"]`,
-    ).type(testStandardPost, { delay: 1 });
+    ).type(testStandardPost, { delay: 10 });
 
     // Enter answers
-    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
-    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 1 });
-
+    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 10 });
+    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 10 });
     // Add another answer
     cy.get("p").contains("Add another answer").click();
 
@@ -614,7 +620,7 @@ describe("main", () => {
     cy.get(".lucide-trash2").should("have.length", 3);
 
     // Add last answer
-    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 1 });
+    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 10 });
 
     // Submit poll
     cy.get('button[aria-label="submit post"]').click();
@@ -659,7 +665,7 @@ describe("main", () => {
     // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Submit post
     cy.get('button[aria-label="submit post"]').click();
@@ -679,7 +685,7 @@ describe("main", () => {
     // Type comment
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
-      .type(testComment, { delay: 1 });
+      .type(testComment, { delay: 10 });
 
     // Submit comment
     cy.get('button[aria-label="submit post"]').click();
@@ -745,20 +751,20 @@ Cypress.Commands.add(
     );
     // Name
     cy.get('textarea[name="displayName"]').type(testCommunityName, {
-      delay: 1,
+      delay: 10,
     });
     // Short desc
     cy.get('input[name="shortDescription"]').type(testCommunityShortDesc, {
-      delay: 1,
+      delay: 10,
     });
     // Description
     cy.get('textarea[name="description"]').type(testCommunityDesc, {
-      delay: 1,
+      delay: 10,
     });
     // Social link
     cy.get("button").contains("Add link").click();
     cy.get('input[placeholder="Enter URL"]').type(testCommunitySocialLink, {
-      delay: 1,
+      delay: 10,
     });
     // Administrators
     if (administrators.length > 0) {
@@ -766,6 +772,9 @@ Cypress.Commands.add(
         cy.get("button").contains("Add Administrator").click();
         cy.get(`input[name="administrators.${index}.address"]`).type(
           administrator,
+          {
+            delay: 10,
+          },
         );
       });
     }

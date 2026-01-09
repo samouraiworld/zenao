@@ -38,16 +38,22 @@ Cypress.Commands.add(
       "cypress/fixtures/bug-bash-bonanza.webp",
       { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
     );
-    cy.get('textarea[placeholder="Event name..."]').type(testEventName);
+    cy.get('textarea[placeholder="Event name..."]').type(testEventName, {
+      delay: 10,
+    });
     cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
-      delay: 1,
+      delay: 10,
     });
 
     // custom location
-    cy.get('input[placeholder="Add an address..."]').type(testEventLocation);
+    cy.get('input[placeholder="Add an address..."]').type(testEventLocation, {
+      delay: 10,
+    });
     cy.get("p").contains(`Use ${testEventLocation}`).trigger("click");
 
-    cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
+    cy.get('input[placeholder="Capacity..."]').type(testEventCapacity, {
+      delay: 10,
+    });
 
     // choose dates in the start of next month
     cy.get("button").contains("Pick a start date...").click();
@@ -74,7 +80,9 @@ Cypress.Commands.add(
 
     if (exclusive) {
       cy.get("button[data-name=exclusive]").click();
-      cy.get("input[name=password]").type(testEventPassword);
+      cy.get("input[name=password]").type(testEventPassword, {
+        delay: 10,
+      });
     }
 
     cy.get("button").contains("Create event").click();
@@ -89,7 +97,9 @@ Cypress.Commands.add(
     if (gatekeepers.length > 0) {
       cy.get("p").contains("Manage gatekeepers (1)").click();
       gatekeepers.forEach((gatekeeper) => {
-        cy.get('input[placeholder="Email..."]').type(gatekeeper);
+        cy.get('input[placeholder="Email..."]').type(gatekeeper, {
+          delay: 10,
+        });
         cy.get('button[aria-label="add gatekeeper"]').click();
       });
 
