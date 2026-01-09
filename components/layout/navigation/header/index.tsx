@@ -243,9 +243,7 @@ const Auth = ({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const { data: profile } = useSuspenseQuery(
-    profileOptions(userInfo?.userId),
-  );
+  const { data: profile } = useSuspenseQuery(profileOptions(userInfo?.userId));
 
   const {
     teams,
