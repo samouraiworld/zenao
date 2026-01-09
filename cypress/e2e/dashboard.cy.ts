@@ -95,9 +95,11 @@ describe("dashboard", () => {
       cy.createEvent({ exclusive: false });
 
       // check we are on event page with correct name
-      cy.get("textarea[placeholder='Event name...']")
-        .should("have.value", testEventName)
-        .should("be.visible");
+      cy.get("textarea")
+        .should("be.visible")
+        .should(($el) => {
+          expect($el.val()).to.eq(testEventName);
+        });
     });
 
     it("edit an event", () => {
@@ -124,10 +126,10 @@ describe("dashboard", () => {
 
           // change event name
           cy.get('textarea[placeholder="Event name..."]')
-            .should("be.visible")
-            .clear({ force: true })
-            .type(newEventName, { delay: 0, force: true })
-            .blur();
+            .clear()
+            .type(newEventName, {
+              delay: 10,
+            });
         });
 
       // save changes

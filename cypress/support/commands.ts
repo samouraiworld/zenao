@@ -40,12 +40,10 @@ Cypress.Commands.add(
       { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
     );
     // name
-    cy.get('textarea[placeholder="Event name..."]')
-      .should("be.visible")
-      .clear({ force: true })
-      .type(testEventName, { delay: 0, force: true })
-      .blur();
-    // fill desc
+    cy.get('textarea[placeholder="Event name..."]').type(testEventName, {
+      delay: 10,
+    });
+    // description
     cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
       delay: 10,
     });
