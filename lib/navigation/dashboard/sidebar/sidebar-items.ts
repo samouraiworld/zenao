@@ -1,4 +1,5 @@
 import { Forklift, Calendar, type LucideIcon, BoxesIcon } from "lucide-react";
+import { useMemo } from "react";
 
 export interface NavSubItem {
   title: string;
@@ -13,7 +14,9 @@ export interface NavMainItem {
   title: string;
   url: string;
   icon?: LucideIcon;
-  subItems?: NavSubItem[];
+  subItems?:
+    | NavSubItem[]
+    | ((pathname: string, id: string | undefined) => NavSubItem[] | undefined);
   comingSoon?: boolean;
   newTab?: boolean;
   isNew?: boolean;
@@ -25,27 +28,68 @@ export interface NavGroup {
   items: NavMainItem[];
 }
 
-export const sidebarItems: NavGroup[] = [
-  {
-    id: 1,
-    label: "",
-    items: [
+export const useSidebarItems: () => NavGroup[] = () =>
+  useMemo(
+    () => [
       {
-        title: "events",
-        url: "/dashboard",
-        icon: Calendar,
-      },
-      {
-        title: "communities",
-        url: "/dashboard/community",
-        icon: BoxesIcon,
-      },
-      {
-        title: "settings",
-        url: "/dashboard/coming-soon",
-        icon: Forklift,
-        comingSoon: true,
+        id: 1,
+        label: "",
+        items: [
+          {
+            title: "events",
+            url: "/dashboard",
+            icon: Calendar,
+            subItems: (pathname, id) => {
+              if (!id) return undefined;
+
+              if (pathname.includes("/dashboard/event")) {
+                return [
+                  {
+                    title: "general",
+                    url: `/dashboard/event/${id}`,
+                  },
+                  {
+                    title: "participants",
+                    url: `/dashboard/event/${id}/participants`,
+                  },
+                  /// XXX Later add gatekepers, broadcast tab with user role checking
+                ];
+              }
+            },
+          },
+          {
+            title: "communities",
+            url: "/dashboard/community",
+            icon: BoxesIcon,
+            subItems: (pathname, id) => {
+              if (!id) return undefined;
+
+              if (pathname.includes("/dashboard/community")) {
+                return [
+                  {
+                    title: "general",
+                    url: `/dashboard/community/${id}`,
+                  },
+                  {
+                    title: "members",
+                    url: `/dashboard/community/${id}/members`,
+                  },
+                  {
+                    title: "administrators",
+                    url: `/dashboard/community/${id}/administrators`,
+                  },
+                ];
+              }
+            },
+          },
+          {
+            title: "settings",
+            url: "/dashboard/coming-soon",
+            icon: Forklift,
+            comingSoon: true,
+          },
+        ],
       },
     ],
-  },
-];
+    [],
+  );

@@ -601,6 +601,13 @@
     "sidebar": {
       "create-event-btn": "Create event",
       "events": "Events",
+      "upcoming":"Upcoming",
+      "past": "Past",
+      "participants": "Participants",
+      "gatekeepers": "Gatekeepers",
+      "general": "General",
+      "members": "Members",
+      "administrators": "Administrators",
       "communities": "Communities",
       "settings": "Settings",
       "coming-soon": "Soon",
@@ -628,7 +635,7 @@
       "actions-column": "Actions",
       "loading": "Loading..."
     },
-    "communitiyEventsTable": {
+        "communitiyEventsTable": {
       "date-column": "Date",
       "participants-column": "Participants",
       "organizers-column": "Organized by",
@@ -650,11 +657,6 @@
           "email-placeholder": "Enter administrator email to add...",
           "error-administrator-already-exists": "This administrator is already assigned to the community!",
           "add-btn": "Add"
-        },
-        "columns": {
-          "email": "Email",
-          "actions": "Actions",
-          "delete-admin": "Delete administrator"
         }
       },
       "members": {
