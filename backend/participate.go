@@ -20,36 +20,59 @@ import (
 	"go.uber.org/zap"
 )
 
-// Participate implements zenaov1connect.ZenaoServiceHandler.
 func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zenaov1.ParticipateRequest]) (*connect.Response[zenaov1.ParticipateResponse], error) {
-	authUser := s.Auth.GetUser(ctx)
+	var (
+		buyer        *zeni.User
+		authUser     *zeni.AuthUser
+		actingAsTeam bool
+		err          error
+	)
 
-	if authUser == nil {
-		if req.Msg.Email == "" {
-			return nil, errors.New("no user and no email")
-		}
-		var err error
-		authUser, err = s.Auth.EnsureUserExists(ctx, req.Msg.Email)
+	// When X-Team-Id header is present, use GetActor which requires authentication.
+	// Otherwise, support unauthenticated participation via email (can't use GetActor for this case).
+	if req.Header().Get(TeamActorHeader) != "" {
+		actor, err := s.GetActor(ctx, req.Header())
 		if err != nil {
 			return nil, err
 		}
-	} else if req.Msg.Email != "" {
-		return nil, errors.New("authenticating and providing an email are mutually exclusive")
-	}
+		buyer = actor.ActingAs
+		authUser = actor.AuthUser
+		actingAsTeam = true
+	} else {
+		authUser = s.Auth.GetUser(ctx)
+		if authUser == nil {
+			if req.Msg.Email == "" {
+				return nil, errors.New("no user and no email")
+			}
+			authUser, err = s.Auth.EnsureUserExists(ctx, req.Msg.Email)
+			if err != nil {
+				return nil, err
+			}
+		} else if req.Msg.Email != "" {
+			return nil, errors.New("authenticating and providing an email are mutually exclusive")
+		}
 
-	_, err := mail.ParseAddress(authUser.Email)
-	if err != nil {
-		return nil, fmt.Errorf("invalid email address: %w", err)
-	}
+		if _, err = mail.ParseAddress(authUser.Email); err != nil {
+			return nil, fmt.Errorf("invalid email address: %w", err)
+		}
 
-	domain := strings.Split(authUser.Email, "@")[1]
-	if blacklistedDomains != nil && slices.Contains(blacklistedDomains, domain) {
-		return nil, fmt.Errorf("email domain %s is not allowed", domain)
+		domain := strings.Split(authUser.Email, "@")[1]
+		if blacklistedDomains != nil && slices.Contains(blacklistedDomains, domain) {
+			return nil, fmt.Errorf("email domain %s is not allowed", domain)
+		}
+
+		if authUser.Banned {
+			return nil, errors.New("user is banned")
+		}
+
+		buyer, err = s.EnsureUserExists(ctx, authUser)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	for _, guestEmail := range req.Msg.Guests {
-		_, err := mail.ParseAddress(guestEmail)
-		if err != nil {
+		if _, err = mail.ParseAddress(guestEmail); err != nil {
 			return nil, fmt.Errorf("invalid guest email address: %w", err)
 		}
 
@@ -59,17 +82,7 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 	}
 
-	if authUser.Banned {
-		return nil, errors.New("user is banned")
-	}
-
-	// retrieve auto-incremented user ID from database, do not use auth provider's user ID directly for realms
-	buyer, err := s.EnsureUserExists(ctx, authUser)
-	if err != nil {
-		return nil, err
-	}
-
-	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", buyer.ID), zap.Bool("user-banned", authUser.Banned))
+	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("buyer-id", buyer.ID), zap.Bool("acting-as-team", actingAsTeam))
 
 	if len(req.Msg.Password) > zeni.MaxPasswordLen {
 		return nil, errors.New("password too long")

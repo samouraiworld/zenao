@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -10,25 +9,15 @@ import (
 	"go.uber.org/zap"
 )
 
-// Participate implements zenaov1connect.ZenaoServiceHandler.
 func (s *ZenaoServer) Checkin(ctx context.Context, req *connect.Request[zenaov1.CheckinRequest]) (*connect.Response[zenaov1.CheckinResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("checkin", zap.String("gatekeeper", zUser.ID), zap.String("pubkey", req.Msg.TicketPubkey))
+	s.Logger.Info("checkin", zap.String("gatekeeper", actor.ID()), zap.String("pubkey", req.Msg.TicketPubkey), zap.Bool("acting-as-team", actor.IsTeam()))
 	if err := s.DB.TxWithSpan(ctx, "db.Checkin", func(db zeni.DB) error {
-		_, err = db.Checkin(req.Msg.TicketPubkey, zUser.ID, req.Msg.Signature)
+		_, err = db.Checkin(req.Msg.TicketPubkey, actor.ID(), req.Msg.Signature)
 		return err
 	}); err != nil {
 		return nil, err

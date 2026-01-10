@@ -18,25 +18,16 @@ import (
 )
 
 func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Request[zenaov1.ExportParticipantsRequest]) (*connect.Response[zenaov1.ExportParticipantsResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("export-participants", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
+	s.Logger.Info("export-participants", zap.String("event-id", req.Msg.EventId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	var tickets []*zeni.SoldTicket
 	if err := s.DB.TxWithSpan(ctx, "db.ExportParticipants", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -75,7 +66,7 @@ func (s *ZenaoServer) ExportParticipants(ctx context.Context, req *connect.Reque
 		if email == "" {
 			s.Logger.Warn("export-participants-fail-to-retrieve-auth-user",
 				zap.String("event-id", req.Msg.EventId),
-				zap.String("user-id", zUser.ID),
+				zap.String("actor-id", actor.ID()),
 				zap.String("auth-user-id", t.User.AuthID))
 			continue
 		}

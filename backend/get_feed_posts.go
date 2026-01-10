@@ -16,20 +16,15 @@ func (s *ZenaoServer) GetFeedPosts(ctx context.Context, req *connect.Request[zen
 		return nil, errors.New("organization entity is required")
 	}
 
+	actor, err := s.GetOptionalActor(ctx, req.Header())
+	if err != nil {
+		return nil, err
+	}
+
 	var (
-		zUser      *zeni.User
 		zPosts     []*zeni.Post
 		PostsViews []*feedsv1.PostView
-		err        error
 	)
-
-	user := s.Auth.GetUser(ctx)
-	if user != nil {
-		zUser, err = s.EnsureUserExists(ctx, user)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	// TODO: see to optimize this
 	if err := s.DB.TxWithSpan(ctx, "GetFeedPosts", func(tx zeni.DB) error {
@@ -55,7 +50,7 @@ func (s *ZenaoServer) GetFeedPosts(ctx context.Context, req *connect.Request[zen
 					rv = &rview{}
 				}
 				rv.count++
-				if zUser != nil && reaction.UserID == zUser.ID {
+				if actor != nil && reaction.UserID == actor.ID() {
 					rv.userHasVoted = true
 				}
 				reactions[reaction.Icon] = rv

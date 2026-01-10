@@ -12,21 +12,12 @@ import (
 )
 
 func (s *ZenaoServer) PinPost(ctx context.Context, req *connect.Request[zenaov1.PinPostRequest]) (*connect.Response[zenaov1.PinPostResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("pin-post", zap.String("post-id", req.Msg.PostId), zap.Bool("pinned", req.Msg.Pinned), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("pin-post", zap.String("post-id", req.Msg.PostId), zap.Bool("pinned", req.Msg.Pinned), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if err := s.DB.TxWithSpan(ctx, "PinPost", func(tx zeni.DB) error {
 		post, err := tx.GetPostByID(req.Msg.PostId)
@@ -37,7 +28,7 @@ func (s *ZenaoServer) PinPost(ctx context.Context, req *connect.Request[zenaov1.
 		if err != nil {
 			return err
 		}
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, feed.OrgType, feed.OrgID)
+		roles, err := tx.EntityRoles(zeni.EntityTypeUser, actor.ID(), feed.OrgType, feed.OrgID)
 		if err != nil {
 			return err
 		}

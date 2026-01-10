@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 
 	"connectrpc.com/connect"
 	"github.com/samouraiworld/zenao/backend/mapsl"
@@ -15,23 +14,14 @@ func (s *ZenaoServer) GetEventTickets(
 	ctx context.Context,
 	req *connect.Request[zenaov1.GetEventTicketsRequest],
 ) (*connect.Response[zenaov1.GetEventTicketsResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("get-event-tickets", zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("get-event-tickets", zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
-
-	tickets, err := s.DB.WithContext(ctx).GetEventUserOrBuyerTickets(req.Msg.EventId, zUser.ID)
+	tickets, err := s.DB.WithContext(ctx).GetEventUserOrBuyerTickets(req.Msg.EventId, actor.ID())
 	if err != nil {
 		return nil, err
 	}
