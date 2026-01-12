@@ -3,6 +3,7 @@ import { getQueryClient } from "../get-query-client";
 import { GetToken } from "../utils";
 import { zenaoClient } from "../zenao-client";
 import { communityUsersWithRoles } from "../queries/community";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 type AddEventToCommunityRequest = {
   communityId: string;
@@ -12,6 +13,8 @@ type AddEventToCommunityRequest = {
 
 export const useEventAddToCommunity = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       eventId,
@@ -30,7 +33,7 @@ export const useEventAddToCommunity = () => {
           communityId,
         },
         {
-          headers: { Authorization: "Bearer " + token },
+          headers: buildHeaders(token),
         },
       );
     },

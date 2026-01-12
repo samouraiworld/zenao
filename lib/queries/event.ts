@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { withSpan } from "../tracer";
+import { buildQueryHeaders } from "./build-query-headers";
 import { GetToken } from "@/lib/utils";
 import { zenaoClient } from "@/lib/zenao-client";
 import { eventInfoSchema } from "@/types/schemas";
@@ -19,9 +20,13 @@ export const eventOptions = (id: string) =>
     staleTime: Infinity,
   });
 
-export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
+export const eventGatekeepersEmails = (
+  eventId: string,
+  getToken: GetToken,
+  teamId?: string,
+) =>
   queryOptions({
-    queryKey: ["event", eventId, "gatekeepers"],
+    queryKey: ["event", eventId, "gatekeepers", teamId],
     queryFn: async () => {
       return withSpan(
         `query:backend:event:${eventId}:gatekeepers`,
@@ -36,7 +41,7 @@ export const eventGatekeepersEmails = (eventId: string, getToken: GetToken) =>
             {
               eventId,
             },
-            { headers: { Authorization: `Bearer ${token}` } },
+            { headers: buildQueryHeaders(token, teamId) },
           );
 
           return data;

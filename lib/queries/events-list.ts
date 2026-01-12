@@ -7,6 +7,7 @@ import {
 import z from "zod";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
+import { buildQueryHeaders } from "./build-query-headers";
 import { EventUserRole } from "./event-users";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import { GetToken } from "@/lib/utils";
@@ -82,6 +83,7 @@ export const eventsByRolesListSuspense = (
   page: number,
   roles: EventUserRole[],
   getToken?: GetToken,
+  teamId?: string,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -98,6 +100,7 @@ export const eventsByRolesListSuspense = (
       limitInt,
       pageInt,
       roles,
+      teamId,
     ],
     queryFn: async () => {
       if (!userId) return [];
@@ -114,7 +117,7 @@ export const eventsByRolesListSuspense = (
             to: BigInt(toInt),
             discoverableFilter: discoverableFilter,
           },
-          token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          { headers: buildQueryHeaders(token, teamId) },
         );
 
         return z.array(eventUserSchema).parse(res.events);
@@ -131,6 +134,7 @@ export const eventsByOrganizerList = (
   toUnixSec: number,
   limit: number,
   getToken?: GetToken,
+  teamId?: string,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -144,6 +148,7 @@ export const eventsByOrganizerList = (
       fromInt,
       toInt,
       limitInt,
+      teamId,
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
@@ -163,7 +168,7 @@ export const eventsByOrganizerList = (
               to: BigInt(toInt),
               discoverableFilter: discoverableFilter,
             },
-            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+            { headers: buildQueryHeaders(token, teamId) },
           );
 
           return z
@@ -196,6 +201,7 @@ export const eventsByParticipantList = (
   toUnixSec: number,
   limit: number,
   getToken?: GetToken,
+  teamId?: string,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -209,6 +215,7 @@ export const eventsByParticipantList = (
       fromInt,
       toInt,
       limitInt,
+      teamId,
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
@@ -226,7 +233,7 @@ export const eventsByParticipantList = (
               to: BigInt(toInt),
               discoverableFilter: discoverableFilter,
             },
-            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+            { headers: buildQueryHeaders(token, teamId) },
           );
 
           return z

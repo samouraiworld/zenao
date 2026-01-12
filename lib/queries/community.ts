@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { GetToken } from "@clerk/types";
 import { withSpan } from "../tracer";
+import { buildQueryHeaders } from "./build-query-headers";
 import { zenaoClient } from "@/lib/zenao-client";
 import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import {
@@ -38,9 +39,10 @@ export const communityInfo = (communityId: string) =>
 export const communityAdministrators = (
   communityId: string,
   getToken: GetToken,
+  teamId?: string,
 ) =>
   queryOptions({
-    queryKey: ["communityAdmins", communityId],
+    queryKey: ["communityAdmins", communityId, teamId],
     queryFn: async () => {
       return withSpan(
         `query:backend:community:${communityId}:administrators`,
@@ -49,7 +51,7 @@ export const communityAdministrators = (
           if (!token) throw new Error("invalid clerk token");
           const res = await zenaoClient.getCommunityAdministrators(
             { communityId },
-            { headers: { Authorization: `Bearer ${token}` } },
+            { headers: buildQueryHeaders(token, teamId) },
           );
 
           return res.administrators;
@@ -223,6 +225,7 @@ export const communitiesByUserRolesListSuspense = (
   limit: number,
   roles: CommunityUserRole[],
   getToken: GetToken,
+  teamId?: string,
 ) => {
   const limitInt = Math.floor(limit);
   const pageInt = Math.max(0, Math.floor(page));
@@ -234,6 +237,7 @@ export const communitiesByUserRolesListSuspense = (
       pageInt,
       limitInt,
       roles,
+      teamId,
     ],
     queryFn: async () => {
       return withSpan(
@@ -248,7 +252,7 @@ export const communitiesByUserRolesListSuspense = (
               offset: pageInt * limitInt,
               roles,
             },
-            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+            { headers: buildQueryHeaders(token, teamId) },
           );
 
           return communityUserSchema.array().parse(res.communities);
@@ -263,12 +267,13 @@ export const communitiesByUserRolesList = (
   roles: CommunityUserRole[],
   limit: number,
   getToken?: GetToken,
+  teamId?: string,
   options?: Omit<
     UseInfiniteQueryOptions<
       SafeCommunityUser[],
       Error,
       InfiniteData<SafeCommunityUser[]>,
-      (string | number | CommunityUserRole[])[],
+      (string | number | CommunityUserRole[] | undefined)[],
       number
     >,
     | "queryKey"
@@ -282,7 +287,7 @@ export const communitiesByUserRolesList = (
 
   return infiniteQueryOptions({
     initialPageParam: 0,
-    queryKey: ["communitiesByUserRoles", userId ?? "", roles, limitInt],
+    queryKey: ["communitiesByUserRoles", userId ?? "", roles, limitInt, teamId],
     enabled: !!userId,
     queryFn: async ({ pageParam = 0 }) => {
       if (!userId) {
@@ -300,7 +305,7 @@ export const communitiesByUserRolesList = (
               limit: limitInt,
               offset: pageParam * limitInt,
             },
-            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+            { headers: buildQueryHeaders(token, teamId) },
           );
 
           return communityUserSchema.array().parse(res.communities);

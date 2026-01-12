@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { profileOptions } from "../queries/profile";
 import { getQueryClient } from "../get-query-client";
 import { zenaoClient } from "@/lib/zenao-client";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 interface EditUserProfileRequest {
   displayName: string;
@@ -13,6 +14,8 @@ interface EditUserProfileRequest {
 
 export const useEditUserProfile = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       displayName,
@@ -27,7 +30,7 @@ export const useEditUserProfile = () => {
           avatarUri,
         },
         {
-          headers: { Authorization: "Bearer " + token },
+          headers: buildHeaders(token),
         },
       );
     },
