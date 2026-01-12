@@ -14,7 +14,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, install [node + npm via nvm](https://github.com/nvm-sh/nvm).
 
 Install the [vercel cli](https://vercel.com/docs/cli)
-
+h
 Get the staging env by linking the vercel project and pulling the env
 
 ```bash
