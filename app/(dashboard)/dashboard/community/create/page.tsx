@@ -1,13 +1,13 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@clerk/nextjs/server";
+import CreateCommunityForm from "./create-community-form";
 import { getQueryClient } from "@/lib/get-query-client";
 import { userInfoOptions } from "@/lib/queries/user";
 import {
   ScreenContainer,
   ScreenContainerCentered,
 } from "@/components/layout/screen-container";
-import CreateCommunityForm from "@/app/(general)/community/(settings)/create/create-community-form";
 
 export default async function CreateCommunityPage() {
   const queryClient = getQueryClient();

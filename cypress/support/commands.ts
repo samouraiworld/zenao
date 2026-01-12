@@ -28,7 +28,7 @@ Cypress.Commands.add(
   "createEvent",
   ({
     exclusive = false,
-    gatekeepers = [],
+    gatekeepers: _ = [],
   }: {
     exclusive: boolean;
     gatekeepers?: string[];
@@ -97,18 +97,5 @@ Cypress.Commands.add(
 
     cy.url().should("include", "/event/");
     cy.url().should("not.include", "/create");
-
-    if (gatekeepers.length > 0) {
-      cy.get("p").contains("Manage gatekeepers (1)").click();
-      gatekeepers.forEach((gatekeeper) => {
-        cy.get('input[placeholder="Email..."]').type(gatekeeper, {
-          delay: 10,
-        });
-        cy.get('button[aria-label="add gatekeeper"]').click();
-      });
-
-      cy.get("button").contains("Done").click();
-      cy.wait(5000);
-    }
   },
 );
