@@ -660,7 +660,8 @@
         "general": "General",
         "members": "Members",
         "administrators": "Administrators",
-        "events": "Events"
+        "events": "Events",
+        "payouts": "Payouts"
       },
       "administrators": {
         "no-administrators": "No administrators assigned yet.",

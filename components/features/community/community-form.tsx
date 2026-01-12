@@ -11,14 +11,12 @@ import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { Button } from "@/components/shadcn/button";
-import { Badge } from "@/components/shadcn/badge";
 import { Card } from "@/components/widgets/cards/card";
 import { Tabs, TabsContent } from "@/components/shadcn/tabs";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import { CommunityFormSchemaType, communityFormSchema } from "@/types/schemas";
 import { cn } from "@/lib/tailwind";
 import Heading from "@/components/widgets/texts/heading";
-import { DateTimeText } from "@/components/widgets/date-time-text";
 import {
   Tooltip,
   TooltipContent,
@@ -28,19 +26,12 @@ import SettingsSection from "@/components/layout/settings-section";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
-import { GetCommunityPayoutStatusResponse } from "@/app/gen/zenao/v1/zenao_pb";
 
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
   onSubmit: (values: CommunityFormSchemaType) => Promise<void>;
   isEditing?: boolean;
   isLoading: boolean;
-  stripeOnboarding?: {
-    onStart: () => Promise<void>;
-    isLoading: boolean;
-  };
-  payoutStatus?: GetCommunityPayoutStatusResponse | null;
-  isPayoutStatusLoading?: boolean;
 }
 
 export const CommunityForm = ({
@@ -48,11 +39,7 @@ export const CommunityForm = ({
   onSubmit,
   isLoading,
   isEditing,
-  stripeOnboarding,
-  payoutStatus,
-  isPayoutStatusLoading = false,
 }: CommunityFormProps) => {
-  const statusMissingAccount = "missing_account";
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "administrators",
@@ -75,39 +62,6 @@ export const CommunityForm = ({
   const isButtonDisabled = !form.formState.isValid || isLastAdminInvalid;
 
   const t = useTranslations("community-form");
-  const lastVerifiedAtSeconds = payoutStatus?.lastVerifiedAt
-    ? Number(payoutStatus.lastVerifiedAt)
-    : 0;
-  const hasLastVerifiedAt =
-    payoutStatus?.lastVerifiedAt != null && lastVerifiedAtSeconds > 0;
-  const isOnboardingComplete =
-    payoutStatus?.onboardingState === "completed" ||
-    payoutStatus?.verificationState === "verified";
-  const stripeDashboardUrl =
-    process.env.NEXT_PUBLIC_ENV === "development"
-      ? "https://dashboard.stripe.com/test"
-      : "https://dashboard.stripe.com";
-  const isMissingStripeAccountId =
-    isOnboardingComplete && !payoutStatus?.platformAccountId;
-  const isStripeAccountMissingError =
-    payoutStatus?.verificationState === statusMissingAccount;
-  const shouldShowRefreshError =
-    !!payoutStatus?.refreshError && !isStripeAccountMissingError;
-  const payoutStatusLabel = payoutStatus?.verificationState;
-  const payoutStatusBadge = {
-    verified: "secondary",
-    failed: "destructive",
-    pending: "outline",
-  } as const;
-  const payoutStatusText: Record<string, string> = {
-    verified: t("payout-status-verified"),
-    failed: t("payout-status-failed"),
-    pending: t("payout-status-pending"),
-    unknown: t("payout-status-unknown"),
-  };
-  const payoutStatusKey = payoutStatusText[payoutStatusLabel ?? ""]
-    ? payoutStatusLabel
-    : "unknown";
 
   return (
     <Form {...form}>
@@ -286,82 +240,6 @@ export const CommunityForm = ({
               </div>
             </Card>
           </SettingsSection>
-
-          {stripeOnboarding && (
-            <SettingsSection
-              title={t("payments-section")}
-              description={t("payments-description")}
-            >
-              <Card className="p-6">
-                <div className="flex flex-col gap-2">
-                  <Heading level={4}>{t("stripe-connect-label")}</Heading>
-                  <p className="text-sm text-muted-foreground">
-                    {t("stripe-connect-description")}
-                  </p>
-                  <div className="pt-2">
-                    <div className="flex items-center gap-2">
-                      <Heading level={5}>{t("payout-status-label")}</Heading>
-                      {isPayoutStatusLoading ||
-                      payoutStatusKey === undefined ? (
-                        <Badge variant="outline">
-                          {t("payout-status-loading")}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant={
-                            payoutStatusBadge[
-                              payoutStatusKey as keyof typeof payoutStatusBadge
-                            ] ?? "outline"
-                          }
-                        >
-                          {payoutStatusText[payoutStatusKey]}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-1 text-sm text-muted-foreground pt-2">
-                      <span>{t("payout-status-last-checked")}</span>
-                      {hasLastVerifiedAt ? (
-                        <DateTimeText datetime={lastVerifiedAtSeconds} />
-                      ) : (
-                        <span>{t("payout-status-never")}</span>
-                      )}
-                      {payoutStatus?.isStale && (
-                        <span>{t("payout-status-stale")}</span>
-                      )}
-                      {shouldShowRefreshError && (
-                        <span>{t("payout-status-refresh-error")}</span>
-                      )}
-                      {(isMissingStripeAccountId ||
-                        isStripeAccountMissingError) && (
-                        <span>{t("stripe-dashboard-missing-account")}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="pt-2">
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        if (isOnboardingComplete) {
-                          window.open(stripeDashboardUrl, "_blank");
-                          return;
-                        }
-                        void stripeOnboarding.onStart();
-                      }}
-                      disabled={
-                        stripeOnboarding.isLoading ||
-                        isPayoutStatusLoading ||
-                        isMissingStripeAccountId
-                      }
-                    >
-                      {isOnboardingComplete
-                        ? t("stripe-dashboard-cta")
-                        : t("stripe-connect-cta")}
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            </SettingsSection>
-          )}
         </div>
 
         <SettingsSection title="">

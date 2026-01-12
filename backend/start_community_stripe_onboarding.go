@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"path"
 	"slices"
 	"strings"
 	"time"
@@ -20,7 +19,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func buildCommunityStripeOnboardingCallbackURL(baseURL string, rawPath string, communityID string) (string, error) {
+func buildCallbackURL(baseURL string, rawPath string) (string, error) {
 	if rawPath == "" {
 		return "", errors.New("path is required")
 	}
@@ -42,12 +41,6 @@ func buildCommunityStripeOnboardingCallbackURL(baseURL string, rawPath string, c
 		return "", errors.New("path must be relative")
 	}
 
-	cleanPath := path.Clean(parsedPath.Path)
-	segments := strings.Split(cleanPath, "/")
-	if len(segments) < 3 || segments[1] != "community" || segments[2] != communityID {
-		return "", errors.New("path must target the requested community")
-	}
-
 	base, err := url.Parse(baseURL)
 	if err != nil {
 		return "", fmt.Errorf("parse base URL: %w", err)
@@ -60,7 +53,7 @@ func buildCommunityStripeOnboardingCallbackURL(baseURL string, rawPath string, c
 	}
 
 	return base.ResolveReference(&url.URL{
-		Path:     cleanPath,
+		Path:     parsedPath.Path,
 		RawQuery: parsedPath.RawQuery,
 		Fragment: parsedPath.Fragment,
 	}).String(), nil
@@ -90,6 +83,15 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 
 	if s.StripeSecretKey == "" || s.AppBaseURL == "" {
 		return nil, errors.New("stripe onboarding is not configured")
+	}
+
+	returnURL, err := buildCallbackURL(s.AppBaseURL, req.Msg.ReturnPath)
+	if err != nil {
+		return nil, err
+	}
+	refreshURL, err := buildCallbackURL(s.AppBaseURL, req.Msg.RefreshPath)
+	if err != nil {
+		return nil, err
 	}
 
 	if req.Msg.ReturnPath == "" || req.Msg.RefreshPath == "" {
@@ -148,15 +150,6 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 			return nil, fmt.Errorf("create stripe account: %w", err)
 		}
 		accountID = acct.ID
-	}
-
-	returnURL, err := buildCommunityStripeOnboardingCallbackURL(s.AppBaseURL, req.Msg.ReturnPath, req.Msg.CommunityId)
-	if err != nil {
-		return nil, err
-	}
-	refreshURL, err := buildCommunityStripeOnboardingCallbackURL(s.AppBaseURL, req.Msg.RefreshPath, req.Msg.CommunityId)
-	if err != nil {
-		return nil, err
 	}
 
 	link, err := accountlink.New(&stripe.AccountLinkParams{

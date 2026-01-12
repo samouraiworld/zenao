@@ -1,21 +1,18 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@clerk/nextjs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/hooks/use-toast";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
-import { useStartCommunityStripeOnboarding } from "@/lib/mutations/stripe-onboarding";
 import { captureException } from "@/lib/report";
 import {
   communityAdministrators,
   communityInfo,
-  communityPayoutStatus,
-  communityUserRoles,
 } from "@/lib/queries/community";
 import { CommunityForm } from "@/components/features/community/community-form";
 import {
@@ -29,36 +26,22 @@ import {
   serializeWithFrontMatter,
 } from "@/lib/serialization";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
-import { userInfoOptions } from "@/lib/queries/user";
 
 interface EditCommunityFormProps {
   communityId: string;
 }
 
 export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
-  const { getToken, userId } = useAuth();
+  const { getToken } = useAuth();
   const { trackEvent } = useAnalyticsEvents();
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
-  const handledStripeParams = useRef(false);
   const { data: communityData } = useSuspenseQuery(communityInfo(communityId));
 
   const { data: adminEmails } = useSuspenseQuery(
     communityAdministrators(communityId, getToken),
   );
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const { data: userRoles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userInfo?.userId || ""),
-  );
-  const isAdmin = userRoles.includes("administrator");
-  const { data: payoutStatus, isLoading: isPayoutStatusLoading } = useQuery({
-    ...communityPayoutStatus(communityId, getToken),
-    enabled: isAdmin,
-  });
+
   const communityDetails = deserializeWithFrontMatter({
     serialized: communityData.description || "",
     schema: communityDetailsSchema,
@@ -88,60 +71,7 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
   });
 
   const { mutateAsync: editCommunity, isPending } = useEditCommunity();
-  const {
-    mutateAsync: startCommunityStripeOnboarding,
-    isPending: isStripeOnboardingPending,
-  } = useStartCommunityStripeOnboarding();
   const t = useTranslations("community-edit-form");
-
-  useEffect(() => {
-    if (handledStripeParams.current) return;
-    const stripeParam = searchParams.get("stripe");
-    if (!stripeParam) return;
-
-    handledStripeParams.current = true;
-    if (stripeParam === "return") {
-      toast({
-        title: t("stripe-onboarding-return"),
-        variant: "default",
-      });
-    } else if (stripeParam === "refresh") {
-      toast({
-        variant: "destructive",
-        title: t("stripe-onboarding-refresh"),
-      });
-    }
-    router.replace(pathname);
-  }, [pathname, router, searchParams, t, toast]);
-
-  const handleStartCommunityStripeOnboarding = async () => {
-    try {
-      const token = await getToken();
-      if (!token) throw new Error("invalid clerk token");
-
-      const returnPath = `/community/${communityId}/edit?stripe=return`;
-      const refreshPath = `/community/${communityId}/edit?stripe=refresh`;
-
-      const onboardingUrl = await startCommunityStripeOnboarding({
-        token,
-        communityId,
-        returnPath,
-        refreshPath,
-      });
-
-      if (!onboardingUrl) {
-        throw new Error("missing onboarding url");
-      }
-
-      window.location.href = onboardingUrl;
-    } catch (err) {
-      captureException(err);
-      toast({
-        variant: "destructive",
-        title: t("stripe-onboarding-failure"),
-      });
-    }
-  };
 
   const onSubmit = async (values: CommunityFormSchemaType) => {
     try {
@@ -188,16 +118,6 @@ export const EditCommunityForm = ({ communityId }: EditCommunityFormProps) => {
       onSubmit={onSubmit}
       isLoading={isPending}
       isEditing
-      stripeOnboarding={
-        isAdmin
-          ? {
-              onStart: handleStartCommunityStripeOnboarding,
-              isLoading: isStripeOnboardingPending,
-            }
-          : undefined
-      }
-      payoutStatus={isAdmin ? payoutStatus : undefined}
-      isPayoutStatusLoading={isAdmin ? isPayoutStatusLoading : false}
     />
   );
 };
