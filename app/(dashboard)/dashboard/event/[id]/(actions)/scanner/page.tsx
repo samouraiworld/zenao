@@ -1,11 +1,11 @@
 import { notFound, redirect, RedirectType } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { EventTicketScanner } from "./event-ticket-scanner";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import { userInfoOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { EventScreenContainer } from "@/components/features/event/event-screen-container";
-import { EventTicketScanner } from "@/app/(general)/event/[id]/scanner/event-ticket-scanner";
 
 type Props = {
   params: Promise<{ id: string }>;
