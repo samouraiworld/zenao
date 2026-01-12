@@ -210,12 +210,9 @@ export function NavMain({ items }: NavMainProps) {
                   <SidebarMenuButton
                     variant="outline"
                     tooltip={t("quick-create")}
-                    asChild
                   >
-                    <Link href="/dashboard/event/create">
-                      <PlusCircleIcon />
-                      <span>{t("create-btn")}</span>
-                    </Link>
+                    <PlusCircleIcon />
+                    <span>{t("create-btn")}</span>
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
