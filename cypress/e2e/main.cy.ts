@@ -185,6 +185,10 @@ describe("main", () => {
 
     cy.createEvent({ exclusive: false });
 
+    cy.url().then((url) => {
+      cy.visit(url.replace("/dashboard", ""));
+    });
+
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
 
