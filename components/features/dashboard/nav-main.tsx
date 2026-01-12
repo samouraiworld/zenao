@@ -227,7 +227,7 @@ export function NavMain({ items }: NavMainProps) {
                   <Link href="/dashboard/community/create">
                     <DropdownMenuItem>
                       <div className="flex">
-                        <Users className="h-5 w-5" />
+                        <Users className="mr-2 h-5 w-5" />
                         <span className="mr-2">{t("create-community")}</span>
                       </div>
                     </DropdownMenuItem>
