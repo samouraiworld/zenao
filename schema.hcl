@@ -395,6 +395,109 @@ table "payment_accounts" {
     columns = [column.deleted_at]
   }
 }
+table "price_groups" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "event_id" {
+    null = false
+    type = integer
+  }
+  column "capacity" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_price_groups_event" {
+    columns     = [column.event_id]
+    ref_columns = [table.events.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_price_groups_deleted_at" {
+    columns = [column.deleted_at]
+  }
+  index "idx_price_groups_event_id" {
+    columns = [column.event_id]
+  }
+}
+table "prices" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "price_group_id" {
+    null = false
+    type = integer
+  }
+  column "amount_minor" {
+    null = false
+    type = integer
+  }
+  column "currency_code" {
+    null = true
+    type = text
+  }
+  column "payment_account_id" {
+    null = true
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_prices_price_group" {
+    columns     = [column.price_group_id]
+    ref_columns = [table.price_groups.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_prices_payment_account" {
+    columns     = [column.payment_account_id]
+    ref_columns = [table.payment_accounts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_prices_deleted_at" {
+    columns = [column.deleted_at]
+  }
+  index "idx_prices_payment_account_id" {
+    columns = [column.payment_account_id]
+  }
+  index "idx_prices_price_group_id" {
+    columns = [column.price_group_id]
+  }
+}
 table "posts" {
   schema = schema.main
   column "id" {
