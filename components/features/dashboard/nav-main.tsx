@@ -210,6 +210,7 @@ export function NavMain({ items }: NavMainProps) {
                   <SidebarMenuButton
                     variant="outline"
                     tooltip={t("quick-create")}
+                    aria-label="quick menu create"
                   >
                     <PlusCircleIcon />
                     <span>{t("create-btn")}</span>
