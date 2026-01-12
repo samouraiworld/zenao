@@ -7,6 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useTransition } from "react";
 import { parseAsInteger, useQueryStates } from "nuqs";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import {
   DEFAULT_EVENT_PARTICIPANTS_LIMIT,
   eventUsersWithRole,
@@ -79,10 +80,12 @@ export default function ParticipantsTable({ eventId }: ParticipantsTableProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="ml-auto flex items-center gap-4">
-        <Button size="sm" className="h-8">
-          <ScanQrCode />
-          {t("openQrCodeScanner")}
-        </Button>
+        <Link href={`/dashboard/event/${eventId}/scanner`}>
+          <Button size="sm" className="h-8">
+            <ScanQrCode />
+            {t("openQrCodeScanner")}
+          </Button>
+        </Link>
         <Button
           variant="outline"
           size="sm"
