@@ -473,7 +473,7 @@ describe("main", () => {
     cy.createEvent({ exclusive: false });
 
     cy.url().then((url) => {
-      cy.visit(url);
+      cy.visit(url.replace("/dashboard", ""));
     });
 
     // Participate to an event
@@ -502,7 +502,7 @@ describe("main", () => {
 
     cy.url().then((url) => {
       logout();
-      cy.visit(url);
+      cy.visit(url.replace("/dashboard", ""));
     });
 
     // Guard
@@ -734,9 +734,6 @@ Cypress.Commands.add(
     cy.get("div").contains("Create new community").click();
 
     login();
-
-    // Click outside to close any open modal
-    cy.get("header").click(0, 0);
 
     // fill community info
 
