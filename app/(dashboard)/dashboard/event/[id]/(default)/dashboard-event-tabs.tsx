@@ -6,7 +6,6 @@ import { useSelectedLayoutSegment } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { TabsContent } from "@/components/shadcn/tabs";
 import { Separator } from "@/components/shadcn/separator";
-import { Badge } from "@/components/shadcn/badge";
 import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
 import { EventUserRole } from "@/lib/queries/event-users";
 import RoleBasedViewMode from "@/components/widgets/permissions/view-mode";
@@ -19,7 +18,7 @@ export default function DashboardEventTabs({
   roles: EventUserRole[];
 }) {
   const t = useTranslations("dashboard.eventDetails.eventTabs");
-  const { eventId, eventInfo } = useDashboardEventContext();
+  const { eventId } = useDashboardEventContext();
   const section = useSelectedLayoutSegment() || "description";
 
   return (
@@ -38,8 +37,7 @@ export default function DashboardEventTabs({
             value="participants"
             className="w-fit flex gap-2 p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            {t("participants")}{" "}
-            <Badge variant="secondary">{eventInfo.participants}</Badge>
+            {t("participants")}
           </TabsTrigger>
         </Link>
 

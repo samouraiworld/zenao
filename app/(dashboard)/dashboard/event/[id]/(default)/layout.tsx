@@ -15,7 +15,7 @@ import {
 import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-event-info";
 import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
-import withEventRoleRestrictions from "@/lib/permissions/with-roles-required";
+import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
