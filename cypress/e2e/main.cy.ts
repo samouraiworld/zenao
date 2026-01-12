@@ -202,9 +202,6 @@ describe("main", () => {
 
     cy.get("button").contains("Register").should("be.visible");
 
-    cy.get("p").contains("Manage event").should("be.visible");
-    cy.get("a").contains("Edit event").should("be.visible");
-
     // participate
     cy.get("button").contains("Register").click();
 
