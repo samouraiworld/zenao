@@ -520,6 +520,10 @@ describe("main", () => {
     cy.visit("/");
     cy.createCommunity({});
 
+    cy.url().then((url) => {
+      cy.visit(url.replace("/dashboard", ""));
+    });
+
     cy.url().should("contain", "/community/");
 
     cy.get("h1").contains(testCommunityName).should("be.visible");
