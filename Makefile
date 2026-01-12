@@ -2,7 +2,7 @@ CAT := $(if $(filter $(OS),Windows_NT),type,cat)
 
 .PHONY: check-node
 check-node:
-	@REQUIRED_NODE=$$(cat .nvmrc); \
+	@REQUIRED_NODE=$$($(CAT) .nvmrc); \
 	CURRENT_NODE=$$(node --version 2>/dev/null | sed 's/v//'); \
 	if [ "$$CURRENT_NODE" != "$$REQUIRED_NODE" ]; then \
 		echo "❌ Node version mismatch: v$$CURRENT_NODE (expected v$$REQUIRED_NODE)"; \
