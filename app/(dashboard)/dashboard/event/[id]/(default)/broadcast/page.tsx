@@ -5,7 +5,7 @@ import DashboardBroadcastForm from "./dashboard-broadcast-form";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
-import withEventRoleRestrictions from "@/lib/permissions/with-roles-required";
+import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventBroadcastPageProps {
   params: Promise<{ id: string }>;
