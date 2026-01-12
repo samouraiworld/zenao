@@ -54,6 +54,10 @@ Override local env with dev env
 cp .env.backend-dev .env.local
 ```
 
+To test the payout features locally you will need a Stripe account and a Stripe test secret key.
+This can be obtained from the [Stripe dashboard](https://dashboard.stripe.com/apikeys).
+The env variable to set is `ZENAO_STRIPE_SECRET_KEY`.
+
 If you need to test file uploads, add back the `PINATA_JWT` in `.env.local`
 
 Be careful not to commit the PINATA_JWT or clerk secret!
