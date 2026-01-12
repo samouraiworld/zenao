@@ -95,6 +95,8 @@ const (
 	ZenaoServiceCreateTeamProcedure = "/zenao.v1.ZenaoService/CreateTeam"
 	// ZenaoServiceEditTeamProcedure is the fully-qualified name of the ZenaoService's EditTeam RPC.
 	ZenaoServiceEditTeamProcedure = "/zenao.v1.ZenaoService/EditTeam"
+	// ZenaoServiceDeleteTeamProcedure is the fully-qualified name of the ZenaoService's DeleteTeam RPC.
+	ZenaoServiceDeleteTeamProcedure = "/zenao.v1.ZenaoService/DeleteTeam"
 	// ZenaoServiceEntityRolesProcedure is the fully-qualified name of the ZenaoService's EntityRoles
 	// RPC.
 	ZenaoServiceEntityRolesProcedure = "/zenao.v1.ZenaoService/EntityRoles"
@@ -179,6 +181,7 @@ type ZenaoServiceClient interface {
 	// TEAM
 	CreateTeam(context.Context, *connect.Request[v1.CreateTeamRequest]) (*connect.Response[v1.CreateTeamResponse], error)
 	EditTeam(context.Context, *connect.Request[v1.EditTeamRequest]) (*connect.Response[v1.EditTeamResponse], error)
+	DeleteTeam(context.Context, *connect.Request[v1.DeleteTeamRequest]) (*connect.Response[v1.DeleteTeamResponse], error)
 	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
 	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
 	EntitiesWithRoles(context.Context, *connect.Request[v1.EntitiesWithRolesRequest]) (*connect.Response[v1.EntitiesWithRolesResponse], error)
@@ -349,6 +352,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("EditTeam")),
 			connect.WithClientOptions(opts...),
 		),
+		deleteTeam: connect.NewClient[v1.DeleteTeamRequest, v1.DeleteTeamResponse](
+			httpClient,
+			baseURL+ZenaoServiceDeleteTeamProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("DeleteTeam")),
+			connect.WithClientOptions(opts...),
+		),
 		entityRoles: connect.NewClient[v1.EntityRolesRequest, v1.EntityRolesResponse](
 			httpClient,
 			baseURL+ZenaoServiceEntityRolesProcedure,
@@ -508,6 +517,7 @@ type zenaoServiceClient struct {
 	removeEventFromCommunity   *connect.Client[v1.RemoveEventFromCommunityRequest, v1.RemoveEventFromCommunityResponse]
 	createTeam                 *connect.Client[v1.CreateTeamRequest, v1.CreateTeamResponse]
 	editTeam                   *connect.Client[v1.EditTeamRequest, v1.EditTeamResponse]
+	deleteTeam                 *connect.Client[v1.DeleteTeamRequest, v1.DeleteTeamResponse]
 	entityRoles                *connect.Client[v1.EntityRolesRequest, v1.EntityRolesResponse]
 	entitiesWithRoles          *connect.Client[v1.EntitiesWithRolesRequest, v1.EntitiesWithRolesResponse]
 	getCommunity               *connect.Client[v1.GetCommunityRequest, v1.GetCommunityResponse]
@@ -640,6 +650,11 @@ func (c *zenaoServiceClient) CreateTeam(ctx context.Context, req *connect.Reques
 // EditTeam calls zenao.v1.ZenaoService.EditTeam.
 func (c *zenaoServiceClient) EditTeam(ctx context.Context, req *connect.Request[v1.EditTeamRequest]) (*connect.Response[v1.EditTeamResponse], error) {
 	return c.editTeam.CallUnary(ctx, req)
+}
+
+// DeleteTeam calls zenao.v1.ZenaoService.DeleteTeam.
+func (c *zenaoServiceClient) DeleteTeam(ctx context.Context, req *connect.Request[v1.DeleteTeamRequest]) (*connect.Response[v1.DeleteTeamResponse], error) {
+	return c.deleteTeam.CallUnary(ctx, req)
 }
 
 // EntityRoles calls zenao.v1.ZenaoService.EntityRoles.
@@ -780,6 +795,7 @@ type ZenaoServiceHandler interface {
 	// TEAM
 	CreateTeam(context.Context, *connect.Request[v1.CreateTeamRequest]) (*connect.Response[v1.CreateTeamResponse], error)
 	EditTeam(context.Context, *connect.Request[v1.EditTeamRequest]) (*connect.Response[v1.EditTeamResponse], error)
+	DeleteTeam(context.Context, *connect.Request[v1.DeleteTeamRequest]) (*connect.Response[v1.DeleteTeamResponse], error)
 	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
 	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
 	EntitiesWithRoles(context.Context, *connect.Request[v1.EntitiesWithRolesRequest]) (*connect.Response[v1.EntitiesWithRolesResponse], error)
@@ -944,6 +960,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceEditTeamProcedure,
 		svc.EditTeam,
 		connect.WithSchema(zenaoServiceMethods.ByName("EditTeam")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceDeleteTeamHandler := connect.NewUnaryHandler(
+		ZenaoServiceDeleteTeamProcedure,
+		svc.DeleteTeam,
+		connect.WithSchema(zenaoServiceMethods.ByName("DeleteTeam")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceEntityRolesHandler := connect.NewUnaryHandler(
@@ -1124,6 +1146,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceCreateTeamHandler.ServeHTTP(w, r)
 		case ZenaoServiceEditTeamProcedure:
 			zenaoServiceEditTeamHandler.ServeHTTP(w, r)
+		case ZenaoServiceDeleteTeamProcedure:
+			zenaoServiceDeleteTeamHandler.ServeHTTP(w, r)
 		case ZenaoServiceEntityRolesProcedure:
 			zenaoServiceEntityRolesHandler.ServeHTTP(w, r)
 		case ZenaoServiceEntitiesWithRolesProcedure:
@@ -1263,6 +1287,10 @@ func (UnimplementedZenaoServiceHandler) CreateTeam(context.Context, *connect.Req
 
 func (UnimplementedZenaoServiceHandler) EditTeam(context.Context, *connect.Request[v1.EditTeamRequest]) (*connect.Response[v1.EditTeamResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.EditTeam is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) DeleteTeam(context.Context, *connect.Request[v1.DeleteTeamRequest]) (*connect.Response[v1.DeleteTeamResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.DeleteTeam is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error) {

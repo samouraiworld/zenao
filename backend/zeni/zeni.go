@@ -263,6 +263,7 @@ type DB interface {
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
+	RemoveUserGatekeeperRoles(userID string) error
 
 	AddEventToCommunity(eventID string, communityID string) error
 	RemoveEventFromCommunity(eventID string, communityID string) error
@@ -277,10 +278,13 @@ type DB interface {
 	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)
 	ListCommunitiesByUserRoles(userID string, roles []string, limit int, offset int) ([]*CommunityWithRoles, error)
+	RemoveUserFromAllCommunities(userID string) error
 
 	CreateTeam(ownerID string, displayName string) (*User, error)
 	EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error
 	GetUserByID(userID string) (*User, error)
+	CanDeleteTeam(teamID string) error
+	DeleteTeam(teamID string) error
 
 	GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
@@ -301,6 +305,7 @@ type DB interface {
 	GetAllPosts(getDeleted bool) ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
 	PinPost(feedID string, postID string, pinned bool) error
+	DeleteUserPostsByAuthor(userID string) error
 
 	CreatePoll(userID string, feedID string, parentURI string, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
