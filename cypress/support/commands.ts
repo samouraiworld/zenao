@@ -26,13 +26,7 @@ Cypress.Commands.overwrite("log", function (log, ...args) {
 // Must be called when already logged in and on Events creation page
 Cypress.Commands.add(
   "createEvent",
-  ({
-    exclusive = false,
-    gatekeepers: _ = [],
-  }: {
-    exclusive: boolean;
-    gatekeepers?: string[];
-  }) => {
+  ({ exclusive = false }: { exclusive: boolean }) => {
     // --- fill event infos ---
     // imageUri
     cy.get("input[name=imageUri]").selectFile(
