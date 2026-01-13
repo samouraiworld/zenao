@@ -85,10 +85,6 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 		return nil, err
 	}
 
-	if req.Msg.ReturnPath == "" || req.Msg.RefreshPath == "" {
-		return nil, errors.New("return and refresh paths are required")
-	}
-
 	s.Logger.Info("start-stripe-onboarding",
 		zap.String("community-id", req.Msg.CommunityId),
 		zap.String("user-id", actor.ID()),
