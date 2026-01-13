@@ -10,6 +10,7 @@ const withNextIntl = createNextIntlPlugin("./app/i18n/request.ts");
 const nextConfig: NextConfig = {
   env: {
     NEXT_APP_VERSION: packageJson.version,
+    NEXT_PUBLIC_STRIPE_DASHBOARD_URL: "https://dashboard.stripe.com",
   },
   /* config options here */
   images: {

@@ -18,12 +18,14 @@ require (
 	github.com/go-faker/faker/v4 v4.5.0
 	github.com/golangci/golangci-lint v1.64.8
 	github.com/goware/prefixer v0.0.0-20160118172347-395022866408
+	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/multiformats/go-multiaddr v0.15.0
 	github.com/resend/resend-go/v2 v2.27.0
 	github.com/ringsaturn/tzf v0.16.1
 	github.com/rs/cors v1.11.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.11.1
+	github.com/stripe/stripe-go/v84 v84.0.0
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.63.0
 	go.opentelemetry.io/otel v1.38.0
@@ -262,7 +264,6 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	github.com/mgechev/revive v1.7.0 // indirect
 	github.com/microsoft/go-mssqldb v1.8.0 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect

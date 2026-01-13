@@ -7,11 +7,13 @@ import (
 )
 
 type ZenaoServer struct {
-	Logger       *zap.Logger
-	Auth         zeni.Auth
-	DB           zeni.DB
-	MailClient   *resend.Client
-	MailSender   string
-	DiscordToken string
-	Maintenance  bool
+	AppBaseURL      string
+	Logger          *zap.Logger
+	Auth            zeni.Auth
+	DB              zeni.DB
+	MailClient      *resend.Client
+	MailSender      string
+	DiscordToken    string
+	Maintenance     bool
+	StripeSecretKey string
 }

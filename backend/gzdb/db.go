@@ -19,6 +19,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/plugin/opentelemetry/tracing"
 )
 
@@ -571,6 +572,59 @@ func (g *gormZenaoDB) ListCommunitiesByUserRoles(userID string, roles []string, 
 	}
 
 	return result, nil
+}
+
+// GetPaymentAccountByCommunityPlatform implements zeni.DB.
+func (g *gormZenaoDB) GetPaymentAccountByCommunityPlatform(communityID string, platformType string) (*zeni.PaymentAccount, error) {
+	communityIDInt, err := strconv.ParseUint(communityID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse community id: %w", err)
+	}
+
+	var account PaymentAccount
+	if err := g.db.Where("community_id = ? AND platform_type = ?", communityIDInt, platformType).First(&account).Error; err != nil {
+		return nil, err
+	}
+
+	return dbPaymentAccountToZeniPaymentAccount(&account), nil
+}
+
+// UpsertPaymentAccount implements zeni.DB.
+func (g *gormZenaoDB) UpsertPaymentAccount(account *zeni.PaymentAccount) error {
+	if account == nil {
+		return errors.New("payment account is nil")
+	}
+
+	communityIDInt, err := strconv.ParseUint(account.CommunityID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse community id: %w", err)
+	}
+
+	newAccount := PaymentAccount{
+		CommunityID:       uint(communityIDInt),
+		PlatformType:      account.PlatformType,
+		PlatformAccountID: account.PlatformAccountID,
+		OnboardingState:   account.OnboardingState,
+		StartedAt:         account.StartedAt,
+		VerificationState: account.VerificationState,
+		LastVerifiedAt:    account.LastVerifiedAt,
+	}
+
+	now := time.Now().UTC()
+	return g.db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "community_id"},
+			{Name: "platform_type"},
+		},
+		DoUpdates: clause.Assignments(map[string]any{
+			"platform_account_id": account.PlatformAccountID,
+			"onboarding_state":    account.OnboardingState,
+			"started_at":          account.StartedAt,
+			"verification_state":  account.VerificationState,
+			"last_verified_at":    account.LastVerifiedAt,
+			"updated_at":          now,
+		}),
+	}).Create(&newAccount).Error
 }
 
 func (g *gormZenaoDB) GetOrgByPollID(pollID string) (orgType, orgID string, err error) {

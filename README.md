@@ -147,6 +147,9 @@ CLERK_SECRET_KEY=""
 NEXT_PUBLIC_ZENAO_BACKEND_ENDPOINT=http://localhost:4242
 NEXT_PUBLIC_ZENAO_NAMESPACE=zenao
 
+# Stripe configuration
+NEXT_PUBLIC_STRIPE_DASHBOARD_URL=https://dashboard.stripe.com/test
+
 # File uploads - See README "File Uploads with Pinata" section
 NEXT_PUBLIC_GATEWAY_URL=pinata.zenao.io
 PINATA_GROUP=f2ecce4d-b615-48ee-8ae8-744145b40dcb  # Optional: for organizing files in Pinata dashboard
@@ -170,6 +173,8 @@ ZENAO_DB=dev.db                                       # Default: dev.db
 ZENAO_ALLOWED_ORIGINS=*                               # Default: * (all origins)
 ZENAO_MAIL_SENDER=contact@mail.zenao.io               # Default: contact@mail.zenao.io
 ZENAO_RESEND_SECRET_KEY=                              # Default: empty (emails disabled)
+ZENAO_STRIPE_SECRET_KEY=                              # Default: empty (stripe disabled)
+ZENAO_APP_BASE_URL=                                   # Default: https://zenao.io/
 DISCORD_TOKEN=                                        # Default: empty (Discord disabled)
 ```
 
