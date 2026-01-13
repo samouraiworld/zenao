@@ -16,6 +16,7 @@ import (
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/resend/resend-go/v2"
 	"github.com/rs/cors"
+	"github.com/stripe/stripe-go/v84"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
@@ -51,6 +52,7 @@ func main() {
 }
 
 type config struct {
+	appBaseURL      string
 	allowedOrigins  string
 	clerkSecretKey  string
 	bindAddr        string
@@ -59,9 +61,11 @@ type config struct {
 	resendSecretKey string
 	discordtoken    string
 	maintenance     bool
+	stripeSecretKey string
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
+	flset.StringVar(&conf.appBaseURL, "app-base-url", "https://zenao.io/", "App base URL")
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
 	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
@@ -70,6 +74,7 @@ func (conf *config) RegisterFlags(flset *flag.FlagSet) {
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
 	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
 	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
+	flset.StringVar(&conf.stripeSecretKey, "stripe-secret-key", "", "Stripe secret key")
 }
 
 var conf config
@@ -90,12 +95,14 @@ func newStartCmd() *commands.Command {
 
 func injectStartEnv() {
 	mappings := map[string]*string{
+		"ZENAO_APP_BASE_URL":      &conf.appBaseURL,
 		"ZENAO_RESEND_SECRET_KEY": &conf.resendSecretKey,
 		"ZENAO_CLERK_SECRET_KEY":  &conf.clerkSecretKey,
 		"ZENAO_DB":                &conf.dbPath,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
 		"ZENAO_MAIL_SENDER":       &conf.mailSender,
 		"DISCORD_TOKEN":           &conf.discordtoken,
+		"ZENAO_STRIPE_SECRET_KEY": &conf.stripeSecretKey,
 	}
 
 	for key, ps := range mappings {
@@ -150,13 +157,18 @@ func execStart(ctx context.Context) (retErr error) {
 	}
 
 	zenao := &ZenaoServer{
-		Logger:       logger,
-		Auth:         auth,
-		DB:           db,
-		MailClient:   mailClient,
-		MailSender:   conf.mailSender,
-		DiscordToken: conf.discordtoken,
-		Maintenance:  conf.maintenance,
+		Logger:          logger,
+		Auth:            auth,
+		DB:              db,
+		AppBaseURL:      conf.appBaseURL,
+		MailClient:      mailClient,
+		MailSender:      conf.mailSender,
+		DiscordToken:    conf.discordtoken,
+		Maintenance:     conf.maintenance,
+		StripeSecretKey: conf.stripeSecretKey,
+	}
+	if conf.stripeSecretKey != "" {
+		stripe.Key = conf.stripeSecretKey
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")
