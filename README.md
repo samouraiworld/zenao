@@ -58,6 +58,14 @@ To test the payout features locally you will need a Stripe account and a Stripe 
 This can be obtained from the [Stripe dashboard](https://dashboard.stripe.com/apikeys).
 The env variable to set is `ZENAO_STRIPE_SECRET_KEY`.
 
+To be redirected to the Zenao app once onboarding is complete,
+a value for `ZENAO_APP_BASE_URL` is required and must be set to the app URL
+(e.g., `http://localhost:3000/`)
+
+To redirect users to the Stripe dashboard, set a value for
+`NEXT_PUBLIC_STRIPE_DASHBOARD_URL`. It defaults to `https://dashboard.stripe.com/`,
+which is the live Stripe dashboard.
+
 If you need to test file uploads, add back the `PINATA_JWT` in `.env.local`
 
 Be careful not to commit the PINATA_JWT or clerk secret!

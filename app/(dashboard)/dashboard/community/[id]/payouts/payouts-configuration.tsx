@@ -21,6 +21,15 @@ import { Button } from "@/components/shadcn/button";
 import { DateTimeText } from "@/components/widgets/date-time-text";
 import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
 
+const payoutStatusBadge = {
+  verified: "secondary",
+  failed: "destructive",
+  pending: "outline",
+  unknown: "outline",
+} as const;
+
+export type PayoutStatus = keyof typeof payoutStatusBadge;
+
 export default function PayoutsConfiguration() {
   const { communityId } = useDashboardCommunityContext();
   const { getToken, userId } = useAuth();
@@ -111,23 +120,15 @@ export default function PayoutsConfiguration() {
   const isOnboardingComplete =
     payoutStatus?.onboardingState === "completed" ||
     payoutStatus?.verificationState === "verified";
-  const stripeDashboardUrl =
-    process.env.NEXT_PUBLIC_ENV === "development"
-      ? "https://dashboard.stripe.com/test"
-      : "https://dashboard.stripe.com";
   const isMissingStripeAccountId =
     isOnboardingComplete && !payoutStatus?.platformAccountId;
   const isStripeAccountMissingError =
     payoutStatus?.verificationState === statusMissingAccount;
   const shouldShowRefreshError =
     !!payoutStatus?.refreshError && !isStripeAccountMissingError;
-  const payoutStatusLabel = payoutStatus?.verificationState;
-  const payoutStatusBadge = {
-    verified: "secondary",
-    failed: "destructive",
-    pending: "outline",
-  } as const;
-  const payoutStatusText: Record<string, string> = {
+  const payoutStatusLabel = (payoutStatus?.verificationState ??
+    "unknown") as PayoutStatus;
+  const payoutStatusText: Record<PayoutStatus, string> = {
     verified: t("payout-status-verified"),
     failed: t("payout-status-failed"),
     pending: t("payout-status-pending"),
@@ -156,9 +157,8 @@ export default function PayoutsConfiguration() {
               ) : (
                 <Badge
                   variant={
-                    payoutStatusBadge[
-                      payoutStatusKey as keyof typeof payoutStatusBadge
-                    ] ?? "outline"
+                    payoutStatusBadge[payoutStatusKey as PayoutStatus] ??
+                    "outline"
                   }
                 >
                   {payoutStatusText[payoutStatusKey]}
@@ -186,7 +186,10 @@ export default function PayoutsConfiguration() {
               type="button"
               onClick={() => {
                 if (isOnboardingComplete) {
-                  window.open(stripeDashboardUrl, "_blank");
+                  window.open(
+                    process.env.NEXT_PUBLIC_STRIPE_DASHBOARD_URL,
+                    "_blank",
+                  );
                   return;
                 }
                 void handleStartCommunityStripeOnboarding();
