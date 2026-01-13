@@ -45,6 +45,10 @@ export const useSidebarItems: () => NavGroup[] = () =>
               if (pathname.includes("/dashboard/event")) {
                 return [
                   {
+                    title: "all",
+                    url: "/dashboard",
+                  },
+                  {
                     title: "general",
                     url: `/dashboard/event/${id}`,
                   },
@@ -66,6 +70,7 @@ export const useSidebarItems: () => NavGroup[] = () =>
 
               if (pathname.includes("/dashboard/community")) {
                 return [
+                  { title: "all", url: "/dashboard/community" },
                   {
                     title: "general",
                     url: `/dashboard/community/${id}`,
