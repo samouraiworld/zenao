@@ -103,7 +103,7 @@ const NavItemExpanded = ({
             </SidebarMenuButton>
           )}
         </CollapsibleTrigger>
-        {item.subItems && (
+        {resolvedSubItems && (
           <CollapsibleContent>
             <SidebarMenuSub>
               {resolvedSubItems?.map((subItem) => (
