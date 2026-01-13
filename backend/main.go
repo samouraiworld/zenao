@@ -65,7 +65,7 @@ type config struct {
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
-	flset.StringVar(&conf.appBaseURL, "app-base-url", "", "App base URL")
+	flset.StringVar(&conf.appBaseURL, "app-base-url", "https://zenao.io/", "App base URL")
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
 	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
