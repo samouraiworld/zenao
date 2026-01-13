@@ -1475,14 +1475,33 @@ func (g *gormZenaoDB) GetUserTeams(userID string) ([]*zeni.TeamWithRole, error) 
 		return nil, fmt.Errorf("get team roles: %w", err)
 	}
 
-	var teams []*zeni.TeamWithRole
+	if len(roles) == 0 {
+		return nil, nil
+	}
+
+	teamIDs := make([]uint, 0, len(roles))
 	for _, role := range roles {
-		var team User
-		if err := g.db.First(&team, role.OrgID).Error; err != nil {
+		teamIDs = append(teamIDs, role.OrgID)
+	}
+
+	var teamUsers []User
+	if err := g.db.Where("id IN ?", teamIDs).Find(&teamUsers).Error; err != nil {
+		return nil, fmt.Errorf("get teams: %w", err)
+	}
+
+	teamMap := make(map[uint]*User, len(teamUsers))
+	for i := range teamUsers {
+		teamMap[teamUsers[i].ID] = &teamUsers[i]
+	}
+
+	teams := make([]*zeni.TeamWithRole, 0, len(roles))
+	for _, role := range roles {
+		team, ok := teamMap[role.OrgID]
+		if !ok {
 			continue
 		}
 		teams = append(teams, &zeni.TeamWithRole{
-			Team: dbUserToZeniDBUser(&team),
+			Team: dbUserToZeniDBUser(team),
 			Role: role.Role,
 		})
 	}

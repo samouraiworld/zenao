@@ -35,6 +35,7 @@ func (s *ZenaoServer) GetUserTeams(
 			Bio:         t.Team.Bio,
 			AvatarUri:   t.Team.AvatarURI,
 			Role:        t.Role,
+			Plan:        t.Team.Plan.String(),
 		})
 	}
 

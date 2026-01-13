@@ -70,7 +70,6 @@ export function CreateTeamDialog({
       switchAccount({
         type: "team",
         id: teamId,
-        displayName: teamName.trim(),
       });
     } catch {
       toast({
