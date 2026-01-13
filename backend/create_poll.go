@@ -14,27 +14,18 @@ import (
 )
 
 func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenaov1.CreatePollRequest]) (*connect.Response[zenaov1.CreatePollResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if err := validatePoll(req.Msg); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
+	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, actor.ID(), req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +40,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
-		if zpoll, err = db.CreatePoll(zUser.ID, feed.ID, "", req.Msg); err != nil {
+		if zpoll, err = db.CreatePoll(actor.ID(), feed.ID, "", req.Msg); err != nil {
 			return err
 		}
 		return nil

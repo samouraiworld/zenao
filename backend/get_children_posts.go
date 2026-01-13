@@ -15,20 +15,15 @@ func (s *ZenaoServer) GetChildrenPosts(ctx context.Context, req *connect.Request
 		return nil, errors.New("parent ID is required")
 	}
 
+	actor, err := s.GetOptionalActor(ctx, req.Header())
+	if err != nil {
+		return nil, err
+	}
+
 	var (
-		zUser      *zeni.User
 		zPosts     []*zeni.Post
 		PostsViews []*feedsv1.PostView
-		err        error
 	)
-
-	user := s.Auth.GetUser(ctx)
-	if user != nil {
-		zUser, err = s.EnsureUserExists(ctx, user)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	// TODO: see to improve this
 	if err := s.DB.TxWithSpan(ctx, "GetChildrensPosts", func(tx zeni.DB) error {
@@ -48,7 +43,7 @@ func (s *ZenaoServer) GetChildrenPosts(ctx context.Context, req *connect.Request
 					rv = &rview{}
 				}
 				rv.count++
-				if zUser != nil && reaction.UserID == zUser.ID {
+				if actor != nil && reaction.UserID == actor.ID() {
 					rv.userHasVoted = true
 				}
 				reactions[reaction.Icon] = rv
