@@ -11,21 +11,12 @@ import (
 )
 
 func (s *ZenaoServer) EditPost(ctx context.Context, req *connect.Request[zenaov1.EditPostRequest]) (*connect.Response[zenaov1.EditPostResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
-
-	s.Logger.Info("edit-post", zap.String("post-id", req.Msg.PostId), zap.String("content", req.Msg.Content), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("edit-post", zap.String("post-id", req.Msg.PostId), zap.String("content", req.Msg.Content), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if len(req.Msg.Content) == 0 {
 		return nil, errors.New("content of standard post cannot be empty")
@@ -43,14 +34,14 @@ func (s *ZenaoServer) EditPost(ctx context.Context, req *connect.Request[zenaov1
 		if err != nil {
 			return err
 		}
-		if zpost.UserID != zUser.ID {
+		if zpost.UserID != actor.ID() {
 			return errors.New("user is not the author of the post")
 		}
 		feed, err := db.GetFeedByID(zpost.FeedID)
 		if err != nil {
 			return err
 		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, feed.OrgType, feed.OrgID)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), feed.OrgType, feed.OrgID)
 		if err != nil {
 			return err
 		}
