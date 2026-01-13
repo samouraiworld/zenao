@@ -15,27 +15,22 @@ func (s *ZenaoServer) GetPoll(ctx context.Context, req *connect.Request[zenaov1.
 		return nil, errors.New("poll ID is required")
 	}
 
+	actor, err := s.GetOptionalActor(ctx, req.Header())
+	if err != nil {
+		return nil, err
+	}
+
 	var (
-		zUser *zeni.User
 		zPoll *zeni.Poll
 		zPost *zeni.Post
-		err   error
 	)
 
-	user := s.Auth.GetUser(ctx)
-	if user != nil {
-		zUser, err = s.EnsureUserExists(ctx, user)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	userID := ""
-	if zUser != nil {
-		userID = zUser.ID
+	actorID := ""
+	if actor != nil {
+		actorID = actor.ID()
 	}
 	if err = s.DB.TxWithSpan(ctx, "GetPoll", func(tx zeni.DB) error {
-		zPoll, err = tx.GetPollByID(req.Msg.PollId, userID)
+		zPoll, err = tx.GetPollByID(req.Msg.PollId, actorID)
 		if err != nil {
 			return err
 		}

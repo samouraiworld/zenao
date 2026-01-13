@@ -599,6 +599,14 @@
       "create-event": "Create Event",
       "create-community": "Create Community",
       "events": "Events",
+      "upcoming":"Upcoming",
+      "past": "Past",
+      "all": "All",
+      "participants": "Participants",
+      "gatekeepers": "Gatekeepers",
+      "general": "General",
+      "members": "Members",
+      "administrators": "Administrators",
       "communities": "Communities",
       "settings": "Settings",
       "coming-soon": "Soon",
@@ -622,7 +630,7 @@
       "create-community-btn": "Create a community",
       "name-column": "Name",
       "members-column": "Members",
-      "roles-column": "Roles",
+      "roles-column": "Role(s)",
       "actions-column": "Actions",
       "loading": "Loading..."
     },
@@ -648,11 +656,6 @@
           "email-placeholder": "Enter administrator email to add...",
           "error-administrator-already-exists": "This administrator is already assigned to the community!",
           "add-btn": "Add"
-        },
-        "columns": {
-          "email": "Email",
-          "actions": "Actions",
-          "delete-admin": "Delete administrator"
         }
       },
       "members": {
