@@ -63,18 +63,9 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 	ctx context.Context,
 	req *connect.Request[zenaov1.StartCommunityStripeOnboardingRequest],
 ) (*connect.Response[zenaov1.StartCommunityStripeOnboardingResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
-	}
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
 	}
 
 	if req.Msg.CommunityId == "" {
@@ -100,13 +91,12 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 
 	s.Logger.Info("start-stripe-onboarding",
 		zap.String("community-id", req.Msg.CommunityId),
-		zap.String("user-id", zUser.ID),
-		zap.Bool("user-banned", user.Banned),
+		zap.String("user-id", actor.User.ID),
 	)
 
 	var existingAccount *zeni.PaymentAccount
 	if err := s.DB.TxWithSpan(ctx, "db.StartStripeOnboarding", func(tx zeni.DB) error {
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+		roles, err := tx.EntityRoles(zeni.EntityTypeUser, actor.User.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
 			return err
 		}
