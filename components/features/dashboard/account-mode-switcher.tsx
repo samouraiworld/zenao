@@ -34,15 +34,23 @@ export function AccountModeSwitcher() {
     return null;
   }
 
-  return <AccountModeSwitcherView user={profile} userId={user.userId} />;
+  return (
+    <AccountModeSwitcherView
+      user={profile}
+      userId={user.userId}
+      plan={user.plan}
+    />
+  );
 }
 
 export function AccountModeSwitcherView({
   user,
   userId,
+  plan,
 }: {
   readonly user: UserProfile;
   readonly userId: string;
+  readonly plan: string;
 }) {
   const t = useTranslations("dashboard.navUser");
   const {
@@ -53,7 +61,9 @@ export function AccountModeSwitcherView({
     setIsCreateTeamOpen,
     handleSwitchToPersonal,
     handleSwitchToTeam,
-  } = useAccountSwitcher(userId, user);
+  } = useAccountSwitcher(userId);
+
+  const currentAccountId = activeAccount?.id ?? userId;
 
   return (
     <>
@@ -61,9 +71,7 @@ export function AccountModeSwitcherView({
         <DropdownMenuTrigger asChild>
           <div className={avatarClassName}>
             <UserAvatar
-              userId={
-                activeAccount?.type === "team" ? activeAccount.id : userId
-              }
+              userId={currentAccountId}
               className={avatarClassName}
               size="md"
             />
@@ -91,7 +99,14 @@ export function AccountModeSwitcherView({
               />
             </div>
             <div className="flex-1">
-              <div className="font-medium">{user.displayName}</div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{user.displayName}</span>
+                {plan === "pro" && (
+                  <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
+                    Pro
+                  </span>
+                )}
+              </div>
               <div className="text-xs text-muted-foreground">
                 {t("personal-account")}
               </div>
@@ -102,7 +117,7 @@ export function AccountModeSwitcherView({
           {teams.map((team) => (
             <DropdownMenuItem
               key={team.teamId}
-              onClick={() => handleSwitchToTeam(team)}
+              onClick={() => handleSwitchToTeam(team.teamId)}
               className="flex items-center gap-2"
             >
               <div className={avatarClassName}>
@@ -113,7 +128,14 @@ export function AccountModeSwitcherView({
                 />
               </div>
               <div className="flex-1">
-                <div className="font-medium">{team.displayName}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{team.displayName}</span>
+                  {team.plan === "pro" && (
+                    <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
+                      Pro
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs text-muted-foreground">{t("team")}</div>
               </div>
               {activeAccount?.type === "team" &&
@@ -136,7 +158,7 @@ export function AccountModeSwitcherView({
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href={`/profile/${activeAccount?.id ?? userId}`}>
+              <Link href={`/profile/${currentAccountId}`}>
                 <CircleUserRound />
                 {t("profile")}
               </Link>

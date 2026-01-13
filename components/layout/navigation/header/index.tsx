@@ -251,10 +251,7 @@ const Auth = ({
     isPersonalActive,
     handleSwitchToPersonal,
     handleSwitchToTeam,
-  } = useAccountSwitcher(userInfo?.userId || "", {
-    displayName: profile?.displayName || "",
-    avatarUri: profile?.avatarUri,
-  });
+  } = useAccountSwitcher(userInfo?.userId || "");
 
   const activeAccountId = activeAccount?.id ?? userInfo?.userId;
 
@@ -304,7 +301,7 @@ const Auth = ({
             </div>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[200px] mt-2 mr-4">
+        <DropdownMenuContent className="w-fit mt-2 mr-4">
           {/* Account switcher */}
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             {tNav("accounts")}
@@ -321,7 +318,16 @@ const Auth = ({
               />
             </div>
             <div className="flex-1">
-              <div className="font-medium text-sm">{profile?.displayName}</div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-sm">
+                  {profile?.displayName}
+                </span>
+                {userInfo?.plan === "pro" && (
+                  <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
+                    Pro
+                  </span>
+                )}
+              </div>
               <div className="text-xs text-muted-foreground">
                 {tNav("personal-account")}
               </div>
@@ -332,7 +338,7 @@ const Auth = ({
           {teams.map((team) => (
             <DropdownMenuItem
               key={team.teamId}
-              onClick={() => handleSwitchToTeam(team)}
+              onClick={() => handleSwitchToTeam(team.teamId)}
               className="flex items-center gap-2 cursor-pointer"
             >
               <div className={avatarClassName}>
@@ -343,7 +349,16 @@ const Auth = ({
                 />
               </div>
               <div className="flex-1">
-                <div className="font-medium text-sm">{team.displayName}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm">
+                    {team.displayName}
+                  </span>
+                  {team.plan === "pro" && (
+                    <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
+                      Pro
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   {tNav("team")}
                 </div>

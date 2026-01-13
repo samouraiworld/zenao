@@ -5467,6 +5467,7 @@ type UserTeam struct {
 	Bio           string                 `protobuf:"bytes,3,opt,name=bio,proto3" json:"bio,omitempty"`
 	AvatarUri     string                 `protobuf:"bytes,4,opt,name=avatar_uri,json=avatarUri,proto3" json:"avatar_uri,omitempty"`
 	Role          string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`
+	Plan          string                 `protobuf:"bytes,6,opt,name=plan,proto3" json:"plan,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5532,6 +5533,13 @@ func (x *UserTeam) GetAvatarUri() string {
 func (x *UserTeam) GetRole() string {
 	if x != nil {
 		return x.Role
+	}
+	return ""
+}
+
+func (x *UserTeam) GetPlan() string {
+	if x != nil {
+		return x.Plan
 	}
 	return ""
 }
@@ -6312,14 +6320,15 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"\x12DeleteTeamResponse\"\x15\n" +
 	"\x13GetUserTeamsRequest\"@\n" +
 	"\x14GetUserTeamsResponse\x12(\n" +
-	"\x05teams\x18\x01 \x03(\v2\x12.zenao.v1.UserTeamR\x05teams\"\x8b\x01\n" +
+	"\x05teams\x18\x01 \x03(\v2\x12.zenao.v1.UserTeamR\x05teams\"\x9f\x01\n" +
 	"\bUserTeam\x12\x17\n" +
 	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x10\n" +
 	"\x03bio\x18\x03 \x01(\tR\x03bio\x12\x1d\n" +
 	"\n" +
 	"avatar_uri\x18\x04 \x01(\tR\tavatarUri\x12\x12\n" +
-	"\x04role\x18\x05 \x01(\tR\x04role\"F\n" +
+	"\x04role\x18\x05 \x01(\tR\x04role\x12\x12\n" +
+	"\x04plan\x18\x06 \x01(\tR\x04plan\"F\n" +
 	"!GetCommunityAdministratorsRequest\x12!\n" +
 	"\fcommunity_id\x18\x01 \x01(\tR\vcommunityId\"L\n" +
 	"\"GetCommunityAdministratorsResponse\x12&\n" +

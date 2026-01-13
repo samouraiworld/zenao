@@ -25,8 +25,8 @@ import (
 const userDefaultAvatar = "ipfs://bafybeidrbpiyfvwsel6fxb7wl4p64tymnhgd7xnt3nowquqymtllrq67uy"
 
 type User struct {
-	gorm.Model         // this ID should be used for any database related logic (like querying)
-	AuthID      string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc)
+	gorm.Model          // this ID should be used for any database related logic (like querying)
+	AuthID      *string `gorm:"uniqueIndex"` // this ID should be only used for user identification & creation (auth provider id: clerk, auth0, etc). nil for teams.
 	DisplayName string
 	Bio         string
 	AvatarURI   string
@@ -636,7 +636,7 @@ func (g *gormZenaoDB) getDBCommunity(id string) (*Community, error) {
 // CreateUser implements zeni.DB.
 func (g *gormZenaoDB) CreateUser(authID string) (*zeni.User, error) {
 	user := &User{
-		AuthID:    authID,
+		AuthID:    &authID,
 		Bio:       "Zenao managed user",
 		AvatarURI: userDefaultAvatar,
 	}
@@ -1387,7 +1387,7 @@ func (g *gormZenaoDB) CreateTeam(ownerID string, displayName string) (*zeni.User
 	}
 
 	team := &User{
-		AuthID:      "", // Teams don't have auth
+		AuthID:      nil, // Teams don't have auth
 		DisplayName: displayName,
 		Bio:         "",
 		AvatarURI:   userDefaultAvatar,
@@ -1475,14 +1475,33 @@ func (g *gormZenaoDB) GetUserTeams(userID string) ([]*zeni.TeamWithRole, error) 
 		return nil, fmt.Errorf("get team roles: %w", err)
 	}
 
-	var teams []*zeni.TeamWithRole
+	if len(roles) == 0 {
+		return nil, nil
+	}
+
+	teamIDs := make([]uint, 0, len(roles))
 	for _, role := range roles {
-		var team User
-		if err := g.db.First(&team, role.OrgID).Error; err != nil {
+		teamIDs = append(teamIDs, role.OrgID)
+	}
+
+	var teamUsers []User
+	if err := g.db.Where("id IN ?", teamIDs).Find(&teamUsers).Error; err != nil {
+		return nil, fmt.Errorf("get teams: %w", err)
+	}
+
+	teamMap := make(map[uint]*User, len(teamUsers))
+	for i := range teamUsers {
+		teamMap[teamUsers[i].ID] = &teamUsers[i]
+	}
+
+	teams := make([]*zeni.TeamWithRole, 0, len(roles))
+	for _, role := range roles {
+		team, ok := teamMap[role.OrgID]
+		if !ok {
 			continue
 		}
 		teams = append(teams, &zeni.TeamWithRole{
-			Team: dbUserToZeniDBUser(&team),
+			Team: dbUserToZeniDBUser(team),
 			Role: role.Role,
 		})
 	}
@@ -2272,13 +2291,17 @@ func (g *gormZenaoDB) CommunitiesByEvent(eventID string) ([]*zeni.Community, err
 }
 
 func dbUserToZeniDBUser(dbuser *User) *zeni.User {
+	authID := ""
+	if dbuser.AuthID != nil {
+		authID = *dbuser.AuthID
+	}
 	u := &zeni.User{
 		ID:          fmt.Sprintf("%d", dbuser.ID),
 		CreatedAt:   dbuser.CreatedAt,
 		DisplayName: dbuser.DisplayName,
 		Bio:         dbuser.Bio,
 		AvatarURI:   dbuser.AvatarURI,
-		AuthID:      dbuser.AuthID,
+		AuthID:      authID,
 		Plan:        zeni.Plan(dbuser.Plan),
 		IsTeam:      dbuser.IsTeam,
 	}

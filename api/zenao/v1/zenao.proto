@@ -552,6 +552,7 @@ message UserTeam {
   string bio = 3;
   string avatar_uri = 4;
   string role = 5;
+  string plan = 6;
 }
 
 message GetCommunityAdministratorsRequest { string community_id = 1; }

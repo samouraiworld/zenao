@@ -36,11 +36,12 @@ import {
 type NavUserProps = {
   readonly userId: string;
   readonly user: UserProfile;
+  readonly plan: string;
 };
 
 const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
-export function NavUser({ userId, user }: NavUserProps) {
+export function NavUser({ userId, user, plan }: NavUserProps) {
   const { isMobile } = useSidebar();
   const t = useTranslations("dashboard.navUser");
   const {
@@ -51,7 +52,15 @@ export function NavUser({ userId, user }: NavUserProps) {
     setIsCreateTeamOpen,
     handleSwitchToPersonal,
     handleSwitchToTeam,
-  } = useAccountSwitcher(userId, user);
+  } = useAccountSwitcher(userId);
+
+  const activeTeam =
+    activeAccount?.type === "team"
+      ? teams.find((t) => t.teamId === activeAccount.id)
+      : null;
+
+  const currentDisplayName = activeTeam?.displayName ?? user.displayName;
+  const currentAccountId = activeAccount?.id ?? userId;
 
   return (
     <SidebarMenu>
@@ -71,11 +80,7 @@ export function NavUser({ userId, user }: NavUserProps) {
                 <SignedIn>
                   <div className={avatarClassName}>
                     <UserAvatar
-                      userId={
-                        activeAccount?.type === "team"
-                          ? activeAccount.id
-                          : userId
-                      }
+                      userId={currentAccountId}
                       className={avatarClassName}
                       size="md"
                     />
@@ -84,11 +89,9 @@ export function NavUser({ userId, user }: NavUserProps) {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
-                  {activeAccount?.type === "team"
-                    ? activeAccount.displayName
-                    : user.displayName}
+                  {currentDisplayName}
                 </span>
-                {activeAccount?.type === "team" && (
+                {activeTeam && (
                   <span className="truncate text-xs text-muted-foreground">
                     {t("team")}
                   </span>
@@ -119,7 +122,14 @@ export function NavUser({ userId, user }: NavUserProps) {
                 />
               </div>
               <div className="flex-1">
-                <div className="font-medium">{user.displayName}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{user.displayName}</span>
+                  {plan === "pro" && (
+                    <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
+                      Pro
+                    </span>
+                  )}
+                </div>
                 <div className="text-xs text-muted-foreground">
                   {t("personal-account")}
                 </div>
@@ -130,7 +140,7 @@ export function NavUser({ userId, user }: NavUserProps) {
             {teams.map((team) => (
               <DropdownMenuItem
                 key={team.teamId}
-                onClick={() => handleSwitchToTeam(team)}
+                onClick={() => handleSwitchToTeam(team.teamId)}
                 className="flex items-center gap-2"
               >
                 <div className={avatarClassName}>
@@ -141,7 +151,14 @@ export function NavUser({ userId, user }: NavUserProps) {
                   />
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium">{team.displayName}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{team.displayName}</span>
+                    {team.plan === "pro" && (
+                      <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
+                        Pro
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     {t("team")}
                   </div>
@@ -166,7 +183,7 @@ export function NavUser({ userId, user }: NavUserProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href={`/profile/${activeAccount?.id ?? userId}`}>
+                <Link href={`/profile/${currentAccountId}`}>
                   <CircleUserRound />
                   {t("profile")}
                 </Link>

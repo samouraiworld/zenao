@@ -6,8 +6,6 @@ import { z } from "zod";
 const activeAccountSchema = z.object({
   type: z.enum(["personal", "team"]),
   id: z.string(),
-  displayName: z.string(),
-  avatarUri: z.string().optional(),
 });
 
 type ActiveAccount = z.infer<typeof activeAccountSchema>;
