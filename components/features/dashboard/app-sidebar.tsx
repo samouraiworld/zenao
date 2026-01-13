@@ -14,13 +14,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/shadcn/sidebar";
-import { sidebarItems } from "@/lib/navigation/dashboard/sidebar/sidebar-items";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Text from "@/components/widgets/texts/text";
+import { useSidebarItems } from "@/lib/navigation/dashboard/sidebar/sidebar-items";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("navigation");
+  const sidebarItems = useSidebarItems();
 
   return (
     <Sidebar {...props}>
