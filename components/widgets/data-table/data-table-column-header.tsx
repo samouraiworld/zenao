@@ -45,7 +45,7 @@ export function DataTableColumnHeader<TData, TValue>({
             size="sm"
             className="data-[state=open]:bg-accent -ml-3 h-8"
           >
-            <span>{title}</span>
+            <span className="text-sm">{title}</span>
             {getSortIcon(column.getIsSorted())}
           </Button>
         </DropdownMenuTrigger>

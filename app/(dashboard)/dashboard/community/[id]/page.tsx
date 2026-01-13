@@ -3,7 +3,6 @@
 import { useFormContext } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Info } from "lucide-react";
-import { useDashboardCommunityEditionContext } from "./dashboard-community-edition-context-provider";
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { CommunityFormSchemaType } from "@/types/schemas";
 import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
@@ -24,11 +23,16 @@ import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
 import SocialMediaLinks from "@/components/features/user/settings/social-media-links";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
+import DashboardCommunityEditionProvider, {
+  DashboardCommunityEditionProps,
+} from "@/components/providers/dashboard-community-edition-provider";
 
-export default function DashboardCommunityInfo() {
-  const { isUpdating, isSubmittable, formRef, save } =
-    useDashboardCommunityEditionContext();
-
+function DashboardCommunityInfo({
+  isUpdating,
+  isSubmittable,
+  formRef,
+  save,
+}: DashboardCommunityEditionProps) {
   const form = useFormContext<CommunityFormSchemaType>();
   const t = useTranslations("community-form");
 
@@ -184,5 +188,20 @@ export default function DashboardCommunityInfo() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function DashboardCommunityInfoPage() {
+  return (
+    <DashboardCommunityEditionProvider>
+      {({ isUpdating, isSubmittable, formRef, save }) => (
+        <DashboardCommunityInfo
+          isUpdating={isUpdating}
+          isSubmittable={isSubmittable}
+          formRef={formRef}
+          save={save}
+        />
+      )}
+    </DashboardCommunityEditionProvider>
   );
 }

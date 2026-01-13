@@ -1,6 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash2 } from "lucide-react";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn/button";
 import {
   Tooltip,
@@ -16,11 +17,14 @@ interface UseCommunityAdministratorsColumnsProps {
 export const useCommunityAdministratorsColumns = (
   props: UseCommunityAdministratorsColumnsProps,
 ): ColumnDef<string>[] => {
+  const t = useTranslations(
+    "dashboard.communityDetails.administrators.columns",
+  );
   const columns = useMemo<ColumnDef<string>[]>(
     () => [
       {
         accessorKey: "email",
-        header: () => <div>Email</div>,
+        header: () => <div>{t("email")}</div>,
         cell: ({ row }) => <div>{row.original}</div>,
         enableHiding: false,
         enableSorting: true,
@@ -30,7 +34,7 @@ export const useCommunityAdministratorsColumns = (
       },
       {
         id: "actions",
-        header: () => <div>Actions</div>,
+        header: () => <div>{t("actions")}</div>,
         cell: ({ row }) => (
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
@@ -43,7 +47,7 @@ export const useCommunityAdministratorsColumns = (
                 <Trash2 className="text-muted-foreground w-4 h-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Delete administrator</TooltipContent>
+            <TooltipContent>{t("delete-admin")}</TooltipContent>
           </Tooltip>
         ),
         enableHiding: false,
@@ -53,7 +57,7 @@ export const useCommunityAdministratorsColumns = (
         },
       },
     ],
-    [props],
+    [t, props],
   );
 
   return columns;

@@ -70,7 +70,7 @@ export default async function Blog({
 
   return (
     <ScreenContainer>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 pb-24">
         <div className="flex flex-wrap items-center gap-2 mb-1 w-full dark:text-slate-400 text-sm">
           <Link href="/" className="text-orange-500">
             Home

@@ -31,6 +31,7 @@ type User struct {
 	Bio         string
 	AvatarURI   string
 	Plan        string `gorm:"default:'free'"`
+	IsTeam      bool   `gorm:"default:false"` // true for team accounts (teams are stored as users)
 }
 
 type EntityRole struct {
@@ -1375,6 +1376,207 @@ func (g *gormZenaoDB) GetAllCommunities() ([]*zeni.Community, error) {
 	return res, nil
 }
 
+// CreateTeam implements zeni.DB.
+func (g *gormZenaoDB) CreateTeam(ownerID string, displayName string) (*zeni.User, error) {
+	g, span := g.trace("gzdb.CreateTeam")
+	defer span.End()
+
+	ownerIDInt, err := strconv.ParseUint(ownerID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse owner id: %w", err)
+	}
+
+	team := &User{
+		AuthID:      "", // Teams don't have auth
+		DisplayName: displayName,
+		Bio:         "",
+		AvatarURI:   userDefaultAvatar,
+		IsTeam:      true,
+	}
+
+	if err := g.db.Create(team).Error; err != nil {
+		return nil, fmt.Errorf("create team in db: %w", err)
+	}
+
+	// Add creator as owner
+	ownerRole := &EntityRole{
+		EntityType: zeni.EntityTypeUser,
+		EntityID:   uint(ownerIDInt),
+		OrgType:    zeni.EntityTypeTeam,
+		OrgID:      team.ID,
+		Role:       zeni.RoleTeamOwner,
+	}
+
+	if err := g.db.Create(ownerRole).Error; err != nil {
+		return nil, fmt.Errorf("create owner role: %w", err)
+	}
+
+	return dbUserToZeniDBUser(team), nil
+}
+
+// EditTeam implements zeni.DB.
+func (g *gormZenaoDB) EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error {
+	g, span := g.trace("gzdb.EditTeam")
+	defer span.End()
+
+	teamIDInt, err := strconv.ParseUint(teamID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse team id: %w", err)
+	}
+
+	team := User{
+		DisplayName: req.DisplayName,
+		Bio:         req.Bio,
+		AvatarURI:   req.AvatarUri,
+	}
+
+	if err := g.db.Model(&User{}).Where("id = ? AND is_team = ?", teamIDInt, true).Updates(team).Error; err != nil {
+		return fmt.Errorf("update team in db: %w", err)
+	}
+
+	if err := g.updateUserRoles(zeni.RoleTeamMember, memberIDs, teamID, zeni.EntityTypeTeam); err != nil {
+		return fmt.Errorf("update members: %w", err)
+	}
+
+	return nil
+}
+
+// GetUserByID implements zeni.DB.
+func (g *gormZenaoDB) GetUserByID(userID string) (*zeni.User, error) {
+	g, span := g.trace("gzdb.GetUserByID")
+	defer span.End()
+
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse user id: %w", err)
+	}
+
+	var user User
+	if err := g.db.First(&user, userIDInt).Error; err != nil {
+		return nil, fmt.Errorf("get user by id: %w", err)
+	}
+
+	return dbUserToZeniDBUser(&user), nil
+}
+
+// CanDeleteTeam implements zeni.DB.
+func (g *gormZenaoDB) CanDeleteTeam(teamID string) error {
+	teamIDInt, err := strconv.ParseUint(teamID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse team id: %w", err)
+	}
+
+	// Check if team is organizer of any event
+	var organizerRoles int64
+	if err := g.db.Model(&EntityRole{}).
+		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND role = ?",
+			zeni.EntityTypeUser, teamIDInt, zeni.EntityTypeEvent, zeni.RoleOrganizer).
+		Count(&organizerRoles).Error; err != nil {
+		return fmt.Errorf("check organizer roles: %w", err)
+	}
+	if organizerRoles > 0 {
+		return errors.New("cannot delete team: team is organizer of one or more events")
+	}
+
+	// Check if team is administrator of any community
+	var adminRoles int64
+	if err := g.db.Model(&EntityRole{}).
+		Where("entity_type = ? AND entity_id = ? AND org_type = ? AND role = ?",
+			zeni.EntityTypeUser, teamIDInt, zeni.EntityTypeCommunity, zeni.RoleAdministrator).
+		Count(&adminRoles).Error; err != nil {
+		return fmt.Errorf("check administrator roles: %w", err)
+	}
+	if adminRoles > 0 {
+		return errors.New("cannot delete team: team is administrator of one or more communities")
+	}
+
+	// Check if team is participant in any future event (not started yet)
+	now := time.Now()
+	var futureParticipations int64
+	if err := g.db.Model(&EntityRole{}).
+		Joins("JOIN events ON events.id = entity_roles.org_id").
+		Where("entity_roles.entity_type = ? AND entity_roles.entity_id = ? AND entity_roles.org_type = ? AND entity_roles.role = ?",
+			zeni.EntityTypeUser, teamIDInt, zeni.EntityTypeEvent, zeni.RoleParticipant).
+		Where("events.start_date > ? AND events.deleted_at IS NULL", now).
+		Count(&futureParticipations).Error; err != nil {
+		return fmt.Errorf("check future participations: %w", err)
+	}
+	if futureParticipations > 0 {
+		return errors.New("cannot delete team: team is participant in one or more future events")
+	}
+
+	return nil
+}
+
+// DeleteUserPostsByAuthor implements zeni.DB.
+func (g *gormZenaoDB) DeleteUserPostsByAuthor(userID string) error {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse user id: %w", err)
+	}
+	return g.db.Where("user_id = ?", userIDInt).Delete(&Post{}).Error
+}
+
+// RemoveUserFromAllCommunities implements zeni.DB.
+func (g *gormZenaoDB) RemoveUserFromAllCommunities(userID string) error {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse user id: %w", err)
+	}
+	return g.db.Where("entity_type = ? AND entity_id = ? AND org_type = ?",
+		zeni.EntityTypeUser, userIDInt, zeni.EntityTypeCommunity).
+		Delete(&EntityRole{}).Error
+}
+
+// RemoveUserGatekeeperRoles implements zeni.DB.
+func (g *gormZenaoDB) RemoveUserGatekeeperRoles(userID string) error {
+	userIDInt, err := strconv.ParseUint(userID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse user id: %w", err)
+	}
+	return g.db.Where("entity_type = ? AND entity_id = ? AND org_type = ? AND role = ?",
+		zeni.EntityTypeUser, userIDInt, zeni.EntityTypeEvent, zeni.RoleGatekeeper).
+		Delete(&EntityRole{}).Error
+}
+
+// DeleteTeam implements zeni.DB.
+func (g *gormZenaoDB) DeleteTeam(teamID string) error {
+	g, span := g.trace("gzdb.DeleteTeam")
+	defer span.End()
+
+	if err := g.CanDeleteTeam(teamID); err != nil {
+		return err
+	}
+
+	teamIDInt, err := strconv.ParseUint(teamID, 10, 64)
+	if err != nil {
+		return fmt.Errorf("parse team id: %w", err)
+	}
+
+	if err := g.RemoveUserGatekeeperRoles(teamID); err != nil {
+		return fmt.Errorf("remove gatekeeper roles: %w", err)
+	}
+
+	if err := g.RemoveUserFromAllCommunities(teamID); err != nil {
+		return fmt.Errorf("leave communities: %w", err)
+	}
+
+	if err := g.DeleteUserPostsByAuthor(teamID); err != nil {
+		return fmt.Errorf("delete posts: %w", err)
+	}
+
+	if err := g.db.Where("org_type = ? AND org_id = ?",
+		zeni.EntityTypeTeam, teamIDInt).Delete(&EntityRole{}).Error; err != nil {
+		return fmt.Errorf("delete team membership roles: %w", err)
+	}
+
+	if err := g.db.Delete(&User{}, teamIDInt).Error; err != nil {
+		return fmt.Errorf("delete team: %w", err)
+	}
+
+	return nil
+}
+
 // CreateFeed implements zeni.DB.
 func (g *gormZenaoDB) CreateFeed(orgType string, orgID string, slug string) (*zeni.Feed, error) {
 	orgIDInt, err := strconv.ParseUint(orgID, 10, 64)
@@ -2047,6 +2249,7 @@ func dbUserToZeniDBUser(dbuser *User) *zeni.User {
 		AvatarURI:   dbuser.AvatarURI,
 		AuthID:      dbuser.AuthID,
 		Plan:        zeni.Plan(dbuser.Plan),
+		IsTeam:      dbuser.IsTeam,
 	}
 	if u.DisplayName == "" {
 		u.DisplayName = fmt.Sprintf("Zenao user #%d", dbuser.ID)
