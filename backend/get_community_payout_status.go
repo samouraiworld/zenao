@@ -51,18 +51,9 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 	ctx context.Context,
 	req *connect.Request[zenaov1.GetCommunityPayoutStatusRequest],
 ) (*connect.Response[zenaov1.GetCommunityPayoutStatusResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
-	}
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
 	}
 
 	if req.Msg.CommunityId == "" {
@@ -71,7 +62,7 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 
 	var accountData *zeni.PaymentAccount
 	if err := s.DB.TxWithSpan(ctx, "db.GetCommunityPayoutStatus", func(tx zeni.DB) error {
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+		roles, err := tx.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
 			return err
 		}

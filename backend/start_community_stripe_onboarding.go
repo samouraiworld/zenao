@@ -91,12 +91,12 @@ func (s *ZenaoServer) StartCommunityStripeOnboarding(
 
 	s.Logger.Info("start-stripe-onboarding",
 		zap.String("community-id", req.Msg.CommunityId),
-		zap.String("user-id", actor.User.ID),
+		zap.String("user-id", actor.ID()),
 	)
 
 	var existingAccount *zeni.PaymentAccount
 	if err := s.DB.TxWithSpan(ctx, "db.StartStripeOnboarding", func(tx zeni.DB) error {
-		roles, err := tx.EntityRoles(zeni.EntityTypeUser, actor.User.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+		roles, err := tx.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
 			return err
 		}
