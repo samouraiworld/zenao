@@ -42,7 +42,7 @@ export default function CreateCommunityForm({
       communityFormSchema.extend({
         administrators: z.array(
           z.object({
-            address: z
+            email: z
               .string()
               .email("Administrator must be a valid email address"),
           }),

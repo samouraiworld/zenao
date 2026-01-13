@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
-import { PlusCircleIcon, ChevronRight } from "lucide-react";
+import { PlusCircleIcon, ChevronRight, Users, Calendar } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   type NavMainItem,
@@ -232,16 +232,36 @@ export function NavMain({ items }: NavMainProps) {
         <SidebarGroupContent className="flex flex-col gap-2">
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <SidebarMenuButton
-                variant="outline"
-                tooltip={t("quick-create")}
-                asChild
-              >
-                <Link href="/dashboard/event/create">
-                  <PlusCircleIcon />
-                  <span>{t("create-event-btn")}</span>
-                </Link>
-              </SidebarMenuButton>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    variant="outline"
+                    tooltip={t("quick-create")}
+                    aria-label="quick menu create"
+                  >
+                    <PlusCircleIcon />
+                    <span>{t("create-btn")}</span>
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <Link href="/dashboard/event/create">
+                    <DropdownMenuItem>
+                      <div className="flex">
+                        <Calendar className="mr-2 h-5 w-5" />
+                        <span className="mr-2">{t("create-event")}</span>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                  <Link href="/dashboard/community/create">
+                    <DropdownMenuItem>
+                      <div className="flex">
+                        <Users className="mr-2 h-5 w-5" />
+                        <span className="mr-2">{t("create-community")}</span>
+                      </div>
+                    </DropdownMenuItem>
+                  </Link>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
