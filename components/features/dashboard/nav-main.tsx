@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 import { PlusCircleIcon, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -56,6 +56,13 @@ const NavItemExpanded = ({
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
   const t = useTranslations("dashboard.sidebar");
+  const path = usePathname();
+  const { id } = useParams<{ id: string | undefined }>();
+
+  const resolvedSubItems =
+    typeof item.subItems === "function"
+      ? item.subItems(path, id)
+      : item.subItems;
 
   return (
     <Collapsible
@@ -66,7 +73,7 @@ const NavItemExpanded = ({
     >
       <SidebarMenuItem>
         <CollapsibleTrigger asChild>
-          {item.subItems ? (
+          {resolvedSubItems ? (
             <SidebarMenuButton
               disabled={item.comingSoon}
               isActive={isActive(item.url, item.subItems)}
@@ -96,10 +103,10 @@ const NavItemExpanded = ({
             </SidebarMenuButton>
           )}
         </CollapsibleTrigger>
-        {item.subItems && (
+        {resolvedSubItems && (
           <CollapsibleContent>
             <SidebarMenuSub>
-              {item.subItems.map((subItem) => (
+              {resolvedSubItems?.map((subItem) => (
                 <SidebarMenuSubItem key={subItem.title}>
                   <SidebarMenuSubButton
                     aria-disabled={subItem.comingSoon}
@@ -134,6 +141,13 @@ const NavItemCollapsed = ({
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
   const t = useTranslations("dashboard.sidebar");
+  const pathname = usePathname();
+  const { id } = useParams<{ id: string | undefined }>();
+
+  const resolvedSubItems =
+    typeof item.subItems === "function"
+      ? item.subItems(pathname, id)
+      : item.subItems;
 
   return (
     <SidebarMenuItem key={item.title}>
@@ -154,7 +168,7 @@ const NavItemCollapsed = ({
           side="right"
           align="start"
         >
-          {item.subItems?.map((subItem) => (
+          {resolvedSubItems?.map((subItem) => (
             <DropdownMenuItem key={subItem.title} asChild>
               <SidebarMenuSubButton
                 key={subItem.title}
@@ -186,9 +200,18 @@ const NavItemCollapsed = ({
 export function NavMain({ items }: NavMainProps) {
   const path = usePathname();
   const { state, isMobile } = useSidebar();
+  const { id } = useParams<{ id: string | undefined }>();
   const t = useTranslations("dashboard.sidebar");
 
   const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
+    if (typeof subItems === "function") {
+      const resolvedSubItems = subItems(path, id);
+      if (resolvedSubItems?.length) {
+        return resolvedSubItems.some((sub) => path.startsWith(sub.url));
+      }
+      return path === url;
+    }
+
     if (subItems?.length) {
       return subItems.some((sub) => path.startsWith(sub.url));
     }
@@ -196,6 +219,10 @@ export function NavMain({ items }: NavMainProps) {
   };
 
   const isSubmenuOpen = (subItems?: NavMainItem["subItems"]) => {
+    if (typeof subItems === "function") {
+      const resolvedSubItems = subItems(path, id);
+      return resolvedSubItems?.some((sub) => path.startsWith(sub.url)) ?? false;
+    }
     return subItems?.some((sub) => path.startsWith(sub.url)) ?? false;
   };
 
@@ -227,7 +254,11 @@ export function NavMain({ items }: NavMainProps) {
               {group.items.map((item) => {
                 if (state === "collapsed" && !isMobile) {
                   // If no subItems, just render the button as a link
-                  if (!item.subItems) {
+                  if (
+                    !item.subItems ||
+                    (typeof item.subItems === "function" &&
+                      !item.subItems(path, id))
+                  ) {
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
@@ -248,6 +279,7 @@ export function NavMain({ items }: NavMainProps) {
                       </SidebarMenuItem>
                     );
                   }
+
                   // Otherwise, render the dropdown as before
                   return (
                     <NavItemCollapsed
