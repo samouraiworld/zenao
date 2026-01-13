@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 	_ "time/tzdata"
@@ -17,21 +16,12 @@ func (s *ZenaoServer) CreateCommunity(
 	ctx context.Context,
 	req *connect.Request[zenaov1.CreateCommunityRequest],
 ) (*connect.Response[zenaov1.CreateCommunityResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-community", zap.String("name", req.Msg.DisplayName), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("create-community", zap.String("name", req.Msg.DisplayName), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if err := validateCommunity(req.Msg.DisplayName, req.Msg.Description, req.Msg.AvatarUri, req.Msg.BannerUri); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
@@ -43,7 +33,7 @@ func (s *ZenaoServer) CreateCommunity(
 	}
 
 	var adminIDs []string
-	adminIDs = append(adminIDs, zUser.ID)
+	adminIDs = append(adminIDs, actor.ID())
 	for _, authAdmin := range authAdmins {
 		if authAdmin.Banned {
 			return nil, fmt.Errorf("user %s is banned", authAdmin.Email)
@@ -62,7 +52,7 @@ func (s *ZenaoServer) CreateCommunity(
 	if err := s.DB.TxWithSpan(ctx, "db.CreateCommunity", func(tx zeni.DB) error {
 		var err error
 		// XXX: put the admins as members too.
-		cmt, err = tx.CreateCommunity(zUser.ID, adminIDs, adminIDs, []string{}, req.Msg)
+		cmt, err = tx.CreateCommunity(actor.ID(), adminIDs, adminIDs, []string{}, req.Msg)
 		if err != nil {
 			return err
 		}
