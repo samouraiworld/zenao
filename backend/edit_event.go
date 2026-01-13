@@ -18,22 +18,12 @@ func (s *ZenaoServer) EditEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.EditEventRequest],
 ) (*connect.Response[zenaov1.EditEventResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	// retrieve auto-incremented user ID from database, do not use auth provider's user ID directly for realms
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("edit-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("edit-event", zap.String("event-id", req.Msg.EventId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	authOrgas, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Organizers)
 	if err != nil {
@@ -42,7 +32,7 @@ func (s *ZenaoServer) EditEvent(
 
 	//XXX: refactor the logic to avoid duplicate w/ gkps ?
 	var organizersIDs []string
-	organizersIDs = append(organizersIDs, zUser.ID)
+	organizersIDs = append(organizersIDs, actor.ID())
 	for _, authOrg := range authOrgas {
 		if authOrg.Banned {
 			return nil, fmt.Errorf("user %s is banned", authOrg.Email)
@@ -90,7 +80,7 @@ func (s *ZenaoServer) EditEvent(
 		evt          *zeni.Event
 	)
 	if err := s.DB.TxWithSpan(ctx, "db.EditEvent", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
@@ -113,7 +103,7 @@ func (s *ZenaoServer) EditEvent(
 			if err != nil {
 				return err
 			}
-			entityRoles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+			entityRoles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, req.Msg.CommunityId)
 			if err != nil {
 				return err
 			}

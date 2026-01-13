@@ -15,32 +15,23 @@ func (s *ZenaoServer) RemoveEventFromCommunity(
 	ctx context.Context,
 	req *connect.Request[zenaov1.RemoveEventFromCommunityRequest],
 ) (*connect.Response[zenaov1.RemoveEventFromCommunityResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("remove-event-from-community", zap.String("event-id", req.Msg.EventId), zap.String("community-id", req.Msg.CommunityId), zap.String("user-id", zUser.ID))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("remove-event-from-community", zap.String("event-id", req.Msg.EventId), zap.String("community-id", req.Msg.CommunityId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if err := s.DB.TxWithSpan(ctx, "db.RemoveEventFromCommunity", func(tx zeni.DB) error {
 		cmt, err := tx.GetCommunity(req.Msg.CommunityId)
 		if err != nil {
 			return err
 		}
-		cmtRoles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
+		cmtRoles, err := tx.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, cmt.ID)
 		if err != nil {
 			return err
 		}
-		evtRoles, err := tx.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		evtRoles, err := tx.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}

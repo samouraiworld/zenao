@@ -15,20 +15,15 @@ func (s *ZenaoServer) GetPost(ctx context.Context, req *connect.Request[zenaov1.
 		return nil, errors.New("post ID is required")
 	}
 
+	actor, err := s.GetOptionalActor(ctx, req.Header())
+	if err != nil {
+		return nil, err
+	}
+
 	var (
-		zUser *zeni.User
 		zPost *zeni.Post
 		count uint64
-		err   error
 	)
-
-	user := s.Auth.GetUser(ctx)
-	if user != nil {
-		zUser, err = s.EnsureUserExists(ctx, user)
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	// TODO: check if children count works good
 	if err = s.DB.TxWithSpan(ctx, "GetPost", func(tx zeni.DB) error {
@@ -56,7 +51,7 @@ func (s *ZenaoServer) GetPost(ctx context.Context, req *connect.Request[zenaov1.
 			rv = &rview{}
 		}
 		rv.count++
-		if zUser != nil && reaction.UserID == zUser.ID {
+		if actor != nil && reaction.UserID == actor.ID() {
 			rv.userHasVoted = true
 		}
 		reactions[reaction.Icon] = rv
