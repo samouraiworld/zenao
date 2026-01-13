@@ -163,8 +163,13 @@ Cypress.Commands.add("accessCreateEventPage", () => {
   // start from dashboard page
   cy.visit("/dashboard");
 
-  // click on create button from sidebar
+  // click on home create button
   cy.get(
-    'a[href="/dashboard/event/create"][data-sidebar="menu-button"]',
+    'button[aria-label="quick menu create"][data-sidebar="menu-button"]',
   ).click();
+
+  cy.get('[role="menu"]').should("be.visible");
+
+  // click on create button from sidebar
+  cy.get('a[href="/dashboard/event/create"] > div[role="menuitem"]').click();
 });

@@ -185,6 +185,10 @@ describe("main", () => {
 
     cy.createEvent({ exclusive: false });
 
+    cy.url().then((url) => {
+      cy.visit(url.replace("/dashboard", ""));
+    });
+
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
 
@@ -469,7 +473,7 @@ describe("main", () => {
     cy.createEvent({ exclusive: false });
 
     cy.url().then((url) => {
-      cy.visit(url);
+      cy.visit(url.replace("/dashboard", ""));
     });
 
     // Participate to an event
@@ -498,7 +502,7 @@ describe("main", () => {
 
     cy.url().then((url) => {
       logout();
-      cy.visit(url);
+      cy.visit(url.replace("/dashboard", ""));
     });
 
     // Guard
@@ -515,6 +519,10 @@ describe("main", () => {
   it("create a community", () => {
     cy.visit("/");
     cy.createCommunity({});
+
+    cy.url().then((url) => {
+      cy.visit(url.replace("/dashboard", ""));
+    });
 
     cy.url().should("contain", "/community/");
 
@@ -710,9 +718,6 @@ Cypress.Commands.add("accessCreateEventPage", () => {
   cy.get("div").contains("Create new event").click();
 
   login();
-
-  // Click outside to close any open modal
-  cy.get("header").click(0, 0);
 });
 
 Cypress.Commands.add(
@@ -733,9 +738,6 @@ Cypress.Commands.add(
     cy.get("div").contains("Create new community").click();
 
     login();
-
-    // Click outside to close any open modal
-    cy.get("header").click(0, 0);
 
     // fill community info
 

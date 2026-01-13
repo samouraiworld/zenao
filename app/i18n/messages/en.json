@@ -619,7 +619,9 @@
   "dashboard": {
     "signout-desc": "Log in to access your dashboard",
     "sidebar": {
-      "create-event-btn": "Create event",
+      "create-btn": "Create",
+      "create-event": "Create Event",
+      "create-community": "Create Community",
       "events": "Events",
       "upcoming":"Upcoming",
       "past": "Past",
