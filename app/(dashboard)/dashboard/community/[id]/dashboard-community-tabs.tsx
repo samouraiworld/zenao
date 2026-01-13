@@ -68,6 +68,17 @@ export default function DashboardCommunityTabs({
             {t("events")}
           </TabsTrigger>
         </Link>
+        <Link
+          href={`/dashboard/community/${communityId}/payouts`}
+          scroll={false}
+        >
+          <TabsTrigger
+            value="payouts"
+            className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
+          >
+            {t("payouts")}
+          </TabsTrigger>
+        </Link>
       </TabsList>
       <Separator className="mb-3" />
 
