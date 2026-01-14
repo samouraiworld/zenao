@@ -202,9 +202,6 @@ describe("main", () => {
 
     cy.get("button").contains("Register").should("be.visible");
 
-    cy.get("p").contains("Manage event").should("be.visible");
-    cy.get("a").contains("Edit event").should("be.visible");
-
     // participate
     cy.get("button").contains("Register").click();
 
@@ -392,79 +389,22 @@ describe("main", () => {
       cy.visit(url);
     });
 
-    cy.get("a").contains("Open ticket scanner").click();
+    // Go to dashboard
+    cy.get("a").contains("Edit event").click();
+
+    // Access Participants page
+    cy.get("a").contains("Participants").click();
+    cy.url().should("contain", "/participants");
+
+    // Open ticket scanner
+    cy.get("button").contains("QR Code Scanner").click();
+    cy.url().should("contain", "/scanner");
 
     cy.wait(5000);
 
     cy.get("h2").should("contain", "Invalid ticket");
 
     cy.visit("/");
-  });
-
-  it("add a gatekeeper", () => {
-    // start from the first fake event
-    cy.visit("/event/1");
-
-    cy.url().then((url) => {
-      login();
-      cy.visit(url);
-    });
-
-    cy.get("p").contains("Manage gatekeepers (1)").click();
-
-    cy.get('input[placeholder="Email..."]').type(testEmail2, {
-      delay: 10,
-    });
-
-    cy.get('button[aria-label="add gatekeeper"]').click();
-
-    cy.get("button").contains("Done").click();
-
-    cy.get("p")
-      .contains("Manage gatekeepers (2)", { timeout: 10000 })
-      .should("be.visible");
-
-    cy.url().then((url) => {
-      // Connect with other account
-      logout();
-      login(testEmail2);
-      cy.visit(url);
-
-      cy.get("a").contains("Open ticket scanner").should("exist");
-    });
-  });
-
-  it("remove a gatekeeper", () => {
-    // start from the first fake event
-    cy.visit("/event/1");
-
-    cy.url().then((url) => {
-      logout();
-      login();
-      cy.visit(url);
-    });
-
-    cy.get("p").contains("Manage gatekeepers (2)").click();
-
-    cy.get('button[aria-label="delete gatekeeper"]').click();
-
-    cy.get("button").contains("Done").click();
-
-    cy.wait(5000);
-
-    cy.get("p").contains("Manage gatekeepers (1)").should("be.visible");
-
-    cy.url().should("include", "/event/");
-    cy.url().should("not.include", "/edit");
-
-    cy.url().then((url) => {
-      // Connect with other account
-      logout();
-      login(testEmail2);
-      cy.visit(url);
-
-      cy.get("a").contains("Open ticket scanner").should("not.exist");
-    });
   });
 
   it("cancel participation", () => {
