@@ -1,19 +1,16 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import DashboardTeamSettingsTabs from "./dashboard-team-settings-tabs";
 import DashboardTeamSettingsHeader from "./dashboard-team-settings-header";
 import { TeamProvider } from "./team-provider";
 import DashboardTeamSettingsEditionProvider from "./dashboard-team-settings-edition-provider";
+import { getQueryClient } from "@/lib/get-query-client";
 
 export default function TeamSettingsPageLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const queryClient = useQueryClient();
+  const queryClient = getQueryClient();
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
