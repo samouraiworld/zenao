@@ -1,3 +1,5 @@
-export default function TeamSettingsPage() {
-  return <div>Team Settings Page - Coming Soon!</div>;
+import DashboardTeamSettingsMembers from "./dashboard-team-settings-members";
+
+export default function TeamSettingsMembers() {
+  return <DashboardTeamSettingsMembers />;
 }
