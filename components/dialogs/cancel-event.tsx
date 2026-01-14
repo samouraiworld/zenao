@@ -47,7 +47,7 @@ export function CancelEventDialog({
 
       toast({ title: t("toast-cancel-event-success") });
       onOpenChange(false);
-      router.push(`/dashboard/event`);
+      router.push(`/dashboard`);
     } catch (error) {
       if (error instanceof Error) {
         let toastMessage = "";
