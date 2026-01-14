@@ -6,13 +6,13 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useWriteContract } from "wagmi";
 import { IMAGE_FILE_SIZE_LIMIT } from "../../../components/features/event/constants";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/shadcn/form";
 import { userInfoOptions } from "@/lib/queries/user";
 import { profileOptions } from "@/lib/queries/profile";
 import Text from "@/components/widgets/texts/text";
-import { useEditUserProfile } from "@/lib/mutations/profile";
 import { captureException } from "@/lib/report";
 import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-children";
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
@@ -39,6 +39,9 @@ import UserExperiences from "@/components/features/user/settings/user-experience
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
+import { uploadString } from "@/lib/files";
+import { profileABI } from "@/lib/evm";
+import { useEditUserProfile } from "@/lib/mutations/profile";
 
 export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
   const router = useRouter();
@@ -91,6 +94,8 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
 
   const bio = form.watch("bio");
 
+  const { writeContractAsync } = useWriteContract();
+
   const onSubmit = async (values: UserFormSchemaType) => {
     try {
       if (!user) {
@@ -117,6 +122,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         },
       );
 
+      // Write to backend (always)
       await editUser({
         userId: userProfileId,
         token,
@@ -124,6 +130,40 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         displayName: values.displayName,
         bio,
       });
+
+      // Also write to blockchain if configured
+      // TODO: Configure NEXT_PUBLIC_EVM_RPC and NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS
+      if (
+        process.env.NEXT_PUBLIC_EVM_RPC &&
+        process.env.NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS
+      ) {
+        try {
+          // Upload bio to IPFS to get CID
+          const bioCID = await uploadString(bio);
+
+          // TODO: only update keys that have been updated (not all 3 every time)
+          const keys: string[] = ["pfp", "dn", "bio"];
+          const txValues: `0x${string}`[] = [
+            `0x${Buffer.from(values.avatarUri, "utf-8").toString("hex")}`,
+            `0x${Buffer.from(values.displayName, "utf-8").toString("hex")}`,
+            `0x${Buffer.from(bioCID, "utf-8").toString("hex")}`,
+          ];
+
+          const txHash = await writeContractAsync({
+            abi: profileABI,
+            address: process.env
+              .NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS as `0x${string}`,
+            functionName: "setBatch",
+            args: [keys, txValues],
+          });
+
+          console.log("Profile updated on-chain:", txHash);
+        } catch (error) {
+          console.error("Failed to update profile on-chain:", error);
+          // Don't block the user flow if blockchain write fails
+          // Backend is already updated
+        }
+      }
 
       trackEvent("UserProfileEdited");
 

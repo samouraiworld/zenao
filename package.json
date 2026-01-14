@@ -53,6 +53,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@types/tz-lookup": "^6.1.2",
     "@vercel/otel": "^2.1.0",
+    "@web3auth/modal": "^10.7.0",
     "@yornaath/batshit": "^0.11.1",
     "@yudiel/react-qr-scanner": "^2.3.1",
     "bech32": "^2.0.0",
@@ -99,6 +100,8 @@
     "tz-lookup": "^6.1.25",
     "use-debounce": "^10.0.6",
     "vaul": "^1.1.2",
+    "viem": "^2.40.3",
+    "wagmi": "^2.14.16",
     "zod": "^3.24.1"
   },
   "devDependencies": {

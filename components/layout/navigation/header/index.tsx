@@ -25,12 +25,11 @@ import {
   SignInButton,
   useAuth,
 } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import QuickCreateMenu from "./quick-create-menu";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
-import { userInfoOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
 import {
   DropdownMenu,
@@ -52,6 +51,7 @@ import {
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import SoonOnBase from "@/components/widgets/soon-on-base";
 import VersionTag from "@/components/widgets/version-tag";
+import { userInfoOptions } from "@/lib/queries/user";
 
 export type NavItem = {
   key: string;
@@ -239,6 +239,7 @@ const Auth = ({
   const t = useTranslations("navigation");
   const tNav = useTranslations("dashboard.navUser");
   const { trackEvent } = useAnalyticsEvents();
+
   const { signOut, getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
