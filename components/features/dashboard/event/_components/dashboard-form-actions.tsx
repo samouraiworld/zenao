@@ -22,7 +22,7 @@ export default function DashboardFormActions() {
   const isMobile = useIsMobile();
 
   const hasStarted = useMemo(() => {
-    return fromUnixTime(Number(startDate) / 1000) > new Date();
+    return fromUnixTime(Number(startDate) / 1000) < new Date();
   }, [startDate]);
 
   if (isMobile) {
