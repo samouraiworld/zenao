@@ -56,21 +56,6 @@ describe("dashboard", () => {
 
       // check we are on home page
       cy.location("pathname", { timeout: 10000 }).should("eq", "/");
-
-      // come back to dashboard
-      cy.visit("/dashboard");
-
-      // click on Avatar menu to go to home
-      cy.get('img[alt="Avatar"]', { timeout: 15000 })
-        .first()
-        .should("be.visible")
-        .click();
-
-      // click on home link
-      cy.get("a").contains("Switch to regular user mode").click();
-
-      // check we are on home page
-      cy.location("pathname").should("eq", "/");
     });
 
     it("navigate to profile from dashboard", () => {

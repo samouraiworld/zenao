@@ -39,6 +39,7 @@ func (s *ZenaoServer) GetUsersProfile(ctx context.Context, req *connect.Request[
 			DisplayName: zUser.DisplayName,
 			Bio:         zUser.Bio,
 			AvatarUri:   zUser.AvatarURI,
+			IsTeam:      zUser.IsTeam,
 		}
 		profiles = append(profiles, profile)
 	}
