@@ -633,9 +633,24 @@
       "quick-create": "Quick create"
     },
     "navUser": {
+      "accounts": "Accounts",
+      "personal-account": "Personal account",
+      "team": "Team",
+      "create-team": "Create a team",
       "profile": "Profile",
       "switch-to-regular-user-mode": "Switch to regular user mode",
       "sign-out": "Sign out"
+    },
+    "createTeam": {
+      "title": "Create a team",
+      "subtitle": "Teams allow you to have multiple people managing events and communities together.",
+      "name-label": "Team name",
+      "name-placeholder": "Enter team name",
+      "description": "You can add members and customize your team later.",
+      "cancel": "Cancel",
+      "create": "Create team",
+      "success": "Team created successfully",
+      "error": "Failed to create team"
     },
     "eventsTable": {
       "events": "Events",
@@ -655,11 +670,16 @@
       "loading": "Loading..."
     },
     "communitiyEventsTable": {
+      "name-column": "Name",
       "date-column": "Date",
       "participants-column": "Participants",
       "organizers-column": "Organized by",
       "actions-column": "Actions",
       "view-event": "View event"
+    },
+    "communitiyAdministratorsTable": {
+      "email-column": "Email",
+      "actions-column": "Actions"
     },
     "communityDetails": {
       "communityTabs": {

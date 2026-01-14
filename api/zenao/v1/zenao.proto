@@ -49,6 +49,7 @@ service ZenaoService {
   rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse);
   rpc EditTeam(EditTeamRequest) returns (EditTeamResponse);
   rpc DeleteTeam(DeleteTeamRequest) returns (DeleteTeamResponse);
+  rpc GetUserTeams(GetUserTeamsRequest) returns (GetUserTeamsResponse);
 
   // XXX: TEMPORARY SWITCH TO WEB2 FIRST
   rpc EntityRoles(EntityRolesRequest) returns (EntityRolesResponse); // -> GetCommunityUserRoles, GetEventUserRoles
@@ -104,6 +105,7 @@ message Profile {
   string display_name = 2;
   string bio = 3;
   string avatar_uri = 4;
+  bool is_team = 5;
 }
 
 message GetUsersProfileRequest {
@@ -562,6 +564,21 @@ message EditTeamResponse {}
 message DeleteTeamRequest { string team_id = 1; }
 
 message DeleteTeamResponse {}
+
+message GetUserTeamsRequest {}
+
+message GetUserTeamsResponse {
+  repeated UserTeam teams = 1;
+}
+
+message UserTeam {
+  string team_id = 1;
+  string display_name = 2;
+  string bio = 3;
+  string avatar_uri = 4;
+  string role = 5;
+  string plan = 6;
+}
 
 message GetCommunityAdministratorsRequest { string community_id = 1; }
 

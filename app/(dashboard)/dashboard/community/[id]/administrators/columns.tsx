@@ -17,14 +17,13 @@ interface UseCommunityAdministratorsColumnsProps {
 export const useCommunityAdministratorsColumns = (
   props: UseCommunityAdministratorsColumnsProps,
 ): ColumnDef<string>[] => {
-  const t = useTranslations(
-    "dashboard.communityDetails.administrators.columns",
-  );
+  const t = useTranslations("dashboard.communitiyAdministratorsTable");
+
   const columns = useMemo<ColumnDef<string>[]>(
     () => [
       {
         accessorKey: "email",
-        header: () => <div>{t("email")}</div>,
+        header: () => <div>{t("email-column")}</div>,
         cell: ({ row }) => <div>{row.original}</div>,
         enableHiding: false,
         enableSorting: true,
@@ -34,7 +33,7 @@ export const useCommunityAdministratorsColumns = (
       },
       {
         id: "actions",
-        header: () => <div>{t("actions")}</div>,
+        header: () => <div>{t("actions-column")}</div>,
         cell: ({ row }) => (
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
