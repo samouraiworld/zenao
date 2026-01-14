@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Trash2Icon, Plus, Info } from "lucide-react";
@@ -45,6 +45,10 @@ export const CommunityForm = ({
     name: "administrators",
   });
 
+  const {
+    formState: { isValid },
+  } = form;
+
   const adminInputs = useWatch({
     control: form.control,
     name: "administrators",
@@ -52,14 +56,23 @@ export const CommunityForm = ({
 
   const description = form.watch("description");
 
-  const lastAdmin = adminInputs?.[adminInputs.length - 1];
-  const isLastAdminInvalid =
-    lastAdmin &&
-    (lastAdmin.email === "" ||
-      !communityFormSchema.shape.administrators.element.shape.email.safeParse(
-        lastAdmin.email,
-      ).success);
-  const isButtonDisabled = !form.formState.isValid || isLastAdminInvalid;
+  const lastAdmin = useMemo(
+    () => adminInputs?.[adminInputs.length - 1],
+    [adminInputs],
+  );
+  const isLastAdminInvalid = useMemo(
+    () =>
+      lastAdmin &&
+      (lastAdmin.email === "" ||
+        !communityFormSchema.shape.administrators.element.shape.email.safeParse(
+          lastAdmin.email,
+        ).success),
+    [lastAdmin],
+  );
+  const isButtonDisabled = useMemo(
+    () => !isValid || isLastAdminInvalid,
+    [isValid, isLastAdminInvalid],
+  );
 
   const t = useTranslations("community-form");
 

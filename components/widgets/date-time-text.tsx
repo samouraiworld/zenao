@@ -8,7 +8,7 @@ import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
 import { useLayoutNow } from "@/hooks/use-layout-now";
 
 interface DateTimeTextProps extends Omit<TextProps, "children"> {
-  datetime: bigint;
+  datetime: number | bigint;
 }
 
 // A datetime Text that can toggles the display between the full datetime or distance from now

@@ -26,13 +26,7 @@ Cypress.Commands.overwrite("log", function (log, ...args) {
 // Must be called when already logged in and on Events creation page
 Cypress.Commands.add(
   "createEvent",
-  ({
-    exclusive = false,
-    gatekeepers = [],
-  }: {
-    exclusive: boolean;
-    gatekeepers?: string[];
-  }) => {
+  ({ exclusive = false }: { exclusive: boolean }) => {
     // --- fill event infos ---
     // imageUri
     cy.get("input[name=imageUri]").selectFile(
@@ -97,18 +91,5 @@ Cypress.Commands.add(
 
     cy.url().should("include", "/event/");
     cy.url().should("not.include", "/create");
-
-    if (gatekeepers.length > 0) {
-      cy.get("p").contains("Manage gatekeepers (1)").click();
-      gatekeepers.forEach((gatekeeper) => {
-        cy.get('input[placeholder="Email..."]').type(gatekeeper, {
-          delay: 10,
-        });
-        cy.get('button[aria-label="add gatekeeper"]').click();
-      });
-
-      cy.get("button").contains("Done").click();
-      cy.wait(5000);
-    }
   },
 );

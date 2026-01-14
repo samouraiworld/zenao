@@ -28,7 +28,7 @@ export default function QuickCreateMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <Link href="/event/create">
+        <Link href="/dashboard/event/create">
           <DropdownMenuItem>
             <div className="flex">
               <Calendar className="mr-2 h-5 w-5" />
@@ -36,7 +36,7 @@ export default function QuickCreateMenu() {
             </div>
           </DropdownMenuItem>
         </Link>
-        <Link href="/community/create">
+        <Link href="/dashboard/community/create">
           <DropdownMenuItem asChild>
             <div className="flex">
               <Users className="h-5 w-5" />
