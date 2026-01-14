@@ -50,8 +50,7 @@ export default function EventFormCommunitySelector({
   );
 
   const entityId = activeAccount?.id ?? userInfo?.userId ?? "";
-  const teamId =
-    activeAccount?.type === "team" ? activeAccount.id : undefined;
+  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
 
   const { data: userCommunitiesPages } = useSuspenseInfiniteQuery(
     communitiesByUserRolesList(
