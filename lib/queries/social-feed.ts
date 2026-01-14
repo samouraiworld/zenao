@@ -8,7 +8,7 @@ export const DEFAULT_FEED_POSTS_COMMENTS_LIMIT = 10;
 
 export const feedPost = (postId: string, userId: string, teamId?: string) =>
   queryOptions({
-    queryKey: ["feedPost", postId, userId, teamId],
+    queryKey: ["feedPost", postId, userId],
     queryFn: async () => {
       return withSpan(
         `query:backend:post:${postId}:main:${userId}`,
@@ -37,7 +37,7 @@ export const feedPosts = (
   teamId?: string,
 ) =>
   infiniteQueryOptions({
-    queryKey: ["feedPosts", feedId, tags, userId, teamId],
+    queryKey: ["feedPosts", feedId, tags, userId],
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
         `query:backend:feed:${feedId}:posts:${tags}:${userId}`,
@@ -80,7 +80,7 @@ export const feedPostsChildren = (
   teamId?: string,
 ) =>
   infiniteQueryOptions({
-    queryKey: ["feedPostsChildren", parentId, tags, userId, teamId],
+    queryKey: ["feedPostsChildren", parentId, tags, userId],
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
         `query:backend:post:${parentId}:${tags}:${userId}`,
@@ -110,7 +110,7 @@ export const feedPostsChildren = (
 
 export const pollInfo = (pollId: string, userId: string, teamId?: string) =>
   queryOptions({
-    queryKey: ["poll", pollId, teamId],
+    queryKey: ["poll", pollId],
     queryFn: async () => {
       return withSpan(`query:backend:poll:${pollId}:${userId}`, async () => {
         const res = await zenaoClient.getPoll(

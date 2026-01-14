@@ -26,7 +26,7 @@ export const eventGatekeepersEmails = (
   teamId?: string,
 ) =>
   queryOptions({
-    queryKey: ["event", eventId, "gatekeepers", teamId],
+    queryKey: ["event", eventId, "gatekeepers"],
     queryFn: async () => {
       return withSpan(
         `query:backend:event:${eventId}:gatekeepers`,

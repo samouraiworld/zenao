@@ -10,7 +10,7 @@ export const eventTickets = (
   teamId?: string,
 ) =>
   queryOptions({
-    queryKey: ["tickets", eventId, teamId],
+    queryKey: ["tickets", eventId],
     queryFn: async () => {
       const token = await getToken();
 

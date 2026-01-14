@@ -1,33 +1,19 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { z } from "zod";
 import { getQueryClient } from "@/lib/get-query-client";
-
-const activeAccountSchema = z.object({
-  type: z.enum(["personal", "team"]),
-  id: z.string(),
-});
-
-type ActiveAccount = z.infer<typeof activeAccountSchema>;
+import {
+  type ActiveAccount,
+  getActiveAccountCookie,
+  setActiveAccountCookie,
+  clearActiveAccountCookie,
+} from "@/lib/active-account/cookie";
 
 type ActiveAccountContextProps = {
   activeAccount: ActiveAccount | null;
   switchAccount: (account: ActiveAccount) => void;
   isTeamContext: boolean;
 };
-
-const STORAGE_KEY = "zenao-active-account";
-
-function parseStoredAccount(stored: string): ActiveAccount | null {
-  try {
-    const parsed: unknown = JSON.parse(stored); // eslint-disable-line no-restricted-syntax
-    const result = activeAccountSchema.safeParse(parsed);
-    return result.success ? result.data : null;
-  } catch {
-    return null;
-  }
-}
 
 const defaultValue: ActiveAccountContextProps = {
   activeAccount: null,
@@ -46,20 +32,17 @@ function ActiveAccountProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const account = parseStoredAccount(stored);
-      if (account) {
-        setActiveAccount(account);
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+    const account = getActiveAccountCookie();
+    if (account) {
+      setActiveAccount(account);
+    } else {
+      clearActiveAccountCookie();
     }
   }, []);
 
   const switchAccount = (account: ActiveAccount) => {
     setActiveAccount(account);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
+    setActiveAccountCookie(account);
     getQueryClient().invalidateQueries();
   };
 

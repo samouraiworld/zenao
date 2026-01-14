@@ -11,6 +11,7 @@ import {
 } from "@/lib/queries/events-list";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import useManualPagination from "@/hooks/use-manual-pagination";
+import { useActiveAccount } from "@/components/providers/active-account-provider";
 
 interface EventsTableProps {
   now: number;
@@ -19,9 +20,13 @@ interface EventsTableProps {
 
 export default function EventsTable({ now, tab }: EventsTableProps) {
   const { getToken, userId } = useAuth();
+  const { activeAccount } = useActiveAccount();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
+
+  const entityId = activeAccount?.id ?? userInfo?.userId;
+  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
 
   const [tablePage, setTablePage] = useQueryState("page", {
     defaultValue: 1,
@@ -34,7 +39,7 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
   const { data: pastEvents, isFetching: isFetchingPastEvents } =
     useSuspenseQuery(
       eventsByRolesListSuspense(
-        userInfo?.userId,
+        entityId,
         DiscoverableFilter.UNSPECIFIED,
         now - 1,
         0,
@@ -42,13 +47,14 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
         tablePage - 1,
         ["organizer", "gatekeeper"],
         getToken,
+        teamId,
       ),
     );
 
   const { data: upcomingEvents, isFetching: isFetchingUpcomingEvents } =
     useSuspenseQuery(
       eventsByRolesListSuspense(
-        userInfo?.userId,
+        entityId,
         DiscoverableFilter.UNSPECIFIED,
         now,
         Number.MAX_SAFE_INTEGER,
@@ -56,6 +62,7 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
         tablePage - 1,
         ["organizer", "gatekeeper"],
         getToken,
+        teamId,
       ),
     );
 

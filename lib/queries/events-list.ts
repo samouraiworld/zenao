@@ -100,7 +100,6 @@ export const eventsByRolesListSuspense = (
       limitInt,
       pageInt,
       roles,
-      teamId,
     ],
     queryFn: async () => {
       if (!userId) return [];
@@ -148,7 +147,6 @@ export const eventsByOrganizerList = (
       fromInt,
       toInt,
       limitInt,
-      teamId,
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
@@ -215,7 +213,6 @@ export const eventsByParticipantList = (
       fromInt,
       toInt,
       limitInt,
-      teamId,
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {

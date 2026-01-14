@@ -13,7 +13,7 @@ export const userInfoOptions = (
   teamId?: string,
 ) =>
   queryOptions({
-    queryKey: ["userInfo", userId, teamId],
+    queryKey: ["userInfo", userId],
     queryFn: async (): Promise<GetUserInfoResponse | null> => {
       if (!userId) {
         return null;

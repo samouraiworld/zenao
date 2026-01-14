@@ -42,7 +42,7 @@ export const communityAdministrators = (
   teamId?: string,
 ) =>
   queryOptions({
-    queryKey: ["communityAdmins", communityId, teamId],
+    queryKey: ["communityAdmins", communityId],
     queryFn: async () => {
       return withSpan(
         `query:backend:community:${communityId}:administrators`,
@@ -259,7 +259,6 @@ export const communitiesByUserRolesListSuspense = (
       pageInt,
       limitInt,
       roles,
-      teamId,
     ],
     queryFn: async () => {
       return withSpan(
@@ -309,7 +308,7 @@ export const communitiesByUserRolesList = (
 
   return infiniteQueryOptions({
     initialPageParam: 0,
-    queryKey: ["communitiesByUserRoles", userId ?? "", roles, limitInt, teamId],
+    queryKey: ["communitiesByUserRoles", userId ?? "", roles, limitInt],
     enabled: !!userId,
     queryFn: async ({ pageParam = 0 }) => {
       if (!userId) {
