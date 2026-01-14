@@ -18,10 +18,12 @@ import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Text from "@/components/widgets/texts/text";
 import { useSidebarItems } from "@/lib/navigation/dashboard/sidebar/sidebar-items";
+import { useActiveAccount } from "@/components/providers/active-account-provider";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("navigation");
-  const sidebarItems = useSidebarItems();
+  const { isTeamContext } = useActiveAccount();
+  const sidebarItems = useSidebarItems(isTeamContext);
 
   return (
     <Sidebar {...props}>

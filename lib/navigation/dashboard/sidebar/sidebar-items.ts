@@ -1,4 +1,4 @@
-import { Forklift, Calendar, type LucideIcon, BoxesIcon } from "lucide-react";
+import { Calendar, type LucideIcon, BoxesIcon, Settings } from "lucide-react";
 import { useMemo } from "react";
 
 export interface NavSubItem {
@@ -28,9 +28,11 @@ export interface NavGroup {
   items: NavMainItem[];
 }
 
-export const useSidebarItems: () => NavGroup[] = () =>
-  useMemo(
-    () => [
+export const useSidebarItems: (isTeamContext: boolean) => NavGroup[] = (
+  isTeamContext: boolean,
+) =>
+  useMemo(() => {
+    return [
       {
         id: 1,
         label: "",
@@ -39,7 +41,7 @@ export const useSidebarItems: () => NavGroup[] = () =>
             title: "events",
             url: "/dashboard",
             icon: Calendar,
-            subItems: (pathname, id) => {
+            subItems: (pathname: string, id: string | undefined) => {
               if (!id) return undefined;
 
               if (pathname.includes("/dashboard/event")) {
@@ -65,7 +67,7 @@ export const useSidebarItems: () => NavGroup[] = () =>
             title: "communities",
             url: "/dashboard/community",
             icon: BoxesIcon,
-            subItems: (pathname, id) => {
+            subItems: (pathname: string, id: string | undefined) => {
               if (!id) return undefined;
 
               if (pathname.includes("/dashboard/community")) {
@@ -87,14 +89,18 @@ export const useSidebarItems: () => NavGroup[] = () =>
               }
             },
           },
-          {
-            title: "settings",
-            url: "/dashboard/coming-soon",
-            icon: Forklift,
-            comingSoon: true,
-          },
-        ],
+        ].concat(
+          isTeamContext
+            ? [
+                {
+                  title: "teamSettings",
+                  url: "/dashboard/team-settings",
+                  icon: Settings,
+                  subItems: () => undefined,
+                },
+              ]
+            : [],
+        ),
       },
-    ],
-    [],
-  );
+    ];
+  }, [isTeamContext]);
