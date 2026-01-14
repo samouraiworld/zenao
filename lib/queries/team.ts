@@ -1,10 +1,11 @@
 import { queryOptions } from "@tanstack/react-query";
+import { GetToken } from "@clerk/types";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import type { UserTeam } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const userTeamsOptions = (
-  getToken: () => Promise<string | null>,
+  getToken: GetToken,
   userId: string | null | undefined,
 ) => {
   return queryOptions<UserTeam[]>({

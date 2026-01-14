@@ -1,6 +1,5 @@
 import { useActiveAccount } from "@/components/providers/active-account-provider";
-
-const TEAM_ACTOR_HEADER = "X-Team-Id";
+import { TEAM_ACTOR_HEADER } from "@/lib/constants";
 
 export function useHeaderBuilder() {
   const { activeAccount, isTeamContext } = useActiveAccount();

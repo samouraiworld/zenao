@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { z } from "zod";
+import { getQueryClient } from "@/lib/get-query-client";
 
 const activeAccountSchema = z.object({
   type: z.enum(["personal", "team"]),
@@ -59,6 +60,7 @@ function ActiveAccountProvider({ children }: { children: React.ReactNode }) {
   const switchAccount = (account: ActiveAccount) => {
     setActiveAccount(account);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
+    getQueryClient().invalidateQueries();
   };
 
   return (

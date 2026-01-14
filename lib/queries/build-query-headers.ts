@@ -1,4 +1,4 @@
-const TEAM_ACTOR_HEADER = "X-Team-Id";
+import { TEAM_ACTOR_HEADER } from "@/lib/constants";
 
 export function buildQueryHeaders(
   token: string | null,
