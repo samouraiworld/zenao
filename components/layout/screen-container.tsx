@@ -7,6 +7,7 @@ interface ScreenContainerProps {
   isSignedOutModal?: boolean;
   background?: BackgroundProps;
   screenContainerMaxWidth?: number;
+  description?: string;
 }
 
 export const defaultScreenContainerMaxWidth = 1280;
@@ -17,6 +18,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   isSignedOutModal,
   background,
   screenContainerMaxWidth = defaultScreenContainerMaxWidth,
+  description,
 }) => {
   return (
     <div className="flex flex-col flex-1 items-center">
@@ -35,7 +37,7 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
           {children}
         </div>
       </main>
-      {isSignedOutModal && <SignedOutDialog />}
+      {isSignedOutModal && <SignedOutDialog description={description} />}
     </div>
   );
 };
@@ -43,13 +45,14 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
 export const ScreenContainerCentered: React.FC<ScreenContainerProps> = ({
   children,
   isSignedOutModal,
+  description,
 }) => {
   return (
     <div className="flex grow flex-col items-center justify-center">
       <main className="flex flex-col w-full justify-center items-center mb-10 sm:mb-0 standalone:mb-24">
-        <div className="mt-8 mx-5">{children}</div>
+        <div className="w-full mt-8 mx-5">{children}</div>
       </main>
-      {isSignedOutModal && <SignedOutDialog />}
+      {isSignedOutModal && <SignedOutDialog description={description} />}
     </div>
   );
 };

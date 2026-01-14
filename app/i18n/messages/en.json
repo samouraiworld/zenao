@@ -17,7 +17,9 @@
     "communities": "Communities",
     "features": "Features",
     "manifesto": "Manifesto",
+    "blog": "Blog",
     "view-profile": "View my profile",
+    "dashboard-access": "Go to dashboard",
     "create-event": "Create Event",
     "footer": {
       "tagline": "Made with ❤️ by Samourai.world crew",
@@ -25,6 +27,7 @@
     }
   },
   "home": {
+    "base-news": "News & Updates: We are arriving soon on",
     "main-text": "Organize event(s) in seconds",
     "secondary-text": "\"Anything that happens, arrives or appears, can give birth to an autonomous community, or a new tribe.\"",
     "placeholder": "Event name...",
@@ -37,7 +40,7 @@
     "title-placeholder": "Event name...",
     "description-label": "Description",
     "write-tab": "Write",
-    "log-in": " Log in to create an event",
+    "log-in": "Log in to create an event",
     "preview-tab": "Preview",
     "change-image": "Change image",
     "description-placeholder": "Description...",
@@ -54,6 +57,7 @@
     "pick-a-end-date-placeholder": "Pick a end date...",
     "from": "From",
     "to": "To",
+    "displayed-timezone": "Displayed time corresponds to {timeZone}",
     "no-file-selected-error": "No file selected.",
     "error-file-uploading-img": "Error while uploading image",
     "error-file-uploading-audio": "Error while uploading audio",
@@ -61,6 +65,7 @@
     "custom-timezone-select": "You choose a custom location, so please select a timezone.",
     "no-timezone-found": "No timezones found.",
     "no-address-found": "No address found.",
+    "onlineEvent": "Online event",
     "community-selector-label": "Link event to one of your communities (optional)",
     "community-selector-placeholder": "Select community...",
     "no-communities-found": "No communities found.",
@@ -110,12 +115,24 @@
     "view-more": "View more",
     "view-less": "View less",
     "export-participant-list": "Export participants list",
-    "manage-gatekeepers-button": "Manage gatekeepers"
+    "manage-gatekeepers-button": "Manage gatekeepers",
+    "event-dashboard-banners": {
+      "gatekeeper": "You have the gatekeeper role for this event. See list of attendees and start scanning tickets.",
+      "organizer": "You are the organizer of this event. Manage your event settings and attendees.",
+      "start-scanning": "Start scanning tickets",
+      "edit-event": "Edit event"
+    }
   },
   "profile-info": {
+    "profile-header": {
+      "dashboard-access": "Go to dashboard",
+      "edit-profile": "Edit my profile"
+    },
     "profile-not-exist": "Profile doesn't exist",
     "hosting-events": "Hosting events",
-    "past-events": "Past events"
+    "past-events": "Past events",
+    "events": "Events",
+    "portfolio": "Portfolio"
   },
   "guest-registration-success-dialog": {
     "registration-title": "You're in!",
@@ -130,6 +147,9 @@
     "title": "Manage gatekeepers",
     "description": "Assign and manage gatekeepers responsible for controlling access to the event.",
     "input-placeholder": "Email...",
+    "gatekeeper-email-placeholder": "Enter gatekeeper email to add...",
+    "add-gatekeeper-button": "Add",
+    "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
     "default": "Default (You)",
     "toast-gatekeeper-management-success": "Gatekeepers successfully updated!",
     "toast-gatekeeper-management-error": "Error while updating gatekeepers!",
@@ -338,6 +358,12 @@
     "label": "Page not found.",
     "button": "Return Home"
   },
+  "post-menu": {
+    "pin-post": "Pin post",
+    "unpin-post": "Unpin post",
+    "edit-post": "Edit post",
+    "delete-post": "Delete post"
+  },
   "components": {
     "modals": {
       "signed-out-modal": {
@@ -347,10 +373,14 @@
         "sign-up": "Sign up"
       }
     },
-    "buttons": {
-      "gnoweb-button": "See on gnoweb"
-    },
     "widgets": {
+      "soon-on-base": {
+        "soon-on": "Soon on"
+      },
+      "quick-create-menu": {
+        "create-event": "Create new event",
+        "create-community": "Create new community"
+      },
       "form": {
         "form-field-image": {
           "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
@@ -363,7 +393,11 @@
   "blog": {
     "pageTitle": "Blog",
     "pageSubheading": "Explore the exciting updates and innovations of Zenao",
-    "publishedAt": "Published at"
+    "no-blog-posts-title": "No blog posts to show."
+  },
+  "blog-post": {
+    "link-copied-toast": "Link copied to clipboard!",
+    "failed-to-copy-link-toast": "Failed to copy link to clipboard!"
   },
   "load-more": "Load more",
   "no-posts-title": "No posts to show.",
@@ -404,6 +438,12 @@
     },
     "poll": {
       "result-count": "{count, plural, one {# vote} other {# votes}}"
+    },
+    "actions": {
+      "toast-post-pin-success": "Post pinned !",
+      "toast-post-pin-error": "Error while pinning the post !",
+      "toast-post-unpin-success": "Post unpinned !",
+      "toast-post-unpin-error": "Error while unpinning the post !"
     }
   },
   "broadcast-email-form": {
@@ -413,12 +453,13 @@
     "message-input-label": "Enter your message",
     "cancel": "Cancel",
     "send": "Send email",
+    "attach-ticket-label": "Attach ticket to the message",
     "toast-email-sent-success": "Email sent !",
     "toast-email-sent-error": "Error while trying to send the email",
     "no-participant-error": "You can't send any message because nobody is going to your event yet"
   },
   "event-community-section": {
-    "sponsored-by": "Sponsored by community"
+    "organized-by": "Organized by community"
   },
   "event-scanner": {
     "check-in-confirmation-dialog": {
@@ -469,6 +510,10 @@
     "events": "Events",
     "members": "Members",
     "proposals": "Proposals",
+    "pinned-events": "Pinned Events",
+    "all-events": "All Events",
+    "event-unpinned": "Event unpinned",
+    "event-pinned": "Event pinned",
     "portfolio": "Portfolio",
     "upcoming": "Upcoming",
     "past": "Past",
@@ -481,35 +526,23 @@
     "leave-only-admin-error": "You cannot leave this community as you are the only administrator.",
     "sign-in-to-join-button": "Sign in to join",
     "joining-state": "Joining...",
-    "join-community-button": "Join Community"
+    "join-community-button": "Join community",
+    "edit-community-button": "Edit community"
   },
-  "community-portfolio": { 
-    "error-file-uploading": "Error while uploading file",
-    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
-    "error-file-deleting": "Error while deleting file",
-    "delete-file-success": "Item deleted successfully",
-    "upload-file-success": "File uploaded successfully",
-    "recent-media-uploaded": "Recent media uploaded",
-    "upload-file-btn": "Upload file",
-    "upload-first-file-btn": "Upload your first file",
-    "no-media-uploaded": "No media uploaded yet.",
-    "error-saving-portfolio": "Error while saving portfolio",
-    "upload-audio": "Upload audio",
-    "upload-image": "Upload image",
-    "upload-video": "Upload video",
-    "add-video": "Add video",
-    "add-video-description": "Add a video from YouTube, Vimeo",
-    "video-origin-label": "Origin of the video",
-    "video-origin-placeholder": "Video source",
-    "delete": "Delete",
-    "confirm-delete-title": "Are you sure you want to delete this item?",
-    "confirm-delete-desc": "This action cannot be undone.",
-    "confirm-delete-cancel": "Cancel",
-    "confirm-delete-confirm": "Yes, delete it"
+  "community-create-form": {
+    "log-in": "Log in to create a community",
+    "create-community-button": "Create community",
+    "toast-creation-success": "Community created!",
+    "toast-creation-failure": "Error on creating community!"
   },
   "community-edit-form": {
     "update-success": "Community updated successfully",
     "update-failure": "Failed to update community",
+    "stripe-onboarding-failure": "Failed to start Stripe onboarding",
+    "stripe-onboarding-return": "Stripe onboarding completed.",
+    "stripe-onboarding-refresh": "Stripe onboarding was not completed. Please try again."
+  },
+  "community-form": {
     "edit-button": "Edit community",
     "upload-avatar": "Upload avatar image",
     "upload-banner": "Upload banner image",
@@ -534,10 +567,196 @@
     "socialLinks-description": "Add links to your community's social media profiles to enhance visibility",
     "remove-admin": "Remove",
     "add-admin": "Add Administrator",
-    "submit": "Update Community"
+    "submit-create": "Create Community",
+    "submit-edit": "Update Community",
+    "payments-section": "Payments",
+    "payments-description": "Connect Stripe to receive payouts from your community.",
+    "stripe-connect-label": "Stripe Connect",
+    "stripe-connect-description": "Start onboarding to enable card payments and transfers.",
+    "stripe-connect-cta": "Start Stripe onboarding",
+    "stripe-dashboard-cta": "Open Stripe dashboard",
+    "payout-status-label": "Payout verification status",
+    "payout-status-loading": "Loading",
+    "payout-status-verified": "Verified",
+    "payout-status-failed": "Failed",
+    "payout-status-pending": "Pending",
+    "payout-status-unknown": "Unknown",
+    "payout-status-last-checked": "Last checked",
+    "payout-status-never": "Not checked yet",
+    "payout-status-stale": "Data may be stale",
+    "payout-status-refresh-error": "Unable to refresh from Stripe. Showing last known status.",
+    "stripe-dashboard-missing-account": "No Stripe account connected, please connect one to enable payouts."
+  },
+  "portfolio": { 
+    "error-file-uploading": "Error while uploading file",
+    "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+    "error-file-deleting": "Error while deleting file",
+    "delete-file-success": "Item deleted successfully",
+    "upload-file-success": "File uploaded successfully",
+    "recent-media-uploaded": "Recent media uploaded",
+    "upload-file-btn": "Upload file",
+    "upload-first-file-btn": "Upload your first file",
+    "no-media-title": "No media to show.",
+    "no-media-description": "You have no media in your portfolio. Why not upload some?",
+    "error-saving-portfolio": "Error while saving portfolio",
+    "upload-audio": "Upload audio",
+    "upload-image": "Upload image",
+    "upload-video": "Upload video",
+    "add-video": "Add video",
+    "add-video-description": "Add a video from YouTube, Vimeo",
+    "video-origin-label": "Origin of the video",
+    "video-origin-placeholder": "Video source",
+    "delete": "Delete",
+    "confirm-delete-title": "Are you sure you want to delete this item?",
+    "confirm-delete-desc": "This action cannot be undone.",
+    "confirm-delete-cancel": "Cancel",
+    "confirm-delete-confirm": "Yes, delete it"
   },
   "empty-list": {
     "title": "Nothing listed",
     "description": "Let's change that!"
+  },
+  "dashboard": {
+    "signout-desc": "Log in to access your dashboard",
+    "sidebar": {
+      "create-btn": "Create",
+      "create-event": "Create Event",
+      "create-community": "Create Community",
+      "events": "Events",
+      "upcoming":"Upcoming",
+      "past": "Past",
+      "all": "All",
+      "participants": "Participants",
+      "gatekeepers": "Gatekeepers",
+      "general": "General",
+      "members": "Members",
+      "administrators": "Administrators",
+      "communities": "Communities",
+      "settings": "Settings",
+      "coming-soon": "Soon",
+      "quick-create": "Quick create"
+    },
+    "navUser": {
+      "accounts": "Accounts",
+      "personal-account": "Personal account",
+      "team": "Team",
+      "create-team": "Create a team",
+      "profile": "Profile",
+      "switch-to-regular-user-mode": "Switch to regular user mode",
+      "sign-out": "Sign out"
+    },
+    "createTeam": {
+      "title": "Create a team",
+      "subtitle": "Teams allow you to have multiple people managing events and communities together.",
+      "name-label": "Team name",
+      "name-placeholder": "Enter team name",
+      "description": "You can add members and customize your team later.",
+      "cancel": "Cancel",
+      "create": "Create team",
+      "success": "Team created successfully",
+      "error": "Failed to create team"
+    },
+    "eventsTable": {
+      "events": "Events",
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "no-events": "No events found.",
+      "create-event-btn": "Create an event"
+    },
+    "communitiesTable": {
+      "communities": "Communities",
+      "no-communities": "No communities found.",
+      "create-community-btn": "Create a community",
+      "name-column": "Name",
+      "members-column": "Members",
+      "roles-column": "Role(s)",
+      "actions-column": "Actions",
+      "loading": "Loading..."
+    },
+    "communitiyEventsTable": {
+      "date-column": "Date",
+      "participants-column": "Participants",
+      "organizers-column": "Organized by",
+      "actions-column": "Actions",
+      "view-event": "View event"
+    },
+    "communityDetails": {
+      "communityTabs": {
+        "general": "General",
+        "members": "Members",
+        "administrators": "Administrators",
+        "events": "Events",
+        "payouts": "Payouts"
+      },
+      "administrators": {
+        "no-administrators": "No administrators assigned yet.",
+        "toast-administrator-management-success": "Administrators successfully updated!",
+        "toast-administrator-management-error": "Error while updating administrators!",
+        "add-administrator-form": {
+          "email-placeholder": "Enter administrator email to add...",
+          "error-administrator-already-exists": "This administrator is already assigned to the community!",
+          "add-btn": "Add"
+        }
+      },
+      "members": {
+        "no-members": "No members yet."
+      },
+      "events": {
+        "no-events": "No events yet."
+      }
+    },
+    "eventDetails": {
+      "event-details": "Event details",
+      "manage-event": "Manage event",
+      "edit-event": "Edit event",
+      "cancel-event": "Cancel event",
+      "view-event": "View event",
+      "eventTabs": {
+        "description": "Description",
+        "participants": "Participants",
+        "gatekeepers": "Gatekeepers",
+        "broadcast": "Broadcast"
+      },
+      "header": {
+        "actions": "Actions",
+        "saveChanges": "Save changes",
+        "edit": "Edit",
+        "cancel": "Cancel event",
+        "dateAndTime": "Date & Time",
+        "from": "From",
+        "to": "To",
+        "updateEventTime": "Update Event Time",
+        "location": "Location",
+        "updateLocation": "Update Location",
+        "capacity": "Capacity",
+        "noPlaces": "No places",
+        "attendees": "{count} attendees",
+        "updateCapacity": "Update Capacity",
+        "community": "Community",
+        "securityAndPrivacy": "Security & Privacy"
+      },
+      "participants": {
+        "exportCSV": "Export CSV",
+        "openQrCodeScanner":"QR Code Scanner",
+        "no-participants": "No participants yet."
+      },
+      "gatekeepers": {
+        "no-gatekeepers": "No gatekeepers assigned yet.",
+        "add-gatekeeper-form": {
+          "email-placeholder": "Enter gatekeeper email to add...",
+          "error-gatekeeper-already-exists": "This gatekeeper is already assigned to the event!",
+          "add-btn": "Add Gatekeeper"
+        }
+      },
+      "broadcast": {
+        "subtitle": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change."
+      }
+    },
+    "data-table": {
+      "pagination": {
+        "rows-per-page": "Rows per page",
+        "page-of": "Page {page} of {pages}"
+      }
+    } 
   }
 }

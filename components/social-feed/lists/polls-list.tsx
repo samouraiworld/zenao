@@ -8,7 +8,7 @@ import { parsePollUri } from "@/lib/multiaddr";
 
 export function PollsList({
   polls,
-  userRealmId,
+  userId,
   onDelete,
   onReactionChange,
   isDeleting,
@@ -18,7 +18,7 @@ export function PollsList({
   replyHrefFormatter,
 }: {
   polls: PollPostView[];
-  userRealmId: string | null;
+  userId: string | null;
   isReacting?: boolean;
   isDeleting?: boolean;
   canReply?: boolean;
@@ -34,7 +34,7 @@ export function PollsList({
     return (
       <Suspense fallback={<PostCardSkeleton />} key={pollId}>
         <PollPost
-          userRealmId={userRealmId}
+          userId={userId}
           pollId={pollId}
           pollPost={pollPost}
           onDelete={async (parentId) => {
@@ -43,7 +43,7 @@ export function PollsList({
           onReactionChange={async (icon) =>
             await onReactionChange?.(postId, icon)
           }
-          isOwner={pollPost.post.author === userRealmId}
+          isOwner={pollPost.post.author === userId}
           replyHref={replyHrefFormatter?.(pollPost.post.localPostId)}
           canReply={canReply}
           canInteract={canInteract}

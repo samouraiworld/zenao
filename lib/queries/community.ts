@@ -1,57 +1,83 @@
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import {
   InfiniteData,
   infiniteQueryOptions,
   queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
-import { fromJson } from "@bufbuild/protobuf";
-import { z } from "zod";
 import { GetToken } from "@clerk/types";
-import { extractGnoJSONResponse } from "../gno";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "@/lib/zenao-client";
+import { CommunityInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import {
-  CommunityInfo,
-  CommunityInfoJson,
-  CommunityInfoSchema,
-} from "@/app/gen/zenao/v1/zenao_pb";
+  communityEntityWithRolesSchema,
+  communityGetUserRolesSchema,
+  CommunityUserRole,
+  communityUserSchema,
+  SafeCommunityUser,
+} from "@/types/schemas";
 
 export const DEFAULT_COMMUNITIES_LIMIT = 20;
-
-const communityUserRolesEnum = z.enum(["administrator", "member", "event"]);
-
-export type CommunityUserRole = z.infer<typeof communityUserRolesEnum>;
-
-export const communityGetUserRolesSchema = z.array(communityUserRolesEnum);
-
-const communityUsersWithRolesResponseSchema = z
-  .object({
-    address: z.string(),
-    roles: z.string().array(),
-  })
-  .transform(({ address, roles }) => ({ realmId: address, roles }));
-
-export type CommunityUsersWithRolesResponseSchema = z.infer<
-  typeof communityUsersWithRolesResponseSchema
->;
+export const DEFAULT_ADMINISTRATORS_PAGE_LIMIT = 10;
+export const DEFAULT_COMMUNITY_MEMBERS_PAGE_LIMIT = 20;
+export const DEFAULT_COMMUNITY_EVENTS_PAGE_LIMIT = 20;
 
 export const communityInfo = (communityId: string) =>
   queryOptions({
     queryKey: ["community", communityId],
     queryFn: async () => {
-      return withSpan(`query:chain:community:${communityId}`, async () => {
-        const client = new GnoJSONRPCProvider(
-          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        );
-        const res = await client.evaluateExpression(
-          `gno.land/r/zenao/communities/c${communityId}`,
-          `community.GetInfoJSON()`,
-        );
-        const community = extractGnoJSONResponse(res) as CommunityInfoJson;
-        return fromJson(CommunityInfoSchema, community);
+      return withSpan(`query:backend:community:${communityId}`, async () => {
+        const res = await zenaoClient.getCommunity({ communityId });
+        if (res.community == null) {
+          throw new Error("community not found");
+        }
+        return res.community;
       });
     },
+  });
+
+export const communityAdministrators = (
+  communityId: string,
+  getToken: GetToken,
+) =>
+  queryOptions({
+    queryKey: ["communityAdmins", communityId],
+    queryFn: async () => {
+      return withSpan(
+        `query:backend:community:${communityId}:administrators`,
+        async () => {
+          const token = await getToken();
+          if (!token) throw new Error("invalid clerk token");
+          const res = await zenaoClient.getCommunityAdministrators(
+            { communityId },
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
+
+          return res.administrators;
+        },
+      );
+    },
+  });
+
+export const communityPayoutStatus = (
+  communityId: string,
+  getToken: GetToken,
+) =>
+  queryOptions({
+    queryKey: ["communityPayoutStatus", communityId],
+    queryFn: async () => {
+      return withSpan(
+        `query:backend:community:${communityId}:payout-status`,
+        async () => {
+          const token = await getToken();
+          if (!token) throw new Error("invalid clerk token");
+          return zenaoClient.getCommunityPayoutStatus(
+            { communityId },
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
+        },
+      );
+    },
+    enabled: !!communityId,
   });
 
 export const communitiesList = (
@@ -77,80 +103,14 @@ export const communitiesList = (
     initialPageParam: 0,
     queryKey: ["communities", limitInt],
     queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(`query:chain:communities`, async () => {
-        const client = new GnoJSONRPCProvider(
-          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        );
-        const res = await client.evaluateExpression(
-          `gno.land/r/zenao/communityreg`,
-          `communitiesToJSON(listCommunities(${limitInt}, ${pageParam * limitInt}))`,
-        );
-        const raw = extractGnoJSONResponse(res);
-        const json = communitiesListFromJson(raw);
+      return withSpan(`query:backend:communities`, async () => {
+        const res = await zenaoClient.listCommunities({
+          limit: limitInt,
+          offset: pageParam * limitInt,
+        });
 
-        return json;
+        return res.communities;
       });
-    },
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length;
-    },
-    getPreviousPageParam: (firstPage, pages) => {
-      if (firstPage.length < limitInt) {
-        return undefined;
-      }
-      return pages.length - 2;
-    },
-    ...options,
-  });
-};
-
-export const communitiesListByMember = (
-  memberAddress: string | null,
-  limit: number,
-  options?: Omit<
-    UseInfiniteQueryOptions<
-      CommunityInfo[],
-      Error,
-      InfiniteData<CommunityInfo[]>,
-      (string | number)[],
-      number // pageParam type
-    >,
-    | "queryKey"
-    | "queryFn"
-    | "getNextPageParam"
-    | "initialPageParam"
-    | "getPreviousPageParam"
-  >,
-) => {
-  const limitInt = Math.floor(limit);
-
-  return infiniteQueryOptions({
-    initialPageParam: 0,
-    queryKey: ["communitiesByMember", memberAddress ?? "", limitInt],
-    enabled: !!memberAddress,
-    queryFn: async ({ pageParam = 0 }) => {
-      if (!memberAddress) {
-        return [] as CommunityInfo[];
-      }
-      return withSpan(
-        `query:chain:communities-by-member:${memberAddress}`,
-        async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/communityreg`,
-            `communitiesToJSON(listCommunitiesByMembers(${JSON.stringify(memberAddress)}, ${limitInt}, ${pageParam * limitInt}))`,
-          );
-          const raw = extractGnoJSONResponse(res);
-          const json = communitiesListFromJson(raw);
-
-          return json;
-        },
-      );
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {
@@ -170,31 +130,34 @@ export const communitiesListByMember = (
 
 export const communityUserRoles = (
   communityId: string | null | undefined,
-  userRealmId: string | null | undefined,
+  userId: string | null | undefined,
 ) =>
   queryOptions({
-    queryKey: ["communityUserRoles", communityId, userRealmId],
+    queryKey: ["communityUserRoles", communityId, userId],
     queryFn: async () => {
-      if (!communityId || !userRealmId) {
+      if (!communityId || !userId) {
         return [];
       }
 
       return withSpan(
-        `query:chain:community:${communityId}:user-roles:${userRealmId}`,
+        `query:backend:community:${communityId}:user-roles:${userId}`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/communities/c${communityId}`,
-            `community.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
-          );
-          const roles = extractGnoJSONResponse(res);
+          const res = await zenaoClient.entityRoles({
+            org: {
+              entityType: "community",
+              entityId: communityId,
+            },
+            entity: {
+              entityType: "user",
+              entityId: userId,
+            },
+          });
+          const roles = res.roles;
           return communityGetUserRolesSchema.parse(roles);
         },
       );
     },
-    enabled: !!communityId && !!userRealmId,
+    enabled: !!communityId && !!userId,
   });
 
 export const communityUsersWithRoles = (
@@ -205,67 +168,27 @@ export const communityUsersWithRoles = (
     queryKey: ["communityRoles", communityId, JSON.stringify(roles)],
     queryFn: async () => {
       return withSpan(
-        `query:chain:community:${communityId}:users-with-roles:${roles.join(",")}`,
+        `query:backend:community:${communityId}:users-with-roles:${roles.join(",")}`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/communities/c${communityId}`,
-            `community.GetUsersWithRolesJSON(${goStringSliceLiteral(roles)})`,
-          );
-          const raw = extractGnoJSONResponse(res);
+          const res = await zenaoClient.entitiesWithRoles({
+            org: {
+              entityType: "community",
+              entityId: communityId,
+            },
+            roles,
+          });
 
-          return communityUsersWithRolesResponseSchema.array().parse(raw);
+          return communityEntityWithRolesSchema
+            .array()
+            .parse(res.entitiesWithRoles);
         },
       );
     },
   });
-
-function communitiesListFromJson(raw: unknown) {
-  const list = raw as unknown[];
-  return list.map((elem) =>
-    fromJson(CommunityInfoSchema, elem as CommunityInfoJson),
-  );
-}
 
 export function goStringSliceLiteral(arr: string[]): string {
   return `[]string{${arr.map((s) => JSON.stringify(s)).join(",")}}`;
 }
-
-export function communityIdFromPkgPath(pkgPath: string): string {
-  const res = /(c\d+)$/.exec(pkgPath);
-  return res?.[1].substring(1) || "";
-}
-
-export const communityAdministratorsQuery = (
-  getToken: GetToken,
-  communityId: string,
-) =>
-  queryOptions({
-    queryKey: ["community-admins", communityId],
-    queryFn: async () => {
-      return withSpan(
-        `query:backend:community:${communityId}:administrators`,
-        async () => {
-          const token = await getToken();
-
-          if (!token) throw new Error("invalid clerk token");
-
-          try {
-            const res = await zenaoClient.getCommunityAdministrators(
-              { communityId },
-              { headers: { Authorization: "Bearer " + token } },
-            );
-
-            return res.administrators;
-          } catch (_) {
-            return [];
-          }
-        },
-      );
-    },
-  });
 
 export const communitiesListByEvent = (
   id: string,
@@ -291,20 +214,120 @@ export const communitiesListByEvent = (
     initialPageParam: 0,
     queryKey: ["communitiesByEvent", id, limitInt],
     queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(`query:chain:event:${id}:communities`, async () => {
-        const client = new GnoJSONRPCProvider(
-          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        );
-        const pkgPath = `gno.land/r/zenao/events/e${id}`;
-        const res = await client.evaluateExpression(
-          `gno.land/r/zenao/communityreg`,
-          `communitiesToJSON(listCommunitiesByEvent(${JSON.stringify(pkgPath)}, ${limitInt}, ${pageParam * limitInt}))`,
-        );
-        const raw = extractGnoJSONResponse(res);
-        const json = communitiesListFromJson(raw);
-
-        return json;
+      return withSpan(`query:backend:event:${id}:communities`, async () => {
+        const res = await zenaoClient.listCommunitiesByEvent({
+          eventId: id,
+          limit: limitInt,
+          offset: pageParam * limitInt,
+        });
+        return res.communities;
       });
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length;
+    },
+    getPreviousPageParam: (firstPage, pages) => {
+      if (firstPage.length < limitInt) {
+        return undefined;
+      }
+      return pages.length - 2;
+    },
+    ...options,
+  });
+};
+
+export const communitiesByUserRolesListSuspense = (
+  userId: string | undefined,
+  page: number,
+  limit: number,
+  roles: CommunityUserRole[],
+  getToken: GetToken,
+) => {
+  const limitInt = Math.floor(limit);
+  const pageInt = Math.max(0, Math.floor(page));
+
+  return queryOptions({
+    queryKey: [
+      "communitiesByUserRoles",
+      userId ?? "",
+      pageInt,
+      limitInt,
+      roles,
+    ],
+    queryFn: async () => {
+      return withSpan(
+        `query:backend:communities-by-user-roles:${userId}`,
+        async () => {
+          const token = await getToken();
+
+          const res = await zenaoClient.listCommunitiesByUserRoles(
+            {
+              userId,
+              limit: limitInt,
+              offset: pageInt * limitInt,
+              roles,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+
+          return communityUserSchema.array().parse(res.communities);
+        },
+      );
+    },
+  });
+};
+
+export const communitiesByUserRolesList = (
+  userId: string | undefined,
+  roles: CommunityUserRole[],
+  limit: number,
+  getToken?: GetToken,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      SafeCommunityUser[],
+      Error,
+      InfiniteData<SafeCommunityUser[]>,
+      (string | number | CommunityUserRole[])[],
+      number
+    >,
+    | "queryKey"
+    | "queryFn"
+    | "getNextPageParam"
+    | "initialPageParam"
+    | "getPreviousPageParam"
+  >,
+) => {
+  const limitInt = Math.floor(limit);
+
+  return infiniteQueryOptions({
+    initialPageParam: 0,
+    queryKey: ["communitiesByUserRoles", userId ?? "", roles, limitInt],
+    enabled: !!userId,
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!userId) {
+        return [] as SafeCommunityUser[];
+      }
+
+      return withSpan(
+        `query:backend:communities-by-user-roles:${userId}`,
+        async () => {
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listCommunitiesByUserRoles(
+            {
+              userId,
+              roles,
+              limit: limitInt,
+              offset: pageParam * limitInt,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+          );
+
+          return communityUserSchema.array().parse(res.communities);
+        },
+      );
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < limitInt) {

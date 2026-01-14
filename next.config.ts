@@ -3,10 +3,15 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import packageJson from "./package.json";
 
 const withNextIntl = createNextIntlPlugin("./app/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_APP_VERSION: packageJson.version,
+    NEXT_PUBLIC_STRIPE_DASHBOARD_URL: "https://dashboard.stripe.com",
+  },
   /* config options here */
   images: {
     remotePatterns: [
@@ -32,6 +37,10 @@ const nextConfig: NextConfig = {
       {
         source: "/community/:id",
         destination: "/community/:id/chat",
+      },
+      {
+        source: "/profile/:userId",
+        destination: "/profile/:userId/events",
       },
     ];
   },

@@ -12,21 +12,12 @@ import (
 )
 
 func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Request[zenaov1.CancelParticipationRequest]) (*connect.Response[zenaov1.CancelParticipationResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("cancel-participation", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID))
+	s.Logger.Info("cancel-participation", zap.String("event-id", req.Msg.EventId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	evt := (*zeni.Event)(nil)
 	ticket := (*zeni.SoldTicket)(nil)
@@ -38,23 +29,19 @@ func (s *ZenaoServer) CancelParticipation(ctx context.Context, req *connect.Requ
 		if time.Now().After(evt.StartDate) {
 			return errors.New("event already started")
 		}
-		ticket, err = db.GetEventUserTicket(req.Msg.EventId, zUser.ID)
+		ticket, err = db.GetEventUserTicket(req.Msg.EventId, actor.ID())
 		if err != nil {
 			return err
 		}
 		if ticket.Checkin != nil {
 			return errors.New("user already checked-in")
 		}
-		err = db.CancelParticipation(evt.ID, zUser.ID)
+		err = db.CancelParticipation(evt.ID, actor.ID())
 		if err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).CancelParticipation(req.Msg.EventId, evt.CreatorID, zUser.ID, ticket.Ticket.Pubkey()); err != nil {
 		return nil, err
 	}
 

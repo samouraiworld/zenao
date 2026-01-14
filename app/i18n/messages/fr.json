@@ -5,5 +5,27 @@
   "home": {
     "first-point": "Commencez en editant ",
     "second-point": "Sauvegardez et voyez vos changements instantanement."
+  },
+  "dashboard": {
+    "navUser": {
+      "accounts": "Comptes",
+      "personal-account": "Compte personnel",
+      "team": "Équipe",
+      "create-team": "Créer une équipe",
+      "profile": "Profil",
+      "switch-to-regular-user-mode": "Passer en mode utilisateur",
+      "sign-out": "Se déconnecter"
+    },
+    "createTeam": {
+      "title": "Créer une équipe",
+      "subtitle": "Les équipes permettent à plusieurs personnes de gérer ensemble des événements et des communautés.",
+      "name-label": "Nom de l'équipe",
+      "name-placeholder": "Entrez le nom de l'équipe",
+      "description": "Vous pourrez ajouter des membres et personnaliser votre équipe plus tard.",
+      "cancel": "Annuler",
+      "create": "Créer l'équipe",
+      "success": "Équipe créée avec succès",
+      "error": "Échec de la création de l'équipe"
+    }
   }
 }

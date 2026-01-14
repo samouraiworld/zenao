@@ -11,35 +11,26 @@ import (
 )
 
 func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenaov1.DeletePostRequest]) (*connect.Response[zenaov1.DeletePostResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("delete-post", zap.String("post-id", req.Msg.PostId), zap.String("user-id", zUser.ID))
+	s.Logger.Info("delete-post", zap.String("post-id", req.Msg.PostId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if err := s.DB.TxWithSpan(ctx, "db.DeletePost", func(db zeni.DB) error {
 		post, err := db.GetPostByID(req.Msg.PostId)
 		if err != nil {
 			return err
 		}
-		if post.UserID != zUser.ID {
+		if post.UserID != actor.ID() {
 			return errors.New("user is not the author of the post")
 		}
 		feed, err := db.GetFeedByID(post.FeedID)
 		if err != nil {
 			return err
 		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, feed.OrgType, feed.OrgID)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), feed.OrgType, feed.OrgID)
 		if err != nil {
 			return err
 		}
@@ -48,10 +39,6 @@ func (s *ZenaoServer) DeletePost(ctx context.Context, req *connect.Request[zenao
 		}
 		return db.DeletePost(req.Msg.PostId)
 	}); err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).DeletePost(zUser.ID, req.Msg.PostId); err != nil {
 		return nil, err
 	}
 

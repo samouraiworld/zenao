@@ -13,32 +13,23 @@ import (
 )
 
 func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *connect.Request[zenaov1.GetCommunityAdministratorsRequest]) (*connect.Response[zenaov1.GetCommunityAdministratorsResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("get-community-administrators", zap.String("community-id", req.Msg.CommunityId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("get-community-administrators", zap.String("community-id", req.Msg.CommunityId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	var admins []*zeni.User
 	if err := s.DB.TxWithSpan(ctx, "db.GetCommunityAdministrators", func(db zeni.DB) error {
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, req.Msg.CommunityId)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, req.Msg.CommunityId)
 		if err != nil {
 			return err
 		}
 		if !slices.Contains(roles, zeni.RoleAdministrator) {
 			return errors.New("user is not administrator of the community")
 		}
-		admins, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleAdministrator)
+		admins, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleAdministrator})
 		if err != nil {
 			return err
 		}

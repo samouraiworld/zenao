@@ -1,44 +1,99 @@
 CAT := $(if $(filter $(OS),Windows_NT),type,cat)
-GNOVERSION := $(shell $(CAT) .gnoversion)
-GNODEV := gnobuild/${GNOVERSION}/gnodev staging --add-account g1cjkwzxyzhgd7c0797r7krhqpm84537stmt2x94=100000000000ugnot $$(find gno -name gnomod.toml -type f -exec dirname {} \;)
-TXS_FILE ?= genesis_txs.jsonl
-GNO := go run github.com/gnolang/gno/gnovm/cmd/gno@${GNOVERSION}
+
+.PHONY: check-node
+check-node:
+	@REQUIRED_NODE=$$($(CAT) .nvmrc); \
+	CURRENT_NODE=$$(node --version 2>/dev/null | sed 's/v//'); \
+	if [ "$$CURRENT_NODE" != "$$REQUIRED_NODE" ]; then \
+		echo "❌ Node version mismatch: v$$CURRENT_NODE (expected v$$REQUIRED_NODE)"; \
+		echo "   Run: nvm use  (or: fnm use)"; \
+		exit 1; \
+	fi; \
+	echo "✓ Using Node v$$CURRENT_NODE"
+
+.PHONY: setup-dev
+setup-dev: check-node
+	@echo "Setting up Zenao development environment..."
+	@echo ""
+	@echo "Step 1: Installing dependencies..."
+	npm install
+	go mod download
+	@echo ""
+	@echo "Step 2: Setting up environment variables..."
+	@if [ ! -f .env.local ]; then \
+		cp .env.example .env.local; \
+		echo "✓ Created .env.local"; \
+	else \
+		echo "⚠ .env.local already exists, skipping..."; \
+	fi
+	@echo ""
+	@if [ ! -f dev.db ]; then \
+		echo "Step 3: Running database migrations..."; \
+		$(MAKE) migrate-local; \
+		echo ""; \
+		echo "Step 4: Generating fake data..."; \
+		go run ./backend fakegen; \
+	else \
+		echo "⚠ dev.db already exists, skipping migrations and fake data..."; \
+	fi
+	@echo ""
+	@echo "✅ Setup complete!"
+	@echo ""
+	@echo "To start development:"
+	@echo "  make dev          # Start both backend and frontend"
+	@echo ""
+	@echo "Or run separately:"
+	@echo "  go run ./backend start    # Terminal 1: Backend"
+	@echo "  npm run dev               # Terminal 2: Frontend"
+
+.PHONY: dev
+dev: check-node
+	@echo "Starting Zenao development environment..."
+	@echo "Make sure you have run 'make migrate-local' first!"
+	@echo ""
+	@trap 'kill 0' EXIT; \
+	echo "Starting backend on http://localhost:4242 ..."; \
+	go run ./backend start & \
+	sleep 2; \
+	echo "Starting frontend on http://localhost:3000 ..."; \
+	npm run dev
+
+.PHONY: dev-otel
+dev-otel:
+	@echo "Starting Zenao development environment with OpenTelemetry..."
+	@echo ""
+	@trap 'docker compose -f dev.docker-compose.yml down; kill 0' EXIT; \
+	echo "Starting OTEL collector and Jaeger..."; \
+	docker compose -f dev.docker-compose.yml up -d; \
+	sleep 2; \
+	echo "Jaeger UI available at http://localhost:16686"; \
+	$(MAKE) dev
+
+.PHONY: test
+test:
+	go test ./backend/...
+
+.PHONY: test-e2e
+test-e2e:
+	@echo "Starting E2E test environment..."
+	@trap 'kill 0' EXIT; \
+	go run ./backend e2e-infra & \
+	sleep 5; \
+	npm run dev & \
+	sleep 5; \
+	npm run cypress:e2e:headless; \
+	echo "E2E tests complete"
 
 .PHONY: generate
 generate:
 	npm i
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf generate
-	gno fmt -w ./gno/...
-	${MAKE} gno-mod-tidy
+	go run golang.org/x/tools/cmd/goimports@latest -w ./backend
 	npm run mail:build
 
 .PHONY: lint-buf
 lint-buf:
 	go run -modfile go.mod github.com/bufbuild/buf/cmd/buf lint
-
-.PHONY: start.gnodev
-start.gnodev: gnobuild/${GNOVERSION}/gnodev
-	$(GNODEV)
-
-.PHONY: start.gnodev-e2e
-start.gnodev-e2e: gnobuild/${GNOVERSION}/gnodev
-	$(GNODEV) --unsafe-api --txs-file=$(TXS_FILE)
-
-.PHONY: lint-gno
-lint-gno:
-	${GNO} lint ./gno/... -v
-
-.PHONY: test-gno
-test-gno:
-	${GNO} test ./gno/... -v
-
-.PHONY: gno-mod-tidy
-gno-mod-tidy:
-	find gno -name gnomod.toml -type f | xargs -I'{}' sh -c 'cd $$(dirname {}); ${GNO} mod tidy' \;
-
-.PHONY: clean-gno
-clean-gno:
-	rm -rf gnobuild
 
 .PHONY: lint-fix
 lint-fix:
@@ -51,23 +106,3 @@ update-schema:
 .PHONY: migrate-local
 migrate-local:
 	atlas migrate apply --dir "file://migrations" --env dev
-
-# TODO: use normal atlas binary when https://github.com/ariga/atlas/pull/3112 is merged
-.PHONY: install-atlas
-install-atlas:
-	rm -fr atlas
-	git clone https://github.com/samouraiworld/atlas.git
-	cd atlas && git fetch origin versioned-libsql-support
-	cd atlas && git checkout c261f318ac25924555e63fdf005cc53de43fa5db
-	cd atlas/cmd/atlas && go install .
-	rm -fr atlas
-
-# we need this since gnodev cannot be `go run`ed
-gnobuild/${GNOVERSION}/gnodev:
-	rm -fr gnobuild/${GNOVERSION}
-	mkdir -p gnobuild/${GNOVERSION}/gno
-	git clone https://github.com/gnolang/gno.git gnobuild/${GNOVERSION}/gno
-	cd gnobuild/${GNOVERSION}/gno && git checkout ${GNOVERSION}
-	cd gnobuild/${GNOVERSION}/gno/contribs/gnodev && make build
-	cp gnobuild/${GNOVERSION}/gno/contribs/gnodev/build/gnodev gnobuild/${GNOVERSION}/gnodev
-	touch gnobuild/${GNOVERSION}/gno/gnowork.toml

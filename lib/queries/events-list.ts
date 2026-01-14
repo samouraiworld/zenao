@@ -1,18 +1,20 @@
-import { fromJson } from "@bufbuild/protobuf";
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import {
   InfiniteData,
   infiniteQueryOptions,
+  queryOptions,
   UseInfiniteQueryOptions,
 } from "@tanstack/react-query";
+import z from "zod";
 import { withSpan } from "../tracer";
-import { extractGnoJSONResponse } from "@/lib/gno";
+import { zenaoClient } from "../zenao-client";
+import { EventUserRole } from "./event-users";
+import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
+import { GetToken } from "@/lib/utils";
 import {
-  EventInfo,
-  EventInfoJson,
-  EventInfoSchema,
-  DiscoverableFilter,
-} from "@/app/gen/zenao/v1/zenao_pb";
+  eventInfoSchema,
+  eventUserSchema,
+  SafeEventInfo,
+} from "@/types/schemas";
 
 export const DEFAULT_EVENTS_LIMIT = 20;
 
@@ -22,9 +24,9 @@ export const eventsList = (
   limit: number,
   options?: Omit<
     UseInfiniteQueryOptions<
-      EventInfo[],
+      SafeEventInfo[],
       Error,
-      InfiniteData<EventInfo[]>,
+      InfiniteData<SafeEventInfo[]>,
       (string | number)[],
       number // pageParam type
     >,
@@ -43,20 +45,16 @@ export const eventsList = (
     queryKey: ["events", fromInt, toInt, limitInt],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
-      return withSpan(`query:events`, async () => {
-        const client = new GnoJSONRPCProvider(
-          process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
-        );
-        const res = await client.evaluateExpression(
-          `gno.land/r/zenao/eventreg`,
-          `eventsToJSON(listEvents(${fromInt}, ${toInt}, ${limitInt}, ${
-            pageParam * limitInt
-          }))`,
-        );
-        const raw = extractGnoJSONResponse(res);
-        const json = eventListFromJson(raw);
+      return withSpan(`query:backend:events`, async () => {
+        const res = await zenaoClient.listEvents({
+          limit: limitInt,
+          offset: pageParam * limitInt,
+          from: BigInt(fromInt),
+          to: BigInt(toInt),
+          discoverableFilter: DiscoverableFilter.DISCOVERABLE,
+        });
 
-        return json;
+        return z.array(eventInfoSchema).parse(res.events);
       });
     },
     getNextPageParam: (lastPage, pages) => {
@@ -75,12 +73,64 @@ export const eventsList = (
   });
 };
 
-export const eventsByOrganizerList = (
-  organizerRealmId: string,
+export const eventsByRolesListSuspense = (
+  userId: string | undefined,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
+  page: number,
+  roles: EventUserRole[],
+  getToken?: GetToken,
+) => {
+  const fromInt = Math.floor(fromUnixSec);
+  const toInt = Math.floor(toUnixSec);
+  const limitInt = Math.floor(limit);
+  const pageInt = Math.floor(page);
+
+  return queryOptions({
+    queryKey: [
+      "eventsByRoles",
+      userId,
+      discoverableFilter,
+      fromInt,
+      toInt,
+      limitInt,
+      pageInt,
+      roles,
+    ],
+    queryFn: async () => {
+      if (!userId) return [];
+
+      return withSpan(`query:backend:user:${userId}:events:roles`, async () => {
+        const token = getToken ? await getToken() : null;
+        const res = await zenaoClient.listEventsByUserRoles(
+          {
+            userId,
+            roles,
+            limit: limitInt,
+            offset: pageInt * limitInt,
+            from: BigInt(fromInt),
+            to: BigInt(toInt),
+            discoverableFilter: discoverableFilter,
+          },
+          token ? { headers: { Authorization: `Bearer ${token}` } } : {},
+        );
+
+        return z.array(eventUserSchema).parse(res.events);
+      });
+    },
+    enabled: !!userId,
+  });
+};
+
+export const eventsByOrganizerList = (
+  organizerId: string | undefined,
+  discoverableFilter: DiscoverableFilter,
+  fromUnixSec: number,
+  toUnixSec: number,
+  limit: number,
+  getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -89,7 +139,7 @@ export const eventsByOrganizerList = (
   return infiniteQueryOptions({
     queryKey: [
       "eventsByOrganizer",
-      organizerRealmId,
+      organizerId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -97,18 +147,29 @@ export const eventsByOrganizerList = (
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
+      if (!organizerId) return [];
+
       return withSpan(
-        `query:chain:user:${organizerRealmId}:events:role:organizer`,
+        `query:backend:user:${organizerId}:events:role:organizer`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listEventsByUserRoles(
+            {
+              userId: organizerId,
+              roles: ["organizer"],
+              limit: limitInt,
+              offset: pageParam * limitInt,
+              from: BigInt(fromInt),
+              to: BigInt(toInt),
+              discoverableFilter: discoverableFilter,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
           );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/eventreg`,
-            `eventsToJSON(listEventsByOrganizer(${JSON.stringify(organizerRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
-          );
-          const raw = extractGnoJSONResponse(res);
-          return eventListFromJson(raw);
+
+          return z
+            .array(eventUserSchema)
+            .parse(res.events)
+            .map((eu) => eu.event);
         },
       );
     },
@@ -124,15 +185,17 @@ export const eventsByOrganizerList = (
       }
       return pages.length - 2;
     },
+    enabled: !!organizerId,
   });
 };
 
 export const eventsByParticipantList = (
-  participantRealmId: string,
+  participantId: string,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
   limit: number,
+  getToken?: GetToken,
 ) => {
   const fromInt = Math.floor(fromUnixSec);
   const toInt = Math.floor(toUnixSec);
@@ -141,7 +204,7 @@ export const eventsByParticipantList = (
   return infiniteQueryOptions({
     queryKey: [
       "eventsByParticipant",
-      participantRealmId,
+      participantId,
       discoverableFilter,
       fromInt,
       toInt,
@@ -150,17 +213,26 @@ export const eventsByParticipantList = (
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
       return withSpan(
-        `query:chain:user:${participantRealmId}:events:role:participant`,
+        `query:backend:user:${participantId}:events:role:participant`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || "",
+          const token = getToken ? await getToken() : null;
+          const res = await zenaoClient.listEventsByUserRoles(
+            {
+              userId: participantId,
+              roles: ["participant"],
+              limit: limitInt,
+              offset: pageParam * limitInt,
+              from: BigInt(fromInt),
+              to: BigInt(toInt),
+              discoverableFilter: discoverableFilter,
+            },
+            token ? { headers: { Authorization: `Bearer ${token}` } } : {},
           );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/eventreg`,
-            `eventsToJSON(listEventsByParticipant(${JSON.stringify(participantRealmId)}, ${discoverableFilter}, ${fromInt}, ${toInt}, ${limitInt}, ${pageParam * limitInt}))`,
-          );
-          const raw = extractGnoJSONResponse(res);
-          return eventListFromJson(raw);
+
+          return z
+            .array(eventUserSchema)
+            .parse(res.events)
+            .map((eu) => eu.event);
         },
       );
     },
@@ -178,8 +250,3 @@ export const eventsByParticipantList = (
     },
   });
 };
-
-function eventListFromJson(raw: unknown) {
-  const list = raw as unknown[];
-  return list.map((elem) => fromJson(EventInfoSchema, elem as EventInfoJson));
-}

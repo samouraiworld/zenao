@@ -16,6 +16,7 @@ import (
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/resend/resend-go/v2"
 	"github.com/rs/cors"
+	"github.com/stripe/stripe-go/v84"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
@@ -41,11 +42,9 @@ func main() {
 		newFakegenCmd(),
 		newMailCmd(),
 		newPromoteUserCmd(),
-		newRealmsrcCmd(),
 		newE2EInfraCmd(),
 		newGenticketCmd(),
 		newGenPdfTicketCmd(),
-		newGenTxsCmd(),
 		newConvertEvtToComCmd(),
 	)
 
@@ -53,35 +52,29 @@ func main() {
 }
 
 type config struct {
+	appBaseURL      string
 	allowedOrigins  string
 	clerkSecretKey  string
 	bindAddr        string
-	adminMnemonic   string
-	gnoNamespace    string
-	chainEndpoint   string
-	chainID         string
 	dbPath          string
 	mailSender      string
 	resendSecretKey string
 	discordtoken    string
-	gasSecurityRate float64
 	maintenance     bool
+	stripeSecretKey string
 }
 
 func (conf *config) RegisterFlags(flset *flag.FlagSet) {
+	flset.StringVar(&conf.appBaseURL, "app-base-url", "https://zenao.io/", "App base URL")
 	flset.StringVar(&conf.allowedOrigins, "allowed-origins", "*", "CORS allowed origin")
 	flset.StringVar(&conf.clerkSecretKey, "clerk-secret-key", "sk_test_cZI9RwUcgLMfd6HPsQgX898hSthNjnNGKRcaVGvUCK", "Clerk secret key")
 	flset.StringVar(&conf.bindAddr, "bind-addr", "localhost:4242", "Address to bind to")
-	flset.StringVar(&conf.adminMnemonic, "admin-mnemonic", "cousin grunt dynamic dune such gold trim fuel route friend plastic rescue sweet analyst math shoe toy limit combine defense result teach weather antique", "Zenao admin mnemonic")
-	flset.StringVar(&conf.chainEndpoint, "chain-endpoint", "127.0.0.1:26657", "Gno rpc address")
-	flset.StringVar(&conf.gnoNamespace, "gno-namespace", "zenao", "Gno namespace")
-	flset.StringVar(&conf.chainID, "gno-chain-id", "dev", "Gno chain ID")
 	flset.StringVar(&conf.dbPath, "db", "dev.db", "DB, can be a file or a libsql dsn")
 	flset.StringVar(&conf.mailSender, "mail-sender", "contact@mail.zenao.io", "Mail sender address")
 	flset.StringVar(&conf.resendSecretKey, "resend-secret-key", "", "Resend secret key")
 	flset.StringVar(&conf.discordtoken, "discord-token", "", "Discord Token")
-	flset.Float64Var(&conf.gasSecurityRate, "gas-security-rate", 0.2, "margin multiplier for estimated gas wanted to be safe")
 	flset.BoolVar(&conf.maintenance, "maintenance", false, "Maintenance mode, disable all API calls except healthcheck")
+	flset.StringVar(&conf.stripeSecretKey, "stripe-secret-key", "", "Stripe secret key")
 }
 
 var conf config
@@ -102,14 +95,14 @@ func newStartCmd() *commands.Command {
 
 func injectStartEnv() {
 	mappings := map[string]*string{
-		"ZENAO_ADMIN_MNEMONIC":    &conf.adminMnemonic,
+		"ZENAO_APP_BASE_URL":      &conf.appBaseURL,
 		"ZENAO_RESEND_SECRET_KEY": &conf.resendSecretKey,
 		"ZENAO_CLERK_SECRET_KEY":  &conf.clerkSecretKey,
 		"ZENAO_DB":                &conf.dbPath,
-		"ZENAO_CHAIN_ENDPOINT":    &conf.chainEndpoint,
 		"ZENAO_ALLOWED_ORIGINS":   &conf.allowedOrigins,
 		"ZENAO_MAIL_SENDER":       &conf.mailSender,
 		"DISCORD_TOKEN":           &conf.discordtoken,
+		"ZENAO_STRIPE_SECRET_KEY": &conf.stripeSecretKey,
 	}
 
 	for key, ps := range mappings {
@@ -118,7 +111,6 @@ func injectStartEnv() {
 			*ps = val
 		}
 	}
-
 }
 
 func execStart(ctx context.Context) (retErr error) {
@@ -138,11 +130,6 @@ func execStart(ctx context.Context) (retErr error) {
 	}()
 
 	auth, err := czauth.SetupAuth(conf.clerkSecretKey, logger)
-	if err != nil {
-		return err
-	}
-
-	chain, err := setupChain(conf.adminMnemonic, conf.gnoNamespace, conf.chainID, conf.chainEndpoint, conf.gasSecurityRate, logger)
 	if err != nil {
 		return err
 	}
@@ -170,14 +157,18 @@ func execStart(ctx context.Context) (retErr error) {
 	}
 
 	zenao := &ZenaoServer{
-		Logger:       logger,
-		Auth:         auth,
-		Chain:        chain,
-		DB:           db,
-		MailClient:   mailClient,
-		MailSender:   conf.mailSender,
-		DiscordToken: conf.discordtoken,
-		Maintenance:  conf.maintenance,
+		Logger:          logger,
+		Auth:            auth,
+		DB:              db,
+		AppBaseURL:      conf.appBaseURL,
+		MailClient:      mailClient,
+		MailSender:      conf.mailSender,
+		DiscordToken:    conf.discordtoken,
+		Maintenance:     conf.maintenance,
+		StripeSecretKey: conf.stripeSecretKey,
+	}
+	if conf.stripeSecretKey != "" {
+		stripe.Key = conf.stripeSecretKey
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")

@@ -20,7 +20,7 @@ interface CommunityPostInfoProps {
   post: StandardPostView | PollPostView;
   postId: string;
   communityId: string;
-  userRealmId: string;
+  userId: string;
   editMode: boolean;
   onEditModeChange: (editMode: boolean) => void;
   onEdit: (
@@ -32,6 +32,8 @@ interface CommunityPostInfoProps {
   isReacting: boolean;
   onDelete: (postId: string, parentId?: string) => Promise<void>;
   isDeleting: boolean;
+  pinned?: boolean;
+  onPinToggle?: () => void | Promise<void>;
 }
 
 export default function CommunityPostInfo({
@@ -39,7 +41,7 @@ export default function CommunityPostInfo({
   postId,
   editMode,
   onEditModeChange,
-  userRealmId,
+  userId,
   communityId,
   onEdit,
   isEditing,
@@ -47,10 +49,12 @@ export default function CommunityPostInfo({
   isReacting,
   onDelete,
   isDeleting,
+  pinned,
+  onPinToggle,
 }: CommunityPostInfoProps) {
   const router = useRouter();
   const { data: roles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userId),
   );
 
   if (isStandardPost(post)) {
@@ -72,6 +76,9 @@ export default function CommunityPostInfo({
           isDeleting={isDeleting}
           isReacting={isReacting}
           isEditing={isEditing}
+          canPin={roles.includes("administrator")}
+          pinned={pinned}
+          onPinToggle={onPinToggle}
           canInteract
           isOwner={roles.includes("administrator") || roles.includes("member")}
         />
@@ -83,7 +90,7 @@ export default function CommunityPostInfo({
     return (
       <Suspense fallback={<PostCardSkeleton />} key={post.post.localPostId}>
         <PollPost
-          userRealmId={userRealmId}
+          userId={userId}
           pollId={parsePollUri(post.post.post.value.uri).pollId}
           pollPost={post}
           onReactionChange={async (icon) =>

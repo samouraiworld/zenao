@@ -1,0 +1,250 @@
+import { ClerkLoaded, SignedIn, useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { ExternalLink, Link2, List, MapPin } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { AspectRatio } from "@/components/shadcn/aspect-ratio";
+import { Button } from "@/components/shadcn/button";
+import { Skeleton } from "@/components/shadcn/skeleton";
+import { Card } from "@/components/widgets/cards/card";
+import { Web3Image } from "@/components/widgets/images/web3-image";
+import Heading from "@/components/widgets/texts/heading";
+import Text from "@/components/widgets/texts/text";
+import { userInfoOptions } from "@/lib/queries/user";
+import { deserializeWithFrontMatter } from "@/lib/serialization";
+import { MarkdownPreview } from "@/components/widgets/markdown-preview";
+import { profileDetailsSchema } from "@/types/schemas";
+import ProfileExperience from "@/components/features/user/profile-experience";
+
+type ProfileHeaderProps = {
+  userId: string;
+  displayName: string;
+  avatarUri: string;
+  bio: string;
+  isTeam?: boolean;
+};
+
+export default function ProfileHeader({
+  userId,
+  displayName,
+  avatarUri,
+  bio,
+  isTeam,
+}: ProfileHeaderProps) {
+  const profileDetails = deserializeWithFrontMatter({
+    serialized: bio,
+    schema: profileDetailsSchema,
+    defaultValue: {
+      bio: "",
+      socialMediaLinks: [],
+      location: "",
+      shortBio: "",
+      bannerUri: "",
+      experiences: [],
+      skills: [],
+      portfolio: [],
+    },
+    contentFieldName: "bio",
+  });
+
+  return (
+    <div className="flex flex-col w-full">
+      <div className="relative w-full">
+        <AspectRatio ratio={4 / 1}>
+          <Web3Image
+            src={
+              profileDetails.bannerUri ||
+              "ipfs://bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny"
+            }
+            alt="Profile banner"
+            priority
+            fill
+            className="w-full h-full object-cover rounded-b-2xl"
+          />
+        </AspectRatio>
+
+        <div className="absolute -bottom-16 left-4">
+          {avatarUri ? (
+            <div className="relative w-24 h-24 sm:w-40 sm:h-40 rounded-full ring-4 ring-background shadow-md overflow-hidden">
+              <Web3Image
+                src={avatarUri}
+                alt="Profile picture"
+                priority
+                fetchPriority="high"
+                fill
+                sizes="(max-width: 768px) 100vw,
+                (max-width: 1200px) 50vw,
+                33vw"
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <Skeleton className="flex w-full rounded-xl self-center" />
+          )}
+        </div>
+      </div>
+
+      <div className="mt-20 sm:mt-24 px-6 flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <Heading level={1} size="4xl">
+                {displayName}
+              </Heading>
+              {isTeam && (
+                <span className="bg-muted text-white text-sm font-medium px-3 py-1 rounded-md">
+                  Team
+                </span>
+              )}
+            </div>
+            {profileDetails.shortBio && (
+              <Text className="text-muted-foreground mt-1 text-lg">
+                {profileDetails.shortBio}
+              </Text>
+            )}
+
+            {profileDetails.location && (
+              <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 mt-3">
+                <MapPin size={16} />
+                <Text className="text-sm">{profileDetails.location}</Text>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <ClerkLoaded>
+              <SignedIn>
+                <EditProfileButton userId={userId} />
+                <DashboardButton userId={userId} />
+              </SignedIn>
+            </ClerkLoaded>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {profileDetails.bio?.trim() && (
+            <Card>
+              <MarkdownPreview markdownString={profileDetails.bio} />
+            </Card>
+          )}
+        </div>
+
+        {profileDetails.skills?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              Skills
+            </Heading>
+            <div className="flex flex-wrap gap-2">
+              {profileDetails.skills.map((skill) => (
+                <span
+                  key={skill.name}
+                  className="bg-primary text-primary-foreground hover:bg-primary/80 text-sm font-medium px-3 py-1 rounded-full transition"
+                >
+                  {skill.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {profileDetails.socialMediaLinks?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              <Link2 size={18} className="text-primary" />
+              Links
+            </Heading>
+            <ul className="flex flex-wrap gap-2">
+              {profileDetails.socialMediaLinks.map((link) => (
+                <li key={link.url}>
+                  <Link
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 hover:bg-muted border hover:border-blue-600/50 transition text-sm"
+                  >
+                    <span className="text-blue-500">{link.url}</span>
+                    <ExternalLink
+                      size={14}
+                      className="flex-shrink-0 text-blue-400"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {profileDetails.experiences?.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <Heading level={2} size="lg" className="flex items-center gap-2">
+              <List size={18} className="text-primary" />
+              Experiences
+            </Heading>
+
+            <ul className="flex flex-col gap-4">
+              {profileDetails.experiences.map((exp, index) => (
+                <li key={index}>
+                  <ProfileExperience
+                    experience={exp}
+                    unique={profileDetails.experiences.length === 1}
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const EditProfileButton = ({ userId }: { userId: string }) => {
+  const t = useTranslations("profile-info.profile-header");
+  const { userId: authId, getToken } = useAuth();
+  const [clientAuthId, setClientAuthId] = useState<string>();
+
+  // we need this useEffect to prevent hydration errors due to clerk
+  useEffect(() => {
+    setClientAuthId(authId || undefined);
+  }, [authId]);
+
+  const { data: info } = useSuspenseQuery(
+    userInfoOptions(getToken, clientAuthId),
+  );
+
+  const loggedInUserId = info?.userId;
+  return (
+    loggedInUserId === userId && (
+      <Link href="/settings" className="w-full sm:w-auto">
+        <Button className="w-full sm:w-auto">{t("edit-profile")}</Button>
+      </Link>
+    )
+  );
+};
+
+const DashboardButton = ({ userId }: { userId: string }) => {
+  const t = useTranslations("profile-info.profile-header");
+  const { userId: authId, getToken } = useAuth();
+  const [clientAuthId, setClientAuthId] = useState<string>();
+
+  // we need this useEffect to prevent hydration errors due to clerk
+  useEffect(() => {
+    setClientAuthId(authId || undefined);
+  }, [authId]);
+
+  const { data: info } = useSuspenseQuery(
+    userInfoOptions(getToken, clientAuthId),
+  );
+
+  const loggedInUserId = info?.userId;
+  return (
+    loggedInUserId === userId && (
+      <Link href="/dashboard" target="_blank" className="w-full sm:w-auto">
+        <Button variant="outline" className="w-full sm:w-auto">
+          {t("dashboard-access")}
+        </Button>
+      </Link>
+    )
+  );
+};

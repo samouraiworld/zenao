@@ -33,14 +33,13 @@ import {
   EmailSchemaType,
   emailSchema,
   eventFormSchema,
+  SafeEventInfo,
 } from "@/types/schemas";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { makeLocationFromEvent } from "@/lib/location";
 import { useEditEvent } from "@/lib/mutations/event-management";
 import { useToast } from "@/hooks/use-toast";
 import {
   communitiesListByEvent,
-  communityIdFromPkgPath,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
@@ -152,7 +151,7 @@ export function GatekeeperManagementDialog({
   onOpenChange,
 }: {
   eventId: string;
-  eventInfo: EventInfo;
+  eventInfo: SafeEventInfo;
   gatekeepers: string[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -172,10 +171,7 @@ export function GatekeeperManagementDialog({
     [communitiesPages],
   );
 
-  const communityId =
-    communities.length > 0
-      ? communityIdFromPkgPath(communities[0].pkgPath)
-      : null;
+  const communityId = communities.length > 0 ? communities[0].id : null;
 
   const location = makeLocationFromEvent(eventInfo.location);
   const defaultValues: EventFormSchemaType = {

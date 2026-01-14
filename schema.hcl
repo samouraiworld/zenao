@@ -78,6 +78,11 @@ table "users" {
     type    = text
     default = "free"
   }
+  column "is_team" {
+    null    = true
+    type    = numeric
+    default = false
+  }
   primary_key {
     columns = [column.id]
   }
@@ -325,6 +330,71 @@ table "feeds" {
     columns = [column.deleted_at]
   }
 }
+table "payment_accounts" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = true
+    type = datetime
+  }
+  column "updated_at" {
+    null = true
+    type = datetime
+  }
+  column "deleted_at" {
+    null = true
+    type = datetime
+  }
+  column "community_id" {
+    null = false
+    type = integer
+  }
+  column "platform_type" {
+    null = false
+    type = text
+  }
+  column "platform_account_id" {
+    null = false
+    type = text
+  }
+  column "onboarding_state" {
+    null = false
+    type = text
+  }
+  column "started_at" {
+    null = false
+    type = datetime
+  }
+  column "verification_state" {
+    null    = false
+    type    = text
+    default = "pending"
+  }
+  column "last_verified_at" {
+    null = true
+    type = datetime
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_payment_accounts_community" {
+    columns     = [column.community_id]
+    ref_columns = [table.communities.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_payment_accounts_community_platform" {
+    unique  = true
+    columns = [column.community_id, column.platform_type]
+  }
+  index "idx_payment_accounts_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
 table "posts" {
   schema = schema.main
   column "id" {
@@ -399,6 +469,10 @@ table "posts" {
   column "thumbnail_image_uri" {
     null = true
     type = text
+  }
+  column "pinned_at" {
+    null = true
+    type = datetime
   }
   column "user_id" {
     null = true

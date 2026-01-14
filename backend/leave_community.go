@@ -14,21 +14,12 @@ func (s *ZenaoServer) LeaveCommunity(
 	ctx context.Context,
 	req *connect.Request[zenaov1.LeaveCommunityRequest],
 ) (*connect.Response[zenaov1.LeaveCommunityResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("leave-community", zap.String("community-id", req.Msg.CommunityId), zap.String("user-id", zUser.ID))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("leave-community", zap.String("community-id", req.Msg.CommunityId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	var cmt *zeni.Community
 	if err := s.DB.TxWithSpan(ctx, "db.LeaveCommunity", func(tx zeni.DB) error {
@@ -45,22 +36,18 @@ func (s *ZenaoServer) LeaveCommunity(
 			return err
 		}
 
-		if len(administrators) == 1 && administrators[0].EntityID == zUser.ID {
+		if len(administrators) == 1 && administrators[0].EntityID == actor.ID() {
 			return errors.New("user is the only administrator of this community and cannot leave it")
 		}
 
-		if err := tx.RemoveMemberFromCommunity(cmt.ID, zUser.ID); err != nil {
+		if err := tx.RemoveMemberFromCommunity(cmt.ID, actor.ID()); err != nil {
 			return err
 		}
 
-		s.Logger.Info("user left community", zap.String("community-id", cmt.ID), zap.String("user-id", zUser.ID))
+		s.Logger.Info("user left community", zap.String("community-id", cmt.ID), zap.String("actor-id", actor.ID()))
 		return nil
 	}); err != nil {
 		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).RemoveMemberFromCommunity(cmt.CreatorID, cmt.ID, zUser.ID); err != nil {
-		return nil, errors.New("failed to remove member from community on chain")
 	}
 
 	return connect.NewResponse(&zenaov1.LeaveCommunityResponse{}), nil

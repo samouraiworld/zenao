@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { StandardPostForm } from "../forms/standard-post-form";
 import { PostCardLayout } from "./post-card-layout";
 import { MarkdownPreview } from "@/components/widgets/markdown-preview";
-import { cford32Encode } from "@/lib/cford32";
 import { profileOptions } from "@/lib/queries/profile";
 import { StandardPostView } from "@/lib/social-feed";
 import { SocialFeedPostFormSchemaType } from "@/types/schemas";
@@ -25,6 +24,10 @@ export function StandardPostCard({
   isReacting,
   onDelete,
   isDeleting,
+  canPin,
+  pinned,
+  onPinToggle,
+  isPinning,
 }: {
   isOwner?: boolean;
   canInteract?: boolean;
@@ -38,8 +41,12 @@ export function StandardPostCard({
   onEditModeChange?: (editMode: boolean) => void;
   onReactionChange?: (icon: string) => void | Promise<void>;
   isReacting?: boolean;
+  canPin?: boolean;
+  pinned?: boolean;
+  onPinToggle?: () => void | Promise<void>;
   onDelete?: (parentId?: string) => void;
   isDeleting?: boolean;
+  isPinning?: boolean;
 }) {
   const { data: createdBy } = useSuspenseQuery(
     profileOptions(post.post.author),
@@ -64,17 +71,20 @@ export function StandardPostCard({
       <PostCardLayout
         post={post}
         createdBy={createdBy}
-        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/social_feed:post/${cford32Encode(post.post.localPostId, 7)}`}
         canReply={canReply}
         replyHref={replyHref}
         canInteract={canInteract}
         onDelete={onDelete}
         canEdit
+        canPin={canPin}
+        pinned={pinned}
+        onPinToggle={onPinToggle}
         editMode={editMode}
         onEditModeChange={onEditModeChange}
         onReactionChange={onReactionChange}
         isReacting={isReacting}
         isDeleting={isDeleting}
+        isPinning={isPinning}
         isOwner={isOwner}
       >
         {innerEditForm && editMode ? (

@@ -6,7 +6,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { Albert_Sans } from "next/font/google";
-import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import PlausibleProvider from "next-plausible";
 import { headers } from "next/headers";
@@ -14,10 +13,8 @@ import { cookieToWeb3AuthState } from "@web3auth/modal";
 import { AppWeb3AuthProvider } from "./web3-auth-provider";
 
 import { Toaster } from "@/components/shadcn/toaster";
-import { Header } from "@/components/layout/navigation/header";
-import { Footer } from "@/components/layout/navigation/footer";
-import PwaBottomBar from "@/components/layout/navigation/pwa-bottom-bar";
 import PwaStateProvider from "@/components/providers/pwa-state-provider";
+import ActiveAccountProvider from "@/components/providers/active-account-provider";
 import { TooltipProvider } from "@/components/shadcn/tooltip";
 import { MaintenanceScreen } from "@/components/layout/maintenance-screen";
 import { zenaoClient } from "@/lib/zenao-client";
@@ -264,27 +261,23 @@ export default async function RootLayout({
             <NuqsAdapter>
               <PlausibleProvider domain="zenao.io">
                 <PwaStateProvider>
-                  <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                  >
-                    <TooltipProvider>
-                      <NextIntlClientProvider
-                        messages={messages}
-                        now={contextNow}
-                      >
-                        <NextTopLoader showSpinner={false} color="#EC7E17" />
-                        <div className="standalone:bottom-bar-padding h-screen flex flex-col family-name:var(--font-geist-sans)]">
-                          <Header />
+                  <ActiveAccountProvider>
+                    <ThemeProvider
+                      attribute="class"
+                      defaultTheme="system"
+                      enableSystem
+                      disableTransitionOnChange
+                    >
+                      <TooltipProvider>
+                        <NextIntlClientProvider
+                          messages={messages}
+                          now={contextNow}
+                        >
                           {children}
-                          <Footer />
-                          <PwaBottomBar />
-                        </div>
-                      </NextIntlClientProvider>
-                    </TooltipProvider>
-                  </ThemeProvider>
+                        </NextIntlClientProvider>
+                      </TooltipProvider>
+                    </ThemeProvider>
+                  </ActiveAccountProvider>
                 </PwaStateProvider>
               </PlausibleProvider>
             </NuqsAdapter>

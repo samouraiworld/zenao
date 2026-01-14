@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"crypto/ed25519"
 	"errors"
 	"fmt"
+	"net/mail"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,34 +20,69 @@ import (
 	"go.uber.org/zap"
 )
 
-// Participate implements zenaov1connect.ZenaoServiceHandler.
 func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zenaov1.ParticipateRequest]) (*connect.Response[zenaov1.ParticipateResponse], error) {
-	authUser := s.Auth.GetUser(ctx)
+	var (
+		buyer        *zeni.User
+		authUser     *zeni.AuthUser
+		actingAsTeam bool
+		err          error
+	)
 
-	if authUser == nil {
-		if req.Msg.Email == "" {
-			return nil, errors.New("no user and no email")
-		}
-		var err error
-		authUser, err = s.Auth.EnsureUserExists(ctx, req.Msg.Email)
+	// When X-Team-Id header is present, use GetActor which requires authentication.
+	// Otherwise, support unauthenticated participation via email (can't use GetActor for this case).
+	if req.Header().Get(TeamActorHeader) != "" {
+		actor, err := s.GetActor(ctx, req.Header())
 		if err != nil {
 			return nil, err
 		}
-	} else if req.Msg.Email != "" {
-		return nil, errors.New("authenticating and providing an email are mutually exclusive")
+		buyer = actor.ActingAs
+		authUser = actor.AuthUser
+		actingAsTeam = true
+	} else {
+		authUser = s.Auth.GetUser(ctx)
+		if authUser == nil {
+			if req.Msg.Email == "" {
+				return nil, errors.New("no user and no email")
+			}
+			authUser, err = s.Auth.EnsureUserExists(ctx, req.Msg.Email)
+			if err != nil {
+				return nil, err
+			}
+		} else if req.Msg.Email != "" {
+			return nil, errors.New("authenticating and providing an email are mutually exclusive")
+		}
+
+		if _, err = mail.ParseAddress(authUser.Email); err != nil {
+			return nil, fmt.Errorf("invalid email address: %w", err)
+		}
+
+		domain := strings.Split(authUser.Email, "@")[1]
+		if blacklistedDomains != nil && slices.Contains(blacklistedDomains, domain) {
+			return nil, fmt.Errorf("email domain %s is not allowed", domain)
+		}
+
+		if authUser.Banned {
+			return nil, errors.New("user is banned")
+		}
+
+		buyer, err = s.EnsureUserExists(ctx, authUser)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	if authUser.Banned {
-		return nil, errors.New("user is banned")
+	for _, guestEmail := range req.Msg.Guests {
+		if _, err = mail.ParseAddress(guestEmail); err != nil {
+			return nil, fmt.Errorf("invalid guest email address: %w", err)
+		}
+
+		guestDomain := strings.Split(guestEmail, "@")[1]
+		if blacklistedDomains != nil && slices.Contains(blacklistedDomains, guestDomain) {
+			return nil, fmt.Errorf("guest email domain %s is not allowed", guestDomain)
+		}
 	}
 
-	// retrieve auto-incremented user ID from database, do not use auth provider's user ID directly for realms
-	buyer, err := s.EnsureUserExists(ctx, authUser)
-	if err != nil {
-		return nil, err
-	}
-
-	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("user-id", buyer.ID), zap.Bool("user-banned", authUser.Banned))
+	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("buyer-id", buyer.ID), zap.Bool("acting-as-team", actingAsTeam))
 
 	if len(req.Msg.Password) > zeni.MaxPasswordLen {
 		return nil, errors.New("password too long")
@@ -200,36 +236,6 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 				s.Logger.Error("send-participate-confirmation-email", zap.Error(err), zap.String("event-id", evt.ID), zap.String("buyer-id", buyer.ID))
 			}
 		}()
-	}
-
-	// XXX: there could be race conditions if the db has changed password but the chain did not
-
-	var eventSK ed25519.PrivateKey
-	if needPasswordIfGuarded {
-		if eventSK, err = zeni.EventSKFromPasswordHash(evt.PasswordHash); err != nil {
-			return nil, err
-		}
-	}
-
-	for i, ticket := range tickets {
-		// XXX: support batch, this might be very very slow
-		// XXX: callerID should be the current user and not creator,
-		//      this could break if the initial creator has the organizer role removed
-		//      also this bypasses password protection on-chain
-		if err := s.Chain.WithContext(ctx).Participate(req.Msg.EventId, evt.CreatorID, participants[i].ID, ticket.Pubkey(), eventSK); err != nil {
-			// XXX: handle case where db tx pass but chain fail
-			return nil, err
-		}
-
-		for _, cmt := range communities {
-			// XXX: does the check in the chain instead of using db.
-			if slices.Contains(rolesByParticipant[i], zeni.RoleMember) {
-				continue
-			}
-			if err := s.Chain.WithContext(ctx).AddMemberToCommunity(cmt.CreatorID, cmt.ID, participants[i].ID); err != nil {
-				return nil, err
-			}
-		}
 	}
 
 	return connect.NewResponse(&zenaov1.ParticipateResponse{}), nil

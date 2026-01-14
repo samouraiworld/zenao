@@ -14,6 +14,7 @@ type AnalyticEvents = {
   SignInClick: { context: string };
   ThemeChange: { theme: "light" | "dark" | "system" };
   UserProfileEdited: never;
+  CommunityCreated: { communityId: string };
   CommunityEdited: { communityId: string };
   CommunityJoined: { communityId: string };
   CommunityLeft: { communityId: string };
@@ -27,6 +28,7 @@ type AnalyticEvents = {
   PostReactionUpdated: { orgType: OrgType; orgId: string; postId: string };
   PostEdited: { orgType: OrgType; orgId: string; postId: string };
   PostCommented: { orgType: OrgType; orgId: string; postId: string };
+  PostPinUpdated: { orgType: OrgType; orgId: string; postId: string };
   PollCreated: { orgType: OrgType; orgId: string };
   PollVoteUpdated: { pollId: string };
 };

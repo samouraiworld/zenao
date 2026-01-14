@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { UseFormReturn, useFieldArray, useWatch } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { Trash2Icon, Plus, Info } from "lucide-react";
@@ -30,6 +30,7 @@ import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
 interface CommunityFormProps {
   form: UseFormReturn<CommunityFormSchemaType>;
   onSubmit: (values: CommunityFormSchemaType) => Promise<void>;
+  isEditing?: boolean;
   isLoading: boolean;
 }
 
@@ -37,11 +38,16 @@ export const CommunityForm = ({
   form,
   onSubmit,
   isLoading,
+  isEditing,
 }: CommunityFormProps) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "administrators",
   });
+
+  const {
+    formState: { isValid },
+  } = form;
 
   const adminInputs = useWatch({
     control: form.control,
@@ -50,15 +56,25 @@ export const CommunityForm = ({
 
   const description = form.watch("description");
 
-  const lastAdmin = adminInputs?.[adminInputs.length - 1];
-  const isLastAdminInvalid =
-    !lastAdmin ||
-    !communityFormSchema.shape.administrators.element.shape.address.safeParse(
-      lastAdmin.address,
-    ).success;
-  const isButtonDisabled = !form.formState.isValid || isLastAdminInvalid;
+  const lastAdmin = useMemo(
+    () => adminInputs?.[adminInputs.length - 1],
+    [adminInputs],
+  );
+  const isLastAdminInvalid = useMemo(
+    () =>
+      lastAdmin &&
+      (lastAdmin.email === "" ||
+        !communityFormSchema.shape.administrators.element.shape.email.safeParse(
+          lastAdmin.email,
+        ).success),
+    [lastAdmin],
+  );
+  const isButtonDisabled = useMemo(
+    () => !isValid || isLastAdminInvalid,
+    [isValid, isLastAdminInvalid],
+  );
 
-  const t = useTranslations("community-edit-form");
+  const t = useTranslations("community-form");
 
   return (
     <Form {...form}>
@@ -204,17 +220,17 @@ export const CommunityForm = ({
                   <div key={field.id} className="flex gap-2 items-start">
                     <FormFieldInputString
                       control={form.control}
-                      name={`administrators.${index}.address`}
+                      name={`administrators.${index}.email`}
                       placeholder={t("admin-placeholder")}
                       className="flex-grow"
                     />
                     <div
                       onClick={() => {
-                        if (fields.length > 1) remove(index);
+                        if (!isEditing || fields.length > 1) remove(index);
                       }}
                       className={cn(
                         "hover:cursor-pointer flex items-center justify-center rounded-full size-11 aspect-square",
-                        fields.length > 1
+                        !isEditing || fields.length > 1
                           ? "hover:bg-destructive"
                           : "opacity-30 cursor-not-allowed",
                       )}
@@ -226,7 +242,7 @@ export const CommunityForm = ({
 
                 <Button
                   type="button"
-                  onClick={() => append({ address: "" })}
+                  onClick={() => append({ email: "" })}
                   className="w-fit gap-2 mt-2"
                   disabled={isLastAdminInvalid}
                   variant="outline"
@@ -246,7 +262,7 @@ export const CommunityForm = ({
             type="submit"
             className="px-8 w-full"
           >
-            {t("submit")}
+            {isEditing ? t("submit-edit") : t("submit-create")}
           </ButtonWithChildren>
         </SettingsSection>
       </form>

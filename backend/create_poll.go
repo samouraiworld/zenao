@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	ma "github.com/multiformats/go-multiaddr"
-	feedsv1 "github.com/samouraiworld/zenao/backend/feeds/v1"
 	pollsv1 "github.com/samouraiworld/zenao/backend/polls/v1"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
@@ -16,49 +14,23 @@ import (
 )
 
 func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenaov1.CreatePollRequest]) (*connect.Response[zenaov1.CreatePollResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("create-poll", zap.String("question", req.Msg.Question), zap.Strings("options", req.Msg.Options), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if err := validatePoll(req.Msg); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
 	}
 
-	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
+	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, actor.ID(), req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, err
 	}
 	if len(roles) == 0 {
 		return nil, errors.New("user is not a member of the organization that owns the feed")
-	}
-	pollID, postID, err := s.Chain.WithContext(ctx).CreatePoll(zUser.ID, req.Msg)
-	if err != nil {
-		return nil, err
-	}
-
-	postURI, err := ma.NewMultiaddr(fmt.Sprintf("/poll/%s/gno/gno.land/r/zenao/polls", pollID))
-	if err != nil {
-		return nil, err
-	}
-
-	post := &feedsv1.Post{
-		Post: &feedsv1.Post_Link{
-			Link: &feedsv1.LinkPost{
-				Uri: postURI.String(),
-			},
-		},
 	}
 
 	zpoll := (*zeni.Poll)(nil)
@@ -68,7 +40,7 @@ func (s *ZenaoServer) CreatePoll(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
-		if zpoll, err = db.CreatePoll(zUser.ID, pollID, postID, feed.ID, post, req.Msg); err != nil {
+		if zpoll, err = db.CreatePoll(actor.ID(), feed.ID, "", req.Msg); err != nil {
 			return err
 		}
 		return nil

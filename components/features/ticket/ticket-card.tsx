@@ -6,16 +6,16 @@ import { format, fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { EventInfo } from "@/app/gen/zenao/v1/zenao_pb";
 import { cn } from "@/lib/tailwind";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import Heading from "@/components/widgets/texts/heading";
 import Text from "@/components/widgets/texts/text";
+import { SafeEventInfo } from "@/types/schemas";
 
 type TicketCardProps = {
   eventId: string;
-  event: EventInfo;
+  event: SafeEventInfo;
   timezone: string;
   ticketInfo: {
     ticketSecret: string;

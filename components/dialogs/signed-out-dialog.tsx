@@ -15,7 +15,9 @@ import {
 import { Button } from "@/components/shadcn/button";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 
-export const SignedOutDialog: React.FC = () => {
+export const SignedOutDialog: React.FC<{ description?: string }> = ({
+  description,
+}) => {
   const { trackEvent } = useAnalyticsEvents();
   const t = useTranslations("components.modals.signed-out-modal");
 
@@ -25,7 +27,9 @@ export const SignedOutDialog: React.FC = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("title")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("description")} </AlertDialogDescription>
+            <AlertDialogDescription>
+              {description ?? t("description")}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <SignUpButton>

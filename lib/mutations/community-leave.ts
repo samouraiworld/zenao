@@ -10,7 +10,7 @@ import { zenaoClient } from "@/lib/zenao-client";
 interface LeaveCommunityRequest {
   communityId: string;
   token: string;
-  userRealmId: string | null;
+  userId: string | null;
 }
 
 export const useLeaveCommunity = () => {
@@ -26,8 +26,8 @@ export const useLeaveCommunity = () => {
         },
       );
     },
-    onSuccess: async (_, { communityId, userRealmId }) => {
-      const rolesOpts = communityUserRoles(communityId, userRealmId);
+    onSuccess: async (_, { communityId, userId }) => {
+      const rolesOpts = communityUserRoles(communityId, userId);
       const communityOpts = communityInfo(communityId);
       const usersWithRolesOpts = communityUsersWithRoles(communityId, [
         "member",

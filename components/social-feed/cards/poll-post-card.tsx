@@ -18,7 +18,7 @@ import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 export function PollPostCard({
   pollId,
   pollPost,
-  userRealmId,
+  userId,
   canReply,
   canInteract,
   onDelete,
@@ -30,7 +30,7 @@ export function PollPostCard({
 }: {
   pollId: string;
   pollPost: PollPostViewInfo;
-  userRealmId: string;
+  userId: string;
   canReply?: boolean;
   canInteract?: boolean;
   isOwner?: boolean;
@@ -75,7 +75,7 @@ export function PollPostCard({
         token,
         pollId,
         option,
-        userRealmId,
+        userId,
       });
       trackEvent("PollVoteUpdated", {
         props: {
@@ -100,7 +100,6 @@ export function PollPostCard({
       <PostCardLayout
         post={pollPost}
         createdBy={createdBy}
-        gnowebHref={`${process.env.NEXT_PUBLIC_GNOWEB_URL}/r/${process.env.NEXT_PUBLIC_ZENAO_NAMESPACE}/polls:${parseInt(pollId, 10).toString(16).padStart(7, "0")}`}
         canReply={canReply}
         canInteract={canInteract}
         isDeleting={isDeleting}

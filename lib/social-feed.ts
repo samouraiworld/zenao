@@ -6,37 +6,7 @@ import {
 } from "@/app/gen/feeds/v1/feeds_pb";
 import { Poll } from "@/app/gen/polls/v1/polls_pb";
 
-// TODO implement all types of post
-// postType:
-//   | "article"
-//   | "audio"
-//   | "video"
-//   | "image"
-//   | "link"
-//   | "standard"
-//   | "poll";
-
 export type SocialFeedPostType = "POLL" | "STANDARD_POST";
-
-export type SocialFeedPost =
-  | SocialFeedPoll
-  | SocialFeedStandardPost
-  | SocialFeedUnknownPost;
-
-export type SocialFeedPoll = {
-  postType: "poll";
-  data: PollPostView;
-};
-
-export type SocialFeedStandardPost = {
-  postType: "standard";
-  data: StandardPostView;
-};
-
-export type SocialFeedUnknownPost = {
-  postType: "unknown";
-  data: PostView;
-};
 
 export type PollPostView = PostView & {
   post: Post & {

@@ -17,23 +17,14 @@ func (s *ZenaoServer) BroadcastEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.BroadcastEventRequest],
 ) (*connect.Response[zenaov1.BroadcastEventResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("broadcast-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("broadcast-event", zap.String("event-id", req.Msg.EventId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
-
-	if zUser.Plan != zeni.ProPlan {
+	if actor.User.Plan != zeni.ProPlan {
 		return nil, errors.New("broadcast feature is only available for pro users")
 	}
 
@@ -53,11 +44,11 @@ func (s *ZenaoServer) BroadcastEvent(
 		if err != nil {
 			return err
 		}
-		participants, err = db.GetOrgUsersWithRole(zeni.EntityTypeEvent, req.Msg.EventId, zeni.RoleParticipant)
+		participants, err = db.GetOrgUsersWithRoles(zeni.EntityTypeEvent, req.Msg.EventId, []string{zeni.RoleParticipant})
 		if err != nil {
 			return err
 		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}

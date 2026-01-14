@@ -2,20 +2,69 @@ package main
 
 import (
 	"context"
-	"errors"
+	"fmt"
+	"slices"
 	_ "time/tzdata"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
+	"github.com/samouraiworld/zenao/backend/zeni"
+	"go.uber.org/zap"
 )
 
 func (s *ZenaoServer) CreateCommunity(
 	ctx context.Context,
 	req *connect.Request[zenaov1.CreateCommunityRequest],
 ) (*connect.Response[zenaov1.CreateCommunityResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
+	actor, err := s.GetActor(ctx, req.Header())
+	if err != nil {
+		return nil, err
 	}
-	return nil, errors.New("not implemented yet")
+
+	s.Logger.Info("create-community", zap.String("name", req.Msg.DisplayName), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
+
+	if err := validateCommunity(req.Msg.DisplayName, req.Msg.Description, req.Msg.AvatarUri, req.Msg.BannerUri); err != nil {
+		return nil, fmt.Errorf("invalid input: %w", err)
+	}
+
+	authAdmins, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Administrators)
+	if err != nil {
+		return nil, err
+	}
+
+	var adminIDs []string
+	adminIDs = append(adminIDs, actor.ID())
+	for _, authAdmin := range authAdmins {
+		if authAdmin.Banned {
+			return nil, fmt.Errorf("user %s is banned", authAdmin.Email)
+		}
+		zAdmin, err := s.EnsureUserExists(ctx, authAdmin)
+		if err != nil {
+			return nil, err
+		}
+		if slices.Contains(adminIDs, zAdmin.ID) {
+			continue
+		}
+		adminIDs = append(adminIDs, zAdmin.ID)
+	}
+
+	cmt := (*zeni.Community)(nil)
+	if err := s.DB.TxWithSpan(ctx, "db.CreateCommunity", func(tx zeni.DB) error {
+		var err error
+		// XXX: put the admins as members too.
+		cmt, err = tx.CreateCommunity(actor.ID(), adminIDs, adminIDs, []string{}, req.Msg)
+		if err != nil {
+			return err
+		}
+
+		if _, err = tx.CreateFeed(zeni.EntityTypeCommunity, cmt.ID, "main"); err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return connect.NewResponse(&zenaov1.CreateCommunityResponse{CommunityId: cmt.ID}), nil
 }

@@ -18,20 +18,14 @@ func (s *ZenaoServer) CancelEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.CancelEventRequest],
 ) (*connect.Response[zenaov1.CancelEventResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("cancel-event", zap.String("event-id", req.Msg.EventId), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("cancel-event", zap.String("event-id", req.Msg.EventId), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	var users []*zeni.User
-	var cmties []*zeni.Community
 	var evt *zeni.Event
 	if err := s.DB.TxWithSpan(ctx, "db.CancelEvent", func(db zeni.DB) error {
 		evt, err = db.GetEvent(req.Msg.EventId)
@@ -45,16 +39,12 @@ func (s *ZenaoServer) CancelEvent(
 		if time.Now().Add(24 * time.Hour).After(evt.StartDate) {
 			return errors.New("events already started or starting within 24h cannot be cancelled")
 		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeEvent, req.Msg.EventId)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeEvent, req.Msg.EventId)
 		if err != nil {
 			return err
 		}
 		if !slices.Contains(roles, zeni.RoleOrganizer) {
 			return errors.New("only organizers can cancel an event")
-		}
-		cmties, err = db.CommunitiesByEvent(req.Msg.EventId)
-		if err != nil {
-			return err
 		}
 		return db.CancelEvent(req.Msg.EventId)
 	}); err != nil {
@@ -95,16 +85,6 @@ func (s *ZenaoServer) CancelEvent(
 			count += len(batch)
 			s.Logger.Info("send-event-cancellation-email", zap.Int("already-sent", count), zap.Int("total", len(requests)))
 		}
-	}
-
-	for _, cmt := range cmties {
-		if err := s.Chain.WithContext(ctx).RemoveEventFromCommunity(cmt.CreatorID, cmt.ID, evt.ID); err != nil {
-			s.Logger.Error("remove-cancelled-event-from-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
-		}
-	}
-
-	if err := s.Chain.WithContext(ctx).CancelEvent(evt.ID, evt.CreatorID); err != nil {
-		return nil, err
 	}
 
 	return connect.NewResponse(&zenaov1.CancelEventResponse{}), nil

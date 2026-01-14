@@ -2,7 +2,6 @@ package zeni
 
 import (
 	"context"
-	"crypto/ed25519"
 	"errors"
 	"fmt"
 	"net/http"
@@ -53,12 +52,41 @@ const (
 	RoleAdministrator string = "administrator" // for communities
 	RoleMember        string = "member"        // for communities
 	RoleEvent         string = "event"         // for communities
+
+	RoleTeamOwner  string = "team_owner"  // for teams
+	RoleTeamMember string = "team_member" // for teams (distinct from community "member")
 )
+
+const (
+	PaymentPlatformStripeConnect = "stripe_connect"
+
+	PaymentOnboardingStateStarted        = "started"
+	PaymentOnboardingStateCompleted      = "completed"
+	PaymentOnboardingStateMissingAccount = "missing_account"
+
+	PaymentVerificationStatePending        = "pending"
+	PaymentVerificationStateVerified       = "verified"
+	PaymentVerificationStateFailed         = "failed"
+	PaymentVerificationStateMissingAccount = "missing_account"
+)
+
+func IsValidEventRole(role string) bool {
+	return role == RoleOrganizer || role == RoleGatekeeper || role == RoleParticipant
+}
+
+func IsValidUserCommunityRole(role string) bool {
+	return role == RoleAdministrator || role == RoleMember
+}
+
+func IsValidTeamRole(role string) bool {
+	return role == RoleTeamOwner || role == RoleTeamMember
+}
 
 const (
 	EntityTypeUser      string = "user"
 	EntityTypeEvent     string = "event"
 	EntityTypeCommunity string = "community"
+	EntityTypeTeam      string = "team"
 )
 
 type AuthUser struct {
@@ -75,6 +103,12 @@ type User struct {
 	Bio         string
 	AvatarURI   string
 	Plan        Plan
+	IsTeam      bool
+}
+
+type TeamWithRole struct {
+	Team *User
+	Role string
 }
 
 type Event struct {
@@ -95,6 +129,11 @@ type Event struct {
 	Discoverable      bool
 }
 
+type EventWithRoles struct {
+	Event *Event
+	Roles []string
+}
+
 type Community struct {
 	CreatedAt   time.Time
 	ID          string
@@ -103,6 +142,24 @@ type Community struct {
 	AvatarURI   string
 	BannerURI   string
 	CreatorID   string
+}
+
+type CommunityWithRoles struct {
+	Community *Community
+	Roles     []string
+}
+
+type PaymentAccount struct {
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	ID                string
+	CommunityID       string
+	PlatformType      string
+	PlatformAccountID string
+	OnboardingState   string
+	StartedAt         time.Time
+	VerificationState string
+	LastVerifiedAt    *time.Time
 }
 
 type EntityRole struct {
@@ -129,6 +186,7 @@ type Post struct {
 	Post      *feedsv1.Post
 	UserID    string
 	FeedID    string
+	PinnedAt  *time.Time
 	Reactions []*Reaction
 }
 
@@ -210,11 +268,14 @@ type DB interface {
 
 	CreateUser(authID string) (*User, error)
 	GetUser(authID string) (*User, error)
+	GetUsersByIDs(ids []string) ([]*User, error)
 	// XXX: add EnsureUsersExist
 
 	EditUser(userID string, req *zenaov1.EditUserRequest) error
 	PromoteUser(userID string, plan Plan) error
 	EntityRoles(entityType string, entityID string, orgType string, orgID string) ([]string, error)
+	EntitiesWithRoles(orgType string, orgID string, roles []string) ([]*EntityRole, error)
+	CountEntities(orgType string, orgID string, entityType string, role string) (uint32, error)
 	GetAllUsers() ([]*User, error)
 
 	CreateEvent(creatorID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest) (*Event, error)
@@ -222,6 +283,9 @@ type DB interface {
 	EditEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest) (*Event, error)
 	ValidatePassword(req *zenaov1.ValidatePasswordRequest) (bool, error)
 	GetEvent(eventID string) (*Event, error)
+	ListEvents(limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*Event, error)
+	ListEventsByUserRoles(userID string, roles []string, limit int, offset int, from int64, to int64, discoverable zenaov1.DiscoverableFilter) ([]*EventWithRoles, error)
+	CountCheckedIn(eventID string) (uint32, error)
 	Participate(eventID string, buyerID string, userID string, ticketSecret string, password string, needPassword bool) error
 	CancelParticipation(eventID string, userID string) error
 	GetAllEvents() ([]*Event, error)
@@ -230,6 +294,7 @@ type DB interface {
 	GetEventUserTicket(eventID string, userID string) (*SoldTicket, error)
 	GetEventUserOrBuyerTickets(eventID string, userID string) ([]*SoldTicket, error)
 	Checkin(pubkey string, gatekeeperID string, signature string) (*Event, error)
+	RemoveUserGatekeeperRoles(userID string) error
 
 	AddEventToCommunity(eventID string, communityID string) error
 	RemoveEventFromCommunity(eventID string, communityID string) error
@@ -239,11 +304,24 @@ type DB interface {
 	CreateCommunity(creatorID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) (*Community, error)
 	EditCommunity(communityID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) (*Community, error)
 	GetCommunity(communityID string) (*Community, error)
+	ListCommunities(entityType string, entityID string, role string, limit int, offset int) ([]*Community, error)
 	AddMemberToCommunity(communityID string, userID string) error
 	RemoveMemberFromCommunity(communityID string, userID string) error
 	GetAllCommunities() ([]*Community, error)
+	ListCommunitiesByUserRoles(userID string, roles []string, limit int, offset int) ([]*CommunityWithRoles, error)
+	RemoveUserFromAllCommunities(userID string) error
 
-	GetOrgUsersWithRole(orgType string, orgID string, role string) ([]*User, error)
+	GetPaymentAccountByCommunityPlatform(communityID string, platformType string) (*PaymentAccount, error)
+	UpsertPaymentAccount(account *PaymentAccount) error
+
+	CreateTeam(ownerID string, displayName string) (*User, error)
+	EditTeam(teamID string, memberIDs []string, req *zenaov1.EditTeamRequest) error
+	GetUserByID(userID string) (*User, error)
+	GetUserTeams(userID string) ([]*TeamWithRole, error)
+	CanDeleteTeam(teamID string) error
+	DeleteTeam(teamID string) error
+
+	GetOrgUsersWithRoles(orgType string, orgID string, roles []string) ([]*User, error)
 	GetOrgUsers(orgType string, orgID string) ([]*User, error)
 	GetOrgByPollID(pollID string) (orgType, orgID string, err error)
 	GetOrgByPostID(postID string) (orgType, orgID string, err error)
@@ -252,53 +330,28 @@ type DB interface {
 	GetFeed(orgType string, orgID string, slug string) (*Feed, error)
 	GetFeedByID(feedID string) (*Feed, error)
 
-	CreatePost(postID string, feedID string, userID string, post *feedsv1.Post) (*Post, error)
+	CreatePost(feedID string, userID string, post *feedsv1.Post) (*Post, error)
 	DeletePost(postID string) error
 	EditPost(postID string, req *zenaov1.EditPostRequest) error
 	GetPostByID(postID string) (*Post, error)
+	GetPostsByFeedID(feedID string, limit int, offset int, tags []string) ([]*Post, error)
+	GetPostsByParentID(parentID string, limit int, offset int, tags []string) ([]*Post, error)
+	CountChildrenPosts(parentID string) (uint64, error)
 	GetAllPosts(getDeleted bool) ([]*Post, error)
 	ReactPost(userID string, req *zenaov1.ReactPostRequest) error
+	PinPost(feedID string, postID string, pinned bool) error
+	DeleteUserPostsByAuthor(userID string) error
 
-	CreatePoll(userID string, pollID, postID string, feedID string, post *feedsv1.Post, req *zenaov1.CreatePollRequest) (*Poll, error)
+	CreatePoll(userID string, feedID string, parentURI string, req *zenaov1.CreatePollRequest) (*Poll, error)
 	VotePoll(userID string, req *zenaov1.VotePollRequest) error
-	GetPollByPostID(postID string) (*Poll, error)
+	GetPollByID(pollID string, userID string) (*Poll, error)
+	GetPollByPostID(postID string, userID string) (*Poll, error)
 
 	// gentxs specific
 	GetOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedOrgEntitiesWithRole(orgType string, orgID string, entityType string, role string) ([]*EntityRole, error)
 	GetDeletedTickets(eventID string) ([]*SoldTicket, error)
 	GetDeletedEvents() ([]*Event, error)
-}
-
-type Chain interface {
-	WithContext(ctx context.Context) Chain
-
-	FillAdminProfile()
-	CreateUser(user *User) error
-	EditUser(userID string, req *zenaov1.EditUserRequest) error
-	UserRealmID(userID string) string
-
-	CreateEvent(eventID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.CreateEventRequest, privacy *zenaov1.EventPrivacy) error
-	CancelEvent(eventID string, callerID string) error
-	EditEvent(eventID string, callerID string, organizersIDs []string, gatekeepersIDs []string, req *zenaov1.EditEventRequest, privacy *zenaov1.EventPrivacy) error
-	Participate(eventID string, callerID string, participantID string, ticketPubkey string, eventSK ed25519.PrivateKey) error
-	CancelParticipation(eventID string, callerID string, participantID string, ticketPubkey string) error
-	Checkin(eventID string, gatekeeperID string, req *zenaov1.CheckinRequest) error
-
-	CreateCommunity(communityID string, administratorsIDs []string, membersIDs []string, eventsIDs []string, req *zenaov1.CreateCommunityRequest) error
-	EditCommunity(communityID string, callerID string, administratorsIDs []string, req *zenaov1.EditCommunityRequest) error
-	AddEventToCommunity(callerID string, communityID string, eventID string) error
-	RemoveEventFromCommunity(callerID string, communityID string, eventID string) error
-	AddMemberToCommunity(callerID string, communityID string, userID string) error
-	AddMembersToCommunity(callerID string, communityID string, userIDs []string) error
-	RemoveMemberFromCommunity(callerID string, communityID string, userID string) error
-
-	CreatePost(userID string, orgType string, orgID string, post *feedsv1.Post) (postID string, err error)
-	DeletePost(userID string, postID string) error
-	EditPost(userID string, postID string, post *feedsv1.Post) error
-	ReactPost(userID string, orgType string, orgID string, req *zenaov1.ReactPostRequest) error
-	CreatePoll(userID string, req *zenaov1.CreatePollRequest) (pollID, postID string, err error)
-	VotePoll(userID string, req *zenaov1.VotePollRequest) error
 }
 
 type Auth interface {

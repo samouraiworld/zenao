@@ -13,24 +13,25 @@ export const CommunityEditAdminButton = ({
 }: {
   communityId: string;
 }) => {
-  const t = useTranslations("community-edit-form");
+  const t = useTranslations("community");
   const { getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
   const { data: userRoles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userInfo?.realmId || ""),
+    communityUserRoles(communityId, userInfo?.userId || ""),
   );
   const isAdmin = userRoles.includes("administrator");
   if (!isAdmin) return null;
+
   return (
     <div>
-      <Link passHref href={`/community/edit/${communityId}`}>
+      <Link passHref href={`/dashboard/community/${communityId}`}>
         <ButtonWithChildren
           variant="outline"
           className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] w-full"
         >
-          {t("edit-button")}
+          {t("edit-community-button")}
         </ButtonWithChildren>
       </Link>
     </div>

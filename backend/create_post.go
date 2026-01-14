@@ -12,21 +12,12 @@ import (
 )
 
 func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenaov1.CreatePostRequest]) (*connect.Response[zenaov1.CreatePostResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-standard-post", zap.String("org-type", req.Msg.OrgType), zap.String("org-id", req.Msg.OrgId), zap.String("content", req.Msg.Content), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("create-standard-post", zap.String("org-type", req.Msg.OrgType), zap.String("org-id", req.Msg.OrgId), zap.String("content", req.Msg.Content), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if req.Msg.OrgType != zeni.EntityTypeEvent && req.Msg.OrgType != zeni.EntityTypeCommunity {
 		return nil, errors.New("invalid org type (must be event or community)")
@@ -43,7 +34,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		}
 	}
 
-	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, zUser.ID, req.Msg.OrgType, req.Msg.OrgId)
+	roles, err := s.DB.WithContext(ctx).EntityRoles(zeni.EntityTypeUser, actor.ID(), req.Msg.OrgType, req.Msg.OrgId)
 	if err != nil {
 		return nil, err
 	}
@@ -69,11 +60,6 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 		},
 	}
 
-	postID, err := s.Chain.WithContext(ctx).CreatePost(zUser.ID, req.Msg.OrgType, req.Msg.OrgId, post)
-	if err != nil {
-		return nil, err
-	}
-
 	zpost := (*zeni.Post)(nil)
 	if err := s.DB.TxWithSpan(ctx, "db.CreatePost", func(db zeni.DB) error {
 		feed, err := db.GetFeed(req.Msg.OrgType, req.Msg.OrgId, "main")
@@ -81,7 +67,7 @@ func (s *ZenaoServer) CreatePost(ctx context.Context, req *connect.Request[zenao
 			return err
 		}
 
-		if zpost, err = db.CreatePost(postID, feed.ID, zUser.ID, post); err != nil {
+		if zpost, err = db.CreatePost(feed.ID, actor.ID(), post); err != nil {
 			return err
 		}
 

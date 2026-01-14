@@ -5,22 +5,21 @@ import { Card } from "../widgets/cards/card";
 import Text from "../widgets/texts/text";
 import { profileOptions } from "@/lib/queries/profile";
 import { deserializeWithFrontMatter } from "@/lib/serialization";
-import { gnoProfileDetailsSchema } from "@/types/schemas";
-import { addressFromRealmId } from "@/lib/gno";
+import { profileDetailsSchema } from "@/types/schemas";
 import { communityUserRoles } from "@/lib/queries/community";
 
 type CommunityMemberCardProps = {
   communityId: string;
-  userRealmId: string;
+  userId: string;
 };
 
 function CommunityMemberCard({
   communityId,
-  userRealmId,
+  userId,
 }: CommunityMemberCardProps) {
-  const { data: profile } = useSuspenseQuery(profileOptions(userRealmId));
+  const { data: profile } = useSuspenseQuery(profileOptions(userId));
   const { data: roles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userId),
   );
 
   if (!profile?.bio && !profile?.displayName && !profile?.avatarUri) {
@@ -29,7 +28,7 @@ function CommunityMemberCard({
 
   const { shortBio } = deserializeWithFrontMatter({
     serialized: profile.bio,
-    schema: gnoProfileDetailsSchema,
+    schema: profileDetailsSchema,
     defaultValue: {
       bio: "",
       socialMediaLinks: [],
@@ -38,6 +37,7 @@ function CommunityMemberCard({
       bannerUri: "",
       skills: [],
       experiences: [],
+      portfolio: [],
     },
     contentFieldName: "bio",
   });
@@ -48,7 +48,7 @@ function CommunityMemberCard({
   return (
     <Card className="flex items-center gap-6 p-6 md:max-w-[600px] bg-secondary/50 hover:bg-secondary/100 transition rounded-xl">
       <UserAvatar
-        realmId={userRealmId}
+        userId={userId}
         className="w-24 h-24 rounded-full"
         size="lg"
       />
@@ -57,9 +57,6 @@ function CommunityMemberCard({
         <div>
           <Text size="sm" className="font-bold text-primary">
             {profile.displayName}
-          </Text>
-          <Text size="xs" className="text-secondary-color">
-            {addressFromRealmId(userRealmId).substring(0, 10)}
           </Text>
         </div>
         {shortBioCut && (

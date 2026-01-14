@@ -11,21 +11,12 @@ import (
 )
 
 func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov1.ReactPostRequest]) (*connect.Response[zenaov1.ReactPostResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("react-post", zap.String("post-id", req.Msg.PostId), zap.String("icon", req.Msg.Icon), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("react-post", zap.String("post-id", req.Msg.PostId), zap.String("icon", req.Msg.Icon), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if len(req.Msg.Icon) == 0 {
 		return nil, errors.New("icon cannot be empty")
@@ -37,7 +28,7 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 		if err != nil {
 			return err
 		}
-		roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, orgType, orgID)
+		roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), orgType, orgID)
 		if err != nil {
 			return err
 		}
@@ -45,16 +36,12 @@ func (s *ZenaoServer) ReactPost(ctx context.Context, req *connect.Request[zenaov
 			return errors.New("user is not a member of the event")
 		}
 
-		if err = db.ReactPost(zUser.ID, req.Msg); err != nil {
+		if err = db.ReactPost(actor.ID(), req.Msg); err != nil {
 			return err
 		}
 
 		return nil
 	}); err != nil {
-		return nil, err
-	}
-
-	if err = s.Chain.WithContext(ctx).ReactPost(zUser.ID, orgID, orgID, req.Msg); err != nil {
 		return nil, err
 	}
 

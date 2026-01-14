@@ -21,22 +21,12 @@ func (s *ZenaoServer) CreateEvent(
 	ctx context.Context,
 	req *connect.Request[zenaov1.CreateEventRequest],
 ) (*connect.Response[zenaov1.CreateEventResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	// retrieve auto-incremented user ID from database, do not use auth provider's user ID directly for realms
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
-
-	if user.Banned {
-		return nil, errors.New("user is banned")
-	}
+	s.Logger.Info("create-event", zap.String("title", req.Msg.Title), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
 	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
@@ -49,7 +39,7 @@ func (s *ZenaoServer) CreateEvent(
 	}
 
 	var organizersIDs []string
-	organizersIDs = append(organizersIDs, zUser.ID)
+	organizersIDs = append(organizersIDs, actor.ID())
 	for _, authOrg := range authOrgas {
 		if authOrg.Banned {
 			return nil, fmt.Errorf("user %s is banned", authOrg.Email)
@@ -88,7 +78,7 @@ func (s *ZenaoServer) CreateEvent(
 	cmt := (*zeni.Community)(nil)
 	targets := []*zeni.User{}
 	if err := s.DB.TxWithSpan(ctx, "db.CreateEvent", func(db zeni.DB) error {
-		if evt, err = db.CreateEvent(zUser.ID, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
+		if evt, err = db.CreateEvent(actor.ID(), organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
 		}
 
@@ -101,7 +91,7 @@ func (s *ZenaoServer) CreateEvent(
 			if err != nil {
 				return err
 			}
-			roles, err := db.EntityRoles(zeni.EntityTypeUser, zUser.ID, zeni.EntityTypeCommunity, cmt.ID)
+			roles, err := db.EntityRoles(zeni.EntityTypeUser, actor.ID(), zeni.EntityTypeCommunity, cmt.ID)
 			if err != nil {
 				return err
 			}
@@ -112,7 +102,7 @@ func (s *ZenaoServer) CreateEvent(
 			if err != nil {
 				return err
 			}
-			targets, err = db.GetOrgUsersWithRole(zeni.EntityTypeCommunity, req.Msg.CommunityId, zeni.RoleMember)
+			targets, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleMember})
 			if err != nil {
 				return err
 			}
@@ -132,7 +122,7 @@ func (s *ZenaoServer) CreateEvent(
 			// XXX: Replace sender name with organizer name
 			if _, err := s.MailClient.Emails.SendWithContext(ctx, &resend.SendEmailRequest{
 				From:    fmt.Sprintf("Zenao <%s>", s.MailSender),
-				To:      []string{user.Email},
+				To:      []string{actor.AuthUser.Email},
 				Subject: fmt.Sprintf("%s - Creation confirmed", evt.Title),
 				Html:    htmlStr,
 				Text:    text,
@@ -181,23 +171,6 @@ func (s *ZenaoServer) CreateEvent(
 			}
 			count += len(batch)
 			s.Logger.Info("send-community-new-event-emails", zap.Int("already-sent-count", count), zap.Int("total", len(requests)))
-		}
-	}
-
-	privacy, err := zeni.EventPrivacyFromPasswordHash(evt.PasswordHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.Chain.WithContext(ctx).CreateEvent(evt.ID, organizersIDs, gatekeepersIDs, req.Msg, privacy); err != nil {
-		s.Logger.Error("create-event", zap.Error(err))
-		return nil, err
-	}
-
-	if req.Msg.CommunityId != "" {
-		if err := s.Chain.WithContext(ctx).AddEventToCommunity(zUser.ID, cmt.ID, evt.ID); err != nil {
-			s.Logger.Error("add-event-to-community", zap.Error(err), zap.String("event-id", evt.ID), zap.String("community-id", cmt.ID))
-			return nil, err
 		}
 	}
 

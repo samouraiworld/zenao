@@ -1,8 +1,9 @@
-import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
-import { extractGnoJSONResponse } from "../gno";
 import { withSpan } from "../tracer";
+import { zenaoClient } from "../zenao-client";
+
+export const DEFAULT_EVENT_PARTICIPANTS_LIMIT = 20;
 
 const eventUserRolesEnum = z.enum(["organizer", "participant", "gatekeeper"]);
 
@@ -12,30 +13,30 @@ export const eventGetUserRolesSchema = z.array(eventUserRolesEnum);
 
 export const eventUserRoles = (
   eventId: string | null | undefined,
-  userRealmId: string | null | undefined,
+  userId: string | null | undefined,
 ) =>
   queryOptions({
-    queryKey: ["eventUserRoles", eventId, userRealmId],
+    queryKey: ["eventUserRoles", eventId, userId],
     queryFn: async () => {
-      if (
-        !eventId ||
-        !userRealmId ||
-        !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT
-      ) {
+      if (!eventId || !userId) {
         return [];
       }
 
       return withSpan(
-        `query:chain:event:${eventId}:user-roles:${userRealmId}`,
+        `query:backend:event:${eventId}:user-roles:${userId}`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/events/e${eventId}`,
-            `event.GetUserRolesJSON(${JSON.stringify(userRealmId)})`,
-          );
-          const roles = extractGnoJSONResponse(res);
+          const res = await zenaoClient.entityRoles({
+            org: {
+              entityType: "event",
+              entityId: eventId,
+            },
+            entity: {
+              entityType: "user",
+              entityId: userId,
+            },
+          });
+          const roles = res.roles;
+
           return eventGetUserRolesSchema.parse(roles);
         },
       );
@@ -49,22 +50,22 @@ export const eventUsersWithRole = (
   queryOptions({
     queryKey: ["eventUsersWithRole", eventId, role],
     queryFn: async () => {
-      if (!eventId || !role || !process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT) {
+      if (!eventId || !role) {
         return [];
       }
 
       return withSpan(
-        `query:chain:event:${eventId}:users-with-role:${role}`,
+        `query:backend:event:${eventId}:users-with-role:${role}`,
         async () => {
-          const client = new GnoJSONRPCProvider(
-            process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
-          );
-          const res = await client.evaluateExpression(
-            `gno.land/r/zenao/events/e${eventId}`,
-            `event.GetUsersWithRoleJSON(${JSON.stringify(role)})`,
-          );
-          const addresses = extractGnoJSONResponse(res);
-          return z.string().array().parse(addresses);
+          const res = await zenaoClient.entitiesWithRoles({
+            org: {
+              entityType: "event",
+              entityId: eventId,
+            },
+            roles: [role],
+          });
+          const userIds = res.entitiesWithRoles.map((u) => u.entityId);
+          return z.string().array().parse(userIds);
         },
       );
     },

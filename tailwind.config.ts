@@ -15,8 +15,12 @@ export default {
     extend: {
       keyframes: {
         "appear-from-bottom": {
-          from: { transform: "translateY(128px)" },
-          to: { transform: "translateY(0px)" },
+          from: {
+            transform: "translateY(128px)",
+          },
+          to: {
+            transform: "translateY(0px)",
+          },
         },
       },
       animation: {
@@ -68,11 +72,19 @@ export default {
           "5": "hsl(var(--chart-5))",
         },
         main: "var(--main)",
-        // Custom
         "custom-input-bg": "rgba(var(--input-bg))",
         "custom-input-border": "var(--input-border)",
-        // Feed sticky input
         "event-post-form-bg": "hsl(var(--background) / .8)",
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -20,16 +20,16 @@ import {
   socialFeedPostFormSchema,
   SocialFeedPostFormSchemaType,
 } from "@/types/schemas";
-import CommunityEvents from "@/app/community/[id]/[tab]/events";
-import CommunityChat from "@/app/community/[id]/[tab]/chat";
-import CommunityMembers from "@/app/community/[id]/[tab]/members";
-import CommunityProposals from "@/app/community/[id]/[tab]/proposals";
-import CommunityPortfolio from "@/app/community/[id]/[tab]/portfolio";
-import CommunityPolls from "@/app/community/[id]/[tab]/votes";
 import { userInfoOptions } from "@/lib/queries/user";
 import { communityUserRoles } from "@/lib/queries/community";
 import SocialFeedForm from "@/components/social-feed/forms/social-feed-form";
 import { PostCardSkeleton } from "@/components/social-feed/cards/post-card-skeleton";
+import CommunityChat from "@/app/(general)/community/(general)/[id]/[tab]/chat";
+import CommunityEvents from "@/app/(general)/community/(general)/[id]/[tab]/events";
+import CommunityMembers from "@/app/(general)/community/(general)/[id]/[tab]/members";
+import CommunityPortfolio from "@/app/(general)/community/(general)/[id]/[tab]/portfolio";
+import CommunityProposals from "@/app/(general)/community/(general)/[id]/[tab]/proposals";
+import CommunityPolls from "@/app/(general)/community/(general)/[id]/[tab]/votes";
 
 type CommunityMainSectionsProps = {
   communityId: string;
@@ -48,9 +48,9 @@ function CommunityMainSections({
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userRealmId = userInfo?.realmId || "";
+  const userProfileId = userInfo?.userId || "";
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userRealmId),
+    communityUserRoles(communityId, userProfileId),
   );
   const isMember = useMemo(
     () => userRoles.includes("member") || userRoles.includes("administrator"),

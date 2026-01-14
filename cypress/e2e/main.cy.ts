@@ -1,35 +1,19 @@
-const testEmail = "alice+clerk_test@example.com"; // this account exists in our clerk dev env
-const testEmail2 = "bob+clerk_test@example.com";
-const testName = "Alice Tester";
-const testBio =
-  "Hi, I’m Alice Tester! I’m a fictional persona created to help test web applications from start to finish.";
-
-const testEventName = "Bug Bash Bonanza: A Testing Extravaganza";
-const testEventDesc = `Join **Alice Tester** for a fun and interactive event where developers, 
-Don’t miss out—RSVP now and bring your testing A-game! 🐞🎉`;
-const testEventLocation = "123 Test Lane, Suite 404, Bugville, QA 98765";
-const testEventCapacity = "42";
-const testEventPassword = "zenao_everyday";
-
-const testStandardPost = "Post to test";
-const testComment = "A comment to test";
-
-const testSocialLink = {
-  url: "https://twitter.com/alice_tester",
-};
-
-const login = (email = testEmail) => {
-  cy.clerkSignIn({ strategy: "email_code", identifier: email });
-  cy.wait(1000);
-};
-const logout = () => {
-  cy.clerkSignOut();
-  cy.wait(1000);
-};
-const toastShouldContain = (contains: string) => {
-  // XXX: this should ensure the element is the toast and not just "li"
-  cy.get("li").contains(contains).should("be.visible");
-};
+import {
+  testEmail2,
+  testName,
+  testBio,
+  testSocialLink,
+  testEventName,
+  testEventLocation,
+  testStandardPost,
+  testComment,
+  testEventPassword,
+  testCommunityName,
+  testCommunityDesc,
+  testCommunityShortDesc,
+  testCommunitySocialLink,
+} from "../support/constants";
+import { login, logout, reset, toastShouldContain } from "../support/helpers";
 
 // XXX: find a way to check for images
 
@@ -37,11 +21,7 @@ describe("main", () => {
   // NOTE: this test requires a valid pinata upload setup in the nextjs server
 
   it("prepare state", () => {
-    cy.task("resetVideoSource");
-    cy.request({
-      url: "http://localhost:4243/reset",
-      timeout: 120000,
-    });
+    reset();
   });
 
   it("participate without login", () => {
@@ -53,11 +33,15 @@ describe("main", () => {
     // go to discover page
     cy.get("a").contains("Discover").click();
 
+    cy.url().should("contain", "/discover");
+
     // click on first event
-    cy.get('a[href^="/event/"]').first().click();
+    cy.get('a.group[href^="/event/"]').first().click();
 
     // type email in participate form
-    cy.get('input[placeholder="Email..."]').type(testEmail2);
+    cy.get('input[placeholder="Email..."]').type(testEmail2, {
+      delay: 10,
+    });
 
     // submit participate form
     cy.get("button").contains("Register").click();
@@ -80,7 +64,7 @@ describe("main", () => {
     cy.get("a").contains("Discover").click();
 
     // click on last event since we already participate in first
-    cy.get('a[href^="/event/"]').first().click();
+    cy.get('a.group[href^="/event/"]').first().click();
 
     // make sure there is no email field
     cy.get('input[placeholder="Email..."]').should("not.exist");
@@ -128,6 +112,19 @@ describe("main", () => {
     cy.get("h1").contains("Organize event(s) in seconds").should("be.visible");
   });
 
+  it("blog exists", () => {
+    // start from the index page
+    cy.visit("/blog");
+
+    // go to blog page
+    // cy.get("a").contains("Blog").click();
+
+    // check that blog page's header text is present
+    cy.get("p")
+      .contains("Explore the exciting updates and innovations of Zenao")
+      .should("be.visible");
+  });
+
   it("edit it's profile", () => {
     // start from the home
     cy.visit("/");
@@ -152,15 +149,17 @@ describe("main", () => {
       "cypress/fixtures/alice-tester.webp",
       { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
     );
-    cy.get('input[placeholder="Name..."]').clear().type(testName);
+    cy.get('input[placeholder="Name..."]').clear().type(testName, {
+      delay: 10,
+    });
     cy.get('textarea[placeholder="Bio..."]')
       .clear()
-      .type(testBio, { delay: 1 });
+      .type(testBio, { delay: 10 });
 
     // add social links
     cy.get("button").contains("Add link").click();
     cy.get('input[placeholder="Enter URL"]').type(testSocialLink.url, {
-      delay: 1,
+      delay: 10,
     });
 
     // save changes
@@ -182,7 +181,13 @@ describe("main", () => {
   });
 
   it("create an event", () => {
+    cy.accessCreateEventPage();
+
     cy.createEvent({ exclusive: false });
+
+    cy.url().then((url) => {
+      cy.visit(url.replace("/dashboard", ""));
+    });
 
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
@@ -217,7 +222,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     logout();
 
@@ -238,7 +243,7 @@ describe("main", () => {
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
       .should("be.enabled")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Submit post
     cy.get('button[aria-label="submit post"]').click();
@@ -253,7 +258,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -278,12 +283,11 @@ describe("main", () => {
     // Enter question
     cy.get(`textarea[placeholder="What do you wanna ask to the community ?"]`)
       .should("be.enabled")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Enter answers
-    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
-    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 1 });
-
+    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 10 });
+    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 10 });
     // Add another answer
     cy.get("p").contains("Add another answer").click();
 
@@ -291,7 +295,7 @@ describe("main", () => {
     cy.get(".lucide-trash2").should("have.length", 3);
 
     // Add last answer
-    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 1 });
+    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 10 });
 
     // Submit poll
     cy.get('button[aria-label="submit post"]').click();
@@ -321,7 +325,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -336,7 +340,7 @@ describe("main", () => {
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
       .should("be.enabled")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Submit post
     cy.get('button[aria-label="submit post"]').click();
@@ -357,7 +361,7 @@ describe("main", () => {
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
       .should("be.enabled")
-      .type(testComment, { delay: 1 });
+      .type(testComment, { delay: 10 });
 
     // Submit comment
     cy.get('button[aria-label="submit post"]').should("be.enabled").click();
@@ -379,7 +383,7 @@ describe("main", () => {
 
     // Explore an event
     cy.get("a").contains("Discover").click();
-    cy.get('a[href^="/event/"]').last().click();
+    cy.get('a.group[href^="/event/"]').last().click();
 
     cy.url().should("contain", "/event/");
 
@@ -408,7 +412,9 @@ describe("main", () => {
 
     cy.get("p").contains("Manage gatekeepers (1)").click();
 
-    cy.get('input[placeholder="Email..."]').type(testEmail2);
+    cy.get('input[placeholder="Email..."]').type(testEmail2, {
+      delay: 10,
+    });
 
     cy.get('button[aria-label="add gatekeeper"]').click();
 
@@ -462,10 +468,12 @@ describe("main", () => {
   });
 
   it("cancel participation", () => {
+    cy.accessCreateEventPage();
+
     cy.createEvent({ exclusive: false });
 
     cy.url().then((url) => {
-      cy.visit(url);
+      cy.visit(url.replace("/dashboard", ""));
     });
 
     // Participate to an event
@@ -488,19 +496,41 @@ describe("main", () => {
   });
 
   it("access an exclusive event", () => {
+    cy.accessCreateEventPage();
+
     cy.createEvent({ exclusive: true });
+
     cy.url().then((url) => {
       logout();
-      cy.visit(url);
+      cy.visit(url.replace("/dashboard", ""));
     });
 
     // Guard
-    cy.get("input[type=password]").type(testEventPassword);
+    cy.get("input[type=password]").type(testEventPassword, {
+      delay: 10,
+    });
     cy.get("button").contains("Access event").click();
 
     // Assertions
     cy.get("h1").contains(testEventName).should("be.visible");
     cy.get("h2").contains(testEventLocation).should("be.visible");
+  });
+
+  it("create a community", () => {
+    cy.visit("/");
+    cy.createCommunity({});
+
+    cy.url().then((url) => {
+      cy.visit(url.replace("/dashboard", ""));
+    });
+
+    cy.url().should("contain", "/community/");
+
+    cy.get("h1").contains(testCommunityName).should("be.visible");
+    cy.get("p").contains("A community for QA enthusiasts to share knowledge.");
+
+    cy.get("button").contains("Edit community").should("be.visible");
+    cy.get("button").contains("Leave community").should("be.visible");
   });
 
   it("access a community", () => {
@@ -548,7 +578,7 @@ describe("main", () => {
     // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Submit post
     cy.get('button[aria-label="submit post"]').click();
@@ -586,12 +616,11 @@ describe("main", () => {
     // Enter question
     cy.get(
       `textarea[placeholder="What do you wanna ask to the community ?"]`,
-    ).type(testStandardPost, { delay: 1 });
+    ).type(testStandardPost, { delay: 10 });
 
     // Enter answers
-    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 1 });
-    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 1 });
-
+    cy.get('input[name="options.0.text"]').type("Answer 1", { delay: 10 });
+    cy.get('input[name="options.1.text"]').type("Answer 2", { delay: 10 });
     // Add another answer
     cy.get("p").contains("Add another answer").click();
 
@@ -599,7 +628,7 @@ describe("main", () => {
     cy.get(".lucide-trash2").should("have.length", 3);
 
     // Add last answer
-    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 1 });
+    cy.get('input[name="options.2.text"]').type("Answer 3", { delay: 10 });
 
     // Submit poll
     cy.get('button[aria-label="submit post"]').click();
@@ -638,16 +667,13 @@ describe("main", () => {
       cy.visit(url);
     });
 
-    // cy.get("a").contains("Edit community").should("be.visible");
-    // cy.get("a").contains("Leave community").should("be.visible");
-
     // Go to chat tab
     cy.get("button").contains("Chat").click();
 
     // SocialFeedForm should exist
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
-      .type(testStandardPost, { delay: 1 });
+      .type(testStandardPost, { delay: 10 });
 
     // Submit post
     cy.get('button[aria-label="submit post"]').click();
@@ -667,7 +693,7 @@ describe("main", () => {
     // Type comment
     cy.get(`textarea[placeholder="Don't be shy, say something!"]`)
       .should("exist")
-      .type(testComment, { delay: 1 });
+      .type(testComment, { delay: 10 });
 
     // Submit comment
     cy.get('button[aria-label="submit post"]').click();
@@ -677,85 +703,92 @@ describe("main", () => {
   });
 });
 
+Cypress.Commands.add("accessCreateEventPage", () => {
+  // start from the home
+  cy.visit("/");
+
+  // ensure hydration
+  cy.get("button").contains("Sign in").should("be.visible", { timeout: 10000 });
+
+  // click on home create button
+  cy.get("header").get('button[aria-label="quick menu create"]').click();
+
+  cy.get('[role="menu"]').should("be.visible");
+  // Select create event
+  cy.get("div").contains("Create new event").click();
+
+  login();
+});
+
 Cypress.Commands.add(
-  "createEvent",
-  ({
-    exclusive = false,
-    gatekeepers = [],
-  }: {
-    exclusive: boolean;
-    gatekeepers?: string[];
-  }) => {
+  "createCommunity",
+  ({ administrators = [] }: { administrators?: string[] }) => {
     // start from the home
     cy.visit("/");
 
+    // ensure hydration
+    cy.get("button")
+      .contains("Sign in")
+      .should("be.visible", { timeout: 10000 });
+
     // click on home create button
-    cy.get("button").contains("Create").click();
+    cy.get("header").get('button[aria-label="quick menu create"]').click();
+    cy.get('[role="menu"]').should("be.visible");
+    // Select create community
+    cy.get("div").contains("Create new community").click();
 
     login();
 
-    // fill event info
-    cy.get("input[name=imageUri]").selectFile(
+    // fill community info
+
+    // Avatar
+    cy.get("input[name=avatarUri]").selectFile(
+      "cypress/fixtures/alice-tester.webp",
+      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
+    );
+    // Banner
+    cy.get("input[name=bannerUri]").selectFile(
       "cypress/fixtures/bug-bash-bonanza.webp",
       { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
     );
-    cy.get('textarea[placeholder="Event name..."]').type(testEventName);
-    cy.get('textarea[placeholder="Description..."]').type(testEventDesc, {
-      delay: 1,
+    // Name
+    cy.get('textarea[name="displayName"]').type(testCommunityName, {
+      delay: 10,
     });
-
-    // custom location
-    cy.get('input[placeholder="Add an address..."]').type(testEventLocation);
-    cy.get("p").contains(`Use ${testEventLocation}`).trigger("click");
-
-    cy.get('input[placeholder="Capacity..."]').type(testEventCapacity);
-
-    // choose dates in the start of next month
-    cy.get("button").contains("Pick a start date...").click();
-    cy.get('button[aria-label="Choose the Month"').click();
-
-    cy.get('div[role="option"]').contains("April").click();
-
-    const year = new Date().getFullYear() + 1;
-
-    cy.get('button[aria-label="Choose the Year"').click();
-    cy.get('div[role="option"]').contains(`${year}`).click();
-    cy.get('table[role="grid"]').find("button").contains("13").click();
-
-    cy.wait(1000);
-
-    cy.get('button[aria-label="Pick date"]').eq(1).click();
-    cy.get('button[aria-label="Choose the Month"').click();
-    cy.get('div[role="option"]').contains("April").click();
-
-    cy.get('button[aria-label="Choose the Year"').click();
-    cy.get('div[role="option"]').contains(`${year}`).click();
-    cy.wait(500); // wait for start date calendar to disapear so there is only one "Choose the Month" button present
-    cy.get('table[role="grid"]').find("button").contains("14").click();
-
-    if (exclusive) {
-      cy.get("button[data-name=exclusive]").click();
-      cy.get("input[name=password]").type(testEventPassword);
-    }
-
-    cy.get("button").contains("Create event").click();
-
-    cy.wait(1000);
-
-    toastShouldContain("Event created!");
-
-    cy.url().should("include", "/event/");
-    cy.url().should("not.include", "/create");
-
-    if (gatekeepers.length > 0) {
-      cy.get("p").contains("Manage gatekeepers (1)").click();
-      gatekeepers.forEach((gatekeeper) => {
-        cy.get('input[placeholder="Email..."]').type(gatekeeper);
-        cy.get('button[aria-label="add gatekeeper"]').click();
+    // Short desc
+    cy.get('input[name="shortDescription"]').type(testCommunityShortDesc, {
+      delay: 10,
+    });
+    // Description
+    cy.get('textarea[name="description"]').type(testCommunityDesc, {
+      delay: 10,
+    });
+    // Social link
+    cy.get("button").contains("Add link").click();
+    cy.get('input[placeholder="Enter URL"]').type(testCommunitySocialLink, {
+      delay: 10,
+    });
+    // Administrators
+    if (administrators.length > 0) {
+      administrators.forEach((administrator, index) => {
+        cy.get("button").contains("Add Administrator").click();
+        cy.get(`input[name="administrators.${index}.address"]`).type(
+          administrator,
+          {
+            delay: 10,
+          },
+        );
       });
-
-      cy.get("button").contains("Done").click();
-      cy.wait(5000);
     }
+
+    // Create community
+    cy.get("button").contains("Create Community").click();
+
+    cy.wait(1000);
+
+    toastShouldContain("Community created!");
+
+    cy.url().should("include", "/community/");
+    cy.url().should("not.include", "/create");
   },
 );
