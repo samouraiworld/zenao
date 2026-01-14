@@ -673,11 +673,16 @@
       "loading": "Loading..."
     },
     "communitiyEventsTable": {
+      "name-column": "Name",
       "date-column": "Date",
       "participants-column": "Participants",
       "organizers-column": "Organized by",
       "actions-column": "Actions",
       "view-event": "View event"
+    },
+    "communitiyAdministratorsTable": {
+      "email-column": "Email",
+      "actions-column": "Actions"
     },
     "communityDetails": {
       "communityTabs": {
