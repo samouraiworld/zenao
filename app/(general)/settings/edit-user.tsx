@@ -122,27 +122,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         },
       );
 
-      // XXX: BEFORE UPDATING WITH MAIN
-      // const bioCID = await uploadString(bio);
-
-      // // TODO: only update keys that have been updated
-      // const keys: string[] = ["pfp", "dn", "bio"];
-      // const txValues: `0x${string}`[] = [
-      //   `0x${Buffer.from(values.avatarUri, "utf-8").toString("hex")}`,
-      //   `0x${Buffer.from(values.displayName, "utf-8").toString("hex")}`,
-      //   `0x${Buffer.from(bioCID, "utf-8").toString("hex")}`,
-      // ];
-
-      // const res = await writeContractAsync({
-      //   abi: profileABI,
-      //   address: process.env
-      //     .NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS as `0x${string}`,
-      //   functionName: "setBatch",
-      //   args: [keys, txValues],
-      // });
-            // console.log(res, "updated on-chain profile");
-
-
+      // Write to backend (always)
       await editUser({
         userId: userProfileId,
         token,
@@ -151,6 +131,39 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
         bio,
       });
 
+      // Also write to blockchain if configured
+      // TODO: Configure NEXT_PUBLIC_EVM_RPC and NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS
+      if (
+        process.env.NEXT_PUBLIC_EVM_RPC &&
+        process.env.NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS
+      ) {
+        try {
+          // Upload bio to IPFS to get CID
+          const bioCID = await uploadString(bio);
+
+          // TODO: only update keys that have been updated (not all 3 every time)
+          const keys: string[] = ["pfp", "dn", "bio"];
+          const txValues: `0x${string}`[] = [
+            `0x${Buffer.from(values.avatarUri, "utf-8").toString("hex")}`,
+            `0x${Buffer.from(values.displayName, "utf-8").toString("hex")}`,
+            `0x${Buffer.from(bioCID, "utf-8").toString("hex")}`,
+          ];
+
+          const txHash = await writeContractAsync({
+            abi: profileABI,
+            address: process.env
+              .NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS as `0x${string}`,
+            functionName: "setBatch",
+            args: [keys, txValues],
+          });
+
+          console.log("Profile updated on-chain:", txHash);
+        } catch (error) {
+          console.error("Failed to update profile on-chain:", error);
+          // Don't block the user flow if blockchain write fails
+          // Backend is already updated
+        }
+      }
 
       trackEvent("UserProfileEdited");
 
@@ -263,7 +276,7 @@ export const EditUserForm: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
 
           <ButtonWithChildren
-            loading={false} // TODO
+            loading={isPending}
             type="submit"
             className="w-full"
           >

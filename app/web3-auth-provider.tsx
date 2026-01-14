@@ -14,9 +14,11 @@ import {
   Web3AuthProvider,
 } from "@web3auth/modal/react";
 import { WagmiProvider } from "@web3auth/modal/react/wagmi";
-import { useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { useAccount } from "wagmi";
 import QueryProviders from "@/components/providers/query-providers";
+import { getUserIdForWallet } from "@/lib/web3-mapping";
 
 // IMP END - Setup Web3Auth Provider
 // IMP START - Setup Wagmi Provider
@@ -80,7 +82,11 @@ function Connector() {
   const { connectTo } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { isSignedIn, getToken, isLoaded: clerkLoaded } = useAuth();
+  const { user } = useUser();
+  const { address, isConnected } = useAccount();
+  const [walletError, setWalletError] = useState<string | null>(null);
 
+  // Connect wallet when user is signed in to Clerk
   useEffect(() => {
     if (!isInitialized || !clerkLoaded || !isSignedIn || status !== "ready") {
       return;
@@ -100,6 +106,7 @@ function Connector() {
     connect();
   }, [isInitialized, connectTo, isSignedIn, getToken, status, clerkLoaded]);
 
+  // Disconnect wallet when user signs out of Clerk
   useEffect(() => {
     if (
       !isInitialized ||
@@ -115,5 +122,80 @@ function Connector() {
     };
     dc();
   }, [isInitialized, clerkLoaded, disconnect, status, isSignedIn]);
+
+  // Verify wallet is linked to userId when connected
+  useEffect(() => {
+    if (!isConnected || !address || !user?.id) {
+      setWalletError(null);
+      return;
+    }
+
+    const verifyWalletLink = async () => {
+      // TODO: Enable when NEXT_PUBLIC_EVM_USER_REGISTRY_ADDRESS is configured
+      if (!process.env.NEXT_PUBLIC_EVM_USER_REGISTRY_ADDRESS) {
+        console.warn(
+          "EVM User Registry not configured - skipping wallet verification",
+        );
+        return;
+      }
+
+      try {
+        const linkedUserId = await getUserIdForWallet(address);
+
+        if (!linkedUserId) {
+          setWalletError(
+            "This wallet is not linked to any account. Please link your wallet first.",
+          );
+          console.error("Wallet not linked:", address);
+          return;
+        }
+
+        if (linkedUserId !== user.id) {
+          setWalletError(
+            `This wallet is linked to a different account. Expected userId: ${user.id}, but wallet is linked to: ${linkedUserId}`,
+          );
+          console.error("Wallet/userId mismatch:", {
+            walletAddress: address,
+            expectedUserId: user.id,
+            linkedUserId,
+          });
+          // TODO: Optionally disconnect the wallet here
+          // await disconnect();
+          return;
+        }
+
+        // Success - wallet is correctly linked
+        setWalletError(null);
+        console.log("Wallet verified for userId:", user.id);
+      } catch (error) {
+        console.error("Error verifying wallet:", error);
+        setWalletError("Failed to verify wallet ownership");
+      }
+    };
+
+    verifyWalletLink();
+  }, [isConnected, address, user?.id]);
+
+  // Display error if wallet verification fails
+  if (walletError) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: "#ff4444",
+          color: "white",
+          padding: "12px",
+          textAlign: "center",
+          zIndex: 9999,
+        }}
+      >
+        <strong>Wallet Error:</strong> {walletError}
+      </div>
+    );
+  }
+
   return null;
 }

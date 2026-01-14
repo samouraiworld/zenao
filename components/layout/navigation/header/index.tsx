@@ -26,8 +26,8 @@ import {
   useAuth,
 } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import QuickCreateMenu from "./quick-create-menu";
-import { useAccount } from "wagmi";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
 import { cn } from "@/lib/tailwind";
@@ -51,7 +51,6 @@ import {
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import SoonOnBase from "@/components/widgets/soon-on-base";
 import VersionTag from "@/components/widgets/version-tag";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { userInfoOptions } from "@/lib/queries/user";
 
 export type NavItem = {
@@ -241,10 +240,6 @@ const Auth = ({
   const tNav = useTranslations("dashboard.navUser");
   const { trackEvent } = useAnalyticsEvents();
 
-  // XXX: BEFORE UPDATING WITH MAIN
-//  const { signOut } = useAuth();
-//   const { address } = useAccount();
-
   const { signOut, getToken, userId } = useAuth();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
@@ -298,9 +293,6 @@ const Auth = ({
                   )}
                 >
                   <UserAvatar
-                    // XXX: BEFORE UPDATING WITH MAIN
-                    // realmId={address}
-
                     userId={activeAccountId || ""}
                     className={avatarClassName}
                     size="md"

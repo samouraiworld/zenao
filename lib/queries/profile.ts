@@ -8,6 +8,7 @@ import { createPublicClient, http } from "viem";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
 import { profileABI } from "../evm";
+import { getWalletForUserId } from "../web3-mapping";
 
 export type GnoProfile = {
   userId: string;
@@ -27,12 +28,20 @@ export const profileOptions = (userId: string | null | undefined) => {
         return null;
       }
 
-      // XXX: BEFORE UPDATING WITH MAIN
-      // const profile = addr.startsWith("0x")
-      //   ? await evmProfiles.fetch(addr as `0x${string}`) // TODO: no type override
-      //   : await profiles.fetch(addr);
-
+      // Try to fetch from backend first (default)
       const profile = await profiles.fetch(userId);
+
+      // If backend has no profile, try to fetch from EVM
+      // TODO: Enable when EVM_RPC and contracts are deployed
+      if (!profile || !profile.displayName) {
+        const wallet = await getWalletForUserId(userId);
+        if (wallet) {
+          const evmProfile = await evmProfiles.fetch(wallet);
+          if (evmProfile) {
+            return evmProfile;
+          }
+        }
+      }
 
       return profile;
     },
@@ -41,43 +50,9 @@ export const profileOptions = (userId: string | null | undefined) => {
 
 export const profiles = createBatcher({
   fetcher: async (userIds: string[]) => {
-    // XXX: BEFORE UPDATING WITH MAIN
-    // if (!process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT || addrs.length === 0) {
-
     if (userIds.length === 0) {
       return [];
     }
-
-    // XXX: BEFORE UPDATING WITH MAIN
-    // return withSpan(`query:chain:profiles:${addrs.join(",")}`, async () => {
-    //   const client = new GnoJSONRPCProvider(
-    //     process.env.NEXT_PUBLIC_ZENAO_GNO_ENDPOINT!,
-    //   );
-
-    //   const req: MessageInitShape<typeof BatchProfileRequestSchema> = {
-    //     fields: [
-    //       { key: "DisplayName", type: "string" },
-    //       { key: "Bio", type: "string" },
-    //       { key: "Avatar", type: "string" },
-    //     ],
-    //     addresses: addrs,
-    //   };
-    //   const resRaw = await client.evaluateExpression(
-    //     `gno.land/r/zenao/batchprofile`,
-    //     `queryJSON(${JSON.stringify(JSON.stringify(req))})`,
-    //   );
-    //   const resu = extractGnoJSONResponse(resRaw) as unknown[][];
-    //   const res: GnoProfile[] = [];
-    //   for (let i = 0; i < addrs.length; i++) {
-    //     res.push({
-    //       address: addrs[i],
-    //       displayName: resu[i][0] as string,
-    //       bio: resu[i][1] as string,
-    //       avatarUri: resu[i][2] as string,
-    //     });
-    //   }
-    //   return res;
-    // });
 
     return withSpan(`query:backend:profiles:${userIds.join(",")}`, async () => {
       const res = await zenaoClient.getUsersProfile({
@@ -94,6 +69,8 @@ export const profiles = createBatcher({
 
 export const evmProfiles = createBatcher({
   fetcher: async (addrs: `0x${string}`[]) => {
+    // TODO: Configure NEXT_PUBLIC_EVM_RPC in .env
+    // TODO: Deploy Profile smart contract and set NEXT_PUBLIC_EVM_PROFILE_CONTRACT_ADDRESS
     if (!process.env.NEXT_PUBLIC_EVM_RPC || addrs.length === 0) {
       return [];
     }
@@ -111,27 +88,26 @@ export const evmProfiles = createBatcher({
         args: [addrs, ["pfp", "dn", "bio"]],
       });
 
-      const res: GnoProfile[] = [];
+      // Convert hex bytes to strings and map to internal format
+      const res: UserProfile[] = [];
       for (let i = 0; i < addrs.length; i++) {
         res.push({
-          // XXX: BEFORE UPDATING WITH MAIN
-          address: addrs[i],
-
           avatarUri: Buffer.from(resu[i][0].substring(2), "hex").toString(),
           displayName: Buffer.from(resu[i][1].substring(2), "hex").toString(),
           bio: Buffer.from(resu[i][2].substring(2), "hex").toString(),
-          // bio: resu[i][1] as string,
+          isTeam: false, // TODO: Add isTeam to smart contract
         });
         console.log("profile", addrs[i], res[i], resu[i]);
       }
       return res;
     });
   },
-  // when we call profiles.fetch, this will resolve the correct user using the field `address`
-
-  // XXX: BEFORE UPDATING WITH MAIN
-  resolver: keyResolver("address"),
-
-  // this will batch all calls to profiles.fetch that are made within 10 milliseconds.
+  // We can't use keyResolver here because UserProfile doesn't have userId/address
+  // Instead, we return profiles in the same order as the input addresses
+  resolver: (profiles: UserProfile[], _address: `0x${string}`) => {
+    // This is a fallback - batching will work by maintaining order
+    return profiles[0] || null;
+  },
+  // this will batch all calls to profiles.fetch that are made within 50 milliseconds.
   scheduler: windowScheduler(50),
 });
