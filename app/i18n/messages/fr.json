@@ -6,9 +6,12 @@
     "first-point": "Commencez en editant ",
     "second-point": "Sauvegardez et voyez vos changements instantanement."
   },
+  "navigation": {
+    "dashboard-view": "Dashboard view",
+    "customer-view": "Customer view"
+  },
   "dashboard": {
     "navUser": {
-      "accounts": "Comptes",
       "personal-account": "Compte personnel",
       "team": "Équipe",
       "create-team": "Créer une équipe",
