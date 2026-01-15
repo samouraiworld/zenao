@@ -6,6 +6,7 @@ import {
   communityUsersWithRoles,
 } from "../queries/community";
 import { zenaoClient } from "@/lib/zenao-client";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 interface LeaveCommunityRequest {
   communityId: string;
@@ -15,6 +16,8 @@ interface LeaveCommunityRequest {
 
 export const useLeaveCommunity = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({ communityId, token }: LeaveCommunityRequest) => {
       if (!token) throw new Error("Missing auth token");
@@ -22,7 +25,7 @@ export const useLeaveCommunity = () => {
       await zenaoClient.leaveCommunity(
         { communityId },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: buildHeaders(token),
         },
       );
     },

@@ -105,9 +105,16 @@ func (s *ZenaoServer) AddEventToCommunity(
 
 		var authIDs []string
 		for _, target := range targets {
+			// Skip teams which don't have AuthID
+			if target.AuthID == "" {
+				continue
+			}
 			if !participantsIDS[target.ID] {
 				authIDs = append(authIDs, target.AuthID)
 			}
+		}
+		if len(authIDs) == 0 {
+			return connect.NewResponse(&zenaov1.AddEventToCommunityResponse{}), nil
 		}
 		authTargets, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 		if err != nil {

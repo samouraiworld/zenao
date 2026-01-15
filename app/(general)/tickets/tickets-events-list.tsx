@@ -16,6 +16,7 @@ import Text from "@/components/widgets/texts/text";
 import EventCardListLayout from "@/components/features/event/event-card-list-layout";
 import { LoaderMoreButton } from "@/components/widgets/buttons/load-more-button";
 import { SafeEventInfo } from "@/types/schemas";
+import { useActiveAccount } from "@/components/providers/active-account-provider";
 
 export function TicketsEventsList({
   now,
@@ -27,6 +28,11 @@ export function TicketsEventsList({
   userId: string;
 }) {
   const { getToken } = useAuth();
+  const { activeAccount } = useActiveAccount();
+
+  const entityId = activeAccount?.id ?? userId;
+  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
+
   const {
     data: eventsPages,
     isFetchingNextPage,
@@ -36,20 +42,22 @@ export function TicketsEventsList({
   } = useSuspenseInfiniteQuery(
     from === "upcoming"
       ? eventsByParticipantList(
-          userId,
+          entityId,
           DiscoverableFilter.UNSPECIFIED,
           now,
           Number.MAX_SAFE_INTEGER,
           DEFAULT_EVENTS_LIMIT,
           getToken,
+          teamId,
         )
       : eventsByParticipantList(
-          userId,
+          entityId,
           DiscoverableFilter.UNSPECIFIED,
           now - 1,
           0,
           DEFAULT_EVENTS_LIMIT,
           getToken,
+          teamId,
         ),
   );
 

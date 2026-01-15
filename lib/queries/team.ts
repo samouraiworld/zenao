@@ -1,10 +1,12 @@
 import { queryOptions } from "@tanstack/react-query";
+import { GetToken } from "@clerk/types";
 import { withSpan } from "../tracer";
 import { zenaoClient } from "../zenao-client";
+import { buildQueryHeaders } from "./build-query-headers";
 import type { UserTeam } from "@/app/gen/zenao/v1/zenao_pb";
 
 export const userTeamsOptions = (
-  getToken: () => Promise<string | null>,
+  getToken: GetToken,
   userId: string | null | undefined,
 ) => {
   return queryOptions<UserTeam[]>({
@@ -22,7 +24,7 @@ export const userTeamsOptions = (
       return withSpan(`query:backend:userTeams:${userId}`, async () => {
         const res = await zenaoClient.getUserTeams(
           {},
-          { headers: { Authorization: `Bearer ${token}` } },
+          { headers: buildQueryHeaders(token) },
         );
         return res.teams;
       });

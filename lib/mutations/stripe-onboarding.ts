@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { zenaoClient } from "@/lib/zenao-client";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 interface StartCommunityStripeOnboardingRequest {
   token: string;
@@ -9,6 +10,8 @@ interface StartCommunityStripeOnboardingRequest {
 }
 
 export const useStartCommunityStripeOnboarding = () => {
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token,
@@ -20,7 +23,7 @@ export const useStartCommunityStripeOnboarding = () => {
 
       const res = await zenaoClient.startCommunityStripeOnboarding(
         { communityId, returnPath, refreshPath },
-        { headers: { Authorization: "Bearer " + token } },
+        { headers: buildHeaders(token) },
       );
 
       return res.onboardingUrl;
