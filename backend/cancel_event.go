@@ -54,7 +54,14 @@ func (s *ZenaoServer) CancelEvent(
 	if s.MailClient != nil {
 		idsList := make([]string, 0, len(users))
 		for _, u := range users {
+			// Skip teams which don't have AuthID
+			if u.AuthID == "" {
+				continue
+			}
 			idsList = append(idsList, u.AuthID)
+		}
+		if len(idsList) == 0 {
+			return connect.NewResponse(&zenaov1.CancelEventResponse{}), nil
 		}
 		authUsers, err := s.Auth.GetUsersFromIDs(ctx, idsList)
 		if err != nil {
