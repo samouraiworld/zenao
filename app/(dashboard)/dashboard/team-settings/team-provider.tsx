@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { UserTeam } from "@/app/gen/zenao/v1/zenao_pb";
@@ -31,7 +31,7 @@ export function TeamProvider({ children }: TeamContextProviderProps) {
   const userId = userInfo?.userId;
 
   const { activeAccount } = useActiveAccount();
-  const { data: teams = [] } = useSuspenseQuery(
+  const { data: teams = [], isFetched } = useSuspenseQuery(
     userTeamsOptions(getToken, userId),
   );
 
@@ -39,6 +39,16 @@ export function TeamProvider({ children }: TeamContextProviderProps) {
     if (activeAccount?.type !== "team") return null;
     return teams.find((t) => t.teamId === activeAccount.id) || null;
   }, [activeAccount, teams]);
+
+  useEffect(() => {
+    if (
+      (isFetched && activeAccount?.type === "team" && !activeTeam) ||
+      !activeAccount ||
+      activeAccount?.type === "personal"
+    ) {
+      window.location.replace("/dashboard");
+    }
+  }, [activeAccount, activeTeam, isFetched]);
 
   if (!activeTeam) {
     return null;
