@@ -1,4 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import DashboardTeamSettingsTabs from "./dashboard-team-settings-tabs";
 import DashboardTeamSettingsHeader from "./dashboard-team-settings-header";
 import { TeamProvider } from "./team-provider";
@@ -14,12 +16,16 @@ export default function TeamSettingsPageLayout({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <TeamProvider>
-        <DashboardTeamSettingsEditionProvider>
-          <DashboardTeamSettingsHeader />
-          <DashboardTeamSettingsTabs>{children}</DashboardTeamSettingsTabs>
-        </DashboardTeamSettingsEditionProvider>
-      </TeamProvider>
+      <Suspense
+        fallback={<Loader2 className="animate-spin h-6 w-6 mx-auto mt-20" />}
+      >
+        <TeamProvider>
+          <DashboardTeamSettingsEditionProvider>
+            <DashboardTeamSettingsHeader />
+            <DashboardTeamSettingsTabs>{children}</DashboardTeamSettingsTabs>
+          </DashboardTeamSettingsEditionProvider>
+        </TeamProvider>
+      </Suspense>
     </HydrationBoundary>
   );
 }
