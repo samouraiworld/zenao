@@ -822,6 +822,7 @@
         "location": "Location",
         "updateLocation": "Update Location",
         "capacity": "Capacity",
+        "prices": "Prices",
         "noPlaces": "No places",
         "attendees": "{count} attendees",
         "updateCapacity": "Update Capacity",

@@ -8,8 +8,6 @@ import {
   isSameDay,
   minutesToSeconds,
 } from "date-fns";
-import { useAuth } from "@clerk/nextjs";
-import { useQuery } from "@tanstack/react-query";
 import { AudioWaveformIcon, Eye, EyeOff, ImageIcon } from "lucide-react";
 import { Card } from "../../widgets/cards/card";
 import { Tabs, TabsContent } from "../../shadcn/tabs";
@@ -40,7 +38,6 @@ import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import Heading from "@/components/widgets/texts/heading";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
-import { communityPayoutStatus } from "@/lib/queries/community";
 import { locationTimezone } from "@/lib/event-location";
 import { captureException } from "@/lib/report";
 import {
@@ -49,6 +46,7 @@ import {
   IMAGE_FILE_SIZE_LIMIT,
   IMAGE_FILE_SIZE_LIMIT_MB,
 } from "@/components/features/event/constants";
+import { useCurrencyOptionsForCommunity } from "@/lib/pricing";
 
 interface EventFormProps {
   form: UseFormReturn<EventFormSchemaType>;
@@ -83,19 +81,6 @@ export const EventForm: React.FC<EventFormProps> = ({
   const discoverable = form.watch("discoverable");
   const communityId = form.watch("communityId");
   const t = useTranslations("eventForm");
-  const { getToken } = useAuth();
-
-  const { data: payoutStatus } = useQuery({
-    ...communityPayoutStatus(communityId ?? "", getToken),
-    enabled: !!communityId,
-  });
-  const pricingLabels = {
-    price: t("price-label"),
-    pricePlaceholder: t("price-placeholder"),
-    currency: t("currency-label"),
-    capacity: t("capacity-price-label"),
-    capacityPlaceholder: t("capacity-placeholder"),
-  };
 
   const [isVirtual, setIsVirtual] = useState<boolean>(
     location.kind === "virtual" || false,
@@ -106,14 +91,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
   const eventTimezone = locationTimezone(location);
   const timeZone = useLayoutTimezone(eventTimezone);
-  const currencyOptions = useMemo(() => {
-    const currencies = payoutStatus?.currencies ?? [];
-    const options = currencies.map((currency) => ({
-      value: currency.toUpperCase(),
-      label: currency.toUpperCase(),
-    }));
-    return [{ value: "", label: t("currency-free-option") }, ...options];
-  }, [payoutStatus?.currencies, t]);
+  const currencyOptions = useCurrencyOptionsForCommunity(communityId);
 
   // Upload
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -439,7 +417,6 @@ export const EventForm: React.FC<EventFormProps> = ({
               form={form}
               groupIndex={index}
               currencyOptions={currencyOptions}
-              labels={pricingLabels}
               disabled={!communityId}
             />
           ))}

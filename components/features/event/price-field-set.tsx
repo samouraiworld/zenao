@@ -1,6 +1,7 @@
 "use client";
 
 import { UseFormReturn } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { FormField } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
 import { FormFieldInputCurrency } from "@/components/widgets/form/form-field-input-currency";
@@ -13,18 +14,11 @@ export type CurrencyOption = {
   label: string;
 };
 
-export type PriceFieldSetLabels = {
-  price: string;
-  pricePlaceholder: string;
-  currency: string;
-};
-
 type PriceFieldSetProps = {
   form: UseFormReturn<EventFormSchemaType>;
   groupIndex: number;
   priceIndex: number;
   currencyOptions: CurrencyOption[];
-  labels: PriceFieldSetLabels;
   disabled?: boolean;
   className?: string;
 };
@@ -34,10 +28,11 @@ export const PriceFieldSet = ({
   groupIndex,
   priceIndex,
   currencyOptions,
-  labels,
   disabled = false,
   className,
 }: PriceFieldSetProps) => {
+  const t = useTranslations("eventForm");
+
   const emptyOptionValue = "__free__";
   const amountName =
     `pricesGroups.${groupIndex}.prices.${priceIndex}.amountMinor` as const;
@@ -55,14 +50,14 @@ export const PriceFieldSet = ({
         name={amountName}
         currencyName={currencyName}
         className="w-full"
-        label={labels.price}
-        placeholder={labels.pricePlaceholder}
+        label={t("price-label")}
+        placeholder={t("price-placeholder")}
         disabled={disabled}
       />
       <FormFieldInputCurrency
         control={form.control}
         name={currencyName}
-        label={labels.currency}
+        label={t("currency-label")}
         emptyValue={emptyOptionValue}
         currencyOptions={currencyOptions}
         disabled={disabled}

@@ -1,3 +1,9 @@
+import { useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@clerk/nextjs";
+import { communityPayoutStatus } from "@/lib/queries/community";
+
 const currenciesDecimalMapping: Record<string, 0 | 3> = {
   BIF: 0,
   CLP: 0,
@@ -75,4 +81,23 @@ export const formatPrice = (
   } catch {
     return `${fromMinorUnits(amountMinor, currencyCode)} ${currencyCode.toUpperCase()}`;
   }
+};
+
+export const useCurrencyOptionsForCommunity = (communityId: string | null) => {
+  const { getToken } = useAuth();
+  const { data: payoutStatus } = useQuery({
+    ...communityPayoutStatus(communityId ?? "", getToken),
+    enabled: !!communityId,
+  });
+
+  const t = useTranslations("eventForm");
+
+  return useMemo(() => {
+    const currencies = payoutStatus?.currencies ?? [];
+    const options = currencies.map((currency) => ({
+      value: currency.toUpperCase(),
+      label: currency.toUpperCase(),
+    }));
+    return [{ value: "", label: t("currency-free-option") }, ...options];
+  }, [payoutStatus?.currencies, t]);
 };
