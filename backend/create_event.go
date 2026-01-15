@@ -135,7 +135,16 @@ func (s *ZenaoServer) CreateEvent(
 	if cmt != nil && len(targets) > 0 && req.Msg.CommunityEmail && s.MailClient != nil {
 		var authIDs []string
 		for _, target := range targets {
+			// Skip teams which don't have AuthID
+			if target.AuthID == "" {
+				continue
+			}
 			authIDs = append(authIDs, target.AuthID)
+		}
+		if len(authIDs) == 0 {
+			return connect.NewResponse(&zenaov1.CreateEventResponse{
+				Id: evt.ID,
+			}), nil
 		}
 		authTargets, err := s.Auth.GetUsersFromIDs(ctx, authIDs)
 		if err != nil {

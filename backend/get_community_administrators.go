@@ -38,9 +38,18 @@ func (s *ZenaoServer) GetCommunityAdministrators(ctx context.Context, req *conne
 		return nil, err
 	}
 
-	admIDs := mapsl.Map(admins, func(adm *zeni.User) string {
-		return adm.AuthID
-	})
+	// TODO: handle team administrators
+	var admIDs []string
+	for _, adm := range admins {
+		if adm.AuthID == "" {
+			continue
+		}
+		admIDs = append(admIDs, adm.AuthID)
+	}
+
+	if len(admIDs) == 0 {
+		return connect.NewResponse(&zenaov1.GetCommunityAdministratorsResponse{Administrators: []string{}}), nil
+	}
 
 	users, err := s.Auth.GetUsersFromIDs(ctx, admIDs)
 	if err != nil {

@@ -16,6 +16,7 @@ import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-
 import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
 import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
+import { getActiveAccountServer } from "@/lib/active-account/server";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
@@ -45,6 +46,10 @@ async function DashboardEventInfoLayoutProps({
     );
   }
 
+  const activeAccount = await getActiveAccountServer();
+  const entityId = activeAccount?.id ?? userProfileId;
+  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
+
   let eventInfo;
 
   try {
@@ -56,9 +61,7 @@ async function DashboardEventInfoLayoutProps({
     notFound();
   }
 
-  const roles = await queryClient.fetchQuery(
-    eventUserRoles(eventId, userProfileId),
-  );
+  const roles = await queryClient.fetchQuery(eventUserRoles(eventId, entityId));
 
   queryClient.prefetchInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
@@ -85,7 +88,7 @@ async function DashboardEventInfoLayoutProps({
     );
   }
 
-  queryClient.prefetchQuery(eventGatekeepersEmails(eventId, getToken));
+  queryClient.prefetchQuery(eventGatekeepersEmails(eventId, getToken, teamId));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
