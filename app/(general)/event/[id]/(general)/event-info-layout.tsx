@@ -33,13 +33,6 @@ const EventParticipationInfo = dynamic(
   { ssr: false },
 );
 
-const EventManagementMenu = dynamic(
-  () => import("@/components/features/event/event-management-menu"),
-  {
-    ssr: false,
-  },
-);
-
 const iconSize = 22;
 
 export function EventInfoLayout({
@@ -137,13 +130,6 @@ export function EventInfoLayout({
 
           {/* Community */}
           {communityId && <EventCommunitySection communityId={communityId} />}
-
-          <Suspense>
-            <EventManagementMenu
-              eventId={eventId}
-              nbParticipants={data.participants}
-            />
-          </Suspense>
         </div>
       </div>
 

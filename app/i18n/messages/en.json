@@ -77,10 +77,6 @@
     "toast-edit-error": "Error on editing event!"
   },
   "event": {
-    "manage-event": "Manage event :",
-    "edit-button": "Edit event",
-    "cancel-event-button": "Cancel event",
-    "send-global-message": "Send a message to all participants",
     "going": "{count} going",
     "nobody-going-yet": "Nobody's going yet",
     "hosted-by": "Hosted by:",
@@ -675,11 +671,16 @@
       "loading": "Loading..."
     },
     "communitiyEventsTable": {
+      "name-column": "Name",
       "date-column": "Date",
       "participants-column": "Participants",
       "organizers-column": "Organized by",
       "actions-column": "Actions",
       "view-event": "View event"
+    },
+    "communitiyAdministratorsTable": {
+      "email-column": "Email",
+      "actions-column": "Actions"
     },
     "communityDetails": {
       "communityTabs": {
