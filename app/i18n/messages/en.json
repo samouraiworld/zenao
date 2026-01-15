@@ -754,6 +754,12 @@
         "subtitle": "Broadcasts are a great way to share more information about your event, such as announcing a special guest, an event update, or a logistical change."
       }
     },
+    "teamSettings": {
+      "tabs": {
+        "members": "Members",
+        "permissions": "Permissions"
+      }
+    },
     "data-table": {
       "pagination": {
         "rows-per-page": "Rows per page",

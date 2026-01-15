@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { useMemo } from "react";
+import { useTeamContext } from "./team-provider";
 import { Separator } from "@/components/shadcn/separator";
 import {
   Tabs,
@@ -18,7 +20,8 @@ export default function DaashboardTeamSettingsTabs({
   children: React.ReactNode;
 }) {
   const t = useTranslations("dashboard.teamSettings.tabs");
-  const { roles } = useDashboardTeamSettingsEditionContext();
+  const { role } = useTeamContext();
+  const roles = useMemo(() => [role], [role]);
   const section = useSelectedLayoutSegment() || "members";
 
   return (
@@ -32,7 +35,7 @@ export default function DaashboardTeamSettingsTabs({
             {t("members")}
           </TabsTrigger>
         </Link>
-        <RoleBasedViewMode roles={roles} allowedRoles={["owner"]}>
+        <RoleBasedViewMode roles={roles} allowedRoles={["team_owner"]}>
           <Link href={`/dashboard/team-settings/permissions`} scroll={false}>
             <TabsTrigger
               value="permissions"
