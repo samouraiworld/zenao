@@ -1,4 +1,4 @@
-import { UseFormReturn } from "react-hook-form";
+import { UseFormReturn, useFieldArray } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -8,6 +8,8 @@ import {
   isSameDay,
   minutesToSeconds,
 } from "date-fns";
+import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "@tanstack/react-query";
 import { AudioWaveformIcon, Eye, EyeOff, ImageIcon } from "lucide-react";
 import { Card } from "../../widgets/cards/card";
 import { Tabs, TabsContent } from "../../shadcn/tabs";
@@ -26,7 +28,6 @@ import { useToast } from "@/hooks/use-toast";
 import useMarkdownUpload from "@/hooks/use-markdown-upload";
 import { FormFieldDatePicker } from "@/components/widgets/form/form-field-date-picker";
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
-import { FormFieldInputNumber } from "@/components/widgets/form/form-field-input-number";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { FormFieldLocation } from "@/components/widgets/form/form-field-location";
 import { FormFieldSwitch } from "@/components/widgets/form/form-field-switch";
@@ -34,10 +35,12 @@ import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea
 import { TimeZonesPopover } from "@/components/widgets/form/time-zones-popover";
 import Text from "@/components/widgets/texts/text";
 import { EventFormSchemaType } from "@/types/schemas";
+import { PriceGroupFieldSet } from "@/components/features/event/price-group-field-set";
 import TabsIconsList from "@/components/widgets/tabs/tabs-icons-list";
 import { getMarkdownEditorTabs } from "@/lib/markdown-editor";
 import Heading from "@/components/widgets/texts/heading";
 import { useLayoutTimezone } from "@/hooks/use-layout-timezone";
+import { communityPayoutStatus } from "@/lib/queries/community";
 import { locationTimezone } from "@/lib/event-location";
 import { captureException } from "@/lib/report";
 import {
@@ -67,6 +70,10 @@ export const EventForm: React.FC<EventFormProps> = ({
   isEditing = false,
 }) => {
   const { toast } = useToast();
+  const { fields: priceGroupFields } = useFieldArray({
+    control: form.control,
+    name: "pricesGroups",
+  });
   const description = form.watch("description");
   const location = form.watch("location");
   const startDate = form.watch("startDate");
@@ -74,7 +81,21 @@ export const EventForm: React.FC<EventFormProps> = ({
   const imageUri = form.watch("imageUri");
   const exclusive = form.watch("exclusive");
   const discoverable = form.watch("discoverable");
+  const communityId = form.watch("communityId");
   const t = useTranslations("eventForm");
+  const { getToken } = useAuth();
+
+  const { data: payoutStatus } = useQuery({
+    ...communityPayoutStatus(communityId ?? "", getToken),
+    enabled: !!communityId,
+  });
+  const pricingLabels = {
+    price: t("price-label"),
+    pricePlaceholder: t("price-placeholder"),
+    currency: t("currency-label"),
+    capacity: t("capacity-price-label"),
+    capacityPlaceholder: t("capacity-placeholder"),
+  };
 
   const [isVirtual, setIsVirtual] = useState<boolean>(
     location.kind === "virtual" || false,
@@ -85,6 +106,14 @@ export const EventForm: React.FC<EventFormProps> = ({
   const isCustom = useMemo(() => !isVirtual && !marker, [isVirtual, marker]);
   const eventTimezone = locationTimezone(location);
   const timeZone = useLayoutTimezone(eventTimezone);
+  const currencyOptions = useMemo(() => {
+    const currencies = payoutStatus?.currencies ?? [];
+    const options = currencies.map((currency) => ({
+      value: currency.toUpperCase(),
+      label: currency.toUpperCase(),
+    }));
+    return [{ value: "", label: t("currency-free-option") }, ...options];
+  }, [payoutStatus?.currencies, t]);
 
   // Upload
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -401,12 +430,23 @@ export const EventForm: React.FC<EventFormProps> = ({
               }}
             />
           )}
-          <FormFieldInputNumber
-            control={form.control}
-            name="capacity"
-            placeholder={t("capacity-placeholder")}
-            label={t("capacity-label")}
-          />
+          {(priceGroupFields.length > 0
+            ? priceGroupFields
+            : [{ id: "new" }]
+          ).map((group, index) => (
+            <PriceGroupFieldSet
+              key={group.id ?? index}
+              form={form}
+              groupIndex={index}
+              currencyOptions={currencyOptions}
+              labels={pricingLabels}
+              disabled={!communityId}
+            />
+          ))}
+          <FormDescription>
+            {t("price-helper")}
+            {!communityId ? ` ${t("price-community-required")}` : ""}
+          </FormDescription>
           <FormFieldDatePicker
             name="startDate"
             label={t("from")}

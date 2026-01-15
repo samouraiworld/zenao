@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"slices"
+	"strings"
 	"time"
 	_ "time/tzdata"
 
@@ -30,6 +31,13 @@ func (s *ZenaoServer) CreateEvent(
 
 	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
+	}
+	if err := validatePriceGroups(req.Msg.PricesGroups); err != nil {
+		return nil, fmt.Errorf("invalid price groups: %w", err)
+	}
+
+	if hasPaidPrices(req.Msg.PricesGroups) && req.Msg.CommunityId == "" {
+		return nil, errors.New("community is required for paid events")
 	}
 
 	//XXX: refactor the logic to avoid duplicate w/ gkps ?
@@ -105,6 +113,55 @@ func (s *ZenaoServer) CreateEvent(
 			targets, err = db.GetOrgUsersWithRoles(zeni.EntityTypeCommunity, req.Msg.CommunityId, []string{zeni.RoleMember})
 			if err != nil {
 				return err
+			}
+		}
+
+		if len(req.Msg.PricesGroups) > 0 {
+			var (
+				paymentAccount   *zeni.PaymentAccount
+				paymentAccountID string
+			)
+			if hasPaidPrices(req.Msg.PricesGroups) {
+				paymentAccount, err = db.GetPaymentAccountByCommunityPlatform(req.Msg.CommunityId, zeni.PaymentPlatformStripeConnect)
+				if err != nil {
+					return errors.New("payment account is required for paid events")
+				}
+				paymentAccountID = paymentAccount.ID
+			}
+
+			for _, group := range req.Msg.PricesGroups {
+				if len(group.Prices) == 0 {
+					continue
+				}
+				priceGroup, err := db.CreatePriceGroup(evt.ID, req.Msg.Capacity)
+				if err != nil {
+					return err
+				}
+				for _, price := range group.Prices {
+					amountMinor := price.AmountMinor
+					currency := strings.ToUpper(strings.TrimSpace(price.CurrencyCode))
+					if amountMinor == 0 {
+						currency = ""
+					}
+
+					var (
+						pricePaymentAccount *zeni.PaymentAccount
+						priceAccountID      string
+					)
+					if amountMinor > 0 {
+						priceAccountID = paymentAccountID
+						pricePaymentAccount = paymentAccount
+					}
+
+					if _, err := db.CreatePrice(pricePaymentAccount, &zeni.Price{
+						PriceGroupID:     priceGroup.ID,
+						AmountMinor:      amountMinor,
+						CurrencyCode:     currency,
+						PaymentAccountID: priceAccountID,
+					}); err != nil {
+						return err
+					}
+				}
 			}
 		}
 		return nil
@@ -273,4 +330,39 @@ func validateEvent(startDate, endDate uint64, title, description string, locatio
 	}
 
 	return nil
+}
+
+func validatePriceGroups(groups []*zenaov1.EventPriceGroup) error {
+	for _, group := range groups {
+		for _, price := range group.Prices {
+			if price.AmountMinor < 0 {
+				return errors.New("amount must be greater or equal to 0")
+			}
+			currency := strings.ToUpper(strings.TrimSpace(price.CurrencyCode))
+			if price.AmountMinor == 0 {
+				if currency != "" {
+					return errors.New("currency must be empty for zero price")
+				}
+				continue
+			}
+			if currency == "" {
+				return errors.New("currency is required for non-zero price")
+			}
+			if !zeni.IsSupportedStripeCurrency(currency) {
+				return errors.New("unsupported currency")
+			}
+		}
+	}
+	return nil
+}
+
+func hasPaidPrices(groups []*zenaov1.EventPriceGroup) bool {
+	for _, group := range groups {
+		for _, price := range group.Prices {
+			if price.AmountMinor > 0 {
+				return true
+			}
+		}
+	}
+	return false
 }

@@ -172,6 +172,7 @@ message CreateEventRequest {
   bool discoverable = 13;
   string community_id = 14; // optional
   bool community_email = 15;
+  repeated EventPriceGroup prices_groups = 16;
 }
 
 message CreateEventResponse { string id = 1; }
@@ -197,6 +198,7 @@ message EditEventRequest {
   bool discoverable = 14;
   string community_id = 15; // optional
   bool community_email = 16;
+  repeated EventPriceGroup prices_groups = 17;
 }
 
 message EditEventResponse { string id = 1; }
@@ -290,6 +292,21 @@ message EventInfo {
   EventPrivacy privacy = 12;
   uint32 checked_in = 13;
   bool discoverable = 14;
+  repeated EventPriceGroup prices_groups = 15;
+}
+
+message EventPriceGroup {
+  string id = 1;
+  string name = 2;
+  repeated EventPrice prices = 3;
+}
+
+message EventPrice {
+  string id = 1;
+  int64 amount_minor = 2;
+  string currency_code = 3;
+  string payment_account_id = 4;
+  string payment_account_type = 5;
 }
 
 message BatchProfileField {
@@ -546,6 +563,7 @@ message GetCommunityPayoutStatusResponse {
   string refresh_error = 4;
   string onboarding_state = 5;
   string platform_account_id = 6;
+  repeated string currencies = 7;
 }
 
 message CreateTeamRequest { string display_name = 1; }
