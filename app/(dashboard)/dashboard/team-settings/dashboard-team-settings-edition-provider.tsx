@@ -9,17 +9,22 @@ import {
   useTransition,
 } from "react";
 import { useTranslations } from "next-intl";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTeamContext } from "./team-provider";
 import { Form } from "@/components/shadcn/form";
 import { captureException } from "@/lib/report";
 import { useToast } from "@/hooks/use-toast";
+import { teamFormSchema, TeamFormSchemaType } from "@/types/schemas";
+import { useEditTeam } from "@/lib/mutations/team-edit";
+import { userInfoOptions } from "@/lib/queries/user";
 
 export interface DashboardTeamSettingsEditionContextProps {
   isUpdating: boolean;
   isSubmittable?: boolean;
   formRef?: React.RefObject<HTMLFormElement | null>;
-  // TODO use correct form schema type
-  save: (values: any) => void;
+  save: (values: TeamFormSchemaType) => void;
 }
 
 const DashboardTeamSettingsEditionContext =
@@ -46,11 +51,27 @@ export default function DashboardTeamSettingsEditionProvider({
   const activeTeam = useTeamContext();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const _t = useTranslations("dashboard.teamSettings");
+  const t = useTranslations("dashboard.teamSettings");
 
-  // TODO use correct form schema
-  const form = useForm<any>({
-    defaultValues: activeTeam,
+  const { getToken, userId: authId } = useAuth();
+  const { data: userInfo } = useSuspenseQuery(
+    userInfoOptions(getToken, authId),
+  );
+
+  const userId = userInfo?.userId || "";
+
+  const { editTeam } = useEditTeam(getToken);
+
+  const defaultValues: TeamFormSchemaType = {
+    displayName: activeTeam?.displayName || "",
+    avatarUri: activeTeam?.avatarUri || "",
+    bio: activeTeam?.bio || "",
+  };
+
+  const form = useForm<TeamFormSchemaType>({
+    mode: "all",
+    resolver: zodResolver(teamFormSchema),
+    defaultValues,
   });
 
   const isSubmittable = useMemo(
@@ -59,26 +80,21 @@ export default function DashboardTeamSettingsEditionProvider({
   );
 
   const [isUpdating, startTransition] = useTransition();
-  // TODO use correct form schema type
-  const save = (values: any) => {
+  const save = (values: TeamFormSchemaType) => {
     startTransition(async () => {
       try {
-        // await editEvent({ ...values, eventId });
-        // form.reset(values, { keepDirty: false });
-        // trackEvent("EventEdited", {
-        //   props: {
-        //     eventId,
-        //   },
-        // });
-        // toast({
-        //   title: t("toast-edit-success"),
-        // });
+        // TODO fix members passing
+        await editTeam({ ...values, members: [], userId });
+        form.reset(values, { keepDirty: false });
+        toast({
+          title: t("toast-edit-success"),
+        });
       } catch (err) {
         // Revert optimistic update
         captureException(err);
         toast({
           variant: "destructive",
-          // title: t("toast-edit-error"),
+          title: t("toast-edit-error"),
         });
       }
     });

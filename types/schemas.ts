@@ -479,3 +479,10 @@ export const communityEntityWithRolesSchema = z.object({
 export type SafeCommunityEntityWithRoles = z.infer<
   typeof communityEntityWithRolesSchema
 >;
+
+export const teamFormSchema = z.object({
+  bio: z.string().trim().max(1000).optional().default(""),
+  displayName: z.string().trim().min(1),
+  avatarUri: uriSchema,
+});
+export type TeamFormSchemaType = z.infer<typeof teamFormSchema>;

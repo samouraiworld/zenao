@@ -758,7 +758,20 @@
       "tabs": {
         "members": "Members",
         "permissions": "Permissions"
-      }
+      },
+      "header": {
+        "change-avatar": "Change avatar",
+        "avatar-placeholder": "Avatar URI...",
+        "save-btn": "Save changes",
+        "name-label": "Team name",
+        "name-placeholder": "Team name...",
+        "bio-label": "Description",
+        "bio-placeholder": "Description...",
+        "write-tab": "Write",
+        "preview-tab": "Preview"
+      },
+      "toast-edit-success": "Team correctly edited!",
+      "toast-edit-error": "Error on editing team!"
     },
     "data-table": {
       "pagination": {
