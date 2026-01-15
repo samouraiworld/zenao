@@ -5,6 +5,7 @@ import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventTickets } from "../queries/ticket";
 import { GetToken } from "../utils";
 import { zenaoClient } from "../zenao-client";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 type EventCancelRequest = {
   eventId: string;
@@ -14,6 +15,8 @@ type EventCancelRequest = {
 
 export const useEventCancel = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({ eventId, getToken }: EventCancelRequest) => {
       const token = await getToken();
@@ -27,7 +30,7 @@ export const useEventCancel = () => {
           eventId,
         },
         {
-          headers: { Authorization: "Bearer " + token },
+          headers: buildHeaders(token),
         },
       );
     },

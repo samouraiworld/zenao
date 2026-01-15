@@ -10,12 +10,17 @@ import {
 } from "@/lib/queries/community";
 import useManualPagination from "@/hooks/use-manual-pagination";
 import { userInfoOptions } from "@/lib/queries/user";
+import { useActiveAccount } from "@/components/providers/active-account-provider";
 
 export default function CommunitiesTable() {
   const { getToken, userId: authId } = useAuth();
+  const { activeAccount } = useActiveAccount();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, authId),
   );
+
+  const entityId = activeAccount?.id ?? userInfo?.userId;
+  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
 
   const [tablePage, setTablePage] = useQueryState("page", {
     defaultValue: 1,
@@ -28,11 +33,12 @@ export default function CommunitiesTable() {
   const { data: communities, isFetching: isFetchingCommunities } =
     useSuspenseQuery(
       communitiesByUserRolesListSuspense(
-        userInfo?.userId,
+        entityId,
         tablePage - 1,
         DEFAULT_COMMUNITIES_LIMIT,
         ["administrator"],
         getToken,
+        teamId,
       ),
     );
 

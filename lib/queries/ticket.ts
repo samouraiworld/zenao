@@ -1,9 +1,14 @@
 import { queryOptions } from "@tanstack/react-query";
 import { GetToken } from "../utils";
 import { withSpan } from "../tracer";
+import { buildQueryHeaders } from "./build-query-headers";
 import { zenaoClient } from "@/lib/zenao-client";
 
-export const eventTickets = (eventId: string, getToken: GetToken) =>
+export const eventTickets = (
+  eventId: string,
+  getToken: GetToken,
+  teamId?: string,
+) =>
   queryOptions({
     queryKey: ["tickets", eventId],
     queryFn: async () => {
@@ -18,7 +23,7 @@ export const eventTickets = (eventId: string, getToken: GetToken) =>
           {
             eventId,
           },
-          { headers: { Authorization: `Bearer ${token}` } },
+          { headers: buildQueryHeaders(token, teamId) },
         );
 
         return data;

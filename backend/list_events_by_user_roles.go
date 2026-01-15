@@ -22,18 +22,14 @@ func (s *ZenaoServer) ListEventsByUserRoles(ctx context.Context, req *connect.Re
 		}
 	}
 
-	// Viewing undiscoverable events is restricted to the user themselves
+	// Viewing undiscoverable events is restricted to the user themselves (or their team)
 	if req.Msg.DiscoverableFilter != zenaov1.DiscoverableFilter_DISCOVERABLE_FILTER_DISCOVERABLE {
-		user := s.Auth.GetUser(ctx)
-		if user == nil {
+		actor, err := s.GetActor(ctx, req.Header())
+		if err != nil {
 			return nil, errors.New("unauthorized: authentication required to view undiscoverable events")
 		}
-		zUser, err := s.EnsureUserExists(ctx, user)
-		if err != nil {
-			return nil, err
-		}
-		if zUser.ID != req.Msg.UserId {
-			return nil, errors.New("unauthorized: user_id must match authenticated user")
+		if actor.ID() != req.Msg.UserId {
+			return nil, errors.New("unauthorized: user_id must match authenticated user or team")
 		}
 	}
 

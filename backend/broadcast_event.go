@@ -72,9 +72,16 @@ func (s *ZenaoServer) BroadcastEvent(
 		return nil, errors.New("a broadcast message cannot be sent to an event without any participants")
 	}
 
-	idsList := make([]string, len(participants))
-	for i, participant := range participants {
-		idsList[i] = participant.AuthID
+	var idsList []string
+	for _, participant := range participants {
+		// Skip teams which don't have AuthID
+		if participant.AuthID == "" {
+			continue
+		}
+		idsList = append(idsList, participant.AuthID)
+	}
+	if len(idsList) == 0 {
+		return connect.NewResponse(&zenaov1.BroadcastEventResponse{}), nil
 	}
 	authParticipants, err := s.Auth.GetUsersFromIDs(ctx, idsList)
 	if err != nil {

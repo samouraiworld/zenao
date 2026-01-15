@@ -5,8 +5,11 @@ import { currentTimezone } from "../time";
 import { GetToken } from "../utils";
 import { EventFormSchemaType } from "@/types/schemas";
 import { zenaoClient } from "@/lib/zenao-client";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 export const useCreateEvent = () => {
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token,
@@ -50,7 +53,7 @@ export const useCreateEvent = () => {
           communityEmail: true,
         },
         {
-          headers: { Authorization: "Bearer " + token },
+          headers: buildHeaders(token),
         },
       );
 
@@ -68,6 +71,8 @@ export const useCreateEvent = () => {
 
 export const useEditEvent = (getToken: GetToken) => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       eventId,
@@ -119,7 +124,7 @@ export const useEditEvent = (getToken: GetToken) => {
           communityEmail: true,
         },
         {
-          headers: { Authorization: "Bearer " + token },
+          headers: buildHeaders(token),
         },
       );
     },
@@ -147,6 +152,8 @@ type EventBroadcastEmailRequest = {
 };
 
 export const useEventBroadcastEmail = () => {
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       eventId,
@@ -160,7 +167,7 @@ export const useEventBroadcastEmail = () => {
           message,
           attachTicket,
         },
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: buildHeaders(token) },
       );
     },
   });
@@ -182,6 +189,8 @@ type EventCheckInRequest = {
 
 export const useEventCheckIn = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
       signature,
@@ -193,7 +202,7 @@ export const useEventCheckIn = () => {
           signature,
           ticketPubkey,
         },
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: buildHeaders(token) },
       );
     },
     onSuccess: (_, variables) => {

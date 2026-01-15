@@ -6,6 +6,7 @@ import {
   communityUsersWithRoles,
 } from "../queries/community";
 import { zenaoClient } from "@/lib/zenao-client";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 interface EditCommunityRequest {
   token: string;
@@ -19,6 +20,7 @@ interface EditCommunityRequest {
 
 export const useEditCommunity = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
 
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
@@ -42,7 +44,7 @@ export const useEditCommunity = () => {
           administrators,
         },
         {
-          headers: { Authorization: "Bearer " + token },
+          headers: buildHeaders(token),
         },
       );
     },

@@ -9,6 +9,7 @@ import { communityInfo, communityUserRoles } from "@/lib/queries/community";
 import { userInfoOptions } from "@/lib/queries/user";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import DashboardCommunityContextProvider from "@/components/providers/dashboard-community-context-provider";
+import { getActiveAccountServer } from "@/lib/active-account/server";
 
 interface DashboardCommunityManagementPageProps {
   params: Promise<{ id: string }>;
@@ -38,6 +39,9 @@ async function DashboardCommunityManagementPage({
     );
   }
 
+  const activeAccount = await getActiveAccountServer();
+  const entityId = activeAccount?.id ?? userProfileId;
+
   let communityData;
 
   try {
@@ -47,7 +51,7 @@ async function DashboardCommunityManagementPage({
   }
 
   const roles = await queryClient.fetchQuery(
-    communityUserRoles(communityId, userProfileId),
+    communityUserRoles(communityId, entityId),
   );
 
   const renderLayout = () => (

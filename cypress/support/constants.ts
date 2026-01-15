@@ -27,3 +27,6 @@ export const testComment = "A comment to test";
 export const testSocialLink = {
   url: "https://twitter.com/alice_tester",
 };
+
+// TEAM
+export const testTeamName = "QA Testing Team";

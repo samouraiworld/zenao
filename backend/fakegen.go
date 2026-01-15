@@ -98,6 +98,11 @@ func execFakegen() (retErr error) {
 		return err
 	}
 
+	// Promote user to pro plan for e2e testing of team functionality
+	if err := db.PromoteUser(zUser.ID, zeni.ProPlan); err != nil {
+		return err
+	}
+
 	logger.Info("creating events")
 	for eC := range fakegenConf.eventsCount {
 		// Create Event

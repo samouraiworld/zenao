@@ -638,7 +638,6 @@
       "team": "Team",
       "create-team": "Create a team",
       "profile": "Profile",
-      "switch-to-regular-user-mode": "Switch to regular user mode",
       "sign-out": "Sign out"
     },
     "createTeam": {
