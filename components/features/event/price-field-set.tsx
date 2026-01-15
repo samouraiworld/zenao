@@ -2,6 +2,7 @@
 
 import { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { FormField } from "@/components/shadcn/form";
 import { Input } from "@/components/shadcn/input";
 import { FormFieldInputCurrency } from "@/components/widgets/form/form-field-input-currency";
@@ -42,6 +43,13 @@ export const PriceFieldSet = ({
     `pricesGroups.${groupIndex}.prices.${priceIndex}.id` as const;
   const paymentAccountIdName =
     `pricesGroups.${groupIndex}.prices.${priceIndex}.paymentAccountId` as const;
+
+  useEffect(() => {
+    if (currencyOptions.length < 2) {
+      form.setValue(currencyName, "");
+      form.setValue(amountName, BigInt(0));
+    }
+  }, [amountName, currencyName, currencyOptions.length, form]);
 
   return (
     <div className={cn("grid gap-4 md:grid-cols-2", className)}>

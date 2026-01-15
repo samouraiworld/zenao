@@ -774,6 +774,11 @@ func (g *gormZenaoDB) validatePaymentAccountID(paymentAccount *zeni.PaymentAccou
 	}
 	switch paymentAccount.PlatformType {
 	case zeni.PaymentPlatformStripeConnect:
+		if paymentAccount.VerificationState != zeni.PaymentVerificationStateVerified ||
+			paymentAccount.OnboardingState != zeni.PaymentOnboardingStateCompleted {
+			return nil, errors.New("payment account is not verified")
+		}
+
 		if !zeni.IsSupportedStripeCurrency(currency) {
 			return nil, errors.New("unsupported currency")
 		}

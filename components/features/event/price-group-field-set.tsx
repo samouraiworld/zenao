@@ -52,7 +52,7 @@ export const PriceGroupFieldSet = ({
             groupIndex={groupIndex}
             priceIndex={priceIndex}
             currencyOptions={currencyOptions}
-            disabled={disabled}
+            disabled={disabled || currencyOptions.length < 2}
             className="md:col-span-2"
           />
           {priceIndex === 0 ? (

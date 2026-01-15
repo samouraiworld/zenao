@@ -110,9 +110,9 @@ func TestPriceGroupAndPricePersistence(t *testing.T) {
 		CommunityID:       community.ID,
 		PlatformType:      "stripe_connect",
 		PlatformAccountID: "some_id",
-		OnboardingState:   "success",
+		OnboardingState:   zeni.PaymentOnboardingStateCompleted,
 		StartedAt:         now,
-		VerificationState: "success",
+		VerificationState: zeni.PaymentVerificationStateVerified,
 		LastVerifiedAt:    &now,
 	})
 	require.NoError(t, err)
@@ -185,9 +185,9 @@ func TestGetPriceGroupsByEventPrefetchesPricesAndPaymentAccount(t *testing.T) {
 		CommunityID:       community.ID,
 		PlatformType:      zeni.PaymentPlatformStripeConnect,
 		PlatformAccountID: "acct_test_123",
-		OnboardingState:   "complete",
+		OnboardingState:   zeni.PaymentOnboardingStateCompleted,
 		StartedAt:         now,
-		VerificationState: "verified",
+		VerificationState: zeni.PaymentVerificationStateVerified,
 		LastVerifiedAt:    &now,
 	})
 	require.NoError(t, err)

@@ -4,6 +4,20 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { communityPayoutStatus } from "@/lib/queries/community";
 
+export enum VerificationState {
+  unknown = "unknown",
+  verified = "verified",
+  failed = "failed",
+  pending = "pending",
+}
+
+export enum PayoutState {
+  started = "started",
+  completed = "completed",
+  missingAccount = "missing_account",
+  unknown = "unknown",
+}
+
 const currenciesDecimalMapping: Record<string, 0 | 3> = {
   BIF: 0,
   CLP: 0,
@@ -93,11 +107,14 @@ export const useCurrencyOptionsForCommunity = (communityId: string | null) => {
   const t = useTranslations("eventForm");
 
   return useMemo(() => {
-    const currencies = payoutStatus?.currencies ?? [];
+    const currencies =
+      payoutStatus?.verificationState == VerificationState.verified
+        ? payoutStatus?.currencies
+        : [];
     const options = currencies.map((currency) => ({
       value: currency.toUpperCase(),
       label: currency.toUpperCase(),
     }));
     return [{ value: "", label: t("currency-free-option") }, ...options];
-  }, [payoutStatus?.currencies, t]);
+  }, [payoutStatus?.currencies, payoutStatus?.verificationState, t]);
 };
