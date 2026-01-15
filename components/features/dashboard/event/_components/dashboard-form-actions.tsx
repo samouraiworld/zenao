@@ -1,8 +1,9 @@
-import { CircleX, Save } from "lucide-react";
+import { CircleX, Eye, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormContext } from "react-hook-form";
 import { useMemo, useState } from "react";
 import { fromUnixTime } from "date-fns";
+import Link from "next/link";
 import { Button } from "@/components/shadcn/button";
 import { useDashboardEventEditionContext } from "@/components/providers/dashboard-event-edition-context-provider";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -32,6 +33,13 @@ export default function DashboardFormActions() {
           <Button type="button" variant="outline" disabled={isUpdating}>
             <CircleX />
             {t("cancel")}
+          </Button>
+
+          <Button type="button" variant="outline" asChild>
+            <Link href={`/event/${eventId}`} target="_blank">
+              <Eye />
+              {t("seeAsCustomer")}
+            </Link>
           </Button>
         </div>
 
@@ -67,6 +75,7 @@ export default function DashboardFormActions() {
             {t("saveChanges")}
           </Button>
         </form>
+
         <Button
           type="button"
           variant="outline"
@@ -75,6 +84,13 @@ export default function DashboardFormActions() {
         >
           <CircleX />
           {t("cancel")}
+        </Button>
+
+        <Button type="button" variant="outline" asChild>
+          <Link href={`/event/${eventId}`} target="_blank">
+            <Eye />
+            {t("seeAsCustomer")}
+          </Link>
         </Button>
       </div>
     </>

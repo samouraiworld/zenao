@@ -8,6 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shadcn/tooltip";
+import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 
 interface UseCommunityAdministratorsColumnsProps {
   onDelete: (email: string) => void;
@@ -23,7 +24,9 @@ export const useCommunityAdministratorsColumns = (
     () => [
       {
         accessorKey: "email",
-        header: () => <div>{t("email-column")}</div>,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("email-column")} />
+        ),
         cell: ({ row }) => <div>{row.original}</div>,
         enableHiding: false,
         enableSorting: true,
@@ -33,7 +36,9 @@ export const useCommunityAdministratorsColumns = (
       },
       {
         id: "actions",
-        header: () => <div>{t("actions-column")}</div>,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("actions-column")} />
+        ),
         cell: ({ row }) => (
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
@@ -46,7 +51,7 @@ export const useCommunityAdministratorsColumns = (
                 <Trash2 className="text-muted-foreground w-4 h-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{t("delete-admin")}</TooltipContent>
+            <TooltipContent>{t("action-tooltip-delete")}</TooltipContent>
           </Tooltip>
         ),
         enableHiding: false,

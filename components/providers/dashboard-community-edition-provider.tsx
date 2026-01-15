@@ -25,6 +25,7 @@ import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
 
 export interface DashboardCommunityEditionProps {
+  communityId: string;
   isUpdating: boolean;
   isSubmittable?: boolean;
   formRef?: React.RefObject<HTMLFormElement | null>;
@@ -127,7 +128,7 @@ export default function DashboardCommunityEditionProvider({
 
   return (
     <Form {...form}>
-      {children({ isUpdating, isSubmittable, formRef, save })}
+      {children({ communityId, isUpdating, isSubmittable, formRef, save })}
     </Form>
   );
 }

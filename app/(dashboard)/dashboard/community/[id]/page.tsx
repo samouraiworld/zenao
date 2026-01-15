@@ -2,7 +2,8 @@
 
 import { useFormContext } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { Info } from "lucide-react";
+import { Eye, Info } from "lucide-react";
+import Link from "next/link";
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { CommunityFormSchemaType } from "@/types/schemas";
 import { IMAGE_FILE_SIZE_LIMIT } from "@/components/features/event/constants";
@@ -26,8 +27,10 @@ import { ButtonWithChildren } from "@/components/widgets/buttons/button-with-chi
 import DashboardCommunityEditionProvider, {
   DashboardCommunityEditionProps,
 } from "@/components/providers/dashboard-community-edition-provider";
+import { Button } from "@/components/shadcn/button";
 
 function DashboardCommunityInfo({
+  communityId,
   isUpdating,
   isSubmittable,
   formRef,
@@ -59,6 +62,13 @@ function DashboardCommunityInfo({
             className="w-full rounded-xl overflow-hidden"
           />
         </div>
+
+        <Button type="button" variant="outline" asChild className="self-end">
+          <Link href={`/community/${communityId}`} target="_blank">
+            <Eye />
+            {t("seeAsCustomer")}
+          </Link>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-6 mt-20 w-full">
@@ -194,8 +204,9 @@ function DashboardCommunityInfo({
 export default function DashboardCommunityInfoPage() {
   return (
     <DashboardCommunityEditionProvider>
-      {({ isUpdating, isSubmittable, formRef, save }) => (
+      {({ communityId, isUpdating, isSubmittable, formRef, save }) => (
         <DashboardCommunityInfo
+          communityId={communityId}
           isUpdating={isUpdating}
           isSubmittable={isSubmittable}
           formRef={formRef}

@@ -545,6 +545,7 @@
     "change-avatar": "Change avatar",
     "change-banner": "Change banner",
     "name-label": "Community name",
+    "seeAsCustomer": "See as customer",
     "community-name-section": "Name of the community",
     "about-section": "About your community",
     "name-placeholder": "Community name...",
@@ -583,7 +584,7 @@
     "payout-status-refresh-error": "Unable to refresh from Stripe. Showing last known status.",
     "stripe-dashboard-missing-account": "No Stripe account connected, please connect one to enable payouts."
   },
-  "portfolio": { 
+  "portfolio": {
     "error-file-uploading": "Error while uploading file",
     "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
     "error-file-deleting": "Error while deleting file",
@@ -619,7 +620,7 @@
       "create-event": "Create Event",
       "create-community": "Create Community",
       "events": "Events",
-      "upcoming":"Upcoming",
+      "upcoming": "Upcoming",
       "past": "Past",
       "all": "All",
       "participants": "Participants",
@@ -651,12 +652,27 @@
       "success": "Team created successfully",
       "error": "Failed to create team"
     },
+    "membersTable": {
+      "name-column": "Name",
+      "roles-column": "Roles"
+    },
     "eventsTable": {
       "events": "Events",
       "upcoming": "Upcoming",
       "past": "Past",
       "no-events": "No events found.",
-      "create-event-btn": "Create an event"
+      "create-event-btn": "Create an event",
+      "name-column": "Name",
+      "date-column": "Date",
+      "roles-column": "Roles",
+      "participants-column": "Participants",
+      "organizers-column": "Organized by",
+      "actions-column": "Actions",
+      "view-event": "See event",
+      "actions-menu": {
+        "dashboard-view": "See on dashboard",
+        "customer-view": "See as customer"
+      }
     },
     "communitiesTable": {
       "communities": "Communities",
@@ -664,21 +680,19 @@
       "create-community-btn": "Create a community",
       "name-column": "Name",
       "members-column": "Members",
-      "roles-column": "Role(s)",
+      "roles-column": "Roles",
+      "view-community": "See community",
+      "loading": "Loading...",
       "actions-column": "Actions",
-      "loading": "Loading..."
-    },
-    "communitiyEventsTable": {
-      "name-column": "Name",
-      "date-column": "Date",
-      "participants-column": "Participants",
-      "organizers-column": "Organized by",
-      "actions-column": "Actions",
-      "view-event": "View event"
+      "actions-menu": {
+        "dashboard-view": "See on dashboard",
+        "customer-view": "See as customer"
+      }
     },
     "communitiyAdministratorsTable": {
       "email-column": "Email",
-      "actions-column": "Actions"
+      "actions-column": "Actions",
+      "action-tooltip-delete": "Remove administrator"
     },
     "communityDetails": {
       "communityTabs": {
@@ -710,7 +724,7 @@
       "manage-event": "Manage event",
       "edit-event": "Edit event",
       "cancel-event": "Cancel event",
-      "view-event": "View event",
+      "view-event": "See event",
       "eventTabs": {
         "description": "Description",
         "participants": "Participants",
@@ -720,6 +734,7 @@
       "header": {
         "actions": "Actions",
         "saveChanges": "Save changes",
+        "seeAsCustomer": "See as customer",
         "edit": "Edit",
         "cancel": "Cancel event",
         "dateAndTime": "Date & Time",
@@ -737,7 +752,7 @@
       },
       "participants": {
         "exportCSV": "Export CSV",
-        "openQrCodeScanner":"QR Code Scanner",
+        "openQrCodeScanner": "QR Code Scanner",
         "no-participants": "No participants yet."
       },
       "gatekeepers": {
@@ -757,6 +772,6 @@
         "rows-per-page": "Rows per page",
         "page-of": "Page {page} of {pages}"
       }
-    } 
+    }
   }
 }
