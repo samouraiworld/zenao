@@ -1,4 +1,11 @@
 import { TEAM_ACTOR_HEADER } from "@/lib/constants";
+import { getActiveAccountCookie } from "@/lib/active-account/cookie";
+
+function getTeamIdFromCookie(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const account = getActiveAccountCookie();
+  return account?.type === "team" ? account.id : undefined;
+}
 
 export function buildQueryHeaders(
   token: string | null,
@@ -9,8 +16,10 @@ export function buildQueryHeaders(
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-  if (teamId) {
-    headers[TEAM_ACTOR_HEADER] = teamId;
+
+  const effectiveTeamId = teamId ?? getTeamIdFromCookie();
+  if (effectiveTeamId) {
+    headers[TEAM_ACTOR_HEADER] = effectiveTeamId;
   }
 
   return headers;

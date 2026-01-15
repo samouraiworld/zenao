@@ -201,16 +201,6 @@ describe("team", () => {
   });
 
   it("create community as team", () => {
-    // Temporarily ignore the "user is not administrator" error which occurs
-    // after community creation when the dashboard tries to load admin info.
-    // This is a known issue with team context not being properly passed.
-    cy.on("uncaught:exception", (err) => {
-      if (err.message.includes("user is not administrator of the community")) {
-        return false; // Prevent test from failing
-      }
-      return true;
-    });
-
     // Start from dashboard
     cy.visit("/dashboard");
 

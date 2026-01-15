@@ -74,7 +74,7 @@ export const communityPayoutStatus = (
           if (!token) throw new Error("invalid clerk token");
           return zenaoClient.getCommunityPayoutStatus(
             { communityId },
-            { headers: { Authorization: `Bearer ${token}` } },
+            { headers: buildQueryHeaders(token) },
           );
         },
       );
