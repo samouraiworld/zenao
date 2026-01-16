@@ -1,5 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Eye } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
@@ -90,7 +90,7 @@ export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () => {
                 className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
                 size="icon"
               >
-                <Eye />
+                <EllipsisVertical />
                 <span className="sr-only">{t("view-event")}</span>
               </Button>
             </DropdownMenuTrigger>

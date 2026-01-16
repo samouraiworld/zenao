@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
@@ -67,7 +67,7 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () => {
                 className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
                 size="icon"
               >
-                <Eye />
+                <EllipsisVertical />
                 <span className="sr-only">{t("view-community")}</span>
               </Button>
             </DropdownMenuTrigger>

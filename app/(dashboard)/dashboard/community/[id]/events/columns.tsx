@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import { SafeEventInfo } from "@/types/schemas";
@@ -91,7 +91,7 @@ export const useCommunityEventsColumns = (): ColumnDef<SafeEventInfo>[] => {
                 className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
                 size="icon"
               >
-                <Eye />
+                <EllipsisVertical />
                 <span className="sr-only">{t("view-event")}</span>
               </Button>
             </DropdownMenuTrigger>
