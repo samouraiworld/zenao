@@ -7,6 +7,7 @@ import {
   communityUsersWithRoles,
 } from "../queries/community";
 import { CreateCommunityRequestJson } from "@/app/gen/zenao/v1/zenao_pb";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 interface CreateCommunityRequest extends CreateCommunityRequestJson {
   token: string;
@@ -20,6 +21,7 @@ interface CreateCommunityRequest extends CreateCommunityRequestJson {
 
 export const useCreateCommunity = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
 
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
     mutationFn: async ({
@@ -39,7 +41,7 @@ export const useCreateCommunity = () => {
           administrators,
         },
         {
-          headers: { Authorization: "Bearer " + token },
+          headers: buildHeaders(token),
         },
       );
 

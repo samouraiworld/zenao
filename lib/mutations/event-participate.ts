@@ -3,6 +3,7 @@ import { eventUserRoles, eventUsersWithRole } from "../queries/event-users";
 import { eventOptions } from "../queries/event";
 import { getQueryClient } from "../get-query-client";
 import { zenaoClient } from "@/lib/zenao-client";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 type EventParticipateLoggedInRequest = {
   eventId: string;
@@ -35,6 +36,8 @@ export const getRelatedQueriesOptions = (variables: {
 
 export const useEventParticipateLoggedIn = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       eventId,
@@ -44,7 +47,7 @@ export const useEventParticipateLoggedIn = () => {
     }: EventParticipateLoggedInRequest) => {
       await zenaoClient.participate(
         { eventId, guests, password },
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: buildHeaders(token) },
       );
     },
     onMutate: async (variables) => {

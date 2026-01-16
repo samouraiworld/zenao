@@ -24,6 +24,7 @@ import {
   CommandList,
 } from "@/components/shadcn/command";
 
+import { useActiveAccount } from "@/components/providers/active-account-provider";
 import { Button } from "@/components/shadcn/button";
 import { FormField } from "@/components/shadcn/form";
 import Heading from "@/components/widgets/texts/heading";
@@ -43,17 +44,21 @@ export default function EventFormCommunitySelector({
   const t = useTranslations("eventForm");
   // Community selection
   const { userId, getToken } = useAuth();
+  const { activeAccount } = useActiveAccount();
   const { data: userInfo } = useSuspenseQuery(
     userInfoOptions(getToken, userId),
   );
-  const userProfileId = userInfo?.userId || "";
+
+  const entityId = activeAccount?.id ?? userInfo?.userId ?? "";
+  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
 
   const { data: userCommunitiesPages } = useSuspenseInfiniteQuery(
     communitiesByUserRolesList(
-      userProfileId,
+      entityId,
       ["administrator"],
       DEFAULT_COMMUNITIES_LIMIT,
       getToken,
+      teamId,
     ),
   );
 

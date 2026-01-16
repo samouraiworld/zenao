@@ -4,6 +4,7 @@ import { redirect, notFound } from "next/navigation";
 import React from "react";
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
+import { getActiveAccountServer } from "../active-account/server";
 import { getQueryClient } from "../get-query-client";
 import { EventUserRole, eventUserRoles } from "../queries/event-users";
 import { userInfoOptions } from "../queries/user";
@@ -47,8 +48,11 @@ export function withEventRoleRestrictions<
       );
     }
 
+    const activeAccount = await getActiveAccountServer();
+    const entityId = activeAccount?.id ?? userProfileId;
+
     const roles = await queryClient.fetchQuery(
-      eventUserRoles(eventId, userProfileId),
+      eventUserRoles(eventId, entityId),
     );
 
     if (!allowedRoles.some((role) => roles.includes(role))) {
@@ -91,8 +95,11 @@ export function withCommunityRolesRestriction<
       );
     }
 
+    const activeAccount = await getActiveAccountServer();
+    const entityId = activeAccount?.id ?? userProfileId;
+
     const roles = await queryClient.fetchQuery(
-      communityUserRoles(communityId, userProfileId),
+      communityUserRoles(communityId, entityId),
     );
 
     if (!allowedRoles.some((role) => roles.includes(role))) {

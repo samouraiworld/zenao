@@ -209,7 +209,7 @@ func withConnectCORS(allowedOrigins ...string) func(http.Handler) http.Handler {
 		middleware := cors.New(cors.Options{
 			AllowedOrigins: allowedOrigins,
 			AllowedMethods: connectcors.AllowedMethods(),
-			AllowedHeaders: append(connectcors.AllowedHeaders(), "Authorization"),
+			AllowedHeaders: append(connectcors.AllowedHeaders(), "Authorization", "X-Team-Id"),
 			ExposedHeaders: connectcors.ExposedHeaders(),
 		})
 		return middleware.Handler(next)

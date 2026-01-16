@@ -9,9 +9,6 @@ import {
   testComment,
   testEventPassword,
   testCommunityName,
-  testCommunityDesc,
-  testCommunityShortDesc,
-  testCommunitySocialLink,
 } from "../support/constants";
 import { login, logout, reset, toastShouldContain } from "../support/helpers";
 
@@ -643,92 +640,4 @@ describe("main", () => {
   });
 });
 
-Cypress.Commands.add("accessCreateEventPage", () => {
-  // start from the home
-  cy.visit("/");
-
-  // ensure hydration
-  cy.get("button").contains("Sign in").should("be.visible", { timeout: 10000 });
-
-  // click on home create button
-  cy.get("header").get('button[aria-label="quick menu create"]').click();
-
-  cy.get('[role="menu"]').should("be.visible");
-  // Select create event
-  cy.get("div").contains("Create new event").click();
-
-  login();
-});
-
-Cypress.Commands.add(
-  "createCommunity",
-  ({ administrators = [] }: { administrators?: string[] }) => {
-    // start from the home
-    cy.visit("/");
-
-    // ensure hydration
-    cy.get("button")
-      .contains("Sign in")
-      .should("be.visible", { timeout: 10000 });
-
-    // click on home create button
-    cy.get("header").get('button[aria-label="quick menu create"]').click();
-    cy.get('[role="menu"]').should("be.visible");
-    // Select create community
-    cy.get("div").contains("Create new community").click();
-
-    login();
-
-    // fill community info
-
-    // Avatar
-    cy.get("input[name=avatarUri]").selectFile(
-      "cypress/fixtures/alice-tester.webp",
-      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
-    );
-    // Banner
-    cy.get("input[name=bannerUri]").selectFile(
-      "cypress/fixtures/bug-bash-bonanza.webp",
-      { force: true }, // XXX: we could maybe use a label with a "for" param to avoid forcing here
-    );
-    // Name
-    cy.get('textarea[name="displayName"]').type(testCommunityName, {
-      delay: 10,
-    });
-    // Short desc
-    cy.get('input[name="shortDescription"]').type(testCommunityShortDesc, {
-      delay: 10,
-    });
-    // Description
-    cy.get('textarea[name="description"]').type(testCommunityDesc, {
-      delay: 10,
-    });
-    // Social link
-    cy.get("button").contains("Add link").click();
-    cy.get('input[placeholder="Enter URL"]').type(testCommunitySocialLink, {
-      delay: 10,
-    });
-    // Administrators
-    if (administrators.length > 0) {
-      administrators.forEach((administrator, index) => {
-        cy.get("button").contains("Add Administrator").click();
-        cy.get(`input[name="administrators.${index}.address"]`).type(
-          administrator,
-          {
-            delay: 10,
-          },
-        );
-      });
-    }
-
-    // Create community
-    cy.get("button").contains("Create Community").click();
-
-    cy.wait(1000);
-
-    toastShouldContain("Community created!");
-
-    cy.url().should("include", "/community/");
-    cy.url().should("not.include", "/create");
-  },
-);
+// Commands accessCreateEventPage and createCommunity are now in commands.ts

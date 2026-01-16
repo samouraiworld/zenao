@@ -16,6 +16,7 @@ import {
   PinPostRequestJson,
   VotePollRequest,
 } from "@/app/gen/zenao/v1/zenao_pb";
+import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
 interface CreatePollRequestMutation
   extends Required<Omit<CreatePollRequest, "$typeName" | "$unknown">> {
@@ -25,10 +26,12 @@ interface CreatePollRequestMutation
 }
 
 export const useCreatePoll = (queryClient: QueryClient) => {
+  const { buildHeaders } = useHeaderBuilder();
+
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ token, ...request }: CreatePollRequestMutation) => {
       await zenaoClient.createPoll(request, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: buildHeaders(token ?? ""),
       });
     },
     onMutate: async (variables) => {
@@ -117,6 +120,8 @@ interface VotePollRequestMutation extends Omit<VotePollRequest, "$typeName"> {
 }
 
 export const useVotePoll = (queryClient: QueryClient) => {
+  const { buildHeaders } = useHeaderBuilder();
+
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ token, ...request }: VotePollRequestMutation) => {
       await zenaoClient.votePoll(
@@ -125,7 +130,7 @@ export const useVotePoll = (queryClient: QueryClient) => {
           option: request.option,
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: buildHeaders(token ?? ""),
         },
       );
     },
@@ -164,6 +169,7 @@ interface CreateStandardPostRequestMutation
 
 export const useCreateStandardPost = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
 
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
@@ -171,7 +177,7 @@ export const useCreateStandardPost = () => {
       ...request
     }: CreateStandardPostRequestMutation) => {
       await zenaoClient.createPost(request, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: buildHeaders(token ?? ""),
       });
     },
     onMutate: async (variables) => {
@@ -288,6 +294,8 @@ interface ReactPostRequestMutation {
 
 export const useReactPost = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token: token,
@@ -295,7 +303,7 @@ export const useReactPost = () => {
       ...request
     }: ReactPostRequestMutation) => {
       await zenaoClient.reactPost(request, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: buildHeaders(token ?? ""),
       });
     },
     onMutate: async (variables) => {
@@ -417,6 +425,8 @@ type EditStandardPostRequestMutation = {
 
 export const useEditStandardPost = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({
       token,
@@ -433,7 +443,7 @@ export const useEditStandardPost = () => {
           postId,
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: buildHeaders(token),
         },
       );
     },
@@ -480,6 +490,8 @@ type DeletePostRequestMutation = {
 
 export const useDeletePost = () => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
+
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ postId, token }: DeletePostRequestMutation) => {
       if (!token) {
@@ -490,7 +502,7 @@ export const useDeletePost = () => {
         {
           postId,
         },
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: buildHeaders(token) },
       );
     },
     onSuccess: (_, variables) => {
@@ -546,6 +558,7 @@ interface PinPostUpdateRequest extends Required<PinPostRequestJson> {
 
 export const usePinPostUpdate = (getToken: GetToken) => {
   const queryClient = getQueryClient();
+  const { buildHeaders } = useHeaderBuilder();
 
   const { isPending, mutateAsync, isSuccess, isError } = useMutation({
     mutationFn: async ({ postId, pinned }: PinPostUpdateRequest) => {
@@ -561,7 +574,7 @@ export const usePinPostUpdate = (getToken: GetToken) => {
           pinned: pinned,
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: buildHeaders(token),
         },
       );
     },

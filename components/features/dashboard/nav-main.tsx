@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 
@@ -58,17 +59,29 @@ const NavItemExpanded = ({
   const t = useTranslations("dashboard.sidebar");
   const path = usePathname();
   const { id } = useParams<{ id: string | undefined }>();
-
   const resolvedSubItems =
     typeof item.subItems === "function"
       ? item.subItems(path, id)
       : item.subItems;
 
+  const shouldBeOpen = isSubmenuOpen(item.subItems);
+  const [isOpen, setIsOpen] = useState(shouldBeOpen);
+  const prevShouldBeOpen = useRef(shouldBeOpen);
+
+  // Auto-expand menu when navigating to an event or community
+  useEffect(() => {
+    if (shouldBeOpen && !prevShouldBeOpen.current) {
+      setIsOpen(true);
+    }
+    prevShouldBeOpen.current = shouldBeOpen;
+  }, [shouldBeOpen]);
+
   return (
     <Collapsible
       key={item.title}
       asChild
-      defaultOpen={isSubmenuOpen(item.subItems)}
+      open={isOpen}
+      onOpenChange={setIsOpen}
       className="group/collapsible"
     >
       <SidebarMenuItem>
