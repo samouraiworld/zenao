@@ -7,8 +7,8 @@
     "second-point": "Sauvegardez et voyez vos changements instantanement."
   },
   "navigation": {
-    "dashboard-view": "Dashboard view",
-    "customer-view": "Customer view"
+    "dashboard-view": "Vue tableau de bord",
+    "customer-view": "Vue client"
   },
   "dashboard": {
     "navUser": {

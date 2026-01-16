@@ -240,10 +240,9 @@ const Auth = ({
       {/* Signed in state */}
       {isMounted && (
         <SignedIn>
-          <UserMenu
-            variant="customer"
-            trigger={<UserAvatarSignedButton userId={activeAccount?.id} />}
-          />
+          <UserMenu variant="customer">
+            <UserAvatarSignedButton userId={activeAccount?.id} />
+          </UserMenu>
         </SignedIn>
       )}
     </div>

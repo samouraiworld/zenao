@@ -33,29 +33,24 @@ export function NavUser({ userId, user }: NavUserProps) {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <UserMenu
-          variant="dashboard"
-          trigger={
-            <SidebarMenuButton
-              size="lg"
-              className="group/avatar-trigger data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
-            >
-              <UserAvatarSignedButton userId={currentAccountId} groupHover />
+        <UserMenu variant="dashboard">
+          <SidebarMenuButton
+            size="lg"
+            className="group/avatar-trigger data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-full"
+          >
+            <UserAvatarSignedButton userId={currentAccountId} groupHover />
 
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">
-                  {currentDisplayName}
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-medium">{currentDisplayName}</span>
+              {activeTeam && (
+                <span className="truncate text-xs text-muted-foreground">
+                  {t("team")}
                 </span>
-                {activeTeam && (
-                  <span className="truncate text-xs text-muted-foreground">
-                    {t("team")}
-                  </span>
-                )}
-              </div>
-              <EllipsisVertical className="ml-auto size-4" />
-            </SidebarMenuButton>
-          }
-        />
+              )}
+            </div>
+            <EllipsisVertical className="ml-auto size-4" />
+          </SidebarMenuButton>
+        </UserMenu>
       </SidebarMenuItem>
     </SidebarMenu>
   );

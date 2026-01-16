@@ -48,9 +48,8 @@ function DashboardUserMenu() {
   const { activeAccount } = useActiveAccount();
 
   return (
-    <UserMenu
-      variant="dashboard"
-      trigger={<UserAvatarSignedButton userId={activeAccount?.id} />}
-    />
+    <UserMenu variant="dashboard">
+      <UserAvatarSignedButton userId={activeAccount?.id} />
+    </UserMenu>
   );
 }

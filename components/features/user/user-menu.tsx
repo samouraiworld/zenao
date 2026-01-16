@@ -31,7 +31,7 @@ export type UserMenuVariant = "dashboard" | "customer";
 
 type UserMenuProps = {
   readonly variant: UserMenuVariant;
-  readonly trigger: ReactNode;
+  readonly children: ReactNode;
   readonly side?: "top" | "bottom" | "left" | "right";
   readonly align?: "start" | "center" | "end";
   readonly sideOffset?: number;
@@ -41,7 +41,7 @@ const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
 export function UserMenu({
   variant,
-  trigger,
+  children,
   side = "bottom",
   align = "end",
   sideOffset = 10,
@@ -76,7 +76,7 @@ export function UserMenu({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+        <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
         <DropdownMenuContent
           className="min-w-56 rounded-lg"
           side={side}
