@@ -1,22 +1,31 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Eye } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import Link from "next/link";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn/button";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import Text from "@/components/widgets/texts/text";
 import { SafeEventUser } from "@/types/schemas";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/dropdown-menu";
 
-export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () =>
-  useMemo(
+export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () => {
+  const t = useTranslations("dashboard.eventsTable");
+
+  return useMemo(
     () => [
       {
         accessorKey: "startDate",
         enableSorting: true,
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Date" />
+          <DataTableColumnHeader column={column} title={t("date-column")} />
         ),
         cell: ({ row }) => (
           <Text size="sm" variant="secondary">
@@ -34,7 +43,7 @@ export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () =>
           <DataTableColumnHeader
             className="w-full text-left"
             column={column}
-            title="Name"
+            title={t("name-column")}
           />
         ),
         cell: ({ row }) => <Text size="sm">{row.original.event.title}</Text>,
@@ -45,7 +54,10 @@ export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () =>
         accessorKey: "participants",
         enableSorting: false,
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Participants" />
+          <DataTableColumnHeader
+            column={column}
+            title={t("participants-column")}
+          />
         ),
         cell: ({ row }) => (
           <Text size="sm" variant="secondary">
@@ -57,7 +69,7 @@ export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () =>
         accessorKey: "roles",
         enableSorting: false,
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Roles" />
+          <DataTableColumnHeader column={column} title={t("roles-column")} />
         ),
         cell: ({ row }) => (
           <Text size="sm" variant="secondary">
@@ -67,18 +79,35 @@ export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () =>
       },
       {
         id: "actions",
-        header: () => <div>Actions</div>,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("actions-column")} />
+        ),
         cell: ({ row }) => (
-          <Link href={`/event/${row.original.event.id}`}>
-            <Button
-              variant="ghost"
-              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-              size="icon"
-            >
-              <Eye />
-              <span className="sr-only">View</span>
-            </Button>
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                size="icon"
+              >
+                <EllipsisVertical />
+                <span className="sr-only">{t("view-event")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Link href={`/dashboard/event/${row.original.event.id}`}>
+                  {t("actions-menu.dashboard-view")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href={`/event/${row.original.event.id}`} target="_blank">
+                  {t("actions-menu.customer-view")}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ),
         enableSorting: false,
         meta: {
@@ -86,5 +115,6 @@ export const useEventsTableColumns: () => ColumnDef<SafeEventUser>[] = () =>
         },
       },
     ],
-    [],
+    [t],
   );
+};

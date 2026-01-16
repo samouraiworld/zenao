@@ -7,6 +7,7 @@ import {
   UseSuspenseQueryResult,
 } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { useCommunityEventsColumns } from "./columns";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
@@ -22,6 +23,7 @@ import { useDashboardCommunityContext } from "@/components/providers/dashboard-c
 
 export default function CommunityEventsTable() {
   const t = useTranslations("dashboard.communityDetails.events");
+  const router = useRouter();
   const { communityId } = useDashboardCommunityContext();
   const { data: eventRoles } = useSuspenseQuery(
     communityUsersWithRoles(communityId, ["event"]),
@@ -79,7 +81,7 @@ export default function CommunityEventsTable() {
               </div>
             )}
             onClickRow={(row) => {
-              window.open(`/event/${row.original.id}`, "_blank");
+              router.push(`/dashboard/event/${row.original.id}`);
             }}
           />
         </div>

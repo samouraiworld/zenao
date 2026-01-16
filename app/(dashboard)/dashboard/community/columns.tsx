@@ -1,11 +1,18 @@
 import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
+
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import { Button } from "@/components/shadcn/button";
 import { SafeCommunityUser } from "@/types/schemas";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/dropdown-menu";
 
 const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () => {
   const t = useTranslations("dashboard.communitiesTable");
@@ -49,18 +56,40 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () => {
       },
       {
         id: "actions",
-        header: () => <div>{t("actions-column")}</div>,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("email-column")} />
+        ),
         cell: ({ row }) => (
-          <Link href={`/event/${row.original.community.id}`}>
-            <Button
-              variant="ghost"
-              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-              size="icon"
-            >
-              <Eye />
-              <span className="sr-only">View</span>
-            </Button>
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                size="icon"
+              >
+                <EllipsisVertical />
+                <span className="sr-only">{t("view-community")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Link
+                  href={`/dashboard/community/${row.original.community.id}`}
+                >
+                  {t("actions-menu.dashboard-view")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link
+                  href={`/community/${row.original.community.id}`}
+                  target="_blank"
+                >
+                  {t("actions-menu.customer-view")}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ),
         enableSorting: false,
         meta: {

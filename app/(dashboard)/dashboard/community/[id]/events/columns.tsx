@@ -3,16 +3,22 @@ import { useMemo } from "react";
 import { format as formatTZ } from "date-fns-tz";
 import { fromUnixTime } from "date-fns";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import { SafeEventInfo } from "@/types/schemas";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 import Text from "@/components/widgets/texts/text";
 import { Button } from "@/components/shadcn/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/shadcn/dropdown-menu";
 
 export const useCommunityEventsColumns = (): ColumnDef<SafeEventInfo>[] => {
-  const t = useTranslations("dashboard.communitiyEventsTable");
+  const t = useTranslations("dashboard.eventsTable");
 
   return useMemo(
     () => [
@@ -74,18 +80,35 @@ export const useCommunityEventsColumns = (): ColumnDef<SafeEventInfo>[] => {
       },
       {
         id: "actions",
-        header: () => <div>{t("actions-column")}</div>,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t("actions-column")} />
+        ),
         cell: ({ row }) => (
-          <Link href={`/event/${row.original.id}`} target="_blank">
-            <Button
-              variant="ghost"
-              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-              size="icon"
-            >
-              <Eye />
-              <span className="sr-only">{t("view-event")}</span>
-            </Button>
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+                size="icon"
+              >
+                <EllipsisVertical />
+                <span className="sr-only">{t("view-event")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Link href={`/dashboard/event/${row.original.id}`}>
+                  {t("actions-menu.dashboard-view")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href={`/event/${row.original.id}`} target="_blank">
+                  {t("actions-menu.customer-view")}
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         ),
         enableSorting: false,
         meta: {

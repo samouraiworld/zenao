@@ -1,17 +1,20 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { UserAvatarWithName } from "@/components/features/user/user";
 import { SafeCommunityEntityWithRoles } from "@/types/schemas";
 import { DataTableColumnHeader } from "@/components/widgets/data-table/data-table-column-header";
 
 export const useMembersColumns =
   (): ColumnDef<SafeCommunityEntityWithRoles>[] => {
+    const t = useTranslations("dashboard.membersTable");
+
     const columns = useMemo<ColumnDef<SafeCommunityEntityWithRoles>[]>(
       () => [
         {
           id: "name",
           header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Name" />
+            <DataTableColumnHeader column={column} title={t("name-column")} />
           ),
           cell: ({ row }) => {
             if (row.original.entityType !== "user") {
@@ -34,7 +37,7 @@ export const useMembersColumns =
         {
           accessorKey: "Roles",
           header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Role(s)" />
+            <DataTableColumnHeader column={column} title={t("roles-column")} />
           ),
           cell: ({ row }) => (
             <div className="flex flex-wrap gap-1">
@@ -51,7 +54,7 @@ export const useMembersColumns =
           enableSorting: true,
         },
       ],
-      [],
+      [t],
     );
 
     return columns;
