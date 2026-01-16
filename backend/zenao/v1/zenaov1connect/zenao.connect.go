@@ -106,6 +106,9 @@ const (
 	// ZenaoServiceGetUserTeamsProcedure is the fully-qualified name of the ZenaoService's GetUserTeams
 	// RPC.
 	ZenaoServiceGetUserTeamsProcedure = "/zenao.v1.ZenaoService/GetUserTeams"
+	// ZenaoServiceGetTeamMembersProcedure is the fully-qualified name of the ZenaoService's
+	// GetTeamMembers RPC.
+	ZenaoServiceGetTeamMembersProcedure = "/zenao.v1.ZenaoService/GetTeamMembers"
 	// ZenaoServiceEntityRolesProcedure is the fully-qualified name of the ZenaoService's EntityRoles
 	// RPC.
 	ZenaoServiceEntityRolesProcedure = "/zenao.v1.ZenaoService/EntityRoles"
@@ -194,6 +197,7 @@ type ZenaoServiceClient interface {
 	EditTeam(context.Context, *connect.Request[v1.EditTeamRequest]) (*connect.Response[v1.EditTeamResponse], error)
 	DeleteTeam(context.Context, *connect.Request[v1.DeleteTeamRequest]) (*connect.Response[v1.DeleteTeamResponse], error)
 	GetUserTeams(context.Context, *connect.Request[v1.GetUserTeamsRequest]) (*connect.Response[v1.GetUserTeamsResponse], error)
+	GetTeamMembers(context.Context, *connect.Request[v1.GetTeamMembersRequest]) (*connect.Response[v1.GetTeamMembersResponse], error)
 	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
 	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
 	EntitiesWithRoles(context.Context, *connect.Request[v1.EntitiesWithRolesRequest]) (*connect.Response[v1.EntitiesWithRolesResponse], error)
@@ -388,6 +392,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(zenaoServiceMethods.ByName("GetUserTeams")),
 			connect.WithClientOptions(opts...),
 		),
+		getTeamMembers: connect.NewClient[v1.GetTeamMembersRequest, v1.GetTeamMembersResponse](
+			httpClient,
+			baseURL+ZenaoServiceGetTeamMembersProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("GetTeamMembers")),
+			connect.WithClientOptions(opts...),
+		),
 		entityRoles: connect.NewClient[v1.EntityRolesRequest, v1.EntityRolesResponse](
 			httpClient,
 			baseURL+ZenaoServiceEntityRolesProcedure,
@@ -551,6 +561,7 @@ type zenaoServiceClient struct {
 	editTeam                       *connect.Client[v1.EditTeamRequest, v1.EditTeamResponse]
 	deleteTeam                     *connect.Client[v1.DeleteTeamRequest, v1.DeleteTeamResponse]
 	getUserTeams                   *connect.Client[v1.GetUserTeamsRequest, v1.GetUserTeamsResponse]
+	getTeamMembers                 *connect.Client[v1.GetTeamMembersRequest, v1.GetTeamMembersResponse]
 	entityRoles                    *connect.Client[v1.EntityRolesRequest, v1.EntityRolesResponse]
 	entitiesWithRoles              *connect.Client[v1.EntitiesWithRolesRequest, v1.EntitiesWithRolesResponse]
 	getCommunity                   *connect.Client[v1.GetCommunityRequest, v1.GetCommunityResponse]
@@ -705,6 +716,11 @@ func (c *zenaoServiceClient) GetUserTeams(ctx context.Context, req *connect.Requ
 	return c.getUserTeams.CallUnary(ctx, req)
 }
 
+// GetTeamMembers calls zenao.v1.ZenaoService.GetTeamMembers.
+func (c *zenaoServiceClient) GetTeamMembers(ctx context.Context, req *connect.Request[v1.GetTeamMembersRequest]) (*connect.Response[v1.GetTeamMembersResponse], error) {
+	return c.getTeamMembers.CallUnary(ctx, req)
+}
+
 // EntityRoles calls zenao.v1.ZenaoService.EntityRoles.
 func (c *zenaoServiceClient) EntityRoles(ctx context.Context, req *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error) {
 	return c.entityRoles.CallUnary(ctx, req)
@@ -847,6 +863,7 @@ type ZenaoServiceHandler interface {
 	EditTeam(context.Context, *connect.Request[v1.EditTeamRequest]) (*connect.Response[v1.EditTeamResponse], error)
 	DeleteTeam(context.Context, *connect.Request[v1.DeleteTeamRequest]) (*connect.Response[v1.DeleteTeamResponse], error)
 	GetUserTeams(context.Context, *connect.Request[v1.GetUserTeamsRequest]) (*connect.Response[v1.GetUserTeamsResponse], error)
+	GetTeamMembers(context.Context, *connect.Request[v1.GetTeamMembersRequest]) (*connect.Response[v1.GetTeamMembersResponse], error)
 	// XXX: TEMPORARY SWITCH TO WEB2 FIRST
 	EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error)
 	EntitiesWithRoles(context.Context, *connect.Request[v1.EntitiesWithRolesRequest]) (*connect.Response[v1.EntitiesWithRolesResponse], error)
@@ -1037,6 +1054,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(zenaoServiceMethods.ByName("GetUserTeams")),
 		connect.WithHandlerOptions(opts...),
 	)
+	zenaoServiceGetTeamMembersHandler := connect.NewUnaryHandler(
+		ZenaoServiceGetTeamMembersProcedure,
+		svc.GetTeamMembers,
+		connect.WithSchema(zenaoServiceMethods.ByName("GetTeamMembers")),
+		connect.WithHandlerOptions(opts...),
+	)
 	zenaoServiceEntityRolesHandler := connect.NewUnaryHandler(
 		ZenaoServiceEntityRolesProcedure,
 		svc.EntityRoles,
@@ -1223,6 +1246,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceDeleteTeamHandler.ServeHTTP(w, r)
 		case ZenaoServiceGetUserTeamsProcedure:
 			zenaoServiceGetUserTeamsHandler.ServeHTTP(w, r)
+		case ZenaoServiceGetTeamMembersProcedure:
+			zenaoServiceGetTeamMembersHandler.ServeHTTP(w, r)
 		case ZenaoServiceEntityRolesProcedure:
 			zenaoServiceEntityRolesHandler.ServeHTTP(w, r)
 		case ZenaoServiceEntitiesWithRolesProcedure:
@@ -1378,6 +1403,10 @@ func (UnimplementedZenaoServiceHandler) DeleteTeam(context.Context, *connect.Req
 
 func (UnimplementedZenaoServiceHandler) GetUserTeams(context.Context, *connect.Request[v1.GetUserTeamsRequest]) (*connect.Response[v1.GetUserTeamsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetUserTeams is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) GetTeamMembers(context.Context, *connect.Request[v1.GetTeamMembersRequest]) (*connect.Response[v1.GetTeamMembersResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.GetTeamMembers is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) EntityRoles(context.Context, *connect.Request[v1.EntityRolesRequest]) (*connect.Response[v1.EntityRolesResponse], error) {
