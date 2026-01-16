@@ -57,7 +57,7 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () => {
       {
         id: "actions",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("email-column")} />
+          <DataTableColumnHeader column={column} title={t("actions-column")} />
         ),
         cell: ({ row }) => (
           <DropdownMenu>
