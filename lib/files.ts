@@ -8,12 +8,26 @@ export const uploadFile = async (
   file: File,
   sizeLimit?: number,
 ): Promise<string> => {
-  if (sizeLimit && file.size > sizeLimit) {
+  return uploadBlob(file, sizeLimit);
+};
+
+export const uploadJSON = async (
+  json: unknown,
+  sizeLimit?: number,
+): Promise<string> => {
+  return uploadString(JSON.stringify(json), sizeLimit);
+};
+
+export const uploadBlob = async (
+  blob: Blob,
+  sizeLimit?: number,
+): Promise<string> => {
+  if (sizeLimit && blob.size > sizeLimit) {
     throw new Error(`File size exceeds limit: ${sizeLimit} bytes`);
   }
 
   const data = new FormData();
-  data.set("file", file);
+  data.set("file", blob);
   const uploadRequest = await fetch("/api/files", {
     method: "POST",
     body: data,
@@ -22,6 +36,14 @@ export const uploadFile = async (
   const res = filesPostResponseSchema.parse(resRaw);
 
   return res.uri;
+};
+
+export const uploadString = async (
+  str: string,
+  sizeLimit?: number,
+): Promise<string> => {
+  const blob = new Blob([Buffer.from(str)], { type: "text/plain" });
+  return uploadBlob(blob, sizeLimit);
 };
 
 export type FilesPostResponse = z.infer<typeof filesPostResponseSchema>;
