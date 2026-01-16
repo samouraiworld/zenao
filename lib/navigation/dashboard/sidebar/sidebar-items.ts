@@ -49,14 +49,21 @@ export const useSidebarItems: () => NavGroup[] = () =>
                     url: "/dashboard",
                   },
                   {
-                    title: "general",
+                    title: "description",
                     url: `/dashboard/event/${id}`,
                   },
                   {
                     title: "participants",
                     url: `/dashboard/event/${id}/participants`,
                   },
-                  /// XXX Later add gatekepers, broadcast tab with user role checking
+                  {
+                    title: "gatekeepers",
+                    url: `/dashboard/event/${id}/gatekeepers`,
+                  },
+                  {
+                    title: "broadcast",
+                    url: `/dashboard/event/${id}/broadcast`,
+                  },
                 ];
               }
             },
@@ -82,6 +89,14 @@ export const useSidebarItems: () => NavGroup[] = () =>
                   {
                     title: "administrators",
                     url: `/dashboard/community/${id}/administrators`,
+                  },
+                  {
+                    title: "events",
+                    url: `/dashboard/community/${id}/events`,
+                  },
+                  {
+                    title: "payouts",
+                    url: `/dashboard/community/${id}/payouts`,
                   },
                 ];
               }
