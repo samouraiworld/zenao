@@ -19,7 +19,8 @@
     "manifesto": "Manifesto",
     "blog": "Blog",
     "view-profile": "View my profile",
-    "dashboard-access": "Go to dashboard",
+    "dashboard-view": "Dashboard view",
+    "customer-view": "Customer view",
     "create-event": "Create Event",
     "footer": {
       "tagline": "Made with ❤️ by Samourai.world crew",
@@ -637,7 +638,6 @@
       "quick-create": "Quick create"
     },
     "navUser": {
-      "accounts": "Accounts",
       "personal-account": "Personal account",
       "team": "Team",
       "create-team": "Create a team",
