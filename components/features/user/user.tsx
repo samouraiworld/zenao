@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { cva } from "class-variance-authority";
@@ -109,6 +110,49 @@ export function UserAvatarWithName({
   }
 
   return <div className={className}>{content}</div>;
+}
+
+const triggerAvatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
+
+type UserAvatarSignedButtonProps = UserComponentProps &
+  React.HTMLAttributes<HTMLDivElement> & {
+    /** Use group-hover with named group (parent must have "group/avatar-trigger" class) 
+      Allows to animate the button when the parent is hovered
+    */
+    groupHover?: boolean;
+  };
+
+export const UserAvatarSignedButton = React.forwardRef<
+  HTMLDivElement,
+  UserAvatarSignedButtonProps
+>(({ userId, groupHover, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      {...props}
+      className={cn(
+        triggerAvatarClassName,
+        "cursor-pointer transition-transform ease-out",
+        groupHover ? "group-hover/avatar-trigger:scale-110" : "hover:scale-110",
+        props.className,
+      )}
+    >
+      <UserAvatar
+        userId={userId}
+        className={triggerAvatarClassName}
+        size="md"
+      />
+    </div>
+  );
+});
+UserAvatarSignedButton.displayName = "UserAvatarSignedButton";
+
+export function UserAvatarSignedButtonSkeleton() {
+  return (
+    <div className={triggerAvatarClassName}>
+      <UserAvatarSkeleton className={triggerAvatarClassName} />
+    </div>
+  );
 }
 
 export function UserAvatarWithNameSkeleton(props: {

@@ -21,11 +21,7 @@ export default function AppSidebarFooter() {
 
   return (
     <SidebarFooter>
-      <NavUser
-        user={profile}
-        userId={user?.userId ?? ""}
-        plan={user?.plan ?? "free"}
-      />
+      <NavUser user={profile} userId={user?.userId ?? ""} />
     </SidebarFooter>
   );
 }

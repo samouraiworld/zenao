@@ -1,13 +1,15 @@
 "use client";
 
 import { Suspense } from "react";
-import { AccountModeSwitcher } from "./account-mode-switcher";
+import { UserAvatarSignedButton } from "../user/user";
+import { UserMenu } from "../user/user-menu";
 import { Separator } from "@/components/shadcn/separator";
 import { SidebarTrigger } from "@/components/shadcn/sidebar";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { cn } from "@/lib/tailwind";
 import { NavbarStyle } from "@/lib/preferences/preferences";
 import { Skeleton } from "@/components/shadcn/skeleton";
+import { useActiveAccount } from "@/components/providers/active-account-provider";
 
 type DashboardHeaderProps = {
   readonly navbarStyle: NavbarStyle;
@@ -34,10 +36,20 @@ export default function DashboardHeader({ navbarStyle }: DashboardHeaderProps) {
         <div className="flex items-center gap-2">
           <ToggleThemeButton />
           <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
-            <AccountModeSwitcher />
+            <DashboardUserMenu />
           </Suspense>
         </div>
       </div>
     </header>
+  );
+}
+
+function DashboardUserMenu() {
+  const { activeAccount } = useActiveAccount();
+
+  return (
+    <UserMenu variant="dashboard">
+      <UserAvatarSignedButton userId={activeAccount?.id} />
+    </UserMenu>
   );
 }

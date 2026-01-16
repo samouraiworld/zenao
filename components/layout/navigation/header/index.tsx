@@ -1,54 +1,33 @@
 "use client";
 
 import { UrlObject } from "url";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   ArrowLeft,
   BookOpenText,
   BoxesIcon,
-  Check,
-  CircleUserRound,
   CompassIcon,
-  LayoutDashboard,
-  LogOut,
   LucideProps,
-  Pencil,
   RssIcon,
   Tickets,
 } from "lucide-react";
-import {
-  ClerkLoading,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  useAuth,
-} from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import QuickCreateMenu from "./quick-create-menu";
 import { ToggleThemeButton } from "@/components/widgets/buttons/toggle-theme-button";
 import { Button } from "@/components/shadcn/button";
-import { userInfoOptions } from "@/lib/queries/user";
 import { cn } from "@/lib/tailwind";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/shadcn/dropdown-menu";
-import { useAccountSwitcher } from "@/hooks/use-account-switcher";
-import { profileOptions } from "@/lib/queries/profile";
 import useSmartBack from "@/hooks/use-smart-back";
 import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 import {
-  UserAvatar,
-  UserAvatarSkeleton,
+  UserAvatarSignedButton,
+  UserAvatarSignedButtonSkeleton,
 } from "@/components/features/user/user";
+import { UserMenu } from "@/components/features/user/user-menu";
+import { useActiveAccount } from "@/components/providers/active-account-provider";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import SoonOnBase from "@/components/widgets/soon-on-base";
 import VersionTag from "@/components/widgets/version-tag";
@@ -221,13 +200,13 @@ export function Header() {
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
-        <Auth className="h-fit" isMounted={isMounted} />
+        <Suspense fallback={<UserAvatarSignedButtonSkeleton />}>
+          <Auth className="h-fit" isMounted={isMounted} />
+        </Suspense>
       </div>
     </header>
   );
 }
-
-const avatarClassName = "h-7 w-7 sm:h-8 sm:w-8";
 
 const Auth = ({
   className,
@@ -237,23 +216,8 @@ const Auth = ({
   isMounted: boolean;
 }) => {
   const t = useTranslations("navigation");
-  const tNav = useTranslations("dashboard.navUser");
   const { trackEvent } = useAnalyticsEvents();
-  const { signOut, getToken, userId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
-  const { data: profile } = useSuspenseQuery(profileOptions(userInfo?.userId));
-
-  const {
-    teams,
-    activeAccount,
-    isPersonalActive,
-    handleSwitchToPersonal,
-    handleSwitchToTeam,
-  } = useAccountSwitcher(userInfo?.userId || "");
-
-  const activeAccountId = activeAccount?.id ?? userInfo?.userId;
+  const { activeAccount } = useActiveAccount();
 
   return (
     <div className={className}>
@@ -273,134 +237,14 @@ const Auth = ({
         </SignInButton>
       </SignedOut>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          {/* Loading state */}
-          {isMounted && (
-            <div>
-              <ClerkLoading>
-                <div className={avatarClassName}>
-                  <UserAvatarSkeleton className={avatarClassName} />
-                </div>
-              </ClerkLoading>
-              {/* Signed in state */}
-              <SignedIn>
-                <div
-                  className={cn(
-                    avatarClassName,
-                    "cursor-pointer hover:scale-110 transition-transform ease-out",
-                  )}
-                >
-                  <UserAvatar
-                    userId={activeAccountId || ""}
-                    className={avatarClassName}
-                    size="md"
-                  />
-                </div>
-              </SignedIn>
-            </div>
-          )}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-fit mt-2 mr-4">
-          {/* Account switcher */}
-          <DropdownMenuLabel className="text-xs text-muted-foreground">
-            {tNav("accounts")}
-          </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={handleSwitchToPersonal}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <div className={avatarClassName}>
-              <UserAvatar
-                userId={userInfo?.userId || ""}
-                className={avatarClassName}
-                size="md"
-              />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-sm">
-                  {profile?.displayName}
-                </span>
-                {userInfo?.plan === "pro" && (
-                  <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
-                    Pro
-                  </span>
-                )}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {tNav("personal-account")}
-              </div>
-            </div>
-            {isPersonalActive && <Check className="size-4" />}
-          </DropdownMenuItem>
-
-          {teams.map((team) => (
-            <DropdownMenuItem
-              key={team.teamId}
-              onClick={() => handleSwitchToTeam(team.teamId)}
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <div className={avatarClassName}>
-                <UserAvatar
-                  userId={team.teamId}
-                  className={avatarClassName}
-                  size="md"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">
-                    {team.displayName}
-                  </span>
-                  {team.plan === "pro" && (
-                    <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
-                      Pro
-                    </span>
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {tNav("team")}
-                </div>
-              </div>
-              {activeAccount?.type === "team" &&
-                activeAccount.id === team.teamId && (
-                  <Check className="size-4" />
-                )}
-            </DropdownMenuItem>
-          ))}
-
-          <DropdownMenuSeparator />
-          <Link href={`/profile/${activeAccountId}`}>
-            <DropdownMenuItem className="cursor-pointer">
-              <CircleUserRound />
-              {t("view-profile")}
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/settings">
-            <DropdownMenuItem className="cursor-pointer">
-              <Pencil />
-              {t("edit-profile")}
-            </DropdownMenuItem>
-          </Link>
-          <DropdownMenuSeparator />
-          <Link href="/dashboard" target="_blank">
-            <DropdownMenuItem className="cursor-pointer">
-              <LayoutDashboard />
-              {t("dashboard-access")}
-            </DropdownMenuItem>
-          </Link>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => {
-              signOut();
-            }}
-          >
-            <LogOut />
-            {t("sign-out")}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Signed in state */}
+      {isMounted && (
+        <SignedIn>
+          <UserMenu variant="customer">
+            <UserAvatarSignedButton userId={activeAccount?.id} />
+          </UserMenu>
+        </SignedIn>
+      )}
     </div>
   );
 };
