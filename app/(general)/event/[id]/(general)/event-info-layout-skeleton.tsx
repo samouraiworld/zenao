@@ -1,5 +1,3 @@
-"use client";
-
 import { useTranslations } from "next-intl";
 import { Calendar } from "lucide-react";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";

@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
@@ -9,8 +9,8 @@ import { LazyInstallButton } from "@/components/widgets/buttons/pwa-install-butt
 import { Card } from "@/components/widgets/cards/card";
 import { BaseLogo } from "@/components/widgets/icons";
 
-export default async function Home() {
-  const t = await getTranslations("home");
+export default function Home() {
+  const t = useTranslations("home");
 
   return (
     <ScreenContainerCentered>
