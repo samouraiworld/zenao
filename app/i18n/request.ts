@@ -1,19 +1,14 @@
 import { getRequestConfig } from "next-intl/server";
-import { cookies } from "next/headers";
-import {
-  SUPPORTED_LOCALES,
-  DEFAULT_LOCALE,
-  LOCALE_COOKIE_NAME,
-  type Locale,
-} from "./config";
+import { headers } from "next/headers";
+import { SUPPORTED_LOCALES, DEFAULT_LOCALE, type Locale } from "./config";
 
 export default getRequestConfig(async () => {
-  const cookieStore = await cookies();
-  const localeCookie = cookieStore.get(LOCALE_COOKIE_NAME)?.value;
+  const headersList = await headers();
+  const localeHeader = headersList.get("x-locale");
 
   const locale =
-    localeCookie && SUPPORTED_LOCALES.includes(localeCookie as Locale)
-      ? (localeCookie as Locale)
+    localeHeader && SUPPORTED_LOCALES.includes(localeHeader as Locale)
+      ? (localeHeader as Locale)
       : DEFAULT_LOCALE;
 
   return {
