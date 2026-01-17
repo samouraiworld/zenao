@@ -68,14 +68,7 @@ export default function DashboardFormActions() {
         onOpenChange={setIsCancelDialogOpen}
         open={isCancelDialogOpen}
       />
-      <div className="flex gap-4 justify-end">
-        <form onSubmit={form.handleSubmit(save)}>
-          <Button type="submit" disabled={!isSubmittable || isUpdating}>
-            <Save />
-            {t("saveChanges")}
-          </Button>
-        </form>
-
+      <div className="flex flex-wrap-reverse h-fit gap-4 justify-end">
         <Button
           type="button"
           variant="outline"
