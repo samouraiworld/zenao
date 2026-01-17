@@ -3,6 +3,7 @@
 import React, { ReactNode } from "react";
 import { Hash, MapPin, MessageCircle, Pin, X } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { PostMenu } from "../post-menu";
 import PostReactions from "../post-reactions";
 import { Card } from "@/components/widgets/cards/card";
@@ -57,6 +58,8 @@ export function PostCardLayout({
   isDeleting,
   isPinning,
 }: PostCardLayoutProps) {
+  const t = useTranslations("social-feed.post-card");
+
   if (!post.post) {
     return null;
   }
@@ -71,7 +74,7 @@ export function PostCardLayout({
         <div className="flex gap-1 items-center">
           <Pin className="w-4 h-4 text-secondary-color" />
           <Text className="text-sm font-medium" variant="secondary">
-            Pinned Post
+            {t("pinned-badge")}
           </Text>
         </div>
       )}
@@ -101,7 +104,7 @@ export function PostCardLayout({
             <Button
               variant="ghost"
               className="px-2"
-              title="Cancel modification"
+              title={t("cancel-modification-tooltip")}
               onClick={() => onEditModeChange?.(false)}
             >
               <X />
@@ -132,7 +135,7 @@ export function PostCardLayout({
               <div className="flex flex-row items-center gap-1 cursor-pointer hover:opacity-50">
                 <MapPin size={14} color="hsl(var(--secondary-color))" />
                 <Text className="text-sm" variant="secondary">
-                  Location
+                  {t("location-label")}
                 </Text>
               </div>
             )}
@@ -166,7 +169,7 @@ export function PostCardLayout({
                 className={
                   "rounded-full cursor-pointer h-8 px-2 gap-1 dark:bg-neutral-800/50 dark:hover:bg-neutral-800"
                 }
-                title="Show replies"
+                title={t("show-replies-tooltip")}
               >
                 <MessageCircle size={16} color="hsl(var(--secondary-color))" />
                 <span className="text-xs">{post.childrenCount}</span>

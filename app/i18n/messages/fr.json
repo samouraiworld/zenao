@@ -2,15 +2,704 @@
   "common": {
     "maintenance": "Zenao est en maintenance, réessayez dans quelques minutes..."
   },
-  "home": {
-    "first-point": "Commencez en editant ",
-    "second-point": "Sauvegardez et voyez vos changements instantanement."
+  "community-card": {
+    "members": "{count, plural, =0 {aucun membre} =1 {1 membre} other {# membres}}",
+    "no-description": "Pas encore de description"
   },
   "navigation": {
+    "zenao": "ZENAO",
+    "your-events": "Vos événements",
+    "your-tickets": "Vos billets",
+    "sign-in": "Se connecter",
+    "sign-out": "Se déconnecter",
+    "edit-profile": "Modifier mon profil",
+    "discover": "Découvrir",
+    "communities": "Communautés",
+    "features": "Fonctionnalités",
+    "manifesto": "Manifeste",
+    "blog": "Blog",
+    "view-profile": "Voir mon profil",
     "dashboard-view": "Vue tableau de bord",
-    "customer-view": "Vue client"
+    "customer-view": "Vue client",
+    "create-event": "Créer un événement",
+    "quick-menu-aria-label": "Menu de création rapide",
+    "footer": {
+      "tagline": "Fait avec ❤️ par l'équipe Samourai.world",
+      "report-bug": "Signaler un bug"
+    }
+  },
+  "home": {
+    "base-news": "Actualités : Nous arrivons bientôt sur",
+    "main-text": "Organisez des événements en quelques secondes",
+    "secondary-text": "\"Tout ce qui arrive, survient ou apparaît, peut donner naissance à une communauté autonome, ou une nouvelle tribu.\"",
+    "placeholder": "Nom de l'événement...",
+    "button": "Créez votre événement"
+  },
+  "eventForm": {
+    "create-event-button": "Créer l'événement",
+    "edit-event-button": "Modifier l'événement",
+    "image-uri-placeholder": "URL de l'image...",
+    "title-placeholder": "Nom de l'événement...",
+    "add-image-tooltip": "Ajouter une image",
+    "add-image-aria-label": "Ajouter une image",
+    "add-audio-tooltip": "Ajouter un audio",
+    "add-audio-aria-label": "Ajouter un audio",
+    "description-label": "Description",
+    "write-tab": "Écrire",
+    "log-in": "Connectez-vous pour créer un événement",
+    "preview-tab": "Aperçu",
+    "change-image": "Changer l'image",
+    "description-placeholder": "Description...",
+    "preview-empty": "Rien à afficher",
+    "location-placeholder": "Ajouter une adresse...",
+    "password-placeholder": "Mot de passe...",
+    "password-label": "Mot de passe",
+    "no-changes-password-placeholder": "Laissez vide pour ne pas modifier",
+    "capacity-label": "Limite de capacité de l'événement",
+    "capacity-placeholder": "Capacité...",
+    "discoverable-label": "Rendre l'événement visible publiquement (Visible dans Découvrir)",
+    "exclusive-label": "Exclusif",
+    "pick-a-start-date-placeholder": "Choisir une date de début...",
+    "pick-a-end-date-placeholder": "Choisir une date de fin...",
+    "from": "De",
+    "to": "À",
+    "displayed-timezone": "L'heure affichée correspond à {timeZone}",
+    "no-file-selected-error": "Aucun fichier sélectionné.",
+    "error-file-uploading-img": "Erreur lors du téléchargement de l'image",
+    "error-file-uploading-audio": "Erreur lors du téléchargement de l'audio",
+    "error-filesize-exceeds-limit": "La taille du fichier dépasse la limite de {size} Mo.",
+    "custom-timezone-select": "Vous avez choisi un lieu personnalisé, veuillez sélectionner un fuseau horaire.",
+    "no-timezone-found": "Aucun fuseau horaire trouvé.",
+    "no-address-found": "Aucune adresse trouvée.",
+    "onlineEvent": "Événement en ligne",
+    "community-selector-label": "Lier l'événement à l'une de vos communautés (optionnel)",
+    "community-selector-placeholder": "Sélectionner une communauté...",
+    "no-communities-found": "Aucune communauté trouvée.",
+    "community-selector-clear": "Effacer",
+    "not-organizer-message": "Vous ne pouvez pas modifier cet événement car vous n'êtes pas l'un des organisateurs.",
+    "toast-creation-success": "Événement créé !",
+    "toast-creation-error": "Erreur lors de la création de l'événement !",
+    "toast-edit-success": "Événement modifié !",
+    "toast-edit-error": "Erreur lors de la modification de l'événement !"
+  },
+  "event": {
+    "going": "{count} participants",
+    "nobody-going-yet": "Personne n'y va encore",
+    "hosted-by": "Organisé par :",
+    "register-address": "Inscrivez-vous pour voir l'adresse",
+    "in": "Vous êtes inscrit !",
+    "start": "Commence dans {count} jours",
+    "cancel-desc": "Vous ne pouvez plus y assister ? Prévenez l'organisateur en annulant votre inscription.",
+    "registration": "Inscription",
+    "already-begun": "L'événement a déjà commencé !",
+    "too-late": "Il est trop tard pour s'inscrire.",
+    "join-desc": "Bienvenue ! Pour rejoindre l'événement, veuillez vous inscrire ci-dessous.",
+    "register-button": "S'inscrire",
+    "about-event": "À propos de l'événement",
+    "discussion": "Discussions",
+    "votes": "Votes",
+    "your-email": "Votre email",
+    "guests": "Invités",
+    "cancel-my-participation": "Annuler ma participation",
+    "sold-out-msg": "L'événement est complet !",
+    "email-placeholder": "Email...",
+    "toast-confirmation": "Vous participez à l'événement !",
+    "toast-already-registered-error": "Email(s) déjà inscrit(s) pour cet événement !",
+    "toast-default-error": "Erreur lors de l'inscription des participants",
+    "participants-list": "Liste des participants",
+    "see-ticket": "Voir le billet",
+    "login-to-see-tickets": "Connectez-vous pour voir le(s) billet(s)",
+    "invitee-form": {
+      "add-a-friend": "Ajouter un ami",
+      "email-placeholder": "Email..."
+    },
+    "gatekeeper-button": "Ouvrir le scanner de billets",
+    "view-more": "Voir plus",
+    "view-less": "Voir moins",
+    "export-participant-list": "Exporter la liste des participants",
+    "manage-gatekeepers-button": "Gérer les portiers",
+    "event-dashboard-banners": {
+      "gatekeeper": "Vous avez le rôle de portier pour cet événement. Consultez la liste des participants et commencez à scanner les billets.",
+      "organizer": "Vous êtes l'organisateur de cet événement. Gérez les paramètres et les participants de votre événement.",
+      "start-scanning": "Commencer à scanner les billets",
+      "edit-event": "Modifier l'événement"
+    }
+  },
+  "profile-info": {
+    "profile-header": {
+      "dashboard-access": "Aller au tableau de bord",
+      "edit-profile": "Modifier mon profil"
+    },
+    "profile-not-exist": "Le profil n'existe pas",
+    "hosting-events": "Événements organisés",
+    "past-events": "Événements passés",
+    "events": "Événements",
+    "portfolio": "Portfolio"
+  },
+  "guest-registration-success-dialog": {
+    "registration-title": "Vous êtes inscrit !",
+    "thank-you": "Merci de rejoindre {title} !",
+    "tickets-explanation": "Une confirmation et votre billet ont été envoyés à :",
+    "view-on-account": "Vous pouvez également le voir en vous connectant à votre compte.",
+    "profile-completion-invitation": "Utilisez le même email pour vous connecter et compléter votre profil.",
+    "profile-completion-incentive": "C'est rapide et utile pour interagir avec la communauté !",
+    "sign-in": "Se connecter"
+  },
+  "gatekeeper-management-dialog": {
+    "title": "Gérer les portiers",
+    "description": "Assignez et gérez les portiers responsables du contrôle d'accès à l'événement.",
+    "input-placeholder": "Email...",
+    "gatekeeper-email-placeholder": "Entrez l'email du portier à ajouter...",
+    "add-gatekeeper-button": "Ajouter",
+    "error-gatekeeper-already-exists": "Ce portier est déjà assigné à l'événement !",
+    "default": "Par défaut (Vous)",
+    "toast-gatekeeper-management-success": "Portiers mis à jour avec succès !",
+    "toast-gatekeeper-management-error": "Erreur lors de la mise à jour des portiers !",
+    "done": "Terminé",
+    "click-add-hint": "Cliquez sur + pour ajouter ce portier"
+  },
+  "manifesto": {
+    "title": "MANIFESTE",
+    "means": "signifie",
+    "p1": "Notre mission est de permettre aux humains d'organiser des projets communs (physiques ou en ligne) de manière résiliente, sûre et transparente, en utilisant des outils radicalement simples.",
+    "p2": "Nous croyons que le monde a besoin d'outils puissants, open-source et décentralisés pour autonomiser les humains dans leurs projets communs. Le temps est venu de lutter contre les plateformes centralisées.",
+    "p3": "Nous, l'équipe Samouraï Coop, nous engageons à construire des outils durables qui aident les gens à organiser ce qu'ils veulent, avec leurs amis, familles et communautés.",
+    "p4": "Nous croyons qu'un événement peut changer la vie et la société. En tant que Français, nous voulons rappeler à tous que la Révolution française a commencé avec un très petit groupe de personnes, discutant, votant et créant progressivement un mouvement entier pour la liberté, l'égalité et la fraternité.",
+    "p5": "Zenao est plus qu'une simple plateforme d'organisation d'événements. Elle est conçue pour vous permettre, à vous et votre tribu, de décider ensemble de l'avenir de votre communauté.",
+    "p6": "Zenao est une machine à créer des DAO* dans un esprit zen, propulsée par",
+    "p6-end": "pour construire une nouvelle CoopNation.",
+    "p6-ref": "(*Organisations Autonomes Décentralisées)",
+    "p7": "En cas d'urgence, restez zen et organisez-vous."
+  },
+  "whitepaper": {
+    "title": "LIVRE BLANC",
+    "vision-title": "1. La Vision",
+    "vision-p1": "Résumé & contexte : Dans le monde numérique d'aujourd'hui, toutes nos interactions sociales sont gouvernées et administrées par des entreprises commerciales qui gèrent des plateformes centralisées sur lesquelles nous ne sommes que des consommateurs.",
+    "vision-p2": "Zenao vise à construire progressivement une expérience sociale et technologique basée sur une architecture radicalement différente, ouverte, modulaire, interopérable et transparente.",
+    "vision-p3": "Nous croyons que les utilisateurs devraient avoir",
+    "vision-p3-end": "dans leur relation avec les organisations sociales qu'ils fondent ou rejoignent, mais aussi dans leur relation avec l'outil lui-même.",
+    "vision-p4": "Au fur et à mesure que la plateforme et l'application Zenao évoluent, la communauté d'utilisateurs construira progressivement une couche de gouvernance basée sur une",
+    "product-title": "2. Le Produit",
+    "product-p1": "Zenao est une plateforme centrée sur les communautés et conçue pour évoluer progressivement vers une gouvernance décentralisée.",
+    "product-p2": "Aujourd'hui, les utilisateurs peuvent participer à, créer ou gérer une communauté et ses événements associés. À terme, chaque communauté deviendra autonome et décentralisée, définira ses propres règles et contrôlera ses opérations. Un individu sera simplement membre d'une communauté, avec un rôle assigné par cette communauté.",
+    "product-p3": "L'application Zenao elle-même suit un chemin vers la décentralisation, permettant aux utilisateurs avancés d'influencer la direction et la feuille de route future de la plateforme.",
+    "product-features-title": "Fonctionnalités — Version Beta (en ligne)",
+    "product-features-list": [
+      "Création et gestion de communautés et événements publics ou privés",
+      "Billetterie numérique sans friction (pas de connexion requise)",
+      "Scan de billets dans l'application",
+      "Système de gouvernance distribué basé sur les rôles",
+      "Découverte d'événements publics",
+      "Social communautés & événements (messages, images, vidéos, sondages, etc.)",
+      "Profils sociaux permettant aux utilisateurs de présenter des portfolios"
+    ],
+    "product-upcoming-title": "Fonctionnalités à venir",
+    "product-upcoming-list": [
+      "Accepter les paiements (événements payants, abonnement communautaire via Stripe)",
+      "Accepter les paiements en cryptomonnaie (Bitcoin, EVM, Stablecoins, etc.)",
+      "Coffres permettant aux communautés de co-gérer des crypto-fonds",
+      "Effectuer des transactions via multisig et votes DAO",
+      "Connexion/intégration d'optimisation de rendement DAO-vault (Morpho)",
+      "Modèles DAO pour des configurations d'organisations faciles et sûres",
+      "Adaptés aux modèles simples (de l'entrepreneuriat aux DAO)",
+      "Connecter DAOKit IAM avec des outils centralisés",
+      "Commander des services centralisés en tant que DAO",
+      "Événements privés et preuves ZK",
+      "Permettre des comptes privés mais fiables avec des preuves à connaissance nulle"
+    ],
+    "gov-title": "3. Couches de gouvernance auto-souveraine et modularité",
+    "gov-actors-title": "3.1 Acteurs du système",
+    "gov-actors-p1": "Chaque acteur du système est représenté comme une DAO :",
+    "gov-actors-list": [
+      "Utilisateur : une DAO avec un seul membre, correspondant à un compte utilisateur sur la plateforme",
+      "Événement : une DAO avec plusieurs membres pouvant distribuer des rôles (participant, portier, organisateur, etc.)",
+      "Communauté : une DAO composée de nombreux membres et événements, avec des rôles tels qu'administrateur, modérateur, membre, etc.",
+      "Zenao : la plateforme elle-même deviendra une communauté d'utilisateurs capables de se coordonner, s'autofinancer et co-administrer le produit via la gouvernance DAO"
+    ],
+    "gov-actors-example": "Les DAO fonctionnent via un système de permissions basé sur les rôles, où chaque rôle dépend de règles de gouvernance spécifiques. Par exemple : une DAO événement peut accorder un rôle de portier à un utilisateur pour lui donner la capacité de vérifier les billets à l'entrée.",
+    "gov-arch-title": "3.2 Architecture et fondations de Zenao",
+    "gov-arch-p1": "Zenao est conçu pour s'intégrer aux infrastructures blockchain programmables.",
+    "gov-arch-list": [
+      "DAOKit agnostique de la blockchain, développé en Golang",
+      "Compatible avec toute VM Turing-complète (EVM, WASM, etc.)"
+    ],
+    "gov-arch-p2": "Zenao intègre un framework DAO pérenne appelé Daokit, développé en interne et utilisé pour représenter chaque entité (communauté, événement, utilisateur) comme une DAO évolutive.",
+    "gov-arch-p3": "Chaque implémentation de DAO peut être mise à jour au fil du temps, permettant une évolution continue des mécanismes de gouvernance.",
+    "gov-arch-doc": "📖 Documentation sur DAOKit par l'équipe Samouraï.",
+    "story-title": "4. Exemple d'histoire utilisateur — Festival Hyper Hacktive",
+    "story-p1": "Comme première expérience, l'équipe Samouraï Coop (les créateurs derrière",
+    "story-p1-end": ") a décidé de démontrer la puissance de la vision de Zenao avec un cas d'usage concret.",
+    "story-p2": "Contexte : Le Festival Hyper Hacktive est un festival de courts-métrages se déroulant à Paris, produit par l'équipe Samouraï Coop avec une forte approche \"Culture DAO\". Le concept est de construire une communauté engagée et passionnée autour des films et créations audiovisuelles à Paris — connectant, encourageant et soutenant la prochaine génération de jeunes réalisateurs.",
+    "story-community-actions-title": "Tous les participants sont invités à :",
+    "story-community-actions-list": [
+      "Une rencontre communautaire avant l'événement pour se connecter avec les autres",
+      "L'événement principal dans un cinéma, projetant 8 à 10 courts-métrages",
+      "Une after-party communautaire",
+      "Voter pour les films et réalisateurs que la communauté souhaite soutenir",
+      "Servir de membres du jury pour la sélection des films du prochain événement"
+    ],
+    "story-community-title": "La communauté est composée de :",
+    "story-community-list": [
+      "Participants (spectateurs regardant les films)",
+      "Cinéastes, techniciens, créatifs, auteurs, etc.",
+      "Producteurs, professionnels, etc.",
+      "Partenaires et sponsors",
+      "Organisateurs (équipe Samouraï)"
+    ],
+    "story-tools-title": "Outils :",
+    "story-tools-list": [
+      "Page communauté : rassemblant toutes les informations de la communauté",
+      "Page événements : se concentrant sur les détails de l'événement principal",
+      "Sondages et fils pour la discussion communautaire et le partage de médias"
+    ],
+    "story-organizer-title": "En tant qu'organisateur :",
+    "story-organizer-list": [
+      "Configurer la page communauté et créer des événements",
+      "Envoyer des newsletters et emails aux membres de la communauté",
+      "Assigner des rôles d'organisation au personnel",
+      "Super-admin (direction)",
+      "Administration / Gestionnaire de trésorerie / Community Manager / Techniciens / Développeurs",
+      "Modérateurs de communauté",
+      "Portiers et agents de sécurité à l'entrée (scan des billets)"
+    ],
+    "story-community-member-title": "En tant que membre de la communauté :",
+    "story-community-member-list": [
+      "Rester informé des actualités et initiatives de la communauté par email",
+      "Se connecter et collaborer avec d'autres membres de la communauté",
+      "Créer un profil personnel et un portfolio",
+      "Obtenir des rôles en fonction des responsabilités et de la confiance",
+      "Voter sur la gouvernance de la communauté, l'allocation de subventions, etc."
+    ],
+    "story-others-title": "En tant que cinéaste, créatif ou technicien :",
+    "story-others-list": [
+      "Mêmes avantages que les membres de la communauté",
+      "Utiliser le profil comme portfolio professionnel",
+      "Accéder au réseau et aux opportunités de la communauté",
+      "Voter sur la gouvernance de la communauté, l'allocation de subventions, etc."
+    ],
+    "roadmap-title": "5. Feuille de route et position philosophique",
+    "roadmap-p1": "À ce stade de Zenao, nous croyons que le seul objectif doit rester de répondre aux besoins des utilisateurs. 99% de la population ne s'intéresse pas à la décentralisation ou aux valeurs des protocoles distribués. Les gens cherchent simplement des outils efficaces, des produits et des applications simples pour répondre à leurs besoins.",
+    "roadmap-p2": "Nous considérons que Zenao est fait pour les besoins réels et non pour les récits de \"spéculation Web3\". Le potentiel de la dApp est très large, tant en termes de \"marché\", en tant que produit, qu'en termes d'adoption de protocoles décentralisés pour être utilisés par le grand public.",
+    "roadmap-p3": "Nous voulons consacrer la phase à venir à rendre l'expérience utilisateur parfaitement adaptée aux personnes non-techniques, afin d'orchestrer une croissance d'utilisateurs organique, dans la vie réelle et non-spéculative.",
+    "roadmap-p4": "Une fois que nous aurons atteint une base d'utilisateurs mensuelle importante, nous présenterons progressivement notre feuille de route de décentralisation et la soumettrons à nos utilisateurs avancés comme proposition, s'intégrant parfaitement à la culture DAO que nous voulons encourager, soutenir et construire avec et pour la communauté Zenao."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "gnoweb-label": "Voir votre profil sur gnoweb",
+    "avatar-placeholder": "URL de l'avatar...",
+    "name-label": "Nom",
+    "name-placeholder": "Nom...",
+    "banner-placeholder": "Bannière...",
+    "bio-label": "Bio",
+    "bio-placeholder": "Bio...",
+    "bio-tooltip": "Parlez-nous de vous. Le Markdown est supporté.",
+    "location-label": "Localisation",
+    "location-placeholder": "Localisation...",
+    "shortbio-label": "Titre ",
+    "shortbio-placeholder": "Une phrase qui vous décrit...",
+    "shortbio-tooltip": "Un bref titre qui capture votre essence en une ligne.",
+    "write-tab": "Écrire",
+    "preview-tab": "Aperçu",
+    "save-button": "Enregistrer les modifications",
+    "change-avatar": "Changer l'avatar",
+    "change-banner": "Changer la bannière",
+    "toast-success": "Utilisateur modifié avec succès !",
+    "toast-error": "Erreur lors de la modification de l'utilisateur !",
+    "sign-out": "Se déconnecter",
+    "experience-form": {
+      "title-label": "Titre",
+      "title-placeholder": "ex. Ingénieur logiciel",
+      "description-label": "Description",
+      "description-placeholder": "Parlez-nous de votre expérience",
+      "start-date-label": "Date de début",
+      "end-date-label": "Date de fin",
+      "still-ongoing-label": "Toujours en cours",
+      "organization-label": "Organisation (optionnel)",
+      "organization-placeholder": "ex. Google",
+      "done-button": "Terminé",
+      "add-experience-button": "Ajouter une expérience"
+    },
+    "social-media-links": {
+      "heading": "Liens sociaux",
+      "url-placeholder": "Entrez l'URL",
+      "add-link-button": "Ajouter un lien"
+    },
+    "skills-list": {
+      "heading": "Compétences",
+      "skill-placeholder": "ex. React",
+      "add-skill-button": "Ajouter une compétence"
+    }
+  },
+  "discover": {
+    "title": "Découvrir les événements",
+    "description": "Plongez dans le pouls des événements tribaux, soirées rave, événements de hacking, avant-premières de cinéma privées, et plus encore."
+  },
+  "tickets": {
+    "title": "Vos billets",
+    "log-in": "Connectez-vous pour voir vos billets",
+    "no-tickets-event": "Aucun billet disponible pour cet événement",
+    "description": "Événements auxquels vous participez.",
+    "see-event-details": "Voir les détails de l'événement"
+  },
+  "event-card": {
+    "exclusive-event": "Événement exclusif",
+    "discoverable-tooltip": "Cet événement est visible publiquement par tous.",
+    "hidden-tooltip": "Cet événement n'est visible que par vous.",
+    "hosted-by": "Organisé par :"
+  },
+  "event-protection-guard": {
+    "description": "Cet événement est réservé à certains participants. Vous avez besoin d'un mot de passe pour accéder aux informations.",
+    "password-placeholder": "Entrez le mot de passe...",
+    "access-button": "Accéder à l'événement",
+    "toast-access-invalid-password": "Mot de passe invalide !",
+    "toast-access-error": "Impossible d'accéder aux informations de l'événement !"
+  },
+  "no-events-title": "Aucun événement à afficher.",
+  "no-events-description": "Vous n'avez pas d'événements. Pourquoi ne pas en créer un ?",
+  "no-more-events": "Plus rien à afficher pour le moment.",
+  "no-members-title": "Aucun membre à afficher.",
+  "no-members-description": "Changeons ça !",
+  "no-proposals-title": "Aucune proposition à afficher.",
+  "no-proposals-description": "Vous n'avez pas de propositions ou de votes. Pourquoi ne pas en créer un ?",
+  "events-list": {
+    "no-events": "Aucun événement à afficher.",
+    "no-events-desc": "Vous n'avez pas d'événements. Pourquoi ne pas en créer un ?",
+    "create-event": "Créer un événement",
+    "upcoming": "À venir",
+    "past": "Passés"
+  },
+  "error": {
+    "label": "Oups ! Une erreur s'est produite.",
+    "retry-button": "Réessayer",
+    "oops-something-went-wrong": "Oups ! Quelque chose s'est mal passé.",
+    "unexpected-error-occurred": "Une erreur inattendue s'est produite. Veuillez réessayer plus tard.",
+    "refresh-page": "Actualiser la page"
+  },
+  "not-found": {
+    "label": "Page non trouvée.",
+    "button": "Retour à l'accueil"
+  },
+  "post-menu": {
+    "pin-post": "Épingler la publication",
+    "unpin-post": "Désépingler la publication",
+    "edit-post": "Modifier la publication",
+    "delete-post": "Supprimer la publication"
+  },
+  "components": {
+    "modals": {
+      "signed-out-modal": {
+        "title": "Connexion/Inscription",
+        "description": "Vous devez vous connecter ou vous inscrire pour créer un événement.",
+        "sign-in": "Se connecter",
+        "sign-up": "S'inscrire"
+      }
+    },
+    "widgets": {
+      "soon-on-base": {
+        "soon-on": "Bientôt sur"
+      },
+      "quick-create-menu": {
+        "create-event": "Créer un événement",
+        "create-community": "Créer une communauté"
+      },
+      "form": {
+        "form-field-image": {
+          "error-filesize-exceeds-limit": "La taille du fichier dépasse la limite de {size} Mo.",
+          "error-no-file-selected": "Aucun fichier sélectionné.",
+          "error-uploading-file": "Problème lors du téléchargement du fichier !"
+        },
+        "form-field-date-picker": {
+          "pick-date-aria-label": "Choisir une date"
+        }
+      },
+      "time-zones-popover": {
+        "placeholder": "Fuseaux horaires"
+      }
+    },
+    "toggle-theme-button": {
+      "dropdown-trigger-aria-label": "Sélecteur de thème",
+      "toggle-theme-label": "Changer de thème",
+      "light-option": "Clair",
+      "light-aria-label": "Thème clair",
+      "dark-option": "Sombre",
+      "dark-aria-label": "Thème sombre",
+      "system-option": "Système",
+      "system-aria-label": "Thème système"
+    },
+    "sidebar": {
+      "toggle-aria-label": "Afficher/masquer la barre latérale",
+      "toggle-tooltip": "Afficher/masquer la barre latérale"
+    },
+    "confirmation-dialog": {
+      "confirm-action-aria-label": "Confirmer l'action"
+    }
+  },
+  "blog": {
+    "pageTitle": "Blog",
+    "pageSubheading": "Explorez les mises à jour et innovations passionnantes de Zenao",
+    "no-blog-posts-title": "Aucun article de blog à afficher."
+  },
+  "blog-post": {
+    "link-copied-toast": "Lien copié dans le presse-papiers !",
+    "failed-to-copy-link-toast": "Échec de la copie du lien !"
+  },
+  "load-more": "Charger plus",
+  "no-posts-title": "Aucune publication à afficher.",
+  "no-posts-description": "Vous n'avez pas de publications. Pourquoi ne pas en créer une ?",
+  "no-more-posts": "Plus rien à afficher pour le moment.",
+  "social-feed": {
+    "no-polls-title": "Aucun sondage à afficher.",
+    "no-polls-description": "Vous n'avez pas de sondages. Pourquoi ne pas en créer un ?",
+    "action-buttons": {
+      "set-type-aria-label": "Définir le type de publication",
+      "submit-aria-label": "Publier"
+    },
+    "post-card": {
+      "pinned-badge": "Publication épinglée",
+      "location-label": "Lieu",
+      "cancel-modification-tooltip": "Annuler la modification",
+      "show-replies-tooltip": "Afficher les réponses"
+    },
+    "poll-form": {
+      "question-placeholder-sm": "Poser une question...",
+      "question-placeholder-lg": "Que voulez-vous demander à la communauté ?",
+      "toast-poll-creation-success": "Sondage créé !",
+      "toast-poll-creation-error": "Erreur lors de la création du sondage !",
+      "label-allow-multiple-answers": "Autoriser les réponses multiples",
+      "option-input-placeholder": "Entrez une réponse",
+      "add-other-answer": "Ajouter une autre réponse",
+      "poll-duration-label": "Durée du sondage",
+      "days": "Jours",
+      "minutes": "Minutes",
+      "hours": "Heures"
+    },
+    "standard-post-form": {
+      "write-tab": "Écrire",
+      "preview-tab": "Aperçu",
+      "message-placeholder-sm": "Dites quelque chose...",
+      "message-placeholder-lg": "Ne soyez pas timide, dites quelque chose !",
+      "toast-post-creation-success": "Publication créée !",
+      "toast-post-creation-error": "Erreur lors de la création de la publication !",
+      "toast-post-edit-error": "Erreur lors de la modification de la publication !",
+      "comment-restricted-to-members": "Vous devez être membre pour soumettre un commentaire.",
+      "comment-restricted-to-participants": "Vous devez être participant pour soumettre un commentaire.",
+      "no-file-selected-error": "Aucun fichier sélectionné.",
+      "image-upload-error": "Erreur lors du téléchargement de l'image.",
+      "audio-upload-error": "Erreur lors du téléchargement de l'audio.",
+      "error-filesize-exceeds-limit": "La taille du fichier dépasse la limite de {size} Mo.",
+      "upload-image-tooltip": "Télécharger une image",
+      "upload-image-aria-label": "Télécharger une image",
+      "upload-audio-tooltip": "Télécharger un audio",
+      "upload-audio-aria-label": "Télécharger un audio"
+    },
+    "vote": {
+      "toast-vote-success": "Vote soumis !",
+      "toast-vote-error": "Erreur lors du vote !"
+    },
+    "poll": {
+      "result-count": "{count, plural, one {# vote} other {# votes}}"
+    },
+    "actions": {
+      "toast-post-pin-success": "Publication épinglée !",
+      "toast-post-pin-error": "Erreur lors de l'épinglage de la publication !",
+      "toast-post-unpin-success": "Publication désépinglée !",
+      "toast-post-unpin-error": "Erreur lors du désépinglage de la publication !"
+    }
+  },
+  "broadcast-email-form": {
+    "title": "Envoyer un email à tous les participants",
+    "desc": "Les diffusions sont un excellent moyen de partager plus d'informations sur votre événement, comme annoncer un invité spécial, une mise à jour de l'événement ou un changement logistique.",
+    "message-input-placeholder": "Quoi de neuf ?",
+    "message-input-label": "Entrez votre message",
+    "cancel": "Annuler",
+    "send": "Envoyer l'email",
+    "attach-ticket-label": "Joindre le billet au message",
+    "toast-email-sent-success": "Email envoyé !",
+    "toast-email-sent-error": "Erreur lors de l'envoi de l'email",
+    "no-participant-error": "Vous ne pouvez envoyer aucun message car personne ne participe encore à votre événement"
+  },
+  "event-community-section": {
+    "organized-by": "Organisé par la communauté"
+  },
+  "event-scanner": {
+    "check-in-confirmation-dialog": {
+      "title-success": "Billet vérifié",
+      "description-error": "Erreur lors de la validation de votre billet",
+      "title-error": "Billet invalide",
+      "description-success": "Vous pouvez entrer",
+      "close": "Fermer"
+    },
+    "last-ticket-scanned": "Dernier billet scanné",
+    "checkin-count": "Total de billets vérifiés",
+    "history-title": "Billets scannés pour l'événement",
+    "no-tickets-scanned": "Aucun billet scanné encore",
+    "signature": "Signature"
+  },
+  "cancel-registration-confirmation-dialog": {
+    "title": "Annuler votre participation",
+    "desc": "Cette action est irréversible ! Êtes-vous sûr ?",
+    "go-back": "Retour",
+    "cancel": "Annuler",
+    "toast-cancel-participation-success": "Votre participation a été annulée",
+    "toast-cancel-participation-error": "Erreur lors de l'annulation de la participation",
+    "event-already-started-error": "Vous ne pouvez pas annuler votre participation car l'événement a déjà commencé",
+    "toast-user-already-checked-in-error": "Vous ne pouvez pas annuler votre participation car vous avez déjà utilisé votre billet pour entrer"
+  },
+  "cancel-event-confirmation-dialog": {
+    "title": "Annuler l'événement",
+    "desc": "Cette action est irréversible ! Êtes-vous sûr ?",
+    "go-back": "Retour",
+    "cancel": "Annuler",
+    "toast-cancel-event-success": "L'événement a été annulé",
+    "toast-cancel-event-error": "Erreur lors de l'annulation de l'événement",
+    "event-starting-soon-error": "Les événements déjà commencés ou commençant dans moins de 24h ne peuvent pas être annulés",
+    "toast-only-organizers-can-cancel-error": "Seuls les organisateurs peuvent annuler un événement"
+  },
+  "delete-post-confirmation-dialog": {
+    "title": "Supprimer la publication",
+    "desc": "Êtes-vous sûr de vouloir supprimer cette publication ?",
+    "delete": "Supprimer",
+    "cancel": "Annuler"
+  },
+  "toast-delete-post-success": "Votre publication a été supprimée",
+  "toast-delete-post-error": "Erreur lors de la suppression de la publication",
+  "community": {
+    "communities": "Communautés",
+    "chat": "Discussion",
+    "votes": "Votes",
+    "events": "Événements",
+    "members": "Membres",
+    "proposals": "Propositions",
+    "pinned-events": "Événements épinglés",
+    "all-events": "Tous les événements",
+    "event-unpinned": "Événement désépinglé",
+    "event-pinned": "Événement épinglé",
+    "portfolio": "Portfolio",
+    "upcoming": "À venir",
+    "past": "Passés",
+    "leave-community-button": "Quitter la communauté",
+    "leaving-state": "Départ en cours...",
+    "leave-success": "Vous avez quitté la communauté.",
+    "leave-success-desc": "Vous n'êtes plus membre.",
+    "leave-failure": "Impossible de quitter la communauté",
+    "leave-failure-desc": "Veuillez réessayer plus tard.",
+    "leave-only-admin-error": "Vous ne pouvez pas quitter cette communauté car vous êtes le seul administrateur.",
+    "sign-in-to-join-button": "Connectez-vous pour rejoindre",
+    "joining-state": "Adhésion en cours...",
+    "join-community-button": "Rejoindre la communauté",
+    "edit-community-button": "Modifier la communauté"
+  },
+  "community-create-form": {
+    "log-in": "Connectez-vous pour créer une communauté",
+    "create-community-button": "Créer la communauté",
+    "toast-creation-success": "Communauté créée !",
+    "toast-creation-failure": "Erreur lors de la création de la communauté !"
+  },
+  "community-edit-form": {
+    "update-success": "Communauté mise à jour avec succès",
+    "update-failure": "Échec de la mise à jour de la communauté",
+    "stripe-onboarding-failure": "Échec du démarrage de l'intégration Stripe",
+    "stripe-onboarding-return": "Intégration Stripe terminée.",
+    "stripe-onboarding-refresh": "L'intégration Stripe n'a pas été complétée. Veuillez réessayer."
+  },
+  "community-form": {
+    "edit-button": "Modifier la communauté",
+    "upload-avatar": "Télécharger une image d'avatar",
+    "upload-banner": "Télécharger une image de bannière",
+    "change-avatar": "Changer l'avatar",
+    "change-banner": "Changer la bannière",
+    "name-label": "Nom de la communauté",
+    "seeAsCustomer": "Voir en tant que client",
+    "community-name-section": "Nom de la communauté",
+    "about-section": "À propos de votre communauté",
+    "name-placeholder": "Nom de la communauté...",
+    "description-label": "Description",
+    "shortDescription-tooltip": "Un bref résumé de votre communauté (max 100 caractères). Sera affiché dans les listes.",
+    "description-tooltip": "Parlez-nous de votre communauté, son but et ce que les membres peuvent attendre. Le Markdown est supporté !",
+    "shortDescription-label": "Résumé bref",
+    "shortDescription-placeholder": "Description courte...",
+    "description-placeholder": "Description...",
+    "write-tab": "Écrire",
+    "preview-tab": "Aperçu",
+    "admin-label": "Administrateurs",
+    "admin-placeholder": "Email du nouvel administrateur",
+    "visibility-section": "Visibilité",
+    "socialLinks": "Liens sociaux",
+    "socialLinks-description": "Ajoutez des liens vers les profils de réseaux sociaux de votre communauté pour améliorer la visibilité",
+    "remove-admin": "Supprimer",
+    "add-admin": "Ajouter un administrateur",
+    "submit-create": "Créer la communauté",
+    "submit-edit": "Mettre à jour la communauté",
+    "payments-section": "Paiements",
+    "payments-description": "Connectez Stripe pour recevoir des paiements de votre communauté.",
+    "stripe-connect-label": "Stripe Connect",
+    "stripe-connect-description": "Démarrez l'intégration pour activer les paiements par carte et les transferts.",
+    "stripe-connect-cta": "Démarrer l'intégration Stripe",
+    "stripe-dashboard-cta": "Ouvrir le tableau de bord Stripe",
+    "payout-status-label": "Statut de vérification des paiements",
+    "payout-status-loading": "Chargement",
+    "payout-status-verified": "Vérifié",
+    "payout-status-failed": "Échoué",
+    "payout-status-pending": "En attente",
+    "payout-status-unknown": "Inconnu",
+    "payout-status-last-checked": "Dernière vérification",
+    "payout-status-never": "Pas encore vérifié",
+    "payout-status-stale": "Les données peuvent être obsolètes",
+    "payout-status-refresh-error": "Impossible d'actualiser depuis Stripe. Affichage du dernier statut connu.",
+    "stripe-dashboard-missing-account": "Aucun compte Stripe connecté, veuillez en connecter un pour activer les paiements."
+  },
+  "portfolio": {
+    "error-file-uploading": "Erreur lors du téléchargement du fichier",
+    "error-filesize-exceeds-limit": "La taille du fichier dépasse la limite de {size} Mo.",
+    "error-file-deleting": "Erreur lors de la suppression du fichier",
+    "delete-file-success": "Élément supprimé avec succès",
+    "upload-file-success": "Fichier téléchargé avec succès",
+    "recent-media-uploaded": "Médias récemment téléchargés",
+    "upload-file-btn": "Télécharger un fichier",
+    "upload-first-file-btn": "Télécharger votre premier fichier",
+    "no-media-title": "Aucun média à afficher.",
+    "no-media-description": "Vous n'avez pas de médias dans votre portfolio. Pourquoi ne pas en télécharger ?",
+    "error-saving-portfolio": "Erreur lors de l'enregistrement du portfolio",
+    "upload-audio": "Télécharger un audio",
+    "upload-image": "Télécharger une image",
+    "upload-video": "Télécharger une vidéo",
+    "add-video": "Ajouter une vidéo",
+    "add-video-description": "Ajouter une vidéo depuis YouTube, Vimeo",
+    "video-origin-label": "Origine de la vidéo",
+    "video-origin-placeholder": "Source de la vidéo",
+    "delete": "Supprimer",
+    "confirm-delete-title": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+    "confirm-delete-desc": "Cette action est irréversible.",
+    "confirm-delete-cancel": "Annuler",
+    "confirm-delete-confirm": "Oui, supprimer"
+  },
+  "empty-list": {
+    "title": "Rien à afficher",
+    "description": "Changeons ça !"
   },
   "dashboard": {
+    "signout-desc": "Connectez-vous pour accéder à votre tableau de bord",
+    "sidebar": {
+      "create-btn": "Créer",
+      "create-event": "Créer un événement",
+      "create-community": "Créer une communauté",
+      "events": "Événements",
+      "upcoming": "À venir",
+      "past": "Passés",
+      "all": "Tous",
+      "description": "Description",
+      "participants": "Participants",
+      "gatekeepers": "Portiers",
+      "broadcast": "Diffusion",
+      "general": "Général",
+      "members": "Membres",
+      "administrators": "Administrateurs",
+      "payouts": "Paiements",
+      "communities": "Communautés",
+      "settings": "Paramètres",
+      "coming-soon": "Bientôt",
+      "quick-create": "Création rapide"
+    },
     "navUser": {
       "personal-account": "Compte personnel",
       "team": "Équipe",
@@ -28,6 +717,127 @@
       "create": "Créer l'équipe",
       "success": "Équipe créée avec succès",
       "error": "Échec de la création de l'équipe"
+    },
+    "membersTable": {
+      "name-column": "Nom",
+      "roles-column": "Rôles"
+    },
+    "eventsTable": {
+      "events": "Événements",
+      "upcoming": "À venir",
+      "past": "Passés",
+      "no-events": "Aucun événement trouvé.",
+      "create-event-btn": "Créer un événement",
+      "name-column": "Nom",
+      "date-column": "Date",
+      "roles-column": "Rôles",
+      "participants-column": "Participants",
+      "organizers-column": "Organisé par",
+      "actions-column": "Actions",
+      "view-event": "Voir l'événement",
+      "actions-menu": {
+        "dashboard-view": "Voir sur le tableau de bord",
+        "customer-view": "Voir en tant que client"
+      }
+    },
+    "communitiesTable": {
+      "communities": "Communautés",
+      "no-communities": "Aucune communauté trouvée.",
+      "create-community-btn": "Créer une communauté",
+      "name-column": "Nom",
+      "members-column": "Membres",
+      "roles-column": "Rôles",
+      "view-community": "Voir la communauté",
+      "loading": "Chargement...",
+      "actions-column": "Actions",
+      "actions-menu": {
+        "dashboard-view": "Voir sur le tableau de bord",
+        "customer-view": "Voir en tant que client"
+      }
+    },
+    "communitiyAdministratorsTable": {
+      "email-column": "Email",
+      "actions-column": "Actions",
+      "action-tooltip-delete": "Supprimer l'administrateur"
+    },
+    "communityDetails": {
+      "communityTabs": {
+        "general": "Général",
+        "members": "Membres",
+        "administrators": "Administrateurs",
+        "events": "Événements",
+        "payouts": "Paiements"
+      },
+      "administrators": {
+        "no-administrators": "Aucun administrateur assigné pour le moment.",
+        "toast-administrator-management-success": "Administrateurs mis à jour avec succès !",
+        "toast-administrator-management-error": "Erreur lors de la mise à jour des administrateurs !",
+        "add-administrator-form": {
+          "email-placeholder": "Entrez l'email de l'administrateur à ajouter...",
+          "error-administrator-already-exists": "Cet administrateur est déjà assigné à la communauté !",
+          "add-btn": "Ajouter"
+        }
+      },
+      "members": {
+        "no-members": "Aucun membre pour le moment."
+      },
+      "events": {
+        "no-events": "Aucun événement pour le moment."
+      }
+    },
+    "eventDetails": {
+      "event-details": "Détails de l'événement",
+      "manage-event": "Gérer l'événement",
+      "edit-event": "Modifier l'événement",
+      "cancel-event": "Annuler l'événement",
+      "view-event": "Voir l'événement",
+      "eventTabs": {
+        "description": "Description",
+        "participants": "Participants",
+        "gatekeepers": "Portiers",
+        "broadcast": "Diffusion"
+      },
+      "header": {
+        "actions": "Actions",
+        "saveChanges": "Enregistrer les modifications",
+        "seeAsCustomer": "Voir en tant que client",
+        "edit": "Modifier",
+        "cancel": "Annuler l'événement",
+        "dateAndTime": "Date et heure",
+        "from": "De",
+        "to": "À",
+        "updateEventTime": "Modifier l'horaire",
+        "location": "Lieu",
+        "updateLocation": "Modifier le lieu",
+        "capacity": "Capacité",
+        "noPlaces": "Aucune place",
+        "attendees": "{count} participants",
+        "updateCapacity": "Modifier la capacité",
+        "community": "Communauté",
+        "securityAndPrivacy": "Sécurité et confidentialité"
+      },
+      "participants": {
+        "exportCSV": "Exporter CSV",
+        "openQrCodeScanner": "Scanner QR Code",
+        "no-participants": "Aucun participant pour le moment."
+      },
+      "gatekeepers": {
+        "no-gatekeepers": "Aucun portier assigné pour le moment.",
+        "add-gatekeeper-form": {
+          "email-placeholder": "Entrez l'email du portier à ajouter...",
+          "error-gatekeeper-already-exists": "Ce portier est déjà assigné à l'événement !",
+          "add-btn": "Ajouter un portier"
+        }
+      },
+      "broadcast": {
+        "subtitle": "Les diffusions sont un excellent moyen de partager plus d'informations sur votre événement, comme annoncer un invité spécial, une mise à jour de l'événement ou un changement logistique."
+      }
+    },
+    "data-table": {
+      "pagination": {
+        "rows-per-page": "Lignes par page",
+        "page-of": "Page {page} sur {pages}"
+      }
     }
   }
 }

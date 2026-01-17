@@ -22,6 +22,7 @@
     "dashboard-view": "Dashboard view",
     "customer-view": "Customer view",
     "create-event": "Create Event",
+    "quick-menu-aria-label": "Quick create menu",
     "footer": {
       "tagline": "Made with ❤️ by Samourai.world crew",
       "report-bug": "Report a bug"
@@ -39,6 +40,10 @@
     "edit-event-button": "Edit event",
     "image-uri-placeholder": "Image URL...",
     "title-placeholder": "Event name...",
+    "add-image-tooltip": "Add image",
+    "add-image-aria-label": "Add image",
+    "add-audio-tooltip": "Add audio",
+    "add-audio-aria-label": "Add audio",
     "description-label": "Description",
     "write-tab": "Write",
     "log-in": "Log in to create an event",
@@ -300,15 +305,34 @@
     "change-banner": "Change banner",
     "toast-success": "User correctly edited!",
     "toast-error": "Error on editing user!",
-    "sign-out": "Sign out"
+    "sign-out": "Sign out",
+    "experience-form": {
+      "title-label": "Title",
+      "title-placeholder": "e.g. Software Engineer",
+      "description-label": "Description",
+      "description-placeholder": "Tell us about your experience",
+      "start-date-label": "Start date",
+      "end-date-label": "End date",
+      "still-ongoing-label": "Still on-going",
+      "organization-label": "Organization (optional)",
+      "organization-placeholder": "e.g. Google",
+      "done-button": "Done",
+      "add-experience-button": "Add experience"
+    },
+    "social-media-links": {
+      "heading": "Social links",
+      "url-placeholder": "Enter URL",
+      "add-link-button": "Add link"
+    },
+    "skills-list": {
+      "heading": "Skills",
+      "skill-placeholder": "e.g. React",
+      "add-skill-button": "Add skill"
+    }
   },
   "discover": {
     "title": "Discover events",
     "description": "Dive into the pulse of tribes events, rave parties, hacking events, private cinema avant-premieres, and more."
-  },
-  "created": {
-    "logged-out": "Log in to see events your created",
-    "title": "Events created"
   },
   "tickets": {
     "title": "Your tickets",
@@ -383,8 +407,31 @@
           "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
           "error-no-file-selected": "No file selected.",
           "error-uploading-file": "Trouble uploading file!"
+        },
+        "form-field-date-picker": {
+          "pick-date-aria-label": "Pick date"
         }
+      },
+      "time-zones-popover": {
+        "placeholder": "Timezones"
       }
+    },
+    "toggle-theme-button": {
+      "dropdown-trigger-aria-label": "Theme selector",
+      "toggle-theme-label": "Toggle theme",
+      "light-option": "Light",
+      "light-aria-label": "Light theme",
+      "dark-option": "Dark",
+      "dark-aria-label": "Dark theme",
+      "system-option": "System",
+      "system-aria-label": "System theme"
+    },
+    "sidebar": {
+      "toggle-aria-label": "Toggle Sidebar",
+      "toggle-tooltip": "Toggle Sidebar"
+    },
+    "confirmation-dialog": {
+      "confirm-action-aria-label": "Confirm action"
     }
   },
   "blog": {
@@ -403,6 +450,16 @@
   "social-feed": {
     "no-polls-title": "No polls to show.",
     "no-polls-description": "You have no polls. Why not create one?",
+    "action-buttons": {
+      "set-type-aria-label": "Set post type",
+      "submit-aria-label": "Submit post"
+    },
+    "post-card": {
+      "pinned-badge": "Pinned Post",
+      "location-label": "Location",
+      "cancel-modification-tooltip": "Cancel modification",
+      "show-replies-tooltip": "Show replies"
+    },
     "poll-form": {
       "question-placeholder-sm": "Ask a question...",
       "question-placeholder-lg": "What do you wanna ask to the community ?",
@@ -417,6 +474,8 @@
       "hours": "Hours"
     },
     "standard-post-form": {
+      "write-tab": "Write",
+      "preview-tab": "Preview",
       "message-placeholder-sm": "Say something...",
       "message-placeholder-lg": "Don't be shy, say something!",
       "toast-post-creation-success": "Post created !",
@@ -427,7 +486,11 @@
       "no-file-selected-error": "No file selected.",
       "image-upload-error": "Error while uploading image.",
       "audio-upload-error": "Error while uploading audio.",
-      "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB."
+      "error-filesize-exceeds-limit": "File size exceeds limit of {size} MB.",
+      "upload-image-tooltip": "Upload image",
+      "upload-image-aria-label": "Upload image",
+      "upload-audio-tooltip": "Upload audio",
+      "upload-audio-aria-label": "Upload audio"
     },
     "vote": {
       "toast-vote-success": "Vote submitted !",
