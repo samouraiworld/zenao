@@ -1,31 +1,6 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
-import {
-  SUPPORTED_LOCALES,
-  DEFAULT_LOCALE,
-  LOCALE_COOKIE_NAME,
-  type Locale,
-} from "@/app/i18n/config";
 
-function getLocaleFromRequest(request: NextRequest): string {
-  const localeCookie = request.cookies.get(LOCALE_COOKIE_NAME)?.value;
-  return localeCookie && SUPPORTED_LOCALES.includes(localeCookie as Locale)
-    ? localeCookie
-    : DEFAULT_LOCALE;
-}
-
-export default clerkMiddleware((_auth, request) => {
-  const locale = getLocaleFromRequest(request);
-
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-locale", locale);
-
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
-});
+export default clerkMiddleware();
 
 export const config = {
   matcher: [
