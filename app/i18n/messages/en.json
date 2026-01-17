@@ -687,7 +687,6 @@
       "upcoming": "Upcoming",
       "past": "Past",
       "all": "All",
-      "description": "Description",
       "participants": "Participants",
       "gatekeepers": "Gatekeepers",
       "broadcast": "Broadcast",
@@ -793,7 +792,7 @@
       "cancel-event": "Cancel event",
       "view-event": "See event",
       "eventTabs": {
-        "description": "Description",
+        "general": "General",
         "participants": "Participants",
         "gatekeepers": "Gatekeepers",
         "broadcast": "Broadcast"
