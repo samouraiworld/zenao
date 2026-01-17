@@ -705,6 +705,7 @@
       "team": "Team",
       "create-team": "Create a team",
       "profile": "Profile",
+      "language": "Language",
       "sign-out": "Sign out"
     },
     "createTeam": {

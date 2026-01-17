@@ -23,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
+import { LanguageSwitcherSubmenu } from "@/components/widgets/buttons/language-switcher";
 import { useAccountSwitcher } from "@/hooks/use-account-switcher";
 import { profileOptions } from "@/lib/queries/profile";
 import { userInfoOptions } from "@/lib/queries/user";
@@ -189,6 +190,11 @@ export function UserMenu({
               </Link>
             </DropdownMenuItem>
           )}
+
+          {/* Language switcher */}
+          <LanguageSwitcherSubmenu />
+
+          <DropdownMenuSeparator />
 
           {/* Sign out */}
           <DropdownMenuItem asChild className="cursor-pointer">
