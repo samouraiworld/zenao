@@ -1,3 +1,5 @@
+"use client";
+
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import useCommunitiesTableColumns from "./columns";
 import { DataTable } from "@/components/widgets/data-table/data-table";

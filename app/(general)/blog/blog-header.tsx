@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import Text from "@/components/widgets/texts/text";
 import Heading from "@/components/widgets/texts/heading";
