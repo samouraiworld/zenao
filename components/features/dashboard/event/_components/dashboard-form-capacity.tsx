@@ -1,5 +1,3 @@
-"use client";
-
 import { useFormContext } from "react-hook-form";
 import { useTranslations } from "next-intl";
 import { EventFormSchemaType } from "@/types/schemas";

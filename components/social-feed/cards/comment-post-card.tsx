@@ -1,5 +1,3 @@
-"use client";
-
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";

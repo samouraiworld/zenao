@@ -1,5 +1,3 @@
-"use client";
-
 import { useTranslations } from "next-intl";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import {

@@ -1,5 +1,3 @@
-"use client";
-
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import React from "react";
 import { useTranslations } from "next-intl";

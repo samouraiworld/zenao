@@ -1,5 +1,3 @@
-"use client";
-
 import { CalendarIcon } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -23,7 +21,7 @@ const EmptyEventsList: React.FC = () => {
         </Text>
       </div>
       <Button variant="secondary">
-        <Link href="/dashboard/event/create">
+        <Link href="/event/create">
           <Text size="sm" variant="secondary">
             {t("create-event")}
           </Text>

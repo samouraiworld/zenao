@@ -1,9 +1,9 @@
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import Text from "@/components/widgets/texts/text";
 import Heading from "@/components/widgets/texts/heading";
 
-export default async function BlogHeader() {
-  const t = await getTranslations("blog");
+export default function BlogHeader() {
+  const t = useTranslations("blog");
 
   return (
     <div className="flex flex-col gap-2">

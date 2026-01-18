@@ -1,5 +1,3 @@
-"use client";
-
 import { AudioWaveform, ImageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";
@@ -196,10 +194,10 @@ export function StandardPostForm({
             <div className="w-full flex justify-between">
               <TabsList className="p-0 h-fit">
                 <TabsTrigger value="form">
-                  <Text size="sm">{t("write-tab")}</Text>
+                  <Text size="sm">Write</Text>
                 </TabsTrigger>
                 <TabsTrigger value="preview">
-                  <Text size="sm">{t("preview-tab")}</Text>
+                  <Text size="sm">Preview</Text>
                 </TabsTrigger>
               </TabsList>
 
@@ -211,7 +209,7 @@ export function StandardPostForm({
                     "flex items-center justify-center rounded-full aspect-square cursor-pointer w-7 h-7 md:w-12 md:h-12",
                     "hover:bg-neutral-500/20",
                   )}
-                  title={t("upload-image-tooltip")}
+                  title="Upload image"
                   onClick={(e) => {
                     e.preventDefault();
                     if (uploading) return;
@@ -223,7 +221,7 @@ export function StandardPostForm({
                     );
                     hiddenImgInputRef.current?.click();
                   }}
-                  aria-label={t("upload-image-aria-label")}
+                  aria-label="upload image"
                 >
                   <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
                 </ButtonBase>
@@ -241,7 +239,7 @@ export function StandardPostForm({
                     "flex items-center justify-center rounded-full aspect-square cursor-pointer w-7 h-7 md:w-12 md:h-12",
                     "hover:bg-neutral-500/20",
                   )}
-                  title={t("upload-audio-tooltip")}
+                  title="Upload audio"
                   onClick={(e) => {
                     e.preventDefault();
                     if (uploading) return;
@@ -253,7 +251,7 @@ export function StandardPostForm({
                     );
                     hiddenAudioInputRef.current?.click();
                   }}
-                  aria-label={t("upload-audio-aria-label")}
+                  aria-label="upload audio"
                 >
                   <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
                 </ButtonBase>

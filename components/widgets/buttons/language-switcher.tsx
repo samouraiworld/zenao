@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import { Button } from "@/components/shadcn/button";
-import { LOCALE_COOKIE_NAME } from "@/app/i18n/config";
 
 const LANGUAGES = [
   { code: "en", label: "English" },
@@ -22,9 +21,10 @@ const LANGUAGES = [
 function useLocaleChange() {
   const locale = useLocale();
 
-  const handleLocaleChange = (newLocale: string) => {
-    document.cookie = `${LOCALE_COOKIE_NAME}=${newLocale};path=/;max-age=31536000`;
-    window.location.reload();
+  const handleLocaleChange = (_newLocale: string) => {
+    // TODO: Implement locale change logic
+    // This should update the locale preference (cookie, localStorage, or user settings)
+    // and trigger a page refresh or navigation to apply the new locale
   };
 
   return { locale, handleLocaleChange };

@@ -1,5 +1,3 @@
-"use client";
-
 import { useTranslations } from "next-intl";
 import { UseFormReturn } from "react-hook-form";
 import { StandardPostForm } from "./standard-post-form";

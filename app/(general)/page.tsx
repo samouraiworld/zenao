@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
@@ -9,8 +9,8 @@ import { LazyInstallButton } from "@/components/widgets/buttons/pwa-install-butt
 import { Card } from "@/components/widgets/cards/card";
 import { BaseLogo } from "@/components/widgets/icons";
 
-export default async function Home() {
-  const t = await getTranslations("home");
+export default function Home() {
+  const t = useTranslations("home");
 
   return (
     <ScreenContainerCentered>
@@ -42,7 +42,7 @@ export default async function Home() {
         </Text>
 
         <div className="flex flex-col gap-2 items-center">
-          <Link href="/dashboard/event/create">
+          <Link href="/event/create">
             <ButtonWithChildren className="w-full flex rounded-3xl py-5">
               <Text variant="invert" className="text-sm">
                 {t("button")}

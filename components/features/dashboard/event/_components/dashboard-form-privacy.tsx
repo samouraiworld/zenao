@@ -1,5 +1,3 @@
-"use client";
-
 import { useFormContext } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 import { useTranslations } from "next-intl";

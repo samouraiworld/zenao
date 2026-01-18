@@ -1,5 +1,3 @@
-"use client";
-
 import { CircleX, Eye, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormContext } from "react-hook-form";
@@ -25,7 +23,7 @@ export default function DashboardFormActions() {
   const isMobile = useIsMobile();
 
   const hasStarted = useMemo(() => {
-    return new Date() >= fromUnixTime(Number(startDate) / 1000);
+    return fromUnixTime(Number(startDate) / 1000) < new Date();
   }, [startDate]);
 
   if (isMobile) {
@@ -70,7 +68,14 @@ export default function DashboardFormActions() {
         onOpenChange={setIsCancelDialogOpen}
         open={isCancelDialogOpen}
       />
-      <div className="flex flex-wrap-reverse h-fit gap-4 justify-end">
+      <div className="flex gap-4 justify-end">
+        <form onSubmit={form.handleSubmit(save)}>
+          <Button type="submit" disabled={!isSubmittable || isUpdating}>
+            <Save />
+            {t("saveChanges")}
+          </Button>
+        </form>
+
         <Button
           type="button"
           variant="outline"

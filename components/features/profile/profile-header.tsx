@@ -1,5 +1,3 @@
-"use client";
-
 import { ClerkLoaded, SignedIn, useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ExternalLink, Link2, List, MapPin } from "lucide-react";

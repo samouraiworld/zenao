@@ -1,5 +1,3 @@
-"use client";
-
 import { useFormContext } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";

@@ -1,4 +1,3 @@
-"use client";
 import { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
@@ -58,7 +57,7 @@ const useCommunitiesTableColumns: () => ColumnDef<SafeCommunityUser>[] = () => {
       {
         id: "actions",
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t("actions-column")} />
+          <DataTableColumnHeader column={column} title={t("email-column")} />
         ),
         cell: ({ row }) => (
           <DropdownMenu>
