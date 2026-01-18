@@ -1,4 +1,3 @@
-"use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { format as formatTZ } from "date-fns-tz";
