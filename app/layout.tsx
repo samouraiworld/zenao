@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
