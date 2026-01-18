@@ -1,4 +1,6 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import { useTranslations } from "next-intl";
 import React, { ReactNode } from "react";
 import { Hash, MapPin, MessageCircle, Pin, X } from "lucide-react";
 import Link from "next/link";
@@ -35,7 +37,7 @@ type PostCardLayoutProps = {
   isPinning?: boolean;
 };
 
-export async function PostCardLayout({
+export function PostCardLayout({
   post,
   createdBy,
   children,
@@ -56,7 +58,7 @@ export async function PostCardLayout({
   isDeleting,
   isPinning,
 }: PostCardLayoutProps) {
-  const t = await getTranslations("social-feed.post-card");
+  const t = useTranslations("social-feed.post-card");
 
   if (!post.post) {
     return null;
