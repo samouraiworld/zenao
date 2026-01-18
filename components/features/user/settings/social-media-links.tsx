@@ -11,6 +11,7 @@ import {
 } from "react-hook-form";
 import { Trash2Icon } from "lucide-react";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import { FormField, FormItem, FormMessage } from "@/components/shadcn/form";
@@ -32,6 +33,7 @@ function SocialMediaLinks<
   T extends FieldValues,
   TName extends ArrayPath<T> = ArrayPath<T>,
 >({ control, name }: SocialMediaLinksProps<T, TName>) {
+  const t = useTranslations("settings.social-media-links");
   const {
     fields,
     append: appendLink,
@@ -62,7 +64,7 @@ function SocialMediaLinks<
 
   return (
     <div className="flex flex-col gap-4">
-      <Heading level={3}>Social links</Heading>
+      <Heading level={3}>{t("heading")}</Heading>
 
       {socialMediaLinks.map((link, index) => {
         return (
@@ -74,7 +76,7 @@ function SocialMediaLinks<
                   <div className="flex flex-col gap-2">
                     <Input
                       type="text"
-                      placeholder="Enter URL"
+                      placeholder={t("url-placeholder")}
                       value={field.value}
                       onChange={field.onChange}
                     />
@@ -103,7 +105,7 @@ function SocialMediaLinks<
         onClick={() => appendLink({ url: "" } as FieldArray<T, TName>)}
         disabled={isLastLinkInvalid}
       >
-        Add link
+        {t("add-link-button")}
       </Button>
     </div>
   );

@@ -1,5 +1,8 @@
+"use client";
+
 import { UseFormReturn } from "react-hook-form";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { FormFieldInputString } from "@/components/widgets/form/form-field-input-string";
 import { Form, FormField } from "@/components/shadcn/form";
 import { FormFieldTextArea } from "@/components/widgets/form/form-field-textarea";
@@ -22,6 +25,7 @@ export default function ExperienceForm({
   experience,
   onSubmit,
 }: ExperienceFormProps) {
+  const t = useTranslations("settings.experience-form");
   const isOnGoing = form.watch("current");
   const { errors } = form.formState;
 
@@ -37,24 +41,26 @@ export default function ExperienceForm({
         <div className="w-full grid grid-cols-1 lg:grid-col-3 gap-4">
           <FormFieldInputString
             control={form.control}
-            label="Title"
+            label={t("title-label")}
             name="title"
-            placeholder="e.g. Software Engineer"
+            placeholder={t("title-placeholder")}
             className="col-span-1 lg:col-span-3"
           />
           <div className="col-span-1 lg:col-span-3">
             <FormFieldTextArea
               control={form.control}
               name="description"
-              placeholder="Tell us about your experience"
-              label="Description"
+              placeholder={t("description-placeholder")}
+              label={t("description-label")}
               wordCounter
               maxLength={1000}
             />
           </div>
           <div className="flex flex-col col-span-1 lg:col-span-3 gap-4">
             <div className="flex flex-col gap-2">
-              <Text className="font-medium text-sm">Start date</Text>
+              <Text className="font-medium text-sm">
+                {t("start-date-label")}
+              </Text>
               <FormField
                 control={form.control}
                 name="start"
@@ -82,11 +88,11 @@ export default function ExperienceForm({
             <FormFieldCheckbox
               control={form.control}
               name="current"
-              label="Still on-going"
+              label={t("still-ongoing-label")}
             />
 
             <div className="flex flex-col gap-2">
-              <Text className="font-medium text-sm">End date</Text>
+              <Text className="font-medium text-sm">{t("end-date-label")}</Text>
               <FormField
                 control={form.control}
                 name="end"
@@ -116,9 +122,9 @@ export default function ExperienceForm({
           </div>
           <FormFieldInputString
             control={form.control}
-            label="Organization (optional)"
+            label={t("organization-label")}
             name="organization"
-            placeholder="e.g. Google"
+            placeholder={t("organization-placeholder")}
             className="col-span-1 lg:col-span-3"
           />
           <div className="col-span-1 lg:col-span-3 mt-6">
@@ -127,7 +133,7 @@ export default function ExperienceForm({
               className="w-full"
               onClick={form.handleSubmit(onSubmit)}
             >
-              {experience ? "Done" : "Add experience"}
+              {experience ? t("done-button") : t("add-experience-button")}
             </Button>
           </div>
         </div>

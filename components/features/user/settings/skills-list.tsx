@@ -2,6 +2,7 @@
 
 import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
 import { Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 
@@ -11,6 +12,7 @@ import Heading from "@/components/widgets/texts/heading";
 import { cn } from "@/lib/tailwind";
 
 function SkillsList({ form }: { form: UseFormReturn<UserFormSchemaType> }) {
+  const t = useTranslations("settings.skills-list");
   const {
     append: appendSkill,
     remove: removeSkill,
@@ -33,7 +35,7 @@ function SkillsList({ form }: { form: UseFormReturn<UserFormSchemaType> }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Heading level={3}>Skills</Heading>
+      <Heading level={3}>{t("heading")}</Heading>
 
       {skillFields.map((skill, index) => {
         return (
@@ -45,7 +47,7 @@ function SkillsList({ form }: { form: UseFormReturn<UserFormSchemaType> }) {
                   <div className="flex flex-col gap-2">
                     <Input
                       type="text"
-                      placeholder="e.g. React"
+                      placeholder={t("skill-placeholder")}
                       value={field.value}
                       onChange={field.onChange}
                     />
@@ -74,7 +76,7 @@ function SkillsList({ form }: { form: UseFormReturn<UserFormSchemaType> }) {
         onClick={() => appendSkill({ name: "" })}
         disabled={isLastSkillInvalid}
       >
-        Add skill
+        {t("add-skill-button")}
       </Button>
     </div>
   );
