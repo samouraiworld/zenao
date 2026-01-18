@@ -20,6 +20,8 @@ import {
   IMAGE_FILE_SIZE_LIMIT_MB,
 } from "@/components/features/event/constants";
 import { captureException } from "@/lib/report";
+import { Separator } from "@/components/shadcn/separator";
+import Text from "@/components/widgets/texts/text";
 
 export default function DashboardFormDescription() {
   const { toast } = useToast();
@@ -135,16 +137,20 @@ export default function DashboardFormDescription() {
   return (
     <Card className="rounded px-3 border-custom-input-border">
       <div className="flex flex-col gap-4 relative">
-        <div className="mb-2 flex items-center gap-2"></div>
-
         <Tabs defaultValue="write" className="w-full">
-          <TabsIconsList
-            tabs={getMarkdownEditorTabs({
-              writeLabel: t("write-tab"),
-              previewLabel: t("preview-tab"),
-            })}
-            className="absolute top-0 right-0 rounded p-0 h-fit"
-          />
+          <div className="flex flex-row items-center justify-between">
+            <Text className="font-semibold">{t("description-label")}</Text>
+
+            <TabsIconsList
+              tabs={getMarkdownEditorTabs({
+                writeLabel: t("write-tab"),
+                previewLabel: t("preview-tab"),
+              })}
+              className="rounded p-0 h-fit"
+            />
+          </div>
+
+          <Separator className="mt-2 mb-3" />
 
           <TabsContent value="write" tabIndex={-1}>
             <div className="flex flex-col gap-2 w-full">
