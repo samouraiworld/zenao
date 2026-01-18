@@ -1,5 +1,4 @@
-"use client";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Calendar } from "lucide-react";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import { Skeleton } from "@/components/shadcn/skeleton";
@@ -10,8 +9,8 @@ import { UserAvatarWithNameSkeleton } from "@/components/features/user/user";
 
 const iconSize = 20;
 
-export function EventInfoLayoutSkeleton() {
-  const t = useTranslations("event");
+export async function EventInfoLayoutSkeleton() {
+  const t = await getTranslations("event");
 
   return (
     <div className="flex flex-col w-full sm:h-full gap-8">

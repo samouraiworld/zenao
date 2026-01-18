@@ -1,6 +1,5 @@
-"use client";
+import { getTranslations } from "next-intl/server";
 import React from "react";
-import { useTranslations } from "next-intl";
 import { FileText } from "lucide-react";
 import Image from "next/image";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
@@ -8,9 +7,9 @@ import { Card } from "@/components/widgets/cards/card";
 import Text from "@/components/widgets/texts/text";
 import { Web3Image } from "@/components/widgets/images/web3-image";
 
-export default function Manifesto() {
-  const t = useTranslations("manifesto");
-  const t2 = useTranslations("whitepaper");
+export default async function Manifesto() {
+  const t = await getTranslations("manifesto");
+  const t2 = await getTranslations("whitepaper");
 
   return (
     <ScreenContainerCentered>
