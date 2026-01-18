@@ -1,3 +1,5 @@
+"use client";
+
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { Loader2, AudioWaveform } from "lucide-react";
 import { useTranslations } from "next-intl";

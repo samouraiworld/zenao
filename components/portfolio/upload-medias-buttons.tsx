@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { AudioWaveform, ImageIcon, Video } from "lucide-react";
 import { Dispatch, RefObject, SetStateAction } from "react";

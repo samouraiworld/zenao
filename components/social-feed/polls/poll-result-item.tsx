@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { PollKind, PollResult } from "@/app/gen/polls/v1/polls_pb";

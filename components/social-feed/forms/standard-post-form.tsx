@@ -1,3 +1,5 @@
+"use client";
+
 import { AudioWaveform, ImageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { Dispatch, SetStateAction, useEffect, useRef } from "react";

@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import { Card } from "./cards/card";
 import { BaseLogo } from "./icons";

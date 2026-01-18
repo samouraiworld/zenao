@@ -1,3 +1,5 @@
+"use client";
+
 import { UseFormReturn } from "react-hook-form";
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";

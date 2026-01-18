@@ -1,3 +1,5 @@
+"use client";
+
 import { CircleX, Eye, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFormContext } from "react-hook-form";
