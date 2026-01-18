@@ -31,7 +31,6 @@ import { useActiveAccount } from "@/components/providers/active-account-provider
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import SoonOnBase from "@/components/widgets/soon-on-base";
 import VersionTag from "@/components/widgets/version-tag";
-import { LanguageSwitcherButon } from "@/components/widgets/buttons/language-switcher";
 
 export type NavItem = {
   key: string;
@@ -134,7 +133,7 @@ const NavLink = ({ item, pathname }: { item: NavItem; pathname: string }) => {
         <Text
           size="sm"
           variant={isActive ? "primary" : "secondary"}
-          className="text-inherit max-[1042px]:hidden"
+          className="text-inherit max-[999px]:hidden"
         >
           {item.children}
         </Text>
@@ -201,10 +200,6 @@ export function Header() {
         <div className="max-md:hidden">
           <ToggleThemeButton />
         </div>
-        <SignedOut>
-          <LanguageSwitcherButon />
-        </SignedOut>
-
         <Suspense fallback={<UserAvatarSignedButtonSkeleton />}>
           <Auth className="h-fit" isMounted={isMounted} />
         </Suspense>
