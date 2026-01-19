@@ -10,7 +10,7 @@ import { EventUserRole, eventUserRoles } from "../queries/event-users";
 import { userInfoOptions } from "../queries/user";
 import { communityUserRoles } from "../queries/community";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
-import { CommunityUserRole } from "@/types/schemas";
+import { CommunityUserRole, planSchema, PlanType } from "@/types/schemas";
 
 type ServerComponent<P> = (
   props: P,
@@ -103,6 +103,40 @@ export function withCommunityRolesRestriction<
     );
 
     if (!allowedRoles.some((role) => roles.includes(role))) {
+      notFound();
+    }
+
+    return <Component {...props} />;
+  };
+}
+
+export function withPlanRestriction<P extends object>(
+  Component: ServerComponent<P>,
+  allowedPlans: PlanType[],
+): ServerComponent<P> {
+  return async function PlanRoleProtectedPage(props: P) {
+    const queryClient = getQueryClient();
+    const { getToken, userId } = await auth();
+    const token = await getToken();
+
+    const userAddrOpts = userInfoOptions(getToken, userId);
+    const userInfo = await queryClient.fetchQuery(userAddrOpts);
+    const userProfileId = userInfo?.userId;
+
+    const t = await getTranslations();
+
+    if (!token || !userProfileId) {
+      return (
+        <ScreenContainerCentered isSignedOutModal>
+          {t("communityForm.log-in")}
+        </ScreenContainerCentered>
+      );
+    }
+
+    const result = planSchema.safeParse(userInfo?.plan);
+    const userPlan = result.success ? result.data : undefined;
+
+    if (!allowedPlans.includes(userPlan ?? "free")) {
       notFound();
     }
 
