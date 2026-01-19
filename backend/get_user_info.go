@@ -19,8 +19,13 @@ func (s *ZenaoServer) GetUserInfo(
 
 	s.Logger.Info("get-user-info", zap.String("user-id", actor.User.ID), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
+	plan := actor.User.Plan
+	if actor.IsTeam() {
+		plan = actor.ActingAs.Plan
+	}
+
 	return connect.NewResponse(&zenaov1.GetUserInfoResponse{
 		UserId: actor.ID(),
-		Plan:   actor.User.Plan.String(),
+		Plan:   plan.String(),
 	}), nil
 }
