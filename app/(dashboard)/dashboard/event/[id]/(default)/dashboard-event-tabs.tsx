@@ -19,17 +19,17 @@ export default function DashboardEventTabs({
 }) {
   const t = useTranslations("dashboard.eventDetails.eventTabs");
   const { eventId } = useDashboardEventContext();
-  const section = useSelectedLayoutSegment() || "general";
+  const section = useSelectedLayoutSegment() || "description";
 
   return (
     <Tabs value={section} className="w-full min-h-[300px]">
       <TabsList className="flex w-full bg-transparent p-0 m-0 overflow-auto justify-start">
         <Link href={`/dashboard/event/${eventId}`} scroll={false}>
           <TabsTrigger
-            value="general"
+            value="description"
             className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80"
           >
-            {t("general")}
+            {t("description")}
           </TabsTrigger>
         </Link>
         <Link href={`/dashboard/event/${eventId}/participants`} scroll={false}>

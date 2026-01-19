@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { useTranslations } from "next-intl";
-import { Eye, Info, Save } from "lucide-react";
+import { Eye, Info } from "lucide-react";
 import Link from "next/link";
 import { FormFieldImage } from "@/components/widgets/form/form-field-image";
 import { CommunityFormSchemaType } from "@/types/schemas";
@@ -190,12 +190,9 @@ function DashboardCommunityInfo({
               loading={isUpdating}
               disabled={isUpdating || !isSubmittable}
               type="submit"
-              className="px-8 w-full "
+              className="px-8 w-full"
             >
-              <div className="flex flex-row items-center gap-2">
-                <Save />
-                {t("submit-edit")}
-              </div>
+              {t("submit-edit")}
             </ButtonWithChildren>
           </SettingsSection>
         </form>

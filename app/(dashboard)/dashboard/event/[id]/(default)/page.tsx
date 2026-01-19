@@ -1,5 +1,5 @@
-import DashboardEventGeneral from "./dashboard-event-general";
+import DashboardEventDescription from "./dashboard-event-description";
 
 export default function DashboardEventDetailsDescriptionPage() {
-  return <DashboardEventGeneral />;
+  return <DashboardEventDescription />;
 }
