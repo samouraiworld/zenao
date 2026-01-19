@@ -479,3 +479,7 @@ export const communityEntityWithRolesSchema = z.object({
 export type SafeCommunityEntityWithRoles = z.infer<
   typeof communityEntityWithRolesSchema
 >;
+
+export const planSchema = z.enum(["free", "pro"]);
+
+export type PlanType = z.infer<typeof planSchema>;

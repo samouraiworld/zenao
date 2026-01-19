@@ -5,7 +5,10 @@ import DashboardBroadcastForm from "./dashboard-broadcast-form";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
 import Text from "@/components/widgets/texts/text";
-import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
+import {
+  withEventRoleRestrictions,
+  withPlanRestriction,
+} from "@/lib/permissions/with-roles-required";
 
 interface DashboardEventBroadcastPageProps {
   params: Promise<{ id: string }>;
@@ -38,10 +41,9 @@ async function DashboardEventBroadcastPage({
   );
 }
 
-export default withEventRoleRestrictions(
-  DashboardEventBroadcastPage,
-  ["organizer"],
-  {
+export default withPlanRestriction(
+  withEventRoleRestrictions(DashboardEventBroadcastPage, ["organizer"], {
     notFoundOnFail: true,
-  },
+  }),
+  ["pro"],
 );

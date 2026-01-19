@@ -8,6 +8,7 @@ export interface NavSubItem {
   comingSoon?: boolean;
   newTab?: boolean;
   isNew?: boolean;
+  requiresPro?: boolean;
 }
 
 export interface NavMainItem {
@@ -20,6 +21,7 @@ export interface NavMainItem {
   comingSoon?: boolean;
   newTab?: boolean;
   isNew?: boolean;
+  requiresPro?: boolean;
 }
 
 export interface NavGroup {
@@ -63,6 +65,7 @@ export const useSidebarItems: () => NavGroup[] = () =>
                   {
                     title: "broadcast",
                     url: `/dashboard/event/${id}/broadcast`,
+                    requiresPro: true,
                   },
                 ];
               }

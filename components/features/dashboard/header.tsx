@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import { ClerkLoading, SignedIn } from "@clerk/nextjs";
 import { UserAvatarSignedButton } from "../user/user";
 import { UserMenu } from "../user/user-menu";
 import { Separator } from "@/components/shadcn/separator";
@@ -48,8 +49,15 @@ function DashboardUserMenu() {
   const { activeAccount } = useActiveAccount();
 
   return (
-    <UserMenu variant="dashboard">
-      <UserAvatarSignedButton userId={activeAccount?.id} />
-    </UserMenu>
+    <>
+      <ClerkLoading>
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </ClerkLoading>
+      <SignedIn>
+        <UserMenu variant="dashboard">
+          <UserAvatarSignedButton userId={activeAccount?.id} />
+        </UserMenu>
+      </SignedIn>
+    </>
   );
 }
