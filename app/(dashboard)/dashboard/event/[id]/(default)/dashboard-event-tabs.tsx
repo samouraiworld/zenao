@@ -66,7 +66,7 @@ export default function DashboardEventTabs({
             <Link href={`/dashboard/event/${eventId}/broadcast`} scroll={false}>
               {t("broadcast")}
             </Link>
-          </RoleLockTabsTrigger>
+          </PlanLockTabsTrigger>
         </RoleBasedViewMode>
       </TabsList>
       <Separator className="mb-3" />
