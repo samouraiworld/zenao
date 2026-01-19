@@ -6,7 +6,8 @@ import { planSchema, PlanType } from "@/types/schemas";
 
 export interface GetActorResponse {
   type: "personal" | "team";
-  actorId: string;
+  userId: string;
+  actingAs: string;
   plan: PlanType;
 }
 
@@ -28,7 +29,7 @@ export default async function getActor(): Promise<GetActorResponse | null> {
       ? userInfo
       : await queryClient.fetchQuery(userInfoOptions(getToken, authId, teamId));
 
-  if (!token || !accountInfo) {
+  if (!token || !accountInfo || !userInfo) {
     return null;
   }
 
@@ -36,7 +37,8 @@ export default async function getActor(): Promise<GetActorResponse | null> {
   const plan = await planSchema.parseAsync(accountInfo.plan || "free");
 
   return {
-    actorId: currentAccountId,
+    userId: userInfo.userId,
+    actingAs: currentAccountId,
     type: activeAccount?.type === "team" ? "team" : "personal",
     plan,
   };
