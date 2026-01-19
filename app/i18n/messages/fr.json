@@ -678,6 +678,11 @@
     "description": "Changeons ça !"
   },
   "dashboard": {
+    "upgradePlan": {
+      "title": "Mettre à niveau votre abonnement",
+      "subtitle": "Vous êtes actuellement sur l'abonnement {currentPlan}. Pour accéder à cette fonctionnalité, veuillez envisager de passer à un abonnement supérieur.",
+      "contact-us": "Nous contacter pour la mise à niveau"
+    },
     "signout-desc": "Connectez-vous pour accéder à votre tableau de bord",
     "sidebar": {
       "create-btn": "Créer",

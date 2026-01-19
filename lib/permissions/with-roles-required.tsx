@@ -11,6 +11,7 @@ import { userInfoOptions } from "../queries/user";
 import { communityUserRoles } from "../queries/community";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { CommunityUserRole, planSchema, PlanType } from "@/types/schemas";
+import UpgradePlan from "@/components/features/dashboard/upgrade-plan";
 
 type ServerComponent<P> = (
   props: P,
@@ -140,7 +141,11 @@ export function withPlanRestriction<P extends object>(
       const userPlan = result.success ? result.data : undefined;
 
       if (!allowedPlans.includes(userPlan ?? "free")) {
-        notFound();
+        return (
+          <ScreenContainerCentered>
+            <UpgradePlan currentPlan={userPlan || "free"} />
+          </ScreenContainerCentered>
+        );
       }
     }
 

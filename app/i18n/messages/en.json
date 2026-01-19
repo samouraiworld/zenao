@@ -678,6 +678,11 @@
     "description": "Let's change that!"
   },
   "dashboard": {
+    "upgradePlan": {
+      "title": "Upgrade your plan",
+      "subtitle": "You are currently on the {currentPlan} plan. To access this feature, please consider upgrading to a higher plan.",
+      "contact-us": "Contact us for upgrade"
+    },
     "signout-desc": "Log in to access your dashboard",
     "sidebar": {
       "create-btn": "Create",
