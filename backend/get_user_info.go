@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
@@ -13,24 +12,22 @@ func (s *ZenaoServer) GetUserInfo(
 	ctx context.Context,
 	req *connect.Request[zenaov1.GetUserInfoRequest],
 ) (*connect.Response[zenaov1.GetUserInfoResponse], error) {
-	user := s.Auth.GetUser(ctx)
-	if user == nil {
-		return nil, errors.New("unauthorized")
-	}
-
-	zUser, err := s.EnsureUserExists(ctx, user)
+	actor, err := s.GetActor(ctx, req.Header())
 	if err != nil {
 		return nil, err
 	}
 
-	s.Logger.Info("get-user-info", zap.String("user-id", zUser.ID), zap.Bool("user-banned", user.Banned))
+	s.Logger.Info("get-user-info", zap.String("user-id", actor.User.ID), zap.String("actor-id", actor.ID()), zap.Bool("acting-as-team", actor.IsTeam()))
 
-	if user.Banned {
-		return nil, errors.New("user is banned")
+	actorPlan := actor.User.Plan
+	if actor.IsTeam() {
+		actorPlan = actor.ActingAs.Plan
 	}
 
 	return connect.NewResponse(&zenaov1.GetUserInfoResponse{
-		UserId: zUser.ID,
-		Plan:   zUser.Plan.String(),
+		UserId:    actor.UserID(),
+		Plan:      actor.User.Plan.String(),
+		ActorId:   actor.ID(),
+		ActorPlan: actorPlan.String(),
 	}), nil
 }
