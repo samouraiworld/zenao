@@ -685,6 +685,7 @@
     },
     "signout-desc": "Connectez-vous pour accéder à votre tableau de bord",
     "sidebar": {
+      "pro": "Pro",
       "create-btn": "Créer",
       "create-event": "Créer un événement",
       "create-community": "Créer une communauté",

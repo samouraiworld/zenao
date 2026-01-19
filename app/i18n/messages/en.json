@@ -685,6 +685,7 @@
     },
     "signout-desc": "Log in to access your dashboard",
     "sidebar": {
+      "pro": "Pro",
       "create-btn": "Create",
       "create-event": "Create Event",
       "create-community": "Create Community",
