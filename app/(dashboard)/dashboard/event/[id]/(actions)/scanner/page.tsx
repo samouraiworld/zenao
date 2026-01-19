@@ -6,6 +6,10 @@ import { eventOptions } from "@/lib/queries/event";
 import { userInfoOptions } from "@/lib/queries/user";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { EventScreenContainer } from "@/components/features/event/event-screen-container";
+import {
+  getActiveAccountServer,
+  getTeamIdFromActiveAccount,
+} from "@/lib/active-account/server";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -17,7 +21,11 @@ export default async function ScannerPage({ params }: Props) {
   const queryClient = getQueryClient();
 
   const { getToken, userId } = await auth();
-  const userAddrOpts = userInfoOptions(getToken, userId);
+
+  const activeAccount = await getActiveAccountServer();
+  const teamId = getTeamIdFromActiveAccount(activeAccount);
+
+  const userAddrOpts = userInfoOptions(getToken, userId, teamId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 

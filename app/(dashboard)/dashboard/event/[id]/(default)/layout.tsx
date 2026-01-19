@@ -16,7 +16,10 @@ import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-
 import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
 import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
-import { getActiveAccountServer } from "@/lib/active-account/server";
+import {
+  getActiveAccountServer,
+  getTeamIdFromActiveAccount,
+} from "@/lib/active-account/server";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
@@ -32,7 +35,10 @@ async function DashboardEventInfoLayoutProps({
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const userAddrOpts = userInfoOptions(getToken, userId);
+  const activeAccount = await getActiveAccountServer();
+  const teamId = getTeamIdFromActiveAccount(activeAccount);
+
+  const userAddrOpts = userInfoOptions(getToken, userId, teamId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 
@@ -46,9 +52,7 @@ async function DashboardEventInfoLayoutProps({
     );
   }
 
-  const activeAccount = await getActiveAccountServer();
   const entityId = activeAccount?.id ?? userProfileId;
-  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
 
   let eventInfo;
 
