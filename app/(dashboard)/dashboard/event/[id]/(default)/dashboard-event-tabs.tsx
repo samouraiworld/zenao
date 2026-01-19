@@ -58,7 +58,7 @@ export default function DashboardEventTabs({
         </RoleBasedViewMode>
 
         <RoleBasedViewMode roles={roles} allowedRoles={["organizer"]}>
-          <RoleLockTabsTrigger
+          <PlanLockTabsTrigger
             allowedRoles={["pro"]}
             roles={[plan]}
             value="broadcast"
