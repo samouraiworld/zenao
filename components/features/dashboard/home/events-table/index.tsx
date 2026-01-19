@@ -21,9 +21,7 @@ export default function EventsTable({ now, tab }: EventsTableProps) {
   const { getToken } = useAuth();
   const actor = useActor();
 
-  console.log(actor);
-
-  const entityId = actor?.userId;
+  const entityId = actor?.actingAs;
   const teamId = actor?.type === "team" ? actor.actingAs : undefined;
 
   const [tablePage, setTablePage] = useQueryState("page", {

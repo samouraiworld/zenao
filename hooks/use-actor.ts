@@ -11,7 +11,6 @@ export default function useActor(): GetActorResponse | null {
   const { getToken, userId: authId } = useAuth();
 
   const { activeAccount } = useActiveAccount();
-  console.log("Active Account in useActor:", activeAccount);
   const teamId = activeAccount?.type === "team" ? activeAccount?.id : undefined;
 
   const { data: userInfo } = useSuspenseQuery(
@@ -21,6 +20,7 @@ export default function useActor(): GetActorResponse | null {
   const { data: accountInfo } = useSuspenseQuery(
     userInfoOptions(getToken, authId, teamId),
   );
+  console.log("Account info:", accountInfo);
 
   if (!userInfo || !accountInfo) {
     return null;
@@ -29,6 +29,8 @@ export default function useActor(): GetActorResponse | null {
   const result = planSchema.safeParse(accountInfo.plan || "free");
   const plan = result.success ? result.data : "free";
 
+  // actingAs is the current account id
+  // userId === userId if personal
   return {
     type: activeAccount?.type === "team" ? "team" : "personal",
     userId: userInfo.userId,

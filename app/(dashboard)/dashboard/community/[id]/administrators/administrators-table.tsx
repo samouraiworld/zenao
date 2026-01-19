@@ -1,13 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { parseAsInteger, useQueryStates } from "nuqs";
 import { useCommunityAdministratorsEditionContext } from "../../../../../../components/providers/community-administrators-edition-context-provider";
 import { useCommunityAdministratorsColumns } from "./columns";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
-import { userInfoOptions } from "@/lib/queries/user";
 import {
   communityUserRoles,
   DEFAULT_ADMINISTRATORS_PAGE_LIMIT,
@@ -17,17 +15,15 @@ import { DataTablePagination } from "@/components/widgets/data-table/data-table-
 import Text from "@/components/widgets/texts/text";
 import { AddAdministratorsForm } from "@/components/features/dashboard/community-details/admins/add-administrator-form";
 import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
+import useActor from "@/hooks/use-actor";
 
 export default function AdministratorsTable() {
   const { communityId } = useDashboardCommunityContext();
   const t = useTranslations("dashboard.communityDetails.administrators");
-  const { getToken, userId } = useAuth();
+  const actor = useActor();
 
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
   const { data: userRoles } = useSuspenseQuery(
-    communityUserRoles(communityId, userInfo?.userId),
+    communityUserRoles(communityId, actor?.actingAs),
   );
 
   const { administrators, onDelete } =
