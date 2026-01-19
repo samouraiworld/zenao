@@ -219,6 +219,29 @@ func (g *gormZenaoDB) CancelEvent(eventID string) error {
 	if err != nil {
 		return err
 	}
+
+	priceGroups, err := g.getPriceGroupsByEvent(evtIDInt)
+	if err != nil {
+		return err
+	}
+
+	if len(priceGroups) > 0 {
+		priceGroupsIDs := make([]uint, len(priceGroups))
+		for i, priceGroup := range priceGroups {
+			priceGroupsIDs[i] = priceGroup.ID
+		}
+
+		err = g.db.Delete(&Price{}, "price_group_id IN ?", priceGroupsIDs).Error
+		if err != nil {
+			return err
+		}
+
+		err = g.db.Delete(&PriceGroup{}, "event_id = ?", evtIDInt).Error
+		if err != nil {
+			return err
+		}
+	}
+
 	err = g.db.Delete(&Event{}, evtIDInt).Error
 	if err != nil {
 		return err
@@ -650,16 +673,7 @@ func (g *gormZenaoDB) CreatePriceGroup(eventID string, capacity uint32) (*zeni.P
 	return dbPriceGroupToZeniPriceGroup(group), nil
 }
 
-// GetPriceGroupsByEvent implements zeni.DB.
-func (g *gormZenaoDB) GetPriceGroupsByEvent(eventID string) ([]*zeni.PriceGroup, error) {
-	g, span := g.trace("gzdb.GetPriceGroupsByEvent")
-	defer span.End()
-
-	eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("parse event id: %w", err)
-	}
-
+func (g *gormZenaoDB) getPriceGroupsByEvent(eventIDInt uint64) ([]PriceGroup, error) {
 	var groups []PriceGroup
 	if err := g.db.
 		Where("event_id = ?", eventIDInt).
@@ -670,6 +684,24 @@ func (g *gormZenaoDB) GetPriceGroupsByEvent(eventID string) ([]*zeni.PriceGroup,
 		Order("id ASC").
 		Find(&groups).Error; err != nil {
 		return nil, fmt.Errorf("query price groups: %w", err)
+	}
+
+	return groups, nil
+}
+
+// GetPriceGroupsByEvent implements zeni.DB.
+func (g *gormZenaoDB) GetPriceGroupsByEvent(eventID string) ([]*zeni.PriceGroup, error) {
+	g, span := g.trace("gzdb.GetPriceGroupsByEvent")
+	defer span.End()
+
+	eventIDInt, err := strconv.ParseUint(eventID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse event id: %w", err)
+	}
+
+	groups, err := g.getPriceGroupsByEvent(eventIDInt)
+	if err != nil {
+		return nil, err
 	}
 
 	result := make([]*zeni.PriceGroup, 0, len(groups))
