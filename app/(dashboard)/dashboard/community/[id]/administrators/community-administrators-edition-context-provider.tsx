@@ -11,12 +11,12 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useDebouncedCallback } from "use-debounce";
-import { useDashboardCommunityContext } from "../dashboard-community-context-provider";
 import { useToast } from "@/hooks/use-toast";
 import { useAnalyticsEvents } from "@/hooks/use-analytics-events";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { communityAdministrators } from "@/lib/queries/community";
 import { captureException } from "@/lib/report";
+import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
 
 interface CommunityAdministratorsEditionContextProviderProps {
   children: React.ReactNode;
