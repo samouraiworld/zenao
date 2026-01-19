@@ -23,7 +23,7 @@ export default function PlanLockTabsTrigger<T extends string>({
       className="w-fit p-2 data-[state=active]:font-semibold hover:bg-secondary/80 data-[state=locked]:cursor-not-allowed data-[state=locked]:opacity-50 data-[state=locked]:pointer-events-none"
       {...(isAllowed ? {} : { "data-state": "locked" })}
     >
-      <Lock className="mr-2 h-4 w-4" />
+      {!isAllowed && <Lock className="mr-2 h-4 w-4" />}
       {children}
     </TabsTrigger>
   );
