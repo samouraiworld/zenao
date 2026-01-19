@@ -11,7 +11,7 @@ import { BaseLogo } from "@/components/widgets/icons";
 
 export default function Home() {
   const t = useTranslations("home");
-
+  const tImages = useTranslations("images");
   return (
     <ScreenContainerCentered>
       <div className="flex flex-col items-center">
@@ -23,7 +23,7 @@ export default function Home() {
         </Card>
         <Image
           src="/zenao-logo.png"
-          alt="zeano logo"
+          alt={tImages("zenao-logo")}
           width={200}
           height={200}
           priority

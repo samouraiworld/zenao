@@ -32,6 +32,7 @@ export default function ProfileHeader({
   bio,
   isTeam,
 }: ProfileHeaderProps) {
+  const tImages = useTranslations("images");
   const profileDetails = deserializeWithFrontMatter({
     serialized: bio,
     schema: profileDetailsSchema,
@@ -57,7 +58,7 @@ export default function ProfileHeader({
               profileDetails.bannerUri ||
               "ipfs://bafybeidp4z4cywvdzoyqgdolcqmmxeug62qukpl3nfumjquqragxwr7bny"
             }
-            alt="Profile banner"
+            alt={tImages("profile-banner")}
             priority
             fill
             className="w-full h-full object-cover rounded-b-2xl"
@@ -69,7 +70,7 @@ export default function ProfileHeader({
             <div className="relative w-24 h-24 sm:w-40 sm:h-40 rounded-full ring-4 ring-background shadow-md overflow-hidden">
               <Web3Image
                 src={avatarUri}
-                alt="Profile picture"
+                alt={tImages("profile-picture")}
                 priority
                 fetchPriority="high"
                 fill

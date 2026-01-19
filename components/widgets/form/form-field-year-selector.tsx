@@ -1,6 +1,7 @@
 "use client";
 
 import { FieldValues } from "react-hook-form";
+import { useTranslations } from "next-intl";
 import { FormFieldProps } from "@/types/schemas";
 import {
   FormField,
@@ -30,6 +31,7 @@ export default function FormFieldYearSelector<T extends FieldValues>({
   className,
   disabled = false,
 }: FormFieldYearSelectorProps<T>) {
+  const tForms = useTranslations("forms");
   return (
     <FormField
       name={name}
@@ -43,7 +45,10 @@ export default function FormFieldYearSelector<T extends FieldValues>({
             disabled={disabled}
           >
             <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="Year" defaultValue={field.value} />
+              <SelectValue
+                placeholder={tForms("year")}
+                defaultValue={field.value}
+              />
             </SelectTrigger>
             <SelectContent className="max-h-60 overflow-y-auto">
               {Array.from({ length: 100 }, (_, i) => {

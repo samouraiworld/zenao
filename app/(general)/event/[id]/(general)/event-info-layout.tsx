@@ -57,6 +57,7 @@ export function EventInfoLayout({
   const timezone = useLayoutTimezone(eventTimezone);
 
   const t = useTranslations("event");
+  const tImages = useTranslations("images");
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -86,7 +87,7 @@ export function EventInfoLayout({
               (max-width: 1200px) 50vw,
               33vw"
             fill
-            alt="Event"
+            alt={tImages("event")}
             priority
             fetchPriority="high"
           />

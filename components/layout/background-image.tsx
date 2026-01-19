@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Web3Image } from "../widgets/images/web3-image";
 
 export interface BackgroundProps {
@@ -9,9 +10,10 @@ export interface BackgroundProps {
 }
 
 export function BackgroundImage(props: BackgroundProps) {
+  const tImages = useTranslations("images");
   return (
     <Web3Image
-      alt="Background"
+      alt={tImages("background")}
       src={props.src}
       width={props.width}
       height={props.height}

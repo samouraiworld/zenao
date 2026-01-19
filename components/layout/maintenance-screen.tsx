@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import Text from "../widgets/texts/text";
 
 export function MaintenanceScreen() {
-  const t = useTranslations("common");
+  const t = useTranslations();
 
   return (
     <div className="h-screen flex items-center justify-center">

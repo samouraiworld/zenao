@@ -13,6 +13,7 @@ import { Button } from "@/components/shadcn/button";
 
 export default function QuickCreateMenu() {
   const t = useTranslations("components.widgets.quick-create-menu");
+  const tA11y = useTranslations("a11y");
 
   return (
     <DropdownMenu>
@@ -20,7 +21,7 @@ export default function QuickCreateMenu() {
         <Button
           variant="outline"
           size="icon"
-          aria-label="quick menu create"
+          aria-label={tA11y("quick-menu")}
           className="border-[#EC7E17] hover:bg-[#EC7E17] text-[#EC7E17] focus-visible:ring-0"
         >
           <PlusIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />

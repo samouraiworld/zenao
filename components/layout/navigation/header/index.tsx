@@ -163,6 +163,7 @@ const GoBackButton = ({ className }: { className?: string }) => {
 
 export function Header() {
   const t = useTranslations("navigation");
+  const tImages = useTranslations("images");
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -179,7 +180,7 @@ export function Header() {
           <Link href="/" className="flex gap-2 items-center">
             <Web3Image
               src="/zenao-logo.png"
-              alt="zenao logo"
+              alt={tImages("zenao-logo")}
               width={28}
               height={28}
               className="max-[450px]:w-6 max-[450px]:h-6"

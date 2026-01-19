@@ -27,6 +27,7 @@ export const TimeZonesPopover: React.FC<{
   defaultValue: string;
 }> = ({ handleSelect, defaultValue }) => {
   const t = useTranslations("eventForm");
+  const tForms = useTranslations("forms");
   const [search, setSearch] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [item, setItem] = useState<string>(defaultValue || "");
@@ -49,7 +50,7 @@ export const TimeZonesPopover: React.FC<{
         <PopoverContent className="w-full relative p-0">
           <Command>
             <CommandInput
-              placeholder="Timezones"
+              placeholder={tForms("timezones")}
               className="h-10"
               onValueChange={setSearch}
               value={search}

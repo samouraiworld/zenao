@@ -52,6 +52,7 @@ export function ExclusiveEventGuard({
   const [canAccess, setCanAccess] = useState<boolean>(isMember);
 
   const t = useTranslations("event-protection-guard");
+  const tImages = useTranslations("images");
   const form = useForm<EventProtectionFormSchemaType>({
     mode: "all",
     resolver: zodResolver(eventProtectionFormSchema),
@@ -113,7 +114,7 @@ export function ExclusiveEventGuard({
             (max-width: 1200px) 50vw,
             33vw"
               fill
-              alt="Event"
+              alt={tImages("event")}
               priority
               fetchPriority="high"
               className="flex w-full rounded-xl self-center object-cover"

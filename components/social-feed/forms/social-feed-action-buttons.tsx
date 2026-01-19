@@ -2,6 +2,7 @@
 
 import { Dispatch, SetStateAction } from "react";
 import { Save, SendHorizonalIcon, VoteIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/tailwind";
 import { ButtonBase } from "@/components/widgets/buttons/button-bases";
 import { SocialFeedPostType } from "@/lib/social-feed";
@@ -21,6 +22,7 @@ export default function SocialFeedActionButtons({
   isEditing?: boolean;
   isDisabled?: boolean;
 }) {
+  const tA11y = useTranslations("a11y");
   return (
     <>
       {!isReplying && (
@@ -37,7 +39,7 @@ export default function SocialFeedActionButtons({
               postTypeMode === "STANDARD_POST" ? "POLL" : "STANDARD_POST",
             )
           }
-          aria-label="set type post"
+          aria-label={tA11y("set-post-type")}
           disabled={isLoading}
         >
           <VoteIcon
@@ -56,7 +58,7 @@ export default function SocialFeedActionButtons({
           "dark:text-white text-black flex items-center justify-center rounded-full aspect-square",
           "hover:bg-neutral-500/20 cursor-pointer w-7 h-7 md:w-12 md:h-12",
         )}
-        aria-label="submit post"
+        aria-label={tA11y("submit-post")}
         loading={isLoading}
         disabled={isDisabled}
       >

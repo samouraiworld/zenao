@@ -17,6 +17,7 @@ export default function EventCommunitySection({
 }: EventCommunitySectionProps) {
   const { data: community } = useSuspenseQuery(communityInfo(communityId));
   const t = useTranslations("event-community-section");
+  const tImages = useTranslations("images");
 
   return (
     <Link href={`/community/${communityId}`}>
@@ -30,7 +31,7 @@ export default function EventCommunitySection({
               width={48}
               height={48}
               quality={80}
-              alt="Community Avatar"
+              alt={tImages("community-profile")}
               className="w-full h-full object-cover"
             />
           </AvatarFallback>

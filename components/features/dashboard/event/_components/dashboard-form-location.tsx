@@ -61,7 +61,7 @@ export default function DashboardFormLocation() {
         <FormFieldInputString
           control={form.control}
           name="location.location"
-          placeholder={"URI..."}
+          placeholder={t("virtual-uri-placeholder")}
         />
       ) : (
         <FormFieldLocation form={form} onRemove={() => setMarker(null)} />

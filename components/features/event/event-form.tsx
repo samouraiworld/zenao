@@ -285,7 +285,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                           "w-fit flex items-center justify-center cursor-pointer",
                           "hover:bg-neutral-700",
                         )}
-                        title="Add image"
+                        title={t("add-image-tooltip")}
                         onClick={(e) => {
                           e.preventDefault();
                           if (uploading) return;
@@ -297,7 +297,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                           );
                           hiddenImgInputRef.current?.click();
                         }}
-                        aria-label="Add image"
+                        aria-label={t("add-image-aria-label")}
                       >
                         <ImageIcon className="!h-4 !w-4" />
                       </Button>
@@ -315,7 +315,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                           "w-fit flex px-4 items-center justify-center cursor-pointer",
                           "hover:bg-neutral-700",
                         )}
-                        title="Add audio"
+                        title={t("add-audio-tooltip")}
                         onClick={(e) => {
                           e.preventDefault();
                           if (uploading) return;
@@ -327,7 +327,7 @@ export const EventForm: React.FC<EventFormProps> = ({
                           );
                           hiddenAudioInputRef.current?.click();
                         }}
-                        aria-label="Add audio"
+                        aria-label={t("add-audio-aria-label")}
                       >
                         <AudioWaveformIcon className="!h-4 !w-4" />
                       </Button>
@@ -382,7 +382,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             <FormFieldInputString
               control={form.control}
               name="location.location"
-              placeholder={"URI..."}
+              placeholder={t("virtual-uri-placeholder")}
             />
           ) : (
             <FormFieldLocation form={form} onRemove={() => setMarker(null)} />
@@ -510,7 +510,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           <FormFieldSwitch
             control={form.control}
             name="exclusive"
-            label={"Protect access with password"}
+            label={t("exclusive-label")}
           />
 
           {exclusive && (

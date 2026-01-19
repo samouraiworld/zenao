@@ -215,6 +215,7 @@ export function NavMain({ items }: NavMainProps) {
   const { state, isMobile } = useSidebar();
   const { id } = useParams<{ id: string | undefined }>();
   const t = useTranslations("dashboard.sidebar");
+  const tA11y = useTranslations("a11y");
 
   const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
     if (typeof subItems === "function") {
@@ -250,7 +251,7 @@ export function NavMain({ items }: NavMainProps) {
                   <SidebarMenuButton
                     variant="outline"
                     tooltip={t("quick-create")}
-                    aria-label="quick menu create"
+                    aria-label={tA11y("quick-menu")}
                   >
                     <PlusCircleIcon />
                     <span>{t("create-btn")}</span>

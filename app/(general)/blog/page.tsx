@@ -21,7 +21,8 @@ async function getPosts(page: number) {
 export const fetchCache = "force-no-store";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Blog | Zenao";
+  const tMetadata = await getTranslations("metadata");
+  const title = tMetadata("blog-page.title");
   const description =
     "Discover the latest articles, news, and updates about Zenao in our blog.";
   return {

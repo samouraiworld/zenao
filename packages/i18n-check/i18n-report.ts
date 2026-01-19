@@ -209,9 +209,9 @@ const extractKeysFromCode = (
   for (const srcPath of srcPaths) {
     try {
       // Read all source files and extract t() calls using proper regex
-      // Get list of files first
+      // Get list of files first, excluding generated directories
       const filesOutput = execSync(
-        `find "${srcPath}" -type f \\( -name "*.tsx" -o -name "*.ts" \\) 2>/dev/null || true`,
+        `find "${srcPath}" -type f \\( -name "*.tsx" -o -name "*.ts" \\) -not -path "*/gen/*" -not -path "*/_generated/*" -not -path "*/generated/*" -not -path "*/.next/*" -not -path "*/node_modules/*" 2>/dev/null || true`,
         { encoding: "utf-8", maxBuffer: 10 * 1024 * 1024 },
       );
 
@@ -223,17 +223,38 @@ const extractKeysFromCode = (
           // Strip comments to avoid false positives from commented-out code
           const content = stripComments(rawContent);
 
+          // Extract namespace context from useTranslations calls
+          const namespaceContexts = new Map<string, string>();
+          const useTranslationsMatches = content.matchAll(
+            /(?:const|let|var)\s+(\w+)\s*=\s*useTranslations\(["']([^"']+)["']\)/gm,
+          );
+
+          for (const match of useTranslationsMatches) {
+            const [, variableName, namespace] = match;
+            namespaceContexts.set(variableName, namespace);
+          }
+
           // Match t("key"), getT("key"), i18n.t("key") patterns
           // Look for patterns: {t(, (t(, =t(, :t(, space+t(, >t(, [t(
           // Also match getT( and i18n.t( which are common wrappers
           // Allow whitespace (including newlines) after opening parenthesis for multiline calls
           const tMatches = content.matchAll(
-            /(?:^|[{\s(=:>\[,])(?:t|getT|i18n\.t)\((?:\s|[\r\n])*["']([^"'\r\n]+)["']/gm,
+            /(?:^|[{\s(=:>\[,])(\w+)\((?:\s|[\r\n])*["']([^"'\r\n]+)["']/gm,
           );
 
           for (const match of tMatches) {
-            if (match[1] && isValidTranslationKey(match[1])) {
-              literalKeys.add(match[1]);
+            const [, functionName, key] = match;
+            if (
+              (functionName === "t" ||
+                functionName === "getT" ||
+                functionName === "i18n.t") &&
+              key &&
+              isValidTranslationKey(key)
+            ) {
+              // Check if we have a namespace context for this t function
+              const namespace = namespaceContexts.get(functionName);
+              const finalKey = namespace ? `${namespace}.${key}` : key;
+              literalKeys.add(finalKey);
             }
           }
 
@@ -241,15 +262,26 @@ const extractKeysFromCode = (
           // Extract the static prefix before the first ${
           // Allow whitespace (including newlines) after opening parenthesis for multiline calls
           const templateMatches = content.matchAll(
-            /(?:^|[{\s(=:>\[,])(?:t|getT|i18n\.t)\((?:\s|[\r\n])*`([^`$]+)\$\{/gm,
+            /(?:^|[{\s(=:>\[,])(\w+)\((?:\s|[\r\n])*`([^`$]+)\$\{/gm,
           );
 
           for (const match of templateMatches) {
-            if (match[1]) {
+            const [, functionName, prefix] = match;
+            if (
+              (functionName === "t" ||
+                functionName === "getT" ||
+                functionName === "i18n.t") &&
+              prefix
+            ) {
               // Remove trailing dot if present
-              const prefix = match[1].replace(/\.$/, "");
-              if (prefix && isValidTranslationKey(prefix)) {
-                dynamicPrefixes.add(prefix);
+              const cleanPrefix = prefix.replace(/\.$/, "");
+              if (cleanPrefix && isValidTranslationKey(cleanPrefix)) {
+                // Check if we have a namespace context for this t function
+                const namespace = namespaceContexts.get(functionName);
+                const finalPrefix = namespace
+                  ? `${namespace}.${cleanPrefix}`
+                  : cleanPrefix;
+                dynamicPrefixes.add(finalPrefix);
               }
             }
           }
@@ -307,7 +339,12 @@ const extractKeysFromCode = (
               !key.startsWith("import.") &&
               !key.startsWith("console.") &&
               !key.startsWith("window.") &&
-              !key.startsWith("document.")
+              !key.startsWith("document.") &&
+              // Skip protobuf patterns
+              !key.match(/^[a-z]+\.v\d+\.[A-Z]/) && // Skip patterns like feeds.v1.ArticlePost
+              !key.match(/\.v\d+\.[A-Z]/) && // Skip any patterns with .v1.ClassName
+              !key.match(/^v\d+\.[A-Z]/) && // Skip patterns starting with v1.ClassName
+              !key.includes(".pb.") // Skip protobuf-related patterns
             ) {
               literalKeys.add(key);
             }
@@ -342,9 +379,6 @@ const checkLoneEntries = (
     const componentsPath = resolve(process.cwd(), "./", "components");
     const libPath = resolve(process.cwd(), "./", "lib");
     const hooksPath = resolve(process.cwd(), "./", "hooks");
-
-    // Also search in backend directory for Go files (though this script focuses on TS/TSX)
-    const backendPath = resolve(process.cwd(), "./", "backend");
 
     // Load default language JSON
     const defaultPath = resolve(
