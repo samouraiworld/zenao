@@ -12,7 +12,6 @@ import {
   communityPayoutStatus,
   communityUserRoles,
 } from "@/lib/queries/community";
-import { userInfoOptions } from "@/lib/queries/user";
 import SettingsSection from "@/components/layout/settings-section";
 import { Card } from "@/components/widgets/cards/card";
 import Heading from "@/components/widgets/texts/heading";
@@ -20,6 +19,7 @@ import { Badge } from "@/components/shadcn/badge";
 import { Button } from "@/components/shadcn/button";
 import { DateTimeText } from "@/components/widgets/date-time-text";
 import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
+import useActor from "@/hooks/use-actor";
 
 const payoutStatusBadge = {
   verified: "secondary",
@@ -32,7 +32,7 @@ export type PayoutStatus = keyof typeof payoutStatusBadge;
 
 export default function PayoutsConfiguration() {
   const { communityId } = useDashboardCommunityContext();
-  const { getToken, userId } = useAuth();
+  const { getToken } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -41,11 +41,9 @@ export default function PayoutsConfiguration() {
   const t = useTranslations("community-form");
   const tEdit = useTranslations("community-edit-form");
 
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
+  const actor = useActor();
   const { data: userRoles = [] } = useSuspenseQuery(
-    communityUserRoles(communityId, userInfo?.userId || ""),
+    communityUserRoles(communityId, actor?.actingAs),
   );
   const isAdmin = userRoles.includes("administrator");
 
