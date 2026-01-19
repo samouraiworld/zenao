@@ -133,11 +133,15 @@ export function withPlanRestriction<P extends object>(
       );
     }
 
-    const result = planSchema.safeParse(userInfo?.plan);
-    const userPlan = result.success ? result.data : undefined;
+    const activeAccount = await getActiveAccountServer();
 
-    if (!allowedPlans.includes(userPlan ?? "free")) {
-      notFound();
+    if (activeAccount?.type === "personal") {
+      const result = planSchema.safeParse(userInfo?.plan);
+      const userPlan = result.success ? result.data : undefined;
+
+      if (!allowedPlans.includes(userPlan ?? "free")) {
+        notFound();
+      }
     }
 
     return <Component {...props} />;
