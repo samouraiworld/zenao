@@ -1,15 +1,13 @@
 import { queryOptions } from "@tanstack/react-query";
-import { useAuth } from "@clerk/nextjs";
 import { withSpan } from "../tracer";
+import { GetToken } from "../utils";
 import { buildQueryHeaders } from "./build-query-headers";
 import { zenaoClient } from "@/lib/zenao-client";
 import { GetUserInfoResponse } from "@/app/gen/zenao/v1/zenao_pb";
 
-type GetToken = ReturnType<typeof useAuth>["getToken"];
-
 export const userInfoOptions = (
   getToken: GetToken,
-  userId: string | null | undefined,
+  userId: string | null | undefined, // Auth id // clerk userId
   teamId?: string,
 ) =>
   queryOptions({

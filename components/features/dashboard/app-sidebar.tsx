@@ -3,12 +3,8 @@
 import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { NavMain } from "./nav-main";
 import AppSidebarFooter from "./app-sidebar-footer";
-import { userInfoOptions } from "@/lib/queries/user";
-import { planSchema } from "@/types/schemas";
 
 import {
   Sidebar,
@@ -22,17 +18,12 @@ import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Text from "@/components/widgets/texts/text";
 import { useSidebarItems } from "@/lib/navigation/dashboard/sidebar/sidebar-items";
+import useActor from "@/hooks/use-actor";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("navigation");
-
-  const { getToken, userId: authId } = useAuth();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, authId),
-  );
-
-  const result = planSchema.safeParse(userInfo?.plan || "free");
-  const plan = result.success ? result.data : "free";
+  const actor = useActor();
+  const plan = actor?.plan || "free";
 
   const sidebarItems = useSidebarItems();
 

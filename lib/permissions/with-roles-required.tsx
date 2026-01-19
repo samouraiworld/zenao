@@ -120,11 +120,10 @@ export function withPlanRestriction<P extends object>(
     const { getToken, userId } = await auth();
     const token = await getToken();
 
+    const t = await getTranslations();
     const userAddrOpts = userInfoOptions(getToken, userId);
     const userInfo = await queryClient.fetchQuery(userAddrOpts);
     const userProfileId = userInfo?.userId;
-
-    const t = await getTranslations();
 
     if (!token || !userProfileId) {
       return (
@@ -135,6 +134,26 @@ export function withPlanRestriction<P extends object>(
     }
 
     const activeAccount = await getActiveAccountServer();
+
+    if (activeAccount?.type === "team") {
+      const teamInfoOpts = userInfoOptions(getToken, activeAccount.id);
+      const teamInfo = await queryClient.fetchQuery(teamInfoOpts);
+
+      if (!teamInfo) {
+        notFound();
+      }
+
+      const result = planSchema.safeParse(teamInfo?.plan);
+      const teamPlan = result.success ? result.data : undefined;
+
+      if (!allowedPlans.includes(teamPlan ?? "free")) {
+        return (
+          <ScreenContainerCentered>
+            <UpgradePlan currentPlan={teamPlan || "free"} />
+          </ScreenContainerCentered>
+        );
+      }
+    }
 
     if (activeAccount?.type === "personal") {
       const result = planSchema.safeParse(userInfo?.plan);
