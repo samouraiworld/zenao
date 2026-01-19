@@ -12,7 +12,9 @@
     "cypress:open": "cypress open",
     "cypress:e2e": "cypress open --e2e -b chrome",
     "cypress:e2e:headless": "cypress run --e2e -b chrome",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "translations": "tsx ./packages/i18n-check/i18n-report.ts --app-name Zenao --locales en,fr --locales-path app/i18n/messages --eslint-config packages/i18n-check/eslint.config.json.mjs",
+    "translations:fix": "tsx ./packages/i18n-check/i18n-report.ts --app-name Zenao --locales en,fr --locales-path app/i18n/messages --eslint-config packages/i18n-check/eslint.config.json.mjs --fix"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.9.0",
@@ -123,6 +125,7 @@
     "prettier": "^3.4.2",
     "react-email": "^4.3.1",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "wait-on": "^9.0.1"
   },
