@@ -17,6 +17,11 @@ import { login, logout, reset, toastShouldContain } from "../support/helpers";
 describe("main", () => {
   // NOTE: this test requires a valid pinata upload setup in the nextjs server
 
+  beforeEach(() => {
+    // Set viewport large enough to show header labels
+    cy.viewport(1280, 720);
+  });
+
   it("prepare state", () => {
     reset();
   });

@@ -49,7 +49,7 @@ export const useSidebarItems: () => NavGroup[] = () =>
                     url: "/dashboard",
                   },
                   {
-                    title: "description",
+                    title: "general",
                     url: `/dashboard/event/${id}`,
                   },
                   {
