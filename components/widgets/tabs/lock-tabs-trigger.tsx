@@ -2,19 +2,19 @@ import React from "react";
 import { Lock } from "lucide-react";
 import { TabsTrigger } from "@/components/shadcn/tabs";
 
-interface RoleLockTabsTriggerProps<T extends string> {
+interface PlanLockTabsTriggerProps<T extends string> {
   allowedRoles: T[];
   roles: T[];
   children: React.ReactNode | null;
   value: string;
 }
 
-export default function RoleLockTabsTrigger<T extends string>({
+export default function PlanLockTabsTrigger<T extends string>({
   allowedRoles,
   roles,
   value,
   children = null,
-}: RoleLockTabsTriggerProps<T>) {
+}: PlanLockTabsTriggerProps<T>) {
   const isAllowed = roles.some((role) => allowedRoles.includes(role));
 
   return (
