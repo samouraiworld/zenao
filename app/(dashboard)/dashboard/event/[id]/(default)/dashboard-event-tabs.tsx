@@ -9,7 +9,7 @@ import { Separator } from "@/components/shadcn/separator";
 import { useDashboardEventContext } from "@/components/providers/dashboard-event-context-provider";
 import { EventUserRole } from "@/lib/queries/event-users";
 import RoleBasedViewMode from "@/components/widgets/permissions/view-mode";
-import RoleLockTabsTrigger from "@/components/widgets/tabs/lock-tabs-trigger";
+import PlanLockTabsTrigger from "@/components/widgets/tabs/lock-tabs-trigger";
 import useActor from "@/hooks/use-actor";
 
 export default function DashboardEventTabs({
