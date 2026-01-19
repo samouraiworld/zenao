@@ -115,7 +115,7 @@ export function withPlanRestriction<P extends object>(
   Component: ServerComponent<P>,
   allowedPlans: PlanType[],
 ): ServerComponent<P> {
-  return async function PlanRoleProtectedPage(props: P) {
+  return async function PlanProtectedPage(props: P) {
     const queryClient = getQueryClient();
     const { getToken, userId } = await auth();
     const token = await getToken();
