@@ -790,6 +790,10 @@ func (g *gormZenaoDB) validatePaymentAccountID(paymentAccount *zeni.PaymentAccou
 }
 
 func validateAmount(price *zeni.Price, paymentAccountID *uint) error {
+	if price.AmountMinor < 0 {
+		return errors.New("amount minor cannot be negative")
+	}
+
 	if price.AmountMinor == 0 && paymentAccountID != nil {
 		return errors.New("amount minor is required when payment account id is provided")
 	} else if price.AmountMinor != 0 && paymentAccountID == nil {
