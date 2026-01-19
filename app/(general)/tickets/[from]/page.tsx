@@ -12,10 +12,6 @@ import { userInfoOptions } from "@/lib/queries/user";
 import { eventsByParticipantList } from "@/lib/queries/events-list";
 import { EventsListLayout } from "@/components/features/event/events-list-layout";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
-import {
-  getActiveAccountServer,
-  getTeamIdFromActiveAccount,
-} from "@/lib/active-account/server";
 
 export const revalidate = 60;
 
@@ -37,10 +33,7 @@ export default async function TicketsPage({ params }: PageProps) {
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const activeAccount = await getActiveAccountServer();
-  const teamId = getTeamIdFromActiveAccount(activeAccount);
-
-  const userAddrOpts = userInfoOptions(getToken, userId, teamId);
+  const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 

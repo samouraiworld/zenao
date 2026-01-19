@@ -5,10 +5,6 @@ import CommunitiesPageLayout from "./communities-page-layout";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { userInfoOptions } from "@/lib/queries/user";
-import {
-  getActiveAccountServer,
-  getTeamIdFromActiveAccount,
-} from "@/lib/active-account/server";
 
 export default async function DashboardCommunityPage() {
   const queryClient = getQueryClient();
@@ -17,10 +13,7 @@ export default async function DashboardCommunityPage() {
 
   const t = await getTranslations();
 
-  const activeAccount = await getActiveAccountServer();
-  const teamId = getTeamIdFromActiveAccount(activeAccount);
-
-  const userAddrOpts = userInfoOptions(getToken, authId, teamId);
+  const userAddrOpts = userInfoOptions(getToken, authId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 

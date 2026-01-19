@@ -9,10 +9,7 @@ import { communityInfo, communityUserRoles } from "@/lib/queries/community";
 import { userInfoOptions } from "@/lib/queries/user";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import DashboardCommunityContextProvider from "@/components/providers/dashboard-community-context-provider";
-import {
-  getActiveAccountServer,
-  getTeamIdFromActiveAccount,
-} from "@/lib/active-account/server";
+import { getActiveAccountServer } from "@/lib/active-account/server";
 
 interface DashboardCommunityManagementPageProps {
   params: Promise<{ id: string }>;
@@ -28,10 +25,7 @@ async function DashboardCommunityManagementPage({
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const activeAccount = await getActiveAccountServer();
-  const teamId = getTeamIdFromActiveAccount(activeAccount);
-
-  const userAddrOpts = userInfoOptions(getToken, userId, teamId);
+  const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 
@@ -45,6 +39,7 @@ async function DashboardCommunityManagementPage({
     );
   }
 
+  const activeAccount = await getActiveAccountServer();
   const entityId = activeAccount?.id ?? userProfileId;
 
   let communityData;

@@ -12,10 +12,6 @@ import { eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
 import { imageWidth, imageHeight } from "@/components/features/event/constants";
 import { eventTickets } from "@/lib/queries/ticket";
-import {
-  getActiveAccountServer,
-  getTeamIdFromActiveAccount,
-} from "@/lib/active-account/server";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -29,10 +25,7 @@ export default async function TicketsPage({ params }: PageProps) {
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const activeAccount = await getActiveAccountServer();
-  const teamId = getTeamIdFromActiveAccount(activeAccount);
-
-  const userAddrOpts = userInfoOptions(getToken, userId, teamId);
+  const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 

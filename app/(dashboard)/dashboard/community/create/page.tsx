@@ -8,23 +8,17 @@ import {
   ScreenContainer,
   ScreenContainerCentered,
 } from "@/components/layout/screen-container";
-import {
-  getActiveAccountServer,
-  getTeamIdFromActiveAccount,
-} from "@/lib/active-account/server";
 
 export default async function CreateCommunityPage() {
   const queryClient = getQueryClient();
 
   const t = await getTranslations("community-create-form");
 
+  // Fetch user
   const { getToken, userId: authId } = await auth();
   const token = await getToken();
 
-  const activeAccount = await getActiveAccountServer();
-  const teamId = getTeamIdFromActiveAccount(activeAccount);
-
-  const userAddrOpts = userInfoOptions(getToken, authId, teamId);
+  const userAddrOpts = userInfoOptions(getToken, authId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 

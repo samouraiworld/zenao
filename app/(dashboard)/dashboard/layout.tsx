@@ -19,10 +19,6 @@ import { cn } from "@/lib/tailwind";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
 import { userInfoOptions } from "@/lib/queries/user";
-import {
-  getActiveAccountServer,
-  getTeamIdFromActiveAccount,
-} from "@/lib/active-account/server";
 
 export default async function DashboardRootLayout({
   children,
@@ -35,10 +31,7 @@ export default async function DashboardRootLayout({
 
   const t = await getTranslations();
 
-  const activeAccount = await getActiveAccountServer();
-  const teamId = getTeamIdFromActiveAccount(activeAccount);
-
-  const userAddrOpts = userInfoOptions(getToken, userId, teamId);
+  const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 

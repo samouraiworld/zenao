@@ -12,13 +12,11 @@ import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
+import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-event-info";
 import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
 import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
-import {
-  getActiveAccountServer,
-  getTeamIdFromActiveAccount,
-} from "@/lib/active-account/server";
+import { getActiveAccountServer } from "@/lib/active-account/server";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
@@ -34,10 +32,7 @@ async function DashboardEventInfoLayoutProps({
   const { getToken, userId } = await auth();
   const token = await getToken();
 
-  const activeAccount = await getActiveAccountServer();
-  const teamId = getTeamIdFromActiveAccount(activeAccount);
-
-  const userAddrOpts = userInfoOptions(getToken, userId, teamId);
+  const userAddrOpts = userInfoOptions(getToken, userId);
   const userInfo = await queryClient.fetchQuery(userAddrOpts);
   const userProfileId = userInfo?.userId;
 
@@ -51,7 +46,9 @@ async function DashboardEventInfoLayoutProps({
     );
   }
 
+  const activeAccount = await getActiveAccountServer();
   const entityId = activeAccount?.id ?? userProfileId;
+  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
 
   let eventInfo;
 
@@ -72,6 +69,7 @@ async function DashboardEventInfoLayoutProps({
 
   const renderLayout = () => (
     <div className="flex flex-col gap-8 pb-16 md:pb-0">
+      <DashboardEventInfo />
       <DashboardEventTabs roles={roles}>{children}</DashboardEventTabs>
     </div>
   );
