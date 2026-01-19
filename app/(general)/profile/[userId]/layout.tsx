@@ -18,8 +18,6 @@ type PageProps = {
 export const revalidate = 60;
 
 export async function generateStaticParams() {
-  console.log("asfausaiuddddssioajsa");
-
   return [];
 }
 

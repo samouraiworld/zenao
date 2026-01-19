@@ -17,7 +17,6 @@ export default function useActor(): GetActorResponse | null {
   const { data: accountInfo } = useSuspenseQuery(
     userInfoOptions(getToken, authId, teamId),
   );
-  console.log("Account info:", accountInfo);
 
   if (!accountInfo) {
     return null;

@@ -56,8 +56,6 @@ async function DashboardEventInfoLayoutProps({
   const teamId = actor.type === "team" ? actor.actingAs : undefined;
   const roles = await queryClient.fetchQuery(eventUserRoles(eventId, entityId));
 
-  console.log(roles);
-
   queryClient.prefetchInfiniteQuery(
     communitiesListByEvent(eventId, DEFAULT_COMMUNITIES_LIMIT),
   );
