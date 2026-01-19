@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -69,6 +70,12 @@ func (s *ZenaoServer) EditEvent(
 
 	if err := validateEvent(req.Msg.StartDate, req.Msg.EndDate, req.Msg.Title, req.Msg.Description, req.Msg.Location, req.Msg.ImageUri, req.Msg.Capacity, req.Msg.TicketPrice, req.Msg.Password); err != nil {
 		return nil, fmt.Errorf("invalid input: %w", err)
+	}
+	if err := validatePriceGroups(req.Msg.PricesGroups); err != nil {
+		return nil, fmt.Errorf("invalid price groups: %w", err)
+	}
+	if hasPaidPrices(req.Msg.PricesGroups) && req.Msg.CommunityId == "" {
+		return nil, errors.New("community is required for paid events")
 	}
 
 	var (
@@ -137,6 +144,124 @@ func (s *ZenaoServer) EditEvent(
 
 		if evt, err = db.EditEvent(req.Msg.EventId, organizersIDs, gatekeepersIDs, req.Msg); err != nil {
 			return err
+		}
+
+		priceGroups, err := db.GetPriceGroupsByEvent(req.Msg.EventId)
+		if err != nil {
+			return err
+		}
+
+		priceGroupsByID := make(map[string]*zeni.PriceGroup, len(priceGroups))
+		for _, group := range priceGroups {
+			priceGroupsByID[group.ID] = group
+		}
+
+		for _, group := range priceGroups {
+			// FIXME: capacity should not be tied to the event capacity
+			if err := db.UpdatePriceGroupCapacity(group.ID, req.Msg.Capacity); err != nil {
+				return err
+			}
+		}
+
+		if len(req.Msg.PricesGroups) > 0 {
+			var (
+				paymentAccount   *zeni.PaymentAccount
+				paymentAccountID string
+			)
+
+			if hasPaidPrices(req.Msg.PricesGroups) {
+				paymentAccount, err = db.GetPaymentAccountByCommunityPlatform(req.Msg.CommunityId, zeni.PaymentPlatformStripeConnect)
+				if err != nil {
+					return errors.New("payment account is required for paid events")
+				}
+				paymentAccountID = paymentAccount.ID
+			}
+
+			for idx, group := range req.Msg.PricesGroups {
+				var targetGroup *zeni.PriceGroup
+				groupID := strings.TrimSpace(group.Id)
+				if groupID != "" {
+					var ok bool
+					targetGroup, ok = priceGroupsByID[groupID]
+					if !ok {
+						return errors.New("price group not found")
+					}
+				} else if idx < len(priceGroups) {
+					targetGroup = priceGroups[idx]
+				} else {
+					targetGroup, err = db.CreatePriceGroup(req.Msg.EventId, req.Msg.Capacity)
+					if err != nil {
+						return err
+					}
+					priceGroups = append(priceGroups, targetGroup)
+					priceGroupsByID[targetGroup.ID] = targetGroup
+				}
+
+				if len(group.Prices) == 0 {
+					continue
+				}
+
+				existingPrices := targetGroup.Prices
+				existingPricesByID := make(map[string]*zeni.Price, len(existingPrices))
+				for _, existingPrice := range existingPrices {
+					existingPricesByID[existingPrice.ID] = existingPrice
+				}
+				for priceIdx, price := range group.Prices {
+					amountMinor := price.AmountMinor
+					currency := strings.ToUpper(strings.TrimSpace(price.CurrencyCode))
+					if amountMinor == 0 {
+						currency = ""
+					}
+
+					var (
+						pricePaymentAccount *zeni.PaymentAccount
+						priceAccountID      string
+					)
+					if amountMinor > 0 {
+						priceAccountID = paymentAccountID
+						pricePaymentAccount = paymentAccount
+					}
+
+					priceID := strings.TrimSpace(price.Id)
+					if priceID != "" {
+						existingPrice, ok := existingPricesByID[priceID]
+						if !ok {
+							return errors.New("price not found")
+						}
+						if err := db.UpdatePrice(pricePaymentAccount, &zeni.Price{
+							ID:               existingPrice.ID,
+							PriceGroupID:     targetGroup.ID,
+							AmountMinor:      amountMinor,
+							CurrencyCode:     currency,
+							PaymentAccountID: priceAccountID,
+						}); err != nil {
+							return err
+						}
+					} else if priceIdx < len(existingPrices) {
+						if err := db.UpdatePrice(pricePaymentAccount, &zeni.Price{
+							ID:               existingPrices[priceIdx].ID,
+							PriceGroupID:     targetGroup.ID,
+							AmountMinor:      amountMinor,
+							CurrencyCode:     currency,
+							PaymentAccountID: priceAccountID,
+						}); err != nil {
+							return err
+						}
+					} else {
+						if _, err := db.CreatePrice(pricePaymentAccount, &zeni.Price{
+							PriceGroupID:     targetGroup.ID,
+							AmountMinor:      amountMinor,
+							CurrencyCode:     currency,
+							PaymentAccountID: priceAccountID,
+						}); err != nil {
+							return err
+						}
+					}
+
+					// TODO: delete unused prices
+				}
+				// TODO: delete unused price groups
+			}
 		}
 
 		return nil

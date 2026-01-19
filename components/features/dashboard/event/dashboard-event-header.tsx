@@ -11,7 +11,7 @@ import DashboardFormTitle from "./_components/dashboard-form-title";
 import DashboardFormImage from "./_components/dashboard-form-image";
 import DashboardFormDateTime from "./_components/dashboard-form-date-time";
 import DashboardFormLocation from "./_components/dashboard-form-location";
-import DashboardFormCapacity from "./_components/dashboard-form-capacity";
+import DashboardFormPrices from "./_components/dashboard-form-prices";
 import DashboardFormCommunity from "./_components/dashboard-form-community";
 import DashboardFormMap from "./_components/dashboard-form-map";
 import { DashboardFormPrivacy } from "./_components/dashboard-form-privacy";
@@ -160,7 +160,7 @@ export default function DashboardEventHeader({
             </RoleBasedViewMode>
           </EventSection>
 
-          <EventSection title={t("capacity")}>
+          <EventSection title={t("prices")}>
             <RoleBasedViewMode
               roles={roles}
               allowedRoles={["organizer"]}
@@ -174,7 +174,7 @@ export default function DashboardEventHeader({
                 </div>
               }
             >
-              <DashboardFormCapacity />
+              <DashboardFormPrices />
             </RoleBasedViewMode>
           </EventSection>
 

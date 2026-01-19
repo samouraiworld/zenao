@@ -98,6 +98,7 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 		IsStale:           false,
 		OnboardingState:   accountData.OnboardingState,
 		PlatformAccountId: accountData.PlatformAccountID,
+		Currencies:        zeni.ListSupportedStripeCurrencies(),
 	}
 
 	if accountData.LastVerifiedAt != nil {
@@ -130,7 +131,7 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 	lastVerifiedAt := now
 
 	if err := s.DB.TxWithSpan(ctx, "db.UpdatePaymentAccountVerification", func(tx zeni.DB) error {
-		return tx.UpsertPaymentAccount(&zeni.PaymentAccount{
+		_, err = tx.UpsertPaymentAccount(&zeni.PaymentAccount{
 			CommunityID:       accountData.CommunityID,
 			PlatformType:      accountData.PlatformType,
 			PlatformAccountID: accountData.PlatformAccountID,
@@ -139,6 +140,8 @@ func (s *ZenaoServer) GetCommunityPayoutStatus(
 			VerificationState: verificationState,
 			LastVerifiedAt:    &lastVerifiedAt,
 		})
+
+		return err
 	}); err != nil {
 		return nil, err
 	}

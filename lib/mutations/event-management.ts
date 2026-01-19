@@ -7,18 +7,33 @@ import { EventFormSchemaType } from "@/types/schemas";
 import { zenaoClient } from "@/lib/zenao-client";
 import { useHeaderBuilder } from "@/hooks/use-header-builder";
 
+const sanitizePriceGroupsForCommunity = (data: EventFormSchemaType) => {
+  if (data.communityId) {
+    return data.pricesGroups;
+  }
+
+  return (data.pricesGroups ?? []).map((group) => ({
+    ...group,
+    prices: (group.prices ?? []).map((price) => ({
+      ...price,
+      amountMinor: BigInt(0),
+      currencyCode: "",
+      paymentAccountId: "",
+    })),
+  }));
+};
+
 export const useCreateEvent = () => {
   const { buildHeaders } = useHeaderBuilder();
 
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
-    mutationFn: async ({
-      token,
-      password,
-      exclusive,
-      ...data
-    }: EventFormSchemaType & {
-      token: string;
-    }) => {
+    mutationFn: async (
+      data: EventFormSchemaType & {
+        token: string;
+      },
+    ) => {
+      const { token, password, exclusive } = data;
+
       // Construct location object for the call
       let value = {};
       switch (data.location.kind) {
@@ -43,12 +58,14 @@ export const useCreateEvent = () => {
           value = {};
       }
 
+      const sanitizedPriceGroups = sanitizePriceGroupsForCommunity(data);
       const event = await zenaoClient.createEvent(
         {
           ...data,
           gatekeepers: data.gatekeepers.map((gatekeeper) => gatekeeper.email),
           location: { address: { case: data.location.kind, value } },
           password: exclusive && password ? password : "",
+          pricesGroups: sanitizedPriceGroups,
           communityId: data.communityId || "",
           communityEmail: true,
         },
@@ -74,14 +91,12 @@ export const useEditEvent = (getToken: GetToken) => {
   const { buildHeaders } = useHeaderBuilder();
 
   const { mutateAsync, isPending, isSuccess, isError } = useMutation({
-    mutationFn: async ({
-      eventId,
-      password,
-      exclusive,
-      ...data
-    }: EventFormSchemaType & {
-      eventId: string;
-    }) => {
+    mutationFn: async (
+      data: EventFormSchemaType & {
+        eventId: string;
+      },
+    ) => {
+      const { eventId, password, exclusive } = data;
       const token = await getToken();
 
       if (!token) {
@@ -112,6 +127,7 @@ export const useEditEvent = (getToken: GetToken) => {
           value = {};
       }
 
+      const sanitizedPriceGroups = sanitizePriceGroupsForCommunity(data);
       await zenaoClient.editEvent(
         {
           ...data,
@@ -120,6 +136,7 @@ export const useEditEvent = (getToken: GetToken) => {
           location: { address: { case: data.location.kind, value } },
           updatePassword: !exclusive || (!!password && password.length > 0),
           password: exclusive && password ? password : "",
+          pricesGroups: sanitizedPriceGroups,
           communityId: data.communityId || "",
           communityEmail: true,
         },

@@ -3,7 +3,7 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { fromUnixTime } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
-import { Calendar } from "lucide-react";
+import { Calendar, Banknote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { Suspense, useMemo } from "react";
 import { Event, WithContext } from "schema-dts";
@@ -27,6 +27,7 @@ import EventLocationSection from "@/components/features/event/event-location-sec
 import { ParticipantsSection } from "@/components/features/event/event-participants-section";
 import { EventSection } from "@/components/features/event/event-section";
 import { SafeEventInfo } from "@/types/schemas";
+import { usePriceLabel } from "@/components/widgets/price-label";
 
 const EventParticipationInfo = dynamic(
   () => import("@/components/features/event/event-participation-info"),
@@ -57,6 +58,7 @@ export function EventInfoLayout({
   const timezone = useLayoutTimezone(eventTimezone);
 
   const t = useTranslations("event");
+  const priceLabel = usePriceLabel(data.pricesGroups);
 
   const jsonLd: WithContext<Event> = {
     "@context": "https://schema.org",
@@ -123,6 +125,12 @@ export function EventInfoLayout({
                 </Text>
               </div>
             </div>
+          </div>
+          <div className="flex flex-row gap-4 items-center">
+            <Banknote width={iconSize} height={iconSize} />
+            <Heading level={3} size="lg">
+              {priceLabel}
+            </Heading>
           </div>
 
           {/* Location */}
