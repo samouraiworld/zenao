@@ -99,6 +99,8 @@ message GetUserInfoRequest {}
 message GetUserInfoResponse {
   string user_id = 1;
   string plan = 2;
+  string actor_id = 3;
+  string actor_plan = 4;
 }
 
 message Profile {

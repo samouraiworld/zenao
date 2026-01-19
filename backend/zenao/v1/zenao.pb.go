@@ -298,6 +298,8 @@ type GetUserInfoResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Plan          string                 `protobuf:"bytes,2,opt,name=plan,proto3" json:"plan,omitempty"`
+	ActorId       string                 `protobuf:"bytes,3,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`
+	ActorPlan     string                 `protobuf:"bytes,4,opt,name=actor_plan,json=actorPlan,proto3" json:"actor_plan,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -342,6 +344,20 @@ func (x *GetUserInfoResponse) GetUserId() string {
 func (x *GetUserInfoResponse) GetPlan() string {
 	if x != nil {
 		return x.Plan
+	}
+	return ""
+}
+
+func (x *GetUserInfoResponse) GetActorId() string {
+	if x != nil {
+		return x.ActorId
+	}
+	return ""
+}
+
+func (x *GetUserInfoResponse) GetActorPlan() string {
+	if x != nil {
+		return x.ActorPlan
 	}
 	return ""
 }
@@ -6379,10 +6395,13 @@ const file_zenao_v1_zenao_proto_rawDesc = "" +
 	"avatar_uri\x18\x03 \x01(\tR\tavatarUri\"\"\n" +
 	"\x10EditUserResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x14\n" +
-	"\x12GetUserInfoRequest\"B\n" +
+	"\x12GetUserInfoRequest\"|\n" +
 	"\x13GetUserInfoResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
-	"\x04plan\x18\x02 \x01(\tR\x04plan\"\x8f\x01\n" +
+	"\x04plan\x18\x02 \x01(\tR\x04plan\x12\x19\n" +
+	"\bactor_id\x18\x03 \x01(\tR\aactorId\x12\x1d\n" +
+	"\n" +
+	"actor_plan\x18\x04 \x01(\tR\tactorPlan\"\x8f\x01\n" +
 	"\aProfile\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x10\n" +
