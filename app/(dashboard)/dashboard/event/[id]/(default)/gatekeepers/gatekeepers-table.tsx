@@ -1,11 +1,9 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { parseAsInteger, useQueryStates } from "nuqs";
 import { useTranslations } from "next-intl";
 import { useGatekeepersEdition } from "./gatekeepers-edition-context-provider";
-import { userInfoOptions } from "@/lib/queries/user";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
 import {
   DEFAULT_EVENT_PARTICIPANTS_LIMIT,
@@ -16,6 +14,7 @@ import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
 import Text from "@/components/widgets/texts/text";
 import { AddGatekeeperForm } from "@/components/features/dashboard/event-details/gatekeepers/add-gatekeeper-form";
+import useActor from "@/hooks/use-actor";
 
 interface GatekeepersTableProps {
   eventId: string;
@@ -23,13 +22,10 @@ interface GatekeepersTableProps {
 
 export default function GatekeepersTable({ eventId }: GatekeepersTableProps) {
   const t = useTranslations("dashboard.eventDetails.gatekeepers");
-  const { getToken, userId } = useAuth();
+  const actor = useActor();
 
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
   const { data: userRoles } = useSuspenseQuery(
-    eventUserRoles(eventId, userInfo?.userId),
+    eventUserRoles(eventId, actor?.actingAs),
   );
 
   const { gatekeepers, onDelete } = useGatekeepersEdition();

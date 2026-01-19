@@ -1,25 +1,18 @@
-import { notFound, redirect, RedirectType } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
 import { EventTicketScanner } from "./event-ticket-scanner";
 import { getQueryClient } from "@/lib/get-query-client";
 import { eventOptions } from "@/lib/queries/event";
-import { userInfoOptions } from "@/lib/queries/user";
-import { eventUserRoles } from "@/lib/queries/event-users";
 import { EventScreenContainer } from "@/components/features/event/event-screen-container";
+import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-export default async function ScannerPage({ params }: Props) {
+async function ScannerPage({ params }: Props) {
   const p = await params;
 
   const queryClient = getQueryClient();
-
-  const { getToken, userId } = await auth();
-  const userAddrOpts = userInfoOptions(getToken, userId);
-  const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userProfileId = userInfo?.userId;
 
   let eventData;
   try {
@@ -31,17 +24,17 @@ export default async function ScannerPage({ params }: Props) {
     notFound();
   }
 
-  const roles = await queryClient.fetchQuery(
-    eventUserRoles(p.id, userProfileId),
-  );
-
-  if (!roles.includes("gatekeeper") && !roles.includes("organizer")) {
-    redirect(`/event/${p.id}`, RedirectType.replace);
-  }
-
   return (
     <EventScreenContainer id={p.id}>
       <EventTicketScanner eventId={p.id} eventData={eventData} />
     </EventScreenContainer>
   );
 }
+
+export default withEventRoleRestrictions(
+  ScannerPage,
+  ["organizer", "gatekeeper"],
+  {
+    notFoundOnFail: true,
+  },
+);
