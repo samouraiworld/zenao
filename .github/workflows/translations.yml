@@ -11,9 +11,19 @@ jobs:
   translations:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - run: "npm install"
-      - run: "npx turbo translations"
+          cache: "npm"
+          node-version-file: ".nvmrc"
+
+      - name: Install node modules (root)
+        run: npm ci
+
+      - name: Install node modules (i18n-check package)
+        working-directory: ./packages/i18n-check
+        run: npm ci
+
+      - name: Run i18n-check
+        run: npm run translations
