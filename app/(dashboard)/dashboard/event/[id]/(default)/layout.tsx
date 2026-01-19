@@ -12,7 +12,6 @@ import {
   communitiesListByEvent,
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
-import DashboardEventInfo from "@/components/features/dashboard/event/dashboard-event-info";
 import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
 import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
@@ -69,7 +68,6 @@ async function DashboardEventInfoLayoutProps({
 
   const renderLayout = () => (
     <div className="flex flex-col gap-8 pb-16 md:pb-0">
-      <DashboardEventInfo />
       <DashboardEventTabs roles={roles}>{children}</DashboardEventTabs>
     </div>
   );
