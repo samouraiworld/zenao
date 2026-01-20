@@ -21,6 +21,8 @@ service ZenaoService {
       returns (ValidatePasswordResponse);
   rpc BroadcastEvent(BroadcastEventRequest) returns (BroadcastEventResponse);
   rpc Participate(ParticipateRequest) returns (ParticipateResponse);
+  rpc StartTicketPayment(StartTicketPaymentRequest)
+      returns (StartTicketPaymentResponse);
   rpc CancelParticipation(CancelParticipationRequest)
       returns (CancelParticipationResponse);
   rpc GetEventTickets(GetEventTicketsRequest) returns (GetEventTicketsResponse);
@@ -226,6 +228,24 @@ message CancelParticipationRequest { string event_id = 1; }
 message CancelParticipationResponse {}
 
 message ParticipateResponse { string ticket_secret = 1; }
+
+message StartTicketPaymentLineItem {
+  string price_id = 1;
+  string attendee_email = 2;
+}
+
+message StartTicketPaymentRequest {
+  string event_id = 1;
+  repeated StartTicketPaymentLineItem line_items = 2;
+  string password = 3;
+  string success_path = 4;
+  string cancel_path = 5;
+}
+
+message StartTicketPaymentResponse {
+  string checkout_url = 1;
+  string order_id = 2;
+}
 
 message BroadcastEventRequest {
   string event_id = 1;

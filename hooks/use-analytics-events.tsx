@@ -10,6 +10,7 @@ type AnalyticEvents = {
   EventCheckIn: { eventId: string };
   EventEmailBroadcasted: { eventId: string };
   EventGatekeepersUpdated: { eventId: string };
+  EventCheckoutStarted: { eventId: string; quantity: number };
   InstallPwaClick: never;
   SignInClick: { context: string };
   ThemeChange: { theme: "light" | "dark" | "system" };

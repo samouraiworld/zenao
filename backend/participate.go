@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/mail"
 	"slices"
-	"strings"
 	"sync"
 	"time"
 
@@ -52,13 +50,8 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 			return nil, errors.New("authenticating and providing an email are mutually exclusive")
 		}
 
-		if _, err = mail.ParseAddress(authUser.Email); err != nil {
-			return nil, fmt.Errorf("invalid email address: %w", err)
-		}
-
-		domain := strings.Split(authUser.Email, "@")[1]
-		if blacklistedDomains != nil && slices.Contains(blacklistedDomains, domain) {
-			return nil, fmt.Errorf("email domain %s is not allowed", domain)
+		if err := validateEmailAddress(authUser.Email); err != nil {
+			return nil, err
 		}
 
 		if authUser.Banned {
@@ -71,21 +64,14 @@ func (s *ZenaoServer) Participate(ctx context.Context, req *connect.Request[zena
 		}
 	}
 
-	for _, guestEmail := range req.Msg.Guests {
-		if _, err = mail.ParseAddress(guestEmail); err != nil {
-			return nil, fmt.Errorf("invalid guest email address: %w", err)
-		}
-
-		guestDomain := strings.Split(guestEmail, "@")[1]
-		if blacklistedDomains != nil && slices.Contains(blacklistedDomains, guestDomain) {
-			return nil, fmt.Errorf("guest email domain %s is not allowed", guestDomain)
-		}
+	if err := validateEmailList(req.Msg.Guests); err != nil {
+		return nil, err
 	}
 
 	s.Logger.Info("participate", zap.String("event-id", req.Msg.EventId), zap.String("buyer-id", buyer.ID), zap.Bool("acting-as-team", actingAsTeam))
 
-	if len(req.Msg.Password) > zeni.MaxPasswordLen {
-		return nil, errors.New("password too long")
+	if err := validatePasswordLength(req.Msg.Password); err != nil {
+		return nil, err
 	}
 
 	authGuests, err := s.Auth.EnsureUsersExists(ctx, req.Msg.Guests)

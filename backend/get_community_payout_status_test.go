@@ -2,21 +2,16 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"net/http"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
 	"testing"
 	"time"
 
 	"connectrpc.com/connect"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/samouraiworld/zenao/backend/gzdb"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"github.com/samouraiworld/zenao/backend/ztesting"
 	"github.com/stretchr/testify/require"
 	"github.com/stripe/stripe-go/v84"
 	"go.uber.org/zap"
@@ -119,56 +114,8 @@ func (a *stubAuth) WithAuth() func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler { return handler }
 }
 
-func applyMigrations(t *testing.T, migrationsDir string, db *sql.DB) {
-	t.Helper()
-
-	entries, err := os.ReadDir(migrationsDir)
-	require.NoError(t, err)
-
-	var files []string
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		if filepath.Ext(entry.Name()) != ".sql" {
-			continue
-		}
-		files = append(files, filepath.Join(migrationsDir, entry.Name()))
-	}
-	sort.Strings(files)
-
-	for _, path := range files {
-		contents, err := os.ReadFile(path)
-		require.NoError(t, err)
-		if strings.TrimSpace(string(contents)) == "" {
-			continue
-		}
-		_, err = db.Exec(string(contents))
-		require.NoErrorf(t, err, "apply migration %s", path)
-	}
-}
-
-func setupTestDB(t *testing.T) zeni.DB {
-	t.Helper()
-
-	dbPath := filepath.Join(t.TempDir(), "test.db")
-	sqlDB, err := sql.Open("sqlite3", dbPath)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = sqlDB.Close() })
-
-	migrationsDir := filepath.Join("..", "migrations")
-	if _, err := os.Stat(migrationsDir); err != nil {
-		migrationsDir = "migrations"
-	}
-	applyMigrations(t, migrationsDir, sqlDB)
-
-	db, err := gzdb.SetupDB(dbPath)
-	require.NoError(t, err)
-	return db
-}
-
 func TestGetCommunityPayoutStatusStripeErrorPreservesState(t *testing.T) {
-	db := setupTestDB(t)
+	db, _ := ztesting.SetupTestDB(t)
 	auth := &stubAuth{user: &zeni.AuthUser{ID: "auth-user"}}
 	server := &ZenaoServer{
 		Logger:          zap.NewNop(),
@@ -224,7 +171,7 @@ func TestGetCommunityPayoutStatusStripeErrorPreservesState(t *testing.T) {
 }
 
 func TestGetCommunityPayoutStatusStripeSuccessUpdatesState(t *testing.T) {
-	db := setupTestDB(t)
+	db, _ := ztesting.SetupTestDB(t)
 	auth := &stubAuth{user: &zeni.AuthUser{ID: "auth-user"}}
 	server := &ZenaoServer{
 		Logger:          zap.NewNop(),

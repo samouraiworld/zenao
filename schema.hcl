@@ -395,6 +395,90 @@ table "payment_accounts" {
     columns = [column.deleted_at]
   }
 }
+table "orders" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = false
+    type = integer
+  }
+  column "event_id" {
+    null = false
+    type = integer
+  }
+  column "buyer_id" {
+    null = false
+    type = integer
+  }
+  column "currency_code" {
+    null = false
+    type = text
+  }
+  column "amount_minor" {
+    null = false
+    type = integer
+  }
+  column "status" {
+    null = false
+    type = text
+  }
+  column "payment_provider" {
+    null = true
+    type = text
+  }
+  column "payment_account_id" {
+    null = false
+    type = integer
+  }
+  column "payment_session_id" {
+    null = true
+    type = text
+  }
+  column "payment_intent_id" {
+    null = true
+    type = text
+  }
+  column "confirmed_at" {
+    null = true
+    type = integer
+  }
+  column "invoice_id" {
+    null = true
+    type = text
+  }
+  column "invoice_url" {
+    null = true
+    type = text
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_orders_payment_account" {
+    columns     = [column.payment_account_id]
+    ref_columns = [table.payment_accounts.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_orders_event" {
+    columns     = [column.event_id]
+    ref_columns = [table.events.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_orders_payment_account_id" {
+    columns = [column.payment_account_id]
+  }
+  index "idx_orders_buyer_id" {
+    columns = [column.buyer_id]
+  }
+  index "idx_orders_event_id" {
+    columns = [column.event_id]
+  }
+}
 table "price_groups" {
   schema = schema.main
   column "id" {
@@ -415,7 +499,7 @@ table "price_groups" {
     type = datetime
   }
   column "event_id" {
-    null = false
+    null = true
     type = integer
   }
   column "capacity" {
@@ -425,17 +509,11 @@ table "price_groups" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_price_groups_event" {
-    columns     = [column.event_id]
-    ref_columns = [table.events.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
+  index "idx_price_groups_event_id" {
+    columns = [column.event_id]
   }
   index "idx_price_groups_deleted_at" {
     columns = [column.deleted_at]
-  }
-  index "idx_price_groups_event_id" {
-    columns = [column.event_id]
   }
 }
 table "prices" {
@@ -458,7 +536,7 @@ table "prices" {
     type = datetime
   }
   column "price_group_id" {
-    null = false
+    null = true
     type = integer
   }
   column "amount_minor" {
@@ -476,7 +554,7 @@ table "prices" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_prices_price_group" {
+  foreign_key "fk_price_groups_prices" {
     columns     = [column.price_group_id]
     ref_columns = [table.price_groups.column.id]
     on_update   = NO_ACTION
@@ -488,14 +566,83 @@ table "prices" {
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
-  index "idx_prices_deleted_at" {
-    columns = [column.deleted_at]
-  }
   index "idx_prices_payment_account_id" {
     columns = [column.payment_account_id]
   }
   index "idx_prices_price_group_id" {
     columns = [column.price_group_id]
+  }
+  index "idx_prices_deleted_at" {
+    columns = [column.deleted_at]
+  }
+}
+table "order_attendees" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = false
+    type = integer
+  }
+  column "order_id" {
+    null = false
+    type = integer
+  }
+  column "price_id" {
+    null = false
+    type = integer
+  }
+  column "price_group_id" {
+    null = false
+    type = integer
+  }
+  column "user_id" {
+    null = false
+    type = integer
+  }
+  column "amount_minor" {
+    null = false
+    type = integer
+  }
+  column "currency_code" {
+    null = false
+    type = text
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_order_attendees_price_group" {
+    columns     = [column.price_group_id]
+    ref_columns = [table.price_groups.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_order_attendees_price" {
+    columns     = [column.price_id]
+    ref_columns = [table.prices.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_order_attendees_order" {
+    columns     = [column.order_id]
+    ref_columns = [table.orders.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_order_attendees_user_id" {
+    columns = [column.user_id]
+  }
+  index "idx_order_attendees_price_group_id" {
+    columns = [column.price_group_id]
+  }
+  index "idx_order_attendees_price_id" {
+    columns = [column.price_id]
+  }
+  index "idx_order_attendees_order_id" {
+    columns = [column.order_id]
   }
 }
 table "posts" {
@@ -588,15 +735,15 @@ table "posts" {
   primary_key {
     columns = [column.id]
   }
-  foreign_key "fk_posts_feed" {
-    columns     = [column.feed_id]
-    ref_columns = [table.feeds.column.id]
-    on_update   = NO_ACTION
-    on_delete   = NO_ACTION
-  }
   foreign_key "fk_posts_user" {
     columns     = [column.user_id]
     ref_columns = [table.users.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_posts_feed" {
+    columns     = [column.feed_id]
+    ref_columns = [table.feeds.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
   }
@@ -803,9 +950,29 @@ table "sold_tickets" {
     null = true
     type = integer
   }
-  column "price" {
+  column "order_id" {
     null = true
-    type = real
+    type = integer
+  }
+  column "price_id" {
+    null = true
+    type = integer
+  }
+  column "price_group_id" {
+    null = true
+    type = integer
+  }
+  column "order_attendee_id" {
+    null = true
+    type = integer
+  }
+  column "amount_minor" {
+    null = true
+    type = integer
+  }
+  column "currency_code" {
+    null = true
+    type = text
   }
   column "secret" {
     null = false
@@ -832,6 +999,18 @@ table "sold_tickets" {
     unique  = true
     columns = [column.secret]
   }
+  index "idx_sold_tickets_order_attendee_id" {
+    columns = [column.order_attendee_id]
+  }
+  index "idx_sold_tickets_price_group_id" {
+    columns = [column.price_group_id]
+  }
+  index "idx_sold_tickets_price_id" {
+    columns = [column.price_id]
+  }
+  index "idx_sold_tickets_order_id" {
+    columns = [column.order_id]
+  }
   index "idx_sold_tickets_event_id" {
     columns = [column.event_id]
   }
@@ -857,6 +1036,71 @@ table "tags" {
     ref_columns = [table.posts.column.id]
     on_update   = NO_ACTION
     on_delete   = NO_ACTION
+  }
+}
+table "ticket_holds" {
+  schema = schema.main
+  column "id" {
+    null           = true
+    type           = integer
+    auto_increment = true
+  }
+  column "created_at" {
+    null = false
+    type = integer
+  }
+  column "event_id" {
+    null = false
+    type = integer
+  }
+  column "price_group_id" {
+    null = false
+    type = integer
+  }
+  column "order_id" {
+    null = false
+    type = integer
+  }
+  column "quantity" {
+    null = false
+    type = integer
+  }
+  column "expires_at" {
+    null = false
+    type = integer
+  }
+  primary_key {
+    columns = [column.id]
+  }
+  foreign_key "fk_ticket_holds_price_group" {
+    columns     = [column.price_group_id]
+    ref_columns = [table.price_groups.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_ticket_holds_event" {
+    columns     = [column.event_id]
+    ref_columns = [table.events.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  foreign_key "fk_ticket_holds_order" {
+    columns     = [column.order_id]
+    ref_columns = [table.orders.column.id]
+    on_update   = NO_ACTION
+    on_delete   = NO_ACTION
+  }
+  index "idx_ticket_holds_expires_at" {
+    columns = [column.expires_at]
+  }
+  index "idx_ticket_holds_order_id" {
+    columns = [column.order_id]
+  }
+  index "idx_ticket_holds_price_group_id" {
+    columns = [column.price_group_id]
+  }
+  index "idx_ticket_holds_event_id" {
+    columns = [column.event_id]
   }
 }
 schema "main" {

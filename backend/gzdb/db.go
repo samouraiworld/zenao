@@ -51,14 +51,19 @@ type EntityRole struct {
 
 type SoldTicket struct {
 	gorm.Model
-	EventID uint `gorm:"index"`
-	BuyerID uint
-	UserID  uint
-	User    *User
-	Price   float64
-	Secret  string `gorm:"uniqueIndex;not null"`
-	Pubkey  string `gorm:"uniqueIndex;not null"`
-	Checkin *Checkin
+	EventID         uint `gorm:"index"`
+	BuyerID         uint
+	UserID          uint
+	OrderID         *uint `gorm:"index"`
+	PriceID         *uint `gorm:"index"`
+	PriceGroupID    *uint `gorm:"index"`
+	OrderAttendeeID *uint `gorm:"index"`
+	User            *User
+	AmountMinor     *int64
+	CurrencyCode    string
+	Secret          string `gorm:"uniqueIndex;not null"`
+	Pubkey          string `gorm:"uniqueIndex;not null"`
+	Checkin         *Checkin
 }
 
 type Checkin struct {
@@ -1010,12 +1015,29 @@ func (g *gormZenaoDB) Participate(eventID string, buyerID string, userID string,
 		return errors.New("user is already participant for this event")
 	}
 
+	var priceGroupID *uint
+	{
+		var group PriceGroup
+		err := g.db.
+			Select("id").
+			Where("event_id = ?", evt.ID).
+			Order("id ASC").
+			First(&group).Error
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+		if group.ID != 0 {
+			priceGroupID = &group.ID
+		}
+	}
+
 	if err := g.db.Create(&SoldTicket{
-		EventID: evt.ID,
-		BuyerID: uint(buyerIDint),
-		UserID:  uint(userIDint),
-		Secret:  ticket.Secret(),
-		Pubkey:  ticket.Pubkey(),
+		EventID:      evt.ID,
+		BuyerID:      uint(buyerIDint),
+		UserID:       uint(userIDint),
+		PriceGroupID: priceGroupID,
+		Secret:       ticket.Secret(),
+		Pubkey:       ticket.Pubkey(),
 	}).Error; err != nil {
 		return err
 	}
@@ -2653,12 +2675,16 @@ func dbSoldTicketToZeniSoldTicket(dbtick *SoldTicket) (*zeni.SoldTicket, error) 
 		user = dbUserToZeniDBUser(dbtick.User)
 	}
 	ticket := &zeni.SoldTicket{
-		Ticket:    tickobj,
-		BuyerID:   fmt.Sprint(dbtick.BuyerID),
-		UserID:    fmt.Sprint(dbtick.UserID),
-		Checkin:   checkin,
-		User:      user,
-		CreatedAt: dbtick.CreatedAt,
+		Ticket:          tickobj,
+		BuyerID:         fmt.Sprint(dbtick.BuyerID),
+		UserID:          fmt.Sprint(dbtick.UserID),
+		OrderID:         uintPtrToString(dbtick.OrderID),
+		PriceID:         uintPtrToString(dbtick.PriceID),
+		PriceGroupID:    uintPtrToString(dbtick.PriceGroupID),
+		OrderAttendeeID: uintPtrToString(dbtick.OrderAttendeeID),
+		Checkin:         checkin,
+		User:            user,
+		CreatedAt:       dbtick.CreatedAt,
 	}
 	if dbtick.DeletedAt.Valid {
 		ticket.DeletedAt = dbtick.DeletedAt.Time

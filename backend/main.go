@@ -16,7 +16,8 @@ import (
 	"github.com/gnolang/gno/tm2/pkg/commands"
 	"github.com/resend/resend-go/v2"
 	"github.com/rs/cors"
-	"github.com/stripe/stripe-go/v84"
+	"github.com/samouraiworld/zenao/backend/payment"
+	"github.com/samouraiworld/zenao/backend/payment/zpstripe"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/zap"
 	"golang.org/x/net/http2"
@@ -157,18 +158,21 @@ func execStart(ctx context.Context) (retErr error) {
 	}
 
 	zenao := &ZenaoServer{
-		Logger:          logger,
-		Auth:            auth,
-		DB:              db,
-		AppBaseURL:      conf.appBaseURL,
-		MailClient:      mailClient,
-		MailSender:      conf.mailSender,
-		DiscordToken:    conf.discordtoken,
-		Maintenance:     conf.maintenance,
-		StripeSecretKey: conf.stripeSecretKey,
+		Logger:           logger,
+		Auth:             auth,
+		DB:               db,
+		AppBaseURL:       conf.appBaseURL,
+		MailClient:       mailClient,
+		MailSender:       conf.mailSender,
+		DiscordToken:     conf.discordtoken,
+		Maintenance:      conf.maintenance,
+		StripeSecretKey:  conf.stripeSecretKey,
+		PaymentProviders: map[string]payment.Payment{},
 	}
+
 	if conf.stripeSecretKey != "" {
-		stripe.Key = conf.stripeSecretKey
+		stripePaymentProvider := zpstripe.NewStripe(conf.stripeSecretKey)
+		zenao.PaymentProviders[stripePaymentProvider.PlatformType()] = stripePaymentProvider
 	}
 
 	allowedOrigins := strings.Split(conf.allowedOrigins, ",")

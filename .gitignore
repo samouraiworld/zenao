@@ -48,6 +48,7 @@ next-env.d.ts
 
 # db
 /*.db
+*.db-journal
 
 # cypress
 /cypress/screenshots

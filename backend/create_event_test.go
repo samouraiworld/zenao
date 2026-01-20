@@ -8,6 +8,7 @@ import (
 	"connectrpc.com/connect"
 	zenaov1 "github.com/samouraiworld/zenao/backend/zenao/v1"
 	"github.com/samouraiworld/zenao/backend/zeni"
+	"github.com/samouraiworld/zenao/backend/ztesting"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
@@ -39,7 +40,7 @@ func TestCreateEventCreatesPriceGroups(t *testing.T) {
 		},
 	} {
 		t.Run(tc.Name, func(t *testing.T) {
-			db := setupPriceRPCDB(t)
+			db, _ := ztesting.SetupTestDB(t)
 			auth := &priceStubAuth{user: &zeni.AuthUser{ID: "auth-user"}}
 			server := &ZenaoServer{
 				Logger: zap.NewNop(),
@@ -123,7 +124,7 @@ func TestCreateEventCreatesPriceGroups(t *testing.T) {
 }
 
 func TestCreateEventRejectsPaidPriceWithoutPaymentAccount(t *testing.T) {
-	db := setupPriceRPCDB(t)
+	db, _ := ztesting.SetupTestDB(t)
 	auth := &priceStubAuth{user: &zeni.AuthUser{ID: "auth-user"}}
 	server := &ZenaoServer{
 		Logger: zap.NewNop(),

@@ -59,6 +59,9 @@ const (
 	// ZenaoServiceParticipateProcedure is the fully-qualified name of the ZenaoService's Participate
 	// RPC.
 	ZenaoServiceParticipateProcedure = "/zenao.v1.ZenaoService/Participate"
+	// ZenaoServiceStartTicketPaymentProcedure is the fully-qualified name of the ZenaoService's
+	// StartTicketPayment RPC.
+	ZenaoServiceStartTicketPaymentProcedure = "/zenao.v1.ZenaoService/StartTicketPayment"
 	// ZenaoServiceCancelParticipationProcedure is the fully-qualified name of the ZenaoService's
 	// CancelParticipation RPC.
 	ZenaoServiceCancelParticipationProcedure = "/zenao.v1.ZenaoService/CancelParticipation"
@@ -178,6 +181,7 @@ type ZenaoServiceClient interface {
 	ValidatePassword(context.Context, *connect.Request[v1.ValidatePasswordRequest]) (*connect.Response[v1.ValidatePasswordResponse], error)
 	BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
+	StartTicketPayment(context.Context, *connect.Request[v1.StartTicketPaymentRequest]) (*connect.Response[v1.StartTicketPaymentResponse], error)
 	CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
@@ -288,6 +292,12 @@ func NewZenaoServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+ZenaoServiceParticipateProcedure,
 			connect.WithSchema(zenaoServiceMethods.ByName("Participate")),
+			connect.WithClientOptions(opts...),
+		),
+		startTicketPayment: connect.NewClient[v1.StartTicketPaymentRequest, v1.StartTicketPaymentResponse](
+			httpClient,
+			baseURL+ZenaoServiceStartTicketPaymentProcedure,
+			connect.WithSchema(zenaoServiceMethods.ByName("StartTicketPayment")),
 			connect.WithClientOptions(opts...),
 		),
 		cancelParticipation: connect.NewClient[v1.CancelParticipationRequest, v1.CancelParticipationResponse](
@@ -544,6 +554,7 @@ type zenaoServiceClient struct {
 	validatePassword               *connect.Client[v1.ValidatePasswordRequest, v1.ValidatePasswordResponse]
 	broadcastEvent                 *connect.Client[v1.BroadcastEventRequest, v1.BroadcastEventResponse]
 	participate                    *connect.Client[v1.ParticipateRequest, v1.ParticipateResponse]
+	startTicketPayment             *connect.Client[v1.StartTicketPaymentRequest, v1.StartTicketPaymentResponse]
 	cancelParticipation            *connect.Client[v1.CancelParticipationRequest, v1.CancelParticipationResponse]
 	getEventTickets                *connect.Client[v1.GetEventTicketsRequest, v1.GetEventTicketsResponse]
 	checkin                        *connect.Client[v1.CheckinRequest, v1.CheckinResponse]
@@ -629,6 +640,11 @@ func (c *zenaoServiceClient) BroadcastEvent(ctx context.Context, req *connect.Re
 // Participate calls zenao.v1.ZenaoService.Participate.
 func (c *zenaoServiceClient) Participate(ctx context.Context, req *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error) {
 	return c.participate.CallUnary(ctx, req)
+}
+
+// StartTicketPayment calls zenao.v1.ZenaoService.StartTicketPayment.
+func (c *zenaoServiceClient) StartTicketPayment(ctx context.Context, req *connect.Request[v1.StartTicketPaymentRequest]) (*connect.Response[v1.StartTicketPaymentResponse], error) {
+	return c.startTicketPayment.CallUnary(ctx, req)
 }
 
 // CancelParticipation calls zenao.v1.ZenaoService.CancelParticipation.
@@ -844,6 +860,7 @@ type ZenaoServiceHandler interface {
 	ValidatePassword(context.Context, *connect.Request[v1.ValidatePasswordRequest]) (*connect.Response[v1.ValidatePasswordResponse], error)
 	BroadcastEvent(context.Context, *connect.Request[v1.BroadcastEventRequest]) (*connect.Response[v1.BroadcastEventResponse], error)
 	Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error)
+	StartTicketPayment(context.Context, *connect.Request[v1.StartTicketPaymentRequest]) (*connect.Response[v1.StartTicketPaymentResponse], error)
 	CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error)
 	GetEventTickets(context.Context, *connect.Request[v1.GetEventTicketsRequest]) (*connect.Response[v1.GetEventTicketsResponse], error)
 	Checkin(context.Context, *connect.Request[v1.CheckinRequest]) (*connect.Response[v1.CheckinResponse], error)
@@ -950,6 +967,12 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 		ZenaoServiceParticipateProcedure,
 		svc.Participate,
 		connect.WithSchema(zenaoServiceMethods.ByName("Participate")),
+		connect.WithHandlerOptions(opts...),
+	)
+	zenaoServiceStartTicketPaymentHandler := connect.NewUnaryHandler(
+		ZenaoServiceStartTicketPaymentProcedure,
+		svc.StartTicketPayment,
+		connect.WithSchema(zenaoServiceMethods.ByName("StartTicketPayment")),
 		connect.WithHandlerOptions(opts...),
 	)
 	zenaoServiceCancelParticipationHandler := connect.NewUnaryHandler(
@@ -1212,6 +1235,8 @@ func NewZenaoServiceHandler(svc ZenaoServiceHandler, opts ...connect.HandlerOpti
 			zenaoServiceBroadcastEventHandler.ServeHTTP(w, r)
 		case ZenaoServiceParticipateProcedure:
 			zenaoServiceParticipateHandler.ServeHTTP(w, r)
+		case ZenaoServiceStartTicketPaymentProcedure:
+			zenaoServiceStartTicketPaymentHandler.ServeHTTP(w, r)
 		case ZenaoServiceCancelParticipationProcedure:
 			zenaoServiceCancelParticipationHandler.ServeHTTP(w, r)
 		case ZenaoServiceGetEventTicketsProcedure:
@@ -1335,6 +1360,10 @@ func (UnimplementedZenaoServiceHandler) BroadcastEvent(context.Context, *connect
 
 func (UnimplementedZenaoServiceHandler) Participate(context.Context, *connect.Request[v1.ParticipateRequest]) (*connect.Response[v1.ParticipateResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.Participate is not implemented"))
+}
+
+func (UnimplementedZenaoServiceHandler) StartTicketPayment(context.Context, *connect.Request[v1.StartTicketPaymentRequest]) (*connect.Response[v1.StartTicketPaymentResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("zenao.v1.ZenaoService.StartTicketPayment is not implemented"))
 }
 
 func (UnimplementedZenaoServiceHandler) CancelParticipation(context.Context, *connect.Request[v1.CancelParticipationRequest]) (*connect.Response[v1.CancelParticipationResponse], error) {
