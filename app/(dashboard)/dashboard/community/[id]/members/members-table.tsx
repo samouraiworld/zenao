@@ -3,7 +3,6 @@
 import { parseAsInteger, useQueryStates } from "nuqs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useDashboardCommunityContext } from "../dashboard-community-context-provider";
 import { useMembersColumns } from "./columns";
 import { DataTable as DataTableNew } from "@/components/widgets/data-table/data-table";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
@@ -13,6 +12,7 @@ import {
 } from "@/lib/queries/community";
 import Text from "@/components/widgets/texts/text";
 import { DataTablePagination } from "@/components/widgets/data-table/data-table-pagination";
+import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
 
 export default function MembersTable() {
   const t = useTranslations("dashboard.communityDetails.members");

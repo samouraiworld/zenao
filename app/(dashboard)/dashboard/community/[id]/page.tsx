@@ -179,9 +179,7 @@ function DashboardCommunityInfo({
         </SettingsSection>
 
         <form
-          onSubmit={form.handleSubmit(save, (errors) => {
-            console.log("Form submission errors:", errors);
-          })}
+          onSubmit={form.handleSubmit(save)}
           ref={formRef}
           className="w-full"
         >

@@ -4,14 +4,13 @@ import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import { EventsTableView } from "./events-table-view";
-import { userInfoOptions } from "@/lib/queries/user";
 import {
   DEFAULT_EVENTS_LIMIT,
   eventsByRolesListSuspense,
 } from "@/lib/queries/events-list";
 import { DiscoverableFilter } from "@/app/gen/zenao/v1/zenao_pb";
 import useManualPagination from "@/hooks/use-manual-pagination";
-import { useActiveAccount } from "@/components/providers/active-account-provider";
+import useActor from "@/hooks/use-actor";
 
 interface EventsTableProps {
   now: number;
@@ -19,14 +18,11 @@ interface EventsTableProps {
 }
 
 export default function EventsTable({ now, tab }: EventsTableProps) {
-  const { getToken, userId } = useAuth();
-  const { activeAccount } = useActiveAccount();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, userId),
-  );
+  const { getToken } = useAuth();
+  const actor = useActor();
 
-  const entityId = activeAccount?.id ?? userInfo?.userId;
-  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
+  const entityId = actor?.actingAs;
+  const teamId = actor?.type === "team" ? actor.actingAs : undefined;
 
   const [tablePage, setTablePage] = useQueryState("page", {
     defaultValue: 1,

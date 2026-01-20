@@ -4,8 +4,8 @@ import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { NavMain } from "./nav-main";
-
 import AppSidebarFooter from "./app-sidebar-footer";
+
 import {
   Sidebar,
   SidebarContent,
@@ -18,9 +18,13 @@ import { Web3Image } from "@/components/widgets/images/web3-image";
 import { Skeleton } from "@/components/shadcn/skeleton";
 import Text from "@/components/widgets/texts/text";
 import { useSidebarItems } from "@/lib/navigation/dashboard/sidebar/sidebar-items";
+import useActor from "@/hooks/use-actor";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("navigation");
+  const actor = useActor();
+  const plan = actor?.plan || "free";
+
   const sidebarItems = useSidebarItems();
 
   return (
@@ -55,7 +59,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={sidebarItems} />
+        <NavMain items={sidebarItems} userPlan={plan} />
       </SidebarContent>
       <Suspense fallback={<Skeleton className="h-12 w-full" />}>
         <AppSidebarFooter />
