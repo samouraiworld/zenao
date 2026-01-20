@@ -1,6 +1,6 @@
 {
   "a11y": {
-    "toggle-sidebar": "Basculer la barre latérale",
+    "toggle-sidebar": "trigger",
     "quick-menu": "quick menu create",
     "set-post-type": "Définir le type de publication",
     "submit-post": "Soumettre la publication",
@@ -9,7 +9,7 @@
   "images": {
     "community-banner": "Image de bannière de la communauté",
     "community-profile": "Image de profil de la communauté",
-    "zenao-logo": "Logo Zenao",
+    "zenao-logo": "zenao-logo",
     "zenao-arch": "Diagramme d'architecture Zenao",
     "event": "Image d'événement",
     "event-presentation": "Image de présentation d'événement",

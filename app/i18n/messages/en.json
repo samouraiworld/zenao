@@ -1,6 +1,6 @@
 {
   "a11y": {
-    "toggle-sidebar": "Toggle Sidebar",
+    "toggle-sidebar": "trigger",
     "quick-menu": "quick menu create",
     "set-post-type": "Set post type",
     "submit-post": "Submit post",
@@ -9,7 +9,7 @@
   "images": {
     "community-banner": "Community banner image",
     "community-profile": "Community profile image",
-    "zenao-logo": "Zenao logo",
+    "zenao-logo": "zenao logo",
     "zenao-arch": "Zenao architecture diagram",
     "event": "Event image",
     "event-presentation": "Event presentation image",
