@@ -1,7 +1,7 @@
 {
   "a11y": {
     "toggle-sidebar": "Toggle Sidebar",
-    "quick-menu": "Quick create menu",
+    "quick-menu": "quick menu create",
     "set-post-type": "Set post type",
     "submit-post": "Submit post",
     "pick-date": "Pick date"
@@ -46,7 +46,7 @@
     "dashboard-view": "Dashboard view",
     "customer-view": "Customer view",
     "create-event": "Create Event",
-    "quick-menu-aria-label": "Quick create menu",
+    "quick-menu-aria-label": "quick menu create",
     "footer": {
       "tagline": "Made with ❤️ by Samourai.world crew",
       "report-bug": "Report a bug"
@@ -732,7 +732,7 @@
       "communities": "Communities",
       "settings": "Settings",
       "coming-soon": "Soon",
-      "quick-create": "Quick create"
+      "quick-create": "quick create menu"
     },
     "navUser": {
       "personal-account": "Personal account",
