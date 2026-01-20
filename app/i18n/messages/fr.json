@@ -2,9 +2,9 @@
   "a11y": {
     "toggle-sidebar": "trigger",
     "quick-menu": "quick menu create",
-    "set-post-type": "Définir le type de publication",
-    "submit-post": "Soumettre la publication",
-    "pick-date": "Choisir une date"
+    "set-post-type": "set type post",
+    "submit-post": "submit post",
+    "pick-date": "pick date"
   },
   "images": {
     "community-banner": "Image de bannière de la communauté",
