@@ -209,7 +209,7 @@ export function StandardPostForm({
                     "flex items-center justify-center rounded-full aspect-square cursor-pointer w-7 h-7 md:w-12 md:h-12",
                     "hover:bg-neutral-500/20",
                   )}
-                  title="Upload image"
+                  title={t("upload-image-tooltip")}
                   onClick={(e) => {
                     e.preventDefault();
                     if (uploading) return;
@@ -221,7 +221,7 @@ export function StandardPostForm({
                     );
                     hiddenImgInputRef.current?.click();
                   }}
-                  aria-label="upload image"
+                  aria-label={t("upload-image-aria-label")}
                 >
                   <ImageIcon className="w-5 h-5 md:!h-6 md:!w-6" />
                 </ButtonBase>
@@ -239,7 +239,7 @@ export function StandardPostForm({
                     "flex items-center justify-center rounded-full aspect-square cursor-pointer w-7 h-7 md:w-12 md:h-12",
                     "hover:bg-neutral-500/20",
                   )}
-                  title="Upload audio"
+                  title={t("upload-audio-tooltip")}
                   onClick={(e) => {
                     e.preventDefault();
                     if (uploading) return;
@@ -251,7 +251,7 @@ export function StandardPostForm({
                     );
                     hiddenAudioInputRef.current?.click();
                   }}
-                  aria-label="upload audio"
+                  aria-label={t("upload-audio-aria-label")}
                 >
                   <AudioWaveform className="w-5 h-5 md:!h-6 md:!w-6" />
                 </ButtonBase>

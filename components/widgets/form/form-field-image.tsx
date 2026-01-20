@@ -44,6 +44,8 @@ export const FormFieldImage = <T extends FieldValues>({
   fit?: "cover" | "pad";
 }) => {
   const { toast } = useToast();
+  const tImages = useTranslations("images");
+  const tForms = useTranslations("forms");
   const { field, fieldState } = useController(props);
   const imageUri = useWatch({ control: props.control, name: props.name });
 
@@ -127,7 +129,7 @@ export const FormFieldImage = <T extends FieldValues>({
                       {(!props.fit || props.fit === "pad") && (
                         <Web3Image
                           src={web2URL(imageUri)}
-                          alt="imageUri"
+                          alt={tImages("avatar")}
                           fill
                           sizes="(max-width: 768px) 100vw,
                       (max-width: 1200px) 70vw,
@@ -140,7 +142,7 @@ export const FormFieldImage = <T extends FieldValues>({
                       )}
                       <Web3Image
                         src={web2URL(imageUri)}
-                        alt="imageUri"
+                        alt={tImages("avatar")}
                         fill
                         sizes="(max-width: 768px) 100vw,
                       (max-width: 1200px) 70vw,
@@ -160,7 +162,7 @@ export const FormFieldImage = <T extends FieldValues>({
                         strokeWidth={1}
                         className="w-16 h-16 text-secondary-color"
                       />
-                      <Text variant="secondary">Upload an image</Text>
+                      <Text variant="secondary">{tForms("upload-image")}</Text>
                       {uploading && <Loader2 className="animate-spin" />}
                     </>
                   )}

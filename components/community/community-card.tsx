@@ -26,6 +26,7 @@ type CommunityCardProps = {
 
 function CommunityCard({ id, community }: CommunityCardProps) {
   const t = useTranslations("community-card");
+  const tImages = useTranslations("images");
 
   const { shortDescription } = deserializeWithFrontMatter({
     serialized: community.description || "",
@@ -46,7 +47,7 @@ function CommunityCard({ id, community }: CommunityCardProps) {
           <AspectRatio ratio={1 / 1}>
             <Web3Image
               src={community.avatarUri}
-              alt="Profile picture"
+              alt={tImages("profile-picture")}
               priority
               fetchPriority="high"
               fill

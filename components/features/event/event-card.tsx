@@ -52,6 +52,7 @@ export function EventCard({
   const eventTimezone = locationTimezone(location);
   const timezone = useLayoutTimezone(eventTimezone);
   const t = useTranslations("event-card");
+  const tImages = useTranslations("images");
 
   const locationString =
     location.kind === "geo" || location.kind === "custom"
@@ -68,7 +69,7 @@ export function EventCard({
                 (max-width: 1200px) 50vw,
                 33vw"
             fill
-            alt="Event presentation"
+            alt={tImages("event-presentation")}
             className="group-hover:opacity-80"
             quality={60}
           />

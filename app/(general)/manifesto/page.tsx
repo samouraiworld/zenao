@@ -10,6 +10,7 @@ import { Web3Image } from "@/components/widgets/images/web3-image";
 export default function Manifesto() {
   const t = useTranslations("manifesto");
   const t2 = useTranslations("whitepaper");
+  const tImages = useTranslations("images");
 
   return (
     <ScreenContainerCentered>
@@ -19,7 +20,7 @@ export default function Manifesto() {
           <div />
           <Image
             src="/zenao-logo.png"
-            alt="zenao logo"
+            alt={tImages("zenao-logo")}
             width={200}
             height={200}
             fetchPriority="high"
@@ -202,7 +203,7 @@ export default function Manifesto() {
 
           <Web3Image
             className="object-cover rounded"
-            alt="zenao arch"
+            alt={tImages("zenao-arch")}
             width={1000}
             height={300}
             src="https://ipfs.io/ipfs/bafybeigirez6x4hn5ghchng5eoxoi2bkcglaybuz4np6joub6zja5om6l4"

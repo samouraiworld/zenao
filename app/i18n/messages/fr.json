@@ -1,7 +1,31 @@
 {
-  "common": {
-    "maintenance": "Zenao est en maintenance, réessayez dans quelques minutes..."
+  "a11y": {
+    "toggle-sidebar": "trigger",
+    "quick-menu": "quick menu create",
+    "set-post-type": "set type post",
+    "submit-post": "submit post",
+    "pick-date": "Pick date"
   },
+  "images": {
+    "community-banner": "Image de bannière de la communauté",
+    "community-profile": "Image de profil de la communauté",
+    "zenao-logo": "zenao-logo",
+    "zenao-arch": "Diagramme d'architecture Zenao",
+    "event": "Image d'événement",
+    "event-presentation": "Image de présentation d'événement",
+    "profile-banner": "Bannière de profil",
+    "profile-picture": "Photo de profil",
+    "avatar": "Avatar",
+    "background": "Image d'arrière-plan"
+  },
+  "forms": {
+    "select-view": "Sélectionner une vue",
+    "month": "Mois",
+    "year": "Année",
+    "timezones": "Fuseaux horaires",
+    "upload-image": "Télécharger une image"
+  },
+  "maintenance": "Zenao est en maintenance, réessayez dans quelques minutes...",
   "community-card": {
     "members": "{count, plural, =0 {aucun membre} =1 {1 membre} other {# membres}}",
     "no-description": "Pas encore de description"
@@ -22,7 +46,7 @@
     "dashboard-view": "Vue tableau de bord",
     "customer-view": "Vue client",
     "create-event": "Créer un événement",
-    "quick-menu-aria-label": "Menu de création rapide",
+    "quick-menu-aria-label": "quick menu create",
     "footer": {
       "tagline": "Fait avec ❤️ par l'équipe Samourai.world",
       "report-bug": "Signaler un bug"
@@ -39,6 +63,7 @@
     "create-event-button": "Créer l'événement",
     "edit-event-button": "Modifier l'événement",
     "image-uri-placeholder": "URL de l'image...",
+    "virtual-uri-placeholder": "Lien de l'événement virtuel (Zoom, Meet, etc.)...",
     "title-placeholder": "Nom de l'événement...",
     "add-image-tooltip": "Ajouter une image",
     "add-image-aria-label": "Ajouter une image",
@@ -111,7 +136,8 @@
     "login-to-see-tickets": "Connectez-vous pour voir le(s) billet(s)",
     "invitee-form": {
       "add-a-friend": "Ajouter un ami",
-      "email-placeholder": "Email..."
+      "email-placeholder": "Email...",
+      "guests": "Invités"
     },
     "gatekeeper-button": "Ouvrir le scanner de billets",
     "view-more": "Voir plus",
@@ -553,7 +579,8 @@
     "toast-cancel-event-success": "L'événement a été annulé",
     "toast-cancel-event-error": "Erreur lors de l'annulation de l'événement",
     "event-starting-soon-error": "Les événements déjà commencés ou commençant dans moins de 24h ne peuvent pas être annulés",
-    "toast-only-organizers-can-cancel-error": "Seuls les organisateurs peuvent annuler un événement"
+    "toast-only-organizers-can-cancel-error": "Seuls les organisateurs peuvent annuler un événement",
+    "toast-only-organizer-can-cancel-error": "Seuls les organisateurs peuvent annuler un événement"
   },
   "delete-post-confirmation-dialog": {
     "title": "Supprimer la publication",
@@ -601,8 +628,9 @@
     "stripe-onboarding-failure": "Échec du démarrage de l'intégration Stripe",
     "stripe-onboarding-return": "Intégration Stripe terminée.",
     "stripe-onboarding-refresh": "L'intégration Stripe n'a pas été complétée. Veuillez réessayer."
-  },
-  "community-form": {
+  },  "communityForm": {
+    "log-in": "Connectez-vous pour gérer les communautés"
+  },  "community-form": {
     "edit-button": "Modifier la communauté",
     "upload-avatar": "Télécharger une image d'avatar",
     "upload-banner": "Télécharger une image de bannière",
@@ -704,7 +732,7 @@
       "communities": "Communautés",
       "settings": "Paramètres",
       "coming-soon": "Bientôt",
-      "quick-create": "Création rapide"
+      "quick-create": "quick create menu"
     },
     "navUser": {
       "personal-account": "Compte personnel",
@@ -754,6 +782,7 @@
       "name-column": "Nom",
       "members-column": "Membres",
       "roles-column": "Rôles",
+      "email-column": "Email",
       "view-community": "Voir la communauté",
       "loading": "Chargement...",
       "actions-column": "Actions",
@@ -845,6 +874,12 @@
         "rows-per-page": "Lignes par page",
         "page-of": "Page {page} sur {pages}"
       }
+    }
+  },
+  "metadata": {
+    "blog-page": {
+      "title": "Blog | Zenao",
+      "description": "Découvrez les derniers articles, nouvelles et mises à jour de Zenao sur notre blog."
     }
   }
 }

@@ -29,6 +29,7 @@ export function TicketCard({
   timezone,
   ticketInfo,
 }: TicketCardProps) {
+  const tImages = useTranslations("images");
   const t = useTranslations("tickets");
   const { Canvas: QRCode } = useQRCode();
 
@@ -56,7 +57,7 @@ export function TicketCard({
                 (max-width: 1200px) 50vw,
                 33vw"
                 fill
-                alt="Event"
+                alt={tImages("event")}
                 priority
                 className="flex w-full max-sm:rounded-tl rounded-tl max-md:rounded-tr md:rounded-bl self-center object-cover pointer-events-none"
               />

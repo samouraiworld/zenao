@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Organization, WithContext } from "schema-dts";
 import { ExternalLink, Link2 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AspectRatio } from "@/components/shadcn/aspect-ratio";
 import Heading from "@/components/widgets/texts/heading";
 import { Web3Image } from "@/components/widgets/images/web3-image";
@@ -25,6 +26,7 @@ function CommunityInfoLayout({
   children,
 }: CommunityInfoLayoutProps) {
   const { data } = useSuspenseQuery(communityInfo(communityId));
+  const tImages = useTranslations("images");
 
   const { description, shortDescription, socialMediaLinks } =
     deserializeWithFrontMatter({
@@ -62,7 +64,7 @@ function CommunityInfoLayout({
         <AspectRatio ratio={4 / 1}>
           <Web3Image
             className="rounded w-full h-full self-center object-cover"
-            alt="Community hero img"
+            alt={tImages("community-banner")}
             src={
               data.bannerUri.length > 0
                 ? data.bannerUri
@@ -80,7 +82,7 @@ function CommunityInfoLayout({
             <Web3Image
               className="rounded h-full self-center object-cover"
               src={data.avatarUri}
-              alt="Community profile img"
+              alt={tImages("community-profile")}
               priority
               fetchPriority="high"
               fill

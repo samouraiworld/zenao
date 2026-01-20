@@ -29,7 +29,7 @@ export function DashboardFormPrivacy() {
       <FormFieldSwitch
         control={form.control}
         name="exclusive"
-        label={"Protect access with password"}
+        label={t("exclusive-label")}
       />
 
       {exclusive && (

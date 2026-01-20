@@ -24,6 +24,7 @@ interface EventsTableProps {
 
 export default function EventsPageLayout({ now }: EventsTableProps) {
   const router = useRouter();
+  const tForms = useTranslations("forms");
   const t = useTranslations("dashboard.eventsTable");
   const [tab] = useQueryState<"upcoming" | "past">("tab", {
     defaultValue: "upcoming",
@@ -58,7 +59,7 @@ export default function EventsPageLayout({ now }: EventsTableProps) {
                 className="flex w-fit xl:hidden"
                 id="view-selector"
               >
-                <SelectValue placeholder="Select a view" />
+                <SelectValue placeholder={tForms("select-view")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="upcoming">{t("upcoming")}</SelectItem>

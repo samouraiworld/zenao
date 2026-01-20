@@ -174,7 +174,7 @@ export default function DashboardFormDescription() {
                     "w-fit flex items-center justify-center cursor-pointer",
                     "hover:bg-neutral-700",
                   )}
-                  title="Add image"
+                  title={t("add-image-tooltip")}
                   onClick={(e) => {
                     e.preventDefault();
                     if (uploading) return;
@@ -186,7 +186,7 @@ export default function DashboardFormDescription() {
                     );
                     hiddenImgInputRef.current?.click();
                   }}
-                  aria-label="Add image"
+                  aria-label={t("add-image-aria-label")}
                 >
                   <ImageIcon className="!h-4 !w-4" />
                 </Button>
@@ -204,7 +204,7 @@ export default function DashboardFormDescription() {
                     "w-fit flex px-4 items-center justify-center cursor-pointer",
                     "hover:bg-neutral-700",
                   )}
-                  title="Add audio"
+                  title={t("add-audio-tooltip")}
                   onClick={(e) => {
                     e.preventDefault();
                     if (uploading) return;
@@ -216,7 +216,7 @@ export default function DashboardFormDescription() {
                     );
                     hiddenAudioInputRef.current?.click();
                   }}
-                  aria-label="Add audio"
+                  aria-label={t("add-audio-aria-label")}
                 >
                   <AudioWaveformIcon className="!h-4 !w-4" />
                 </Button>

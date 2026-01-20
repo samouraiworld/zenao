@@ -22,6 +22,7 @@ import useActor from "@/hooks/use-actor";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("navigation");
+  const tImages = useTranslations("images");
   const actor = useActor();
   const plan = actor?.plan || "free";
 
@@ -47,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link href="/" className="flex items-center gap-2">
                 <Web3Image
                   src="/zenao-logo.png"
-                  alt="zenao logo"
+                  alt={tImages("zenao-logo")}
                   width={28}
                   height={28}
                   priority

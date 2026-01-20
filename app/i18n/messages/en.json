@@ -1,7 +1,31 @@
 {
-  "common": {
-    "maintenance": "Zenao is under maintenance, try again in few minutes..."
+  "a11y": {
+    "toggle-sidebar": "trigger",
+    "quick-menu": "quick menu create",
+    "set-post-type": "set type post",
+    "submit-post": "submit post",
+    "pick-date": "Pick date"
   },
+  "images": {
+    "community-banner": "Community banner image",
+    "community-profile": "Community profile image",
+    "zenao-logo": "zenao logo",
+    "zenao-arch": "Zenao architecture diagram",
+    "event": "Event image",
+    "event-presentation": "Event presentation image",
+    "profile-banner": "Profile banner",
+    "profile-picture": "Profile picture",
+    "avatar": "Avatar",
+    "background": "Background image"
+  },
+  "forms": {
+    "select-view": "Select a view",
+    "month": "Month",
+    "year": "Year",
+    "timezones": "Timezones",
+    "upload-image": "Upload image"
+  },
+  "maintenance": "Zenao is under maintenance, try again in few minutes...",
   "community-card": {
     "members": "{count, plural, =0 {no members yet} =1 {1 member} other {# members}}",
     "no-description": "No description yet"
@@ -22,7 +46,7 @@
     "dashboard-view": "Dashboard view",
     "customer-view": "Customer view",
     "create-event": "Create Event",
-    "quick-menu-aria-label": "Quick create menu",
+    "quick-menu-aria-label": "quick menu create",
     "footer": {
       "tagline": "Made with ❤️ by Samourai.world crew",
       "report-bug": "Report a bug"
@@ -39,6 +63,7 @@
     "create-event-button": "Create event",
     "edit-event-button": "Edit event",
     "image-uri-placeholder": "Image URL...",
+    "virtual-uri-placeholder": "Virtual event link (Zoom, Meet, etc.)...",
     "title-placeholder": "Event name...",
     "add-image-tooltip": "Add image",
     "add-image-aria-label": "Add image",
@@ -111,7 +136,8 @@
     "login-to-see-tickets": "Login to see ticket(s)",
     "invitee-form": {
       "add-a-friend": "Add a friend",
-      "email-placeholder": "Email..."
+      "email-placeholder": "Email...",
+      "guests": "Guests"
     },
     "gatekeeper-button": "Open ticket scanner",
     "view-more": "View more",
@@ -553,7 +579,7 @@
     "toast-cancel-event-success": "Event has been cancelled",
     "toast-cancel-event-error": "Error while cancelling the event",
     "event-starting-soon-error": "Events already started or starting within 24h cannot be cancelled",
-    "toast-only-organizers-can-cancel-error": "Only organizers can cancel an event"
+    "toast-only-organizer-can-cancel-error": "Only organizers can cancel an event"
   },
   "delete-post-confirmation-dialog": {
     "title": "Delete post",
@@ -601,6 +627,9 @@
     "stripe-onboarding-failure": "Failed to start Stripe onboarding",
     "stripe-onboarding-return": "Stripe onboarding completed.",
     "stripe-onboarding-refresh": "Stripe onboarding was not completed. Please try again."
+  },
+  "communityForm": {
+    "log-in": "Log in to manage communities"
   },
   "community-form": {
     "edit-button": "Edit community",
@@ -703,7 +732,7 @@
       "communities": "Communities",
       "settings": "Settings",
       "coming-soon": "Soon",
-      "quick-create": "Quick create"
+      "quick-create": "quick create menu"
     },
     "navUser": {
       "personal-account": "Personal account",
@@ -753,6 +782,7 @@
       "name-column": "Name",
       "members-column": "Members",
       "roles-column": "Roles",
+      "email-column": "Email",
       "view-community": "See community",
       "loading": "Loading...",
       "actions-column": "Actions",
@@ -844,6 +874,12 @@
         "rows-per-page": "Rows per page",
         "page-of": "Page {page} of {pages}"
       }
+    }
+  },
+  "metadata": {
+    "blog-page": {
+      "title": "Blog | Zenao",
+      "description": "Discover the latest articles, news, and updates about Zenao in our blog."
     }
   }
 }

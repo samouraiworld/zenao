@@ -3,6 +3,7 @@
 import React from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { cva } from "class-variance-authority";
 import { profileOptions } from "@/lib/queries/profile";
 import { cn } from "@/lib/tailwind";
@@ -49,6 +50,7 @@ export function UserAvatar({
   size = "sm",
 }: UserComponentProps) {
   const { data: profile } = useSuspenseQuery(profileOptions(userId));
+  const tImages = useTranslations("images");
 
   const imgSize = size === "sm" ? 24 : size === "md" ? 48 : 96;
   const imgQuality = size === "sm" ? 60 : size === "md" ? 80 : 90;
@@ -65,7 +67,7 @@ export function UserAvatar({
           width={imgSize}
           height={imgSize}
           quality={imgQuality}
-          alt="Avatar"
+          alt={tImages("avatar")}
           className="w-full h-full object-cover"
         />
       </AvatarFallback>

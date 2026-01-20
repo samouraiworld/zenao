@@ -6,6 +6,7 @@ import { CalendarIcon } from "lucide-react";
 import { format, fromUnixTime, getUnixTime, minutesToSeconds } from "date-fns";
 import { format as formatTZ } from "date-fns-tz";
 import { DateInterval, DateRange, Matcher } from "react-day-picker";
+import { useTranslations } from "next-intl";
 import {
   FormControl,
   FormField,
@@ -77,6 +78,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
     label?: string;
   },
 ) {
+  const tA11y = useTranslations("a11y");
   const { field } = useController({
     name: props.name,
     control: props.control,
@@ -151,7 +153,7 @@ export function FormFieldDatePicker<T extends FieldValues>(
                     <FormControl>
                       <Button
                         variant="input"
-                        aria-label="Pick date"
+                        aria-label={tA11y("pick-date")}
                         disabled={props.disabled}
                         className={cn(
                           "w-full",
