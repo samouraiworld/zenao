@@ -9,18 +9,14 @@ import {
   DEFAULT_COMMUNITIES_LIMIT,
 } from "@/lib/queries/community";
 import useManualPagination from "@/hooks/use-manual-pagination";
-import { userInfoOptions } from "@/lib/queries/user";
-import { useActiveAccount } from "@/components/providers/active-account-provider";
+import useActor from "@/hooks/use-actor";
 
 export default function CommunitiesTable() {
-  const { getToken, userId: authId } = useAuth();
-  const { activeAccount } = useActiveAccount();
-  const { data: userInfo } = useSuspenseQuery(
-    userInfoOptions(getToken, authId),
-  );
+  const actor = useActor();
+  const { getToken } = useAuth();
 
-  const entityId = activeAccount?.id ?? userInfo?.userId;
-  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
+  const entityId = actor?.actingAs;
+  const teamId = actor?.type === "team" ? actor?.actingAs : undefined;
 
   const [tablePage, setTablePage] = useQueryState("page", {
     defaultValue: 1,

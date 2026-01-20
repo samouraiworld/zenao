@@ -12,7 +12,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@clerk/nextjs";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useDashboardCommunityContext } from "./dashboard-community-context-provider";
 import { Form } from "@/components/shadcn/form";
 import {
   CommunityDetails,
@@ -29,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { communityAdministrators } from "@/lib/queries/community";
 import { useEditCommunity } from "@/lib/mutations/community-edit";
 import { captureException } from "@/lib/report";
+import { useDashboardCommunityContext } from "@/components/providers/dashboard-community-context-provider";
 
 interface DashboardEventEditionContextProps {
   isUpdating: boolean;

@@ -28,8 +28,6 @@ function ProfileMainSections({
   section,
   now,
 }: ProfileMainSectionsProps) {
-  console.log("asfausaiuazazassioajsa", userId);
-
   const t = useTranslations("profile-info");
 
   return (

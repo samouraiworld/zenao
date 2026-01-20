@@ -2,15 +2,14 @@
 import "server-only";
 import { redirect, notFound } from "next/navigation";
 import React from "react";
-import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
-import { getActiveAccountServer } from "../active-account/server";
 import { getQueryClient } from "../get-query-client";
 import { EventUserRole, eventUserRoles } from "../queries/event-users";
-import { userInfoOptions } from "../queries/user";
 import { communityUserRoles } from "../queries/community";
+import getActor from "../utils/actor";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
-import { CommunityUserRole } from "@/types/schemas";
+import { CommunityUserRole, PlanType } from "@/types/schemas";
+import UpgradePlan from "@/components/features/dashboard/upgrade-plan";
 
 type ServerComponent<P> = (
   props: P,
@@ -31,16 +30,11 @@ export function withEventRoleRestrictions<
   return async function RoleProtectedPage(props: P) {
     const { id: eventId } = await props.params;
     const queryClient = getQueryClient();
-    const { getToken, userId } = await auth();
-    const token = await getToken();
-
-    const userAddrOpts = userInfoOptions(getToken, userId);
-    const userInfo = await queryClient.fetchQuery(userAddrOpts);
-    const userProfileId = userInfo?.userId;
+    const actor = await getActor();
 
     const t = await getTranslations();
 
-    if (!token || !userProfileId) {
+    if (!actor) {
       return (
         <ScreenContainerCentered isSignedOutModal>
           {t("eventForm.log-in")}
@@ -48,11 +42,8 @@ export function withEventRoleRestrictions<
       );
     }
 
-    const activeAccount = await getActiveAccountServer();
-    const entityId = activeAccount?.id ?? userProfileId;
-
     const roles = await queryClient.fetchQuery(
-      eventUserRoles(eventId, entityId),
+      eventUserRoles(eventId, actor.actingAs),
     );
 
     if (!allowedRoles.some((role) => roles.includes(role))) {
@@ -78,16 +69,11 @@ export function withCommunityRolesRestriction<
   return async function RoleProtectedPage(props: P) {
     const { id: communityId } = await props.params;
     const queryClient = getQueryClient();
-    const { getToken, userId } = await auth();
-    const token = await getToken();
-
-    const userAddrOpts = userInfoOptions(getToken, userId);
-    const userInfo = await queryClient.fetchQuery(userAddrOpts);
-    const userProfileId = userInfo?.userId;
+    const actor = await getActor();
 
     const t = await getTranslations();
 
-    if (!token || !userProfileId) {
+    if (!actor) {
       return (
         <ScreenContainerCentered isSignedOutModal>
           {t("communityForm.log-in")}
@@ -95,15 +81,40 @@ export function withCommunityRolesRestriction<
       );
     }
 
-    const activeAccount = await getActiveAccountServer();
-    const entityId = activeAccount?.id ?? userProfileId;
-
     const roles = await queryClient.fetchQuery(
-      communityUserRoles(communityId, entityId),
+      communityUserRoles(communityId, actor.actingAs),
     );
 
     if (!allowedRoles.some((role) => roles.includes(role))) {
       notFound();
+    }
+
+    return <Component {...props} />;
+  };
+}
+
+export function withPlanRestriction<P extends object>(
+  Component: ServerComponent<P>,
+  allowedPlans: PlanType[],
+): ServerComponent<P> {
+  return async function PlanProtectedPage(props: P) {
+    const t = await getTranslations();
+    const actor = await getActor();
+
+    if (!actor) {
+      return (
+        <ScreenContainerCentered isSignedOutModal>
+          {t("communityForm.log-in")}
+        </ScreenContainerCentered>
+      );
+    }
+
+    if (!allowedPlans.includes(actor.plan ?? "free")) {
+      return (
+        <ScreenContainerCentered>
+          <UpgradePlan currentPlan={actor.plan || "free"} />
+        </ScreenContainerCentered>
+      );
     }
 
     return <Component {...props} />;

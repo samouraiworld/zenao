@@ -1,15 +1,13 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { notFound } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
 import DashboardCommunityTabs from "./dashboard-community-tabs";
 import { getQueryClient } from "@/lib/get-query-client";
 import { withCommunityRolesRestriction } from "@/lib/permissions/with-roles-required";
 import { communityInfo, communityUserRoles } from "@/lib/queries/community";
-import { userInfoOptions } from "@/lib/queries/user";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import DashboardCommunityContextProvider from "@/components/providers/dashboard-community-context-provider";
-import { getActiveAccountServer } from "@/lib/active-account/server";
+import getActor from "@/lib/utils/actor";
 
 interface DashboardCommunityManagementPageProps {
   params: Promise<{ id: string }>;
@@ -22,25 +20,18 @@ async function DashboardCommunityManagementPage({
 }: DashboardCommunityManagementPageProps) {
   const { id: communityId } = await params;
   const queryClient = getQueryClient();
-  const { getToken, userId } = await auth();
-  const token = await getToken();
 
-  const userAddrOpts = userInfoOptions(getToken, userId);
-  const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userProfileId = userInfo?.userId;
+  const actor = await getActor();
 
   const t = await getTranslations();
 
-  if (!token || !userProfileId) {
+  if (!actor) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("eventForm.log-in")}
       </ScreenContainerCentered>
     );
   }
-
-  const activeAccount = await getActiveAccountServer();
-  const entityId = activeAccount?.id ?? userProfileId;
 
   let communityData;
 
@@ -51,7 +42,7 @@ async function DashboardCommunityManagementPage({
   }
 
   const roles = await queryClient.fetchQuery(
-    communityUserRoles(communityId, entityId),
+    communityUserRoles(communityId, actor.actingAs),
   );
 
   const renderLayout = () => (

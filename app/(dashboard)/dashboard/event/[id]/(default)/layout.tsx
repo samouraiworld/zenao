@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import DashboardEventTabs from "./dashboard-event-tabs";
 import { getQueryClient } from "@/lib/get-query-client";
-import { userInfoOptions } from "@/lib/queries/user";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { eventGatekeepersEmails, eventOptions } from "@/lib/queries/event";
 import { eventUserRoles } from "@/lib/queries/event-users";
@@ -15,7 +14,7 @@ import {
 import DashboardEventEditionContextProvider from "@/components/providers/dashboard-event-edition-context-provider";
 import DashboardEventContextProvider from "@/components/providers/dashboard-event-context-provider";
 import { withEventRoleRestrictions } from "@/lib/permissions/with-roles-required";
-import { getActiveAccountServer } from "@/lib/active-account/server";
+import getActor from "@/lib/utils/actor";
 
 interface DashboardEventInfoLayoutProps {
   params: Promise<{ id: string }>;
@@ -28,26 +27,19 @@ async function DashboardEventInfoLayoutProps({
 }: DashboardEventInfoLayoutProps) {
   const { id: eventId } = await params;
   const queryClient = getQueryClient();
-  const { getToken, userId } = await auth();
+  const actor = await getActor();
+  const { getToken } = await auth();
   const token = await getToken();
-
-  const userAddrOpts = userInfoOptions(getToken, userId);
-  const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userProfileId = userInfo?.userId;
 
   const t = await getTranslations();
 
-  if (!token || !userProfileId) {
+  if (!token || !actor) {
     return (
       <ScreenContainerCentered isSignedOutModal>
         {t("eventForm.log-in")}
       </ScreenContainerCentered>
     );
   }
-
-  const activeAccount = await getActiveAccountServer();
-  const entityId = activeAccount?.id ?? userProfileId;
-  const teamId = activeAccount?.type === "team" ? activeAccount.id : undefined;
 
   let eventInfo;
 
@@ -60,6 +52,8 @@ async function DashboardEventInfoLayoutProps({
     notFound();
   }
 
+  const entityId = actor.actingAs;
+  const teamId = actor.type === "team" ? actor.actingAs : undefined;
   const roles = await queryClient.fetchQuery(eventUserRoles(eventId, entityId));
 
   queryClient.prefetchInfiniteQuery(

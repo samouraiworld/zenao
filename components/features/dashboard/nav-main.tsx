@@ -10,6 +10,7 @@ import {
   type NavMainItem,
   type NavGroup,
 } from "@/lib/navigation/dashboard/sidebar/sidebar-items";
+import { PlanType } from "@/types/schemas";
 import {
   Collapsible,
   CollapsibleContent,
@@ -36,6 +37,7 @@ import {
 
 interface NavMainProps {
   readonly items: readonly NavGroup[];
+  readonly userPlan?: PlanType;
 }
 
 const IsComingSoon = () => {
@@ -47,14 +49,25 @@ const IsComingSoon = () => {
   );
 };
 
+const RequiresPro = () => {
+  const t = useTranslations("dashboard.sidebar");
+  return (
+    <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
+      {t("pro")}
+    </span>
+  );
+};
+
 const NavItemExpanded = ({
   item,
   isActive,
   isSubmenuOpen,
+  userPlan = "free",
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
+  userPlan?: PlanType;
 }) => {
   const t = useTranslations("dashboard.sidebar");
   const path = usePathname();
@@ -88,19 +101,24 @@ const NavItemExpanded = ({
         <CollapsibleTrigger asChild>
           {resolvedSubItems ? (
             <SidebarMenuButton
-              disabled={item.comingSoon}
+              disabled={
+                item.comingSoon || (item.requiresPro && userPlan !== "pro")
+              }
               isActive={isActive(item.url, item.subItems)}
               tooltip={item.title}
             >
               {item.icon && <item.icon />}
               <span>{t(item.title)}</span>
               {item.comingSoon && <IsComingSoon />}
+              {item.requiresPro && userPlan !== "pro" && <RequiresPro />}
               <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
             </SidebarMenuButton>
           ) : (
             <SidebarMenuButton
               asChild
-              aria-disabled={item.comingSoon}
+              aria-disabled={
+                item.comingSoon || (item.requiresPro && userPlan !== "pro")
+              }
               isActive={isActive(item.url)}
               tooltip={item.title}
             >
@@ -112,6 +130,7 @@ const NavItemExpanded = ({
                 {item.icon && <item.icon />}
                 <span>{t(item.title)}</span>
                 {item.comingSoon && <IsComingSoon />}
+                {item.requiresPro && userPlan !== "pro" && <RequiresPro />}
               </Link>
             </SidebarMenuButton>
           )}
@@ -122,7 +141,10 @@ const NavItemExpanded = ({
               {resolvedSubItems?.map((subItem) => (
                 <SidebarMenuSubItem key={subItem.title}>
                   <SidebarMenuSubButton
-                    aria-disabled={subItem.comingSoon}
+                    aria-disabled={
+                      subItem.comingSoon ||
+                      (subItem.requiresPro && userPlan !== "pro")
+                    }
                     isActive={isActive(subItem.url)}
                     asChild
                   >
@@ -134,6 +156,9 @@ const NavItemExpanded = ({
                       {subItem.icon && <subItem.icon />}
                       <span>{t(subItem.title)}</span>
                       {subItem.comingSoon && <IsComingSoon />}
+                      {subItem.requiresPro && userPlan !== "pro" && (
+                        <RequiresPro />
+                      )}
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
@@ -149,9 +174,11 @@ const NavItemExpanded = ({
 const NavItemCollapsed = ({
   item,
   isActive,
+  userPlan = "free",
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
+  userPlan?: PlanType;
 }) => {
   const t = useTranslations("dashboard.sidebar");
   const pathname = usePathname();
@@ -167,7 +194,9 @@ const NavItemCollapsed = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <SidebarMenuButton
-            disabled={item.comingSoon}
+            disabled={
+              item.comingSoon || (item.requiresPro && userPlan !== "pro")
+            }
             tooltip={item.title}
             isActive={isActive(item.url, item.subItems)}
           >
@@ -187,7 +216,10 @@ const NavItemCollapsed = ({
                 key={subItem.title}
                 asChild
                 className="focus-visible:ring-0"
-                aria-disabled={subItem.comingSoon}
+                aria-disabled={
+                  subItem.comingSoon ||
+                  (subItem.requiresPro && userPlan !== "pro")
+                }
                 isActive={isActive(subItem.url)}
               >
                 <Link
@@ -200,6 +232,7 @@ const NavItemCollapsed = ({
                   )}
                   <span>{t(subItem.title)}</span>
                   {subItem.comingSoon && <IsComingSoon />}
+                  {subItem.requiresPro && userPlan !== "pro" && <RequiresPro />}
                 </Link>
               </SidebarMenuSubButton>
             </DropdownMenuItem>
@@ -210,7 +243,7 @@ const NavItemCollapsed = ({
   );
 };
 
-export function NavMain({ items }: NavMainProps) {
+export function NavMain({ items, userPlan = "free" }: NavMainProps) {
   const path = usePathname();
   const { state, isMobile } = useSidebar();
   const { id } = useParams<{ id: string | undefined }>();
@@ -297,7 +330,10 @@ export function NavMain({ items }: NavMainProps) {
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
                           asChild
-                          aria-disabled={item.comingSoon}
+                          aria-disabled={
+                            item.comingSoon ||
+                            (item.requiresPro && userPlan !== "pro")
+                          }
                           tooltip={t(item.title)}
                           isActive={isItemActive(item.url)}
                         >
@@ -320,6 +356,7 @@ export function NavMain({ items }: NavMainProps) {
                       key={item.title}
                       item={item}
                       isActive={isItemActive}
+                      userPlan={userPlan}
                     />
                   );
                 }
@@ -330,6 +367,7 @@ export function NavMain({ items }: NavMainProps) {
                     item={item}
                     isActive={isItemActive}
                     isSubmenuOpen={isSubmenuOpen}
+                    userPlan={userPlan}
                   />
                 );
               })}

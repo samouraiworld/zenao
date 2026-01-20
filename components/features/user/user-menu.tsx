@@ -26,6 +26,8 @@ import {
 import { useAccountSwitcher } from "@/hooks/use-account-switcher";
 import { profileOptions } from "@/lib/queries/profile";
 import { userInfoOptions } from "@/lib/queries/user";
+import RoleBasedViewMode from "@/components/widgets/permissions/view-mode";
+import { planSchema } from "@/types/schemas";
 
 export type UserMenuVariant = "dashboard" | "customer";
 
@@ -58,7 +60,8 @@ export function UserMenu({
   );
 
   const userId = userInfo?.userId || "";
-  const plan = userInfo?.plan || "";
+  const result = planSchema.safeParse(userInfo?.plan || "free");
+  const plan = result.success ? result.data : "free";
   const displayName = profile?.displayName || "";
 
   const {
@@ -111,52 +114,54 @@ export function UserMenu({
             {isPersonalActive && <Check className="size-4" />}
           </DropdownMenuItem>
 
-          {/* Teams (dashboard only) */}
+          {/* Teams (dashboard only & pro plan) */}
           {variant === "dashboard" && (
-            <>
-              {teams.map((team) => (
+            <RoleBasedViewMode allowedRoles={["pro"]} roles={[plan]}>
+              <>
+                {teams.map((team) => (
+                  <DropdownMenuItem
+                    key={team.teamId}
+                    onClick={() => handleSwitchToTeam(team.teamId)}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <div className={avatarClassName}>
+                      <UserAvatar
+                        userId={team.teamId}
+                        className={avatarClassName}
+                        size="md"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{team.displayName}</span>
+                        {team.plan === "pro" && (
+                          <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
+                            Pro
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {t("team")}
+                      </div>
+                    </div>
+                    {activeAccount?.type === "team" &&
+                      activeAccount.id === team.teamId && (
+                        <Check className="size-4" />
+                      )}
+                  </DropdownMenuItem>
+                ))}
+
                 <DropdownMenuItem
-                  key={team.teamId}
-                  onClick={() => handleSwitchToTeam(team.teamId)}
+                  onClick={() => setIsCreateTeamOpen(true)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <div className={avatarClassName}>
-                    <UserAvatar
-                      userId={team.teamId}
-                      className={avatarClassName}
-                      size="md"
-                    />
+                  <div className="flex size-7 items-center justify-center rounded-full border border-dashed sm:size-8">
+                    <Plus className="size-4" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{team.displayName}</span>
-                      {team.plan === "pro" && (
-                        <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded">
-                          Pro
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {t("team")}
-                    </div>
-                  </div>
-                  {activeAccount?.type === "team" &&
-                    activeAccount.id === team.teamId && (
-                      <Check className="size-4" />
-                    )}
+                  <span>{t("create-team")}</span>
                 </DropdownMenuItem>
-              ))}
-
-              <DropdownMenuItem
-                onClick={() => setIsCreateTeamOpen(true)}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <div className="flex size-7 items-center justify-center rounded-full border border-dashed sm:size-8">
-                  <Plus className="size-4" />
-                </div>
-                <span>{t("create-team")}</span>
-              </DropdownMenuItem>
-            </>
+              </>
+            </RoleBasedViewMode>
           )}
 
           <DropdownMenuSeparator />

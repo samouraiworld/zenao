@@ -1,23 +1,17 @@
-import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import CommunitiesPageLayout from "./communities-page-layout";
 import { ScreenContainerCentered } from "@/components/layout/screen-container";
 import { getQueryClient } from "@/lib/get-query-client";
-import { userInfoOptions } from "@/lib/queries/user";
+import getActor from "@/lib/utils/actor";
 
 export default async function DashboardCommunityPage() {
   const queryClient = getQueryClient();
-  const { getToken, userId: authId } = await auth();
-  const token = await getToken();
 
   const t = await getTranslations();
+  const actor = await getActor();
 
-  const userAddrOpts = userInfoOptions(getToken, authId);
-  const userInfo = await queryClient.fetchQuery(userAddrOpts);
-  const userProfileId = userInfo?.userId;
-
-  if (!token || !userProfileId) {
+  if (!actor) {
     return (
       <ScreenContainerCentered
         isSignedOutModal
