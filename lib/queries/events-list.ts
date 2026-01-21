@@ -193,7 +193,7 @@ export const eventsByOrganizerList = (
 };
 
 export const eventsByParticipantList = (
-  participantId: string,
+  participantId: string | null | undefined,
   discoverableFilter: DiscoverableFilter,
   fromUnixSec: number,
   toUnixSec: number,
@@ -216,6 +216,8 @@ export const eventsByParticipantList = (
     ],
     initialPageParam: 0,
     queryFn: async ({ pageParam = 0 }) => {
+      if (!participantId) return [];
+
       return withSpan(
         `query:backend:user:${participantId}:events:role:participant`,
         async () => {
@@ -252,5 +254,6 @@ export const eventsByParticipantList = (
       }
       return pages.length - 2;
     },
+    enabled: !!participantId,
   });
 };
